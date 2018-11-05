@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.trusts.models
 
-import play.api.http.Status.{BAD_REQUEST, OK}
-import play.api.libs.json.{Json, Reads}
+import play.api.Logger
+import play.api.http.Status._
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
 
@@ -25,23 +26,52 @@ sealed trait ExistingTrustResponse
 
 object ExistingTrustResponse {
 
-  final case class Success(`match`: Boolean) extends ExistingTrustResponse
+  final case object Matched extends ExistingTrustResponse
+  final case object NotMatched extends ExistingTrustResponse
+  final case object BadRequest extends ExistingTrustResponse
+  final case object AlreadyRegistered extends ExistingTrustResponse
+  final case object ServerError extends ExistingTrustResponse
+  final case object ServiceUnavailable extends ExistingTrustResponse
 
-  final case class Failure(message: String, code: String) extends ExistingTrustResponse
+
 
   implicit lazy val httpReads: HttpReads[ExistingTrustResponse] =
     new HttpReads[ExistingTrustResponse] {
       override def read(method: String, url: String, response: HttpResponse): ExistingTrustResponse = {
+        Logger.info(s"response status received: ${response.status}")
         response.status match {
-          case OK ⇒
-            response.json.as[Success]
-          case BAD_REQUEST ⇒
-            Failure(response.body, "")
-          case status ⇒
-            Failure(response.body, "")
+          case OK =>
+            response.json.as[DesResponse].`match` match {
+              case true => Matched
+              case false =>  NotMatched
+            }
+          case CONFLICT => {
+            response.json.asOpt[DesErrorResponse] match {
+              case Some(desReponse) if desReponse.code == "ALREADY_REGISTERED"=> AlreadyRegistered
+              case _ => ServerError
+            }
+          }
+
+          case BAD_REQUEST => BadRequest
+          case SERVICE_UNAVAILABLE => ServiceUnavailable
+          case status =>  ServerError
         }
       }
     }
-  implicit val successReads: Reads[Success] = Json.reads[Success]
+  implicit val desResponseReads = DesResponse.formats
+  implicit val desErrorResponseReads = DesErrorResponse.formats
 
+}
+
+
+case class DesResponse(`match`:Boolean)
+object DesResponse {
+  implicit val formats = Json.format[DesResponse]
+}
+
+
+case class DesErrorResponse(code: String,reason: String )
+
+object DesErrorResponse {
+  implicit val formats = Json.format[DesErrorResponse]
 }
