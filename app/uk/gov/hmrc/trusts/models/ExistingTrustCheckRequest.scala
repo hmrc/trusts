@@ -19,16 +19,30 @@ package uk.gov.hmrc.trusts.models
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-case class ExistingTrustCheckRequest(name: String, postCode: Option[String] = None, utr: String)
+case class ExistingTrustCheckRequest(name: String, postcode: Option[String] = None, utr: String){
+  private val nameLength = name.length >= 1 && name.length <= 56
+  require(nameLength, "Trust name should be between 1 and 56.")
+  private val utrLength = utr.length == 10
+  require(utrLength, "Trust's UTR must be a 10 digit number.")
+
+}
 
 object ExistingTrustCheckRequest {
   implicit val writes: Writes[ExistingTrustCheckRequest] = (
     (JsPath \ "name").write[String] and
       (JsPath \ "postcode").writeNullable[String] and
       (JsPath \ "sa-utr").write[String]
-    )(c => (
+    ) (c => (
     c.name,
-    c.postCode,
+    c.postcode,
     c.utr))
 
-  implicit val reads: Reads[ExistingTrustCheckRequest] = Json.reads[ExistingTrustCheckRequest]}
+  implicit val reads: Reads[ExistingTrustCheckRequest] = Json.reads[ExistingTrustCheckRequest]
+}
+
+
+case class ErrorResponse(message: String, code: String)
+
+object ErrorResponse {
+  implicit val formats = Json.format[ErrorResponse]
+}

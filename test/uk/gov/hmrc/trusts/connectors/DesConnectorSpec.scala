@@ -40,7 +40,7 @@ class DesConnectorSpec extends BaseConnectorSpec
 
   lazy val connector: DesConnector = app.injector.instanceOf[DesConnector]
 
-  lazy val request = ExistingTrustCheckRequest("trust name", postCode = Some("NE65TA"), "1234567890")
+  lazy val request = ExistingTrustCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
 
 
   ".checkExistingTrust" should {

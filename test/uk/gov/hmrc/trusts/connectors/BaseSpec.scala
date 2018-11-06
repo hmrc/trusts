@@ -16,17 +16,23 @@
 
 package uk.gov.hmrc.trusts.connectors
 
-import org.scalatest.{MustMatchers, WordSpec}
+import org.scalatest.{Matchers, MustMatchers, WordSpec}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.{JsValue, Json}
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.models.ExistingTrustCheckRequest
 
 
 class BaseSpec  extends WordSpec with MustMatchers with ScalaFutures with MockitoSugar {
 
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
+
+  def postRequestWithPayload(payload: JsValue): FakeRequest[JsValue] =
+    FakeRequest("POST", "")
+      .withHeaders(CONTENT_TYPE -> "application/json")
+      .withBody(payload)
 
 
 }

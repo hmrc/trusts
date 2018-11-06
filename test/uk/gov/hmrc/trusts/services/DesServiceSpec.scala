@@ -16,20 +16,18 @@
 
 package uk.gov.hmrc.trusts.services
 
-import play.api.libs.json.Json
-import uk.gov.hmrc.trusts.config.{AppConfig, WSHttp}
-import uk.gov.hmrc.trusts.connector.{DesConnector, DesConnectorImpl}
+import org.mockito.Mockito.when
+import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.models.ExistingTrustCheckRequest
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse._
 
-import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
-import org.mockito.Mockito.when
+import scala.concurrent.{Await, Future}
 
 class DesServiceSpec extends BaseSpec {
 
-  lazy val request = ExistingTrustCheckRequest("trust name", postCode = Some("NE65TA"), "1234567890")
+  lazy val request = ExistingTrustCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
   val mockConnector = mock[DesConnector]
 
   val SUT = new DesServiceImpl(mockConnector)
