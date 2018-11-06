@@ -68,7 +68,7 @@ class DesConnectorSpec extends BaseConnectorSpec
 
     "return BadRequest " when {
         "payload sent is not valid" in {
-          val wrongPayloadRequest = request.copy(utr = "NOT A NUMBER STRING")
+          val wrongPayloadRequest = request.copy(utr = "NUMBER1234")
           val requestBody = Json.stringify(Json.toJson(wrongPayloadRequest))
 
           stubFor("/trusts/match", requestBody, 400, Json.stringify(jsonResponse400))

@@ -26,7 +26,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.ExistingTrustCheckRequest
 import org.mockito.Mockito._
-import uk.gov.hmrc.trusts.models.ExistingTrustResponse.{AlreadyRegistered, Matched, NotMatched}
+import uk.gov.hmrc.trusts.models.ExistingTrustResponse.{AlreadyRegistered, Matched, NotMatched, ServiceUnavailable}
 import org.mockito.Matchers.any
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -40,7 +40,9 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
   val appConfig = mock[AppConfig]
 
   val validPayloadRequest = Json.parse("""{"name": "trust name","postcode": "NE11NE","utr": "1234567890"}""")
-  val invalidPayloadRequest = Json.parse("""{"name": "","postcode": "NE11NE","utr": "12345678"}""")
+  val nameInvalidPayload = Json.parse("""{"name": "","postcode": "NE11NE","utr": "1234567890"}""")
+  val utrInvalidPayload = Json.parse("""{"name": "trust name","postcode": "NE11NE","utr": "12345678"}""")
+
 
   //implicit val timeout = new Timeout(new FiniteDuration(5, MINUTES))
 
@@ -84,12 +86,36 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
     }
 
     "return 400 " when {
-      "submitted payload is not valid" in {
+      "submitted payload trust name is not valid" in {
         val SUT = new TrustsController(mockDesService, appConfig)
         when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(NotMatched))
-        val result = SUT.checkExistingTrust().apply(postRequestWithPayload(invalidPayloadRequest))
+        val result = SUT.checkExistingTrust().apply(postRequestWithPayload(nameInvalidPayload))
         status(result) mustBe BAD_REQUEST
+      }
+    }
+    "return 400 " when {
+      "submitted payload utr is not valid" in {
+        val SUT = new TrustsController(mockDesService, appConfig)
+        when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(NotMatched))
+        val result = SUT.checkExistingTrust().apply(postRequestWithPayload(utrInvalidPayload))
+        status(result) mustBe BAD_REQUEST
+      }
+    }
+
+    "return Internal server error " when {
+      "des dependent service is not responding" in {
+        val SUT = new TrustsController(mockDesService, appConfig)
+        when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(ServiceUnavailable))
+
+        val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequest))
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+        val output = contentAsJson(result)
+        (output \ "code").as[String] mustBe "INTERNAL_SERVER_ERROR"
+        (output \ "message").as[String] mustBe "Internal server error."
       }
     }
 
