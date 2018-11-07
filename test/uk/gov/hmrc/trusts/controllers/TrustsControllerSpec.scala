@@ -40,11 +40,8 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
   val appConfig = mock[AppConfig]
 
   val validPayloadRequest = Json.parse("""{"name": "trust name","postcode": "NE11NE","utr": "1234567890"}""")
-  val nameInvalidPayload = Json.parse("""{"name": "","postcode": "NE11NE","utr": "1234567890"}""")
-  val utrInvalidPayload = Json.parse("""{"name": "trust name","postcode": "NE11NE","utr": "12345678"}""")
 
 
-  //implicit val timeout = new Timeout(new FiniteDuration(5, MINUTES))
 
 
   ".checkExistingTrust" should {
@@ -88,6 +85,8 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
     "return 400 " when {
       "submitted payload trust name is not valid" in {
         val SUT = new TrustsController(mockDesService, appConfig)
+        val nameInvalidPayload = Json.parse("""{"name": "","postcode": "NE11NE","utr": "1234567890"}""")
+
         when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(NotMatched))
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(nameInvalidPayload))
@@ -97,6 +96,9 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
     "return 400 " when {
       "submitted payload utr is not valid" in {
         val SUT = new TrustsController(mockDesService, appConfig)
+
+        val utrInvalidPayload = Json.parse("""{"name": "trust name","postcode": "NE11NE","utr": "12345678"}""")
+
         when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(NotMatched))
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(utrInvalidPayload))
