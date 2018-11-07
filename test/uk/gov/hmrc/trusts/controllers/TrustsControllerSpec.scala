@@ -40,6 +40,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
   val appConfig = mock[AppConfig]
 
   val validPayloadRequest = Json.parse("""{"name": "trust name","postcode": "NE11NE","utr": "1234567890"}""")
+  val validPayloadRequestWithoutPostCode = Json.parse("""{"name": "trust name","utr": "1234567890"}""")
 
 
 
@@ -52,6 +53,17 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(Matched))
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequest))
+        status(result) mustBe OK
+        (contentAsJson(result) \ "match").as[Boolean] mustBe true
+      }
+    }
+
+    "return OK with match true" when {
+      "trusts data match with existing trusts without postcode. " in {
+        val SUT = new TrustsController(mockDesService, appConfig)
+        when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Matched))
+        val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequestWithoutPostCode))
         status(result) mustBe OK
         (contentAsJson(result) \ "match").as[Boolean] mustBe true
       }
@@ -83,24 +95,32 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
     }
 
     "return 400 " when {
-      "submitted payload trust name is not valid" in {
+      "trust name is not valid" in {
         val SUT = new TrustsController(mockDesService, appConfig)
         val nameInvalidPayload = Json.parse("""{"name": "","postcode": "NE11NE","utr": "1234567890"}""")
 
-        when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(NotMatched))
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(nameInvalidPayload))
         status(result) mustBe BAD_REQUEST
       }
     }
+
     "return 400 " when {
-      "submitted payload utr is not valid" in {
+      "utr is not valid" in {
         val SUT = new TrustsController(mockDesService, appConfig)
 
         val utrInvalidPayload = Json.parse("""{"name": "trust name","postcode": "NE11NE","utr": "12345678"}""")
 
-        when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(NotMatched))
+        val result = SUT.checkExistingTrust().apply(postRequestWithPayload(utrInvalidPayload))
+        status(result) mustBe BAD_REQUEST
+      }
+    }
+
+    "return 400 " when {
+      "postcode is not valid" in {
+        val SUT = new TrustsController(mockDesService, appConfig)
+
+        val utrInvalidPayload = Json.parse("""{"name": "trust name","postcode": "NE11NE1234567","utr": "1234567890"}""")
+
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(utrInvalidPayload))
         status(result) mustBe BAD_REQUEST
       }

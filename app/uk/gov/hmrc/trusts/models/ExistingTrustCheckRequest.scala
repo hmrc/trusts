@@ -21,9 +21,11 @@ import play.api.libs.functional.syntax._
 
 case class ExistingTrustCheckRequest(name: String, postcode: Option[String] = None, utr: String){
   private val nameLength = name.length >= 1 && name.length <= 56
-  require(nameLength, "Trust name should be between 1 and 56.")
+  require(nameLength, "Trusts name should be between 1 and 56.")
   private val utrLength = utr.length == 10
   require(utrLength, "Trust's UTR must be a 10 digit number.")
+  private val postcodeLength = (postcode.isDefined && postcode.get.length >= 1 && postcode.get.length <= 10) || !postcode.isDefined
+  require(postcodeLength, "Trusts postcode should be between 1 and 10.")
 
 }
 
