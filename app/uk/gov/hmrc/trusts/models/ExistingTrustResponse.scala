@@ -69,7 +69,6 @@ object DesResponse {
   implicit val formats = Json.format[DesResponse]
 }
 
-
 case class DesErrorResponse(code: String,reason: String )
 
 object DesErrorResponse {
