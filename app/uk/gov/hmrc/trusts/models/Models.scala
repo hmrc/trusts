@@ -18,18 +18,34 @@ package uk.gov.hmrc.trusts.models
 
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import play.api.libs.json.Reads._
+import play.api.data.validation.ValidationError
 
 case class ExistingTrustCheckRequest(name: String, postcode: Option[String] = None, utr: String){
-  private val nameLength = name.length >= 1 && name.length <= 56
-  require(nameLength, "Trusts name should be between 1 and 56.")
-  private val utrLength = utr.length == 10
-  require(utrLength, "Trust's UTR must be a 10 digit number.")
-  private val postcodeLength = (postcode.isDefined && postcode.get.length >= 1 && postcode.get.length <= 10) || !postcode.isDefined
-  require(postcodeLength, "Trusts postcode should be between 1 and 10.")
-
 }
 
 object ExistingTrustCheckRequest {
+
+  private val validationError = ValidationError("")
+  private val utrValidation: Reads[String] =
+    Reads.StringReads.filter(validationError)(
+      utrValidationRegEx.findFirstIn(_).isDefined
+    )
+  private val utrValidationRegEx = """^[0-9]{10}$""".r
+
+  private val postcodeValidation: Reads[String] =
+    Reads.StringReads.filter(validationError)(
+      postcodeRegEx.findFirstIn(_).isDefined
+    )
+  private val postcodeRegEx = """^[a-zA-Z0-9]{1,10}$""".r
+
+  private val nameValidation: Reads[String] =
+    Reads.StringReads.filter(validationError)(
+      nameRegEx.findFirstIn(_).isDefined
+    )
+
+  private val nameRegEx = """[A-Za-z0-9 ,.()/&'-]{1,56}$""".r
+
   implicit val writes: Writes[ExistingTrustCheckRequest] = (
     (JsPath \ "name").write[String] and
       (JsPath \ "postcode").writeNullable[String] and
@@ -39,8 +55,22 @@ object ExistingTrustCheckRequest {
     c.postcode,
     c.utr))
 
-  implicit val reads: Reads[ExistingTrustCheckRequest] = Json.reads[ExistingTrustCheckRequest]
+  implicit val reads: Reads[ExistingTrustCheckRequest] = (
+    (JsPath \ "name").read[String](nameValidation) and
+      (JsPath \ "postcode").readNullable[String](postcodeValidation) and
+      (JsPath \ "utr").read[String](utrValidation)
+  )(ExistingTrustCheckRequest.apply _)
+
+
+
+
+
+
 }
+
+
+
+
 
 
 case class ErrorResponse(message: String, code: String)
