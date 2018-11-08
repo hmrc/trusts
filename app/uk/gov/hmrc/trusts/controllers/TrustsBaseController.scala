@@ -46,14 +46,11 @@ class TrustsBaseController extends BaseController {
 
   override protected def withJsonBody[T](
                                           f: (T) => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]) =
-    Try(request.body.validate[T]) match {
-      case Success(JsSuccess(payload, _)) => f(payload)
-      case Success(JsError(errs)) => {
+    request.body.validate[T] match {
+      case JsSuccess(payload, _) => f(payload)
+      case JsError(errs)=> {
         val response = handleErrorResponseByField(errs)
         Future.successful(response)
-      }
-      case Failure(e) => {
-        Future.successful(BadRequest(s"could not parse body due to ${e.getMessage}"))
       }
     }
 
@@ -63,7 +60,6 @@ class TrustsBaseController extends BaseController {
     val fields = field.map { case (key, validationError) =>
       (key.toString.stripPrefix("/"), validationError.head.message)
     }
-
     getErrorResponse(fields.head._1, fields.head._2)
   }
 

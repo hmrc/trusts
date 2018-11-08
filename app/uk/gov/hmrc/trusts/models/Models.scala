@@ -27,24 +27,26 @@ case class ExistingTrustCheckRequest(name: String, postcode: Option[String] = No
 object ExistingTrustCheckRequest {
 
   private val validationError = ValidationError("")
+  private val utrValidationRegEx = """^[0-9]{10}$""".r
+  private val postcodeRegEx = """^[a-zA-Z0-9]{1,10}$""".r
+  private val nameRegEx = """[A-Za-z0-9 ,.()/&'-]{1,56}$""".r
+
+
   private val utrValidation: Reads[String] =
     Reads.StringReads.filter(validationError)(
       utrValidationRegEx.findFirstIn(_).isDefined
     )
-  private val utrValidationRegEx = """^[0-9]{10}$""".r
 
   private val postcodeValidation: Reads[String] =
     Reads.StringReads.filter(validationError)(
       postcodeRegEx.findFirstIn(_).isDefined
     )
-  private val postcodeRegEx = """^[a-zA-Z0-9]{1,10}$""".r
 
   private val nameValidation: Reads[String] =
     Reads.StringReads.filter(validationError)(
       nameRegEx.findFirstIn(_).isDefined
     )
 
-  private val nameRegEx = """[A-Za-z0-9 ,.()/&'-]{1,56}$""".r
 
   implicit val writes: Writes[ExistingTrustCheckRequest] = (
     (JsPath \ "name").write[String] and
@@ -61,16 +63,7 @@ object ExistingTrustCheckRequest {
       (JsPath \ "utr").read[String](utrValidation)
   )(ExistingTrustCheckRequest.apply _)
 
-
-
-
-
-
 }
-
-
-
-
 
 
 case class ErrorResponse(message: String, code: String)
