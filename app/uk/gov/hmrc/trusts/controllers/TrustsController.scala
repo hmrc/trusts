@@ -18,6 +18,7 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.{Inject, Singleton}
 
+import play.api.Logger
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.models.ExistingTrustCheckRequest
@@ -35,17 +36,17 @@ class TrustsController @Inject()(desService: DesService, config: AppConfig) exte
       trustsCheckRequest =>
         desService.checkExistingTrust(trustsCheckRequest).map {
           result =>
+            Logger.info(s"[TrustsController][checkExistingTrust] response type :${result}")
             result match {
               case Matched => Ok(matchResponse)
               case NotMatched => Ok(noMatchResponse)
               case AlreadyRegistered => alreadyRegisteredResponse
               case _ => internalServerErrorResponse
             }
-
         }
     }
 
-  }
+  }//checkExistingTrust
 
 
 }

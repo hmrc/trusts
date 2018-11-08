@@ -38,7 +38,7 @@ object ExistingTrustResponse {
   implicit lazy val httpReads: HttpReads[ExistingTrustResponse] =
     new HttpReads[ExistingTrustResponse] {
       override def read(method: String, url: String, response: HttpResponse): ExistingTrustResponse = {
-        Logger.info(s"response status received: ${response.status}")
+        Logger.info(s"response status received from des: ${response.status}")
         response.status match {
           case OK =>
             response.json.as[DesResponse].`match` match {

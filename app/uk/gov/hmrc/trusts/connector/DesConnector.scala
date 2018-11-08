@@ -59,6 +59,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
     val response: Future[ExistingTrustResponse] =
       http.POST[JsValue, ExistingTrustResponse](matchEndpoint, Json.toJson(existingTrustCheckRequest), desHeaders.headers)
 
+
     response
   }
 }

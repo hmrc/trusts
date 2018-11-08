@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.trusts.controllers
 
-import play.api.Logger
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import play.api.mvc.{Request, Result}
@@ -24,7 +23,6 @@ import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import uk.gov.hmrc.trusts.models.ErrorResponse
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
 
 
 class TrustsBaseController extends BaseController {
