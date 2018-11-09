@@ -14,27 +14,25 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.controllers
+package uk.gov.hmrc.trusts.connectors
 
-import play.api.http.Status
+import org.scalatest.{Matchers, MustMatchers, WordSpec}
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.mockito.MockitoSugar
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
-import play.api.http.Status
-import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.UnitSpec
-import uk.gov.hmrc.play.test.WithFakeApplication
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import play.api.test.Helpers._
+import uk.gov.hmrc.http.HeaderCarrier
 
 
-class MicroserviceHelloWorldControllerSpec extends UnitSpec with WithFakeApplication{
+class BaseSpec  extends WordSpec with MustMatchers with ScalaFutures with MockitoSugar {
 
-  val fakeRequest = FakeRequest("GET", "/")
+  implicit lazy val hc: HeaderCarrier = HeaderCarrier()
 
-  "GET /" should {
-    "return 200" in {
-      val controller = new MicroserviceHelloWorld()
-      val result = controller.hello()(fakeRequest)
-      status(result) shouldBe Status.OK
-    }
-  }
+  def postRequestWithPayload(payload: JsValue): FakeRequest[JsValue] =
+    FakeRequest("POST", "")
+      .withHeaders(CONTENT_TYPE -> "application/json")
+      .withBody(payload)
+
 
 }
