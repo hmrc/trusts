@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.connectors
+package uk.gov.hmrc.trusts.utils
 
-import org.scalatest.{Matchers, MustMatchers, WordSpec}
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.{JsValue, Json}
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import uk.gov.hmrc.http.HeaderCarrier
+
+import scala.io.Source
 
 
-class BaseSpec  extends WordSpec with MustMatchers with ScalaFutures with MockitoSugar {
+trait JsonUtils {
 
-  implicit lazy val hc: HeaderCarrier = HeaderCarrier()
+ //resources/schemas/sample/valid-trusts-registration.json
+  def getJsonFromFile(filename :String) :String = {
+    val basePath = "/resources/schemas/tests/"
+    val jsonString = Source.fromFile(getClass.getResource(basePath+filename).getPath).mkString
+    jsonString
+  }
 
-  def postRequestWithPayload(payload: JsValue): FakeRequest[JsValue] =
-    FakeRequest("POST", "")
-      .withHeaders(CONTENT_TYPE -> "application/json")
-      .withBody(payload)
+  def getJsonValueFromFile(filename:String) :JsValue = {
+    Json.parse(getJsonFromFile(filename))
+  }
+
 
 
 }
+
+object JsonUtils extends JsonUtils

@@ -226,15 +226,8 @@
 					"$ref": "#/definitions/willType"
 				},
 				"leadTrustees": {
-					"type": "object",
-					"oneOf": [
-						{
-							"$ref": "#/definitions/leadTrusteeOrgType"
-						},
-						{
-							"$ref": "#/definitions/leadTrusteeIndType"
-						}
-					]
+					"$ref": "#/definitions/leadTrusteeType"
+
 				},
 				"trustees": {
 					"type": "array",
@@ -289,8 +282,7 @@
 										}
 									},
 									"required": [
-										"name",
-										"identification"
+										"name"
 									],
 									"additionalProperties": false
 								}
@@ -320,9 +312,7 @@
 									}
 								},
 								"required": [
-									"name",
-									"dateOfBirth",
-									"identification"
+									"name"
 								],
 								"additionalProperties": false
 							}
@@ -352,8 +342,7 @@
 									}
 								},
 								"required": [
-									"name",
-									"identification"
+									"name"
 								],
 								"additionalProperties": false
 							}
@@ -462,9 +451,7 @@
 			},
 			"required": [
 				"name",
-				"dateOfBirth",
-				"vulnerableBeneficiary",
-				"identification"
+				"vulnerableBeneficiary"
 			],
 			"additionalProperties": false
 		},
@@ -523,7 +510,6 @@
 			},
 			"required": [
 				"name",
-				"phoneNumber",
 				"identification"
 			],
 			"additionalProperties": false
@@ -545,10 +531,38 @@
 				}
 			},
 			"required": [
-				"name",
-				"identification"
+				"name"
 			],
 			"additionalProperties": false
+		},
+		"leadTrusteeType": {
+			"type": "object",
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"leadTrusteeInd": {
+							"$ref": "#/definitions/leadTrusteeIndType"
+						}
+					},
+					"required": [
+						"leadTrusteeInd"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"leadTrusteeOrg": {
+							"$ref": "#/definitions/leadTrusteeOrgType"
+						}
+					},
+					"required": [
+						"leadTrusteeOrg"
+					],
+					"additionalProperties": false
+				}
+			]
 		},
 		"leadTrusteeIndType": {
 			"type": "object",
@@ -604,8 +618,7 @@
 				}
 			},
 			"required": [
-				"organisationName",
-				"identification"
+				"organisationName"
 			],
 			"additionalProperties": false
 		},
@@ -635,8 +648,7 @@
 				}
 			},
 			"required": [
-				"organisationName",
-				"identification"
+				"organisationName"
 			],
 			"additionalProperties": false
 		},
@@ -711,7 +723,6 @@
 			"required": [
 				"organisationName",
 				"numberOfBeneficiary",
-				"identification",
 				"description"
 			],
 			"additionalProperties": false
@@ -738,8 +749,7 @@
 				}
 			},
 			"required": [
-				"description",
-				"address"
+				"description"
 			],
 			"additionalProperties": false
 		},
@@ -769,8 +779,7 @@
 				}
 			},
 			"required": [
-				"organisationName",
-				"identification"
+				"organisationName"
 			],
 			"additionalProperties": false
 		},
@@ -853,7 +862,7 @@
 		},
 		"shareofIncomeString": {
 			"type": "string",
-			"pattern": "^([0-9]|[1-9][0-9]{1,2})$"
+			"pattern": "^([0-9]|[1-9][0-9]|100)$"
 		},
 		"trustDetailsType": {
 			"type": "object",

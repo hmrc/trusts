@@ -18,11 +18,31 @@ package uk.gov.hmrc.trusts.models
 
 
 import org.joda.time.DateTime
-import play.api.libs.functional.syntax._
 import play.api.libs.json._
 /**
   * DES API Schema - definitions models below
   */
+
+case class Registration(matchData: Option[MatchData],
+                        correspondence: Correspondence,
+                        yearsReturns: Option[YearsReturns],
+                        declaration: Declaration,
+                        details: Details,
+                        agentDetails: Option[AgentDetails] = None
+                       )
+
+object Registration {
+  implicit val registrationFormat: Format[Registration] = Json.format[Registration]
+}
+
+
+case class Details(estate: Option[Estate],
+                   trust: Option[Trust])
+
+object Details {
+
+  implicit val detailsFormat: Format[Details] = Json.format[Details]
+}
 
 case class MatchData(utr: String,
                      name: String,
@@ -40,21 +60,7 @@ case class Correspondence(abroadIndicator: Boolean,
 
 object Correspondence {
 
-  implicit val correspondenceReads: Reads[Correspondence] = (
-    (JsPath \ "abroadIndicator").format[Boolean] and
-      (JsPath \ "name").format[String] and
-      (JsPath \ "address").format[AddressType] and
-      (JsPath \ "phoneNumber").format[String]
-    ) (Correspondence.apply, unlift(Correspondence.unapply))
-
-  implicit val correspondenceWrites: Writes[Correspondence] = Writes { correspondence =>
-    Json.obj(
-      "abroadIndicator" -> correspondence.abroadIndicator,
-      "name" -> correspondence.name.take(56),
-      "address" -> correspondence.address,
-      "phoneNumber" -> correspondence.phoneNumber
-    )
-  }
+  implicit val correspondenceFormat : Format[Correspondence] = Json.format[Correspondence]
 
 
 }
@@ -138,7 +144,7 @@ object ProtectorCompany {
 
 
 
-case class TrusteeType(trusteeInd : TrusteeIndividualType, trusteeOrg : TrusteeOrgType)
+case class TrusteeType(trusteeInd : Option[TrusteeIndividualType], trusteeOrg : Option[TrusteeOrgType])
 object TrusteeType {
   implicit val trusteeTypeFormat : Format[TrusteeType] = Json.format[TrusteeType]
 }
@@ -189,54 +195,39 @@ object SettlorCompany {
 }
 
 
-
-case class LeadTrusteeType(
-                            trusteeType: String,
+case class LeadTrusteeIndType (
+                            name: String,
                             dateOfBirth: Option[DateTime] = None,
                             phoneNumber: String,
                             email: Option[String] = None,
-                            individualName: Option[NameType] = None,
-                            individualIdentification: Option[IdentificationType] = None,
-                            organisationName: Option[String] = None,
-                            organisationIdentification: Option[IdentificationOrgType] = None
+                            identification: Option[IdentificationType] = None
                           )
-object LeadTrusteeType {
-
-  implicit val leadTrusteeTypeReads: Reads[LeadTrusteeType] = (
-    (JsPath \ "trusteeType").format[String] and
-      (JsPath \ "dateOfBirth").formatNullable[DateTime] and
-      (JsPath \ "phoneNumber").format[String] and
-      (JsPath \ "email").formatNullable[String] and
-      (JsPath \ "individualName").formatNullable[NameType] and
-      (JsPath \ "individualIdentification").formatNullable[IdentificationType] and
-      (JsPath \ "organisationName").formatNullable[String] and
-      (JsPath \ "organisationIdentification").formatNullable[IdentificationOrgType]
-    ) (LeadTrusteeType.apply, unlift(LeadTrusteeType.unapply))
-
-  implicit val leadTrusteeTypeWrites: Writes[LeadTrusteeType] = Writes {leadTrustee =>
-    val json = leadTrustee.trusteeType match {
-      case "Ind" => Json.obj(
-        "name" -> leadTrustee.individualName,
-        "dateOfBirth" -> leadTrustee.dateOfBirth,
-        "identification" -> leadTrustee.individualIdentification,
-        "phoneNumber" -> leadTrustee.phoneNumber
-      )
-      case "Org" => Json.obj(
-        "name" -> leadTrustee.organisationName,
-        "phoneNumber" -> leadTrustee.phoneNumber,
-        "identification" -> leadTrustee.organisationIdentification
-      )
-    }
-    leadTrustee.email match {
-      case Some(email) => json.deepMerge(Json.obj(
-        "email" -> email
-      ))
-      case _ => json
-    }
-  }
-
+object LeadTrusteeIndType {
 
   implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads("yyyy-MM-dd"), Writes.jodaDateWrites("yyyy-MM-dd") )
+  implicit val leadTrusteeIndTypeFormat: Format[LeadTrusteeIndType] = Json.format[LeadTrusteeIndType]
+
+}
+case class LeadTrusteeOrgType(
+                               name: String,
+                               phoneNumber: String,
+                               email: Option[String] = None,
+                               identification: Option[IdentificationOrgType] = None
+
+                             )
+object LeadTrusteeOrgType {
+  implicit val leadTrusteeOrgTypeFormat: Format[LeadTrusteeOrgType] = Json.format[LeadTrusteeOrgType]
+}
+
+case class LeadTrusteeType(
+                            leadTrusteeInd : Option[LeadTrusteeIndType] = None,
+                            leadTrusteeOrg : Option[LeadTrusteeOrgType] = None
+                          )
+
+object LeadTrusteeType {
+
+  implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads("yyyy-MM-dd"), Writes.jodaDateWrites("yyyy-MM-dd") )
+  implicit val leadTrusteeTypeFormat: Format[LeadTrusteeType] = Json.format[LeadTrusteeType]
 
 }
 
