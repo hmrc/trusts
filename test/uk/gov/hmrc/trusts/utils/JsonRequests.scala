@@ -35,5 +35,6 @@ trait JsonRequests {
   lazy val invalidRegistrationRequestJson  =  readResourcesFileAsString("invalid-payload-trusts-registration.json")
 
   lazy val registrationRequest = Json.parse(validRegistrationRequestJson).validate[Registration].get
+  lazy val invalidRegistrationRequest = Json.parse(invalidRegistrationRequestJson).validate[Registration].get
 
 }

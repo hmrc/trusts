@@ -39,4 +39,6 @@ class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with Mockito
 
 
 
+
+
 }

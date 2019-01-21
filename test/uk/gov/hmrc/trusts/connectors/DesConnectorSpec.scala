@@ -23,7 +23,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse._
-import uk.gov.hmrc.trusts.models.{ExistingTrustCheckRequest, ExistingTrustResponse}
+import uk.gov.hmrc.trusts.models.{ErrorRegistrationTrustsResponse, ExistingTrustCheckRequest, ExistingTrustResponse, SuccessRegistrationResponse}
 import uk.gov.hmrc.trusts.utils.WireMockHelper
 
 import scala.concurrent.Await
@@ -67,15 +67,15 @@ class DesConnectorSpec extends BaseConnectorSpec
     }
 
     "return BadRequest " when {
-        "payload sent is not valid" in {
-          val wrongPayloadRequest = request.copy(utr = "NUMBER1234")
-          val requestBody = Json.stringify(Json.toJson(wrongPayloadRequest))
+      "payload sent is not valid" in {
+        val wrongPayloadRequest = request.copy(utr = "NUMBER1234")
+        val requestBody = Json.stringify(Json.toJson(wrongPayloadRequest))
 
-          stubFor("/trusts/match", requestBody, 400, Json.stringify(jsonResponse400))
+        stubFor("/trusts/match", requestBody, 400, Json.stringify(jsonResponse400))
 
-          val result = Await.result(connector.checkExistingTrust(wrongPayloadRequest), Duration.Inf)
-          result mustBe BadRequest
-        }
+        val result = Await.result(connector.checkExistingTrust(wrongPayloadRequest), Duration.Inf)
+        result mustBe BadRequest
+      }
     }
 
     "return AlreadyRegistered " when {
@@ -121,9 +121,80 @@ class DesConnectorSpec extends BaseConnectorSpec
         result mustBe ServerError
       }
     }
-
-
   }
+
+
+    ".registerTrust" should {
+
+      "return TRN  " when {
+        "valid request to des register trust." in {
+          val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+          stubFor("/trusts/registration", requestBody, 200, """{"trn": "XTRN1234567"}""")
+
+          val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
+          result mustBe SuccessRegistrationResponse("XTRN1234567")
+        }
+      }
+
+
+      "return ErrorRegistrationTrustsResponse with BAD_REQUEST as code " when {
+        "payload sent to des is invalid" in {
+          val requestBody = Json.stringify(Json.toJson(invalidRegistrationRequest))
+          stubFor("/trusts/registration", requestBody, 400, Json.stringify(jsonResponse400))
+
+          val result = Await.result(connector.registerTrust(invalidRegistrationRequest), Duration.Inf)
+          result mustBe ErrorRegistrationTrustsResponse("BAD_REQUEST", "Invalid payload submitted.")
+        }
+      }
+
+      "return ErrorRegistrationTrustsResponse with ALREADY_REGISTERED code " when {
+        "trusts is already registered with provided details." in {
+          val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+          stubFor("/trusts/registration", requestBody, 403, Json.stringify(jsonResponseAlreadyRegistered))
+
+          val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
+          result mustBe ErrorRegistrationTrustsResponse("ALREADY_REGISTERED", "Trust is already registered.")
+        }
+      }
+
+      "return ErrorRegistrationTrustsResponse with code SERVIVE_UNAVAILABLE " when {
+        "des dependent service is not responding " in {
+          val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+          stubFor("/trusts/registration", requestBody, 503, Json.stringify(jsonResponse503))
+
+          val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
+          result mustBe ErrorRegistrationTrustsResponse("SERVIVE_UNAVAILABLE", "Depedent system is not responding.")
+        }
+      }
+
+      "return ErrorRegistrationTrustsResponse with code INTERNAL_SERVER_ERROR " when {
+        "des is experiencing some problem." in {
+          val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+          stubFor("/trusts/registration", requestBody, 500, Json.stringify(jsonResponse500))
+
+          val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
+          result mustBe ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
+        }
+      }
+
+      "return ErrorRegistrationTrustsResponse with INTERNAL_SERVER_ERROR" when {
+        "des is returning any other error " in {
+          val requestBody = Json.stringify(Json.toJson(registrationRequest))
+          
+          stubFor("/trusts/registration", requestBody, 409, "{}")
+
+          val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
+          result mustBe ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
+        }
+      }
+
+
+
+    }
 
 
   def stubFor(url: String, requestBody: String, returnStatus: Int, responseBody: String) =

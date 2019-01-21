@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.models
 
 import play.api.Logger
-import play.api.http.Status.{BAD_REQUEST, CONFLICT, OK, SERVICE_UNAVAILABLE}
+import play.api.http.Status.{BAD_REQUEST, CONFLICT, OK, SERVICE_UNAVAILABLE, FORBIDDEN}
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
@@ -48,14 +48,21 @@ object RegistrationTrustResponse {
         Logger.info(s"response status received from des: ${response.status}")
         response.status match {
           case OK =>response.json.as[SuccessRegistrationResponse]
+          case FORBIDDEN =>{
+            response.json.asOpt[DesErrorResponse] match {
+              case Some(desReponse) if desReponse.code == "ALREADY_REGISTERED"=>
+                ErrorRegistrationTrustsResponse("ALREADY_REGISTERED", "Trust is already registered.")
+              case _ => ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
+            }
+          }
           case BAD_REQUEST => ErrorRegistrationTrustsResponse("BAD_REQUEST", "Invalid payload submitted.")
-          case SERVICE_UNAVAILABLE => ErrorRegistrationTrustsResponse("SERVIVE_UNAVAILABLE", "Depedent system are not responding.")
+          case SERVICE_UNAVAILABLE => ErrorRegistrationTrustsResponse("SERVIVE_UNAVAILABLE", "Depedent system is not responding.")
           case status =>  ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
         }
       }
     }
   implicit val registrationDesResponseReads = RegistrationDesResponse.formats
-  implicit val registrationDesErrorResponseReads = RegistrationDesErrorResponse.formats
+  implicit val registrationDesErrorResponseReads = DesErrorResponse.formats
 
 }
 case class RegistrationDesResponse(trn:String)
@@ -63,8 +70,9 @@ object RegistrationDesResponse {
   implicit val formats = Json.format[DesResponse]
 }
 
+/*
 case class RegistrationDesErrorResponse(code: String,reason: String )
 
 object RegistrationDesErrorResponse {
   implicit val formats = Json.format[DesErrorResponse]
-}
+}*/
