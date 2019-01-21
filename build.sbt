@@ -1,5 +1,6 @@
 import TestPhases.oneForkedJvmPerTest
-import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption}
+import sbt.Keys.baseDirectory
+import uk.gov.hmrc.DefaultBuildSettings.addTestReportOption
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 import uk.gov.hmrc.SbtArtifactory
@@ -27,6 +28,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     publishingSettings ++ scoverageSettings: _*
   )
+  .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "resources")
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
   .settings(

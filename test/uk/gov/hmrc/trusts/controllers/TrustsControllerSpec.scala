@@ -24,7 +24,7 @@ import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.services.DesService
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.models.ExistingTrustCheckRequest
+import uk.gov.hmrc.trusts.models.{ErrorRegistrationTrustsResponse, ExistingTrustCheckRequest, Registration, SuccessRegistrationResponse}
 import org.mockito.Mockito._
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse.{AlreadyRegistered, Matched, NotMatched, ServiceUnavailable}
 import org.mockito.Matchers.any
@@ -41,8 +41,6 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
   val validPayloadRequest = Json.parse("""{"name": "trust name","postcode": "NE11NE","utr": "1234567890"}""")
   val validPayloadRequestWithoutPostCode = Json.parse("""{"name": "trust name","utr": "1234567890"}""")
-
-
 
 
   ".checkExistingTrust" should {
@@ -161,6 +159,71 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
 
   } //checkExistingTrust
-}
 
-//end
+  ".registration" should {
+
+    "return 200 with TRN" when {
+      "the register endpoint is called with a valid json payload " in {
+        val SUT = new TrustsController(mockDesService, appConfig)
+        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(SuccessRegistrationResponse("XTRN123456")))
+        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
+        status(result) mustBe OK
+        (contentAsJson(result) \ "trn").as[String] mustBe "XTRN123456"
+      }
+    }
+
+
+    "return a BAD REQUEST" when {
+      "input request fails schema validation"  in {
+        val SUT = new TrustsController(mockDesService, appConfig)
+
+        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(invalidRegistrationRequestJson)))
+        status(result) mustBe BAD_REQUEST
+      }
+    }
+
+
+    "return an internal server error" when {
+      "the register endpoint called and something goes wrong." in {
+        val SUT = new TrustsController(mockDesService, appConfig)
+        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")))
+
+        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
+        status(result) mustBe INTERNAL_SERVER_ERROR
+        val output = contentAsJson(result)
+        (output \ "code").as[String] mustBe "INTERNAL_SERVER_ERROR"
+        (output \ "message").as[String] mustBe "Internal server error."
+      }
+    }
+
+    "return an internal server error" when {
+      "the des returns BAD REQUEST" in {
+        val SUT = new TrustsController(mockDesService, appConfig)
+        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(ErrorRegistrationTrustsResponse("BAD_REQUEST", "Invalid payload submitted.")))
+
+        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
+        status(result) mustBe INTERNAL_SERVER_ERROR
+        val output = contentAsJson(result)
+        (output \ "code").as[String] mustBe "INTERNAL_SERVER_ERROR"
+        (output \ "message").as[String] mustBe "Internal server error."
+      }
+    }
+
+    "return an internal server error" when {
+      "the des returns Service Unavailable as dependent service is down. " in {
+        val SUT = new TrustsController(mockDesService, appConfig)
+        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(ErrorRegistrationTrustsResponse("SERVIVE_UNAVAILABLE", "Depedent system are not responding.")))
+
+        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
+        status(result) mustBe INTERNAL_SERVER_ERROR
+        val output = contentAsJson(result)
+        (output \ "code").as[String] mustBe "INTERNAL_SERVER_ERROR"
+        (output \ "message").as[String] mustBe "Internal server error."
+      }
+    }
+  }
+}

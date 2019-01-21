@@ -19,13 +19,16 @@ package uk.gov.hmrc.trusts.controllers
 import javax.inject.{Inject, Singleton}
 
 import play.api.Logger
+import play.api.libs.json.Json
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.models.ExistingTrustCheckRequest
+import uk.gov.hmrc.trusts.models.{ErrorRegistrationTrustsResponse, ExistingTrustCheckRequest, Registration, SuccessRegistrationResponse}
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse.{AlreadyRegistered, Matched, NotMatched}
 import uk.gov.hmrc.trusts.services.DesService
+import uk.gov.hmrc.trusts.utils.TrustsRegistrationSchemaValidator
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton()
 class TrustsController @Inject()(desService: DesService, config: AppConfig) extends TrustsBaseController {
@@ -47,6 +50,40 @@ class TrustsController @Inject()(desService: DesService, config: AppConfig) exte
     }
 
   }//checkExistingTrust
+
+
+  def registration() = Action.async(parse.json) { implicit request =>
+
+    val registrationJsonString = request.body.toString()
+    val isValid = TrustsRegistrationSchemaValidator.validateRequest(registrationJsonString)
+
+
+    isValid match {
+      case true => {
+        request.body.validate[Registration].fold(
+          errors => handleValidateionErrors(),
+          trustsRegistrationRequest => desService.registerTrust(trustsRegistrationRequest).map {
+            response => {
+              response match {
+                case success: SuccessRegistrationResponse =>
+                  Ok(Json.toJson(success))
+                case failure: ErrorRegistrationTrustsResponse => internalServerErrorResponse
+
+              }
+            }
+          }
+        )
+      }
+
+      case false => handleValidateionErrors()
+
+    }
+
+  } //registration
+
+  def handleValidateionErrors() ={
+    Future.successful(invalidRequestErrorResponse)
+  }
 
 
 }

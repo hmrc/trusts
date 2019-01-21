@@ -1,0 +1,247 @@
+{
+	"matchData": {
+		"utr": "54545416151",
+		"name": "Mark Wolberg",
+		"postCode": "TF3 2BX"
+	},
+	"correspondence": {
+		"abroadIndicator": false,
+		"name": "Acme Invest",
+		"address": {
+			"line1": "1344 Army Road",
+			"line2": "Suite 111",
+			"line4": "Telford",
+			"country": "ZW"
+		},
+		"phoneNumber": "0121822983"
+	},
+	"yearsReturns": {
+		"taxReturnsNoDues": true,
+		"returns": [
+			{
+				"taxReturnYear": "16",
+				"taxConsequence": false
+			},
+			{
+				"taxReturnYear": "15",
+				"taxConsequence": false
+			},
+			{
+				"taxReturnYear": "14",
+				"taxConsequence": false
+			},
+			{
+				"taxReturnYear": "13",
+				"taxConsequence": false
+			}
+		]
+	},
+	"declaration": {
+		"name": {
+			"firstName": "John",
+			"middleName": "William",
+			"lastName": "O'Connor"
+		},
+		"address": {
+			"line1": "1344 Army Road",
+			"line2": "Suite 111",
+			"line4": "Telford",
+			"postCode": "TF1 5DR",
+			"country": "GB"
+		}
+	},
+	"details": {
+		"trust": {
+			"details": {
+				"startDate": "2001-01-01",
+				"administrationCountry": "GB",
+				"residentialStatus": {
+					"uk": {
+						"scottishLaw": false,
+						"preOffShore": "AD"
+					}
+				},
+				"typeOfTrust": "Will Trust or Intestacy Trust",
+				"deedOfVariation": "Previously there was only an absolute interest under the will",
+				"interVivos": false,
+				"efrbsStartDate": "2001-01-01"
+			},
+			"entities": {
+				"naturalPerson": [
+					{
+						"name": {
+							"firstName": "John",
+							"middleName": "William",
+							"lastName": "O'Connor"
+						},
+						"dateOfBirth": "1956-02-12",
+						"identification": {
+							"nino": "KC287812"
+						}
+					}
+				],
+				"beneficiary": {
+					"individualDetails": [
+						{
+							"name": {
+								"firstName": "John",
+								"middleName": "William",
+								"lastName": "O'Connor"
+							},
+							"dateOfBirth": "2001-01-01",
+							"vulnerableBeneficiary": true,
+							"beneficiaryType": "Director",
+							"beneficiaryDiscretion": true,
+							"beneficiaryShareOfIncome": "100",
+							"identification": {
+								"passport": {
+									"number": "abcdefgh",
+									"expirationDate": "2001-01-01",
+									"countryOfIssue": "GB"
+								},
+								"address": {
+									"line1": "1344 Army Road",
+									"line2": "Suite 111",
+									"line4": "Telford",
+									"postCode": "TF1 5DR",
+									"country": "GB"
+								}
+							}
+						}
+					],
+					"other": [
+						{
+							"address": {
+								"line1": "1344 Army Road",
+								"line2": "Suite 111",
+								"line4": "Telford",
+								"postCode": "TF1 5DR",
+								"country": "GB"
+							},
+							"description": "Lorem ipsum"
+						}
+					]
+				},
+				"deceased": {
+					"name": {
+						"firstName": "John",
+						"middleName": "William",
+						"lastName": "O'Connor"
+					},
+					"dateOfBirth": "1956-02-12",
+					"dateOfDeath": "2016-01-01",
+					"identification": {
+						"nino": "KC456736"
+					}
+				},
+				"leadTrustees": {
+					"leadTrusteeOrg": {
+						"name": "Trust Services LTD",
+						"phoneNumber": "0754545454",
+						"email": "me@you.com",
+						"identification": {
+							"utr": "5465416546"
+						}
+					}
+				},
+				"trustees": [
+					{
+						"trusteeInd": {
+							"name": {
+								"firstName": "John",
+								"middleName": "William",
+								"lastName": "O'Connor"
+							},
+							"dateOfBirth": "1956-02-12",
+							"identification": {
+								"nino": "ST123456"
+							},
+							"phoneNumber": "0121546546"
+						}
+					}
+				],
+				"settlors": {
+					"settlor": [
+						{
+							"name": {
+								"firstName": "abcdefghijkl",
+								"middleName": "abcdefghijklmn",
+								"lastName": "abcde"
+							},
+							"dateOfBirth": "2001-01-01",
+							"identification": {
+								"nino": "ST019091"
+							}
+						}
+					],
+					"settlorCompany": [
+						{
+							"name": "abcdefghijklmnopqr",
+							"companyType": "Trading",
+							"companyTime": false,
+							"identification": {
+								"utr": "1234561234"
+							}
+						}
+					]
+				}
+			},
+			"assets": {
+				"monetary": [
+					{
+						"assetMonetaryAmount": 100000
+					}
+				],
+				"propertyOrLand": [
+					{
+						"buildingLandName": "ACB House",
+						"address": {
+							"line1": "1344 Army Road",
+							"line2": "Suite 111",
+							"line4": "Telford",
+							"postCode": "TF1 5DR",
+							"country": "GB"
+						},
+						"valueFull": 1000000,
+						"valuePrevious": 200000
+					}
+				],
+				"shares": [
+					{
+						"numberOfShares": "100",
+						"orgName": "Mock Org LTD",
+						"utr": "1231712342",
+						"shareClass": "Ordinary shares",
+						"typeOfShare": "Quoted",
+						"value": 4584545
+					}
+				],
+				"partnerShip": [
+					{
+						"utr": "5456456221",
+						"description": "Partnership Trade \\ {À-˿’}\\- &`'^",
+						"partnershipStart": "2001-01-01"
+					}
+				],
+				"other": [
+					{
+						"description": "Lorem ipsum anum",
+						"value": 1982372
+					}
+				]
+			}
+		}
+	},
+	"agentDetails": {
+		"arn": "AARN1234567",
+		"agentName": "Mr . xys abcde",
+		"agentAddress": {
+			"line1": "line1",
+			"line2": "line2",
+			"postCode": "TF3 2BX",
+			"country": "GB"
+		},
+		"agentTelephoneNumber": "07912180120",
+		"clientReference": "clientReference"
+	}
+}

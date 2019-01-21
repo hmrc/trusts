@@ -22,19 +22,14 @@ import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.models.Registration
 
 
-class DesSchemaValidatorSpec extends BaseSpec with  GuiceOneServerPerSuite {
+class ApiSchemaValidatorSpec extends BaseSpec with  GuiceOneServerPerSuite {
 
-  "DesSchemaValidator" should {
+  "ApiSchemaValidator" should {
     "return successvalidation when json string is valid " when {
       "Json having all required fields" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration.json")
-        val validationResult = DesSchemaValidator.validateRegistrationAgainstSchema(jsonString)
-        validationResult.isSuccess mustBe true
-        println(Json.parse(jsonString).validate[Registration])
-        Json.parse(jsonString).validate[Registration].fold (
-           errors => println("error"),
-           request => println(request)
-        )
+        val isValid = TrustsRegistrationSchemaValidator.validateRequest(jsonString)
+        isValid mustBe true
         Json.parse(jsonString).validate[Registration].isSuccess mustBe true
       }
   }

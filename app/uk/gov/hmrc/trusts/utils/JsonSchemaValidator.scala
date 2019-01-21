@@ -24,6 +24,7 @@ import play.api.libs.json._
 import scala.collection.JavaConverters._
 import scala.io.Source
 import scala.util.{Success, Try}
+import com.eclipsesource.schema.SchemaValidator
 
 
 trait JsonSchemaValidator {
@@ -33,57 +34,45 @@ trait JsonSchemaValidator {
 
 
 
-   def validateRegistrationAgainstSchema(registration: String) = {
+   def validateRequest(registration: String): Boolean = {
 
-    import com.eclipsesource.schema.SchemaValidator
-
-    Logger.info(s"Validating registration  payload to DES")
-
+    Logger.info(s"Validating input request for registration against schema.")
     val validator = SchemaValidator()
-
     val validationResult: JsResult[JsValue] = validator.validate(registrationSchema, Json.parse(registration))
 
     validationResult.isSuccess match {
-      case true => Logger.info(s"Validated against DES schema successfully")
+      case true => Logger.info(s"Validated registration payload against trusts schema successfully")
       case false => {
         val errors: Seq[(JsPath, Seq[ValidationError])] = validationResult.asEither.left.get
 
         errors.map {
           case (path, validationErrors) =>
             validationErrors.map(err => {
-
               for (e <- err.args) {
 
                 val errorTransformer = (__ \ 'errors).json.pickBranch
                 val errorsJsObj: JsObject = e.asInstanceOf[JsValue].transform(errorTransformer).get.as[JsObject]
-
                 val errorsString = errorsJsObj.toString
-
                 val regex = "\"value\":.*?,\"instancePath\"".r
-
                 val errorsToReport: String = regex.replaceAllIn(errorsString, """"value": "PROTECTED", "instancePath"""")
-
-                Logger.info(s"Validated against DES schema FAILED = $errorsToReport")
+                Logger.error(s"Validated against DES schema FAILED = $errorsToReport")
 
               }
-
             })
         }
       }
     }
-    validationResult
+    validationResult.isSuccess
   }
 }
 
 
 
 
-object DesSchemaValidator extends JsonSchemaValidator {
+object TrustsRegistrationSchemaValidator extends JsonSchemaValidator {
 
   val jsonString = Source.fromFile(getClass.getResource("/resources/schemas/desSchemaRegistration_2.10.json").getPath).mkString
-  println("sceham"+jsonString)
   val schemaType = Json.fromJson[SchemaType](Json.parse(jsonString))
-  println("sceham"+schemaType)
 
   val registrationSchema : SchemaType = schemaType.get
 

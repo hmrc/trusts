@@ -1,4 +1,5 @@
 # microservice specific routes
 
-POST        /check                  uk.gov.hmrc.trusts.controllers.TrustsController.checkExistingTrust
+POST        /check                    uk.gov.hmrc.trusts.controllers.TrustsController.checkExistingTrust
 
+POST        /register                  uk.gov.hmrc.trusts.controllers.TrustsController.registration

@@ -163,6 +163,8 @@ case class TrusteeIndividualType(name: NameType,
                        phoneNumber: Option[String],
                        identification: IdentificationType)
 object TrusteeIndividualType {
+  val dateTimePattern = "yyyy-MM-dd"
+  implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val trusteeIndividualTypeFormat : Format[TrusteeIndividualType] = Json.format[TrusteeIndividualType]
 }
 
@@ -227,7 +229,16 @@ case class LeadTrusteeType(
 object LeadTrusteeType {
 
   implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads("yyyy-MM-dd"), Writes.jodaDateWrites("yyyy-MM-dd") )
-  implicit val leadTrusteeTypeFormat: Format[LeadTrusteeType] = Json.format[LeadTrusteeType]
+ // implicit val leadTrusteeTypeFormat: Format[LeadTrusteeType] = Json.format[LeadTrusteeType]
+  implicit val leadTrusteeTypeReads:Reads[LeadTrusteeType] = Json.reads[LeadTrusteeType]
+
+  implicit val leadTrusteeWritesToDes : Writes[LeadTrusteeType] = Writes {
+    leadTrustee=> leadTrustee.leadTrusteeInd match {
+      case Some(indLeadTrutee) => Json.toJson(indLeadTrutee)
+      case None => Json.toJson(leadTrustee.leadTrusteeOrg)
+    }
+  }
+
 
 }
 

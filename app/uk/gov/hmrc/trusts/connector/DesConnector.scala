@@ -25,7 +25,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.trusts.config.{AppConfig, WSHttp}
-import uk.gov.hmrc.trusts.models.{ExistingTrustCheckRequest, ExistingTrustResponse}
+import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse.httpReads
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,7 +35,7 @@ import scala.concurrent.Future
 class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesConnector {
   lazy val trustsServiceUrl = s"${config.desUrl}/trusts"
   lazy val matchEndpoint = trustsServiceUrl + "/match"
-
+  lazy val registrationEndpoint = trustsServiceUrl + "/registration"
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "Correlation-Id"
@@ -62,9 +62,29 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
     response
   }
+
+  override def registerTrust(registration: Registration)
+                                 (implicit hc: HeaderCarrier): Future[RegistrationTrustResponse] = {
+    val desHeaders = hc.copy(authorization = Some(Authorization(s"Bearer ${config.desToken}"))).withExtraHeaders(headers: _*)
+
+    Logger.debug(s"Sending matching request to DES, url=$registrationEndpoint")
+
+      http.POST[JsValue, RegistrationTrustResponse](registrationEndpoint, Json.toJson(registration), desHeaders.headers) map{
+        response => response
+      } recover {
+        case exception: Exception => {
+          Logger.error(s"[registerTrust] post to des return exception :${exception.getMessage}")
+          ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
+        }
+      }
+
+
+  }
 }
 
 @ImplementedBy(classOf[DesConnectorImpl])
 trait DesConnector {
   def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest)(implicit hc: HeaderCarrier): Future[ExistingTrustResponse]
+  def registerTrust(registration: Registration)(implicit hc: HeaderCarrier): Future[RegistrationTrustResponse]
+
 }
