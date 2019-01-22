@@ -22,7 +22,7 @@ import javax.inject.Inject
 import com.google.inject.ImplementedBy
 import play.api.Logger
 import play.api.libs.json._
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{BadGatewayException, GatewayTimeoutException, HeaderCarrier}
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.trusts.config.{AppConfig, WSHttp}
 import uk.gov.hmrc.trusts.models._
@@ -72,10 +72,14 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
       http.POST[JsValue, RegistrationTrustResponse](registrationEndpoint, Json.toJson(registration), desHeaders.headers) map{
         response => response
       } recover {
-        case exception: Exception => {
-          Logger.error(s"[registerTrust] post to des return exception :${exception.getMessage}")
+        case gatewayTimeout: GatewayTimeoutException => {
+          Logger.error(s"[registerTrust] post to des return GatewayTimeoutException :${gatewayTimeout.getMessage}")
           ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
         }
+        case badgateway : BadGatewayException =>
+          Logger.error(s"[registerTrust] post to des return BadGatewayException :${badgateway.getMessage}")
+          ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
+
       }
 
 

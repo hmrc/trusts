@@ -34,7 +34,7 @@ class DesConnectorSpec extends BaseConnectorSpec
 
   override lazy val app: Application = new GuiceApplicationBuilder()
     .configure(
-      Seq("microservice.services.des.port" -> server.port(),
+      Seq("microservice.services.des.port" -> wiremockPort,
         "auditing.enabled" -> false): _*).build()
 
 
@@ -145,6 +145,8 @@ class DesConnectorSpec extends BaseConnectorSpec
 
           val result = Await.result(connector.registerTrust(invalidRegistrationRequest), Duration.Inf)
           result mustBe ErrorRegistrationTrustsResponse("BAD_REQUEST", "Invalid payload submitted.")
+          result.asInstanceOf[ErrorRegistrationTrustsResponse].code mustBe "BAD_REQUEST"
+
         }
       }
 
@@ -156,6 +158,8 @@ class DesConnectorSpec extends BaseConnectorSpec
 
           val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
           result mustBe ErrorRegistrationTrustsResponse("ALREADY_REGISTERED", "Trust is already registered.")
+          result.asInstanceOf[ErrorRegistrationTrustsResponse].code mustBe "ALREADY_REGISTERED"
+
         }
       }
 
@@ -167,6 +171,7 @@ class DesConnectorSpec extends BaseConnectorSpec
 
           val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
           result mustBe ErrorRegistrationTrustsResponse("SERVIVE_UNAVAILABLE", "Depedent system is not responding.")
+          result.asInstanceOf[ErrorRegistrationTrustsResponse].code mustBe "SERVIVE_UNAVAILABLE"
         }
       }
 
@@ -178,26 +183,56 @@ class DesConnectorSpec extends BaseConnectorSpec
 
           val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
           result mustBe ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
+          result.asInstanceOf[ErrorRegistrationTrustsResponse].code mustBe "INTERNAL_SERVER_ERROR"
+
         }
       }
 
       "return ErrorRegistrationTrustsResponse with INTERNAL_SERVER_ERROR" when {
-        "des is returning any other error " in {
+        "des is returning 403 without ALREADY REGISTERED code." in {
           val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
-          stubFor("/trusts/registration", requestBody, 409, "{}")
+          stubFor("/trusts/registration", requestBody, 403, "{}")
 
           val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
           result mustBe ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
+          result.asInstanceOf[ErrorRegistrationTrustsResponse].code mustBe "INTERNAL_SERVER_ERROR"
+
         }
       }
+
+      "return ErrorRegistrationTrustsResponse with INTERNAL_SERVER_ERROR" when {
+        "des is down" in {
+          val requestBody = Json.stringify(Json.toJson(registrationRequest))
+          server.stop()
+          val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
+          result mustBe ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
+          result.asInstanceOf[ErrorRegistrationTrustsResponse].code mustBe "INTERNAL_SERVER_ERROR"
+          server.start()
+        }
+      }
+
+      "return ErrorRegistrationTrustsResponse with INTERNAL_SERVER_ERROR" when {
+        "there is gateway timeout before receiving response" in {
+          val requestBody = Json.stringify(Json.toJson(registrationRequest))
+          stubFor("/trusts/registration", requestBody, 200, """{"trn": "XTRN1234567"}""",25000)
+          val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
+          result mustBe ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
+          result.asInstanceOf[ErrorRegistrationTrustsResponse].code mustBe "INTERNAL_SERVER_ERROR"
+
+        }
+      }
+
+
+
+
 
 
 
     }
 
 
-  def stubFor(url: String, requestBody: String, returnStatus: Int, responseBody: String) =
+  def stubFor(url: String, requestBody: String, returnStatus: Int, responseBody: String, delayResponse :Int = 0) = {
     server.stubFor(post(urlEqualTo(url))
       .withHeader("content-Type", containing("application/json"))
       .withHeader("Environment", containing("dev"))
@@ -205,7 +240,9 @@ class DesConnectorSpec extends BaseConnectorSpec
       .willReturn(
         aResponse()
           .withStatus(returnStatus)
-          .withBody(responseBody)))
+          .withBody(responseBody).withFixedDelay(delayResponse)))
+  }
+
 
 
 

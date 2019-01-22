@@ -198,7 +198,7 @@ object SettlorCompany {
 
 
 case class LeadTrusteeIndType (
-                            name: String,
+                            name: NameType,
                             dateOfBirth: Option[DateTime] = None,
                             phoneNumber: String,
                             email: Option[String] = None,
