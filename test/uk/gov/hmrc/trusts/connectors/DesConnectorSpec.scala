@@ -184,7 +184,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "return ErrorRegistrationTrustsResponse with INTERNAL_SERVER_ERROR" when {
         "des is returning any other error " in {
           val requestBody = Json.stringify(Json.toJson(registrationRequest))
-          
+
           stubFor("/trusts/registration", requestBody, 409, "{}")
 
           val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)

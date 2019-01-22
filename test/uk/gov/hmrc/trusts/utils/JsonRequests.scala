@@ -24,17 +24,13 @@ import scala.io.Source
 /**
   * Created by manish on 21/01/19.
   */
-trait JsonRequests {
-
-  private def readResourcesFileAsString(fileName : String): String = {
-    Source.fromFile(getClass.getResource(s"/$fileName").getPath).mkString
-  }
+trait JsonRequests extends JsonUtils {
 
 
-  lazy val validRegistrationRequestJson  =  readResourcesFileAsString("valid-trusts-registration-api.json")
-  lazy val invalidRegistrationRequestJson  =  readResourcesFileAsString("invalid-payload-trusts-registration.json")
+  lazy val validRegistrationRequestJson  =  getJsonFromFile("valid-trusts-registration-api.json")
+  lazy val invalidRegistrationRequestJson  =  getJsonFromFile("invalid-payload-trusts-registration.json")
 
-  lazy val registrationRequest = Json.parse(validRegistrationRequestJson).validate[Registration].get
-  lazy val invalidRegistrationRequest = Json.parse(invalidRegistrationRequestJson).validate[Registration].get
+  lazy val registrationRequest = getJsonValueFromFile("valid-trusts-registration-api.json").validate[Registration].get
+  lazy val invalidRegistrationRequest = getJsonValueFromFile("invalid-payload-trusts-registration.json").validate[Registration].get
 
 }

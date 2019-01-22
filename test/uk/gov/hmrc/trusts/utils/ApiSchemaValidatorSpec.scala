@@ -27,7 +27,7 @@ class ApiSchemaValidatorSpec extends BaseSpec with  GuiceOneServerPerSuite {
   "ApiSchemaValidator" should {
     "return successvalidation when json string is valid " when {
       "Json having all required fields" in {
-        val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration.json")
+        val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
         val isValid = TrustsRegistrationSchemaValidator.validateRequest(jsonString)
         isValid mustBe true
         Json.parse(jsonString).validate[Registration].isSuccess mustBe true
