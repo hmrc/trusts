@@ -37,6 +37,8 @@ class AppConfig @Inject() (config: Configuration, playEnv: Environment) extends 
   val desEnvironment : String =   loadConfig("microservice.services.des.environment")
   val desToken : String =    loadConfig("microservice.services.des.token")
 
+  val trustsApiRegistrationSchema : String  = "/resources/schemas/trustsApiRegistrationSchema_3.0.0.json"
+
 
 }
 

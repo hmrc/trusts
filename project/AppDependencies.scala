@@ -9,7 +9,7 @@ object AppDependencies {
     "uk.gov.hmrc" %% "play-reactivemongo" % "6.2.0",
     ws,
     "uk.gov.hmrc" %% "bootstrap-play-25" % "3.3.0",
-    "com.eclipsesource" %% "play-json-schema-validator" % "0.8.9" withSources()
+    "com.github.java-json-tools" % "json-schema-validator" % "2.2.8"
   )
 
   def test(scope: String = "test") = Seq(

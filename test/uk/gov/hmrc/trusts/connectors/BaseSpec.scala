@@ -24,9 +24,9 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.utils.JsonRequests
+import play.api.test
 
-
-class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with MockitoSugar with JsonRequests {
+class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with MockitoSugar with JsonRequests  {
 
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
 

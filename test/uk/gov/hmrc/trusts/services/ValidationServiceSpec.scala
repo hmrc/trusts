@@ -14,25 +14,34 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.utils
+package uk.gov.hmrc.trusts.services
 
-import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.models.Registration
+import uk.gov.hmrc.trusts.utils.JsonUtils
 
 
-class ApiSchemaValidatorSpec extends BaseSpec with  GuiceOneServerPerSuite {
+class ValidationServiceSpec extends BaseSpec {
 
-  "ApiSchemaValidator" should {
-    "return successvalidation when json string is valid " when {
+  private lazy val validatationService: ValidationService = new ValidationService()
+  private lazy val validator : Validator = validatationService.get("/resources/schemas/trustsApiRegistrationSchema_3.0.0.json")
+
+  "a validator " should {
+    "return an empty list of errors when " when {
       "Json having all required fields" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
-        val isValid = TrustsRegistrationSchemaValidator.validateRequest(jsonString)
-        isValid mustBe true
+        validator.validate(jsonString).isEmpty mustBe true
         Json.parse(jsonString).validate[Registration].isSuccess mustBe true
       }
-  }
+    }
+
+    "return a list of validaton errors " when {
+      "json document is invalid" in {
+        val jsonString = JsonUtils.getJsonFromFile("invalid-payload-trusts-registration.json")
+        validator.validate(jsonString).isEmpty mustBe false
+      }
+    }
   }
 
 }
