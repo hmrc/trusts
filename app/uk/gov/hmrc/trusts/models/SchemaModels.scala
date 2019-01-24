@@ -229,7 +229,6 @@ case class LeadTrusteeType(
 object LeadTrusteeType {
 
   implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads("yyyy-MM-dd"), Writes.jodaDateWrites("yyyy-MM-dd") )
- // implicit val leadTrusteeTypeFormat: Format[LeadTrusteeType] = Json.format[LeadTrusteeType]
   implicit val leadTrusteeTypeReads:Reads[LeadTrusteeType] = Json.reads[LeadTrusteeType]
 
   implicit val leadTrusteeWritesToDes : Writes[LeadTrusteeType] = Writes {
@@ -379,9 +378,9 @@ object NaturalPersonType {
   implicit val naturalPersonTypeFormat: Format[NaturalPersonType] = Json.format[NaturalPersonType]
 }
 
-case class IdentificationType(nino: Option[String], // OneOf under 'IdentificationType' {0}
-                              passport: Option[PassportType], // OneOf under 'IdentificationType' {1}
-                              address: Option[AddressType]) // OneOf under 'IdentificationType' {1}
+case class IdentificationType(nino: Option[String],
+                              passport: Option[PassportType],
+                              address: Option[AddressType])
 
 object IdentificationType {
   implicit val identificationTypeFormat: Format[IdentificationType] = Json.format[IdentificationType]
@@ -570,20 +569,11 @@ object WillType {
 
 case class AgentDetails(arn: String,
                         agentName: String,
-                        agentAddress: AgentAddressType,
+                        agentAddress: AddressType,
                         agentTelephoneNumber: String,
                         clientReference: String)
 object AgentDetails {
   implicit val agentDetailsFormat: Format[AgentDetails] = Json.format[AgentDetails]
 }
 
-case class AgentAddressType(isUkAddress: Option[Boolean] = None,
-                            line1: Option[String] = None,
-                            line2: Option[String] = None,
-                            line3: Option[String] = None,
-                            line4: Option[String] = None,
-                            postCode: Option[String] = None,
-                            country: Option[String] = None)
-object AgentAddressType {
-  implicit val agentAddressTypeFormat: Format[AgentAddressType] = Json.format[AgentAddressType]
-}
+

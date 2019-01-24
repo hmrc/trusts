@@ -45,7 +45,7 @@ object RegistrationTrustResponse {
   implicit lazy val httpReads: HttpReads[RegistrationTrustResponse] =
     new HttpReads[RegistrationTrustResponse] {
       override def read(method: String, url: String, response: HttpResponse): RegistrationTrustResponse = {
-        Logger.info(s"response status received from des: ${response.status}")
+        Logger.info(s"[RegistrationTrustResponse]  response status received from des: ${response.status}")
         response.status match {
           case OK =>response.json.as[SuccessRegistrationResponse]
           case FORBIDDEN =>{
@@ -69,10 +69,3 @@ case class RegistrationDesResponse(trn:String)
 object RegistrationDesResponse {
   implicit val formats = Json.format[DesResponse]
 }
-
-/*
-case class RegistrationDesErrorResponse(code: String,reason: String )
-
-object RegistrationDesErrorResponse {
-  implicit val formats = Json.format[DesErrorResponse]
-}*/
