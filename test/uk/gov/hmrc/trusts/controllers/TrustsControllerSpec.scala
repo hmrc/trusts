@@ -39,7 +39,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
   val mockDesService = mock[DesService]
   val appConfig = mock[AppConfig]
 
-  val validPayloadRequest = Json.parse("""{"name": "trust name","postcode": "NE11NE","utr": "1234567890"}""")
+  val validPayloadRequest = Json.parse("""{"name": "trust name","postcode": "NE1 1NE","utr": "1234567890"}""")
   val validPayloadRequestWithoutPostCode = Json.parse("""{"name": "trust name","utr": "1234567890"}""")
 
 
@@ -134,7 +134,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "postcode is not valid" in {
         val SUT = new TrustsController(mockDesService, appConfig)
 
-        val invalidPayload = Json.parse("""{"name": "trust name","postcode": "NE11NE1234567","utr": "1234567890"}""")
+        val invalidPayload = Json.parse("""{"name": "trust name","postcode": "AA9A 9AAT","utr": "1234567890"}""")
 
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(invalidPayload))
         status(result) mustBe BAD_REQUEST
