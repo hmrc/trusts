@@ -41,7 +41,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   lazy val validatationService: ValidationService = new ValidationService()
 
-  val validPayloadRequest = Json.parse("""{"name": "trust name","postcode": "NE11NE","utr": "1234567890"}""")
+  val validPayloadRequest = Json.parse("""{"name": "trust name","postcode": "NE1 1NE","utr": "1234567890"}""")
   val validPayloadRequestWithoutPostCode = Json.parse("""{"name": "trust name","utr": "1234567890"}""")
 
 
@@ -104,6 +104,18 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         (contentAsJson(result) \ "code").as[String] mustBe "INVALID_NAME"
         (contentAsJson(result) \ "message").as[String] mustBe "Provided name is invalid."
       }
+
+      "trust name is more than 56 characters" in {
+        val SUT = new TrustsController(mockDesService, appConfig)
+        val nameInvalidPayload = Json.parse("""{"name": "Lorem ipsum dolor sit amet, consectetur adipiscing elitee","postcode": "NE11NE","utr": "1234567890"}""")
+
+        val result = SUT.checkExistingTrust().apply(postRequestWithPayload(nameInvalidPayload))
+        status(result) mustBe BAD_REQUEST
+        (contentAsJson(result) \ "code").as[String] mustBe "INVALID_NAME"
+        (contentAsJson(result) \ "message").as[String] mustBe "Provided name is invalid."
+      }
+
+
     }
 
     "return 400 " when {
@@ -122,7 +134,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "postcode is not valid" in {
         val SUT = new TrustsController(mockDesService, appConfig,validatationService)
 
-        val invalidPayload = Json.parse("""{"name": "trust name","postcode": "NE11NE1234567","utr": "1234567890"}""")
+        val invalidPayload = Json.parse("""{"name": "trust name","postcode": "AA9A 9AAT","utr": "1234567890"}""")
 
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(invalidPayload))
         status(result) mustBe BAD_REQUEST
