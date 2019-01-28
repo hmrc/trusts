@@ -21,8 +21,9 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Action
+import uk.gov.hmrc.http.ServiceUnavailableException
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.models.{ErrorRegistrationTrustsResponse, ExistingTrustCheckRequest, Registration, SuccessRegistrationResponse}
+import uk.gov.hmrc.trusts.models.{AlreadyRegisteredException, ExistingTrustCheckRequest, Registration}
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse.{AlreadyRegistered, Matched, NotMatched}
 import uk.gov.hmrc.trusts.services.{DesService, ValidationService}
 
@@ -64,18 +65,19 @@ class TrustsController @Inject()(desService: DesService, config: AppConfig, vali
           errors => Future.successful(invalidRequestErrorResponse),
           trustsRegistrationRequest => {
             desService.registerTrust(trustsRegistrationRequest).map {
-              response => {
-                response match {
-                  case success: SuccessRegistrationResponse =>
-                    Ok(Json.toJson(success))
-                  case failure: ErrorRegistrationTrustsResponse
-                    if failure.code == "ALREADY_REGISTERED"=>  Conflict(doErrorResponse(failure.reason, failure.code))
-                  case failure: ErrorRegistrationTrustsResponse => internalServerErrorResponse
-
-                }
+              response => Ok(Json.toJson(response))
+            } recover {
+                  case alreadyRegisterd : AlreadyRegisteredException =>{
+                    Logger.info("[TrustsController][registration] Returning already registered response.")
+                    Conflict(doErrorResponse("The trust is already registered.", "ALREADY_REGISTERED"))
+                  }
+                  case exception : Exception  => {
+                    Logger.error(s"[TrustsController][registration] Exception received : ${exception}.")
+                    internalServerErrorResponse
+                  }
               }
             }
-          }
+
         )
       }
       case false => Future.successful(invalidRequestErrorResponse)

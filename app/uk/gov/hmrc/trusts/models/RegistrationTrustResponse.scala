@@ -22,29 +22,18 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
 
-trait RegistrationTrustResponse
 
-case class SuccessRegistrationResponse(trn : String) extends  RegistrationTrustResponse
-object SuccessRegistrationResponse {
-  implicit val formats = Json.format[SuccessRegistrationResponse]
-}
-//
-/*case class ErrorRegistrationTrustsResponse(code: String,reason: String) extends RegistrationTrustResponse
-object ErrorRegistrationTrustsResponse {
-  implicit val formats = Json.format[ErrorRegistrationTrustsResponse]
-}*/
-
-
+case class RegistrationTrustResponse(trn : String)
 
 object RegistrationTrustResponse {
 
-
+  implicit val formats = Json.format[RegistrationTrustResponse]
   implicit lazy val httpReads: HttpReads[RegistrationTrustResponse] =
     new HttpReads[RegistrationTrustResponse] {
       override def read(method: String, url: String, response: HttpResponse): RegistrationTrustResponse = {
         Logger.info(s"[RegistrationTrustResponse]  response status received from des: ${response.status}")
         response.status match {
-          case OK =>response.json.as[SuccessRegistrationResponse]
+          case OK =>response.json.as[RegistrationTrustResponse]
           case FORBIDDEN =>{
             response.json.asOpt[DesErrorResponse] match {
               case Some(desReponse) if desReponse.code == "ALREADY_REGISTERED"=>

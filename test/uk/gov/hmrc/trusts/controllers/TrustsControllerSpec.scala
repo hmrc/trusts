@@ -24,7 +24,7 @@ import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.services.{DesService, ValidationService}
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.models.{ErrorRegistrationTrustsResponse, ExistingTrustCheckRequest, Registration, SuccessRegistrationResponse}
+import uk.gov.hmrc.trusts.models._
 import org.mockito.Mockito._
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse.{AlreadyRegistered, Matched, NotMatched, ServiceUnavailable}
 import org.mockito.Matchers.any
@@ -168,7 +168,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "the register endpoint is called with a valid json payload " in {
         val SUT = new TrustsController(mockDesService, appConfig,validatationService)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(SuccessRegistrationResponse("XTRN123456")))
+          .thenReturn(Future.successful(RegistrationTrustResponse("XTRN123456")))
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe OK
         (contentAsJson(result) \ "trn").as[String] mustBe "XTRN123456"
@@ -180,12 +180,12 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "trusts is already registered with provided details." in {
         val SUT = new TrustsController(mockDesService, appConfig,validatationService)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(ErrorRegistrationTrustsResponse("ALREADY_REGISTERED", "The trusts is already registered.")))
+          .thenReturn(Future.failed(new AlreadyRegisteredException))
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe CONFLICT
         val output = contentAsJson(result)
         (output \ "code").as[String] mustBe "ALREADY_REGISTERED"
-        (output \ "message").as[String] mustBe "The trusts is already registered."
+        (output \ "message").as[String] mustBe "The trust is already registered."
       }
     }
 
@@ -193,7 +193,6 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
     "return a BAD REQUEST" when {
       "input request fails schema validation"  in {
         val SUT = new TrustsController(mockDesService, appConfig,validatationService)
-
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(invalidRegistrationRequestJson)))
         status(result) mustBe BAD_REQUEST
       }
@@ -204,7 +203,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "the register endpoint called and something goes wrong." in {
         val SUT = new TrustsController(mockDesService, appConfig,validatationService)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")))
+          .thenReturn(Future.failed(new InternalServerErrorException("some error")))
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe INTERNAL_SERVER_ERROR
@@ -218,7 +217,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "the des returns BAD REQUEST" in {
         val SUT = new TrustsController(mockDesService, appConfig,validatationService)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(ErrorRegistrationTrustsResponse("BAD_REQUEST", "Invalid payload submitted.")))
+          .thenReturn(Future.failed(new BadRequestException))
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe INTERNAL_SERVER_ERROR
@@ -232,7 +231,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "the des returns Service Unavailable as dependent service is down. " in {
         val SUT = new TrustsController(mockDesService, appConfig,validatationService)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(ErrorRegistrationTrustsResponse("SERVIVE_UNAVAILABLE", "Depedent system are not responding.")))
+          .thenReturn(Future.failed(new ServiceNotAvailableException("dependent is down")))
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe INTERNAL_SERVER_ERROR
