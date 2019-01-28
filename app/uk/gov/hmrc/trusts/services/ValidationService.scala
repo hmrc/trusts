@@ -20,7 +20,10 @@ import javax.inject.Inject
 
 import com.github.fge.jackson.JsonLoader
 import com.github.fge.jsonschema.main.{JsonSchema, JsonSchemaFactory}
-
+import play.api.Logger
+import play.api.libs.json.Json
+import com.github.fge.jsonschema.core.report.LogLevel.ERROR
+import com.github.fge.jsonschema.core.report.ProcessingReport
 import scala.collection.JavaConverters._
 import scala.io.Source
 
@@ -42,20 +45,44 @@ class ValidationService @Inject()() {
 
 class Validator(schema : JsonSchema) {
 
-  def validate (inputJson : String) : List[String] = {
+  private val JsonErrorMessageTag = "message"
+  private val JsonErrorInstanceTag = "instance"
+  private val JsonErrorPointerTag = "pointer"
+
+  def validate (inputJson : String) : List[ValidationError] = {
     val json = JsonLoader.fromString(inputJson)
     val result = schema.validate(json)
-
     if(result.isSuccess){
       List.empty
     } else {
-      result.iterator.asScala.toList.map {
+      val errors = result.iterator.asScala.toList.map {
         _.getMessage
       }
+      getValidationErrors(result)
+
     }
 
   }
 
+
+  private def getValidationErrors(validationOutput: ProcessingReport): List[ValidationError] = {
+    val validationErrors: List[ValidationError] = validationOutput.iterator.asScala.toList.filter(m => m.getLogLevel == ERROR).map(m => {
+      val error = m.asJson()
+      val message = error.findValue(JsonErrorMessageTag).asText("")
+      val location = error.findValue(JsonErrorInstanceTag).at(s"/$JsonErrorPointerTag").asText()
+      val locations = error.findValues(JsonErrorPointerTag)
+      Logger.error(s"validation failed at locations :  ${locations}")
+      ValidationError(message, if (location == "") "/" else location)
+    })
+
+    validationErrors
+  }
+
+}
+
+case class ValidationError(message: String, location: String)
+object TrustsValidationError {
+  implicit val formats = Json.format[ValidationError]
 }
 
 

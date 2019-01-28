@@ -17,13 +17,10 @@
 package uk.gov.hmrc.trusts.models
 
 import play.api.Logger
-import play.api.http.Status.{BAD_REQUEST, CONFLICT, OK, SERVICE_UNAVAILABLE, FORBIDDEN}
+import play.api.http.Status.{BAD_REQUEST, CONFLICT, FORBIDDEN, OK, SERVICE_UNAVAILABLE}
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
-/**
-  * Created by manish on 18/01/19.
-  */
 
 trait RegistrationTrustResponse
 
@@ -31,11 +28,11 @@ case class SuccessRegistrationResponse(trn : String) extends  RegistrationTrustR
 object SuccessRegistrationResponse {
   implicit val formats = Json.format[SuccessRegistrationResponse]
 }
-
-case class ErrorRegistrationTrustsResponse(code: String,reason: String) extends RegistrationTrustResponse
+//
+/*case class ErrorRegistrationTrustsResponse(code: String,reason: String) extends RegistrationTrustResponse
 object ErrorRegistrationTrustsResponse {
   implicit val formats = Json.format[ErrorRegistrationTrustsResponse]
-}
+}*/
 
 
 
@@ -51,13 +48,16 @@ object RegistrationTrustResponse {
           case FORBIDDEN =>{
             response.json.asOpt[DesErrorResponse] match {
               case Some(desReponse) if desReponse.code == "ALREADY_REGISTERED"=>
-                ErrorRegistrationTrustsResponse("ALREADY_REGISTERED", "Trust is already registered.")
-              case _ => ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
+                throw new AlreadyRegisteredException
+                //ErrorRegistrationTrustsResponse("ALREADY_REGISTERED", "Trust is already registered.")
+              case _ =>
+                throw new InternalServerErrorException("Forbiddent response from des.")
+               // ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
             }
           }
-          case BAD_REQUEST => ErrorRegistrationTrustsResponse("BAD_REQUEST", "Invalid payload submitted.")
-          case SERVICE_UNAVAILABLE => ErrorRegistrationTrustsResponse("SERVIVE_UNAVAILABLE", "Depedent system is not responding.")
-          case status =>  ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
+          case BAD_REQUEST => throw new  BadRequestException
+          case SERVICE_UNAVAILABLE => throw new ServiceNotAvailableException("Des depdedent service is down.")
+          case status =>  throw new InternalServerErrorException(s"Not handled status response from des $status")
         }
       }
     }
@@ -69,3 +69,5 @@ case class RegistrationDesResponse(trn:String)
 object RegistrationDesResponse {
   implicit val formats = Json.format[DesResponse]
 }
+
+

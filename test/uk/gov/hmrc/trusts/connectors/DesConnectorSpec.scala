@@ -21,9 +21,10 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
+import uk.gov.hmrc.http.{InternalServerException, ServiceUnavailableException}
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse._
-import uk.gov.hmrc.trusts.models.{ErrorRegistrationTrustsResponse, ExistingTrustCheckRequest,  SuccessRegistrationResponse}
+import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.utils.WireMockHelper
 
 import scala.concurrent.Await
@@ -142,10 +143,9 @@ class DesConnectorSpec extends BaseConnectorSpec
       "payload sent to des is invalid" in {
         val requestBody = Json.stringify(Json.toJson(invalidRegistrationRequest))
         stubFor("/trusts/registration", requestBody, 400, Json.stringify(jsonResponse400))
-
-        val result = Await.result(connector.registerTrust(invalidRegistrationRequest), Duration.Inf)
-        result mustBe ErrorRegistrationTrustsResponse("BAD_REQUEST", "Invalid payload submitted.")
-        result.asInstanceOf[ErrorRegistrationTrustsResponse].code mustBe "BAD_REQUEST"
+        assertThrows[BadRequestException] {
+          val result = Await.result(connector.registerTrust(invalidRegistrationRequest), Duration.Inf)
+        }
 
       }
     }
@@ -155,10 +155,11 @@ class DesConnectorSpec extends BaseConnectorSpec
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
         stubFor("/trusts/registration", requestBody, 403, Json.stringify(jsonResponseAlreadyRegistered))
+        assertThrows[AlreadyRegisteredException] {
 
-        val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
-        result mustBe ErrorRegistrationTrustsResponse("ALREADY_REGISTERED", "Trust is already registered.")
-        result.asInstanceOf[ErrorRegistrationTrustsResponse].code mustBe "ALREADY_REGISTERED"
+          val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
+        }
+
 
       }
     }
@@ -168,10 +169,9 @@ class DesConnectorSpec extends BaseConnectorSpec
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
         stubFor("/trusts/registration", requestBody, 503, Json.stringify(jsonResponse503))
-
-        val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
-        result mustBe ErrorRegistrationTrustsResponse("SERVIVE_UNAVAILABLE", "Depedent system is not responding.")
-        result.asInstanceOf[ErrorRegistrationTrustsResponse].code mustBe "SERVIVE_UNAVAILABLE"
+        assertThrows[ServiceUnavailableException] {
+          val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
+        }
       }
     }
 
@@ -180,10 +180,9 @@ class DesConnectorSpec extends BaseConnectorSpec
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
         stubFor("/trusts/registration", requestBody, 500, Json.stringify(jsonResponse500))
-
-        val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
-        result mustBe ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
-        result.asInstanceOf[ErrorRegistrationTrustsResponse].code mustBe "INTERNAL_SERVER_ERROR"
+        assertThrows[InternalServerErrorException] {
+          val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
+        }
 
       }
     }
@@ -193,32 +192,11 @@ class DesConnectorSpec extends BaseConnectorSpec
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
         stubFor("/trusts/registration", requestBody, 403, "{}")
+        assertThrows[InternalServerErrorException] {
 
-        val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
-        result mustBe ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
-        result.asInstanceOf[ErrorRegistrationTrustsResponse].code mustBe "INTERNAL_SERVER_ERROR"
+          val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
+        }
 
-      }
-    }
-
-    "return ErrorRegistrationTrustsResponse with INTERNAL_SERVER_ERROR" when {
-      "des is down" in {
-        val requestBody = Json.stringify(Json.toJson(registrationRequest))
-        server.stop()
-        val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
-        result mustBe ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
-        result.asInstanceOf[ErrorRegistrationTrustsResponse].code mustBe "INTERNAL_SERVER_ERROR"
-        server.start()
-      }
-    }
-
-    "return ErrorRegistrationTrustsResponse with INTERNAL_SERVER_ERROR" when {
-      "there is gateway timeout before receiving response" in {
-        val requestBody = Json.stringify(Json.toJson(registrationRequest))
-        stubFor("/trusts/registration", requestBody, 200, """{"trn": "XTRN1234567"}""", 25000)
-        val result = Await.result(connector.registerTrust(registrationRequest), Duration.Inf)
-        result mustBe ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
-        result.asInstanceOf[ErrorRegistrationTrustsResponse].code mustBe "INTERNAL_SERVER_ERROR"
 
       }
     }

@@ -69,20 +69,9 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
     Logger.debug(s"Sending matching request to DES, url=$registrationEndpoint")
 
-      http.POST[JsValue, RegistrationTrustResponse](registrationEndpoint, Json.toJson(registration), desHeaders.headers) map{
-        response => response
-      } recover {
-        case gatewayTimeout: GatewayTimeoutException => {
-          Logger.error(s"[registerTrust] post to des return GatewayTimeoutException :${gatewayTimeout.getMessage}")
-          ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
-        }
-        case badgateway : BadGatewayException =>
-          Logger.error(s"[registerTrust] post to des return BadGatewayException :${badgateway.getMessage}")
-          ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
-
-      }
-
-
+    val response: Future[RegistrationTrustResponse] =
+      http.POST[JsValue, RegistrationTrustResponse](registrationEndpoint, Json.toJson(registration), desHeaders.headers)
+    response
   }
 }
 
