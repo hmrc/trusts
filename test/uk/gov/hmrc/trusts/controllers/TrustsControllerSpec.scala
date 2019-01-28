@@ -106,7 +106,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       }
 
       "trust name is more than 56 characters" in {
-        val SUT = new TrustsController(mockDesService, appConfig)
+        val SUT = new TrustsController(mockDesService, appConfig,validatationService)
         val nameInvalidPayload = Json.parse("""{"name": "Lorem ipsum dolor sit amet, consectetur adipiscing elitee","postcode": "NE11NE","utr": "1234567890"}""")
 
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(nameInvalidPayload))

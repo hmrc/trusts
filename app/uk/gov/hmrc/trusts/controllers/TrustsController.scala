@@ -55,32 +55,29 @@ class TrustsController @Inject()(desService: DesService, config: AppConfig, vali
   def registration() = Action.async(parse.json) { implicit request =>
 
     val registrationJsonString = request.body.toString()
-    val isValid = validationService.get(config.trustsApiRegistrationSchema)
-                  .validate(registrationJsonString).isEmpty
+    validationService.get(config.trustsApiRegistrationSchema)
+      .validate[Registration](registrationJsonString)
 
 
-    isValid match {
-      case true => {
-        request.body.validate[Registration].fold(
-          errors => Future.successful(invalidRequestErrorResponse),
-          trustsRegistrationRequest => {
-            desService.registerTrust(trustsRegistrationRequest).map {
-              response => Ok(Json.toJson(response))
-            } recover {
-                  case alreadyRegisterd : AlreadyRegisteredException =>{
-                    Logger.info("[TrustsController][registration] Returning already registered response.")
-                    Conflict(doErrorResponse("The trust is already registered.", "ALREADY_REGISTERED"))
-                  }
-                  case exception : Exception  => {
-                    Logger.error(s"[TrustsController][registration] Exception received : ${exception}.")
-                    internalServerErrorResponse
-                  }
-              }
-            }
+    validationService.get(config.trustsApiRegistrationSchema)
+      .validate[Registration](registrationJsonString) match {
 
-        )
+      case Right(trustsRegistrationRequest) => {
+        desService.registerTrust(trustsRegistrationRequest).map {
+          response => Ok(Json.toJson(response))
+        } recover {
+          case alreadyRegisterd: AlreadyRegisteredException => {
+            Logger.info("[TrustsController][registration] Returning already registered response.")
+            Conflict(doErrorResponse("The trust is already registered.", "ALREADY_REGISTERED"))
+          }
+          case exception: Exception => {
+            Logger.error(s"[TrustsController][registration] Exception received : ${exception}.")
+            internalServerErrorResponse
+          }
+        }
       }
-      case false => Future.successful(invalidRequestErrorResponse)
+      case Left(validationErros) =>
+        Future.successful(invalidRequestErrorResponse)
     }
 
   } //registration

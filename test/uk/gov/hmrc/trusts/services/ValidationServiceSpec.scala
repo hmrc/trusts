@@ -31,15 +31,15 @@ class ValidationServiceSpec extends BaseSpec {
     "return an empty list of errors when " when {
       "Json having all required fields" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
-        validator.validate(jsonString).isEmpty mustBe true
-        Json.parse(jsonString).validate[Registration].isSuccess mustBe true
+        validator.validate[Registration](jsonString).isRight mustBe true
+
       }
     }
 
     "return a list of validaton errors " when {
       "json document is invalid" in {
         val jsonString = JsonUtils.getJsonFromFile("invalid-payload-trusts-registration.json")
-        validator.validate(jsonString).isEmpty mustBe false
+        validator.validate[Registration](jsonString).isLeft mustBe true
       }
     }
   }
