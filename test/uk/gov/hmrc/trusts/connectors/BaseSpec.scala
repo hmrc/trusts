@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.trusts.connectors
 
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.{Matchers, MustMatchers, WordSpec}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
@@ -34,6 +36,18 @@ class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with Mockito
     FakeRequest("POST", "")
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withBody(payload)
+
+
+  def stubFor(server: WireMockServer ,  url: String, requestBody: String, returnStatus: Int, responseBody: String, delayResponse: Int = 0) = {
+    server.stubFor(post(urlEqualTo(url))
+      .withHeader("content-Type", containing("application/json"))
+      .withHeader("Environment", containing("dev"))
+      .withRequestBody(equalTo(requestBody))
+      .willReturn(
+        aResponse()
+          .withStatus(returnStatus)
+          .withBody(responseBody).withFixedDelay(delayResponse)))
+  }
 
 
 

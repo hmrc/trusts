@@ -38,10 +38,8 @@ object RegistrationTrustResponse {
             response.json.asOpt[DesErrorResponse] match {
               case Some(desReponse) if desReponse.code == "ALREADY_REGISTERED"=>
                 throw new AlreadyRegisteredException
-                //ErrorRegistrationTrustsResponse("ALREADY_REGISTERED", "Trust is already registered.")
               case _ =>
-                throw new InternalServerErrorException("Forbiddent response from des.")
-               // ErrorRegistrationTrustsResponse("INTERNAL_SERVER_ERROR", "Internal server error.")
+                throw new InternalServerErrorException("Forbidden response from des.")
             }
           }
           case BAD_REQUEST => throw new  BadRequestException
