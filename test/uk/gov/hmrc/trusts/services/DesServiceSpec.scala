@@ -102,7 +102,7 @@ class DesServiceSpec extends BaseSpec {
       }
     }
 
-    "throws AlreadyRegisteredException " when {
+    "throw AlreadyRegisteredException " when {
       "connector returns  AlreadyRegisteredException." in {
         when(mockConnector.registerTrust(registrationRequest)).
           thenReturn(Future.failed(new AlreadyRegisteredException))

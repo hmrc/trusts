@@ -34,7 +34,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.{DAYS, Duration, FiniteDuration, MINUTES}
 
-class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
+class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
 
   val mockDesService = mock[DesService]
@@ -49,7 +49,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return OK with match true" when {
       "trusts data match with existing trusts. " in {
-        val SUT = new TrustsController(mockDesService, appConfig,validatationService)
+        val SUT = new CheckTrustController(mockDesService, appConfig,validatationService)
         when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(Matched))
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequest))
@@ -60,7 +60,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return OK with match true" when {
       "trusts data match with existing trusts without postcode. " in {
-        val SUT = new TrustsController(mockDesService, appConfig,validatationService)
+        val SUT = new CheckTrustController(mockDesService, appConfig,validatationService)
         when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(Matched))
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequestWithoutPostCode))
@@ -71,7 +71,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return OK with match false" when {
       "trusts data does not match with existing trusts." in {
-        val SUT = new TrustsController(mockDesService, appConfig,validatationService)
+        val SUT = new CheckTrustController(mockDesService, appConfig,validatationService)
         when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(NotMatched))
 
@@ -83,7 +83,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return 403 with message and code" when {
       "trusts data matched with already registered trusts." in {
-        val SUT = new TrustsController(mockDesService, appConfig,validatationService)
+        val SUT = new CheckTrustController(mockDesService, appConfig,validatationService)
         when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(AlreadyRegistered))
 
@@ -96,7 +96,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return 400 " when {
       "trust name is not valid" in {
-        val SUT = new TrustsController(mockDesService, appConfig,validatationService)
+        val SUT = new CheckTrustController(mockDesService, appConfig,validatationService)
         val nameInvalidPayload = Json.parse("""{"name": "","postcode": "NE11NE","utr": "1234567890"}""")
 
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(nameInvalidPayload))
@@ -106,7 +106,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       }
 
       "trust name is more than 56 characters" in {
-        val SUT = new TrustsController(mockDesService, appConfig,validatationService)
+        val SUT = new CheckTrustController(mockDesService, appConfig,validatationService)
         val nameInvalidPayload = Json.parse("""{"name": "Lorem ipsum dolor sit amet, consectetur adipiscing elitee","postcode": "NE11NE","utr": "1234567890"}""")
 
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(nameInvalidPayload))
@@ -120,7 +120,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return 400 " when {
       "utr is not valid" in {
-        val SUT = new TrustsController(mockDesService, appConfig,validatationService)
+        val SUT = new CheckTrustController(mockDesService, appConfig,validatationService)
 
         val utrInvalidPayload = Json.parse("""{"name": "trust name","postcode": "NE11NE","utr": "12345678"}""")
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(utrInvalidPayload))
@@ -132,7 +132,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return 400 " when {
       "postcode is not valid" in {
-        val SUT = new TrustsController(mockDesService, appConfig,validatationService)
+        val SUT = new CheckTrustController(mockDesService, appConfig,validatationService)
 
         val invalidPayload = Json.parse("""{"name": "trust name","postcode": "AA9A 9AAT","utr": "1234567890"}""")
 
@@ -145,7 +145,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return 400 " when {
       "request is not valid" in {
-        val SUT = new TrustsController(mockDesService, appConfig,validatationService)
+        val SUT = new CheckTrustController(mockDesService, appConfig,validatationService)
 
         val requestInvalid = Json.parse("""{"name1": "trust name","postcode": "NE11NE","utr": "1234567890"}""")
 
@@ -158,7 +158,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return Internal server error " when {
       "des dependent service is not responding" in {
-        val SUT = new TrustsController(mockDesService, appConfig,validatationService)
+        val SUT = new CheckTrustController(mockDesService, appConfig,validatationService)
         when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(ServiceUnavailable))
 
@@ -174,83 +174,5 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
   } //checkExistingTrust
 
-  ".registration" should {
 
-    "return 200 with TRN" when {
-      "the register endpoint is called with a valid json payload " in {
-        val SUT = new TrustsController(mockDesService, appConfig,validatationService)
-        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(RegistrationTrustResponse("XTRN123456")))
-        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
-        status(result) mustBe OK
-        (contentAsJson(result) \ "trn").as[String] mustBe "XTRN123456"
-      }
-    }
-
-
-    "return a Conflict" when {
-      "trusts is already registered with provided details." in {
-        val SUT = new TrustsController(mockDesService, appConfig,validatationService)
-        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.failed(new AlreadyRegisteredException))
-        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
-        status(result) mustBe CONFLICT
-        val output = contentAsJson(result)
-        (output \ "code").as[String] mustBe "ALREADY_REGISTERED"
-        (output \ "message").as[String] mustBe "The trust is already registered."
-      }
-    }
-
-
-    "return a BAD REQUEST" when {
-      "input request fails schema validation"  in {
-        val SUT = new TrustsController(mockDesService, appConfig,validatationService)
-        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(invalidRegistrationRequestJson)))
-        status(result) mustBe BAD_REQUEST
-      }
-    }
-
-
-    "return an internal server error" when {
-      "the register endpoint called and something goes wrong." in {
-        val SUT = new TrustsController(mockDesService, appConfig,validatationService)
-        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.failed(new InternalServerErrorException("some error")))
-
-        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
-        status(result) mustBe INTERNAL_SERVER_ERROR
-        val output = contentAsJson(result)
-        (output \ "code").as[String] mustBe "INTERNAL_SERVER_ERROR"
-        (output \ "message").as[String] mustBe "Internal server error."
-      }
-    }
-
-    "return an internal server error" when {
-      "the des returns BAD REQUEST" in {
-        val SUT = new TrustsController(mockDesService, appConfig,validatationService)
-        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.failed(new BadRequestException))
-
-        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
-        status(result) mustBe INTERNAL_SERVER_ERROR
-        val output = contentAsJson(result)
-        (output \ "code").as[String] mustBe "INTERNAL_SERVER_ERROR"
-        (output \ "message").as[String] mustBe "Internal server error."
-      }
-    }
-
-    "return an internal server error" when {
-      "the des returns Service Unavailable as dependent service is down. " in {
-        val SUT = new TrustsController(mockDesService, appConfig,validatationService)
-        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.failed(new ServiceNotAvailableException("dependent is down")))
-
-        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
-        status(result) mustBe INTERNAL_SERVER_ERROR
-        val output = contentAsJson(result)
-        (output \ "code").as[String] mustBe "INTERNAL_SERVER_ERROR"
-        (output \ "message").as[String] mustBe "Internal server error."
-      }
-    }
-  }
 }

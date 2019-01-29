@@ -16,40 +16,20 @@
 
 package uk.gov.hmrc.trusts.controllers
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Action
-import uk.gov.hmrc.http.ServiceUnavailableException
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.models.{AlreadyRegisteredException, ExistingTrustCheckRequest, Registration}
-import uk.gov.hmrc.trusts.models.ExistingTrustResponse.{AlreadyRegistered, Matched, NotMatched}
+import uk.gov.hmrc.trusts.models.{AlreadyRegisteredException, Registration}
 import uk.gov.hmrc.trusts.services.{DesService, ValidationService}
-
 import scala.concurrent.ExecutionContext.Implicits.global
+
 import scala.concurrent.Future
 
-@Singleton()
-class TrustsController @Inject()(desService: DesService, config: AppConfig, validationService: ValidationService) extends TrustsBaseController {
 
-
-  def checkExistingTrust() = Action.async(parse.json) { implicit request =>
-    withJsonBody[ExistingTrustCheckRequest] {
-      trustsCheckRequest =>
-        desService.checkExistingTrust(trustsCheckRequest).map {
-          result =>
-            Logger.info(s"[TrustsController][checkExistingTrust] response type :${result}")
-            result match {
-              case Matched => Ok(matchResponse)
-              case NotMatched => Ok(noMatchResponse)
-              case AlreadyRegistered => alreadyRegisteredResponse
-              case _ => internalServerErrorResponse
-            }
-        }
-    }
-
-  }//checkExistingTrust
+class RegisterTrustController @Inject()(desService: DesService, config: AppConfig, validationService: ValidationService) extends TrustsBaseController {
 
 
   def registration() = Action.async(parse.json) { implicit request =>
@@ -67,11 +47,11 @@ class TrustsController @Inject()(desService: DesService, config: AppConfig, vali
           response => Ok(Json.toJson(response))
         } recover {
           case alreadyRegisterd: AlreadyRegisteredException => {
-            Logger.info("[TrustsController][registration] Returning already registered response.")
+            Logger.info("[RegisterTrustController][registration] Returning already registered response.")
             Conflict(doErrorResponse("The trust is already registered.", "ALREADY_REGISTERED"))
           }
           case exception: Exception => {
-            Logger.error(s"[TrustsController][registration] Exception received : ${exception}.")
+            Logger.error(s"[RegisterTrustController][registration] Exception received : ${exception}.")
             internalServerErrorResponse
           }
         }
@@ -83,7 +63,4 @@ class TrustsController @Inject()(desService: DesService, config: AppConfig, vali
   } //registration
 
 
-
 }
-
-
