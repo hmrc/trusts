@@ -35,7 +35,7 @@ class DesConnectorSpec extends BaseConnectorSpec
 
   override lazy val app: Application = new GuiceApplicationBuilder()
     .configure(
-      Seq("microservice.services.des.port" -> wiremockPort,
+      Seq("microservice.services.des.port" -> server.port(),
         "auditing.enabled" -> false): _*).build()
 
 
