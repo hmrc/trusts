@@ -21,9 +21,7 @@ import uk.gov.hmrc.trusts.models.Registration
 
 import scala.io.Source
 
-/**
-  * Created by manish on 21/01/19.
-  */
+
 trait JsonRequests extends JsonUtils {
 
 

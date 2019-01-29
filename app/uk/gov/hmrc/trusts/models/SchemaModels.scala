@@ -199,10 +199,10 @@ object SettlorCompany {
 
 case class LeadTrusteeIndType (
                             name: NameType,
-                            dateOfBirth: Option[DateTime] = None,
+                            dateOfBirth: DateTime ,
                             phoneNumber: String,
                             email: Option[String] = None,
-                            identification: Option[IdentificationType] = None
+                            identification: IdentificationType
                           )
 object LeadTrusteeIndType {
 
@@ -214,7 +214,7 @@ case class LeadTrusteeOrgType(
                                name: String,
                                phoneNumber: String,
                                email: Option[String] = None,
-                               identification: Option[IdentificationOrgType] = None
+                               identification: IdentificationOrgType
 
                              )
 object LeadTrusteeOrgType {
