@@ -56,7 +56,7 @@ class LeadTrusteeMapperSpec  extends BaseSpec with DataExamples {
 
         val domainLeadTrustee = leadTrusteeOrganisation
         val json: JsValue = Json.toJson(domainLeadTrustee)
-        
+
         "containing a name" in {
           (json \ "name").get.as[String] mustBe domainLeadTrustee.leadTrusteeOrg.get.name
         }

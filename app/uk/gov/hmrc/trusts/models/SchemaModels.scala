@@ -59,9 +59,7 @@ case class Correspondence(abroadIndicator: Boolean,
                           phoneNumber: String)
 
 object Correspondence {
-
   implicit val correspondenceFormat : Format[Correspondence] = Json.format[Correspondence]
-
 
 }
 
@@ -110,8 +108,7 @@ case class TrustEntitiesType(naturalPerson: Option[List[NaturalPersonType]],
                              leadTrustees: LeadTrusteeType,
                              trustees: Option[List[TrusteeType]],
                              protectors: Option[ProtectorsType],
-                             settlors: Option[Settlors]) // Making Settlors optional although, it is mandatory in DES schema there are instances where the settlors page isn't populated.
-
+                             settlors: Option[Settlors])
 object TrustEntitiesType {
   implicit val trustEntitiesTypeFormat: Format[TrustEntitiesType] = Json.format[TrustEntitiesType]
 }
@@ -162,6 +159,7 @@ case class TrusteeIndividualType(name: NameType,
                        dateOfBirth: DateTime,
                        phoneNumber: Option[String],
                        identification: IdentificationType)
+
 object TrusteeIndividualType {
   val dateTimePattern = "yyyy-MM-dd"
   implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
@@ -176,8 +174,8 @@ object Settlors {
 }
 
 case class Settlor(name: NameType,
-                   dateOfBirth: DateTime,
-                   identification: IdentificationType)
+                   dateOfBirth: Option[DateTime],
+                   identification: Option[IdentificationType])
 
 object Settlor {
   val dateTimePattern = "yyyy-MM-dd"
@@ -190,7 +188,7 @@ object Settlor {
 case class SettlorCompany(name: String,
                           companyType: Option[String],
                           companyTime: Option[Boolean],
-                          identification: IdentificationOrgType)
+                          identification: Option[IdentificationOrgType])
 
 object SettlorCompany {
   implicit val settlorCompanyFormat: Format[SettlorCompany] = Json.format[SettlorCompany]
@@ -261,12 +259,12 @@ object BeneficiaryType {
 }
 
 case class IndividualDetailsType(name: NameType,
-                                 dateOfBirth: DateTime,
+                                 dateOfBirth: Option[DateTime],
                                  vulnerableBeneficiary: Boolean,
                                  beneficiaryType: Option[String],
                                  beneficiaryDiscretion: Option[Boolean],
                                  beneficiaryShareOfIncome: Option[String],
-                                 identification: IdentificationType)
+                                 identification: Option[IdentificationType])
 
 object IndividualDetailsType {
   val dateTimePattern = "yyyy-MM-dd"
@@ -279,7 +277,7 @@ object IndividualDetailsType {
 case class BeneficiaryTrustType(organisationName: String,
                                 beneficiaryDiscretion: Option[Boolean],
                                 beneficiaryShareOfIncome: Option[String],
-                                identification: TrustBeneficiaryIdentification)
+                                identification: Option[TrustBeneficiaryIdentification])
 
 object BeneficiaryTrustType {
   implicit val beneficiaryTrustTypeFormat: Format[BeneficiaryTrustType] = Json.format[BeneficiaryTrustType]
@@ -302,7 +300,7 @@ object Identification {
 case class CharityType(organisationName: String,
                        beneficiaryDiscretion: Option[Boolean],
                        beneficiaryShareOfIncome: Option[String],
-                       identification: TrustBeneficiaryCharityIdentification)
+                       identification: Option[TrustBeneficiaryCharityIdentification])
 
 object CharityType {
   implicit val charityTypeFormat: Format[CharityType] = Json.format[CharityType]
@@ -324,9 +322,13 @@ object UnidentifiedType {
 }
 
 case class LargeType(organisationName: String,
-                     description: Option[String],
+                     description: String,
+                     description1: String,
+                     description2: String,
+                     description3: String,
+                     description4: String,
                      numberOfBeneficiary: String,
-                     identification: LargeTypeIdentification,
+                     identification: Option[LargeTypeIdentification],
                      beneficiaryDiscretion: Option[Boolean],
                      beneficiaryShareOfIncome: Option[String])
 
@@ -341,7 +343,7 @@ object LargeTypeIdentification {
 }
 
 case class OtherType(description: String,
-                     address: AddressType,
+                     address: Option[AddressType],
                      numberOfBeneficiary: Option[String],
                      beneficiaryDiscretion: Option[Boolean],
                      beneficiaryShareOfIncome: Option[String])
@@ -353,7 +355,7 @@ object OtherType {
 case class CompanyType(organisationName: String,
                        beneficiaryDiscretion: Option[Boolean],
                        beneficiaryShareOfIncome: Option[String],
-                       identification: CompanyBeneficiaryIdentification)
+                       identification: Option[CompanyBeneficiaryIdentification])
 
 object CompanyType {
   implicit val companyTypeFormat: Format[CompanyType] = Json.format[CompanyType]
@@ -367,7 +369,7 @@ object CompanyBeneficiaryIdentification {
 }
 
 case class NaturalPersonType(name: NameType,
-                             dateOfBirth: DateTime,
+                             dateOfBirth: Option[DateTime],
                              identification: IdentificationType)
 
 object NaturalPersonType {
