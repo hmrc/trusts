@@ -34,6 +34,11 @@ class ValidationServiceSpec extends BaseSpec {
         validator.validate[Registration](jsonString).isRight mustBe true
 
       }
+
+      "Json having trust with orgnisation  trustees" in {
+        val jsonString = JsonUtils.getJsonFromFile("valid-trusts-org-trustees.json")
+        validator.validate[Registration](jsonString).isRight mustBe true
+      }
     }
 
     "return a list of validaton errors " when {

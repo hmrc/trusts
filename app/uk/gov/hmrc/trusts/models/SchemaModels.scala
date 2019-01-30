@@ -147,7 +147,7 @@ object TrusteeType {
 }
 
 case class TrusteeOrgType(name: String,
-                          phoneNumber: String,
+                          phoneNumber: Option[String] = None,
                           email: Option[String] = None,
                           identification: IdentificationOrgType)
 
