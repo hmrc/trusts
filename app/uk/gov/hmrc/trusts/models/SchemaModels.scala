@@ -80,7 +80,7 @@ object Assets {
   implicit val assetsFormat: Format[Assets] = Json.format[Assets]
 }
 
-case class AssetMonetaryAmount(assetMonetaryAmount: Int)
+case class AssetMonetaryAmount(assetMonetaryAmount: Long)
 
 object AssetMonetaryAmount {
   implicit val assetMonetaryAmountFormat: Format[AssetMonetaryAmount] = Json.format[AssetMonetaryAmount]
@@ -121,8 +121,8 @@ object ProtectorsType {
 }
 
 case class Protector(name: NameType,
-                     dateOfBirth: DateTime,
-                     identification: IdentificationType)
+                     dateOfBirth: Option[DateTime],
+                     identification: Option[IdentificationType])
 
 object Protector {
   val dateTimePattern = "yyyy-MM-dd"
@@ -323,10 +323,10 @@ object UnidentifiedType {
 
 case class LargeType(organisationName: String,
                      description: String,
-                     description1: String,
-                     description2: String,
-                     description3: String,
-                     description4: String,
+                     description1: Option[String],
+                     description2: Option[String],
+                     description3: Option[String],
+                     description4: Option[String],
                      numberOfBeneficiary: String,
                      identification: Option[LargeTypeIdentification],
                      beneficiaryDiscretion: Option[Boolean],
@@ -443,8 +443,8 @@ object Estate {
 
 case class PropertyLandType(buildingLandName: Option[String],
                             address: Option[AddressType],
-                            valueFull: Option[Int],
-                            valuePrevious: Option[Int])
+                            valueFull: Option[Long],
+                            valuePrevious: Option[Long])
 
 object PropertyLandType {
   implicit val propertyLandTypeFormat: Format[PropertyLandType] = Json.format[PropertyLandType]
@@ -454,14 +454,14 @@ case class BusinessAssetType(orgName: String,
                              utr: Option[String],
                              businessDescription: Option[String],
                              address: Option[AddressType],
-                             businessValue: Option[Int])
+                             businessValue: Option[Long])
 
 object BusinessAssetType {
   implicit val businessAssetTypeFormat: Format[BusinessAssetType] = Json.format[BusinessAssetType]
 }
 
 case class OtherAssetType(description: String,
-                          value: Option[Int])
+                          value: Option[Long])
 
 object OtherAssetType {
   implicit val otherAssetTypeFormat: Format[OtherAssetType] = Json.format[OtherAssetType]
@@ -484,7 +484,7 @@ case class SharesType(numberOfShares: String,
                       utr: Option[String],
                       shareClass: Option[String],
                       typeOfShare: Option[String],
-                      value: Option[Int])
+                      value: Option[Long])
 
 object SharesType {
   implicit val sharesTypeFormat: Format[SharesType] = Json.format[SharesType]

@@ -189,7 +189,7 @@
 			"assets": {
 				"monetary": [
 					{
-						"assetMonetaryAmount": 100000
+						"assetMonetaryAmount": 999999999999
 					}
 				],
 				"propertyOrLand": [
@@ -202,8 +202,8 @@
 							"postCode": "TF1 5DR",
 							"country": "GB"
 						},
-						"valueFull": 1000000,
-						"valuePrevious": 200000
+						"valueFull": 999999999999,
+						"valuePrevious": 999999999999
 					}
 				],
 				"shares": [
@@ -213,7 +213,7 @@
 						"utr": "1231712342",
 						"shareClass": "Ordinary shares",
 						"typeOfShare": "Quoted",
-						"value": 4584545
+						"value": 999999999999
 					}
 				],
 				"partnerShip": [
@@ -226,7 +226,7 @@
 				"other": [
 					{
 						"description": "Lorem ipsum anum",
-						"value": 1982372
+						"value": 999999999999
 					}
 				]
 			}

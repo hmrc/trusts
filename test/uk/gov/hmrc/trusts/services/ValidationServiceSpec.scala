@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.services
 
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.connectors.BaseSpec
-import uk.gov.hmrc.trusts.models.Registration
+import uk.gov.hmrc.trusts.models.{ExistingTrustCheckRequest, Registration}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 
@@ -40,6 +40,11 @@ class ValidationServiceSpec extends BaseSpec {
       "json document is invalid" in {
         val jsonString = JsonUtils.getJsonFromFile("invalid-payload-trusts-registration.json")
         validator.validate[Registration](jsonString).isLeft mustBe true
+      }
+
+      "json document is valid but failed to match with Domain" in {
+        val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
+        validator.validate[ExistingTrustCheckRequest](jsonString).isLeft mustBe true
       }
     }
   }
