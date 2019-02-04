@@ -735,10 +735,6 @@
 				"address": {
 					"$ref": "#/definitions/addressType"
 				},
-				"numberOfBeneficiary": {
-					"type": "string",
-					"pattern": "^[0-9a-zA-Z]{1,4}$"
-				},
 				"beneficiaryDiscretion": {
 					"type": "boolean"
 				},
@@ -1264,8 +1260,7 @@
 				}
 			},
 			"required": [
-				"name",
-				"identification"
+				"name"
 			],
 			"additionalProperties": false
 		},
@@ -1330,20 +1325,13 @@
 					"format": "email"
 				},
 				"identification": {
-					"type": "object",
-					"oneOf": [
-						{
-							"$ref": "#/definitions/utrString"
-						},
-						{
-							"$ref": "#/definitions/addressType"
-						}
-					]
-				}
+                     "$ref": "#/definitions/identificationOrgType"
+                }
 			},
 			"required": [
 				"orgName",
-				"phoneNumber"
+				"phoneNumber",
+				"identification"
 			],
 			"additionalProperties": false
 		},
