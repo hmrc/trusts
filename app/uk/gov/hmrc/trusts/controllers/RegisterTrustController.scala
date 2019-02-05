@@ -35,9 +35,6 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
   def registration() = Action.async(parse.json) { implicit request =>
 
     val registrationJsonString = request.body.toString()
-    validationService.get(config.trustsApiRegistrationSchema)
-      .validate[Registration](registrationJsonString)
-
 
     validationService.get(config.trustsApiRegistrationSchema)
       .validate[Registration](registrationJsonString) match {
