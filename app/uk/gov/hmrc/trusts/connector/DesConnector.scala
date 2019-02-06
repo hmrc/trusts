@@ -22,7 +22,7 @@ import javax.inject.Inject
 import com.google.inject.ImplementedBy
 import play.api.Logger
 import play.api.libs.json._
-import uk.gov.hmrc.http.{BadGatewayException, GatewayTimeoutException, HeaderCarrier}
+import uk.gov.hmrc.http.{BadGatewayException, BadRequestException, GatewayTimeoutException, HeaderCarrier}
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.trusts.config.{AppConfig, WSHttp}
 import uk.gov.hmrc.trusts.models._
@@ -56,21 +56,27 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
     Logger.debug(s"Sending matching request to DES, url=$matchEndpoint")
 
-    val response: Future[ExistingTrustResponse] =
-      http.POST[JsValue, ExistingTrustResponse](matchEndpoint, Json.toJson(existingTrustCheckRequest), desHeaders.headers)
-
-
-    response
+    http.POST[JsValue, ExistingTrustResponse](matchEndpoint, Json.toJson(existingTrustCheckRequest), desHeaders.headers)
   }
 
   override def registerTrust(registration: Registration)
-                                 (implicit hc: HeaderCarrier): Future[RegistrationTrustResponse] = {
+                                 (implicit hc: HeaderCarrier): Future[RegistrationResponse] = {
     val desHeaders = hc.copy(authorization = Some(Authorization(s"Bearer ${config.desToken}"))).withExtraHeaders(headers: _*)
 
     Logger.debug(s"Sending matching request to DES, url=$registrationEndpoint")
 
-    val response: Future[RegistrationTrustResponse] =
-      http.POST[JsValue, RegistrationTrustResponse](registrationEndpoint, Json.toJson(registration), desHeaders.headers)
+    val response = http.POST[JsValue, RegistrationResponse](registrationEndpoint, Json.toJson(registration), desHeaders.headers)
+   /* response map {
+      response => response
+    } recover {
+      case badRequest: BadRequestException=>  {
+        Logger.error(s"[registerTrust] Exception received from des ${badRequest}")
+        BadRequestException
+      }
+      case exception: Exception =>
+        Logger.error(s"[registerTrust] Exception received from des ${exception}")
+        InternalServerErrorException
+    }*/
     response
   }
 }
@@ -78,6 +84,6 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 @ImplementedBy(classOf[DesConnectorImpl])
 trait DesConnector {
   def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest)(implicit hc: HeaderCarrier): Future[ExistingTrustResponse]
-  def registerTrust(registration: Registration)(implicit hc: HeaderCarrier): Future[RegistrationTrustResponse]
+  def registerTrust(registration: Registration)(implicit hc: HeaderCarrier): Future[RegistrationResponse]
 
 }

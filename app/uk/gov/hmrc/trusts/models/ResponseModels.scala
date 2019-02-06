@@ -16,12 +16,18 @@
 
 package uk.gov.hmrc.trusts.models
 
+import play.api.libs.json.Json
+import uk.gov.hmrc.trusts.utils.Contstants._
 
+case class ErrorResponse(code: String, message: String)
+object ErrorResponse {
+  implicit val formats = Json.format[ErrorResponse]
+}
 
-/*class ServiceNotAvailableException(message : String )  extends Exception(message)
-class InternalServerErrorException(message : String )  extends Exception(message)
-class AlreadyRegisteredException extends Exception
-class BadRequestException extends Exception*/
+object ApiResponse {
+  def alreadyRegisteredResponse = ErrorResponse(ALREADY_REGISTERED_CODE, ALREADY_REGISTERED_MESSAGE)
+  def internalServerErrorResponse = ErrorResponse(INTERNAL_SERVER_ERROR_CODE, INTERNAL_SERVER_ERROR_MESSAGE)
 
+}
 
 

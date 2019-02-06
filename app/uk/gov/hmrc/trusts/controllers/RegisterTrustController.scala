@@ -22,18 +22,18 @@ import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.models.{AlreadyRegisteredException, Registration}
+import uk.gov.hmrc.trusts.models.{AlreadyRegisteredException, Registration, RegistrationTrustResponse}
 import uk.gov.hmrc.trusts.services.{DesService, ValidationService}
+
 import scala.concurrent.ExecutionContext.Implicits.global
-
 import scala.concurrent.Future
-
+import uk.gov.hmrc.trusts.models.ApiResponse._
 
 class RegisterTrustController @Inject()(desService: DesService, config: AppConfig, validationService: ValidationService) extends TrustsBaseController {
 
 
   def registration() = Action.async(parse.json) { implicit request =>
-
+    import uk.gov.hmrc.trusts.models.RegistrationResponse.formats
     val registrationJsonString = request.body.toString()
 
     validationService.get(config.trustsApiRegistrationSchema)
@@ -41,15 +41,16 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
 
       case Right(trustsRegistrationRequest) => {
         desService.registerTrust(trustsRegistrationRequest).map {
-          response => Ok(Json.toJson(response))
+          case  response: RegistrationTrustResponse=> Ok(Json.toJson(response))
+
         } recover {
-          case alreadyRegisterd: AlreadyRegisteredException => {
+          case AlreadyRegisteredException => {
             Logger.info("[RegisterTrustController][registration] Returning already registered response.")
-            Conflict(doErrorResponse("The trust is already registered.", "ALREADY_REGISTERED"))
+            Conflict(Json.toJson(alreadyRegisteredResponse))
           }
           case exception: Exception => {
             Logger.error(s"[RegisterTrustController][registration] Exception received : ${exception}.")
-            internalServerErrorResponse
+            InternalServerError(Json.toJson(internalServerErrorResponse))
           }
         }
       }

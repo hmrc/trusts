@@ -19,11 +19,13 @@ package uk.gov.hmrc.trusts.controllers
 import javax.inject.{Inject, Singleton}
 
 import play.api.Logger
+import play.api.libs.json.Json
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.models.ExistingTrustCheckRequest
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse.{AlreadyRegistered, Matched, NotMatched}
 import uk.gov.hmrc.trusts.services.{DesService, ValidationService}
+import uk.gov.hmrc.trusts.models.ApiResponse._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -40,8 +42,8 @@ class CheckTrustController @Inject()(desService: DesService, config: AppConfig, 
             result match {
               case Matched => Ok(matchResponse)
               case NotMatched => Ok(noMatchResponse)
-              case AlreadyRegistered => alreadyRegisteredResponse
-              case _ => internalServerErrorResponse
+              case AlreadyRegistered => Conflict(Json.toJson(alreadyRegisteredResponse))
+              case _ => InternalServerError(Json.toJson(internalServerErrorResponse))
             }
         }
     }

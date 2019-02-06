@@ -88,8 +88,8 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
           .thenReturn(Future.successful(AlreadyRegistered))
 
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequest))
-        status(result) mustBe FORBIDDEN
-        (contentAsJson(result) \ "code").as[String] mustBe "FORBIDDEN"
+        status(result) mustBe CONFLICT
+        (contentAsJson(result) \ "code").as[String] mustBe "ALREADY_REGISTERED"
         (contentAsJson(result) \ "message").as[String] mustBe "The trust is already registered."
       }
     }

@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models
+package uk.gov.hmrc.trusts.utils
 
 
+object Contstants {
 
-/*class ServiceNotAvailableException(message : String )  extends Exception(message)
-class InternalServerErrorException(message : String )  extends Exception(message)
-class AlreadyRegisteredException extends Exception
-class BadRequestException extends Exception*/
+  val ALREADY_REGISTERED_CODE = "ALREADY_REGISTERED"
+  val ALREADY_REGISTERED_MESSAGE = "The trust is already registered."
+  val INTERNAL_SERVER_ERROR_CODE = "INTERNAL_SERVER_ERROR"
+  val INTERNAL_SERVER_ERROR_MESSAGE = "Internal server error."
 
 
-
+}

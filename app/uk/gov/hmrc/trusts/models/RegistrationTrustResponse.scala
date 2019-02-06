@@ -20,31 +20,41 @@ import play.api.Logger
 import play.api.http.Status.{BAD_REQUEST, CONFLICT, FORBIDDEN, OK, SERVICE_UNAVAILABLE}
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
+import uk.gov.hmrc.trusts.utils.Contstants._
+
+sealed trait RegistrationResponse
+sealed abstract class RegistrationException extends Exception with RegistrationResponse
+final case object AlreadyRegisteredException extends RegistrationException
+final case object BadRequestException extends RegistrationException
+final case object ServiceNotAvailableException extends RegistrationException
+final case object InternalServerErrorException extends RegistrationException
 
 
+final case class RegistrationTrustResponse(trn : String) extends RegistrationResponse
 
-case class RegistrationTrustResponse(trn : String)
-
-object RegistrationTrustResponse {
-
+object RegistrationResponse {
   implicit val formats = Json.format[RegistrationTrustResponse]
-  implicit lazy val httpReads: HttpReads[RegistrationTrustResponse] =
-    new HttpReads[RegistrationTrustResponse] {
-      override def read(method: String, url: String, response: HttpResponse): RegistrationTrustResponse = {
+
+  implicit lazy val httpReads: HttpReads[RegistrationResponse] =
+    new HttpReads[RegistrationResponse] {
+      override def read(method: String, url: String, response: HttpResponse): RegistrationResponse = {
         Logger.info(s"[RegistrationTrustResponse]  response status received from des: ${response.status}")
         response.status match {
           case OK =>response.json.as[RegistrationTrustResponse]
           case FORBIDDEN =>{
             response.json.asOpt[DesErrorResponse] match {
-              case Some(desReponse) if desReponse.code == "ALREADY_REGISTERED"=>
-                throw new AlreadyRegisteredException
-              case _ =>
-                throw new InternalServerErrorException("Forbidden response from des.")
+              case Some(desReponse) if desReponse.code == ALREADY_REGISTERED_CODE=>
+                Logger.info(s"[RegistrationTrustResponse] already registered response.")
+                AlreadyRegisteredException
+              case _ => {
+                Logger.error("[RegistrationTrustResponse] Forbidden response from des.")
+                InternalServerErrorException
+              }
             }
           }
-          case BAD_REQUEST => throw new  BadRequestException
-          case SERVICE_UNAVAILABLE => throw new ServiceNotAvailableException("Des depdedent service is down.")
-          case status =>  throw new InternalServerErrorException(s"Not handled status response from des $status")
+          case BAD_REQUEST => BadRequestException
+          case SERVICE_UNAVAILABLE => ServiceNotAvailableException
+          case status =>  InternalServerErrorException
         }
       }
     }

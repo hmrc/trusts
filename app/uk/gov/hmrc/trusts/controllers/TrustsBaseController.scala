@@ -28,16 +28,13 @@ import scala.concurrent.Future
 class TrustsBaseController extends BaseController {
 
 
-  protected def alreadyRegisteredResponse = Forbidden(doErrorResponse("The trust is already registered.", "FORBIDDEN"))
 
-  protected def internalServerErrorResponse = InternalServerError(doErrorResponse("Internal server error.", "INTERNAL_SERVER_ERROR"))
 
-  protected def doErrorResponse(message: String, code: String) = Json.toJson(ErrorResponse(message, code))
-
-  protected def invalidNameErrorResponse = BadRequest(doErrorResponse("Provided name is invalid.", "INVALID_NAME"))
-  protected def invalidUtrErrorResponse = BadRequest(doErrorResponse("Provided utr is invalid.", "INVALID_UTR"))
-  protected def invalidPostcodeErrorResponse = BadRequest(doErrorResponse("Provided postcode is invalid.", "INVALID_POSTCODE"))
-  protected def invalidRequestErrorResponse = BadRequest(doErrorResponse("Provided request is invalid.","BAD_REQUEST"))
+  protected def doErrorResponse(code: String,message: String) = Json.toJson(ErrorResponse(code: String,message: String))
+  protected def invalidNameErrorResponse = BadRequest(doErrorResponse("INVALID_NAME","Provided name is invalid." ))
+  protected def invalidUtrErrorResponse = BadRequest(doErrorResponse("INVALID_UTR", "Provided utr is invalid." ))
+  protected def invalidPostcodeErrorResponse = BadRequest(doErrorResponse("INVALID_POSTCODE","Provided postcode is invalid." ))
+  protected def invalidRequestErrorResponse = BadRequest(doErrorResponse("BAD_REQUEST","Provided request is invalid."))
 
   protected def matchResponse = """{"match": true}"""
   protected def noMatchResponse = """{"match": false}"""
