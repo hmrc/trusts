@@ -139,7 +139,7 @@ class DesConnectorSpec extends BaseConnectorSpec
     }
 
 
-    "throw BadRequestException  " when {
+    "return BadRequestException  " when {
       "payload sent to des is invalid" in {
         val requestBody = Json.stringify(Json.toJson(invalidRegistrationRequest))
         stubFor(server,"/trusts/registration", requestBody, 400, Json.stringify(jsonResponse400))
@@ -149,7 +149,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       }
     }
 
-    "throw AlreadyRegisteredException  " when {
+    "return AlreadyRegisteredException  " when {
       "trusts is already registered with provided details." in {
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
@@ -159,7 +159,7 @@ class DesConnectorSpec extends BaseConnectorSpec
         }
     }
 
-    "throw ServiceUnavailableException  " when {
+    "return ServiceUnavailableException  " when {
       "des dependent service is not responding " in {
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
         stubFor(server,"/trusts/registration", requestBody, 503, Json.stringify(jsonResponse503))
@@ -168,7 +168,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       }
     }
 
-    "throw InternalServerErrorException" when {
+    "return InternalServerErrorException" when {
       "des is experiencing some problem." in {
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
@@ -180,7 +180,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       }
     }
 
-    "throw InternalServerErrorException" when {
+    "return InternalServerErrorException" when {
       "des is returning 403 without ALREADY REGISTERED code." in {
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 

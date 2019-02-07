@@ -102,7 +102,7 @@ class DesServiceSpec extends BaseSpec {
       }
     }
 
-    "throw AlreadyRegisteredException " when {
+    "return AlreadyRegisteredException " when {
       "connector returns  AlreadyRegisteredException." in {
         when(mockConnector.registerTrust(registrationRequest)).
           thenReturn(Future.successful(AlreadyRegisteredException))
@@ -111,7 +111,7 @@ class DesServiceSpec extends BaseSpec {
       }
     }
 
-    "throws same Exception " when {
+    "return same Exception " when {
       "connector returns  exception." in {
         when(mockConnector.registerTrust(registrationRequest)).
           thenReturn(Future.successful(InternalServerErrorException))
