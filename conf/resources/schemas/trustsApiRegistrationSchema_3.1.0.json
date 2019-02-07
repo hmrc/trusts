@@ -1,6 +1,6 @@
 {
 	"$schema": "http://json-schema.org/draft-04/schema#",
-	"title": "Register a Trust or Estate",
+	"title": "Register a Trust",
 	"type": "object",
 	"properties": {
 		"matchData": {
@@ -167,7 +167,16 @@
 					}
 				}
 			},
+			"anyOf":[
+				{"required" : ["monetary"] },
+				{"required" : ["propertyOrLand"] },
+				{"required" : ["shares"]},
+				{"required" : ["business"]},
+				{"required" : ["partnerShip"]},
+				{"required" : ["other"]}
+			],
 			"additionalProperties": false
+
 		},
 		"agentDetailsType": {
 			"type": "object",
@@ -408,6 +417,15 @@
 					}
 				}
 			},
+			"anyOf":[
+				{"required" : ["individualDetails"]},
+				{"required" : ["company"]},
+				{"required" : ["trust"]},
+				{"required" : ["charity"]},
+				{"required" : ["unidentified"]},
+				{"required" : ["large"]},
+				{"required" : ["other"]}
+			],
 			"additionalProperties": false
 		},
 		"individualDetailsType": {
@@ -958,41 +976,6 @@
 			],
 			"additionalProperties": false
 		},
-		"estateType": {
-			"type": "object",
-			"properties": {
-				"estate": {
-					"type": "object",
-					"properties": {
-						"entities": {
-							"$ref": "#/definitions/entitiesType"
-						},
-						"administrationEndDate": {
-							"$ref": "#/definitions/dateString"
-						},
-						"periodTaxDues": {
-							"description": "01-Total Income Tax and Capital Gains due for the administration period more than £10,000, 02-Date of Death before 05 April 2016 and the sale of estates assets by administrators is £250,000 in any  one tax year, 03-Date of Death After 05 April 2016 and the sale of estates assets by administrators is £500.00 in any one tax year, 04-Estate worth more than 2.5 million at the death of death",
-							"type": "string",
-							"enum": [
-								"01",
-								"02",
-								"03",
-								"04"
-							]
-						}
-					},
-					"required": [
-						"entities",
-						"periodTaxDues"
-					],
-					"additionalProperties": false
-				}
-			},
-			"required": [
-				"estate"
-			],
-			"additionalProperties": false
-		},
 		"monetaryType": {
 			"description": "Integer up to 12 digits max; 1500 represents 1500 pounds",
 			"type": "integer",
@@ -1158,32 +1141,6 @@
 			},
 			"additionalProperties": false
 		},
-		"entitiesType": {
-			"type": "object",
-			"properties": {
-				"deceased": {
-					"$ref": "#/definitions/willType"
-				},
-				"personalRepresentative": {
-					"type": "object",
-					"oneOf": [
-						{
-							"type": "object",
-							"$ref": "#/definitions/estatePerRepInd"
-						},
-						{
-							"type": "object",
-							"$ref": "#/definitions/estatePerRepOrg"
-						}
-					]
-				}
-			},
-			"required": [
-				"deceased",
-				"personalRepresentative"
-			],
-			"additionalProperties": false
-		},
 		"passportType": {
 			"type": "object",
 			"properties": {
@@ -1272,58 +1229,6 @@
 			"required": [
 				"firstName",
 				"lastName"
-			],
-			"additionalProperties": false
-		},
-		"estatePerRepInd": {
-			"type": "object",
-			"properties": {
-				"name": {
-					"$ref": "#/definitions/nameType"
-				},
-				"dateOfBirth": {
-					"$ref": "#/definitions/dateString"
-				},
-				"identification": {
-					"$ref": "#/definitions/identificationType"
-				},
-				"phoneNumber": {
-					"$ref": "#/definitions/phoneString"
-				},
-				"email": {
-					"type": "string",
-					"format": "email"
-				}
-			},
-			"required": [
-				"name",
-				"dateOfBirth",
-				"identification",
-				"phoneNumber"
-			],
-			"additionalProperties": false
-		},
-		"estatePerRepOrg": {
-			"type": "object",
-			"properties": {
-				"orgName": {
-					"$ref": "#/definitions/orgName56String"
-				},
-				"phoneNumber": {
-					"$ref": "#/definitions/phoneString"
-				},
-				"email": {
-					"type": "string",
-					"format": "email"
-				},
-				"identification": {
-                     "$ref": "#/definitions/identificationOrgType"
-                }
-			},
-			"required": [
-				"orgName",
-				"phoneNumber",
-				"identification"
 			],
 			"additionalProperties": false
 		},
