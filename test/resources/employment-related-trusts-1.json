@@ -1,0 +1,79 @@
+{
+  "correspondence": {
+    "abroadIndicator": false,
+    "name": " ,&T(hhx9Hm*QHunuak)fY9'yz-zn&SuHDfbDXFluZt6",
+    "address": {
+      "line1": "y&9tHdsPOCxNRTCAl01iA6ZS(kn&",
+      "line2": "d7avDqE6hg-Jz-ks8HIHZ6",
+      "country": "CM"
+    },
+    "phoneNumber": "96947479842"
+  },
+  "declaration": {
+    "name": {
+      "firstName": "NQy,EPLv7ySxnl/nfWoS7b-PBY",
+      "lastName": "S406X-)"
+    },
+    "address": {
+      "line1": "Cp902n8lUHZR1C0lu1/QZb/egb)-5PjYADo",
+      "line2": "3(mbSso",
+      "postCode": "Ws3s 9WM",
+      "country": "GB"
+    }
+  },
+  "details": {
+    "trust": {
+      "details": {
+        "startDate": "1835-02-22",
+        "typeOfTrust": "Employment Related"
+      },
+      "entities": {
+        "beneficiary": {
+          "charity": [
+            {
+              "organisationName": "(HBVcRrP4J-cltTmbRZU3lAY2skSQM8Rm/dfY"
+            },
+            {
+              "organisationName": "zX9XVGvt-UFllzCOu4ej"
+            },
+            {
+              "organisationName": "&'z7FrGbSj0SSzOdS2dNd,e)vo.xw&8qJR'"
+            },
+            {
+              "organisationName": "5T9zxZ3slSZEMhdd-2GHRjZsq&hIn7MO3JqQgdG7lUC'L"
+            },
+            {
+              "organisationName": "d6t0p5tvcDmIbYVRhXxPg8HGoz6aYabbzTcuqUUgXSs-K"
+            },
+            {
+              "organisationName": "qmrymQFLl71d.iD7/Ce2 4//GO3)A nl6TTZpoaKx3q5MFulx8-X)yGq'pLxw-LPnAK7-wM.uDJ(xb'cDvMH0"
+            },
+            {
+              "organisationName": "Iz"
+            }
+          ]
+        },
+        "leadTrustees": {
+          "leadTrusteeInd": {
+            "name": {
+              "firstName": "GUfk3WshkqjtGaWX'u8,VMfVoHX-gGx",
+              "lastName": "P1Vsv8sKWdv  1Vxl1JfXLIw-'6f(QYdqrN"
+            },
+            "dateOfBirth": "2084-02-29",
+            "identification": {
+              "nino": "KC287812"
+            },
+            "phoneNumber": "99892262374"
+          }
+        }
+      },
+      "assets": {
+        "monetary": [
+          {
+            "assetMonetaryAmount": 269795856384
+          }
+        ]
+      }
+    }
+  }
+}
