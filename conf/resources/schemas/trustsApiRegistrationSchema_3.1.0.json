@@ -70,15 +70,7 @@
 			"additionalProperties": false
 		},
 		"details": {
-			"type": "object",
-			"oneOf": [
-				{
-					"$ref": "#/definitions/estateType"
-				},
-				{
 					"$ref": "#/definitions/trustType"
-				}
-			]
 		},
 		"agentDetails": {
 			"$ref": "#/definitions/agentDetailsType"

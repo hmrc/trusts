@@ -115,8 +115,6 @@
 			],
 			"additionalProperties": false
 		},
-
-
 		"identificationType": {
 			"type": "object",
 			"oneOf": [
