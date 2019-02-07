@@ -65,19 +65,9 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
     Logger.debug(s"Sending matching request to DES, url=$registrationEndpoint")
 
-    val response = http.POST[JsValue, RegistrationResponse](registrationEndpoint, Json.toJson(registration), desHeaders.headers)
-   /* response map {
-      response => response
-    } recover {
-      case badRequest: BadRequestException=>  {
-        Logger.error(s"[registerTrust] Exception received from des ${badRequest}")
-        BadRequestException
-      }
-      case exception: Exception =>
-        Logger.error(s"[registerTrust] Exception received from des ${exception}")
-        InternalServerErrorException
-    }*/
-    response
+    http.POST[JsValue, RegistrationResponse](registrationEndpoint, Json.toJson(registration), desHeaders.headers)
+
+
   }
 }
 
