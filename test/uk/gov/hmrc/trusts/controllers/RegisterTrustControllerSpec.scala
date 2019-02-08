@@ -30,6 +30,8 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models._
 import org.mockito.Mockito._
+import uk.gov.hmrc.trusts.exceptions._
+
 import scala.concurrent.Future
 
 class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
@@ -56,12 +58,25 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "trusts is already registered with provided details." in {
         val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.failed(AlreadyRegisteredException))
+          .thenReturn(Future.failed(new AlreadyRegisteredException))
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe CONFLICT
         val output = contentAsJson(result)
         (output \ "code").as[String] mustBe "ALREADY_REGISTERED"
         (output \ "message").as[String] mustBe "The trust is already registered."
+      }
+    }
+
+    "return a Forbidden" when {
+      "no match found for provided existing trusts details." in {
+        val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService)
+        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
+          .thenReturn(Future.failed(new NoMatchException))
+        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
+        status(result) mustBe FORBIDDEN
+        val output = contentAsJson(result)
+        (output \ "code").as[String] mustBe "NO_MATCH"
+        (output \ "message").as[String] mustBe "No match has been found in HMRC's records."
       }
     }
 
@@ -82,7 +97,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "the register endpoint called and something goes wrong." in {
         val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.failed(InternalServerErrorException))
+          .thenReturn(Future.failed(new InternalServerErrorException("some error")))
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe INTERNAL_SERVER_ERROR
@@ -96,7 +111,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "the des returns BAD REQUEST" in {
         val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.failed(BadRequestException))
+          .thenReturn(Future.failed(new BadRequestException))
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe INTERNAL_SERVER_ERROR
@@ -110,7 +125,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "the des returns Service Unavailable as dependent service is down. " in {
         val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.failed(ServiceNotAvailableException))
+          .thenReturn(Future.failed(new ServiceNotAvailableException("dependent service is down")))
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe INTERNAL_SERVER_ERROR

@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.utils
+package uk.gov.hmrc.trusts.exceptions
 
-
-object Contstants {
-
-  val ALREADY_REGISTERED_CODE = "ALREADY_REGISTERED"
-  val ALREADY_REGISTERED_MESSAGE = "The trust is already registered."
-  val NO_MATCH_CODE = "NO_MATCH"
-  val NO_MATCH_MESSAGE = "No match has been found in HMRC's records."
-  val INTERNAL_SERVER_ERROR_CODE = "INTERNAL_SERVER_ERROR"
-  val INTERNAL_SERVER_ERROR_MESSAGE = "Internal server error."
-
-
-}
+class ServiceNotAvailableException(message : String )  extends Exception(message)
+class InternalServerErrorException(message : String )  extends Exception(message)
+class AlreadyRegisteredException extends Exception
+class NoMatchException extends Exception
+class BadRequestException extends Exception

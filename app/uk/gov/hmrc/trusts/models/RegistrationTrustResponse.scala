@@ -17,18 +17,13 @@
 package uk.gov.hmrc.trusts.models
 
 import play.api.Logger
-import play.api.http.Status.{BAD_REQUEST, CONFLICT, FORBIDDEN, OK, SERVICE_UNAVAILABLE}
+import play.api.http.Status._
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
+import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.utils.Contstants._
 
 sealed trait RegistrationResponse
-sealed abstract class RegistrationException extends Exception with RegistrationResponse
-final case object AlreadyRegisteredException extends RegistrationException
-final case object BadRequestException extends RegistrationException
-final case object ServiceNotAvailableException extends RegistrationException
-final case object InternalServerErrorException extends RegistrationException
-
 
 final case class RegistrationTrustResponse(trn : String) extends RegistrationResponse
 
@@ -44,17 +39,20 @@ object RegistrationResponse {
           case FORBIDDEN =>{
             response.json.asOpt[DesErrorResponse] match {
               case Some(desReponse) if desReponse.code == ALREADY_REGISTERED_CODE=>
-                Logger.info(s"[RegistrationTrustResponse] already registered response.")
-                AlreadyRegisteredException
+                Logger.info(s"[RegistrationTrustResponse] already registered response from des.")
+                throw new AlreadyRegisteredException
+              case Some(desReponse) if desReponse.code == NO_MATCH_CODE=>
+                Logger.info(s"[RegistrationTrustResponse] No match response from des.")
+                throw new NoMatchException
               case _ => {
                 Logger.error("[RegistrationTrustResponse] Forbidden response from des.")
-                InternalServerErrorException
+                throw new InternalServerErrorException("Forbidden response from des.")
               }
             }
           }
-          case BAD_REQUEST => BadRequestException
-          case SERVICE_UNAVAILABLE => ServiceNotAvailableException
-          case status =>  InternalServerErrorException
+          case BAD_REQUEST => throw new  BadRequestException
+          case SERVICE_UNAVAILABLE => throw new ServiceNotAvailableException("Des depdedent service is down.")
+          case status =>  throw new InternalServerErrorException(s"Error response from des $status")
         }
       }
     }

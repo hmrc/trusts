@@ -19,7 +19,8 @@ package uk.gov.hmrc.trusts.services
 import org.mockito.Mockito.when
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.connectors.BaseSpec
-import uk.gov.hmrc.trusts.models.{AlreadyRegisteredException, ExistingTrustCheckRequest, InternalServerErrorException, RegistrationTrustResponse}
+import uk.gov.hmrc.trusts.exceptions._
+import uk.gov.hmrc.trusts.models.{ExistingTrustCheckRequest, RegistrationTrustResponse}
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse._
 
 import scala.concurrent.duration.Duration
@@ -105,25 +106,26 @@ class DesServiceSpec extends BaseSpec {
     "return AlreadyRegisteredException " when {
       "connector returns  AlreadyRegisteredException." in {
         when(mockConnector.registerTrust(registrationRequest)).
-          thenReturn(Future.successful(AlreadyRegisteredException))
-        val result = Await.result(SUT.registerTrust(registrationRequest), Duration.Inf)
-        result mustBe AlreadyRegisteredException
+          thenReturn(Future.failed(new AlreadyRegisteredException))
+        assertThrows[AlreadyRegisteredException] {
+          val result = Await.result(SUT.registerTrust(registrationRequest), Duration.Inf)
+        }
       }
     }
 
     "return same Exception " when {
       "connector returns  exception." in {
         when(mockConnector.registerTrust(registrationRequest)).
-          thenReturn(Future.successful(InternalServerErrorException))
-        val result = Await.result(SUT.registerTrust(registrationRequest), Duration.Inf)
-        result mustBe InternalServerErrorException
+          thenReturn(Future.failed(new InternalServerErrorException("")))
+        assertThrows[InternalServerErrorException] {
+          val result = Await.result(SUT.registerTrust(registrationRequest), Duration.Inf)
+        }
 
       }
     }
 
 
-}//registerTrust
-
+  } //registerTrust
 
 
 }
