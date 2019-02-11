@@ -20,11 +20,10 @@ import org.mockito.Mockito.when
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.exceptions._
-import uk.gov.hmrc.trusts.models.{ExistingTrustCheckRequest, RegistrationTrustResponse}
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse._
+import uk.gov.hmrc.trusts.models.{ExistingTrustCheckRequest, RegistrationTrustResponse}
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 
 class DesServiceSpec extends BaseSpec {
 

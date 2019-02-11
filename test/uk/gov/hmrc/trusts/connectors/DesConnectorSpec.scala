@@ -16,20 +16,15 @@
 
 package uk.gov.hmrc.trusts.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.ServiceUnavailableException
+import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions.{AlreadyRegisteredException, _}
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse._
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.utils.WireMockHelper
-
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 
 class DesConnectorSpec extends BaseConnectorSpec
   with GuiceOneAppPerSuite with WireMockHelper {
