@@ -22,44 +22,51 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.utils.Contstants._
+import uk.gov.hmrc.trusts.models.RegistrationDesResponse.formats
+import uk.gov.hmrc.trusts.models.DesErrorResponse.formats
 
 sealed trait RegistrationResponse
 
-final case class RegistrationTrustResponse(trn : String) extends RegistrationResponse
+final case class RegistrationTrustResponse(trn: String) extends RegistrationResponse
 
 object RegistrationResponse {
+
   implicit val formats = Json.format[RegistrationTrustResponse]
+
 
   implicit lazy val httpReads: HttpReads[RegistrationResponse] =
     new HttpReads[RegistrationResponse] {
       override def read(method: String, url: String, response: HttpResponse): RegistrationResponse = {
+
         Logger.info(s"[RegistrationTrustResponse]  response status received from des: ${response.status}")
         response.status match {
           case OK =>
-               response.json.as[RegistrationTrustResponse]
+            response.json.as[RegistrationTrustResponse]
 
-          case FORBIDDEN =>{
+          case FORBIDDEN =>
             response.json.asOpt[DesErrorResponse] match {
-              case Some(desReponse) if desReponse.code == ALREADY_REGISTERED_CODE=>
+              case Some(desReponse) if desReponse.code == ALREADY_REGISTERED_CODE =>
                 Logger.info(s"[RegistrationTrustResponse] already registered response from des.")
                 throw new AlreadyRegisteredException
-              case Some(desReponse) if desReponse.code == NO_MATCH_CODE=>
+              case Some(desReponse) if desReponse.code == NO_MATCH_CODE =>
                 Logger.info(s"[RegistrationTrustResponse] No match response from des.")
                 throw new NoMatchException
-              case _ => {
+              case _ =>
                 Logger.error("[RegistrationTrustResponse] Forbidden response from des.")
                 throw new InternalServerErrorException("Forbidden response from des.")
-              }
             }
-          }
-          case BAD_REQUEST => throw new  BadRequestException
-          case SERVICE_UNAVAILABLE => throw new ServiceNotAvailableException("Des depdedent service is down.")
-          case status =>  throw new InternalServerErrorException(s"Error response from des $status")
+
+
+          case BAD_REQUEST =>
+            throw new BadRequestException
+          case SERVICE_UNAVAILABLE =>
+            throw new ServiceNotAvailableException("Des depdedent service is down.")
+          case status =>
+            throw new InternalServerErrorException(s"Error response from des $status")
         }
       }
     }
-  implicit val registrationDesResponseReads = RegistrationDesResponse.formats
-  implicit val registrationDesErrorResponseReads = DesErrorResponse.formats
+
 
 }
 

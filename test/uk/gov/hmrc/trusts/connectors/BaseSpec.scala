@@ -27,10 +27,15 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.utils.JsonRequests
 import play.api.test
+import org.scalatest.time.{Millis, Seconds, Span}
+
 
 class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with MockitoSugar with JsonRequests  {
 
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
+
+  implicit val defaultPatience =
+    PatienceConfig(timeout = Span(5, Seconds), interval = Span(500, Millis))
 
   def postRequestWithPayload(payload: JsValue): FakeRequest[JsValue] =
     FakeRequest("POST", "")
