@@ -39,8 +39,10 @@ class DesServiceSpec extends BaseSpec {
       "connector returns Matched." in {
         when(mockConnector.checkExistingTrust(request)).
           thenReturn(Future.successful(Matched))
-        val result = Await.result(SUT.checkExistingTrust(request), Duration.Inf)
-        result mustBe Matched
+        val futureResult = SUT.checkExistingTrust(request)
+        whenReady(futureResult) {
+          result => result mustBe Matched
+        }
       }
     }
 
@@ -49,8 +51,10 @@ class DesServiceSpec extends BaseSpec {
       "connector returns NotMatched." in {
         when(mockConnector.checkExistingTrust(request)).
           thenReturn(Future.successful(NotMatched))
-        val result = Await.result(SUT.checkExistingTrust(request), Duration.Inf)
-        result mustBe NotMatched
+        val futureResult = SUT.checkExistingTrust(request)
+        whenReady(futureResult) {
+          result => result mustBe NotMatched
+        }
       }
     }
 
@@ -58,8 +62,10 @@ class DesServiceSpec extends BaseSpec {
       "connector returns BadRequest." in {
         when(mockConnector.checkExistingTrust(request)).
           thenReturn(Future.successful(BadRequest))
-        val result = Await.result(SUT.checkExistingTrust(request), Duration.Inf)
-        result mustBe BadRequest
+        val futureResult = SUT.checkExistingTrust(request)
+        whenReady(futureResult) {
+          result => result mustBe BadRequest
+        }
       }
     }
 
@@ -67,8 +73,10 @@ class DesServiceSpec extends BaseSpec {
       "connector returns AlreadyRegistered." in {
         when(mockConnector.checkExistingTrust(request)).
           thenReturn(Future.successful(AlreadyRegistered))
-        val result = Await.result(SUT.checkExistingTrust(request), Duration.Inf)
-        result mustBe AlreadyRegistered
+        val futureResult = SUT.checkExistingTrust(request)
+        whenReady(futureResult) {
+          result => result mustBe AlreadyRegistered
+        }
       }
     }
 
@@ -76,8 +84,11 @@ class DesServiceSpec extends BaseSpec {
       "connector returns ServiceUnavailable." in {
         when(mockConnector.checkExistingTrust(request)).
           thenReturn(Future.successful(ServiceUnavailable))
-        val result = Await.result(SUT.checkExistingTrust(request), Duration.Inf)
-        result mustBe ServiceUnavailable
+        val futureResult = SUT.checkExistingTrust(request)
+        whenReady(futureResult) {
+          result => result mustBe ServiceUnavailable
+        }
+
       }
     }
 
@@ -85,8 +96,10 @@ class DesServiceSpec extends BaseSpec {
       "connector returns ServerError." in {
         when(mockConnector.checkExistingTrust(request)).
           thenReturn(Future.successful(ServerError))
-        val result = Await.result(SUT.checkExistingTrust(request), Duration.Inf)
-        result mustBe ServerError
+        val futureResult = SUT.checkExistingTrust(request)
+        whenReady(futureResult) {
+          result => result mustBe ServerError
+        }
       }
     }
   }
@@ -98,8 +111,10 @@ class DesServiceSpec extends BaseSpec {
       "connector returns SuccessRegistrationResponse." in {
         when(mockConnector.registerTrust(registrationRequest)).
           thenReturn(Future.successful(RegistrationTrustResponse("trn123")))
-        val result = Await.result(SUT.registerTrust(registrationRequest), Duration.Inf)
-        result mustBe RegistrationTrustResponse("trn123")
+        val futureResult = SUT.registerTrust(registrationRequest)
+        whenReady(futureResult) {
+          result => result mustBe RegistrationTrustResponse("trn123")
+        }
       }
     }
 
@@ -107,8 +122,10 @@ class DesServiceSpec extends BaseSpec {
       "connector returns  AlreadyRegisteredException." in {
         when(mockConnector.registerTrust(registrationRequest)).
           thenReturn(Future.failed(new AlreadyRegisteredException))
-        assertThrows[AlreadyRegisteredException] {
-          val result = Await.result(SUT.registerTrust(registrationRequest), Duration.Inf)
+          val futureResult = SUT.registerTrust(registrationRequest)
+
+        whenReady(futureResult.failed) {
+          result => result mustBe an[AlreadyRegisteredException]
         }
       }
     }
@@ -117,15 +134,12 @@ class DesServiceSpec extends BaseSpec {
       "connector returns  exception." in {
         when(mockConnector.registerTrust(registrationRequest)).
           thenReturn(Future.failed(new InternalServerErrorException("")))
-        assertThrows[InternalServerErrorException] {
-          val result = Await.result(SUT.registerTrust(registrationRequest), Duration.Inf)
-        }
+          val futureResult = SUT.registerTrust(registrationRequest)
 
+        whenReady(futureResult.failed) {
+          result => result mustBe an[InternalServerErrorException]
+        }
       }
     }
-
-
   } //registerTrust
-
-
 }
