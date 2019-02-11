@@ -35,7 +35,9 @@ object RegistrationResponse {
       override def read(method: String, url: String, response: HttpResponse): RegistrationResponse = {
         Logger.info(s"[RegistrationTrustResponse]  response status received from des: ${response.status}")
         response.status match {
-          case OK =>response.json.as[RegistrationTrustResponse]
+          case OK =>
+               response.json.as[RegistrationTrustResponse]
+
           case FORBIDDEN =>{
             response.json.asOpt[DesErrorResponse] match {
               case Some(desReponse) if desReponse.code == ALREADY_REGISTERED_CODE=>
@@ -60,9 +62,6 @@ object RegistrationResponse {
   implicit val registrationDesErrorResponseReads = DesErrorResponse.formats
 
 }
-case class RegistrationDesResponse(trn:String)
-object RegistrationDesResponse {
-  implicit val formats = Json.format[DesResponse]
-}
+
 
 

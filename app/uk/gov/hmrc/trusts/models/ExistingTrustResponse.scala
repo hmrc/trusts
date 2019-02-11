@@ -64,13 +64,4 @@ object ExistingTrustResponse {
 }
 
 
-case class DesResponse(`match`:Boolean)
-object DesResponse {
-  implicit val formats = Json.format[DesResponse]
-}
 
-case class DesErrorResponse(code: String,reason: String )
-
-object DesErrorResponse {
-  implicit val formats = Json.format[DesErrorResponse]
-}
