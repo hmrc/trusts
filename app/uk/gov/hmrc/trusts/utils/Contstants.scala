@@ -26,5 +26,7 @@ object Contstants {
   val INTERNAL_SERVER_ERROR_CODE = "INTERNAL_SERVER_ERROR"
   val INTERNAL_SERVER_ERROR_MESSAGE = "Internal server error."
 
+  val dateTimePattern = "yyyy-MM-dd"
+
 
 }

@@ -19,6 +19,7 @@ package uk.gov.hmrc.trusts.models
 
 import org.joda.time.DateTime
 import play.api.libs.json._
+import uk.gov.hmrc.trusts.utils.Contstants._
 /**
   * DES API Schema - definitions models below
   */
@@ -124,7 +125,7 @@ case class Protector(name: NameType,
                      identification: Option[IdentificationType])
 
 object Protector {
-  val dateTimePattern = "yyyy-MM-dd"
+
 
   implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
 
@@ -160,7 +161,7 @@ case class TrusteeIndividualType(name: NameType,
                        identification: IdentificationType)
 
 object TrusteeIndividualType {
-  val dateTimePattern = "yyyy-MM-dd"
+
   implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val trusteeIndividualTypeFormat : Format[TrusteeIndividualType] = Json.format[TrusteeIndividualType]
 }
@@ -177,7 +178,7 @@ case class Settlor(name: NameType,
                    identification: Option[IdentificationType])
 
 object Settlor {
-  val dateTimePattern = "yyyy-MM-dd"
+
 
   implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
 
@@ -266,7 +267,7 @@ case class IndividualDetailsType(name: NameType,
                                  identification: Option[IdentificationType])
 
 object IndividualDetailsType {
-  val dateTimePattern = "yyyy-MM-dd"
+
 
   implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
 
@@ -371,7 +372,7 @@ case class NaturalPersonType(name: NameType,
                              identification: IdentificationType)
 
 object NaturalPersonType {
-  val dateTimePattern = "yyyy-MM-dd"
+
 
   implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
 
@@ -396,7 +397,7 @@ case class TrustDetailsType(startDate: DateTime,
                             efrbsStartDate: Option[DateTime])
 
 object TrustDetailsType {
-  val dateTimePattern = "yyyy-MM-dd"
+
 
   implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
 
@@ -432,7 +433,7 @@ case class Estate(entities: EntitiesType,
                   periodTaxDues: String)
 
 object Estate {
-  val dateTimePattern = "yyyy-MM-dd"
+
 
   implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
 
@@ -470,7 +471,7 @@ case class PartnershipType(utr: Option[String],
                            partnershipStart: Option[DateTime])
 
 object PartnershipType {
-  val dateTimePattern = "yyyy-MM-dd"
+
 
   implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
 
@@ -512,7 +513,7 @@ case class PassportType(number: String,
                         countryOfIssue: String)
 
 object PassportType {
-  val dateTimePattern = "yyyy-MM-dd"
+
 
   implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
 
@@ -550,7 +551,7 @@ case class PersonalRepOrg(orgName: String,
                           email: Option[String])
 
 object PersonalRepOrg {
-  val dateTimePattern = "yyyy-MM-dd"
+
   implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val personalRepOrgFormat: Format[PersonalRepOrg] = Json.format[PersonalRepOrg]
 }
@@ -562,7 +563,7 @@ case class PersonalRepInd(name: NameType,
                                   email: Option[String])
 
 object PersonalRepInd {
-  val dateTimePattern = "yyyy-MM-dd"
+
   implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val personalRepresentativeFormat: Format[PersonalRepInd] = Json.format[PersonalRepInd]
 }
@@ -573,7 +574,7 @@ case class WillType(name: NameType,
                     identification: Option[Identification])
 
 object WillType {
-  val dateTimePattern = "yyyy-MM-dd"
+
   implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val willTypeFormat: Format[WillType] = Json.format[WillType]
 }
