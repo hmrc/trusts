@@ -25,18 +25,22 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.services.{DesService, ValidationService}
+import uk.gov.hmrc.trusts.services.{AuthService, DesService, ValidationService}
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models._
 import org.mockito.Mockito._
+import uk.gov.hmrc.auth.core.{AuthorisationException, MissingBearerToken}
 import uk.gov.hmrc.trusts.exceptions._
+import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
+
+class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite  {
 
   val mockDesService = mock[DesService]
+
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   lazy val validatationService: ValidationService = new ValidationService()
 
@@ -44,19 +48,33 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return 200 with TRN" when {
       "the register endpoint is called with a valid json payload " in {
-        val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService)
+        val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService,mockAuthServiceSucces())
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
           .thenReturn(Future.successful(RegistrationTrustResponse("XTRN123456")))
+
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe OK
         (contentAsJson(result) \ "trn").as[String] mustBe "XTRN123456"
       }
     }
 
+    "return 401" when {
+      "the register endpoint is called without bearer token" in {
+        def exception = Some(new MissingBearerToken)
+
+       // val result = route(app,postRequestWithPayload(Json.parse(validRegistrationRequestJson))
+        val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService,mockAuthServiceFailure())
+        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(RegistrationTrustResponse("XTRN123456")))
+
+        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
+        status(result) mustBe UNAUTHORIZED
+      }
+    }
 
     "return a Conflict" when {
       "trusts is already registered with provided details." in {
-        val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService)
+        val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService,mockAuthServiceSucces())
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(new AlreadyRegisteredException))
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
@@ -69,7 +87,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return a Forbidden" when {
       "no match found for provided existing trusts details." in {
-        val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService)
+        val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService,mockAuthServiceSucces())
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(new NoMatchException))
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
@@ -83,7 +101,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return a BAD REQUEST" when {
       "input request fails schema validation"  in {
-        val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService)
+        val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService,mockAuthServiceSucces())
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(invalidRegistrationRequestJson)))
         status(result) mustBe BAD_REQUEST
         val output = contentAsJson(result)
@@ -95,10 +113,9 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return an internal server error" when {
       "the register endpoint called and something goes wrong." in {
-        val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService)
+        val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService,mockAuthServiceSucces())
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(new InternalServerErrorException("some error")))
-
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe INTERNAL_SERVER_ERROR
         val output = contentAsJson(result)
@@ -109,10 +126,9 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return an internal server error" when {
       "the des returns BAD REQUEST" in {
-        val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService)
+        val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService,mockAuthServiceSucces())
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(new BadRequestException))
-
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe INTERNAL_SERVER_ERROR
         val output = contentAsJson(result)
@@ -123,7 +139,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return an internal server error" when {
       "the des returns Service Unavailable as dependent service is down. " in {
-        val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService)
+        val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService,mockAuthServiceSucces())
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(new ServiceNotAvailableException("dependent service is down")))
 

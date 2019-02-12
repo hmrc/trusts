@@ -21,49 +21,57 @@ import javax.inject.Inject
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Action
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.exceptions._
-import uk.gov.hmrc.trusts.models.{ Registration, RegistrationTrustResponse}
-import uk.gov.hmrc.trusts.services.{DesService, ValidationService}
+import uk.gov.hmrc.trusts.models.{Registration, RegistrationTrustResponse}
+import uk.gov.hmrc.trusts.services.{AuthService, DesService, ValidationService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import uk.gov.hmrc.trusts.models.ApiResponse._
 
-class RegisterTrustController @Inject()(desService: DesService, config: AppConfig, validationService: ValidationService) extends TrustsBaseController {
+class RegisterTrustController @Inject()(desService: DesService, config: AppConfig,
+                                        validationService: ValidationService,
+                                        authService : AuthService) extends TrustsBaseController {
 
 
   def registration() = Action.async(parse.json) { implicit request =>
     import uk.gov.hmrc.trusts.models.RegistrationResponse.formats
-    val registrationJsonString = request.body.toString()
+    import scala.concurrent.ExecutionContext.Implicits.global
+    import authService._
 
-    validationService.get(config.trustsApiRegistrationSchema)
-      .validate[Registration](registrationJsonString) match {
+    authenticate() {
+      val registrationJsonString = request.body.toString()
 
-      case Right(trustsRegistrationRequest) => {
-        desService.registerTrust(trustsRegistrationRequest).map {
-          case  response: RegistrationTrustResponse=> Ok(Json.toJson(response))
+      validationService.get(config.trustsApiRegistrationSchema)
+        .validate[Registration](registrationJsonString) match {
 
-        } recover {
-          case alreadyRegisterd: AlreadyRegisteredException => {
-            Logger.info("[RegisterTrustController][registration] Returning already registered response.")
-            Conflict(Json.toJson(alreadyRegisteredResponse))
-          }
-          case noMatch: NoMatchException => {
-            Logger.info("[RegisterTrustController][registration] Returning no match response.")
-            Forbidden(Json.toJson(noMatchRegistrationResponse))
-          }
-          case exception: Exception => {
-            Logger.error(s"[RegisterTrustController][registration] Exception received : ${exception}.")
-            InternalServerError(Json.toJson(internalServerErrorResponse))
+        case Right(trustsRegistrationRequest) => {
+          desService.registerTrust(trustsRegistrationRequest).map {
+            case response: RegistrationTrustResponse => Ok(Json.toJson(response))
+
+          } recover {
+            case alreadyRegisterd: AlreadyRegisteredException => {
+              Logger.info("[RegisterTrustController][registration] Returning already registered response.")
+              Conflict(Json.toJson(alreadyRegisteredResponse))
+            }
+            case noMatch: NoMatchException => {
+              Logger.info("[RegisterTrustController][registration] Returning no match response.")
+              Forbidden(Json.toJson(noMatchRegistrationResponse))
+            }
+            case exception: Exception => {
+              Logger.error(s"[RegisterTrustController][registration] Exception received : ${exception}.")
+              InternalServerError(Json.toJson(internalServerErrorResponse))
+            }
           }
         }
+        case Left(validationErros) =>
+          Future.successful(invalidRequestErrorResponse)
       }
-      case Left(validationErros) =>
-        Future.successful(invalidRequestErrorResponse)
-    }
 
-  } //registration
+    }
+  }//registration
 
 
 }
