@@ -27,6 +27,7 @@ import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.{Registration, RegistrationTrustResponse}
 import uk.gov.hmrc.trusts.services.{AuthService, DesService, ValidationService}
 
+import uk.gov.hmrc.trusts.models.RegistrationResponse.formats
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import uk.gov.hmrc.trusts.models.ApiResponse._
@@ -37,11 +38,10 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
 
 
   def registration() = Action.async(parse.json) { implicit request =>
-    import uk.gov.hmrc.trusts.models.RegistrationResponse.formats
-    import scala.concurrent.ExecutionContext.Implicits.global
+
     import authService._
 
-    authenticate() {
+    authorisedUser() {
       val registrationJsonString = request.body.toString()
 
       validationService.get(config.trustsApiRegistrationSchema)
