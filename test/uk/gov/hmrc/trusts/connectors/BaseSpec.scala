@@ -72,14 +72,5 @@ class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with Mockito
       }
     }
   }
-  val mockAuthService = new AuthService(authConnector(Some(new MissingBearerToken)))
-  def mockAuthServiceFailure():AuthService ={
-    val mockAuthService = new AuthService(authConnector(Some(new MissingBearerToken)))
-    mockAuthService
-  }
-  def mockAuthServiceSucces():AuthService ={
-    val mockAuthService = new AuthService(authConnector())
-    mockAuthService
-  }
 
 }
