@@ -40,6 +40,7 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
   val appConfig = mock[AppConfig]
 
   val validPayloadRequest = Json.parse("""{"name": "trust name","postcode": "NE1 1NE","utr": "1234567890"}""")
+  val validPayloadPostCodeLowerCase = Json.parse("""{"name": "trust name","postcode": "aa9a 9aa","utr": "1234567890"}""")
   val validPayloadRequestWithoutPostCode = Json.parse("""{"name": "trust name","utr": "1234567890"}""")
 
 
@@ -53,6 +54,14 @@ class TrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(Matched))
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequest))
+        status(result) mustBe OK
+        (contentAsJson(result) \ "match").as[Boolean] mustBe true
+      }
+      "trusts data match with existing trusts with postcode in lowercase. " in {
+        val SUT = new TrustsController(mockDesService, appConfig)
+        when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Matched))
+        val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadPostCodeLowerCase))
         status(result) mustBe OK
         (contentAsJson(result) \ "match").as[Boolean] mustBe true
       }

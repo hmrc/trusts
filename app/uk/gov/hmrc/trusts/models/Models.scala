@@ -28,7 +28,7 @@ object ExistingTrustCheckRequest {
 
   private val validationError = ValidationError("")
   private val utrValidationRegEx = """^[0-9]{10}$""".r
-  private val postcodeRegEx ="""^[A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2}$""".r
+  private val postcodeRegEx ="""^[a-zA-Z]{1,2}[0-9][0-9a-zA-Z]?\s?[0-9][a-zA-Z]{2}$""".r
   private val nameRegEx = """^[A-Za-z0-9 ,.()/&'-]{1,56}$""".r
 
   private val utrValidation: Reads[String] =
