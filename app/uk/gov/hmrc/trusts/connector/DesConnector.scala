@@ -22,8 +22,9 @@ import javax.inject.Inject
 import com.google.inject.ImplementedBy
 import play.api.Logger
 import play.api.libs.json._
-import uk.gov.hmrc.http.{BadGatewayException, BadRequestException, GatewayTimeoutException, HeaderCarrier}
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.logging.Authorization
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext
 import uk.gov.hmrc.trusts.config.{AppConfig, WSHttp}
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse.httpReads
@@ -69,11 +70,21 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
 
   }
+
+  override def getSubscriptionId(trn: String)(implicit hc: HeaderCarrier): Future[SubscriptionIdResponse] = {
+    val desHeaders = hc.copy(authorization = Some(Authorization(s"Bearer ${config.desToken}"))).withExtraHeaders(headers: _*)
+
+    val subscriptionIdEndpointUrl = s"${trustsServiceUrl}/trn/$trn/subscription"
+    Logger.debug(s"[getSubscriptionId] Sending get subscription id request to DES, url=$subscriptionIdEndpointUrl")
+
+    http.GET[SubscriptionIdResponse](subscriptionIdEndpointUrl)(SubscriptionIdResponse.httpReads, hc = desHeaders, ec = global)
+  }
 }
 
 @ImplementedBy(classOf[DesConnectorImpl])
 trait DesConnector {
   def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest)(implicit hc: HeaderCarrier): Future[ExistingTrustResponse]
   def registerTrust(registration: Registration)(implicit hc: HeaderCarrier): Future[RegistrationResponse]
+  def getSubscriptionId(trn: String)(implicit hc: HeaderCarrier): Future[SubscriptionIdResponse]
 
 }

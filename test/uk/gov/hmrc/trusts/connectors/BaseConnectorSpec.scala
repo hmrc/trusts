@@ -57,4 +57,19 @@ class BaseConnectorSpec extends  BaseSpec {
        | "reason": "DES is currently experiencing problems that require live service intervention"
        |}""".stripMargin)
 
+  //subscription id
+  val jsonResponse400GetSubscriptionId: JsValue = Json.parse(
+    s"""
+       |{
+       | "code": "INVALID_TRN",
+       | "reason": "Submission has not passed validation. Invalid parameter TRN."
+       |}""".stripMargin)
+
+  val jsonResponse404GetSubscriptionId: JsValue = Json.parse(
+    s"""
+       |{
+       | "code": "NOT_FOUND",
+       | "reason": "The remote endpoint has indicated that no data can be found for given TRN."
+       |}""".stripMargin)
+
 }

@@ -63,6 +63,16 @@ class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with Mockito
           .withBody(responseBody).withFixedDelay(delayResponse)))
   }
 
+  def stubForGet(server: WireMockServer ,  url: String, returnStatus: Int, responseBody: String, delayResponse: Int = 0) = {
+    server.stubFor(get(urlEqualTo(url))
+      .withHeader("content-Type", containing("application/json"))
+      .withHeader("Environment", containing("dev"))
+      .willReturn(
+        aResponse()
+          .withStatus(returnStatus)
+          .withBody(responseBody).withFixedDelay(delayResponse)))
+  }
+
 
   def authConnector( exception: Option[AuthorisationException]= None): AuthConnector = {
     val success: Any = ()

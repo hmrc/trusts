@@ -21,3 +21,4 @@ class InternalServerErrorException(message : String )  extends Exception(message
 class AlreadyRegisteredException extends Exception
 class NoMatchException extends Exception
 class BadRequestException extends Exception
+class NotFoundException extends Exception
