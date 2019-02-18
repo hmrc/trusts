@@ -59,7 +59,7 @@ object RegistrationResponse {
           case BAD_REQUEST =>
             throw new BadRequestException
           case SERVICE_UNAVAILABLE =>
-            throw new ServiceNotAvailableException("Des depdedent service is down.")
+            throw new ServiceNotAvailableException("Des dependent service is down.")
           case status =>
             throw new InternalServerErrorException(s"Error response from des $status")
         }
