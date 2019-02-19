@@ -30,7 +30,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models._
 import org.mockito.Mockito._
-import uk.gov.hmrc.auth.core.{AuthorisationException, BearerTokenExpired, MissingBearerToken}
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 
@@ -48,10 +48,14 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return 200 with TRN" when {
       "the register endpoint is called with a valid json payload " in {
-        val mockAuthService = new AuthService(authConnector())
-        val SUT = new RegisterTrustController(mockDesService, appConfig, validatationService, mockAuthService)
+
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
           .thenReturn(Future.successful(RegistrationTrustResponse("XTRN123456")))
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(succesfulRetrieval)
+
+        val mockAuthService = new AuthService(authConnector)
+        val SUT = new RegisterTrustController(mockDesService, appConfig, validatationService, mockAuthService)
+
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe OK
@@ -82,7 +86,10 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return a Conflict" when {
       "trusts is already registered with provided details." in {
-        val mockAuthService = new AuthService(authConnector())
+
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(succesfulRetrieval)
+
+        val mockAuthService = new AuthService(authConnector)
         val SUT = new RegisterTrustController(mockDesService, appConfig, validatationService, mockAuthService)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(new AlreadyRegisteredException))
@@ -96,8 +103,10 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return a Forbidden" when {
       "no match found for provided existing trusts details." in {
-        val mockAuthService = new AuthService(authConnector())
 
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(succesfulRetrieval)
+
+        val mockAuthService = new AuthService(authConnector)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(new NoMatchException))
 
@@ -114,7 +123,9 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return a BAD REQUEST" when {
       "input request fails schema validation" in {
-        val mockAuthService = new AuthService(authConnector())
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(succesfulRetrieval)
+        val mockAuthService = new AuthService(authConnector)
+
         val SUT = new RegisterTrustController(mockDesService, appConfig, validatationService, mockAuthService)
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(invalidRegistrationRequestJson)))
         status(result) mustBe BAD_REQUEST
@@ -131,7 +142,8 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(new InternalServerErrorException("some error")))
 
-        val mockAuthService = new AuthService(authConnector())
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(succesfulRetrieval)
+        val mockAuthService = new AuthService(authConnector)
         val SUT = new RegisterTrustController(mockDesService, appConfig, validatationService, mockAuthService)
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
@@ -144,7 +156,8 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return an internal server error" when {
       "the des returns BAD REQUEST" in {
-        val mockAuthService = new AuthService(authConnector())
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(succesfulRetrieval)
+        val mockAuthService = new AuthService(authConnector)
         val SUT = new RegisterTrustController(mockDesService, appConfig, validatationService, mockAuthService)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(new BadRequestException))
@@ -158,7 +171,9 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return an internal server error" when {
       "the des returns Service Unavailable as dependent service is down. " in {
-        val mockAuthService = new AuthService(authConnector())
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(succesfulRetrieval)
+        val mockAuthService = new AuthService(authConnector)
+
         val SUT = new RegisterTrustController(mockDesService, appConfig, validatationService, mockAuthService)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(new ServiceNotAvailableException("dependent service is down")))

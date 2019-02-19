@@ -22,26 +22,29 @@ import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.{Registration, RegistrationTrustResponse}
-import uk.gov.hmrc.trusts.services.{AuthService, DesService, ValidationService}
-
+import uk.gov.hmrc.trusts.services.{AuthService, DesService, RosmPatternService, ValidationService}
 import uk.gov.hmrc.trusts.models.RegistrationResponse.formats
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import uk.gov.hmrc.trusts.models.ApiResponse._
 
 class RegisterTrustController @Inject()(desService: DesService, config: AppConfig,
                                         validationService: ValidationService,
-                                        authService : AuthService) extends TrustsBaseController {
+                                        authService : AuthService
+                                        //rosmPatternService : RosmPatternService
+                                       ) extends TrustsBaseController {
 
 
   def registration() = Action.async(parse.json) { implicit request =>
 
     import authService._
 
-    authorisedUser() {
+    authorisedUser() {isOrganisation : Boolean =>
       val registrationJsonString = request.body.toString()
 
       validationService.get(config.trustsApiRegistrationSchema)
@@ -49,7 +52,10 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
 
         case Right(trustsRegistrationRequest) => {
           desService.registerTrust(trustsRegistrationRequest).map {
-            case response: RegistrationTrustResponse => Ok(Json.toJson(response))
+            case response: RegistrationTrustResponse => {
+
+              Ok(Json.toJson(response))
+            }
 
           } recover {
             case alreadyRegisterd: AlreadyRegisteredException => {
@@ -72,6 +78,21 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
 
     }
   }//registration
+
+
+  /*private def completeRosmPatternWithTaxEnrolments(trn : String, isOrganisation : Boolean)(implicit hc: HeaderCarrier): Unit = {
+    isOrganisation match {
+      case false  => Logger.info("Rosm is not required for Agent.")
+      case true => rosmPatternService.completeRosmTransaction(trn) map {
+         subId =>  Logger.info(s"Rosm completed successfully for ${subId}.")
+      } recover {
+        case  exception : Exception => {
+          Logger.error(s"Rosm pattern is not completed for trn:  ${trn}.")
+          Logger.error(s"[completeRosmPatternWithTaxEnrolments] Exception received : ${exception}.")
+        }
+      }
+    }
+  }*/
 
 
 }

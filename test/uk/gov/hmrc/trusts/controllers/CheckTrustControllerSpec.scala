@@ -28,7 +28,7 @@ import uk.gov.hmrc.trusts.models._
 import org.mockito.Mockito._
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse.{AlreadyRegistered, Matched, NotMatched, ServiceUnavailable}
 import org.mockito.Matchers.any
-import uk.gov.hmrc.auth.core.{BearerTokenExpired, MissingBearerToken}
+import uk.gov.hmrc.auth.core.{AffinityGroup, BearerTokenExpired, MissingBearerToken}
 import uk.gov.hmrc.trusts.connector.DesConnector
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -50,7 +50,9 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return OK with match true" when {
       "trusts data match with existing trusts. " in {
-        val mockAuthService = new AuthService(authConnector())
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(succesfulRetrieval)
+
+        val mockAuthService = new AuthService(authConnector)
         val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, mockAuthService)
         when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(Matched))
@@ -79,7 +81,9 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return OK with match true" when {
       "trusts data match with existing trusts without postcode. " in {
-        val mockAuthService = new AuthService(authConnector())
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(succesfulRetrieval)
+
+        val mockAuthService = new AuthService(authConnector)
         val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, mockAuthService)
         when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(Matched))
@@ -91,7 +95,9 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return OK with match false" when {
       "trusts data does not match with existing trusts." in {
-        val mockAuthService = new AuthService(authConnector())
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(succesfulRetrieval)
+
+        val mockAuthService = new AuthService(authConnector)
         val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, mockAuthService)
         when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(NotMatched))
@@ -105,7 +111,9 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
     "return 403 with message and code" when {
 
       "trusts data matched with already registered trusts." in {
-        val mockAuthService = new AuthService(authConnector())
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(succesfulRetrieval)
+
+        val mockAuthService = new AuthService(authConnector)
         val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, mockAuthService)
         when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(AlreadyRegistered))
@@ -119,7 +127,9 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return 400 " when {
       "trust name is not valid" in {
-        val mockAuthService = new AuthService(authConnector())
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(succesfulRetrieval)
+
+        val mockAuthService = new AuthService(authConnector)
         val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, mockAuthService)
         val nameInvalidPayload = Json.parse("""{"name": "","postcode": "NE11NE","utr": "1234567890"}""")
 
@@ -130,7 +140,9 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       }
 
       "trust name is more than 56 characters" in {
-        val mockAuthService = new AuthService(authConnector())
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(succesfulRetrieval)
+
+        val mockAuthService = new AuthService(authConnector)
         val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, mockAuthService)
         val nameInvalidPayload = Json.parse("""{"name": "Lorem ipsum dolor sit amet, consectetur adipiscing elitee","postcode": "NE11NE","utr": "1234567890"}""")
 
@@ -145,7 +157,9 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return 400 " when {
       "utr is not valid" in {
-        val mockAuthService = new AuthService(authConnector())
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(succesfulRetrieval)
+
+        val mockAuthService = new AuthService(authConnector)
         val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, mockAuthService)
 
         val utrInvalidPayload = Json.parse("""{"name": "trust name","postcode": "NE11NE","utr": "12345678"}""")
@@ -158,7 +172,9 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return 400 " when {
       "postcode is not valid" in {
-        val mockAuthService = new AuthService(authConnector())
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(succesfulRetrieval)
+
+        val mockAuthService = new AuthService(authConnector)
         val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, mockAuthService)
 
         val invalidPayload = Json.parse("""{"name": "trust name","postcode": "AA9A 9AAT","utr": "1234567890"}""")
@@ -172,7 +188,9 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return 400 " when {
       "request is not valid" in {
-        val mockAuthService = new AuthService(authConnector())
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(succesfulRetrieval)
+
+        val mockAuthService = new AuthService(authConnector)
         val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, mockAuthService)
 
         val requestInvalid = Json.parse("""{"name1": "trust name","postcode": "NE11NE","utr": "1234567890"}""")
@@ -186,7 +204,9 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return Internal server error " when {
       "des dependent service is not responding" in {
-        val mockAuthService = new AuthService(authConnector())
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(succesfulRetrieval)
+
+        val mockAuthService = new AuthService(authConnector)
         val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, mockAuthService)
         when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(ServiceUnavailable))

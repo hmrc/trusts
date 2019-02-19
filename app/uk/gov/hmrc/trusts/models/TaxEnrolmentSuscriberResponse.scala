@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.models
 
 import play.api.Logger
-import play.api.http.Status.NO_CONTENT
+import play.api.http.Status._
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.trusts.exceptions._
@@ -27,11 +27,7 @@ sealed trait TaxEnrolmentSuscriberResponse
 
 object TaxEnrolmentSuscriberResponse {
 
-  implicit val formats = Json.format[TaxEnrolmentSuscriberResponse]
-
   final case object Success extends TaxEnrolmentSuscriberResponse
-
-  final case object Failed extends TaxEnrolmentSuscriberResponse
 
   implicit lazy val httpReads: HttpReads[TaxEnrolmentSuscriberResponse] =
     new HttpReads[TaxEnrolmentSuscriberResponse] {
@@ -41,6 +37,9 @@ object TaxEnrolmentSuscriberResponse {
         response.status match {
           case NO_CONTENT =>
             Success
+          case BAD_REQUEST =>
+            Logger.error("[TaxEnrolmentSuscriberResponse] Bad request response received from tax enrolment")
+            throw new BadRequestException
           case status =>
             throw new InternalServerErrorException(s"Error response from tax enrolment:  $status")
         }

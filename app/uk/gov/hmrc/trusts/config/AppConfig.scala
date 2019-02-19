@@ -39,6 +39,10 @@ class AppConfig @Inject() (config: Configuration, playEnv: Environment) extends 
 
   val trustsApiRegistrationSchema : String  = "/resources/schemas/trustsApiRegistrationSchema_3.1.0.json"
 
+  val taxEnrolmentsUrl : String = baseUrl("tax-enrolments")
+  val taxEnrolmentsPayloadBodyServiceName : String =   loadConfig("microservice.services.tax-enrolments.serviceName")
+  val taxEnrolmentsPayloadBodyCallback : String =    loadConfig("microservice.services.tax-enrolments.callback")
+
 
 }
 

@@ -21,15 +21,16 @@ import javax.inject.Inject
 import com.google.inject.ImplementedBy
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.connector.{DesConnector, TaxEnrolmentConnector}
+import uk.gov.hmrc.trusts.models.TaxEnrolmentSuscriberResponse
+
+import scala.concurrent.Future
 
 
 class TaxEnrolmentsServiceImpl @Inject()(val taxEnrolmentConnector :TaxEnrolmentConnector) extends TaxEnrolmentsService {
-  override def setSubscriptionId(subscriptionId: String)(implicit hc: HeaderCarrier): Unit = {
-
-  }
+  override def setSubscriptionId(subscriptionId: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] = ???
 }
 
 @ImplementedBy(classOf[TaxEnrolmentsServiceImpl])
 trait TaxEnrolmentsService{
-   def setSubscriptionId(subscriptionId: String)(implicit hc: HeaderCarrier)
+   def setSubscriptionId(subscriptionId: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse]
 }

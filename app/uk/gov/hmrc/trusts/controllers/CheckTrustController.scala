@@ -37,7 +37,7 @@ class CheckTrustController @Inject()(desService: DesService, config: AppConfig,
 
   def checkExistingTrust() = Action.async(parse.json) { implicit request =>
     import authService._
-    authorisedUser() {
+    authorisedUser() { isOrganisation : Boolean=>
       withJsonBody[ExistingTrustCheckRequest] {
         trustsCheckRequest =>
           desService.checkExistingTrust(trustsCheckRequest).map {

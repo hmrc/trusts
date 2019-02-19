@@ -43,6 +43,9 @@ class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with Mockito
 
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
 
+  val succesfulRetrieval: Future[Option[AffinityGroup]] = Future.successful((Some(AffinityGroup.Organisation)))
+  val authConnector = mock[AuthConnector]
+
   implicit val defaultPatience =
     PatienceConfig(timeout = Span(5, Seconds), interval = Span(500, Millis))
 
@@ -52,7 +55,7 @@ class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with Mockito
       .withBody(payload)
 
 
-  def stubFor(server: WireMockServer ,  url: String, requestBody: String, returnStatus: Int, responseBody: String, delayResponse: Int = 0) = {
+  def stubForPost(server: WireMockServer ,  url: String, requestBody: String, returnStatus: Int, responseBody: String, delayResponse: Int = 0) = {
     server.stubFor(post(urlEqualTo(url))
       .withHeader("content-Type", containing("application/json"))
       .withHeader("Environment", containing("dev"))
@@ -66,11 +69,19 @@ class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with Mockito
   def stubForGet(server: WireMockServer ,  url: String, returnStatus: Int, responseBody: String, delayResponse: Int = 0) = {
     server.stubFor(get(urlEqualTo(url))
       .withHeader("content-Type", containing("application/json"))
-      .withHeader("Environment", containing("dev"))
       .willReturn(
         aResponse()
           .withStatus(returnStatus)
           .withBody(responseBody).withFixedDelay(delayResponse)))
+  }
+
+  def stubForPut(server: WireMockServer ,  url: String, returnStatus: Int,  delayResponse: Int = 0) = {
+    server.stubFor(put(urlEqualTo(url))
+      .withHeader("content-Type", containing("application/json"))
+      .willReturn(
+        aResponse()
+          .withStatus(returnStatus)
+          .withFixedDelay(delayResponse)))
   }
 
 

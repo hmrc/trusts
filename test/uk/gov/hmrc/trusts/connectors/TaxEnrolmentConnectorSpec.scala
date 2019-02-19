@@ -20,6 +20,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.trusts.connector.TaxEnrolmentConnector
+import uk.gov.hmrc.trusts.exceptions.{BadRequestException, InternalServerErrorException}
 import uk.gov.hmrc.trusts.models.TaxEnrolmentSuscriberResponse.Success
 import uk.gov.hmrc.trusts.utils.WireMockHelper
 
@@ -45,6 +46,32 @@ class TaxEnrolmentConnectorSpec extends BaseConnectorSpec
 
         whenReady(futureResult) {
           result => result mustBe Success
+        }
+      }
+    }
+
+    "return BadRequestException " when {
+      "tax enrolments returns bad request " in {
+
+        stubForPut(server, "/tax-enrolments/subscriptions/987654321/subscriber", 400)
+
+        val futureResult = connector.enrolSubscriber("987654321")
+
+        whenReady(futureResult.failed) {
+          result => result mustBe an[BadRequestException]
+        }
+      }
+    }
+
+    "return InternalServerErrorException " when {
+      "tax enrolments returns internal server error " in {
+
+        stubForPut(server, "/tax-enrolments/subscriptions/987654321/subscriber", 500)
+
+        val futureResult = connector.enrolSubscriber("987654321")
+
+        whenReady(futureResult.failed) {
+          result => result mustBe an[InternalServerErrorException]
         }
       }
     }

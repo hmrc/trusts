@@ -28,5 +28,8 @@ object Contstants {
 
   val dateTimePattern = "yyyy-MM-dd"
 
+  val CONTENT_TYPE = "Content-Type"
+  val CONTENT_TYPE_JSON = "application/json; charset=utf-8"
+
 
 }

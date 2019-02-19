@@ -31,6 +31,7 @@ import uk.gov.hmrc.trusts.models.ExistingTrustResponse.httpReads
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.trusts.utils.Contstants._
 
 
 class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesConnector {
@@ -40,8 +41,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "Correlation-Id"
-  val CONTENT_TYPE = "Content-Type"
-  val CONTENT_TYPE_JSON = "application/json; charset=utf-8"
+
 
   def headers =
     Seq(

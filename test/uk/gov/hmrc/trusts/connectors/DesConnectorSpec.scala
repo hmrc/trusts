@@ -46,7 +46,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "trusts data match with existing trusts." in {
         val requestBody = Json.stringify(Json.toJson(request))
 
-        stubFor(server, "/trusts/match", requestBody, 200, """{"match": true}""")
+        stubForPost(server, "/trusts/match", requestBody, 200, """{"match": true}""")
 
         val futureResult = connector.checkExistingTrust(request)
 
@@ -60,7 +60,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "trusts data does not with existing trusts." in {
         val requestBody = Json.stringify(Json.toJson(request))
 
-        stubFor(server, "/trusts/match", requestBody, 200, """{"match": false}""")
+        stubForPost(server, "/trusts/match", requestBody, 200, """{"match": false}""")
 
         val futureResult = connector.checkExistingTrust(request)
         whenReady(futureResult) {
@@ -74,7 +74,7 @@ class DesConnectorSpec extends BaseConnectorSpec
         val wrongPayloadRequest = request.copy(utr = "NUMBER1234")
         val requestBody = Json.stringify(Json.toJson(wrongPayloadRequest))
 
-        stubFor(server, "/trusts/match", requestBody, 400, Json.stringify(jsonResponse400))
+        stubForPost(server, "/trusts/match", requestBody, 400, Json.stringify(jsonResponse400))
 
         val futureResult = connector.checkExistingTrust(wrongPayloadRequest)
 
@@ -88,7 +88,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "trusts is already registered with provided details." in {
         val requestBody = Json.stringify(Json.toJson(request))
 
-        stubFor(server, "/trusts/match", requestBody, 409, Json.stringify(jsonResponseAlreadyRegistered))
+        stubForPost(server, "/trusts/match", requestBody, 409, Json.stringify(jsonResponseAlreadyRegistered))
 
         val futureResult = connector.checkExistingTrust(request)
 
@@ -102,7 +102,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "des dependent service is not responding " in {
         val requestBody = Json.stringify(Json.toJson(request))
 
-        stubFor(server, "/trusts/match", requestBody, 503, Json.stringify(jsonResponse503))
+        stubForPost(server, "/trusts/match", requestBody, 503, Json.stringify(jsonResponse503))
 
         val futureResult = connector.checkExistingTrust(request)
 
@@ -116,7 +116,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "des is experiencing some problem." in {
         val requestBody = Json.stringify(Json.toJson(request))
 
-        stubFor(server, "/trusts/match", requestBody, 500, Json.stringify(jsonResponse500))
+        stubForPost(server, "/trusts/match", requestBody, 500, Json.stringify(jsonResponse500))
 
         val futureResult = connector.checkExistingTrust(request)
 
@@ -130,7 +130,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "des is returning forbidden response" in {
         val requestBody = Json.stringify(Json.toJson(request))
 
-        stubFor(server, "/trusts/match", requestBody, 409, "{}")
+        stubForPost(server, "/trusts/match", requestBody, 409, "{}")
 
         val futureResult = connector.checkExistingTrust(request)
 
@@ -148,7 +148,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "valid request to des register trust." in {
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
-        stubFor(server, "/trusts/registration", requestBody, 200, """{"trn": "XTRN1234567"}""")
+        stubForPost(server, "/trusts/registration", requestBody, 200, """{"trn": "XTRN1234567"}""")
 
         val futureResult = connector.registerTrust(registrationRequest)
 
@@ -162,7 +162,7 @@ class DesConnectorSpec extends BaseConnectorSpec
     "return BadRequestException  " when {
       "payload sent to des is invalid" in {
         val requestBody = Json.stringify(Json.toJson(invalidRegistrationRequest))
-        stubFor(server, "/trusts/registration", requestBody, 400, Json.stringify(jsonResponse400))
+        stubForPost(server, "/trusts/registration", requestBody, 400, Json.stringify(jsonResponse400))
 
         val futureResult = connector.registerTrust(invalidRegistrationRequest)
 
@@ -178,7 +178,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "trusts is already registered with provided details." in {
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
-        stubFor(server, "/trusts/registration", requestBody, 403, Json.stringify(jsonResponseAlreadyRegistered))
+        stubForPost(server, "/trusts/registration", requestBody, 403, Json.stringify(jsonResponseAlreadyRegistered))
         val futureResult = connector.registerTrust(registrationRequest)
 
         whenReady(futureResult.failed) {
@@ -191,7 +191,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "trusts is already registered with provided details." in {
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
-        stubFor(server, "/trusts/registration", requestBody, 403, Json.stringify(jsonResponse403NoMatch))
+        stubForPost(server, "/trusts/registration", requestBody, 403, Json.stringify(jsonResponse403NoMatch))
         val futureResult = connector.registerTrust(registrationRequest)
 
         whenReady(futureResult.failed) {
@@ -203,7 +203,7 @@ class DesConnectorSpec extends BaseConnectorSpec
     "return ServiceUnavailableException  " when {
       "des dependent service is not responding " in {
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
-        stubFor(server, "/trusts/registration", requestBody, 503, Json.stringify(jsonResponse503))
+        stubForPost(server, "/trusts/registration", requestBody, 503, Json.stringify(jsonResponse503))
         val futureResult = connector.registerTrust(registrationRequest)
 
         whenReady(futureResult.failed) {
@@ -216,7 +216,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "des is experiencing some problem." in {
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
-        stubFor(server, "/trusts/registration", requestBody, 500, Json.stringify(jsonResponse500))
+        stubForPost(server, "/trusts/registration", requestBody, 500, Json.stringify(jsonResponse500))
         val futureResult = connector.registerTrust(registrationRequest)
         whenReady(futureResult.failed) {
           result => result mustBe an[InternalServerErrorException]
@@ -228,7 +228,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "des is returning 403 without ALREADY REGISTERED code." in {
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
-        stubFor(server, "/trusts/registration", requestBody, 403, "{}")
+        stubForPost(server, "/trusts/registration", requestBody, 403, "{}")
         val futureResult = connector.registerTrust(registrationRequest)
 
         whenReady(futureResult.failed) {
