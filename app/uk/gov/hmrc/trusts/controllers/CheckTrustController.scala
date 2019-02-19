@@ -30,15 +30,17 @@ import uk.gov.hmrc.trusts.models.ApiResponse._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton()
-class CheckTrustController @Inject()(desService: DesService, config: AppConfig, validationService: ValidationService) extends TrustsBaseController {
-
+class CheckTrustController @Inject()(desService: DesService,
+                                     config: AppConfig,
+                                     validationService: ValidationService)
+  extends TrustsBaseController {
 
   def checkExistingTrust() = Action.async(parse.json) { implicit request =>
     withJsonBody[ExistingTrustCheckRequest] {
       trustsCheckRequest =>
         desService.checkExistingTrust(trustsCheckRequest).map {
           result =>
-            Logger.info(s"[CheckTrustController][checkExistingTrust] response type :${result}")
+            Logger.info(s"[CheckTrustController][checkExistingTrust] response: $result")
             result match {
               case Matched => Ok(matchResponse)
               case NotMatched => Ok(noMatchResponse)
@@ -48,12 +50,6 @@ class CheckTrustController @Inject()(desService: DesService, config: AppConfig, 
         }
     }
 
-  }//checkExistingTrust
-
-
-
-
+  }
 
 }
-
-

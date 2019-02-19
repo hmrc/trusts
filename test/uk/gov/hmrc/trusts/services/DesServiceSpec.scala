@@ -120,11 +120,11 @@ class DesServiceSpec extends BaseSpec {
     "return AlreadyRegisteredException " when {
       "connector returns  AlreadyRegisteredException." in {
         when(mockConnector.registerTrust(registrationRequest)).
-          thenReturn(Future.failed(new AlreadyRegisteredException))
+          thenReturn(Future.failed(AlreadyRegisteredException))
           val futureResult = SUT.registerTrust(registrationRequest)
 
         whenReady(futureResult.failed) {
-          result => result mustBe an[AlreadyRegisteredException]
+          result => result mustBe AlreadyRegisteredException
         }
       }
     }
@@ -132,7 +132,7 @@ class DesServiceSpec extends BaseSpec {
     "return same Exception " when {
       "connector returns  exception." in {
         when(mockConnector.registerTrust(registrationRequest)).
-          thenReturn(Future.failed(new InternalServerErrorException("")))
+          thenReturn(Future.failed(InternalServerErrorException("")))
           val futureResult = SUT.registerTrust(registrationRequest)
 
         whenReady(futureResult.failed) {
@@ -140,5 +140,5 @@ class DesServiceSpec extends BaseSpec {
         }
       }
     }
-  } //registerTrust
+  }
 }

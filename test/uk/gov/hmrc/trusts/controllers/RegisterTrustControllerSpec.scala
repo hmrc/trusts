@@ -58,7 +58,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "trusts is already registered with provided details." in {
         val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.failed(new AlreadyRegisteredException))
+          .thenReturn(Future.failed(AlreadyRegisteredException))
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe CONFLICT
         val output = contentAsJson(result)
@@ -71,7 +71,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "no match found for provided existing trusts details." in {
         val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.failed(new NoMatchException))
+          .thenReturn(Future.failed(NoMatchException))
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe FORBIDDEN
         val output = contentAsJson(result)
@@ -97,7 +97,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "the register endpoint called and something goes wrong." in {
         val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.failed(new InternalServerErrorException("some error")))
+          .thenReturn(Future.failed(InternalServerErrorException("some error")))
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe INTERNAL_SERVER_ERROR
@@ -111,7 +111,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "the des returns BAD REQUEST" in {
         val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.failed(new BadRequestException))
+          .thenReturn(Future.failed(BadRequestException))
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe INTERNAL_SERVER_ERROR
@@ -125,7 +125,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "the des returns Service Unavailable as dependent service is down. " in {
         val SUT = new RegisterTrustController(mockDesService, appConfig,validatationService)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.failed(new ServiceNotAvailableException("dependent service is down")))
+          .thenReturn(Future.failed(ServiceNotAvailableException("dependent service is down")))
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe INTERNAL_SERVER_ERROR
