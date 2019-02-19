@@ -68,7 +68,6 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
     http.POST[JsValue, RegistrationResponse](registrationEndpoint, Json.toJson(registration), desHeaders.headers)
 
-
   }
 
   override def getSubscriptionId(trn: String)(implicit hc: HeaderCarrier): Future[SubscriptionIdResponse] = {

@@ -21,7 +21,7 @@ import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse._
-import uk.gov.hmrc.trusts.models.{ExistingTrustCheckRequest, RegistrationTrustResponse}
+import uk.gov.hmrc.trusts.models.{ExistingTrustCheckRequest, RegistrationTrustResponse, SubscriptionIdResponse}
 
 import scala.concurrent.Future
 
@@ -134,6 +134,32 @@ class DesServiceSpec extends BaseSpec {
         when(mockConnector.registerTrust(registrationRequest)).
           thenReturn(Future.failed(new InternalServerErrorException("")))
           val futureResult = SUT.registerTrust(registrationRequest)
+
+        whenReady(futureResult.failed) {
+          result => result mustBe an[InternalServerErrorException]
+        }
+      }
+    }
+  } //registerTrust
+
+  ".getSubscriptionId" should {
+
+    "return SubscriptionIdResponse " when {
+      "connector returns SubscriptionIdResponse." in {
+        when(mockConnector.getSubscriptionId("trn123456789")).
+          thenReturn(Future.successful(SubscriptionIdResponse("123456789")))
+        val futureResult = SUT.getSubscriptionId("trn123456789")
+        whenReady(futureResult) {
+          result => result mustBe SubscriptionIdResponse("123456789")
+        }
+      }
+    }
+
+    "return same Exception " when {
+      "connector returns  exception." in {
+        when(mockConnector.getSubscriptionId("trn123456789")).
+          thenReturn(Future.failed(new InternalServerErrorException("")))
+        val futureResult = SUT.getSubscriptionId("trn123456789")
 
         whenReady(futureResult.failed) {
           result => result mustBe an[InternalServerErrorException]
