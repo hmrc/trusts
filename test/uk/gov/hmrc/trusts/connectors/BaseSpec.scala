@@ -42,10 +42,15 @@ class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with Mockito
       .withHeaders(CONTENT_TYPE -> "application/json")
       .withBody(payload)
 
+  def stubFor(server: WireMockServer,
+              url: String,
+              requestBody: String,
+              returnStatus: Int,
+              responseBody: String,
+              delayResponse: Int = 0) = {
 
-  def stubFor(server: WireMockServer ,  url: String, requestBody: String, returnStatus: Int, responseBody: String, delayResponse: Int = 0) = {
     server.stubFor(post(urlEqualTo(url))
-      .withHeader("content-Type", containing("application/json"))
+      .withHeader(CONTENT_TYPE, containing("application/json"))
       .withHeader("Environment", containing("dev"))
       .withRequestBody(equalTo(requestBody))
       .willReturn(
@@ -53,11 +58,5 @@ class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with Mockito
           .withStatus(returnStatus)
           .withBody(responseBody).withFixedDelay(delayResponse)))
   }
-
-
-
-
-
-
 
 }

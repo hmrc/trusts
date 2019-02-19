@@ -217,6 +217,7 @@ class DesConnectorSpec extends BaseConnectorSpec
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
         stubFor(server, "/trusts/registration", requestBody, 500, Json.stringify(jsonResponse500))
+
         val futureResult = connector.registerTrust(registrationRequest)
         whenReady(futureResult.failed) {
           result => result mustBe an[InternalServerErrorException]
