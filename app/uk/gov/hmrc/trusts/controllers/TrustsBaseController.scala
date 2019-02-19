@@ -27,26 +27,35 @@ import scala.concurrent.Future
 
 class TrustsBaseController extends BaseController {
 
+  protected def doErrorResponse(code: String, message: String) =
+    Json.toJson(ErrorResponse(code: String, message: String))
 
+  protected def invalidNameErrorResponse =
+    BadRequest(doErrorResponse("INVALID_NAME", "Provided name is invalid."))
 
+  protected def invalidUtrErrorResponse =
+    BadRequest(doErrorResponse("INVALID_UTR", "Provided utr is invalid."))
 
-  protected def doErrorResponse(code: String,message: String) = Json.toJson(ErrorResponse(code: String,message: String))
-  protected def invalidNameErrorResponse = BadRequest(doErrorResponse("INVALID_NAME","Provided name is invalid." ))
-  protected def invalidUtrErrorResponse = BadRequest(doErrorResponse("INVALID_UTR", "Provided utr is invalid." ))
-  protected def invalidPostcodeErrorResponse = BadRequest(doErrorResponse("INVALID_POSTCODE","Provided postcode is invalid." ))
-  protected def invalidRequestErrorResponse = BadRequest(doErrorResponse("BAD_REQUEST","Provided request is invalid."))
+  protected def invalidPostcodeErrorResponse =
+    BadRequest(doErrorResponse("INVALID_POSTCODE", "Provided postcode is invalid."))
+
+  protected def invalidRequestErrorResponse =
+    BadRequest(doErrorResponse("BAD_REQUEST", "Provided request is invalid."))
 
   protected def matchResponse = """{"match": true}"""
+
   protected def noMatchResponse = """{"match": false}"""
 
-  override protected def withJsonBody[T](
-                                          f: (T) => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]) =
+  override protected def withJsonBody[T](f: T => Future[Result])
+                                        (implicit request: Request[JsValue],
+                                         m: Manifest[T],
+                                         reads: Reads[T]) =
     request.body.validate[T] match {
-      case JsSuccess(payload, _) => f(payload)
-      case JsError(errs)=> {
+      case JsSuccess(payload, _) =>
+        f(payload)
+      case JsError(errs) =>
         val response = handleErrorResponseByField(errs)
         Future.successful(response)
-      }
     }
 
 
@@ -62,7 +71,7 @@ class TrustsBaseController extends BaseController {
     error match {
       case "error.path.missing" =>
         invalidRequestErrorResponse
-      case e =>
+      case _ =>
         errors(key)
     }
   }
@@ -73,6 +82,5 @@ class TrustsBaseController extends BaseController {
     "postcode" -> invalidPostcodeErrorResponse
 
   ).withDefaultValue(invalidRequestErrorResponse)
-
 
 }
