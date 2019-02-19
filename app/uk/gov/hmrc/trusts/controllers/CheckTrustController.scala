@@ -22,10 +22,10 @@ import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.config.AppConfig
+import uk.gov.hmrc.trusts.models.ApiResponse._
 import uk.gov.hmrc.trusts.models.ExistingTrustCheckRequest
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse.{AlreadyRegistered, Matched, NotMatched}
 import uk.gov.hmrc.trusts.services.{AuthService, DesService, ValidationService}
-import uk.gov.hmrc.trusts.models.ApiResponse._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -42,7 +42,7 @@ class CheckTrustController @Inject()(desService: DesService, config: AppConfig,
         trustsCheckRequest =>
           desService.checkExistingTrust(trustsCheckRequest).map {
             result =>
-              Logger.info(s"[CheckTrustController][checkExistingTrust] response type :${result}")
+              Logger.info(s"[CheckTrustController][checkExistingTrust] response: $result")
               result match {
                 case Matched => Ok(matchResponse)
                 case NotMatched => Ok(noMatchResponse)
@@ -54,6 +54,8 @@ class CheckTrustController @Inject()(desService: DesService, config: AppConfig,
     }
 
   }//checkExistingTrust
+
+
+
+
 }
-
-

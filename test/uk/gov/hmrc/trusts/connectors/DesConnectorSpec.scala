@@ -168,7 +168,7 @@ class DesConnectorSpec extends BaseConnectorSpec
 
 
         whenReady(futureResult.failed) {
-          result => result mustBe an[BadRequestException]
+          result => result mustBe BadRequestException
         }
 
       }
@@ -182,7 +182,7 @@ class DesConnectorSpec extends BaseConnectorSpec
         val futureResult = connector.registerTrust(registrationRequest)
 
         whenReady(futureResult.failed) {
-          result => result mustBe an[AlreadyRegisteredException]
+          result => result mustBe AlreadyRegisteredException
         }
       }
     }
@@ -195,7 +195,7 @@ class DesConnectorSpec extends BaseConnectorSpec
         val futureResult = connector.registerTrust(registrationRequest)
 
         whenReady(futureResult.failed) {
-          result => result mustBe an[NoMatchException]
+          result => result mustBe NoMatchException
         }
       }
     }
@@ -217,6 +217,7 @@ class DesConnectorSpec extends BaseConnectorSpec
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
         stubFor(server, "/trusts/registration", requestBody, 500, Json.stringify(jsonResponse500))
+
         val futureResult = connector.registerTrust(registrationRequest)
         whenReady(futureResult.failed) {
           result => result mustBe an[InternalServerErrorException]
@@ -236,8 +237,6 @@ class DesConnectorSpec extends BaseConnectorSpec
         }
       }
     }
-  } //registerTrust
+  }
 }
-
-//end
 

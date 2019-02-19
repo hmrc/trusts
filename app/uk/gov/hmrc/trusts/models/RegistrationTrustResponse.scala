@@ -46,22 +46,22 @@ object RegistrationResponse {
             response.json.asOpt[DesErrorResponse] match {
               case Some(desReponse) if desReponse.code == ALREADY_REGISTERED_CODE =>
                 Logger.info(s"[RegistrationTrustResponse] already registered response from des.")
-                throw new AlreadyRegisteredException
+                throw AlreadyRegisteredException
               case Some(desReponse) if desReponse.code == NO_MATCH_CODE =>
                 Logger.info(s"[RegistrationTrustResponse] No match response from des.")
-                throw new NoMatchException
+                throw NoMatchException
               case _ =>
                 Logger.error("[RegistrationTrustResponse] Forbidden response from des.")
-                throw new InternalServerErrorException("Forbidden response from des.")
+                throw InternalServerErrorException("Forbidden response from des.")
             }
 
 
           case BAD_REQUEST =>
-            throw new BadRequestException
+            throw BadRequestException
           case SERVICE_UNAVAILABLE =>
-            throw new ServiceNotAvailableException("Des depdedent service is down.")
+            throw ServiceNotAvailableException("Des dependent service is down.")
           case status =>
-            throw new InternalServerErrorException(s"Error response from des $status")
+            throw InternalServerErrorException(s"Error response from des $status")
         }
       }
     }

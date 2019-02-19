@@ -32,10 +32,6 @@ trait JsonUtils {
     Json.parse(getJsonFromFile(filename))
   }
 
-
-
-
-
 }
 
 object JsonUtils extends JsonUtils
