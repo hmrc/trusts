@@ -26,8 +26,9 @@ import uk.gov.hmrc.trusts.models.TaxEnrolmentSuscriberResponse
 import scala.concurrent.Future
 
 
-class TaxEnrolmentsServiceImpl @Inject()(val taxEnrolmentConnector :TaxEnrolmentConnector) extends TaxEnrolmentsService {
-  override def setSubscriptionId(subscriptionId: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] = ???
+class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector :TaxEnrolmentConnector) extends TaxEnrolmentsService {
+  override def setSubscriptionId(subscriptionId: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] =
+    taxEnrolmentConnector.enrolSubscriber(subscriptionId)
 }
 
 @ImplementedBy(classOf[TaxEnrolmentsServiceImpl])
