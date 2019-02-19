@@ -21,7 +21,7 @@ import play.api.http.Status._
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.trusts.exceptions._
-import uk.gov.hmrc.trusts.utils.Contstants._
+import uk.gov.hmrc.trusts.utils.Constants._
 import uk.gov.hmrc.trusts.models.DesErrorResponse.formats
 
 sealed trait RegistrationResponse

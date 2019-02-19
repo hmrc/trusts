@@ -53,9 +53,6 @@ class CheckTrustController @Inject()(desService: DesService, config: AppConfig,
       }
     }
 
-  }//checkExistingTrust
-
-
-
+  }
 
 }

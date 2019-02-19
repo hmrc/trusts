@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.models
 
 import play.api.libs.json.Json
-import uk.gov.hmrc.trusts.utils.Contstants._
+import uk.gov.hmrc.trusts.utils.Constants._
 
 case class ErrorResponse(code: String, message: String)
 object ErrorResponse {

@@ -20,12 +20,10 @@ import java.util.UUID
 
 import com.google.inject.ImplementedBy
 import javax.inject.Inject
-import play.api.Logger
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.trusts.config.{AppConfig, WSHttp}
-import uk.gov.hmrc.trusts.models.ExistingTrustResponse.httpReads
 import uk.gov.hmrc.trusts.models._
 
 import scala.concurrent.ExecutionContext.Implicits.global

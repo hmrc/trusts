@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.utils
 
 
-object Contstants {
+object Constants {
 
   val ALREADY_REGISTERED_CODE = "ALREADY_REGISTERED"
   val ALREADY_REGISTERED_MESSAGE = "The trust is already registered."
