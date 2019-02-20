@@ -20,26 +20,26 @@ import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.connector.DesConnector
-import uk.gov.hmrc.trusts.models.SubscriptionIdResponse
+import uk.gov.hmrc.trusts.models.TaxEnrolmentSuscriberResponse
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
 class RosmPatternServiceImpl @Inject()( desService :DesService, taxEnrolmentService : TaxEnrolmentsService) extends RosmPatternService{
 
-  override def completeRosmTransaction(trn : String) (implicit hc : HeaderCarrier): Future[SubscriptionIdResponse] ={
+  override def completeRosmTransaction(trn : String) (implicit hc : HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] ={
 
     for {
       subscriptionIdResponse <- desService.getSubscriptionId(trn = trn)
-      //taxEnrolmentSuscriberResponse <- taxEnrolmentService.setSubscriptionId(subscriptionIdResponse.subscriptionId)
+      taxEnrolmentSuscriberResponse <- taxEnrolmentService.setSubscriptionId(subscriptionIdResponse.subscriptionId)
     } yield {
-      subscriptionIdResponse
+      taxEnrolmentSuscriberResponse
     }
   }
 
 }
 @ImplementedBy(classOf[RosmPatternServiceImpl])
 trait RosmPatternService {
-  def completeRosmTransaction (trn : String) (implicit hc : HeaderCarrier): Future[SubscriptionIdResponse]
+  def completeRosmTransaction (trn : String) (implicit hc : HeaderCarrier): Future[TaxEnrolmentSuscriberResponse]
 }
