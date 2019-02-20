@@ -17,6 +17,7 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
+
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Action
@@ -26,10 +27,11 @@ import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ApiResponse._
 import uk.gov.hmrc.trusts.models.RegistrationResponse.formats
-import uk.gov.hmrc.trusts.models.{Registration, RegistrationTrustResponse}
+import uk.gov.hmrc.trusts.models.{Registration, RegistrationTrustResponse, TaxEnrolmentSuscriberResponse}
 import uk.gov.hmrc.trusts.services.{AuthService, DesService, RosmPatternService, ValidationService}
 import uk.gov.hmrc.trusts.models.RegistrationResponse.formats
 import uk.gov.hmrc.trusts.services.{AuthService, DesService, ValidationService}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
@@ -37,7 +39,8 @@ import scala.util.control.NonFatal
 
 class RegisterTrustController @Inject()(desService: DesService, config: AppConfig,
                                         validationService: ValidationService,
-                                        authService: AuthService) extends TrustsBaseController {
+                                        authService: AuthService,
+                                        rosmPatternService: RosmPatternService) extends TrustsBaseController {
 
 
   def registration() = Action.async(parse.json) {
@@ -54,6 +57,7 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
           case Right(trustsRegistrationRequest) =>
             desService.registerTrust(trustsRegistrationRequest).map {
               case response: RegistrationTrustResponse =>
+                completeRosmPatternWithTaxEnrolments(response.trn,isOrganisation)
                 Ok(Json.toJson(response))
             } recover {
               case AlreadyRegisteredException =>
@@ -72,5 +76,25 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
 
       }
   }
+
+
+  private def completeRosmPatternWithTaxEnrolments(trn : String,
+                                                   isOrganisation : Boolean)
+                                                  (implicit hc: HeaderCarrier): Unit = {
+    isOrganisation match {
+      case false => Logger.info("Rosm is not required for Agent.")
+      case true => rosmPatternService.completeRosmTransaction(trn) map {
+        taxEnrolmentSuscriberResponse =>
+          Logger.info(s"Rosm completed successfully for provided trn.")
+          taxEnrolmentSuscriberResponse
+      } recover {
+        case exception: Exception => {
+          Logger.error(s"Rosm pattern is not completed for trn:  ${trn}.")
+          Logger.error(s"[completeRosmPatternWithTaxEnrolments] Exception received : ${exception}.")
+        }
+      }
+    }
+  }
+
 
 }
