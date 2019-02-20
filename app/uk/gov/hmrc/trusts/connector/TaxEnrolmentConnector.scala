@@ -25,7 +25,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.trusts.config.{AppConfig, WSHttp}
 import uk.gov.hmrc.trusts.models.{ExistingTrustResponse, TaxEnrolmentSubscription, TaxEnrolmentSuscriberResponse}
-import uk.gov.hmrc.trusts.utils.Contstants._
+import uk.gov.hmrc.trusts.utils.Constants._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -40,8 +40,6 @@ class TaxEnrolmentConnectorImpl @Inject()(http: WSHttp, config: AppConfig) exten
   override  def enrolSubscriber(subscriptionId: String)(implicit hc: HeaderCarrier) :  Future[TaxEnrolmentSuscriberResponse] = {
     val taxEnrolmentsEndpoint = s"${config.taxEnrolmentsUrl}/tax-enrolments/subscriptions/$subscriptionId/subscriber"
     val taxEnolmentHeaders = hc.withExtraHeaders(headers: _*)
-
-    Logger.debug(s"Requesting the enrolment for : subscriptionId - $subscriptionId")
 
     val taxRequest = TaxEnrolmentSubscription(
       serviceName = config.taxEnrolmentsPayloadBodyServiceName,

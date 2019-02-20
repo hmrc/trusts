@@ -24,12 +24,13 @@ import uk.gov.hmrc.play.config.ServicesConfig
 
 
 @Singleton
-class AppConfig @Inject() (config: Configuration, playEnv: Environment) extends  ServicesConfig {
+class AppConfig @Inject()(config: Configuration, playEnv: Environment) extends ServicesConfig {
 
   override protected def mode: Mode = playEnv.mode
   override protected def runModeConfiguration: Configuration = config
 
-  private def loadConfig(key:String) = runModeConfiguration.getString(key).getOrElse(
+
+  private def loadConfig(key: String) = runModeConfiguration.getString(key).getOrElse(
     throw new Exception(s"Missing configuration key : $key")
   )
 

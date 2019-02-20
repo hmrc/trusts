@@ -17,7 +17,6 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
-
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Action
@@ -25,74 +24,53 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.exceptions._
+import uk.gov.hmrc.trusts.models.ApiResponse._
+import uk.gov.hmrc.trusts.models.RegistrationResponse.formats
 import uk.gov.hmrc.trusts.models.{Registration, RegistrationTrustResponse}
 import uk.gov.hmrc.trusts.services.{AuthService, DesService, RosmPatternService, ValidationService}
 import uk.gov.hmrc.trusts.models.RegistrationResponse.formats
-
+import uk.gov.hmrc.trusts.services.{AuthService, DesService, ValidationService}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.trusts.models.ApiResponse._
+import scala.util.control.NonFatal
+
 
 class RegisterTrustController @Inject()(desService: DesService, config: AppConfig,
                                         validationService: ValidationService,
-                                        authService : AuthService
-                                        //rosmPatternService : RosmPatternService
-                                       ) extends TrustsBaseController {
+                                        authService: AuthService) extends TrustsBaseController {
 
 
-  def registration() = Action.async(parse.json) { implicit request =>
+  def registration() = Action.async(parse.json) {
+    implicit request =>
 
-    import authService._
 
-    authorisedUser() {isOrganisation : Boolean =>
-      val registrationJsonString = request.body.toString()
+      authService.authorisedUser() { isOrganisation: Boolean =>
+        val registrationJsonString = request.body.toString()
 
-      validationService.get(config.trustsApiRegistrationSchema)
-        .validate[Registration](registrationJsonString) match {
+        validationService
+          .get(config.trustsApiRegistrationSchema)
+          .validate[Registration](registrationJsonString) match {
 
-        case Right(trustsRegistrationRequest) => {
-          desService.registerTrust(trustsRegistrationRequest).map {
-            case response: RegistrationTrustResponse => {
-
-              Ok(Json.toJson(response))
+          case Right(trustsRegistrationRequest) =>
+            desService.registerTrust(trustsRegistrationRequest).map {
+              case response: RegistrationTrustResponse =>
+                Ok(Json.toJson(response))
+            } recover {
+              case AlreadyRegisteredException =>
+                Logger.info("[RegisterTrustController][registration] Returning already registered response.")
+                Conflict(Json.toJson(alreadyRegisteredResponse))
+              case NoMatchException =>
+                Logger.info("[RegisterTrustController][registration] Returning no match response.")
+                Forbidden(Json.toJson(noMatchRegistrationResponse))
+              case NonFatal(e) =>
+                Logger.error(s"[RegisterTrustController][registration] Exception received : $e.")
+                InternalServerError(Json.toJson(internalServerErrorResponse))
             }
-
-          } recover {
-            case alreadyRegisterd: AlreadyRegisteredException => {
-              Logger.info("[RegisterTrustController][registration] Returning already registered response.")
-              Conflict(Json.toJson(alreadyRegisteredResponse))
-            }
-            case noMatch: NoMatchException => {
-              Logger.info("[RegisterTrustController][registration] Returning no match response.")
-              Forbidden(Json.toJson(noMatchRegistrationResponse))
-            }
-            case exception: Exception => {
-              Logger.error(s"[RegisterTrustController][registration] Exception received : ${exception}.")
-              InternalServerError(Json.toJson(internalServerErrorResponse))
-            }
-          }
+          case Left(_) =>
+            Future.successful(invalidRequestErrorResponse)
         }
-        case Left(validationErros) =>
-          Future.successful(invalidRequestErrorResponse)
+
       }
-
-    }
-  }//registration
-
-
-  /*private def completeRosmPatternWithTaxEnrolments(trn : String, isOrganisation : Boolean)(implicit hc: HeaderCarrier): Unit = {
-    isOrganisation match {
-      case false  => Logger.info("Rosm is not required for Agent.")
-      case true => rosmPatternService.completeRosmTransaction(trn) map {
-         subId =>  Logger.info(s"Rosm completed successfully for ${subId}.")
-      } recover {
-        case  exception : Exception => {
-          Logger.error(s"Rosm pattern is not completed for trn:  ${trn}.")
-          Logger.error(s"[completeRosmPatternWithTaxEnrolments] Exception received : ${exception}.")
-        }
-      }
-    }
-  }*/
-
+  }
 
 }

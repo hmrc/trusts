@@ -58,7 +58,7 @@ class TaxEnrolmentConnectorSpec extends BaseConnectorSpec
         val futureResult = connector.enrolSubscriber("987654321")
 
         whenReady(futureResult.failed) {
-          result => result mustBe an[BadRequestException]
+          result => result mustBe BadRequestException
         }
       }
     }

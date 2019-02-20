@@ -16,25 +16,20 @@
 
 package uk.gov.hmrc.trusts.services
 
-import javax.inject.Inject
-
 import com.github.fge.jackson.JsonLoader
-import com.github.fge.jsonschema.main.{JsonSchema, JsonSchemaFactory}
-import play.api.Logger
-import play.api.libs.json.{JsPath, Json, Reads}
 import com.github.fge.jsonschema.core.report.LogLevel.ERROR
 import com.github.fge.jsonschema.core.report.ProcessingReport
+import com.github.fge.jsonschema.main.{JsonSchema, JsonSchemaFactory}
+import javax.inject.Inject
+import play.api.Logger
 import play.api.data.validation.ValidationError
-import play.api.mvc.Result
-import uk.gov.hmrc.trusts.models.Registration
+import play.api.libs.json.{JsPath, Json, Reads}
 
 import scala.collection.JavaConverters._
-import scala.concurrent.Future
 import scala.io.Source
-
+import scala.util.{Failure, Success, Try}
 
 class ValidationService @Inject()() {
-
 
   private val factory = JsonSchemaFactory.byDefault()
 
@@ -47,7 +42,6 @@ class ValidationService @Inject()() {
 
 }
 
-
 class Validator(schema: JsonSchema) {
 
   private val JsonErrorMessageTag = "message"
@@ -55,16 +49,22 @@ class Validator(schema: JsonSchema) {
   private val JsonErrorPointerTag = "pointer"
 
   def validate[T](inputJson: String)(implicit reads: Reads[T]): Either[List[TrustsValidationError], T] = {
-    val json = JsonLoader.fromString(inputJson)
-    val result = schema.validate(json)
-    Logger.error(s"[validate]result isSuccess :  ${result.isSuccess}")
-    if (result.isSuccess) {
-      Json.parse(inputJson).validate[T].fold(
-        errors => Left(getValidationErrors(errors)),
-        request => Right(request)
-      )
-    } else {
-      Left(getValidationErrors(result))
+    Try(JsonLoader.fromString(inputJson)) match {
+      case Success(json) =>
+        val result = schema.validate(json)
+
+        if (result.isSuccess) {
+          Json.parse(inputJson).validate[T].fold(
+            errors => Left(getValidationErrors(errors)),
+            request => Right(request)
+          )
+        } else {
+          Logger.error(s"[Validator][validate] unable to validate to schema")
+          Left(getValidationErrors(result))
+        }
+      case Failure(e) =>
+        Logger.error(s"[Validator][validate] IOException $e")
+        Left(List(TrustsValidationError(s"[Validator][validate] IOException $e", "")))
     }
 
   }
@@ -83,7 +83,7 @@ class Validator(schema: JsonSchema) {
       val message = error.findValue(JsonErrorMessageTag).asText("")
       val location = error.findValue(JsonErrorInstanceTag).at(s"/$JsonErrorPointerTag").asText()
       val locations = error.findValues(JsonErrorPointerTag)
-      Logger.error(s"validation failed at locations :  ${locations}")
+      Logger.error(s"validation failed at locations :  $locations")
       TrustsValidationError(message, location)
     })
     validationErrors

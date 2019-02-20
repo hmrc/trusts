@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.models
 
 import org.joda.time.DateTime
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.utils.Contstants._
+import uk.gov.hmrc.trusts.utils.Constants._
 /**
   * DES API Schema - definitions models below
   */

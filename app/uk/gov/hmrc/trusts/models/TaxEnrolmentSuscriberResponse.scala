@@ -39,9 +39,9 @@ object TaxEnrolmentSuscriberResponse {
             Success
           case BAD_REQUEST =>
             Logger.error("[TaxEnrolmentSuscriberResponse] Bad request response received from tax enrolment")
-            throw new BadRequestException
+            throw  BadRequestException
           case status =>
-            throw new InternalServerErrorException(s"Error response from tax enrolment:  $status")
+            throw  InternalServerErrorException(s"Error response from tax enrolment:  $status")
         }
       }
     } //httpReads

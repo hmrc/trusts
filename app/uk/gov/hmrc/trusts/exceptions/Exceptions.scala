@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.trusts.exceptions
 
-class ServiceNotAvailableException(message : String )  extends Exception(message)
-class InternalServerErrorException(message : String )  extends Exception(message)
-class AlreadyRegisteredException extends Exception
-class NoMatchException extends Exception
-class BadRequestException extends Exception
-class NotFoundException extends Exception
+case class ServiceNotAvailableException(message : String )  extends Exception(message)
+case class InternalServerErrorException(message : String )  extends Exception(message)
+case object AlreadyRegisteredException extends Exception
+case object NotFoundException extends Exception
+case object NoMatchException extends Exception
+case object BadRequestException extends Exception

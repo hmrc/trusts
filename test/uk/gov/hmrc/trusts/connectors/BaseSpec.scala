@@ -39,7 +39,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.{EmptyRetrieval, Retrieval, ~}
 
-class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with MockitoSugar with JsonRequests  {
+class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with MockitoSugar with JsonRequests {
 
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
 
@@ -55,43 +55,53 @@ class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with Mockito
       .withBody(payload)
 
 
-  def stubForPost(server: WireMockServer ,  url: String, requestBody: String, returnStatus: Int, responseBody: String, delayResponse: Int = 0) = {
-    server.stubFor(post(urlEqualTo(url))
-      .withHeader("content-Type", containing("application/json"))
-      .withHeader("Environment", containing("dev"))
-      .withRequestBody(equalTo(requestBody))
-      .willReturn(
-        aResponse()
-          .withStatus(returnStatus)
-          .withBody(responseBody).withFixedDelay(delayResponse)))
-  }
+    def stubForPost(server: WireMockServer,
+                url: String,
+                requestBody: String,
+                returnStatus: Int,
+                responseBody: String,
+                delayResponse: Int = 0) = {
 
-  def stubForGet(server: WireMockServer ,  url: String, returnStatus: Int, responseBody: String, delayResponse: Int = 0) = {
-    server.stubFor(get(urlEqualTo(url))
-      .withHeader("content-Type", containing("application/json"))
-      .willReturn(
-        aResponse()
-          .withStatus(returnStatus)
-          .withBody(responseBody).withFixedDelay(delayResponse)))
-  }
-
-  def stubForPut(server: WireMockServer ,  url: String, returnStatus: Int,  delayResponse: Int = 0) = {
-    server.stubFor(put(urlEqualTo(url))
-      .withHeader("content-Type", containing("application/json"))
-      .willReturn(
-        aResponse()
-          .withStatus(returnStatus)
-          .withFixedDelay(delayResponse)))
-  }
-
-
-  def authConnector( exception: Option[AuthorisationException]= None): AuthConnector = {
-    val success: Any = ()
-    new AuthConnector {
-      def authorise[A](predicate: Predicate, retrieval: Retrieval[A])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[A] = {
-        exception.fold(Future.successful(success.asInstanceOf[A]))(Future.failed(_))
-      }
+      server.stubFor(post(urlEqualTo(url))
+        .withHeader(CONTENT_TYPE, containing("application/json"))
+        .withHeader("Environment", containing("dev"))
+        .withRequestBody(equalTo(requestBody))
+        .willReturn(
+          aResponse()
+            .withStatus(returnStatus)
+            .withBody(responseBody).withFixedDelay(delayResponse)))
     }
-  }
+
+
+    def stubForGet(server: WireMockServer,
+                   url: String, returnStatus: Int,
+                   responseBody: String,
+                   delayResponse: Int = 0) = {
+      server.stubFor(get(urlEqualTo(url))
+        .withHeader("content-Type", containing("application/json"))
+        .willReturn(
+          aResponse()
+            .withStatus(returnStatus)
+            .withBody(responseBody).withFixedDelay(delayResponse)))
+    }
+
+    def stubForPut(server: WireMockServer,
+                   url: String,
+                   returnStatus: Int,
+                   delayResponse: Int = 0) = {
+      server.stubFor(put(urlEqualTo(url))
+        .withHeader("content-Type", containing("application/json"))
+        .willReturn(
+          aResponse()
+            .withStatus(returnStatus)
+            .withFixedDelay(delayResponse)))
+    }
+
 
 }
+
+
+
+
+
+

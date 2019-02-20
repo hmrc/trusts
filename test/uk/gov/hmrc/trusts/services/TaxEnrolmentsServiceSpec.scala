@@ -54,12 +54,12 @@ class TaxEnrolmentsServiceSpec extends BaseSpec {
     "return BadRequestException " when {
       "connector BadRequestException." in {
         when(mockConnector.enrolSubscriber("123456789")).
-          thenReturn(Future.failed(new BadRequestException))
+          thenReturn(Future.failed(BadRequestException))
 
         val futureResult = SUT.setSubscriptionId("123456789")
 
         whenReady(futureResult.failed) {
-          result => result mustBe an[BadRequestException]
+          result => result mustBe BadRequestException
         }
 
       }
