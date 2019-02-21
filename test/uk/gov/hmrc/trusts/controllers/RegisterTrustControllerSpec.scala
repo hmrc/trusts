@@ -50,7 +50,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
   ".registration" should {
 
     "return 200 with TRN" when {
-      "the register endpoint is called with a valid json payload " in {
+      "individual user called the register endpoint with a valid json payload " in {
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
           .thenReturn(Future.successful(RegistrationTrustResponse("XTRN123456")))
         when(rosmPatternService.completeRosmTransaction(Matchers.eq("XTRN123456"))(any[HeaderCarrier]))
@@ -64,6 +64,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe OK
         (contentAsJson(result) \ "trn").as[String] mustBe "XTRN123456"
+        verify(rosmPatternService, times(1)).completeRosmTransaction(any())(any[HeaderCarrier])
       }
 
       "agent user submits trusts payload" in {
@@ -94,6 +95,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe UNAUTHORIZED
+        verify(rosmPatternService, times(0)).completeRosmTransaction(any())(any[HeaderCarrier])
       }
 
       "the register endpoint is called user session has expired" in {
@@ -104,6 +106,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe UNAUTHORIZED
+        verify(rosmPatternService, times(0)).completeRosmTransaction(any())(any[HeaderCarrier])
       }
     }
 
@@ -122,6 +125,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         val output = contentAsJson(result)
         (output \ "code").as[String] mustBe "ALREADY_REGISTERED"
         (output \ "message").as[String] mustBe "The trust is already registered."
+        verify(rosmPatternService, times(0)).completeRosmTransaction(any())(any[HeaderCarrier])
       }
     }
 
@@ -141,6 +145,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         val output = contentAsJson(result)
         (output \ "code").as[String] mustBe "NO_MATCH"
         (output \ "message").as[String] mustBe "No match has been found in HMRC's records."
+        verify(rosmPatternService, times(0)).completeRosmTransaction(any())(any[HeaderCarrier])
       }
     }
 
@@ -157,6 +162,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         val output = contentAsJson(result)
         (output \ "code").as[String] mustBe "BAD_REQUEST"
         (output \ "message").as[String] mustBe "Provided request is invalid."
+        verify(rosmPatternService, times(0)).completeRosmTransaction(any())(any[HeaderCarrier])
       }
     }
 
@@ -176,6 +182,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         val output = contentAsJson(result)
         (output \ "code").as[String] mustBe "INTERNAL_SERVER_ERROR"
         (output \ "message").as[String] mustBe "Internal server error."
+        verify(rosmPatternService, times(0)).completeRosmTransaction(any())(any[HeaderCarrier])
       }
     }
 
@@ -193,6 +200,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         val output = contentAsJson(result)
         (output \ "code").as[String] mustBe "INTERNAL_SERVER_ERROR"
         (output \ "message").as[String] mustBe "Internal server error."
+        verify(rosmPatternService, times(0)).completeRosmTransaction(any())(any[HeaderCarrier])
       }
     }
 
@@ -210,6 +218,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         val output = contentAsJson(result)
         (output \ "code").as[String] mustBe "INTERNAL_SERVER_ERROR"
         (output \ "message").as[String] mustBe "Internal server error."
+        verify(rosmPatternService, times(0)).completeRosmTransaction(any())(any[HeaderCarrier])
       }
     }
   }
