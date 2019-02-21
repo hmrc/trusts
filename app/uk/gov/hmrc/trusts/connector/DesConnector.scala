@@ -47,7 +47,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
                                  (implicit hc: HeaderCarrier): Future[ExistingTrustResponse] = {
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
-    http.POST[JsValue, ExistingTrustResponse](matchEndpoint, Json.toJson(existingTrustCheckRequest))
+    http.POST[JsValue, ExistingTrustResponse](matchEndpoint, Json.toJson(existingTrustCheckRequest),hc.headers)
   }
 
 
@@ -64,7 +64,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
                             (implicit hc: HeaderCarrier): Future[RegistrationResponse] = {
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
-    http.POST[JsValue, RegistrationResponse](registrationEndpoint, Json.toJson(registration))
+    http.POST[JsValue, RegistrationResponse](registrationEndpoint, Json.toJson(registration),hc.headers)
   }
 }
 
