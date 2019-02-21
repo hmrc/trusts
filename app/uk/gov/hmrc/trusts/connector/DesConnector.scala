@@ -44,7 +44,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
   val CONTENT_TYPE_JSON = "application/json; charset=utf-8"
 
   override def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest)
-                                 (implicit hc: HeaderCarrier): Future[ExistingTrustResponse] = {
+                                 : Future[ExistingTrustResponse] = {
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
     http.POST[JsValue, ExistingTrustResponse](matchEndpoint, Json.toJson(existingTrustCheckRequest),hc.headers)
@@ -61,7 +61,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
     )
 
   override def registerTrust(registration: Registration)
-                            (implicit hc: HeaderCarrier): Future[RegistrationResponse] = {
+                            : Future[RegistrationResponse] = {
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
     http.POST[JsValue, RegistrationResponse](registrationEndpoint, Json.toJson(registration),hc.headers)
@@ -70,7 +70,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
 @ImplementedBy(classOf[DesConnectorImpl])
 trait DesConnector {
-  def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest)(implicit hc: HeaderCarrier): Future[ExistingTrustResponse]
+  def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest): Future[ExistingTrustResponse]
 
-  def registerTrust(registration: Registration)(implicit hc: HeaderCarrier): Future[RegistrationResponse]
+  def registerTrust(registration: Registration): Future[RegistrationResponse]
 }
