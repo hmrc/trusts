@@ -36,6 +36,13 @@ class BaseConnectorSpec extends  BaseSpec {
        | "reason": "Trust/ Estate is already registered."
        |}""".stripMargin)
 
+  val jsonResponse403NoMatch: JsValue = Json.parse(
+    s"""
+       |{
+       | "code": "NO_MATCH",
+       | "reason": "There is no match in HMRC records."
+       |}""".stripMargin)
+
   val jsonResponse503: JsValue = Json.parse(
     s"""
        |{

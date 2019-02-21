@@ -19,36 +19,40 @@ package uk.gov.hmrc.trusts.controllers
 import javax.inject.{Inject, Singleton}
 
 import play.api.Logger
+import play.api.libs.json.Json
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.config.AppConfig
+import uk.gov.hmrc.trusts.models.ApiResponse._
 import uk.gov.hmrc.trusts.models.ExistingTrustCheckRequest
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse.{AlreadyRegistered, Matched, NotMatched}
-import uk.gov.hmrc.trusts.services.DesService
+import uk.gov.hmrc.trusts.services.{AuthService, DesService, ValidationService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton()
-class TrustsController @Inject()(desService: DesService, config: AppConfig) extends TrustsBaseController {
+class CheckTrustController @Inject()(desService: DesService, config: AppConfig,
+                                     validationService: ValidationService,
+                                     authService : AuthService) extends TrustsBaseController {
 
 
   def checkExistingTrust() = Action.async(parse.json) { implicit request =>
-    withJsonBody[ExistingTrustCheckRequest] {
-      trustsCheckRequest =>
-        desService.checkExistingTrust(trustsCheckRequest).map {
-          result =>
-            Logger.info(s"[TrustsController][checkExistingTrust] response type :${result}")
-            result match {
-              case Matched => Ok(matchResponse)
-              case NotMatched => Ok(noMatchResponse)
-              case AlreadyRegistered => alreadyRegisteredResponse
-              case _ => internalServerErrorResponse
-            }
-        }
+    import authService._
+    authorisedUser() {
+      withJsonBody[ExistingTrustCheckRequest] {
+        trustsCheckRequest =>
+          desService.checkExistingTrust(trustsCheckRequest).map {
+            result =>
+              Logger.info(s"[CheckTrustController][checkExistingTrust] response: $result")
+              result match {
+                case Matched => Ok(matchResponse)
+                case NotMatched => Ok(noMatchResponse)
+                case AlreadyRegistered => Conflict(Json.toJson(alreadyRegisteredResponse))
+                case _ => InternalServerError(Json.toJson(internalServerErrorResponse))
+              }
+          }
+      }
     }
 
-  }//checkExistingTrust
-
+  }
 
 }
-
-

@@ -24,19 +24,21 @@ import uk.gov.hmrc.play.config.ServicesConfig
 
 
 @Singleton
-class AppConfig @Inject() (config: Configuration, playEnv: Environment) extends  ServicesConfig {
+class AppConfig @Inject()(config: Configuration, playEnv: Environment) extends ServicesConfig {
+
+  val desUrl: String = baseUrl("des")
+  val desEnvironment: String = loadConfig("microservice.services.des.environment")
+  val desToken: String = loadConfig("microservice.services.des.token")
+
+  val trustsApiRegistrationSchema: String = "/resources/schemas/trustsApiRegistrationSchema_3.1.0.json"
 
   override protected def mode: Mode = playEnv.mode
-  override protected def runModeConfiguration: Configuration = config
 
-  private def loadConfig(key:String) = runModeConfiguration.getString(key).getOrElse(
+  private def loadConfig(key: String) = runModeConfiguration.getString(key).getOrElse(
     throw new Exception(s"Missing configuration key : $key")
   )
 
-  val desUrl : String = baseUrl("des")
-  val desEnvironment : String =   loadConfig("microservice.services.des.environment")
-  val desToken : String =    loadConfig("microservice.services.des.token")
-
+  override protected def runModeConfiguration: Configuration = config
 
 }
 

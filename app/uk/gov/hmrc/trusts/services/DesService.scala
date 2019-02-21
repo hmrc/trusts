@@ -16,29 +16,33 @@
 
 package uk.gov.hmrc.trusts.services
 
-import javax.inject.Inject
-
 import com.google.inject.ImplementedBy
+import javax.inject.Inject
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.config.{AppConfig, WSHttp}
 import uk.gov.hmrc.trusts.connector.DesConnector
-import uk.gov.hmrc.trusts.models.{ExistingTrustCheckRequest, ExistingTrustResponse}
+import uk.gov.hmrc.trusts.models._
 
 import scala.concurrent.Future
 
 
-class DesServiceImpl @Inject()(val desConnector :DesConnector) extends DesService{
+class DesServiceImpl @Inject()(val desConnector: DesConnector) extends DesService {
 
   override def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest)
                                  (implicit hc: HeaderCarrier): Future[ExistingTrustResponse] = {
     desConnector.checkExistingTrust(existingTrustCheckRequest)(hc)
   }
 
-}
+  override def registerTrust(registration: Registration)
+                            (implicit hc: HeaderCarrier): Future[RegistrationResponse] = {
+    desConnector.registerTrust(registration)(hc)
+  }
 
+}
 
 
 @ImplementedBy(classOf[DesServiceImpl])
 trait DesService {
   def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest)(implicit hc: HeaderCarrier): Future[ExistingTrustResponse]
+
+  def registerTrust(registration: Registration)(implicit hc: HeaderCarrier): Future[RegistrationResponse]
 }
