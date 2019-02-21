@@ -20,6 +20,8 @@ import java.util.UUID
 
 import com.google.inject.ImplementedBy
 import javax.inject.Inject
+
+import play.api.http.HeaderNames
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
@@ -43,13 +45,16 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
   override def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest)
                                  (implicit hc: HeaderCarrier): Future[ExistingTrustResponse] = {
-    val desHeaders = hc.copy(authorization = Some(Authorization(s"Bearer ${config.desToken}"))).withExtraHeaders(headers: _*)
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
-    http.POST[JsValue, ExistingTrustResponse](matchEndpoint, Json.toJson(existingTrustCheckRequest), desHeaders.headers)
+    http.POST[JsValue, ExistingTrustResponse](matchEndpoint, Json.toJson(existingTrustCheckRequest))
   }
 
-  def headers : Seq[(String, String)] =
+
+  def desHeaders : Seq[(String, String)] =
     Seq(
+      HeaderNames.AUTHORIZATION -> s"Bearer ${config.desToken}",
+      HeaderNames.ACCEPT -> CONTENT_TYPE_JSON,
       CONTENT_TYPE -> CONTENT_TYPE_JSON,
       ENVIRONMENT_HEADER -> config.desEnvironment,
       CORRELATION_HEADER -> UUID.randomUUID().toString
@@ -57,9 +62,9 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
   override def registerTrust(registration: Registration)
                             (implicit hc: HeaderCarrier): Future[RegistrationResponse] = {
-    val desHeaders = hc.copy(authorization = Some(Authorization(s"Bearer ${config.desToken}"))).withExtraHeaders(headers: _*)
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
-    http.POST[JsValue, RegistrationResponse](registrationEndpoint, Json.toJson(registration), desHeaders.headers)
+    http.POST[JsValue, RegistrationResponse](registrationEndpoint, Json.toJson(registration))
   }
 }
 
