@@ -46,6 +46,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
   override def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest)
                                  : Future[ExistingTrustResponse] = {
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
+      .copy(authorization = Some(Authorization(s"Bearer ${config.desToken}")))
 
     http.POST[JsValue, ExistingTrustResponse](matchEndpoint, Json.toJson(existingTrustCheckRequest),hc.headers)
   }
