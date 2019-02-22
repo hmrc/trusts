@@ -67,7 +67,10 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
                             : Future[RegistrationResponse] = {
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
-    http.POST[JsValue, RegistrationResponse](registrationEndpoint, Json.toJson(registration),hc.headers)
+    val response = http.POST[JsValue, RegistrationResponse](registrationEndpoint, Json.toJson(registration),hc.headers)
+    (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc),global)
+
+    response
   }
 }
 
