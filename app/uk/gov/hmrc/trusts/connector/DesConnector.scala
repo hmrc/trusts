@@ -41,21 +41,23 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "Correlation-Id"
   val CONTENT_TYPE = "Content-Type"
-  val CONTENT_TYPE_JSON = "application/json; charset=utf-8"
+  val CONTENT_TYPE_JSON = "application/json"
 
   override def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest)
                                  : Future[ExistingTrustResponse] = {
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
-      .copy(authorization = Some(Authorization(s"Bearer ${config.desToken}")))
 
-    http.POST[JsValue, ExistingTrustResponse](matchEndpoint, Json.toJson(existingTrustCheckRequest),hc.headers)
+
+    val response = http.POST[JsValue, ExistingTrustResponse](matchEndpoint, Json.toJson(existingTrustCheckRequest))
+    (implicitly[Writes[JsValue]], ExistingTrustResponse.httpReads, implicitly[HeaderCarrier](hc),global)
+
+    response
   }
 
 
   def desHeaders : Seq[(String, String)] =
     Seq(
       HeaderNames.AUTHORIZATION -> s"Bearer ${config.desToken}",
-      HeaderNames.ACCEPT -> CONTENT_TYPE_JSON,
       CONTENT_TYPE -> CONTENT_TYPE_JSON,
       ENVIRONMENT_HEADER -> config.desEnvironment,
       CORRELATION_HEADER -> UUID.randomUUID().toString
