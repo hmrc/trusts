@@ -21,13 +21,13 @@ import javax.inject.Inject
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Action
-import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ApiResponse._
 import uk.gov.hmrc.trusts.models.RegistrationResponse.formats
-import uk.gov.hmrc.trusts.models.{Registration, RegistrationTrustResponse, TaxEnrolmentSuscriberResponse}
+import uk.gov.hmrc.trusts.models.{TaxEnrolmentSuccess, _}
 import uk.gov.hmrc.trusts.services.{AuthService, DesService, RosmPatternService, ValidationService}
 import uk.gov.hmrc.trusts.models.RegistrationResponse.formats
 import uk.gov.hmrc.trusts.services.{AuthService, DesService, ValidationService}
@@ -47,7 +47,7 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
     implicit request =>
 
 
-      authService.authorisedUser() { isOrganisation: Boolean =>
+      authService.authorisedUser() { userAffinityGroup: Option[AffinityGroup] =>
         val registrationJsonString = request.body.toString()
 
         validationService
@@ -57,7 +57,7 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
           case Right(trustsRegistrationRequest) =>
             desService.registerTrust(trustsRegistrationRequest).map {
               case response: RegistrationTrustResponse =>
-                completeRosmPatternWithTaxEnrolments(response.trn,isOrganisation)
+                completeRosmPatternWithTaxEnrolments(response.trn, userAffinityGroup)
                 Ok(Json.toJson(response))
             } recover {
               case AlreadyRegisteredException =>
@@ -78,23 +78,25 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
   }
 
 
-  private def completeRosmPatternWithTaxEnrolments(trn : String,
-                                                   isOrganisation : Boolean)
+  private def completeRosmPatternWithTaxEnrolments(trn: String,
+                                                   userAffinityGroup: Option[AffinityGroup])
                                                   (implicit hc: HeaderCarrier): Unit = {
-    isOrganisation match {
-      case false => Logger.info("Rosm is not required for Agent.")
-      case true => rosmPatternService.completeRosmTransaction(trn) map {
-        taxEnrolmentSuscriberResponse =>
-          Logger.info(s"Rosm completed successfully for provided trn.")
-          taxEnrolmentSuscriberResponse
-      } recover {
-        case exception: Exception => {
-          Logger.error(s"Rosm pattern is not completed for trn:  ${trn}.")
-          Logger.error(s"[completeRosmPatternWithTaxEnrolments] Exception received : ${exception}.")
+    userAffinityGroup match {
+      case Some(AffinityGroup.Organisation) =>
+        rosmPatternService.completeRosmTransaction(trn) map {
+          taxEnrolmentSuccess =>
+            Logger.info(s"Rosm completed successfully for provided trn." + taxEnrolmentSuccess)
+        } recover {
+          case NonFatal(exception) => {
+            Logger.error(s"Rosm pattern is not completed for trn:  ${trn}.")
+            Logger.error(s"[completeRosmPatternWithTaxEnrolments] Exception received : ${exception}.")
+          }
         }
-      }
+
+      case _ =>
+        Logger.info("Tax enrolments is not required for Agent.")
     }
-  }
+  } //rosm
 
 
 }

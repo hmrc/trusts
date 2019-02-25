@@ -21,7 +21,7 @@ import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.trusts.connector.TaxEnrolmentConnector
 import uk.gov.hmrc.trusts.exceptions.{BadRequestException, InternalServerErrorException}
-import uk.gov.hmrc.trusts.models.TaxEnrolmentSuscriberResponse.Success
+import uk.gov.hmrc.trusts.models.TaxEnrolmentSuccess
 import uk.gov.hmrc.trusts.utils.WireMockHelper
 
 
@@ -45,7 +45,7 @@ class TaxEnrolmentConnectorSpec extends BaseConnectorSpec
         val futureResult = connector.enrolSubscriber("123456789")
 
         whenReady(futureResult) {
-          result => result mustBe Success
+          result => result mustBe TaxEnrolmentSuccess
         }
       }
     }

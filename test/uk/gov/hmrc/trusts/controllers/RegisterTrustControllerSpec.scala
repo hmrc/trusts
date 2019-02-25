@@ -27,7 +27,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.connectors.{BaseSpec, FakeAuthConnector}
 import uk.gov.hmrc.trusts.exceptions._
-import uk.gov.hmrc.trusts.models.TaxEnrolmentSuscriberResponse.Success
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.services.{AuthService, DesService, RosmPatternService, ValidationService}
 
@@ -54,7 +53,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
           .thenReturn(Future.successful(RegistrationTrustResponse("XTRN123456")))
         when(rosmPatternService.completeRosmTransaction(Matchers.eq("XTRN123456"))(any[HeaderCarrier]))
-          .thenReturn(Future.successful(Success))
+          .thenReturn(Future.successful(TaxEnrolmentSuccess))
         when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
 
         val mockAuthService = new AuthService(authConnector)

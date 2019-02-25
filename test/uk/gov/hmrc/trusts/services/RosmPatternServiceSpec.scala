@@ -17,10 +17,8 @@
 package uk.gov.hmrc.trusts.services
 
 import org.mockito.Mockito.when
-import uk.gov.hmrc.trusts.connector.TaxEnrolmentConnector
 import uk.gov.hmrc.trusts.connectors.BaseSpec
-import uk.gov.hmrc.trusts.models.SubscriptionIdResponse
-import uk.gov.hmrc.trusts.models.TaxEnrolmentSuscriberResponse.Success
+import uk.gov.hmrc.trusts.models.{SubscriptionIdResponse, TaxEnrolmentSuccess}
 import uk.gov.hmrc.trusts.exceptions._
 
 import scala.concurrent.Future
@@ -41,12 +39,12 @@ class RosmPatternServiceSpec extends BaseSpec {
         when(mockDesService.getSubscriptionId("trn123456789")).
           thenReturn(Future.successful(SubscriptionIdResponse("123456789")))
         when(mockTaxEnrolmentsService.setSubscriptionId("123456789")).
-          thenReturn(Future.successful(Success))
+          thenReturn(Future.successful(TaxEnrolmentSuccess))
 
         val futureResult = SUT.completeRosmTransaction("trn123456789")
 
         whenReady(futureResult) {
-          result => result mustBe Success
+          result => result mustBe TaxEnrolmentSuccess
         }
       }
     }
@@ -56,7 +54,7 @@ class RosmPatternServiceSpec extends BaseSpec {
         when(mockDesService.getSubscriptionId("trn123456789")).
           thenReturn(Future.failed(new InternalServerErrorException("")))
         when(mockTaxEnrolmentsService.setSubscriptionId("123456789")).
-          thenReturn(Future.successful(Success))
+          thenReturn(Future.successful(TaxEnrolmentSuccess))
 
         val futureResult = SUT.completeRosmTransaction("trn123456789")
 

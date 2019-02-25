@@ -25,9 +25,9 @@ import uk.gov.hmrc.trusts.exceptions._
 
 sealed trait TaxEnrolmentSuscriberResponse
 
-object TaxEnrolmentSuscriberResponse {
+final case object TaxEnrolmentSuccess extends TaxEnrolmentSuscriberResponse
 
-  final case object Success extends TaxEnrolmentSuscriberResponse
+object TaxEnrolmentSuscriberResponse {
 
   implicit lazy val httpReads: HttpReads[TaxEnrolmentSuscriberResponse] =
     new HttpReads[TaxEnrolmentSuscriberResponse] {
@@ -36,7 +36,7 @@ object TaxEnrolmentSuscriberResponse {
         Logger.info(s"[TaxEnrolmentSuscriberResponse]  response status received from tax enrolment: ${response.status}")
         response.status match {
           case NO_CONTENT =>
-            Success
+            TaxEnrolmentSuccess
           case BAD_REQUEST =>
             Logger.error("[TaxEnrolmentSuscriberResponse] Bad request response received from tax enrolment")
             throw  BadRequestException

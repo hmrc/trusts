@@ -22,8 +22,7 @@ import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.exceptions.{AlreadyRegisteredException, BadRequestException, InternalServerErrorException}
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse.Matched
 import uk.gov.hmrc.trusts.models.TaxEnrolmentSuscriberResponse
-import uk.gov.hmrc.trusts.models.TaxEnrolmentSuscriberResponse.Success
-
+import uk.gov.hmrc.trusts.models.TaxEnrolmentSuccess
 import scala.concurrent.Future
 
 
@@ -39,12 +38,12 @@ class TaxEnrolmentsServiceSpec extends BaseSpec {
     "return success taxEnrolmentSuscriberResponse " when {
       "connector returns success taxEnrolmentSuscriberResponse." in {
         when(mockConnector.enrolSubscriber("123456789")).
-          thenReturn(Future.successful(Success))
+          thenReturn(Future.successful(TaxEnrolmentSuccess))
 
         val futureResult = SUT.setSubscriptionId("123456789")
 
         whenReady(futureResult) {
-          result => result mustBe Success
+          result => result mustBe TaxEnrolmentSuccess
         }
 
       }
