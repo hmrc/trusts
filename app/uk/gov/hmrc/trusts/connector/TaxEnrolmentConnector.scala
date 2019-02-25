@@ -41,12 +41,12 @@ class TaxEnrolmentConnectorImpl @Inject()(http: WSHttp, config: AppConfig) exten
     val taxEnrolmentsEndpoint = s"${config.taxEnrolmentsUrl}/tax-enrolments/subscriptions/$subscriptionId/subscriber"
     val taxEnolmentHeaders = hc.withExtraHeaders(headers: _*)
 
-    val taxRequest = TaxEnrolmentSubscription(
+    val taxEnrolmentSubscriptionRequest = TaxEnrolmentSubscription(
       serviceName = config.taxEnrolmentsPayloadBodyServiceName,
       callback = config.taxEnrolmentsPayloadBodyCallback,
       etmpId = subscriptionId)
 
-    val response = http.PUT[JsValue, TaxEnrolmentSuscriberResponse](taxEnrolmentsEndpoint, Json.toJson(taxRequest))
+    val response = http.PUT[JsValue, TaxEnrolmentSuscriberResponse](taxEnrolmentsEndpoint, Json.toJson(taxEnrolmentSubscriptionRequest))
     (Writes.JsValueWrites ,TaxEnrolmentSuscriberResponse.httpReads,taxEnolmentHeaders.headers, global)
     response
   }

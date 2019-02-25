@@ -25,7 +25,8 @@ import uk.gov.hmrc.trusts.exceptions._
 
 sealed trait TaxEnrolmentSuscriberResponse
 
-final case object TaxEnrolmentSuccess extends TaxEnrolmentSuscriberResponse
+case object TaxEnrolmentSuccess extends TaxEnrolmentSuscriberResponse
+case object TaxEnrolmentFailure extends TaxEnrolmentSuscriberResponse
 
 object TaxEnrolmentSuscriberResponse {
 

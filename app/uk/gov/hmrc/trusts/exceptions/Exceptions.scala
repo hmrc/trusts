@@ -22,3 +22,4 @@ case object AlreadyRegisteredException extends Exception
 case object NotFoundException extends Exception
 case object NoMatchException extends Exception
 case object BadRequestException extends Exception
+case object MaxRetriesAttemptedException extends Exception

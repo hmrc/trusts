@@ -21,8 +21,8 @@ import uk.gov.hmrc.trusts.connector.{DesConnector, TaxEnrolmentConnector}
 import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.exceptions.{AlreadyRegisteredException, BadRequestException, InternalServerErrorException}
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse.Matched
-import uk.gov.hmrc.trusts.models.TaxEnrolmentSuscriberResponse
-import uk.gov.hmrc.trusts.models.TaxEnrolmentSuccess
+import uk.gov.hmrc.trusts.models.{TaxEnrolmentFailure, TaxEnrolmentSuccess, TaxEnrolmentSuscriberResponse}
+
 import scala.concurrent.Future
 
 
@@ -35,7 +35,7 @@ class TaxEnrolmentsServiceSpec extends BaseSpec {
 
   ".setSubscriptionId" should {
 
-    "return success taxEnrolmentSuscriberResponse " when {
+    "return TaxEnrolmentSuccess  " when {
       "connector returns success taxEnrolmentSuscriberResponse." in {
         when(mockConnector.enrolSubscriber("123456789")).
           thenReturn(Future.successful(TaxEnrolmentSuccess))
@@ -50,7 +50,7 @@ class TaxEnrolmentsServiceSpec extends BaseSpec {
     }
 
 
-    "return BadRequestException " when {
+    /*"return BadRequestException " when {
       "connector BadRequestException." in {
         when(mockConnector.enrolSubscriber("123456789")).
           thenReturn(Future.failed(BadRequestException))
@@ -74,8 +74,21 @@ class TaxEnrolmentsServiceSpec extends BaseSpec {
         whenReady(futureResult.failed) {
           result => result mustBe an[InternalServerErrorException]
         }
-
       }
+    }*/
+
+    "return TaxEnrolmentFailure " when {
+      "tax enrolment returns error" in {
+        when(mockConnector.enrolSubscriber("123456789")).
+          thenReturn(Future.failed(BadRequestException))
+
+        val futureResult = SUT.setSubscriptionId("123456789")
+
+        whenReady(futureResult) {
+          result => result mustBe TaxEnrolmentFailure
+        }
+      }
+
     }
   }//setSubscriptionId
 
