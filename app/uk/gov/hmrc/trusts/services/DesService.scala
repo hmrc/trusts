@@ -29,17 +29,16 @@ class DesServiceImpl @Inject()(val desConnector: DesConnector) extends DesServic
 
   override def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest)
                                  (implicit hc: HeaderCarrier): Future[ExistingTrustResponse] = {
-    desConnector.checkExistingTrust(existingTrustCheckRequest)(hc)
+    desConnector.checkExistingTrust(existingTrustCheckRequest)
   }
 
   override def registerTrust(registration: Registration)
                             (implicit hc: HeaderCarrier): Future[RegistrationResponse] = {
-    desConnector.registerTrust(registration)(hc)
+    desConnector.registerTrust(registration)
   }
 
-
   override def getSubscriptionId(trn: String)(implicit hc: HeaderCarrier): Future[SubscriptionIdResponse] = {
-    desConnector.getSubscriptionId(trn)(hc)
+    desConnector.getSubscriptionId(trn)
   }
 
 

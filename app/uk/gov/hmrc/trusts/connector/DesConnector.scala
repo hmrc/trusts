@@ -22,6 +22,8 @@ import com.google.inject.ImplementedBy
 import javax.inject.Inject
 
 import play.api.Logger
+
+import play.api.http.HeaderNames
 import play.api.libs.json._
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -46,42 +48,52 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
 
   override def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest)
-                                 (implicit hc: HeaderCarrier): Future[ExistingTrustResponse] = {
-    val desHeaders = hc.copy(authorization = Some(Authorization(s"Bearer ${config.desToken}"))).withExtraHeaders(headers: _*)
+                                 : Future[ExistingTrustResponse] = {
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
-    http.POST[JsValue, ExistingTrustResponse](matchEndpoint, Json.toJson(existingTrustCheckRequest), desHeaders.headers)
+    val response = http.POST[JsValue, ExistingTrustResponse](matchEndpoint, Json.toJson(existingTrustCheckRequest))
+    (implicitly[Writes[JsValue]], ExistingTrustResponse.httpReads, implicitly[HeaderCarrier](hc),global)
+
+    response
   }
 
-  def headers : Seq[(String, String)] =
+
+  def desHeaders : Seq[(String, String)] =
     Seq(
+      HeaderNames.AUTHORIZATION -> s"Bearer ${config.desToken}",
       CONTENT_TYPE -> CONTENT_TYPE_JSON,
       ENVIRONMENT_HEADER -> config.desEnvironment,
       CORRELATION_HEADER -> UUID.randomUUID().toString
     )
 
   override def registerTrust(registration: Registration)
-                            (implicit hc: HeaderCarrier): Future[RegistrationResponse] = {
-    val desHeaders = hc.copy(authorization = Some(Authorization(s"Bearer ${config.desToken}"))).withExtraHeaders(headers: _*)
+                            : Future[RegistrationResponse] = {
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
-    http.POST[JsValue, RegistrationResponse](registrationEndpoint, Json.toJson(registration), desHeaders.headers)
+    val response = http.POST[JsValue, RegistrationResponse](registrationEndpoint, Json.toJson(registration))
+    (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc),global)
 
-
+    response
   }
 
-  override def getSubscriptionId(trn: String)(implicit hc: HeaderCarrier): Future[SubscriptionIdResponse] = {
-    val desHeaders = hc.copy(authorization = Some(Authorization(s"Bearer ${config.desToken}"))).withExtraHeaders(headers: _*)
+  override def getSubscriptionId(trn: String): Future[SubscriptionIdResponse] = {
+
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
     val subscriptionIdEndpointUrl = s"${trustsServiceUrl}/trn/$trn/subscription"
     Logger.debug(s"[getSubscriptionId] Sending get subscription id request to DES, url=$subscriptionIdEndpointUrl")
 
-    http.GET[SubscriptionIdResponse](subscriptionIdEndpointUrl)(SubscriptionIdResponse.httpReads, hc = desHeaders, ec = global)
+    val response = http.GET[SubscriptionIdResponse](subscriptionIdEndpointUrl)
+    (SubscriptionIdResponse.httpReads, implicitly[HeaderCarrier](hc),global)
+
+    response
   }
 }
 
 @ImplementedBy(classOf[DesConnectorImpl])
 trait DesConnector {
-  def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest)(implicit hc: HeaderCarrier): Future[ExistingTrustResponse]
-  def registerTrust(registration: Registration)(implicit hc: HeaderCarrier): Future[RegistrationResponse]
-  def getSubscriptionId(trn: String)(implicit hc: HeaderCarrier): Future[SubscriptionIdResponse]
+  def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest): Future[ExistingTrustResponse]
+  def registerTrust(registration: Registration): Future[RegistrationResponse]
+  def getSubscriptionId(trn: String): Future[SubscriptionIdResponse]
 
 }
