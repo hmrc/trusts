@@ -54,8 +54,10 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         status(result) mustBe OK
         (contentAsJson(result) \ "match").as[Boolean] mustBe true
       }
+      
       "trusts data match with existing trusts with postcode in lowercase. " in {
-        val SUT = new TrustsController(mockDesService, appConfig)
+        val mockAuthService = new AuthService(FakeAuthConnector())
+        val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, mockAuthService)
         when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(Matched))
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadPostCodeLowerCase))
