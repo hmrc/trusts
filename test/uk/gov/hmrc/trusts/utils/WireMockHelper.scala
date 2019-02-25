@@ -23,7 +23,6 @@ import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
 
 trait WireMockHelper extends BeforeAndAfterAll with BeforeAndAfterEach {
     this: Suite =>
-
     protected  val server: WireMockServer = new WireMockServer(wireMockConfig().dynamicPort())
 
     override def beforeAll(): Unit = {

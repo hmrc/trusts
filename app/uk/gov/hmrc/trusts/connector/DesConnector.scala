@@ -17,48 +17,58 @@
 package uk.gov.hmrc.trusts.connector
 
 import java.util.UUID
-import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
-import play.api.Logger
+import javax.inject.Inject
+
+import play.api.http.HeaderNames
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.trusts.config.{AppConfig, WSHttp}
-import uk.gov.hmrc.trusts.models.{ExistingTrustCheckRequest, ExistingTrustResponse}
-import uk.gov.hmrc.trusts.models.ExistingTrustResponse.httpReads
+import uk.gov.hmrc.trusts.models._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
 class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesConnector {
-  lazy val trustsServiceUrl = s"${config.desUrl}/trusts"
-  lazy val matchEndpoint = trustsServiceUrl + "/match"
 
+  lazy val trustsServiceUrl : String = s"${config.desUrl}/trusts"
+  lazy val matchEndpoint : String = trustsServiceUrl + "/match"
+  lazy val registrationEndpoint : String = trustsServiceUrl + "/registration"
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "Correlation-Id"
   val CONTENT_TYPE = "Content-Type"
-  val CONTENT_TYPE_JSON = "application/json; charset=utf-8"
+  val CONTENT_TYPE_JSON = "application/json"
 
-  def headers =
+  override def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest)
+                                 : Future[ExistingTrustResponse] = {
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
+
+
+    val response = http.POST[JsValue, ExistingTrustResponse](matchEndpoint, Json.toJson(existingTrustCheckRequest))
+    (implicitly[Writes[JsValue]], ExistingTrustResponse.httpReads, implicitly[HeaderCarrier](hc),global)
+
+    response
+  }
+
+
+  def desHeaders : Seq[(String, String)] =
     Seq(
+      HeaderNames.AUTHORIZATION -> s"Bearer ${config.desToken}",
       CONTENT_TYPE -> CONTENT_TYPE_JSON,
       ENVIRONMENT_HEADER -> config.desEnvironment,
       CORRELATION_HEADER -> UUID.randomUUID().toString
     )
 
+  override def registerTrust(registration: Registration)
+                            : Future[RegistrationResponse] = {
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
-  override def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest)
-                                 (implicit hc: HeaderCarrier): Future[ExistingTrustResponse] = {
-    val desHeaders = hc.copy(authorization = Some(Authorization(s"Bearer ${config.desToken}"))).withExtraHeaders(headers: _*)
-
-    Logger.debug(s"Sending matching request to DES, url=$matchEndpoint")
-
-    val response: Future[ExistingTrustResponse] =
-      http.POST[JsValue, ExistingTrustResponse](matchEndpoint, Json.toJson(existingTrustCheckRequest), desHeaders.headers)
-
+    val response = http.POST[JsValue, RegistrationResponse](registrationEndpoint, Json.toJson(registration))
+    (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc),global)
 
     response
   }
@@ -66,5 +76,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
 @ImplementedBy(classOf[DesConnectorImpl])
 trait DesConnector {
-  def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest)(implicit hc: HeaderCarrier): Future[ExistingTrustResponse]
+  def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest): Future[ExistingTrustResponse]
+
+  def registerTrust(registration: Registration): Future[RegistrationResponse]
 }

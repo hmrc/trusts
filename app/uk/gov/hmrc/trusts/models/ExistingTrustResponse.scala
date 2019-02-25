@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.trusts.models
 
-import play.api.Logger
 import play.api.http.Status._
-import play.api.libs.json.Json
+import play.api.libs.json.Format
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
+import uk.gov.hmrc.trusts.utils.Constants
 
 
 sealed trait ExistingTrustResponse
@@ -33,44 +33,33 @@ object ExistingTrustResponse {
   final case object ServerError extends ExistingTrustResponse
   final case object ServiceUnavailable extends ExistingTrustResponse
 
-
+  implicit val desResponseReads : Format[DesResponse] = DesResponse.formats
+  implicit val desErrorResponseReads : Format[DesErrorResponse] = DesErrorResponse.formats
 
   implicit lazy val httpReads: HttpReads[ExistingTrustResponse] =
     new HttpReads[ExistingTrustResponse] {
       override def read(method: String, url: String, response: HttpResponse): ExistingTrustResponse = {
-        Logger.info(s"response status received from des: ${response.status}")
         response.status match {
           case OK =>
-            response.json.as[DesResponse].`match` match {
-              case true => Matched
-              case false =>  NotMatched
-            }
-          case CONFLICT => {
+            if (response.json.as[DesResponse].`match`) Matched else NotMatched
+          case CONFLICT =>
             response.json.asOpt[DesErrorResponse] match {
-              case Some(desReponse) if desReponse.code == "ALREADY_REGISTERED"=> AlreadyRegistered
-              case _ => ServerError
+              case Some(desResponse) if desResponse.code == Constants.ALREADY_REGISTERED_CODE =>
+                AlreadyRegistered
+              case _ =>
+                ServerError
             }
-          }
-
-          case BAD_REQUEST => BadRequest
-          case SERVICE_UNAVAILABLE => ServiceUnavailable
-          case status =>  ServerError
+          case BAD_REQUEST =>
+            BadRequest
+          case SERVICE_UNAVAILABLE =>
+            ServiceUnavailable
+          case _ =>
+            ServerError
         }
       }
     }
-  implicit val desResponseReads = DesResponse.formats
-  implicit val desErrorResponseReads = DesErrorResponse.formats
 
 }
 
 
-case class DesResponse(`match`:Boolean)
-object DesResponse {
-  implicit val formats = Json.format[DesResponse]
-}
 
-case class DesErrorResponse(code: String,reason: String )
-
-object DesErrorResponse {
-  implicit val formats = Json.format[DesErrorResponse]
-}

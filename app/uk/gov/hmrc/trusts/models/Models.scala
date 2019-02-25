@@ -65,8 +65,4 @@ object ExistingTrustCheckRequest {
 }
 
 
-case class ErrorResponse(message: String, code: String)
 
-object ErrorResponse {
-  implicit val formats = Json.format[ErrorResponse]
-}
