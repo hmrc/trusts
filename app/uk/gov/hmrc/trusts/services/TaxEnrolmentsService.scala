@@ -70,7 +70,9 @@ class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector :TaxEnrolmentConn
     after(duration, as.scheduler, global, Future.successful(1))
   }
 
-  private def makeRequest(subscriptionId: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] = taxEnrolmentConnector.enrolSubscriber(subscriptionId)
+  private def makeRequest(subscriptionId: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] = {
+    taxEnrolmentConnector.enrolSubscriber(subscriptionId)
+  }
 
 }
 
