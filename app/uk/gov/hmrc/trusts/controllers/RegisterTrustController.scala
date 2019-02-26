@@ -84,8 +84,10 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
     userAffinityGroup match {
       case Some(AffinityGroup.Organisation) =>
         rosmPatternService.completeRosmTransaction(trn) map {
-          taxEnrolmentSuccess =>
-            Logger.info(s"Rosm completed successfully for provided trn." + taxEnrolmentSuccess)
+          case TaxEnrolmentSuccess =>
+            Logger.info(s"Rosm completed successfully for provided trn.")
+          case TaxEnrolmentFailure =>
+            Logger.error(s"Rosm pattern is not completed for trn:  ${trn}.")
         } recover {
           case NonFatal(exception) => {
             Logger.error(s"Rosm pattern is not completed for trn:  ${trn}.")

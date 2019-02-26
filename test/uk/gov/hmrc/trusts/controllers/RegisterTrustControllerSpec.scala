@@ -66,6 +66,25 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         verify(rosmPatternService, times(1)).completeRosmTransaction(any())(any[HeaderCarrier])
       }
 
+      "individual user called the register endpoint with a valid json payload " when {
+        "tax enrolment failed to enrol user " in {
+          when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
+            .thenReturn(Future.successful(RegistrationTrustResponse("XTRN123456")))
+          when(rosmPatternService.completeRosmTransaction(Matchers.eq("XTRN123456"))(any[HeaderCarrier]))
+            .thenReturn(Future.successful(TaxEnrolmentFailure))
+          when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
+
+          val mockAuthService = new AuthService(authConnector)
+          val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, mockAuthService, rosmPatternService)
+
+
+          val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
+          status(result) mustBe OK
+          (contentAsJson(result) \ "trn").as[String] mustBe "XTRN123456"
+          verify(rosmPatternService, times(1)).completeRosmTransaction(any())(any[HeaderCarrier])
+        }
+      }
+
       "agent user submits trusts payload" in {
         val agentRetrieval: Future[Option[AffinityGroup]] = Future.successful((Some(AffinityGroup.Agent)))
 
