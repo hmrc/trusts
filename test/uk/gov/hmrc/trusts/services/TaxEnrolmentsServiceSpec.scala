@@ -54,7 +54,7 @@ class TaxEnrolmentsServiceSpec extends BaseSpec with GuiceOneServerPerSuite {
         whenReady(futureResult) {
           result => result mustBe TaxEnrolmentSuccess
         }
-
+        verify(mockConnector, times(1)).enrolSubscriber(any())(any[HeaderCarrier])
       }
     }
 

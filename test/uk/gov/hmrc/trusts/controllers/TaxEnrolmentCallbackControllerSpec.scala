@@ -36,7 +36,7 @@ class TaxEnrolmentCallbackControllerSpec extends BaseSpec with GuiceOneServerPer
       "tax enrolment callback for subscription id enrolment  " in {
         val SUT = new TaxEnrolmentCallbackController( auditConnector)
 
-        val result = SUT.subscriptionCallback().apply(postRequestWithPayload(Json.parse({"""{}"""})))
+        val result = SUT.subscriptionCallback().apply(postRequestWithPayload(Json.parse({"""{ "url" : "http//","state" : "SUCCESS"}"""})))
         status(result) mustBe OK
       }
     }
