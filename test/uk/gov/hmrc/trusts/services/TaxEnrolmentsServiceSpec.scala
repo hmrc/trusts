@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.trusts.services
 
-import org.mockito.Mockito.when
+import org.mockito.Matchers.any
+import org.mockito.Mockito.{times, verify, when, _}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.connector.{DesConnector, TaxEnrolmentConnector}
+import uk.gov.hmrc.trusts.connector.TaxEnrolmentConnector
 import uk.gov.hmrc.trusts.connectors.BaseSpec
-import uk.gov.hmrc.trusts.exceptions.{AlreadyRegisteredException, BadRequestException, InternalServerErrorException}
-import uk.gov.hmrc.trusts.models.ExistingTrustResponse.Matched
-import uk.gov.hmrc.trusts.models.{TaxEnrolmentFailure, TaxEnrolmentSuccess, TaxEnrolmentSuscriberResponse}
+import uk.gov.hmrc.trusts.exceptions.{BadRequestException, InternalServerErrorException}
+import uk.gov.hmrc.trusts.models.{TaxEnrolmentFailure, TaxEnrolmentSuccess}
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -35,6 +36,10 @@ class TaxEnrolmentsServiceSpec extends BaseSpec with GuiceOneServerPerSuite {
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
 
   val SUT = new TaxEnrolmentsServiceImpl(mockConnector,appConfig)
+
+  before {
+    reset(mockConnector)
+  }
 
 
   ".setSubscriptionId" should {
@@ -60,6 +65,7 @@ class TaxEnrolmentsServiceSpec extends BaseSpec with GuiceOneServerPerSuite {
           thenReturn(Future.failed(new InternalServerErrorException("")))
         val result = Await.result(SUT.setSubscriptionId("123456789"), Duration.Inf)
         result mustBe TaxEnrolmentFailure
+        verify(mockConnector, times(10)).enrolSubscriber(any())(any[HeaderCarrier])
       }
     }
 
@@ -70,6 +76,7 @@ class TaxEnrolmentsServiceSpec extends BaseSpec with GuiceOneServerPerSuite {
 
         val result = Await.result(SUT.setSubscriptionId("123456789"), Duration.Inf)
         result mustBe TaxEnrolmentFailure
+        verify(mockConnector, times(10)).enrolSubscriber(any())(any[HeaderCarrier])
       }
 
     }
