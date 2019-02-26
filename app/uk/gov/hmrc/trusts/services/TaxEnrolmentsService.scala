@@ -26,6 +26,7 @@ import uk.gov.hmrc.trusts.exceptions.MaxRetriesAttemptedException
 import uk.gov.hmrc.trusts.models.{TaxEnrolmentFailure, TaxEnrolmentSuccess, TaxEnrolmentSuscriberResponse}
 import akka.pattern.Patterns.after
 import play.api.Logger
+import uk.gov.hmrc.trusts.config.AppConfig
 
 import scala.annotation.tailrec
 import scala.concurrent.duration._
@@ -35,25 +36,25 @@ import scala.util.control.NonFatal
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
-class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector :TaxEnrolmentConnector) extends TaxEnrolmentsService {
+class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector :TaxEnrolmentConnector, config: AppConfig) extends TaxEnrolmentsService {
 
-  private val DELAY_SECONDS_BETWEEN_REQUEST = 5
-  private val MAX_TRIES = 10
+  private val DELAY_SECONDS_BETWEEN_REQUEST = config.delayToConnectTaxEnrolment
+  private val MAX_TRIES = config.maxRetry
 
   override def setSubscriptionId(subscriptionId: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] = {
     implicit val as = ActorSystem()
     enrolSubscriberWithRetry( subscriptionId, 1)
-    taxEnrolmentConnector.enrolSubscriber(subscriptionId)
   }
 
   private def enrolSubscriberWithRetry( subscriptionId: String, acc: Int)(implicit as: ActorSystem, hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] = {
     makeRequest(subscriptionId) recoverWith {
       case NonFatal(exception) => {
         if (isMaxRetryReached(acc)) {
-          Logger.error("[enrolSubscriberWithRetry] Max retry done, tax enrolment failed.")
+          Logger.error("[enrolSubscriberWithRetry] Maximum retry completed. Tax enrolment failed.")
           Future{TaxEnrolmentFailure}
         } else {
-          after(DELAY_SECONDS_BETWEEN_REQUEST.seconds, as.scheduler, global, Future.successful(1)).flatMap { _ =>
+          afterSeconds(DELAY_SECONDS_BETWEEN_REQUEST.seconds).flatMap { _ =>
+            Logger.error(s"[enrolSubscriberWithRetry]  Retrying to enrol. ${acc}")
             enrolSubscriberWithRetry(subscriptionId, acc+1)
           }
         }

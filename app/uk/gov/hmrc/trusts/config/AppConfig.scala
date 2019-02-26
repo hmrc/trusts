@@ -43,7 +43,8 @@ class AppConfig @Inject()(config: Configuration, playEnv: Environment) extends S
   val taxEnrolmentsUrl : String = baseUrl("tax-enrolments")
   val taxEnrolmentsPayloadBodyServiceName : String =   loadConfig("microservice.services.tax-enrolments.serviceName")
   val taxEnrolmentsPayloadBodyCallback : String =    loadConfig("microservice.services.tax-enrolments.callback")
-
+  val delayToConnectTaxEnrolment : Int =    loadConfig("microservice.services.trusts.delayToConnectTaxEnrolment").toInt
+  val maxRetry : Int =    loadConfig("microservice.services.trusts.maxRetry").toInt
 
 }
 

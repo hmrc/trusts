@@ -40,12 +40,10 @@ object SubscriptionIdResponse {
           case OK =>
             response.json.as[SubscriptionIdResponse]
           case BAD_REQUEST =>
-            val errorResponse = response.json.asOpt[DesErrorResponse].getOrElse(DesErrorResponse("",""))
-            Logger.error(s"[SubscriptionIdResponse] Bad Request response from des ${errorResponse}")
+            Logger.error(s"[SubscriptionIdResponse] Bad Request response from des ")
             throw  BadRequestException
           case NOT_FOUND =>
-            val errorResponse = response.json.asOpt[DesErrorResponse].getOrElse(DesErrorResponse("",""))
-            Logger.error(s"[SubscriptionIdResponse] Not found response from des ${errorResponse}")
+            Logger.error(s"[SubscriptionIdResponse] Not found response from des")
             throw  NotFoundException
           case SERVICE_UNAVAILABLE =>
             throw new ServiceNotAvailableException("Des depdedent service is down.")

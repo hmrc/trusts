@@ -62,7 +62,9 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       }
       
       "trusts data match with existing trusts with postcode in lowercase. " in {
-        val mockAuthService = new AuthService(FakeAuthConnector())
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
+        val mockAuthService = new AuthService(authConnector)
+
         val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, mockAuthService)
         when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(Matched))

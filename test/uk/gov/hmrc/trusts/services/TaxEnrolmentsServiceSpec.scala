@@ -17,20 +17,24 @@
 package uk.gov.hmrc.trusts.services
 
 import org.mockito.Mockito.when
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.connector.{DesConnector, TaxEnrolmentConnector}
 import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.exceptions.{AlreadyRegisteredException, BadRequestException, InternalServerErrorException}
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse.Matched
 import uk.gov.hmrc.trusts.models.{TaxEnrolmentFailure, TaxEnrolmentSuccess, TaxEnrolmentSuscriberResponse}
 
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 
-class TaxEnrolmentsServiceSpec extends BaseSpec {
+class TaxEnrolmentsServiceSpec extends BaseSpec with GuiceOneServerPerSuite {
 
   val mockConnector = mock[TaxEnrolmentConnector]
+  lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
 
-  val SUT = new TaxEnrolmentsServiceImpl(mockConnector)
+  val SUT = new TaxEnrolmentsServiceImpl(mockConnector,appConfig)
 
 
   ".setSubscriptionId" should {
@@ -50,43 +54,22 @@ class TaxEnrolmentsServiceSpec extends BaseSpec {
     }
 
 
-    /*"return BadRequestException " when {
-      "connector BadRequestException." in {
-        when(mockConnector.enrolSubscriber("123456789")).
-          thenReturn(Future.failed(BadRequestException))
-
-        val futureResult = SUT.setSubscriptionId("123456789")
-
-        whenReady(futureResult.failed) {
-          result => result mustBe BadRequestException
-        }
-
-      }
-    }
-
-    "return InternalServerErrorException " when {
-      "connector InternalServerErrorException." in {
+    "return TaxEnrolmentFailure " when {
+      "tax enrolment returns internal server error." in {
         when(mockConnector.enrolSubscriber("123456789")).
           thenReturn(Future.failed(new InternalServerErrorException("")))
-
-        val futureResult = SUT.setSubscriptionId("123456789")
-
-        whenReady(futureResult.failed) {
-          result => result mustBe an[InternalServerErrorException]
-        }
+        val result = Await.result(SUT.setSubscriptionId("123456789"), Duration.Inf)
+        result mustBe TaxEnrolmentFailure
       }
-    }*/
+    }
 
     "return TaxEnrolmentFailure " when {
       "tax enrolment returns error" in {
         when(mockConnector.enrolSubscriber("123456789")).
           thenReturn(Future.failed(BadRequestException))
 
-        val futureResult = SUT.setSubscriptionId("123456789")
-
-        whenReady(futureResult) {
-          result => result mustBe TaxEnrolmentFailure
-        }
+        val result = Await.result(SUT.setSubscriptionId("123456789"), Duration.Inf)
+        result mustBe TaxEnrolmentFailure
       }
 
     }
