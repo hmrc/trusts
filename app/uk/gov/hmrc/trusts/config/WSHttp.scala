@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.config
 import javax.inject.{Inject, Singleton}
 
 import play.api.Mode.Mode
-import play.api.{Configuration, Environment}
+import play.api.{Configuration, Environment, Play}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.hooks.{HttpHook, HttpHooks}
 import uk.gov.hmrc.play.audit.http.HttpAuditing
@@ -46,6 +46,10 @@ class WSHttp @Inject()(
   override protected def runModeConfiguration: Configuration = conf
 
   override protected def appNameConfiguration: Configuration = conf
+
+  override protected def actorSystem: akka.actor.ActorSystem = Play.current.actorSystem
+  override protected def configuration: Option[com.typesafe.config.Config] = Some(Play.current.configuration.underlying)
+
 
 
 }
