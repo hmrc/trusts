@@ -42,6 +42,8 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   lazy val validationService: ValidationService = new ValidationService()
 
+  private val trnResponse = "XTRN123456"
+
   before {
     reset(rosmPatternService)
   }
@@ -51,8 +53,8 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
     "return 200 with TRN" when {
       "individual user called the register endpoint with a valid json payload " in {
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(RegistrationTrustResponse("XTRN123456")))
-        when(rosmPatternService.completeRosmTransaction(Matchers.eq("XTRN123456"))(any[HeaderCarrier]))
+          .thenReturn(Future.successful(RegistrationTrustResponse(trnResponse)))
+        when(rosmPatternService.completeRosmTransaction(Matchers.eq(trnResponse))(any[HeaderCarrier]))
           .thenReturn(Future.successful(TaxEnrolmentSuccess))
         when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
 
@@ -62,15 +64,15 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe OK
-        (contentAsJson(result) \ "trn").as[String] mustBe "XTRN123456"
+        (contentAsJson(result) \ "trn").as[String] mustBe trnResponse
         verify(rosmPatternService, times(1)).completeRosmTransaction(any())(any[HeaderCarrier])
       }
 
       "individual user called the register endpoint with a valid json payload " when {
         "tax enrolment failed to enrol user " in {
           when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-            .thenReturn(Future.successful(RegistrationTrustResponse("XTRN123456")))
-          when(rosmPatternService.completeRosmTransaction(Matchers.eq("XTRN123456"))(any[HeaderCarrier]))
+            .thenReturn(Future.successful(RegistrationTrustResponse(trnResponse)))
+          when(rosmPatternService.completeRosmTransaction(Matchers.eq(trnResponse))(any[HeaderCarrier]))
             .thenReturn(Future.successful(TaxEnrolmentFailure))
           when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
 
@@ -80,7 +82,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
           val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
           status(result) mustBe OK
-          (contentAsJson(result) \ "trn").as[String] mustBe "XTRN123456"
+          (contentAsJson(result) \ "trn").as[String] mustBe trnResponse
           verify(rosmPatternService, times(1)).completeRosmTransaction(any())(any[HeaderCarrier])
         }
       }
@@ -89,7 +91,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         val agentRetrieval: Future[Option[AffinityGroup]] = Future.successful((Some(AffinityGroup.Agent)))
 
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(RegistrationTrustResponse("XTRN123456")))
+          .thenReturn(Future.successful(RegistrationTrustResponse(trnResponse)))
 
         when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(agentRetrieval)
 
@@ -99,7 +101,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe OK
-        (contentAsJson(result) \ "trn").as[String] mustBe "XTRN123456"
+        (contentAsJson(result) \ "trn").as[String] mustBe trnResponse
         verify(rosmPatternService, times(0)).completeRosmTransaction(any())(any[HeaderCarrier])
       }
     }
@@ -120,7 +122,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         val mockAuthService = new AuthService(FakeAuthConnector(BearerTokenExpired()))
         val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(RegistrationTrustResponse("XTRN123456")))
+          .thenReturn(Future.successful(RegistrationTrustResponse(trnResponse)))
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe UNAUTHORIZED
