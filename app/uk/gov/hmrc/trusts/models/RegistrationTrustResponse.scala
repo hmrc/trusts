@@ -55,10 +55,10 @@ object RegistrationResponse {
                 throw InternalServerErrorException("Forbidden response from des.")
             }
 
-
           case BAD_REQUEST =>
             throw BadRequestException
           case SERVICE_UNAVAILABLE =>
+            Logger.error("[RegistrationTrustResponse] Service unavailable response from des.")
             throw ServiceNotAvailableException("Des dependent service is down.")
           case status =>
             throw InternalServerErrorException(s"Error response from des $status")

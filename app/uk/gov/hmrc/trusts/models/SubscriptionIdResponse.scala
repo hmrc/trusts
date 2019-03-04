@@ -46,6 +46,7 @@ object SubscriptionIdResponse {
             Logger.error(s"[SubscriptionIdResponse] Not found response from des")
             throw  NotFoundException
           case SERVICE_UNAVAILABLE =>
+            Logger.error("[SubscriptionIdResponse] Service unavailable response from des.")
             throw new ServiceNotAvailableException("Des depdedent service is down.")
           case status =>
             Logger.error(s"[SubscriptionIdResponse]  Error response from des : ${status}")
