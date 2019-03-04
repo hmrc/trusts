@@ -32,9 +32,7 @@ class AuthService @Inject()(override val authConnector: AuthConnector) extends A
 
 
   def authorisedUser()(f: Option[AffinityGroup] => Future[Result])(implicit hc: HeaderCarrier): Future[Result] = {
-    authorised().retrieve(affinityGroup) {
-      response =>f(response)
-    } recover {
+    authorised().retrieve(affinityGroup)(f(_)).recover {
       case NonFatal(_) =>
         Logger.error(s"[AuthService][authorisedUser] Returning unauthorized.")
         Results.Unauthorized

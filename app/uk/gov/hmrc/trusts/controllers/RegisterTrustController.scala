@@ -80,12 +80,12 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
 
   private def completeRosmPatternWithTaxEnrolments(trn: String,
                                                    userAffinityGroup: Option[AffinityGroup])
-                                                  (implicit hc: HeaderCarrier): Unit = {
+                                                  (implicit hc: HeaderCarrier)  = {
     userAffinityGroup match {
       case Some(AffinityGroup.Organisation) =>
         rosmPatternService.completeRosmTransaction(trn) map {
           case TaxEnrolmentSuccess =>
-            Logger.info(s"Rosm completed successfully for provided trn.")
+            Logger.info(s"Rosm completed successfully for provided trn : ${trn}.")
           case TaxEnrolmentFailure =>
             Logger.error(s"Rosm pattern is not completed for trn:  ${trn}.")
         } recover {
@@ -94,7 +94,6 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
             Logger.error(s"[completeRosmPatternWithTaxEnrolments] Exception received : ${exception}.")
           }
         }
-
       case _ =>
         Logger.info("Tax enrolments is not required for Agent.")
     }

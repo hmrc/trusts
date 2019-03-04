@@ -50,11 +50,11 @@ class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector :TaxEnrolmentConn
     makeRequest(subscriptionId) recoverWith {
       case NonFatal(exception) => {
         if (isMaxRetryReached(acc)) {
-          Logger.error("[enrolSubscriberWithRetry] Maximum retry completed. Tax enrolment failed.")
-          Future{TaxEnrolmentFailure}
+          Logger.error(s"[enrolSubscriberWithRetry] Maximum retry completed. Tax enrolment failed for subscription id ${subscriptionId}")
+          Future.successful(TaxEnrolmentFailure)
         } else {
           afterSeconds(DELAY_SECONDS_BETWEEN_REQUEST.seconds).flatMap { _ =>
-            Logger.error(s"[enrolSubscriberWithRetry]  Retrying to enrol. ${acc}")
+            Logger.error(s"[enrolSubscriberWithRetry]  Retrying to enrol subscription id ${subscriptionId},  ${acc}")
             enrolSubscriberWithRetry(subscriptionId, acc+1)
           }
         }

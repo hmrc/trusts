@@ -19,6 +19,7 @@ package uk.gov.hmrc.trusts.services
 import javax.inject.Inject
 
 import com.google.inject.ImplementedBy
+import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.TaxEnrolmentSuscriberResponse
 
