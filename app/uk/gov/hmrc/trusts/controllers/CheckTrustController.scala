@@ -21,6 +21,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Action
+import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.models.ApiResponse._
 import uk.gov.hmrc.trusts.models.ExistingTrustCheckRequest
@@ -37,7 +38,7 @@ class CheckTrustController @Inject()(desService: DesService, config: AppConfig,
 
   def checkExistingTrust() = Action.async(parse.json) { implicit request =>
     import authService._
-    authorisedUser() {
+    authorisedUser() { userAffinityGroup: Option[AffinityGroup]=>
       withJsonBody[ExistingTrustCheckRequest] {
         trustsCheckRequest =>
           desService.checkExistingTrust(trustsCheckRequest).map {

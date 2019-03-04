@@ -17,29 +17,37 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
+
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Action
+import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ApiResponse._
 import uk.gov.hmrc.trusts.models.RegistrationResponse.formats
-import uk.gov.hmrc.trusts.models.{Registration, RegistrationTrustResponse}
+import uk.gov.hmrc.trusts.models.{TaxEnrolmentSuccess, _}
+import uk.gov.hmrc.trusts.services.{AuthService, DesService, RosmPatternService, ValidationService}
+import uk.gov.hmrc.trusts.models.RegistrationResponse.formats
 import uk.gov.hmrc.trusts.services.{AuthService, DesService, ValidationService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
+
 class RegisterTrustController @Inject()(desService: DesService, config: AppConfig,
                                         validationService: ValidationService,
-                                        authService: AuthService) extends TrustsBaseController {
+                                        authService: AuthService,
+                                        rosmPatternService: RosmPatternService) extends TrustsBaseController {
 
 
   def registration() = Action.async(parse.json) {
     implicit request =>
 
-      authService.authorisedUser() {
+
+      authService.authorisedUser() { userAffinityGroup: Option[AffinityGroup] =>
         val registrationJsonString = request.body.toString()
 
         validationService
@@ -49,6 +57,7 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
           case Right(trustsRegistrationRequest) =>
             desService.registerTrust(trustsRegistrationRequest).map {
               case response: RegistrationTrustResponse =>
+                completeRosmPatternWithTaxEnrolments(response.trn, userAffinityGroup)
                 Ok(Json.toJson(response))
             } recover {
               case AlreadyRegisteredException =>
@@ -67,5 +76,28 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
 
       }
   }
+
+
+  private def completeRosmPatternWithTaxEnrolments(trn: String,
+                                                   userAffinityGroup: Option[AffinityGroup])
+                                                  (implicit hc: HeaderCarrier)  = {
+    userAffinityGroup match {
+      case Some(AffinityGroup.Organisation) =>
+        rosmPatternService.completeRosmTransaction(trn) map {
+          case TaxEnrolmentSuccess =>
+            Logger.info(s"Rosm completed successfully for provided trn : ${trn}.")
+          case TaxEnrolmentFailure =>
+            Logger.error(s"Rosm pattern is not completed for trn:  ${trn}.")
+        } recover {
+          case NonFatal(exception) => {
+            Logger.error(s"Rosm pattern is not completed for trn:  ${trn}.")
+            Logger.error(s"[completeRosmPatternWithTaxEnrolments] Exception received : ${exception}.")
+          }
+        }
+      case _ =>
+        Logger.info("Tax enrolments is not required for Agent.")
+    }
+  } //rosm
+
 
 }

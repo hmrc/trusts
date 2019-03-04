@@ -3,3 +3,5 @@
 POST        /check                    uk.gov.hmrc.trusts.controllers.CheckTrustController.checkExistingTrust
 
 POST        /register                  uk.gov.hmrc.trusts.controllers.RegisterTrustController.registration
+
+POST        /tax-enrolment/callback/subscriptions      uk.gov.hmrc.trusts.controllers.TaxEnrolmentCallbackController.subscriptionCallback

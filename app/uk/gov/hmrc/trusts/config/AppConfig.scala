@@ -26,19 +26,25 @@ import uk.gov.hmrc.play.config.ServicesConfig
 @Singleton
 class AppConfig @Inject()(config: Configuration, playEnv: Environment) extends ServicesConfig {
 
-  val desUrl: String = baseUrl("des")
-  val desEnvironment: String = loadConfig("microservice.services.des.environment")
-  val desToken: String = loadConfig("microservice.services.des.token")
-
-  val trustsApiRegistrationSchema: String = "/resources/schemas/trustsApiRegistrationSchema_3.1.0.json"
-
   override protected def mode: Mode = playEnv.mode
+  override protected def runModeConfiguration: Configuration = config
+
 
   private def loadConfig(key: String) = runModeConfiguration.getString(key).getOrElse(
     throw new Exception(s"Missing configuration key : $key")
   )
 
-  override protected def runModeConfiguration: Configuration = config
+  val desUrl : String = baseUrl("des")
+  val desEnvironment : String =   loadConfig("microservice.services.des.environment")
+  val desToken : String =    loadConfig("microservice.services.des.token")
+
+  val trustsApiRegistrationSchema : String  = "/resources/schemas/trustsApiRegistrationSchema_3.1.0.json"
+
+  val taxEnrolmentsUrl : String = baseUrl("tax-enrolments")
+  val taxEnrolmentsPayloadBodyServiceName : String =   loadConfig("microservice.services.tax-enrolments.serviceName")
+  val taxEnrolmentsPayloadBodyCallback : String =    loadConfig("microservice.services.tax-enrolments.callback")
+  val delayToConnectTaxEnrolment : Int =    loadConfig("microservice.services.trusts.delayToConnectTaxEnrolment").toInt
+  val maxRetry : Int =    loadConfig("microservice.services.trusts.maxRetry").toInt
 
 }
 

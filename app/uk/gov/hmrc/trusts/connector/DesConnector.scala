@@ -21,15 +21,20 @@ import java.util.UUID
 import com.google.inject.ImplementedBy
 import javax.inject.Inject
 
+import play.api.Logger
+
 import play.api.http.HeaderNames
 import play.api.libs.json._
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext
 import uk.gov.hmrc.trusts.config.{AppConfig, WSHttp}
 import uk.gov.hmrc.trusts.models._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.trusts.utils.Constants._
 
 
 class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesConnector {
@@ -40,13 +45,11 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "Correlation-Id"
-  val CONTENT_TYPE = "Content-Type"
-  val CONTENT_TYPE_JSON = "application/json"
+
 
   override def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest)
                                  : Future[ExistingTrustResponse] = {
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
-
 
     val response = http.POST[JsValue, ExistingTrustResponse](matchEndpoint, Json.toJson(existingTrustCheckRequest))
     (implicitly[Writes[JsValue]], ExistingTrustResponse.httpReads, implicitly[HeaderCarrier](hc),global)
@@ -72,11 +75,25 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
     response
   }
+
+  override def getSubscriptionId(trn: String): Future[SubscriptionIdResponse] = {
+
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
+
+    val subscriptionIdEndpointUrl = s"${trustsServiceUrl}/trn/$trn/subscription"
+    Logger.debug(s"[getSubscriptionId] Sending get subscription id request to DES, url=$subscriptionIdEndpointUrl")
+
+    val response = http.GET[SubscriptionIdResponse](subscriptionIdEndpointUrl)
+    (SubscriptionIdResponse.httpReads, implicitly[HeaderCarrier](hc),global)
+
+    response
+  }
 }
 
 @ImplementedBy(classOf[DesConnectorImpl])
 trait DesConnector {
   def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest): Future[ExistingTrustResponse]
-
   def registerTrust(registration: Registration): Future[RegistrationResponse]
+  def getSubscriptionId(trn: String): Future[SubscriptionIdResponse]
+
 }
