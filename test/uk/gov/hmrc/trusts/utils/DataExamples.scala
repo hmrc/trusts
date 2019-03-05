@@ -20,7 +20,7 @@ import org.joda.time.DateTime
 import uk.gov.hmrc.trusts.models._
 
 
-trait DataExamples {
+trait DataExamples extends  JsonRequests {
 
   val nameType = NameType(
     firstName = "Oliver",
@@ -45,6 +45,23 @@ trait DataExamples {
       phoneNumber = "1234567890",
       email = Some("test@test.com")
     )))
+
+
+  def registrationWithStartDate(date : DateTime ) = {
+    val trustDetailsType = registrationRequest.details.trust.get.details.copy(startDate = date)
+    val trust = registrationRequest.details.trust.get
+
+    Registration(
+      details = registrationRequest.details.copy(trust = Some(trust.copy(details = trustDetailsType))),
+      matchData = None,
+      correspondence = registrationRequest.correspondence,
+      yearsReturns = registrationRequest.yearsReturns,
+      declaration = registrationRequest.declaration,
+      agentDetails = None
+    )
+  }
+
+
 
 
 
