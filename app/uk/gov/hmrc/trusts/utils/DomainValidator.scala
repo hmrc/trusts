@@ -43,3 +43,18 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
   }
 
 }
+
+
+object BusinessValidation {
+
+ def  check(registration : Registration)  = {
+  val domainValidator =  new DomainValidator(registration)
+   val errors = List (
+     domainValidator.trustStartDateIsNotFutureDate,
+     domainValidator.validateEfrbsDate,
+     domainValidator.trustEfrbsDateIsNotFutureDate
+   ).flatMap(x=> x)
+
+   errors
+  }
+}
