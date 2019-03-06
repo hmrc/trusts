@@ -53,7 +53,7 @@
 	"details": {
 		"trust": {
 			"details": {
-				"startDate": "2001-01-01",
+				"startDate": "2019-03-06",
 				"administrationCountry": "GB",
 				"residentialStatus": {
 					"uk": {
@@ -64,7 +64,7 @@
 				"typeOfTrust": "Employment Related",
 				"deedOfVariation": "Previously there was only an absolute interest under the will",
 				"interVivos": false,
-				"efrbsStartDate": "2001-01-01"
+				"efrbsStartDate": "2019-03-06"
 			},
 			"entities": {
 				"naturalPerson": [

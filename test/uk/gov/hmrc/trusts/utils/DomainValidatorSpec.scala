@@ -45,18 +45,18 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
 
   "trustEfrbsDateIsNotFutureDate for employment related trust" should {
     "return None for valid date" in {
-      val registrationWithFutureStartDate = registrationWithEfrbsStartDate(new DateTime().plusDays(1000),EMPLOYMENT_RELATED_TRUST)
-      SUT(registrationRequest).trustEfrbsDateIsNotFutureDate mustBe None
+      val request = registrationWithEfrbsStartDate(new DateTime().plusDays(-1000),EMPLOYMENT_RELATED_TRUST)
+      SUT(request).trustEfrbsDateIsNotFutureDate mustBe None
     }
 
     "return None for today's date" in {
-      val registrationWithFutureStartDate = registrationWithEfrbsStartDate(new DateTime(),EMPLOYMENT_RELATED_TRUST)
-      SUT(registrationWithFutureStartDate).trustEfrbsDateIsNotFutureDate mustBe None
+      val request = registrationWithEfrbsStartDate(new DateTime(),EMPLOYMENT_RELATED_TRUST)
+      SUT(request).trustEfrbsDateIsNotFutureDate mustBe None
     }
 
     "return validation error for tomorrow date" in {
-      val registrationWithFutureStartDate = registrationWithEfrbsStartDate(new DateTime().plusDays(1),EMPLOYMENT_RELATED_TRUST)
-      SUT(registrationWithFutureStartDate).trustEfrbsDateIsNotFutureDate.get.message mustBe
+      val request = registrationWithEfrbsStartDate(new DateTime().plusDays(1),EMPLOYMENT_RELATED_TRUST)
+      SUT(request).trustEfrbsDateIsNotFutureDate.get.message mustBe
         "Trusts efrbs start date must be today or in the past."
     }
   }
