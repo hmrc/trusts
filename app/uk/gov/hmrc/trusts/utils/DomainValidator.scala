@@ -18,30 +18,28 @@ package uk.gov.hmrc.trusts.utils
 
 import uk.gov.hmrc.trusts.models.Registration
 import uk.gov.hmrc.trusts.services.TrustsValidationError
-
+import uk.gov.hmrc.trusts.utils.TypeOfTrust._
 
 class DomainValidator(registration : Registration) extends ValidationUtil {
 
-  val EFRBS_VALIDAION_MESSAGE = "Trust' efrbs start Date can be provided for Employment Related trust."
+  val EFRBS_VALIDAION_MESSAGE = "Trusts efrbs start date can be provided for Employment Related trust only."
 
   def trustStartDateIsNotFutureDate : Option[TrustsValidationError] = {
     isNotFutureDate(registration.details.trust.get.details.startDate,
-      "/details/trust/details/startDate", "Trust' start Date")
+      "/details/trust/details/startDate", "Trusts start date")
   }
 
   def validateEfrbsDate : Option[TrustsValidationError] = {
     val isEfrbsDateDefined = registration.details.trust.get.details.efrbsStartDate.isDefined
-    val isEmploymentRelatedTrust = registration.details.trust.get.details.typeOfTrust=="Employment Related"
+    val isEmploymentRelatedTrust = registration.details.trust.get.details.typeOfTrust==EMPLOYMENT_RELATED_TRUST.toString
     if (isEfrbsDateDefined && !isEmploymentRelatedTrust){
       Some(TrustsValidationError(EFRBS_VALIDAION_MESSAGE, "/details/trust/details/efrbsStartDate"))
-
     } else None
   }
 
   def trustEfrbsDateIsNotFutureDate : Option[TrustsValidationError] = {
-
     isNotFutureDate(registration.details.trust.get.details.efrbsStartDate,
-      "/details/trust/details/efrbsStartDate", "Trust' efrbs start Date")
+      "/details/trust/details/efrbsStartDate", "Trusts efrbs start date")
   }
 
 }

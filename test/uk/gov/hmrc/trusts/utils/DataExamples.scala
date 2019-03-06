@@ -49,8 +49,18 @@ trait DataExamples extends  JsonRequests {
 
   def registrationWithStartDate(date : DateTime ) = {
     val trustDetailsType = registrationRequest.details.trust.get.details.copy(startDate = date)
-    val trust = registrationRequest.details.trust.get
+    registration(trustDetailsType)
+  }
 
+  def registrationWithEfrbsStartDate(date : DateTime, typeOfTrust: TypeOfTrust.Value) = {
+    val trustDetailsType = registrationRequest.details.trust.get.details.copy(efrbsStartDate = Some(date),
+      typeOfTrust = typeOfTrust.toString)
+    registration(trustDetailsType)
+  }
+
+
+  private def registration(trustDetailsType: TrustDetailsType) = {
+    val trust = registrationRequest.details.trust.get
     Registration(
       details = registrationRequest.details.copy(trust = Some(trust.copy(details = trustDetailsType))),
       matchData = None,
@@ -60,10 +70,4 @@ trait DataExamples extends  JsonRequests {
       agentDetails = None
     )
   }
-
-
-
-
-
-
 }
