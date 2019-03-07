@@ -42,6 +42,23 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
       "/details/trust/details/efrbsStartDate", "Trusts efrbs start date")
   }
 
+  def indTrusteesDobIsNotFutureDate : List[Option[TrustsValidationError]] = {
+    registration.details.trust.get.entities.trustees.map {
+      trustees =>
+        val errors = trustees.zipWithIndex.map {
+          case (trustee, index) =>
+            val response = trustee.trusteeInd.flatMap(x => {
+              isNotFutureDate(x.dateOfBirth, s"/details/trust/entities/trustees/$index/trusteeInd/dateOfBirth", "Date of birth")
+            })
+            response
+        }
+        errors
+    }.toList.flatten
+  }
+
+
+
+
 }
 
 

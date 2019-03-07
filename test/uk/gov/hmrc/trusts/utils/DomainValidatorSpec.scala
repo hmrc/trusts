@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.utils
 
 import org.joda.time.DateTime
 import uk.gov.hmrc.trusts.connectors.BaseSpec
-import uk.gov.hmrc.trusts.models.Registration
+import uk.gov.hmrc.trusts.models.{Registration, TrusteeType}
 import uk.gov.hmrc.trusts.utils.TypeOfTrust._
 
 
@@ -71,6 +71,45 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
       val willTrust = registrationWithEfrbsStartDate(new DateTime().plusDays(1000),WILL_TRUST)
       SUT(willTrust).validateEfrbsDate.get.message mustBe
         "Trusts efrbs start date can be provided for Employment Related trust only."
+    }
+  }
+
+  "trusteesDobIsNotFutureDate" should {
+    "return None when there is no trustees" in {
+      val request = registrationWithTrustess(None)
+      SUT(request).indTrusteesDobIsNotFutureDate.flatten.isEmpty mustBe true
+    }
+
+    "return validation error when trustee has future date of birth" in {
+      val request = registrationWithTrustess(Some(listOfIndividualTrustees))
+      val response =  SUT(request).indTrusteesDobIsNotFutureDate
+      response.flatten.size mustBe 1
+      response.flatten.map {
+        error =>
+          error.message mustBe "Date of birth must be today or in the past."
+          error.location mustBe "/details/trust/entities/trustees/1/trusteeInd/dateOfBirth"
+      }
+    }
+
+    "return validation error " when {
+      "trustees are mix of individual and organisation" when {
+        "individual trustee has future date of birth" in {
+
+          val request = registrationWithTrustess(Some(listOfIndAndOrgTrustees))
+          val response =  SUT(request).indTrusteesDobIsNotFutureDate
+          response.flatten.size mustBe 1
+          response.flatten.map {
+            error =>
+              error.message mustBe "Date of birth must be today or in the past."
+              error.location mustBe "/details/trust/entities/trustees/0/trusteeInd/dateOfBirth"
+          }
+        }
+      }
+    }
+
+    "return None when there is trustees is of business/organisation type" in {
+      val request = registrationWithTrustess(Some(listOfOrgTrustees))
+      SUT(request).indTrusteesDobIsNotFutureDate.flatten.isEmpty mustBe true
     }
   }
 
