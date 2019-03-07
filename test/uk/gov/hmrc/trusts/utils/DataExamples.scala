@@ -64,8 +64,9 @@ trait DataExamples extends  JsonRequests {
     registration(Some(trustDetailsType))
   }
 
+
   def registrationWithEfrbsStartDate(date : DateTime, typeOfTrust: TypeOfTrust.Value) = {
-    val trustDetailsType = defaultTrustDetails.copy(efrbsStartDate = Some(date),
+    val trustDetailsType = registrationRequest.details.trust.details.copy(efrbsStartDate = Some(date),
       typeOfTrust = typeOfTrust.toString)
     registration(Some(trustDetailsType))
   }
@@ -79,15 +80,15 @@ trait DataExamples extends  JsonRequests {
     registration(trustEntities =Some(trustEntities))
   }
 
-  def defaultTrustDetails = registrationRequest.details.trust.get.details
-  def defaultTrustEntities = registrationRequest.details.trust.get.entities
+  def defaultTrustDetails = registrationRequest.details.trust.details
+  def defaultTrustEntities = registrationRequest.details.trust.entities
 
   private def registration(trustDetailsType: Option[TrustDetailsType]= Some(defaultTrustDetails),
                            trustEntities: Option[TrustEntitiesType]= Some(defaultTrustEntities)) = {
-    val trust = registrationRequest.details.trust.get
+
+    val trust = registrationRequest.details.trust
     Registration(
-      details = registrationRequest.details.copy(trust =
-        Some(trust.copy(details = trustDetailsType.get, entities = trustEntities.get))),
+      details = registrationRequest.details.copy(trust = trust.copy(details = trustDetailsType.get, entities = trustEntities.get)),
       matchData = None,
       correspondence = registrationRequest.correspondence,
       yearsReturns = registrationRequest.yearsReturns,

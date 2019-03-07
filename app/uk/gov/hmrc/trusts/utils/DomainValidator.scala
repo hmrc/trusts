@@ -18,32 +18,35 @@ package uk.gov.hmrc.trusts.utils
 
 import uk.gov.hmrc.trusts.models.Registration
 import uk.gov.hmrc.trusts.services.TrustsValidationError
-import uk.gov.hmrc.trusts.utils.TypeOfTrust._
 
 class DomainValidator(registration : Registration) extends ValidationUtil {
 
   val EFRBS_VALIDAION_MESSAGE = "Trusts efrbs start date can be provided for Employment Related trust only."
 
   def trustStartDateIsNotFutureDate : Option[TrustsValidationError] = {
-    isNotFutureDate(registration.details.trust.get.details.startDate,
+    isNotFutureDate(registration.details.trust.details.startDate,
       "/details/trust/details/startDate", "Trusts start date")
   }
 
   def validateEfrbsDate : Option[TrustsValidationError] = {
-    val isEfrbsDateDefined = registration.details.trust.get.details.efrbsStartDate.isDefined
-    val isEmploymentRelatedTrust = registration.details.trust.get.details.typeOfTrust==EMPLOYMENT_RELATED_TRUST.toString
+    val isEfrbsDateDefined = registration.details.trust.details.efrbsStartDate.isDefined
+
+    val isEmploymentRelatedTrust = registration.details.trust.details.isEmploymentRelatedTrust
+
     if (isEfrbsDateDefined && !isEmploymentRelatedTrust){
       Some(TrustsValidationError(EFRBS_VALIDAION_MESSAGE, "/details/trust/details/efrbsStartDate"))
-    } else None
+    } else {
+      None
+    }
   }
 
   def trustEfrbsDateIsNotFutureDate : Option[TrustsValidationError] = {
-    isNotFutureDate(registration.details.trust.get.details.efrbsStartDate,
+    isNotFutureDate(registration.details.trust.details.efrbsStartDate,
       "/details/trust/details/efrbsStartDate", "Trusts efrbs start date")
   }
 
   def indTrusteesDobIsNotFutureDate : List[Option[TrustsValidationError]] = {
-    registration.details.trust.get.entities.trustees.map {
+    registration.details.trust.entities.trustees.map {
       trustees =>
         val errors = trustees.zipWithIndex.map {
           case (trustee, index) =>
@@ -64,14 +67,14 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
 
 object BusinessValidation {
 
- def  check(registration : Registration)  = {
-  val domainValidator =  new DomainValidator(registration)
-   val errors = List (
+ def check(registration : Registration): List[TrustsValidationError]  = {
+
+  val domainValidator = new DomainValidator(registration)
+
+   List(
      domainValidator.trustStartDateIsNotFutureDate,
      domainValidator.validateEfrbsDate,
      domainValidator.trustEfrbsDateIsNotFutureDate
-   ).flatMap(x=> x)
-
-   errors
+   ).flatten
   }
 }

@@ -77,10 +77,9 @@ class Validator(schema: JsonSchema) {
   private def validateBusinessRules[T](request: T): Either[List[TrustsValidationError], T] = {
     request match {
       case registration: Registration =>
-        val businessValidationErrors = BusinessValidation.check(registration)
-        businessValidationErrors.isEmpty match {
-          case true => Right(request)
-          case false => Left(businessValidationErrors)
+        BusinessValidation.check(registration) match {
+          case Nil => Right(request)
+          case l @ _ :: _ => Left(l)
         }
       case _ => Right(request)
     }
@@ -91,9 +90,6 @@ class Validator(schema: JsonSchema) {
     Logger.debug(s"[Validator][getValidationErrors]  validationErrors in validate :  $validationErrors")
     validationErrors
   }
-
-
-
 
   private def getValidationErrors(validationOutput: ProcessingReport): List[TrustsValidationError] = {
     val validationErrors: List[TrustsValidationError] = validationOutput.iterator.asScala.toList.filter(m => m.getLogLevel == ERROR).map(m => {
@@ -114,6 +110,3 @@ case class TrustsValidationError(message: String, location: String)
 object TrustsValidationError {
   implicit val formats = Json.format[TrustsValidationError]
 }
-
-
-

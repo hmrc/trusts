@@ -16,25 +16,25 @@
 
 package uk.gov.hmrc.trusts.utils
 
-import org.joda.time.{DateTime, DateTimeUtils}
+import org.joda.time.DateTime
 import uk.gov.hmrc.trusts.services.TrustsValidationError
-
 
 trait ValidationUtil {
 
-
-
-  def isNotFutureDate(date : DateTime,path : String, key : String ) : Option[TrustsValidationError]= {
-
+  def isNotFutureDate(date : DateTime,path : String, key : String ) : Option[TrustsValidationError] = {
     if (isAfterToday(date)) {
       Some(TrustsValidationError(s"$key must be today or in the past.", path))
-    } else None
+    } else {
+      None
+    }
   }
 
   def isNotFutureDate(date : Option[DateTime],path : String, key : String ) : Option[TrustsValidationError]= {
     if (date.isDefined && isAfterToday(date.get)) {
       isNotFutureDate(date.get, path, key)
-    } else None
+    } else {
+      None
+    }
   }
 
    def isAfterToday(date :DateTime): Boolean = {
