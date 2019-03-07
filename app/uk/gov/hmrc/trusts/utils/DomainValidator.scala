@@ -31,10 +31,14 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
 
   def validateEfrbsDate : Option[TrustsValidationError] = {
     val isEfrbsDateDefined = registration.details.trust.get.details.efrbsStartDate.isDefined
-    val isEmploymentRelatedTrust = registration.details.trust.get.details.typeOfTrust==EMPLOYMENT_RELATED_TRUST.toString
+
+    val isEmploymentRelatedTrust = registration.details.trust.get.details.isEmploymentRelatedTrust
+
     if (isEfrbsDateDefined && !isEmploymentRelatedTrust){
       Some(TrustsValidationError(EFRBS_VALIDAION_MESSAGE, "/details/trust/details/efrbsStartDate"))
-    } else None
+    } else {
+      None
+    }
   }
 
   def trustEfrbsDateIsNotFutureDate : Option[TrustsValidationError] = {

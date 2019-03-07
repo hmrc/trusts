@@ -20,6 +20,7 @@ package uk.gov.hmrc.trusts.models
 import org.joda.time.DateTime
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.utils.Constants._
+import uk.gov.hmrc.trusts.utils.TypeOfTrust.EMPLOYMENT_RELATED_TRUST
 /**
   * DES API Schema - definitions models below
   */
@@ -394,7 +395,11 @@ case class TrustDetailsType(startDate: DateTime,
                             typeOfTrust: String,
                             deedOfVariation: Option[String],
                             interVivos: Option[Boolean],
-                            efrbsStartDate: Option[DateTime])
+                            efrbsStartDate: Option[DateTime]) {
+
+  def isEmploymentRelatedTrust : Boolean = typeOfTrust == EMPLOYMENT_RELATED_TRUST.toString
+
+}
 
 object TrustDetailsType {
 
