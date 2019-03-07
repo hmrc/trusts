@@ -432,17 +432,6 @@ object NonUKType {
 }
 
 
-case class Estate(entities: EntitiesType,
-                  administrationEndDate: Option[DateTime],
-                  periodTaxDues: String)
-
-object Estate {
-
-
-  implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
-
-  implicit val estateFormat: Format[Estate] = Json.format[Estate]
-}
 
 case class PropertyLandType(buildingLandName: Option[String],
                             address: Option[AddressType],
@@ -476,9 +465,7 @@ case class PartnershipType(utr: Option[String],
 
 object PartnershipType {
 
-
   implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
-
   implicit val partnershipTypeFormat: Format[PartnershipType] = Json.format[PartnershipType]
 }
 
@@ -505,12 +492,6 @@ object YearsReturnType {
   implicit val yearsReturnTypeFormat: Format[YearsReturnType] = Json.format[YearsReturnType]
 }
 
-case class EntitiesType(personalRepresentative: PersonalRepresentativeType,
-                        deceased: WillType)
-
-object EntitiesType {
-  implicit val entitiesTypeFormat: Format[EntitiesType] = Json.format[EntitiesType]
-}
 
 case class PassportType(number: String,
                         expirationDate: DateTime,
@@ -518,9 +499,7 @@ case class PassportType(number: String,
 
 object PassportType {
 
-
   implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
-
   implicit val passportTypeFormat: Format[PassportType] = Json.format[PassportType]
 }
 
@@ -541,35 +520,6 @@ case class AddressType(line1: String,
 
 object AddressType {
   implicit val addressTypeFormat: Format[AddressType] = Json.format[AddressType]
-}
-
-case class PersonalRepresentativeType(estatePerRepInd: Option[PersonalRepInd],
-                                      estatePerRepOrg: Option[PersonalRepOrg])
-object PersonalRepresentativeType {
-  implicit val personalRepTypeFormat: Format[PersonalRepresentativeType] = Json.format[PersonalRepresentativeType]
-}
-
-case class PersonalRepOrg(orgName: String,
-                          identification: IdentificationOrgType,
-                          phoneNumber: String,
-                          email: Option[String])
-
-object PersonalRepOrg {
-
-  implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
-  implicit val personalRepOrgFormat: Format[PersonalRepOrg] = Json.format[PersonalRepOrg]
-}
-
-case class PersonalRepInd(name: NameType,
-                                  dateOfBirth: DateTime,
-                                  identification: IdentificationType,
-                                  phoneNumber: Option[String],
-                                  email: Option[String])
-
-object PersonalRepInd {
-
-  implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
-  implicit val personalRepresentativeFormat: Format[PersonalRepInd] = Json.format[PersonalRepInd]
 }
 
 case class WillType(name: NameType,
