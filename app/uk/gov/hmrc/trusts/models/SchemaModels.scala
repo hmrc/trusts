@@ -38,8 +38,7 @@ object Registration {
 }
 
 
-case class Details(estate: Option[Estate],
-                   trust: Option[Trust])
+case class Details(trust: Trust)
 
 object Details {
   implicit val detailsFormat: Format[Details] = Json.format[Details]
