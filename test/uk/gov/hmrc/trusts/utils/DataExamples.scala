@@ -28,7 +28,7 @@ trait DataExamples extends  JsonRequests {
     lastName = "Johnson"
   )
   val nino = IdentificationType(nino = Some("WA123456A"),None,None)
-  val utr = IdentificationOrgType(utr = Some("1234567890"),None)
+  val utr = IdentificationOrgType(utr = Some("5454541615"),None)
   val phoneNumber = "1234567890"
   val email = Some("test@test.com")
 
@@ -91,7 +91,7 @@ trait DataExamples extends  JsonRequests {
     val trust = registrationRequest.details.trust
     Registration(
       details = registrationRequest.details.copy(trust = trust.copy(details = trustDetailsType.get, entities = trustEntities.get)),
-      matchData = None,
+      matchData = registrationRequest.matchData,
       correspondence = registrationRequest.correspondence,
       yearsReturns = registrationRequest.yearsReturns,
       declaration = registrationRequest.declaration,

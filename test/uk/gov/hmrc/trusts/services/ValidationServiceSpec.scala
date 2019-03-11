@@ -50,22 +50,42 @@ class ValidationServiceSpec extends BaseSpec {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
         validator.validate[ExistingTrustCheckRequest](jsonString).isLeft mustBe true
       }
+
+      "date of birth of trustee is before 1500/01/01" in {
+        val jsonString = JsonUtils.getJsonFromFile("trustees-invalid-dob.json")
+        val errorList =validator.validate[Registration](jsonString).left.get.
+          filter(_.location=="/details/trust/entities/trustees/0/trusteeInd/dateOfBirth")
+        errorList.size mustBe 1
+      }
     }
+
     "return a list of validaton errors " when {
       "json request is valid but failed in business rules for trust start date, efrbs start date " in {
         val jsonString = JsonUtils.getJsonFromFile("trust-business-validation-fail.json")
-        validator.validate[Registration](jsonString).left.get.size mustBe 6
+        validator.validate[Registration](jsonString).left.get.size mustBe 8
       }
 
       "individual trustees has same NINO " in {
         val jsonString = JsonUtils.getJsonFromFile("trust-business-validation-fail.json")
-        validator.validate[Registration](jsonString).left.get.size mustBe 6
+        val errorList =validator.validate[Registration](jsonString).left.get.
+          filter(_.message=="NINO is already used for another trustee individual.")
+        errorList.size mustBe 2
       }
 
       "business trustees has same utr " in {
         val jsonString = JsonUtils.getJsonFromFile("trust-business-validation-fail.json")
-        validator.validate[Registration](jsonString).left.get.size mustBe 6
+        val errorList =validator.validate[Registration](jsonString).left.get.
+          filter(_.message=="Utr is already used for another business trustee.")
+        errorList.size mustBe 1
       }
+
+      "business trustees has same utr as trust utr" in {
+        val jsonString = JsonUtils.getJsonFromFile("trust-business-validation-fail.json")
+        val errorList =validator.validate[Registration](jsonString).left.get.
+          filter(_.message=="Business trustee utr is same as trust utr.")
+        errorList.size mustBe 2
+      }
+
     }
   }//validator
 

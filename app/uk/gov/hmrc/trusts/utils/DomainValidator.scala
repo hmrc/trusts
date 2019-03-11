@@ -87,12 +87,28 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
         Logger.info(s"[businessTrusteesDuplicateUtr] Number of Duplicate utr found : ${duplicatesUtr.size} ")
         duplicatesUtr.map{
           case (utr,index) =>
-            Some(TrustsValidationError(s"UTR is already used for another trustee business.",
+            Some(TrustsValidationError(s"Utr is already used for another business trustee.",
               s"/details/trust/entities/trustees/$index/trusteeOrg/identification/utr"))
         }
       }
     }.toList.flatten
 
+  }
+
+  def bussinessTrusteeUtrIsNotTrustUtr : List[Option[TrustsValidationError]] = {
+    val trustUtr = registration.matchData.map( x=> x.utr)
+    registration.details.trust.entities.trustees.map {
+      trustees => {
+        val utrList: List[(String, Int)] = getUtrWithIndex(trustees)
+        utrList.map {
+          case (utr,index) if trustUtr == Some(utr) =>
+            Some(TrustsValidationError(s"Business trustee utr is same as trust utr.",
+              s"/details/trust/entities/trustees/$index/trusteeOrg/identification/utr"))
+          case _ =>
+            None
+        }
+      }
+    }.toList.flatten
   }
 
   private def getUtrWithIndex(trustees: List[TrusteeType]) = {
@@ -124,10 +140,15 @@ object BusinessValidation {
 
   val domainValidator = new DomainValidator(registration)
 
-   List(
+   val errorsList = List(
      domainValidator.trustStartDateIsNotFutureDate,
      domainValidator.validateEfrbsDate,
      domainValidator.trustEfrbsDateIsNotFutureDate
-   ).flatten ::: domainValidator.indTrusteesDuplicateNino.flatten ::: domainValidator.businessTrusteesDuplicateUtr.flatten
-  }
+   ).flatten
+
+   errorsList ++ domainValidator.indTrusteesDuplicateNino.flatten ++
+   domainValidator.businessTrusteesDuplicateUtr.flatten ++
+   domainValidator.bussinessTrusteeUtrIsNotTrustUtr.flatten
+
+ }
 }

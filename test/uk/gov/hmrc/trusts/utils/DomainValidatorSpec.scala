@@ -136,7 +136,7 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
   "businessTrusteesDuplicateUtr" should {
     "return None when there is no trustees" in {
       val request = registrationWithTrustess(None)
-      SUT(request).indTrusteesDobIsNotFutureDate.flatten.isEmpty mustBe true
+      SUT(request).businessTrusteesDuplicateUtr.flatten.isEmpty mustBe true
     }
 
     "return validation error when business trustees has duplicate utr " in {
@@ -145,8 +145,27 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
       response.flatten.size mustBe 1
       response.flatten.map {
         error =>
-          error.message mustBe "UTR is already used for another trustee business."
+          error.message mustBe "Utr is already used for another business trustee."
           error.location mustBe s"/details/trust/entities/trustees/0/trusteeOrg/identification/utr"
+      }
+    }
+  }
+
+
+  "bussinessTrusteeUtrIsSameTrustUtr" should {
+    "return None when there is no trustees" in {
+      val request = registrationWithTrustess(None)
+      SUT(request).bussinessTrusteeUtrIsNotTrustUtr.flatten.isEmpty mustBe true
+    }
+
+    "return validation error when business trustees utr is same as trust utr " in {
+      val request = registrationWithTrustess(Some(listOfDuplicateIndAndOrgTrustees))
+      val response = SUT(request).bussinessTrusteeUtrIsNotTrustUtr
+      response.flatten.size mustBe 2
+      response.flatten.zipWithIndex.map{
+        case (error,index) =>
+          error.message mustBe "Business trustee utr is same as trust utr."
+          error.location mustBe s"/details/trust/entities/trustees/$index/trusteeOrg/identification/utr"
       }
     }
   }
