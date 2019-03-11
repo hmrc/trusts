@@ -113,5 +113,43 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
     }
   }
 
+  "indTrusteesDuplicateNino" should {
+    "return None when there is no trustees" in {
+      val request = registrationWithTrustess(None)
+      SUT(request).indTrusteesDobIsNotFutureDate.flatten.isEmpty mustBe true
+    }
+
+    "return validation error when individual trustees has duplicate nino " in {
+      val request = registrationWithTrustess(Some(listOfDuplicateIndAndOrgTrustees))
+      val response = SUT(request).indTrusteesDuplicateNino
+      response.flatten.size mustBe 4
+      var trusteeIndex = 0
+      response.flatten.map {
+          error =>
+          trusteeIndex = trusteeIndex +1
+          error.message mustBe "NINO is already used for another trustee individual."
+          error.location mustBe s"/details/trust/entities/trustees/${trusteeIndex}/trusteeInd/identification/nino"
+      }
+    }
+  }
+
+  "businessTrusteesDuplicateUtr" should {
+    "return None when there is no trustees" in {
+      val request = registrationWithTrustess(None)
+      SUT(request).indTrusteesDobIsNotFutureDate.flatten.isEmpty mustBe true
+    }
+
+    "return validation error when business trustees has duplicate utr " in {
+      val request = registrationWithTrustess(Some(listOfDuplicateIndAndOrgTrustees))
+      val response = SUT(request).businessTrusteesDuplicateUtr
+      response.flatten.size mustBe 1
+      response.flatten.map {
+        error =>
+          error.message mustBe "UTR is already used for another trustee business."
+          error.location mustBe s"/details/trust/entities/trustees/0/trusteeOrg/identification/utr"
+      }
+    }
+  }
+
 
 }

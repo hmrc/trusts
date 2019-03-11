@@ -153,7 +153,36 @@
 							},
 							"phoneNumber": "0121546546"
 						}
+					},
+					{
+						"trusteeInd": {
+							"name": {
+								"firstName": "John1",
+								"middleName": "William",
+								"lastName": "O'Connor"
+							},
+							"dateOfBirth": "1956-02-12",
+							"identification": {
+								"nino": "ST123456"
+							},
+							"phoneNumber": "0121546546"
+						}
+					},
+					{
+						"trusteeInd": {
+							"name": {
+								"firstName": "John1",
+								"middleName": "William",
+								"lastName": "O'Connor"
+							},
+							"dateOfBirth": "1956-02-12",
+							"identification": {
+								"nino": "ST123456"
+							},
+							"phoneNumber": "0121546546"
+						}
 					}
+
 				],
 				"settlors": {
 					"settlor": [

@@ -16,8 +16,11 @@
 
 package uk.gov.hmrc.trusts.utils
 
-import uk.gov.hmrc.trusts.models.Registration
+import play.api.Logger
+import uk.gov.hmrc.trusts.models.{Registration, TrusteeType}
 import uk.gov.hmrc.trusts.services.TrustsValidationError
+
+import scala.annotation.tailrec
 
 class DomainValidator(registration : Registration) extends ValidationUtil {
 
@@ -59,9 +62,59 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
     }.toList.flatten
   }
 
+  def indTrusteesDuplicateNino : List[Option[TrustsValidationError]] = {
+    registration.details.trust.entities.trustees.map {
+      trustees => {
+       val ninoList: List[(String, Int)] = getNinoWithIndex(trustees)
+       val duplicatesNino =  findDuplicates(ninoList).reverse
+        Logger.info(s"[indTrusteesDuplicateNino] Number of Duplicate Nino found : ${duplicatesNino.size} ")
+        duplicatesNino.map{
+          case (nino,index) =>
+            Some(TrustsValidationError(s"NINO is already used for another trustee individual.",
+              s"/details/trust/entities/trustees/$index/trusteeInd/identification/nino"))
+        }
+      }
+    }.toList.flatten
+
+  }
 
 
+  def businessTrusteesDuplicateUtr : List[Option[TrustsValidationError]] = {
+    registration.details.trust.entities.trustees.map {
+      trustees => {
+        val utrList: List[(String, Int)] = getUtrWithIndex(trustees)
+        val duplicatesUtr =  findDuplicates(utrList).reverse
+        Logger.info(s"[businessTrusteesDuplicateUtr] Number of Duplicate utr found : ${duplicatesUtr.size} ")
+        duplicatesUtr.map{
+          case (utr,index) =>
+            Some(TrustsValidationError(s"UTR is already used for another trustee business.",
+              s"/details/trust/entities/trustees/$index/trusteeOrg/identification/utr"))
+        }
+      }
+    }.toList.flatten
 
+  }
+
+  private def getUtrWithIndex(trustees: List[TrusteeType]) = {
+    val utrList: List[(String, Int)] = trustees.zipWithIndex.flatMap {
+      case (trustee, index) =>
+        trustee.trusteeOrg.flatMap { x =>
+          x.identification.utr.map { y => (y, index) }
+        }
+    }
+    utrList
+  }
+
+
+  private def getNinoWithIndex(trustees: List[TrusteeType]) = {
+    val ninoList: List[(String, Int)] = trustees.zipWithIndex.flatMap {
+      case (trustee, index) =>
+        trustee.trusteeInd.flatMap { x =>
+          x.identification.nino.map { y => (y, index) }
+        }
+    }
+    ninoList
+  }
 }
 
 
@@ -75,6 +128,6 @@ object BusinessValidation {
      domainValidator.trustStartDateIsNotFutureDate,
      domainValidator.validateEfrbsDate,
      domainValidator.trustEfrbsDateIsNotFutureDate
-   ).flatten
+   ).flatten ::: domainValidator.indTrusteesDuplicateNino.flatten
   }
 }
