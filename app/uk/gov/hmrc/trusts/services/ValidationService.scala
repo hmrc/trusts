@@ -21,9 +21,12 @@ import com.github.fge.jsonschema.core.report.LogLevel.ERROR
 import com.github.fge.jsonschema.core.report.ProcessingReport
 import com.github.fge.jsonschema.main.{JsonSchema, JsonSchemaFactory}
 import javax.inject.Inject
+
 import play.api.Logger
 import play.api.data.validation.ValidationError
 import play.api.libs.json.{JsPath, Json, Reads}
+import uk.gov.hmrc.trusts.models.Registration
+import uk.gov.hmrc.trusts.utils.BusinessValidation
 
 import scala.collection.JavaConverters._
 import scala.io.Source
@@ -56,7 +59,8 @@ class Validator(schema: JsonSchema) {
         if (result.isSuccess) {
           Json.parse(inputJson).validate[T].fold(
             errors => Left(getValidationErrors(errors)),
-            request => Right(request)
+            request =>
+              validateBusinessRules(request)
           )
         } else {
           Logger.error(s"[Validator][validate] unable to validate to schema")
@@ -70,12 +74,22 @@ class Validator(schema: JsonSchema) {
   }
 
 
+  private def validateBusinessRules[T](request: T): Either[List[TrustsValidationError], T] = {
+    request match {
+      case registration: Registration =>
+        BusinessValidation.check(registration) match {
+          case Nil => Right(request)
+          case l @ _ :: _ => Left(l)
+        }
+      case _ => Right(request)
+    }
+  }
+
   protected def getValidationErrors(errors: Seq[(JsPath, Seq[ValidationError])]): List[TrustsValidationError] = {
     val validationErrors = errors.flatMap(errors => errors._2.map(error => TrustsValidationError(error.message, errors._1.toString()))).toList
     Logger.debug(s"[Validator][getValidationErrors]  validationErrors in validate :  $validationErrors")
     validationErrors
   }
-
 
   private def getValidationErrors(validationOutput: ProcessingReport): List[TrustsValidationError] = {
     val validationErrors: List[TrustsValidationError] = validationOutput.iterator.asScala.toList.filter(m => m.getLogLevel == ERROR).map(m => {
@@ -96,6 +110,3 @@ case class TrustsValidationError(message: String, location: String)
 object TrustsValidationError {
   implicit val formats = Json.format[TrustsValidationError]
 }
-
-
-

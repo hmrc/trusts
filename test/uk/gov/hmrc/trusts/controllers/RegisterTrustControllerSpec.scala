@@ -184,6 +184,20 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         (output \ "message").as[String] mustBe "Provided request is invalid."
         verify(rosmPatternService, times(0)).completeRosmTransaction(any())(any[HeaderCarrier])
       }
+
+      "input request fails business validation" in {
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
+
+        val mockAuthService = new AuthService(authConnector)
+        val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)
+
+        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(invalidTrustBusinessValidation)))
+        status(result) mustBe BAD_REQUEST
+        val output = contentAsJson(result)
+        (output \ "code").as[String] mustBe "BAD_REQUEST"
+        (output \ "message").as[String] mustBe "Provided request is invalid."
+        verify(rosmPatternService, times(0)).completeRosmTransaction(any())(any[HeaderCarrier])
+      }
     }
 
 

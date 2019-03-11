@@ -20,7 +20,7 @@ import org.joda.time.DateTime
 import uk.gov.hmrc.trusts.models._
 
 
-trait DataExamples {
+trait DataExamples extends  JsonRequests {
 
   val nameType = NameType(
     firstName = "Oliver",
@@ -47,6 +47,27 @@ trait DataExamples {
     )))
 
 
+  def registrationWithStartDate(date : DateTime ) = {
+    val trustDetailsType = registrationRequest.details.trust.details.copy(startDate = date)
+    registration(trustDetailsType)
+  }
+
+  def registrationWithEfrbsStartDate(date : DateTime, typeOfTrust: TypeOfTrust.Value) = {
+    val trustDetailsType = registrationRequest.details.trust.details.copy(efrbsStartDate = Some(date),
+      typeOfTrust = typeOfTrust.toString)
+    registration(trustDetailsType)
+  }
 
 
+  private def registration(trustDetailsType: TrustDetailsType) = {
+    val trust = registrationRequest.details.trust
+    Registration(
+      details = registrationRequest.details.copy(trust = trust.copy(details = trustDetailsType)),
+      matchData = None,
+      correspondence = registrationRequest.correspondence,
+      yearsReturns = registrationRequest.yearsReturns,
+      declaration = registrationRequest.declaration,
+      agentDetails = None
+    )
+  }
 }

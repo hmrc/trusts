@@ -32,7 +32,6 @@ class ValidationServiceSpec extends BaseSpec {
       "Json having all required fields" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
         validator.validate[Registration](jsonString).isRight mustBe true
-
       }
 
       "Json having trust with orgnisation  trustees" in {
@@ -52,6 +51,12 @@ class ValidationServiceSpec extends BaseSpec {
         validator.validate[ExistingTrustCheckRequest](jsonString).isLeft mustBe true
       }
     }
-  }
+    "return a list of validaton errors " when {
+      "json request is valid but failed in business rules for trust start date, efrbs start date " in {
+        val jsonString = JsonUtils.getJsonFromFile("trust-business-validation-fail.json")
+        validator.validate[Registration](jsonString).left.get.size mustBe 3
+      }
+    }
+  }//validator
 
 }
