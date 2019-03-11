@@ -19,6 +19,7 @@ package uk.gov.hmrc.trusts.utils
 import org.joda.time.DateTime
 import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.models.{Registration, TrusteeType}
+import uk.gov.hmrc.trusts.models.Registration
 import uk.gov.hmrc.trusts.utils.TypeOfTrust._
 
 

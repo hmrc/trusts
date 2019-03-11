@@ -39,9 +39,9 @@ trait ValidationUtil {
     }
   }
 
-   def isAfterToday(date :DateTime): Boolean = {
-     date.isAfter(new DateTime().plusDays(1).withTimeAtStartOfDay())
-   }
+  def isAfterToday(date :DateTime): Boolean = {
+    date.isAfter(new DateTime().plusDays(1).withTimeAtStartOfDay())
+  }
 
   type ListOfItemsAtIndex = List[(String, Int)]
 

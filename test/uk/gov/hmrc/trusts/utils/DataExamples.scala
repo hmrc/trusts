@@ -95,8 +95,8 @@ trait DataExamples extends  JsonRequests {
       correspondence = registrationRequest.correspondence,
       yearsReturns = registrationRequest.yearsReturns,
       declaration = registrationRequest.declaration,
-      agentDetails = None
-
-    )
+      agentDetails = None)
   }
+
+
 }

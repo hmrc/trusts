@@ -65,8 +65,8 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
   def indTrusteesDuplicateNino : List[Option[TrustsValidationError]] = {
     registration.details.trust.entities.trustees.map {
       trustees => {
-       val ninoList: List[(String, Int)] = getNinoWithIndex(trustees)
-       val duplicatesNino =  findDuplicates(ninoList).reverse
+        val ninoList: List[(String, Int)] = getNinoWithIndex(trustees)
+        val duplicatesNino =  findDuplicates(ninoList).reverse
         Logger.info(s"[indTrusteesDuplicateNino] Number of Duplicate Nino found : ${duplicatesNino.size} ")
         duplicatesNino.map{
           case (nino,index) =>
@@ -136,19 +136,19 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
 
 object BusinessValidation {
 
- def check(registration : Registration): List[TrustsValidationError]  = {
+  def check(registration : Registration): List[TrustsValidationError]  = {
 
-  val domainValidator = new DomainValidator(registration)
+    val domainValidator = new DomainValidator(registration)
 
-   val errorsList = List(
-     domainValidator.trustStartDateIsNotFutureDate,
-     domainValidator.validateEfrbsDate,
-     domainValidator.trustEfrbsDateIsNotFutureDate
-   ).flatten
+    val errorsList = List(
+      domainValidator.trustStartDateIsNotFutureDate,
+      domainValidator.validateEfrbsDate,
+      domainValidator.trustEfrbsDateIsNotFutureDate
+    ).flatten
 
-   errorsList ++ domainValidator.indTrusteesDuplicateNino.flatten ++
-   domainValidator.businessTrusteesDuplicateUtr.flatten ++
-   domainValidator.bussinessTrusteeUtrIsNotTrustUtr.flatten
+    errorsList ++ domainValidator.indTrusteesDuplicateNino.flatten ++
+      domainValidator.businessTrusteesDuplicateUtr.flatten ++
+      domainValidator.bussinessTrusteeUtrIsNotTrustUtr.flatten
 
- }
+  }
 }
