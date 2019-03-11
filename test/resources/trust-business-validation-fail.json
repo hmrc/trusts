@@ -152,7 +152,16 @@
 								"nino": "ST123456"
 							},
 							"phoneNumber": "0121546546"
+						},
+						"trusteeOrg" :{
+							"name": "Trust Services LTD",
+							"phoneNumber": "0754545454",
+							"email": "me@you.com",
+							"identification": {
+								"utr": "5465416546"
+							}
 						}
+
 					},
 					{
 						"trusteeInd": {
@@ -166,6 +175,15 @@
 								"nino": "ST123456"
 							},
 							"phoneNumber": "0121546546"
+						}
+					,
+						"trusteeOrg" :{
+							"name": "Trust Services LTD",
+							"phoneNumber": "0754545454",
+							"email": "me@you.com",
+							"identification": {
+								"utr": "5465416546"
+							}
 						}
 					},
 					{

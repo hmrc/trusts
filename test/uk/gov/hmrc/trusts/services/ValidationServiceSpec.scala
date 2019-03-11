@@ -54,14 +54,18 @@ class ValidationServiceSpec extends BaseSpec {
     "return a list of validaton errors " when {
       "json request is valid but failed in business rules for trust start date, efrbs start date " in {
         val jsonString = JsonUtils.getJsonFromFile("trust-business-validation-fail.json")
-        validator.validate[Registration](jsonString).left.get.size mustBe 5
+        validator.validate[Registration](jsonString).left.get.size mustBe 6
       }
 
       "individual trustees has same NINO " in {
         val jsonString = JsonUtils.getJsonFromFile("trust-business-validation-fail.json")
-        validator.validate[Registration](jsonString).left.get.size mustBe 5
+        validator.validate[Registration](jsonString).left.get.size mustBe 6
       }
 
+      "business trustees has same utr " in {
+        val jsonString = JsonUtils.getJsonFromFile("trust-business-validation-fail.json")
+        validator.validate[Registration](jsonString).left.get.size mustBe 6
+      }
     }
   }//validator
 

@@ -82,7 +82,6 @@ class Validator(schema: JsonSchema) {
           case l @ _ :: _ =>
             Logger.error(s"[validateBusinessRules] Validation fails : ${l}")
             Left(l)
-
         }
       case _ => Right(request)
     }

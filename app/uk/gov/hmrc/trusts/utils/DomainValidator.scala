@@ -128,6 +128,6 @@ object BusinessValidation {
      domainValidator.trustStartDateIsNotFutureDate,
      domainValidator.validateEfrbsDate,
      domainValidator.trustEfrbsDateIsNotFutureDate
-   ).flatten ::: domainValidator.indTrusteesDuplicateNino.flatten
+   ).flatten ::: domainValidator.indTrusteesDuplicateNino.flatten ::: domainValidator.businessTrusteesDuplicateUtr.flatten
   }
 }
