@@ -141,7 +141,7 @@ object ProtectorCompany {
 
 
 
-case class TrusteeType(trusteeInd : Option[TrusteeIndividualType], trusteeOrg : Option[TrusteeOrgType])
+case class TrusteeType(trusteeInd : Option[TrusteeIndividualType], trusteeOrg : Option[TrusteeOrgType] )
 object TrusteeType {
   implicit val trusteeTypeFormat : Format[TrusteeType] = Json.format[TrusteeType]
 }

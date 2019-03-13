@@ -27,13 +27,16 @@ trait DataExamples extends  JsonRequests {
     middleName = None,
     lastName = "Johnson"
   )
-
+  val nino = IdentificationType(nino = Some("WA123456A"),None,None)
+  val utr = IdentificationOrgType(utr = Some("5454541615"),None)
+  val phoneNumber = "1234567890"
+  val email = Some("test@test.com")
 
   val leadTrusteeIndividual = LeadTrusteeType(
     leadTrusteeInd = Some(LeadTrusteeIndType(
       name = nameType,
       dateOfBirth = new DateTime("1900-01-01"),
-      identification = IdentificationType(nino = Some("WA123456A"),None,None),
+      identification = nino,
       phoneNumber = "1234567890",
       email = Some("test@test.com")
     )))
@@ -41,33 +44,59 @@ trait DataExamples extends  JsonRequests {
   val leadTrusteeOrganisation = LeadTrusteeType(
     leadTrusteeOrg = Some(LeadTrusteeOrgType(
       name = "company name",
-      identification = IdentificationOrgType(utr = Some("1234567890"),None),
-      phoneNumber = "1234567890",
-      email = Some("test@test.com")
+      identification = utr,
+      phoneNumber = phoneNumber,
+      email = email
     )))
+
+  def trusteeIndividual(dateOfBirthStr :String= "1500-01-01") = Some(TrusteeIndividualType(name = nameType,
+    dateOfBirth = new DateTime(dateOfBirthStr),None,identification = nino))
+
+  def trusteeOrg  = Some(TrusteeOrgType(
+    name = "trustee as company",
+    identification = utr,
+    phoneNumber = None,
+    email = email))
 
 
   def registrationWithStartDate(date : DateTime ) = {
-    val trustDetailsType = registrationRequest.details.trust.details.copy(startDate = date)
-    registration(trustDetailsType)
+    val trustDetailsType = defaultTrustDetails.copy(startDate = date)
+    registration(Some(trustDetailsType))
   }
+
 
   def registrationWithEfrbsStartDate(date : DateTime, typeOfTrust: TypeOfTrust.Value) = {
     val trustDetailsType = registrationRequest.details.trust.details.copy(efrbsStartDate = Some(date),
       typeOfTrust = typeOfTrust.toString)
-    registration(trustDetailsType)
+    registration(Some(trustDetailsType))
   }
 
+  def listOfIndividualTrustees = List(TrusteeType(trusteeIndividual(),None),TrusteeType(trusteeIndividual("2030-01-01"),None))
+  def listOfOrgTrustees = List(TrusteeType(None,trusteeOrg),TrusteeType(None,trusteeOrg))
+  def listOfIndAndOrgTrustees = List(TrusteeType(trusteeIndividual("2030-01-01"),trusteeOrg))
+  def listOfDuplicateIndAndOrgTrustees = List(TrusteeType(None,trusteeOrg),TrusteeType(trusteeIndividual("2030-01-01"),trusteeOrg),TrusteeType(trusteeIndividual("2030-01-01"),None),TrusteeType(trusteeIndividual("2030-01-01"),None),TrusteeType(trusteeIndividual("2030-01-01"),None),TrusteeType(trusteeIndividual("2030-01-01"),None))
 
-  private def registration(trustDetailsType: TrustDetailsType) = {
+
+  def registrationWithTrustess(updatedTrustees : Option[List[TrusteeType]] ) = {
+    val trustEntities = defaultTrustEntities.copy(trustees = updatedTrustees)
+    registration(trustEntities =Some(trustEntities))
+  }
+
+  def defaultTrustDetails = registrationRequest.details.trust.details
+  def defaultTrustEntities = registrationRequest.details.trust.entities
+
+  private def registration(trustDetailsType: Option[TrustDetailsType]= Some(defaultTrustDetails),
+                           trustEntities: Option[TrustEntitiesType]= Some(defaultTrustEntities)) = {
+
     val trust = registrationRequest.details.trust
     Registration(
-      details = registrationRequest.details.copy(trust = trust.copy(details = trustDetailsType)),
-      matchData = None,
+      details = registrationRequest.details.copy(trust = trust.copy(details = trustDetailsType.get, entities = trustEntities.get)),
+      matchData = registrationRequest.matchData,
       correspondence = registrationRequest.correspondence,
       yearsReturns = registrationRequest.yearsReturns,
       declaration = registrationRequest.declaration,
-      agentDetails = None
-    )
+      agentDetails = None)
   }
+
+
 }

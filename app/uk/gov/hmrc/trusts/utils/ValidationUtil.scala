@@ -19,6 +19,8 @@ package uk.gov.hmrc.trusts.utils
 import org.joda.time.DateTime
 import uk.gov.hmrc.trusts.services.TrustsValidationError
 
+import scala.annotation.tailrec
+
 trait ValidationUtil {
 
   def isNotFutureDate(date : DateTime,path : String, key : String ) : Option[TrustsValidationError] = {
@@ -37,8 +39,30 @@ trait ValidationUtil {
     }
   }
 
-   def isAfterToday(date :DateTime): Boolean = {
-     date.isAfter(new DateTime().plusDays(1).withTimeAtStartOfDay())
-   }
+  def isAfterToday(date :DateTime): Boolean = {
+    date.isAfter(new DateTime().plusDays(1).withTimeAtStartOfDay())
+  }
+
+  type ListOfItemsAtIndex = List[(String, Int)]
+
+  def findDuplicates(ninos : ListOfItemsAtIndex) : ListOfItemsAtIndex = {
+
+    @tailrec
+    def findDuplicateHelper(remaining : ListOfItemsAtIndex, duplicates : ListOfItemsAtIndex) : ListOfItemsAtIndex = {
+      remaining match {
+        case Nil => {
+          duplicates
+        }
+        case head :: tail =>
+          if (tail.exists(x => x._1 == head._1)) {
+            findDuplicateHelper(tail, head :: duplicates)
+          } else {
+            findDuplicateHelper(tail, duplicates)
+          }
+      }
+    }
+
+    findDuplicateHelper(ninos, Nil)
+  }
 
 }
