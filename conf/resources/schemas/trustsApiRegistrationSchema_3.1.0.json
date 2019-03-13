@@ -228,7 +228,6 @@
 				},
 				"leadTrustees": {
 					"$ref": "#/definitions/leadTrusteeType"
-
 				},
 				"trustees": {
 					"type": "array",
@@ -613,16 +612,7 @@
 					"$ref": "#/definitions/shareofIncomeString"
 				},
 				"identification": {
-					"type": "object",
-					"properties": {
-						"address": {
-							"$ref": "#/definitions/addressType"
-						},
-						"utr": {
-							"$ref": "#/definitions/utrString"
-						}
-					},
-					"additionalProperties": false
+					"$ref": "#/definitions/identificationOrgType"
 				}
 			},
 			"required": [
@@ -643,16 +633,7 @@
 					"$ref": "#/definitions/shareofIncomeString"
 				},
 				"identification": {
-					"type": "object",
-					"properties": {
-						"address": {
-							"$ref": "#/definitions/addressType"
-						},
-						"utr": {
-							"$ref": "#/definitions/utrString"
-						}
-					},
-					"additionalProperties": false
+					"$ref": "#/definitions/identificationOrgType"
 				}
 			},
 			"required": [
@@ -710,16 +691,7 @@
 					"pattern": "^[0-9a-zA-Z]{1,4}$"
 				},
 				"identification": {
-					"type": "object",
-					"properties": {
-						"address": {
-							"$ref": "#/definitions/addressType"
-						},
-						"utr": {
-							"$ref": "#/definitions/utrString"
-						}
-					},
-					"additionalProperties": false
+					"$ref": "#/definitions/identificationOrgType"
 				},
 				"beneficiaryDiscretion": {
 					"type": "boolean"
@@ -770,16 +742,7 @@
 					"$ref": "#/definitions/shareofIncomeString"
 				},
 				"identification": {
-					"type": "object",
-					"properties": {
-						"address": {
-							"$ref": "#/definitions/addressType"
-						},
-						"utr": {
-							"$ref": "#/definitions/utrString"
-						}
-					},
-					"additionalProperties": false
+					"$ref": "#/definitions/identificationOrgType"
 				}
 			},
 			"required": [
