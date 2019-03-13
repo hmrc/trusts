@@ -38,7 +38,7 @@ class AppConfig @Inject()(config: Configuration, playEnv: Environment) extends S
   val desEnvironment : String =   loadConfig("microservice.services.des.environment")
   val desToken : String =    loadConfig("microservice.services.des.token")
 
-  val trustsApiRegistrationSchema : String  = "/resources/schemas/trustsApiRegistrationSchema_3.1.0.json"
+  val trustsApiRegistrationSchema : String  = "/resources/schemas/trustsApiRegistrationSchema_3.2.0.json"
 
   val taxEnrolmentsUrl : String = baseUrl("tax-enrolments")
   val taxEnrolmentsPayloadBodyServiceName : String =   loadConfig("microservice.services.tax-enrolments.serviceName")
