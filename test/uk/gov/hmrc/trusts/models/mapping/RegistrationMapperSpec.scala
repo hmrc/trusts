@@ -25,7 +25,7 @@ import uk.gov.hmrc.trusts.utils.DataExamples
 class RegistrationMapperSpec extends BaseSpec with DataExamples {
 
   "Registration" should {
-    "map to des representation of trust" in {
+    "map trust to des representation of trust" in {
       val apiRegistration = registrationRequest
       val desRegistration: JsValue = Json.toJson(apiRegistration)
        (desRegistration \ "details" \ "trust").get.as[Trust].details mustBe apiRegistration.trust.details
