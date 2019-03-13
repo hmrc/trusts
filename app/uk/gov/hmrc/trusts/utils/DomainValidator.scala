@@ -70,7 +70,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
         Logger.info(s"[indTrusteesDuplicateNino] Number of Duplicate Nino found : ${duplicatesNino.size} ")
         duplicatesNino.map{
           case (nino,index) =>
-            Some(TrustsValidationError(s"NINO is already used for another trustee individual.",
+            Some(TrustsValidationError(s"NINO is already used for another individual trustee.",
               s"/details/trust/entities/trustees/$index/trusteeInd/identification/nino"))
         }
       }
@@ -95,7 +95,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
 
   }
 
-  def bussinessTrusteeUtrIsNotTrustUtr : List[Option[TrustsValidationError]] = {
+  def businessTrusteeUtrIsNotTrustUtr : List[Option[TrustsValidationError]] = {
     val trustUtr = registration.matchData.map( x=> x.utr)
     registration.details.trust.entities.trustees.map {
       trustees => {
@@ -148,7 +148,7 @@ object BusinessValidation {
 
     errorsList ++ domainValidator.indTrusteesDuplicateNino.flatten ++
       domainValidator.businessTrusteesDuplicateUtr.flatten ++
-      domainValidator.bussinessTrusteeUtrIsNotTrustUtr.flatten
+      domainValidator.businessTrusteeUtrIsNotTrustUtr.flatten
 
   }
 }

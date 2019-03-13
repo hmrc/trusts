@@ -78,7 +78,7 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
   "trusteesDobIsNotFutureDate" should {
     "return None when there is no trustees" in {
       val request = registrationWithTrustess(None)
-      SUT(request).indTrusteesDobIsNotFutureDate.flatten.isEmpty mustBe true
+      SUT(request).indTrusteesDobIsNotFutureDate.flatten mustBe empty
     }
 
     "return validation error when trustee has future date of birth" in {
@@ -110,26 +110,24 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
 
     "return None when there is trustees is of business/organisation type" in {
       val request = registrationWithTrustess(Some(listOfOrgTrustees))
-      SUT(request).indTrusteesDobIsNotFutureDate.flatten.isEmpty mustBe true
+      SUT(request).indTrusteesDobIsNotFutureDate.flatten mustBe empty
     }
   }
 
   "indTrusteesDuplicateNino" should {
     "return None when there is no trustees" in {
       val request = registrationWithTrustess(None)
-      SUT(request).indTrusteesDobIsNotFutureDate.flatten.isEmpty mustBe true
+      SUT(request).indTrusteesDobIsNotFutureDate.flatten mustBe empty
     }
 
     "return validation error when individual trustees has duplicate nino " in {
       val request = registrationWithTrustess(Some(listOfDuplicateIndAndOrgTrustees))
       val response = SUT(request).indTrusteesDuplicateNino
       response.flatten.size mustBe 4
-      var trusteeIndex = 0
-      response.flatten.map {
-          error =>
-          trusteeIndex = trusteeIndex +1
-          error.message mustBe "NINO is already used for another trustee individual."
-          error.location mustBe s"/details/trust/entities/trustees/${trusteeIndex}/trusteeInd/identification/nino"
+      response.flatten.zipWithIndex.map{
+        case (error,index) =>
+          error.message mustBe "NINO is already used for another individual trustee."
+          error.location mustBe s"/details/trust/entities/trustees/${index+1}/trusteeInd/identification/nino"
       }
     }
   }
@@ -137,7 +135,7 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
   "businessTrusteesDuplicateUtr" should {
     "return None when there is no trustees" in {
       val request = registrationWithTrustess(None)
-      SUT(request).businessTrusteesDuplicateUtr.flatten.isEmpty mustBe true
+      SUT(request).businessTrusteesDuplicateUtr.flatten mustBe empty
     }
 
     "return validation error when business trustees has duplicate utr " in {
@@ -156,12 +154,12 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
   "bussinessTrusteeUtrIsSameTrustUtr" should {
     "return None when there is no trustees" in {
       val request = registrationWithTrustess(None)
-      SUT(request).bussinessTrusteeUtrIsNotTrustUtr.flatten.isEmpty mustBe true
+      SUT(request).businessTrusteeUtrIsNotTrustUtr.flatten mustBe empty
     }
 
     "return validation error when business trustees utr is same as trust utr " in {
       val request = registrationWithTrustess(Some(listOfDuplicateIndAndOrgTrustees))
-      val response = SUT(request).bussinessTrusteeUtrIsNotTrustUtr
+      val response = SUT(request).businessTrusteeUtrIsNotTrustUtr
       response.flatten.size mustBe 2
       response.flatten.zipWithIndex.map{
         case (error,index) =>

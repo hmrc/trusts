@@ -68,7 +68,7 @@ class ValidationServiceSpec extends BaseSpec {
       "individual trustees has same NINO " in {
         val jsonString = JsonUtils.getJsonFromFile("trust-business-validation-fail.json")
         val errorList =validator.validate[Registration](jsonString).left.get.
-          filter(_.message=="NINO is already used for another trustee individual.")
+          filter(_.message=="NINO is already used for another individual trustee.")
         errorList.size mustBe 2
       }
 
