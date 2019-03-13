@@ -27,14 +27,14 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
   val EFRBS_VALIDAION_MESSAGE = "Trusts efrbs start date can be provided for Employment Related trust only."
 
   def trustStartDateIsNotFutureDate : Option[TrustsValidationError] = {
-    isNotFutureDate(registration.details.trust.details.startDate,
+    isNotFutureDate(registration.trust.details.startDate,
       "/details/trust/details/startDate", "Trusts start date")
   }
 
   def validateEfrbsDate : Option[TrustsValidationError] = {
-    val isEfrbsDateDefined = registration.details.trust.details.efrbsStartDate.isDefined
+    val isEfrbsDateDefined = registration.trust.details.efrbsStartDate.isDefined
 
-    val isEmploymentRelatedTrust = registration.details.trust.details.isEmploymentRelatedTrust
+    val isEmploymentRelatedTrust = registration.trust.details.isEmploymentRelatedTrust
 
     if (isEfrbsDateDefined && !isEmploymentRelatedTrust){
       Some(TrustsValidationError(EFRBS_VALIDAION_MESSAGE, "/details/trust/details/efrbsStartDate"))
@@ -44,12 +44,12 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
   }
 
   def trustEfrbsDateIsNotFutureDate : Option[TrustsValidationError] = {
-    isNotFutureDate(registration.details.trust.details.efrbsStartDate,
+    isNotFutureDate(registration.trust.details.efrbsStartDate,
       "/details/trust/details/efrbsStartDate", "Trusts efrbs start date")
   }
 
   def indTrusteesDobIsNotFutureDate : List[Option[TrustsValidationError]] = {
-    registration.details.trust.entities.trustees.map {
+    registration.trust.entities.trustees.map {
       trustees =>
         val errors = trustees.zipWithIndex.map {
           case (trustee, index) =>
@@ -63,7 +63,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
   }
 
   def indTrusteesDuplicateNino : List[Option[TrustsValidationError]] = {
-    registration.details.trust.entities.trustees.map {
+    registration.trust.entities.trustees.map {
       trustees => {
         val ninoList: List[(String, Int)] = getNinoWithIndex(trustees)
         val duplicatesNino =  findDuplicates(ninoList).reverse
@@ -80,7 +80,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
 
 
   def businessTrusteesDuplicateUtr : List[Option[TrustsValidationError]] = {
-    registration.details.trust.entities.trustees.map {
+    registration.trust.entities.trustees.map {
       trustees => {
         val utrList: List[(String, Int)] = getUtrWithIndex(trustees)
         val duplicatesUtr =  findDuplicates(utrList).reverse
@@ -97,7 +97,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
 
   def businessTrusteeUtrIsNotTrustUtr : List[Option[TrustsValidationError]] = {
     val trustUtr = registration.matchData.map( x=> x.utr)
-    registration.details.trust.entities.trustees.map {
+    registration.trust.entities.trustees.map {
       trustees => {
         val utrList: List[(String, Int)] = getUtrWithIndex(trustees)
         utrList.map {
