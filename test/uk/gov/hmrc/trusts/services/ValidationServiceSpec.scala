@@ -25,7 +25,7 @@ import uk.gov.hmrc.trusts.utils.JsonUtils
 class ValidationServiceSpec extends BaseSpec {
 
   private lazy val validatationService: ValidationService = new ValidationService()
-  private lazy val validator : Validator = validatationService.get("/resources/schemas/trustsApiRegistrationSchema_3.1.0.json")
+  private lazy val validator : Validator = validatationService.get("/resources/schemas/trustsApiRegistrationSchema_3.2.0.json")
 
   "a validator " should {
     "return an empty list of errors when " when {

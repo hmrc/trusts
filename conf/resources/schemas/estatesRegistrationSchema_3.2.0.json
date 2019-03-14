@@ -253,7 +253,7 @@
 			"type": "object",
 			"properties": {
 				"deceased": {
-					"$ref": "#/definitions/willType"
+					"$ref": "#/definitions/willTypeEstate"
 				},
 				"personalRepresentative": {
 					"type": "object",
@@ -300,7 +300,7 @@
 			"type": "string",
 			"pattern": "^\\+[0-9 ]{1,18}$|^[0-9 ]{1,19}$"
 		},
-		"willType": {
+		"willTypeEstate": {
 			"type": "object",
 			"properties": {
 				"name": {
@@ -343,7 +343,8 @@
 				}
 			},
 			"required": [
-				"name"
+				"name",
+				"dateOfDeath"
 			],
 			"additionalProperties": false
 		},
