@@ -54,7 +54,7 @@ class ValidationServiceSpec extends BaseSpec {
       "date of birth of trustee is before 1500/01/01" in {
         val jsonString = JsonUtils.getJsonFromFile("trustees-invalid-dob.json")
         val errorList =validator.validate[Registration](jsonString).left.get.
-          filter(_.location=="/details/trust/entities/trustees/0/trusteeInd/dateOfBirth")
+          filter(_.location=="/trust/entities/trustees/0/trusteeInd/dateOfBirth")
         errorList.size mustBe 1
       }
     }

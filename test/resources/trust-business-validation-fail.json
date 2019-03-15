@@ -50,7 +50,6 @@
       "country": "GB"
     }
   },
-  "details": {
     "trust": {
       "details": {
         "startDate": "2020-01-01",
@@ -274,7 +273,6 @@
           }
         ]
       }
-    }
   },
   "agentDetails": {
     "arn": "AARN1234567",

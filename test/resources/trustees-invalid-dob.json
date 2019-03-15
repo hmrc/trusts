@@ -30,7 +30,6 @@
 			"country": "GB"
 		}
 	},
-	"details": {
 		"trust": {
 			"details": {
 				"startDate": "2019-03-06",
@@ -141,5 +140,5 @@
 				]
 			}
 		}
-	}
+
 }

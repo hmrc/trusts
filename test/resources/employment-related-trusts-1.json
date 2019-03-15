@@ -21,7 +21,6 @@
       "country": "GB"
     }
   },
-  "details": {
     "trust": {
       "details": {
         "startDate": "1835-02-22",
@@ -75,5 +74,4 @@
         ]
       }
     }
-  }
 }

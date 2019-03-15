@@ -50,7 +50,7 @@
 			"country": "GB"
 		}
 	},
-	"details": {
+
 		"trust": {
 			"details": {
 				"startDate": "2019-03-06",
@@ -111,14 +111,14 @@
 					],
 					"other": [
 						{
+							"description": "Lorem ipsum",
 							"address": {
 								"line1": "1344 Army Road",
 								"line2": "Suite 111",
 								"line4": "Telford",
 								"postCode": "TF1 5DR",
 								"country": "GB"
-							},
-							"description": "Lorem ipsum"
+							}
 						}
 					]
 				},
@@ -153,10 +153,10 @@
 								"lastName": "O'Connor"
 							},
 							"dateOfBirth": "1956-02-12",
+							"phoneNumber": "0121546546",
 							"identification": {
 								"nino": "ST123456"
-							},
-							"phoneNumber": "0121546546"
+							}
 						}
 					}
 				],
@@ -230,7 +230,7 @@
 					}
 				]
 			}
-		}
+
 	},
 	"agentDetails": {
 		"arn": "AARN1234567",

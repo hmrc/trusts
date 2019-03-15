@@ -88,7 +88,7 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
       response.flatten.map {
         error =>
           error.message mustBe "Date of birth must be today or in the past."
-          error.location mustBe "/details/trust/entities/trustees/1/trusteeInd/dateOfBirth"
+          error.location mustBe "/trust/entities/trustees/1/trusteeInd/dateOfBirth"
       }
     }
 
@@ -102,7 +102,7 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
           response.flatten.map {
             error =>
               error.message mustBe "Date of birth must be today or in the past."
-              error.location mustBe "/details/trust/entities/trustees/0/trusteeInd/dateOfBirth"
+              error.location mustBe "/trust/entities/trustees/0/trusteeInd/dateOfBirth"
           }
         }
       }
@@ -127,7 +127,7 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
       response.flatten.zipWithIndex.map{
         case (error,index) =>
           error.message mustBe "NINO is already used for another individual trustee."
-          error.location mustBe s"/details/trust/entities/trustees/${index+1}/trusteeInd/identification/nino"
+          error.location mustBe s"/trust/entities/trustees/${index+1}/trusteeInd/identification/nino"
       }
     }
   }
@@ -145,7 +145,7 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
       response.flatten.map {
         error =>
           error.message mustBe "Utr is already used for another business trustee."
-          error.location mustBe s"/details/trust/entities/trustees/0/trusteeOrg/identification/utr"
+          error.location mustBe s"/trust/entities/trustees/0/trusteeOrg/identification/utr"
       }
     }
   }
@@ -164,7 +164,7 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
       response.flatten.zipWithIndex.map{
         case (error,index) =>
           error.message mustBe "Business trustee utr is same as trust utr."
-          error.location mustBe s"/details/trust/entities/trustees/$index/trusteeOrg/identification/utr"
+          error.location mustBe s"/trust/entities/trustees/$index/trusteeOrg/identification/utr"
       }
     }
   }

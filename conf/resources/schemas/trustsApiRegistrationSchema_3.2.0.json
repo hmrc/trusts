@@ -69,7 +69,7 @@
 			],
 			"additionalProperties": false
 		},
-		"details": {
+		"trust": {
 					"$ref": "#/definitions/trustType"
 		},
 		"agentDetails": {
@@ -79,14 +79,11 @@
 	"required": [
 		"correspondence",
 		"declaration",
-		"details"
+		"trust"
 	],
 	"additionalProperties": false,
 	"definitions": {
 		"trustType": {
-			"type": "object",
-			"properties": {
-				"trust": {
 					"type": "object",
 					"properties": {
 						"details": {
@@ -105,12 +102,6 @@
 						"assets"
 					],
 					"additionalProperties": false
-				}
-			},
-			"required": [
-				"trust"
-			],
-			"additionalProperties": false
 		},
 		"assetsType": {
 			"type": "object",
