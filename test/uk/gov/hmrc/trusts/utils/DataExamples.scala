@@ -29,6 +29,7 @@ trait DataExamples extends  JsonRequests {
     lastName = "Johnson"
   )
   val nino = IdentificationType(nino = Some("WA123456A"),None,None)
+  val nino2 = IdentificationType(nino = Some("WA123457A"),None,None)
   val utr = IdentificationOrgType(utr = Some("5454541615"),None)
   val phoneNumber = "1234567890"
   val email = Some("test@test.com")
@@ -52,6 +53,11 @@ trait DataExamples extends  JsonRequests {
 
   def trusteeIndividual(dateOfBirthStr :String= "1500-01-01") = Some(TrusteeIndividualType(name = nameType,
     dateOfBirth = new DateTime(dateOfBirthStr),None,identification = nino))
+
+
+  def indBenficiary(ninoInput :IdentificationType= nino) =
+    IndividualDetailsType(
+      nameType,None,false,None,None,None, Some(ninoInput))
 
   def trusteeOrg  = Some(TrusteeOrgType(
     name = "trustee as company",
@@ -80,6 +86,14 @@ trait DataExamples extends  JsonRequests {
 
   def registrationWithTrustess(updatedTrustees : Option[List[TrusteeType]] ) = {
     val trustEntities = defaultTrustEntities.copy(trustees = updatedTrustees)
+    registration(trustEntities =Some(trustEntities))
+  }
+
+  def beneficiaryTypeEntity(individualDetails: Option[List[IndividualDetailsType]] = Some(List(indBenficiary(),indBenficiary(nino2))))
+  = BeneficiaryType( individualDetails, None,None,None,None,None,None)
+
+  def registrationWithBeneficiary(beneficiaryType: BeneficiaryType = beneficiaryTypeEntity()  ) = {
+    val trustEntities = defaultTrustEntities.copy(beneficiary = beneficiaryType)
     registration(trustEntities =Some(trustEntities))
   }
 

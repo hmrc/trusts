@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.utils
 
 import play.api.Logger
-import uk.gov.hmrc.trusts.models.{Registration, TrusteeType}
+import uk.gov.hmrc.trusts.models.{IndividualDetailsType, Registration, TrusteeType}
 import uk.gov.hmrc.trusts.services.TrustsValidationError
 
 import scala.annotation.tailrec
@@ -78,6 +78,22 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
 
   }
 
+  def indBeneficiariesDuplicateNino : List[Option[TrustsValidationError]] = {
+    registration.trust.entities.beneficiary.individualDetails.map {
+      indBeneficiary => {
+        val ninoList: List[(String, Int)] = getIndBenificiaryNinoWithIndex(indBeneficiary)
+        val duplicatesNino =  findDuplicates(ninoList).reverse
+        Logger.info(s"[indBeneficiariesDuplicateNino] Number of Duplicate Nino found : ${duplicatesNino.size} ")
+        duplicatesNino.map{
+          case (nino,index) =>
+            Some(TrustsValidationError(s"NINO is already used for another individual beneficiary.",
+              s"/trust/entities/beneficiary/individualDetails/$index/identification/nino"))
+        }
+      }
+    }.toList.flatten
+
+  }
+
 
   def businessTrusteesDuplicateUtr : List[Option[TrustsValidationError]] = {
     registration.trust.entities.trustees.map {
@@ -129,6 +145,17 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
           x.identification.nino.map { y => (y, index) }
         }
     }
+    ninoList
+  }
+
+
+  private def getIndBenificiaryNinoWithIndex(indBenificiaries: List[IndividualDetailsType]) = {
+    val ninoList: List[(String, Int)] = indBenificiaries.zipWithIndex.flatMap {
+      case (indv, index) =>
+        indv.identification.map { x =>
+          x.nino.map { y => (y, index) }
+        }
+    }.toList.flatten
     ninoList
   }
 }

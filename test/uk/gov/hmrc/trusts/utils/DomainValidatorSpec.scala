@@ -170,4 +170,23 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
   }
 
 
+  "indBeneficiariesDuplicateNino" should {
+    "return None when individual beneficiary has different nino" in {
+      val request = registrationWithBeneficiary()
+      SUT(request).indBeneficiariesDuplicateNino.flatten mustBe empty
+    }
+
+    "return validation error when individual beneficiaries has same nino " in {
+      val request = registrationWithBeneficiary(beneficiaryType = beneficiaryTypeEntity(Some(List(indBenficiary(),indBenficiary()))))
+      val response = SUT(request).indBeneficiariesDuplicateNino
+      response.flatten.size mustBe 1
+      response.flatten.zipWithIndex.map{
+        case (error,index) =>
+          error.message mustBe "NINO is already used for another individual beneficiary."
+          error.location mustBe s"/trust/entities/beneficiary/individualDetails/${index}/identification/nino"
+      }
+    }
+  }
+
+
 }
