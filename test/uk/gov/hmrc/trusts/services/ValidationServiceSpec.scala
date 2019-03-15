@@ -19,10 +19,10 @@ package uk.gov.hmrc.trusts.services
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.models.{ExistingTrustCheckRequest, Registration}
-import uk.gov.hmrc.trusts.utils.JsonUtils
+import uk.gov.hmrc.trusts.utils.{DataExamples, JsonUtils}
 
 
-class ValidationServiceSpec extends BaseSpec {
+class ValidationServiceSpec extends BaseSpec with DataExamples {
 
   private lazy val validatationService: ValidationService = new ValidationService()
   private lazy val validator : Validator = validatationService.get("/resources/schemas/trustsApiRegistrationSchema_3.2.0.json")
@@ -55,6 +55,12 @@ class ValidationServiceSpec extends BaseSpec {
         val jsonString = JsonUtils.getJsonFromFile("trustees-invalid-dob.json")
         val errorList =validator.validate[Registration](jsonString).left.get.
           filter(_.location=="/trust/entities/trustees/0/trusteeInd/dateOfBirth")
+        errorList.size mustBe 1
+      }
+
+      "no beneficiary is provided" in {
+        val errorList = validator.validate[Registration](trustWithoutBeneficiary).left.get.
+          filter(_.message=="object has missing required properties ([\"beneficiary\"])")
         errorList.size mustBe 1
       }
     }

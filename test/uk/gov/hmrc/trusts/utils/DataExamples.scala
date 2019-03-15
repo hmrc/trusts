@@ -17,8 +17,9 @@
 package uk.gov.hmrc.trusts.utils
 
 import org.joda.time.DateTime
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.trusts.models._
-
+import play.api.libs.json._
 
 trait DataExamples extends  JsonRequests {
 
@@ -96,6 +97,13 @@ trait DataExamples extends  JsonRequests {
       yearsReturns = registrationRequest.yearsReturns,
       declaration = registrationRequest.declaration,
       agentDetails = None)
+  }
+
+
+  def trustWithoutBeneficiary : String = {
+    val json = getJsonValueFromFile("valid-trusts-registration-api.json")
+    val jsonTransformer = (__  \ 'trust \  'entities \ 'beneficiary ).json.prune
+    json.transform(jsonTransformer).get.toString()
   }
 
 
