@@ -54,6 +54,20 @@ class ValidationServiceSpec extends BaseSpec with DataExamples {
         }
       }
 
+      "valid json having large type beneficiary with 1 required description " in {
+        val jsonString = JsonUtils.getJsonFromFile("valid-trusts-org-trustees.json")
+        val registration =  validator.validate[Registration](jsonString).right.get
+        registration.trust.entities.beneficiary.large.get.map{
+          largeBeneficiary =>
+            largeBeneficiary.description mustBe "Description"
+            largeBeneficiary.description1 mustBe None
+            largeBeneficiary.description2 mustBe None
+            largeBeneficiary.description3 mustBe None
+            largeBeneficiary.description4 mustBe None
+
+        }
+      }
+
     }
 
     "return a list of validaton errors " when {
