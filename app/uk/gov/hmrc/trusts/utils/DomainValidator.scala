@@ -78,6 +78,9 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
 
   }
 
+
+
+
   def indBeneficiariesDuplicateNino : List[Option[TrustsValidationError]] = {
     registration.trust.entities.beneficiary.individualDetails.map {
       indBeneficiary => {
@@ -92,6 +95,20 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
       }
     }.toList.flatten
 
+  }
+
+
+  def indBeneficiariesDobIsNotFutureDate : List[Option[TrustsValidationError]] = {
+    registration.trust.entities.beneficiary.individualDetails.map {
+      indBeneficiary =>
+        val errors = indBeneficiary.zipWithIndex.map {
+          case (individualBen, index) =>
+            val response =
+              isNotFutureDate(individualBen.dateOfBirth, s"/trust/entities/beneficiary/individualDetails/$index/dateOfBirth", "Date of birth")
+            response
+        }
+        errors
+      }.toList.flatten
   }
 
 
