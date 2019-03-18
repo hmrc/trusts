@@ -40,6 +40,22 @@ class ValidationServiceSpec extends BaseSpec with DataExamples {
       }
     }
 
+    "return registration domain" when {
+      "valid json having large type beneficiary with 5 description" in {
+        val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
+       val registration =  validator.validate[Registration](jsonString).right.get
+        registration.trust.entities.beneficiary.large.get.map{
+          largeBeneficiary =>
+            largeBeneficiary.description mustBe "Description"
+            largeBeneficiary.description1.get mustBe "Description1"
+            largeBeneficiary.description2.get mustBe "Description2"
+            largeBeneficiary.description3.get mustBe "Description3"
+            largeBeneficiary.description4.get mustBe "Description4"
+        }
+      }
+
+    }
+
     "return a list of validaton errors " when {
       "json document is invalid" in {
         val jsonString = JsonUtils.getJsonFromFile("invalid-payload-trusts-registration.json")
