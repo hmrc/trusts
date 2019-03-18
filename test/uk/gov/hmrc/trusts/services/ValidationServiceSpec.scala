@@ -63,6 +63,13 @@ class ValidationServiceSpec extends BaseSpec with DataExamples {
           filter(_.message=="object has missing required properties ([\"beneficiary\"])")
         errorList.size mustBe 1
       }
+
+      "date of birth of individual beneficiary is before 1500/01/01" in {
+        val jsonString = trustWithValues(indBenficiaryDob = "1499-12-31")
+        val errorList = validator.validate[Registration](jsonString).left.get.
+          filter(_.location=="/trust/entities/beneficiary/individualDetails/0/dateOfBirth")
+        errorList.size mustBe 1
+      }
     }
 
     "return a list of validaton errors " when {

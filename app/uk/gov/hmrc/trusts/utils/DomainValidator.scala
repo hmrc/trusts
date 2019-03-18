@@ -79,8 +79,6 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
   }
 
 
-
-
   def indBeneficiariesDuplicateNino : List[Option[TrustsValidationError]] = {
     registration.trust.entities.beneficiary.individualDetails.map {
       indBeneficiary => {
@@ -144,37 +142,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
     }.toList.flatten
   }
 
-  private def getUtrWithIndex(trustees: List[TrusteeType]) = {
-    val utrList: List[(String, Int)] = trustees.zipWithIndex.flatMap {
-      case (trustee, index) =>
-        trustee.trusteeOrg.flatMap { x =>
-          x.identification.utr.map { y => (y, index) }
-        }
-    }
-    utrList
-  }
 
-
-  private def getNinoWithIndex(trustees: List[TrusteeType]) = {
-    val ninoList: List[(String, Int)] = trustees.zipWithIndex.flatMap {
-      case (trustee, index) =>
-        trustee.trusteeInd.flatMap { x =>
-          x.identification.nino.map { y => (y, index) }
-        }
-    }
-    ninoList
-  }
-
-
-  private def getIndBenificiaryNinoWithIndex(indBenificiaries: List[IndividualDetailsType]) = {
-    val ninoList: List[(String, Int)] = indBenificiaries.zipWithIndex.flatMap {
-      case (indv, index) =>
-        indv.identification.map { x =>
-          x.nino.map { y => (y, index) }
-        }
-    }.toList.flatten
-    ninoList
-  }
 }
 
 
