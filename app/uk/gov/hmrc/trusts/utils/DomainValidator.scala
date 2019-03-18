@@ -109,6 +109,22 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
       }.toList.flatten
   }
 
+  def indBeneficiariesDuplicatePassportNumber : List[Option[TrustsValidationError]] = {
+    registration.trust.entities.beneficiary.individualDetails.map {
+      indBeneficiary => {
+        val passportNumberList: List[(String, Int)] = getIndBenificiaryPassportNumberWithIndex(indBeneficiary)
+        val duplicatePassportNumberList =  findDuplicates(passportNumberList).reverse
+        Logger.info(s"[indBeneficiariesDuplicatePassportNumber] Number of Duplicate passport number found : ${duplicatePassportNumberList.size} ")
+        duplicatePassportNumberList.map{
+          case (passport,index) =>
+            Some(TrustsValidationError(s"Passport number is already used for another individual beneficiary.",
+              s"/trust/entities/beneficiary/individualDetails/$index/identification/passport/number"))
+        }
+      }
+    }.toList.flatten
+
+  }
+
 
   def businessTrusteesDuplicateUtr : List[Option[TrustsValidationError]] = {
     registration.trust.entities.trustees.map {

@@ -99,4 +99,14 @@ trait ValidationUtil {
     ninoList
   }
 
+  def getIndBenificiaryPassportNumberWithIndex(indBenificiaries: List[IndividualDetailsType]) = {
+    val passportNumberList: List[(String, Int)] = indBenificiaries.zipWithIndex.flatMap {
+      case (indv, index) =>
+        indv.identification.map { x =>
+          x.passport.map { y => (y.number, index) }
+        }
+    }.toList.flatten
+    passportNumberList
+  }
+
 }

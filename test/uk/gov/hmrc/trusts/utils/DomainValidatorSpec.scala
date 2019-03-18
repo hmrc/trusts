@@ -203,4 +203,24 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
     }
   }
 
+  "indBeneficiariesDuplicatePassportNumber" should {
+    "return None when individual beneficiary has different passport Number" in {
+      val request = registrationWithBeneficiary(beneficiaryType
+        =   beneficiaryTypeEntity(Some(List(indBenficiary(passportIdentification()),indBenficiary(passportIdentification("AB123456789D"))))))
+      SUT(request).indBeneficiariesDuplicatePassportNumber.flatten mustBe empty
+    }
+
+    "return validation error when individual beneficiaries has same passport number " in {
+      val request = registrationWithBeneficiary(beneficiaryType
+        =   beneficiaryTypeEntity(Some(List(indBenficiary(passportIdentification()),indBenficiary(passportIdentification())))))
+      val response = SUT(request).indBeneficiariesDuplicatePassportNumber
+      response.flatten.size mustBe 1
+      response.flatten.zipWithIndex.map{
+        case (error,index) =>
+          error.message mustBe "Passport number is already used for another individual beneficiary."
+          error.location mustBe s"/trust/entities/beneficiary/individualDetails/${index}/identification/passport/number"
+      }
+    }
+  }
+
 }

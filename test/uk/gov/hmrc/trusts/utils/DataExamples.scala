@@ -28,8 +28,12 @@ trait DataExamples extends  JsonRequests {
     middleName = None,
     lastName = "Johnson"
   )
+
+  def passport(passportNumber : String = "AB123456789C") = Some(PassportType(passportNumber,new DateTime(), countryOfIssue= "IN"))
+
   val nino = IdentificationType(nino = Some("WA123456A"),None,None)
   val nino2 = IdentificationType(nino = Some("WA123457A"),None,None)
+  def passportIdentification(passportNumber : String = "AB123456789C") = IdentificationType(nino = None,passport= passport(passportNumber),None)
   val utr = IdentificationOrgType(utr = Some("5454541615"),None)
   val phoneNumber = "1234567890"
   val email = Some("test@test.com")
@@ -55,9 +59,11 @@ trait DataExamples extends  JsonRequests {
     dateOfBirth = new DateTime(dateOfBirthStr),None,identification = nino))
 
 
-  def indBenficiary(ninoInput :IdentificationType= nino,dateOfBirthStr :String= "1500-01-01") =
+  def indBenficiary(identification :IdentificationType = nino,dateOfBirthStr :String= "1500-01-01") =
     IndividualDetailsType(
-      nameType,Some(new DateTime(dateOfBirthStr)),false,None,None,None, Some(ninoInput))
+      nameType,Some(new DateTime(dateOfBirthStr)),false,None,None,None, Some(identification))
+
+
 
   def trusteeOrg  = Some(TrusteeOrgType(
     name = "trustee as company",
