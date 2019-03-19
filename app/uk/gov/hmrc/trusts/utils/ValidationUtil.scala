@@ -67,7 +67,7 @@ trait ValidationUtil {
   }
 
 
-   def getUtrWithIndex(trustees: List[TrusteeType]) = {
+   def getTrusteesUtrWithIndex(trustees: List[TrusteeType]) = {
     val utrList: List[(String, Int)] = trustees.zipWithIndex.flatMap {
       case (trustee, index) =>
         trustee.trusteeOrg.flatMap { x =>
@@ -78,7 +78,7 @@ trait ValidationUtil {
   }
 
 
-   def getNinoWithIndex(trustees: List[TrusteeType]) = {
+   def getTrusteesNinoWithIndex(trustees: List[TrusteeType]) = {
     val ninoList: List[(String, Int)] = trustees.zipWithIndex.flatMap {
       case (trustee, index) =>
         trustee.trusteeInd.flatMap { x =>

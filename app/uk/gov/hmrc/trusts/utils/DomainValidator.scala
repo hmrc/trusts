@@ -65,7 +65,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
   def indTrusteesDuplicateNino : List[Option[TrustsValidationError]] = {
     registration.trust.entities.trustees.map {
       trustees => {
-        val ninoList: List[(String, Int)] = getNinoWithIndex(trustees)
+        val ninoList: List[(String, Int)] = getTrusteesNinoWithIndex(trustees)
         val duplicatesNino =  findDuplicates(ninoList).reverse
         Logger.info(s"[indTrusteesDuplicateNino] Number of Duplicate Nino found : ${duplicatesNino.size} ")
         duplicatesNino.map{
@@ -129,7 +129,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
   def businessTrusteesDuplicateUtr : List[Option[TrustsValidationError]] = {
     registration.trust.entities.trustees.map {
       trustees => {
-        val utrList: List[(String, Int)] = getUtrWithIndex(trustees)
+        val utrList: List[(String, Int)] = getTrusteesUtrWithIndex(trustees)
         val duplicatesUtr =  findDuplicates(utrList).reverse
         Logger.info(s"[businessTrusteesDuplicateUtr] Number of Duplicate utr found : ${duplicatesUtr.size} ")
         duplicatesUtr.map{
@@ -146,7 +146,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
     val trustUtr = registration.matchData.map( x=> x.utr)
     registration.trust.entities.trustees.map {
       trustees => {
-        val utrList: List[(String, Int)] = getUtrWithIndex(trustees)
+        val utrList: List[(String, Int)] = getTrusteesUtrWithIndex(trustees)
         utrList.map {
           case (utr,index) if trustUtr == Some(utr) =>
             Some(TrustsValidationError(s"Business trustee utr is same as trust utr.",
