@@ -100,6 +100,13 @@ class ValidationServiceSpec extends BaseSpec with DataExamples {
           filter(_.location=="/trust/entities/beneficiary/individualDetails/0/dateOfBirth")
         errorList.size mustBe 1
       }
+
+      "no description provided for large type beneficiary" in {
+        val jsonString =JsonUtils.getJsonFromFile("trust-without-large-ben-description.json")
+        val errorList = validator.validate[Registration](jsonString).left.get.
+          filter(_.location=="/trust/entities/beneficiary/large/0")
+        errorList.size mustBe 1
+      }
     }
 
     "return a list of validaton errors " when {
