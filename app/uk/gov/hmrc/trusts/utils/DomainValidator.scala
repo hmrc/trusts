@@ -158,6 +158,13 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
     }.toList.flatten
   }
 
+  def deceasedSettlorDobIsNotFutureDate : Option[TrustsValidationError] = {
+    registration.trust.entities.deceased.map {
+      deceased =>
+        isNotFutureDate(deceased.dateOfBirth, s"/trust/entities/deceased/dateOfBirth", "Date of birth")
+    }.get
+  }
+
 
 }
 
@@ -171,7 +178,8 @@ object BusinessValidation {
     val errorsList = List(
       domainValidator.trustStartDateIsNotFutureDate,
       domainValidator.validateEfrbsDate,
-      domainValidator.trustEfrbsDateIsNotFutureDate
+      domainValidator.trustEfrbsDateIsNotFutureDate,
+      domainValidator.deceasedSettlorDobIsNotFutureDate
     ).flatten
 
     errorsList ++ domainValidator.indTrusteesDuplicateNino.flatten ++

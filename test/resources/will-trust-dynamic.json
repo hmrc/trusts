@@ -1,0 +1,139 @@
+{
+
+  "correspondence": {
+    "abroadIndicator": false,
+    "name": "Acme Invest",
+    "address": {
+      "line1": "1344 Army Road",
+      "line2": "Suite 111",
+      "line4": "Telford",
+      "country": "ZW"
+    },
+    "phoneNumber": "0121822983"
+  },
+  "yearsReturns": {
+    "taxReturnsNoDues": true,
+    "returns": [
+      {
+        "taxReturnYear": "16",
+        "taxConsequence": false
+      }
+
+    ]
+  },
+  "declaration": {
+    "name": {
+      "firstName": "John",
+      "middleName": "William",
+      "lastName": "O'Connor"
+    },
+    "address": {
+      "line1": "1344 Army Road",
+      "line2": "Suite 111",
+      "line4": "Telford",
+      "postCode": "TF1 5DR",
+      "country": "GB"
+    }
+  },
+  "trust": {
+    "details": {
+      "startDate": "2015-01-01",
+      "administrationCountry": "GB",
+      "residentialStatus": {
+        "uk": {
+          "scottishLaw": false,
+          "preOffShore": "AD"
+        }
+      },
+      "typeOfTrust": "Will Trust or Intestacy Trust",
+      "deedOfVariation": "Previously there was only an absolute interest under the will",
+      "interVivos": false
+    },
+    "entities": {
+      "naturalPerson": [
+        {
+          "name": {
+            "firstName": "John",
+            "middleName": "William",
+            "lastName": "O'Connor"
+          },
+          "dateOfBirth": "1956-02-12",
+          "identification": {
+            "nino": "KC287812"
+          }
+        }
+      ],
+      "beneficiary": {
+        "other": [
+          {
+            "address": {
+              "line1": "1344 Army Road",
+              "line2": "Suite 111",
+              "line4": "Telford",
+              "postCode": "TF1 5DR",
+              "country": "GB"
+            },
+            "description": "Lorem ipsum"
+          }
+        ]
+      },
+      "deceased": {
+        "name": {
+          "firstName": "John",
+          "middleName": "William",
+          "lastName": "O'Connor"
+        },
+        "dateOfBirth": "{deceasedDateOfBirth}",
+        "dateOfDeath": "2016-01-01",
+        "identification": {
+          "nino": "KC456736"
+        }
+      },
+      "leadTrustees": {
+        "leadTrusteeOrg": {
+          "name": "Trust Services LTD",
+          "phoneNumber": "0754545454",
+          "email": "me@you.com",
+          "identification": {
+            "utr": "5465416546"
+          }
+        }
+      }
+
+    },
+    "assets": {
+      "monetary": [
+        {
+          "assetMonetaryAmount": 999999999999
+        }
+      ],
+      "propertyOrLand": [
+        {
+          "buildingLandName": "ACB House",
+          "address": {
+            "line1": "1344 Army Road",
+            "line2": "Suite 111",
+            "line4": "Telford",
+            "postCode": "TF1 5DR",
+            "country": "GB"
+          },
+          "valueFull": 999999999999,
+          "valuePrevious": 999999999999
+        }
+      ]
+
+    }
+  },
+  "agentDetails": {
+    "arn": "AARN1234567",
+    "agentName": "Mr . xys abcde",
+    "agentAddress": {
+      "line1": "line1",
+      "line2": "line2",
+      "postCode": "TF3 2BX",
+      "country": "GB"
+    },
+    "agentTelephoneNumber": "07912180120",
+    "clientReference": "clientReference"
+  }
+}

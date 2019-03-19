@@ -222,4 +222,29 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
     }
   }
 
+  //settlor
+  "deceasedSettlorDobIsNotFutureDate" should {
+    "return validation error when deceased settlor's date of birth is future date" in {
+      val willTrust = willTrustWithValues("2030-01-01")
+      SUT(willTrust).deceasedSettlorDobIsNotFutureDate.get.message mustBe
+        "Date of birth must be today or in the past."
+      println(BusinessValidation.check(willTrust))
+      BusinessValidation.check(willTrust).size mustBe 1
+    }
+
+    "return None when deceased settlor's date of birth is in past" in {
+      val willTrust = willTrustWithValues("2019-01-01")
+      SUT(willTrust).deceasedSettlorDobIsNotFutureDate mustBe None
+      BusinessValidation.check(willTrust).size mustBe 0
+
+    }
+
+    "return None when there is no deceased settlor" in {
+      val employmentTrust = registrationRequest
+      SUT(employmentTrust).deceasedSettlorDobIsNotFutureDate mustBe None
+      BusinessValidation.check(employmentTrust).size mustBe 0
+    }
+  }
+
+
 }

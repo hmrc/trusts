@@ -32,6 +32,10 @@ trait JsonUtils {
     Json.parse(getJsonFromFile(filename))
   }
 
+  def getJsonValueFromString(jsonString : String ):JsValue = {
+    Json.parse(jsonString)
+  }
+
 }
 
 object JsonUtils extends JsonUtils
