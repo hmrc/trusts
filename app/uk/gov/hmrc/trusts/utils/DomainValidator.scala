@@ -175,8 +175,12 @@ object BusinessValidation {
     ).flatten
 
     errorsList ++ domainValidator.indTrusteesDuplicateNino.flatten ++
+      domainValidator.indTrusteesDobIsNotFutureDate.flatten ++
       domainValidator.businessTrusteesDuplicateUtr.flatten ++
-      domainValidator.businessTrusteeUtrIsNotTrustUtr.flatten
+      domainValidator.businessTrusteeUtrIsNotTrustUtr.flatten ++
+      domainValidator.indBeneficiariesDobIsNotFutureDate.flatten ++
+      domainValidator.indBeneficiariesDuplicateNino.flatten ++
+      domainValidator.indBeneficiariesDuplicatePassportNumber.flatten
 
   }
 }
