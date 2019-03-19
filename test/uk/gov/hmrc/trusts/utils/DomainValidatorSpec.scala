@@ -193,7 +193,6 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
     "return validation error when individual beneficiaries has future date of birth" in {
       val request = registrationWithBeneficiary(beneficiaryType = beneficiaryTypeEntity(Some(List(indBenficiary(nino, "2030-12-31")))))
       val response =  SUT(request).indBeneficiariesDobIsNotFutureDate
-      println(response)
       response.flatten.size mustBe 1
       response.flatten.map {
         error =>
