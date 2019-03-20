@@ -86,7 +86,7 @@
         "dateOfBirth": "{deceasedDateOfBirth}",
         "dateOfDeath": "{deceasedDateOfDeath}",
         "identification": {
-          "nino": "KC456736"
+          "nino": "{deceasedNino}"
         }
       },
       "leadTrustees": {
@@ -98,8 +98,23 @@
             "utr": "5465416546"
           }
         }
-      }
-
+      },
+      "trustees": [
+        {
+          "trusteeInd": {
+            "name": {
+              "firstName": "John",
+              "middleName": "William",
+              "lastName": "O'Connor"
+            },
+            "dateOfBirth": "1956-02-12",
+            "phoneNumber": "0121546546",
+            "identification": {
+              "nino": "ST123456"
+            }
+          }
+        }
+      ]
     },
     "assets": {
       "monetary": [

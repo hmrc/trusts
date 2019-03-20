@@ -257,6 +257,14 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
         "Date of death must be today or in the past."
       BusinessValidation.check(willTrust).size mustBe 1
     }
+
+
+    "return validation error when deceased settlor nino is same as trustee nino" in {
+      val willTrust = willTrustWithValues(deceasedNino="ST123456")
+      SUT(willTrust).deceasedSettlorIsNotTrustee.get.message mustBe
+        "Deceased NINO is same as trustee NINO."
+      BusinessValidation.check(willTrust).size mustBe 1
+    }
   }
 
 

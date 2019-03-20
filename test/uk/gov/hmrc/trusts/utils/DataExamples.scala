@@ -133,17 +133,15 @@ trait DataExamples extends  JsonRequests {
 
   def willTrustWithValues(
                            deceasedDateOfBirth : String ="2001-01-01",
-                           deceasedDateOfDeath : String ="2016-01-01") : Registration = {
+                           deceasedDateOfDeath : String ="2016-01-01",
+                           deceasedNino :String = "KC456736") : Registration = {
     val json = getJsonValueFromFile("will-trust-dynamic.json")
     getJsonValueFromString(json.toString().
-      replace("{deceasedDateOfBirth}", deceasedDateOfBirth)
-      replace("{deceasedDateOfDeath}", deceasedDateOfDeath)).
+      replace("{deceasedDateOfBirth}", deceasedDateOfBirth).
+      replace("{deceasedDateOfDeath}", deceasedDateOfDeath).
+      replace("{deceasedNino}", deceasedNino)).
       validate[Registration].get
   }
-
-
-
-
 
 
 }

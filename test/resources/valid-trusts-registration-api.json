@@ -139,18 +139,6 @@
           }
         ]
       },
-      "deceased": {
-        "name": {
-          "firstName": "John",
-          "middleName": "William",
-          "lastName": "O'Connor"
-        },
-        "dateOfBirth": "1956-02-12",
-        "dateOfDeath": "2016-01-01",
-        "identification": {
-          "nino": "KC456736"
-        }
-      },
       "leadTrustees": {
         "leadTrusteeOrg": {
           "name": "Trust Services LTD",
