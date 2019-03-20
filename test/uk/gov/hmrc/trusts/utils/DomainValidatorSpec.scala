@@ -225,15 +225,14 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
   //settlor
   "deceasedSettlorDobIsNotFutureDate" should {
     "return validation error when deceased settlor's date of birth is future date" in {
-      val willTrust = willTrustWithValues("2030-01-01")
+      val willTrust = willTrustWithValues("2030-01-01","2031-01-01")
       SUT(willTrust).deceasedSettlorDobIsNotFutureDate.get.message mustBe
         "Date of birth must be today or in the past."
-      println(BusinessValidation.check(willTrust))
-      BusinessValidation.check(willTrust).size mustBe 1
+      BusinessValidation.check(willTrust).size mustBe 2
     }
 
     "return None when deceased settlor's date of birth is in past" in {
-      val willTrust = willTrustWithValues("2019-01-01")
+      val willTrust = willTrustWithValues("2019-01-01","2019-02-01")
       SUT(willTrust).deceasedSettlorDobIsNotFutureDate mustBe None
       BusinessValidation.check(willTrust).size mustBe 0
 
@@ -242,7 +241,21 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
     "return None when there is no deceased settlor" in {
       val employmentTrust = registrationRequest
       SUT(employmentTrust).deceasedSettlorDobIsNotFutureDate mustBe None
+      println(BusinessValidation.check(employmentTrust))
       BusinessValidation.check(employmentTrust).size mustBe 0
+    }
+
+    "return validation error when deceased date of death is after date of birth." in {
+      val willTrust = willTrustWithValues(deceasedDateOfBirth  ="2016-01-01",deceasedDateOfDeath  ="2015-01-01")
+      SUT(willTrust).deceasedSettlorDoDIsNotAfterDob.get.message mustBe "Date of death is after date of birth"
+      BusinessValidation.check(willTrust).size mustBe 1
+    }
+
+    "return validation error when deceased settlor's date of death is future date" in {
+      val willTrust = willTrustWithValues("2019-01-01","2031-01-01")
+      SUT(willTrust).deceasedSettlorDoDIsNotFutureDate.get.message mustBe
+        "Date of death must be today or in the past."
+      BusinessValidation.check(willTrust).size mustBe 1
     }
   }
 

@@ -165,6 +165,24 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
     }.get
   }
 
+  def deceasedSettlorDoDIsNotFutureDate : Option[TrustsValidationError] = {
+    registration.trust.entities.deceased.map {
+      deceased =>
+        isNotFutureDate(deceased.dateOfDeath, s"/trust/entities/deceased/dateOfDeath", "Date of death")
+    }.get
+  }
+
+  def deceasedSettlorDoDIsNotAfterDob : Option[TrustsValidationError] = {
+    registration.trust.entities.deceased.map {
+      deceased =>
+        val result = deceased.dateOfBirth.map(x=>deceased.dateOfDeath.map(_.isBefore(x)))
+        if(result.flatten.isDefined && result.flatten.get){
+          Some(TrustsValidationError(s"Date of death is after date of birth",
+            s"/trust/entities/deceased/dateOfDeath"))
+        }else None
+    }.get
+  }
+
 
 }
 
@@ -179,7 +197,9 @@ object BusinessValidation {
       domainValidator.trustStartDateIsNotFutureDate,
       domainValidator.validateEfrbsDate,
       domainValidator.trustEfrbsDateIsNotFutureDate,
-      domainValidator.deceasedSettlorDobIsNotFutureDate
+      domainValidator.deceasedSettlorDobIsNotFutureDate,
+      domainValidator.deceasedSettlorDoDIsNotFutureDate,
+      domainValidator.deceasedSettlorDoDIsNotAfterDob
     ).flatten
 
     errorsList ++ domainValidator.indTrusteesDuplicateNino.flatten ++

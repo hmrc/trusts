@@ -84,7 +84,7 @@
           "lastName": "O'Connor"
         },
         "dateOfBirth": "{deceasedDateOfBirth}",
-        "dateOfDeath": "2016-01-01",
+        "dateOfDeath": "{deceasedDateOfDeath}",
         "identification": {
           "nino": "KC456736"
         }
