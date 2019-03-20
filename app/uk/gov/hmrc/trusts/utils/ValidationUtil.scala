@@ -109,4 +109,7 @@ trait ValidationUtil {
     passportNumberList
   }
 
+  def isNotTrust(currentTypeOfTrust: String, typeOfTrust: TypeOfTrust.Value) = currentTypeOfTrust == typeOfTrust.toString
+
+
 }

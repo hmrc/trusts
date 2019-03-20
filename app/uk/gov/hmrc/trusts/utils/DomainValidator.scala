@@ -199,6 +199,20 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
         }
     }
   }
+
+
+
+  def validateSettlor : Option[TrustsValidationError] = {
+   val currentTrust =  registration.trust.details.typeOfTrust
+   val settlorDefined =  registration.trust.entities.settlors.isDefined
+
+    if(isNotTrust(currentTrust, TypeOfTrust.WILL_TRUST) && !settlorDefined){
+      Some(TrustsValidationError(s"Settlor is mandatory for provided type of trust.",
+        s"/trust/entities/settlors"))
+    } else None
+  }
+
+
 }
 
 
@@ -215,7 +229,8 @@ object BusinessValidation {
       domainValidator.deceasedSettlorDobIsNotFutureDate,
       domainValidator.deceasedSettlorDoDIsNotFutureDate,
       domainValidator.deceasedSettlorDoDIsNotAfterDob,
-      domainValidator.deceasedSettlorIsNotTrustee
+      domainValidator.deceasedSettlorIsNotTrustee,
+      domainValidator.validateSettlor
     ).flatten
 
     errorsList ++ domainValidator.indTrusteesDuplicateNino.flatten ++

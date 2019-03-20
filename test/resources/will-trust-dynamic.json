@@ -45,7 +45,7 @@
           "preOffShore": "AD"
         }
       },
-      "typeOfTrust": "Will Trust or Intestacy Trust",
+      "typeOfTrust": "{typeOfTrust}",
       "deedOfVariation": "Previously there was only an absolute interest under the will",
       "interVivos": false
     },

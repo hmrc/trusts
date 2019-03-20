@@ -265,6 +265,13 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
         "Deceased NINO is same as trustee NINO."
       BusinessValidation.check(willTrust).size mustBe 1
     }
+
+    "return validation error when settlor is not provided for employment related trust" in {
+      val interVivos = willTrustWithValues(typeOfTrust = TypeOfTrust.INTER_VIVOS_SETTLEMENT.toString)
+      SUT(interVivos).validateSettlor.get.message mustBe
+        "Settlor is mandatory for provided type of trust."
+      BusinessValidation.check(interVivos).size mustBe 1
+    }
   }
 
 
