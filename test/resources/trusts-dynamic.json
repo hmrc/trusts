@@ -158,6 +158,17 @@
             },
             "dateOfBirth": "2001-01-01",
             "identification": {
+              "nino": "{settlorNino}"
+            }
+          },
+          {
+            "name": {
+              "firstName": "abcdefghijkl",
+              "middleName": "abcdefghijklmn",
+              "lastName": "abcde"
+            },
+            "dateOfBirth": "2001-01-01",
+            "identification": {
               "nino": "ST019091"
             }
           }

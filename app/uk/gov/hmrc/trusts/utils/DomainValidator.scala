@@ -200,8 +200,6 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
     }
   }
 
-
-
   def validateSettlor : Option[TrustsValidationError] = {
    val currentTrust =  registration.trust.details.typeOfTrust
    val settlorDefined =  registration.trust.entities.settlors.isDefined
@@ -210,6 +208,24 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
       Some(TrustsValidationError(s"Settlor is mandatory for provided type of trust.",
         s"/trust/entities/settlors"))
     } else None
+  }
+
+  def livingSettlorDuplicateNino  : List[Option[TrustsValidationError]]={
+    registration.trust.entities.settlors.flatMap {
+      settlors => {
+        settlors.settlor.map {
+          settlorIndividuals =>
+            val ninoList: List[(String, Int)] = getSettlorNinoWithIndex(settlorIndividuals)
+            val duplicatesNino = findDuplicates(ninoList).reverse
+            Logger.info(s"[livingSettlorDuplicateNino] Number of Duplicate Nino found : ${duplicatesNino.size} ")
+            duplicatesNino.map {
+              case (nino, index) =>
+                Some(TrustsValidationError(s"NINO is already used for another individual settlor.",
+                  s"/trust/entities/settlors/settlor/$index/identification/nino"))
+            }
+        }
+      }
+    }.toList.flatten
   }
 
 
@@ -239,7 +255,8 @@ object BusinessValidation {
       domainValidator.businessTrusteeUtrIsNotTrustUtr.flatten ++
       domainValidator.indBeneficiariesDobIsNotFutureDate.flatten ++
       domainValidator.indBeneficiariesDuplicateNino.flatten ++
-      domainValidator.indBeneficiariesDuplicatePassportNumber.flatten
+      domainValidator.indBeneficiariesDuplicatePassportNumber.flatten ++
+      domainValidator.livingSettlorDuplicateNino.flatten
 
   }
 }

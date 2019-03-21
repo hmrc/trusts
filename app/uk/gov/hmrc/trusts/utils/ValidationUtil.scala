@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.utils
 
 import org.joda.time.DateTime
-import uk.gov.hmrc.trusts.models.{IndividualDetailsType, TrusteeType}
+import uk.gov.hmrc.trusts.models.{IndividualDetailsType, Settlor, TrusteeType}
 import uk.gov.hmrc.trusts.services.TrustsValidationError
 
 import scala.annotation.tailrec
@@ -99,6 +99,18 @@ trait ValidationUtil {
     ninoList
   }
 
+  def getSettlorNinoWithIndex(settlors: List[Settlor]) = {
+    val ninoList: List[(String, Int)] = settlors.zipWithIndex.flatMap {
+      case (settlor, index) =>
+        settlor.identification.map { x =>
+          x.nino.map { y => (y, index) }
+        }
+    }.toList.flatten
+    ninoList
+  }
+
+
+
   def getIndBenificiaryPassportNumberWithIndex(indBenificiaries: List[IndividualDetailsType]) = {
     val passportNumberList: List[(String, Int)] = indBenificiaries.zipWithIndex.flatMap {
       case (indv, index) =>
@@ -109,7 +121,7 @@ trait ValidationUtil {
     passportNumberList
   }
 
-  def isNotTrust(currentTypeOfTrust: String, typeOfTrust: TypeOfTrust.Value) = currentTypeOfTrust == typeOfTrust.toString
+  def isNotTrust(currentTypeOfTrust: String, typeOfTrust: TypeOfTrust.Value) = currentTypeOfTrust != typeOfTrust.toString
 
 
 }

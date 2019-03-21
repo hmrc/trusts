@@ -248,6 +248,7 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
     "return validation error when deceased date of death is after date of birth." in {
       val willTrust = willTrustWithValues(deceasedDateOfBirth  ="2016-01-01",deceasedDateOfDeath  ="2015-01-01")
       SUT(willTrust).deceasedSettlorDoDIsNotAfterDob.get.message mustBe "Date of death is after date of birth"
+
       BusinessValidation.check(willTrust).size mustBe 1
     }
 
@@ -271,6 +272,18 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
       SUT(interVivos).validateSettlor.get.message mustBe
         "Settlor is mandatory for provided type of trust."
       BusinessValidation.check(interVivos).size mustBe 1
+    }
+
+
+    "return validation error when individual settlor has same NINO" in {
+      val employmentTrust = getJsonValueFromString(trustWithValues(settlorNino = "ST019091")).validate[Registration].get
+      val response = SUT(employmentTrust).livingSettlorDuplicateNino
+      response.flatten.zipWithIndex.map{
+        case (error,index) =>
+          error.message mustBe "NINO is already used for another individual settlor."
+          error.location mustBe s"/trust/entities/settlors/settlor/$index/identification/nino"
+      }
+      BusinessValidation.check(employmentTrust).size mustBe 1
     }
   }
 

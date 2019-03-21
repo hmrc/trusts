@@ -126,9 +126,12 @@ trait DataExamples extends  JsonRequests {
     json.transform(jsonTransformer).get.toString()
   }
 
-  def trustWithValues(indBenficiaryDob : String ="2001-01-01") : String = {
+  def trustWithValues(indBenficiaryDob : String ="2001-01-01",
+                      settlorNino :String = "ST019092"
+                    ) : String = {
     val json = getJsonValueFromFile("trusts-dynamic.json")
     json.toString().replace("{indBeneficiaryDob}", indBenficiaryDob)
+      .replace("{settlorNino}", settlorNino)
   }
 
   def willTrustWithValues(
