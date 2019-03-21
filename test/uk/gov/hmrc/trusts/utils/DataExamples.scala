@@ -17,8 +17,9 @@
 package uk.gov.hmrc.trusts.utils
 
 import org.joda.time.DateTime
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.trusts.models._
-
+import play.api.libs.json._
 
 trait DataExamples extends  JsonRequests {
 
@@ -27,7 +28,12 @@ trait DataExamples extends  JsonRequests {
     middleName = None,
     lastName = "Johnson"
   )
+
+  def passport(passportNumber : String = "AB123456789C") = Some(PassportType(passportNumber,new DateTime(), countryOfIssue= "IN"))
+
   val nino = IdentificationType(nino = Some("WA123456A"),None,None)
+  val nino2 = IdentificationType(nino = Some("WA123457A"),None,None)
+  def passportIdentification(passportNumber : String = "AB123456789C") = IdentificationType(nino = None,passport= passport(passportNumber),None)
   val utr = IdentificationOrgType(utr = Some("5454541615"),None)
   val phoneNumber = "1234567890"
   val email = Some("test@test.com")
@@ -51,6 +57,13 @@ trait DataExamples extends  JsonRequests {
 
   def trusteeIndividual(dateOfBirthStr :String= "1500-01-01") = Some(TrusteeIndividualType(name = nameType,
     dateOfBirth = new DateTime(dateOfBirthStr),None,identification = nino))
+
+
+  def indBenficiary(identification :IdentificationType = nino,dateOfBirthStr :String= "1500-01-01") =
+    IndividualDetailsType(
+      nameType,Some(new DateTime(dateOfBirthStr)),false,None,None,None, Some(identification))
+
+
 
   def trusteeOrg  = Some(TrusteeOrgType(
     name = "trustee as company",
@@ -82,6 +95,14 @@ trait DataExamples extends  JsonRequests {
     registration(trustEntities =Some(trustEntities))
   }
 
+  def beneficiaryTypeEntity(individualDetails: Option[List[IndividualDetailsType]] = Some(List(indBenficiary(),indBenficiary(nino2))))
+  = BeneficiaryType( individualDetails, None,None,None,None,None,None)
+
+  def registrationWithBeneficiary(beneficiaryType: BeneficiaryType = beneficiaryTypeEntity()  ) = {
+    val trustEntities = defaultTrustEntities.copy(beneficiary = beneficiaryType)
+    registration(trustEntities =Some(trustEntities))
+  }
+
   def defaultTrustDetails = registrationRequest.trust.details
   def defaultTrustEntities = registrationRequest.trust.entities
 
@@ -97,6 +118,20 @@ trait DataExamples extends  JsonRequests {
       declaration = registrationRequest.declaration,
       agentDetails = None)
   }
+
+
+  def trustWithoutBeneficiary : String = {
+    val json = getJsonValueFromFile("valid-trusts-registration-api.json")
+    val jsonTransformer = (__  \ 'trust \  'entities \ 'beneficiary ).json.prune
+    json.transform(jsonTransformer).get.toString()
+  }
+
+  def trustWithValues(indBenficiaryDob : String ="2001-01-01") : String = {
+    val json = getJsonValueFromFile("trusts-dynamic.json")
+    json.toString().replace("{indBeneficiaryDob}", indBenficiaryDob)
+  }
+
+
 
 
 }

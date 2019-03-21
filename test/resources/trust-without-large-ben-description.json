@@ -1,9 +1,5 @@
 {
-  "matchData": {
-    "utr": "5454541615",
-    "name": "Mark Wolberg",
-    "postCode": "TF3 2BX"
-  },
+
   "correspondence": {
     "abroadIndicator": false,
     "name": "Acme Invest",
@@ -80,54 +76,9 @@
         }
       ],
       "beneficiary": {
-        "individualDetails": [
-          {
-            "name": {
-              "firstName": "John",
-              "middleName": "William",
-              "lastName": "O'Connor"
-            },
-            "dateOfBirth": "2001-01-01",
-            "vulnerableBeneficiary": true,
-            "beneficiaryType": "Director",
-            "beneficiaryDiscretion": true,
-            "beneficiaryShareOfIncome": "100",
-            "identification": {
-              "passport": {
-                "number": "abcdefgh",
-                "expirationDate": "2001-01-01",
-                "countryOfIssue": "GB"
-              },
-              "address": {
-                "line1": "1344 Army Road",
-                "line2": "Suite 111",
-                "line4": "Telford",
-                "postCode": "TF1 5DR",
-                "country": "GB"
-              }
-            }
-          }
-        ],
-        "other": [
-          {
-            "description": "Lorem ipsum",
-            "address": {
-              "line1": "1344 Army Road",
-              "line2": "Suite 111",
-              "line4": "Telford",
-              "postCode": "TF1 5DR",
-              "country": "GB"
-            }
-          }
-        ],
         "large": [
           {
             "organisationName": "ds",
-            "description": "Description",
-            "description1": "Description1",
-            "description2": "Description2",
-            "description3": "Description3",
-            "description4": "Description4",
             "numberOfBeneficiary": "1",
             "identification": {
               "address": {

@@ -17,6 +17,7 @@
 package uk.gov.hmrc.trusts.utils
 
 import org.joda.time.DateTime
+import uk.gov.hmrc.trusts.models.{IndividualDetailsType, TrusteeType}
 import uk.gov.hmrc.trusts.services.TrustsValidationError
 
 import scala.annotation.tailrec
@@ -63,6 +64,49 @@ trait ValidationUtil {
     }
 
     findDuplicateHelper(ninos, Nil)
+  }
+
+
+   def getTrusteesUtrWithIndex(trustees: List[TrusteeType]) = {
+    val utrList: List[(String, Int)] = trustees.zipWithIndex.flatMap {
+      case (trustee, index) =>
+        trustee.trusteeOrg.flatMap { x =>
+          x.identification.utr.map { y => (y, index) }
+        }
+    }
+    utrList
+  }
+
+
+   def getTrusteesNinoWithIndex(trustees: List[TrusteeType]) = {
+    val ninoList: List[(String, Int)] = trustees.zipWithIndex.flatMap {
+      case (trustee, index) =>
+        trustee.trusteeInd.flatMap { x =>
+          x.identification.nino.map { y => (y, index) }
+        }
+    }
+    ninoList
+  }
+
+
+   def getIndBenificiaryNinoWithIndex(indBenificiaries: List[IndividualDetailsType]) = {
+    val ninoList: List[(String, Int)] = indBenificiaries.zipWithIndex.flatMap {
+      case (indv, index) =>
+        indv.identification.map { x =>
+          x.nino.map { y => (y, index) }
+        }
+    }.toList.flatten
+    ninoList
+  }
+
+  def getIndBenificiaryPassportNumberWithIndex(indBenificiaries: List[IndividualDetailsType]) = {
+    val passportNumberList: List[(String, Int)] = indBenificiaries.zipWithIndex.flatMap {
+      case (indv, index) =>
+        indv.identification.map { x =>
+          x.passport.map { y => (y.number, index) }
+        }
+    }.toList.flatten
+    passportNumberList
   }
 
 }

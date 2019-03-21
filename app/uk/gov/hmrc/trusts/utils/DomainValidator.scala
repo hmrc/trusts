@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.utils
 
 import play.api.Logger
-import uk.gov.hmrc.trusts.models.{Registration, TrusteeType}
+import uk.gov.hmrc.trusts.models.{IndividualDetailsType, Registration, TrusteeType}
 import uk.gov.hmrc.trusts.services.TrustsValidationError
 
 import scala.annotation.tailrec
@@ -65,7 +65,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
   def indTrusteesDuplicateNino : List[Option[TrustsValidationError]] = {
     registration.trust.entities.trustees.map {
       trustees => {
-        val ninoList: List[(String, Int)] = getNinoWithIndex(trustees)
+        val ninoList: List[(String, Int)] = getTrusteesNinoWithIndex(trustees)
         val duplicatesNino =  findDuplicates(ninoList).reverse
         Logger.info(s"[indTrusteesDuplicateNino] Number of Duplicate Nino found : ${duplicatesNino.size} ")
         duplicatesNino.map{
@@ -79,10 +79,57 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
   }
 
 
+  def indBeneficiariesDuplicateNino : List[Option[TrustsValidationError]] = {
+    registration.trust.entities.beneficiary.individualDetails.map {
+      indBeneficiary => {
+        val ninoList: List[(String, Int)] = getIndBenificiaryNinoWithIndex(indBeneficiary)
+        val duplicatesNino =  findDuplicates(ninoList).reverse
+        Logger.info(s"[indBeneficiariesDuplicateNino] Number of Duplicate Nino found : ${duplicatesNino.size} ")
+        duplicatesNino.map{
+          case (nino,index) =>
+            Some(TrustsValidationError(s"NINO is already used for another individual beneficiary.",
+              s"/trust/entities/beneficiary/individualDetails/$index/identification/nino"))
+        }
+      }
+    }.toList.flatten
+
+  }
+
+
+  def indBeneficiariesDobIsNotFutureDate : List[Option[TrustsValidationError]] = {
+    registration.trust.entities.beneficiary.individualDetails.map {
+      indBeneficiary =>
+        val errors = indBeneficiary.zipWithIndex.map {
+          case (individualBen, index) =>
+            val response =
+              isNotFutureDate(individualBen.dateOfBirth, s"/trust/entities/beneficiary/individualDetails/$index/dateOfBirth", "Date of birth")
+            response
+        }
+        errors
+      }.toList.flatten
+  }
+
+  def indBeneficiariesDuplicatePassportNumber : List[Option[TrustsValidationError]] = {
+    registration.trust.entities.beneficiary.individualDetails.map {
+      indBeneficiary => {
+        val passportNumberList: List[(String, Int)] = getIndBenificiaryPassportNumberWithIndex(indBeneficiary)
+        val duplicatePassportNumberList =  findDuplicates(passportNumberList).reverse
+        Logger.info(s"[indBeneficiariesDuplicatePassportNumber] Number of Duplicate passport number found : ${duplicatePassportNumberList.size} ")
+        duplicatePassportNumberList.map{
+          case (passport,index) =>
+            Some(TrustsValidationError(s"Passport number is already used for another individual beneficiary.",
+              s"/trust/entities/beneficiary/individualDetails/$index/identification/passport/number"))
+        }
+      }
+    }.toList.flatten
+
+  }
+
+
   def businessTrusteesDuplicateUtr : List[Option[TrustsValidationError]] = {
     registration.trust.entities.trustees.map {
       trustees => {
-        val utrList: List[(String, Int)] = getUtrWithIndex(trustees)
+        val utrList: List[(String, Int)] = getTrusteesUtrWithIndex(trustees)
         val duplicatesUtr =  findDuplicates(utrList).reverse
         Logger.info(s"[businessTrusteesDuplicateUtr] Number of Duplicate utr found : ${duplicatesUtr.size} ")
         duplicatesUtr.map{
@@ -99,7 +146,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
     val trustUtr = registration.matchData.map( x=> x.utr)
     registration.trust.entities.trustees.map {
       trustees => {
-        val utrList: List[(String, Int)] = getUtrWithIndex(trustees)
+        val utrList: List[(String, Int)] = getTrusteesUtrWithIndex(trustees)
         utrList.map {
           case (utr,index) if trustUtr == Some(utr) =>
             Some(TrustsValidationError(s"Business trustee utr is same as trust utr.",
@@ -111,26 +158,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
     }.toList.flatten
   }
 
-  private def getUtrWithIndex(trustees: List[TrusteeType]) = {
-    val utrList: List[(String, Int)] = trustees.zipWithIndex.flatMap {
-      case (trustee, index) =>
-        trustee.trusteeOrg.flatMap { x =>
-          x.identification.utr.map { y => (y, index) }
-        }
-    }
-    utrList
-  }
 
-
-  private def getNinoWithIndex(trustees: List[TrusteeType]) = {
-    val ninoList: List[(String, Int)] = trustees.zipWithIndex.flatMap {
-      case (trustee, index) =>
-        trustee.trusteeInd.flatMap { x =>
-          x.identification.nino.map { y => (y, index) }
-        }
-    }
-    ninoList
-  }
 }
 
 
@@ -147,8 +175,12 @@ object BusinessValidation {
     ).flatten
 
     errorsList ++ domainValidator.indTrusteesDuplicateNino.flatten ++
+      domainValidator.indTrusteesDobIsNotFutureDate.flatten ++
       domainValidator.businessTrusteesDuplicateUtr.flatten ++
-      domainValidator.businessTrusteeUtrIsNotTrustUtr.flatten
+      domainValidator.businessTrusteeUtrIsNotTrustUtr.flatten ++
+      domainValidator.indBeneficiariesDobIsNotFutureDate.flatten ++
+      domainValidator.indBeneficiariesDuplicateNino.flatten ++
+      domainValidator.indBeneficiariesDuplicatePassportNumber.flatten
 
   }
 }

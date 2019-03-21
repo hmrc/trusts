@@ -19,10 +19,10 @@ package uk.gov.hmrc.trusts.services
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.models.{ExistingTrustCheckRequest, Registration}
-import uk.gov.hmrc.trusts.utils.JsonUtils
+import uk.gov.hmrc.trusts.utils.{DataExamples, JsonUtils}
 
 
-class ValidationServiceSpec extends BaseSpec {
+class ValidationServiceSpec extends BaseSpec with DataExamples {
 
   private lazy val validatationService: ValidationService = new ValidationService()
   private lazy val validator : Validator = validatationService.get("/resources/schemas/trustsApiRegistrationSchema_3.2.0.json")
@@ -40,6 +40,36 @@ class ValidationServiceSpec extends BaseSpec {
       }
     }
 
+    "return registration domain" when {
+      "valid json having large type beneficiary with 5 description" in {
+        val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
+       val registration =  validator.validate[Registration](jsonString).right.get
+        registration.trust.entities.beneficiary.large.get.map{
+          largeBeneficiary =>
+            largeBeneficiary.description mustBe "Description"
+            largeBeneficiary.description1.get mustBe "Description1"
+            largeBeneficiary.description2.get mustBe "Description2"
+            largeBeneficiary.description3.get mustBe "Description3"
+            largeBeneficiary.description4.get mustBe "Description4"
+        }
+      }
+
+      "valid json having large type beneficiary with 1 required description " in {
+        val jsonString = JsonUtils.getJsonFromFile("valid-trusts-org-trustees.json")
+        val registration =  validator.validate[Registration](jsonString).right.get
+        registration.trust.entities.beneficiary.large.get.map{
+          largeBeneficiary =>
+            largeBeneficiary.description mustBe "Description"
+            largeBeneficiary.description1 mustBe None
+            largeBeneficiary.description2 mustBe None
+            largeBeneficiary.description3 mustBe None
+            largeBeneficiary.description4 mustBe None
+
+        }
+      }
+
+    }
+
     "return a list of validaton errors " when {
       "json document is invalid" in {
         val jsonString = JsonUtils.getJsonFromFile("invalid-payload-trusts-registration.json")
@@ -55,6 +85,26 @@ class ValidationServiceSpec extends BaseSpec {
         val jsonString = JsonUtils.getJsonFromFile("trustees-invalid-dob.json")
         val errorList =validator.validate[Registration](jsonString).left.get.
           filter(_.location=="/trust/entities/trustees/0/trusteeInd/dateOfBirth")
+        errorList.size mustBe 1
+      }
+
+      "no beneficiary is provided" in {
+        val errorList = validator.validate[Registration](trustWithoutBeneficiary).left.get.
+          filter(_.message=="object has missing required properties ([\"beneficiary\"])")
+        errorList.size mustBe 1
+      }
+
+      "date of birth of individual beneficiary is before 1500/01/01" in {
+        val jsonString = trustWithValues(indBenficiaryDob = "1499-12-31")
+        val errorList = validator.validate[Registration](jsonString).left.get.
+          filter(_.location=="/trust/entities/beneficiary/individualDetails/0/dateOfBirth")
+        errorList.size mustBe 1
+      }
+
+      "no description provided for large type beneficiary" in {
+        val jsonString =JsonUtils.getJsonFromFile("trust-without-large-ben-description.json")
+        val errorList = validator.validate[Registration](jsonString).left.get.
+          filter(_.location=="/trust/entities/beneficiary/large/0")
         errorList.size mustBe 1
       }
     }

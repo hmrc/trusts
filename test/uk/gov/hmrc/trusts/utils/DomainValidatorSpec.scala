@@ -170,4 +170,56 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
   }
 
 
+  "indBeneficiariesDuplicateNino" should {
+    "return None when individual beneficiary has different nino" in {
+      val request = registrationWithBeneficiary()
+      SUT(request).indBeneficiariesDuplicateNino.flatten mustBe empty
+    }
+
+    "return validation error when individual beneficiaries has same nino " in {
+      val request = registrationWithBeneficiary(beneficiaryType = beneficiaryTypeEntity(Some(List(indBenficiary(),indBenficiary()))))
+      val response = SUT(request).indBeneficiariesDuplicateNino
+      response.flatten.size mustBe 1
+      response.flatten.zipWithIndex.map{
+        case (error,index) =>
+          error.message mustBe "NINO is already used for another individual beneficiary."
+          error.location mustBe s"/trust/entities/beneficiary/individualDetails/${index}/identification/nino"
+      }
+    }
+  }
+
+  "indBeneficiariesDobIsNotFutureDate" should {
+
+    "return validation error when individual beneficiaries has future date of birth" in {
+      val request = registrationWithBeneficiary(beneficiaryType = beneficiaryTypeEntity(Some(List(indBenficiary(nino, "2030-12-31")))))
+      val response =  SUT(request).indBeneficiariesDobIsNotFutureDate
+      response.flatten.size mustBe 1
+      response.flatten.map {
+        error =>
+          error.message mustBe "Date of birth must be today or in the past."
+          error.location mustBe "/trust/entities/beneficiary/individualDetails/0/dateOfBirth"
+      }
+    }
+  }
+
+  "indBeneficiariesDuplicatePassportNumber" should {
+    "return None when individual beneficiary has different passport Number" in {
+      val request = registrationWithBeneficiary(beneficiaryType
+        =   beneficiaryTypeEntity(Some(List(indBenficiary(passportIdentification()),indBenficiary(passportIdentification("AB123456789D"))))))
+      SUT(request).indBeneficiariesDuplicatePassportNumber.flatten mustBe empty
+    }
+
+    "return validation error when individual beneficiaries has same passport number " in {
+      val request = registrationWithBeneficiary(beneficiaryType
+        =   beneficiaryTypeEntity(Some(List(indBenficiary(passportIdentification()),indBenficiary(passportIdentification())))))
+      val response = SUT(request).indBeneficiariesDuplicatePassportNumber
+      response.flatten.size mustBe 1
+      response.flatten.zipWithIndex.map{
+        case (error,index) =>
+          error.message mustBe "Passport number is already used for another individual beneficiary."
+          error.location mustBe s"/trust/entities/beneficiary/individualDetails/${index}/identification/passport/number"
+      }
+    }
+  }
+
 }
