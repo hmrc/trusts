@@ -124,4 +124,14 @@ trait ValidationUtil {
   def isNotTrust(currentTypeOfTrust: String, typeOfTrust: TypeOfTrust.Value) = currentTypeOfTrust != typeOfTrust.toString
 
 
+  def getSettlorPassportNumberWithIndex(settlor: List[Settlor]) = {
+    val passportNumberList: List[(String, Int)] = settlor.zipWithIndex.flatMap {
+      case (indv, index) =>
+        indv.identification.map { x =>
+          x.passport.map { y => (y.number, index) }
+        }
+    }.toList.flatten
+    passportNumberList
+  }
+
 }

@@ -185,7 +185,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
 
 
   def deceasedSettlorIsNotTrustee: Option[TrustsValidationError] = {
-   registration.trust.entities.deceased.flatMap {
+    registration.trust.entities.deceased.flatMap {
       deceased =>
         val deceasedNino = deceased.identification.map(_.nino).flatten
         registration.trust.entities.trustees.flatMap {
@@ -200,17 +200,17 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
     }
   }
 
-  def validateSettlor : Option[TrustsValidationError] = {
-   val currentTrust =  registration.trust.details.typeOfTrust
-   val settlorDefined =  registration.trust.entities.settlors.isDefined
+  def validateSettlor: Option[TrustsValidationError] = {
+    val currentTrust = registration.trust.details.typeOfTrust
+    val settlorDefined = registration.trust.entities.settlors.isDefined
 
-    if(isNotTrust(currentTrust, TypeOfTrust.WILL_TRUST) && !settlorDefined){
+    if (isNotTrust(currentTrust, TypeOfTrust.WILL_TRUST) && !settlorDefined) {
       Some(TrustsValidationError(s"Settlor is mandatory for provided type of trust.",
         s"/trust/entities/settlors"))
     } else None
   }
 
-  def livingSettlorDuplicateNino  : List[Option[TrustsValidationError]]={
+  def livingSettlorDuplicateNino: List[Option[TrustsValidationError]] = {
     registration.trust.entities.settlors.flatMap {
       settlors => {
         settlors.settlor.map {
@@ -228,6 +228,39 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
     }.toList.flatten
   }
 
+
+  def livingSettlorDobIsNotFutureDate: List[Option[TrustsValidationError]] = {
+    registration.trust.entities.settlors.flatMap {
+      settlors => {
+        settlors.settlor.map {
+          settlorIndividuals =>
+            val errors = settlorIndividuals.zipWithIndex.map {
+              case (individualSettlor, index) =>
+                isNotFutureDate(individualSettlor.dateOfBirth, s"/trust/entities/settlors/settlor/$index/dateOfBirth", "Date of birth")
+            }
+            errors
+        }
+      }
+    }.toList.flatten
+  }
+
+  def livingSettlorDuplicatePassportNumber: List[Option[TrustsValidationError]] = {
+    registration.trust.entities.settlors.flatMap {
+      settlors => {
+        settlors.settlor.map {
+          settlorIndividuals =>
+            val passportNumberList: List[(String, Int)] = getSettlorPassportNumberWithIndex(settlorIndividuals)
+            val duplicatePassportNumberList = findDuplicates(passportNumberList).reverse
+            Logger.info(s"[livingSettlorDuplicatePassportNumber] Number of Duplicate passport number found : ${duplicatePassportNumberList.size} ")
+            duplicatePassportNumberList.map {
+              case (passport, index) =>
+                Some(TrustsValidationError(s"Passport number is already used for another individual settlor.",
+                  s"/trust/entities/settlors/settlor/$index/identification/passport/number"))
+            }
+        }
+      }
+    }.toList.flatten
+  }
 
 }
 
@@ -256,7 +289,9 @@ object BusinessValidation {
       domainValidator.indBeneficiariesDobIsNotFutureDate.flatten ++
       domainValidator.indBeneficiariesDuplicateNino.flatten ++
       domainValidator.indBeneficiariesDuplicatePassportNumber.flatten ++
-      domainValidator.livingSettlorDuplicateNino.flatten
+      domainValidator.livingSettlorDuplicateNino.flatten ++
+      domainValidator.livingSettlorDobIsNotFutureDate.flatten ++
+      domainValidator.livingSettlorDuplicatePassportNumber.flatten
 
   }
 }

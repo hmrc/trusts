@@ -285,6 +285,31 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
       }
       BusinessValidation.check(employmentTrust).size mustBe 1
     }
+
+    "return validation error when individual settlor date of birth is future date." in {
+      val employmentTrust = getJsonValueFromString(trustWithValues(settlorDob = "2050-01-01")).validate[Registration].get
+      val response = SUT(employmentTrust).livingSettlorDobIsNotFutureDate
+      response.flatten.size mustBe 1
+      response.flatten.zipWithIndex.map{
+        case (error,index) =>
+          error.message mustBe "Date of birth must be today or in the past."
+          error.location mustBe s"/trust/entities/settlors/settlor/${index+1}/dateOfBirth"
+      }
+      BusinessValidation.check(employmentTrust).size mustBe 1
+    }
+
+    "return validation error when individual settlors has same passport number " in {
+      val trust = heritageFundWithValues(settlorPassportNumber = "AB123456789C")
+      val response = SUT(trust).livingSettlorDuplicatePassportNumber
+      response.flatten.size mustBe 1
+      response.flatten.zipWithIndex.map{
+        case (error,index) =>
+          error.message mustBe "Passport number is already used for another individual settlor."
+          error.location mustBe s"/trust/entities/settlors/settlor/$index/identification/passport/number"
+      }
+      BusinessValidation.check(trust).size mustBe 1
+    }
+
   }
 
 
