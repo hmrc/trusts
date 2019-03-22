@@ -134,6 +134,23 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
             }
     }.toList.flatten
   }
+
+
+  def companySettlorUtrIsNotTrustUtr: List[Option[TrustsValidationError]] = {
+    val trustUtr = registration.matchData.map(x => x.utr)
+    getSettlorCompanies(registration).map {
+      settlorCompanies => {
+        val utrList: List[(String, Int)] = getSettlorUtrNumberWithIndex(settlorCompanies)
+        utrList.map {
+          case (utr, index) if trustUtr == Some(utr) =>
+            Some(TrustsValidationError(s"Settlor company utr is same as trust utr.",
+              s"/trust/entities/settlors/settlorCompany/$index/identification/utr"))
+          case _ =>
+            None
+        }
+      }
+    }.toList.flatten
+  }
 }
 
 
@@ -155,7 +172,8 @@ object SettlorDomainValidation {
       domainValidator.livingSettlorDuplicateNino.flatten ++
       domainValidator.livingSettlorDobIsNotFutureDate.flatten ++
       domainValidator.livingSettlorDuplicatePassportNumber.flatten ++
-      domainValidator.livingSettlorDuplicateUtr.flatten
+      domainValidator.livingSettlorDuplicateUtr.flatten ++
+      domainValidator.companySettlorUtrIsNotTrustUtr.flatten
 
   }
 }

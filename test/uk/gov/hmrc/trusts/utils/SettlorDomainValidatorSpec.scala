@@ -122,6 +122,25 @@ class SettlorDomainValidatorSpec extends BaseSpec with DataExamples {
       BusinessValidation.check(employmentTrust).size mustBe 1
     }
 
+    "return validation error when company settlor utr is trust utr" in {
+      val employmentTrust = getJsonValueFromString(trustWithValues(settlorUtr = "5454541615")).validate[Registration].get
+      val response = SUT(employmentTrust).companySettlorUtrIsNotTrustUtr
+      response.flatten.size mustBe 1
+      response.flatten.zipWithIndex.map {
+        case (error,index) =>
+          error.message mustBe "Settlor company utr is same as trust utr."
+          error.location mustBe s"/trust/entities/settlors/settlorCompany/${index+1}/identification/utr"
+      }
+      BusinessValidation.check(employmentTrust).size mustBe 1
+    }
+
+    "return None when company settlor utr is not trust utr" in {
+      val employmentTrust = getJsonValueFromString(trustWithValues(settlorUtr = "5454541616")).validate[Registration].get
+      val response = SUT(employmentTrust).companySettlorUtrIsNotTrustUtr
+      response.flatten mustBe empty
+      BusinessValidation.check(employmentTrust) mustBe empty
+    }
+
   }
 
 

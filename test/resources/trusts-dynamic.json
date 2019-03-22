@@ -108,18 +108,6 @@
               }
             }
           }
-        ],
-        "other": [
-          {
-            "description": "Lorem ipsum",
-            "address": {
-              "line1": "1344 Army Road",
-              "line2": "Suite 111",
-              "line4": "Telford",
-              "postCode": "TF1 5DR",
-              "country": "GB"
-            }
-          }
         ]
       },
       "leadTrustees": {
