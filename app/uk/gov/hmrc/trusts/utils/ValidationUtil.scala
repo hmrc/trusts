@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.utils
 
 import org.joda.time.DateTime
-import uk.gov.hmrc.trusts.models.{IndividualDetailsType, Settlor, TrusteeType}
+import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.services.TrustsValidationError
 
 import scala.annotation.tailrec
@@ -133,5 +133,40 @@ trait ValidationUtil {
     }.toList.flatten
     passportNumberList
   }
+
+
+  def getSettlorUtrNumberWithIndex(settlorCompanies: List[SettlorCompany]) = {
+    val utrList: List[(String, Int)] = settlorCompanies.zipWithIndex.flatMap {
+      case (settlorCompany, index) =>
+        settlorCompany.identification.map { x=> x.utr map { y => (y,index) } }
+
+    }.toList.flatten
+    utrList
+  }
+
+  def getDeceasedSettlor(registration: Registration) = {
+    registration.trust.entities.deceased.map(x => x)
+  }
+
+  def getSettlorIndividuals(registration: Registration) = {
+    registration.trust.entities.settlors.flatMap {
+      settlors => {
+        settlors.settlor.map {
+          settlorIndividuals => settlorIndividuals
+        }
+      }
+    }
+  }
+
+  def getSettlorCompanies(registration: Registration) = {
+    registration.trust.entities.settlors.flatMap {
+      settlors => {
+        settlors.settlorCompany.map {
+          settlorCompanies => settlorCompanies
+        }
+      }
+    }
+  }
+
 
 }

@@ -181,6 +181,14 @@
             "identification": {
               "utr": "1234561234"
             }
+          },
+          {
+            "name": "abcdefghijklmnopqr",
+            "companyType": "Trading",
+            "companyTime": false,
+            "identification": {
+              "utr": "{settlorUtr}"
+            }
           }
         ]
       }
