@@ -79,6 +79,16 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
     } else None
   }
 
+  def validateDeceasedSettlor: Option[TrustsValidationError] = {
+    val isWillTrust = registration.trust.details.typeOfTrust == TypeOfTrust.WILL_TRUST.toString
+    val deceasedSettlorDefined = registration.trust.entities.deceased.isDefined
+
+    if (isWillTrust && !deceasedSettlorDefined) {
+      Some(TrustsValidationError(s"Deceased settlor is mandatory for Will trust.",
+        s"/trust/entities/settlors"))
+    } else None
+  }
+
   def livingSettlorDuplicateNino: List[Option[TrustsValidationError]] = {
     getSettlorIndividuals(registration).map{
           settlorIndividuals =>

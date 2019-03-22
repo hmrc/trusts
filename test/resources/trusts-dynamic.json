@@ -61,7 +61,7 @@
           "preOffShore": "AD"
         }
       },
-      "typeOfTrust": "Employment Related",
+      "typeOfTrust": "{typeOfTrust}",
       "deedOfVariation": "Previously there was only an absolute interest under the will",
       "interVivos": false,
       "efrbsStartDate": "2019-03-06"

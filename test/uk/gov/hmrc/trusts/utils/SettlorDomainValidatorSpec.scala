@@ -46,6 +46,14 @@ class SettlorDomainValidatorSpec extends BaseSpec with DataExamples {
       BusinessValidation.check(employmentTrust).size mustBe 0
     }
 
+    "return validation error when there is no deceased settlor for will trust." in {
+      val willTrust = getJsonValueFromString(trustWithValues(typeOfTrust = TypeOfTrust.WILL_TRUST.toString)).
+        validate[Registration].get
+      SUT(willTrust).validateDeceasedSettlor.get.message mustBe
+        "Deceased settlor is mandatory for Will trust."
+      BusinessValidation.check(willTrust).size mustBe 1
+    }
+
     "return validation error when deceased date of death is after date of birth." in {
       val willTrust = willTrustWithValues(deceasedDateOfBirth  ="2016-01-01",deceasedDateOfDeath  ="2015-01-01")
       SUT(willTrust).deceasedSettlorDoDIsNotAfterDob.get.message mustBe "Date of death is after date of birth"

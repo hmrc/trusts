@@ -129,12 +129,13 @@ trait DataExamples extends  JsonRequests {
   def trustWithValues(indBenficiaryDob : String ="2001-01-01",
                       settlorNino :String = "ST019092",
                       settlorDob :String = "2001-01-01",
-                      settlorUtr :String = "1234561235"
-                    ) : String = {
+                      settlorUtr :String = "1234561235" ,
+                      typeOfTrust :String= TypeOfTrust.EMPLOYMENT_RELATED_TRUST.toString
+  ) : String = {
     val json = getJsonValueFromFile("trusts-dynamic.json")
     json.toString().replace("{indBeneficiaryDob}", indBenficiaryDob)
       .replace("{settlorNino}", settlorNino).replace("{settlorDob}", settlorDob)
-      .replace("{settlorUtr}", settlorUtr)
+      .replace("{settlorUtr}", settlorUtr).replace("{typeOfTrust}", typeOfTrust)
   }
 
   def willTrustWithValues(
@@ -160,6 +161,8 @@ trait DataExamples extends  JsonRequests {
       .validate[Registration].get
 
   }
+
+
 
 
 
