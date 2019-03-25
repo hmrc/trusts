@@ -165,6 +165,13 @@ trait DataExamples extends  JsonRequests {
   }
 
 
+  def trustWithoutAssets : String = {
+    val json = getJsonValueFromFile("employment-related-trusts-1.json")
+    val jsonTransformer = (__  \ 'trust \  'assets \ 'monetary ).json.prune
+    json.transform(jsonTransformer).get.toString()
+  }
+
+
 
 
 
