@@ -67,7 +67,7 @@ trait ValidationUtil {
   }
 
 
-   def getTrusteesUtrWithIndex(trustees: List[TrusteeType]) = {
+   def getTrusteesUtrWithIndex(trustees: List[TrusteeType]) : List[(String, Int)] = {
     val utrList: List[(String, Int)] = trustees.zipWithIndex.flatMap {
       case (trustee, index) =>
         trustee.trusteeOrg.flatMap { x =>
@@ -78,7 +78,7 @@ trait ValidationUtil {
   }
 
 
-   def getTrusteesNinoWithIndex(trustees: List[TrusteeType]) = {
+   def getTrusteesNinoWithIndex(trustees: List[TrusteeType]):List[(String, Int)] = {
     val ninoList: List[(String, Int)] = trustees.zipWithIndex.flatMap {
       case (trustee, index) =>
         trustee.trusteeInd.flatMap { x =>
@@ -89,84 +89,71 @@ trait ValidationUtil {
   }
 
 
-   def getIndBenificiaryNinoWithIndex(indBenificiaries: List[IndividualDetailsType]) = {
+   def getIndBenificiaryNinoWithIndex(indBenificiaries: List[IndividualDetailsType]):List[(String, Int)] = {
     val ninoList: List[(String, Int)] = indBenificiaries.zipWithIndex.flatMap {
       case (indv, index) =>
         indv.identification.map { x =>
           x.nino.map { y => (y, index) }
         }
-    }.toList.flatten
+    }.flatten
     ninoList
   }
 
-  def getSettlorNinoWithIndex(settlors: List[Settlor]) = {
+  def getSettlorNinoWithIndex(settlors: List[Settlor]) :List[(String, Int)] = {
     val ninoList: List[(String, Int)] = settlors.zipWithIndex.flatMap {
       case (settlor, index) =>
         settlor.identification.map { x =>
           x.nino.map { y => (y, index) }
         }
-    }.toList.flatten
+    }.flatten
     ninoList
   }
 
 
 
-  def getIndBenificiaryPassportNumberWithIndex(indBenificiaries: List[IndividualDetailsType]) = {
+  def getIndBenificiaryPassportNumberWithIndex(indBenificiaries: List[IndividualDetailsType]) :List[(String, Int)] = {
     val passportNumberList: List[(String, Int)] = indBenificiaries.zipWithIndex.flatMap {
       case (indv, index) =>
         indv.identification.map { x =>
           x.passport.map { y => (y.number, index) }
         }
-    }.toList.flatten
+    }.flatten
     passportNumberList
   }
 
-  def isNotTrust(currentTypeOfTrust: String, typeOfTrust: TypeOfTrust.Value) = currentTypeOfTrust != typeOfTrust.toString
+  def isNotTrust(currentTypeOfTrust: String, typeOfTrust: TypeOfTrust.Value): Boolean = currentTypeOfTrust != typeOfTrust.toString
 
 
-  def getSettlorPassportNumberWithIndex(settlor: List[Settlor]) = {
+  def getSettlorPassportNumberWithIndex(settlor: List[Settlor]):List[(String, Int)] = {
     val passportNumberList: List[(String, Int)] = settlor.zipWithIndex.flatMap {
       case (indv, index) =>
         indv.identification.map { x =>
           x.passport.map { y => (y.number, index) }
         }
-    }.toList.flatten
+    }.flatten
     passportNumberList
   }
 
 
-  def getSettlorUtrNumberWithIndex(settlorCompanies: List[SettlorCompany]) = {
+  def getSettlorUtrNumberWithIndex(settlorCompanies: List[SettlorCompany]):List[(String, Int)] = {
     val utrList: List[(String, Int)] = settlorCompanies.zipWithIndex.flatMap {
       case (settlorCompany, index) =>
         settlorCompany.identification.map { x=> x.utr map { y => (y,index) } }
 
-    }.toList.flatten
+    }.flatten
     utrList
   }
 
-  def getDeceasedSettlor(registration: Registration) = {
+  def getDeceasedSettlor(registration: Registration): Option[WillType] = {
     registration.trust.entities.deceased.map(x => x)
   }
 
-  def getSettlorIndividuals(registration: Registration) = {
-    registration.trust.entities.settlors.flatMap {
-      settlors => {
-        settlors.settlor.map {
-          settlorIndividuals => settlorIndividuals
-        }
-      }
-    }
+  def getSettlorIndividuals(registration: Registration): Option[List[Settlor]] = {
+    registration.trust.entities.settlors.flatMap { settlors => settlors.settlor.map(x=>x)}
   }
 
-  def getSettlorCompanies(registration: Registration) = {
-    registration.trust.entities.settlors.flatMap {
-      settlors => {
-        settlors.settlorCompany.map {
-          settlorCompanies => settlorCompanies
-        }
-      }
-    }
+  def getSettlorCompanies(registration: Registration): Option[List[SettlorCompany]] = {
+    registration.trust.entities.settlors.flatMap {settlors => settlors.settlorCompany.map(x=>x) }
   }
-
 
 }
