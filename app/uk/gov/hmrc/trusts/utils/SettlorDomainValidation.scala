@@ -209,6 +209,7 @@ object SettlorDomainValidation {
       sValidator.deceasedSettlorDoDIsNotAfterDob,
       sValidator.deceasedSettlorIsNotTrustee,
       sValidator.validateSettlor,
+      sValidator.validateDeceasedSettlor,
       sValidator.deceasedSettlorIsNotBeneficiary,
       sValidator.deceasedSettlorIsNotProtector
     ).flatten

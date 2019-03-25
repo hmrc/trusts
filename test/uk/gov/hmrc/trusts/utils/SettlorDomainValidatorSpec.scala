@@ -42,7 +42,6 @@ class SettlorDomainValidatorSpec extends BaseSpec with DataExamples {
     "return None when there is no deceased settlor" in {
       val employmentTrust = registrationRequest
       SUT(employmentTrust).deceasedSettlorDobIsNotFutureDate mustBe None
-      println(BusinessValidation.check(employmentTrust))
       BusinessValidation.check(employmentTrust).size mustBe 0
     }
 
