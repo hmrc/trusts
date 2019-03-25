@@ -179,6 +179,16 @@
             }
           }
         ]
+      },
+      "protectors": {
+        "protector": [
+          {
+            "name": {
+              "firstName": "Oscar",
+              "lastName": "Joshi"
+            }
+          }
+        ]
       }
     },
     "assets": {

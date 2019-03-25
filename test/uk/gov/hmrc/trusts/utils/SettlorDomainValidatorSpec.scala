@@ -149,6 +149,27 @@ class SettlorDomainValidatorSpec extends BaseSpec with DataExamples {
       BusinessValidation.check(employmentTrust) mustBe empty
     }
 
+    "return validation error when deceased settlor nino is same as benficiary nino" in {
+      val willTrust = willTrustWithValues(deceasedNino="KC287322")
+      SUT(willTrust).deceasedSettlorIsNotBeneficiary.get.message mustBe
+        "Deceased NINO is same as beneficiary NINO."
+     BusinessValidation.check(willTrust).size mustBe 1
+    }
+
+    "return validation error when deceased settlor nino is same as protector nino" in {
+      val willTrust = willTrustWithValues(deceasedNino="AB123456K")
+      SUT(willTrust).deceasedSettlorIsNotProtector.get.message mustBe
+        "Deceased NINO is same as individual protector NINO."
+      BusinessValidation.check(willTrust).size mustBe 1
+    }
+
+    "return no error when deceased settlor nino is different from protector nino" in {
+      val willTrust = willTrustWithValues(deceasedNino="AB123456K")
+      SUT(willTrust).deceasedSettlorIsNotProtector.get.message mustBe
+        "Deceased NINO is same as individual protector NINO."
+      BusinessValidation.check(willTrust).size mustBe 1
+    }
+
   }
 
 

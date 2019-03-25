@@ -64,16 +64,21 @@
         }
       ],
       "beneficiary": {
-        "other": [
+        "individualDetails": [
           {
-            "address": {
-              "line1": "1344 Army Road",
-              "line2": "Suite 111",
-              "line4": "Telford",
-              "postCode": "TF1 5DR",
-              "country": "GB"
+            "name": {
+              "firstName": "John",
+              "middleName": "William",
+              "lastName": "O'Connor"
             },
-            "description": "Lorem ipsum"
+            "dateOfBirth": "2001-01-01",
+            "vulnerableBeneficiary": true,
+            "beneficiaryType": "Director",
+            "beneficiaryDiscretion": true,
+            "beneficiaryShareOfIncome": "100",
+            "identification": {
+              "nino": "KC287322"
+            }
           }
         ]
       },
@@ -114,7 +119,20 @@
             }
           }
         }
-      ]
+      ],
+      "protectors": {
+        "protector": [
+          {
+            "name": {
+              "firstName": "Oscar",
+              "lastName": "Joshi"
+            },
+            "identification": {
+              "nino": "{protectorNino}"
+            }
+          }
+        ]
+      }
     },
     "assets": {
       "monetary": [

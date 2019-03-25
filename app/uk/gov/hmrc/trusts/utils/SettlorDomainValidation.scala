@@ -69,6 +69,39 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
     }
   }
 
+  def deceasedSettlorIsNotBeneficiary: Option[TrustsValidationError] = {
+    getDeceasedSettlor(registration).flatMap {
+      deceased =>
+        val deceasedNino = deceased.identification.map(_.nino).flatten
+        registration.trust.entities.beneficiary.individualDetails.flatMap {
+          indBeneficiary => {
+            val beneficiaryNino = indBeneficiary.flatMap{x=>x.identification.map{y=>y.nino}}
+            if (deceasedNino.isDefined && beneficiaryNino.contains(deceasedNino)) {
+              Some(TrustsValidationError(s"Deceased NINO is same as beneficiary NINO.",
+                s"/trust/entities/deceased/identification/nino"))
+            } else None
+          }
+        }
+    }
+  }
+
+
+  def deceasedSettlorIsNotProtector: Option[TrustsValidationError] = {
+    getDeceasedSettlor(registration).flatMap {
+      deceased =>
+        val deceasedNino = deceased.identification.map(_.nino).flatten
+        registration.trust.entities.protectors.flatMap {
+          protectors => {
+            val protectorNino = protectors.protector.map{x=>x.flatMap{y=>y.identification.map{z=>z.nino}}}.toList.flatten
+            if (deceasedNino.isDefined && protectorNino.contains(deceasedNino)) {
+              Some(TrustsValidationError(s"Deceased NINO is same as individual protector NINO.",
+                s"/trust/entities/deceased/identification/nino"))
+            } else None
+          }
+        }
+    }
+  }
+
   def validateSettlor: Option[TrustsValidationError] = {
     val currentTrust = registration.trust.details.typeOfTrust
     val settlorDefined = registration.trust.entities.settlors.isDefined
@@ -168,22 +201,25 @@ object SettlorDomainValidation {
 
   def check(registration: Registration): List[TrustsValidationError] = {
 
-    val domainValidator = new SettlorDomainValidation(registration)
+    val sValidator = new SettlorDomainValidation(registration)
 
     val errorsList = List(
-      domainValidator.deceasedSettlorDobIsNotFutureDate,
-      domainValidator.deceasedSettlorDoDIsNotFutureDate,
-      domainValidator.deceasedSettlorDoDIsNotAfterDob,
-      domainValidator.deceasedSettlorIsNotTrustee,
-      domainValidator.validateSettlor
+      sValidator.deceasedSettlorDobIsNotFutureDate,
+      sValidator.deceasedSettlorDoDIsNotFutureDate,
+      sValidator.deceasedSettlorDoDIsNotAfterDob,
+      sValidator.deceasedSettlorIsNotTrustee,
+      sValidator.validateSettlor,
+      sValidator.deceasedSettlorIsNotBeneficiary,
+      sValidator.deceasedSettlorIsNotProtector
     ).flatten
 
     errorsList ++
-      domainValidator.livingSettlorDuplicateNino.flatten ++
-      domainValidator.livingSettlorDobIsNotFutureDate.flatten ++
-      domainValidator.livingSettlorDuplicatePassportNumber.flatten ++
-      domainValidator.livingSettlorDuplicateUtr.flatten ++
-      domainValidator.companySettlorUtrIsNotTrustUtr.flatten
+      sValidator.livingSettlorDuplicateNino.flatten ++
+      sValidator.livingSettlorDobIsNotFutureDate.flatten ++
+      sValidator.livingSettlorDuplicatePassportNumber.flatten ++
+      sValidator.livingSettlorDuplicateUtr.flatten ++
+      sValidator.companySettlorUtrIsNotTrustUtr.flatten
+
 
   }
 }
