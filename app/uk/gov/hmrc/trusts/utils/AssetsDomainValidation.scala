@@ -46,14 +46,7 @@ class AssetsDomainValidation (registration: Registration) extends ValidationUtil
 object AssetsDomainValidation {
 
   def check(registration: Registration): List[TrustsValidationError] = {
-
     val aValidator = new AssetsDomainValidation(registration)
-
-    val errorsList = List(
-    ).flatten
-
-    errorsList ++
-      aValidator.valueFullIsNotMoreThanValuePrevious.flatten
-
+    aValidator.valueFullIsNotMoreThanValuePrevious.flatten
   }
 }
