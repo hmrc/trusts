@@ -178,7 +178,6 @@
         {
           "numberOfShares": "100",
           "orgName": "Mock Org LTD",
-          "utr": "1231712342",
           "shareClass": "Ordinary shares",
           "typeOfShare": "Quoted",
           "value": 999999999999
@@ -186,7 +185,6 @@
       ],
       "partnerShip": [
         {
-          "utr": "5456456221",
           "description": "Partnership Trade \\ {À-˿’}\\- &`'^",
           "partnershipStart": "2001-01-01"
         }
