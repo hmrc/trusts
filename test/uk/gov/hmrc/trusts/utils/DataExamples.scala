@@ -126,10 +126,44 @@ trait DataExamples extends  JsonRequests {
     json.transform(jsonTransformer).get.toString()
   }
 
-  def trustWithValues(indBenficiaryDob : String ="2001-01-01") : String = {
+  def trustWithValues(indBenficiaryDob : String ="2001-01-01",
+                      settlorNino :String = "ST019092",
+                      settlorDob :String = "2001-01-01",
+                      settlorUtr :String = "1234561235" ,
+                      typeOfTrust :String= TypeOfTrust.EMPLOYMENT_RELATED_TRUST.toString
+  ) : String = {
     val json = getJsonValueFromFile("trusts-dynamic.json")
     json.toString().replace("{indBeneficiaryDob}", indBenficiaryDob)
+      .replace("{settlorNino}", settlorNino).replace("{settlorDob}", settlorDob)
+      .replace("{settlorUtr}", settlorUtr).replace("{typeOfTrust}", typeOfTrust)
   }
+
+  def willTrustWithValues(
+                           deceasedDateOfBirth : String ="2001-01-01",
+                           deceasedDateOfDeath : String ="2016-01-01",
+                           deceasedNino :String = "KC456736",
+                           typeOfTrust :String= TypeOfTrust.WILL_TRUST.toString,
+                           protectorNino :String = "AB123456K") : Registration = {
+    val json = getJsonValueFromFile("will-trust-dynamic.json")
+    getJsonValueFromString(json.toString().
+      replace("{deceasedDateOfBirth}", deceasedDateOfBirth).
+      replace("{deceasedDateOfDeath}", deceasedDateOfDeath).
+      replace("{typeOfTrust}", typeOfTrust).
+      replace("{protectorNino}", protectorNino).
+      replace("{deceasedNino}", deceasedNino)).
+      validate[Registration].get
+  }
+
+  def heritageFundWithValues(settlorPassportNumber : String ="AB123456789D"
+                     ) : Registration = {
+    val json = getJsonValueFromFile("trusts-dynamic-1.json")
+    getJsonValueFromString(
+    json.toString().
+      replace("{settlorPassportNumber}", settlorPassportNumber))
+      .validate[Registration].get
+
+  }
+
 
 
 

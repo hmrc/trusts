@@ -50,7 +50,6 @@
       "country": "GB"
     }
   },
-
   "trust": {
     "details": {
       "startDate": "2019-03-06",
@@ -61,7 +60,7 @@
           "preOffShore": "AD"
         }
       },
-      "typeOfTrust": "{typeOfTrust}",
+      "typeOfTrust": "Heritage Maintenance Fund",
       "deedOfVariation": "Previously there was only an absolute interest under the will",
       "interVivos": false
     },
@@ -87,7 +86,7 @@
               "middleName": "William",
               "lastName": "O'Connor"
             },
-            "dateOfBirth": "{indBeneficiaryDob}",
+            "dateOfBirth": "2001-01-01",
             "vulnerableBeneficiary": true,
             "beneficiaryType": "Director",
             "beneficiaryDiscretion": true,
@@ -104,6 +103,36 @@
                 "line4": "Telford",
                 "postCode": "TF1 5DR",
                 "country": "GB"
+              }
+            }
+          }
+        ],
+        "other": [
+          {
+            "description": "Lorem ipsum",
+            "address": {
+              "line1": "1344 Army Road",
+              "line2": "Suite 111",
+              "line4": "Telford",
+              "postCode": "TF1 5DR",
+              "country": "GB"
+            }
+          }
+        ],
+        "large": [
+          {
+            "organisationName": "ds",
+            "description": "Description",
+            "description1": "Description1",
+            "description2": "Description2",
+            "description3": "Description3",
+            "description4": "Description4",
+            "numberOfBeneficiary": "1",
+            "identification": {
+              "address": {
+                "line1": "sdf",
+                "line2": "sdf",
+                "country": "TL"
               }
             }
           }
@@ -143,9 +172,20 @@
               "middleName": "abcdefghijklmn",
               "lastName": "abcde"
             },
-            "dateOfBirth": "2015-01-01",
+            "dateOfBirth": "2001-01-01",
             "identification": {
-              "nino": "{settlorNino}"
+              "passport": {
+                "number": "{settlorPassportNumber}",
+                "expirationDate": "2001-01-01",
+                "countryOfIssue": "GB"
+              },
+              "address": {
+                "line1": "1344 Army Road",
+                "line2": "Suite 111",
+                "line4": "Telford",
+                "postCode": "TF1 5DR",
+                "country": "GB"
+              }
             }
           },
           {
@@ -154,9 +194,20 @@
               "middleName": "abcdefghijklmn",
               "lastName": "abcde"
             },
-            "dateOfBirth": "{settlorDob}",
+            "dateOfBirth": "2001-01-01",
             "identification": {
-              "nino": "ST019091"
+              "passport": {
+                "number": "AB123456789C",
+                "expirationDate": "2001-01-01",
+                "countryOfIssue": "GB"
+              },
+              "address": {
+                "line1": "1344 Army Road",
+                "line2": "Suite 111",
+                "line4": "Telford",
+                "postCode": "TF1 5DR",
+                "country": "GB"
+              }
             }
           }
         ],
@@ -167,24 +218,6 @@
             "companyTime": false,
             "identification": {
               "utr": "1234561234"
-            }
-          },
-          {
-            "name": "abcdefghijklmnopqr",
-            "companyType": "Trading",
-            "companyTime": false,
-            "identification": {
-              "utr": "{settlorUtr}"
-            }
-          }
-        ]
-      },
-      "protectors": {
-        "protector": [
-          {
-            "name": {
-              "firstName": "Oscar",
-              "lastName": "Joshi"
             }
           }
         ]
@@ -234,7 +267,6 @@
         }
       ]
     }
-
   },
   "agentDetails": {
     "arn": "AARN1234567",

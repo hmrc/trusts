@@ -1,9 +1,5 @@
 {
-  "matchData": {
-    "utr": "5454541615",
-    "name": "Mark Wolberg",
-    "postCode": "TF3 2BX"
-  },
+
   "correspondence": {
     "abroadIndicator": false,
     "name": "Acme Invest",
@@ -21,19 +17,8 @@
       {
         "taxReturnYear": "16",
         "taxConsequence": false
-      },
-      {
-        "taxReturnYear": "15",
-        "taxConsequence": false
-      },
-      {
-        "taxReturnYear": "14",
-        "taxConsequence": false
-      },
-      {
-        "taxReturnYear": "13",
-        "taxConsequence": false
       }
+
     ]
   },
   "declaration": {
@@ -50,10 +35,9 @@
       "country": "GB"
     }
   },
-
   "trust": {
     "details": {
-      "startDate": "2019-03-06",
+      "startDate": "2015-01-01",
       "administrationCountry": "GB",
       "residentialStatus": {
         "uk": {
@@ -87,27 +71,28 @@
               "middleName": "William",
               "lastName": "O'Connor"
             },
-            "dateOfBirth": "{indBeneficiaryDob}",
+            "dateOfBirth": "2001-01-01",
             "vulnerableBeneficiary": true,
             "beneficiaryType": "Director",
             "beneficiaryDiscretion": true,
             "beneficiaryShareOfIncome": "100",
             "identification": {
-              "passport": {
-                "number": "abcdefgh",
-                "expirationDate": "2001-01-01",
-                "countryOfIssue": "GB"
-              },
-              "address": {
-                "line1": "1344 Army Road",
-                "line2": "Suite 111",
-                "line4": "Telford",
-                "postCode": "TF1 5DR",
-                "country": "GB"
-              }
+              "nino": "KC287322"
             }
           }
         ]
+      },
+      "deceased": {
+        "name": {
+          "firstName": "John",
+          "middleName": "William",
+          "lastName": "O'Connor"
+        },
+        "dateOfBirth": "{deceasedDateOfBirth}",
+        "dateOfDeath": "{deceasedDateOfDeath}",
+        "identification": {
+          "nino": "{deceasedNino}"
+        }
       },
       "leadTrustees": {
         "leadTrusteeOrg": {
@@ -135,56 +120,15 @@
           }
         }
       ],
-      "settlors": {
-        "settlor": [
-          {
-            "name": {
-              "firstName": "abcdefghijkl",
-              "middleName": "abcdefghijklmn",
-              "lastName": "abcde"
-            },
-            "dateOfBirth": "2015-01-01",
-            "identification": {
-              "nino": "{settlorNino}"
-            }
-          },
-          {
-            "name": {
-              "firstName": "abcdefghijkl",
-              "middleName": "abcdefghijklmn",
-              "lastName": "abcde"
-            },
-            "dateOfBirth": "{settlorDob}",
-            "identification": {
-              "nino": "ST019091"
-            }
-          }
-        ],
-        "settlorCompany": [
-          {
-            "name": "abcdefghijklmnopqr",
-            "companyType": "Trading",
-            "companyTime": false,
-            "identification": {
-              "utr": "1234561234"
-            }
-          },
-          {
-            "name": "abcdefghijklmnopqr",
-            "companyType": "Trading",
-            "companyTime": false,
-            "identification": {
-              "utr": "{settlorUtr}"
-            }
-          }
-        ]
-      },
       "protectors": {
         "protector": [
           {
             "name": {
               "firstName": "Oscar",
               "lastName": "Joshi"
+            },
+            "identification": {
+              "nino": "{protectorNino}"
             }
           }
         ]
@@ -209,32 +153,9 @@
           "valueFull": 999999999999,
           "valuePrevious": 999999999999
         }
-      ],
-      "shares": [
-        {
-          "numberOfShares": "100",
-          "orgName": "Mock Org LTD",
-          "utr": "1231712342",
-          "shareClass": "Ordinary shares",
-          "typeOfShare": "Quoted",
-          "value": 999999999999
-        }
-      ],
-      "partnerShip": [
-        {
-          "utr": "5456456221",
-          "description": "Partnership Trade \\ {À-˿’}\\- &`'^",
-          "partnershipStart": "2001-01-01"
-        }
-      ],
-      "other": [
-        {
-          "description": "Lorem ipsum anum",
-          "value": 999999999999
-        }
       ]
-    }
 
+    }
   },
   "agentDetails": {
     "arn": "AARN1234567",
