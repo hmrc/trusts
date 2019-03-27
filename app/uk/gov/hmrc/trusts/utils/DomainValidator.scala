@@ -180,7 +180,8 @@ object BusinessValidation {
       domainValidator.indBeneficiariesDobIsNotFutureDate.flatten ++
       domainValidator.indBeneficiariesDuplicateNino.flatten ++
       domainValidator.indBeneficiariesDuplicatePassportNumber.flatten ++
-      SettlorDomainValidation.check(registration)
+      SettlorDomainValidation.check(registration) ++
+      AssetsDomainValidation.check(registration)
 
   }
 }

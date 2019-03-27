@@ -22,6 +22,24 @@ import uk.gov.hmrc.trusts.services.TrustsValidationError
 
 class AssetsDomainValidation (registration: Registration) extends ValidationUtil {
 
+
+  def valueFullIsNotMoreThanValuePrevious:List[Option[TrustsValidationError]]= {
+    registration.trust.assets.propertyOrLand.map {
+      properties =>
+        properties.zipWithIndex.map {
+          case (property, index) =>
+            val isValid = property.valueFull.getOrElse(0L) >= property.valuePrevious.getOrElse(0L)
+            if (!isValid) {
+              Some(TrustsValidationError(s"Value full must be equal or more than value previous.",
+                s"/trust/assets/propertyOrLand/${index}/valueFull"))
+            } else {
+              None
+            }
+        }
+    }.toList.flatten
+  }
+
+
 }
 
 
@@ -32,10 +50,10 @@ object AssetsDomainValidation {
     val aValidator = new AssetsDomainValidation(registration)
 
     val errorsList = List(
-
     ).flatten
 
-    errorsList
+    errorsList ++
+      aValidator.valueFullIsNotMoreThanValuePrevious.flatten
 
   }
 }

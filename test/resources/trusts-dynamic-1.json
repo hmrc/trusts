@@ -239,7 +239,7 @@
             "postCode": "TF1 5DR",
             "country": "GB"
           },
-          "valueFull": 999999999999,
+          "valueFull": "{valueFull}",
           "valuePrevious": 999999999999
         }
       ],

@@ -154,12 +154,14 @@ trait DataExamples extends  JsonRequests {
       validate[Registration].get
   }
 
-  def heritageFundWithValues(settlorPassportNumber : String ="AB123456789D"
+  def heritageFundWithValues(settlorPassportNumber : String ="AB123456789D",
+                             valueFull:String = "999999999999"
                      ) : Registration = {
     val json = getJsonValueFromFile("trusts-dynamic-1.json")
     getJsonValueFromString(
     json.toString().
-      replace("{settlorPassportNumber}", settlorPassportNumber))
+      replace("{settlorPassportNumber}", settlorPassportNumber).
+      replace("\"{valueFull}\"", valueFull))
       .validate[Registration].get
 
   }
