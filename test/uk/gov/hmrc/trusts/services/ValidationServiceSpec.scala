@@ -68,6 +68,15 @@ class ValidationServiceSpec extends BaseSpec with DataExamples {
         }
       }
 
+      "valid json having asset value of 12 digits. " in {
+        val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
+        val registration =  validator.validate[Registration](jsonString).right.get
+        registration.trust.assets.monetary.get.map{x=>x.assetMonetaryAmount.toString.length mustBe 12}
+        registration.trust.assets.propertyOrLand.get.map{x=>x.valueFull.get.toString.length mustBe 12}
+        registration.trust.assets.shares.get.map{x=>x.value.get.toString.length mustBe 12}
+        registration.trust.assets.other.get.map{x=>x.value.get.toString.length mustBe 12}
+      }
+
     }
 
     "return a list of validaton errors " when {
@@ -105,6 +114,12 @@ class ValidationServiceSpec extends BaseSpec with DataExamples {
         val jsonString =JsonUtils.getJsonFromFile("trust-without-large-ben-description.json")
         val errorList = validator.validate[Registration](jsonString).left.get.
           filter(_.location=="/trust/entities/beneficiary/large/0")
+        errorList.size mustBe 1
+      }
+
+      "no asset type is provided" in {
+        val errorList = validator.validate[Registration](trustWithoutAssets).left.get.
+          filter(_.location=="/trust/assets")
         errorList.size mustBe 1
       }
     }

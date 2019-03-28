@@ -109,6 +109,7 @@
 				"monetary": {
 					"type": "array",
 					"minItems": 1,
+					"maxItems": 1,
 					"items": {
 						"type": "object",
 						"properties": {
@@ -125,6 +126,7 @@
 				"propertyOrLand": {
 					"type": "array",
 					"minItems": 1,
+					"maxItems": 10,
 					"items": {
 						"$ref": "#/definitions/propertyLandType"
 					}
@@ -132,6 +134,7 @@
 				"shares": {
 					"type": "array",
 					"minItems": 1,
+					"maxItems": 10,
 					"items": {
 						"$ref": "#/definitions/sharesType"
 					}
@@ -139,6 +142,7 @@
 				"business": {
 					"type": "array",
 					"minItems": 1,
+					"maxItems": 10,
 					"items": {
 						"$ref": "#/definitions/businessAssetType"
 					}
@@ -146,6 +150,7 @@
 				"partnerShip": {
 					"type": "array",
 					"minItems": 1,
+					"maxItems": 10,
 					"items": {
 						"$ref": "#/definitions/partnershipType"
 					}
@@ -153,6 +158,7 @@
 				"other": {
 					"type": "array",
 					"minItems": 1,
+					"maxItems": 10,
 					"items": {
 						"$ref": "#/definitions/otherAssetType"
 					}
@@ -961,9 +967,7 @@
 				"orgName": {
 					"$ref": "#/definitions/orgNameString"
 				},
-				"utr": {
-					"$ref": "#/definitions/utrString"
-				},
+
 				"businessDescription": {
 					"type": "string",
 					"pattern": "^[0-9a-zA-Z{\u00C0-\u02FF\u2019}\\- \\u005C&`'^]{1,56}$"
@@ -1000,9 +1004,6 @@
 		"partnershipType": {
 			"type": "object",
 			"properties": {
-				"utr": {
-					"$ref": "#/definitions/utrString"
-				},
 				"description": {
 					"type": "string",
 					"pattern": "^[0-9a-zA-Z{\u00C0-\u02FF\u2019}\\- \\u005C&`'^]{1,56}$"
@@ -1026,9 +1027,7 @@
 				"orgName": {
 					"$ref": "#/definitions/orgNameString"
 				},
-				"utr": {
-					"$ref": "#/definitions/utrString"
-				},
+
 				"shareClass": {
 					"type": "string",
 					"enum": [
