@@ -37,10 +37,14 @@ class DesServiceImpl @Inject()(val desConnector: DesConnector) extends DesServic
     desConnector.registerTrust(registration)
   }
 
+  override def registerEstate(estateRegistration: EstateRegistration)
+                            (implicit hc: HeaderCarrier): Future[RegistrationResponse] = {
+    desConnector.registerEstate(estateRegistration)
+  }
+
   override def getSubscriptionId(trn: String)(implicit hc: HeaderCarrier): Future[SubscriptionIdResponse] = {
     desConnector.getSubscriptionId(trn)
   }
-
 
 
 }
@@ -48,12 +52,12 @@ class DesServiceImpl @Inject()(val desConnector: DesConnector) extends DesServic
 
 @ImplementedBy(classOf[DesServiceImpl])
 trait DesService {
+
   def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest)(implicit hc: HeaderCarrier): Future[ExistingTrustResponse]
 
   def registerTrust(registration: Registration)(implicit hc: HeaderCarrier): Future[RegistrationResponse]
 
+  def registerEstate(estateRegistration: EstateRegistration)(implicit hc: HeaderCarrier): Future[RegistrationResponse]
 
   def getSubscriptionId(trn: String)(implicit hc: HeaderCarrier): Future[SubscriptionIdResponse]
-
-
 }

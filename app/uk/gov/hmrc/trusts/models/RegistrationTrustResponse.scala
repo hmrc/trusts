@@ -26,11 +26,12 @@ import uk.gov.hmrc.trusts.models.DesErrorResponse.formats
 
 sealed trait RegistrationResponse
 
-final case class RegistrationTrustResponse(trn: String) extends RegistrationResponse
+final case class RegistrationTrnResponse(trn: String) extends RegistrationResponse
+
 
 object RegistrationResponse {
 
-  implicit val formats = Json.format[RegistrationTrustResponse]
+  implicit val formats = Json.format[RegistrationTrnResponse]
 
 
   implicit lazy val httpReads: HttpReads[RegistrationResponse] =
@@ -40,7 +41,7 @@ object RegistrationResponse {
         Logger.info(s"[RegistrationTrustResponse]  response status received from des: ${response.status}")
         response.status match {
           case OK =>
-            response.json.as[RegistrationTrustResponse]
+            response.json.as[RegistrationTrnResponse]
 
           case FORBIDDEN =>
             response.json.asOpt[DesErrorResponse] match {

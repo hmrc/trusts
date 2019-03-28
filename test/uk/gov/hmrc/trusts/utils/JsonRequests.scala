@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.utils
 
 import play.api.libs.json.Json
-import uk.gov.hmrc.trusts.models.Registration
+import uk.gov.hmrc.trusts.models.{EstateRegistration, Registration}
 
 import scala.io.Source
 
@@ -29,8 +29,12 @@ trait JsonRequests extends JsonUtils {
   lazy val invalidRegistrationRequestJson  =  getJsonFromFile("invalid-payload-trusts-registration.json")
   lazy val invalidTrustBusinessValidation  =  getJsonFromFile("trust-business-validation-fail.json")
 
+  lazy val estateRegistration01  =  getJsonFromFile("valid-estate-registration-01.json")
+
+
   lazy val registrationRequest = getJsonValueFromFile("valid-trusts-registration-api.json").validate[Registration].get
 
   lazy val invalidRegistrationRequest = getJsonValueFromFile("invalid-payload-trusts-registration.json").validate[Registration].get
 
+  lazy val estateRegRequest = getJsonValueFromFile("valid-estate-registration-01.json").validate[EstateRegistration].get
 }

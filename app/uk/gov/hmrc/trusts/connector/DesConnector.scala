@@ -40,8 +40,11 @@ import uk.gov.hmrc.trusts.utils.Constants._
 class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesConnector {
 
   lazy val trustsServiceUrl : String = s"${config.desUrl}/trusts"
+  lazy val estatesServiceUrl : String = s"${config.desUrl}/estates"
+
   lazy val matchEndpoint : String = trustsServiceUrl + "/match"
-  lazy val registrationEndpoint : String = trustsServiceUrl + "/registration"
+  lazy val trustRegistrationEndpoint : String = trustsServiceUrl + "/registration"
+  lazy val registrationEstatesEndpoint : String = estatesServiceUrl + "/registration"
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "Correlation-Id"
@@ -70,9 +73,17 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
                             : Future[RegistrationResponse] = {
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
-    val response = http.POST[JsValue, RegistrationResponse](registrationEndpoint, Json.toJson(registration))
+    val response = http.POST[JsValue, RegistrationResponse](trustRegistrationEndpoint, Json.toJson(registration))
     (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc),global)
 
+    response
+  }
+
+  override def registerEstate(registration: EstateRegistration)
+  : Future[RegistrationResponse] = {
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
+    val response = http.POST[JsValue, RegistrationResponse](registrationEstatesEndpoint, Json.toJson(registration))
+    (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc),global)
     response
   }
 
@@ -94,6 +105,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 trait DesConnector {
   def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest): Future[ExistingTrustResponse]
   def registerTrust(registration: Registration): Future[RegistrationResponse]
+  def registerEstate(registration: EstateRegistration): Future[RegistrationResponse]
   def getSubscriptionId(trn: String): Future[SubscriptionIdResponse]
 
 }
