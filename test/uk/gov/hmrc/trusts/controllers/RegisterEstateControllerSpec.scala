@@ -99,7 +99,7 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
         val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)
 
 
-        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(estateRegistration01)))
+        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(estateRegistration03)))
         status(result) mustBe OK
         (contentAsJson(result) \ "trn").as[String] mustBe estateTrnResponse
         verify(rosmPatternService, times(0)).completeRosmTransaction(any())(any[HeaderCarrier])
