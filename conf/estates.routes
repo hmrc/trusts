@@ -1,7 +1,5 @@
 # microservice specific routes
 
-POST        /trusts/check                    uk.gov.hmrc.trusts.controllers.CheckTrustController.checkExistingTrust
 
-POST        /trusts/register                  uk.gov.hmrc.trusts.controllers.RegisterTrustController.registration
+POST        /register                  uk.gov.hmrc.trusts.controllers.RegisterEstateController.registration
 
-POST        /trusts/tax-enrolment/callback/subscriptions      uk.gov.hmrc.trusts.controllers.TaxEnrolmentCallbackController.subscriptionCallback

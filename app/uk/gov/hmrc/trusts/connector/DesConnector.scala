@@ -39,8 +39,8 @@ import uk.gov.hmrc.trusts.utils.Constants._
 
 class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesConnector {
 
-  lazy val trustsServiceUrl : String = s"${config.desUrl}/trusts"
-  lazy val estatesServiceUrl : String = s"${config.desUrl}/estates"
+  lazy val trustsServiceUrl : String = s"${config.desTrustsUrl}/trusts"
+  lazy val estatesServiceUrl : String = s"${config.desEstatesUrl}/estates"
 
   lazy val matchEndpoint : String = trustsServiceUrl + "/match"
   lazy val trustRegistrationEndpoint : String = trustsServiceUrl + "/registration"
@@ -79,9 +79,9 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
     response
   }
 
-  override def registerEstate(registration: EstateRegistration)
-  : Future[RegistrationResponse] = {
+  override def registerEstate(registration: EstateRegistration): Future[RegistrationResponse] = {
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
+    Logger.debug(s"Registration endpoint ${registrationEstatesEndpoint}")
     val response = http.POST[JsValue, RegistrationResponse](registrationEstatesEndpoint, Json.toJson(registration))
     (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc),global)
     response
