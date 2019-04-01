@@ -46,7 +46,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
   lazy val matchEstatesEndpoint : String = estatesServiceUrl + "/match"
 
   lazy val trustRegistrationEndpoint : String = trustsServiceUrl + "/registration"
-  lazy val registrationEstatesEndpoint : String = estatesServiceUrl + "/registration"
+  lazy val estateRegistrationEndpoint : String = estatesServiceUrl + "/registration"
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "Correlation-Id"
@@ -95,8 +95,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
   override def registerEstate(registration: EstateRegistration): Future[RegistrationResponse] = {
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
-    Logger.debug(s"Registration endpoint ${registrationEstatesEndpoint}")
-    val response = http.POST[JsValue, RegistrationResponse](registrationEstatesEndpoint, Json.toJson(registration))
+    val response = http.POST[JsValue, RegistrationResponse](estateRegistrationEndpoint, Json.toJson(registration))
     (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc),global)
     response
   }
