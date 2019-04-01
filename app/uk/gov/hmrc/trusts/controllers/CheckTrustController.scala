@@ -47,7 +47,7 @@ class CheckTrustController @Inject()(desService: DesService, config: AppConfig,
               result match {
                 case Matched => Ok(matchResponse)
                 case NotMatched => Ok(noMatchResponse)
-                case AlreadyRegistered => Conflict(Json.toJson(alreadyRegisteredResponse))
+                case AlreadyRegistered => Conflict(Json.toJson(alreadyRegisteredTrustsResponse))
                 case _ => InternalServerError(Json.toJson(internalServerErrorResponse))
               }
           }

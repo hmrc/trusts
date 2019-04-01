@@ -62,7 +62,7 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
             } recover {
               case AlreadyRegisteredException =>
                 Logger.info("[RegisterTrustController][registration] Returning already registered response.")
-                Conflict(Json.toJson(alreadyRegisteredResponse))
+                Conflict(Json.toJson(alreadyRegisteredTrustsResponse))
               case NoMatchException =>
                 Logger.info("[RegisterTrustController][registration] Returning no match response.")
                 Forbidden(Json.toJson(noMatchRegistrationResponse))

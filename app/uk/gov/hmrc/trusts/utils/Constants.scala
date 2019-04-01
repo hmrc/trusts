@@ -20,7 +20,7 @@ package uk.gov.hmrc.trusts.utils
 object Constants {
 
   val ALREADY_REGISTERED_CODE = "ALREADY_REGISTERED"
-  val ALREADY_REGISTERED_MESSAGE = "The trust is already registered."
+  val ALREADY_REGISTERED_TRUSTS_MESSAGE = "The trust is already registered."
   val ALREADY_REGISTERED_ESTATE_MESSAGE = "The estate is already registered."
 
   val NO_MATCH_CODE = "NO_MATCH"
