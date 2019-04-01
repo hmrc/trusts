@@ -1,0 +1,5 @@
+# microservice specific routes
+
+
+POST        /register                  uk.gov.hmrc.trusts.controllers.RegisterEstateController.registration
+

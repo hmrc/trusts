@@ -21,7 +21,7 @@ import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ExistingTrustResponse._
-import uk.gov.hmrc.trusts.models.{ExistingTrustCheckRequest, RegistrationTrustResponse, SubscriptionIdResponse}
+import uk.gov.hmrc.trusts.models.{ExistingTrustCheckRequest, RegistrationTrnResponse, SubscriptionIdResponse}
 
 import scala.concurrent.Future
 
@@ -109,10 +109,10 @@ class DesServiceSpec extends BaseSpec {
     "return SuccessRegistrationResponse " when {
       "connector returns SuccessRegistrationResponse." in {
         when(mockConnector.registerTrust(registrationRequest)).
-          thenReturn(Future.successful(RegistrationTrustResponse("trn123")))
+          thenReturn(Future.successful(RegistrationTrnResponse("trn123")))
         val futureResult = SUT.registerTrust(registrationRequest)
         whenReady(futureResult) {
-          result => result mustBe RegistrationTrustResponse("trn123")
+          result => result mustBe RegistrationTrnResponse("trn123")
         }
       }
     }
@@ -134,6 +134,45 @@ class DesServiceSpec extends BaseSpec {
         when(mockConnector.registerTrust(registrationRequest)).
           thenReturn(Future.failed(InternalServerErrorException("")))
           val futureResult = SUT.registerTrust(registrationRequest)
+
+        whenReady(futureResult.failed) {
+          result => result mustBe an[InternalServerErrorException]
+        }
+      }
+    }
+
+  } //registerTrust
+
+  ".registerEstate" should {
+
+    "return RegistrationTrnResponse " when {
+      "connector returns RegistrationTrnResponse." in {
+        when(mockConnector.registerEstate(estateRegRequest)).
+          thenReturn(Future.successful(RegistrationTrnResponse("trn123")))
+        val futureResult = SUT.registerEstate(estateRegRequest)
+        whenReady(futureResult) {
+          result => result mustBe RegistrationTrnResponse("trn123")
+        }
+      }
+    }
+
+    "return AlreadyRegisteredException " when {
+      "connector returns  AlreadyRegisteredException." in {
+        when(mockConnector.registerEstate(estateRegRequest)).
+          thenReturn(Future.failed(AlreadyRegisteredException))
+        val futureResult = SUT.registerEstate(estateRegRequest)
+
+        whenReady(futureResult.failed) {
+          result => result mustBe AlreadyRegisteredException
+        }
+      }
+    }
+
+    "return same Exception " when {
+      "connector returns  exception." in {
+        when(mockConnector.registerEstate(estateRegRequest)).
+          thenReturn(Future.failed(InternalServerErrorException("")))
+        val futureResult = SUT.registerEstate(estateRegRequest)
 
         whenReady(futureResult.failed) {
           result => result mustBe an[InternalServerErrorException]

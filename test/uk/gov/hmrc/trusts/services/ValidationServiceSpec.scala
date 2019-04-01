@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.services
 
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.connectors.BaseSpec
-import uk.gov.hmrc.trusts.models.{ExistingTrustCheckRequest, Registration}
+import uk.gov.hmrc.trusts.models.{EstateRegistration, ExistingTrustCheckRequest, Registration}
 import uk.gov.hmrc.trusts.utils.{DataExamples, JsonUtils}
 
 
@@ -26,6 +26,7 @@ class ValidationServiceSpec extends BaseSpec with DataExamples {
 
   private lazy val validatationService: ValidationService = new ValidationService()
   private lazy val validator : Validator = validatationService.get("/resources/schemas/trustsApiRegistrationSchema_3.2.0.json")
+  private lazy val estateValidator : Validator = validatationService.get("/resources/schemas/estatesRegistrationSchema_3.2.0.json")
 
   "a validator " should {
     "return an empty list of errors when " when {
@@ -37,6 +38,16 @@ class ValidationServiceSpec extends BaseSpec with DataExamples {
       "Json having trust with orgnisation  trustees" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-org-trustees.json")
         validator.validate[Registration](jsonString).isRight mustBe true
+      }
+
+      "estate payload json having all required fields" in {
+        val jsonString = JsonUtils.getJsonFromFile("valid-estate-registration-01.json")
+        estateValidator.validate[EstateRegistration](jsonString).isRight mustBe true
+      }
+
+      "estate payload json having required fields for estate type 02" in {
+        val jsonString = JsonUtils.getJsonFromFile("valid-estate-registration-02.json")
+        estateValidator.validate[EstateRegistration](jsonString).isRight mustBe true
       }
     }
 
@@ -120,6 +131,13 @@ class ValidationServiceSpec extends BaseSpec with DataExamples {
       "no asset type is provided" in {
         val errorList = validator.validate[Registration](trustWithoutAssets).left.get.
           filter(_.location=="/trust/assets")
+        errorList.size mustBe 1
+      }
+
+      "no personal representative provided" in {
+        val jsonString =JsonUtils.getJsonFromFile("invalid-estate-registration-01.json")
+        val errorList = estateValidator.validate[EstateRegistration](jsonString).left.get.
+          filter(_.message =="object has missing required properties ([\"personalRepresentative\"])")
         errorList.size mustBe 1
       }
     }
