@@ -27,9 +27,14 @@ import scala.concurrent.Future
 
 class DesServiceImpl @Inject()(val desConnector: DesConnector) extends DesService {
 
-  override def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest)
-                                 (implicit hc: HeaderCarrier): Future[ExistingTrustResponse] = {
+  override def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest)
+                                 (implicit hc: HeaderCarrier): Future[ExistingCheckResponse] = {
     desConnector.checkExistingTrust(existingTrustCheckRequest)
+  }
+
+  override def checkExistingEstate(existingEstateCheckRequest: ExistingCheckRequest)
+                                 (implicit hc: HeaderCarrier): Future[ExistingCheckResponse] = {
+    desConnector.checkExistingEstate(existingEstateCheckRequest)
   }
 
   override def registerTrust(registration: Registration)
@@ -53,7 +58,8 @@ class DesServiceImpl @Inject()(val desConnector: DesConnector) extends DesServic
 @ImplementedBy(classOf[DesServiceImpl])
 trait DesService {
 
-  def checkExistingTrust(existingTrustCheckRequest: ExistingTrustCheckRequest)(implicit hc: HeaderCarrier): Future[ExistingTrustResponse]
+  def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest)(implicit hc: HeaderCarrier): Future[ExistingCheckResponse]
+  def checkExistingEstate(existingEstateCheckRequest: ExistingCheckRequest)(implicit hc: HeaderCarrier): Future[ExistingCheckResponse]
 
   def registerTrust(registration: Registration)(implicit hc: HeaderCarrier): Future[RegistrationResponse]
 

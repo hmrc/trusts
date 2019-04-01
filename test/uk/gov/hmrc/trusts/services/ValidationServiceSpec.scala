@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.services
 
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.connectors.BaseSpec
-import uk.gov.hmrc.trusts.models.{EstateRegistration, ExistingTrustCheckRequest, Registration}
+import uk.gov.hmrc.trusts.models.{EstateRegistration, ExistingCheckRequest, Registration}
 import uk.gov.hmrc.trusts.utils.{DataExamples, JsonUtils}
 
 
@@ -98,7 +98,7 @@ class ValidationServiceSpec extends BaseSpec with DataExamples {
 
       "json document is valid but failed to match with Domain" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
-        validator.validate[ExistingTrustCheckRequest](jsonString).isLeft mustBe true
+        validator.validate[ExistingCheckRequest](jsonString).isLeft mustBe true
       }
 
       "date of birth of trustee is before 1500/01/01" in {

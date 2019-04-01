@@ -22,23 +22,23 @@ import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.trusts.utils.Constants
 
 
-sealed trait ExistingTrustResponse
+sealed trait ExistingCheckResponse
 
-object ExistingTrustResponse {
+object ExistingCheckResponse {
 
-  final case object Matched extends ExistingTrustResponse
-  final case object NotMatched extends ExistingTrustResponse
-  final case object BadRequest extends ExistingTrustResponse
-  final case object AlreadyRegistered extends ExistingTrustResponse
-  final case object ServerError extends ExistingTrustResponse
-  final case object ServiceUnavailable extends ExistingTrustResponse
+  final case object Matched extends ExistingCheckResponse
+  final case object NotMatched extends ExistingCheckResponse
+  final case object BadRequest extends ExistingCheckResponse
+  final case object AlreadyRegistered extends ExistingCheckResponse
+  final case object ServerError extends ExistingCheckResponse
+  final case object ServiceUnavailable extends ExistingCheckResponse
 
   implicit val desResponseReads : Format[DesResponse] = DesResponse.formats
   implicit val desErrorResponseReads : Format[DesErrorResponse] = DesErrorResponse.formats
 
-  implicit lazy val httpReads: HttpReads[ExistingTrustResponse] =
-    new HttpReads[ExistingTrustResponse] {
-      override def read(method: String, url: String, response: HttpResponse): ExistingTrustResponse = {
+  implicit lazy val httpReads: HttpReads[ExistingCheckResponse] =
+    new HttpReads[ExistingCheckResponse] {
+      override def read(method: String, url: String, response: HttpResponse): ExistingCheckResponse = {
         response.status match {
           case OK =>
             if (response.json.as[DesResponse].`match`) Matched else NotMatched

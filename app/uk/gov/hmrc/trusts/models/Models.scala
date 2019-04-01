@@ -21,10 +21,10 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
 import play.api.data.validation.ValidationError
 
-case class ExistingTrustCheckRequest(name: String, postcode: Option[String] = None, utr: String){
-}
+case class ExistingCheckRequest(name: String, postcode: Option[String] = None, utr: String)
 
-object ExistingTrustCheckRequest {
+
+object ExistingCheckRequest {
 
   private val validationError = ValidationError("")
   private val utrValidationRegEx = """^[0-9]{10}$""".r
@@ -47,7 +47,7 @@ object ExistingTrustCheckRequest {
     )
 
 
-  implicit val writes: Writes[ExistingTrustCheckRequest] = (
+  implicit val writes: Writes[ExistingCheckRequest] = (
     (JsPath \ "name").write[String] and
       (JsPath \ "postcode").writeNullable[String] and
       (JsPath \ "sa-utr").write[String]
@@ -56,11 +56,11 @@ object ExistingTrustCheckRequest {
     c.postcode,
     c.utr))
 
-  implicit val reads: Reads[ExistingTrustCheckRequest] = (
+  implicit val reads: Reads[ExistingCheckRequest] = (
     (JsPath \ "name").read[String](nameValidation) and
       (JsPath \ "postcode").readNullable[String](postcodeValidation) and
       (JsPath \ "utr").read[String](utrValidation)
-  )(ExistingTrustCheckRequest.apply _)
+  )(ExistingCheckRequest.apply _)
 
 }
 

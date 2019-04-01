@@ -20,14 +20,14 @@ import org.mockito.Mockito.when
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.exceptions._
-import uk.gov.hmrc.trusts.models.ExistingTrustResponse._
-import uk.gov.hmrc.trusts.models.{ExistingTrustCheckRequest, RegistrationTrnResponse, SubscriptionIdResponse}
+import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
+import uk.gov.hmrc.trusts.models.{ExistingCheckRequest, RegistrationTrnResponse, SubscriptionIdResponse}
 
 import scala.concurrent.Future
 
 class DesServiceSpec extends BaseSpec {
 
-  lazy val request = ExistingTrustCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
+  lazy val request = ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
   val mockConnector = mock[DesConnector]
 
   val SUT = new DesServiceImpl(mockConnector)

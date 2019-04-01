@@ -22,7 +22,8 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions.{AlreadyRegisteredException, _}
-import uk.gov.hmrc.trusts.models.ExistingTrustResponse._
+import uk.gov.hmrc.trusts.models.ExistingCheckRequest._
+import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.utils.WireMockHelper
 
@@ -38,7 +39,7 @@ class DesConnectorSpec extends BaseConnectorSpec
 
   lazy val connector: DesConnector = app.injector.instanceOf[DesConnector]
 
-  lazy val request = ExistingTrustCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
+  lazy val request = ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
 
 
   ".checkExistingTrust" should {
