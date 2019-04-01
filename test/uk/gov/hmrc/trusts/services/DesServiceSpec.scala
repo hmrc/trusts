@@ -104,6 +104,78 @@ class DesServiceSpec extends BaseSpec {
   }
 
 
+  ".checkExistingEstate" should {
+
+    "return Matched " when {
+      "connector returns Matched." in {
+        when(mockConnector.checkExistingEstate(request)).
+          thenReturn(Future.successful(Matched))
+        val futureResult = SUT.checkExistingEstate(request)
+        whenReady(futureResult) {
+          result => result mustBe Matched
+        }
+      }
+    }
+
+
+    "return NotMatched " when {
+      "connector returns NotMatched." in {
+        when(mockConnector.checkExistingEstate(request)).
+          thenReturn(Future.successful(NotMatched))
+        val futureResult = SUT.checkExistingEstate(request)
+        whenReady(futureResult) {
+          result => result mustBe NotMatched
+        }
+      }
+    }
+
+    "return BadRequest " when {
+      "connector returns BadRequest." in {
+        when(mockConnector.checkExistingEstate(request)).
+          thenReturn(Future.successful(BadRequest))
+        val futureResult = SUT.checkExistingEstate(request)
+        whenReady(futureResult) {
+          result => result mustBe BadRequest
+        }
+      }
+    }
+
+    "return AlreadyRegistered " when {
+      "connector returns AlreadyRegistered." in {
+        when(mockConnector.checkExistingEstate(request)).
+          thenReturn(Future.successful(AlreadyRegistered))
+        val futureResult = SUT.checkExistingEstate(request)
+        whenReady(futureResult) {
+          result => result mustBe AlreadyRegistered
+        }
+      }
+    }
+
+    "return ServiceUnavailable " when {
+      "connector returns ServiceUnavailable." in {
+        when(mockConnector.checkExistingEstate(request)).
+          thenReturn(Future.successful(ServiceUnavailable))
+        val futureResult = SUT.checkExistingEstate(request)
+        whenReady(futureResult) {
+          result => result mustBe ServiceUnavailable
+        }
+
+      }
+    }
+
+    "return ServerError " when {
+      "connector returns ServerError." in {
+        when(mockConnector.checkExistingEstate(request)).
+          thenReturn(Future.successful(ServerError))
+        val futureResult = SUT.checkExistingEstate(request)
+        whenReady(futureResult) {
+          result => result mustBe ServerError
+        }
+      }
+    }
+  }//checkExistingEstate
+
+
   ".registerTrust" should {
 
     "return SuccessRegistrationResponse " when {

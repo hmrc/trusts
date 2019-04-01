@@ -107,7 +107,6 @@ class CheckEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
       "estate data matched with already registered estate." in {
         mockAuthSuccess
-
         mockDesServiceResponse(AlreadyRegistered)
 
         val result = getEstateController.checkExistingEstate().apply(postRequestWithPayload(validPayloadRequest))
@@ -158,7 +157,9 @@ class CheckEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
     "return 400 " when {
       "postcode is not valid" in {
         mockAuthSuccess
+
         val invalidPayload = Json.parse("""{"name": "trust name","postcode": "AA9A 9AAT","utr": "1234567890"}""")
+
         val result = getEstateController.checkExistingEstate().apply(postRequestWithPayload(invalidPayload))
         status(result) mustBe BAD_REQUEST
         (contentAsJson(result) \ "code").as[String] mustBe "INVALID_POSTCODE"
@@ -170,6 +171,7 @@ class CheckEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "request is not valid" in {
         mockAuthSuccess
         val requestInvalid = Json.parse("""{"name1": "trust name","postcode": "NE11NE","utr": "1234567890"}""")
+
         val result = getEstateController.checkExistingEstate().apply(postRequestWithPayload(requestInvalid))
         status(result) mustBe BAD_REQUEST
         (contentAsJson(result) \ "code").as[String] mustBe "BAD_REQUEST"
