@@ -274,7 +274,7 @@ class DesConnectorSpec extends BaseConnectorSpec
     }
 
     "return AlreadyRegisteredException  " when {
-      "trusts is already registered with provided details." in {
+      "estates is already registered with provided details." in {
         val requestBody = Json.stringify(Json.toJson(estateRegRequest))
 
         stubForPost(server, "/estates/registration", requestBody, 403, Json.stringify(jsonResponseAlreadyRegistered))
@@ -287,7 +287,7 @@ class DesConnectorSpec extends BaseConnectorSpec
     }
 
     "return NoMatchException  " when {
-      "trusts is already registered with provided details." in {
+      "estates is already registered with provided details." in {
         val requestBody = Json.stringify(Json.toJson(estateRegRequest))
 
         stubForPost(server, "/estates/registration", requestBody, 403, Json.stringify(jsonResponse403NoMatch))

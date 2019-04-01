@@ -52,11 +52,9 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
 
     "return 200 with TRN" when {
       "individual user called the register endpoint with a valid json payload " in {
-        when(mockDesService.registerEstate(any[EstateRegistration])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(RegistrationTrnResponse(estateTrnResponse)))
-        when(rosmPatternService.completeRosmTransaction(Matchers.eq(estateTrnResponse))(any[HeaderCarrier]))
-          .thenReturn(Future.successful(TaxEnrolmentSuccess))
-        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
+        mockRosmResponse(TaxEnrolmentSuccess)
+        mockAuthSuccess
+        mockDesServiceResponse
 
         val mockAuthService = new AuthService(authConnector)
         val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)
@@ -70,11 +68,9 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
 
       "individual user called the register endpoint with a valid json payload " when {
         "tax enrolment failed to enrol user " in {
-          when(mockDesService.registerEstate(any[EstateRegistration])(any[HeaderCarrier]))
-            .thenReturn(Future.successful(RegistrationTrnResponse(estateTrnResponse)))
-          when(rosmPatternService.completeRosmTransaction(Matchers.eq(estateTrnResponse))(any[HeaderCarrier]))
-            .thenReturn(Future.successful(TaxEnrolmentFailure))
-          when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
+          mockAuthSuccess
+          mockRosmResponse(TaxEnrolmentFailure)
+          mockDesServiceResponse
 
           val mockAuthService = new AuthService(authConnector)
           val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, mockAuthService, rosmPatternService)
@@ -90,8 +86,7 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
       "agent user submits estates payload" in {
         val agentRetrieval: Future[Option[AffinityGroup]] = Future.successful(Some(AffinityGroup.Agent))
 
-        when(mockDesService.registerEstate(any[EstateRegistration])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(RegistrationTrnResponse(estateTrnResponse)))
+        mockDesServiceResponse
 
         when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(agentRetrieval)
 
@@ -112,17 +107,16 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
 
         val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)
 
-
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(estateRegistration01)))
         status(result) mustBe UNAUTHORIZED
         verify(rosmPatternService, times(0)).completeRosmTransaction(any())(any[HeaderCarrier])
       }
 
       "the register endpoint is called user session has expired" in {
+        mockDesServiceResponse
+
         val mockAuthService = new AuthService(FakeAuthConnector(BearerTokenExpired()))
         val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)
-        when(mockDesService.registerEstate(any[EstateRegistration])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(RegistrationTrnResponse(estateTrnResponse)))
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(estateRegistration01)))
         status(result) mustBe UNAUTHORIZED
@@ -133,13 +127,13 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
     "return a Conflict" when {
       "estates is already registered with provided details." in {
 
-
-        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
-
+        mockAuthSuccess
         val mockAuthService = new AuthService(authConnector)
-        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)
         when(mockDesService.registerEstate(any[EstateRegistration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(AlreadyRegisteredException))
+
+        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)
+
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(estateRegistration01)))
         status(result) mustBe CONFLICT
         val output = contentAsJson(result)
@@ -152,8 +146,7 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
     "return a Forbidden" when {
       "no match found for provided existing estate details." in {
 
-        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
-
+        mockAuthSuccess
         val mockAuthService = new AuthService(authConnector)
         when(mockDesService.registerEstate(any[EstateRegistration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(NoMatchException))
@@ -172,8 +165,7 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
 
     "return a BAD REQUEST" when {
       "input request fails schema validation" in {
-        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
-
+        mockAuthSuccess
         val mockAuthService = new AuthService(authConnector)
         val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)
 
@@ -190,11 +182,10 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
 
     "return an internal server error" when {
       "the register endpoint called and something goes wrong." in {
-
+        mockAuthSuccess
         when(mockDesService.registerEstate(any[EstateRegistration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(InternalServerErrorException("some error")))
 
-        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
         val mockAuthService = new AuthService(authConnector)
         val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)
 
@@ -209,9 +200,8 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
 
     "return an internal server error" when {
       "the des returns BAD REQUEST" in {
-        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
+        mockAuthSuccess
         val mockAuthService = new AuthService(authConnector)
-
         val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)
         when(mockDesService.registerEstate(any[EstateRegistration])(any[HeaderCarrier])).
           thenReturn(Future.failed(BadRequestException))
@@ -227,7 +217,7 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
 
     "return an internal server error" when {
       "the des returns Service Unavailable as dependent service is down. " in {
-        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
+        mockAuthSuccess
         val mockAuthService = new AuthService(authConnector)
 
         val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)
@@ -242,5 +232,19 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
         verify(rosmPatternService, times(0)).completeRosmTransaction(any())(any[HeaderCarrier])
       }
     }
+  }
+
+  private def mockDesServiceResponse = {
+    when(mockDesService.registerEstate(any[EstateRegistration])(any[HeaderCarrier]))
+      .thenReturn(Future.successful(RegistrationTrnResponse(estateTrnResponse)))
+  }
+
+  private def mockAuthSuccess = {
+    when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
+  }
+
+  private def mockRosmResponse(response :TaxEnrolmentSuscriberResponse) = {
+    when(rosmPatternService.completeRosmTransaction(Matchers.eq(estateTrnResponse))(any[HeaderCarrier]))
+      .thenReturn(Future.successful(response))
   }
 }

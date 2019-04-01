@@ -18,6 +18,9 @@ package uk.gov.hmrc.trusts.connectors
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
+import org.mockito.Matchers
+import org.mockito.Matchers.any
+import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -27,6 +30,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.trusts.models.TaxEnrolmentSuccess
+import uk.gov.hmrc.trusts.services.RosmPatternService
 import uk.gov.hmrc.trusts.utils.JsonRequests
 
 import scala.concurrent.Future
