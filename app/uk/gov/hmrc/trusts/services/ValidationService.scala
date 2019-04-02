@@ -25,8 +25,8 @@ import javax.inject.Inject
 import play.api.Logger
 import play.api.data.validation.ValidationError
 import play.api.libs.json.{JsPath, Json, Reads}
-import uk.gov.hmrc.trusts.models.Registration
-import uk.gov.hmrc.trusts.utils.BusinessValidation
+import uk.gov.hmrc.trusts.models.{EstateRegistration, Registration}
+import uk.gov.hmrc.trusts.utils.{BusinessValidation, EstateBusinessValidation}
 
 import scala.collection.JavaConverters._
 import scala.io.Source
@@ -78,6 +78,13 @@ class Validator(schema: JsonSchema) {
     request match {
       case registration: Registration =>
         BusinessValidation.check(registration) match {
+          case Nil => Right(request)
+          case l @ _ :: _ =>
+            Logger.error(s"[validateBusinessRules] Validation fails : ${l}")
+            Left(l)
+        }
+      case estateRegistration: EstateRegistration =>
+        EstateBusinessValidation.check(estateRegistration) match {
           case Nil => Right(request)
           case l @ _ :: _ =>
             Logger.error(s"[validateBusinessRules] Validation fails : ${l}")

@@ -148,7 +148,7 @@ class ValidationServiceSpec extends BaseSpec with DataExamples with EstateDataEx
       }
     }
 
-    "return a list of validaton errors " when {
+    "return a list of validaton errors for trusts " when {
       "json request is valid but failed in business rules for trust start date, efrbs start date " in {
         val jsonString = JsonUtils.getJsonFromFile("trust-business-validation-fail.json")
         validator.validate[Registration](jsonString).left.get.size mustBe 8
@@ -173,6 +173,17 @@ class ValidationServiceSpec extends BaseSpec with DataExamples with EstateDataEx
         val errorList =validator.validate[Registration](jsonString).left.get.
           filter(_.message=="Business trustee utr is same as trust utr.")
         errorList.size mustBe 2
+      }
+
+    }
+
+    "return a list of validaton errors for estates " when {
+      "individual personal representative has future date of birth" in {
+        val jsonString = getJsonFromFile("estate-registration-dynamic-01.json").
+          replace("{estatePerRepIndDob}", "2030-01-01")
+        val errorList =estateValidator.validate[EstateRegistration](jsonString).left.get.
+          filter(_.message=="Date of birth must be today or in the past.")
+        errorList.size mustBe 1
       }
 
     }
