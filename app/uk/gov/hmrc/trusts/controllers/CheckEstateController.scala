@@ -43,7 +43,7 @@ class CheckEstateController @Inject()(desService: DesService, config: AppConfig,
         estatesCheckRequest =>
           desService.checkExistingEstate(estatesCheckRequest).map {
             result =>
-              Logger.info(s"[CheckEstateController][checkExistingTrust] response: $result")
+              Logger.info(s"[CheckEstateController][checkExistingEstate] response: $result")
               result match {
                 case Matched => Ok(matchResponse)
                 case NotMatched => Ok(noMatchResponse)
