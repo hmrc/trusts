@@ -19,10 +19,10 @@ package uk.gov.hmrc.trusts.services
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.models.{EstateRegistration, ExistingTrustCheckRequest, Registration}
-import uk.gov.hmrc.trusts.utils.{DataExamples, JsonUtils}
+import uk.gov.hmrc.trusts.utils.{DataExamples, EstateDataExamples, JsonUtils}
 
 
-class ValidationServiceSpec extends BaseSpec with DataExamples {
+class ValidationServiceSpec extends BaseSpec with DataExamples with EstateDataExamples {
 
   private lazy val validatationService: ValidationService = new ValidationService()
   private lazy val validator : Validator = validatationService.get("/resources/schemas/trustsApiRegistrationSchema_3.2.0.json")
@@ -138,6 +138,12 @@ class ValidationServiceSpec extends BaseSpec with DataExamples {
         val jsonString =JsonUtils.getJsonFromFile("invalid-estate-registration-01.json")
         val errorList = estateValidator.validate[EstateRegistration](jsonString).left.get.
           filter(_.message =="object has missing required properties ([\"personalRepresentative\"])")
+        errorList.size mustBe 1
+      }
+
+      "no correspodence address provided for estate" in {
+        val errorList = estateValidator.validate[EstateRegistration](estateWithoutCorrespondenceAddress).left.get.
+          filter(_.message =="object has missing required properties ([\"address\"])")
         errorList.size mustBe 1
       }
     }
