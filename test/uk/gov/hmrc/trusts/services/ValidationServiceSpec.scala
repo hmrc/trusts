@@ -49,6 +49,13 @@ class ValidationServiceSpec extends BaseSpec with DataExamples with EstateDataEx
         val jsonString = JsonUtils.getJsonFromFile("valid-estate-registration-02.json")
         estateValidator.validate[EstateRegistration](jsonString).isRight mustBe true
       }
+
+      "estate payload json having required fields for estate type 04" in {
+        val jsonString = JsonUtils.getJsonFromFile("valid-estate-registration-04.json")
+        val estateRegistration = estateValidator.validate[EstateRegistration](jsonString).right.get
+        estateRegistration.estate.entities.personalRepresentative.estatePerRepOrg.isDefined mustBe true
+        estateRegistration.estate.entities.deceased.identification.isDefined mustBe false
+      }
     }
 
     "return registration domain" when {
