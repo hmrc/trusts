@@ -196,7 +196,6 @@ class CheckEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
   private def getEstateController = {
     val mockAuthService = new AuthService(authConnector)
-    when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
     val SUT = new CheckEstateController(mockDesService, appConfig, validatationService, mockAuthService)
     SUT
   }
