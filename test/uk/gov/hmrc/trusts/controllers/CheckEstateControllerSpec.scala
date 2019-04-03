@@ -74,7 +74,7 @@ class CheckEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         status(result) mustBe UNAUTHORIZED
       }
 
-      "the register endpoint is called user session has expired" in {
+      "the check endpoint is called user session has expired" in {
         val mockAuthService = new AuthService(FakeAuthConnector(BearerTokenExpired()))
         val SUT = new CheckEstateController(mockDesService, appConfig, validatationService, mockAuthService)
         val result = SUT.checkExistingEstate().apply(postRequestWithPayload(validPayloadRequest))
