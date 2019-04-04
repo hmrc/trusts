@@ -283,7 +283,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "trusts is already registered with provided details." in {
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
-        stubForPost(server, "/trusts/registration", requestBody, 403, Json.stringify(jsonResponseAlreadyRegistered))
+        stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN, Json.stringify(jsonResponseAlreadyRegistered))
         val futureResult = connector.registerTrust(registrationRequest)
 
         whenReady(futureResult.failed) {
@@ -296,7 +296,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "trusts is already registered with provided details." in {
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
-        stubForPost(server, "/trusts/registration", requestBody, 403, Json.stringify(jsonResponse403NoMatch))
+        stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN, Json.stringify(jsonResponse403NoMatch))
         val futureResult = connector.registerTrust(registrationRequest)
 
         whenReady(futureResult.failed) {
@@ -308,7 +308,7 @@ class DesConnectorSpec extends BaseConnectorSpec
     "return ServiceUnavailableException  " when {
       "des dependent service is not responding " in {
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
-        stubForPost(server, "/trusts/registration", requestBody, 503, Json.stringify(jsonResponse503))
+        stubForPost(server, "/trusts/registration", requestBody, SERVICE_UNAVAILABLE, Json.stringify(jsonResponse503))
         val futureResult = connector.registerTrust(registrationRequest)
 
         whenReady(futureResult.failed) {
@@ -321,7 +321,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "des is experiencing some problem." in {
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
-        stubForPost(server, "/trusts/registration", requestBody, 500, Json.stringify(jsonResponse500))
+        stubForPost(server, "/trusts/registration", requestBody, INTERNAL_SERVER_ERROR, Json.stringify(jsonResponse500))
 
         val futureResult = connector.registerTrust(registrationRequest)
         whenReady(futureResult.failed) {
@@ -334,7 +334,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "des is returning 403 without ALREADY REGISTERED code." in {
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
-        stubForPost(server, "/trusts/registration", requestBody, 403, "{}")
+        stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN, "{}")
         val futureResult = connector.registerTrust(registrationRequest)
 
         whenReady(futureResult.failed) {
@@ -351,7 +351,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "valid request to des register an estate." in {
         val requestBody = Json.stringify(Json.toJson(estateRegRequest))
 
-        stubForPost(server, "/estates/registration", requestBody, 200, """{"trn": "XTRN1234567"}""")
+        stubForPost(server, "/estates/registration", requestBody, OK, """{"trn": "XTRN1234567"}""")
 
         val futureResult = connector.registerEstate(estateRegRequest)
 
@@ -365,7 +365,7 @@ class DesConnectorSpec extends BaseConnectorSpec
     "return BadRequestException  " when {
       "payload sent to des is invalid" in {
         val requestBody = Json.stringify(Json.toJson(estateRegRequest))
-        stubForPost(server, "/estates/registration", requestBody, 400, Json.stringify(jsonResponse400))
+        stubForPost(server, "/estates/registration", requestBody, BAD_REQUEST, Json.stringify(jsonResponse400))
 
         val futureResult = connector.registerEstate(estateRegRequest)
 
@@ -381,7 +381,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "estates is already registered with provided details." in {
         val requestBody = Json.stringify(Json.toJson(estateRegRequest))
 
-        stubForPost(server, "/estates/registration", requestBody, 403, Json.stringify(jsonResponseAlreadyRegistered))
+        stubForPost(server, "/estates/registration", requestBody, FORBIDDEN, Json.stringify(jsonResponseAlreadyRegistered))
         val futureResult = connector.registerEstate(estateRegRequest)
 
         whenReady(futureResult.failed) {
@@ -394,7 +394,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "estates is already registered with provided details." in {
         val requestBody = Json.stringify(Json.toJson(estateRegRequest))
 
-        stubForPost(server, "/estates/registration", requestBody, 403, Json.stringify(jsonResponse403NoMatch))
+        stubForPost(server, "/estates/registration", requestBody, FORBIDDEN, Json.stringify(jsonResponse403NoMatch))
         val futureResult = connector.registerEstate(estateRegRequest)
 
         whenReady(futureResult.failed) {
@@ -406,7 +406,7 @@ class DesConnectorSpec extends BaseConnectorSpec
     "return ServiceUnavailableException  " when {
       "des dependent service is not responding " in {
         val requestBody = Json.stringify(Json.toJson(estateRegRequest))
-        stubForPost(server, "/estates/registration", requestBody, 503, Json.stringify(jsonResponse503))
+        stubForPost(server, "/estates/registration", requestBody, SERVICE_UNAVAILABLE, Json.stringify(jsonResponse503))
         val futureResult = connector.registerEstate(estateRegRequest)
 
         whenReady(futureResult.failed) {
@@ -419,7 +419,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "des is experiencing some problem." in {
         val requestBody = Json.stringify(Json.toJson(estateRegRequest))
 
-        stubForPost(server, "/estates/registration", requestBody, 500, Json.stringify(jsonResponse500))
+        stubForPost(server, "/estates/registration", requestBody, INTERNAL_SERVER_ERROR, Json.stringify(jsonResponse500))
 
         val futureResult = connector.registerEstate(estateRegRequest)
         whenReady(futureResult.failed) {
@@ -432,7 +432,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "des is returning 403 without ALREADY REGISTERED code." in {
         val requestBody = Json.stringify(Json.toJson(estateRegRequest))
 
-        stubForPost(server, "/estates/registration", requestBody, 403, "{}")
+        stubForPost(server, "/estates/registration", requestBody, FORBIDDEN, "{}")
         val futureResult = connector.registerEstate(estateRegRequest)
 
         whenReady(futureResult.failed) {
@@ -448,7 +448,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "valid trn has been submitted" in {
         val trn = "XTRN1234567"
         val subscriptionIdEndpointUrl = s"/trusts/trn/$trn/subscription"
-        stubForGet(server, subscriptionIdEndpointUrl,  200, """{"subscriptionId": "987654321"}""")
+        stubForGet(server, subscriptionIdEndpointUrl,  OK, """{"subscriptionId": "987654321"}""")
 
         val futureResult = connector.getSubscriptionId(trn)
 
@@ -462,7 +462,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "invalid trn has been submitted" in {
         val trn = "invalidtrn"
         val subscriptionIdEndpointUrl = s"/trusts/trn/$trn/subscription"
-        stubForGet(server, subscriptionIdEndpointUrl,  400,Json.stringify(jsonResponse400GetSubscriptionId))
+        stubForGet(server, subscriptionIdEndpointUrl,  BAD_REQUEST,Json.stringify(jsonResponse400GetSubscriptionId))
 
         val futureResult = connector.getSubscriptionId(trn)
 
@@ -476,7 +476,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "trn submitted has no data in des " in {
         val trn = "notfoundtrn"
         val subscriptionIdEndpointUrl = s"/trusts/trn/$trn/subscription"
-        stubForGet(server, subscriptionIdEndpointUrl,  404 ,Json.stringify(jsonResponse404GetSubscriptionId))
+        stubForGet(server, subscriptionIdEndpointUrl,  NOT_FOUND ,Json.stringify(jsonResponse404GetSubscriptionId))
 
         val futureResult = connector.getSubscriptionId(trn)
 
@@ -490,7 +490,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "des dependent service is not responding " in {
         val trn = "XTRN1234567"
         val subscriptionIdEndpointUrl = s"/trusts/trn/$trn/subscription"
-        stubForGet(server, subscriptionIdEndpointUrl,  503 ,Json.stringify(jsonResponse503))
+        stubForGet(server, subscriptionIdEndpointUrl,  SERVICE_UNAVAILABLE ,Json.stringify(jsonResponse503))
 
         val futureResult = connector.getSubscriptionId(trn)
 
@@ -504,7 +504,7 @@ class DesConnectorSpec extends BaseConnectorSpec
       "des is experiencing some problem." in {
         val trn = "XTRN1234567"
         val subscriptionIdEndpointUrl = s"/trusts/trn/$trn/subscription"
-        stubForGet(server, subscriptionIdEndpointUrl,  500 ,Json.stringify(jsonResponse500))
+        stubForGet(server, subscriptionIdEndpointUrl,  INTERNAL_SERVER_ERROR ,Json.stringify(jsonResponse500))
 
         val futureResult = connector.getSubscriptionId(trn)
         whenReady(futureResult.failed) {
