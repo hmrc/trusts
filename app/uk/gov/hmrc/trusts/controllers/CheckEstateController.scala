@@ -31,23 +31,23 @@ import uk.gov.hmrc.trusts.services.{AuthService, DesService, ValidationService}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton()
-class CheckTrustController @Inject()(desService: DesService, config: AppConfig,
-                                     validationService: ValidationService,
-                                     authService : AuthService) extends TrustsBaseController {
+class CheckEstateController @Inject()(desService: DesService, config: AppConfig,
+                                      validationService: ValidationService,
+                                      authService : AuthService) extends TrustsBaseController {
 
 
-  def checkExistingTrust() = Action.async(parse.json) { implicit request =>
+  def checkExistingEstate() = Action.async(parse.json) { implicit request =>
     import authService._
     authorisedUser() { userAffinityGroup: Option[AffinityGroup]=>
       withJsonBody[ExistingCheckRequest] {
-        trustsCheckRequest =>
-          desService.checkExistingTrust(trustsCheckRequest).map {
+        estatesCheckRequest =>
+          desService.checkExistingEstate(estatesCheckRequest).map {
             result =>
-              Logger.info(s"[CheckTrustController][checkExistingTrust] response: $result")
+              Logger.info(s"[CheckEstateController][checkExistingEstate] response: $result")
               result match {
                 case Matched => Ok(matchResponse)
                 case NotMatched => Ok(noMatchResponse)
-                case AlreadyRegistered => Conflict(Json.toJson(alreadyRegisteredTrustsResponse))
+                case AlreadyRegistered => Conflict(Json.toJson(alreadyRegisteredEstateResponse))
                 case _ => InternalServerError(Json.toJson(internalServerErrorResponse))
               }
           }

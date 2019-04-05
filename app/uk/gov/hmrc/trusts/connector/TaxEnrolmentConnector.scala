@@ -24,7 +24,7 @@ import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.trusts.config.{AppConfig, WSHttp}
-import uk.gov.hmrc.trusts.models.{ExistingTrustResponse, TaxEnrolmentSubscription, TaxEnrolmentSuscriberResponse}
+import uk.gov.hmrc.trusts.models.{ExistingCheckResponse, TaxEnrolmentSubscription, TaxEnrolmentSuscriberResponse}
 import uk.gov.hmrc.trusts.utils.Constants._
 
 import scala.concurrent.ExecutionContext.Implicits.global

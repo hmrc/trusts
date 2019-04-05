@@ -20,14 +20,14 @@ import org.mockito.Mockito.when
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.exceptions._
-import uk.gov.hmrc.trusts.models.ExistingTrustResponse._
-import uk.gov.hmrc.trusts.models.{ExistingTrustCheckRequest, RegistrationTrnResponse, SubscriptionIdResponse}
+import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
+import uk.gov.hmrc.trusts.models.{ExistingCheckRequest, RegistrationTrnResponse, SubscriptionIdResponse}
 
 import scala.concurrent.Future
 
 class DesServiceSpec extends BaseSpec {
 
-  lazy val request = ExistingTrustCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
+  lazy val request = ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
   val mockConnector = mock[DesConnector]
 
   val SUT = new DesServiceImpl(mockConnector)
@@ -102,6 +102,78 @@ class DesServiceSpec extends BaseSpec {
       }
     }
   }
+
+
+  ".checkExistingEstate" should {
+
+    "return Matched " when {
+      "connector returns Matched." in {
+        when(mockConnector.checkExistingEstate(request)).
+          thenReturn(Future.successful(Matched))
+        val futureResult = SUT.checkExistingEstate(request)
+        whenReady(futureResult) {
+          result => result mustBe Matched
+        }
+      }
+    }
+
+
+    "return NotMatched " when {
+      "connector returns NotMatched." in {
+        when(mockConnector.checkExistingEstate(request)).
+          thenReturn(Future.successful(NotMatched))
+        val futureResult = SUT.checkExistingEstate(request)
+        whenReady(futureResult) {
+          result => result mustBe NotMatched
+        }
+      }
+    }
+
+    "return BadRequest " when {
+      "connector returns BadRequest." in {
+        when(mockConnector.checkExistingEstate(request)).
+          thenReturn(Future.successful(BadRequest))
+        val futureResult = SUT.checkExistingEstate(request)
+        whenReady(futureResult) {
+          result => result mustBe BadRequest
+        }
+      }
+    }
+
+    "return AlreadyRegistered " when {
+      "connector returns AlreadyRegistered." in {
+        when(mockConnector.checkExistingEstate(request)).
+          thenReturn(Future.successful(AlreadyRegistered))
+        val futureResult = SUT.checkExistingEstate(request)
+        whenReady(futureResult) {
+          result => result mustBe AlreadyRegistered
+        }
+      }
+    }
+
+    "return ServiceUnavailable " when {
+      "connector returns ServiceUnavailable." in {
+        when(mockConnector.checkExistingEstate(request)).
+          thenReturn(Future.successful(ServiceUnavailable))
+        val futureResult = SUT.checkExistingEstate(request)
+        whenReady(futureResult) {
+          result => result mustBe ServiceUnavailable
+        }
+
+      }
+    }
+
+    "return ServerError " when {
+      "connector returns ServerError." in {
+        when(mockConnector.checkExistingEstate(request)).
+          thenReturn(Future.successful(ServerError))
+        val futureResult = SUT.checkExistingEstate(request)
+        whenReady(futureResult) {
+          result => result mustBe ServerError
+        }
+      }
+    }
+  }//checkExistingEstate
 
 
   ".registerTrust" should {

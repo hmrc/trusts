@@ -25,7 +25,7 @@ import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, BearerTokenExpired, 
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.connectors.{BaseSpec, FakeAuthConnector}
-import uk.gov.hmrc.trusts.models.ExistingTrustResponse.{AlreadyRegistered, Matched, NotMatched, ServiceUnavailable}
+import uk.gov.hmrc.trusts.models.ExistingCheckResponse.{AlreadyRegistered, Matched, NotMatched, ServiceUnavailable}
 import org.mockito.Matchers.any
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.models._
@@ -54,7 +54,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
         val mockAuthService = new AuthService(authConnector)
         val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, mockAuthService)
-        when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
+        when(mockDesService.checkExistingTrust(any[ExistingCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(Matched))
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequest))
         status(result) mustBe OK
@@ -66,7 +66,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         val mockAuthService = new AuthService(authConnector)
 
         val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, mockAuthService)
-        when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
+        when(mockDesService.checkExistingTrust(any[ExistingCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(Matched))
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadPostCodeLowerCase))
         status(result) mustBe OK
@@ -97,7 +97,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
         val mockAuthService = new AuthService(authConnector)
         val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, mockAuthService)
-        when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
+        when(mockDesService.checkExistingTrust(any[ExistingCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(Matched))
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequestWithoutPostCode))
         status(result) mustBe OK
@@ -111,7 +111,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
         val mockAuthService = new AuthService(authConnector)
         val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, mockAuthService)
-        when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
+        when(mockDesService.checkExistingTrust(any[ExistingCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(NotMatched))
 
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequest))
@@ -127,7 +127,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
         val mockAuthService = new AuthService(authConnector)
         val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, mockAuthService)
-        when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
+        when(mockDesService.checkExistingTrust(any[ExistingCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(AlreadyRegistered))
 
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequest))
@@ -224,7 +224,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         val mockAuthService = new AuthService(authConnector)
 
         val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, mockAuthService)
-        when(mockDesService.checkExistingTrust(any[ExistingTrustCheckRequest])(any[HeaderCarrier]))
+        when(mockDesService.checkExistingTrust(any[ExistingCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(ServiceUnavailable))
 
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequest))
