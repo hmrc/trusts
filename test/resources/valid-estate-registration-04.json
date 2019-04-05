@@ -1,0 +1,50 @@
+ {
+  "correspondence": {
+    "abroadIndicator": false,
+    "name": "RLlVnX(G/e&kvM(9VmPI8tj,jOW8mlm7yXVcwUR1G4aDkuDI",
+    "address": {
+      "line1": "cf9-aI8biB1qszA,CWPs9yb0imNX",
+      "line2": "Y5&hb.TFmIepcR8f9c..",
+      "postCode": "Fu1a5JY",
+      "country": "GB"
+    },
+    "phoneNumber": "3786591082191 3"
+  },
+  "declaration": {
+    "name": {
+      "firstName": "ngQCJFaEXNCS'FQ4/8pnnQZ9),'vvj",
+      "lastName": "x3GY1&K"
+    },
+    "address": {
+      "line1": ".'D'2t-DpwOzS0k)a",
+      "line2": "cjedX5a)YvI",
+      "postCode": "M1g4Xt",
+      "country": "GB"
+    }
+  },
+  "estate": {
+    "entities": {
+      "deceased": {
+        "name": {
+          "firstName": "lni3DHd-X",
+          "lastName": ",Cecxov,,OrDtgF/ieEiNhOZF-qeb,k"
+        },
+        "dateOfDeath": "1561-05-29"
+      },
+      "personalRepresentative": {
+        "estatePerRepOrg": {
+          "orgName": "-NQSp(ji9eeTJP98.OICk4",
+          "phoneNumber": "30152694576 240953",
+          "identification": {
+            "address": {
+              "line1": "yjBiNzs1JuvYIv886.ZLxeODG2g1",
+              "line2": "7'7'&p&,t5NcZE0vXDkk(eWj",
+              "country": "CU"
+            }
+          }
+        }
+      }
+    },
+    "periodTaxDues": "04"
+  }
+}

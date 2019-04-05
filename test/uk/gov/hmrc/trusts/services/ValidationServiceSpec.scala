@@ -18,11 +18,12 @@ package uk.gov.hmrc.trusts.services
 
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.connectors.BaseSpec
+
 import uk.gov.hmrc.trusts.models.{EstateRegistration, ExistingCheckRequest, Registration}
-import uk.gov.hmrc.trusts.utils.{DataExamples, JsonUtils}
+import uk.gov.hmrc.trusts.utils.{DataExamples, EstateDataExamples, JsonUtils}
 
 
-class ValidationServiceSpec extends BaseSpec with DataExamples {
+class ValidationServiceSpec extends BaseSpec with DataExamples with EstateDataExamples {
 
   private lazy val validatationService: ValidationService = new ValidationService()
   private lazy val validator : Validator = validatationService.get("/resources/schemas/trustsApiRegistrationSchema_3.2.0.json")
@@ -48,6 +49,13 @@ class ValidationServiceSpec extends BaseSpec with DataExamples {
       "estate payload json having required fields for estate type 02" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-estate-registration-02.json")
         estateValidator.validate[EstateRegistration](jsonString).isRight mustBe true
+      }
+
+      "estate payload json having required fields for estate type 04" in {
+        val jsonString = JsonUtils.getJsonFromFile("valid-estate-registration-04.json")
+        val estateRegistration = estateValidator.validate[EstateRegistration](jsonString).right.get
+        estateRegistration.estate.entities.personalRepresentative.estatePerRepOrg.isDefined mustBe true
+        estateRegistration.estate.entities.deceased.identification.isDefined mustBe false
       }
     }
 
@@ -140,9 +148,15 @@ class ValidationServiceSpec extends BaseSpec with DataExamples {
           filter(_.message =="object has missing required properties ([\"personalRepresentative\"])")
         errorList.size mustBe 1
       }
+
+      "no correspodence address provided for estate" in {
+        val errorList = estateValidator.validate[EstateRegistration](estateWithoutCorrespondenceAddress).left.get.
+          filter(_.message =="object has missing required properties ([\"address\"])")
+        errorList.size mustBe 1
+      }
     }
 
-    "return a list of validaton errors " when {
+    "return a list of validaton errors for trusts " when {
       "json request is valid but failed in business rules for trust start date, efrbs start date " in {
         val jsonString = JsonUtils.getJsonFromFile("trust-business-validation-fail.json")
         validator.validate[Registration](jsonString).left.get.size mustBe 8
@@ -167,6 +181,17 @@ class ValidationServiceSpec extends BaseSpec with DataExamples {
         val errorList =validator.validate[Registration](jsonString).left.get.
           filter(_.message=="Business trustee utr is same as trust utr.")
         errorList.size mustBe 2
+      }
+
+    }
+
+    "return a list of validaton errors for estates " when {
+      "individual personal representative has future date of birth" in {
+        val jsonString = getJsonFromFile("estate-registration-dynamic-01.json").
+          replace("{estatePerRepIndDob}", "2030-01-01")
+        val errorList =estateValidator.validate[EstateRegistration](jsonString).left.get.
+          filter(_.message=="Date of birth must be today or in the past.")
+        errorList.size mustBe 1
       }
 
     }

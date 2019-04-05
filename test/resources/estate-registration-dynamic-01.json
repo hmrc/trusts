@@ -1,0 +1,93 @@
+{
+  "correspondence": {
+    "abroadIndicator": false,
+    "name": "Estates 03",
+    "address": {
+      "line1": "Address line 1",
+      "line2": "Address line 2",
+      "line3": "Address line 3",
+      "line4": "Town or city",
+      "postCode": "Z99 2YY",
+      "country": "GB"
+    },
+    "phoneNumber": "07598765432"
+  },
+  "yearsReturns": {
+    "returns": [
+      {
+        "taxReturnYear": "17",
+        "taxConsequence": true
+      },
+      {
+        "taxReturnYear": "18",
+        "taxConsequence": true
+      }
+    ]
+  },
+  "declaration": {
+    "name": {
+      "firstName": "Alister",
+      "middleName": "Stuart",
+      "lastName": "McGovern"
+    },
+    "address": {
+      "line1": "Address line 1",
+      "line2": "Address line 2",
+      "line3": "Address line 3",
+      "line4": "Town or city",
+      "postCode": "Z99 2YY",
+      "country": "GB"
+    }
+  },
+    "estate": {
+      "entities": {
+        "personalRepresentative": {
+          "estatePerRepInd": {
+            "name": {
+              "firstName": "Alister",
+              "middleName": "Stuart",
+              "lastName": "McGovern"
+            },
+            "dateOfBirth": "{estatePerRepIndDob}",
+            "identification": {
+              "passport": {
+                "number": "123456789",
+                "expirationDate": "2025-09-28",
+                "countryOfIssue": "ES"
+              },
+              "address": {
+                "line1": "Address line 1",
+                "line2": "Address line 2",
+                "line3": "Address line 3",
+                "line4": "Town or city",
+                "postCode": "Z99 2YY",
+                "country": "GB"
+              }
+            },
+            "phoneNumber": "078888888",
+            "email": "test@abc.com"
+          }
+        },
+        "deceased": {
+          "name": {
+            "firstName": "Wilbert",
+            "middleName": "Charles",
+            "lastName": "Jefferies"
+          },
+          "dateOfBirth": "1980-06-01",
+          "dateOfDeath": "2014-04-06",
+          "identification": {
+            "address": {
+              "line1": "Address line 1",
+              "line2": "Address line 2",
+              "line3": "Address line 3",
+              "line4": "Town or city",
+              "postCode": "Z99 2YY",
+              "country": "GB"
+            }
+          }
+        }
+        },
+        "periodTaxDues": "02"
+      }
+}
