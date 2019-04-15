@@ -69,7 +69,8 @@ class RegisterEstateController @Inject()(desService: DesService, config: AppConf
                 Logger.error(s"[RegisterEstateController][registration] Exception received : $e.")
                 InternalServerError(Json.toJson(internalServerErrorResponse))
             }
-          case Left(_) =>
+          case Left(errors) =>
+            Logger.error(s"[registration] estates validation errors: ${errors}")
             Future.successful(invalidRequestErrorResponse)
         }
 
