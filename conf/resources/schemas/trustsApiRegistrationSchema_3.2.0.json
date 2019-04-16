@@ -536,7 +536,8 @@
 				}
 			},
 			"required": [
-				"name"
+				"name",
+				"identification"
 			],
 			"additionalProperties": false
 		},
