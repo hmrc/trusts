@@ -159,7 +159,7 @@ object TrusteeType {
 case class TrusteeOrgType(name: String,
                           phoneNumber: Option[String] = None,
                           email: Option[String] = None,
-                          identification: IdentificationOrgType)
+                          identification: Option[IdentificationOrgType])
 
 object TrusteeOrgType {
   implicit val trusteeOrgTypeFormat: Format[TrusteeOrgType] = Json.format[TrusteeOrgType]
@@ -168,7 +168,7 @@ object TrusteeOrgType {
 case class TrusteeIndividualType(name: NameType,
                        dateOfBirth: DateTime,
                        phoneNumber: Option[String],
-                       identification: IdentificationType)
+                       identification: Option[IdentificationType])
 
 object TrusteeIndividualType {
 

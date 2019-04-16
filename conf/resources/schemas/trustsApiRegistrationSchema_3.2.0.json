@@ -514,8 +514,7 @@
 				}
 			},
 			"required": [
-				"name",
-				"identification"
+				"name"
 			],
 			"additionalProperties": false
 		},
@@ -536,8 +535,7 @@
 				}
 			},
 			"required": [
-				"name",
-				"identification"
+				"name"
 			],
 			"additionalProperties": false
 		},

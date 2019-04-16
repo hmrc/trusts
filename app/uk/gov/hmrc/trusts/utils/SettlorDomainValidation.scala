@@ -59,7 +59,7 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
         val deceasedNino = deceased.identification.map(_.nino).flatten
         registration.trust.entities.trustees.flatMap {
           trustees => {
-            val trusteeNino = trustees.flatMap(_.trusteeInd.map(_.identification.nino))
+            val trusteeNino = trustees.flatMap(_.trusteeInd.flatMap(_.identification.map(_.nino)))
             if (deceasedNino.isDefined && trusteeNino.contains(deceasedNino)) {
               Some(TrustsValidationError(s"Deceased NINO is same as trustee NINO.",
                 s"/trust/entities/deceased/identification/nino"))

@@ -71,7 +71,7 @@ trait ValidationUtil {
     val utrList: List[(String, Int)] = trustees.zipWithIndex.flatMap {
       case (trustee, index) =>
         trustee.trusteeOrg.flatMap { x =>
-          x.identification.utr.map { y => (y, index) }
+          x.identification.flatMap{ z => z.utr.map { y => (y, index) } }
         }
     }
     utrList
@@ -82,7 +82,7 @@ trait ValidationUtil {
     val ninoList: List[(String, Int)] = trustees.zipWithIndex.flatMap {
       case (trustee, index) =>
         trustee.trusteeInd.flatMap { x =>
-          x.identification.nino.map { y => (y, index) }
+          x.identification.flatMap { z=> z.nino.map { y => (y, index) } }
         }
     }
     ninoList
