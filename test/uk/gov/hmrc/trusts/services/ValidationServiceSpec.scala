@@ -96,6 +96,10 @@ class ValidationServiceSpec extends BaseSpec with DataExamples with EstateDataEx
         registration.trust.assets.other.get.map{x=>x.value.get.toString.length mustBe 12}
       }
 
+      "trustees has no identification" in {
+        val jsonString = JsonUtils.getJsonFromFile("trusts-without-trustees-identification.json")
+        validator.validate[Registration](jsonString).isRight mustBe true
+      }
     }
 
     "return a list of validaton errors " when {
