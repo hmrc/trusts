@@ -75,11 +75,23 @@
           },
           "dateOfBirth": "1956-02-12",
           "identification": {
-            "nino": "KC287812"
+            "passport": {
+              "number": "abcdefgh",
+              "expirationDate": "2001-01-01",
+              "countryOfIssue": "GB"
+            },
+            "address": {
+              "line1": "1344 Army Road",
+              "line2": "Suite 111",
+              "line4": "Telford",
+              "postCode": "TF1 5DR",
+              "country": "GB"
+            }
           }
         }
       ],
       "beneficiary": {
+
         "individualDetails": [
           {
             "name": {
