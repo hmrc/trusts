@@ -24,7 +24,7 @@ import uk.gov.hmrc.trusts.utils.{DataExamples, EstateDataExamples, JsonUtils}
 class ValidationServiceSpec extends BaseSpec with DataExamples with EstateDataExamples {
 
   private lazy val validationService: ValidationService = new ValidationService()
-  private lazy val validator : Validator = validationService.get("/resources/schemas/trustsApiRegistrationSchema_3.2.0.json")
+  private lazy val validator : Validator = validationService.get("/resources/schemas/trusts-api-schema-5.0.json")
   private lazy val estateValidator : Validator = validationService.get("/resources/schemas/estatesRegistrationSchema_3.2.0.json")
 
   "a validator " should {

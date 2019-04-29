@@ -479,7 +479,7 @@ object PartnershipType {
 }
 
 case class SharesType(numberOfShares: String,
-                      orgName: Option[String],
+                      orgName: String,
                       shareClass: Option[String],
                       typeOfShare: Option[String],
                       value: Option[Long])

@@ -1086,7 +1086,8 @@
 				}
 			},
 			"required": [
-				"orgName"
+				"orgName",
+				"numberOfShares"
 			],
 			"additionalProperties": false
 		},
