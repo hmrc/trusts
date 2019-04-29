@@ -20,11 +20,8 @@ package uk.gov.hmrc.trusts.models
 import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
-import uk.gov.hmrc.trusts.utils.Constants._
-import uk.gov.hmrc.trusts.utils.TypeOfTrust
-import uk.gov.hmrc.trusts.utils.TypeOfTrust.EMPLOYMENT_RELATED_TRUST
 import play.api.libs.json.{JsPath, Json, Reads, Writes}
-
+import uk.gov.hmrc.trusts.utils.Constants._
 case class EstateRegistration(matchData: Option[MatchData],
                         correspondence: Correspondence,
                         yearsReturns: Option[YearsReturns],
@@ -109,6 +106,6 @@ case class EstateWillType(name: NameType,
                     identification: Option[Identification])
 
 object EstateWillType {
-  implicit val dateFormat = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
+  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val estateWillTypeFormat: Format[EstateWillType] = Json.format[EstateWillType]
 }
