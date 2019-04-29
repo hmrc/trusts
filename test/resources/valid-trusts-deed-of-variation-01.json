@@ -1,0 +1,145 @@
+{
+  "correspondence": {
+    "abroadIndicator": false,
+    "name": "1234567890 QwErTyUiOp ,.(/)&'- name",
+    "address": {
+      "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+      "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+      "line3": "1234567890 QwErTyUiOp ,.(/)&'- name",
+      "line4": "1234567890 QwErTyUiOp ,.(/)&'- name",
+      "postCode": "SR2 7UY",
+      "country": "GB"
+    },
+    "phoneNumber": "+123456789012345678"
+  },
+  "yearsReturns": {
+    "returns": [
+      {
+        "taxReturnYear": "18",
+        "taxConsequence": true
+      },
+      {
+        "taxReturnYear": "19",
+        "taxConsequence": true
+      }
+    ]
+  },
+  "declaration": {
+    "name": {
+      "firstName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+      "lastName": "1234567890 QwErTyUiOp ,.(/)&'- name"
+    },
+    "address": {
+      "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+      "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+      "line3": "1234567890 QwErTyUiOp ,.(/)&'- name",
+      "line4": "1234567890 QwErTyUiOp ,.(/)&'- name",
+      "postCode": "SR2 7UY",
+      "country": "GB"
+    }
+  },
+  "trust": {
+    "details": {
+      "startDate": "2017-04-06",
+      "administrationCountry": "GB",
+      "residentialStatus": {
+        "nonUK": {
+          "sch5atcgga92": false,
+          "s218ihta84": false
+        }
+      },
+      "typeOfTrust": "Deed of Variation Trust or Family Arrangement",
+      "deedOfVariation": "Replaced the will trust"
+    },
+    "entities": {
+      "naturalPerson": [
+        {
+          "name": {
+            "firstName": "John",
+            "middleName": "William",
+            "lastName": "O'Connor"
+          }
+        }
+      ],
+      "beneficiary": {
+        "charity": [
+          {
+            "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "beneficiaryDiscretion": false,
+            "beneficiaryShareOfIncome": "100",
+            "identification": {
+              "address": {
+                "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "line3": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "country": "DE"
+              }
+            }
+          }
+        ]
+      },
+      "leadTrustees": {
+        "leadTrusteeOrg": {
+          "name": "1234567890 QwErTyUiOp ,.(/)&'- name",
+          "phoneNumber": "0123456789012345678",
+          "email": "a@b.com",
+          "identification": {
+            "address": {
+              "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+              "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+              "line3": "1234567890 QwErTyUiOp ,.(/)&'- name",
+              "line4": "1234567890 QwErTyUiOp ,.(/)&'- name",
+              "postCode": "SR2 7UY",
+              "country": "GB"
+            }
+          }
+        }
+      },
+      "trustees": [
+        {
+          "trusteeOrg": {
+            "name": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "identification": {
+              "address": {
+                "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "line3": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "line4": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "postCode": "SR2 7UY",
+                "country": "GB"
+              }
+            }
+          }
+        }
+      ],
+      "protectors": {
+        "protectorCompany": [
+          {
+            "name": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "identification": {
+              "utr": "1234567891"
+            }
+          }
+        ]
+      },
+      "settlors": {
+        "settlorCompany": [
+          {
+            "name": "1234567890 QwErTyUiOp ,.(/)&'- name"
+          }
+        ]
+      }
+    },
+    "assets": {
+      "shares": [
+        {
+          "numberOfShares": "100",
+          "orgName": "Mock Org LTD",
+          "shareClass": "Ordinary shares",
+          "typeOfShare": "Quoted",
+          "value": 999999999999
+        }
+      ]
+    }
+  }
+}

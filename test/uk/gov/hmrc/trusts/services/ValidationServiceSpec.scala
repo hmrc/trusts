@@ -16,18 +16,16 @@
 
 package uk.gov.hmrc.trusts.services
 
-import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.connectors.BaseSpec
-
 import uk.gov.hmrc.trusts.models.{EstateRegistration, ExistingCheckRequest, Registration}
 import uk.gov.hmrc.trusts.utils.{DataExamples, EstateDataExamples, JsonUtils}
 
 
 class ValidationServiceSpec extends BaseSpec with DataExamples with EstateDataExamples {
 
-  private lazy val validatationService: ValidationService = new ValidationService()
-  private lazy val validator : Validator = validatationService.get("/resources/schemas/trustsApiRegistrationSchema_3.2.0.json")
-  private lazy val estateValidator : Validator = validatationService.get("/resources/schemas/estatesRegistrationSchema_3.2.0.json")
+  private lazy val validationService: ValidationService = new ValidationService()
+  private lazy val validator : Validator = validationService.get("/resources/schemas/trustsApiRegistrationSchema_3.2.0.json")
+  private lazy val estateValidator : Validator = validationService.get("/resources/schemas/estatesRegistrationSchema_3.2.0.json")
 
   "a validator " should {
     "return an empty list of errors when " when {
@@ -36,7 +34,7 @@ class ValidationServiceSpec extends BaseSpec with DataExamples with EstateDataEx
         validator.validate[Registration](jsonString).isRight mustBe true
       }
 
-      "Json having trust with orgnisation  trustees" in {
+      "Json having trust with organisation  trustees" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-org-trustees.json")
         validator.validate[Registration](jsonString).isRight mustBe true
       }
@@ -100,9 +98,14 @@ class ValidationServiceSpec extends BaseSpec with DataExamples with EstateDataEx
         val jsonString = JsonUtils.getJsonFromFile("trusts-without-trustees-identification.json")
         validator.validate[Registration](jsonString).isRight mustBe true
       }
+
+      "natural people identification is not provided." in {
+        val jsonString = JsonUtils.getJsonFromFile("valid-trusts-deed-of-variation-01.json")
+        validator.validate[Registration](jsonString).isRight mustBe true
+      }
     }
 
-    "return a list of validaton errors " when {
+    "return a list of validation errors " when {
       "json document is invalid" in {
         val jsonString = JsonUtils.getJsonFromFile("invalid-payload-trusts-registration.json")
         validator.validate[Registration](jsonString).isLeft mustBe true

@@ -379,7 +379,7 @@ object CompanyBeneficiaryIdentification {
 
 case class NaturalPersonType(name: NameType,
                              dateOfBirth: Option[DateTime],
-                             identification: IdentificationType)
+                             identification: Option[IdentificationType])
 
 object NaturalPersonType {
 
