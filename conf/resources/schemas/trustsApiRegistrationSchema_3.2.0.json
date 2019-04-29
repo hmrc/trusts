@@ -194,7 +194,7 @@
 				},
 				"clientReference": {
 					"type": "string",
-					"pattern": "^[0-9a-zA-Z{\u00C0-\u02FF\u2019}\\- \\u005C&`'^]{1,56}$"
+					"pattern": "^[A-Za-z0-9 ,.()/&'-]{1,56}$"
 				}
 			},
 			"required": [
@@ -578,7 +578,7 @@
 					"$ref": "#/definitions/dateString"
 				},
 				"identification": {
-					"$ref": "#/definitions/identificationType"
+					"$ref": "#/definitions/identificationTypeNPLT"
 				},
 				"phoneNumber": {
 					"$ref": "#/definitions/phoneString"
@@ -761,8 +761,7 @@
 				}
 			},
 			"required": [
-				"name",
-				"identification"
+				"name"
 			],
 			"additionalProperties": false
 		},
@@ -791,6 +790,37 @@
 							"$ref": "#/definitions/addressType"
 						}
 					},
+					"additionalProperties": false
+				}
+			]
+		},
+		"identificationTypeNPLT": {
+			"type": "object",
+			"oneOf": [{
+					"type": "object",
+					"properties": {
+						"nino": {
+							"$ref": "#/definitions/ninoType"
+						}
+					},
+					"required": [
+						"nino"
+					],
+					"additionalProperties": false
+				}, {
+					"type": "object",
+					"properties": {
+						"passport": {
+							"$ref": "#/definitions/passportType"
+						},
+						"address": {
+							"$ref": "#/definitions/addressType"
+						}
+					},
+					"required": [
+						"passport",
+						"address"
+					],
 					"additionalProperties": false
 				}
 			]
@@ -1056,7 +1086,7 @@
 				}
 			},
 			"required": [
-				"numberOfShares"
+				"orgName"
 			],
 			"additionalProperties": false
 		},
@@ -1131,34 +1161,8 @@
 				"dateOfDeath": {
 					"$ref": "#/definitions/dateString"
 				},
-				"identification": {
-					"type": "object",
-					"oneOf": [
-						{
-							"type": "object",
-							"properties": {
-								"nino": {
-									"$ref": "#/definitions/ninoType"
-								}
-							},
-							"required": [
-								"nino"
-							],
-							"additionalProperties": false
-						},
-						{
-							"type": "object",
-							"properties": {
-								"address": {
-									"$ref": "#/definitions/addressType"
-								}
-							},
-							"required": [
-								"address"
-							],
-							"additionalProperties": false
-						}
-					]
+			"identification": {
+					"$ref": "#/definitions/identificationType"
 				}
 			},
 			"required": [
