@@ -22,7 +22,6 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import uk.gov.hmrc.trusts.utils.Constants._
 import uk.gov.hmrc.trusts.utils.TypeOfTrust.EMPLOYMENT_RELATED_TRUST
-import uk.gov.hmrc.trusts.models.CommonFormat._
 /**
   * DES API Schema - definitions models below
   */
@@ -135,7 +134,7 @@ case class Protector(name: NameType,
                      identification: Option[IdentificationType])
 
 object Protector {
-  dateTimeFormat()
+     implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val protectorFormat: Format[Protector] = Json.format[Protector]
 }
 
@@ -169,7 +168,7 @@ case class TrusteeIndividualType(name: NameType,
 
 object TrusteeIndividualType {
 
-  dateTimeFormat()
+     implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val trusteeIndividualTypeFormat : Format[TrusteeIndividualType] = Json.format[TrusteeIndividualType]
 }
 
@@ -185,7 +184,7 @@ case class Settlor(name: NameType,
                    identification: Option[IdentificationType])
 
 object Settlor {
-  dateTimeFormat()
+     implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val settlorFormat: Format[Settlor] = Json.format[Settlor]
 }
 
@@ -208,8 +207,8 @@ case class LeadTrusteeIndType (
                           )
 object LeadTrusteeIndType {
 
- dateTimeFormat()
- implicit val leadTrusteeIndTypeFormat: Format[LeadTrusteeIndType] = Json.format[LeadTrusteeIndType]
+     implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
+  implicit val leadTrusteeIndTypeFormat: Format[LeadTrusteeIndType] = Json.format[LeadTrusteeIndType]
 
 }
 case class LeadTrusteeOrgType(
@@ -230,7 +229,7 @@ case class LeadTrusteeType(
 
 object LeadTrusteeType {
 
-  dateTimeFormat()
+     implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val leadTrusteeTypeReads:Reads[LeadTrusteeType] = Json.reads[LeadTrusteeType]
 
   implicit val leadTrusteeWritesToDes : Writes[LeadTrusteeType] = Writes {
@@ -271,7 +270,7 @@ case class IndividualDetailsType(name: NameType,
                                  identification: Option[IdentificationType])
 
 object IndividualDetailsType {
-  dateTimeFormat()
+     implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val individualDetailsTypeFormat: Format[IndividualDetailsType] = Json.format[IndividualDetailsType]
 }
 
@@ -373,7 +372,7 @@ case class NaturalPersonType(name: NameType,
                              identification: Option[IdentificationType])
 
 object NaturalPersonType {
-  dateTimeFormat()
+     implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val naturalPersonTypeFormat: Format[NaturalPersonType] = Json.format[NaturalPersonType]
 }
 
@@ -400,7 +399,7 @@ case class TrustDetailsType(startDate: DateTime,
 }
 
 object TrustDetailsType {
-  dateTimeFormat()
+     implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val trustDetailsTypeFormat: Format[TrustDetailsType] = Json.format[TrustDetailsType]
 }
 
@@ -459,7 +458,7 @@ case class PartnershipType(description: String,
 
 object PartnershipType {
 
-  dateTimeFormat()
+     implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val partnershipTypeFormat: Format[PartnershipType] = Json.format[PartnershipType]
 }
 
@@ -492,7 +491,7 @@ case class PassportType(number: String,
 
 object PassportType {
 
-  dateTimeFormat()
+     implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val passportTypeFormat: Format[PassportType] = Json.format[PassportType]
 }
 
@@ -521,8 +520,7 @@ case class WillType(name: NameType,
                     identification: Option[Identification])
 
 object WillType {
-
-  dateTimeFormat()
+  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val willTypeFormat: Format[WillType] = Json.format[WillType]
 }
 
@@ -535,8 +533,3 @@ object AgentDetails {
   implicit val agentDetailsFormat: Format[AgentDetails] = Json.format[AgentDetails]
 }
 
-object CommonFormat {
-   def dateTimeFormat(): Unit = {
-    implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
-  }
-}

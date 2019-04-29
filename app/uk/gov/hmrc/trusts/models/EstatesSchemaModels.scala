@@ -21,8 +21,7 @@ import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, Json, Reads, Writes}
-import uk.gov.hmrc.trusts.models.CommonFormat._
-
+import uk.gov.hmrc.trusts.utils.Constants._
 case class EstateRegistration(matchData: Option[MatchData],
                         correspondence: Correspondence,
                         yearsReturns: Option[YearsReturns],
@@ -49,7 +48,7 @@ case class Estate(entities: EntitiesType,
                   periodTaxDues: String)
 
 object Estate {
-  dateTimeFormat()
+     implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val estateFormat: Format[Estate] = Json.format[Estate]
 }
 
@@ -67,7 +66,7 @@ case class PersonalRepresentativeType (
                           )
 
 object PersonalRepresentativeType {
-  dateTimeFormat()
+  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val personalRepTypeReads:Reads[PersonalRepresentativeType] = Json.reads[PersonalRepresentativeType]
 
   implicit val personalRepTypeWritesToDes : Writes[PersonalRepresentativeType] = Writes {
@@ -85,7 +84,7 @@ case class EstatePerRepIndType(   name: NameType,
                                   email: Option[String])
 
 object EstatePerRepIndType {
-  dateTimeFormat()
+     implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val estatePerRepIndTypeFormat: Format[EstatePerRepIndType] = Json.format[EstatePerRepIndType]
 }
 
@@ -107,6 +106,6 @@ case class EstateWillType(name: NameType,
                     identification: Option[Identification])
 
 object EstateWillType {
-  dateTimeFormat()
+     implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val estateWillTypeFormat: Format[EstateWillType] = Json.format[EstateWillType]
 }
