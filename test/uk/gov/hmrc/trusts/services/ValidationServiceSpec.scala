@@ -25,7 +25,7 @@ class ValidationServiceSpec extends BaseSpec with DataExamples with EstateDataEx
 
   private lazy val validationService: ValidationService = new ValidationService()
   private lazy val validator : Validator = validationService.get("/resources/schemas/trusts-api-schema-5.0.json")
-  private lazy val estateValidator : Validator = validationService.get("/resources/schemas/estatesRegistrationSchema_3.2.0.json")
+  private lazy val estateValidator : Validator = validationService.get("/resources/schemas/estates-api-schema-5.0.json")
 
   "a validator " should {
     "return an empty list of errors when " when {
