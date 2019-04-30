@@ -390,7 +390,7 @@
           "$ref": "#/definitions/dateString"
         },
         "identification": {
-          "$ref": "#/definitions/identificationType"
+          "$ref": "#/definitions/identificationTypeNPLT"
         },
         "phoneNumber": {
           "$ref": "#/definitions/phoneString"
