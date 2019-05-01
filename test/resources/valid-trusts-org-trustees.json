@@ -255,7 +255,8 @@
 							"line2": "Suite 111",
 							"postCode": "TF1 5DR",
 							"country": "GB"
-						}
+						},
+						"businessValue" : 999999999999
 					}
 				]
 			}

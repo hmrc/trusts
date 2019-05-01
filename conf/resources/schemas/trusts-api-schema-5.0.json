@@ -1003,7 +1003,6 @@
 				"orgName": {
 					"$ref": "#/definitions/orgNameString"
 				},
-
 				"businessDescription": {
 					"type": "string",
 					"pattern": "^[0-9a-zA-Z{\u00C0-\u02FF\u2019}\\- \\u005C&`'^]{1,56}$"
@@ -1018,7 +1017,8 @@
 			"required": [
 				"orgName",
 				"businessDescription",
-				"address"
+				"address",
+				"businessValue"
 			],
 			"additionalProperties": false
 		},
@@ -1034,7 +1034,8 @@
 				}
 			},
 			"required": [
-				"description"
+				"description",
+				"value"
 			],
 			"additionalProperties": false
 		},

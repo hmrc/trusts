@@ -419,14 +419,14 @@ object PropertyLandType {
 case class BusinessAssetType(orgName: String,
                              businessDescription: Option[String],
                              address: AddressType,
-                             businessValue: Option[Long])
+                             businessValue: Long)
 
 object BusinessAssetType {
   implicit val businessAssetTypeFormat: Format[BusinessAssetType] = Json.format[BusinessAssetType]
 }
 
 case class OtherAssetType(description: String,
-                          value: Option[Long])
+                          value: Long)
 
 object OtherAssetType {
   implicit val otherAssetTypeFormat: Format[OtherAssetType] = Json.format[OtherAssetType]
