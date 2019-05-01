@@ -418,7 +418,7 @@ object PropertyLandType {
 
 case class BusinessAssetType(orgName: String,
                              businessDescription: Option[String],
-                             address: Option[AddressType],
+                             address: AddressType,
                              businessValue: Option[Long])
 
 object BusinessAssetType {
@@ -433,7 +433,7 @@ object OtherAssetType {
 }
 
 case class PartnershipType(description: String,
-                           partnershipStart: Option[DateTime])
+                           partnershipStart: DateTime)
 
 object PartnershipType {
 
@@ -443,10 +443,9 @@ object PartnershipType {
 
 case class SharesType(numberOfShares: String,
                       orgName: String,
-                      shareClass: Option[String],
-                      typeOfShare: Option[String],
-                      value: Option[Long])
-
+                      shareClass: String,
+                      typeOfShare: String,
+                      value: Long)
 object SharesType {
   implicit val sharesTypeFormat: Format[SharesType] = Json.format[SharesType]
 }

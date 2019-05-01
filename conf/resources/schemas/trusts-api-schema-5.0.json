@@ -1050,7 +1050,8 @@
 				}
 			},
 			"required": [
-				"description"
+				"description",
+				"partnershipStart"
 			],
 			"additionalProperties": false
 		},
@@ -1064,7 +1065,6 @@
 				"orgName": {
 					"$ref": "#/definitions/orgNameString"
 				},
-
 				"shareClass": {
 					"type": "string",
 					"enum": [
@@ -1094,7 +1094,10 @@
 			},
 			"required": [
 				"orgName",
-				"numberOfShares"
+				"numberOfShares",
+				"shareClass",
+				"typeOfShare",
+				"value"
 			],
 			"additionalProperties": false
 		},
