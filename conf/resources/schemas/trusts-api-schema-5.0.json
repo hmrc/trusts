@@ -991,6 +991,10 @@
 					"$ref": "#/definitions/monetaryType"
 				}
 			},
+			"required": [
+				"valueFull",
+				"valuePrevious"
+			],
 			"additionalProperties": false
 		},
 		"businessAssetType": {

@@ -320,18 +320,12 @@ case class LargeType(organisationName: String,
                      description3: Option[String],
                      description4: Option[String],
                      numberOfBeneficiary: String,
-                     identification: Option[LargeTypeIdentification],
+                     identification: Option[IdentificationOrgType],
                      beneficiaryDiscretion: Option[Boolean],
                      beneficiaryShareOfIncome: Option[String])
 
 object LargeType {
   implicit val largeTypeFormat: Format[LargeType] = Json.format[LargeType]
-}
-
-case class LargeTypeIdentification(utr: Option[String], address: Option[AddressType])
-
-object LargeTypeIdentification {
-  implicit val largeTypeIdentificationFormat: Format[LargeTypeIdentification] = Json.format[LargeTypeIdentification]
 }
 
 case class OtherType(description: String,
@@ -415,8 +409,8 @@ object NonUKType {
 
 case class PropertyLandType(buildingLandName: Option[String],
                             address: Option[AddressType],
-                            valueFull: Option[Long],
-                            valuePrevious: Option[Long])
+                            valueFull: Long,
+                            valuePrevious: Long)
 
 object PropertyLandType {
   implicit val propertyLandTypeFormat: Format[PropertyLandType] = Json.format[PropertyLandType]
