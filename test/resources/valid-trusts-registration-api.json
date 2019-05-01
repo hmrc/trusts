@@ -149,6 +149,47 @@
               }
             }
           }
+        ],
+        "charity": [
+          {
+            "organisationName": "charity org name",
+            "beneficiaryDiscretion": true,
+            "identification": {
+              "address": {
+                "line1": "1 Some High Street",
+                "line2": "Newcastle Upon Tyne",
+                "postCode": "Z99 2YY",
+                "country": "GB"
+              }
+            }
+          }
+        ],
+        "trust": [
+          {
+            "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "beneficiaryDiscretion": true,
+            "identification": {
+              "address": {
+                "line1": "sdf",
+                "line2": "sdf",
+                "country": "TL"
+              }
+            }
+          }
+        ],
+        "company": [
+          {
+            "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "beneficiaryDiscretion": true,
+            "identification": {
+              "address": {
+                "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "postCode": "Z99 2YY",
+                "country": "GB"
+              }
+            }
+          }
         ]
       },
       "leadTrustees": {

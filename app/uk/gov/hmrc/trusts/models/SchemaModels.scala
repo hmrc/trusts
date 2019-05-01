@@ -238,16 +238,8 @@ object LeadTrusteeType {
       case None => Json.toJson(leadTrustee.leadTrusteeOrg)
     }
   }
-
-
 }
 
-case class IdentificationOrgType(utr: Option[String],
-                                 address: Option[AddressType])
-
-object IdentificationOrgType {
-  implicit val identificationOrgTypeFormat: Format[IdentificationOrgType] = Json.format[IdentificationOrgType]
-}
 
 case class BeneficiaryType(individualDetails: Option[List[IndividualDetailsType]],
                            company: Option[List[CompanyType]],
@@ -277,17 +269,17 @@ object IndividualDetailsType {
 case class BeneficiaryTrustType(organisationName: String,
                                 beneficiaryDiscretion: Option[Boolean],
                                 beneficiaryShareOfIncome: Option[String],
-                                identification: Option[TrustBeneficiaryIdentification])
+                                identification: IdentificationOrgType)
 
 object BeneficiaryTrustType {
   implicit val beneficiaryTrustTypeFormat: Format[BeneficiaryTrustType] = Json.format[BeneficiaryTrustType]
 }
 
-case class TrustBeneficiaryIdentification(utr: Option[String],
+case class IdentificationOrgType(utr: Option[String],
                                           address: Option[AddressType])
 
-object TrustBeneficiaryIdentification {
-  implicit val trustBeneficiaryIdentificationFormat: Format[TrustBeneficiaryIdentification] = Json.format[TrustBeneficiaryIdentification]
+object IdentificationOrgType {
+  implicit val trustBeneficiaryIdentificationFormat: Format[IdentificationOrgType] = Json.format[IdentificationOrgType]
 }
 
 case class Identification(nino: Option[String],
@@ -300,7 +292,7 @@ object Identification {
 case class CharityType(organisationName: String,
                        beneficiaryDiscretion: Option[Boolean],
                        beneficiaryShareOfIncome: Option[String],
-                       identification: Option[TrustBeneficiaryCharityIdentification])
+                       identification: IdentificationOrgType)
 
 object CharityType {
   implicit val charityTypeFormat: Format[CharityType] = Json.format[CharityType]
@@ -354,17 +346,10 @@ object OtherType {
 case class CompanyType(organisationName: String,
                        beneficiaryDiscretion: Option[Boolean],
                        beneficiaryShareOfIncome: Option[String],
-                       identification: Option[CompanyBeneficiaryIdentification])
+                       identification: IdentificationOrgType)
 
 object CompanyType {
   implicit val companyTypeFormat: Format[CompanyType] = Json.format[CompanyType]
-}
-
-case class CompanyBeneficiaryIdentification(utr: Option[String],
-                                            address: Option[AddressType])
-
-object CompanyBeneficiaryIdentification {
-  implicit val companyBeneficiaryIdentificationFormat: Format[CompanyBeneficiaryIdentification] = Json.format[CompanyBeneficiaryIdentification]
 }
 
 case class NaturalPersonType(name: NameType,

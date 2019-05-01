@@ -613,7 +613,8 @@
 				}
 			},
 			"required": [
-				"organisationName"
+				"organisationName",
+				"identification"
 			],
 			"additionalProperties": false
 		},
@@ -634,7 +635,8 @@
 				}
 			},
 			"required": [
-				"organisationName"
+				"organisationName",
+				"identification"
 			],
 			"additionalProperties": false
 		},
