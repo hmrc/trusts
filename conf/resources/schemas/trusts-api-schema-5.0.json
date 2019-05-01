@@ -1017,7 +1017,8 @@
 			},
 			"required": [
 				"orgName",
-				"businessDescription"
+				"businessDescription",
+				"address"
 			],
 			"additionalProperties": false
 		},

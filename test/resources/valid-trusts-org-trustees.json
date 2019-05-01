@@ -245,6 +245,18 @@
 						"description": "Lorem ipsum anum",
 						"value": 999999999999
 					}
+				],
+				"business": [
+					{
+						"orgName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+						"businessDescription": "1234567890&`'^ -QWERTYqwertyzxcvbnmasdfghjklpoiuypoiuytr",
+						"address": {
+							"line1": "1344 Army Road",
+							"line2": "Suite 111",
+							"postCode": "TF1 5DR",
+							"country": "GB"
+						}
+					}
 				]
 			}
 
