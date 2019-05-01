@@ -17,9 +17,8 @@
 package uk.gov.hmrc.trusts.utils
 
 import org.joda.time.DateTime
-import play.api.libs.json.JsValue
-import uk.gov.hmrc.trusts.models._
 import play.api.libs.json._
+import uk.gov.hmrc.trusts.models._
 
 trait DataExamples extends  JsonRequests {
 
@@ -67,7 +66,7 @@ trait DataExamples extends  JsonRequests {
 
   def trusteeOrg  = Some(TrusteeOrgType(
     name = "trustee as company",
-    identification = Some(utr),
+    identification = utr,
     phoneNumber = None,
     email = email))
 
@@ -87,7 +86,13 @@ trait DataExamples extends  JsonRequests {
   def listOfIndividualTrustees = List(TrusteeType(trusteeIndividual(),None),TrusteeType(trusteeIndividual("2030-01-01"),None))
   def listOfOrgTrustees = List(TrusteeType(None,trusteeOrg),TrusteeType(None,trusteeOrg))
   def listOfIndAndOrgTrustees = List(TrusteeType(trusteeIndividual("2030-01-01"),trusteeOrg))
-  def listOfDuplicateIndAndOrgTrustees = List(TrusteeType(None,trusteeOrg),TrusteeType(trusteeIndividual("2030-01-01"),trusteeOrg),TrusteeType(trusteeIndividual("2030-01-01"),None),TrusteeType(trusteeIndividual("2030-01-01"),None),TrusteeType(trusteeIndividual("2030-01-01"),None),TrusteeType(trusteeIndividual("2030-01-01"),None))
+  def listOfDuplicateIndAndOrgTrustees =
+    List(TrusteeType(None,trusteeOrg),
+    TrusteeType(trusteeIndividual("2030-01-01"),trusteeOrg),
+      TrusteeType(trusteeIndividual("2030-01-01"),None),
+      TrusteeType(trusteeIndividual("2030-01-01"),None),
+      TrusteeType(trusteeIndividual("2030-01-01"),None),
+      TrusteeType(trusteeIndividual("2030-01-01"),None))
 
 
   def registrationWithTrustess(updatedTrustees : Option[List[TrusteeType]] ) = {
