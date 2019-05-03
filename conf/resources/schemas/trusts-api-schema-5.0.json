@@ -514,7 +514,8 @@
 				}
 			},
 			"required": [
-				"name"
+				"name",
+				"identification"
 			],
 			"additionalProperties": false
 		},
@@ -613,7 +614,8 @@
 				}
 			},
 			"required": [
-				"organisationName"
+				"organisationName",
+				"identification"
 			],
 			"additionalProperties": false
 		},
@@ -634,7 +636,8 @@
 				}
 			},
 			"required": [
-				"organisationName"
+				"organisationName",
+				"identification"
 			],
 			"additionalProperties": false
 		},
@@ -989,6 +992,10 @@
 					"$ref": "#/definitions/monetaryType"
 				}
 			},
+			"required": [
+				"valueFull",
+				"valuePrevious"
+			],
 			"additionalProperties": false
 		},
 		"businessAssetType": {
@@ -997,7 +1004,6 @@
 				"orgName": {
 					"$ref": "#/definitions/orgNameString"
 				},
-
 				"businessDescription": {
 					"type": "string",
 					"pattern": "^[0-9a-zA-Z{\u00C0-\u02FF\u2019}\\- \\u005C&`'^]{1,56}$"
@@ -1011,7 +1017,9 @@
 			},
 			"required": [
 				"orgName",
-				"businessDescription"
+				"businessDescription",
+				"address",
+				"businessValue"
 			],
 			"additionalProperties": false
 		},
@@ -1027,7 +1035,8 @@
 				}
 			},
 			"required": [
-				"description"
+				"description",
+				"value"
 			],
 			"additionalProperties": false
 		},
@@ -1043,7 +1052,8 @@
 				}
 			},
 			"required": [
-				"description"
+				"description",
+				"partnershipStart"
 			],
 			"additionalProperties": false
 		},
@@ -1057,7 +1067,6 @@
 				"orgName": {
 					"$ref": "#/definitions/orgNameString"
 				},
-
 				"shareClass": {
 					"type": "string",
 					"enum": [
@@ -1087,7 +1096,10 @@
 			},
 			"required": [
 				"orgName",
-				"numberOfShares"
+				"numberOfShares",
+				"shareClass",
+				"typeOfShare",
+				"value"
 			],
 			"additionalProperties": false
 		},
