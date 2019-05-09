@@ -6,14 +6,13 @@ import sbt._
 object AppDependencies {
 
   val compile = Seq(
-    "uk.gov.hmrc" %% "play-reactivemongo" % "6.2.0",
     ws,
-    "uk.gov.hmrc" %% "bootstrap-play-25" % "4.9.0",
+    "uk.gov.hmrc" %% "bootstrap-play-25" % "4.11.0",
     "com.github.java-json-tools" % "json-schema-validator" % "2.2.8"
   )
 
   def test(scope: String = "test") = Seq(
-    "uk.gov.hmrc" %% "hmrctest" % "3.1.0" % scope,
+    "uk.gov.hmrc" %% "hmrctest" % "3.8.0-play-25" % scope,
     "org.scalatest" %% "scalatest" % "3.0.4" % scope,
     "org.pegdown" % "pegdown" % "1.6.0" % scope,
     "com.github.tomakehurst" % "wiremock-standalone" % "2.17.0",
