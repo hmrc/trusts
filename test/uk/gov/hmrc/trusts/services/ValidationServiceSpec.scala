@@ -47,19 +47,28 @@ class ValidationServiceSpec extends BaseSpec
 
       "estate payload json having all required fields" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-estate-registration-01.json")
-        estateValidator.validate[EstateRegistration](jsonString).isRight mustBe true
+
+        estateValidator.validate[EstateRegistration](jsonString) must not be 'left
+        estateValidator.validate[EstateRegistration](jsonString).right.value mustBe a[EstateRegistration]
       }
 
       "estate payload json having required fields for estate type 02" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-estate-registration-02.json")
-        estateValidator.validate[EstateRegistration](jsonString).isRight mustBe true
+
+        estateValidator.validate[EstateRegistration](jsonString) must not be 'left
+        estateValidator.validate[EstateRegistration](jsonString).right.value mustBe a[EstateRegistration]
       }
 
       "estate payload json having required fields for estate type 04" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-estate-registration-04.json")
-        val estateRegistration = estateValidator.validate[EstateRegistration](jsonString).right.get
-        estateRegistration.estate.entities.personalRepresentative.estatePerRepOrg.isDefined mustBe true
-        estateRegistration.estate.entities.deceased.identification.isDefined mustBe false
+
+        estateValidator.validate[EstateRegistration](jsonString) must not be 'left
+        val rightValue = estateValidator.validate[EstateRegistration](jsonString).right.value
+
+        rightValue mustBe a[EstateRegistration]
+
+        rightValue.estate.entities.personalRepresentative.estatePerRepOrg mustBe defined
+        rightValue.estate.entities.deceased.identification mustNot be(defined)
       }
     }
 
@@ -102,24 +111,24 @@ class ValidationServiceSpec extends BaseSpec
 
       "individual trustees has no identification" in {
         val jsonString = JsonUtils.getJsonFromFile("trusts-without-trustees-identification.json")
-        validator.validate[Registration](jsonString).isRight mustBe true
+        validator.validate[Registration](jsonString) mustBe 'right
       }
 
       "natural people identification is not provided." in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-deed-of-variation-01.json")
-        validator.validate[Registration](jsonString).isRight mustBe true
+        validator.validate[Registration](jsonString) mustBe 'right
       }
     }
 
     "return a list of validation errors " when {
       "json document is invalid" in {
         val jsonString = JsonUtils.getJsonFromFile("invalid-payload-trusts-registration.json")
-        validator.validate[Registration](jsonString).isLeft mustBe true
+        validator.validate[Registration](jsonString) mustBe 'left
       }
 
       "json document is valid but failed to match with Domain" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
-        validator.validate[ExistingCheckRequest](jsonString).isLeft mustBe true
+        validator.validate[ExistingCheckRequest](jsonString) mustBe 'left
       }
 
       "date of birth of trustee is before 1500/01/01" in {
@@ -208,6 +217,5 @@ class ValidationServiceSpec extends BaseSpec
       }
 
     }
-  }//validator
-
+  }
 }
