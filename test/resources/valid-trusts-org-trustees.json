@@ -177,6 +177,18 @@
 								"utr": "1234567890"
 							}
 						}
+					},
+					{
+						"trusteeInd": {
+							"name": {
+								"firstName": "Rebecca",
+								"lastName": "O'Connor"
+							},
+							"identification": {
+								"nino": "ST123789"
+							},
+							"phoneNumber": "0121546546"
+						}
 					}
 				],
 				"settlors": {
