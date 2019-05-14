@@ -162,7 +162,7 @@ object TrusteeOrgType {
 }
 
 case class TrusteeIndividualType(name: NameType,
-                       dateOfBirth: DateTime,
+                       dateOfBirth: Option[DateTime],
                        phoneNumber: Option[String],
                        identification: Option[IdentificationType])
 

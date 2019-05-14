@@ -16,12 +16,14 @@
 
 package uk.gov.hmrc.trusts.services
 
+import org.scalatest.EitherValues
 import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.models.{EstateRegistration, ExistingCheckRequest, Registration}
 import uk.gov.hmrc.trusts.utils.{DataExamples, EstateDataExamples, JsonUtils}
 
 
-class ValidationServiceSpec extends BaseSpec with DataExamples with EstateDataExamples {
+class ValidationServiceSpec extends BaseSpec
+  with DataExamples with EstateDataExamples with EitherValues {
 
   private lazy val validationService: ValidationService = new ValidationService()
   private lazy val validator : Validator = validationService.get("/resources/schemas/trusts-api-schema-5.0.json")
@@ -31,12 +33,16 @@ class ValidationServiceSpec extends BaseSpec with DataExamples with EstateDataEx
     "return an empty list of errors when " when {
       "Json having all required fields" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
-        validator.validate[Registration](jsonString).isRight mustBe true
+
+        validator.validate[Registration](jsonString) must not be 'left
+        validator.validate[Registration](jsonString).right.value mustBe a[Registration]
       }
 
       "Json having trust with organisation  trustees" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-org-trustees.json")
-        validator.validate[Registration](jsonString).isRight mustBe true
+
+        validator.validate[Registration](jsonString) must not be 'left
+        validator.validate[Registration](jsonString).right.value mustBe a[Registration]
       }
 
       "estate payload json having all required fields" in {

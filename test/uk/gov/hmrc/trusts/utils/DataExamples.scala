@@ -55,7 +55,7 @@ trait DataExamples extends  JsonRequests {
     )))
 
   def trusteeIndividual(dateOfBirthStr :String= "1500-01-01") = Some(TrusteeIndividualType(name = nameType,
-    dateOfBirth = new DateTime(dateOfBirthStr),None,identification = Some(nino)))
+    dateOfBirth = Some(new DateTime(dateOfBirthStr)),None,identification = Some(nino)))
 
 
   def indBenficiary(identification :IdentificationType = nino,dateOfBirthStr :String= "1500-01-01") =
