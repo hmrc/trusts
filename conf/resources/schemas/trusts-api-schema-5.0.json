@@ -494,6 +494,10 @@
 					"$ref": "#/definitions/trusteeOrgType"
 				}
 			},
+			"oneOf":[
+				{"required" : ["trusteeInd"] },
+				{"required" : ["trusteeOrg"] }
+			],
 			"additionalProperties": false
 		},
 		"trusteeOrgType": {

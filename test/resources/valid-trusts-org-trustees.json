@@ -159,6 +159,14 @@
 				},
 				"trustees": [
 					{
+						"trusteeOrg": {
+							"name" : "trustee org name",
+							"identification": {
+								"utr": "1234567890"
+							}
+						}
+					},
+					{
 						"trusteeInd": {
 							"name": {
 								"firstName": "John",
@@ -170,13 +178,8 @@
 								"nino": "ST123456"
 							},
 							"phoneNumber": "0121546546"
-						},
-						"trusteeOrg": {
-							"name" : "trustee org name",
-							"identification": {
-								"utr": "1234567890"
-							}
 						}
+
 					},
 					{
 						"trusteeInd": {

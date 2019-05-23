@@ -156,7 +156,9 @@
                 "nino": "ST123456"
               },
               "phoneNumber": "0121546546"
-            },
+            }
+          },
+          {
             "trusteeOrg": {
               "name": "Trust Services LTD",
               "phoneNumber": "0754545454",
@@ -178,7 +180,9 @@
                 "nino": "ST123456"
               },
               "phoneNumber": "0121546546"
-            },
+            }
+          },
+          {
             "trusteeOrg": {
               "name": "Trust Services LTD",
               "phoneNumber": "0754545454",

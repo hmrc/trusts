@@ -159,6 +159,14 @@
 				},
 				"trustees": [
 					{
+						"trusteeOrg": {
+							"name" : "trustee org name",
+							"identification": {
+								"utr": "5465416546"
+							}
+						}
+					},
+					{
 						"trusteeInd": {
 							"name": {
 								"firstName": "John",
@@ -166,13 +174,8 @@
 								"lastName": "O'Connor"
 							},
 							"dateOfBirth": "1956-02-12"
-						},
-						"trusteeOrg": {
-							"name" : "trustee org name",
-							"identification": {
-								"utr": "5465416546"
-							}
 						}
+
 					}
 				],
 				"settlors": {
