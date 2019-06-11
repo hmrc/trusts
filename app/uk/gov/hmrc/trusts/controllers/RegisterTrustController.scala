@@ -70,8 +70,8 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
                 Logger.error(s"[RegisterTrustController][registration] Exception received : $e.")
                 InternalServerError(Json.toJson(internalServerErrorResponse))
             }
-          case Left(errors) =>
-            Logger.error(s"[registration] trusts validation errors: ${errors}")
+          case Left(_) =>
+            Logger.error(s"[registration] trusts validation errors, returning bad request.")
             Future.successful(invalidRequestErrorResponse)
         }
 
