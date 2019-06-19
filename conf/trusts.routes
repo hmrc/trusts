@@ -5,3 +5,5 @@ POST        /check                    uk.gov.hmrc.trusts.controllers.CheckTrustC
 POST        /register                  uk.gov.hmrc.trusts.controllers.RegisterTrustController.registration
 
 POST        /tax-enrolment/callback/subscriptions      uk.gov.hmrc.trusts.controllers.TaxEnrolmentCallbackController.subscriptionCallback
+
+GET         /:utr                       uk.gov.hmrc.trusts.controllers.GetTrustsController.get(utr: String)
