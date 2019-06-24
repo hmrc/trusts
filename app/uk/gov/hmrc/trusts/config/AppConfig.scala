@@ -38,17 +38,17 @@ class AppConfig @Inject()(config: Configuration, playEnv: Environment) extends S
   val desEstatesUrl : String = baseUrl("des-estates")
 
 
-  val desEnvironment : String =   loadConfig("microservice.services.des-trusts.environment")
-  val desToken : String =    loadConfig("microservice.services.des-trusts.token")
+  val desEnvironment : String = loadConfig("microservice.services.des-trusts.environment")
+  val desToken : String = loadConfig("microservice.services.des-trusts.token")
 
   val trustsApiRegistrationSchema : String  = "/resources/schemas/trusts-api-schema-5.0.json"
   val estatesApiRegistrationSchema : String  = "/resources/schemas/estates-api-schema-5.0.json"
 
   val taxEnrolmentsUrl : String = baseUrl("tax-enrolments")
-  val taxEnrolmentsPayloadBodyServiceName : String =   loadConfig("microservice.services.tax-enrolments.serviceName")
-  val taxEnrolmentsPayloadBodyCallback : String =    loadConfig("microservice.services.tax-enrolments.callback")
-  val delayToConnectTaxEnrolment : Int =    loadConfig("microservice.services.trusts.delayToConnectTaxEnrolment").toInt
-  val maxRetry : Int =    loadConfig("microservice.services.trusts.maxRetry").toInt
+  val taxEnrolmentsPayloadBodyServiceName : String = loadConfig("microservice.services.tax-enrolments.serviceName")
+  val taxEnrolmentsPayloadBodyCallback : String = loadConfig("microservice.services.tax-enrolments.callback")
+  val delayToConnectTaxEnrolment : Int = loadConfig("microservice.services.trusts.delayToConnectTaxEnrolment").toInt
+  val maxRetry : Int = loadConfig("microservice.services.trusts.maxRetry").toInt
 
 }
 

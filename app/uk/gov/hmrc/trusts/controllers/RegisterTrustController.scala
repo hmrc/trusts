@@ -17,20 +17,18 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
-
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Action
-import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector}
+import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ApiResponse._
 import uk.gov.hmrc.trusts.models.RegistrationResponse.formats
 import uk.gov.hmrc.trusts.models.{TaxEnrolmentSuccess, _}
 import uk.gov.hmrc.trusts.services.{AuthService, DesService, RosmPatternService, ValidationService}
-import uk.gov.hmrc.trusts.models.RegistrationResponse.formats
-import uk.gov.hmrc.trusts.services.{AuthService, DesService, ValidationService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -42,17 +40,17 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
                                         authService: AuthService,
                                         rosmPatternService: RosmPatternService) extends TrustsBaseController {
 
-
   def registration() = Action.async(parse.json) {
     implicit request =>
 
+      implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
       authService.authorisedUser() { userAffinityGroup: Option[AffinityGroup] =>
-        val registrationJsonString = request.body.toString()
+        val payload = request.body.toString()
 
         validationService
           .get(config.trustsApiRegistrationSchema)
-          .validate[Registration](registrationJsonString) match {
+          .validate[Registration](payload) match {
 
           case Right(trustsRegistrationRequest) =>
             desService.registerTrust(trustsRegistrationRequest).map {
@@ -81,7 +79,7 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
 
   private def completeRosmPatternWithTaxEnrolments(trn: String,
                                                    userAffinityGroup: Option[AffinityGroup])
-                                                  (implicit hc: HeaderCarrier)  = {
+                                                  (implicit hc: HeaderCarrier) : Unit  = {
     userAffinityGroup match {
       case Some(AffinityGroup.Organisation) =>
         rosmPatternService.completeRosmTransaction(trn) map {
@@ -98,7 +96,7 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
       case _ =>
         Logger.info("Tax enrolments is not required for Agent.")
     }
-  } //rosm
+  }
 
 
 }

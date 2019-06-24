@@ -71,8 +71,6 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
     response
   }
 
-
-
   override def checkExistingEstate(existingEstateCheckRequest: ExistingCheckRequest)
   : Future[ExistingCheckResponse] = {
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
