@@ -30,8 +30,8 @@ import scala.util.control.NonFatal
 @Singleton
 class AuthService @Inject()(override val authConnector: AuthConnector) extends AuthorisedFunctions {
 
-
   def authorisedUser()(f: Option[AffinityGroup] => Future[Result])(implicit hc: HeaderCarrier): Future[Result] = {
+
     authorised().retrieve(affinityGroup)(f(_)).recover {
       case NonFatal(_) =>
         Logger.error(s"[AuthService][authorisedUser] Returning unauthorized.")

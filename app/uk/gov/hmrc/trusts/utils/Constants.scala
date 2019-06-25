@@ -28,6 +28,9 @@ object Constants {
   val INTERNAL_SERVER_ERROR_CODE = "INTERNAL_SERVER_ERROR"
   val INTERNAL_SERVER_ERROR_MESSAGE = "Internal server error."
 
+  val NO_DRAFT_ID = "NO_DRAFT_ID"
+  val NO_DRAFT_ID_MESSAGE = "No draft registration identifier provided."
+
   val dateTimePattern = "yyyy-MM-dd"
 
   val CONTENT_TYPE = "Content-Type"

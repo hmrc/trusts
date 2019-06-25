@@ -102,7 +102,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
-    val subscriptionIdEndpointUrl = s"${trustsServiceUrl}/trn/$trn/subscription"
+    val subscriptionIdEndpointUrl = s"$trustsServiceUrl/trn/$trn/subscription"
     Logger.debug(s"[getSubscriptionId] Sending get subscription id request to DES, url=$subscriptionIdEndpointUrl")
 
     val response = http.GET[SubscriptionIdResponse](subscriptionIdEndpointUrl)
@@ -115,7 +115,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 @ImplementedBy(classOf[DesConnectorImpl])
 trait DesConnector {
   def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest): Future[ExistingCheckResponse]
-  def checkExistingEstate(existingEsateCheckRequest: ExistingCheckRequest): Future[ExistingCheckResponse]
+  def checkExistingEstate(existingEstateCheckRequest: ExistingCheckRequest): Future[ExistingCheckResponse]
 
   def registerTrust(registration: Registration): Future[RegistrationResponse]
   def registerEstate(registration: EstateRegistration): Future[RegistrationResponse]

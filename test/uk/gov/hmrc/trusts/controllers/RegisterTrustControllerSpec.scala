@@ -198,6 +198,31 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         (output \ "message").as[String] mustBe "Provided request is invalid."
         verify(rosmPatternService, times(0)).completeRosmTransaction(any())(any[HeaderCarrier])
       }
+
+      "no draft id is provided in the headers" in {
+        val agentRetrieval: Future[Option[AffinityGroup]] = Future.successful(Some(AffinityGroup.Agent))
+
+        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
+
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(agentRetrieval)
+
+        val mockAuthService = new AuthService(authConnector)
+        val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)
+
+
+        val request = postRequestWithPayload(Json.parse(validRegistrationRequestJson), withDraftId = false)
+
+        val result = SUT.registration().apply(request)
+
+        status(result) mustBe BAD_REQUEST
+        val output = contentAsJson(result)
+        (output \ "code").as[String] mustBe "NO_DRAFT_ID"
+        (output \ "message").as[String] mustBe "No draft registration identifier provided."
+
+        verify(rosmPatternService, times(0)).completeRosmTransaction(any())(any[HeaderCarrier])
+      }
+
     }
 
 
