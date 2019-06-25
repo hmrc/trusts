@@ -24,8 +24,7 @@ import play.api.test.Helpers.{status, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.connectors.BaseSpec
+import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models._
@@ -43,7 +42,6 @@ class RegisterTrustControllerSpec extends BaseSpec {
   val fakeOrganisationAuthAction = new FakeIdentifierAction(Organisation)
   val fakeAgentAuthAction = new FakeIdentifierAction(Agent)
 
-  lazy val appConfig: AppConfig = injector.instanceOf[AppConfig]
   lazy val validationService: ValidationService = new ValidationService()
 
   private val trnResponse = "XTRN123456"
@@ -106,7 +104,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         verify(rosmPatternService, times(0)).completeRosmTransaction(any())(any[HeaderCarrier])
       }
     }
-    
+
     "return a Conflict" when {
       "trusts is already registered with provided details." in {
 

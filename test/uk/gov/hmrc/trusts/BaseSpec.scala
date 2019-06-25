@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.connectors
+package uk.gov.hmrc.trusts
 
 import java.util.UUID
 
@@ -26,12 +26,13 @@ import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfter, MustMatchers, WordSpec}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.utils.{Headers, JsonRequests, WireMockHelper}
+import uk.gov.hmrc.trusts.config.AppConfig
+import uk.gov.hmrc.trusts.utils._
 
 import scala.concurrent.Future
 
@@ -52,6 +53,8 @@ class BaseSpec extends WordSpec
 
   def injector = application.injector
 
+  def appConfig : AppConfig = injector.instanceOf[AppConfig]
+
   def applicationBuilder(): GuiceApplicationBuilder = {
     new GuiceApplicationBuilder()
       .configure(
@@ -63,6 +66,11 @@ class BaseSpec extends WordSpec
           "auditing.enabled" -> false): _*
       )
   }
+
+  def fakeRequest : FakeRequest[JsValue] = FakeRequest("POST", "")
+    .withHeaders(CONTENT_TYPE -> "application/json")
+    .withHeaders(Headers.DraftRegistrationId -> UUID.randomUUID().toString)
+    .withBody(Json.parse("{}"))
 
   implicit val defaultPatience =
     PatienceConfig(timeout = Span(5, Seconds), interval = Span(500, Millis))

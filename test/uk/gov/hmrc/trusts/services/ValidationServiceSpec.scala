@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.services
 
 import org.scalatest.EitherValues
-import uk.gov.hmrc.trusts.connectors.BaseSpec
+import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.models.{EstateRegistration, ExistingCheckRequest, Registration}
 import uk.gov.hmrc.trusts.utils.{DataExamples, EstateDataExamples, JsonUtils}
 

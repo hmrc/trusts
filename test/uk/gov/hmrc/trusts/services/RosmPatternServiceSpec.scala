@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.services
 
 import org.mockito.Mockito.when
-import uk.gov.hmrc.trusts.connectors.BaseSpec
+import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.models.{SubscriptionIdResponse, TaxEnrolmentFailure, TaxEnrolmentSuccess}
 import uk.gov.hmrc.trusts.exceptions._
 

@@ -24,8 +24,9 @@ import play.api.libs.json.Json
 import play.api.test.Helpers.{status, _}
 import uk.gov.hmrc.auth.core.{BearerTokenExpired, MissingBearerToken, _}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.connectors.{BaseSpec, FakeAuthConnector}
+import uk.gov.hmrc.trusts.connectors.FakeAuthConnector
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.services.{AuthService, DesService, RosmPatternService, ValidationService}
@@ -39,7 +40,6 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
   private val rosmPatternService = mock[RosmPatternService]
   private val authConnector = mock[AuthConnector]
 
-  lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   lazy val validationService: ValidationService = new ValidationService()
 
   private val estateTrnResponse = "XTRN123456"

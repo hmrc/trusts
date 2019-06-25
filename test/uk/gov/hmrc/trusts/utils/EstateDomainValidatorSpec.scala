@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.trusts.utils
 
-import uk.gov.hmrc.trusts.connectors.BaseSpec
+import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.models.{EstateRegistration, Registration}
 
 

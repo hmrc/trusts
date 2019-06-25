@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.models.mapping
 
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.trusts.connectors.BaseSpec
+import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.models.Trust
 import uk.gov.hmrc.trusts.utils.DataExamples
 

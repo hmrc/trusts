@@ -23,11 +23,9 @@ import play.api.libs.json.Json
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, BearerTokenExpired, MissingBearerToken}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.connectors.{BaseSpec, FakeAuthConnector}
+import uk.gov.hmrc.trusts.BaseSpec
+import uk.gov.hmrc.trusts.connectors.FakeAuthConnector
 import uk.gov.hmrc.trusts.models.ExistingCheckResponse.{AlreadyRegistered, Matched, NotMatched, ServiceUnavailable}
-import org.mockito.Matchers.any
-import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.services.{AuthService, DesService, ValidationService}
 
@@ -35,8 +33,6 @@ import scala.concurrent.Future
 
 class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
-
-  lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   lazy val validatationService: ValidationService = new ValidationService()
   val mockDesService = mock[DesService]
   val authConnector = mock[AuthConnector]

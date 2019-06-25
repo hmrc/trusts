@@ -83,6 +83,9 @@ class AuthenticatedIdentifierAction @Inject()(override val authConnector: AuthCo
         block(IdentifierRequest(request, internalId, AffinityGroup.Organisation))
       case _ =>
         Future.successful(Unauthorized(Json.toJson(insufficientEnrolmentErrorResponse)))
+    } recoverWith {
+      case _ : AuthorisationException =>
+        Future.successful(Unauthorized)
     }
   }
 
