@@ -25,7 +25,7 @@ import uk.gov.hmrc.trusts.utils.TypeOfTrust.EMPLOYMENT_RELATED_TRUST
   * DES API Schema - definitions models below
   */
 
-case class Registration(matchData: Option[MatchData],
+case class Registration(matchData: Option[GetTrust.MatchData],
                         correspondence: Correspondence,
                         yearsReturns: Option[YearsReturns],
                         declaration: Declaration,
@@ -36,50 +36,13 @@ case class Registration(matchData: Option[MatchData],
 object Registration {
  implicit val registrationReads :Reads[Registration] = Json.reads[Registration]
  implicit val writeToDes :Writes[Registration] = (
-    (JsPath \ "matchData").writeNullable[MatchData] and
+    (JsPath \ "matchData").writeNullable[GetTrust.MatchData] and
     (JsPath \ "correspondence").write[Correspondence] and
     (JsPath \ "declaration").write[Declaration] and
     (JsPath \ "yearsReturns").writeNullable[YearsReturns] and
     (JsPath \ "details" \ "trust").write[Trust] and
     (JsPath \ "agentDetails" ).writeNullable[AgentDetails]
   )(r => (r.matchData, r.correspondence,r.declaration, r.yearsReturns, r.trust,r.agentDetails))
-}
-
-case class ResponseHeader(dfmcaReturnUserStatus: String,
-                          formBundleNo: Int)
-
-object ResponseHeader {
-  implicit val writes: Writes[ResponseHeader] = Json.writes[ResponseHeader]
-  implicit val reads: Reads[ResponseHeader] = (
-    (JsPath \ "responseHeader" \ "dfmcaReturnUserStatus").read[String] and
-    (JsPath \ "responseHeader" \ "formBundleNo").read[Int]
-  )(ResponseHeader.apply _)
-}
-
-case class GetTrust(matchData: MatchData,
-                    correspondence: Correspondence,
-                    declaration: Declaration,
-                    trust: Trust)
-
-object GetTrust {
-  implicit val writes: Writes[GetTrust] = Json.writes[GetTrust]
-  implicit val reads: Reads[GetTrust] = (
-    (JsPath \ "trustOrEstateDisplay" \ "matchData").read[MatchData] and
-    (JsPath \ "trustOrEstateDisplay" \ "correspondence").read[Correspondence] and
-    (JsPath \ "trustOrEstateDisplay" \ "declaration").read[Declaration] and
-    (JsPath \ "trustOrEstateDisplay" \ "details").read[Trust]
-  )(GetTrust.apply _)
-}
-
-case class GetTrustDesResponse(getTrust: Option[GetTrust],
-                               responseHeader: ResponseHeader)
-
-object GetTrustDesResponse {
-  implicit val writes: Writes[GetTrustDesResponse] = Json.writes[GetTrustDesResponse]
-  implicit val reads: Reads[GetTrustDesResponse] = (
-    (JsPath \ "trustOrEstateDisplay").readNullable[GetTrust] and
-    (JsPath \ "responseHeader").read[ResponseHeader]
-  )(GetTrustDesResponse.apply _)
 }
 
 case class Details(trust: Trust)
@@ -94,7 +57,7 @@ case class MatchData(utr: String,
                     )
 
 object MatchData {
-  implicit val matchDataFormat: Format[MatchData] = Json.format[MatchData]
+  implicit val matchDataFormat: Format[GetTrust.MatchData] = Json.format[GetTrust.MatchData]
 }
 
 case class Correspondence(abroadIndicator: Boolean,

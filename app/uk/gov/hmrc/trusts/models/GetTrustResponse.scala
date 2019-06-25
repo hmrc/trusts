@@ -18,18 +18,20 @@ package uk.gov.hmrc.trusts.models
 
 import play.api.Logger
 import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK, SERVICE_UNAVAILABLE}
-import play.api.libs.json.Json
+import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
-import uk.gov.hmrc.trusts.exceptions.{BadRequestException, InternalServerErrorException, NotFoundException, ServiceNotAvailableException}
+import play.api.libs.functional.syntax._
+import uk.gov.hmrc.trusts.models.GetTrust.{GetTrust, ResponseHeader}
 
 trait GetTrustResponse
 
-sealed abstract class FailureResponse extends GetTrustResponse {
+trait FailureResponse extends GetTrustResponse {
   val code: String
   val reason: String
 }
 
-case class TrustFoundResponse(getTrustDesResponse: GetTrustDesResponse) extends GetTrustResponse
+case class TrustFoundResponse(getTrust: Option[GetTrust],
+                              responseHeader: ResponseHeader) extends GetTrustResponse
 
 case object InvalidUTRResponse extends FailureResponse {
   override val code = "INVALID_UTR"
@@ -63,7 +65,11 @@ case object ServiceUnavailableResponse extends FailureResponse {
 
 
 object TrustFoundResponse {
-  implicit val format = Json.format[TrustFoundResponse]
+  implicit val writes: Writes[TrustFoundResponse] = Json.writes[TrustFoundResponse]
+  implicit val reads: Reads[TrustFoundResponse] = (
+    (JsPath \ "trustOrEstateDisplay").readNullable[GetTrust] and
+    (JsPath \ "responseHeader").read[ResponseHeader]
+  )(TrustFoundResponse.apply _)
 }
 
 object GetTrustResponse {
@@ -74,9 +80,11 @@ object GetTrustResponse {
         Logger.info(s"[SubscriptionIdResponse]  response status received from des: ${response.status}")
         response.status match {
           case OK =>
-            val trust = response.json.asOpt[GetTrust]
-            TrustFoundResponse(GetTrustDesResponse(None, ResponseHeader("TODO", 1)))
-          case BAD_REQUEST => {
+            response.json.asOpt[TrustFoundResponse] match {
+              case Some(trustFound) => trustFound
+              case None => InternalServerErrorResponse
+            }
+          case BAD_REQUEST =>
             response.json.asOpt[DesErrorResponse] match {
               case Some(desErrorResponse) =>
                 desErrorResponse.code match {
@@ -90,7 +98,6 @@ object GetTrustResponse {
               case None =>
                 InternalServerErrorResponse
             }
-          }
           case NOT_FOUND => ResourceNotFoundResponse
           case SERVICE_UNAVAILABLE => ServiceUnavailableResponse
           case _ => InternalServerErrorResponse

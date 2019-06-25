@@ -22,6 +22,7 @@ import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
+import uk.gov.hmrc.trusts.models.GetTrust.ResponseHeader
 import uk.gov.hmrc.trusts.models._
 
 import scala.concurrent.Future
@@ -287,12 +288,12 @@ class DesServiceSpec extends BaseSpec {
 
         val utr = "1234567890"
 
-        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustFoundResponse(utr)))
+        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustFoundResponse(None, ResponseHeader("TODO", 1))))
 
         val futureResult = SUT.getTrustInfo(utr)
 
         whenReady(futureResult) { result =>
-          result mustBe TrustFoundResponse(utr)
+          result mustBe TrustFoundResponse(None, ResponseHeader("TODO", 1))
         }
       }
     }

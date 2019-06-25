@@ -70,4 +70,5 @@ trait DesService {
   def getSubscriptionId(trn: String)(implicit hc: HeaderCarrier): Future[SubscriptionIdResponse]
 
   def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse]
+  def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse]
 }

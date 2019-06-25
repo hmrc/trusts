@@ -23,7 +23,8 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.{AuthConnector, BearerTokenExpired, MissingBearerToken}
 import uk.gov.hmrc.trusts.connectors.{BaseSpec, FakeAuthConnector}
 import play.api.test.Helpers._
-import uk.gov.hmrc.trusts.models.TrustFoundResponse
+import uk.gov.hmrc.trusts.models.GetTrust.ResponseHeader
+import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.services.{AuthService, DesService}
 
 import scala.concurrent.Future
@@ -40,7 +41,7 @@ class GetTrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite  {
 
       val utr = "1234567890"
 
-      when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustFoundResponse(utr)))
+      when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustFoundResponse(None, ResponseHeader("TODO", 1))))
 
       val result = getTrustsController.get(utr).apply(FakeRequest(GET, ""))
 
@@ -76,6 +77,74 @@ class GetTrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite  {
 
         val result = SUT.get(utr).apply(FakeRequest(GET, ""))
         status(result) mustBe UNAUTHORIZED
+      }
+    }
+
+    "return 500 - InternalServerError" when {
+      "the get endpoint returns a InvalidUTRResponse" in {
+        mockAuthSuccess
+
+        when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(InvalidUTRResponse))
+
+        val utr = "1234567890"
+        val result = getTrustsController.get(utr).apply(FakeRequest(GET, ""))
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+
+      "the get endpoint returns a InvalidRegimeResponse" in {
+        mockAuthSuccess
+
+        when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(InvalidRegimeResponse))
+
+        val utr = "1234567890"
+        val result = getTrustsController.get(utr).apply(FakeRequest(GET, ""))
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+
+      "the get endpoint returns a BadRequestResponse" in {
+        mockAuthSuccess
+
+        when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(BadRequestResponse))
+
+        val utr = "1234567890"
+        val result = getTrustsController.get(utr).apply(FakeRequest(GET, ""))
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+
+      "the get endpoint returns a ResourceNotFoundResponse" in {
+        mockAuthSuccess
+
+        when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(ResourceNotFoundResponse))
+
+        val utr = "1234567890"
+        val result = getTrustsController.get(utr).apply(FakeRequest(GET, ""))
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+
+      "the get endpoint returns a InternalServerErrorResponse" in {
+        mockAuthSuccess
+
+        when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(InternalServerErrorResponse))
+
+        val utr = "1234567890"
+        val result = getTrustsController.get(utr).apply(FakeRequest(GET, ""))
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+
+      "the get endpoint returns a ServiceUnavailableResponse" in {
+        mockAuthSuccess
+
+        when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(ServiceUnavailableResponse))
+
+        val utr = "1234567890"
+        val result = getTrustsController.get(utr).apply(FakeRequest(GET, ""))
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
       }
     }
   }

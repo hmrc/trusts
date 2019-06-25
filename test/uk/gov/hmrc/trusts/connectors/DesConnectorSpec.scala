@@ -27,6 +27,7 @@ import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.utils.WireMockHelper
 import play.api.http.Status._
+import uk.gov.hmrc.trusts.models.GetTrust.ResponseHeader
 
 class DesConnectorSpec extends BaseConnectorSpec
   with GuiceOneAppPerSuite with WireMockHelper {
@@ -521,11 +522,11 @@ class DesConnectorSpec extends BaseConnectorSpec
     "return TrustFoundResponse" when {
       "des has returned a 200 with trust details" in {
         val utr = "1234567890"
-        stubForGet(server, createEndpoint(utr), OK, Json.stringify(Json.toJson(getTrustResponse)))
+        stubForGet(server, createEndpoint(utr), OK, getTrustResponse.toString())
 
         val futureResult = connector.getTrustInfo(utr)
         whenReady(futureResult) { result =>
-          result mustBe TrustFoundResponse(getTrustResponse)
+          result mustBe getTrustResponse.as[TrustFoundResponse]
         }
       }
 
@@ -535,7 +536,7 @@ class DesConnectorSpec extends BaseConnectorSpec
 
         val futureResult = connector.getTrustInfo(utr)
         whenReady(futureResult) { result =>
-          result mustBe TrustFoundResponse("TO BE AMMENDED")
+          result mustBe TrustFoundResponse(None, ResponseHeader("In Processing", 1))
         }
       }
     }
