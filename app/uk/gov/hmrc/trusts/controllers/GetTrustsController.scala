@@ -19,20 +19,22 @@ package uk.gov.hmrc.trusts.controllers
 import javax.inject.Inject
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
-import uk.gov.hmrc.trusts.services.AuthService
+import uk.gov.hmrc.trusts.services.{AuthService, DesService}
+import uk.gov.hmrc.trusts.actions.ValidateUTRAction
 
-import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class GetTrustsController @Inject()(authService : AuthService) extends BaseController {
+class GetTrustsController @Inject()(authService : AuthService,
+                                    desService: DesService) extends BaseController {
 
-  def get(utr: String): Action[AnyContent] = Action.async {
-    implicit request =>
+  def get(utr: String): Action[AnyContent] = (Action andThen ValidateUTRAction(utr)).async { implicit request =>
+
     import authService._
 
-      authorisedUser() {
-        user =>
-          Future.successful(Ok)
-      }
-
+    authorisedUser() {
+      user =>
+        desService.getTrustInfo(utr)
+          .map(_ => Ok)
+    }
   }
 }

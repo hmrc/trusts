@@ -22,9 +22,6 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.trusts.exceptions._
 
-
-
-
 final case class SubscriptionIdResponse(subscriptionId: String)
 
 object SubscriptionIdResponse {

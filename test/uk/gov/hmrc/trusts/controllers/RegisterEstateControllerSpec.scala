@@ -37,7 +37,7 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
 
   private val mockDesService = mock[DesService]
   private val rosmPatternService = mock[RosmPatternService]
-  private val authConnector = mock[AuthConnector]
+  override val authConnector = mock[AuthConnector]
 
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   lazy val validationService: ValidationService = new ValidationService()
@@ -237,10 +237,6 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
   private def mockDesServiceResponse = {
     when(mockDesService.registerEstate(any[EstateRegistration])(any[HeaderCarrier]))
       .thenReturn(Future.successful(RegistrationTrnResponse(estateTrnResponse)))
-  }
-
-  private def mockAuthSuccess = {
-    when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
   }
 
   private def mockRosmResponse(response :TaxEnrolmentSuscriberResponse) = {

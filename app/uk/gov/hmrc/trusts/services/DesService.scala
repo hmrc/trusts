@@ -51,7 +51,9 @@ class DesServiceImpl @Inject()(val desConnector: DesConnector) extends DesServic
     desConnector.getSubscriptionId(trn)
   }
 
-
+  def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
+    desConnector.getTrustInfo(utr)
+  }
 }
 
 
@@ -66,4 +68,6 @@ trait DesService {
   def registerEstate(estateRegistration: EstateRegistration)(implicit hc: HeaderCarrier): Future[RegistrationResponse]
 
   def getSubscriptionId(trn: String)(implicit hc: HeaderCarrier): Future[SubscriptionIdResponse]
+
+  def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse]
 }

@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.trusts.models
 
-
 import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, Json, Reads, Writes}
 import uk.gov.hmrc.trusts.utils.Constants._
+
 case class EstateRegistration(matchData: Option[MatchData],
                         correspondence: Correspondence,
                         yearsReturns: Option[YearsReturns],
@@ -42,6 +42,22 @@ object EstateRegistration {
     )(r => (r.matchData, r.correspondence,r.declaration, r.yearsReturns, r.estate,r.agentDetails))
 }
 
+case class GetEstate(matchData: MatchData,
+                    correspondence: Correspondence,
+                    declaration: Declaration,
+                    estate: Estate,
+                    responseHeader: ResponseHeader)
+
+object GetEstate {
+  implicit val writes: Writes[GetEstate] = Json.writes[GetEstate]
+  implicit val reads: Reads[GetEstate] = (
+    (JsPath \ "trustOrEstateDisplay" \ "matchData").read[MatchData] and
+      (JsPath \ "trustOrEstateDisplay" \ "correspondence").read[Correspondence] and
+      (JsPath \ "trustOrEstateDisplay" \ "declaration").read[Declaration] and
+      (JsPath \ "trustOrEstateDisplay" \ "details").read[Estate] and
+      (JsPath \ "responseHeader").read[ResponseHeader]
+    )(GetEstate.apply _)
+}
 
 case class Estate(entities: EntitiesType,
                   administrationEndDate: Option[DateTime],

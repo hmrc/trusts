@@ -20,9 +20,7 @@ import java.util.UUID
 
 import com.google.inject.ImplementedBy
 import javax.inject.Inject
-
 import play.api.Logger
-
 import play.api.http.HeaderNames
 import play.api.libs.json._
 import uk.gov.hmrc.http._
@@ -35,7 +33,7 @@ import uk.gov.hmrc.trusts.models._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import uk.gov.hmrc.trusts.utils.Constants._
-
+import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK, SERVICE_UNAVAILABLE}
 
 class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesConnector {
 
@@ -47,6 +45,8 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
   lazy val trustRegistrationEndpoint : String = trustsServiceUrl + "/registration"
   lazy val estateRegistrationEndpoint : String = estatesServiceUrl + "/registration"
+
+  def createGetTrustEndpoint(utr: String): String = trustsServiceUrl + s"/registration/$utr"
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "Correlation-Id"
@@ -60,6 +60,9 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
       CORRELATION_HEADER -> UUID.randomUUID().toString
     )
 
+  val httpReads: HttpReads[HttpResponse] = new HttpReads[HttpResponse] {
+    override def read(method: String, url: String, response: HttpResponse) = response
+  }
 
   override def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest)
                                  : Future[ExistingCheckResponse] = {
@@ -112,6 +115,12 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
     response
   }
+
+  override def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
+    val updatedHeaderCarrier = hc.copy(extraHeaders = desHeaders)
+
+    http.GET[GetTrustResponse](createGetTrustEndpoint(utr))(GetTrustResponse.httpReads, updatedHeaderCarrier, global)
+  }
 }
 
 @ImplementedBy(classOf[DesConnectorImpl])
@@ -122,5 +131,7 @@ trait DesConnector {
   def registerTrust(registration: Registration): Future[RegistrationResponse]
   def registerEstate(registration: EstateRegistration): Future[RegistrationResponse]
   def getSubscriptionId(trn: String): Future[SubscriptionIdResponse]
+
+  def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse]
 
 }

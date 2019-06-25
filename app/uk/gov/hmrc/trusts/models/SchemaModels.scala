@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.trusts.models
 
-
 import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
@@ -38,14 +37,50 @@ object Registration {
  implicit val registrationReads :Reads[Registration] = Json.reads[Registration]
  implicit val writeToDes :Writes[Registration] = (
     (JsPath \ "matchData").writeNullable[MatchData] and
-      (JsPath \ "correspondence").write[Correspondence] and
-      (JsPath \ "declaration").write[Declaration] and
-      (JsPath \ "yearsReturns").writeNullable[YearsReturns] and
-      (JsPath \ "details" \ "trust").write[Trust] and
-      (JsPath \ "agentDetails" ).writeNullable[AgentDetails]
+    (JsPath \ "correspondence").write[Correspondence] and
+    (JsPath \ "declaration").write[Declaration] and
+    (JsPath \ "yearsReturns").writeNullable[YearsReturns] and
+    (JsPath \ "details" \ "trust").write[Trust] and
+    (JsPath \ "agentDetails" ).writeNullable[AgentDetails]
   )(r => (r.matchData, r.correspondence,r.declaration, r.yearsReturns, r.trust,r.agentDetails))
 }
 
+case class ResponseHeader(dfmcaReturnUserStatus: String,
+                          formBundleNo: Int)
+
+object ResponseHeader {
+  implicit val writes: Writes[ResponseHeader] = Json.writes[ResponseHeader]
+  implicit val reads: Reads[ResponseHeader] = (
+    (JsPath \ "responseHeader" \ "dfmcaReturnUserStatus").read[String] and
+    (JsPath \ "responseHeader" \ "formBundleNo").read[Int]
+  )(ResponseHeader.apply _)
+}
+
+case class GetTrust(matchData: MatchData,
+                    correspondence: Correspondence,
+                    declaration: Declaration,
+                    trust: Trust)
+
+object GetTrust {
+  implicit val writes: Writes[GetTrust] = Json.writes[GetTrust]
+  implicit val reads: Reads[GetTrust] = (
+    (JsPath \ "trustOrEstateDisplay" \ "matchData").read[MatchData] and
+    (JsPath \ "trustOrEstateDisplay" \ "correspondence").read[Correspondence] and
+    (JsPath \ "trustOrEstateDisplay" \ "declaration").read[Declaration] and
+    (JsPath \ "trustOrEstateDisplay" \ "details").read[Trust]
+  )(GetTrust.apply _)
+}
+
+case class GetTrustDesResponse(getTrust: Option[GetTrust],
+                               responseHeader: ResponseHeader)
+
+object GetTrustDesResponse {
+  implicit val writes: Writes[GetTrustDesResponse] = Json.writes[GetTrustDesResponse]
+  implicit val reads: Reads[GetTrustDesResponse] = (
+    (JsPath \ "trustOrEstateDisplay").readNullable[GetTrust] and
+    (JsPath \ "responseHeader").read[ResponseHeader]
+  )(GetTrustDesResponse.apply _)
+}
 
 case class Details(trust: Trust)
 
@@ -510,4 +545,3 @@ case class AgentDetails(arn: String,
 object AgentDetails {
   implicit val agentDetailsFormat: Format[AgentDetails] = Json.format[AgentDetails]
 }
-

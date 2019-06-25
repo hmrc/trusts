@@ -17,11 +17,12 @@
 package uk.gov.hmrc.trusts.services
 
 import org.mockito.Mockito.when
+import org.mockito.Matchers._
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
-import uk.gov.hmrc.trusts.models.{ExistingCheckRequest, RegistrationTrnResponse, SubscriptionIdResponse}
+import uk.gov.hmrc.trusts.models._
 
 import scala.concurrent.Future
 
@@ -280,5 +281,104 @@ class DesServiceSpec extends BaseSpec {
     }
   } //getSubscriptionId
 
+  ".getTrustInfo" should {
+    "return TrustFoundResponse" when {
+      "TrustFoundResponse is returned from DES Connector" in {
 
+        val utr = "1234567890"
+
+        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustFoundResponse(utr)))
+
+        val futureResult = SUT.getTrustInfo(utr)
+
+        whenReady(futureResult) { result =>
+          result mustBe TrustFoundResponse(utr)
+        }
+      }
+    }
+
+    "return InvalidUTRResponse" when {
+      "InvalidUTRResponse is returned from DES Connector" in {
+
+        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(InvalidUTRResponse))
+
+        val invalidUtr = "123456789"
+        val futureResult = SUT.getTrustInfo(invalidUtr)
+
+        whenReady(futureResult) { result =>
+          result mustBe InvalidUTRResponse
+        }
+      }
+    }
+
+    "return InvalidRegimeResponse" when {
+      "InvalidRegimeResponse is returned from DES Connector" in {
+
+        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(InvalidRegimeResponse))
+
+        val utr = "123456789"
+        val futureResult = SUT.getTrustInfo(utr)
+
+        whenReady(futureResult) { result =>
+          result mustBe InvalidRegimeResponse
+        }
+      }
+    }
+
+    "return BadRequestResponse" when {
+      "BadRequestResponse is returned from DES Connector" in {
+
+        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(BadRequestResponse))
+
+        val utr = "123456789"
+        val futureResult = SUT.getTrustInfo(utr)
+
+        whenReady(futureResult) { result =>
+          result mustBe BadRequestResponse
+        }
+      }
+    }
+
+    "return ResourceNotFoundResponse" when {
+      "ResourceNotFoundResponse is returned from DES Connector" in {
+
+        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(ResourceNotFoundResponse))
+
+        val utr = "123456789"
+        val futureResult = SUT.getTrustInfo(utr)
+
+        whenReady(futureResult) { result =>
+          result mustBe ResourceNotFoundResponse
+        }
+      }
+    }
+
+    "return InternalServerErrorResponse" when {
+      "InternalServerErrorResponse is returned from DES Connector" in {
+
+        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(InternalServerErrorResponse))
+
+        val utr = "123456789"
+        val futureResult = SUT.getTrustInfo(utr)
+
+        whenReady(futureResult) { result =>
+          result mustBe InternalServerErrorResponse
+        }
+      }
+    }
+
+    "return ServiceUnavailableResponse" when {
+      "ServiceUnavailableResponse is returned from DES Connector" in {
+
+        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(ServiceUnavailableResponse))
+
+        val utr = "123456789"
+        val futureResult = SUT.getTrustInfo(utr)
+
+        whenReady(futureResult) { result =>
+          result mustBe ServiceUnavailableResponse
+        }
+      }
+    }
+  } // getTrustInfo
 }

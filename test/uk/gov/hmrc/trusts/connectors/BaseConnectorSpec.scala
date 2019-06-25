@@ -72,4 +72,24 @@ class BaseConnectorSpec extends  BaseSpec {
        | "reason": "The remote endpoint has indicated that no data can be found for given TRN."
        |}""".stripMargin)
 
+  //get trust
+
+  val jsonResponse400InvalidUTR: JsValue = Json.parse(
+    s"""
+       |{
+       |  "code" : "INVALID_UTR",
+       |  "reason" : "Submission has not passed validation. Invalid parameter UTR."
+       |}
+     """.stripMargin
+  )
+
+  val jsonResponse400InvalidRegime: JsValue = Json.parse(
+    s"""
+       |{
+       |  "code" : "INVALID_REGIME",
+       |  "reason" : "The remote endpoint has indicated that the REGIME provided is invalid."
+       |}
+     """.stripMargin
+  )
+
 }

@@ -514,5 +514,105 @@ class DesConnectorSpec extends BaseConnectorSpec
     }
   }//getSubscriptionId
 
-}
+  ".getTrustInfo" should {
 
+    def createEndpoint(utr: String) = s"/trusts/registration/$utr"
+
+    "return TrustFoundResponse" when {
+      "des has returned a 200 with trust details" in {
+        val utr = "1234567890"
+        stubForGet(server, createEndpoint(utr), OK, Json.stringify(Json.toJson(getTrustResponse)))
+
+        val futureResult = connector.getTrustInfo(utr)
+        whenReady(futureResult) { result =>
+          result mustBe TrustFoundResponse(getTrustResponse)
+        }
+      }
+
+      "des has returned a 200 and indicated that the submission is still being processed" in {
+        val utr = "1234567800"
+        stubForGet(server, createEndpoint(utr), OK, Json.stringify(Json.toJson(getTrustOrEstateNoDetailsResponse)))
+
+        val futureResult = connector.getTrustInfo(utr)
+        whenReady(futureResult) { result =>
+          result mustBe TrustFoundResponse("TO BE AMMENDED")
+        }
+      }
+    }
+
+    "return InvalidUTRResponse" when {
+      "des has returned a 400 with the code INVALID_UTR" in {
+        val invalidUTR = "123456789"
+        stubForGet(server, createEndpoint(invalidUTR), BAD_REQUEST,
+                   Json.stringify(jsonResponse400InvalidUTR))
+
+        val futureResult = connector.getTrustInfo(invalidUTR)
+        whenReady(futureResult) { result =>
+          result mustBe InvalidUTRResponse
+        }
+      }
+    }
+
+    "return InvalidRegimeResponse" when {
+      "des has returned a 400 with the code INVALID_REGIME" in {
+        val utr = "1234567891"
+        stubForGet(server, createEndpoint(utr), BAD_REQUEST,
+                   Json.stringify(jsonResponse400InvalidRegime))
+
+        val futureResult = connector.getTrustInfo(utr)
+        whenReady(futureResult) { result =>
+          result mustBe InvalidRegimeResponse
+        }
+      }
+    }
+
+    "return BadRequestResponse" when {
+      "des has returned a 400 with a code which is not INVALID_UTR OR INVALID_REGIME" in {
+        val utr = "1234567891"
+        stubForGet(server, createEndpoint(utr), BAD_REQUEST,
+          Json.stringify(jsonResponse400))
+
+        val futureResult = connector.getTrustInfo(utr)
+        whenReady(futureResult) { result =>
+          result mustBe BadRequestResponse
+        }
+      }
+    }
+
+    "return ResourceNotFoundResponse" when {
+      "des has returned a 404" in {
+        val utr = "1234567892"
+        stubForGet(server, createEndpoint(utr), NOT_FOUND, "")
+
+        val futureResult = connector.getTrustInfo(utr)
+        whenReady(futureResult) { result =>
+          result mustBe ResourceNotFoundResponse
+        }
+      }
+    }
+
+    "return InternalServerErrorResposne" when {
+      "des has returned a 500 with the code SERVER_ERROR" in {
+        val utr = "1234567893"
+        stubForGet(server, createEndpoint(utr), INTERNAL_SERVER_ERROR, "")
+
+        val futureResult = connector.getTrustInfo(utr)
+        whenReady(futureResult) { result =>
+          result mustBe InternalServerErrorResponse
+        }
+      }
+    }
+
+    "return ServiceUnavailableResponse" when {
+      "des has returned a 503 with the code SERVICE_UNAVAILABLE" in {
+        val utr = "1234567894"
+        stubForGet(server, createEndpoint(utr), SERVICE_UNAVAILABLE, "")
+
+        val futureResult = connector.getTrustInfo(utr)
+        whenReady(futureResult) { result =>
+          result mustBe ServiceUnavailableResponse
+        }
+      }
+    }
+  }//getTrustInfo
+}

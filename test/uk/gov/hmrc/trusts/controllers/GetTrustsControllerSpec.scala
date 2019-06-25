@@ -20,55 +20,68 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.test.FakeRequest
-import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, BearerTokenExpired, MissingBearerToken}
+import uk.gov.hmrc.auth.core.{AuthConnector, BearerTokenExpired, MissingBearerToken}
 import uk.gov.hmrc.trusts.connectors.{BaseSpec, FakeAuthConnector}
 import play.api.test.Helpers._
-import uk.gov.hmrc.trusts.services.AuthService
+import uk.gov.hmrc.trusts.models.TrustFoundResponse
+import uk.gov.hmrc.trusts.services.{AuthService, DesService}
+
+import scala.concurrent.Future
 
 class GetTrustsControllerSpec extends BaseSpec with GuiceOneServerPerSuite  {
 
-  val authConnector = mock[AuthConnector]
+  override val authConnector = mock[AuthConnector]
+  val desService = mock[DesService]
 
   ".get" should {
 
-      "return 200" in {
+    "return 200 - Ok" in {
+      mockAuthSuccess
+
+      val utr = "1234567890"
+
+      when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustFoundResponse(utr)))
+
+      val result = getTrustsController.get(utr).apply(FakeRequest(GET, ""))
+
+      status(result) mustBe OK
+    }
+
+    "return 400 - BadRequest" when {
+      "the UTR given is invalid" in {
         mockAuthSuccess
 
-        val utr = "1234567890"
+        val invalidUTR = "1234567"
 
-        val result = getTrustsController.get(utr).apply(FakeRequest(GET, ""))
+        val result = getTrustsController.get(invalidUTR).apply(FakeRequest(GET, s"/trusts/$invalidUTR"))
 
-        status(result) mustBe OK
+        status(result) mustBe BAD_REQUEST
       }
+    }
 
-    "return Unauthorised" when {
+    "return 401 - Unauthorised" when {
       "the get endpoint is called user hasn't logged in" in {
         val utr = "1234567890"
         val mockAuthService = new AuthService(FakeAuthConnector(MissingBearerToken()))
-        val SUT = new GetTrustsController(mockAuthService)
+        val SUT = new GetTrustsController(mockAuthService, desService)
 
         val result = SUT.get(utr).apply(FakeRequest(GET, ""))
         status(result) mustBe UNAUTHORIZED
       }
+
       "the get endpoint is called user session has expired" in {
         val utr = "1234567890"
         val mockAuthService = new AuthService(FakeAuthConnector(BearerTokenExpired()))
-        val SUT = new GetTrustsController(mockAuthService)
+        val SUT = new GetTrustsController(mockAuthService, desService)
 
         val result = SUT.get(utr).apply(FakeRequest(GET, ""))
         status(result) mustBe UNAUTHORIZED
       }
     }
-    }
-
-  private def mockAuthSuccess = {
-    when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
-
   }
 
-  private def getTrustsController = {
+  private def getTrustsController: GetTrustsController = {
     val mockAuthService = new AuthService(authConnector)
-    val SUT = new GetTrustsController(mockAuthService)
-    SUT
+    new GetTrustsController(mockAuthService, desService)
   }
 }

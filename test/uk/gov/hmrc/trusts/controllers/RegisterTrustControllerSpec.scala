@@ -37,7 +37,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
   val mockDesService = mock[DesService]
   val rosmPatternService = mock[RosmPatternService]
-  val authConnector = mock[AuthConnector]
+  override val authConnector = mock[AuthConnector]
 
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   lazy val validationService: ValidationService = new ValidationService()
@@ -56,7 +56,8 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
           .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
         when(rosmPatternService.completeRosmTransaction(Matchers.eq(trnResponse))(any[HeaderCarrier]))
           .thenReturn(Future.successful(TaxEnrolmentSuccess))
-        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
+
+        mockAuthSuccess
 
         val mockAuthService = new AuthService(authConnector)
         val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)
@@ -74,7 +75,8 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
             .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
           when(rosmPatternService.completeRosmTransaction(Matchers.eq(trnResponse))(any[HeaderCarrier]))
             .thenReturn(Future.successful(TaxEnrolmentFailure))
-          when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
+
+          mockAuthSuccess
 
           val mockAuthService = new AuthService(authConnector)
           val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, mockAuthService, rosmPatternService)
@@ -132,9 +134,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return a Conflict" when {
       "trusts is already registered with provided details." in {
-
-
-        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
+        mockAuthSuccess
 
         val mockAuthService = new AuthService(authConnector)
         val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)
@@ -152,7 +152,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
     "return a Forbidden" when {
       "no match found for provided existing trusts details." in {
 
-        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
+        mockAuthSuccess
 
         val mockAuthService = new AuthService(authConnector)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
@@ -172,7 +172,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return a BAD REQUEST" when {
       "input request fails schema validation" in {
-        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
+        mockAuthSuccess
 
         val mockAuthService = new AuthService(authConnector)
         val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)
@@ -186,7 +186,7 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       }
 
       "input request fails business validation" in {
-        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
+        mockAuthSuccess
 
         val mockAuthService = new AuthService(authConnector)
         val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)
@@ -207,7 +207,8 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(InternalServerErrorException("some error")))
 
-        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
+        mockAuthSuccess
+
         val mockAuthService = new AuthService(authConnector)
         val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)
 
@@ -222,7 +223,8 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return an internal server error" when {
       "the des returns BAD REQUEST" in {
-        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
+        mockAuthSuccess
+
         val mockAuthService = new AuthService(authConnector)
 
         val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)
@@ -240,7 +242,8 @@ class RegisterTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return an internal server error" when {
       "the des returns Service Unavailable as dependent service is down. " in {
-        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
+        mockAuthSuccess
+
         val mockAuthService = new AuthService(authConnector)
 
         val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)

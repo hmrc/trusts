@@ -21,7 +21,7 @@ import org.mockito.Mockito._
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, BearerTokenExpired, MissingBearerToken}
+import uk.gov.hmrc.auth.core.{AuthConnector, BearerTokenExpired, MissingBearerToken}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.connectors.{BaseSpec, FakeAuthConnector}
@@ -37,7 +37,7 @@ class CheckEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   lazy val validatationService: ValidationService = new ValidationService()
   val mockDesService = mock[DesService]
-  val authConnector = mock[AuthConnector]
+  override val authConnector = mock[AuthConnector]
 
   val validPayloadRequest: JsValue = Json.parse("""{"name": "estate name","postcode": "NE1 1NE","utr": "1234567890"}""")
   val validPayloadPostCodeLowerCase: JsValue = Json.parse("""{"name": "estate name","postcode": "aa9a 9aa","utr": "1234567890"}""")
@@ -203,10 +203,5 @@ class CheckEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
   private def mockDesServiceResponse(response : ExistingCheckResponse) = {
     when(mockDesService.checkExistingEstate(any[ExistingCheckRequest])(any[HeaderCarrier]))
       .thenReturn(Future.successful(response))
-  }
-
-  private def mockAuthSuccess = {
-    when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
-
   }
 }

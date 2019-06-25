@@ -16,11 +16,7 @@
 
 package uk.gov.hmrc.trusts.utils
 
-import play.api.libs.json.Json
-import uk.gov.hmrc.trusts.models.{EstateRegistration, Registration}
-
-import scala.io.Source
-
+import uk.gov.hmrc.trusts.models._
 
 trait JsonRequests extends JsonUtils {
 
@@ -32,11 +28,14 @@ trait JsonRequests extends JsonUtils {
   lazy val estateRegistration01  =  getJsonFromFile("valid-estate-registration-01.json")
   lazy val estateRegistration03  =  getJsonFromFile("valid-estate-registration-03.json")
 
-
-
   lazy val registrationRequest = getJsonValueFromFile("valid-trusts-registration-api.json").validate[Registration].get
 
   lazy val invalidRegistrationRequest = getJsonValueFromFile("invalid-payload-trusts-registration.json").validate[Registration].get
 
   lazy val estateRegRequest = getJsonValueFromFile("valid-estate-registration-01.json").validate[EstateRegistration].get
+
+  lazy val getTrustResponse = getJsonValueFromFile("valid-get-trust-response.json").validate[GetTrustDesResponse].get
+  //lazy val getEstateResponse = getJsonValueFromFile("valid-get-estate-response.json").validate[GetEstate].get
+  lazy val getTrustOrEstateNoDetailsResponse =
+    getJsonValueFromFile("valid-get-trust-or-estate-no-details-response.json").validate[GetTrustDesResponse].get
 }
