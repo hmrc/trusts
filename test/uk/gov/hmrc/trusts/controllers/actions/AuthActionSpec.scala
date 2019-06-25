@@ -51,7 +51,7 @@ class AuthActionSpec extends BaseSpec {
 
       "redirect the user to the create agent services page" in {
         
-        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(agentAffinityGroup, noEnrollment)), appConfig)(global)
+        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(agentAffinityGroup, noEnrollment)), appConfig)
         val controller = new Harness(authAction)
         val result = controller.onSubmit()(fakeRequest)
         status(result) mustBe UNAUTHORIZED
@@ -69,7 +69,7 @@ class AuthActionSpec extends BaseSpec {
 
       "allow user to continue" in {
 
-        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(agentAffinityGroup, agentEnrolment)), appConfig)(global)
+        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(agentAffinityGroup, agentEnrolment)), appConfig)
         val controller = new Harness(authAction)
         val result = controller.onSubmit()(fakeRequest)
 
@@ -84,7 +84,7 @@ class AuthActionSpec extends BaseSpec {
 
       "allow user to continue" in {
 
-        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(orgAffinityGroup, noEnrollment)), appConfig)(global)
+        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(orgAffinityGroup, noEnrollment)), appConfig)
         val controller = new Harness(authAction)
         val result = controller.onSubmit()(fakeRequest)
 
@@ -99,7 +99,7 @@ class AuthActionSpec extends BaseSpec {
 
       "redirect the user to the unauthorised page" in {
         
-        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(enrolment = noEnrollment)), appConfig)(global)
+        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(enrolment = noEnrollment)), appConfig)
         val controller = new Harness(authAction)
         val result = controller.onSubmit()(fakeRequest)
         status(result) mustBe UNAUTHORIZED
@@ -113,7 +113,7 @@ class AuthActionSpec extends BaseSpec {
 
       "redirect the user to log in " in {
 
-        val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new MissingBearerToken), appConfig)(global)
+        val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new MissingBearerToken), appConfig)
         val controller = new Harness(authAction)
         val result = controller.onSubmit()(fakeRequest)
 
@@ -127,7 +127,7 @@ class AuthActionSpec extends BaseSpec {
 
       "redirect the user to log in " in {
 
-        val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new BearerTokenExpired), appConfig)(global)
+        val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new BearerTokenExpired), appConfig)
         val controller = new Harness(authAction)
         val result = controller.onSubmit()(fakeRequest)
 

@@ -24,7 +24,6 @@ import uk.gov.hmrc.trusts.models.ErrorResponse
 
 import scala.concurrent.Future
 
-
 class TrustsBaseController extends BaseController {
 
   protected def doErrorResponse(code: String, message: String) =
@@ -49,7 +48,7 @@ class TrustsBaseController extends BaseController {
   override protected def withJsonBody[T](f: T => Future[Result])
                                         (implicit request: Request[JsValue],
                                          m: Manifest[T],
-                                         reads: Reads[T]) =
+                                         reads: Reads[T]) : Future[Result] =
     request.body.validate[T] match {
       case JsSuccess(payload, _) =>
         f(payload)

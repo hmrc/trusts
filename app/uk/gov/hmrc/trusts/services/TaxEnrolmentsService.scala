@@ -43,10 +43,10 @@ class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector :TaxEnrolmentConn
 
   override def setSubscriptionId(subscriptionId: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] = {
     implicit val as = ActorSystem()
-    enrolSubscriberWithRetry( subscriptionId, 1)
+    enrolSubscriberWithRetry(subscriptionId, 1)
   }
 
-  private def enrolSubscriberWithRetry( subscriptionId: String, acc: Int)
+  private def enrolSubscriberWithRetry(subscriptionId: String, acc: Int)
                                       (implicit as: ActorSystem, hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] = {
     makeRequest(subscriptionId) recoverWith {
       case NonFatal(_) =>
@@ -64,7 +64,6 @@ class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector :TaxEnrolmentConn
 
   private def isMaxRetryReached(currentCounter: Int): Boolean =
     currentCounter == MAX_TRIES
-
 
   private def afterSeconds(duration: FiniteDuration)(implicit as: ActorSystem) = {
     after(duration, as.scheduler, global, Future.successful(1))

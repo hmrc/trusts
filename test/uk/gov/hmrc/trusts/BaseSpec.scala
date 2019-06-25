@@ -29,12 +29,9 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.utils._
-
-import scala.concurrent.Future
 
 class BaseSpec extends WordSpec
   with MustMatchers
@@ -44,8 +41,6 @@ class BaseSpec extends WordSpec
   with BeforeAndAfter
   with GuiceOneServerPerSuite
   with WireMockHelper {
-
-  val organisationRetrieval: Future[Option[AffinityGroup]] = Future.successful(Some(AffinityGroup.Organisation))
 
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
 

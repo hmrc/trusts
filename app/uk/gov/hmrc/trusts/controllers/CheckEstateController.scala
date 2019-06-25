@@ -17,28 +17,24 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.{Inject, Singleton}
-
 import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.Action
-import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.trusts.config.AppConfig
+import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.ApiResponse._
-import uk.gov.hmrc.trusts.models.{ExistingCheckRequest}
+import uk.gov.hmrc.trusts.models.ExistingCheckRequest
 import uk.gov.hmrc.trusts.models.ExistingCheckResponse.{AlreadyRegistered, Matched, NotMatched}
-import uk.gov.hmrc.trusts.services.{AuthService, DesService, ValidationService}
+import uk.gov.hmrc.trusts.services.{DesService, ValidationService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton()
 class CheckEstateController @Inject()(desService: DesService, config: AppConfig,
                                       validationService: ValidationService,
-                                      authService : AuthService) extends TrustsBaseController {
+                                      identify: IdentifierAction) extends TrustsBaseController {
 
 
-  def checkExistingEstate() = Action.async(parse.json) { implicit request =>
-    import authService._
-    authorisedUser() { userAffinityGroup: Option[AffinityGroup]=>
+  def checkExistingEstate() = identify.async(parse.json) { implicit request =>
       withJsonBody[ExistingCheckRequest] {
         estatesCheckRequest =>
           desService.checkExistingEstate(estatesCheckRequest).map {
@@ -52,8 +48,6 @@ class CheckEstateController @Inject()(desService: DesService, config: AppConfig,
               }
           }
       }
-    }
-
   }
 
 }

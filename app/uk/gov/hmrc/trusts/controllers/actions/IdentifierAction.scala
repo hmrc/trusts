@@ -17,6 +17,7 @@
 package uk.gov.hmrc.trusts.controllers.actions
 
 import com.google.inject.Inject
+import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc.{Request, Result, _}
@@ -26,14 +27,14 @@ import uk.gov.hmrc.auth.core.retrieve.{Retrievals, ~}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 import uk.gov.hmrc.trusts.models.ApiResponse._
+import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits._
+import scala.concurrent.Future
 
 class AuthenticatedIdentifierAction @Inject()(override val authConnector: AuthConnector,
                                                config: AppConfig)
-                                             (override implicit val executionContext: ExecutionContext)
   extends IdentifierAction with AuthorisedFunctions {
 
   private def authoriseAgent[A](request : Request[A],
@@ -70,11 +71,11 @@ class AuthenticatedIdentifierAction @Inject()(override val authConnector: AuthCo
   def invokeBlock[A](request: Request[A],
                      block: IdentifierRequest[A] => Future[Result]) : Future[Result] = {
 
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
-
     val retrievals = Retrievals.internalId and
                      Retrievals.affinityGroup and
                      Retrievals.allEnrolments
+
+    implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
     authorised().retrieve(retrievals) {
       case Some(internalId) ~ Some(Agent) ~ enrolments =>
@@ -82,9 +83,11 @@ class AuthenticatedIdentifierAction @Inject()(override val authConnector: AuthCo
       case Some(internalId) ~ Some(Organisation) ~ _ =>
         block(IdentifierRequest(request, internalId, AffinityGroup.Organisation))
       case _ =>
+        Logger.info(s"[IdentifierAction] Insufficient enrolment")
         Future.successful(Unauthorized(Json.toJson(insufficientEnrolmentErrorResponse)))
     } recoverWith {
-      case _ : AuthorisationException =>
+      case e : AuthorisationException =>
+        Logger.info(s"[IdentifierAction] AuthorisationException: $e")
         Future.successful(Unauthorized)
     }
   }
