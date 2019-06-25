@@ -24,25 +24,50 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfter, MustMatchers, WordSpec}
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.JsValue
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.utils.{Headers, JsonRequests}
+import uk.gov.hmrc.trusts.utils.{Headers, JsonRequests, WireMockHelper}
 
 import scala.concurrent.Future
 
-class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with MockitoSugar with JsonRequests with BeforeAndAfter {
+class BaseSpec extends WordSpec
+  with MustMatchers
+  with ScalaFutures
+  with MockitoSugar
+  with JsonRequests
+  with BeforeAndAfter
+  with GuiceOneServerPerSuite
+  with WireMockHelper {
+
+  val organisationRetrieval: Future[Option[AffinityGroup]] = Future.successful(Some(AffinityGroup.Organisation))
 
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
 
-  val organisationRetrieval: Future[Option[AffinityGroup]] = Future.successful(Some(AffinityGroup.Organisation))
+  def application = applicationBuilder().build()
+
+  def injector = application.injector
+
+  def applicationBuilder(): GuiceApplicationBuilder = {
+    new GuiceApplicationBuilder()
+      .configure(
+        Seq(
+          "microservice.services.des-trusts.port" -> server.port(),
+          "microservice.services.des-estates.port" -> server.port(),
+          "microservice.services.tax-enrolments.port" -> server.port(),
+          "metrics.enabled" -> false,
+          "auditing.enabled" -> false): _*
+      )
+  }
 
   implicit val defaultPatience =
     PatienceConfig(timeout = Span(5, Seconds), interval = Span(500, Millis))
 
-  def postRequestWithPayload(payload: JsValue, withDraftId : Boolean = true): FakeRequest[JsValue] = {
+  def postRequestWithPayload(payload: JsValue, withDraftId: Boolean = true): FakeRequest[JsValue] = {
     if (withDraftId) {
       FakeRequest("POST", "/trusts/register")
         .withHeaders(CONTENT_TYPE -> "application/json")
@@ -55,48 +80,47 @@ class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with Mockito
     }
   }
 
-    def stubForPost(server: WireMockServer,
-                url: String,
-                requestBody: String,
-                returnStatus: Int,
-                responseBody: String,
-                delayResponse: Int = 0) = {
+  def stubForPost(server: WireMockServer,
+                  url: String,
+                  requestBody: String,
+                  returnStatus: Int,
+                  responseBody: String,
+                  delayResponse: Int = 0) = {
 
-      server.stubFor(post(urlEqualTo(url))
-        .withHeader(CONTENT_TYPE, containing("application/json"))
-        .withHeader("Environment", containing("dev"))
-        .withRequestBody(equalTo(requestBody))
-        .willReturn(
-          aResponse()
-            .withStatus(returnStatus)
-            .withBody(responseBody).withFixedDelay(delayResponse)))
-    }
+    server.stubFor(post(urlEqualTo(url))
+      .withHeader(CONTENT_TYPE, containing("application/json"))
+      .withHeader("Environment", containing("dev"))
+      .withRequestBody(equalTo(requestBody))
+      .willReturn(
+        aResponse()
+          .withStatus(returnStatus)
+          .withBody(responseBody).withFixedDelay(delayResponse)))
+  }
 
 
-    def stubForGet(server: WireMockServer,
-                   url: String, returnStatus: Int,
-                   responseBody: String,
-                   delayResponse: Int = 0) = {
-      server.stubFor(get(urlEqualTo(url))
-        .withHeader("content-Type", containing("application/json"))
-        .willReturn(
-          aResponse()
-            .withStatus(returnStatus)
-            .withBody(responseBody).withFixedDelay(delayResponse)))
-    }
+  def stubForGet(server: WireMockServer,
+                 url: String, returnStatus: Int,
+                 responseBody: String,
+                 delayResponse: Int = 0) = {
+    server.stubFor(get(urlEqualTo(url))
+      .withHeader("content-Type", containing("application/json"))
+      .willReturn(
+        aResponse()
+          .withStatus(returnStatus)
+          .withBody(responseBody).withFixedDelay(delayResponse)))
+  }
 
-    def stubForPut(server: WireMockServer,
-                   url: String,
-                   returnStatus: Int,
-                   delayResponse: Int = 0) = {
-      server.stubFor(put(urlEqualTo(url))
-        .withHeader("content-Type", containing("application/json"))
-        .willReturn(
-          aResponse()
-            .withStatus(returnStatus)
-            .withFixedDelay(delayResponse)))
-    }
-
+  def stubForPut(server: WireMockServer,
+                 url: String,
+                 returnStatus: Int,
+                 delayResponse: Int = 0) = {
+    server.stubFor(put(urlEqualTo(url))
+      .withHeader("content-Type", containing("application/json"))
+      .willReturn(
+        aResponse()
+          .withStatus(returnStatus)
+          .withFixedDelay(delayResponse)))
+  }
 
 }
 

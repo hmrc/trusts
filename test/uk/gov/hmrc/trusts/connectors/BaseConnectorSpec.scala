@@ -19,8 +19,7 @@ package uk.gov.hmrc.trusts.connectors
 import play.api.libs.json.{JsValue, Json}
 
 
-class BaseConnectorSpec extends  BaseSpec {
-
+class BaseConnectorSpec extends BaseSpec {
 
   val jsonResponse400: JsValue = Json.parse(
     s"""

@@ -36,13 +36,13 @@ class CheckEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   lazy val validatationService: ValidationService = new ValidationService()
+
   val mockDesService = mock[DesService]
   val authConnector = mock[AuthConnector]
 
   val validPayloadRequest: JsValue = Json.parse("""{"name": "estate name","postcode": "NE1 1NE","utr": "1234567890"}""")
   val validPayloadPostCodeLowerCase: JsValue = Json.parse("""{"name": "estate name","postcode": "aa9a 9aa","utr": "1234567890"}""")
   val validPayloadRequestWithoutPostCode: JsValue = Json.parse("""{"name": "estate name","utr": "1234567890"}""")
-
 
   ".checkExistingTrust" should {
 

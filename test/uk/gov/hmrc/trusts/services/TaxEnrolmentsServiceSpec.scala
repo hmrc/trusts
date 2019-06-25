@@ -30,17 +30,16 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 
-class TaxEnrolmentsServiceSpec extends BaseSpec with GuiceOneServerPerSuite {
+class TaxEnrolmentsServiceSpec extends BaseSpec {
 
-  val mockConnector = mock[TaxEnrolmentConnector]
+  lazy val mockConnector = mock[TaxEnrolmentConnector]
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
 
-  val SUT = new TaxEnrolmentsServiceImpl(mockConnector,appConfig)
+  lazy val SUT = new TaxEnrolmentsServiceImpl(mockConnector,appConfig)
 
   before {
     reset(mockConnector)
   }
-
 
   ".setSubscriptionId" should {
 

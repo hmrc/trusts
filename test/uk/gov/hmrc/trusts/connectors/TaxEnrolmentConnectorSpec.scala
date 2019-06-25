@@ -16,24 +16,13 @@
 
 package uk.gov.hmrc.trusts.connectors
 
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.Application
-import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.trusts.connector.TaxEnrolmentConnector
 import uk.gov.hmrc.trusts.exceptions.{BadRequestException, InternalServerErrorException}
 import uk.gov.hmrc.trusts.models.TaxEnrolmentSuccess
-import uk.gov.hmrc.trusts.utils.WireMockHelper
 
+class TaxEnrolmentConnectorSpec extends BaseConnectorSpec {
 
-class TaxEnrolmentConnectorSpec extends BaseConnectorSpec
-  with GuiceOneAppPerSuite with WireMockHelper {
-
-  override lazy val app: Application = new GuiceApplicationBuilder()
-    .configure(
-      Seq("microservice.services.tax-enrolments.port" -> server.port(),
-        "auditing.enabled" -> false): _*).build()
-
-  lazy val connector: TaxEnrolmentConnector = app.injector.instanceOf[TaxEnrolmentConnector]
+  lazy val connector: TaxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
 
   ".enrolSubscriber" should {
 
@@ -76,6 +65,5 @@ class TaxEnrolmentConnectorSpec extends BaseConnectorSpec
       }
     }
   }
-
 
 }

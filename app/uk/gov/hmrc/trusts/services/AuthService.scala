@@ -27,7 +27,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-@Singleton
+@Singleton @deprecated("use IdentifierAction instead")
 class AuthService @Inject()(override val authConnector: AuthConnector) extends AuthorisedFunctions {
 
   def authorisedUser()(f: Option[AffinityGroup] => Future[Result])(implicit hc: HeaderCarrier): Future[Result] = {

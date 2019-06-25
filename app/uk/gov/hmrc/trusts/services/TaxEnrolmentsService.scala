@@ -46,18 +46,18 @@ class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector :TaxEnrolmentConn
     enrolSubscriberWithRetry( subscriptionId, 1)
   }
 
-  private def enrolSubscriberWithRetry( subscriptionId: String, acc: Int)(implicit as: ActorSystem, hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] = {
+  private def enrolSubscriberWithRetry( subscriptionId: String, acc: Int)
+                                      (implicit as: ActorSystem, hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] = {
     makeRequest(subscriptionId) recoverWith {
-      case NonFatal(exception) => {
+      case NonFatal(_) =>
         if (isMaxRetryReached(acc)) {
-          Logger.error(s"[enrolSubscriberWithRetry] Maximum retry completed. Tax enrolment failed for subscription id ${subscriptionId}")
+          Logger.error(s"[enrolSubscriberWithRetry] Maximum retry completed. Tax enrolment failed for subscription id $subscriptionId")
           Future.successful(TaxEnrolmentFailure)
         } else {
           afterSeconds(DELAY_SECONDS_BETWEEN_REQUEST.seconds).flatMap { _ =>
-            Logger.error(s"[enrolSubscriberWithRetry]  Retrying to enrol subscription id ${subscriptionId},  ${acc}")
-            enrolSubscriberWithRetry(subscriptionId, acc+1)
+            Logger.error(s"[enrolSubscriberWithRetry]  Retrying to enrol subscription id $subscriptionId,  $acc")
+            enrolSubscriberWithRetry(subscriptionId, acc + 1)
           }
-        }
       }
     }
   }

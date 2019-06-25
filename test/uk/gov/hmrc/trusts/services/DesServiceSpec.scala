@@ -45,7 +45,6 @@ class DesServiceSpec extends BaseSpec {
       }
     }
 
-
     "return NotMatched " when {
       "connector returns NotMatched." in {
         when(mockConnector.checkExistingTrust(request)).

@@ -19,15 +19,15 @@ package uk.gov.hmrc.trusts.controllers
 import javax.inject.Inject
 import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.Action
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.config.AppConfig
+import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ApiResponse._
 import uk.gov.hmrc.trusts.models.RegistrationResponse.formats
 import uk.gov.hmrc.trusts.models.{TaxEnrolmentSuccess, _}
-import uk.gov.hmrc.trusts.services.{AuthService, DesService, RosmPatternService, ValidationService}
+import uk.gov.hmrc.trusts.services.{DesService, RosmPatternService, ValidationService}
 import uk.gov.hmrc.trusts.utils.Headers
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -37,68 +37,62 @@ import scala.util.control.NonFatal
 
 class RegisterTrustController @Inject()(desService: DesService, config: AppConfig,
                                         validationService: ValidationService,
-                                        authService: AuthService,
+                                        identify: IdentifierAction,
                                         rosmPatternService: RosmPatternService) extends TrustsBaseController {
 
-  def registration() = Action.async(parse.json) {
+  def registration() = identify.async(parse.json) {
     implicit request =>
 
       val draftIdOption = request.headers.get(Headers.DraftRegistrationId)
 
-      authService.authorisedUser() {
-        userAffinityGroup: Option[AffinityGroup] =>
+      val payload = request.body.toString
 
-          val payload = request.body.toString()
+      validationService
+        .get(config.trustsApiRegistrationSchema)
+        .validate[Registration](payload) match {
 
-          validationService
-            .get(config.trustsApiRegistrationSchema)
-            .validate[Registration](payload) match {
+        case Right(trustsRegistrationRequest) =>
 
-            case Right(trustsRegistrationRequest) =>
-
-              draftIdOption match {
-                case Some(draftId) =>
-                  desService.registerTrust(trustsRegistrationRequest).map {
-                    case response: RegistrationTrnResponse =>
-                      completeRosmPatternWithTaxEnrolments(response.trn, userAffinityGroup)
-                      Ok(Json.toJson(response))
-                  } recover {
-                    case AlreadyRegisteredException =>
-                      Logger.info("[RegisterTrustController][registration] Returning already registered response.")
-                      Conflict(Json.toJson(alreadyRegisteredTrustsResponse))
-                    case NoMatchException =>
-                      Logger.info("[RegisterTrustController][registration] Returning no match response.")
-                      Forbidden(Json.toJson(noMatchRegistrationResponse))
-                    case NonFatal(e) =>
-                      Logger.error(s"[RegisterTrustController][registration] Exception received : $e.")
-                      InternalServerError(Json.toJson(internalServerErrorResponse))
-                  }
-                case None =>
-                  Future.successful(BadRequest(Json.toJson(noDraftIdProvided)))
+          draftIdOption match {
+            case Some(draftId) =>
+              desService.registerTrust(trustsRegistrationRequest).map {
+                case response: RegistrationTrnResponse =>
+                  completeRosmPatternWithTaxEnrolments(response.trn, request.affinityGroup)
+                  Ok(Json.toJson(response))
+              } recover {
+                case AlreadyRegisteredException =>
+                  Logger.info("[RegisterTrustController][registration] Returning already registered response.")
+                  Conflict(Json.toJson(alreadyRegisteredTrustsResponse))
+                case NoMatchException =>
+                  Logger.info("[RegisterTrustController][registration] Returning no match response.")
+                  Forbidden(Json.toJson(noMatchRegistrationResponse))
+                case NonFatal(e) =>
+                  Logger.error(s"[RegisterTrustController][registration] Exception received : $e.")
+                  InternalServerError(Json.toJson(internalServerErrorResponse))
               }
-            case Left(_) =>
-              Logger.error(s"[registration] trusts validation errors, returning bad request.")
-              Future.successful(invalidRequestErrorResponse)
+            case None =>
+              Future.successful(BadRequest(Json.toJson(noDraftIdProvided)))
           }
-
+        case Left(_) =>
+          Logger.error(s"[registration] trusts validation errors, returning bad request.")
+          Future.successful(invalidRequestErrorResponse)
       }
   }
 
 
-  private def completeRosmPatternWithTaxEnrolments(trn: String,
-                                                   userAffinityGroup: Option[AffinityGroup])
+  private def completeRosmPatternWithTaxEnrolments(trn: String, affinityGroup: AffinityGroup)
                                                   (implicit hc: HeaderCarrier) : Unit  = {
-    userAffinityGroup match {
-      case Some(AffinityGroup.Organisation) =>
+    affinityGroup match {
+      case AffinityGroup.Organisation =>
         rosmPatternService.completeRosmTransaction(trn) map {
           case TaxEnrolmentSuccess =>
-            Logger.info(s"Rosm completed successfully for provided trn : ${trn}.")
+            Logger.info(s"Rosm completed successfully for provided trn : $trn.")
           case TaxEnrolmentFailure =>
-            Logger.error(s"Rosm pattern is not completed for trn:  ${trn}.")
+            Logger.error(s"Rosm pattern is not completed for trn:  $trn.")
         } recover {
           case NonFatal(exception) => {
-            Logger.error(s"Rosm pattern is not completed for trn:  ${trn}.")
-            Logger.error(s"[completeRosmPatternWithTaxEnrolments] Exception received : ${exception}.")
+            Logger.error(s"Rosm pattern is not completed for trn:  $trn.")
+            Logger.error(s"[completeRosmPatternWithTaxEnrolments] Exception received : $exception.")
           }
         }
       case _ =>
