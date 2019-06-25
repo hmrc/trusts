@@ -177,6 +177,27 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
         verify(rosmPatternService, times(0)).completeRosmTransaction(any())(any[HeaderCarrier])
       }
 
+      "no draft id provided in headers" in {
+        val agentRetrieval: Future[Option[AffinityGroup]] = Future.successful(Some(AffinityGroup.Agent))
+
+        mockDesServiceResponse
+
+        when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(agentRetrieval)
+
+        val mockAuthService = new AuthService(authConnector)
+        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, mockAuthService,rosmPatternService)
+
+        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(estateRegistration03), withDraftId = false))
+
+        status(result) mustBe BAD_REQUEST
+        val output = contentAsJson(result)
+
+        (output \ "code").as[String] mustBe "NO_DRAFT_ID"
+        (output \ "message").as[String] mustBe "No draft registration identifier provided."
+
+        verify(rosmPatternService, times(0)).completeRosmTransaction(any())(any[HeaderCarrier])
+      }
+
     }
 
 

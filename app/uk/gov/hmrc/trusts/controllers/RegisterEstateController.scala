@@ -17,7 +17,6 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
-
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Action
@@ -29,6 +28,7 @@ import uk.gov.hmrc.trusts.models.ApiResponse._
 import uk.gov.hmrc.trusts.models.RegistrationResponse.formats
 import uk.gov.hmrc.trusts.models.{TaxEnrolmentSuccess, _}
 import uk.gov.hmrc.trusts.services.{AuthService, DesService, RosmPatternService, ValidationService}
+import uk.gov.hmrc.trusts.utils.Headers
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -44,6 +44,7 @@ class RegisterEstateController @Inject()(desService: DesService, config: AppConf
   def registration() = Action.async(parse.json) {
     implicit request =>
 
+      val draftIdOption = request.headers.get(Headers.DraftRegistrationId)
 
       authService.authorisedUser() { userAffinityGroup: Option[AffinityGroup] =>
         val registrationJsonString = request.body.toString()
@@ -53,21 +54,27 @@ class RegisterEstateController @Inject()(desService: DesService, config: AppConf
           .validate[EstateRegistration](registrationJsonString) match {
 
           case Right(estatesRegistrationRequest) =>
-            desService.registerEstate(estatesRegistrationRequest).map {
-              case response: RegistrationTrnResponse =>
-                Logger.info("[RegisterEstateController] Estate registration completed successfully.")
-                completeRosmPatternWithTaxEnrolments(response.trn, userAffinityGroup)
-                Ok(Json.toJson(response))
-            } recover {
-              case AlreadyRegisteredException =>
-                Logger.info("[RegisterEstateController][registration] Returning already registered response.")
-                Conflict(Json.toJson(alreadyRegisteredEstateResponse))
-              case NoMatchException =>
-                Logger.info("[RegisterEstateController][registration] Returning no match response.")
-                Forbidden(Json.toJson(noMatchRegistrationResponse))
-              case NonFatal(e) =>
-                Logger.error(s"[RegisterEstateController][registration] Exception received : $e.")
-                InternalServerError(Json.toJson(internalServerErrorResponse))
+
+            draftIdOption match {
+              case Some(draftId) =>
+                desService.registerEstate(estatesRegistrationRequest).map {
+                  case response: RegistrationTrnResponse =>
+                    Logger.info("[RegisterEstateController] Estate registration completed successfully.")
+                    completeRosmPatternWithTaxEnrolments(response.trn, userAffinityGroup)
+                    Ok(Json.toJson(response))
+                } recover {
+                  case AlreadyRegisteredException =>
+                    Logger.info("[RegisterEstateController][registration] Returning already registered response.")
+                    Conflict(Json.toJson(alreadyRegisteredEstateResponse))
+                  case NoMatchException =>
+                    Logger.info("[RegisterEstateController][registration] Returning no match response.")
+                    Forbidden(Json.toJson(noMatchRegistrationResponse))
+                  case NonFatal(e) =>
+                    Logger.error(s"[RegisterEstateController][registration] Exception received : $e.")
+                    InternalServerError(Json.toJson(internalServerErrorResponse))
+                }
+              case None =>
+                Future.successful(BadRequest(Json.toJson(noDraftIdProvided)))
             }
           case Left(_) =>
             Logger.error(s"[registration] estates validation errors, returning bad request.")

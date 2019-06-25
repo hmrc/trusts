@@ -37,7 +37,7 @@ class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with Mockito
 
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
 
-  val organisationRetrieval: Future[Option[AffinityGroup]] = Future.successful((Some(AffinityGroup.Organisation)))
+  val organisationRetrieval: Future[Option[AffinityGroup]] = Future.successful(Some(AffinityGroup.Organisation))
 
   implicit val defaultPatience =
     PatienceConfig(timeout = Span(5, Seconds), interval = Span(500, Millis))
@@ -54,7 +54,6 @@ class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with Mockito
         .withBody(payload)
     }
   }
-
 
     def stubForPost(server: WireMockServer,
                 url: String,
