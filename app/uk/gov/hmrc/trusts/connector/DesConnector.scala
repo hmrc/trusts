@@ -25,15 +25,14 @@ import play.api.http.HeaderNames
 import play.api.libs.json._
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.Authorization
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext
 import uk.gov.hmrc.trusts.config.{AppConfig, WSHttp}
 import uk.gov.hmrc.trusts.models._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import uk.gov.hmrc.trusts.utils.Constants._
-import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK, SERVICE_UNAVAILABLE}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.GetEstateResponse
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustResponse
 
 class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesConnector {
 
@@ -46,7 +45,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
   lazy val trustRegistrationEndpoint : String = trustsServiceUrl + "/registration"
   lazy val estateRegistrationEndpoint : String = estatesServiceUrl + "/registration"
 
-  def createGetTrustEndpoint(utr: String): String = trustsServiceUrl + s"/registration/$utr"
+  def createGetTrustOrEsateEndpoint(utr: String): String = trustsServiceUrl + s"/registration/$utr"
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "Correlation-Id"
@@ -119,7 +118,13 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
   override def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
     val updatedHeaderCarrier = hc.copy(extraHeaders = desHeaders)
 
-    http.GET[GetTrustResponse](createGetTrustEndpoint(utr))(GetTrustResponse.httpReads, updatedHeaderCarrier, global)
+    http.GET[GetTrustResponse](createGetTrustOrEsateEndpoint(utr))(GetTrustResponse.httpReads, updatedHeaderCarrier, global)
+  }
+
+  override def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse] = {
+    val updatedHeaderCarrier = hc.copy(extraHeaders = desHeaders)
+
+    http.GET[GetEstateResponse](createGetTrustOrEsateEndpoint(utr))(GetEstateResponse.httpReads, updatedHeaderCarrier, global)
   }
 }
 
@@ -133,5 +138,5 @@ trait DesConnector {
   def getSubscriptionId(trn: String): Future[SubscriptionIdResponse]
 
   def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse]
-
+  def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse]
 }

@@ -22,8 +22,10 @@ import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
-import uk.gov.hmrc.trusts.models.GetTrust.ResponseHeader
 import uk.gov.hmrc.trusts.models._
+import uk.gov.hmrc.trusts.models.get_trust_or_estate._
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 
 import scala.concurrent.Future
 
@@ -382,4 +384,105 @@ class DesServiceSpec extends BaseSpec {
       }
     }
   } // getTrustInfo
+
+  ".getEstateInfo" should {
+    "return EstateFoundResponse" when {
+      "EstateFoundResponse is returned from DES Connector" in {
+
+        val utr = "1234567890"
+
+        when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(EstateFoundResponse(None, ResponseHeader("TODO", 1))))
+
+        val futureResult = SUT.getEstateInfo(utr)
+
+        whenReady(futureResult) { result =>
+          result mustBe EstateFoundResponse(None, ResponseHeader("TODO", 1))
+        }
+      }
+    }
+
+    "return InvalidUTRResponse" when {
+      "InvalidUTRResponse is returned from DES Connector" in {
+
+        when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(InvalidUTRResponse))
+
+        val invalidUtr = "123456789"
+        val futureResult = SUT.getEstateInfo(invalidUtr)
+
+        whenReady(futureResult) { result =>
+          result mustBe InvalidUTRResponse
+        }
+      }
+    }
+
+    "return InvalidRegimeResponse" when {
+      "InvalidRegimeResponse is returned from DES Connector" in {
+
+        when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(InvalidRegimeResponse))
+
+        val utr = "123456789"
+        val futureResult = SUT.getEstateInfo(utr)
+
+        whenReady(futureResult) { result =>
+          result mustBe InvalidRegimeResponse
+        }
+      }
+    }
+
+    "return BadRequestResponse" when {
+      "BadRequestResponse is returned from DES Connector" in {
+
+        when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(BadRequestResponse))
+
+        val utr = "123456789"
+        val futureResult = SUT.getEstateInfo(utr)
+
+        whenReady(futureResult) { result =>
+          result mustBe BadRequestResponse
+        }
+      }
+    }
+
+    "return ResourceNotFoundResponse" when {
+      "ResourceNotFoundResponse is returned from DES Connector" in {
+
+        when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(ResourceNotFoundResponse))
+
+        val utr = "123456789"
+        val futureResult = SUT.getEstateInfo(utr)
+
+        whenReady(futureResult) { result =>
+          result mustBe ResourceNotFoundResponse
+        }
+      }
+    }
+
+    "return InternalServerErrorResponse" when {
+      "InternalServerErrorResponse is returned from DES Connector" in {
+
+        when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(InternalServerErrorResponse))
+
+        val utr = "123456789"
+        val futureResult = SUT.getEstateInfo(utr)
+
+        whenReady(futureResult) { result =>
+          result mustBe InternalServerErrorResponse
+        }
+      }
+    }
+
+    "return ServiceUnavailableResponse" when {
+      "ServiceUnavailableResponse is returned from DES Connector" in {
+
+        when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(ServiceUnavailableResponse))
+
+        val utr = "123456789"
+        val futureResult = SUT.getEstateInfo(utr)
+
+        whenReady(futureResult) { result =>
+          result mustBe ServiceUnavailableResponse
+        }
+      }
+    }
+  } // getEstateInfo
 }

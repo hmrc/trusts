@@ -22,6 +22,7 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, Json, Reads, Writes}
 import uk.gov.hmrc.trusts.utils.Constants._
+
 case class EstateRegistration(matchData: Option[MatchData],
                               correspondence: Correspondence,
                               yearsReturns: Option[YearsReturns],
@@ -88,13 +89,11 @@ object EstatePerRepIndType {
   implicit val estatePerRepIndTypeFormat: Format[EstatePerRepIndType] = Json.format[EstatePerRepIndType]
 }
 
-case class EstatePerRepOrgType(
-                                orgName: String,
-                                phoneNumber: String,
-                                email: Option[String] = None,
-                                identification: IdentificationOrgType
+case class EstatePerRepOrgType(orgName: String,
+                               phoneNumber: String,
+                               email: Option[String] = None,
+                               identification: IdentificationOrgType)
 
-                              )
 object EstatePerRepOrgType {
   implicit val estatePerRepOrgTypeFormat: Format[EstatePerRepOrgType] = Json.format[EstatePerRepOrgType]
 }

@@ -14,55 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models
+package uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust
 
 import play.api.Logger
 import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK, SERVICE_UNAVAILABLE}
+import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
-import play.api.libs.functional.syntax._
-import uk.gov.hmrc.trusts.models.GetTrust.{GetTrust, ResponseHeader}
+import uk.gov.hmrc.trusts.models._
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
+import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 
 trait GetTrustResponse
 
-trait FailureResponse extends GetTrustResponse {
-  val code: String
-  val reason: String
-}
-
 case class TrustFoundResponse(getTrust: Option[GetTrust],
                               responseHeader: ResponseHeader) extends GetTrustResponse
-
-case object InvalidUTRResponse extends FailureResponse {
-  override val code = "INVALID_UTR"
-  override val reason = "Bad Request"
-}
-
-case object InvalidRegimeResponse extends FailureResponse {
-  override val code = "INVALID_REGIME"
-  override val reason = "Bad Request"
-}
-
-case object BadRequestResponse extends FailureResponse {
-  override val code = "BAD_REQUEST"
-  override val reason = "Bad Request"
-}
-
-case object ResourceNotFoundResponse extends FailureResponse {
-  override val code = "NOT_FOUND"
-  override val reason = "Resource not found"
-}
-
-case object InternalServerErrorResponse extends FailureResponse {
-  override val code = "INTERNAL_SERVER_ERROR"
-  override val reason = "Internal Server Error"
-}
-
-case object ServiceUnavailableResponse extends FailureResponse {
-  override val code = "SERVICE_UNAVAILABLE"
-  override val reason = "Service Unavailable"
-}
-
 
 object TrustFoundResponse {
   implicit val writes: Writes[TrustFoundResponse] = Json.writes[TrustFoundResponse]
@@ -104,6 +70,4 @@ object GetTrustResponse {
         }
       }
     }
-
-
 }

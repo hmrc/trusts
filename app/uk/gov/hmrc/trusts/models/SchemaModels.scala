@@ -25,7 +25,7 @@ import uk.gov.hmrc.trusts.utils.TypeOfTrust.EMPLOYMENT_RELATED_TRUST
   * DES API Schema - definitions models below
   */
 
-case class Registration(matchData: Option[GetTrust.MatchData],
+case class Registration(matchData: Option[MatchData],
                         correspondence: Correspondence,
                         yearsReturns: Option[YearsReturns],
                         declaration: Declaration,
@@ -36,7 +36,7 @@ case class Registration(matchData: Option[GetTrust.MatchData],
 object Registration {
  implicit val registrationReads :Reads[Registration] = Json.reads[Registration]
  implicit val writeToDes :Writes[Registration] = (
-    (JsPath \ "matchData").writeNullable[GetTrust.MatchData] and
+    (JsPath \ "matchData").writeNullable[MatchData] and
     (JsPath \ "correspondence").write[Correspondence] and
     (JsPath \ "declaration").write[Declaration] and
     (JsPath \ "yearsReturns").writeNullable[YearsReturns] and
@@ -57,7 +57,7 @@ case class MatchData(utr: String,
                     )
 
 object MatchData {
-  implicit val matchDataFormat: Format[GetTrust.MatchData] = Json.format[GetTrust.MatchData]
+  implicit val matchDataFormat: Format[MatchData] = Json.format[MatchData]
 }
 
 case class Correspondence(abroadIndicator: Boolean,

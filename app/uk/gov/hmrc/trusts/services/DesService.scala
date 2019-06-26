@@ -21,6 +21,8 @@ import javax.inject.Inject
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.models._
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.GetEstateResponse
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustResponse
 
 import scala.concurrent.Future
 
@@ -54,6 +56,10 @@ class DesServiceImpl @Inject()(val desConnector: DesConnector) extends DesServic
   def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
     desConnector.getTrustInfo(utr)
   }
+
+  def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse] = {
+    desConnector.getEstateInfo(utr)
+  }
 }
 
 
@@ -70,5 +76,5 @@ trait DesService {
   def getSubscriptionId(trn: String)(implicit hc: HeaderCarrier): Future[SubscriptionIdResponse]
 
   def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse]
-  def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse]
+  def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse]
 }
