@@ -80,7 +80,7 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
                     registration = trustsRegistrationRequest,
                     draftId = draftId,
                     internalId = request.identifier,
-                    response = RegistrationFailureResponse(403, "ALREADY_REGISTERED", "Trust/Estate is already registered.")
+                    response = RegistrationFailureResponse(403, "ALREADY_REGISTERED", "Trust is already registered.")
                   )
 
                   Logger.info("[RegisterTrustController][registration] Returning already registered response.")

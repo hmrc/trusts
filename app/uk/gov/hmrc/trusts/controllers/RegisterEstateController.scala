@@ -19,12 +19,14 @@ package uk.gov.hmrc.trusts.controllers
 import javax.inject.Inject
 import play.api.Logger
 import play.api.libs.json.Json
+import uk.gov.hmrc.http.BadRequestException
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ApiResponse._
 import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.services.{DesService, RosmPatternService, ValidationService}
+import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
+import uk.gov.hmrc.trusts.services.{AuditService, DesService, RosmPatternService, ValidationService}
 import uk.gov.hmrc.trusts.utils.Headers
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,8 +37,8 @@ import scala.util.control.NonFatal
 class RegisterEstateController @Inject()(desService: DesService, config: AppConfig,
                                          validationService: ValidationService,
                                          identifierAction: IdentifierAction,
-                                         rosmPatternService: RosmPatternService) extends TrustsBaseController {
-
+                                         rosmPatternService: RosmPatternService,
+                                         auditService: AuditService) extends TrustsBaseController {
 
   def registration() = identifierAction.async(parse.json) {
     implicit request =>
@@ -55,6 +57,15 @@ class RegisterEstateController @Inject()(desService: DesService, config: AppConf
               case Some(draftId) =>
                 desService.registerEstate(estatesRegistrationRequest).flatMap {
                   case response: RegistrationTrnResponse =>
+
+                    auditService.audit(
+                      event = TrustAuditing.ESTATE_REGISTRATION_SUBMITTED,
+                      registration = estatesRegistrationRequest,
+                      draftId = draftId,
+                      internalId = request.identifier,
+                      response = response
+                    )
+
                     Logger.info("[RegisterEstateController] Estate registration completed successfully.")
                     rosmPatternService.enrolAndLogResult(response.trn, request.affinityGroup) map {
                       _ =>
@@ -62,11 +73,53 @@ class RegisterEstateController @Inject()(desService: DesService, config: AppConf
                     }
                 } recover {
                   case AlreadyRegisteredException =>
+
+                    auditService.audit(
+                      event = TrustAuditing.ESTATE_REGISTRATION_SUBMITTED,
+                      registration = estatesRegistrationRequest,
+                      draftId = draftId,
+                      internalId = request.identifier,
+                      response = RegistrationFailureResponse(403, "ALREADY_REGISTERED", "Estate is already registered.")
+                    )
+
                     Logger.info("[RegisterEstateController][registration] Returning already registered response.")
                     Conflict(Json.toJson(alreadyRegisteredEstateResponse))
                   case NoMatchException =>
+
+                    auditService.audit(
+                      event = TrustAuditing.ESTATE_REGISTRATION_SUBMITTED,
+                      registration = estatesRegistrationRequest,
+                      draftId = draftId,
+                      internalId = request.identifier,
+                      response = RegistrationFailureResponse(403, "NO_MATCH", "There is no match in HMRC records.")
+                    )
+
                     Logger.info("[RegisterEstateController][registration] Returning no match response.")
                     Forbidden(Json.toJson(noMatchRegistrationResponse))
+                  case x : ServiceNotAvailableException =>
+
+                    auditService.audit(
+                      event = TrustAuditing.ESTATE_REGISTRATION_SUBMITTED,
+                      registration = estatesRegistrationRequest,
+                      draftId = draftId,
+                      internalId = request.identifier,
+                      response = RegistrationFailureResponse(503, "SERVICE_UNAVAILABLE", "Dependent systems are currently not responding.")
+                    )
+
+                    Logger.error(s"[RegisterTrustController][registration] Service unavailable response from DES")
+                    InternalServerError(Json.toJson(internalServerErrorResponse))
+                  case x : BadRequestException =>
+
+                    auditService.audit(
+                      event = TrustAuditing.ESTATE_REGISTRATION_SUBMITTED,
+                      registration = estatesRegistrationRequest,
+                      draftId = draftId,
+                      internalId = request.identifier,
+                      response = RegistrationFailureResponse(400, "INVALID_PAYLOAD", "Submission has not passed validation. Invalid payload..")
+                    )
+
+                    Logger.error(s"[RegisterTrustController][registration] bad request response from DES")
+                    InternalServerError(Json.toJson(internalServerErrorResponse))
                   case NonFatal(e) =>
                     Logger.error(s"[RegisterEstateController][registration] Exception received : $e.")
                     InternalServerError(Json.toJson(internalServerErrorResponse))
