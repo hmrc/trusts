@@ -14,51 +14,81 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.connectors
+package uk.gov.hmrc.trusts
+
+import java.util.UUID
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
-import org.mockito.Matchers
-import org.mockito.Matchers.any
-import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfter, MustMatchers, WordSpec}
-import play.api.libs.json.JsValue
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.models.TaxEnrolmentSuccess
-import uk.gov.hmrc.trusts.services.RosmPatternService
-import uk.gov.hmrc.trusts.utils.JsonRequests
+import uk.gov.hmrc.trusts.config.AppConfig
+import uk.gov.hmrc.trusts.utils._
 
-import scala.concurrent.Future
-
-class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with MockitoSugar with JsonRequests with BeforeAndAfter {
+class BaseSpec extends WordSpec
+  with MustMatchers
+  with ScalaFutures
+  with MockitoSugar
+  with JsonRequests
+  with BeforeAndAfter
+  with GuiceOneServerPerSuite
+  with WireMockHelper {
 
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
 
-  val organisationRetrieval: Future[Option[AffinityGroup]] = Future.successful((Some(AffinityGroup.Organisation)))
+  def application = applicationBuilder().build()
 
-  val authConnector = mock[AuthConnector]
+  def injector = application.injector
+
+  def appConfig : AppConfig = injector.instanceOf[AppConfig]
+
+  def applicationBuilder(): GuiceApplicationBuilder = {
+    new GuiceApplicationBuilder()
+      .configure(
+        Seq(
+          "microservice.services.des-trusts.port" -> server.port(),
+          "microservice.services.des-estates.port" -> server.port(),
+          "microservice.services.tax-enrolments.port" -> server.port(),
+          "metrics.enabled" -> false,
+          "auditing.enabled" -> false): _*
+      )
+  }
+
+  def fakeRequest : FakeRequest[JsValue] = FakeRequest("POST", "")
+    .withHeaders(CONTENT_TYPE -> "application/json")
+    .withHeaders(Headers.DraftRegistrationId -> UUID.randomUUID().toString)
+    .withBody(Json.parse("{}"))
 
   implicit val defaultPatience =
     PatienceConfig(timeout = Span(5, Seconds), interval = Span(500, Millis))
 
-  def postRequestWithPayload(payload: JsValue): FakeRequest[JsValue] =
-    FakeRequest("POST", "/trusts/register")
-      .withHeaders(CONTENT_TYPE -> "application/json")
-      .withBody(payload)
-
+  def postRequestWithPayload(payload: JsValue, withDraftId: Boolean = true): FakeRequest[JsValue] = {
+    if (withDraftId) {
+      FakeRequest("POST", "/trusts/register")
+        .withHeaders(CONTENT_TYPE -> "application/json")
+        .withHeaders(Headers.DraftRegistrationId -> UUID.randomUUID().toString)
+        .withBody(payload)
+    } else {
+      FakeRequest("POST", "/trusts/register")
+        .withHeaders(CONTENT_TYPE -> "application/json")
+        .withBody(payload)
+    }
+  }
 
   def stubForPost(server: WireMockServer,
-              url: String,
-              requestBody: String,
-              returnStatus: Int,
-              responseBody: String,
-              delayResponse: Int = 0) = {
+                  url: String,
+                  requestBody: String,
+                  returnStatus: Int,
+                  responseBody: String,
+                  delayResponse: Int = 0) = {
 
     server.stubFor(post(urlEqualTo(url))
       .withHeader(CONTENT_TYPE, containing("application/json"))
@@ -95,9 +125,6 @@ class BaseSpec extends WordSpec with MustMatchers with ScalaFutures with Mockito
           .withFixedDelay(delayResponse)))
   }
 
-  protected def mockAuthSuccess = {
-    when(authConnector.authorise[Option[AffinityGroup]](any(), any())(any(), any())).thenReturn(organisationRetrieval)
-  }
 }
 
 

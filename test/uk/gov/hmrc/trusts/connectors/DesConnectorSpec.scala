@@ -20,6 +20,8 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsSuccess, Json}
+import play.api.http.Status._
+import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions.{AlreadyRegisteredException, _}
 import uk.gov.hmrc.trusts.models.ExistingCheckRequest._
@@ -31,17 +33,9 @@ import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 
-class DesConnectorSpec extends BaseConnectorSpec
-  with GuiceOneAppPerSuite with WireMockHelper {
+class DesConnectorSpec extends BaseConnectorSpec {
 
-  override lazy val app: Application = new GuiceApplicationBuilder()
-    .configure(
-      Seq("microservice.services.des-trusts.port" -> server.port(),
-        "microservice.services.des-estates.port" -> server.port(),
-        "auditing.enabled" -> false): _*).build()
-
-
-  lazy val connector: DesConnector = app.injector.instanceOf[DesConnector]
+  lazy val connector: DesConnector = injector.instanceOf[DesConnector]
 
   lazy val request = ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
 
@@ -57,9 +51,13 @@ class DesConnectorSpec extends BaseConnectorSpec
 
         val futureResult = connector.checkExistingTrust(request)
 
+        application.stop()
+
         whenReady(futureResult) {
-          result => result mustBe Matched
+          result =>
+            result mustBe Matched
         }
+
 
       }
     }
@@ -70,6 +68,9 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForPost(server, "/trusts/match", requestBody, OK, """{"match": false}""")
 
         val futureResult = connector.checkExistingTrust(request)
+
+        application.stop()
+
         whenReady(futureResult) {
           result => result mustBe NotMatched
         }
@@ -85,6 +86,8 @@ class DesConnectorSpec extends BaseConnectorSpec
 
         val futureResult = connector.checkExistingTrust(wrongPayloadRequest)
 
+        application.stop()
+
         whenReady(futureResult) {
           result => result mustBe BadRequest
         }
@@ -98,6 +101,8 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForPost(server, "/trusts/match", requestBody, CONFLICT, Json.stringify(jsonResponseAlreadyRegistered))
 
         val futureResult = connector.checkExistingTrust(request)
+
+        application.stop()
 
         whenReady(futureResult) {
           result => result mustBe AlreadyRegistered
@@ -113,6 +118,8 @@ class DesConnectorSpec extends BaseConnectorSpec
 
         val futureResult = connector.checkExistingTrust(request)
 
+        application.stop()
+
         whenReady(futureResult) {
           result => result mustBe ServiceUnavailable
         }
@@ -127,6 +134,8 @@ class DesConnectorSpec extends BaseConnectorSpec
 
         val futureResult = connector.checkExistingTrust(request)
 
+        application.stop()
+
         whenReady(futureResult) {
           result => result mustBe ServerError
         }
@@ -140,6 +149,8 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForPost(server, "/trusts/match", requestBody, CONFLICT, "{}")
 
         val futureResult = connector.checkExistingTrust(request)
+
+        application.stop()
 
         whenReady(futureResult) {
           result => result mustBe ServerError
@@ -159,6 +170,8 @@ class DesConnectorSpec extends BaseConnectorSpec
 
         val futureResult = connector.checkExistingEstate(request)
 
+        application.stop()
+
         whenReady(futureResult) {
           result => result mustBe Matched
         }
@@ -172,6 +185,9 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForPost(server, "/estates/match", requestBody, OK, """{"match": false}""")
 
         val futureResult = connector.checkExistingEstate(request)
+
+        application.stop()
+
         whenReady(futureResult) {
           result => result mustBe NotMatched
         }
@@ -187,6 +203,8 @@ class DesConnectorSpec extends BaseConnectorSpec
 
         val futureResult = connector.checkExistingEstate(wrongPayloadRequest)
 
+        application.stop()
+
         whenReady(futureResult) {
           result => result mustBe BadRequest
         }
@@ -200,6 +218,8 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForPost(server, "/estates/match", requestBody, CONFLICT, Json.stringify(jsonResponseAlreadyRegistered))
 
         val futureResult = connector.checkExistingEstate(request)
+
+        application.stop()
 
         whenReady(futureResult) {
           result => result mustBe AlreadyRegistered
@@ -215,6 +235,8 @@ class DesConnectorSpec extends BaseConnectorSpec
 
         val futureResult = connector.checkExistingEstate(request)
 
+        application.stop()
+
         whenReady(futureResult) {
           result => result mustBe ServiceUnavailable
         }
@@ -229,6 +251,8 @@ class DesConnectorSpec extends BaseConnectorSpec
 
         val futureResult = connector.checkExistingEstate(request)
 
+        application.stop()
+
         whenReady(futureResult) {
           result => result mustBe ServerError
         }
@@ -242,6 +266,8 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForPost(server, "/estates/match", requestBody, CONFLICT, "{}")
 
         val futureResult = connector.checkExistingEstate(request)
+
+        application.stop()
 
         whenReady(futureResult) {
           result => result mustBe ServerError
@@ -261,6 +287,8 @@ class DesConnectorSpec extends BaseConnectorSpec
 
         val futureResult = connector.registerTrust(registrationRequest)
 
+        application.stop()
+
         whenReady(futureResult) {
           result => result mustBe RegistrationTrnResponse("XTRN1234567")
         }
@@ -275,6 +303,7 @@ class DesConnectorSpec extends BaseConnectorSpec
 
         val futureResult = connector.registerTrust(invalidRegistrationRequest)
 
+        application.stop()
 
         whenReady(futureResult.failed) {
           result => result mustBe BadRequestException
@@ -303,6 +332,8 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN, Json.stringify(jsonResponse403NoMatch))
         val futureResult = connector.registerTrust(registrationRequest)
 
+        application.stop()
+
         whenReady(futureResult.failed) {
           result => result mustBe NoMatchException
         }
@@ -314,6 +345,8 @@ class DesConnectorSpec extends BaseConnectorSpec
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
         stubForPost(server, "/trusts/registration", requestBody, SERVICE_UNAVAILABLE, Json.stringify(jsonResponse503))
         val futureResult = connector.registerTrust(registrationRequest)
+
+        application.stop()
 
         whenReady(futureResult.failed) {
           result => result mustBe an[ServiceNotAvailableException]
@@ -328,6 +361,9 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForPost(server, "/trusts/registration", requestBody, INTERNAL_SERVER_ERROR, Json.stringify(jsonResponse500))
 
         val futureResult = connector.registerTrust(registrationRequest)
+
+        application.stop()
+
         whenReady(futureResult.failed) {
           result => result mustBe an[InternalServerErrorException]
         }
@@ -340,6 +376,8 @@ class DesConnectorSpec extends BaseConnectorSpec
 
         stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN, "{}")
         val futureResult = connector.registerTrust(registrationRequest)
+
+        application.stop()
 
         whenReady(futureResult.failed) {
           result => result mustBe an[InternalServerErrorException]
@@ -359,6 +397,8 @@ class DesConnectorSpec extends BaseConnectorSpec
 
         val futureResult = connector.registerEstate(estateRegRequest)
 
+        application.stop()
+
         whenReady(futureResult) {
           result => result mustBe RegistrationTrnResponse("XTRN1234567")
         }
@@ -373,6 +413,7 @@ class DesConnectorSpec extends BaseConnectorSpec
 
         val futureResult = connector.registerEstate(estateRegRequest)
 
+        application.stop()
 
         whenReady(futureResult.failed) {
           result => result mustBe BadRequestException
@@ -387,6 +428,8 @@ class DesConnectorSpec extends BaseConnectorSpec
 
         stubForPost(server, "/estates/registration", requestBody, FORBIDDEN, Json.stringify(jsonResponseAlreadyRegistered))
         val futureResult = connector.registerEstate(estateRegRequest)
+
+        application.stop()
 
         whenReady(futureResult.failed) {
           result => result mustBe AlreadyRegisteredException
@@ -413,6 +456,8 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForPost(server, "/estates/registration", requestBody, SERVICE_UNAVAILABLE, Json.stringify(jsonResponse503))
         val futureResult = connector.registerEstate(estateRegRequest)
 
+        application.stop()
+
         whenReady(futureResult.failed) {
           result => result mustBe an[ServiceNotAvailableException]
         }
@@ -426,6 +471,9 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForPost(server, "/estates/registration", requestBody, INTERNAL_SERVER_ERROR, Json.stringify(jsonResponse500))
 
         val futureResult = connector.registerEstate(estateRegRequest)
+
+        application.stop()
+
         whenReady(futureResult.failed) {
           result => result mustBe an[InternalServerErrorException]
         }
@@ -438,6 +486,8 @@ class DesConnectorSpec extends BaseConnectorSpec
 
         stubForPost(server, "/estates/registration", requestBody, FORBIDDEN, "{}")
         val futureResult = connector.registerEstate(estateRegRequest)
+
+        application.stop()
 
         whenReady(futureResult.failed) {
           result => result mustBe an[InternalServerErrorException]
@@ -456,6 +506,8 @@ class DesConnectorSpec extends BaseConnectorSpec
 
         val futureResult = connector.getSubscriptionId(trn)
 
+        application.stop()
+
         whenReady(futureResult) {
           result => result mustBe SubscriptionIdResponse("987654321")
         }
@@ -469,6 +521,8 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForGet(server, subscriptionIdEndpointUrl,  BAD_REQUEST,Json.stringify(jsonResponse400GetSubscriptionId))
 
         val futureResult = connector.getSubscriptionId(trn)
+
+        application.stop()
 
         whenReady(futureResult.failed) {
           result => result mustBe BadRequestException
@@ -484,6 +538,8 @@ class DesConnectorSpec extends BaseConnectorSpec
 
         val futureResult = connector.getSubscriptionId(trn)
 
+        application.stop()
+
         whenReady(futureResult.failed) {
           result => result mustBe NotFoundException
         }
@@ -498,6 +554,8 @@ class DesConnectorSpec extends BaseConnectorSpec
 
         val futureResult = connector.getSubscriptionId(trn)
 
+        application.stop()
+
         whenReady(futureResult.failed) {
           result => result mustBe an[ServiceNotAvailableException]
         }
@@ -511,6 +569,9 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForGet(server, subscriptionIdEndpointUrl,  INTERNAL_SERVER_ERROR ,Json.stringify(jsonResponse500))
 
         val futureResult = connector.getSubscriptionId(trn)
+
+        application.stop()
+
         whenReady(futureResult.failed) {
           result => result mustBe an[InternalServerErrorException]
         }
@@ -526,6 +587,9 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustResponseJson)
 
         val futureResult = connector.getTrustInfo(utr)
+
+        application.stop()
+
         whenReady(futureResult) { result =>
           val expectedResult = Json.fromJson[TrustFoundResponse](getTrustResponse) match {
             case JsSuccess(data, _) => data
@@ -540,6 +604,9 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustOrEstateNoDetailsResponseJson)
 
         val futureResult = connector.getTrustInfo(utr)
+
+        application.stop()
+
         whenReady(futureResult) { result =>
           result mustBe TrustFoundResponse(None, ResponseHeader("In Processing", 1))
         }
@@ -553,6 +620,9 @@ class DesConnectorSpec extends BaseConnectorSpec
                    Json.stringify(jsonResponse400InvalidUTR))
 
         val futureResult = connector.getTrustInfo(invalidUTR)
+
+        application.stop()
+
         whenReady(futureResult) { result =>
           result mustBe InvalidUTRResponse
         }
@@ -566,6 +636,9 @@ class DesConnectorSpec extends BaseConnectorSpec
                    Json.stringify(jsonResponse400InvalidRegime))
 
         val futureResult = connector.getTrustInfo(utr)
+
+        application.stop()
+
         whenReady(futureResult) { result =>
           result mustBe InvalidRegimeResponse
         }
@@ -579,6 +652,9 @@ class DesConnectorSpec extends BaseConnectorSpec
           Json.stringify(jsonResponse400))
 
         val futureResult = connector.getTrustInfo(utr)
+
+        application.stop()
+
         whenReady(futureResult) { result =>
           result mustBe BadRequestResponse
         }
@@ -591,6 +667,9 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForGet(server, createTrustOrEstateEndpoint(utr), NOT_FOUND, "")
 
         val futureResult = connector.getTrustInfo(utr)
+
+        application.stop()
+
         whenReady(futureResult) { result =>
           result mustBe ResourceNotFoundResponse
         }
@@ -603,6 +682,9 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForGet(server, createTrustOrEstateEndpoint(utr), INTERNAL_SERVER_ERROR, "")
 
         val futureResult = connector.getTrustInfo(utr)
+
+        application.stop()
+
         whenReady(futureResult) { result =>
           result mustBe InternalServerErrorResponse
         }
@@ -615,6 +697,9 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForGet(server, createTrustOrEstateEndpoint(utr), SERVICE_UNAVAILABLE, "")
 
         val futureResult = connector.getTrustInfo(utr)
+
+        application.stop()
+
         whenReady(futureResult) { result =>
           result mustBe ServiceUnavailableResponse
         }
@@ -630,6 +715,9 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getEstateResponseJson)
 
         val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
         whenReady(futureResult) { result =>
           result mustBe Json.fromJson[EstateFoundResponse](getEstateResponse)
         }
@@ -640,6 +728,9 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustOrEstateNoDetailsResponseJson)
 
         val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
         whenReady(futureResult) { result =>
           result mustBe EstateFoundResponse(None, ResponseHeader("In Processing", 1))
         }
@@ -653,6 +744,9 @@ class DesConnectorSpec extends BaseConnectorSpec
           Json.stringify(jsonResponse400InvalidUTR))
 
         val futureResult = connector.getEstateInfo(invalidUTR)
+
+        application.stop()
+
         whenReady(futureResult) { result =>
           result mustBe InvalidUTRResponse
         }
@@ -666,6 +760,9 @@ class DesConnectorSpec extends BaseConnectorSpec
           Json.stringify(jsonResponse400InvalidRegime))
 
         val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
         whenReady(futureResult) { result =>
           result mustBe InvalidRegimeResponse
         }
@@ -679,6 +776,9 @@ class DesConnectorSpec extends BaseConnectorSpec
           Json.stringify(jsonResponse400))
 
         val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
         whenReady(futureResult) { result =>
           result mustBe BadRequestResponse
         }
@@ -691,6 +791,9 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForGet(server, createTrustOrEstateEndpoint(utr), NOT_FOUND, "")
 
         val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
         whenReady(futureResult) { result =>
           result mustBe ResourceNotFoundResponse
         }
@@ -703,6 +806,9 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForGet(server, createTrustOrEstateEndpoint(utr), INTERNAL_SERVER_ERROR, "")
 
         val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
         whenReady(futureResult) { result =>
           result mustBe InternalServerErrorResponse
         }
@@ -715,6 +821,9 @@ class DesConnectorSpec extends BaseConnectorSpec
         stubForGet(server, createTrustOrEstateEndpoint(utr), SERVICE_UNAVAILABLE, "")
 
         val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
         whenReady(futureResult) { result =>
           result mustBe ServiceUnavailableResponse
         }

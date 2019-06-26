@@ -25,17 +25,22 @@ object Constants {
 
   val NO_MATCH_CODE = "NO_MATCH"
   val NO_MATCH_MESSAGE = "No match has been found in HMRC's records."
-
   val INTERNAL_SERVER_ERROR_CODE = "INTERNAL_SERVER_ERROR"
   val INTERNAL_SERVER_ERROR_MESSAGE = "Internal server error."
 
-  val INVALID_UTR_CODE = "INVALID_UTR"
-  val INVALID_UTR_MESSAGE = "The UTR provided is invalid."
+
+  val INSUFFICiENT_ENROLMENT_MESSAGE = "Insufficient enrolment for authorised user."
+  val UNAUTHORISED = "UNAUTHORISED"
+
+  val NO_DRAFT_ID = "NO_DRAFT_ID"
+  val NO_DRAFT_ID_MESSAGE = "No draft registration identifier provided."
 
   val dateTimePattern = "yyyy-MM-dd"
 
   val CONTENT_TYPE = "Content-Type"
   val CONTENT_TYPE_JSON = "application/json; charset=utf-8"
 
+  val INVALID_UTR_CODE = "INVALID_UTR"
+  val INVALID_UTR_MESSAGE = "The UTR provided is invalid."
 
 }

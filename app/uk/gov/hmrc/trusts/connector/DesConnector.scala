@@ -23,33 +23,32 @@ import javax.inject.Inject
 import play.api.Logger
 import play.api.http.HeaderNames
 import play.api.libs.json._
-import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.config.{AppConfig, WSHttp}
 import uk.gov.hmrc.trusts.models._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import uk.gov.hmrc.trusts.utils.Constants._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.GetEstateResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustResponse
+
+import scala.concurrent.ExecutionContext.Implicits._
+import scala.concurrent.{ExecutionContext, Future}
+
 
 class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesConnector {
 
   lazy val trustsServiceUrl : String = s"${config.desTrustsUrl}/trusts"
   lazy val estatesServiceUrl : String = s"${config.desEstatesUrl}/estates"
 
-  lazy val matchTrustsEndpoint : String = trustsServiceUrl + "/match"
-  lazy val matchEstatesEndpoint : String = estatesServiceUrl + "/match"
+  lazy val matchTrustsEndpoint : String = s"$trustsServiceUrl/match"
+  lazy val matchEstatesEndpoint : String = s"$estatesServiceUrl/match"
 
-  lazy val trustRegistrationEndpoint : String = trustsServiceUrl + "/registration"
-  lazy val estateRegistrationEndpoint : String = estatesServiceUrl + "/registration"
+  lazy val trustRegistrationEndpoint : String = s"$trustsServiceUrl/registration"
+  lazy val estateRegistrationEndpoint : String = s"$estatesServiceUrl/registration"
 
   def createGetTrustOrEsateEndpoint(utr: String): String = trustsServiceUrl + s"/registration/$utr"
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "Correlation-Id"
-
 
   private def desHeaders : Seq[(String, String)] =
     Seq(
@@ -59,28 +58,23 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
       CORRELATION_HEADER -> UUID.randomUUID().toString
     )
 
-  val httpReads: HttpReads[HttpResponse] = new HttpReads[HttpResponse] {
-    override def read(method: String, url: String, response: HttpResponse) = response
-  }
 
   override def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest)
                                  : Future[ExistingCheckResponse] = {
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
     val response = http.POST[JsValue, ExistingCheckResponse](matchTrustsEndpoint, Json.toJson(existingTrustCheckRequest))
-    (implicitly[Writes[JsValue]], ExistingCheckResponse.httpReads, implicitly[HeaderCarrier](hc),global)
+    (implicitly[Writes[JsValue]], ExistingCheckResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
 
     response
   }
-
-
 
   override def checkExistingEstate(existingEstateCheckRequest: ExistingCheckRequest)
   : Future[ExistingCheckResponse] = {
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
     val response = http.POST[JsValue, ExistingCheckResponse](matchEstatesEndpoint, Json.toJson(existingEstateCheckRequest))
-    (implicitly[Writes[JsValue]], ExistingCheckResponse.httpReads, implicitly[HeaderCarrier](hc),global)
+    (implicitly[Writes[JsValue]], ExistingCheckResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
 
     response
   }
@@ -90,7 +84,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
     val response = http.POST[JsValue, RegistrationResponse](trustRegistrationEndpoint, Json.toJson(registration))
-    (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc),global)
+    (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
 
     response
   }
@@ -98,7 +92,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
   override def registerEstate(registration: EstateRegistration): Future[RegistrationResponse] = {
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
     val response = http.POST[JsValue, RegistrationResponse](estateRegistrationEndpoint, Json.toJson(registration))
-    (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc),global)
+    (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
     response
   }
 
@@ -106,11 +100,11 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
-    val subscriptionIdEndpointUrl = s"${trustsServiceUrl}/trn/$trn/subscription"
+    val subscriptionIdEndpointUrl = s"$trustsServiceUrl/trn/$trn/subscription"
     Logger.debug(s"[getSubscriptionId] Sending get subscription id request to DES, url=$subscriptionIdEndpointUrl")
 
     val response = http.GET[SubscriptionIdResponse](subscriptionIdEndpointUrl)
-    (SubscriptionIdResponse.httpReads, implicitly[HeaderCarrier](hc),global)
+    (SubscriptionIdResponse.httpReads, implicitly[HeaderCarrier](hc), implicitly[ExecutionContext])
 
     response
   }
@@ -131,7 +125,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 @ImplementedBy(classOf[DesConnectorImpl])
 trait DesConnector {
   def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest): Future[ExistingCheckResponse]
-  def checkExistingEstate(existingEsateCheckRequest: ExistingCheckRequest): Future[ExistingCheckResponse]
+  def checkExistingEstate(existingEstateCheckRequest: ExistingCheckRequest): Future[ExistingCheckResponse]
 
   def registerTrust(registration: Registration): Future[RegistrationResponse]
   def registerEstate(registration: EstateRegistration): Future[RegistrationResponse]

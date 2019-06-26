@@ -14,23 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models.mapping
+package uk.gov.hmrc.trusts.models.requests
 
-import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.trusts.BaseSpec
-import uk.gov.hmrc.trusts.models.Trust
-import uk.gov.hmrc.trusts.utils.DataExamples
+import play.api.mvc.{Request, WrappedRequest}
+import uk.gov.hmrc.auth.core.AffinityGroup
 
-
-class RegistrationMapperSpec extends BaseSpec with DataExamples {
-
-  "Registration" should {
-    "map trust to des representation of trust" in {
-      val apiRegistration = registrationRequest
-      val desRegistration: JsValue = Json.toJson(apiRegistration)
-       (desRegistration \ "details" \ "trust").get.as[Trust].details mustBe apiRegistration.trust.details
-    }
-  }
-
-
-}
+case class IdentifierRequest[A] (request: Request[A], identifier: String, affinityGroup: AffinityGroup, agentARN: Option[String] = None) extends WrappedRequest[A](request)

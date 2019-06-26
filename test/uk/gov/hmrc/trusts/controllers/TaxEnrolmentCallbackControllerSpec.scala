@@ -18,9 +18,12 @@ package uk.gov.hmrc.trusts.controllers
 
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.Json
+import play.api.test.Helpers.status
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.trusts.connectors.BaseSpec
 import play.api.test.Helpers.{status, _}
+import uk.gov.hmrc.trusts.BaseSpec
+import uk.gov.hmrc.trusts.config.AppConfig
 
 
 class TaxEnrolmentCallbackControllerSpec extends BaseSpec with GuiceOneServerPerSuite {

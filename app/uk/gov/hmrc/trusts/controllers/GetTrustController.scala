@@ -20,27 +20,22 @@ import javax.inject.{Inject, Singleton}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
-import uk.gov.hmrc.trusts.services.{AuthService, DesService}
-import uk.gov.hmrc.trusts.actions.ValidateUTRAction
+import uk.gov.hmrc.trusts.services.DesService
+import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUTRAction}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustFoundResponse
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class GetTrustController @Inject()(authService : AuthService,
+class GetTrustController @Inject()(identify: IdentifierAction,
                                    desService: DesService) extends BaseController {
 
-  def get(utr: String): Action[AnyContent] = (Action andThen ValidateUTRAction(utr)).async { implicit request =>
+  def get(utr: String): Action[AnyContent] = (identify andThen ValidateUTRAction(utr)).async { implicit request =>
 
-    import authService._
-
-    authorisedUser() {
-      _ =>
-        //TODO: Find out what needs to be returned in body
-        desService.getTrustInfo(utr) map {
-          case response: TrustFoundResponse => Ok(Json.toJson(response))
-          case _ => InternalServerError
-        }
+    //TODO: Find out what needs to be returned in body
+    desService.getTrustInfo(utr) map {
+      case response: TrustFoundResponse => Ok(Json.toJson(response))
+      case _ => InternalServerError
     }
   }
 }

@@ -18,8 +18,8 @@ package uk.gov.hmrc.trusts.services
 
 import org.mockito.Mockito.when
 import org.mockito.Matchers._
+import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.connector.DesConnector
-import uk.gov.hmrc.trusts.connectors.BaseSpec
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
 import uk.gov.hmrc.trusts.models._
@@ -48,7 +48,6 @@ class DesServiceSpec extends BaseSpec {
         }
       }
     }
-
 
     "return NotMatched " when {
       "connector returns NotMatched." in {

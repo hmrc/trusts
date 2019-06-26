@@ -17,41 +17,35 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.{Inject, Singleton}
-
 import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.Action
-import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.trusts.config.AppConfig
+import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.ApiResponse._
-import uk.gov.hmrc.trusts.models.{ExistingCheckRequest}
+import uk.gov.hmrc.trusts.models.ExistingCheckRequest
 import uk.gov.hmrc.trusts.models.ExistingCheckResponse.{AlreadyRegistered, Matched, NotMatched}
-import uk.gov.hmrc.trusts.services.{AuthService, DesService, ValidationService}
+import uk.gov.hmrc.trusts.services.{DesService, ValidationService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton()
 class CheckTrustController @Inject()(desService: DesService, config: AppConfig,
                                      validationService: ValidationService,
-                                     authService : AuthService) extends TrustsBaseController {
+                                     identify: IdentifierAction) extends TrustsBaseController {
 
-
-  def checkExistingTrust() = Action.async(parse.json) { implicit request =>
-    import authService._
-    authorisedUser() { userAffinityGroup: Option[AffinityGroup]=>
-      withJsonBody[ExistingCheckRequest] {
-        trustsCheckRequest =>
-          desService.checkExistingTrust(trustsCheckRequest).map {
-            result =>
-              Logger.info(s"[CheckTrustController][checkExistingTrust] response: $result")
-              result match {
-                case Matched => Ok(matchResponse)
-                case NotMatched => Ok(noMatchResponse)
-                case AlreadyRegistered => Conflict(Json.toJson(alreadyRegisteredTrustsResponse))
-                case _ => InternalServerError(Json.toJson(internalServerErrorResponse))
-              }
-          }
-      }
+  def checkExistingTrust() = identify.async(parse.json) { implicit request =>
+    withJsonBody[ExistingCheckRequest] {
+      trustsCheckRequest =>
+        desService.checkExistingTrust(trustsCheckRequest).map {
+          result =>
+            Logger.info(s"[CheckTrustController][checkExistingTrust] response: $result")
+            result match {
+              case Matched => Ok(matchResponse)
+              case NotMatched => Ok(noMatchResponse)
+              case AlreadyRegistered => Conflict(Json.toJson(alreadyRegisteredTrustsResponse))
+              case _ => InternalServerError(Json.toJson(internalServerErrorResponse))
+            }
+        }
     }
 
   }

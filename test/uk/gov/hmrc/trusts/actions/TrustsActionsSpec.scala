@@ -21,9 +21,11 @@ import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.Json
 import play.api.mvc.{ActionRefiner, AnyContent, Request}
-import play.api.mvc.Results.{Ok, BadRequest}
+import play.api.mvc.Results.{BadRequest, Ok}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.trusts.controllers.actions.ValidateUTRAction
+
 import scala.concurrent.Future
 import uk.gov.hmrc.trusts.models.ApiResponse.invalidUTRErrorResponse
 
