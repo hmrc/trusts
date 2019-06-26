@@ -27,6 +27,7 @@ sealed trait TaxEnrolmentSuscriberResponse
 
 case object TaxEnrolmentSuccess extends TaxEnrolmentSuscriberResponse
 case object TaxEnrolmentFailure extends TaxEnrolmentSuscriberResponse
+case object TaxEnrolmentNotProcessed extends TaxEnrolmentSuscriberResponse
 
 object TaxEnrolmentSuscriberResponse {
 
@@ -46,6 +47,6 @@ object TaxEnrolmentSuscriberResponse {
             throw  InternalServerErrorException(s"Error response from tax enrolment:  $status")
         }
       }
-    } //httpReads
+    }
 }
 

@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.services
 
 import org.mockito.Mockito.when
-import uk.gov.hmrc.trusts.connectors.BaseSpec
+import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.models.{SubscriptionIdResponse, TaxEnrolmentFailure, TaxEnrolmentSuccess}
 import uk.gov.hmrc.trusts.exceptions._
 
@@ -41,7 +41,7 @@ class RosmPatternServiceSpec extends BaseSpec {
         when(mockTaxEnrolmentsService.setSubscriptionId("123456789")).
           thenReturn(Future.successful(TaxEnrolmentSuccess))
 
-        val futureResult = SUT.completeRosmTransaction("trn123456789")
+        val futureResult = SUT.setSubscriptionId("trn123456789")
 
         whenReady(futureResult) {
           result => result mustBe TaxEnrolmentSuccess
@@ -56,7 +56,7 @@ class RosmPatternServiceSpec extends BaseSpec {
         when(mockTaxEnrolmentsService.setSubscriptionId("123456789")).
           thenReturn(Future.successful(TaxEnrolmentSuccess))
 
-        val futureResult = SUT.completeRosmTransaction("trn123456789")
+        val futureResult = SUT.setSubscriptionId("trn123456789")
 
         whenReady(futureResult.failed) {
           result => result mustBe an[InternalServerErrorException]
@@ -71,7 +71,7 @@ class RosmPatternServiceSpec extends BaseSpec {
         when(mockTaxEnrolmentsService.setSubscriptionId("123456789")).
           thenReturn(Future.successful(TaxEnrolmentFailure))
 
-        val futureResult = SUT.completeRosmTransaction("trn123456789")
+        val futureResult = SUT.setSubscriptionId("trn123456789")
 
         whenReady(futureResult) {
           result => result mustBe TaxEnrolmentFailure
@@ -85,7 +85,7 @@ class RosmPatternServiceSpec extends BaseSpec {
         when(mockTaxEnrolmentsService.setSubscriptionId("123456789")).
           thenReturn(Future.failed(BadRequestException))
 
-        val futureResult = SUT.completeRosmTransaction("trn123456789")
+        val futureResult = SUT.setSubscriptionId("trn123456789")
 
         whenReady(futureResult.failed) {
           result => result mustBe BadRequestException

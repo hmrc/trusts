@@ -51,7 +51,6 @@ class DesServiceImpl @Inject()(val desConnector: DesConnector) extends DesServic
     desConnector.getSubscriptionId(trn)
   }
 
-
 }
 
 

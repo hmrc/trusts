@@ -29,6 +29,8 @@ object ApiResponse {
   def alreadyRegisteredEstateResponse = ErrorResponse(ALREADY_REGISTERED_CODE, ALREADY_REGISTERED_ESTATE_MESSAGE)
   def noMatchRegistrationResponse = ErrorResponse(NO_MATCH_CODE, NO_MATCH_MESSAGE)
   def internalServerErrorResponse = ErrorResponse(INTERNAL_SERVER_ERROR_CODE, INTERNAL_SERVER_ERROR_MESSAGE)
+  def insufficientEnrolmentErrorResponse = ErrorResponse(UNAUTHORISED, INSUFFICiENT_ENROLMENT_MESSAGE)
+  def noDraftIdProvided = ErrorResponse(NO_DRAFT_ID, NO_DRAFT_ID_MESSAGE)
 }
 
 

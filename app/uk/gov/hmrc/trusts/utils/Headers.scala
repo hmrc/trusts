@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models.mapping
+package uk.gov.hmrc.trusts.utils
 
-import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.trusts.BaseSpec
-import uk.gov.hmrc.trusts.models.Trust
-import uk.gov.hmrc.trusts.utils.DataExamples
+object Headers {
 
-
-class RegistrationMapperSpec extends BaseSpec with DataExamples {
-
-  "Registration" should {
-    "map trust to des representation of trust" in {
-      val apiRegistration = registrationRequest
-      val desRegistration: JsValue = Json.toJson(apiRegistration)
-       (desRegistration \ "details" \ "trust").get.as[Trust].details mustBe apiRegistration.trust.details
-    }
-  }
-
+  val DraftRegistrationId = "Draft-Registration-ID"
+  val ENVIRONMENT_HEADER = "Environment"
+  val CORRELATION_HEADER = "Correlation-Id"
 
 }
