@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models.auditing
+package uk.gov.hmrc.trusts.services
 
-import play.api.libs.json.{Format, Json}
+import javax.inject.Inject
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.trusts.models.{Registration, RegistrationResponse}
 
-case class TrustRegistrationSubmissionAuditEvent(
-                                                  registration: Registration,
-                                                  draftId : String,
-                                                  internalAuthId : String,
-                                                  response: RegistrationResponse
-                                                )
+class FakeAuditService @Inject()(auditConnector: AuditConnector) extends AuditService(auditConnector) {
 
-object TrustRegistrationSubmissionAuditEvent {
-
-  implicit val formats: Format[TrustRegistrationSubmissionAuditEvent] = Json.format[TrustRegistrationSubmissionAuditEvent]
+  override def audit(event: String, registration: Registration, draftId: String, internalId: String, response: RegistrationResponse)(implicit hc: HeaderCarrier): Unit = ()
 
 }

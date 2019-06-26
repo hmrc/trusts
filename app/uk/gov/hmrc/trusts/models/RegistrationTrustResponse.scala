@@ -28,9 +28,13 @@ sealed trait RegistrationResponse
 case class RegistrationTrnResponse(trn: String) extends RegistrationResponse
 
 object RegistrationTrnResponse {
-
   implicit val formats = Json.format[RegistrationTrnResponse]
+}
 
+case class RegistrationFailureResponse(status: Int, code: String, message: String) extends RegistrationResponse
+
+object RegistrationFailureResponse {
+  implicit val formats = Json.format[RegistrationFailureResponse]
 }
 
 object RegistrationResponse {
@@ -41,6 +45,8 @@ object RegistrationResponse {
 
     override def writes(o: RegistrationResponse): JsValue = o match {
       case x : RegistrationTrnResponse => Json.toJson(x)(RegistrationTrnResponse.formats)
+      case x : RegistrationFailureResponse => Json.toJson(x)(RegistrationFailureResponse.formats)
+
     }
 
   }
@@ -50,7 +56,8 @@ object RegistrationResponse {
       override def read(method: String, url: String, response: HttpResponse): RegistrationResponse = {
         Logger.info(s"[RegistrationTrustResponse]  response status received from des: ${response.status}")
         response.status match {
-          case OK => response.json.as[RegistrationTrnResponse]
+          case OK =>
+            response.json.as[RegistrationTrnResponse]
           case FORBIDDEN =>
             response.json.asOpt[DesErrorResponse] match {
               case Some(desReponse) if desReponse.code == ALREADY_REGISTERED_CODE =>
@@ -69,7 +76,7 @@ object RegistrationResponse {
             Logger.error("[RegistrationTrustResponse] Service unavailable response from des.")
             throw ServiceNotAvailableException("Des dependent service is down.")
           case status =>
-            throw InternalServerErrorException(s"Error response from des $status")
+            throw InternalServerErrorException(s"Error response from des $status body: ${response.body}")
         }
       }
     }
