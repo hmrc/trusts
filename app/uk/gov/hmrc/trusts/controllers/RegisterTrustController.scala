@@ -18,13 +18,15 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
 import play.api.Logger
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ApiResponse._
-import uk.gov.hmrc.trusts.models.RegistrationResponse.formats
+import uk.gov.hmrc.trusts.models.RegistrationTrnResponse._
 import uk.gov.hmrc.trusts.models._
+import uk.gov.hmrc.trusts.models.auditing.{TrustAuditing, TrustRegistrationSubmissionAuditEvent}
 import uk.gov.hmrc.trusts.services.{DesService, RosmPatternService, ValidationService}
 import uk.gov.hmrc.trusts.utils.Headers
 
@@ -36,7 +38,8 @@ import scala.util.control.NonFatal
 class RegisterTrustController @Inject()(desService: DesService, config: AppConfig,
                                         validationService: ValidationService,
                                         identify: IdentifierAction,
-                                        rosmPatternService: RosmPatternService
+                                        rosmPatternService: RosmPatternService,
+                                        auditConnector: AuditConnector
                                         ) extends TrustsBaseController {
 
   def registration() = identify.async(parse.json) {
@@ -56,6 +59,20 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
             case Some(draftId) =>
               desService.registerTrust(trustsRegistrationRequest).flatMap {
                 case response: RegistrationTrnResponse =>
+
+                  val auditPayload = TrustRegistrationSubmissionAuditEvent(
+                    registration = trustsRegistrationRequest,
+                    trn = response.trn,
+                    draftId = draftId,
+                    internalAuthId = request.identifier,
+                    response = response
+                  )
+
+                  auditConnector.sendExplicitAudit(
+                    TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
+                    auditPayload
+                  )
+
                   rosmPatternService.enrolAndLogResult(response.trn, request.affinityGroup) map {
                     _ =>
                       Ok(Json.toJson(response))

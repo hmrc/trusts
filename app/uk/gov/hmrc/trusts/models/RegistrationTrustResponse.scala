@@ -18,31 +18,39 @@ package uk.gov.hmrc.trusts.models
 
 import play.api.Logger
 import play.api.http.Status._
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, JsResult, JsValue, Json}
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.utils.Constants._
-import uk.gov.hmrc.trusts.models.DesErrorResponse.formats
 
 sealed trait RegistrationResponse
 
-final case class RegistrationTrnResponse(trn: String) extends RegistrationResponse
+case class RegistrationTrnResponse(trn: String) extends RegistrationResponse
 
-
-object RegistrationResponse {
+object RegistrationTrnResponse {
 
   implicit val formats = Json.format[RegistrationTrnResponse]
 
+}
+
+object RegistrationResponse {
+
+  implicit object RegistrationResponseFormats extends Format[RegistrationResponse] {
+
+    override def reads(json: JsValue): JsResult[RegistrationResponse] = json.validate[RegistrationTrnResponse]
+
+    override def writes(o: RegistrationResponse): JsValue = o match {
+      case x : RegistrationTrnResponse => Json.toJson(x)(RegistrationTrnResponse.formats)
+    }
+
+  }
 
   implicit lazy val httpReads: HttpReads[RegistrationResponse] =
     new HttpReads[RegistrationResponse] {
       override def read(method: String, url: String, response: HttpResponse): RegistrationResponse = {
-
         Logger.info(s"[RegistrationTrustResponse]  response status received from des: ${response.status}")
         response.status match {
-          case OK =>
-            response.json.as[RegistrationTrnResponse]
-
+          case OK => response.json.as[RegistrationTrnResponse]
           case FORBIDDEN =>
             response.json.asOpt[DesErrorResponse] match {
               case Some(desReponse) if desReponse.code == ALREADY_REGISTERED_CODE =>
@@ -55,7 +63,6 @@ object RegistrationResponse {
                 Logger.error("[RegistrationTrustResponse] Forbidden response from des.")
                 throw InternalServerErrorException("Forbidden response from des.")
             }
-
           case BAD_REQUEST =>
             throw BadRequestException
           case SERVICE_UNAVAILABLE =>
@@ -66,7 +73,6 @@ object RegistrationResponse {
         }
       }
     }
-
 
 }
 

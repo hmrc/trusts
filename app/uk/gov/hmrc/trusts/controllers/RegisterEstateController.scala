@@ -23,7 +23,6 @@ import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ApiResponse._
-import uk.gov.hmrc.trusts.models.RegistrationResponse.formats
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.services.{DesService, RosmPatternService, ValidationService}
 import uk.gov.hmrc.trusts.utils.Headers
