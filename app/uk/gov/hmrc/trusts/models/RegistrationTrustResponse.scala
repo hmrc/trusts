@@ -18,31 +18,46 @@ package uk.gov.hmrc.trusts.models
 
 import play.api.Logger
 import play.api.http.Status._
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, JsResult, JsValue, Json}
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.utils.Constants._
-import uk.gov.hmrc.trusts.models.DesErrorResponse.formats
 
 sealed trait RegistrationResponse
 
-final case class RegistrationTrnResponse(trn: String) extends RegistrationResponse
+case class RegistrationTrnResponse(trn: String) extends RegistrationResponse
 
+object RegistrationTrnResponse {
+  implicit val formats = Json.format[RegistrationTrnResponse]
+}
+
+case class RegistrationFailureResponse(status: Int, code: String, message: String) extends RegistrationResponse
+
+object RegistrationFailureResponse {
+  implicit val formats = Json.format[RegistrationFailureResponse]
+}
 
 object RegistrationResponse {
 
-  implicit val formats = Json.format[RegistrationTrnResponse]
+  implicit object RegistrationResponseFormats extends Format[RegistrationResponse] {
 
+    override def reads(json: JsValue): JsResult[RegistrationResponse] = json.validate[RegistrationTrnResponse]
+
+    override def writes(o: RegistrationResponse): JsValue = o match {
+      case x : RegistrationTrnResponse => Json.toJson(x)(RegistrationTrnResponse.formats)
+      case x : RegistrationFailureResponse => Json.toJson(x)(RegistrationFailureResponse.formats)
+
+    }
+
+  }
 
   implicit lazy val httpReads: HttpReads[RegistrationResponse] =
     new HttpReads[RegistrationResponse] {
       override def read(method: String, url: String, response: HttpResponse): RegistrationResponse = {
-
         Logger.info(s"[RegistrationTrustResponse]  response status received from des: ${response.status}")
         response.status match {
           case OK =>
             response.json.as[RegistrationTrnResponse]
-
           case FORBIDDEN =>
             response.json.asOpt[DesErrorResponse] match {
               case Some(desReponse) if desReponse.code == ALREADY_REGISTERED_CODE =>
@@ -55,18 +70,16 @@ object RegistrationResponse {
                 Logger.error("[RegistrationTrustResponse] Forbidden response from des.")
                 throw InternalServerErrorException("Forbidden response from des.")
             }
-
           case BAD_REQUEST =>
             throw BadRequestException
           case SERVICE_UNAVAILABLE =>
             Logger.error("[RegistrationTrustResponse] Service unavailable response from des.")
             throw ServiceNotAvailableException("Des dependent service is down.")
           case status =>
-            throw InternalServerErrorException(s"Error response from des $status")
+            throw InternalServerErrorException(s"Error response from des $status body: ${response.body}")
         }
       }
     }
-
 
 }
 
