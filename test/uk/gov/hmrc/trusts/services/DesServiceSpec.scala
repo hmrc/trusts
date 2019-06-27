@@ -289,12 +289,12 @@ class DesServiceSpec extends BaseSpec {
 
         val utr = "1234567890"
 
-        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustFoundResponse(None, ResponseHeader("TODO", 1))))
+        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustFoundResponse(None, ResponseHeader("In Processing", "1"))))
 
         val futureResult = SUT.getTrustInfo(utr)
 
         whenReady(futureResult) { result =>
-          result mustBe TrustFoundResponse(None, ResponseHeader("TODO", 1))
+          result mustBe TrustFoundResponse(None, ResponseHeader("In Processing", "1"))
         }
       }
     }
@@ -390,12 +390,12 @@ class DesServiceSpec extends BaseSpec {
 
         val utr = "1234567890"
 
-        when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(EstateFoundResponse(None, ResponseHeader("TODO", 1))))
+        when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(EstateFoundResponse(None, ResponseHeader("In Processing", "1"))))
 
         val futureResult = SUT.getEstateInfo(utr)
 
         whenReady(futureResult) { result =>
-          result mustBe EstateFoundResponse(None, ResponseHeader("TODO", 1))
+          result mustBe EstateFoundResponse(None, ResponseHeader("In Processing", "1"))
         }
       }
     }

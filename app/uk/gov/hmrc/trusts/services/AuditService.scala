@@ -17,12 +17,13 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.trusts.models.auditing.{EstateRegistrationSubmissionAuditEvent, TrustRegistrationSubmissionAuditEvent}
+import uk.gov.hmrc.trusts.models.auditing.{EstateRegistrationSubmissionAuditEvent, GetTrustOrEstateAuditEvent, TrustRegistrationSubmissionAuditEvent}
 import uk.gov.hmrc.trusts.models.{EstateRegistration, Registration, RegistrationResponse}
 
-class AuditService @Inject()(auditConnector: AuditConnector){
+class  AuditService @Inject()(auditConnector: AuditConnector){
 
   import scala.concurrent.ExecutionContext.Implicits._
 
@@ -64,4 +65,20 @@ class AuditService @Inject()(auditConnector: AuditConnector){
     )
   }
 
+  def audit(event: String,
+            request: JsValue,
+            internalId: String,
+            response: JsValue)(implicit hc: HeaderCarrier) = {
+
+    val auditPayload = GetTrustOrEstateAuditEvent(
+      request = request,
+      internalAuthId = internalId,
+      response = response
+    )
+
+    auditConnector.sendExplicitAudit(
+      event,
+      auditPayload
+    )
+  }
 }

@@ -25,13 +25,13 @@ object MatchData {
   implicit val matchDataFormat: Format[MatchData] = Json.format[MatchData]
 }
 
-case class ResponseHeader(dfmcaReturnUserStatus: String,
-                          formBundleNo: Int)
+case class ResponseHeader(status: String,
+                          formBundleNo: String)
 
 object ResponseHeader {
   implicit val writes: Writes[ResponseHeader] = Json.writes[ResponseHeader]
   implicit val reads: Reads[ResponseHeader] = (
     (JsPath \ "dfmcaReturnUserStatus").read[String] and
-      (JsPath \ "formBundleNo").read[Int]
+      (JsPath \ "formBundleNo").read[String]
     )(ResponseHeader.apply _)
 }

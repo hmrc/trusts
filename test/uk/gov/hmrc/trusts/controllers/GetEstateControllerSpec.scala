@@ -16,8 +16,10 @@
 
 package uk.gov.hmrc.trusts.controllers
 
-import org.mockito.Matchers.any
-import org.mockito.Mockito.when
+import org.mockito.Matchers.{any, eq => mockEq}
+import org.mockito.Mockito.{verify, when, reset}
+import org.scalatest.BeforeAndAfter
+import play.api.libs.json.JsValue
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
@@ -25,62 +27,55 @@ import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
-import uk.gov.hmrc.trusts.services.DesService
+import uk.gov.hmrc.trusts.services.{AuditService, DesService, FakeAuditService}
 
 import scala.concurrent.Future
 
-class GetEstateControllerSpec extends BaseSpec{
+class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter {
 
-  val desService = mock[DesService]
+  lazy val desService: DesService = mock[DesService]
+  lazy val mockedAuditService: AuditService = mock[AuditService]
+
+
+  override def afterEach() =  {
+    reset(mockedAuditService)
+  }
 
   private def getEstatesController = {
-    val SUT = new GetEstateController(new FakeIdentifierAction(Organisation), desService)
+    val SUT = new GetEstateController(new FakeIdentifierAction(Organisation), mockedAuditService, desService)
     SUT
   }
+
+
+  val invalidUTR = "1234567"
+  val utr = "1234567890"
 
   ".get" should {
 
     "return 200 - Ok" in {
-      val utr = "1234567890"
 
-      when(desService.getEstateInfo(any())(any())).thenReturn(Future.successful(EstateFoundResponse(None, ResponseHeader("TODO", 1))))
+      when(desService.getEstateInfo(any())(any())).thenReturn(Future.successful(EstateFoundResponse(None, ResponseHeader("Parked", "1"))))
 
-      val result = getEstatesController.get(utr).apply(FakeRequest(GET, ""))
+      val result = getEstatesController.get(utr).apply(FakeRequest(GET, s"/estates/$utr"))
 
-      status(result) mustBe OK
-      contentType(result) mustBe Some(JSON)
+      whenReady(result) { _ =>
+        verify(mockedAuditService).audit(mockEq("GetEstate"), any[JsValue], any[String], any[JsValue])(any())
+        status(result) mustBe OK
+        contentType(result) mustBe Some(JSON)
+      }
     }
 
     "return 400 - BadRequest" when {
       "the UTR given is invalid" in {
 
-        val invalidUTR = "1234567"
+        val result = getEstatesController.get(invalidUTR).apply(FakeRequest(GET, s"/estates/$invalidUTR"))
 
-        val result = getEstatesController.get(invalidUTR).apply(FakeRequest(GET, s"/trusts/$invalidUTR"))
-
-        status(result) mustBe BAD_REQUEST
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetEstate"), any(), any(), any())(any())
+          status(result) mustBe BAD_REQUEST
+        }
       }
     }
-
-//    "return 401 - Unauthorised" when {
-//      "the get endpoint is called user hasn't logged in" in {
-//        val utr = "1234567890"
-//        val mockAuthService = new AuthService(FakeAuthConnector(MissingBearerToken()))
-//        val SUT = new GetEstateController(mockAuthService, desService)
-//
-//        val result = SUT.get(utr).apply(FakeRequest(GET, ""))
-//        status(result) mustBe UNAUTHORIZED
-//      }
-//
-//      "the get endpoint is called user session has expired" in {
-//        val utr = "1234567890"
-//        val mockAuthService = new AuthService(FakeAuthConnector(BearerTokenExpired()))
-//        val SUT = new GetEstateController(mockAuthService, desService)
-//
-//        val result = SUT.get(utr).apply(FakeRequest(GET, ""))
-//        status(result) mustBe UNAUTHORIZED
-//      }
-//    }
 
     "return 500 - InternalServerError" when {
       "the get endpoint returns a InvalidUTRResponse" in {
@@ -89,7 +84,7 @@ class GetEstateControllerSpec extends BaseSpec{
         when(desService.getEstateInfo(any())(any())).thenReturn(Future.successful(InvalidUTRResponse))
 
         val utr = "1234567890"
-        val result = getEstatesController.get(utr).apply(FakeRequest(GET, ""))
+        val result = getEstatesController.get(utr).apply(FakeRequest(GET, s"/estates/$invalidUTR"))
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
@@ -100,7 +95,7 @@ class GetEstateControllerSpec extends BaseSpec{
         when(desService.getEstateInfo(any())(any())).thenReturn(Future.successful(InvalidRegimeResponse))
 
         val utr = "1234567890"
-        val result = getEstatesController.get(utr).apply(FakeRequest(GET, ""))
+        val result = getEstatesController.get(utr).apply(FakeRequest(GET, s"/estates/$utr"))
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
@@ -111,7 +106,7 @@ class GetEstateControllerSpec extends BaseSpec{
         when(desService.getEstateInfo(any())(any())).thenReturn(Future.successful(BadRequestResponse))
 
         val utr = "1234567890"
-        val result = getEstatesController.get(utr).apply(FakeRequest(GET, ""))
+        val result = getEstatesController.get(utr).apply(FakeRequest(GET, s"/estates/$utr"))
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
@@ -122,7 +117,7 @@ class GetEstateControllerSpec extends BaseSpec{
         when(desService.getEstateInfo(any())(any())).thenReturn(Future.successful(ResourceNotFoundResponse))
 
         val utr = "1234567890"
-        val result = getEstatesController.get(utr).apply(FakeRequest(GET, ""))
+        val result = getEstatesController.get(utr).apply(FakeRequest(GET, s"/estates/$utr"))
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
@@ -133,7 +128,7 @@ class GetEstateControllerSpec extends BaseSpec{
         when(desService.getEstateInfo(any())(any())).thenReturn(Future.successful(InternalServerErrorResponse))
 
         val utr = "1234567890"
-        val result = getEstatesController.get(utr).apply(FakeRequest(GET, ""))
+        val result = getEstatesController.get(utr).apply(FakeRequest(GET, s"/estates/$utr"))
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
@@ -144,7 +139,7 @@ class GetEstateControllerSpec extends BaseSpec{
         when(desService.getEstateInfo(any())(any())).thenReturn(Future.successful(ServiceUnavailableResponse))
 
         val utr = "1234567890"
-        val result = getEstatesController.get(utr).apply(FakeRequest(GET, ""))
+        val result = getEstatesController.get(utr).apply(FakeRequest(GET, s"/estates/$utr"))
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }

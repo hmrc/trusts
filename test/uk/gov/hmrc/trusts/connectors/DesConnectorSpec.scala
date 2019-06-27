@@ -601,14 +601,14 @@ class DesConnectorSpec extends BaseConnectorSpec {
 
       "des has returned a 200 and indicated that the submission is still being processed" in {
         val utr = "1234567800"
-        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustOrEstateNoDetailsResponseJson)
+        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustOrEstateProcessingResponseJson)
 
         val futureResult = connector.getTrustInfo(utr)
 
         application.stop()
 
         whenReady(futureResult) { result =>
-          result mustBe TrustFoundResponse(None, ResponseHeader("In Processing", 1))
+          result mustBe TrustFoundResponse(None, ResponseHeader("In Processing", "1"))
         }
       }
     }
@@ -710,7 +710,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
   ".getEstateInfo" should {
 
     "return EstateFoundResponse" when {
-      "des has returned a 200 with trust details" in {
+      "des has returned a 200 with estate details" in {
         val utr = "1234567890"
         stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getEstateResponseJson)
 
@@ -719,20 +719,89 @@ class DesConnectorSpec extends BaseConnectorSpec {
         application.stop()
 
         whenReady(futureResult) { result =>
-          result mustBe Json.fromJson[EstateFoundResponse](getEstateResponse)
+          val expectedResult = Json.fromJson[EstateFoundResponse](getEstateResponse) match {
+            case JsSuccess(data, _) => data
+            case _ => fail("Json could not be parsed to EstateFoundResponse model")
+          }
+          result mustBe expectedResult
         }
       }
 
       "des has returned a 200 and indicated that the submission is still being processed" in {
         val utr = "1234567800"
-        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustOrEstateNoDetailsResponseJson)
+        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustOrEstateProcessingResponseJson)
 
         val futureResult = connector.getEstateInfo(utr)
 
         application.stop()
 
         whenReady(futureResult) { result =>
-          result mustBe EstateFoundResponse(None, ResponseHeader("In Processing", 1))
+          result mustBe EstateFoundResponse(None, ResponseHeader("In Processing", "1"))
+        }
+      }
+
+      "des has returned a 200 and indicated that the submission is pending closure" in {
+        val utr = "1234567800"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustOrEstatePendingClosureResponseJson)
+
+        val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe EstateFoundResponse(None, ResponseHeader("Pending Closure", "1"))
+        }
+      }
+
+      "des has returned a 200 and indicated that the submission is closed" in {
+        val utr = "1234567800"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustOrEstateClosedResponseJson)
+
+        val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe EstateFoundResponse(None, ResponseHeader("Closed", "1"))
+        }
+      }
+
+      "des has returned a 200 and indicated that the submission is suspended" in {
+        val utr = "1234567800"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustOrEstateSuspendedResponseJson)
+
+        val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe EstateFoundResponse(None, ResponseHeader("Suspended", "1"))
+        }
+      }
+
+      "des has returned a 200 and indicated that the submission is parked" in {
+        val utr = "1234567800"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustOrEstateParkedResponseJson)
+
+        val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe EstateFoundResponse(None, ResponseHeader("Parked", "1"))
+        }
+      }
+
+      "des has returned a 200 and indicated that the submission is obsoleted" in {
+        val utr = "1234567800"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustOrEstateObsoletedResponseJson)
+
+        val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe EstateFoundResponse(None, ResponseHeader("Obsoleted", "1"))
         }
       }
     }

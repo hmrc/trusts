@@ -21,21 +21,35 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUTRAction}
+import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
-import uk.gov.hmrc.trusts.services.DesService
+import uk.gov.hmrc.trusts.services.{AuditService, DesService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class GetEstateController @Inject()(identify: IdentifierAction,
+class GetEstateController @Inject()(identify: IdentifierAction, auditService: AuditService,
                                     desService: DesService) extends BaseController {
 
-  def get(utr: String): Action[AnyContent] = (identify andThen ValidateUTRAction(utr)).async { implicit request =>
+  def get(utr: String): Action[AnyContent] = (ValidateUTRAction(utr) andThen identify).async { implicit request =>
 
-    //TODO: Find out what needs to be returned in body
     desService.getEstateInfo(utr) map {
-      case response: EstateFoundResponse => Ok(Json.toJson(response))
-      case _ => InternalServerError
+
+      case estateFoundResponse: EstateFoundResponse =>
+
+        val response = Json.toJson(estateFoundResponse)
+
+        auditService.audit(
+          event = TrustAuditing.GET_ESTATE,
+          request = Json.obj("utr" -> utr),
+          internalId = request.identifier,
+          response = response
+        )
+
+        Ok(response)
+
+      case _ =>
+        InternalServerError
     }
   }
 }

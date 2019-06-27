@@ -39,8 +39,21 @@ trait JsonRequests extends JsonUtils {
   lazy val getEstateResponseJson = getJsonFromFile("valid-get-estate-response.json")
   lazy val getEstateResponse = getJsonValueFromFile("valid-get-estate-response.json")
 
-  lazy val getTrustOrEstateNoDetailsResponseJson =
-    getJsonFromFile("valid-get-trust-or-estate-no-details-response.json")
-  lazy val getTrustOrEstateNoDetailsResponse =
-    getJsonValueFromFile("valid-get-trust-or-estate-no-details-response.json")
+  lazy val getTrustOrEstateProcessingResponseJson = getJsonFromFile("valid-get-trust-or-estate-in-processing-response.json")
+  lazy val getTrustOrEstateProcessingResponse = getJsonValueFromFile("valid-get-trust-or-estate-in-processing-response.json")
+
+  lazy val getTrustOrEstatePendingClosureResponseJson = getJsonFromFile("valid-get-trust-or-estate-pending-closure-response.json")
+  lazy val getTrustOrEstatePendingClosureResponse = getJsonValueFromFile("valid-get-trust-or-estate-pending-closure-response.json")
+
+  lazy val getTrustOrEstateClosedResponseJson = getJsonFromFile("valid-get-trust-or-estate-closed-response.json")
+  lazy val getTrustOrEstateClosedResponse = getJsonValueFromFile("valid-get-trust-or-estate-closed-response.json")
+
+  lazy val getTrustOrEstateSuspendedResponseJson = getJsonFromFile("valid-get-trust-or-estate-suspended-response.json")
+  lazy val getTrustOrEstateSuspendedResponse = getJsonValueFromFile("valid-get-trust-or-estate-suspended-response.json")
+
+  lazy val getTrustOrEstateParkedResponseJson = getJsonFromFile("valid-get-trust-or-estate-parked-response.json")
+  lazy val getTrustOrEstateParkedResponse = getJsonValueFromFile("valid-get-trust-or-estate-parked-response.json")
+
+  lazy val getTrustOrEstateObsoletedResponseJson = getJsonFromFile("valid-get-trust-or-estate-obsoleted-response.json")
+  lazy val getTrustOrEstateObsoletedResponse = getJsonValueFromFile("valid-get-trust-or-estate-obsoleted-response.json")
 }

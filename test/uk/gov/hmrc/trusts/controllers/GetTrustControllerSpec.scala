@@ -25,18 +25,18 @@ import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.services.DesService
+import uk.gov.hmrc.trusts.services.{DesService, FakeAuditService}
 
 import scala.concurrent.Future
 
 class GetTrustControllerSpec extends BaseSpec  {
 
-  val desService = mock[DesService]
-
+  lazy val desService = mock[DesService]
+  lazy val mockedAuditService: FakeAuditService = injector.instanceOf[FakeAuditService]
 
 
   private def getTrustsController = {
-    val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), desService)
+    val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), mockedAuditService, desService)
     SUT
   }
 
@@ -46,9 +46,9 @@ class GetTrustControllerSpec extends BaseSpec  {
 
       val utr = "1234567890"
 
-      when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustFoundResponse(None, ResponseHeader("TODO", 1))))
+      when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustFoundResponse(None, ResponseHeader("Processed", "1"))))
 
-      val result = getTrustsController.get(utr).apply(FakeRequest(GET, ""))
+      val result = getTrustsController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 
       status(result) mustBe OK
       contentType(result) mustBe Some(JSON)
@@ -66,32 +66,12 @@ class GetTrustControllerSpec extends BaseSpec  {
       }
     }
 
-//    "return 401 - Unauthorised" when {
-//      "the get endpoint is called user hasn't logged in" in {
-//        val utr = "1234567890"
-//        val mockAuthService = new AuthService(FakeAuthConnector(MissingBearerToken()))
-//        val SUT = new GetTrustController(mockAuthService, desService)
-//
-//        val result = SUT.get(utr).apply(FakeRequest(GET, ""))
-//        status(result) mustBe UNAUTHORIZED
-//      }
-//
-//      "the get endpoint is called user session has expired" in {
-//        val utr = "1234567890"
-//        val mockAuthService = new AuthService(FakeAuthConnector(BearerTokenExpired()))
-//        val SUT = new GetTrustController(mockAuthService, desService)
-//
-//        val result = SUT.get(utr).apply(FakeRequest(GET, ""))
-//        status(result) mustBe UNAUTHORIZED
-//      }
-//    }
-
     "return 500 - InternalServerError" when {
       "the get endpoint returns a InvalidUTRResponse" in {
         when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(InvalidUTRResponse))
 
         val utr = "1234567890"
-        val result = getTrustsController.get(utr).apply(FakeRequest(GET, ""))
+        val result = getTrustsController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
@@ -101,7 +81,7 @@ class GetTrustControllerSpec extends BaseSpec  {
         when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(InvalidRegimeResponse))
 
         val utr = "1234567890"
-        val result = getTrustsController.get(utr).apply(FakeRequest(GET, ""))
+        val result = getTrustsController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
@@ -111,7 +91,7 @@ class GetTrustControllerSpec extends BaseSpec  {
         when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(BadRequestResponse))
 
         val utr = "1234567890"
-        val result = getTrustsController.get(utr).apply(FakeRequest(GET, ""))
+        val result = getTrustsController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
@@ -121,7 +101,7 @@ class GetTrustControllerSpec extends BaseSpec  {
         when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(ResourceNotFoundResponse))
 
         val utr = "1234567890"
-        val result = getTrustsController.get(utr).apply(FakeRequest(GET, ""))
+        val result = getTrustsController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
@@ -131,7 +111,7 @@ class GetTrustControllerSpec extends BaseSpec  {
         when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(InternalServerErrorResponse))
 
         val utr = "1234567890"
-        val result = getTrustsController.get(utr).apply(FakeRequest(GET, ""))
+        val result = getTrustsController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
@@ -141,7 +121,7 @@ class GetTrustControllerSpec extends BaseSpec  {
         when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(ServiceUnavailableResponse))
 
         val utr = "1234567890"
-        val result = getTrustsController.get(utr).apply(FakeRequest(GET, ""))
+        val result = getTrustsController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
