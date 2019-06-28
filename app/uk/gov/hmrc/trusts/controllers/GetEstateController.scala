@@ -23,15 +23,18 @@ import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUTRAction}
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
+import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.services.{AuditService, DesService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class GetEstateController @Inject()(identify: IdentifierAction, auditService: AuditService,
+class GetEstateController @Inject()(identify: IdentifierAction,
+                                    auditService: AuditService,
                                     desService: DesService) extends BaseController {
 
-  def get(utr: String): Action[AnyContent] = (ValidateUTRAction(utr) andThen identify).async { implicit request =>
+  def get(utr: String): Action[AnyContent] = (ValidateUTRAction(utr) andThen identify).async {
+    implicit request =>
 
     desService.getEstateInfo(utr) map {
 
@@ -48,7 +51,32 @@ class GetEstateController @Inject()(identify: IdentifierAction, auditService: Au
 
         Ok(response)
 
+      case _: InvalidUTRResponse.type =>
+        auditService.auditErrorResponse(TrustAuditing.GET_ESTATE, utr, request.identifier, "The UTR provided is invalid.")
+        InternalServerError
+
+      case _: InvalidRegimeResponse.type =>
+        auditService.auditErrorResponse(TrustAuditing.GET_ESTATE, utr, request.identifier, "Invalid regime received from DES.")
+        InternalServerError
+
+      case _: BadRequestResponse.type =>
+        auditService.auditErrorResponse(TrustAuditing.GET_ESTATE, utr, request.identifier, "Bad Request received from DES.")
+        InternalServerError
+
+      case _: ResourceNotFoundResponse.type =>
+        auditService.auditErrorResponse(TrustAuditing.GET_ESTATE, utr, request.identifier, "Not Found received from DES.")
+        InternalServerError
+
+      case _: InternalServerErrorResponse.type =>
+        auditService.auditErrorResponse(TrustAuditing.GET_ESTATE, utr, request.identifier, "Internal Server Error received from DES.")
+        InternalServerError
+
+      case _: ServiceUnavailableResponse.type =>
+        auditService.auditErrorResponse(TrustAuditing.GET_ESTATE, utr, request.identifier, "Service Unavailable received from DES.")
+        InternalServerError
+
       case _ =>
+        auditService.auditErrorResponse(TrustAuditing.GET_ESTATE, utr, request.identifier, "UNKNOWN")
         InternalServerError
     }
   }

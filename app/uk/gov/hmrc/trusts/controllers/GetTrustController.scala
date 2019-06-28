@@ -23,35 +23,61 @@ import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import uk.gov.hmrc.trusts.services.{AuditService, DesService}
 import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUTRAction}
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
+import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustFoundResponse
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class GetTrustController @Inject()(identify: IdentifierAction, auditService: AuditService,
+class GetTrustController @Inject()(identify: IdentifierAction,
+                                   auditService: AuditService,
                                    desService: DesService) extends BaseController {
 
   def get(utr: String): Action[AnyContent] = (ValidateUTRAction(utr) andThen identify).async {
     implicit request =>
 
+      desService.getTrustInfo(utr) map {
 
-    desService.getTrustInfo(utr) map {
+        case trustFoundResponse: TrustFoundResponse =>
 
-      case trustFoundResponse: TrustFoundResponse =>
+          val response = Json.toJson(trustFoundResponse)
 
-        val response = Json.toJson(trustFoundResponse)
+          auditService.audit(
+            event = TrustAuditing.GET_TRUST,
+            request = Json.obj("utr" -> utr),
+            internalId = request.identifier,
+            response = response
+          )
 
-        auditService.audit(
-          event = TrustAuditing.GET_TRUST,
-          request = Json.obj("utr" -> utr),
-          internalId = request.identifier,
-          response = response
-        )
+          Ok(response)
 
-        Ok(response)
+        case _: InvalidUTRResponse.type =>
+          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, utr, request.identifier, "The UTR provided is invalid.")
+          InternalServerError
 
-      case _ =>
-        InternalServerError
-    }
+        case _: InvalidRegimeResponse.type =>
+          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, utr, request.identifier, "Invalid regime received from DES.")
+          InternalServerError
+
+        case _: BadRequestResponse.type =>
+          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, utr, request.identifier, "Bad Request received from DES.")
+          InternalServerError
+
+        case _: ResourceNotFoundResponse.type =>
+          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, utr, request.identifier, "Not Found received from DES.")
+          InternalServerError
+
+        case _: InternalServerErrorResponse.type =>
+          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, utr, request.identifier, "Internal Server Error received from DES.")
+          InternalServerError
+
+        case _: ServiceUnavailableResponse.type =>
+          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, utr, request.identifier, "Service Unavailable received from DES.")
+          InternalServerError
+
+        case _ =>
+          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, utr, request.identifier, "UNKNOWN")
+          InternalServerError
+      }
   }
 }

@@ -19,6 +19,8 @@ package uk.gov.hmrc.trusts.models.get_trust_or_estate
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.GetEstateResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustResponse
 
+trait ErrorResponse
+
 case object InvalidUTRResponse extends GetTrustResponse with GetEstateResponse
 
 case object InvalidRegimeResponse extends GetTrustResponse with GetEstateResponse

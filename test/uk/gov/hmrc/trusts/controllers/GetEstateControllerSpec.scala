@@ -71,7 +71,6 @@ class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter {
         val result = getEstatesController.get(invalidUTR).apply(FakeRequest(GET, s"/estates/$invalidUTR"))
 
         whenReady(result) { _ =>
-          verify(mockedAuditService).audit(mockEq("GetEstate"), any(), any(), any())(any())
           status(result) mustBe BAD_REQUEST
         }
       }
@@ -86,7 +85,10 @@ class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter {
         val utr = "1234567890"
         val result = getEstatesController.get(utr).apply(FakeRequest(GET, s"/estates/$invalidUTR"))
 
-        status(result) mustBe INTERNAL_SERVER_ERROR
+        whenReady(result) { _ =>
+          verify(mockedAuditService).auditErrorResponse(mockEq("GetEstate"), any[String], any[String], any[String])(any())
+          status(result) mustBe INTERNAL_SERVER_ERROR
+        }
       }
 
       "the get endpoint returns a InvalidRegimeResponse" in {
@@ -97,7 +99,10 @@ class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter {
         val utr = "1234567890"
         val result = getEstatesController.get(utr).apply(FakeRequest(GET, s"/estates/$utr"))
 
-        status(result) mustBe INTERNAL_SERVER_ERROR
+        whenReady(result) { _ =>
+          verify(mockedAuditService).auditErrorResponse(mockEq("GetEstate"), any[String], any[String], any[String])(any())
+          status(result) mustBe INTERNAL_SERVER_ERROR
+        }
       }
 
       "the get endpoint returns a BadRequestResponse" in {
@@ -108,7 +113,10 @@ class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter {
         val utr = "1234567890"
         val result = getEstatesController.get(utr).apply(FakeRequest(GET, s"/estates/$utr"))
 
-        status(result) mustBe INTERNAL_SERVER_ERROR
+        whenReady(result) { _ =>
+          verify(mockedAuditService).auditErrorResponse(mockEq("GetEstate"), any[String], any[String], any[String])(any())
+          status(result) mustBe INTERNAL_SERVER_ERROR
+        }
       }
 
       "the get endpoint returns a ResourceNotFoundResponse" in {
@@ -119,7 +127,10 @@ class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter {
         val utr = "1234567890"
         val result = getEstatesController.get(utr).apply(FakeRequest(GET, s"/estates/$utr"))
 
-        status(result) mustBe INTERNAL_SERVER_ERROR
+        whenReady(result) { _ =>
+          verify(mockedAuditService).auditErrorResponse(mockEq("GetEstate"), any[String], any[String], any[String])(any())
+          status(result) mustBe INTERNAL_SERVER_ERROR
+        }
       }
 
       "the get endpoint returns a InternalServerErrorResponse" in {
@@ -130,7 +141,10 @@ class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter {
         val utr = "1234567890"
         val result = getEstatesController.get(utr).apply(FakeRequest(GET, s"/estates/$utr"))
 
-        status(result) mustBe INTERNAL_SERVER_ERROR
+        whenReady(result) { _ =>
+          verify(mockedAuditService).auditErrorResponse(mockEq("GetEstate"), any[String], any[String], any[String])(any())
+          status(result) mustBe INTERNAL_SERVER_ERROR
+        }
       }
 
       "the get endpoint returns a ServiceUnavailableResponse" in {
@@ -141,7 +155,10 @@ class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter {
         val utr = "1234567890"
         val result = getEstatesController.get(utr).apply(FakeRequest(GET, s"/estates/$utr"))
 
-        status(result) mustBe INTERNAL_SERVER_ERROR
+        whenReady(result) { _ =>
+          verify(mockedAuditService).auditErrorResponse(mockEq("GetEstate"), any[String], any[String], any[String])(any())
+          status(result) mustBe INTERNAL_SERVER_ERROR
+        }
       }
     }
   }
