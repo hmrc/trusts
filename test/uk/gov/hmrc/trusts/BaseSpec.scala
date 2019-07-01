@@ -56,6 +56,7 @@ class BaseSpec extends WordSpec
         Seq(
           "microservice.services.des-trusts.port" -> server.port(),
           "microservice.services.des-estates.port" -> server.port(),
+          "microservice.services.des-display-trust-or-estste.port" -> server.port(),
           "microservice.services.tax-enrolments.port" -> server.port(),
           "metrics.enabled" -> false,
           "auditing.enabled" -> false): _*
