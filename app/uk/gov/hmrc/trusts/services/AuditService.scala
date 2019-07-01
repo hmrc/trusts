@@ -19,10 +19,11 @@ package uk.gov.hmrc.trusts.services
 import javax.inject.Inject
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.models.auditing.{EstateRegistrationSubmissionAuditEvent, TrustRegistrationSubmissionAuditEvent}
 import uk.gov.hmrc.trusts.models.{EstateRegistration, Registration, RegistrationResponse}
 
-class AuditService @Inject()(auditConnector: AuditConnector){
+class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig){
 
   import scala.concurrent.ExecutionContext.Implicits._
 
@@ -32,17 +33,22 @@ class AuditService @Inject()(auditConnector: AuditConnector){
             internalId: String,
             response: RegistrationResponse)(implicit hc: HeaderCarrier) = {
 
-    val auditPayload = TrustRegistrationSubmissionAuditEvent(
-      registration = registration,
-      draftId = draftId,
-      internalAuthId = internalId,
-      response = response
-    )
+    if (config.auditingEnabled) {
+      val auditPayload = TrustRegistrationSubmissionAuditEvent(
+        registration = registration,
+        draftId = draftId,
+        internalAuthId = internalId,
+        response = response
+      )
 
-    auditConnector.sendExplicitAudit(
-      event,
-      auditPayload
-    )
+      auditConnector.sendExplicitAudit(
+        event,
+        auditPayload
+      )
+    } else {
+      ()
+    }
+
   }
 
   def audit(event: String,
@@ -51,17 +57,22 @@ class AuditService @Inject()(auditConnector: AuditConnector){
             internalId: String,
             response: RegistrationResponse)(implicit hc: HeaderCarrier) = {
 
-    val auditPayload = EstateRegistrationSubmissionAuditEvent(
-      registration = registration,
-      draftId = draftId,
-      internalAuthId = internalId,
-      response = response
-    )
+    if (config.auditingEnabled) {
+      val auditPayload = EstateRegistrationSubmissionAuditEvent(
+        registration = registration,
+        draftId = draftId,
+        internalAuthId = internalId,
+        response = response
+      )
 
-    auditConnector.sendExplicitAudit(
-      event,
-      auditPayload
-    )
+      auditConnector.sendExplicitAudit(
+        event,
+        auditPayload
+      )
+    } else {
+      ()
+    }
+
   }
 
 }
