@@ -43,12 +43,16 @@ object GetEstateResponse {
   implicit lazy val httpReads: HttpReads[GetEstateResponse] =
     new HttpReads[GetEstateResponse] {
       override def read(method: String, url: String, response: HttpResponse): GetEstateResponse = {
-        Logger.info(s"[SubscriptionIdResponse]  response status received from des: ${response.status}")
+        Logger.info(s"[GetEstateResonse] response status received from des: ${response.status}")
         response.status match {
           case OK =>
             response.json.asOpt[EstateFoundResponse] match {
-              case Some(trustFound) => trustFound
-              case None => InternalServerErrorResponse
+              case Some(estateFound) =>
+                Logger.info("[GetEstateResponse] response successfully parsed as EstateFoundResponse")
+                estateFound
+              case None =>
+                Logger.info("[GetEstateResponse] response unsuccessfully parsed as EstateFoundResponse")
+                InternalServerErrorResponse
             }
           case BAD_REQUEST =>
             response.json.asOpt[DesErrorResponse] match {

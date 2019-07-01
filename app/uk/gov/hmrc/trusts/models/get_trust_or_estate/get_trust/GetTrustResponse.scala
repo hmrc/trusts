@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust
 
+import com.gargoylesoftware.htmlunit.WebConsole
 import play.api.Logger
 import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK, SERVICE_UNAVAILABLE}
 import play.api.libs.functional.syntax._
@@ -43,12 +44,17 @@ object GetTrustResponse {
   implicit lazy val httpReads: HttpReads[GetTrustResponse] =
     new HttpReads[GetTrustResponse] {
       override def read(method: String, url: String, response: HttpResponse): GetTrustResponse = {
-        Logger.info(s"[SubscriptionIdResponse]  response status received from des: ${response.status}")
+        Logger.info(s"[GetTrustResponse] response status received from des: ${response.status}")
         response.status match {
           case OK =>
             response.json.asOpt[TrustFoundResponse] match {
-              case Some(trustFound) => trustFound
-              case None => InternalServerErrorResponse
+              case Some(trustFound) =>
+                Logger.info("[GetTrustResponse] response successfully parsed as TrustFoundResponse")
+                trustFound
+              case None =>
+                Logger.info(response.json.toString)
+                Logger.info("[GetTrustResponse] response unsuccessfully parsed as TrustFoundResponse")
+                InternalServerErrorResponse
             }
           case BAD_REQUEST =>
             response.json.asOpt[DesErrorResponse] match {
