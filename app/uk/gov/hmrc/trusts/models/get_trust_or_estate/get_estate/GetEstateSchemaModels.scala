@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models.get_estate_or_estate.get_estate
+package uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -42,7 +42,7 @@ case class GetEstateDesResponse(getEstate: Option[GetEstate],
 object GetEstateDesResponse {
   implicit val writes: Writes[GetEstateDesResponse] = Json.writes[GetEstateDesResponse]
   implicit val reads: Reads[GetEstateDesResponse] = (
-    (JsPath \ "estateOrEstateDisplay").readNullable[GetEstate] and
+    (JsPath \ "trustOrEstateDisplay").readNullable[GetEstate] and
     (JsPath \ "responseHeader").read[ResponseHeader]
   )(GetEstateDesResponse.apply _)
 }

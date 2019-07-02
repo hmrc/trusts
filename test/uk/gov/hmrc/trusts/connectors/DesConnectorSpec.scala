@@ -19,9 +19,8 @@ package uk.gov.hmrc.trusts.connectors
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.http.Status._
-import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions.{AlreadyRegisteredException, _}
 import uk.gov.hmrc.trusts.models.ExistingCheckRequest._
@@ -592,8 +591,12 @@ class DesConnectorSpec extends BaseConnectorSpec {
 
         whenReady(futureResult) { result =>
           val expectedResult = Json.fromJson[TrustFoundResponse](getTrustResponse) match {
-            case JsSuccess(data, _) => data
-            case _ => fail("Json could not be parsed to TrustFoundResponse model")
+            case JsSuccess(data, _) => {
+               data
+            }
+            case JsError(errors) => {
+              fail("Json could not be parsed to TrustFoundResponse model")
+            }
           }
           result mustBe expectedResult
         }

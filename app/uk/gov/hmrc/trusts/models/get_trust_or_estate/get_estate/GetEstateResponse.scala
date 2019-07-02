@@ -22,7 +22,6 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.models.get_estate_or_estate.get_estate.GetEstate
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 
 trait GetEstateResponse
