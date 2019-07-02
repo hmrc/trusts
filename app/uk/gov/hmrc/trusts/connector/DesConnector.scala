@@ -38,6 +38,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
   lazy val trustsServiceUrl : String = s"${config.desTrustsUrl}/trusts"
   lazy val estatesServiceUrl : String = s"${config.desEstatesUrl}/estates"
+  lazy val getTrustOrEstateUrl: String =  s"${config.getTrustOrEstateUrl}/trusts"
 
   lazy val matchTrustsEndpoint : String = s"$trustsServiceUrl/match"
   lazy val matchEstatesEndpoint : String = s"$estatesServiceUrl/match"
@@ -45,7 +46,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
   lazy val trustRegistrationEndpoint : String = s"$trustsServiceUrl/registration"
   lazy val estateRegistrationEndpoint : String = s"$estatesServiceUrl/registration"
 
-  def createGetTrustOrEsateEndpoint(utr: String): String = trustsServiceUrl + s"/registration/$utr"
+  def createGetTrustOrEsateEndpoint(utr: String): String = s"$getTrustOrEstateUrl/registration/$utr"
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "Correlation-Id"
