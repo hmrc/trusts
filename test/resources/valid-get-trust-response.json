@@ -196,8 +196,8 @@
           "leadTrustees": {
             "lineNo": "1",
             "bpMatchStatus": "01",
-            "name": " ",
-            "phoneNumber": "+ ",
+            "name": "Some Name",
+            "phoneNumber": "+1234567",
             "email": "a",
             "identification": {
               "safeId": "2222200000000"

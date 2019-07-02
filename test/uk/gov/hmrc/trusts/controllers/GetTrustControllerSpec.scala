@@ -17,9 +17,9 @@
 package uk.gov.hmrc.trusts.controllers
 
 import org.mockito.Matchers.{any, eq => mockEq}
-import org.mockito.Mockito.{verify, when, reset}
+import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.BeforeAndAfter
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
@@ -28,10 +28,11 @@ import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustFoundResponse
 import uk.gov.hmrc.trusts.services.{AuditService, DesService}
+import uk.gov.hmrc.trusts.utils.JsonRequests
 
 import scala.concurrent.Future
 
-class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter {
+class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonRequests{
 
   lazy val desService: DesService = mock[DesService]
   lazy val mockedAuditService: AuditService = mock[AuditService]

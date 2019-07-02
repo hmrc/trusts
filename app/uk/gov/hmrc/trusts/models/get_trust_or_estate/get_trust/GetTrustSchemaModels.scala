@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust
 import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.{AddressType, Assets, Correspondence, Declaration, IdentificationOrgType, IdentificationType, NameType, PassportType, TrustDetailsType}
+import uk.gov.hmrc.trusts.models.{AddressType, AssetMonetaryAmount, Assets, BusinessAssetType, Correspondence, Declaration, IdentificationOrgType, IdentificationType, NameType, OtherAssetType, PassportType, PropertyLandType, SharesType, TrustDetailsType}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.{MatchData, ResponseHeader}
 import uk.gov.hmrc.trusts.utils.Constants.dateTimePattern
 
@@ -52,7 +52,7 @@ object GetTrustDesResponse {
 case class DisplayTrust(
                   details: TrustDetailsType,
                   entities: DisplayTrustEntitiesType,
-                  assets: Assets)
+                  assets: DisplayTrustAssets)
 
 object DisplayTrust {
   implicit val trustFormat: Format[DisplayTrust] = Json.format[DisplayTrust]
@@ -369,4 +369,25 @@ case class DisplayTrustIdentification(safeId: Option[String],
 
 object DisplayTrustIdentification {
   implicit val identificationFormat: Format[DisplayTrustIdentification] = Json.format[DisplayTrustIdentification]
+}
+
+case class DisplayTrustPartnershipType(utr: Option[String],
+                                       description: String,
+                                       partnershipStart: Option[DateTime])
+
+object DisplayTrustPartnershipType {
+
+  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
+  implicit val partnershipTypeFormat: Format[DisplayTrustPartnershipType] = Json.format[DisplayTrustPartnershipType]
+}
+
+case class DisplayTrustAssets(monetary: Option[List[AssetMonetaryAmount]],
+                              propertyOrLand: Option[List[PropertyLandType]],
+                              shares: Option[List[SharesType]],
+                              business: Option[List[BusinessAssetType]],
+                              partnerShip: Option[List[DisplayTrustPartnershipType]],
+                              other: Option[List[OtherAssetType]])
+
+object DisplayTrustAssets {
+  implicit val assetsFormat: Format[DisplayTrustAssets] = Json.format[DisplayTrustAssets]
 }

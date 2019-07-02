@@ -56,4 +56,6 @@ trait JsonRequests extends JsonUtils {
 
   lazy val getTrustOrEstateObsoletedResponseJson = getJsonFromFile("valid-get-trust-or-estate-obsoleted-response.json")
   lazy val getTrustOrEstateObsoletedResponse = getJsonValueFromFile("valid-get-trust-or-estate-obsoleted-response.json")
+
+  lazy val expectedParsedJson = getJsonValueFromFile("expected-parsed-trust-response.json")
 }

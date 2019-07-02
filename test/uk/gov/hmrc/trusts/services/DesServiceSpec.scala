@@ -348,12 +348,12 @@ class DesServiceSpec extends BaseSpec {
               Some(DisplayTrustSettlors(Some(List(DisplayTrustSettlor("1", Some("01"), NameType("Bruce", Some("Bob"), "Branson"), Some(dateTime),
                 Some(DisplayTrustIdentificationType(Some("2222200000000"), None, None, None)), "2017-02-28"))),
                 Some(List(DisplayTrustSettlorCompany("1", Some("01"), "Completors Limited", Some("Trading"), Some(true), Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28")))))),
-            Assets(
+            DisplayTrustAssets(
               Some(List(AssetMonetaryAmount(0))),
               Some(List(PropertyLandType(Some("Tokyo Campus"), Some(AddressType("10 Enderson Road ", "Cheapside", Some("Riverside "), Some("Boston "), Some("SN8 4DD"), "GB")), 1892090, 1699000))),
               Some(List(SharesType("0", "Smart Estates", "Ordinary shares", "Quoted", 9891828))),
               Some(List(BusinessAssetType("Lone Wolf Ltd", Some("Travel Business"), AddressType("Suite 10", "Wealthy Arena", Some("Trafagar Square"), Some("London"), Some("SE2 2HB"), "GB"), 0))),
-              Some(List(PartnershipType("Real Estates partnership", dateTime))), Some(List(OtherAssetType("Jewelries", 781720)))))))
+              Some(List(DisplayTrustPartnershipType(None, "Real Estates partnership", Some(dateTime)))), Some(List(OtherAssetType("Jewelries", 781720)))))))
 
         when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustFoundResponse(getTrust, ResponseHeader("Processed", "1"))))
 

@@ -598,6 +598,9 @@ class DesConnectorSpec extends BaseConnectorSpec {
               fail("Json could not be parsed to TrustFoundResponse model")
             }
           }
+
+          // TODO: Currently leadTrustees will be null 
+          Json.toJson(expectedResult) mustBe expectedParsedJson
           result mustBe expectedResult
         }
       }
