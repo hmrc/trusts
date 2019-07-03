@@ -599,7 +599,6 @@ class DesConnectorSpec extends BaseConnectorSpec {
             }
           }
 
-          // TODO: Currently leadTrustees will be null 
           Json.toJson(expectedResult) mustBe expectedParsedJson
           result mustBe expectedResult
         }
@@ -724,15 +723,13 @@ class DesConnectorSpec extends BaseConnectorSpec {
 
         application.stop()
 
-        whenReady(futureResult) { result =>
-          result match {
-            case estateFoundResponse: EstateFoundResponse =>
-              val actualResult = Json.toJson(estateFoundResponse)
+        whenReady(futureResult) {
+          case estateFoundResponse: EstateFoundResponse =>
+            val actualResult = Json.toJson(estateFoundResponse)
 
-              actualResult mustBe getEstateExpectedResponse
-            case _ =>
-              fail("Test Failed: Should have parsed the json into EstateFoundResponse model.")
-          }
+            actualResult mustBe getEstateExpectedResponse
+          case _ =>
+            fail("Test Failed: Should have parsed the json into EstateFoundResponse model.")
         }
       }
 
