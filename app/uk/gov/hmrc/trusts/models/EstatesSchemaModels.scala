@@ -22,13 +22,14 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, Json, Reads, Writes}
 import uk.gov.hmrc.trusts.utils.Constants._
+
 case class EstateRegistration(matchData: Option[MatchData],
-                        correspondence: Correspondence,
-                        yearsReturns: Option[YearsReturns],
-                        declaration: Declaration,
-                        estate: Estate,
-                        agentDetails: Option[AgentDetails] = None
-                       )
+                              correspondence: Correspondence,
+                              yearsReturns: Option[YearsReturns],
+                              declaration: Declaration,
+                              estate: Estate,
+                              agentDetails: Option[AgentDetails] = None
+                             )
 
 object EstateRegistration {
   implicit val estateRegistrationReads :Reads[EstateRegistration] = Json.reads[EstateRegistration]
@@ -61,9 +62,9 @@ object EntitiesType {
 
 
 case class PersonalRepresentativeType (
-                            estatePerRepInd : Option[EstatePerRepIndType] = None,
-                            estatePerRepOrg : Option[EstatePerRepOrgType] = None
-                          )
+                                        estatePerRepInd : Option[EstatePerRepIndType] = None,
+                                        estatePerRepOrg : Option[EstatePerRepOrgType] = None
+                                      )
 
 object PersonalRepresentativeType {
   implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
@@ -88,22 +89,20 @@ object EstatePerRepIndType {
   implicit val estatePerRepIndTypeFormat: Format[EstatePerRepIndType] = Json.format[EstatePerRepIndType]
 }
 
-case class EstatePerRepOrgType(
-                               orgName: String,
+case class EstatePerRepOrgType(orgName: String,
                                phoneNumber: String,
                                email: Option[String] = None,
-                               identification: IdentificationOrgType
+                               identification: IdentificationOrgType)
 
-                             )
 object EstatePerRepOrgType {
   implicit val estatePerRepOrgTypeFormat: Format[EstatePerRepOrgType] = Json.format[EstatePerRepOrgType]
 }
 
 
 case class EstateWillType(name: NameType,
-                    dateOfBirth: Option[DateTime],
-                    dateOfDeath: DateTime,
-                    identification: Option[Identification])
+                          dateOfBirth: Option[DateTime],
+                          dateOfDeath: DateTime,
+                          identification: Option[Identification])
 
 object EstateWillType {
   implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )

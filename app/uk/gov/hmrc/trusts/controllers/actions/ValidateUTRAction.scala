@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models.auditing
+package uk.gov.hmrc.trusts.controllers.actions
 
-object TrustAuditing {
+import play.api.libs.json.Json.toJson
+import play.api.mvc.Results._
+import play.api.mvc._
+import uk.gov.hmrc.trusts.models.ApiResponse.invalidUTRErrorResponse
 
-  val TRUST_REGISTRATION_SUBMITTED = "TrustRegistrationSubmitted"
-  val ESTATE_REGISTRATION_SUBMITTED = "EstateRegistrationSubmitted"
+import scala.concurrent.Future
 
-  val GET_TRUST = "GetTrust"
-  val GET_ESTATE = "GetEstate"
+case class ValidateUTRAction(input: String) extends ActionFilter[Request] with ActionBuilder[Request] {
+  override protected def filter[A](request: Request[A]): Future[Option[Result]] = Future.successful{
+    if (input.matches("^[0-9]{10}$")) {
+      None
+    } else {
+      Some(BadRequest(toJson(invalidUTRErrorResponse)))
+    }
+  }
 }

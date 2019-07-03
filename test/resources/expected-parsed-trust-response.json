@@ -1,0 +1,311 @@
+{
+  "getTrust": {
+    "matchData": { "utr": "2134514321" },
+    "correspondence": {
+      "abroadIndicator": true,
+      "name": "Nelson James",
+      "address": {
+        "line1": "1010 EASY ST",
+        "line2": "OTTAWA",
+        "line3": "ONTARIO",
+        "line4": "ONTARIO",
+        "postCode": "K1A 0B1",
+        "country": "GB"
+      },
+      "phoneNumber": "+10392019203"
+    },
+    "declaration": {
+      "name": {
+        "firstName": "Nelson",
+        "middleName": "Nicola",
+        "lastName": "James"
+      },
+      "address": {
+        "line1": "1010 EASY ST",
+        "line2": "OTTAWA",
+        "line3": "ONTARIO",
+        "line4": "ONTARIO",
+        "postCode": "K1A 0B1",
+        "country": "GB"
+      }
+    },
+    "trust": {
+      "details": {
+        "startDate": "1920-03-28",
+        "lawCountry": "AD",
+        "administrationCountry": "GB",
+        "residentialStatus": {
+          "uk": { "scottishLaw": false, "preOffShore": "GB" }
+        },
+        "typeOfTrust": "Will Trust or Intestacy Trust",
+        "deedOfVariation": "Previously there was only an absolute interest under the will",
+        "interVivos": true,
+        "efrbsStartDate": "1920-02-28"
+      },
+      "entities": {
+        "naturalPerson": [
+          {
+            "lineNo": "1",
+            "bpMatchStatus": "01",
+            "name": {
+              "firstName": "Nicola",
+              "middleName": "Andrey",
+              "lastName": "Jackson"
+            },
+            "dateOfBirth": "1970-02-28",
+            "identification": { "safeId": "2222200000000" },
+            "entityStart": "2017-02-28"
+          }
+        ],
+        "beneficiary": {
+          "individualDetails": [
+            {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "name": {
+                "firstName": "Nicola",
+                "middleName": "Andrey",
+                "lastName": "Jackson"
+              },
+              "dateOfBirth": "1970-02-28",
+              "vulnerableBeneficiary": true,
+              "beneficiaryType": "Director",
+              "beneficiaryDiscretion": true,
+              "beneficiaryShareOfIncome": "0",
+              "identification": { "safeId": "2222200000000" },
+              "entityStart": "2017-02-28"
+            }
+          ],
+          "company": [
+            {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "organisationName": " ",
+              "beneficiaryDiscretion": true,
+              "beneficiaryShareOfIncome": "0",
+              "identification": { "safeId": "2222200000000" },
+              "entityStart": "2017-02-28"
+            }
+          ],
+          "trust": [
+            {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "organisationName": "Nelson Ltd ",
+              "beneficiaryDiscretion": true,
+              "beneficiaryShareOfIncome": "0",
+              "identification": { "safeId": "2222200000000" },
+              "entityStart": "2017-02-28"
+            }
+          ],
+          "charity": [
+            {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "organisationName": "Nelson Ltd",
+              "beneficiaryDiscretion": true,
+              "beneficiaryShareOfIncome": "0",
+              "identification": { "safeId": "2222200000000" },
+              "entityStart": "2017-02-28"
+            }
+          ],
+          "unidentified": [
+            {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "description": "Reserve money",
+              "beneficiaryDiscretion": true,
+              "beneficiaryShareOfIncome": "0",
+              "entityStart": "2017-02-28"
+            }
+          ],
+          "large": [
+            {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "organisationName": "Nelson Ltd",
+              "description": "This is a must",
+              "description1": "This is a must",
+              "description2": "This is a must",
+              "description3": "This is a must",
+              "description4": "This is a must",
+              "numberOfBeneficiary": "0",
+              "identification": { "safeId": "2222200000000" },
+              "beneficiaryDiscretion": true,
+              "beneficiaryShareOfIncome": "0",
+              "entityStart": "2017-02-28"
+            }
+          ],
+          "other": [
+            {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "description": "Joint Fund",
+              "address": {
+                "line1": "1010 EASY ST",
+                "line2": "OTTAWA",
+                "line3": "ONTARIO",
+                "line4": "ONTARIO",
+                "postCode": "K1A 0B1",
+                "country": "GB"
+              },
+              "beneficiaryDiscretion": true,
+              "beneficiaryShareOfIncome": "0",
+              "entityStart": "2017-02-28"
+            }
+          ]
+        },
+        "deceased": {
+          "lineNo": "1",
+          "bpMatchStatus": "01",
+          "name": {
+            "firstName": "James",
+            "middleName": "Kingsley",
+            "lastName": "Bond"
+          },
+          "dateOfBirth": "1965-02-28",
+          "dateOfDeath": "2018-02-28",
+          "identification": { "safeId": "2222200000000" },
+          "entityStart": "2017-02-28"
+        },
+        "leadTrustees": {
+          "lineNo": "1",
+          "bpMatchStatus": "01",
+          "name": "Some Name",
+          "phoneNumber": "+1234567",
+          "email": "a",
+          "identification": { "safeId": "2222200000000" },
+          "entityStart": "2017-02-28"
+        },
+        "trustees": [
+          {
+            "trusteeInd": {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "name": {
+                "firstName": "Tamara",
+                "middleName": "Hingis",
+                "lastName": "Jones"
+              },
+              "dateOfBirth": "1965-02-28",
+              "phoneNumber": "+447456788112",
+              "identification": { "safeId": "2222200000000" },
+              "entityStart": "2017-02-28"
+            },
+            "trusteeOrg": {
+              "lineNo": "1",
+              "name": "MyOrg Incorporated",
+              "phoneNumber": "+447456788112",
+              "email": "a",
+              "identification": { "safeId": "2222200000000" },
+              "entityStart": "2017-02-28"
+            }
+          }
+        ],
+        "protectors": {
+          "protector": [
+            {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "name": {
+                "firstName": "Bruce",
+                "middleName": "Bob",
+                "lastName": "Branson"
+              },
+              "dateOfBirth": "1965-02-28",
+              "identification": { "safeId": "2222200000000" },
+              "entityStart": "2017-02-28"
+            }
+          ],
+          "protectorCompany": [
+            {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "name": "Raga Dandy",
+              "identification": { "safeId": "2222200000000" },
+              "entityStart": "2017-02-28"
+            }
+          ]
+        },
+        "settlors": {
+          "settlor": [
+            {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "name": {
+                "firstName": "Bruce",
+                "middleName": "Bob",
+                "lastName": "Branson"
+              },
+              "dateOfBirth": "1965-02-28",
+              "identification": { "safeId": "2222200000000" },
+              "entityStart": "2017-02-28"
+            }
+          ],
+          "settlorCompany": [
+            {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "name": "Completors Limited ",
+              "companyType": "Trading",
+              "companyTime": true,
+              "identification": { "safeId": "2222200000000" },
+              "entityStart": "2017-02-28"
+            }
+          ]
+        }
+      },
+      "assets": {
+        "monetary": [{ "assetMonetaryAmount": 0 }],
+        "propertyOrLand": [
+          {
+            "buildingLandName": "Tokyo Campus",
+            "address": {
+              "line1": "10 Enderson Road ",
+              "line2": "Cheapside",
+              "line3": "Riverside ",
+              "line4": "Boston ",
+              "postCode": "SN8 4DD",
+              "country": "GB"
+            },
+            "valueFull": 1892090,
+            "valuePrevious": 1699000
+          }
+        ],
+        "shares": [
+          {
+            "numberOfShares": "0",
+            "orgName": "Smart Estates",
+            "shareClass": "Ordinary shares",
+            "typeOfShare": "Quoted",
+            "value": 9891828
+          }
+        ],
+        "business": [
+          {
+            "orgName": "Lone Wolf Ltd",
+            "businessDescription": "Travel Business",
+            "address": {
+              "line1": "Suite 10",
+              "line2": "Wealthy Arena",
+              "line3": "Trafagar Square ",
+              "line4": "London",
+              "postCode": "SE2 2HB",
+              "country": "GB"
+            },
+            "businessValue": 0
+          }
+        ],
+        "partnerShip": [
+          {
+            "utr": "2134514321",
+            "description": "Real Estates partnership",
+            "partnershipStart": "2010-02-28"
+          }
+        ],
+        "other": [{ "description": "Jewelries", "value": 781720 }]
+      }
+    }
+  },
+  "responseHeader": { "status": "Processed", "formBundleNo": "1" }
+}

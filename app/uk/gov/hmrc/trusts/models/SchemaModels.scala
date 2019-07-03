@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.trusts.models
 
-
 import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
@@ -38,14 +37,13 @@ object Registration {
  implicit val registrationReads :Reads[Registration] = Json.reads[Registration]
  implicit val writeToDes :Writes[Registration] = (
     (JsPath \ "matchData").writeNullable[MatchData] and
-      (JsPath \ "correspondence").write[Correspondence] and
-      (JsPath \ "declaration").write[Declaration] and
-      (JsPath \ "yearsReturns").writeNullable[YearsReturns] and
-      (JsPath \ "details" \ "trust").write[Trust] and
-      (JsPath \ "agentDetails" ).writeNullable[AgentDetails]
+    (JsPath \ "correspondence").write[Correspondence] and
+    (JsPath \ "declaration").write[Declaration] and
+    (JsPath \ "yearsReturns").writeNullable[YearsReturns] and
+    (JsPath \ "details" \ "trust").write[Trust] and
+    (JsPath \ "agentDetails" ).writeNullable[AgentDetails]
   )(r => (r.matchData, r.correspondence,r.declaration, r.yearsReturns, r.trust,r.agentDetails))
 }
-
 
 case class Details(trust: Trust)
 
@@ -510,4 +508,3 @@ case class AgentDetails(arn: String,
 object AgentDetails {
   implicit val agentDetailsFormat: Format[AgentDetails] = Json.format[AgentDetails]
 }
-

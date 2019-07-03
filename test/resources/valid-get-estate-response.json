@@ -1,0 +1,73 @@
+{
+  "responseHeader": {
+    "dfmcaReturnUserStatus": "Processed",
+    "formBundleNo": "1"
+  },
+  "trustOrEstateDisplay": {
+    "applicationType": "02",
+    "matchData": {
+      "utr": "2000000000"
+    },
+    "correspondence": {
+      "abroadIndicator": false,
+      "name": "Estates 02",
+      "address": {
+        "line1": "Address line 1",
+        "line2": "Town or city",
+        "postCode": "Z99 2YY",
+        "country": "GB"
+      },
+      "phoneNumber": "07523456756"
+    },
+    "declaration": {
+      "name": {
+        "firstName": "Alister",
+        "middleName": "Stuart",
+        "lastName": "Mc'Govern"
+      },
+      "address": {
+        "line1": "Address line 1",
+        "line2": "Address line 2",
+        "line3": "Address line 3",
+        "line4": "Town or city",
+        "postCode": "Z99 2YY",
+        "country": "GB"
+      }
+    },
+    "details": {
+      "estate": {
+        "entities": {
+          "personalRepresentative": {
+            "lineNo": "1",
+            "bpMatchStatus": "01",
+            "entityStart": "2017-02-28",
+            "name": {
+              "firstName": "Alister",
+              "lastName": "Mc'Govern"
+            },
+            "dateOfBirth": "1980-06-01",
+            "identification": {
+              "nino": "JS123456A"
+            },
+            "phoneNumber": "078888888"
+          },
+          "deceased": {
+            "lineNo": "1",
+            "bpMatchStatus": "01",
+            "entityStart": "2017-02-28",
+            "name": {
+              "firstName": "Wilbert",
+              "lastName": "Jefferies"
+            },
+            "dateOfDeath": "2016-04-06",
+            "identification": {
+              "nino": "JS123456A"
+            }
+          }
+        },
+        "administrationEndDate": "2017-06-01",
+        "periodTaxDues": "01"
+      }
+    }
+  }
+}
