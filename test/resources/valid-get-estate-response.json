@@ -19,14 +19,6 @@
       },
       "phoneNumber": "07523456756"
     },
-    "yearsReturns": {
-      "returns": [
-        {
-          "taxReturnYear": "18",
-          "taxConsequence": true
-        }
-      ]
-    },
     "declaration": {
       "name": {
         "firstName": "Alister",

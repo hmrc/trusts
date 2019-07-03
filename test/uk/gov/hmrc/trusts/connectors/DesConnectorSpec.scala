@@ -725,11 +725,25 @@ class DesConnectorSpec extends BaseConnectorSpec {
         application.stop()
 
         whenReady(futureResult) { result =>
-          val expectedResult = Json.fromJson[EstateFoundResponse](getEstateResponse) match {
-            case JsSuccess(data, _) => data
-            case _ => fail("Json could not be parsed to EstateFoundResponse model")
+          result match {
+            case estateFoundResponse: EstateFoundResponse =>
+              val expectedResult = getEstateResponse
+                .replaceAll("\r", "")
+                .replaceAll("\n", "")
+                .replaceAll("\t", "")
+                .replaceAll("\\s", "")
+
+              val actualResult = Json.toJson(estateFoundResponse)
+                .toString
+                .replaceAll("\r", "")
+                .replaceAll("\n", "")
+                .replaceAll("\t", "")
+                .replaceAll("\\s", "")
+
+              actualResult mustBe expectedResult
+            case _ =>
+              fail("Test Failed: Should have parsed the json into EstateFoundResponse model.")
           }
-          result mustBe expectedResult
         }
       }
 
