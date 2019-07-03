@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust
 
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.{AddressType, AssetMonetaryAmount, Assets, BusinessAssetType, Correspondence, Declaration, IdentificationOrgType, IdentificationType, NameType, OtherAssetType, PassportType, PropertyLandType, SharesType, TrustDetailsType}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.{MatchData, ResponseHeader}
+import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.utils.Constants.dateTimePattern
 
 case class GetTrust(matchData: MatchData,
@@ -67,6 +67,7 @@ case class DisplayTrustEntitiesType(naturalPerson: Option[List[DisplayTrustNatur
                                     settlors: Option[DisplayTrustSettlors])
 
 object DisplayTrustEntitiesType {
+
   implicit val trustEntitiesTypeFormat: Format[DisplayTrustEntitiesType] = Json.format[DisplayTrustEntitiesType]
 }
 
@@ -122,15 +123,30 @@ case class DisplayTrustLeadTrusteeType(
 object DisplayTrustLeadTrusteeType {
 
   implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
-  implicit val leadTrusteeTypeReads: Reads[DisplayTrustLeadTrusteeType] = Json.reads[DisplayTrustLeadTrusteeType]
 
-  implicit val leadTrusteeWritesToDes: Writes[DisplayTrustLeadTrusteeType] = Writes {
-    leadTrustee =>
-      leadTrustee.leadTrusteeInd match {
+  implicit object LeadTrusteeFormats extends Format[DisplayTrustLeadTrusteeType] {
+
+    override def writes(o: DisplayTrustLeadTrusteeType): JsValue = {
+      o.leadTrusteeInd match {
         case Some(indLeadTrutee) => Json.toJson(indLeadTrutee)
-        case None => Json.toJson(leadTrustee.leadTrusteeOrg)
+        case None => Json.toJson(o.leadTrusteeOrg)
       }
+    }
+
+    override def reads(json: JsValue): JsResult[DisplayTrustLeadTrusteeType] = {
+      json.validate[DisplayTrustLeadTrusteeIndType].map {
+        leadTrusteeInd =>
+          DisplayTrustLeadTrusteeType(leadTrusteeInd = Some(leadTrusteeInd))
+      }.orElse {
+        json.validate[DisplayTrustLeadTrusteeOrgType].map {
+          org =>
+            DisplayTrustLeadTrusteeType(leadTrusteeOrg = Some(org))
+        }
+      }
+    }
   }
+
+  implicit val leadTrusteeFormats : Format[DisplayTrustLeadTrusteeType] = LeadTrusteeFormats
 }
 
 case class DisplayTrustBeneficiaryType(individualDetails: Option[List[DisplayTrustIndividualDetailsType]],
