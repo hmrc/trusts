@@ -49,7 +49,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
   def createGetTrustOrEsateEndpoint(utr: String): String = s"$getTrustOrEstateUrl/registration/$utr"
 
   val ENVIRONMENT_HEADER = "Environment"
-  val CORRELATION_HEADER = "Correlation-Id"
+  val CORRELATION_HEADER = "CorrelationId"
 
   private def desHeaders : Seq[(String, String)] =
     Seq(
