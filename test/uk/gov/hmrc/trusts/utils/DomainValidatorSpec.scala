@@ -46,17 +46,17 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
 
   "trustEfrbsDateIsNotFutureDate for employment related trust" should {
     "return None for valid date" in {
-      val request = registrationWithEfrbsStartDate(new DateTime().plusDays(-1000),EMPLOYMENT_RELATED_TRUST)
+      val request = registrationWithEfrbsStartDate(new DateTime().plusDays(-1000), TypeOfTrust.Employment)
       SUT(request).trustEfrbsDateIsNotFutureDate mustBe None
     }
 
     "return None for today's date" in {
-      val request = registrationWithEfrbsStartDate(new DateTime(),EMPLOYMENT_RELATED_TRUST)
+      val request = registrationWithEfrbsStartDate(new DateTime(),TypeOfTrust.Employment)
       SUT(request).trustEfrbsDateIsNotFutureDate mustBe None
     }
 
     "return validation error for tomorrow date" in {
-      val request = registrationWithEfrbsStartDate(new DateTime().plusDays(1),EMPLOYMENT_RELATED_TRUST)
+      val request = registrationWithEfrbsStartDate(new DateTime().plusDays(1),TypeOfTrust.Employment)
       SUT(request).trustEfrbsDateIsNotFutureDate.get.message mustBe
         "Trusts efrbs start date must be today or in the past."
     }
@@ -64,12 +64,12 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
 
   "validateEfrbsDate" should {
     "return None when efrbs date is provided for employment trusts" in {
-      val employmentRelatedTrust = registrationWithEfrbsStartDate(new DateTime().plusDays(1000),EMPLOYMENT_RELATED_TRUST)
+      val employmentRelatedTrust = registrationWithEfrbsStartDate(new DateTime().plusDays(1000),TypeOfTrust.Employment)
       SUT(employmentRelatedTrust).validateEfrbsDate mustBe None
     }
 
     "return validation error when efrbs date is provided with any other trust except employment trusts" in {
-      val willTrust = registrationWithEfrbsStartDate(new DateTime().plusDays(1000),WILL_TRUST)
+      val willTrust = registrationWithEfrbsStartDate(new DateTime().plusDays(1000), TypeOfTrust.Will)
       SUT(willTrust).validateEfrbsDate.get.message mustBe
         "Trusts efrbs start date can be provided for Employment Related trust only."
     }

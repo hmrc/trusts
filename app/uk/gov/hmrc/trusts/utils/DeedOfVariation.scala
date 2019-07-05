@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.services
+package uk.gov.hmrc.trusts.utils
 
-import javax.inject.Inject
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.models.{Registration, RegistrationResponse}
+import play.api.libs.json.{Format, Reads, Writes}
 
-class FakeAuditService @Inject()(auditConnector: AuditConnector, config: AppConfig)
-  extends AuditService(auditConnector, config) {
+object DeedOfVariation extends Enumeration {
 
-  override def audit(event: String, registration: Registration, draftId: String, internalId: String, response: RegistrationResponse)(implicit hc: HeaderCarrier): Unit = ()
+  type DeedOfVariation = Value
+
+  val AbsoluteInterestUnderWill = Value("Previously there was only an absolute interest under the will")
+  val ReplacedWill = Value("Replaced the will trust")
+  val AdditionToWill = Value("Addition to the will trust")
+
+  implicit val reads = Reads.enumNameReads(DeedOfVariation)
+  implicit val writes = Writes.enumNameWrites
+  implicit val formats = Format.apply(reads, writes)
 
 }

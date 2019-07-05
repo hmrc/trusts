@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.services
+package uk.gov.hmrc.trusts.models.mapping.registration
 
-import javax.inject.Inject
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.models.{Registration, RegistrationResponse}
+import play.api.libs.json.{JsValue, Json}
+import uk.gov.hmrc.trusts.BaseSpec
+import uk.gov.hmrc.trusts.models.Trust
+import uk.gov.hmrc.trusts.utils.DataExamples
 
-class FakeAuditService @Inject()(auditConnector: AuditConnector, config: AppConfig)
-  extends AuditService(auditConnector, config) {
 
-  override def audit(event: String, registration: Registration, draftId: String, internalId: String, response: RegistrationResponse)(implicit hc: HeaderCarrier): Unit = ()
+class RegistrationMapperSpec extends BaseSpec with DataExamples {
+
+  "Registration" should {
+    "map trust to des representation of trust" in {
+      val apiRegistration = registrationRequest
+      val desRegistration: JsValue = Json.toJson(apiRegistration)
+       (desRegistration \ "details" \ "trust").get.as[Trust].details mustBe apiRegistration.trust.details
+    }
+  }
+
 
 }

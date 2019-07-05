@@ -20,10 +20,11 @@ import javax.inject.Inject
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.models.auditing.{EstateRegistrationSubmissionAuditEvent, GetTrustOrEstateAuditEvent, TrustRegistrationSubmissionAuditEvent}
 import uk.gov.hmrc.trusts.models.{EstateRegistration, Registration, RegistrationResponse}
 
-class  AuditService @Inject()(auditConnector: AuditConnector){
+class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig){
 
   import scala.concurrent.ExecutionContext.Implicits._
 
@@ -33,17 +34,22 @@ class  AuditService @Inject()(auditConnector: AuditConnector){
             internalId: String,
             response: RegistrationResponse)(implicit hc: HeaderCarrier) = {
 
-    val auditPayload = TrustRegistrationSubmissionAuditEvent(
-      registration = registration,
-      draftId = draftId,
-      internalAuthId = internalId,
-      response = response
-    )
+    if (config.auditingEnabled) {
+      val auditPayload = TrustRegistrationSubmissionAuditEvent(
+        registration = registration,
+        draftId = draftId,
+        internalAuthId = internalId,
+        response = response
+      )
 
-    auditConnector.sendExplicitAudit(
-      event,
-      auditPayload
-    )
+      auditConnector.sendExplicitAudit(
+        event,
+        auditPayload
+      )
+    } else {
+      ()
+    }
+
   }
 
   def audit(event: String,
@@ -52,17 +58,22 @@ class  AuditService @Inject()(auditConnector: AuditConnector){
             internalId: String,
             response: RegistrationResponse)(implicit hc: HeaderCarrier) = {
 
-    val auditPayload = EstateRegistrationSubmissionAuditEvent(
-      registration = registration,
-      draftId = draftId,
-      internalAuthId = internalId,
-      response = response
-    )
+    if (config.auditingEnabled) {
+      val auditPayload = EstateRegistrationSubmissionAuditEvent(
+        registration = registration,
+        draftId = draftId,
+        internalAuthId = internalId,
+        response = response
+      )
 
-    auditConnector.sendExplicitAudit(
-      event,
-      auditPayload
-    )
+      auditConnector.sendExplicitAudit(
+        event,
+        auditPayload
+      )
+    } else {
+      ()
+    }
+
   }
 
   def audit(event: String,
@@ -70,27 +81,35 @@ class  AuditService @Inject()(auditConnector: AuditConnector){
             internalId: String,
             response: JsValue)(implicit hc: HeaderCarrier) = {
 
-    val auditPayload = GetTrustOrEstateAuditEvent(
-      request = request,
-      internalAuthId = internalId,
-      response = response
-    )
+    if (config.auditingEnabled) {
+      val auditPayload = GetTrustOrEstateAuditEvent(
+        request = request,
+        internalAuthId = internalId,
+        response = response
+      )
 
-    auditConnector.sendExplicitAudit(
-      event,
-      auditPayload
-    )
+      auditConnector.sendExplicitAudit(
+        event,
+        auditPayload
+      )
+    } else {
+      ()
+    }
   }
 
-  def auditErrorResponse(eventName: String, utr: String, internalId: String, errorReason: String)(implicit hc: HeaderCarrier): Unit = {
+  def auditErrorResponse(eventName: String, request: JsValue, internalId: String, errorReason: String)(implicit hc: HeaderCarrier): Unit = {
 
-    val response = Json.obj("errorReason" -> errorReason)
+    if (config.auditingEnabled) {
+      val response = Json.obj("errorReason" -> errorReason)
 
-    audit(
-      event = eventName,
-      request = Json.obj("utr" -> utr),
-      internalId = internalId,
-      response = response
-    )
+      audit(
+        event = eventName,
+        request = request,
+        internalId = internalId,
+        response = response
+      )
+    } else {
+      ()
+    }
   }
 }

@@ -16,21 +16,17 @@
 
 package uk.gov.hmrc.trusts.connectors
 
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.Application
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsError, JsSuccess, Json}
-import play.api.http.Status._
+import play.api.libs.json.{Format, JsError, JsSuccess, Json, Reads, Writes}
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions.{AlreadyRegisteredException, _}
 import uk.gov.hmrc.trusts.models.ExistingCheckRequest._
 import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
 import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.utils.WireMockHelper
 import play.api.http.Status._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.variation.{Variation, VariationResponse}
 
 class DesConnectorSpec extends BaseConnectorSpec {
 
@@ -158,7 +154,6 @@ class DesConnectorSpec extends BaseConnectorSpec {
     }
   }//trustsmatch
 
-
   ".checkExistingEstate" should {
 
     "return Matched " when {
@@ -275,7 +270,6 @@ class DesConnectorSpec extends BaseConnectorSpec {
     }
   }//estatematch
 
-
   ".registerTrust" should {
 
     "return TRN  " when {
@@ -384,7 +378,6 @@ class DesConnectorSpec extends BaseConnectorSpec {
       }
     }
   } //registerTrust
-
 
   ".registerEstate" should {
 
@@ -905,4 +898,109 @@ class DesConnectorSpec extends BaseConnectorSpec {
       }
     }
   }//getEstateInfo
+
+  ".variation" should {
+
+    val url = "/trusts/variation"
+
+    "return a VariationTrnResponse" when {
+      "des has returned a 200 with a trn" in {
+
+        val requestBody = Json.stringify(Json.toJson(variationsRequest))
+        stubForPost(server, url, requestBody, OK, """{"tvn": "XXTVN1234567890"}""")
+
+        val futureResult = connector.variations(variationsRequest)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe a[VariationResponse]
+          inside(result){ case VariationResponse(tvn)  => tvn must fullyMatch regex """^[a-zA-Z0-9]{15}$""".r }
+        }
+      }
+    }
+
+    "return BadRequestException" when {
+      "payload sent to des is invalid" in {
+
+        implicit val invalidVariationRead: Reads[Variation] = Json.reads[Variation]
+
+        val variation = invalidVariationsRequest.validate[Variation].get
+
+        val requestBody = Json.stringify(Json.toJson(variation))
+        stubForPost(server, url, requestBody, BAD_REQUEST, Json.stringify(jsonResponse400))
+
+        val futureResult = connector.variations(variation)
+
+        application.stop()
+
+        whenReady(futureResult.failed) {
+          result => result mustBe BadRequestException
+        }
+
+      }
+    }
+
+    "return DuplicateSubmissionException" when {
+      "trusts two requests are submitted with the same Correlation ID." in {
+
+        val requestBody = Json.stringify(Json.toJson(variationsRequest))
+
+        stubForPost(server, url, requestBody, CONFLICT, Json.stringify(jsonResponse409DuplicateCorrelation))
+        val futureResult = connector.variations(variationsRequest)
+
+        whenReady(futureResult.failed) {
+          result => result mustBe an[InternalServerErrorException]
+        }
+      }
+    }
+
+    "return InvalidCorrelationIdException" when {
+      "trusts provides an invalid Correlation ID." in {
+        val requestBody = Json.stringify(Json.toJson(variationsRequest))
+
+        stubForPost(server, url, requestBody, BAD_REQUEST, Json.stringify(jsonResponse400CorrelationId))
+        val futureResult = connector.variations(variationsRequest)
+
+        application.stop()
+
+        whenReady(futureResult.failed) {
+          result => result mustBe an[InternalServerErrorException]
+        }
+      }
+    }
+
+    "return ServiceUnavailableException  " when {
+      "des dependent service is not responding " in {
+        val requestBody = Json.stringify(Json.toJson(variationsRequest))
+
+        stubForPost(server, url, requestBody, SERVICE_UNAVAILABLE, Json.stringify(jsonResponse503))
+
+        val futureResult = connector.variations(variationsRequest)
+
+        application.stop()
+
+        whenReady(futureResult.failed) {
+          result => result mustBe an[ServiceNotAvailableException]
+        }
+      }
+    }
+
+    "return InternalServerErrorException" when {
+      "des is experiencing some problem." in {
+        val requestBody = Json.stringify(Json.toJson(variationsRequest))
+
+        stubForPost(server, url, requestBody, INTERNAL_SERVER_ERROR, Json.stringify(jsonResponse500))
+
+        val futureResult = connector.variations(variationsRequest)
+
+        application.stop()
+
+        whenReady(futureResult.failed) {
+          result => result mustBe an[InternalServerErrorException]
+        }
+      }
+    }
+
+  } //variations
 }

@@ -19,9 +19,9 @@ package uk.gov.hmrc.trusts.services
 import java.time.format.DateTimeFormatter
 
 import org.joda.time.format.DateTimeFormat
-import org.mockito.Mockito.when
 import org.mockito.Matchers._
-import uk.gov.hmrc.trusts.{BaseSpec, models}
+import org.mockito.Mockito.when
+import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
@@ -29,6 +29,9 @@ import uk.gov.hmrc.trusts.models.{get_trust_or_estate, _}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.variation.VariationResponse
+import uk.gov.hmrc.trusts.models.{get_trust_or_estate, _}
+import uk.gov.hmrc.trusts.utils.{DeedOfVariation, TypeOfTrust}
 
 import scala.concurrent.Future
 
@@ -305,8 +308,8 @@ class DesServiceSpec extends BaseSpec {
             AddressType("1010 EASY ST", "OTTAWA", Some("ONTARIO"), Some("ONTARIO"), Some("K1A 0B1"), "GB")),
           DisplayTrust(
             TrustDetailsType(dateTime, Some("AD"), Some("GB"),
-              Some(ResidentialStatusType(Some(UkType(scottishLaw = false, Some("GB"))), None)), "Will Trust or Intestacy Trust",
-              Some("Previously there was only an absolute interest under the will"), Some(true), Some(dateTime)),
+              Some(ResidentialStatusType(Some(UkType(scottishLaw = false, Some("GB"))), None)), TypeOfTrust.Will,
+              Some(DeedOfVariation.AbsoluteInterestUnderWill), Some(true), Some(dateTime)),
             DisplayTrustEntitiesType(
               Some(List(DisplayTrustNaturalPersonType("1", Some("01"), NameType("Nicola", Some("Andrey"), "Jackson"), Some(dateTime),
               Some(DisplayTrustIdentificationType(Some("2222200000000"),
@@ -565,4 +568,57 @@ class DesServiceSpec extends BaseSpec {
       }
     }
   } // getEstateInfo
+
+  ".variation" should {
+    "return a VariationTvnResponse" when {
+
+      "connector returns VariationResponse." in {
+
+        when(mockConnector.variations(variationsRequest)).
+          thenReturn(Future.successful(VariationResponse("tvn123")))
+
+        val futureResult = SUT.variation(variationsRequest)
+
+        whenReady(futureResult) {
+          result => result mustBe VariationResponse("tvn123")
+        }
+
+      }
+
+
+      "return DuplicateSubmissionException" when {
+
+        "connector returns  DuplicateSubmissionException." in {
+
+          when(mockConnector.variations(variationsRequest)).
+            thenReturn(Future.failed(DuplicateSubmissionException))
+
+          val futureResult = SUT.variation(variationsRequest)
+
+          whenReady(futureResult.failed) {
+            result => result mustBe DuplicateSubmissionException
+          }
+
+        }
+
+      }
+
+      "return same Exception " when {
+        "connector returns  exception." in {
+
+          when(mockConnector.variations(variationsRequest)).
+            thenReturn(Future.failed(InternalServerErrorException("")))
+
+          val futureResult = SUT.variation(variationsRequest)
+
+          whenReady(futureResult.failed) {
+            result => result mustBe an[InternalServerErrorException]
+          }
+
+        }
+      }
+
+    }
+  } // variation
+
 }

@@ -78,7 +78,6 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
 
   }
 
-
   def indBeneficiariesDuplicateNino: List[Option[TrustsValidationError]] = {
     registration.trust.entities.beneficiary.individualDetails.map {
       indBeneficiary => {
@@ -148,7 +147,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
       trustees => {
         val utrList: List[(String, Int)] = getTrusteesUtrWithIndex(trustees)
         utrList.map {
-          case (utr, index) if trustUtr == Some(utr) =>
+          case (utr, index) if trustUtr.contains(utr) =>
             Some(TrustsValidationError(s"Business trustee utr is same as trust utr.",
               s"/trust/entities/trustees/$index/trusteeOrg/identification/utr"))
           case _ =>
