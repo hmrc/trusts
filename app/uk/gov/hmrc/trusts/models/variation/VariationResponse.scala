@@ -17,5 +17,14 @@
 package uk.gov.hmrc.trusts.models.variation
 
 sealed trait VariationResponse
-
 case class VariationTvnResponse(tvn: String) extends VariationResponse
+
+
+sealed trait VariationErrorResponseElement
+
+case class VariationFailureResponses(responseElements: List[VariationErrorResponseElement])
+case object InvalidPayload extends VariationErrorResponseElement
+case object DuplicatedSubmission extends VariationErrorResponseElement
+case object ServerError extends VariationErrorResponseElement
+case object ServiceUnavailable extends VariationErrorResponseElement
+case object InvalidCorrelationId extends VariationErrorResponseElement
