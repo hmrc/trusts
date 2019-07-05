@@ -29,6 +29,7 @@ import uk.gov.hmrc.trusts.models.{get_trust_or_estate, _}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.variation.VariationTvnResponse
 
 import scala.concurrent.Future
 
@@ -565,4 +566,20 @@ class DesServiceSpec extends BaseSpec {
       }
     }
   } // getEstateInfo
+
+  ".variation" should {
+    "return a VariationTvnResponse" when {
+      "VariationTvnResponse is returned from DES Connector" in {
+
+        when(mockConnector.variation()(any())).thenReturn(Future.successful(VariationTvnResponse("XXTVN1234567890")))
+
+        val futureResult = SUT.variation()
+
+        whenReady(futureResult) { result =>
+          result mustBe a[VariationTvnResponse]
+          inside(result){ case VariationTvnResponse(tvn)  => tvn must fullyMatch regex """[a-zA-Z0-9]{15}""".r }
+        }
+      }
+    }
+  } // variation
 }

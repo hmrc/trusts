@@ -23,7 +23,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Seconds, Span}
-import org.scalatest.{BeforeAndAfter, MustMatchers, WordSpec}
+import org.scalatest.{BeforeAndAfter, Inside, MustMatchers, WordSpec}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
@@ -40,7 +40,8 @@ class BaseSpec extends WordSpec
   with JsonRequests
   with BeforeAndAfter
   with GuiceOneServerPerSuite
-  with WireMockHelper {
+  with WireMockHelper
+  with Inside {
 
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
 

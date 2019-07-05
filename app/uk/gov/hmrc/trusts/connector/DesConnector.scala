@@ -29,6 +29,7 @@ import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.utils.Constants._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.GetEstateResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustResponse
+import uk.gov.hmrc.trusts.models.variation.{VariationResponse, VariationTvnResponse}
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
@@ -124,6 +125,11 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
     http.GET[GetEstateResponse](createGetTrustOrEsateEndpoint(utr))(GetEstateResponse.httpReads, updatedHeaderCarrier, global)
   }
+
+  override def variation()(implicit hc: HeaderCarrier): Future[VariationResponse] = {
+    //TODO: Make POST and wiremock
+    Future.successful(VariationTvnResponse("XXTVN1234567890"))
+  }
 }
 
 @ImplementedBy(classOf[DesConnectorImpl])
@@ -137,4 +143,6 @@ trait DesConnector {
 
   def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse]
   def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse]
+
+  def variation()(implicit hc: HeaderCarrier): Future[VariationResponse]
 }

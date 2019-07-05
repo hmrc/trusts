@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.trusts.connectors
 
+import org.scalatest.Inside
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -25,12 +26,14 @@ import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions.{AlreadyRegisteredException, _}
 import uk.gov.hmrc.trusts.models.ExistingCheckRequest._
 import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
-import uk.gov.hmrc.trusts.models._
+import uk.gov.hmrc.trusts.models.{variation, _}
 import uk.gov.hmrc.trusts.utils.WireMockHelper
 import play.api.http.Status._
+import uk.gov.hmrc.trusts.models
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.variation.VariationTvnResponse
 
 class DesConnectorSpec extends BaseConnectorSpec {
 
@@ -905,4 +908,19 @@ class DesConnectorSpec extends BaseConnectorSpec {
       }
     }
   }//getEstateInfo
+
+  ".variation" should {
+
+    "return a VariationTrnResponse" when {
+      "des has returned a 200 with a trn" in {
+
+        val futureResult = connector.variation()
+
+        whenReady(futureResult) { result =>
+          result mustBe a[VariationTvnResponse]
+          inside(result){ case VariationTvnResponse(tvn)  => tvn must fullyMatch regex """^[a-zA-Z0-9]{15}$""".r }
+        }
+      }
+    }
+  }
 }
