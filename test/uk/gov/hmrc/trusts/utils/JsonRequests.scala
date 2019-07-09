@@ -17,6 +17,7 @@
 package uk.gov.hmrc.trusts.utils
 
 import uk.gov.hmrc.trusts.models._
+import uk.gov.hmrc.trusts.models.variation.Variation
 
 trait JsonRequests extends JsonUtils {
 

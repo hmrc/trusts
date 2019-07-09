@@ -29,7 +29,7 @@ import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.utils.Constants._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.GetEstateResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustResponse
-import uk.gov.hmrc.trusts.models.variation.{VariationResponse, VariationTvnResponse}
+import uk.gov.hmrc.trusts.models.variation.{Variation, VariationResponse, VariationTvnResponse}
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
