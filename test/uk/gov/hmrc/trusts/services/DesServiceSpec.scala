@@ -16,12 +16,10 @@
 
 package uk.gov.hmrc.trusts.services
 
-import java.time.format.DateTimeFormatter
-
 import org.joda.time.format.DateTimeFormat
 import org.mockito.Mockito.when
 import org.mockito.Matchers._
-import uk.gov.hmrc.trusts.{BaseSpec, models}
+import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
@@ -571,9 +569,9 @@ class DesServiceSpec extends BaseSpec {
     "return a VariationTvnResponse" when {
       "VariationTvnResponse is returned from DES Connector" in {
 
-        when(mockConnector.variation()(any())).thenReturn(Future.successful(VariationTvnResponse("XXTVN1234567890")))
+        when(mockConnector.variations(???)(any())).thenReturn(Future.successful(VariationTvnResponse("XXTVN1234567890")))
 
-        val futureResult = SUT.variation()
+        val futureResult = SUT.variation(???)
 
         whenReady(futureResult) { result =>
           result mustBe a[VariationTvnResponse]

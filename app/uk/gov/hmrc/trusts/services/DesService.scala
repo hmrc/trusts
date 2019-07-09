@@ -62,9 +62,8 @@ class DesServiceImpl @Inject()(val desConnector: DesConnector) extends DesServic
     desConnector.getEstateInfo(utr)
   }
 
-  def variation()(implicit hc: HeaderCarrier): Future[VariationResponse] = {
-    desConnector.variation()
-  }
+  def variation(variation: Variation)(implicit hc: HeaderCarrier): Future[VariationResponse] =
+    desConnector.variations(variation: Variation)
 }
 
 
@@ -82,5 +81,5 @@ trait DesService {
   def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse]
   def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse]
 
-  def variation()(implicit hc: HeaderCarrier): Future[VariationResponse]
+  def variation(variation: Variation)(implicit hc: HeaderCarrier): Future[VariationResponse]
 }

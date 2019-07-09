@@ -45,6 +45,28 @@ object Registration {
   )(r => (r.matchData, r.correspondence,r.declaration, r.yearsReturns, r.trust,r.agentDetails))
 }
 
+case class Variation(matchData: MatchData,
+                     correspondence: Correspondence,
+                     declaration: Declaration,
+                     trust: Trust,
+                     agentDetails: Option[AgentDetails] = None,
+                     trustEndDate: Option[DateTime],
+                     reqHeader: String
+                    )
+
+object Variation {
+  implicit val variationReads :Reads[Variation] = Json.reads[Variation]
+  implicit val writeToDes :Writes[Variation] = (
+    (JsPath \ "matchData").write[MatchData] and
+      (JsPath \ "correspondence").write[Correspondence] and
+      (JsPath \ "declaration").write[Declaration] and
+      (JsPath \ "details" \ "trust").write[Trust] and
+      (JsPath \ "agentDetails" ).writeNullable[AgentDetails] and
+      (JsPath \ "trustEndDate").writeNullable[DateTime] and
+      (JsPath \ "reqHeader").write[String]
+    )(r => (r.matchData, r.correspondence,r.declaration, r.trust, r.agentDetails, r.trustEndDate, r.reqHeader))
+}
+
 case class Details(trust: Trust)
 
 object Details {

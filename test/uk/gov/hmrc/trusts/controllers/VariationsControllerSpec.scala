@@ -43,7 +43,7 @@ class VariationsControllerSpec extends BaseSpec {
   ".variation" should {
     "return a 200 - OK" when {
       "the des service returns a VariationTvnResponse" in {
-        when(mockDesService.variation()(any())).thenReturn(Future.successful(VariationTvnResponse("XXTVN1234567890")))
+        when(mockDesService.variation(???)(any())).thenReturn(Future.successful(VariationTvnResponse("XXTVN1234567890")))
 
         val result = variationsController.variation().apply(postRequestWithPayload(Json.obj("test" -> "value"), withDraftId = false))
 

@@ -126,7 +126,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
     http.GET[GetEstateResponse](createGetTrustOrEsateEndpoint(utr))(GetEstateResponse.httpReads, updatedHeaderCarrier, global)
   }
 
-  override def variation()(implicit hc: HeaderCarrier): Future[VariationResponse] = {
+  override def variations(variation: Variation)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
     //TODO: Make POST and wiremock
     Future.successful(VariationTvnResponse("XXTVN1234567890"))
   }
@@ -144,5 +144,5 @@ trait DesConnector {
   def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse]
   def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse]
 
-  def variation()(implicit hc: HeaderCarrier): Future[VariationResponse]
+  def variations(variation: Variation)(implicit hc: HeaderCarrier): Future[VariationResponse]
 }
