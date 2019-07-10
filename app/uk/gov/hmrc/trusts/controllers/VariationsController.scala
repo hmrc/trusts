@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
-import uk.gov.hmrc.trusts.models.variation.VariationTvnResponse
+import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.services.DesService
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -30,7 +30,7 @@ class VariationsController @Inject() (identify: IdentifierAction, desService: De
   def variation() = identify.async(parse.json) {
     implicit request =>
       desService.variation(???) map {
-        case _: VariationTvnResponse => Ok
+        case _: VariationResponse => Ok
         case _ => NotImplemented
       }
   }

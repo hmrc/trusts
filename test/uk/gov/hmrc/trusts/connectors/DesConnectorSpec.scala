@@ -26,7 +26,7 @@ import play.api.http.Status._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.VariationTvnResponse
+import uk.gov.hmrc.trusts.models.variation.VariationResponse
 
 class DesConnectorSpec extends BaseConnectorSpec {
 
@@ -906,21 +906,27 @@ class DesConnectorSpec extends BaseConnectorSpec {
     "return a VariationTrnResponse" when {
       "des has returned a 200 with a trn" in {
 
+        val requestBody = Json.stringify(Json.toJson(variationsRequest))
+        stubForPost(server, url, requestBody, OK, """{"tvn": "XXTVN1234567890"}""")
+
         val futureResult = connector.variations(variationsRequest)
 
+        application.stop()
+
         whenReady(futureResult) { result =>
-          result mustBe a[VariationTvnResponse]
-          inside(result){ case VariationTvnResponse(tvn)  => tvn must fullyMatch regex """^[a-zA-Z0-9]{15}$""".r }
+          result mustBe a[VariationResponse]
+          inside(result){ case VariationResponse(tvn)  => tvn must fullyMatch regex """^[a-zA-Z0-9]{15}$""".r }
         }
       }
     }
 
     "return BadRequestException" when {
       "payload sent to des is invalid" in {
-        val requestBody = Json.stringify(Json.toJson(invalidRegistrationRequest))
+
+        val requestBody = Json.stringify(Json.toJson(invalidVariationsRequest))
         stubForPost(server, url, requestBody, BAD_REQUEST, Json.stringify(jsonResponse400))
 
-        val futureResult = connector.variations(variationsRequest)
+        val futureResult = connector.variations(invalidVariationsRequest)
 
         application.stop()
 

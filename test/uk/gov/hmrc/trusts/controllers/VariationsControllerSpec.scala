@@ -26,7 +26,7 @@ import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustFoundResponse
-import uk.gov.hmrc.trusts.models.variation.VariationTvnResponse
+import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.services.DesService
 
 import scala.concurrent.Future
@@ -43,7 +43,7 @@ class VariationsControllerSpec extends BaseSpec {
   ".variation" should {
     "return a 200 - OK" when {
       "the des service returns a VariationTvnResponse" in {
-        when(mockDesService.variation(???)(any())).thenReturn(Future.successful(VariationTvnResponse("XXTVN1234567890")))
+        when(mockDesService.variation(???)(any())).thenReturn(Future.successful(VariationResponse("XXTVN1234567890")))
 
         val result = variationsController.variation().apply(postRequestWithPayload(Json.obj("test" -> "value"), withDraftId = false))
 
