@@ -26,7 +26,7 @@ case class Variation(
                       matchData: MatchData,
                       correspondence: Correspondence,
                       declaration: Declaration,
-                      trust: Trust,
+                      details: Trust,
                       agentDetails: Option[AgentDetails] = None,
                       trustEndDate: Option[DateTime],
                       reqHeader: ReqHeader
@@ -34,7 +34,15 @@ case class Variation(
 
 object Variation {
   implicit val variationReads: Reads[Variation] = {
-    ???
+    (
+      (__ \ "matchData").read[MatchData] and
+        (__ \ "correspondence").read[Correspondence] and
+        (__ \ "declaration").read[Declaration] and
+        (__ \ "details" \ "trust").read[Trust] and
+        (__ \ "agentDetails").readNullable[AgentDetails] and
+        (__ \ "trustEndDate").readNullable[DateTime] and
+        (__ \ "reqHeader").read[ReqHeader]
+      ) (Variation.apply _)
   }
 
   implicit val writeToDes: Writes[Variation] = (
@@ -45,7 +53,7 @@ object Variation {
       (JsPath \ "agentDetails").writeNullable[AgentDetails] and
       (JsPath \ "trustEndDate").writeNullable[DateTime] and
       (JsPath \ "reqHeader").write[ReqHeader]
-    ) (r => (r.matchData, r.correspondence, r.declaration, r.trust, r.agentDetails, r.trustEndDate, r.reqHeader))
+    ) (r => (r.matchData, r.correspondence, r.declaration, r.details, r.agentDetails, r.trustEndDate, r.reqHeader))
 }
 
 case class MatchData(utr: String)
