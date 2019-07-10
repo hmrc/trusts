@@ -17,22 +17,26 @@
 package uk.gov.hmrc.trusts.models.variation
 
 import org.joda.time.DateTime
-import play.api.libs.json.{Format, JsPath, Json, Reads, Writes}
-import uk.gov.hmrc.trusts.models.{Assets, _}
+import uk.gov.hmrc.trusts.models._
 import play.api.libs.functional.syntax._
+import play.api.libs.json._
 import uk.gov.hmrc.trusts.utils.Constants.dateTimePattern
 
-case class Variation(matchData: MatchData,
-                     correspondence: Correspondence,
-                     declaration: Declaration,
-                     trust: Trust,
-                     agentDetails: Option[AgentDetails] = None,
-                     trustEndDate: Option[DateTime],
-                     reqHeader: ReqHeader
+case class Variation(
+                      matchData: MatchData,
+                      correspondence: Correspondence,
+                      declaration: Declaration,
+                      trust: Trust,
+                      agentDetails: Option[AgentDetails] = None,
+                      trustEndDate: Option[DateTime],
+                      reqHeader: ReqHeader
                     )
 
 object Variation {
-  implicit val variationReads: Reads[Variation] = Json.reads[Variation]
+  implicit val variationReads: Reads[Variation] = {
+    ???
+  }
+
   implicit val writeToDes: Writes[Variation] = (
     (JsPath \ "matchData").write[MatchData] and
       (JsPath \ "correspondence").write[Correspondence] and
@@ -50,7 +54,7 @@ object MatchData {
   implicit val matchDataFormat: Format[MatchData] = Json.format[MatchData]
 }
 
-case class ReqHeader(formBundle: String)
+case class ReqHeader(formBundleNo: String)
 
 object ReqHeader {
   implicit val reqHeaderFormat: Format[ReqHeader] = Json.format[ReqHeader]
@@ -357,6 +361,6 @@ case class PartnershipType(
 
 object PartnershipType {
 
-  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
+  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val partnershipTypeFormat: Format[PartnershipType] = Json.format[PartnershipType]
 }
