@@ -31,7 +31,6 @@ import uk.gov.hmrc.trusts.services.{DesService, FakeAuditService, RosmPatternSer
 
 import scala.concurrent.Future
 
-
 class RegisterTrustControllerSpec extends BaseSpec {
 
   val mockDesService = mock[DesService]

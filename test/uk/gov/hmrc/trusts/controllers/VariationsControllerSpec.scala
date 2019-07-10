@@ -16,18 +16,20 @@
 
 package uk.gov.hmrc.trusts.controllers
 
-import org.mockito.Matchers.any
-import org.mockito.Mockito.when
+import java.util.UUID
+
+import org.mockito.Matchers._
+import org.mockito.Mockito._
 import play.api.libs.json.Json
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustFoundResponse
-import uk.gov.hmrc.trusts.models.variation.VariationResponse
+import uk.gov.hmrc.trusts.exceptions._
+import uk.gov.hmrc.trusts.models.variation.{Variation, VariationResponse}
 import uk.gov.hmrc.trusts.services.DesService
+import uk.gov.hmrc.trusts.utils.Headers
 
 import scala.concurrent.Future
 
@@ -40,14 +42,157 @@ class VariationsControllerSpec extends BaseSpec {
     SUT
   }
 
-  ".variation" should {
-    "return a 200 - OK" when {
-      "the des service returns a VariationTvnResponse" in {
-        when(mockDesService.variation(???)(any())).thenReturn(Future.successful(VariationResponse("XXTVN1234567890")))
+  val tvnResponse = "XXTVN1234567890"
 
-        val result = variationsController.variation().apply(postRequestWithPayload(Json.obj("test" -> "value"), withDraftId = false))
+
+  ".variation" should {
+
+    "return 200 with TVN" when {
+
+      "individual user called the register endpoint with a valid json payload " in {
+
+        when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(VariationResponse(tvnResponse)))
+
+        val SUT = variationsController
+
+        val result = SUT.variation()(
+          postRequestWithPayload(Json.parse(validVariationsRequestJson), withDraftId = false)
+            .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
+        )
 
         status(result) mustBe OK
+        (contentAsJson(result) \ "tvn").as[String] mustBe tvnResponse
+
+      }
+
+    }
+
+    "return a Conflict" when {
+      "submission with same correlation id is submitted." in {
+
+        val SUT = variationsController
+
+        when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+          .thenReturn(Future.failed(DuplicateSubmissionException))
+
+        val result = SUT.variation()(
+          postRequestWithPayload(Json.parse(validVariationsRequestJson), withDraftId = false)
+            .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
+        )
+
+        status(result) mustBe CONFLICT
+
+        val output = contentAsJson(result)
+
+        (output \ "code").as[String] mustBe "DUPLICATE_SUBMISSION"
+        (output \ "message").as[String] mustBe "Duplicate Correlation Id was submitted."
+
+      }
+    }
+
+    "return a BadRequest" when {
+
+      "input request fails schema validation" in {
+
+        val SUT = variationsController
+
+        val result = SUT.variation()(
+          postRequestWithPayload(Json.parse(invalidVariationsRequestJson), withDraftId = false)
+            .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
+        )
+
+        status(result) mustBe BAD_REQUEST
+
+        val output = contentAsJson(result)
+
+        (output \ "code").as[String] mustBe "BAD_REQUEST"
+        (output \ "message").as[String] mustBe "Provided request is invalid."
+
+      }
+
+      "input request fails business validation" in {
+
+        val SUT = variationsController
+
+        val result = SUT.variation()(
+          postRequestWithPayload(Json.parse(invalidTrustBusinessValidation), withDraftId = false)
+            .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
+        )
+
+        status(result) mustBe BAD_REQUEST
+
+        val output = contentAsJson(result)
+
+        (output \ "code").as[String] mustBe "BAD_REQUEST"
+        (output \ "message").as[String] mustBe "Provided request is invalid."
+
+      }
+
+      "invalid correlation id is provided in the headers" in {
+
+        when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(VariationResponse(tvnResponse)))
+
+        val SUT = variationsController
+
+        val request = postRequestWithPayload(Json.parse(validVariationsRequestJson), withDraftId = false)
+
+        val result = SUT.variation()(request)
+
+        status(result) mustBe BAD_REQUEST
+
+        val output = contentAsJson(result)
+
+        (output \ "code").as[String] mustBe "INVALID_CORRELATIONID"
+        (output \ "message").as[String] mustBe "Submission has not passed validation. Invalid CorrelationId."
+
+      }
+
+    }
+
+    "return an internal server error" when {
+
+      "the register endpoint called and something goes wrong." in {
+
+        when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+          .thenReturn(Future.failed(InternalServerErrorException("some error")))
+
+        val SUT = variationsController
+
+        val result = SUT.variation()(
+          postRequestWithPayload(Json.parse(validRegistrationRequestJson))
+            .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
+        )
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+
+        val output = contentAsJson(result)
+
+        (output \ "code").as[String] mustBe "INTERNAL_SERVER_ERROR"
+        (output \ "message").as[String] mustBe "Internal server error."
+
+      }
+
+      "the des returns Service Unavailable as dependent service is down. " in {
+
+        val SUT = variationsController
+
+        when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+          .thenReturn(Future.failed(ServiceNotAvailableException("dependent service is down")))
+
+        val result = SUT.variation()(
+          postRequestWithPayload(Json.parse(validRegistrationRequestJson))
+            .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
+        )
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+
+        val output = contentAsJson(result)
+
+        (output \ "code").as[String] mustBe "INTERNAL_SERVER_ERROR"
+        (output \ "message").as[String] mustBe "Internal server error."
+
       }
     }
   }
