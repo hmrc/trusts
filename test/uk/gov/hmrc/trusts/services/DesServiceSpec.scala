@@ -108,7 +108,6 @@ class DesServiceSpec extends BaseSpec {
     }
   }
 
-
   ".checkExistingEstate" should {
 
     "return Matched " when {
@@ -179,7 +178,6 @@ class DesServiceSpec extends BaseSpec {
       }
     }
   } //checkExistingEstate
-
 
   ".registerTrust" should {
 
@@ -567,17 +565,54 @@ class DesServiceSpec extends BaseSpec {
 
   ".variation" should {
     "return a VariationTvnResponse" when {
-      "VariationTvnResponse is returned from DES Connector" in {
 
-        when(mockConnector.variations(???)(any())).thenReturn(Future.successful(VariationResponse("XXTVN1234567890")))
+      "connector returns VariationResponse." in {
 
-        val futureResult = SUT.variation(???)
+        when(mockConnector.variations(variationsRequest)).
+          thenReturn(Future.successful(VariationResponse("tvn123")))
 
-        whenReady(futureResult) { result =>
-          result mustBe a[VariationResponse]
-          inside(result){ case VariationResponse(tvn)  => tvn must fullyMatch regex """[a-zA-Z0-9]{15}""".r }
+        val futureResult = SUT.variation(variationsRequest)
+
+        whenReady(futureResult) {
+          result => result mustBe VariationResponse("tvn123")
+        }
+
+      }
+
+
+      "return DuplicateSubmissionException" when {
+
+        "connector returns  DuplicateSubmissionException." in {
+
+          when(mockConnector.variations(variationsRequest)).
+            thenReturn(Future.failed(DuplicateSubmissionException))
+
+          val futureResult = SUT.variation(variationsRequest)
+
+          whenReady(futureResult.failed) {
+            result => result mustBe DuplicateSubmissionException
+          }
+
+        }
+
+      }
+
+      "return same Exception " when {
+        "connector returns  exception." in {
+
+          when(mockConnector.variations(variationsRequest)).
+            thenReturn(Future.failed(InternalServerErrorException("")))
+
+          val futureResult = SUT.variation(variationsRequest)
+
+          whenReady(futureResult.failed) {
+            result => result mustBe an[InternalServerErrorException]
+          }
+
         }
       }
+
     }
   } // variation
+
 }
