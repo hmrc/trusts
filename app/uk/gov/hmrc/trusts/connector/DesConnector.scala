@@ -46,7 +46,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
   lazy val trustRegistrationEndpoint : String = s"$trustsServiceUrl/registration"
   lazy val estateRegistrationEndpoint : String = s"$estatesServiceUrl/registration"
 
-  def createGetTrustOrEsateEndpoint(utr: String): String = s"$getTrustOrEstateUrl/registration/$utr"
+  def createGetTrustOrEstateEndpoint(utr: String): String = s"$getTrustOrEstateUrl/registration/$utr"
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "CorrelationId"
@@ -114,15 +114,17 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
   }
 
   override def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
-    val updatedHeaderCarrier = hc.copy(extraHeaders = desHeaders)
 
-    http.GET[GetTrustResponse](createGetTrustOrEsateEndpoint(utr))(GetTrustResponse.httpReads, updatedHeaderCarrier, global)
+    implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
+
+    http.GET[GetTrustResponse](createGetTrustOrEstateEndpoint(utr))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)
   }
 
   override def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse] = {
-    val updatedHeaderCarrier = hc.copy(extraHeaders = desHeaders)
 
-    http.GET[GetEstateResponse](createGetTrustOrEsateEndpoint(utr))(GetEstateResponse.httpReads, updatedHeaderCarrier, global)
+    implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
+
+    http.GET[GetEstateResponse](createGetTrustOrEstateEndpoint(utr))(GetEstateResponse.httpReads, implicitly[HeaderCarrier](hc), global)
   }
 }
 
