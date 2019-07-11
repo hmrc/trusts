@@ -20,7 +20,7 @@ import javax.inject.Inject
 import play.api.Logger
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateHeadersAction}
-import uk.gov.hmrc.trusts.exceptions.{DuplicateSubmissionException, InternalServerErrorException, InvalidCorrelationIdException, ServiceNotAvailableException}
+import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.variation.Variation
 import uk.gov.hmrc.trusts.services.DesService
 import uk.gov.hmrc.trusts.utils.{Headers, ValidationUtil}
@@ -42,9 +42,8 @@ class VariationsController @Inject()(
           Logger.error(s"[variations] trusts validation errors from request body $errors.")
           Future.successful(invalidRequestErrorResponse)
         },
-        desService.variation(_) map {
-          case response => Ok(Json.toJson(response))
-          case _ => NotImplemented
+        desService.variation(_) map { response =>
+          Ok(Json.toJson(response))
         } recover {
           case _: InvalidCorrelationIdException.type =>
             invalidCorrelationIdErrorResponse
