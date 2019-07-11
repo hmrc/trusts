@@ -115,8 +115,7 @@
           "dateOfDeath": "2016-01-01",
           "identification": {
             "nino": "KC456736"
-          },
-          "entityStart": "1998-02-12"
+          }
         },
         "leadTrustees": [
           {

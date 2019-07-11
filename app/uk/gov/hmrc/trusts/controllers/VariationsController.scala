@@ -24,6 +24,7 @@ import uk.gov.hmrc.trusts.models.variation.{Variation, VariationResponse}
 import uk.gov.hmrc.trusts.services.DesService
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class VariationsController @Inject() (identify: IdentifierAction, desService: DesService) extends TrustsBaseController {
 
@@ -33,7 +34,7 @@ class VariationsController @Inject() (identify: IdentifierAction, desService: De
       request.body.validate[Variation].fold(
         errors => {
           Logger.error(s"[variations] trusts validation errors from request body $errors.")
-          ???
+          Future.successful(invalidRequestErrorResponse)
         },
         desService.variation(_) map {
           case response => Ok(Json.toJson(response))
