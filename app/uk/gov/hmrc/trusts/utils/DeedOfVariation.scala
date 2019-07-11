@@ -18,18 +18,15 @@ package uk.gov.hmrc.trusts.utils
 
 import play.api.libs.json.{Format, Reads, Writes}
 
-object TypeOfTrust extends Enumeration {
+object DeedOfVariation extends Enumeration {
 
-  type TypeOfTrust = Value
+  type DeedOfVariation = Value
 
-  val Will = Value("Will Trust or Intestacy Trust")
-  val DeedOfVariationOrFamilyAgreement = Value("Deed of Variation Trust or Family Arrangement")
-  val Employment = Value("Employment Related")
-  val IntervivosSettlement = Value("Inter vivos Settlement")
-  val HeritageMaintenance = Value("Heritage Maintenance Fund")
-  val FlatManagement = Value("Flat Management Company or Sinking Fund")
+  val AbsoluteInterestUnderWill = Value("Previously there was only an absolute interest under the will")
+  val ReplacedWill = Value("Replaced the will trust")
+  val AdditionToWill = Value("Addition to the will trust")
 
-  implicit val reads = Reads.enumNameReads(TypeOfTrust)
+  implicit val reads = Reads.enumNameReads(DeedOfVariation)
   implicit val writes = Writes.enumNameWrites
   implicit val formats = Format.apply(reads, writes)
 

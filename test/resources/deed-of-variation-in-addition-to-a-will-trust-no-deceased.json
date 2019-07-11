@@ -1,0 +1,112 @@
+{
+  "matchData": {
+    "name": "Sean Barnett DOV Trust",
+    "utr": "1000000200"
+  },
+  "correspondence": {
+    "abroadIndicator": true,
+    "name": "Sean Barnett DOV Trust",
+    "address": {
+      "line1": "4 Trust Street",
+      "line2": "Trust Area",
+      "line3": "Trust County",
+      "country": "CA"
+    },
+    "phoneNumber": "0191 1234567"
+  },
+  "declaration": {
+    "name": {
+      "firstName": "John",
+      "middleName": "Lead",
+      "lastName": "Trustee"
+    },
+    "address": {
+      "line1": "4 Trustee Street",
+      "line2": "Trustee Area",
+      "line3": "Trustee County",
+      "country": "CA"
+    }
+  },
+  "trust": {
+    "details": {
+      "startDate": "2019-01-01",
+      "lawCountry": "CA",
+      "administrationCountry": "CA",
+      "residentialStatus": {
+        "nonUK": {
+          "sch5atcgga92": false,
+          "s218ihta84": true,
+          "agentS218IHTA84": true
+        }
+      },
+      "typeOfTrust": "Deed of Variation Trust or Family Arrangement",
+      "deedOfVariation": "Addition to the will trust"
+    },
+    "entities": {
+      "beneficiary": {
+        "company": [
+          {
+            "organisationName": "Beneficiary Org",
+            "beneficiaryDiscretion": false,
+            "beneficiaryShareOfIncome": "50",
+            "identification": {
+              "utr": "9999999999"
+            }
+          }
+        ]
+      },
+      "leadTrustees": {
+        "leadTrusteeInd": {
+          "name": {
+            "firstName": "Sean",
+            "middleName": "Lead",
+            "lastName": "Trustee"
+          },
+          "dateOfBirth": "1950-01-01",
+          "identification": {
+            "nino": "AA111111A"
+          },
+          "phoneNumber": "0191 237569679",
+          "email": "Lead@Trustee.com"
+        }
+      },
+      "trustees": [
+        {
+          "trusteeInd": {
+            "name": {
+              "firstName": "Billy",
+              "middleName": "Individual",
+              "lastName": "Trustee"
+            },
+            "dateOfBirth": "1960-01-01",
+            "identification": {
+              "nino": "AB123456A"
+            }
+          }
+        }
+      ],
+      "settlors": {
+        "settlor": [
+          {
+            "name": {
+              "firstName": "abcdefghijkl",
+              "middleName": "abcdefghijklmn",
+              "lastName": "abcde"
+            },
+            "dateOfBirth": "2015-01-01",
+            "identification": {
+              "nino": "{settlorNino}"
+            }
+          }
+        ]
+      }
+    },
+    "assets": {
+      "monetary": [
+        {
+          "assetMonetaryAmount": 100
+        }
+      ]
+    }
+  }
+}
