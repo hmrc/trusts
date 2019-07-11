@@ -21,10 +21,11 @@ import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.services.TrustsValidationError
 
 import scala.annotation.tailrec
+import scala.util.matching.Regex
 
 trait ValidationUtil {
 
-  def isNotFutureDate(date : DateTime,path : String, key : String ) : Option[TrustsValidationError] = {
+  def isNotFutureDate(date: DateTime, path: String, key: String): Option[TrustsValidationError] = {
     if (isAfterToday(date)) {
       Some(TrustsValidationError(s"$key must be today or in the past.", path))
     } else {
@@ -32,7 +33,7 @@ trait ValidationUtil {
     }
   }
 
-  def isNotFutureDate(date : Option[DateTime],path : String, key : String ) : Option[TrustsValidationError]= {
+  def isNotFutureDate(date: Option[DateTime], path: String, key: String): Option[TrustsValidationError] = {
     if (date.isDefined && isAfterToday(date.get)) {
       isNotFutureDate(date.get, path, key)
     } else {
@@ -40,16 +41,16 @@ trait ValidationUtil {
     }
   }
 
-  def isAfterToday(date :DateTime): Boolean = {
+  def isAfterToday(date: DateTime): Boolean = {
     date.isAfter(new DateTime().plusDays(1).withTimeAtStartOfDay())
   }
 
   type ListOfItemsAtIndex = List[(String, Int)]
 
-  def findDuplicates(ninos : ListOfItemsAtIndex) : ListOfItemsAtIndex = {
+  def findDuplicates(ninos: ListOfItemsAtIndex): ListOfItemsAtIndex = {
 
     @tailrec
-    def findDuplicateHelper(remaining : ListOfItemsAtIndex, duplicates : ListOfItemsAtIndex) : ListOfItemsAtIndex = {
+    def findDuplicateHelper(remaining: ListOfItemsAtIndex, duplicates: ListOfItemsAtIndex): ListOfItemsAtIndex = {
       remaining match {
         case Nil => {
           duplicates
@@ -66,29 +67,27 @@ trait ValidationUtil {
     findDuplicateHelper(ninos, Nil)
   }
 
-
-   def getTrusteesUtrWithIndex(trustees: List[TrusteeType]) : List[(String, Int)] = {
+  def getTrusteesUtrWithIndex(trustees: List[TrusteeType]): List[(String, Int)] = {
     val utrList: List[(String, Int)] = trustees.zipWithIndex.flatMap {
       case (trustee, index) =>
         trustee.trusteeOrg.flatMap { x =>
-          x.identification.utr.map { y => (y, index) } }
+          x.identification.utr.map { y => (y, index) }
         }
+    }
     utrList
   }
 
-
-   def getTrusteesNinoWithIndex(trustees: List[TrusteeType]):List[(String, Int)] = {
+  def getTrusteesNinoWithIndex(trustees: List[TrusteeType]): List[(String, Int)] = {
     val ninoList: List[(String, Int)] = trustees.zipWithIndex.flatMap {
       case (trustee, index) =>
         trustee.trusteeInd.flatMap { x =>
-          x.identification.flatMap { z=> z.nino.map { y => (y, index) } }
+          x.identification.flatMap { z => z.nino.map { y => (y, index) } }
         }
     }
     ninoList
   }
 
-
-   def getIndBenificiaryNinoWithIndex(indBenificiaries: List[IndividualDetailsType]):List[(String, Int)] = {
+  def getIndBenificiaryNinoWithIndex(indBenificiaries: List[IndividualDetailsType]): List[(String, Int)] = {
     val ninoList: List[(String, Int)] = indBenificiaries.zipWithIndex.flatMap {
       case (indv, index) =>
         indv.identification.map { x =>
@@ -98,7 +97,7 @@ trait ValidationUtil {
     ninoList
   }
 
-  def getSettlorNinoWithIndex(settlors: List[Settlor]) :List[(String, Int)] = {
+  def getSettlorNinoWithIndex(settlors: List[Settlor]): List[(String, Int)] = {
     val ninoList: List[(String, Int)] = settlors.zipWithIndex.flatMap {
       case (settlor, index) =>
         settlor.identification.map { x =>
@@ -108,9 +107,7 @@ trait ValidationUtil {
     ninoList
   }
 
-
-
-  def getIndBenificiaryPassportNumberWithIndex(indBenificiaries: List[IndividualDetailsType]) :List[(String, Int)] = {
+  def getIndBenificiaryPassportNumberWithIndex(indBenificiaries: List[IndividualDetailsType]): List[(String, Int)] = {
     val passportNumberList: List[(String, Int)] = indBenificiaries.zipWithIndex.flatMap {
       case (indv, index) =>
         indv.identification.map { x =>
@@ -122,8 +119,7 @@ trait ValidationUtil {
 
   def isNotTrust(currentTypeOfTrust: String, typeOfTrust: TypeOfTrust.Value): Boolean = currentTypeOfTrust != typeOfTrust.toString
 
-
-  def getSettlorPassportNumberWithIndex(settlor: List[Settlor]):List[(String, Int)] = {
+  def getSettlorPassportNumberWithIndex(settlor: List[Settlor]): List[(String, Int)] = {
     val passportNumberList: List[(String, Int)] = settlor.zipWithIndex.flatMap {
       case (indv, index) =>
         indv.identification.map { x =>
@@ -133,11 +129,10 @@ trait ValidationUtil {
     passportNumberList
   }
 
-
-  def getSettlorUtrNumberWithIndex(settlorCompanies: List[SettlorCompany]):List[(String, Int)] = {
+  def getSettlorUtrNumberWithIndex(settlorCompanies: List[SettlorCompany]): List[(String, Int)] = {
     val utrList: List[(String, Int)] = settlorCompanies.zipWithIndex.flatMap {
       case (settlorCompany, index) =>
-        settlorCompany.identification.map { x=> x.utr map { y => (y,index) } }
+        settlorCompany.identification.map { x => x.utr map { y => (y, index) } }
 
     }.flatten
     utrList
@@ -148,11 +143,20 @@ trait ValidationUtil {
   }
 
   def getSettlorIndividuals(registration: Registration): Option[List[Settlor]] = {
-    registration.trust.entities.settlors.flatMap { settlors => settlors.settlor.map(x=>x)}
+    registration.trust.entities.settlors.flatMap { settlors => settlors.settlor.map(x => x) }
   }
 
   def getSettlorCompanies(registration: Registration): Option[List[SettlorCompany]] = {
-    registration.trust.entities.settlors.flatMap {settlors => settlors.settlorCompany.map(x=>x) }
+    registration.trust.entities.settlors.flatMap { settlors => settlors.settlorCompany.map(x => x) }
+  }
+
+  def isValidCorrelationId(header: Option[String], regex: Regex): Boolean = {
+
+    header match {
+      case Some(correlationId) => regex.findFirstMatchIn(correlationId).isDefined
+      case _ => false
+    }
+
   }
 
 }

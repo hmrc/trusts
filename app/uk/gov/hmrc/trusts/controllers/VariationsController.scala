@@ -22,25 +22,30 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.variation.{Variation, VariationResponse}
 import uk.gov.hmrc.trusts.services.DesService
+import uk.gov.hmrc.trusts.utils.{Headers, ValidationUtil}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class VariationsController @Inject() (identify: IdentifierAction, desService: DesService) extends TrustsBaseController {
+class VariationsController @Inject() (identify: IdentifierAction, desService: DesService) extends TrustsBaseController with ValidationUtil {
 
   def variation() = identify.async(parse.json) {
     implicit request =>
 
-      request.body.validate[Variation].fold(
-        errors => {
-          Logger.error(s"[variations] trusts validation errors from request body $errors.")
-          Future.successful(invalidRequestErrorResponse)
-        },
-        desService.variation(_) map {
-          case response => Ok(Json.toJson(response))
-          case _ => NotImplemented
-        }
-      )
+      if(isValidCorrelationId(request.headers.get(Headers.CORRELATION_HEADER), Headers.VARIATION_CORRELATION_REGEX)){
+        request.body.validate[Variation].fold(
+          errors => {
+            Logger.error(s"[variations] trusts validation errors from request body $errors.")
+            Future.successful(invalidRequestErrorResponse)
+          },
+          desService.variation(_) map {
+            case response => Ok(Json.toJson(response))
+            case _ => NotImplemented
+          }
+        )
+      } else {
+        Future.successful(invalidCorrelationIdErrorResponse)
+      }
 
   }
 }

@@ -41,6 +41,9 @@ class TrustsBaseController extends BaseController {
   protected def invalidRequestErrorResponse =
     BadRequest(doErrorResponse("BAD_REQUEST", "Provided request is invalid."))
 
+  protected def invalidCorrelationIdErrorResponse =
+    BadRequest(doErrorResponse("INVALID_CORRELATIONID", "Submission has not passed validation. Invalid CorrelationId."))
+
   protected def matchResponse = """{"match": true}"""
 
   protected def noMatchResponse = """{"match": false}"""
