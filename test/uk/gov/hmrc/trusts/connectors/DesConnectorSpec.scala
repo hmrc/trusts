@@ -16,19 +16,29 @@
 
 package uk.gov.hmrc.trusts.connectors
 
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.http.Status._
-import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions.{AlreadyRegisteredException, _}
 import uk.gov.hmrc.trusts.models.ExistingCheckRequest._
 import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
 import uk.gov.hmrc.trusts.models._
+import uk.gov.hmrc.trusts.utils.WireMockHelper
+import play.api.http.Status._
+import uk.gov.hmrc.trusts.models.get_trust_or_estate._
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 
 class DesConnectorSpec extends BaseConnectorSpec {
 
   lazy val connector: DesConnector = injector.instanceOf[DesConnector]
 
   lazy val request = ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
+
+  def createTrustOrEstateEndpoint(utr: String) = s"/trusts/registration/$utr"
 
   ".checkExistingTrust" should {
 
@@ -568,5 +578,331 @@ class DesConnectorSpec extends BaseConnectorSpec {
     }
   }//getSubscriptionId
 
-}
+  ".getTrustInfo" should {
 
+    "return TrustFoundResponse" when {
+      "des has returned a 200 with trust details" in {
+        val utr = "1234567890"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustResponseJson)
+
+        val futureResult = connector.getTrustInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          val expectedResult = Json.fromJson[TrustFoundResponse](getTrustResponse) match {
+            case JsSuccess(data, _) => {
+               data
+            }
+            case JsError(errors) => {
+              fail("Json could not be parsed to TrustFoundResponse model")
+            }
+          }
+
+          Json.toJson(expectedResult) mustBe expectedParsedJson
+          result mustBe expectedResult
+        }
+      }
+
+      "des has returned a 200 and indicated that the submission is still being processed" in {
+        val utr = "1234567800"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustOrEstateProcessingResponseJson)
+
+        val futureResult = connector.getTrustInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe TrustFoundResponse(None, ResponseHeader("In Processing", "1"))
+        }
+      }
+    }
+
+    "return InvalidUTRResponse" when {
+      "des has returned a 400 with the code INVALID_UTR" in {
+        val invalidUTR = "123456789"
+        stubForGet(server, createTrustOrEstateEndpoint(invalidUTR), BAD_REQUEST,
+                   Json.stringify(jsonResponse400InvalidUTR))
+
+        val futureResult = connector.getTrustInfo(invalidUTR)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe InvalidUTRResponse
+        }
+      }
+    }
+
+    "return InvalidRegimeResponse" when {
+      "des has returned a 400 with the code INVALID_REGIME" in {
+        val utr = "1234567891"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), BAD_REQUEST,
+                   Json.stringify(jsonResponse400InvalidRegime))
+
+        val futureResult = connector.getTrustInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe InvalidRegimeResponse
+        }
+      }
+    }
+
+    "return BadRequestResponse" when {
+      "des has returned a 400 with a code which is not INVALID_UTR OR INVALID_REGIME" in {
+        val utr = "1234567891"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), BAD_REQUEST,
+          Json.stringify(jsonResponse400))
+
+        val futureResult = connector.getTrustInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe BadRequestResponse
+        }
+      }
+    }
+
+    "return ResourceNotFoundResponse" when {
+      "des has returned a 404" in {
+        val utr = "1234567892"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), NOT_FOUND, "")
+
+        val futureResult = connector.getTrustInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe ResourceNotFoundResponse
+        }
+      }
+    }
+
+    "return InternalServerErrorResposne" when {
+      "des has returned a 500 with the code SERVER_ERROR" in {
+        val utr = "1234567893"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), INTERNAL_SERVER_ERROR, "")
+
+        val futureResult = connector.getTrustInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe InternalServerErrorResponse
+        }
+      }
+    }
+
+    "return ServiceUnavailableResponse" when {
+      "des has returned a 503 with the code SERVICE_UNAVAILABLE" in {
+        val utr = "1234567894"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), SERVICE_UNAVAILABLE, "")
+
+        val futureResult = connector.getTrustInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe ServiceUnavailableResponse
+        }
+      }
+    }
+  }//getTrustInfo
+
+  ".getEstateInfo" should {
+
+    "return EstateFoundResponse" when {
+      "des has returned a 200 with estate details" in {
+        val utr = "1234567890"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getEstateResponseJson)
+
+        val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) {
+          case estateFoundResponse: EstateFoundResponse =>
+            val actualResult = Json.toJson(estateFoundResponse)
+
+            actualResult mustBe getEstateExpectedResponse
+          case _ =>
+            fail("Test Failed: Should have parsed the json into EstateFoundResponse model.")
+        }
+      }
+
+      "des has returned a 200 and indicated that the submission is still being processed" in {
+        val utr = "1234567800"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustOrEstateProcessingResponseJson)
+
+        val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe EstateFoundResponse(None, ResponseHeader("In Processing", "1"))
+        }
+      }
+
+      "des has returned a 200 and indicated that the submission is pending closure" in {
+        val utr = "1234567800"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustOrEstatePendingClosureResponseJson)
+
+        val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe EstateFoundResponse(None, ResponseHeader("Pending Closure", "1"))
+        }
+      }
+
+      "des has returned a 200 and indicated that the submission is closed" in {
+        val utr = "1234567800"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustOrEstateClosedResponseJson)
+
+        val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe EstateFoundResponse(None, ResponseHeader("Closed", "1"))
+        }
+      }
+
+      "des has returned a 200 and indicated that the submission is suspended" in {
+        val utr = "1234567800"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustOrEstateSuspendedResponseJson)
+
+        val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe EstateFoundResponse(None, ResponseHeader("Suspended", "1"))
+        }
+      }
+
+      "des has returned a 200 and indicated that the submission is parked" in {
+        val utr = "1234567800"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustOrEstateParkedResponseJson)
+
+        val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe EstateFoundResponse(None, ResponseHeader("Parked", "1"))
+        }
+      }
+
+      "des has returned a 200 and indicated that the submission is obsoleted" in {
+        val utr = "1234567800"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustOrEstateObsoletedResponseJson)
+
+        val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe EstateFoundResponse(None, ResponseHeader("Obsoleted", "1"))
+        }
+      }
+    }
+
+    "return InvalidUTRResponse" when {
+      "des has returned a 400 with the code INVALID_UTR" in {
+        val invalidUTR = "123456789"
+        stubForGet(server, createTrustOrEstateEndpoint(invalidUTR), BAD_REQUEST,
+          Json.stringify(jsonResponse400InvalidUTR))
+
+        val futureResult = connector.getEstateInfo(invalidUTR)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe InvalidUTRResponse
+        }
+      }
+    }
+
+    "return InvalidRegimeResponse" when {
+      "des has returned a 400 with the code INVALID_REGIME" in {
+        val utr = "1234567891"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), BAD_REQUEST,
+          Json.stringify(jsonResponse400InvalidRegime))
+
+        val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe InvalidRegimeResponse
+        }
+      }
+    }
+
+    "return BadRequestResponse" when {
+      "des has returned a 400 with a code which is not INVALID_UTR OR INVALID_REGIME" in {
+        val utr = "1234567891"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), BAD_REQUEST,
+          Json.stringify(jsonResponse400))
+
+        val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe BadRequestResponse
+        }
+      }
+    }
+
+    "return ResourceNotFoundResponse" when {
+      "des has returned a 404" in {
+        val utr = "1234567892"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), NOT_FOUND, "")
+
+        val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe ResourceNotFoundResponse
+        }
+      }
+    }
+
+    "return InternalServerErrorResposne" when {
+      "des has returned a 500 with the code SERVER_ERROR" in {
+        val utr = "1234567893"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), INTERNAL_SERVER_ERROR, "")
+
+        val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe InternalServerErrorResponse
+        }
+      }
+    }
+
+    "return ServiceUnavailableResponse" when {
+      "des has returned a 503 with the code SERVICE_UNAVAILABLE" in {
+        val utr = "1234567894"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), SERVICE_UNAVAILABLE, "")
+
+        val futureResult = connector.getEstateInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe ServiceUnavailableResponse
+        }
+      }
+    }
+  }//getEstateInfo
+}

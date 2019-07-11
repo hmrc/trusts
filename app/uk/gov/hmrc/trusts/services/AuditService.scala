@@ -17,10 +17,11 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.models.auditing.{EstateRegistrationSubmissionAuditEvent, TrustRegistrationSubmissionAuditEvent}
+import uk.gov.hmrc.trusts.models.auditing.{EstateRegistrationSubmissionAuditEvent, GetTrustOrEstateAuditEvent, TrustRegistrationSubmissionAuditEvent}
 import uk.gov.hmrc.trusts.models.{EstateRegistration, Registration, RegistrationResponse}
 
 class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig){
@@ -75,4 +76,32 @@ class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig)
 
   }
 
+  def audit(event: String,
+            request: JsValue,
+            internalId: String,
+            response: JsValue)(implicit hc: HeaderCarrier) = {
+
+    val auditPayload = GetTrustOrEstateAuditEvent(
+      request = request,
+      internalAuthId = internalId,
+      response = response
+    )
+
+    auditConnector.sendExplicitAudit(
+      event,
+      auditPayload
+    )
+  }
+
+  def auditErrorResponse(eventName: String, utr: String, internalId: String, errorReason: String)(implicit hc: HeaderCarrier): Unit = {
+
+    val response = Json.obj("errorReason" -> errorReason)
+
+    audit(
+      event = eventName,
+      request = Json.obj("utr" -> utr),
+      internalId = internalId,
+      response = response
+    )
+  }
 }

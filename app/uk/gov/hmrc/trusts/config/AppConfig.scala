@@ -36,6 +36,7 @@ class AppConfig @Inject()(config: Configuration, playEnv: Environment) extends S
 
   val desTrustsUrl : String = baseUrl("des-trusts")
   val desEstatesUrl : String = baseUrl("des-estates")
+  val getTrustOrEstateUrl : String = baseUrl("des-display-trust-or-estate")
 
 
   val desEnvironment : String = loadConfig("microservice.services.des-trusts.environment")
