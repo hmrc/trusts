@@ -19,16 +19,17 @@ package uk.gov.hmrc.trusts.utils
 import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.models.Registration
 
-
 class SettlorDomainValidatorSpec extends BaseSpec with DataExamples {
 
   def SUT(registration: Registration) = new SettlorDomainValidation(registration)
 
   "deceasedSettlorDobIsNotFutureDate" should {
+
     "return validation error when deceased settlor's date of birth is future date" in {
       val willTrust = willTrustWithValues("2030-01-01","2031-01-01")
       SUT(willTrust).deceasedSettlorDobIsNotFutureDate.get.message mustBe
         "Date of birth must be today or in the past."
+
       BusinessValidation.check(willTrust).size mustBe 2
     }
 
@@ -36,7 +37,41 @@ class SettlorDomainValidatorSpec extends BaseSpec with DataExamples {
       val willTrust = willTrustWithValues("2019-01-01","2019-02-01")
       SUT(willTrust).deceasedSettlorDobIsNotFutureDate mustBe None
       BusinessValidation.check(willTrust).size mustBe 0
+    }
 
+    "return no validation errors when there is a deed of variation, in addition to a will trust" in {
+      val deedOfVariationTrust = getJsonValueFromFile("deed-of-variation-in-addition-to-a-will-trust-both-settlors.json").as[Registration]
+
+      SUT(deedOfVariationTrust).validateSettlor mustNot be(defined)
+      BusinessValidation.check(deedOfVariationTrust).size mustBe 0
+    }
+
+    "return no validation errors when there is a deed of variation, in addition to a will trust, without a living settlor" in {
+      val deedOfVariationTrust = getJsonValueFromFile("deed-of-variation-in-addition-to-a-will-trust-no-living-settlor.json").as[Registration]
+
+      SUT(deedOfVariationTrust).validateSettlor mustNot be(defined)
+      BusinessValidation.check(deedOfVariationTrust).size mustBe 0
+    }
+
+    "return validation error when there is a deed of variation, in addition to a will trust, without a deceased settlor" in {
+      val deedOfVariationTrust = getJsonValueFromFile("deed-of-variation-in-addition-to-a-will-trust-no-deceased.json").as[Registration]
+
+      SUT(deedOfVariationTrust).validateSettlor.get.message mustBe "Deed of Variation Trust or Family Arrangement, Addition to the will trust, must have a deceased settlor"
+      BusinessValidation.check(deedOfVariationTrust).size mustBe 1
+    }
+
+    "return a validation error where there is a deed of variation, not an addition to a will trust and there is no living settlor" in {
+      val deedOfVariationTrust = getJsonValueFromFile("deed-of-variation-replaced-the-will-no-living.json").as[Registration]
+
+      SUT(deedOfVariationTrust).validateSettlor.get.message mustBe "Deed of Variation Trust or Family Arrangement, Replaced the will trust, must have a living settlor"
+      BusinessValidation.check(deedOfVariationTrust).size mustBe 1
+    }
+
+    "return a validation error where there is a deed of variation, not an addition to a will trust and there is a deceased settlor" in {
+      val deedOfVariationTrust = getJsonValueFromFile("deed-of-variation-replaced-the-will-deceased.json").as[Registration]
+
+      SUT(deedOfVariationTrust).validateSettlor.get.message mustBe "Deed of Variation Trust or Family Arrangement, Replaced the will trust, must not have a deceased settlor"
+      BusinessValidation.check(deedOfVariationTrust).size mustBe 1
     }
 
     "return None when there is no deceased settlor" in {
@@ -46,10 +81,10 @@ class SettlorDomainValidatorSpec extends BaseSpec with DataExamples {
     }
 
     "return validation error when there is no deceased settlor for will trust." in {
-      val willTrust = getJsonValueFromString(trustWithValues(typeOfTrust = TypeOfTrust.WILL_TRUST.toString)).
+      val willTrust = getJsonValueFromString(trustWithValues(typeOfTrust = TypeOfTrust.Will)).
         validate[Registration].get
-      SUT(willTrust).validateDeceasedSettlor.get.message mustBe
-        "Deceased settlor is mandatory for Will trust."
+      SUT(willTrust).validateSettlor.get.message mustBe
+        "Deceased Settlor is required for Will Trust or Intestacy Trust"
       BusinessValidation.check(willTrust).size mustBe 1
     }
 
@@ -67,7 +102,6 @@ class SettlorDomainValidatorSpec extends BaseSpec with DataExamples {
       BusinessValidation.check(willTrust).size mustBe 1
     }
 
-
     "return validation error when deceased settlor nino is same as trustee nino" in {
       val willTrust = willTrustWithValues(deceasedNino="ST123456")
       SUT(willTrust).deceasedSettlorIsNotTrustee.get.message mustBe
@@ -76,12 +110,11 @@ class SettlorDomainValidatorSpec extends BaseSpec with DataExamples {
     }
 
     "return validation error when settlor is not provided for employment related trust" in {
-      val interVivos = willTrustWithValues(typeOfTrust = TypeOfTrust.INTER_VIVOS_SETTLEMENT.toString)
+      val interVivos = willTrustWithValues(typeOfTrust = TypeOfTrust.IntervivosSettlement)
       SUT(interVivos).validateSettlor.get.message mustBe
         "Settlor is mandatory for provided type of trust."
       BusinessValidation.check(interVivos).size mustBe 1
     }
-
 
     "return validation error when individual settlor has same NINO" in {
       val employmentTrust = getJsonValueFromString(trustWithValues(settlorNino = "ST019091")).validate[Registration].get

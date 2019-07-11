@@ -19,13 +19,10 @@ package uk.gov.hmrc.trusts.utils
 import play.api.Logger
 import uk.gov.hmrc.trusts.models.Registration
 import uk.gov.hmrc.trusts.services.TrustsValidationError
+import uk.gov.hmrc.trusts.utils.TypeOfTrust.TypeOfTrust
 
 
 class SettlorDomainValidation(registration: Registration) extends ValidationUtil {
-
-
-
-
 
   def deceasedSettlorDobIsNotFutureDate: Option[TrustsValidationError] = {
     getDeceasedSettlor(registration).flatMap {
@@ -52,11 +49,10 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
     }
   }
 
-
   def deceasedSettlorIsNotTrustee: Option[TrustsValidationError] = {
     getDeceasedSettlor(registration).flatMap {
       deceased =>
-        val deceasedNino = deceased.identification.map(_.nino).flatten
+        val deceasedNino = deceased.identification.flatMap(_.nino)
         registration.trust.entities.trustees.flatMap {
           trustees => {
             val trusteeNino = trustees.flatMap(_.trusteeInd.flatMap(_.identification.map(_.nino)))
@@ -72,7 +68,7 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
   def deceasedSettlorIsNotBeneficiary: Option[TrustsValidationError] = {
     getDeceasedSettlor(registration).flatMap {
       deceased =>
-        val deceasedNino = deceased.identification.map(_.nino).flatten
+        val deceasedNino = deceased.identification.flatMap(_.nino)
         registration.trust.entities.beneficiary.individualDetails.flatMap {
           indBeneficiary => {
             val beneficiaryNino = indBeneficiary.flatMap{x=>x.identification.map{y=>y.nino}}
@@ -85,11 +81,10 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
     }
   }
 
-
   def deceasedSettlorIsNotProtector: Option[TrustsValidationError] = {
     getDeceasedSettlor(registration).flatMap {
       deceased =>
-        val deceasedNino = deceased.identification.map(_.nino).flatten
+        val deceasedNino = deceased.identification.flatMap(_.nino)
         registration.trust.entities.protectors.flatMap {
           protectors => {
             val protectorNino = protectors.protector.map{x=>x.flatMap{y=>y.identification.map{z=>z.nino}}}.toList.flatten
@@ -102,24 +97,83 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
     }
   }
 
-  def validateSettlor: Option[TrustsValidationError] = {
-    val currentTrust = registration.trust.details.typeOfTrust
-    val settlorDefined = registration.trust.entities.settlors.isDefined
+  private def validateDeedOfVariation(trustType : TypeOfTrust) : Option[TrustsValidationError] = {
+    registration.trust.details.deedOfVariation match {
+      case None =>
+        Some(TrustsValidationError(
+          message = s"Trust is $trustType so must have reason for deed of variation",
+          location = "/trust/deedOfVariation"
+        ))
+      case Some(reasonForVariation) =>
 
-    if (isNotTrust(currentTrust, TypeOfTrust.WILL_TRUST) && !settlorDefined) {
-      Some(TrustsValidationError(s"Settlor is mandatory for provided type of trust.",
-        s"/trust/entities/settlors"))
-    } else None
+        reasonForVariation match {
+          case DeedOfVariation.AdditionToWill =>
+            val noDeceasedSettlor = registration.trust.entities.deceased.isEmpty
+            if (noDeceasedSettlor) {
+              Some(TrustsValidationError(
+                message = s"$trustType, $reasonForVariation, must have a deceased settlor",
+                location = "/trust/entities/deceased"
+              ))
+            } else {
+              None
+            }
+          case _ =>
+            registration.trust.entities.settlors match {
+              case Some(_) =>
+                if (registration.trust.entities.deceased.isDefined) {
+                  Some(TrustsValidationError(
+                    message = s"$trustType, $reasonForVariation, must not have a deceased settlor",
+                    location = "/trust/entities/deceased"
+                  ))
+                } else {
+                  None
+                }
+              case None =>
+                Some(TrustsValidationError(
+                  message = s"$trustType, $reasonForVariation, must have a living settlor",
+                  location = "/trust/entities/settlors"
+                ))
+            }
+        }
+
+    }
   }
 
-  def validateDeceasedSettlor: Option[TrustsValidationError] = {
-    val isWillTrust = registration.trust.details.typeOfTrust == TypeOfTrust.WILL_TRUST.toString
-    val deceasedSettlorDefined = registration.trust.entities.deceased.isDefined
+  private def validateTrustHasLivingSettlor = {
+    val livingSettlors = registration.trust.entities.settlors
+    livingSettlors match {
+      case Some(_) => None
+      case None =>
+        Some(
+          TrustsValidationError(
+            s"Settlor is mandatory for provided type of trust.",
+            s"/trust/entities/settlors"
+          )
+        )
+    }
+  }
 
-    if (isWillTrust && !deceasedSettlorDefined) {
-      Some(TrustsValidationError(s"Deceased settlor is mandatory for Will trust.",
-        s"/trust/entities/settlors"))
-    } else None
+  private def validateDeceasedSettlor : Option[TrustsValidationError] = {
+    registration.trust.entities.deceased match {
+      case Some(_) => None
+      case None =>
+        Some(
+          TrustsValidationError(
+            s"Deceased Settlor is required for ${TypeOfTrust.Will}",
+            s"/trust/entities/deceased"
+          )
+        )
+    }
+  }
+
+  def validateSettlor: Option[TrustsValidationError] = {
+    val trustType = registration.trust.details.typeOfTrust
+
+    trustType match {
+      case TypeOfTrust.DeedOfVariationOrFamilyAgreement => validateDeedOfVariation(trustType)
+      case TypeOfTrust.Will => validateDeceasedSettlor
+      case _ => validateTrustHasLivingSettlor
+    }
   }
 
   def livingSettlorDuplicateNino: List[Option[TrustsValidationError]] = {
@@ -136,7 +190,6 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
     }.toList.flatten
   }
 
-
   def livingSettlorDobIsNotFutureDate: List[Option[TrustsValidationError]] = {
     getSettlorIndividuals(registration).map{
       settlorIndividuals =>
@@ -147,7 +200,6 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
             errors
     }.toList.flatten
   }
-
 
   def livingSettlorDuplicatePassportNumber: List[Option[TrustsValidationError]] = {
     getSettlorIndividuals(registration).map{
@@ -163,7 +215,6 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
     }.toList.flatten
   }
 
-
   def livingSettlorDuplicateUtr: List[Option[TrustsValidationError]] = {
     getSettlorCompanies(registration).map{
       settlorCompanies =>
@@ -178,14 +229,13 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
     }.toList.flatten
   }
 
-
   def companySettlorUtrIsNotTrustUtr: List[Option[TrustsValidationError]] = {
     val trustUtr = registration.matchData.map(x => x.utr)
     getSettlorCompanies(registration).map {
       settlorCompanies => {
         val utrList: List[(String, Int)] = getSettlorUtrNumberWithIndex(settlorCompanies)
         utrList.map {
-          case (utr, index) if trustUtr == Some(utr) =>
+          case (utr, index) if trustUtr.contains(utr) =>
             Some(TrustsValidationError(s"Settlor company utr is same as trust utr.",
               s"/trust/entities/settlors/settlorCompany/$index/identification/utr"))
           case _ =>
@@ -195,7 +245,6 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
     }.toList.flatten
   }
 }
-
 
 object SettlorDomainValidation {
 
@@ -209,7 +258,6 @@ object SettlorDomainValidation {
       sValidator.deceasedSettlorDoDIsNotAfterDob,
       sValidator.deceasedSettlorIsNotTrustee,
       sValidator.validateSettlor,
-      sValidator.validateDeceasedSettlor,
       sValidator.deceasedSettlorIsNotBeneficiary,
       sValidator.deceasedSettlorIsNotProtector
     ).flatten
@@ -220,7 +268,5 @@ object SettlorDomainValidation {
       sValidator.livingSettlorDuplicatePassportNumber.flatten ++
       sValidator.livingSettlorDuplicateUtr.flatten ++
       sValidator.companySettlorUtrIsNotTrustUtr.flatten
-
-
   }
 }
