@@ -33,7 +33,8 @@ case class Variation(
                     )
 
 object Variation {
-  implicit val variationReads: Reads[Variation] = {
+
+  val variationReads: Reads[Variation] = {
     (
       (__ \ "matchData").read[MatchData] and
         (__ \ "correspondence").read[Correspondence] and
@@ -45,7 +46,7 @@ object Variation {
       ) (Variation.apply _)
   }
 
-  implicit val writeToDes: Writes[Variation] = (
+  val writeToDes: Writes[Variation] = (
     (JsPath \ "matchData").write[MatchData] and
       (JsPath \ "correspondence").write[Correspondence] and
       (JsPath \ "declaration").write[Declaration] and
@@ -54,6 +55,9 @@ object Variation {
       (JsPath \ "trustEndDate").writeNullable[DateTime] and
       (JsPath \ "reqHeader").write[ReqHeader]
     ) (r => (r.matchData, r.correspondence, r.declaration, r.details, r.agentDetails, r.trustEndDate, r.reqHeader))
+
+  implicit val variationFormat: Format[Variation] = Format(variationReads, writeToDes)
+
 }
 
 case class MatchData(utr: String)

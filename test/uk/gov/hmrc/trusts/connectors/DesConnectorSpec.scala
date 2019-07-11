@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.trusts.connectors
 
-import play.api.libs.json.{JsError, JsSuccess, Json}
+import play.api.libs.json.{Format, JsError, JsSuccess, Json, Reads, Writes}
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions.{AlreadyRegisteredException, _}
 import uk.gov.hmrc.trusts.models.ExistingCheckRequest._
@@ -26,7 +26,7 @@ import play.api.http.Status._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.VariationResponse
+import uk.gov.hmrc.trusts.models.variation.{Variation, VariationResponse}
 
 class DesConnectorSpec extends BaseConnectorSpec {
 
@@ -923,10 +923,14 @@ class DesConnectorSpec extends BaseConnectorSpec {
     "return BadRequestException" when {
       "payload sent to des is invalid" in {
 
-        val requestBody = Json.stringify(Json.toJson(invalidVariationsRequest))
+        implicit val invalidVariationRead: Reads[Variation] = Json.reads[Variation]
+
+        val variation = invalidVariationsRequest.validate[Variation].get
+
+        val requestBody = Json.stringify(Json.toJson(variation))
         stubForPost(server, url, requestBody, BAD_REQUEST, Json.stringify(jsonResponse400))
 
-        val futureResult = connector.variations(invalidVariationsRequest)
+        val futureResult = connector.variations(variation)
 
         application.stop()
 
@@ -939,6 +943,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
 
     "return DuplicateSubmissionException" when {
       "trusts two requests are submitted with the same Correlation ID." in {
+
         val requestBody = Json.stringify(Json.toJson(variationsRequest))
 
         stubForPost(server, url, requestBody, CONFLICT, Json.stringify(jsonResponse409DuplicateCorrelation))

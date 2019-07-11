@@ -31,7 +31,6 @@
     }
   },
   "details": {
-    "trust": {
       "details": {
         "startDate": "2001-01-01",
         "administrationCountry": "GB",
@@ -115,7 +114,8 @@
           "dateOfDeath": "2016-01-01",
           "identification": {
             "nino": "KC456736"
-          }
+          },
+          "entityStart": "1998-02-12"
         },
         "leadTrustees": [
           {
@@ -219,8 +219,7 @@
           }
         ]
       }
-    }
-  },
+    },
   "agentDetails": {
     "arn": "AARN1234567",
     "agentName": "Mr. xys abcde",

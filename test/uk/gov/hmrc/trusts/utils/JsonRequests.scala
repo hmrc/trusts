@@ -34,7 +34,7 @@ trait JsonRequests extends JsonUtils {
   lazy val invalidVariationsRequestJson = getJsonFromFile("invalid-payload-trusts-variations.json")
 
   lazy val variationsRequest = getJsonValueFromFile("valid-trusts-variations-api.json").validate[Variation].get
-  lazy val invalidVariationsRequest = getJsonValueFromFile("invalid-payload-trusts-variations.json").validate[Variation].get
+  lazy val invalidVariationsRequest = getJsonValueFromFile("invalid-payload-trusts-variations.json")
 
   lazy val registrationRequest = getJsonValueFromFile("valid-trusts-registration-api.json").validate[Registration].get
   lazy val invalidRegistrationRequest = getJsonValueFromFile("invalid-payload-trusts-registration.json").validate[Registration].get
