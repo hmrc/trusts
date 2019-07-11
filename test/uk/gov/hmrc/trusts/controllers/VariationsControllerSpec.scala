@@ -68,29 +68,6 @@ class VariationsControllerSpec extends BaseSpec {
 
     }
 
-    "return a Conflict" when {
-      "submission with same correlation id is submitted." in {
-
-        val SUT = variationsController
-
-        when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
-          .thenReturn(Future.failed(DuplicateSubmissionException))
-
-        val result = SUT.variation()(
-          postRequestWithPayload(Json.parse(validVariationsRequestJson), withDraftId = false)
-            .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
-        )
-
-        status(result) mustBe CONFLICT
-
-        val output = contentAsJson(result)
-
-        (output \ "code").as[String] mustBe "DUPLICATE_SUBMISSION"
-        (output \ "message").as[String] mustBe "Duplicate Correlation Id was submitted."
-
-      }
-    }
-
     "return a BadRequest" when {
 
       "input request fails schema validation" in {
@@ -113,6 +90,9 @@ class VariationsControllerSpec extends BaseSpec {
 
       "input request fails business validation" in {
 
+        when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+          .thenReturn(Future.failed(BadRequestException))
+
         val SUT = variationsController
 
         val result = SUT.variation()(
@@ -131,9 +111,6 @@ class VariationsControllerSpec extends BaseSpec {
 
       "invalid correlation id is provided in the headers" in {
 
-        when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(VariationResponse(tvnResponse)))
-
         val SUT = variationsController
 
         val request = postRequestWithPayload(Json.parse(validVariationsRequestJson), withDraftId = false)
@@ -149,6 +126,29 @@ class VariationsControllerSpec extends BaseSpec {
 
       }
 
+    }
+
+    "return a Conflict" when {
+      "submission with same correlation id is submitted." in {
+
+        when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+          .thenReturn(Future.failed(DuplicateSubmissionException))
+
+        val SUT = variationsController
+
+        val result = SUT.variation()(
+          postRequestWithPayload(Json.parse(validVariationsRequestJson), withDraftId = false)
+            .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
+        )
+
+        status(result) mustBe CONFLICT
+
+        val output = contentAsJson(result)
+
+        (output \ "code").as[String] mustBe "DUPLICATE_SUBMISSION"
+        (output \ "message").as[String] mustBe "Duplicate Correlation Id was submitted."
+
+      }
     }
 
     "return an internal server error" when {
@@ -174,12 +174,15 @@ class VariationsControllerSpec extends BaseSpec {
 
       }
 
-      "the des returns Service Unavailable as dependent service is down. " in {
+    }
 
-        val SUT = variationsController
+    "return service unavailable" when {
+      "the des returns Service Unavailable as dependent service is down. " in {
 
         when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
           .thenReturn(Future.failed(ServiceNotAvailableException("dependent service is down")))
+
+        val SUT = variationsController
 
         val result = SUT.variation()(
           postRequestWithPayload(Json.parse(validRegistrationRequestJson))
