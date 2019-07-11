@@ -111,6 +111,9 @@ class VariationsControllerSpec extends BaseSpec {
 
       "invalid correlation id is provided in the headers" in {
 
+        when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+          .thenReturn(Future.failed(InvalidCorrelationIdException))
+
         val SUT = variationsController
 
         val request = postRequestWithPayload(Json.parse(validVariationsRequestJson), withDraftId = false)
@@ -161,7 +164,7 @@ class VariationsControllerSpec extends BaseSpec {
         val SUT = variationsController
 
         val result = SUT.variation()(
-          postRequestWithPayload(Json.parse(validRegistrationRequestJson))
+          postRequestWithPayload(Json.parse(validVariationsRequestJson))
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
 
@@ -185,16 +188,17 @@ class VariationsControllerSpec extends BaseSpec {
         val SUT = variationsController
 
         val result = SUT.variation()(
-          postRequestWithPayload(Json.parse(validRegistrationRequestJson))
+          postRequestWithPayload(Json.parse(validVariationsRequestJson))
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
 
-        status(result) mustBe INTERNAL_SERVER_ERROR
+
+        status(result) mustBe SERVICE_UNAVAILABLE
 
         val output = contentAsJson(result)
 
-        (output \ "code").as[String] mustBe "INTERNAL_SERVER_ERROR"
-        (output \ "message").as[String] mustBe "Internal server error."
+        (output \ "code").as[String] mustBe "SERVICE_UNAVAILABLE"
+        (output \ "message").as[String] mustBe "Service unavailable."
 
       }
     }

@@ -40,4 +40,12 @@ object ErrorResponses {
   def invalidCorrelationIdErrorResponse =
     BadRequest(doErrorResponse("INVALID_CORRELATIONID", "Submission has not passed validation. Invalid CorrelationId."))
 
+  def duplicateSubmissionErrorResponse =
+    Conflict(doErrorResponse("DUPLICATE_SUBMISSION", "Duplicate Correlation Id was submitted."))
+
+  def internalServerErrorErrorResponse =
+    InternalServerError(doErrorResponse("INTERNAL_SERVER_ERROR", "Internal server error."))
+
+  def serviceUnavailableErrorResponse =
+    ServiceUnavailable(doErrorResponse("SERVICE_UNAVAILABLE", "Service unavailable."))
 }
