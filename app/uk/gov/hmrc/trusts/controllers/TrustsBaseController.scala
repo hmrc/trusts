@@ -20,29 +20,11 @@ import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
-import uk.gov.hmrc.trusts.models.ErrorResponse
+import uk.gov.hmrc.trusts.utils.ErrorResponses._
 
 import scala.concurrent.Future
 
 class TrustsBaseController extends BaseController {
-
-  protected def doErrorResponse(code: String, message: String) =
-    Json.toJson(ErrorResponse(code: String, message: String))
-
-  protected def invalidNameErrorResponse =
-    BadRequest(doErrorResponse("INVALID_NAME", "Provided name is invalid."))
-
-  protected def invalidUtrErrorResponse =
-    BadRequest(doErrorResponse("INVALID_UTR", "Provided utr is invalid."))
-
-  protected def invalidPostcodeErrorResponse =
-    BadRequest(doErrorResponse("INVALID_POSTCODE", "Provided postcode is invalid."))
-
-  protected def invalidRequestErrorResponse =
-    BadRequest(doErrorResponse("BAD_REQUEST", "Provided request is invalid."))
-
-  protected def invalidCorrelationIdErrorResponse =
-    BadRequest(doErrorResponse("INVALID_CORRELATIONID", "Submission has not passed validation. Invalid CorrelationId."))
 
   protected def matchResponse = """{"match": true}"""
 
