@@ -51,5 +51,7 @@ class AppConfig @Inject()(config: Configuration, playEnv: Environment) extends S
   val delayToConnectTaxEnrolment : Int = loadConfig("microservice.services.trusts.delayToConnectTaxEnrolment").toInt
   val maxRetry : Int = loadConfig("microservice.services.trusts.maxRetry").toInt
 
+  val auditingEnabled : Boolean = loadConfig("microservice.services.trusts.features.auditing.enabled").toBoolean
+
 }
 
