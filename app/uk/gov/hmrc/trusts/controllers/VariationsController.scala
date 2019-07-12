@@ -53,7 +53,6 @@ class VariationsController @Inject()(
             internalServerErrorErrorResponse
           case _: ServiceNotAvailableException =>
             serviceUnavailableErrorResponse
-
         }
       )
 
