@@ -29,7 +29,6 @@ class AppConfig @Inject()(config: Configuration, playEnv: Environment) extends S
   override protected def mode: Mode = playEnv.mode
   override protected def runModeConfiguration: Configuration = config
 
-
   private def loadConfig(key: String) = runModeConfiguration.getString(key).getOrElse(
     throw new Exception(s"Missing configuration key : $key")
   )

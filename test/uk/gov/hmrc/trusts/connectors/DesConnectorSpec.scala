@@ -901,7 +901,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
 
   ".variation" should {
 
-    val url = "/trusts/variations"
+    val url = "/trusts/variation"
 
     "return a VariationTrnResponse" when {
       "des has returned a 200 with a trn" in {
