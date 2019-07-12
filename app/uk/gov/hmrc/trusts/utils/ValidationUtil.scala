@@ -19,6 +19,7 @@ package uk.gov.hmrc.trusts.utils
 import org.joda.time.DateTime
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.services.TrustsValidationError
+import uk.gov.hmrc.trusts.utils.TypeOfTrust.TypeOfTrust
 
 import scala.annotation.tailrec
 import scala.util.matching.Regex
@@ -117,9 +118,10 @@ trait ValidationUtil {
     passportNumberList
   }
 
-  def isNotTrust(currentTypeOfTrust: String, typeOfTrust: TypeOfTrust.Value): Boolean = currentTypeOfTrust != typeOfTrust.toString
 
-  def getSettlorPassportNumberWithIndex(settlor: List[Settlor]): List[(String, Int)] = {
+  def isNotTrust(currentTypeOfTrust: TypeOfTrust, expectedType: TypeOfTrust): Boolean = currentTypeOfTrust != expectedType
+
+  def getSettlorPassportNumberWithIndex(settlor: List[Settlor]):List[(String, Int)] = {
     val passportNumberList: List[(String, Int)] = settlor.zipWithIndex.flatMap {
       case (indv, index) =>
         indv.identification.map { x =>

@@ -17,17 +17,18 @@
 package uk.gov.hmrc.trusts.services
 
 import org.joda.time.format.DateTimeFormat
-import org.mockito.Mockito.when
 import org.mockito.Matchers._
+import org.mockito.Mockito.when
 import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
-import uk.gov.hmrc.trusts.models.{get_trust_or_estate, _}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
+import uk.gov.hmrc.trusts.models.{get_trust_or_estate, _}
+import uk.gov.hmrc.trusts.utils.{DeedOfVariation, TypeOfTrust}
 
 import scala.concurrent.Future
 
@@ -302,8 +303,8 @@ class DesServiceSpec extends BaseSpec {
             AddressType("1010 EASY ST", "OTTAWA", Some("ONTARIO"), Some("ONTARIO"), Some("K1A 0B1"), "GB")),
           DisplayTrust(
             TrustDetailsType(dateTime, Some("AD"), Some("GB"),
-              Some(ResidentialStatusType(Some(UkType(scottishLaw = false, Some("GB"))), None)), "Will Trust or Intestacy Trust",
-              Some("Previously there was only an absolute interest under the will"), Some(true), Some(dateTime)),
+              Some(ResidentialStatusType(Some(UkType(scottishLaw = false, Some("GB"))), None)), TypeOfTrust.Will,
+              Some(DeedOfVariation.AbsoluteInterestUnderWill), Some(true), Some(dateTime)),
             DisplayTrustEntitiesType(
               Some(List(DisplayTrustNaturalPersonType("1", Some("01"), NameType("Nicola", Some("Andrey"), "Jackson"), Some(dateTime),
               Some(DisplayTrustIdentificationType(Some("2222200000000"),

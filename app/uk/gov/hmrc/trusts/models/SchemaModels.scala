@@ -17,10 +17,11 @@
 package uk.gov.hmrc.trusts.models
 
 import org.joda.time.DateTime
-import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import play.api.libs.json._
 import uk.gov.hmrc.trusts.utils.Constants._
-import uk.gov.hmrc.trusts.utils.TypeOfTrust.EMPLOYMENT_RELATED_TRUST
+import uk.gov.hmrc.trusts.utils.DeedOfVariation.DeedOfVariation
+import uk.gov.hmrc.trusts.utils.TypeOfTrust.{Employment, TypeOfTrust}
 /**
   * DES API Schema - definitions models below
   */
@@ -365,17 +366,17 @@ case class TrustDetailsType(startDate: DateTime,
                             lawCountry: Option[String],
                             administrationCountry: Option[String],
                             residentialStatus: Option[ResidentialStatusType],
-                            typeOfTrust: String,
-                            deedOfVariation: Option[String],
+                            typeOfTrust: TypeOfTrust,
+                            deedOfVariation: Option[DeedOfVariation],
                             interVivos: Option[Boolean],
                             efrbsStartDate: Option[DateTime]) {
 
-  def isEmploymentRelatedTrust : Boolean = typeOfTrust == EMPLOYMENT_RELATED_TRUST.toString
-
+  def isEmploymentRelatedTrust : Boolean = typeOfTrust == Employment
 
 }
 
 object TrustDetailsType {
+
   implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val trustDetailsTypeFormat: Format[TrustDetailsType] = Json.format[TrustDetailsType]
 }
