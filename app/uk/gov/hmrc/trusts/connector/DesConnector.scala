@@ -41,6 +41,8 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
   lazy val estatesServiceUrl : String = s"${config.desEstatesUrl}/estates"
   lazy val getTrustOrEstateUrl: String =  s"${config.getTrustOrEstateUrl}/trusts"
 
+  lazy val varyTrustUrl: String =  s"${config.varyTrustOrEstateUrl}/trusts"
+
   lazy val matchTrustsEndpoint : String = s"$trustsServiceUrl/match"
   lazy val matchEstatesEndpoint : String = s"$estatesServiceUrl/match"
 
@@ -49,7 +51,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
   lazy val trustVariationsEndpoint : String = s"$trustsServiceUrl/variations"
 
-  def createGetTrustOrEsateEndpoint(utr: String): String = s"$getTrustOrEstateUrl/registration/$utr"
+  def createGetTrustOrEstateEndpoint(utr: String): String = s"$getTrustOrEstateUrl/registration/$utr"
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "CorrelationId"
@@ -117,15 +119,17 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
   }
 
   override def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
-    val updatedHeaderCarrier = hc.copy(extraHeaders = desHeaders)
 
-    http.GET[GetTrustResponse](createGetTrustOrEsateEndpoint(utr))(GetTrustResponse.httpReads, updatedHeaderCarrier, global)
+    implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
+
+    http.GET[GetTrustResponse](createGetTrustOrEstateEndpoint(utr))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)
   }
 
   override def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse] = {
-    val updatedHeaderCarrier = hc.copy(extraHeaders = desHeaders)
 
-    http.GET[GetEstateResponse](createGetTrustOrEsateEndpoint(utr))(GetEstateResponse.httpReads, updatedHeaderCarrier, global)
+    implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
+
+    http.GET[GetEstateResponse](createGetTrustOrEstateEndpoint(utr))(GetEstateResponse.httpReads, implicitly[HeaderCarrier](hc), global)
   }
 
   override def variations(variation: Variation)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
@@ -136,7 +140,6 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
     response
   }
-
 
 }
 

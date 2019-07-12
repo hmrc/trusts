@@ -19,6 +19,7 @@ package uk.gov.hmrc.trusts.utils
 import org.joda.time.DateTime
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models._
+import uk.gov.hmrc.trusts.utils.TypeOfTrust.TypeOfTrust
 
 trait DataExamples extends  JsonRequests {
 
@@ -62,8 +63,6 @@ trait DataExamples extends  JsonRequests {
     IndividualDetailsType(
       nameType,Some(new DateTime(dateOfBirthStr)),false,None,None,None, Some(identification))
 
-
-
   def trusteeOrg  = Some(TrusteeOrgType(
     name = "trustee as company",
     identification = utr,
@@ -77,9 +76,9 @@ trait DataExamples extends  JsonRequests {
   }
 
 
-  def registrationWithEfrbsStartDate(date : DateTime, typeOfTrust: TypeOfTrust.Value) = {
+  def registrationWithEfrbsStartDate(date : DateTime, typeOfTrust: TypeOfTrust) = {
     val trustDetailsType = registrationRequest.trust.details.copy(efrbsStartDate = Some(date),
-      typeOfTrust = typeOfTrust.toString)
+      typeOfTrust = typeOfTrust)
     registration(Some(trustDetailsType))
   }
 
@@ -135,25 +134,27 @@ trait DataExamples extends  JsonRequests {
                       settlorNino :String = "ST019092",
                       settlorDob :String = "2001-01-01",
                       settlorUtr :String = "1234561235" ,
-                      typeOfTrust :String= TypeOfTrust.EMPLOYMENT_RELATED_TRUST.toString
+                      typeOfTrust : TypeOfTrust = TypeOfTrust.Employment
   ) : String = {
     val json = getJsonValueFromFile("trusts-dynamic.json")
     json.toString().replace("{indBeneficiaryDob}", indBenficiaryDob)
       .replace("{settlorNino}", settlorNino).replace("{settlorDob}", settlorDob)
-      .replace("{settlorUtr}", settlorUtr).replace("{typeOfTrust}", typeOfTrust)
+      .replace("{settlorUtr}", settlorUtr).replace("{typeOfTrust}", typeOfTrust.toString)
   }
 
   def willTrustWithValues(
                            deceasedDateOfBirth : String ="2001-01-01",
                            deceasedDateOfDeath : String ="2016-01-01",
                            deceasedNino :String = "KC456736",
-                           typeOfTrust :String= TypeOfTrust.WILL_TRUST.toString,
+                           typeOfTrust : TypeOfTrust = TypeOfTrust.Will,
                            protectorNino :String = "AB123456K") : Registration = {
+
     val json = getJsonValueFromFile("will-trust-dynamic.json")
+
     getJsonValueFromString(json.toString().
       replace("{deceasedDateOfBirth}", deceasedDateOfBirth).
       replace("{deceasedDateOfDeath}", deceasedDateOfDeath).
-      replace("{typeOfTrust}", typeOfTrust).
+      replace("{typeOfTrust}", typeOfTrust.toString).
       replace("{protectorNino}", protectorNino).
       replace("{deceasedNino}", deceasedNino)).
       validate[Registration].get
@@ -171,15 +172,10 @@ trait DataExamples extends  JsonRequests {
 
   }
 
-
   def trustWithoutAssets : String = {
     val json = getJsonValueFromFile("employment-related-trusts-1.json")
     val jsonTransformer = (__  \ 'trust \  'assets \ 'monetary ).json.prune
     json.transform(jsonTransformer).get.toString()
   }
-
-
-
-
 
 }

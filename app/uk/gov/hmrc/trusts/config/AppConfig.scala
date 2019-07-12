@@ -36,8 +36,10 @@ class AppConfig @Inject()(config: Configuration, playEnv: Environment) extends S
 
   val desTrustsUrl : String = baseUrl("des-trusts")
   val desEstatesUrl : String = baseUrl("des-estates")
+
   val getTrustOrEstateUrl : String = baseUrl("des-display-trust-or-estate")
 
+  val varyTrustOrEstateUrl : String = baseUrl("des-vary-trust-or-estate")
 
   val desEnvironment : String = loadConfig("microservice.services.des-trusts.environment")
   val desToken : String = loadConfig("microservice.services.des-trusts.token")
@@ -50,6 +52,8 @@ class AppConfig @Inject()(config: Configuration, playEnv: Environment) extends S
   val taxEnrolmentsPayloadBodyCallback : String = loadConfig("microservice.services.tax-enrolments.callback")
   val delayToConnectTaxEnrolment : Int = loadConfig("microservice.services.trusts.delayToConnectTaxEnrolment").toInt
   val maxRetry : Int = loadConfig("microservice.services.trusts.maxRetry").toInt
+
+  val auditingEnabled : Boolean = loadConfig("microservice.services.trusts.features.auditing.enabled").toBoolean
 
 }
 
