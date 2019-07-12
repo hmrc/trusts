@@ -45,7 +45,7 @@ object VariationResponse {
             Logger.error(s"[VariationTvnResponse] Conflict response from des")
             throw DuplicateSubmissionException
           case INTERNAL_SERVER_ERROR =>
-            Logger.error(s"[VariationTvnResponse] Conflict response from des")
+            Logger.error(s"[VariationTvnResponse] Internal server error response from des")
             throw InternalServerErrorException("des is currently experiencing problems that require live service intervention")
           case SERVICE_UNAVAILABLE =>
             Logger.error("[VariationTvnResponse] Service unavailable response from des.")
