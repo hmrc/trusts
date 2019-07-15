@@ -81,27 +81,35 @@ class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig)
             internalId: String,
             response: JsValue)(implicit hc: HeaderCarrier) = {
 
-    val auditPayload = GetTrustOrEstateAuditEvent(
-      request = request,
-      internalAuthId = internalId,
-      response = response
-    )
+    if (config.auditingEnabled) {
+      val auditPayload = GetTrustOrEstateAuditEvent(
+        request = request,
+        internalAuthId = internalId,
+        response = response
+      )
 
-    auditConnector.sendExplicitAudit(
-      event,
-      auditPayload
-    )
+      auditConnector.sendExplicitAudit(
+        event,
+        auditPayload
+      )
+    } else {
+      ()
+    }
   }
 
-  def auditErrorResponse(eventName: String, utr: String, internalId: String, errorReason: String)(implicit hc: HeaderCarrier): Unit = {
+  def auditErrorResponse(eventName: String, request: JsValue, internalId: String, errorReason: String)(implicit hc: HeaderCarrier): Unit = {
 
-    val response = Json.obj("errorReason" -> errorReason)
+    if (config.auditingEnabled) {
+      val response = Json.obj("errorReason" -> errorReason)
 
-    audit(
-      event = eventName,
-      request = Json.obj("utr" -> utr),
-      internalId = internalId,
-      response = response
-    )
+      audit(
+        event = eventName,
+        request = request,
+        internalId = internalId,
+        response = response
+      )
+    } else {
+      ()
+    }
   }
 }
