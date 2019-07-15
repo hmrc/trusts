@@ -57,6 +57,7 @@ class VariationMappingSpec extends BaseSpec {
 
         (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0) mustBe defined
         (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0 \ "leadTrusteeOrg" \ "name").as[String] mustNot be(empty)
+        (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0 \ "leadTrusteeOrg" \ "entityStart").as[String] mustEqual "1998-02-12"
         (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0 \ "leadTrusteeInd") mustNot be(defined)
         (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 1 \ "leadTrusteeInd") mustNot be(defined)
       }
