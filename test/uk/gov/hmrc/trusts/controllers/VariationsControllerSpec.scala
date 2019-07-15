@@ -120,7 +120,7 @@ class VariationsControllerSpec extends BaseSpec {
 
         val result = SUT.variation()(request)
 
-        status(result) mustBe BAD_REQUEST
+        status(result) mustBe INTERNAL_SERVER_ERROR
 
         val output = contentAsJson(result)
 

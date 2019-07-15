@@ -19,12 +19,12 @@ package uk.gov.hmrc.trusts.controllers
 import javax.inject.Inject
 import play.api.Logger
 import play.api.libs.json.Json
-import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateHeadersAction}
+import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.variation.Variation
 import uk.gov.hmrc.trusts.services.DesService
-import uk.gov.hmrc.trusts.utils.{Headers, ValidationUtil}
 import uk.gov.hmrc.trusts.utils.ErrorResponses._
+import uk.gov.hmrc.trusts.utils.ValidationUtil
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -34,7 +34,7 @@ class VariationsController @Inject()(
                                       desService: DesService
                                     ) extends TrustsBaseController with ValidationUtil {
 
-  def variation() = (identify andThen ValidateHeadersAction(Headers.VARIATION_CORRELATION_REGEX)).async(parse.json) {
+  def variation() = identify.async(parse.json) {
     implicit request =>
 
       request.body.validate[Variation].fold(

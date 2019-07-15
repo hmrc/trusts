@@ -40,13 +40,13 @@ object VariationResponse {
             response.json.as[VariationResponse]
           case BAD_REQUEST if response.body contains "INVALID_CORRELATIONID" =>
             Logger.error(s"[VariationTvnResponse] Bad Request for invalid correlation id response from des ")
-            throw InvalidCorrelationIdException
+            throw InternalServerErrorException("Invalid correlation id response from des")
           case BAD_REQUEST =>
             Logger.error(s"[VariationTvnResponse] Bad Request response from des ")
             throw BadRequestException
           case CONFLICT =>
             Logger.error(s"[VariationTvnResponse] Conflict response from des")
-            throw DuplicateSubmissionException
+            throw InternalServerErrorException("Conflict response from des")
           case INTERNAL_SERVER_ERROR =>
             Logger.error(s"[VariationTvnResponse] Internal server error response from des")
             throw InternalServerErrorException("des is currently experiencing problems that require live service intervention")
