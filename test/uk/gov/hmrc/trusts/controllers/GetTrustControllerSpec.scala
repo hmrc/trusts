@@ -17,13 +17,15 @@
 package uk.gov.hmrc.trusts.controllers
 
 import org.mockito.Matchers.{any, eq => mockEq}
-import org.mockito.Mockito.{reset, verify, when}
+import org.mockito.Mockito.{reset, verify, when, times}
 import org.scalatest.BeforeAndAfter
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.JsValue
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.trusts.BaseSpec
+import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustFoundResponse
@@ -37,9 +39,14 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
   lazy val desService: DesService = mock[DesService]
   lazy val mockedAuditService: AuditService = mock[AuditService]
 
+  val mockAuditConnector = mock[AuditConnector]
+  val mockConfig = mock[AppConfig]
+
+  val auditService = new AuditService(mockAuditConnector, mockConfig)
+
 
   override def afterEach() =  {
-    reset(mockedAuditService, desService)
+    reset(mockedAuditService, desService, mockAuditConnector, mockConfig)
   }
 
   private def getTrustController = {
@@ -52,6 +59,40 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
   val utr = "1234567890"
 
   ".get" should {
+
+    "not perform auditing" when {
+      "the feature toggle is set to false" in {
+
+        val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), auditService, desService)
+
+        when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustFoundResponse(None, ResponseHeader("Parked", "1"))))
+
+        when(mockConfig.auditingEnabled).thenReturn(false)
+
+        val result = SUT.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
+
+        whenReady(result) { _ =>
+          verify(mockAuditConnector, times(0)).sendExplicitAudit[Any](any(), any())(any(), any(), any())
+        }
+      }
+    }
+
+    "perform auditing" when {
+      "the feature toggle is set to true" in {
+
+        val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), auditService, desService)
+
+        when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustFoundResponse(None, ResponseHeader("Parked", "1"))))
+
+        when(mockConfig.auditingEnabled).thenReturn(true)
+
+        val result = SUT.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
+
+        whenReady(result) { _ =>
+          verify(mockAuditConnector, times(1)).sendExplicitAudit[Any](any(), any())(any(), any(), any())
+        }
+      }
+    }
 
     "return 200 - Ok" in {
 
@@ -135,7 +176,6 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
       }
 
       "the get endpoint returns a InternalServerErrorResponse" in {
-
 
         when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(InternalServerErrorResponse))
 

@@ -17,16 +17,19 @@
 package uk.gov.hmrc.trusts.controllers
 
 import org.mockito.Matchers.{any, eq => mockEq}
-import org.mockito.Mockito.{verify, when, reset}
+import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatest.BeforeAndAfter
 import play.api.libs.json.JsValue
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.trusts.BaseSpec
+import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustFoundResponse
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, FakeAuditService}
 
 import scala.concurrent.Future
@@ -36,9 +39,13 @@ class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter {
   lazy val desService: DesService = mock[DesService]
   lazy val mockedAuditService: AuditService = mock[AuditService]
 
+  val mockAuditConnector = mock[AuditConnector]
+  val mockConfig = mock[AppConfig]
+
+  val auditService = new AuditService(mockAuditConnector, mockConfig)
 
   override def afterEach() =  {
-    reset(mockedAuditService)
+    reset(mockedAuditService, mockAuditConnector, mockConfig)
   }
 
   private def getEstatesController = {
@@ -51,6 +58,40 @@ class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter {
   val utr = "1234567890"
 
   ".get" should {
+
+    "not perform auditing" when {
+      "the feature toggle is set to false" in {
+
+        when(desService.getEstateInfo(any())(any())).thenReturn(Future.successful(EstateFoundResponse(None, ResponseHeader("Parked", "1"))))
+
+        when(mockConfig.auditingEnabled).thenReturn(false)
+
+        val SUT = new GetEstateController(new FakeIdentifierAction(Organisation), auditService, desService)
+
+        val result = SUT.get(utr).apply(FakeRequest(GET, s"/estates/$utr"))
+
+        whenReady(result) { _ =>
+          verify(mockAuditConnector, times(0)).sendExplicitAudit[Any](any(), any())(any(), any(), any())
+        }
+      }
+    }
+
+    "perform auditing" when {
+      "the feature toggle is set to true" in {
+
+        when(desService.getEstateInfo(any())(any())).thenReturn(Future.successful(EstateFoundResponse(None, ResponseHeader("Parked", "1"))))
+
+        when(mockConfig.auditingEnabled).thenReturn(true)
+
+        val SUT = new GetEstateController(new FakeIdentifierAction(Organisation), auditService, desService)
+
+        val result = SUT.get(utr).apply(FakeRequest(GET, s"/estates/$utr"))
+
+        whenReady(result) { _ =>
+          verify(mockAuditConnector, times(1)).sendExplicitAudit[Any](any(), any())(any(), any(), any())
+        }
+      }
+    }
 
     "return 200 - Ok" in {
 
