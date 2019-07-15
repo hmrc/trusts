@@ -38,7 +38,7 @@ object ErrorResponses {
     BadRequest(doErrorResponse("BAD_REQUEST", "Provided request is invalid."))
 
   def invalidCorrelationIdErrorResponse =
-    BadRequest(doErrorResponse("INVALID_CORRELATIONID", "Submission has not passed validation. Invalid CorrelationId."))
+    InternalServerError(doErrorResponse("INVALID_CORRELATIONID", "Submission has not passed validation. Invalid CorrelationId."))
 
   def duplicateSubmissionErrorResponse =
     Conflict(doErrorResponse("DUPLICATE_SUBMISSION", "Duplicate Correlation Id was submitted."))

@@ -152,10 +152,4 @@ trait ValidationUtil {
     registration.trust.entities.settlors.flatMap { settlors => settlors.settlorCompany.map(x => x) }
   }
 
-  def isValidCorrelationId(header: Option[String], regex: Regex): Boolean =
-    header match {
-      case Some(correlationId) => regex.findFirstMatchIn(correlationId).isDefined
-      case _ => false
-    }
-
 }

@@ -16,14 +16,10 @@
 
 package uk.gov.hmrc.trusts.utils
 
-import scala.util.matching.Regex
-
 object Headers {
 
   val DraftRegistrationId = "Draft-Registration-ID"
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "Correlation-Id"
-
-  val VARIATION_CORRELATION_REGEX: Regex = """^[A-Za-z0-9\-]{36}$""".r
 
 }

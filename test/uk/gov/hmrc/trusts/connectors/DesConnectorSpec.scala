@@ -950,7 +950,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
         val futureResult = connector.variations(variationsRequest)
 
         whenReady(futureResult.failed) {
-          result => result mustBe DuplicateSubmissionException
+          result => result mustBe an[InternalServerErrorException]
         }
       }
     }
@@ -965,7 +965,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
         application.stop()
 
         whenReady(futureResult.failed) {
-          result => result mustBe InvalidCorrelationIdException
+          result => result mustBe an[InternalServerErrorException]
         }
       }
     }
