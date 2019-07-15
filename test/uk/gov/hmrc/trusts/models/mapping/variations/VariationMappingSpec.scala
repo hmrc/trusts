@@ -17,7 +17,8 @@
 package uk.gov.hmrc.trusts.models.mapping.variations
 
 import org.scalatest.enablers.Definition
-import play.api.libs.json.{JsError, JsLookupResult, JsSuccess, Json}
+import org.scalatest.matchers.{HavePropertyMatchResult, HavePropertyMatcher}
+import play.api.libs.json.{JsError, JsLookupResult, JsSuccess, JsValue, Json}
 import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.models.variation.Variation
 
@@ -72,6 +73,9 @@ class VariationMappingSpec extends BaseSpec {
         (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 0 \ "leadTrusteeInd") mustNot be(defined)
         (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 1) mustBe defined
         (json \ "details" \ "trust" \ "entities" \ "leadTrustees" \ 1 \ "leadTrusteeInd" \ "name" \ "firstName").as[String] mustBe "John"
+
+        (json \ "details" \ "trust" \ "assets" \ "monetary" \ 0 \ "assetMonetaryAmount").as[Int] mustBe 100000
+
       }
 
     }
