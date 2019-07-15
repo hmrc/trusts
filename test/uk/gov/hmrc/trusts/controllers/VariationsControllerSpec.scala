@@ -113,7 +113,7 @@ class VariationsControllerSpec extends BaseSpec {
 
       }
 
-      "input request fails business validation" ignore {
+      "input request fails business validation" in {
 
         when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
           .thenReturn(Future.failed(BadRequestException))
@@ -144,6 +144,16 @@ class VariationsControllerSpec extends BaseSpec {
         val request = postRequestWithPayload(Json.parse(validVariationsRequestJson), withDraftId = false)
 
         val result = SUT.variation()(request)
+
+        whenReady(result){_ =>
+
+          verify(mockAuditService).auditErrorResponse(
+            Meq(trustVariationsAuditEvent),
+            any(),
+            Meq("id"),
+            Meq("Submission has not passed validation. Invalid CorrelationId.")
+          )(any())
+        }
 
         status(result) mustBe INTERNAL_SERVER_ERROR
 

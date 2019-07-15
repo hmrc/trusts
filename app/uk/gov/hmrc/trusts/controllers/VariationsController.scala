@@ -65,6 +65,12 @@ class VariationsController @Inject()(
             Ok(Json.toJson(response))
           } recover {
             case InvalidCorrelationIdException =>
+              auditService.auditErrorResponse(
+                TrustAuditing.TRUST_VARIATION,
+                request.body,
+                request.identifier,
+                errorReason = "Submission has not passed validation. Invalid CorrelationId."
+              )
               invalidCorrelationIdErrorResponse
 
             case DuplicateSubmissionException =>
