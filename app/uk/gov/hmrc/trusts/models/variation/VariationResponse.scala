@@ -31,6 +31,9 @@ object VariationResponse {
   implicit lazy val httpReads: HttpReads[VariationResponse] =
     new HttpReads[VariationResponse] {
       override def read(method: String, url: String, response: HttpResponse): VariationResponse = {
+
+        Logger.debug(s"[VariationResponse] response body ${response.body}")
+
         Logger.info(s"[VariationTvnResponse]  response status received from des: ${response.status}")
         response.status match {
           case OK =>
@@ -45,7 +48,7 @@ object VariationResponse {
             Logger.error(s"[VariationTvnResponse] Conflict response from des")
             throw InternalServerErrorException("Conflict response from des")
           case INTERNAL_SERVER_ERROR =>
-            Logger.error(s"[VariationTvnResponse] Server Error response from des")
+            Logger.error(s"[VariationTvnResponse] Internal server error response from des")
             throw InternalServerErrorException("des is currently experiencing problems that require live service intervention")
           case SERVICE_UNAVAILABLE =>
             Logger.error("[VariationTvnResponse] Service unavailable response from des.")

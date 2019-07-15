@@ -18,10 +18,10 @@ package uk.gov.hmrc.trusts.exceptions
 
 case class ServiceNotAvailableException(message : String )  extends Exception(message)
 case class InternalServerErrorException(message : String )  extends Exception(message)
-case object AlreadyRegisteredException extends Exception
-case object DuplicateSubmissionException extends Exception
-case object InvalidCorrelationIdException extends Exception
-case object NotFoundException extends Exception
-case object NoMatchException extends Exception
-case object BadRequestException extends Exception
-case object MaxRetriesAttemptedException extends Exception
+case object AlreadyRegisteredException extends Exception("Already registered")
+case object DuplicateSubmissionException extends Exception("Duplicate submission")
+case object InvalidCorrelationIdException extends Exception("Invalid correlation ID")
+case object NotFoundException extends Exception("Not found")
+case object NoMatchException extends Exception("No matched")
+case object BadRequestException extends Exception("Bad request")
+case object MaxRetriesAttemptedException extends Exception("Max retries attempted")

@@ -45,15 +45,14 @@ class VariationsController @Inject()(
         desService.variation(_) map { response =>
           Ok(Json.toJson(response))
         } recover {
-          case _: InvalidCorrelationIdException.type =>
+          case InvalidCorrelationIdException =>
             invalidCorrelationIdErrorResponse
-          case _: DuplicateSubmissionException.type =>
+          case DuplicateSubmissionException =>
             duplicateSubmissionErrorResponse
-          case _: InternalServerErrorException =>
-            internalServerErrorErrorResponse
-          case _: ServiceNotAvailableException =>
+          case ServiceNotAvailableException(_) =>
             serviceUnavailableErrorResponse
-
+          case _ =>
+            internalServerErrorErrorResponse
         }
       )
 
