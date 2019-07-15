@@ -19,6 +19,7 @@ package uk.gov.hmrc.trusts.controllers
 import java.util.UUID
 
 import org.mockito.Matchers._
+import org.mockito.Matchers.{eq => Meq}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.Helpers._
@@ -28,7 +29,7 @@ import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.variation.{Variation, VariationResponse}
-import uk.gov.hmrc.trusts.services.DesService
+import uk.gov.hmrc.trusts.services.{AuditService, DesService}
 import uk.gov.hmrc.trusts.utils.Headers
 
 import scala.concurrent.Future
@@ -37,13 +38,15 @@ class VariationsControllerSpec extends BaseSpec {
 
   lazy val mockDesService: DesService = mock[DesService]
 
+  lazy val mockAuditService: AuditService = mock[AuditService]
+
   private def variationsController = {
-    val SUT = new VariationsController(new FakeIdentifierAction(Organisation), mockDesService)
+    val SUT = new VariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService)
     SUT
   }
 
   val tvnResponse = "XXTVN1234567890"
-
+  val trustVariationsAuditEvent =  "TrustVariation"
 
   ".variation" should {
 
@@ -54,12 +57,24 @@ class VariationsControllerSpec extends BaseSpec {
         when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
           .thenReturn(Future.successful(VariationResponse(tvnResponse)))
 
+        val requestPayLoad = Json.parse(validVariationsRequestJson)
+
         val SUT = variationsController
 
         val result = SUT.variation()(
-          postRequestWithPayload(Json.parse(validVariationsRequestJson), withDraftId = false)
+          postRequestWithPayload(requestPayLoad, withDraftId = false)
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
+
+        whenReady(result){_ =>
+
+          verify(mockAuditService).audit(
+            Meq(trustVariationsAuditEvent),
+            any(),
+            Meq("id"),
+            Meq(Json.obj("tvn" -> tvnResponse))
+          )(any())
+        }
 
         status(result) mustBe OK
         (contentAsJson(result) \ "tvn").as[String] mustBe tvnResponse
@@ -78,6 +93,16 @@ class VariationsControllerSpec extends BaseSpec {
           postRequestWithPayload(Json.parse(invalidVariationsRequestJson), withDraftId = false)
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
+
+        whenReady(result){_ =>
+
+          verify(mockAuditService).auditErrorResponse(
+            Meq(trustVariationsAuditEvent),
+            any(),
+            Meq("id"),
+            Meq("Provided request is invalid.")
+          )(any())
+        }
 
         status(result) mustBe BAD_REQUEST
 

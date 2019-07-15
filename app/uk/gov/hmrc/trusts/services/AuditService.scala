@@ -93,13 +93,13 @@ class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig)
     )
   }
 
-  def auditErrorResponse(eventName: String, utr: String, internalId: String, errorReason: String)(implicit hc: HeaderCarrier): Unit = {
+  def auditErrorResponse(eventName: String, request: JsValue, internalId: String, errorReason: String)(implicit hc: HeaderCarrier): Unit = {
 
     val response = Json.obj("errorReason" -> errorReason)
 
     audit(
       event = eventName,
-      request = Json.obj("utr" -> utr),
+      request = request,
       internalId = internalId,
       response = response
     )

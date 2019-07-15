@@ -86,7 +86,7 @@ class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter {
         val result = getEstatesController.get(utr).apply(FakeRequest(GET, s"/estates/$invalidUTR"))
 
         whenReady(result) { _ =>
-          verify(mockedAuditService).auditErrorResponse(mockEq("GetEstate"), any[String], any[String], any[String])(any())
+          verify(mockedAuditService).auditErrorResponse(mockEq("GetEstate"), any[JsValue], any[String], any[String])(any())
           status(result) mustBe INTERNAL_SERVER_ERROR
         }
       }
@@ -100,7 +100,7 @@ class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter {
         val result = getEstatesController.get(utr).apply(FakeRequest(GET, s"/estates/$utr"))
 
         whenReady(result) { _ =>
-          verify(mockedAuditService).auditErrorResponse(mockEq("GetEstate"), any[String], any[String], any[String])(any())
+          verify(mockedAuditService).auditErrorResponse(mockEq("GetEstate"), any[JsValue], any[String], any[String])(any())
           status(result) mustBe INTERNAL_SERVER_ERROR
         }
       }
@@ -114,7 +114,7 @@ class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter {
         val result = getEstatesController.get(utr).apply(FakeRequest(GET, s"/estates/$utr"))
 
         whenReady(result) { _ =>
-          verify(mockedAuditService).auditErrorResponse(mockEq("GetEstate"), any[String], any[String], any[String])(any())
+          verify(mockedAuditService).auditErrorResponse(mockEq("GetEstate"), any[JsValue], any[String], any[String])(any())
           status(result) mustBe INTERNAL_SERVER_ERROR
         }
       }
@@ -128,7 +128,7 @@ class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter {
         val result = getEstatesController.get(utr).apply(FakeRequest(GET, s"/estates/$utr"))
 
         whenReady(result) { _ =>
-          verify(mockedAuditService).auditErrorResponse(mockEq("GetEstate"), any[String], any[String], any[String])(any())
+          verify(mockedAuditService).auditErrorResponse(mockEq("GetEstate"), any[JsValue], any[String], any[String])(any())
           status(result) mustBe INTERNAL_SERVER_ERROR
         }
       }
@@ -142,7 +142,7 @@ class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter {
         val result = getEstatesController.get(utr).apply(FakeRequest(GET, s"/estates/$utr"))
 
         whenReady(result) { _ =>
-          verify(mockedAuditService).auditErrorResponse(mockEq("GetEstate"), any[String], any[String], any[String])(any())
+          verify(mockedAuditService).auditErrorResponse(mockEq("GetEstate"), any[JsValue], any[String], any[String])(any())
           status(result) mustBe INTERNAL_SERVER_ERROR
         }
       }
@@ -156,7 +156,7 @@ class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter {
         val result = getEstatesController.get(utr).apply(FakeRequest(GET, s"/estates/$utr"))
 
         whenReady(result) { _ =>
-          verify(mockedAuditService).auditErrorResponse(mockEq("GetEstate"), any[String], any[String], any[String])(any())
+          verify(mockedAuditService).auditErrorResponse(mockEq("GetEstate"), any[JsValue], any[String], any[String])(any())
           status(result) mustBe INTERNAL_SERVER_ERROR
         }
       }

@@ -21,8 +21,9 @@ import play.api.Logger
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
+import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.variation.Variation
-import uk.gov.hmrc.trusts.services.DesService
+import uk.gov.hmrc.trusts.services.{AuditService, DesService}
 import uk.gov.hmrc.trusts.utils.ErrorResponses._
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
@@ -31,7 +32,8 @@ import scala.concurrent.Future
 
 class VariationsController @Inject()(
                                       identify: IdentifierAction,
-                                      desService: DesService
+                                      desService: DesService,
+                                      auditService: AuditService
                                     ) extends TrustsBaseController with ValidationUtil {
 
   def variation() = identify.async(parse.json) {
@@ -40,19 +42,37 @@ class VariationsController @Inject()(
       request.body.validate[Variation].fold(
         errors => {
           Logger.error(s"[variations] trusts validation errors from request body $errors.")
+
+          auditService.auditErrorResponse(
+            TrustAuditing.TRUST_VARIATION,
+            request.body,
+            request.identifier,
+            errorReason = "Provided request is invalid."
+          )
+
           Future.successful(invalidRequestErrorResponse)
         },
-        desService.variation(_) map { response =>
-          Ok(Json.toJson(response))
-        } recover {
-          case InvalidCorrelationIdException =>
-            invalidCorrelationIdErrorResponse
-          case DuplicateSubmissionException =>
-            duplicateSubmissionErrorResponse
-          case ServiceNotAvailableException(_) =>
-            serviceUnavailableErrorResponse
-          case _ =>
-            internalServerErrorErrorResponse
+        variationRequest => {
+          desService.variation(variationRequest) map { response =>
+
+            auditService.audit(
+              TrustAuditing.TRUST_VARIATION,
+              Json.toJson(variationRequest),
+              request.identifier,
+              Json.toJson(response)
+            )
+
+            Ok(Json.toJson(response))
+          } recover {
+            case InvalidCorrelationIdException =>
+              invalidCorrelationIdErrorResponse
+            case DuplicateSubmissionException =>
+              duplicateSubmissionErrorResponse
+            case ServiceNotAvailableException(_) =>
+              serviceUnavailableErrorResponse
+            case _ =>
+              internalServerErrorErrorResponse
+          }
         }
       )
 
