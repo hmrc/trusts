@@ -31,6 +31,9 @@ object VariationResponse {
   implicit lazy val httpReads: HttpReads[VariationResponse] =
     new HttpReads[VariationResponse] {
       override def read(method: String, url: String, response: HttpResponse): VariationResponse = {
+
+        Logger.debug(s"[VariationResponse] response body ${response.body}")
+
         Logger.info(s"[VariationTvnResponse]  response status received from des: ${response.status}")
         response.status match {
           case OK =>
