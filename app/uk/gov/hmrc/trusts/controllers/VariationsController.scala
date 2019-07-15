@@ -66,11 +66,32 @@ class VariationsController @Inject()(
           } recover {
             case InvalidCorrelationIdException =>
               invalidCorrelationIdErrorResponse
+
             case DuplicateSubmissionException =>
+              auditService.auditErrorResponse(
+                TrustAuditing.TRUST_VARIATION,
+                request.body,
+                request.identifier,
+                errorReason = "Duplicate Correlation Id was submitted."
+              )
               duplicateSubmissionErrorResponse
+
             case ServiceNotAvailableException(_) =>
+              auditService.auditErrorResponse(
+                TrustAuditing.TRUST_VARIATION,
+                request.body,
+                request.identifier,
+                errorReason = "Service unavailable."
+              )
               serviceUnavailableErrorResponse
+
             case _ =>
+              auditService.auditErrorResponse(
+                TrustAuditing.TRUST_VARIATION,
+                request.body,
+                request.identifier,
+                errorReason = "Internal server error."
+              )
               internalServerErrorErrorResponse
           }
         }

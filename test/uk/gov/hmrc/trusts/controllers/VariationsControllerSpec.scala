@@ -169,6 +169,16 @@ class VariationsControllerSpec extends BaseSpec {
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
 
+        whenReady(result){_ =>
+
+          verify(mockAuditService).auditErrorResponse(
+            Meq(trustVariationsAuditEvent),
+            any(),
+            Meq("id"),
+            Meq("Duplicate Correlation Id was submitted.")
+          )(any())
+        }
+
         status(result) mustBe CONFLICT
 
         val output = contentAsJson(result)
@@ -192,6 +202,15 @@ class VariationsControllerSpec extends BaseSpec {
           postRequestWithPayload(Json.parse(validVariationsRequestJson))
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
+        whenReady(result){_ =>
+
+          verify(mockAuditService).auditErrorResponse(
+            Meq(trustVariationsAuditEvent),
+            any(),
+            Meq("id"),
+            Meq("Internal server error.")
+          )(any())
+        }
 
         status(result) mustBe INTERNAL_SERVER_ERROR
 
@@ -216,6 +235,16 @@ class VariationsControllerSpec extends BaseSpec {
           postRequestWithPayload(Json.parse(validVariationsRequestJson))
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
+
+        whenReady(result){_ =>
+
+          verify(mockAuditService).auditErrorResponse(
+            Meq(trustVariationsAuditEvent),
+            any(),
+            Meq("id"),
+            Meq("Service unavailable.")
+          )(any())
+        }
 
 
         status(result) mustBe SERVICE_UNAVAILABLE
