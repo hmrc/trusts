@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models.mapping
+package uk.gov.hmrc.trusts.models.mapping.registration
 
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.trusts.BaseSpec

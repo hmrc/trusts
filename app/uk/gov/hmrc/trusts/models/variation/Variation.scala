@@ -86,7 +86,7 @@ case class TrustEntitiesType(
                               naturalPerson: Option[List[NaturalPersonType]],
                               beneficiary: BeneficiaryType,
                               deceased: Option[WillType],
-                              leadTrustees: LeadTrusteeType,
+                              leadTrustees: List[LeadTrusteeType],
                               trustees: Option[List[TrusteeType]],
                               protectors: Option[ProtectorsType],
                               settlors: Option[Settlors]
@@ -202,15 +202,7 @@ case class LeadTrusteeType(
 object LeadTrusteeType {
 
   implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
-  implicit val leadTrusteeTypeReads: Reads[LeadTrusteeType] = Json.reads[LeadTrusteeType]
-
-  implicit val leadTrusteeWritesToDes: Writes[LeadTrusteeType] = Writes {
-    leadTrustee =>
-      leadTrustee.leadTrusteeInd match {
-        case Some(indLeadTrustee) => Json.toJson(indLeadTrustee)
-        case None => Json.toJson(leadTrustee.leadTrusteeOrg)
-      }
-  }
+  implicit val leadTrusteeFormats: Format[LeadTrusteeType] = Json.format[LeadTrusteeType]
 }
 
 case class TrusteeType(
