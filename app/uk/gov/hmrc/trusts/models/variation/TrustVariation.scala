@@ -17,12 +17,13 @@
 package uk.gov.hmrc.trusts.models.variation
 
 import org.joda.time.DateTime
-import uk.gov.hmrc.trusts.models._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.{Identification, IdentificationType}
+import uk.gov.hmrc.trusts.models.{AddressType, AgentDetails, AssetMonetaryAmount, Correspondence, Declaration, IdentificationOrgType, NameType, OtherAssetType, PropertyLandType, TrustDetailsType}
 import uk.gov.hmrc.trusts.utils.Constants.dateTimePattern
 
-case class Variation(
+case class TrustVariation(
                       matchData: MatchData,
                       correspondence: Correspondence,
                       declaration: Declaration,
@@ -32,9 +33,9 @@ case class Variation(
                       reqHeader: ReqHeader
                     )
 
-object Variation {
+object TrustVariation {
 
-  val variationReads: Reads[Variation] = {
+  val variationReads: Reads[TrustVariation] = {
     (
       (__ \ "matchData").read[MatchData] and
         (__ \ "correspondence").read[Correspondence] and
@@ -43,10 +44,10 @@ object Variation {
         (__ \ "agentDetails").readNullable[AgentDetails] and
         (__ \ "trustEndDate").readNullable[DateTime] and
         (__ \ "reqHeader").read[ReqHeader]
-      ) (Variation.apply _)
+      ) (TrustVariation.apply _)
   }
 
-  val writeToDes: Writes[Variation] = (
+  val writeToDes: Writes[TrustVariation] = (
     (JsPath \ "matchData").write[MatchData] and
       (JsPath \ "correspondence").write[Correspondence] and
       (JsPath \ "declaration").write[Declaration] and
@@ -54,9 +55,9 @@ object Variation {
       (JsPath \ "agentDetails").writeNullable[AgentDetails] and
       (JsPath \ "trustEndDate").writeNullable[DateTime] and
       (JsPath \ "reqHeader").write[ReqHeader]
-    ) (r => (r.matchData, r.correspondence, r.declaration, r.details, r.agentDetails, r.trustEndDate, r.reqHeader))
+    ) (unlift(EstateVariation.unapply))
 
-  implicit val variationFormat: Format[Variation] = Format(variationReads, writeToDes)
+  implicit val variationFormat: Format[TrustVariation] = Format(variationReads, writeToDes)
 
 }
 
@@ -86,7 +87,7 @@ case class TrustEntitiesType(
                               naturalPerson: Option[List[NaturalPersonType]],
                               beneficiary: BeneficiaryType,
                               deceased: Option[WillType],
-                              leadTrustees: LeadTrusteeType,
+                              leadTrustees: List[LeadTrusteeType],
                               trustees: Option[List[TrusteeType]],
                               protectors: Option[ProtectorsType],
                               settlors: Option[Settlors]
@@ -125,6 +126,53 @@ object BeneficiaryType {
   implicit val beneficiaryTypeFormat: Format[BeneficiaryType] = Json.format[BeneficiaryType]
 }
 
+case class UnidentifiedType(lineNo: Option[String],
+                            bpMatchStatus: Option[String],
+                            description: String,
+                            beneficiaryDiscretion: Option[Boolean],
+                            beneficiaryShareOfIncome: Option[String],
+                            entityStart: DateTime,
+                            entityEnd: Option[DateTime])
+
+object UnidentifiedType {
+  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
+  implicit val unidentifiedTypeFormat: Format[UnidentifiedType] = Json.format[UnidentifiedType]
+}
+
+case class LargeType(lineNo: Option[String],
+                     bpMatchStatus: Option[String],
+                     organisationName: String,
+                     description: String,
+                     description1: Option[String],
+                     description2: Option[String],
+                     description3: Option[String],
+                     description4: Option[String],
+                     numberOfBeneficiary: String,
+                     identification: Option[IdentificationOrgType],
+                     beneficiaryDiscretion: Option[Boolean],
+                     beneficiaryShareOfIncome: Option[String],
+                     entityStart: DateTime,
+                     entityEnd: Option[DateTime])
+
+object LargeType {
+  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
+  implicit val largeTypeFormat: Format[LargeType] = Json.format[LargeType]
+}
+
+case class OtherType(lineNo: Option[String],
+                     bpMatchStatus: Option[String],
+                     description: String,
+                     address: Option[AddressType],
+                     beneficiaryDiscretion: Option[Boolean],
+                     beneficiaryShareOfIncome: Option[String],
+                     entityStart: DateTime,
+                     entityEnd: Option[DateTime])
+
+object OtherType {
+  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
+  implicit val otherTypeFormat: Format[OtherType] = Json.format[OtherType]
+}
+
 case class IndividualDetailsType(
                                   lineNo: Option[String],
                                   bpMatchStatus: Option[String],
@@ -142,6 +190,47 @@ case class IndividualDetailsType(
 object IndividualDetailsType {
   implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val individualDetailsTypeFormat: Format[IndividualDetailsType] = Json.format[IndividualDetailsType]
+}
+
+case class CompanyType(lineNo: Option[String],
+                       bpMatchStatus: Option[String],
+                       organisationName: String,
+                       beneficiaryDiscretion: Option[Boolean],
+                       beneficiaryShareOfIncome: Option[String],
+                       identification: IdentificationOrgType,
+                       entityStart: DateTime,
+                       entityEnd: Option[DateTime])
+
+object CompanyType {
+  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
+  implicit val companyTypeFormat: Format[CompanyType] = Json.format[CompanyType]
+}
+
+case class BeneficiaryTrustType(lineNo: Option[String],
+                                bpMatchStatus: Option[String],
+                                organisationName: String,
+                                beneficiaryDiscretion: Option[Boolean],
+                                beneficiaryShareOfIncome: Option[String],
+                                identification: IdentificationOrgType,
+                                entityStart: DateTime,
+                                entityEnd: Option[DateTime])
+
+object BeneficiaryTrustType {
+  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
+  implicit val beneficiaryTrustTypeFormat: Format[BeneficiaryTrustType] = Json.format[BeneficiaryTrustType]
+}
+
+case class CharityType(lineNo: Option[String],
+                       bpMatchStatus: Option[String],
+                       organisationName: String,
+                       beneficiaryDiscretion: Option[Boolean],
+                       beneficiaryShareOfIncome: Option[String],
+                       identification: IdentificationOrgType,
+                       entityStart: DateTime,
+                       entityEnd: Option[DateTime])
+
+object CharityType {
+  implicit val charityTypeFormat: Format[CharityType] = Json.format[CharityType]
 }
 
 case class WillType(
@@ -191,6 +280,7 @@ case class LeadTrusteeOrgType(
                              )
 
 object LeadTrusteeOrgType {
+  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val leadTrusteeOrgTypeFormat: Format[LeadTrusteeOrgType] = Json.format[LeadTrusteeOrgType]
 }
 
@@ -201,16 +291,7 @@ case class LeadTrusteeType(
 
 object LeadTrusteeType {
 
-  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
-  implicit val leadTrusteeTypeReads: Reads[LeadTrusteeType] = Json.reads[LeadTrusteeType]
-
-  implicit val leadTrusteeWritesToDes: Writes[LeadTrusteeType] = Writes {
-    leadTrustee =>
-      leadTrustee.leadTrusteeInd match {
-        case Some(indLeadTrustee) => Json.toJson(indLeadTrustee)
-        case None => Json.toJson(leadTrustee.leadTrusteeOrg)
-      }
-  }
+  implicit val leadTrusteeFormats: Format[LeadTrusteeType] = Json.format[LeadTrusteeType]
 }
 
 case class TrusteeType(
@@ -234,6 +315,8 @@ case class TrusteeOrgType(
                          )
 
 object TrusteeOrgType {
+
+  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val trusteeOrgTypeFormat: Format[TrusteeOrgType] = Json.format[TrusteeOrgType]
 }
 
@@ -249,6 +332,7 @@ case class TrusteeIndividualType(
                                 )
 
 object TrusteeIndividualType {
+
   implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val trusteeIndividualTypeFormat: Format[TrusteeIndividualType] = Json.format[TrusteeIndividualType]
 }
@@ -271,8 +355,10 @@ case class Protector(
                     )
 
 object Protector {
+
   implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val protectorFormat: Format[Protector] = Json.format[Protector]
+
 }
 
 case class ProtectorCompany(
@@ -285,6 +371,8 @@ case class ProtectorCompany(
                            )
 
 object ProtectorCompany {
+
+  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val protectorCompanyFormat: Format[ProtectorCompany] = Json.format[ProtectorCompany]
 }
 
@@ -324,6 +412,7 @@ case class SettlorCompany(
                          )
 
 object SettlorCompany {
+  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val settlorCompanyFormat: Format[SettlorCompany] = Json.format[SettlorCompany]
 }
 

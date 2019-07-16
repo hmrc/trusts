@@ -23,7 +23,7 @@ import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.GetEstateResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustResponse
-import uk.gov.hmrc.trusts.models.variation.{Variation, VariationResponse}
+import uk.gov.hmrc.trusts.models.variation.{EstateVariation, TrustVariation, VariationResponse}
 
 import scala.concurrent.Future
 
@@ -62,8 +62,11 @@ class DesServiceImpl @Inject()(val desConnector: DesConnector) extends DesServic
     desConnector.getEstateInfo(utr)
   }
 
-  def variation(variation: Variation)(implicit hc: HeaderCarrier): Future[VariationResponse] =
-    desConnector.variations(variation: Variation)
+  def trustVariation(trustVariation: TrustVariation)(implicit hc: HeaderCarrier): Future[VariationResponse] =
+    desConnector.trustVariation(trustVariation: TrustVariation)
+
+  def estateVariation(estateVariation: EstateVariation)(implicit hc: HeaderCarrier): Future[VariationResponse] =
+    desConnector.estateVariation(estateVariation: EstateVariation)
 }
 
 
@@ -81,5 +84,7 @@ trait DesService {
   def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse]
   def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse]
 
-  def variation(variation: Variation)(implicit hc: HeaderCarrier): Future[VariationResponse]
+  def trustVariation(trustVariation: TrustVariation)(implicit hc: HeaderCarrier): Future[VariationResponse]
+
+  def estateVariation(estateVariation: EstateVariation)(implicit hc: HeaderCarrier): Future[VariationResponse]
 }

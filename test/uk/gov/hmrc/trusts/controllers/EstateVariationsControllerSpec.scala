@@ -18,50 +18,108 @@ package uk.gov.hmrc.trusts.controllers
 
 import java.util.UUID
 
-import org.mockito.Matchers._
-import org.mockito.Matchers.{eq => Meq}
+import org.mockito.Matchers.{eq => Meq, _}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.trusts.BaseSpec
+import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
-import uk.gov.hmrc.trusts.models.variation.{Variation, VariationResponse}
+import uk.gov.hmrc.trusts.models.variation.{EstateVariation, Variation, VariationResponse}
 import uk.gov.hmrc.trusts.services.{AuditService, DesService}
 import uk.gov.hmrc.trusts.utils.Headers
 
 import scala.concurrent.Future
 
-class VariationsControllerSpec extends BaseSpec {
+class EstateVariationsControllerSpec extends BaseSpec {
 
   lazy val mockDesService: DesService = mock[DesService]
 
   lazy val mockAuditService: AuditService = mock[AuditService]
 
-  private def variationsController = {
-    val SUT = new VariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService)
+  val mockAuditConnector: AuditConnector = mock[AuditConnector]
+  val mockConfig: AppConfig = mock[AppConfig]
+
+  val auditService = new AuditService(mockAuditConnector, mockConfig)
+
+  override def beforeEach() = {
+    reset(mockDesService, mockAuditService, mockAuditConnector, mockConfig)
+  }
+
+  private def estateVariationsController = {
+    val SUT = new EstateVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService)
     SUT
   }
 
   val tvnResponse = "XXTVN1234567890"
-  val trustVariationsAuditEvent =  "TrustVariation"
+  val estateVariationsAuditEvent =  "EstateVariation"
 
-  ".variation" should {
+  ".estateVariation" should {
+
+    "not perform auditing" when {
+      "the feature toggle is set to false" in {
+
+        when(mockDesService.variation(any[EstateVariation])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(VariationResponse(tvnResponse)))
+
+        when(mockConfig.auditingEnabled).thenReturn(false)
+
+        val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
+
+        val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, auditService)
+
+        val result = SUT.trustVariation()(
+          postRequestWithPayload(requestPayLoad, withDraftId = false)
+            .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
+        )
+
+        whenReady(result) { _ =>
+
+          verify(mockAuditConnector, times(0)).sendExplicitAudit[Any](any(), any())(any(), any(), any())
+        }
+      }
+    }
+
+    "perform auditing" when {
+      "the feature toggle is set to true" in {
+
+        when(mockDesService.variation(any[EstateVariation])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(VariationResponse(tvnResponse)))
+
+        when(mockConfig.auditingEnabled).thenReturn(true)
+
+        val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
+
+        val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, auditService)
+
+        val result = SUT.trustVariation()(
+          postRequestWithPayload(requestPayLoad, withDraftId = false)
+            .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
+        )
+
+        whenReady(result) { _ =>
+
+          verify(mockAuditConnector, times(1)).sendExplicitAudit[Any](any(), any())(any(), any(), any())
+        }
+      }
+    }
 
     "return 200 with TVN" when {
 
       "individual user called the register endpoint with a valid json payload " in {
 
-        when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+        when(mockDesService.variation(any[EstateVariation])(any[HeaderCarrier]))
           .thenReturn(Future.successful(VariationResponse(tvnResponse)))
 
-        val requestPayLoad = Json.parse(validVariationsRequestJson)
+        val requestPayLoad = Json.parse(validEstateVariationsRequestJson)
 
-        val SUT = variationsController
+        val SUT = estateVariationsController
 
-        val result = SUT.variation()(
+        val result = SUT.estateVariation()(
           postRequestWithPayload(requestPayLoad, withDraftId = false)
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
@@ -69,7 +127,7 @@ class VariationsControllerSpec extends BaseSpec {
         whenReady(result){_ =>
 
           verify(mockAuditService).audit(
-            Meq(trustVariationsAuditEvent),
+            Meq(estateVariationsAuditEvent),
             any(),
             Meq("id"),
             Meq(Json.obj("tvn" -> tvnResponse))
@@ -87,17 +145,17 @@ class VariationsControllerSpec extends BaseSpec {
 
       "input request fails schema validation" in {
 
-        val SUT = variationsController
+        val SUT = estateVariationsController
 
-        val result = SUT.variation()(
-          postRequestWithPayload(Json.parse(invalidVariationsRequestJson), withDraftId = false)
+        val result = SUT.estateVariation()(
+          postRequestWithPayload(Json.parse(invalidEstateVariationsRequestJson), withDraftId = false)
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
 
         whenReady(result){_ =>
 
           verify(mockAuditService).auditErrorResponse(
-            Meq(trustVariationsAuditEvent),
+            Meq(estateVariationsAuditEvent),
             any(),
             Meq("id"),
             Meq("Provided request is invalid.")
@@ -115,12 +173,12 @@ class VariationsControllerSpec extends BaseSpec {
 
       "input request fails business validation" in {
 
-        when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+        when(mockDesService.variation(any[EstateVariation])(any[HeaderCarrier]))
           .thenReturn(Future.failed(BadRequestException))
 
-        val SUT = variationsController
+        val SUT = estateVariationsController
 
-        val result = SUT.variation()(
+        val result = SUT.estateVariation()(
           postRequestWithPayload(Json.parse(invalidTrustBusinessValidation), withDraftId = false)
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
@@ -136,19 +194,19 @@ class VariationsControllerSpec extends BaseSpec {
 
       "invalid correlation id is provided in the headers" in {
 
-        when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+        when(mockDesService.variation(any[EstateVariation])(any[HeaderCarrier]))
           .thenReturn(Future.failed(InvalidCorrelationIdException))
 
-        val SUT = variationsController
+        val SUT = estateVariationsController
 
-        val request = postRequestWithPayload(Json.parse(validVariationsRequestJson), withDraftId = false)
+        val request = postRequestWithPayload(Json.parse(validEstateVariationsRequestJson), withDraftId = false)
 
-        val result = SUT.variation()(request)
+        val result = SUT.estateVariation()(request)
 
         whenReady(result){_ =>
 
           verify(mockAuditService).auditErrorResponse(
-            Meq(trustVariationsAuditEvent),
+            Meq(estateVariationsAuditEvent),
             any(),
             Meq("id"),
             Meq("Submission has not passed validation. Invalid CorrelationId.")
@@ -169,20 +227,20 @@ class VariationsControllerSpec extends BaseSpec {
     "return a Conflict" when {
       "submission with same correlation id is submitted." in {
 
-        when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+        when(mockDesService.variation(any[EstateVariation])(any[HeaderCarrier]))
           .thenReturn(Future.failed(DuplicateSubmissionException))
 
-        val SUT = variationsController
+        val SUT = estateVariationsController
 
-        val result = SUT.variation()(
-          postRequestWithPayload(Json.parse(validVariationsRequestJson), withDraftId = false)
+        val result = SUT.estateVariation()(
+          postRequestWithPayload(Json.parse(validEstateVariationsRequestJson), withDraftId = false)
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
 
         whenReady(result){_ =>
 
           verify(mockAuditService).auditErrorResponse(
-            Meq(trustVariationsAuditEvent),
+            Meq(estateVariationsAuditEvent),
             any(),
             Meq("id"),
             Meq("Duplicate Correlation Id was submitted.")
@@ -203,19 +261,19 @@ class VariationsControllerSpec extends BaseSpec {
 
       "the register endpoint called and something goes wrong." in {
 
-        when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+        when(mockDesService.variation(any[EstateVariation])(any[HeaderCarrier]))
           .thenReturn(Future.failed(InternalServerErrorException("some error")))
 
-        val SUT = variationsController
+        val SUT = estateVariationsController
 
-        val result = SUT.variation()(
-          postRequestWithPayload(Json.parse(validVariationsRequestJson))
+        val result = SUT.estateVariation()(
+          postRequestWithPayload(Json.parse(validEstateVariationsRequestJson))
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
         whenReady(result){_ =>
 
           verify(mockAuditService).auditErrorResponse(
-            Meq(trustVariationsAuditEvent),
+            Meq(estateVariationsAuditEvent),
             any(),
             Meq("id"),
             Meq("Internal server error.")
@@ -236,20 +294,20 @@ class VariationsControllerSpec extends BaseSpec {
     "return service unavailable" when {
       "the des returns Service Unavailable as dependent service is down. " in {
 
-        when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+        when(mockDesService.variation(any[EstateVariation])(any[HeaderCarrier]))
           .thenReturn(Future.failed(ServiceNotAvailableException("dependent service is down")))
 
-        val SUT = variationsController
+        val SUT = estateVariationsController
 
-        val result = SUT.variation()(
-          postRequestWithPayload(Json.parse(validVariationsRequestJson))
+        val result = SUT.estateVariation()(
+          postRequestWithPayload(Json.parse(validEstateVariationsRequestJson))
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
 
         whenReady(result){_ =>
 
           verify(mockAuditService).auditErrorResponse(
-            Meq(trustVariationsAuditEvent),
+            Meq(estateVariationsAuditEvent),
             any(),
             Meq("id"),
             Meq("Service unavailable.")
