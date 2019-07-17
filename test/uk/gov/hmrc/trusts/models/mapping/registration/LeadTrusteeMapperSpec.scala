@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models.mapping
+package uk.gov.hmrc.trusts.models.mapping.registration
 
 import org.joda.time.DateTime
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.trusts.BaseSpec
-import uk.gov.hmrc.trusts.utils.{DataExamples, JsonRequests}
+import uk.gov.hmrc.trusts.utils.DataExamples
 
 
 class LeadTrusteeMapperSpec  extends BaseSpec with DataExamples {
 
-
   "Lead Trustee" should {
+
     "map to a valid json payload for a DES lead trustee" when {
       "it is individual type" when {
 

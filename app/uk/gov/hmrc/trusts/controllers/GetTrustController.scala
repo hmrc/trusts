@@ -52,31 +52,31 @@ class GetTrustController @Inject()(identify: IdentifierAction,
           Ok(response)
 
         case _: InvalidUTRResponse.type =>
-          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, utr, request.identifier, "The UTR provided is invalid.")
+          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, Json.obj("utr" -> utr), request.identifier, "The UTR provided is invalid.")
           InternalServerError
 
         case _: InvalidRegimeResponse.type =>
-          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, utr, request.identifier, "Invalid regime received from DES.")
+          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, Json.obj("utr" -> utr), request.identifier, "Invalid regime received from DES.")
           InternalServerError
 
         case _: BadRequestResponse.type =>
-          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, utr, request.identifier, "Bad Request received from DES.")
+          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, Json.obj("utr" -> utr), request.identifier, "Bad Request received from DES.")
           InternalServerError
 
         case _: ResourceNotFoundResponse.type =>
-          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, utr, request.identifier, "Not Found received from DES.")
+          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, Json.obj("utr" -> utr), request.identifier, "Not Found received from DES.")
           NotFound
 
         case _: InternalServerErrorResponse.type =>
-          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, utr, request.identifier, "Internal Server Error received from DES.")
+          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, Json.obj("utr" -> utr), request.identifier, "Internal Server Error received from DES.")
           InternalServerError
 
         case _: ServiceUnavailableResponse.type =>
-          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, utr, request.identifier, "Service Unavailable received from DES.")
+          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, Json.obj("utr" -> utr), request.identifier, "Service Unavailable received from DES.")
           InternalServerError
 
         case _ =>
-          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, utr, request.identifier, "UNKNOWN")
+          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, Json.obj("utr" -> utr), request.identifier, "UNKNOWN")
           InternalServerError
       }
   }

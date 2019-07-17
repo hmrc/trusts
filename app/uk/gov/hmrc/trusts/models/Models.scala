@@ -23,7 +23,6 @@ import play.api.data.validation.ValidationError
 
 case class ExistingCheckRequest(name: String, postcode: Option[String] = None, utr: String)
 
-
 object ExistingCheckRequest {
 
   private val validationError = ValidationError("")

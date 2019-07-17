@@ -29,11 +29,11 @@ import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, RosmPatternService, ValidationService}
 import uk.gov.hmrc.trusts.utils.Headers
+import uk.gov.hmrc.trusts.utils.ErrorResponses._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
-
 
 class RegisterTrustController @Inject()(desService: DesService, config: AppConfig,
                                         validationService: ValidationService,

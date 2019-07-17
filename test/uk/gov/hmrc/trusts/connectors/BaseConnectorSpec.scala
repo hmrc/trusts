@@ -92,4 +92,19 @@ class BaseConnectorSpec extends BaseSpec {
      """.stripMargin
   )
 
+  val jsonResponse409DuplicateCorrelation: JsValue = Json.parse(
+    s"""
+       |{
+       | "code": "DUPLICATE_SUBMISSION",
+       | "reason": "Duplicate Correlation Id was submitted."
+       |}""".stripMargin)
+
+
+  val jsonResponse400CorrelationId: JsValue = Json.parse(
+    s"""
+       |{
+       | "code": "INVALID_CORRELATIONID",
+       | "reason": "Submission has not passed validation. Invalid CorrelationId."
+       |}""".stripMargin)
+
 }
