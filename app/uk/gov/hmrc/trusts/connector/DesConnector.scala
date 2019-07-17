@@ -121,12 +121,16 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
     implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
+    val updatedHeaderCarrier = hc.copy(extraHeaders = desHeaders)
+
     http.GET[GetTrustResponse](createGetTrustOrEstateEndpoint(utr))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)
   }
 
   override def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse] = {
 
     implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
+
+    val updatedHeaderCarrier = hc.copy(extraHeaders = desHeaders)
 
     http.GET[GetEstateResponse](createGetTrustOrEstateEndpoint(utr))(GetEstateResponse.httpReads, implicitly[HeaderCarrier](hc), global)
   }

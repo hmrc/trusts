@@ -154,6 +154,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
     }
   }//trustsmatch
 
+
   ".checkExistingEstate" should {
 
     "return Matched " when {
@@ -270,6 +271,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
     }
   }//estatematch
 
+
   ".registerTrust" should {
 
     "return TRN  " when {
@@ -378,6 +380,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
       }
     }
   } //registerTrust
+
 
   ".registerEstate" should {
 

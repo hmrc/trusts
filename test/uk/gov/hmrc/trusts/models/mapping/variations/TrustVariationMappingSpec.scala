@@ -77,6 +77,16 @@ class TrustVariationMappingSpec extends BaseSpec {
 
       }
 
+      "fully hydrate the variation models as expected" in {
+        val payload = getJsonValueFromFile("valid-trusts-variations-api-two-lead-trustees.json").as[TrustVariation]
+
+        val jsonFromModels = Json.toJson(payload)
+
+        val expectedJson = getJsonValueFromFile("valid-trusts-variations-api-two-lead-trustees-expected.json")
+
+        jsonFromModels mustBe expectedJson
+      }
+
     }
 
   }

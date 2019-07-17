@@ -77,6 +77,7 @@ trait DesService {
   def checkExistingEstate(existingEstateCheckRequest: ExistingCheckRequest)(implicit hc: HeaderCarrier): Future[ExistingCheckResponse]
 
   def registerTrust(registration: Registration)(implicit hc: HeaderCarrier): Future[RegistrationResponse]
+
   def registerEstate(estateRegistration: EstateRegistration)(implicit hc: HeaderCarrier): Future[RegistrationResponse]
 
   def getSubscriptionId(trn: String)(implicit hc: HeaderCarrier): Future[SubscriptionIdResponse]

@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.trusts.services
 
+import java.time.format.DateTimeFormatter
+
 import org.joda.time.format.DateTimeFormat
 import org.mockito.Matchers._
 import org.mockito.Mockito.when
@@ -23,6 +25,7 @@ import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
+import uk.gov.hmrc.trusts.models.{get_trust_or_estate, _}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
@@ -109,6 +112,7 @@ class DesServiceSpec extends BaseSpec {
     }
   }
 
+
   ".checkExistingEstate" should {
 
     "return Matched " when {
@@ -179,6 +183,7 @@ class DesServiceSpec extends BaseSpec {
       }
     }
   } //checkExistingEstate
+
 
   ".registerTrust" should {
 

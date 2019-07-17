@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.models.mapping.variations
 
 import org.joda.time.DateTime
 import org.scalatest.enablers.Definition
-import play.api.libs.json.{JsError, JsLookupResult, JsSuccess, Json}
+import play.api.libs.json._
 import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.models.variation.EstateVariation
 
@@ -76,6 +76,16 @@ class EstateVariationMappingSpec extends BaseSpec {
         (json \ "details" \ "estate" \ "entities" \ "personalRepresentative" \ 1 \ "estatePerRepInd" \ "name" \ "firstName").as[String] mustBe "John"
 
 
+      }
+
+      "fully hydrate the variation models as expected" in {
+        val payload = getJsonValueFromFile("valid-estate-variation-add-perrep-ind-api.json").as[EstateVariation]
+
+        val jsonFromModels = Json.toJson(payload)
+
+        val expectedJson: JsValue = getJsonValueFromFile("valid-estate-variation-add-perrep-ind-api.json")
+
+        jsonFromModels mustBe expectedJson
       }
 
     }
