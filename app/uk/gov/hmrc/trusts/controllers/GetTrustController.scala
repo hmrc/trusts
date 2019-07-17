@@ -65,7 +65,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
 
         case _: ResourceNotFoundResponse.type =>
           auditService.auditErrorResponse(TrustAuditing.GET_TRUST, utr, request.identifier, "Not Found received from DES.")
-          InternalServerError
+          NotFound
 
         case _: InternalServerErrorResponse.type =>
           auditService.auditErrorResponse(TrustAuditing.GET_TRUST, utr, request.identifier, "Internal Server Error received from DES.")

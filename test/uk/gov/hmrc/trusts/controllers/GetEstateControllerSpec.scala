@@ -129,7 +129,7 @@ class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter {
 
         whenReady(result) { _ =>
           verify(mockedAuditService).auditErrorResponse(mockEq("GetEstate"), any[String], any[String], any[String])(any())
-          status(result) mustBe INTERNAL_SERVER_ERROR
+          status(result) mustBe NOT_FOUND
         }
       }
 
