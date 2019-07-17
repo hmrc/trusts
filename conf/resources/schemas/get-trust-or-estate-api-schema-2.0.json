@@ -104,9 +104,8 @@
                     ]
                 },
                 "formBundleNo": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 999999999999
+                    "type": "string",
+                    "pattern": "^[0-9]{12}$"
                 }
             },
             "required": [
@@ -547,7 +546,7 @@
                             "$ref": "#/definitions/dateString"
                         },
                         "periodTaxDues": {
-                            "description": "01-Total Income Tax and Capital Gains due for the administration period more than £10,000, 02-Date of Death before 05 April 2016 and the sale of estates assets by administrators is £225,000 in any  one tax year, 03-Date of Death After 05 April 2016 and the sale of estates assets by administrators is £250.00 in any one tax year, 04-Estate worth more than 2.5 million at the death of death",
+                            "description": "01-Total Income Tax and Capital Gains due for the administration period more than Â£10,000, 02-Date of Death before 05 April 2016 and the sale of estates assets by administrators is Â£225,000 in any  one tax year, 03-Date of Death After 05 April 2016 and the sale of estates assets by administrators is Â£250.00 in any one tax year, 04-Estate worth more than 2.5 million at the death of death",
                             "type": "string",
                             "enum": [
                                 "01",
@@ -739,7 +738,7 @@
                 }
             ]
         },
-		"identificationTypeNPLT": {
+        "identificationTypeNPLT": {
             "type": "object",
             "oneOf": [
                 {
@@ -778,7 +777,7 @@
                     },
                     "required": [
                         "passport",
-						"address"
+                        "address"
                     ],
                     "additionalProperties": false
                 }
@@ -1298,7 +1297,7 @@
         "trusteeOrgType": {
             "type": "object",
             "properties": {
-                 "lineNo": {
+                "lineNo": {
                     "$ref": "#/definitions/lineNoType"
                 },
                 "bpMatchStatus": {
@@ -1592,7 +1591,7 @@
         },
         "safeIdType": {
             "type": "string",
-            "pattern": "^[A-Z0-9]{13}$"
+            "pattern": "^[A-Z0-9]{1,15}$"
         },
         "monetaryType": {
             "description": "Integer up to 12 digits max; 1250 represents 1250 pounds",
