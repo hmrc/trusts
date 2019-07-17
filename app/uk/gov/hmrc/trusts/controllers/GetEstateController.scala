@@ -65,7 +65,7 @@ class GetEstateController @Inject()(identify: IdentifierAction,
 
       case _: ResourceNotFoundResponse.type =>
         auditService.auditErrorResponse(TrustAuditing.GET_ESTATE, utr, request.identifier, "Not Found received from DES.")
-        InternalServerError
+        NotFound
 
       case _: InternalServerErrorResponse.type =>
         auditService.auditErrorResponse(TrustAuditing.GET_ESTATE, utr, request.identifier, "Internal Server Error received from DES.")
