@@ -1108,7 +1108,7 @@
     },
     "safeIdType": {
       "type": "string",
-      "pattern": "^[A-Z0-9]{13}$"
+      "pattern": "^[A-Z0-9]{1,15}$"
     },
     "shareofIncomeString": {
       "type": "string",
