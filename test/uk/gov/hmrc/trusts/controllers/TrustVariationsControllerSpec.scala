@@ -31,7 +31,7 @@ import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
-import uk.gov.hmrc.trusts.models.variation.{Variation, VariationResponse}
+import uk.gov.hmrc.trusts.models.variation.{TrustVariation, VariationResponse}
 import uk.gov.hmrc.trusts.services.{AuditService, DesService}
 import uk.gov.hmrc.trusts.utils.Headers
 
@@ -66,7 +66,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter {
       "not perform auditing" when {
         "the feature toggle is set to false" in {
 
-          when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[TrustVariation])(any[HeaderCarrier]))
             .thenReturn(Future.successful(VariationResponse(tvnResponse)))
 
           when(mockConfig.auditingEnabled).thenReturn(false)
@@ -90,7 +90,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter {
       "perform auditing" when {
         "the feature toggle is set to true" in {
 
-          when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[TrustVariation])(any[HeaderCarrier]))
             .thenReturn(Future.successful(VariationResponse(tvnResponse)))
 
           when(mockConfig.auditingEnabled).thenReturn(true)
@@ -115,7 +115,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter {
 
         "individual user called the register endpoint with a valid json payload " in {
 
-          when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[TrustVariation])(any[HeaderCarrier]))
             .thenReturn(Future.successful(VariationResponse(tvnResponse)))
 
           val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
@@ -176,7 +176,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter {
 
         "input request fails business validation" in {
 
-          when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[TrustVariation])(any[HeaderCarrier]))
             .thenReturn(Future.failed(BadRequestException))
 
           val SUT = trustVariationsController
@@ -197,7 +197,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter {
 
         "invalid correlation id is provided in the headers" in {
 
-          when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[TrustVariation])(any[HeaderCarrier]))
             .thenReturn(Future.failed(InvalidCorrelationIdException))
 
           val SUT = trustVariationsController
@@ -230,7 +230,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter {
       "return a Conflict" when {
         "submission with same correlation id is submitted." in {
 
-          when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[TrustVariation])(any[HeaderCarrier]))
             .thenReturn(Future.failed(DuplicateSubmissionException))
 
           val SUT = trustVariationsController
@@ -264,7 +264,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter {
 
         "the register endpoint called and something goes wrong." in {
 
-          when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[TrustVariation])(any[HeaderCarrier]))
             .thenReturn(Future.failed(InternalServerErrorException("some error")))
 
           val SUT = trustVariationsController
@@ -297,7 +297,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter {
       "return service unavailable" when {
         "the des returns Service Unavailable as dependent service is down. " in {
 
-          when(mockDesService.variation(any[Variation])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[TrustVariation])(any[HeaderCarrier]))
             .thenReturn(Future.failed(ServiceNotAvailableException("dependent service is down")))
 
           val SUT = trustVariationsController

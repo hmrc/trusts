@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.trusts.models.mapping.variations
 
+import org.joda.time.DateTime
 import org.scalatest.enablers.Definition
 import play.api.libs.json.{JsError, JsLookupResult, JsSuccess, Json}
 import uk.gov.hmrc.trusts.BaseSpec
@@ -32,15 +33,15 @@ class EstateVariationMappingSpec extends BaseSpec {
     "reading json" must {
 
       "create a model" in {
-        val payload = getJsonValueFromFile("valid-trusts-variations-api.json")
+        val payload = getJsonValueFromFile("valid-estate-variation-api.json")
 
         payload.validate[EstateVariation] match {
           case JsSuccess(model, _) =>
 
             model mustBe a[EstateVariation]
 
-            model.details.entities.personalRepresentative mustNot be(empty)
-            model.details.entities.personalRepresentative.estatePerRepOrg mustBe defined
+            model.details.administrationEndDate mustBe defined
+            model.details.administrationEndDate.get mustBe DateTime.parse("2017-06-01")
 
           case JsError(errors) =>
             fail(errors.toString())
@@ -51,27 +52,28 @@ class EstateVariationMappingSpec extends BaseSpec {
     "writing json" must {
 
       "format json accepted by downstream" in {
-        val payload = getJsonValueFromFile("valid-estate-variation-api.json").as[EstateVariation]
+        val payload = getJsonValueFromFile("valid-estate-variation-perrep-org-api.json").as[EstateVariation]
 
         val json = Json.toJson(payload)
 
         (json \ "details" \ "estate" \ "entities" \ "personalRepresentative" \ 0) mustBe defined
-        (json \ "details" \ "estate" \ "entities" \ "personalRepresentative" \ 0 \ "estatePerRepOrg" \ "name").as[String] mustNot be(empty)
-        (json \ "details" \ "estate" \ "entities" \ "personalRepresentative" \ 0 \ "estatePerRepOrg" \ "entityStart").as[String] mustEqual "1998-02-12"
+        (json \ "details" \ "estate" \ "entities" \ "personalRepresentative" \ 0 \ "estatePerRepOrg" \ "orgName").as[String] mustNot be(empty)
+        (json \ "details" \ "estate" \ "entities" \ "personalRepresentative" \ 0 \ "estatePerRepOrg" \ "entityStart").as[String] mustEqual "2017-02-28"
         (json \ "details" \ "estate" \ "entities" \ "personalRepresentative" \ 0 \ "estatePerRepInd") mustNot be(defined)
         (json \ "details" \ "estate" \ "entities" \ "personalRepresentative" \ 1 \ "estatePerRepInd") mustNot be(defined)
       }
 
-      "format json accepted by downstream (two lead trustees)" in {
-        val payload = getJsonValueFromFile("valid-estate-variation-api-two-personal-representatives.json").as[EstateVariation]
+      "format json accepted by downstream (two personal representatives)" in {
+        val payload = getJsonValueFromFile("valid-estate-variation-add-perrep-ind-api.json").as[EstateVariation]
 
         val json = Json.toJson(payload)
 
-        (json \ "details" \ "estate" \ "entities" \ "leadTrustees" \ 0) mustBe defined
-        (json \ "details" \ "estate" \ "entities" \ "leadTrustees" \ 0 \ "estatePerRepOrg" \ "name").as[String] mustBe "Trust Services LTD"
-        (json \ "details" \ "estate" \ "entities" \ "leadTrustees" \ 0 \ "estatePerRepInd") mustNot be(defined)
-        (json \ "details" \ "estate" \ "entities" \ "leadTrustees" \ 1) mustBe defined
-        (json \ "details" \ "estate" \ "entities" \ "leadTrustees" \ 1 \ "estatePerRepInd" \ "name" \ "firstName").as[String] mustBe "John"
+        (json \ "details" \ "estate" \ "entities" \ "personalRepresentative" \ 0) mustBe defined
+        (json \ "details" \ "estate" \ "entities" \ "personalRepresentative" \ 0 \ "estatePerRepOrg" \ "orgName").as[String] mustBe "Trust Services LTD"
+        (json \ "details" \ "estate" \ "entities" \ "personalRepresentative" \ 0 \ "estatePerRepOrg" \ "entityEnd").as[String] mustEqual "2001-02-28"
+        (json \ "details" \ "estate" \ "entities" \ "personalRepresentative" \ 0 \ "estatePerRepInd") mustNot be(defined)
+        (json \ "details" \ "estate" \ "entities" \ "personalRepresentative" \ 1) mustBe defined
+        (json \ "details" \ "estate" \ "entities" \ "personalRepresentative" \ 1 \ "estatePerRepInd" \ "name" \ "firstName").as[String] mustBe "John"
 
 
       }

@@ -55,7 +55,7 @@ object TrustVariation {
       (JsPath \ "agentDetails").writeNullable[AgentDetails] and
       (JsPath \ "trustEndDate").writeNullable[DateTime] and
       (JsPath \ "reqHeader").write[ReqHeader]
-    ) (unlift(EstateVariation.unapply))
+    ) (unlift(TrustVariation.unapply))
 
   implicit val variationFormat: Format[TrustVariation] = Format(variationReads, writeToDes)
 

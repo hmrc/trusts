@@ -74,7 +74,7 @@ class EstateVariationsController @Inject()(
                 TrustAuditing.ESTATE_VARIATION,
                 request.body,
                 request.identifier,
-                errorReason = "Provided request is invalid."
+                errorReason = "Submission has not passed validation. Invalid CorrelationId."
               )
 
               invalidCorrelationIdErrorResponse
@@ -85,7 +85,7 @@ class EstateVariationsController @Inject()(
                 TrustAuditing.ESTATE_VARIATION,
                 request.body,
                 request.identifier,
-                errorReason = "Provided request is invalid."
+                errorReason = "Duplicate Correlation Id was submitted."
               )
 
               duplicateSubmissionErrorResponse
@@ -96,7 +96,7 @@ class EstateVariationsController @Inject()(
                 TrustAuditing.ESTATE_VARIATION,
                 request.body,
                 request.identifier,
-                errorReason = "Provided request is invalid."
+                errorReason = "Service unavailable."
               )
 
               serviceUnavailableErrorResponse
@@ -107,7 +107,7 @@ class EstateVariationsController @Inject()(
                 TrustAuditing.ESTATE_VARIATION,
                 request.body,
                 request.identifier,
-                errorReason = "Provided request is invalid."
+                errorReason = "Internal server error."
               )
 
               internalServerErrorErrorResponse
