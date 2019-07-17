@@ -46,7 +46,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
 
 
   override def afterEach() =  {
-    reset(mockedAuditService, desService, mockAuditConnector, mockConfig)
+    reset(mockedAuditService, desService)
   }
 
   private def getTrustController = {
@@ -118,6 +118,22 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
       }
     }
 
+    "return 404 - NotFound" when {
+      "the get endpoint returns a ResourceNotFoundResponse" in {
+
+
+        when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(ResourceNotFoundResponse))
+
+        val utr = "1234567890"
+        val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).auditErrorResponse(mockEq("GetTrust"), any[JsValue], any[String], any[String])(any())
+          status(result) mustBe NOT_FOUND
+        }
+      }
+    }
+
     "return 500 - InternalServerError" when {
       "the get endpoint returns a InvalidUTRResponse" in {
 
@@ -161,21 +177,8 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
         }
       }
 
-      "the get endpoint returns a ResourceNotFoundResponse" in {
-
-
-        when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(ResourceNotFoundResponse))
-
-        val utr = "1234567890"
-        val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
-
-        whenReady(result) { _ =>
-          verify(mockedAuditService).auditErrorResponse(mockEq("GetTrust"), any[JsValue], any[String], any[String])(any())
-          status(result) mustBe INTERNAL_SERVER_ERROR
-        }
-      }
-
       "the get endpoint returns a InternalServerErrorResponse" in {
+
 
         when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(InternalServerErrorResponse))
 
