@@ -514,8 +514,7 @@
 				}
 			},
 			"required": [
-				"name",
-				"identification"
+				"name"
 			],
 			"additionalProperties": false
 		},
@@ -614,8 +613,7 @@
 				}
 			},
 			"required": [
-				"organisationName",
-				"identification"
+				"organisationName"
 			],
 			"additionalProperties": false
 		},
@@ -636,8 +634,7 @@
 				}
 			},
 			"required": [
-				"organisationName",
-				"identification"
+				"organisationName"
 			],
 			"additionalProperties": false
 		},

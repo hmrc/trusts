@@ -72,7 +72,7 @@ trait ValidationUtil {
     val utrList: List[(String, Int)] = trustees.zipWithIndex.flatMap {
       case (trustee, index) =>
         trustee.trusteeOrg.flatMap { x =>
-          x.identification.utr.map { y => (y, index) }
+          x.identification.flatMap(_.utr.map { y => (y, index) })
         }
     }
     utrList

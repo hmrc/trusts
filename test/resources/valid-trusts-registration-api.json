@@ -66,6 +66,13 @@
       "efrbsStartDate": "2019-03-06"
     },
     "entities": {
+      "protectors": {
+        "protectorCompany": [
+          {
+            "name": "Protector company 1"
+          }
+        ]
+      },
       "naturalPerson": [
         {
           "name": {
@@ -147,6 +154,15 @@
                 "country": "TL"
               }
             }
+          },
+          {
+            "organisationName": "ds",
+            "description": "Description",
+            "description1": "Description1",
+            "description2": "Description2",
+            "description3": "Description3",
+            "description4": "Description4",
+            "numberOfBeneficiary": "1"
           }
         ],
         "charity": [
@@ -161,6 +177,10 @@
                 "country": "GB"
               }
             }
+          },
+          {
+            "organisationName": "charity org name",
+            "beneficiaryDiscretion": true
           }
         ],
         "trust": [
@@ -174,6 +194,10 @@
                 "country": "TL"
               }
             }
+          },
+          {
+            "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "beneficiaryDiscretion": true
           }
         ],
         "company": [
@@ -188,6 +212,10 @@
                 "country": "GB"
               }
             }
+          },
+          {
+            "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "beneficiaryDiscretion": true
           }
         ]
       },
@@ -213,6 +241,30 @@
             "phoneNumber": "0121546546",
             "identification": {
               "nino": "ST123456"
+            }
+          }
+        },
+        {
+          "trusteeOrg": {
+            "name": "Trustee Org 1",
+            "phoneNumber": "0121546546"
+          }
+        },
+        {
+          "trusteeOrg": {
+            "name": "Trustee Org 1",
+            "phoneNumber": "0121546546",
+            "identification": {
+              "utr": "5465416546"
+            }
+          }
+        },
+        {
+          "trusteeOrg": {
+            "name": "Trustee Org 2",
+            "phoneNumber": "0121546546",
+            "identification": {
+              "utr": "5465416547"
             }
           }
         }

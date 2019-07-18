@@ -61,7 +61,6 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
         when(rosmPatternService.enrolAndLogResult(any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentSuccess))
 
-
         val SUT = new RegisterTrustController(
           mockDesService,
           appConfig,
