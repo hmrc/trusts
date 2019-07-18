@@ -268,7 +268,7 @@ object IndividualDetailsType {
 case class BeneficiaryTrustType(organisationName: String,
                                 beneficiaryDiscretion: Option[Boolean],
                                 beneficiaryShareOfIncome: Option[String],
-                                identification: IdentificationOrgType)
+                                identification: Option[IdentificationOrgType])
 
 object BeneficiaryTrustType {
   implicit val beneficiaryTrustTypeFormat: Format[BeneficiaryTrustType] = Json.format[BeneficiaryTrustType]
@@ -291,17 +291,10 @@ object Identification {
 case class CharityType(organisationName: String,
                        beneficiaryDiscretion: Option[Boolean],
                        beneficiaryShareOfIncome: Option[String],
-                       identification: IdentificationOrgType)
+                       identification: Option[IdentificationOrgType])
 
 object CharityType {
   implicit val charityTypeFormat: Format[CharityType] = Json.format[CharityType]
-}
-
-case class TrustBeneficiaryCharityIdentification(utr: Option[String],
-                                                 address: Option[AddressType])
-
-object TrustBeneficiaryCharityIdentification {
-  implicit val trustBeneficiaryCharityIdentificationFormat: Format[TrustBeneficiaryCharityIdentification] = Json.format[TrustBeneficiaryCharityIdentification]
 }
 
 case class UnidentifiedType(description: String,
@@ -339,7 +332,7 @@ object OtherType {
 case class CompanyType(organisationName: String,
                        beneficiaryDiscretion: Option[Boolean],
                        beneficiaryShareOfIncome: Option[String],
-                       identification: IdentificationOrgType)
+                       identification: Option[IdentificationOrgType])
 
 object CompanyType {
   implicit val companyTypeFormat: Format[CompanyType] = Json.format[CompanyType]

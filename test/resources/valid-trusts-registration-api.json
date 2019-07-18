@@ -147,6 +147,15 @@
                 "country": "TL"
               }
             }
+          },
+          {
+            "organisationName": "ds",
+            "description": "Description",
+            "description1": "Description1",
+            "description2": "Description2",
+            "description3": "Description3",
+            "description4": "Description4",
+            "numberOfBeneficiary": "1"
           }
         ],
         "charity": [
@@ -161,6 +170,10 @@
                 "country": "GB"
               }
             }
+          },
+          {
+            "organisationName": "charity org name",
+            "beneficiaryDiscretion": true
           }
         ],
         "trust": [
@@ -174,6 +187,10 @@
                 "country": "TL"
               }
             }
+          },
+          {
+            "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "beneficiaryDiscretion": true
           }
         ],
         "company": [
@@ -188,6 +205,10 @@
                 "country": "GB"
               }
             }
+          },
+          {
+            "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "beneficiaryDiscretion": true
           }
         ]
       },
