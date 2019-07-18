@@ -514,8 +514,7 @@
 				}
 			},
 			"required": [
-				"name",
-				"identification"
+				"name"
 			],
 			"additionalProperties": false
 		},

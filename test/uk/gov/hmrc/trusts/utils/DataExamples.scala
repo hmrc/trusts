@@ -65,7 +65,7 @@ trait DataExamples extends  JsonRequests {
 
   def trusteeOrg  = Some(TrusteeOrgType(
     name = "trustee as company",
-    identification = utr,
+    identification = Some(utr),
     phoneNumber = None,
     email = email))
 
