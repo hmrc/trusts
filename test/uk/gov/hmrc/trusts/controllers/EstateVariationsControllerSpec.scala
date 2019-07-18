@@ -30,7 +30,7 @@ import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.variation.{EstateVariation, VariationResponse}
-import uk.gov.hmrc.trusts.services.{AuditService, DesService}
+import uk.gov.hmrc.trusts.services.{AuditService, DesService, ValidationService}
 import uk.gov.hmrc.trusts.utils.Headers
 
 import scala.concurrent.Future
@@ -45,13 +45,14 @@ class EstateVariationsControllerSpec extends BaseSpec {
   val mockConfig: AppConfig = mock[AppConfig]
 
   val auditService = new AuditService(mockAuditConnector, mockConfig)
+  val validationService = new ValidationService()
 
   override def beforeEach() = {
     reset(mockDesService, mockAuditService, mockAuditConnector, mockConfig)
   }
 
   private def estateVariationsController = {
-    val SUT = new EstateVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService)
+    val SUT = new EstateVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig)
     SUT
   }
 
@@ -67,10 +68,11 @@ class EstateVariationsControllerSpec extends BaseSpec {
           .thenReturn(Future.successful(VariationResponse(tvnResponse)))
 
         when(mockConfig.auditingEnabled).thenReturn(false)
+        when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)
 
         val requestPayLoad = Json.parse(validEstateVariationsRequestJson)
 
-        val SUT = new EstateVariationsController(new FakeIdentifierAction(Organisation), mockDesService, auditService)
+        val SUT = new EstateVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig)
 
         val result = SUT.estateVariation()(
           postRequestWithPayload(requestPayLoad, withDraftId = false)
@@ -91,10 +93,11 @@ class EstateVariationsControllerSpec extends BaseSpec {
           .thenReturn(Future.successful(VariationResponse(tvnResponse)))
 
         when(mockConfig.auditingEnabled).thenReturn(true)
+        when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)
 
         val requestPayLoad = Json.parse(validEstateVariationsRequestJson)
 
-        val SUT = new EstateVariationsController(new FakeIdentifierAction(Organisation), mockDesService, auditService)
+        val SUT = new EstateVariationsController(new FakeIdentifierAction(Organisation),mockDesService, auditService, validationService, mockConfig)
 
         val result = SUT.estateVariation()(
           postRequestWithPayload(requestPayLoad, withDraftId = false)
@@ -114,6 +117,8 @@ class EstateVariationsControllerSpec extends BaseSpec {
 
         when(mockDesService.estateVariation(any[EstateVariation])(any[HeaderCarrier]))
           .thenReturn(Future.successful(VariationResponse(tvnResponse)))
+
+        when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)
 
         val requestPayLoad = Json.parse(validEstateVariationsRequestJson)
 
@@ -144,6 +149,8 @@ class EstateVariationsControllerSpec extends BaseSpec {
     "return a BadRequest" when {
 
       "input request fails schema validation" in {
+
+        when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)
 
         val SUT = estateVariationsController
 
@@ -176,6 +183,8 @@ class EstateVariationsControllerSpec extends BaseSpec {
         when(mockDesService.estateVariation(any[EstateVariation])(any[HeaderCarrier]))
           .thenReturn(Future.failed(BadRequestException))
 
+        when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)
+
         val SUT = estateVariationsController
 
         val result = SUT.estateVariation()(
@@ -196,6 +205,8 @@ class EstateVariationsControllerSpec extends BaseSpec {
 
         when(mockDesService.estateVariation(any[EstateVariation])(any[HeaderCarrier]))
           .thenReturn(Future.failed(InvalidCorrelationIdException))
+
+        when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)
 
         val SUT = estateVariationsController
 
@@ -229,6 +240,8 @@ class EstateVariationsControllerSpec extends BaseSpec {
 
         when(mockDesService.estateVariation(any[EstateVariation])(any[HeaderCarrier]))
           .thenReturn(Future.failed(DuplicateSubmissionException))
+
+        when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)
 
         val SUT = estateVariationsController
 
@@ -264,6 +277,8 @@ class EstateVariationsControllerSpec extends BaseSpec {
         when(mockDesService.estateVariation(any[EstateVariation])(any[HeaderCarrier]))
           .thenReturn(Future.failed(InternalServerErrorException("some error")))
 
+        when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)
+
         val SUT = estateVariationsController
 
         val result = SUT.estateVariation()(
@@ -296,6 +311,8 @@ class EstateVariationsControllerSpec extends BaseSpec {
 
         when(mockDesService.estateVariation(any[EstateVariation])(any[HeaderCarrier]))
           .thenReturn(Future.failed(ServiceNotAvailableException("dependent service is down")))
+
+        when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)
 
         val SUT = estateVariationsController
 

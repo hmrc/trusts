@@ -158,7 +158,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
   ".checkExistingEstate" should {
 
     "return Matched " when {
-      "trusts data match with existing trusts." in {
+      "estate data match with existing estate." in {
         val requestBody = Json.stringify(Json.toJson(request))
 
         stubForPost(server, "/estates/match", requestBody, OK, """{"match": true}""")
@@ -174,7 +174,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
       }
     }
     "return NotMatched " when {
-      "trusts data does not with existing trusts." in {
+      "estate data does not with existing estate." in {
         val requestBody = Json.stringify(Json.toJson(request))
 
         stubForPost(server, "/estates/match", requestBody, OK, """{"match": false}""")
@@ -207,7 +207,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
     }
 
     "return AlreadyRegistered " when {
-      "trusts is already registered with provided details." in {
+      "estate is already registered with provided details." in {
         val requestBody = Json.stringify(Json.toJson(request))
 
         stubForPost(server, "/estates/match", requestBody, CONFLICT, Json.stringify(jsonResponseAlreadyRegistered))

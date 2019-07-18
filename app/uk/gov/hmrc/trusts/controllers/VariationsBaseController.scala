@@ -24,7 +24,7 @@ import uk.gov.hmrc.trusts.utils.ErrorResponses._
 
 import scala.concurrent.Future
 
-class TrustsBaseController extends BaseController {
+class VariationsBaseController extends BaseController {
 
   protected def matchResponse = """{"match": true}"""
 

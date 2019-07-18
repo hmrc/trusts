@@ -171,7 +171,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
 
         whenReady(result) { _ =>
           verify(mockedAuditService).auditErrorResponse(mockEq("GetTrust"), any[JsValue], any[String], any[String])(any())
-          status(result) mustBe INTERNAL_SERVER_ERROR
+          status(result) mustBe NOT_FOUND
         }
       }
 

@@ -19,11 +19,12 @@ package uk.gov.hmrc.trusts.controllers
 import javax.inject.Inject
 import play.api.Logger
 import play.api.libs.json.Json
+import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.variation.TrustVariation
-import uk.gov.hmrc.trusts.services.{AuditService, DesService}
+import uk.gov.hmrc.trusts.services.{AuditService, DesService, ValidationService}
 import uk.gov.hmrc.trusts.utils.ErrorResponses._
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
@@ -31,15 +32,19 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TrustVariationsController @Inject()(
-                                      identify: IdentifierAction,
-                                      desService: DesService,
-                                      auditService: AuditService
-                                    ) extends TrustsBaseController with ValidationUtil {
+                                           identify: IdentifierAction,
+                                           desService: DesService,
+                                           auditService: AuditService,
+                                           validator: ValidationService,
+                                           config : AppConfig
+                                    ) extends VariationsBaseController with ValidationUtil {
 
   def trustVariation() = identify.async(parse.json) {
     implicit request =>
 
-      request.body.validate[TrustVariation].fold(
+      val payload = request.body.toString()
+
+      validator.get(config.variationsApiSchema).validate[TrustVariation](payload).fold(
         errors => {
           Logger.error(s"[variations] trusts validation errors from request body $errors.")
 
