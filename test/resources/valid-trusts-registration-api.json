@@ -66,6 +66,13 @@
       "efrbsStartDate": "2019-03-06"
     },
     "entities": {
+      "protectors": {
+        "protectorCompany": [
+          {
+            "name": "Protector company 1"
+          }
+        ]
+      },
       "naturalPerson": [
         {
           "name": {
