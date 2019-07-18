@@ -79,16 +79,16 @@ class Validator(schema: JsonSchema) {
       case registration: Registration =>
         BusinessValidation.check(registration) match {
           case Nil => Right(request)
-          case l @ _ :: _ =>
-            Logger.error(s"[validateBusinessRules] Validation fails : ${l}")
-            Left(l)
+          case errors @ _ :: _ =>
+            Logger.error(s"[validateBusinessRules] Validation fails : $errors")
+            Left(errors)
         }
       case estateRegistration: EstateRegistration =>
         EstateBusinessValidation.check(estateRegistration) match {
           case Nil => Right(request)
-          case l @ _ :: _ =>
-            Logger.error(s"[validateBusinessRules] Validation fails : ${l}")
-            Left(l)
+          case errors @ _ :: _ =>
+            Logger.error(s"[validateBusinessRules] Validation fails : $errors")
+            Left(errors)
         }
       case _ => Right(request)
     }
