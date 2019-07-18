@@ -29,7 +29,7 @@ import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
-import uk.gov.hmrc.trusts.models.variation.{EstateVariation, TrustVariation, VariationResponse}
+import uk.gov.hmrc.trusts.models.variation.{EstateVariation, VariationResponse}
 import uk.gov.hmrc.trusts.services.{AuditService, DesService}
 import uk.gov.hmrc.trusts.utils.Headers
 
@@ -68,7 +68,7 @@ class EstateVariationsControllerSpec extends BaseSpec {
 
         when(mockConfig.auditingEnabled).thenReturn(false)
 
-        val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
+        val requestPayLoad = Json.parse(validEstateVariationsRequestJson)
 
         val SUT = new EstateVariationsController(new FakeIdentifierAction(Organisation), mockDesService, auditService)
 
@@ -92,7 +92,7 @@ class EstateVariationsControllerSpec extends BaseSpec {
 
         when(mockConfig.auditingEnabled).thenReturn(true)
 
-        val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
+        val requestPayLoad = Json.parse(validEstateVariationsRequestJson)
 
         val SUT = new EstateVariationsController(new FakeIdentifierAction(Organisation), mockDesService, auditService)
 

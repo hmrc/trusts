@@ -41,7 +41,7 @@ class EstateVariationsController @Inject()(
 
       request.body.validate[EstateVariation].fold(
         errors => {
-          Logger.error(s"[variations] trusts validation errors from request body $errors.")
+          Logger.error(s"[variations] estate validation errors from request body $errors.")
 
           auditService.auditErrorResponse(
             TrustAuditing.ESTATE_VARIATION,
