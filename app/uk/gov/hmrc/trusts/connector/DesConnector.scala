@@ -51,6 +51,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
   def createGetTrustOrEstateEndpoint(utr: String): String = s"$getTrustOrEstateUrl/registration/$utr"
 
   lazy val trustVariationsEndpoint : String = s"${config.varyTrustOrEstateUrl}/trusts/variation"
+  lazy val estateVariationsEndpoint : String = s"${config.varyTrustOrEstateUrl}/estates/variation"
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "CorrelationId"
@@ -121,8 +122,6 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
     implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
-    val updatedHeaderCarrier = hc.copy(extraHeaders = desHeaders)
-
     http.GET[GetTrustResponse](createGetTrustOrEstateEndpoint(utr))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)
   }
 
@@ -130,27 +129,23 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
     implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
-    val updatedHeaderCarrier = hc.copy(extraHeaders = desHeaders)
-
     http.GET[GetEstateResponse](createGetTrustOrEstateEndpoint(utr))(GetEstateResponse.httpReads, implicitly[HeaderCarrier](hc), global)
   }
 
   override def trustVariation(trustVariations: TrustVariation)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
-    val response = http.POST[JsValue, VariationResponse](trustVariationsEndpoint, Json.toJson(trustVariations))
-    (implicitly[Writes[JsValue]], VariationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
+     http.POST[JsValue, VariationResponse](trustVariationsEndpoint, Json.toJson(trustVariations))(
+       implicitly[Writes[JsValue]], VariationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
 
-    response
   }
 
   override def estateVariation(estateVariations: EstateVariation)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
-    val response = http.POST[JsValue, VariationResponse](trustVariationsEndpoint, Json.toJson(estateVariations))
-    (implicitly[Writes[JsValue]], VariationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
+    http.POST[JsValue, VariationResponse](estateVariationsEndpoint, Json.toJson(estateVariations))(
+      implicitly[Writes[JsValue]], VariationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
 
-    response
   }
 
 }

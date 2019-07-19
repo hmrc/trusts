@@ -18,13 +18,10 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
 import play.api.Logger
-import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.Result
+import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
-import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
-import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 import uk.gov.hmrc.trusts.models.variation.EstateVariation
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, ValidationService}
 import uk.gov.hmrc.trusts.utils.ErrorResponses._
