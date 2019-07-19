@@ -47,12 +47,14 @@ class EstateVariationsControllerSpec extends BaseSpec {
   val auditService = new AuditService(mockAuditConnector, mockConfig)
   val validationService = new ValidationService()
 
+  val responseHandler = new VariationsResponseHandler(mockAuditService)
+
   override def beforeEach() = {
     reset(mockDesService, mockAuditService, mockAuditConnector, mockConfig)
   }
 
   private def estateVariationsController = {
-    val SUT = new EstateVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig)
+    val SUT = new EstateVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig, responseHandler)
     SUT
   }
 
@@ -72,7 +74,7 @@ class EstateVariationsControllerSpec extends BaseSpec {
 
         val requestPayLoad = Json.parse(validEstateVariationsRequestJson)
 
-        val SUT = new EstateVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig)
+        val SUT = new EstateVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig, responseHandler)
 
         val result = SUT.estateVariation()(
           postRequestWithPayload(requestPayLoad, withDraftId = false)
@@ -97,7 +99,7 @@ class EstateVariationsControllerSpec extends BaseSpec {
 
         val requestPayLoad = Json.parse(validEstateVariationsRequestJson)
 
-        val SUT = new EstateVariationsController(new FakeIdentifierAction(Organisation),mockDesService, auditService, validationService, mockConfig)
+        val SUT = new EstateVariationsController(new FakeIdentifierAction(Organisation),mockDesService, auditService, validationService, mockConfig, responseHandler)
 
         val result = SUT.estateVariation()(
           postRequestWithPayload(requestPayLoad, withDraftId = false)
@@ -129,17 +131,15 @@ class EstateVariationsControllerSpec extends BaseSpec {
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
 
-        whenReady(result){_ =>
-
-          verify(mockAuditService).audit(
-            Meq(estateVariationsAuditEvent),
-            any(),
-            Meq("id"),
-            Meq(Json.obj("tvn" -> tvnResponse))
-          )(any())
-        }
-
         status(result) mustBe OK
+
+        verify(mockAuditService).audit(
+          Meq(estateVariationsAuditEvent),
+          any(),
+          Meq("id"),
+          Meq(Json.obj("tvn" -> tvnResponse))
+        )(any())
+
         (contentAsJson(result) \ "tvn").as[String] mustBe tvnResponse
 
       }
@@ -159,19 +159,16 @@ class EstateVariationsControllerSpec extends BaseSpec {
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
 
-        whenReady(result){_ =>
-
-          verify(mockAuditService).auditErrorResponse(
-            Meq(estateVariationsAuditEvent),
-            any(),
-            Meq("id"),
-            Meq("Provided request is invalid.")
-          )(any())
-        }
-
         status(result) mustBe BAD_REQUEST
 
         val output = contentAsJson(result)
+
+        verify(mockAuditService).auditErrorResponse(
+          Meq(estateVariationsAuditEvent),
+          any(),
+          Meq("id"),
+          Meq("Provided request is invalid.")
+        )(any())
 
         (output \ "code").as[String] mustBe "BAD_REQUEST"
         (output \ "message").as[String] mustBe "Provided request is invalid."
@@ -214,17 +211,15 @@ class EstateVariationsControllerSpec extends BaseSpec {
 
         val result = SUT.estateVariation()(request)
 
-        whenReady(result) { _ =>
-
-          verify(mockAuditService).auditErrorResponse(
-            Meq(estateVariationsAuditEvent),
-            any(),
-            Meq("id"),
-            Meq("Submission has not passed validation. Invalid CorrelationId.")
-          )(any())
-        }
 
         status(result) mustBe INTERNAL_SERVER_ERROR
+
+        verify(mockAuditService).auditErrorResponse(
+          Meq(estateVariationsAuditEvent),
+          any(),
+          Meq("id"),
+          Meq("Submission has not passed validation. Invalid CorrelationId.")
+        )(any())
 
         val output = contentAsJson(result)
 
@@ -250,17 +245,14 @@ class EstateVariationsControllerSpec extends BaseSpec {
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
 
-        whenReady(result){_ =>
-
-          verify(mockAuditService).auditErrorResponse(
-            Meq(estateVariationsAuditEvent),
-            any(),
-            Meq("id"),
-            Meq("Duplicate Correlation Id was submitted.")
-          )(any())
-        }
-
         status(result) mustBe CONFLICT
+
+        verify(mockAuditService).auditErrorResponse(
+          Meq(estateVariationsAuditEvent),
+          any(),
+          Meq("id"),
+          Meq("Duplicate Correlation Id was submitted.")
+        )(any())
 
         val output = contentAsJson(result)
 
@@ -285,17 +277,15 @@ class EstateVariationsControllerSpec extends BaseSpec {
           postRequestWithPayload(Json.parse(validEstateVariationsRequestJson))
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
-        whenReady(result){_ =>
-
-          verify(mockAuditService).auditErrorResponse(
-            Meq(estateVariationsAuditEvent),
-            any(),
-            Meq("id"),
-            Meq("Internal server error.")
-          )(any())
-        }
 
         status(result) mustBe INTERNAL_SERVER_ERROR
+
+        verify(mockAuditService).auditErrorResponse(
+          Meq(estateVariationsAuditEvent),
+          any(),
+          Meq("id"),
+          Meq("Internal server error.")
+        )(any())
 
         val output = contentAsJson(result)
 
@@ -321,18 +311,14 @@ class EstateVariationsControllerSpec extends BaseSpec {
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
 
-        whenReady(result){_ =>
-
-          verify(mockAuditService).auditErrorResponse(
-            Meq(estateVariationsAuditEvent),
-            any(),
-            Meq("id"),
-            Meq("Service unavailable.")
-          )(any())
-        }
-
-
         status(result) mustBe SERVICE_UNAVAILABLE
+
+        verify(mockAuditService).auditErrorResponse(
+          Meq(estateVariationsAuditEvent),
+          any(),
+          Meq("id"),
+          Meq("Service unavailable.")
+        )(any())
 
         val output = contentAsJson(result)
 

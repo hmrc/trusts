@@ -49,13 +49,15 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter {
   val auditService = new AuditService(mockAuditConnector, mockConfig)
   val validationService = new ValidationService()
 
+  val responseHandler = new VariationsResponseHandler(mockAuditService)
+
   override def beforeEach() = {
     reset(mockDesService, mockAuditService, mockAuditConnector, mockConfig)
   }
 
 
   private def trustVariationsController = {
-    val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig)
+    val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig, responseHandler)
     SUT
   }
 
@@ -75,7 +77,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter {
 
           val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
 
-          val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig)
+          val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig, responseHandler)
 
           val result = SUT.trustVariation()(
             postRequestWithPayload(requestPayLoad, withDraftId = false)
@@ -101,7 +103,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter {
 
           val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
 
-          val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, auditService, validationService, mockConfig)
+          val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, auditService, validationService, mockConfig, responseHandler)
 
           val result = SUT.trustVariation()(
             postRequestWithPayload(requestPayLoad, withDraftId = false)
@@ -133,17 +135,15 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter {
               .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
           )
 
-          whenReady(result) { _ =>
-
-            verify(mockAuditService).audit(
-              Meq(trustVariationsAuditEvent),
-              any(),
-              Meq("id"),
-              Meq(Json.obj("tvn" -> tvnResponse))
-            )(any())
-          }
-
           status(result) mustBe OK
+
+          verify(mockAuditService).audit(
+            Meq(trustVariationsAuditEvent),
+            any(),
+            Meq("id"),
+            Meq(Json.obj("tvn" -> tvnResponse))
+          )(any())
+
           (contentAsJson(result) \ "tvn").as[String] mustBe tvnResponse
 
         }
@@ -163,17 +163,14 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter {
               .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
           )
 
-          whenReady(result) { _ =>
-
-            verify(mockAuditService).auditErrorResponse(
-              Meq(trustVariationsAuditEvent),
-              any(),
-              Meq("id"),
-              Meq("Provided request is invalid.")
-            )(any())
-          }
-
           status(result) mustBe BAD_REQUEST
+
+          verify(mockAuditService).auditErrorResponse(
+            Meq(trustVariationsAuditEvent),
+            any(),
+            Meq("id"),
+            Meq("Provided request is invalid.")
+          )(any())
 
           val output = contentAsJson(result)
 
@@ -218,17 +215,14 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter {
 
           val result = SUT.trustVariation()(request)
 
-          whenReady(result) { _ =>
-
-            verify(mockAuditService).auditErrorResponse(
-              Meq(trustVariationsAuditEvent),
-              any(),
-              Meq("id"),
-              Meq("Submission has not passed validation. Invalid CorrelationId.")
-            )(any())
-          }
-
           status(result) mustBe INTERNAL_SERVER_ERROR
+
+          verify(mockAuditService).auditErrorResponse(
+            Meq(trustVariationsAuditEvent),
+            any(),
+            Meq("id"),
+            Meq("Submission has not passed validation. Invalid CorrelationId.")
+          )(any())
 
           val output = contentAsJson(result)
 
@@ -254,17 +248,14 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter {
               .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
           )
 
-          whenReady(result) { _ =>
-
-            verify(mockAuditService).auditErrorResponse(
-              Meq(trustVariationsAuditEvent),
-              any(),
-              Meq("id"),
-              Meq("Duplicate Correlation Id was submitted.")
-            )(any())
-          }
-
           status(result) mustBe CONFLICT
+
+          verify(mockAuditService).auditErrorResponse(
+            Meq(trustVariationsAuditEvent),
+            any(),
+            Meq("id"),
+            Meq("Duplicate Correlation Id was submitted.")
+          )(any())
 
           val output = contentAsJson(result)
 
@@ -289,17 +280,15 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter {
             postRequestWithPayload(Json.parse(validTrustVariationsRequestJson))
               .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
           )
-          whenReady(result) { _ =>
-
-            verify(mockAuditService).auditErrorResponse(
-              Meq(trustVariationsAuditEvent),
-              any(),
-              Meq("id"),
-              Meq("Internal server error.")
-            )(any())
-          }
 
           status(result) mustBe INTERNAL_SERVER_ERROR
+
+          verify(mockAuditService).auditErrorResponse(
+            Meq(trustVariationsAuditEvent),
+            any(),
+            Meq("id"),
+            Meq("Internal server error.")
+          )(any())
 
           val output = contentAsJson(result)
 
@@ -325,18 +314,14 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter {
               .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
           )
 
-          whenReady(result) { _ =>
-
-            verify(mockAuditService).auditErrorResponse(
-              Meq(trustVariationsAuditEvent),
-              any(),
-              Meq("id"),
-              Meq("Service unavailable.")
-            )(any())
-          }
-
-
           status(result) mustBe SERVICE_UNAVAILABLE
+
+          verify(mockAuditService).auditErrorResponse(
+            Meq(trustVariationsAuditEvent),
+            any(),
+            Meq("id"),
+            Meq("Service unavailable.")
+          )(any())
 
           val output = contentAsJson(result)
 

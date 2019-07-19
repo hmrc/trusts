@@ -36,7 +36,8 @@ class TrustVariationsController @Inject()(
                                            desService: DesService,
                                            auditService: AuditService,
                                            validator: ValidationService,
-                                           config : AppConfig
+                                           config : AppConfig,
+                                           responseHandler: VariationsResponseHandler
                                     ) extends VariationsBaseController with ValidationUtil {
 
   def trustVariation() = identify.async(parse.json) {
@@ -68,43 +69,8 @@ class TrustVariationsController @Inject()(
             )
 
             Ok(Json.toJson(response))
-          } recover {
-            case InvalidCorrelationIdException =>
-              auditService.auditErrorResponse(
-                TrustAuditing.TRUST_VARIATION,
-                request.body,
-                request.identifier,
-                errorReason = "Submission has not passed validation. Invalid CorrelationId."
-              )
-              invalidCorrelationIdErrorResponse
 
-            case DuplicateSubmissionException =>
-              auditService.auditErrorResponse(
-                TrustAuditing.TRUST_VARIATION,
-                request.body,
-                request.identifier,
-                errorReason = "Duplicate Correlation Id was submitted."
-              )
-              duplicateSubmissionErrorResponse
-
-            case ServiceNotAvailableException(_) =>
-              auditService.auditErrorResponse(
-                TrustAuditing.TRUST_VARIATION,
-                request.body,
-                request.identifier,
-                errorReason = "Service unavailable."
-              )
-              serviceUnavailableErrorResponse
-
-            case _ =>
-              auditService.auditErrorResponse(
-                TrustAuditing.TRUST_VARIATION,
-                request.body,
-                request.identifier,
-                errorReason = "Internal server error."
-              )
-              internalServerErrorErrorResponse
-          }
+          } recover responseHandler.recoverFromException(TrustAuditing.TRUST_VARIATION)
         }
       )
 

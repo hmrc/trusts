@@ -18,11 +18,13 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
 import play.api.Logger
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.Result
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
+import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 import uk.gov.hmrc.trusts.models.variation.EstateVariation
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, ValidationService}
 import uk.gov.hmrc.trusts.utils.ErrorResponses._
@@ -36,7 +38,8 @@ class EstateVariationsController @Inject()(
                                       desService: DesService,
                                       auditService: AuditService,
                                       validator: ValidationService,
-                                      config : AppConfig
+                                      config : AppConfig,
+                                      responseHandler: VariationsResponseHandler
                                     ) extends VariationsBaseController with ValidationUtil {
 
   def estateVariation() = identify.async(parse.json) {
@@ -71,55 +74,10 @@ class EstateVariationsController @Inject()(
 
             Ok(Json.toJson(response))
 
-          } recover {
-
-            case InvalidCorrelationIdException =>
-
-              auditService.auditErrorResponse(
-                TrustAuditing.ESTATE_VARIATION,
-                request.body,
-                request.identifier,
-                errorReason = "Submission has not passed validation. Invalid CorrelationId."
-              )
-
-              invalidCorrelationIdErrorResponse
-
-            case DuplicateSubmissionException =>
-
-              auditService.auditErrorResponse(
-                TrustAuditing.ESTATE_VARIATION,
-                request.body,
-                request.identifier,
-                errorReason = "Duplicate Correlation Id was submitted."
-              )
-
-              duplicateSubmissionErrorResponse
-
-            case ServiceNotAvailableException(_) =>
-
-              auditService.auditErrorResponse(
-                TrustAuditing.ESTATE_VARIATION,
-                request.body,
-                request.identifier,
-                errorReason = "Service unavailable."
-              )
-
-              serviceUnavailableErrorResponse
-
-            case _ =>
-
-              auditService.auditErrorResponse(
-                TrustAuditing.ESTATE_VARIATION,
-                request.body,
-                request.identifier,
-                errorReason = "Internal server error."
-              )
-
-              internalServerErrorErrorResponse
-          }
+          } recover responseHandler.recoverFromException(TrustAuditing.ESTATE_VARIATION)
         }
       )
-
   }
+
 }
 
