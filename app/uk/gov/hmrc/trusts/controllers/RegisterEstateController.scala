@@ -39,7 +39,7 @@ class RegisterEstateController @Inject()(desService: DesService, config: AppConf
                                          validationService: ValidationService,
                                          identifierAction: IdentifierAction,
                                          rosmPatternService: RosmPatternService,
-                                         auditService: AuditService) extends VariationsBaseController {
+                                         auditService: AuditService) extends TrustsBaseController {
 
   def registration() = identifierAction.async(parse.json) {
     implicit request =>

@@ -38,7 +38,7 @@ class TrustVariationsController @Inject()(
                                            validator: ValidationService,
                                            config : AppConfig,
                                            responseHandler: VariationsResponseHandler
-                                    ) extends VariationsBaseController with ValidationUtil {
+                                    ) extends TrustsBaseController with ValidationUtil {
 
   def trustVariation() = identify.async(parse.json) {
     implicit request =>

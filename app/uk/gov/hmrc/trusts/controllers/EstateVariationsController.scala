@@ -37,7 +37,7 @@ class EstateVariationsController @Inject()(
                                       validator: ValidationService,
                                       config : AppConfig,
                                       responseHandler: VariationsResponseHandler
-                                    ) extends VariationsBaseController with ValidationUtil {
+                                    ) extends TrustsBaseController with ValidationUtil {
 
   def estateVariation() = identify.async(parse.json) {
     implicit request =>

@@ -31,7 +31,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 @Singleton()
 class CheckEstateController @Inject()(desService: DesService, config: AppConfig,
                                       validationService: ValidationService,
-                                      identify: IdentifierAction) extends VariationsBaseController {
+                                      identify: IdentifierAction) extends TrustsBaseController {
 
 
   def checkExistingEstate() = identify.async(parse.json) { implicit request =>

@@ -40,7 +40,7 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
                                         identify: IdentifierAction,
                                         rosmPatternService: RosmPatternService,
                                         auditService: AuditService
-                                        ) extends VariationsBaseController {
+                                        ) extends TrustsBaseController {
 
   def registration() = identify.async(parse.json) {
     implicit request =>
