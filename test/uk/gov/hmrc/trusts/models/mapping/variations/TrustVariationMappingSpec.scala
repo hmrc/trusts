@@ -17,12 +17,11 @@
 package uk.gov.hmrc.trusts.models.mapping.variations
 
 import org.scalatest.enablers.Definition
-import org.scalatest.matchers.{HavePropertyMatchResult, HavePropertyMatcher}
-import play.api.libs.json.{JsError, JsLookupResult, JsSuccess, JsValue, Json}
+import play.api.libs.json.{JsError, JsLookupResult, JsSuccess, Json}
 import uk.gov.hmrc.trusts.BaseSpec
-import uk.gov.hmrc.trusts.models.variation.Variation
+import uk.gov.hmrc.trusts.models.variation.TrustVariation
 
-class VariationMappingSpec extends BaseSpec {
+class TrustVariationMappingSpec extends BaseSpec {
 
   implicit object JsonDefined extends Definition[JsLookupResult] {
     override def isDefined(thing: JsLookupResult): Boolean = thing.toOption.isDefined
@@ -35,10 +34,10 @@ class VariationMappingSpec extends BaseSpec {
       "create a model" in {
         val payload = getJsonValueFromFile("valid-trusts-variations-api.json")
 
-        payload.validate[Variation] match {
+        payload.validate[TrustVariation] match {
           case JsSuccess(model, _) =>
 
-            model mustBe a[Variation]
+            model mustBe a[TrustVariation]
 
             model.details.entities.leadTrustees mustNot be(empty)
             model.details.entities.leadTrustees.head.leadTrusteeOrg mustBe defined
@@ -52,7 +51,7 @@ class VariationMappingSpec extends BaseSpec {
     "writing json" must {
 
       "format json accepted by downstream" in {
-        val payload = getJsonValueFromFile("valid-trusts-variations-api.json").as[Variation]
+        val payload = getJsonValueFromFile("valid-trusts-variations-api.json").as[TrustVariation]
 
         val json = Json.toJson(payload)
 
@@ -64,7 +63,7 @@ class VariationMappingSpec extends BaseSpec {
       }
 
       "format json accepted by downstream (two lead trustees)" in {
-        val payload = getJsonValueFromFile("valid-trusts-variations-api-two-lead-trustees.json").as[Variation]
+        val payload = getJsonValueFromFile("valid-trusts-variations-api-two-lead-trustees.json").as[TrustVariation]
 
         val json = Json.toJson(payload)
 
@@ -79,7 +78,7 @@ class VariationMappingSpec extends BaseSpec {
       }
 
       "fully hydrate the variation models as expected" in {
-        val payload = getJsonValueFromFile("valid-trusts-variations-api-two-lead-trustees.json").as[Variation]
+        val payload = getJsonValueFromFile("valid-trusts-variations-api-two-lead-trustees.json").as[TrustVariation]
 
         val jsonFromModels = Json.toJson(payload)
 

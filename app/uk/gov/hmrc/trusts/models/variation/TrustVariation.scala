@@ -19,12 +19,11 @@ package uk.gov.hmrc.trusts.models.variation
 import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.utils.Implicits.dateFormat
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.{Identification, IdentificationType}
 import uk.gov.hmrc.trusts.models.{AddressType, AgentDetails, AssetMonetaryAmount, Correspondence, Declaration, IdentificationOrgType, NameType, OtherAssetType, PropertyLandType, TrustDetailsType}
-import uk.gov.hmrc.trusts.utils.Constants.dateTimePattern
+import uk.gov.hmrc.trusts.utils.Implicits._
 
-case class Variation(
+case class TrustVariation(
                       matchData: MatchData,
                       correspondence: Correspondence,
                       declaration: Declaration,
@@ -34,10 +33,9 @@ case class Variation(
                       reqHeader: ReqHeader
                     )
 
-object Variation {
+object TrustVariation {
 
-
-  val variationReads: Reads[Variation] = {
+  val variationReads: Reads[TrustVariation] = {
     (
       (__ \ "matchData").read[MatchData] and
         (__ \ "correspondence").read[Correspondence] and
@@ -46,10 +44,10 @@ object Variation {
         (__ \ "agentDetails").readNullable[AgentDetails] and
         (__ \ "trustEndDate").readNullable[DateTime] and
         (__ \ "reqHeader").read[ReqHeader]
-      ) (Variation.apply _)
+      ) (TrustVariation.apply _)
   }
 
-  val writeToDes: Writes[Variation] = (
+  val writeToDes: Writes[TrustVariation] = (
     (JsPath \ "matchData").write[MatchData] and
       (JsPath \ "correspondence").write[Correspondence] and
       (JsPath \ "declaration").write[Declaration] and
@@ -57,9 +55,9 @@ object Variation {
       (JsPath \ "agentDetails").writeNullable[AgentDetails] and
       (JsPath \ "trustEndDate").writeNullable[DateTime] and
       (JsPath \ "reqHeader").write[ReqHeader]
-    ) (r => (r.matchData, r.correspondence, r.declaration, r.details, r.agentDetails, r.trustEndDate, r.reqHeader))
+    ) (unlift(TrustVariation.unapply))
 
-  implicit val variationFormat: Format[Variation] = Format(variationReads, writeToDes)
+  implicit val variationFormat: Format[TrustVariation] = Format(variationReads, writeToDes)
 
 }
 
@@ -307,6 +305,7 @@ case class TrusteeOrgType(
                          )
 
 object TrusteeOrgType {
+
   implicit val trusteeOrgTypeFormat: Format[TrusteeOrgType] = Json.format[TrusteeOrgType]
 }
 
@@ -322,6 +321,7 @@ case class TrusteeIndividualType(
                                 )
 
 object TrusteeIndividualType {
+
   implicit val trusteeIndividualTypeFormat: Format[TrusteeIndividualType] = Json.format[TrusteeIndividualType]
 }
 
@@ -343,6 +343,7 @@ case class Protector(
                     )
 
 object Protector {
+
   implicit val protectorFormat: Format[Protector] = Json.format[Protector]
 
 }
@@ -357,6 +358,7 @@ case class ProtectorCompany(
                            )
 
 object ProtectorCompany {
+
   implicit val protectorCompanyFormat: Format[ProtectorCompany] = Json.format[ProtectorCompany]
 }
 
@@ -443,5 +445,6 @@ case class PartnershipType(
                           )
 
 object PartnershipType {
+
   implicit val partnershipTypeFormat: Format[PartnershipType] = Json.format[PartnershipType]
 }

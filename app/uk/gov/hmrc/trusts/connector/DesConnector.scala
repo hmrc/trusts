@@ -26,10 +26,10 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.config.{AppConfig, WSHttp}
 import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.utils.Constants._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.GetEstateResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustResponse
-import uk.gov.hmrc.trusts.models.variation.{Variation, VariationResponse}
+import uk.gov.hmrc.trusts.models.variation.{EstateVariation, TrustVariation, VariationResponse}
+import uk.gov.hmrc.trusts.utils.Constants._
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
@@ -39,7 +39,6 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
   lazy val trustsServiceUrl : String = s"${config.desTrustsUrl}/trusts"
   lazy val estatesServiceUrl : String = s"${config.desEstatesUrl}/estates"
-  lazy val getTrustOrEstateUrl: String =  s"${config.getTrustOrEstateUrl}/trusts"
 
   lazy val matchTrustsEndpoint : String = s"$trustsServiceUrl/match"
   lazy val matchEstatesEndpoint : String = s"$estatesServiceUrl/match"
@@ -47,9 +46,12 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
   lazy val trustRegistrationEndpoint : String = s"$trustsServiceUrl/registration"
   lazy val estateRegistrationEndpoint : String = s"$estatesServiceUrl/registration"
 
+  lazy val getTrustOrEstateUrl: String =  s"${config.getTrustOrEstateUrl}/trusts"
+
   def createGetTrustOrEstateEndpoint(utr: String): String = s"$getTrustOrEstateUrl/registration/$utr"
 
   lazy val trustVariationsEndpoint : String = s"${config.varyTrustOrEstateUrl}/trusts/variation"
+  lazy val estateVariationsEndpoint : String = s"${config.varyTrustOrEstateUrl}/estates/variation"
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "CorrelationId"
@@ -117,28 +119,33 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
   }
 
   override def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
-    implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
-    val updatedHeaderCarrier = hc.copy(extraHeaders = desHeaders)
+    implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
     http.GET[GetTrustResponse](createGetTrustOrEstateEndpoint(utr))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)
   }
 
   override def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse] = {
-    implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
-    val updatedHeaderCarrier = hc.copy(extraHeaders = desHeaders)
+    implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
     http.GET[GetEstateResponse](createGetTrustOrEstateEndpoint(utr))(GetEstateResponse.httpReads, implicitly[HeaderCarrier](hc), global)
   }
 
-  override def variations(variation: Variation)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
+  override def trustVariation(trustVariations: TrustVariation)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
 
-    val response = http.POST[JsValue, VariationResponse](trustVariationsEndpoint, Json.toJson(variation))
-    (implicitly[Writes[JsValue]], VariationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
+     http.POST[JsValue, VariationResponse](trustVariationsEndpoint, Json.toJson(trustVariations))(
+       implicitly[Writes[JsValue]], VariationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
 
-    response
+  }
+
+  override def estateVariation(estateVariations: EstateVariation)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
+
+    http.POST[JsValue, VariationResponse](estateVariationsEndpoint, Json.toJson(estateVariations))(
+      implicitly[Writes[JsValue]], VariationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
+
   }
 
 }
@@ -155,5 +162,6 @@ trait DesConnector {
   def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse]
   def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse]
 
-  def variations(variation: Variation)(implicit hc: HeaderCarrier): Future[VariationResponse]
+  def trustVariation(trustVariation: TrustVariation)(implicit hc: HeaderCarrier): Future[VariationResponse]
+  def estateVariation(estateVariation: EstateVariation)(implicit hc: HeaderCarrier): Future[VariationResponse]
 }

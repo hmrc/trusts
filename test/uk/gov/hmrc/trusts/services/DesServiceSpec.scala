@@ -567,17 +567,17 @@ class DesServiceSpec extends BaseSpec {
         }
       }
     }
-  } // getEstateInfo
+  } // getTrustInfo
 
-  ".variation" should {
+  ".trustVariation" should {
     "return a VariationTvnResponse" when {
 
       "connector returns VariationResponse." in {
 
-        when(mockConnector.variations(variationsRequest)).
+        when(mockConnector.trustVariation(trustVariationsRequest)).
           thenReturn(Future.successful(VariationResponse("tvn123")))
 
-        val futureResult = SUT.variation(variationsRequest)
+        val futureResult = SUT.trustVariation(trustVariationsRequest)
 
         whenReady(futureResult) {
           result => result mustBe VariationResponse("tvn123")
@@ -590,10 +590,10 @@ class DesServiceSpec extends BaseSpec {
 
         "connector returns  DuplicateSubmissionException." in {
 
-          when(mockConnector.variations(variationsRequest)).
+          when(mockConnector.trustVariation(trustVariationsRequest)).
             thenReturn(Future.failed(DuplicateSubmissionException))
 
-          val futureResult = SUT.variation(variationsRequest)
+          val futureResult = SUT.trustVariation(trustVariationsRequest)
 
           whenReady(futureResult.failed) {
             result => result mustBe DuplicateSubmissionException
@@ -606,10 +606,10 @@ class DesServiceSpec extends BaseSpec {
       "return same Exception " when {
         "connector returns  exception." in {
 
-          when(mockConnector.variations(variationsRequest)).
+          when(mockConnector.trustVariation(trustVariationsRequest)).
             thenReturn(Future.failed(InternalServerErrorException("")))
 
-          val futureResult = SUT.variation(variationsRequest)
+          val futureResult = SUT.trustVariation(trustVariationsRequest)
 
           whenReady(futureResult.failed) {
             result => result mustBe an[InternalServerErrorException]
@@ -619,6 +619,59 @@ class DesServiceSpec extends BaseSpec {
       }
 
     }
-  } // variation
+  }
+
+  ".estateVariation" should {
+    "return a VariationTvnResponse" when {
+
+      "connector returns VariationResponse." in {
+
+        when(mockConnector.estateVariation(estateVariationsRequest)).
+          thenReturn(Future.successful(VariationResponse("tvn123")))
+
+        val futureResult = SUT.estateVariation(estateVariationsRequest)
+
+        whenReady(futureResult) {
+          result => result mustBe VariationResponse("tvn123")
+        }
+
+      }
+
+
+      "return DuplicateSubmissionException" when {
+
+        "connector returns  DuplicateSubmissionException." in {
+
+          when(mockConnector.estateVariation(estateVariationsRequest)).
+            thenReturn(Future.failed(DuplicateSubmissionException))
+
+          val futureResult = SUT.estateVariation(estateVariationsRequest)
+
+          whenReady(futureResult.failed) {
+            result => result mustBe DuplicateSubmissionException
+          }
+
+        }
+
+      }
+
+      "return same Exception " when {
+        "connector returns  exception." in {
+
+          when(mockConnector.estateVariation(estateVariationsRequest)).
+            thenReturn(Future.failed(InternalServerErrorException("")))
+
+          val futureResult = SUT.estateVariation(estateVariationsRequest)
+
+          whenReady(futureResult.failed) {
+            result => result mustBe an[InternalServerErrorException]
+          }
+
+        }
+      }
+
+    }
+  }
 
 }
+

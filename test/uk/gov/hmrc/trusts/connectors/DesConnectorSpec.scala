@@ -26,7 +26,7 @@ import play.api.http.Status._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.{Variation, VariationResponse}
+import uk.gov.hmrc.trusts.models.variation.{EstateVariation, TrustVariation, VariationResponse}
 
 class DesConnectorSpec extends BaseConnectorSpec {
 
@@ -154,10 +154,11 @@ class DesConnectorSpec extends BaseConnectorSpec {
     }
   }//trustsmatch
 
+
   ".checkExistingEstate" should {
 
     "return Matched " when {
-      "trusts data match with existing trusts." in {
+      "estate data match with existing estate." in {
         val requestBody = Json.stringify(Json.toJson(request))
 
         stubForPost(server, "/estates/match", requestBody, OK, """{"match": true}""")
@@ -173,7 +174,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
       }
     }
     "return NotMatched " when {
-      "trusts data does not with existing trusts." in {
+      "estate data does not with existing estate." in {
         val requestBody = Json.stringify(Json.toJson(request))
 
         stubForPost(server, "/estates/match", requestBody, OK, """{"match": false}""")
@@ -206,7 +207,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
     }
 
     "return AlreadyRegistered " when {
-      "trusts is already registered with provided details." in {
+      "estate is already registered with provided details." in {
         val requestBody = Json.stringify(Json.toJson(request))
 
         stubForPost(server, "/estates/match", requestBody, CONFLICT, Json.stringify(jsonResponseAlreadyRegistered))
@@ -269,6 +270,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
       }
     }
   }//estatematch
+
 
   ".registerTrust" should {
 
@@ -378,6 +380,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
       }
     }
   } //registerTrust
+
 
   ".registerEstate" should {
 
@@ -899,17 +902,17 @@ class DesConnectorSpec extends BaseConnectorSpec {
     }
   }//getEstateInfo
 
-  ".variation" should {
+  ".TrustVariation" should {
 
     val url = "/trusts/variation"
 
     "return a VariationTrnResponse" when {
       "des has returned a 200 with a trn" in {
 
-        val requestBody = Json.stringify(Json.toJson(variationsRequest))
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
         stubForPost(server, url, requestBody, OK, """{"tvn": "XXTVN1234567890"}""")
 
-        val futureResult = connector.variations(variationsRequest)
+        val futureResult = connector.trustVariation(trustVariationsRequest)
 
         application.stop()
 
@@ -923,14 +926,14 @@ class DesConnectorSpec extends BaseConnectorSpec {
     "return BadRequestException" when {
       "payload sent to des is invalid" in {
 
-        implicit val invalidVariationRead: Reads[Variation] = Json.reads[Variation]
+        implicit val invalidVariationRead: Reads[TrustVariation] = Json.reads[TrustVariation]
 
-        val variation = invalidVariationsRequest.validate[Variation].get
+        val variation = invalidTrustVariationsRequest.validate[TrustVariation].get
 
         val requestBody = Json.stringify(Json.toJson(variation))
         stubForPost(server, url, requestBody, BAD_REQUEST, Json.stringify(jsonResponse400))
 
-        val futureResult = connector.variations(variation)
+        val futureResult = connector.trustVariation(variation)
 
         application.stop()
 
@@ -944,10 +947,10 @@ class DesConnectorSpec extends BaseConnectorSpec {
     "return DuplicateSubmissionException" when {
       "trusts two requests are submitted with the same Correlation ID." in {
 
-        val requestBody = Json.stringify(Json.toJson(variationsRequest))
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
 
         stubForPost(server, url, requestBody, CONFLICT, Json.stringify(jsonResponse409DuplicateCorrelation))
-        val futureResult = connector.variations(variationsRequest)
+        val futureResult = connector.trustVariation(trustVariationsRequest)
 
         whenReady(futureResult.failed) {
           result => result mustBe an[InternalServerErrorException]
@@ -957,10 +960,10 @@ class DesConnectorSpec extends BaseConnectorSpec {
 
     "return InvalidCorrelationIdException" when {
       "trusts provides an invalid Correlation ID." in {
-        val requestBody = Json.stringify(Json.toJson(variationsRequest))
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
 
         stubForPost(server, url, requestBody, BAD_REQUEST, Json.stringify(jsonResponse400CorrelationId))
-        val futureResult = connector.variations(variationsRequest)
+        val futureResult = connector.trustVariation(trustVariationsRequest)
 
         application.stop()
 
@@ -972,11 +975,11 @@ class DesConnectorSpec extends BaseConnectorSpec {
 
     "return ServiceUnavailableException  " when {
       "des dependent service is not responding " in {
-        val requestBody = Json.stringify(Json.toJson(variationsRequest))
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
 
         stubForPost(server, url, requestBody, SERVICE_UNAVAILABLE, Json.stringify(jsonResponse503))
 
-        val futureResult = connector.variations(variationsRequest)
+        val futureResult = connector.trustVariation(trustVariationsRequest)
 
         application.stop()
 
@@ -988,11 +991,11 @@ class DesConnectorSpec extends BaseConnectorSpec {
 
     "return InternalServerErrorException" when {
       "des is experiencing some problem." in {
-        val requestBody = Json.stringify(Json.toJson(variationsRequest))
+        val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
 
         stubForPost(server, url, requestBody, INTERNAL_SERVER_ERROR, Json.stringify(jsonResponse500))
 
-        val futureResult = connector.variations(variationsRequest)
+        val futureResult = connector.trustVariation(trustVariationsRequest)
 
         application.stop()
 
@@ -1002,5 +1005,107 @@ class DesConnectorSpec extends BaseConnectorSpec {
       }
     }
 
-  } //variations
+  }
+  ".EstateVariation" should {
+
+    val url = "/estates/variation"
+
+    "return a VariationTrnResponse" when {
+
+      "des has returned a 200 with a trn" in {
+
+        val requestBody = Json.stringify(Json.toJson(estateVariationsRequest))
+        stubForPost(server, url, requestBody, OK, """{"tvn": "XXTVN1234567890"}""")
+
+        val futureResult = connector.estateVariation(estateVariationsRequest)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe a[VariationResponse]
+          inside(result){ case VariationResponse(tvn)  => tvn must fullyMatch regex """^[a-zA-Z0-9]{15}$""".r }
+        }
+      }
+    }
+
+    "payload sent to des is invalid" in {
+
+      implicit val invalidVariationRead: Reads[EstateVariation] = Json.reads[EstateVariation]
+
+      val variation = estateVariationsRequest
+
+      val requestBody = Json.stringify(Json.toJson(variation))
+      stubForPost(server, url, requestBody, BAD_REQUEST, Json.stringify(jsonResponse400))
+
+      val futureResult = connector.estateVariation(variation)
+
+      application.stop()
+
+      whenReady(futureResult.failed) {
+        result => result mustBe BadRequestException
+      }
+
+    }
+
+    "return DuplicateSubmissionException" when {
+      "trusts two requests are submitted with the same Correlation ID." in {
+
+        val requestBody = Json.stringify(Json.toJson(estateVariationsRequest))
+
+        stubForPost(server, url, requestBody, CONFLICT, Json.stringify(jsonResponse409DuplicateCorrelation))
+        val futureResult = connector.estateVariation(estateVariationsRequest)
+
+        whenReady(futureResult.failed) {
+          result => result mustBe an[InternalServerErrorException]
+        }
+      }
+    }
+
+    "return InvalidCorrelationIdException" when {
+      "trusts provides an invalid Correlation ID." in {
+        val requestBody = Json.stringify(Json.toJson(estateVariationsRequest))
+
+        stubForPost(server, url, requestBody, BAD_REQUEST, Json.stringify(jsonResponse400CorrelationId))
+        val futureResult = connector.estateVariation(estateVariationsRequest)
+
+        application.stop()
+
+        whenReady(futureResult.failed) {
+          result => result mustBe an[InternalServerErrorException]
+        }
+      }
+    }
+
+    "return ServiceUnavailableException  " when {
+      "des dependent service is not responding " in {
+        val requestBody = Json.stringify(Json.toJson(estateVariationsRequest))
+
+        stubForPost(server, url, requestBody, SERVICE_UNAVAILABLE, Json.stringify(jsonResponse503))
+
+        val futureResult = connector.estateVariation(estateVariationsRequest)
+
+        application.stop()
+
+        whenReady(futureResult.failed) {
+          result => result mustBe an[ServiceNotAvailableException]
+        }
+      }
+    }
+
+    "return InternalServerErrorException" when {
+      "des is experiencing some problem." in {
+        val requestBody = Json.stringify(Json.toJson(estateVariationsRequest))
+
+        stubForPost(server, url, requestBody, INTERNAL_SERVER_ERROR, Json.stringify(jsonResponse500))
+
+        val futureResult = connector.estateVariation(estateVariationsRequest)
+
+        application.stop()
+
+        whenReady(futureResult.failed) {
+          result => result mustBe an[InternalServerErrorException]
+        }
+      }
+    }
+  }
 }
