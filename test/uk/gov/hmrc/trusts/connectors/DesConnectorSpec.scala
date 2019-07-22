@@ -1032,7 +1032,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
 
       implicit val invalidVariationRead: Reads[EstateVariation] = Json.reads[EstateVariation]
 
-      val variation = validEstateVariationsRequest.validate[EstateVariation].get
+      val variation = estateVariationsRequest
 
       val requestBody = Json.stringify(Json.toJson(variation))
       stubForPost(server, url, requestBody, BAD_REQUEST, Json.stringify(jsonResponse400))
