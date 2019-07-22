@@ -29,11 +29,13 @@ case class EstateVariation(
                       declaration: Declaration,
                       details: Estate,
                       agentDetails: Option[AgentDetails] = None,
-                      estateEndDate: Option[DateTime],
+                      trustEndDate: Option[DateTime],
                       reqHeader: ReqHeader
                     )
 
 object EstateVariation {
+
+  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
 
   val variationReads: Reads[EstateVariation] = {
       (
@@ -42,7 +44,7 @@ object EstateVariation {
         (__ \ "declaration").read[Declaration] and
         (__ \ "details" \ "estate").read[Estate] and
         (__ \ "agentDetails").readNullable[AgentDetails] and
-        (__ \ "estateEndDate").readNullable[DateTime] and
+        (__ \ "trustEndDate").readNullable[DateTime] and
         (__ \ "reqHeader").read[ReqHeader]
       ) (EstateVariation.apply _)
   }
@@ -54,13 +56,12 @@ object EstateVariation {
         (JsPath \ "declaration").write[Declaration] and
         (JsPath \ "details" \ "estate").write[Estate] and
         (JsPath \ "agentDetails").writeNullable[AgentDetails] and
-        (JsPath \ "estateEndDate").writeNullable[DateTime] and
+        (JsPath \ "trustEndDate").writeNullable[DateTime] and
         (JsPath \ "reqHeader").write[ReqHeader]
       ) (unlift(EstateVariation.unapply))
   }
 
   implicit val variationFormat: Format[EstateVariation] = Format(variationReads, writeToDes)
-
 }
 
 case class Estate(entities: EstateEntitiesType,

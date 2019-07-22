@@ -74,8 +74,6 @@ class EstateVariationMappingSpec extends BaseSpec {
         (json \ "details" \ "estate" \ "entities" \ "personalRepresentative" \ 0 \ "estatePerRepInd") mustNot be(defined)
         (json \ "details" \ "estate" \ "entities" \ "personalRepresentative" \ 1) mustBe defined
         (json \ "details" \ "estate" \ "entities" \ "personalRepresentative" \ 1 \ "estatePerRepInd" \ "name" \ "firstName").as[String] mustBe "John"
-
-
       }
 
       "fully hydrate the variation models as expected" in {
@@ -86,6 +84,17 @@ class EstateVariationMappingSpec extends BaseSpec {
         val expectedJson: JsValue = getJsonValueFromFile("valid-estate-variation-add-perrep-ind-api.json")
 
         jsonFromModels mustBe expectedJson
+      }
+
+      "format Json when closing an estate" in {
+
+        val payload = getJsonValueFromFile("valid-estate-variation-with-closing-date-api.json").as[EstateVariation]
+
+        val json = Json.toJson(payload)
+
+        (json \ "trustEndDate") mustBe defined
+        (json \ "trustEndDate").as[String] mustEqual "2019-01-01"
+
       }
 
     }
