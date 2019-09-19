@@ -45,12 +45,12 @@ object GetEstateResponse {
         Logger.info(s"[GetEstateResonse] response status received from des: ${response.status}")
         response.status match {
           case OK =>
-            response.json.asOpt[EstateFoundResponse] match {
-              case Some(estateFound) =>
+            response.json.validate[EstateFoundResponse] match {
+              case JsSuccess(estateFound,_) =>
                 Logger.info("[GetEstateResponse] response successfully parsed as EstateFoundResponse")
                 estateFound
-              case None =>
-                Logger.info("[GetEstateResponse] response unsuccessfully parsed as EstateFoundResponse")
+              case JsError(errors) =>
+                Logger.info(s"[GetTrustResponse] Cannot parse as EstateFoundResponse due to $errors")
                 InternalServerErrorResponse
             }
           case BAD_REQUEST =>
