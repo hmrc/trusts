@@ -182,7 +182,7 @@ case class DisplayTrustCompanyType(lineNo: String,
                                    bpMatchStatus: Option[String],organisationName: String,
                                    beneficiaryDiscretion: Option[Boolean],
                                    beneficiaryShareOfIncome: Option[String],
-                                   identification: DisplayTrustIdentificationOrgType,
+                                   identification: Option[DisplayTrustIdentificationOrgType],
                                    entityStart: String)
 
 object DisplayTrustCompanyType {
@@ -207,7 +207,7 @@ case class DisplayTrustBeneficiaryTrustType(lineNo: String,
                                             organisationName: String,
                                             beneficiaryDiscretion: Option[Boolean],
                                             beneficiaryShareOfIncome: Option[String],
-                                            identification: DisplayTrustIdentificationOrgType,
+                                            identification: Option[DisplayTrustIdentificationOrgType],
                                             entityStart: String)
 
 object DisplayTrustBeneficiaryTrustType {
@@ -219,7 +219,7 @@ case class DisplayTrustCharityType(lineNo: String,
                                     organisationName: String,
                                    beneficiaryDiscretion: Option[Boolean],
                                    beneficiaryShareOfIncome: Option[String],
-                                   identification: DisplayTrustIdentificationOrgType,
+                                   identification: Option[DisplayTrustIdentificationOrgType],
                                    entityStart: String)
 
 object DisplayTrustCharityType {
@@ -269,7 +269,8 @@ object DisplayTrustOtherType {
   implicit val otherTypeFormat: Format[DisplayTrustOtherType] = Json.format[DisplayTrustOtherType]
 }
 
-case class DisplayTrustTrusteeType(trusteeInd : Option[DisplayTrustTrusteeIndividualType], trusteeOrg : Option[DisplayTrustTrusteeOrgType] )
+case class DisplayTrustTrusteeType(trusteeInd : Option[DisplayTrustTrusteeIndividualType],
+                                   trusteeOrg : Option[DisplayTrustTrusteeOrgType])
 object DisplayTrustTrusteeType {
   implicit val trusteeTypeFormat : Format[DisplayTrustTrusteeType] = Json.format[DisplayTrustTrusteeType]
 }
@@ -279,7 +280,7 @@ case class DisplayTrustTrusteeOrgType(lineNo: String,
                                       name: String,
                                       phoneNumber: Option[String] = None,
                                       email: Option[String] = None,
-                                      identification: DisplayTrustIdentificationOrgType,
+                                      identification: Option[DisplayTrustIdentificationOrgType],
                                       entityStart: String)
 
 object DisplayTrustTrusteeOrgType {
@@ -323,7 +324,7 @@ object DisplayTrustProtector {
 case class DisplayTrustProtectorCompany(lineNo: String,
                                         bpMatchStatus: Option[String],
                                         name: String,
-                                        identification: DisplayTrustIdentificationOrgType,
+                                        identification: Option[DisplayTrustIdentificationOrgType],
                                         entityStart: String)
 
 object DisplayTrustProtectorCompany {
