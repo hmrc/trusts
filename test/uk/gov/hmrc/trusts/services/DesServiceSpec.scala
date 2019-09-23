@@ -182,7 +182,7 @@ class DesServiceSpec extends BaseSpec {
         }
       }
     }
-  } //checkExistingEstate
+  }
 
 
   ".registerTrust" should {
@@ -222,7 +222,7 @@ class DesServiceSpec extends BaseSpec {
       }
     }
 
-  } //registerTrust
+  }
 
   ".registerEstate" should {
 
@@ -261,7 +261,7 @@ class DesServiceSpec extends BaseSpec {
       }
     }
 
-  } //registerTrust
+  }
 
   ".getSubscriptionId" should {
 
@@ -287,10 +287,12 @@ class DesServiceSpec extends BaseSpec {
         }
       }
     }
-  } //getSubscriptionId
+  }
 
   ".getTrustInfo" should {
+
     "return TrustFoundResponse" when {
+
       "TrustFoundResponse is returned from DES Connector with a Processed flag and a trust body" in {
 
         val utr = "1234567890"
@@ -369,6 +371,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return TrustFoundResponse" when {
+
       "TrustFoundResponse is returned from DES Connector" in {
 
         val utr = "1234567890"
@@ -384,6 +387,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return InvalidUTRResponse" when {
+
       "InvalidUTRResponse is returned from DES Connector" in {
 
         when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(InvalidUTRResponse))
@@ -466,7 +470,7 @@ class DesServiceSpec extends BaseSpec {
         }
       }
     }
-  } // getTrustInfo
+  }
 
   ".getEstateInfo" should {
     "return EstateFoundResponse" when {
