@@ -322,13 +322,13 @@ class DesServiceSpec extends BaseSpec {
               "2017-02-28"))),
               Some(List(
                 DisplayTrustCompanyType("1", Some("01"), "", Some(true), Some("0"),
-                  DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None), "2017-02-28"))),
+                  Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28"))),
               Some(List(
                 DisplayTrustBeneficiaryTrustType("1", Some("01"), "Nelson Ltd ", Some(true), Some("0"),
-                  DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None), "2017-02-28"))),
+                  Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28"))),
               Some(List(
                 DisplayTrustCharityType("1", Some("01"), "Nelson Ltd", Some(true), Some("0"),
-                  DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None), "2017-02-28"))),
+                  Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28"))),
               Some(List(
                 DisplayTrustUnidentifiedType("1", Some("01"), "Reserve money", Some(true), Some("0"), "2017-02-28"))),
               Some(List(
@@ -345,11 +345,11 @@ class DesServiceSpec extends BaseSpec {
                   Some(DisplayTrustTrusteeIndividualType("1", Some("01"), NameType("Tamara", Some("Hingis"), "Jones"), Some(dateTime), Some("+447456788112"),
                     Some(DisplayTrustIdentificationType(
                       Some("2222200000000"), None, None, None)), "2017-02-28")), Some(DisplayTrustTrusteeOrgType("1", None, "MyOrg Incorporated", Some("+447456788112"), Some("a"),
-                    DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None), "2017-02-28"))))),
+                    Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28"))))),
               Some(DisplayTrustProtectorsType(Some(List(DisplayTrustProtector("1", Some("01"), NameType("Bruce", Some("Bob"), "Branson"), Some(dateTime),
                 Some(DisplayTrustIdentificationType(Some("2222200000000"), None, None, None)), "2017-02-28"))),
                 Some(List(DisplayTrustProtectorCompany("1", Some("01"), "Raga Dandy",
-                  DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None), "2017-02-28"))))),
+                  Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28"))))),
               Some(DisplayTrustSettlors(Some(List(DisplayTrustSettlor("1", Some("01"), NameType("Bruce", Some("Bob"), "Branson"), Some(dateTime),
                 Some(DisplayTrustIdentificationType(Some("2222200000000"), None, None, None)), "2017-02-28"))),
                 Some(List(DisplayTrustSettlorCompany("1", Some("01"), "Completors Limited", Some("Trading"), Some(true), Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28")))))),
