@@ -45,7 +45,7 @@ class AppConfig @Inject()(config: Configuration, playEnv: Environment) extends S
 
   val trustsApiRegistrationSchema : String  = "/resources/schemas/trusts-api-schema-5.0.json"
   val estatesApiRegistrationSchema : String  = "/resources/schemas/estates-api-schema-5.0.json"
-  val variationsApiSchema: String = "/resources/schemas/variations-api-schema-3.2.0.json"
+  val variationsApiSchema: String = "/resources/schemas/variations-api-schema-4.0.json"
 
   val taxEnrolmentsUrl : String = baseUrl("tax-enrolments")
   val taxEnrolmentsPayloadBodyServiceName : String = loadConfig("microservice.services.tax-enrolments.serviceName")
