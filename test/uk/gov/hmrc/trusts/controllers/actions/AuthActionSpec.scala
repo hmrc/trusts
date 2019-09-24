@@ -20,6 +20,7 @@ import akka.stream.Materializer
 import com.google.inject.Inject
 import play.api.mvc.{BodyParsers, Results}
 import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core.AffinityGroup.Individual
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.{Retrieval, ~}
@@ -37,39 +38,20 @@ class AuthActionSpec extends BaseSpec {
     def onSubmit() = authAction.apply(BodyParsers.parse.json) { _ => Results.Ok }
   }
 
-  private def authRetrievals(affinityGroup: AffinityGroup = AffinityGroup.Individual, enrolment: Enrolments = noEnrollment) =
-    Future.successful(new ~(new ~(Some("id"), Some(affinityGroup)), enrolment))
+  private def authRetrievals(affinityGroup: AffinityGroup) =
+    Future.successful(new ~(Some("id"), Some(affinityGroup)))
 
   private val agentAffinityGroup = AffinityGroup.Agent
   private val orgAffinityGroup = AffinityGroup.Organisation
   private val noEnrollment = Enrolments(Set())
-  private val agentEnrolment = Enrolments(Set(Enrolment("HMRC-AS-AGENT",List(EnrolmentIdentifier("AgentReferenceNumber","SomeVal")),"Activated",None)))
 
   "Auth Action" when {
 
-    "Agent user has not enrolled in Agent Services Account" must {
-
-      "redirect the user to the create agent services page" in {
-        
-        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(agentAffinityGroup, noEnrollment)), appConfig)
-        val controller = new Harness(authAction)
-        val result = controller.onSubmit()(fakeRequest)
-        status(result) mustBe UNAUTHORIZED
-
-        val output = contentAsJson(result)
-        (output \ "code").as[String] mustBe "UNAUTHORISED"
-        (output \ "message").as[String] mustBe "Insufficient enrolment for authorised user."
-
-        application.stop()
-      }
-
-    }
-
-    "Agent user has correct enrolled in Agent Services Account" must {
+    "Agent user" must {
 
       "allow user to continue" in {
 
-        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(agentAffinityGroup, agentEnrolment)), appConfig)
+        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(agentAffinityGroup)), appConfig)
         val controller = new Harness(authAction)
         val result = controller.onSubmit()(fakeRequest)
 
@@ -84,7 +66,7 @@ class AuthActionSpec extends BaseSpec {
 
       "allow user to continue" in {
 
-        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(orgAffinityGroup, noEnrollment)), appConfig)
+        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(orgAffinityGroup)), appConfig)
         val controller = new Harness(authAction)
         val result = controller.onSubmit()(fakeRequest)
 
@@ -99,7 +81,7 @@ class AuthActionSpec extends BaseSpec {
 
       "redirect the user to the unauthorised page" in {
         
-        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(enrolment = noEnrollment)), appConfig)
+        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(Individual)), appConfig)
         val controller = new Harness(authAction)
         val result = controller.onSubmit()(fakeRequest)
         status(result) mustBe UNAUTHORIZED

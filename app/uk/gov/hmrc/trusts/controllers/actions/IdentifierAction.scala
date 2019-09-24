@@ -37,51 +37,19 @@ class AuthenticatedIdentifierAction @Inject()(override val authConnector: AuthCo
                                                config: AppConfig)
   extends IdentifierAction with AuthorisedFunctions {
 
-  private def authoriseAgent[A](request : Request[A],
-                                enrolments : Enrolments,
-                                internalId : String,
-                                block: IdentifierRequest[A] => Future[Result]
-                               ) : Future[Result] = {
-
-    val hmrcAgentEnrolmentKey = "HMRC-AS-AGENT"
-    val arnIdentifier = "AgentReferenceNumber"
-
-    val unauthorisedResult = Future.successful(Unauthorized(Json.toJson(insufficientEnrolmentErrorResponse)))
-
-    enrolments.getEnrolment(hmrcAgentEnrolmentKey).fold(
-      unauthorisedResult
-    ){
-      agentEnrolment =>
-        agentEnrolment.getIdentifier(arnIdentifier).fold(
-          unauthorisedResult
-        ){
-          enrolmentIdentifier =>
-            val arn = enrolmentIdentifier.value
-
-            if(arn.isEmpty) {
-              unauthorisedResult
-            } else {
-              block(IdentifierRequest(request, internalId, AffinityGroup.Agent, Some(arn)))
-            }
-        }
-    }
-  }
-
-
   def invokeBlock[A](request: Request[A],
                      block: IdentifierRequest[A] => Future[Result]) : Future[Result] = {
 
     val retrievals = Retrievals.internalId and
-                     Retrievals.affinityGroup and
-                     Retrievals.allEnrolments
+                     Retrievals.affinityGroup
 
     implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
     authorised().retrieve(retrievals) {
-      case Some(internalId) ~ Some(Agent) ~ enrolments =>
-        authoriseAgent(request, enrolments, internalId, block)
-      case Some(internalId) ~ Some(Organisation) ~ _ =>
-        block(IdentifierRequest(request, internalId, AffinityGroup.Organisation))
+      case Some(internalId) ~ Some(Agent) =>
+        block(IdentifierRequest(request, internalId, Agent))
+      case Some(internalId) ~ Some(Organisation) =>
+        block(IdentifierRequest(request, internalId, Organisation))
       case _ =>
         Logger.info(s"[IdentifierAction] Insufficient enrolment")
         Future.successful(Unauthorized(Json.toJson(insufficientEnrolmentErrorResponse)))

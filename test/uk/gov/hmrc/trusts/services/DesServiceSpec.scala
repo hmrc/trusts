@@ -182,7 +182,7 @@ class DesServiceSpec extends BaseSpec {
         }
       }
     }
-  } //checkExistingEstate
+  }
 
 
   ".registerTrust" should {
@@ -222,7 +222,7 @@ class DesServiceSpec extends BaseSpec {
       }
     }
 
-  } //registerTrust
+  }
 
   ".registerEstate" should {
 
@@ -261,7 +261,7 @@ class DesServiceSpec extends BaseSpec {
       }
     }
 
-  } //registerTrust
+  }
 
   ".getSubscriptionId" should {
 
@@ -287,10 +287,12 @@ class DesServiceSpec extends BaseSpec {
         }
       }
     }
-  } //getSubscriptionId
+  }
 
   ".getTrustInfo" should {
+
     "return TrustFoundResponse" when {
+
       "TrustFoundResponse is returned from DES Connector with a Processed flag and a trust body" in {
 
         val utr = "1234567890"
@@ -320,13 +322,13 @@ class DesServiceSpec extends BaseSpec {
               "2017-02-28"))),
               Some(List(
                 DisplayTrustCompanyType("1", Some("01"), "", Some(true), Some("0"),
-                  DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None), "2017-02-28"))),
+                  Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28"))),
               Some(List(
                 DisplayTrustBeneficiaryTrustType("1", Some("01"), "Nelson Ltd ", Some(true), Some("0"),
-                  DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None), "2017-02-28"))),
+                  Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28"))),
               Some(List(
                 DisplayTrustCharityType("1", Some("01"), "Nelson Ltd", Some(true), Some("0"),
-                  DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None), "2017-02-28"))),
+                  Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28"))),
               Some(List(
                 DisplayTrustUnidentifiedType("1", Some("01"), "Reserve money", Some(true), Some("0"), "2017-02-28"))),
               Some(List(
@@ -343,11 +345,11 @@ class DesServiceSpec extends BaseSpec {
                   Some(DisplayTrustTrusteeIndividualType("1", Some("01"), NameType("Tamara", Some("Hingis"), "Jones"), Some(dateTime), Some("+447456788112"),
                     Some(DisplayTrustIdentificationType(
                       Some("2222200000000"), None, None, None)), "2017-02-28")), Some(DisplayTrustTrusteeOrgType("1", None, "MyOrg Incorporated", Some("+447456788112"), Some("a"),
-                    DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None), "2017-02-28"))))),
+                    Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28"))))),
               Some(DisplayTrustProtectorsType(Some(List(DisplayTrustProtector("1", Some("01"), NameType("Bruce", Some("Bob"), "Branson"), Some(dateTime),
                 Some(DisplayTrustIdentificationType(Some("2222200000000"), None, None, None)), "2017-02-28"))),
                 Some(List(DisplayTrustProtectorCompany("1", Some("01"), "Raga Dandy",
-                  DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None), "2017-02-28"))))),
+                  Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28"))))),
               Some(DisplayTrustSettlors(Some(List(DisplayTrustSettlor("1", Some("01"), NameType("Bruce", Some("Bob"), "Branson"), Some(dateTime),
                 Some(DisplayTrustIdentificationType(Some("2222200000000"), None, None, None)), "2017-02-28"))),
                 Some(List(DisplayTrustSettlorCompany("1", Some("01"), "Completors Limited", Some("Trading"), Some(true), Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28")))))),
@@ -369,6 +371,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return TrustFoundResponse" when {
+
       "TrustFoundResponse is returned from DES Connector" in {
 
         val utr = "1234567890"
@@ -384,6 +387,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return InvalidUTRResponse" when {
+
       "InvalidUTRResponse is returned from DES Connector" in {
 
         when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(InvalidUTRResponse))
@@ -466,7 +470,7 @@ class DesServiceSpec extends BaseSpec {
         }
       }
     }
-  } // getTrustInfo
+  }
 
   ".getEstateInfo" should {
     "return EstateFoundResponse" when {

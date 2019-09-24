@@ -46,9 +46,11 @@ object GetTrustResponse {
         Logger.info(s"[GetTrustResponse]  response status received from des: ${response.status}")
         response.status match {
           case OK =>
-            response.json.asOpt[TrustFoundResponse] match {
-              case Some(trustFound) => trustFound
-              case None => InternalServerErrorResponse
+            response.json.validate[TrustFoundResponse] match {
+              case JsSuccess(trustFound,_) => trustFound
+              case JsError(errors) =>
+                Logger.info(s"[GetTrustResponse] Cannot parse as TrustFoundResponse due to $errors")
+                InternalServerErrorResponse
             }
           case BAD_REQUEST =>
             response.json.asOpt[DesErrorResponse] match {
@@ -64,9 +66,12 @@ object GetTrustResponse {
               case None =>
                 InternalServerErrorResponse
             }
-          case NOT_FOUND => ResourceNotFoundResponse
-          case SERVICE_UNAVAILABLE => ServiceUnavailableResponse
-          case _ => InternalServerErrorResponse
+          case NOT_FOUND =>
+            ResourceNotFoundResponse
+          case SERVICE_UNAVAILABLE =>
+            ServiceUnavailableResponse
+          case _ =>
+            InternalServerErrorResponse
         }
       }
     }

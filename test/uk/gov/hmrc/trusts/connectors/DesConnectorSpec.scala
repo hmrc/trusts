@@ -152,7 +152,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
         }
       }
     }
-  }//trustsmatch
+  }
 
 
   ".checkExistingEstate" should {
@@ -269,7 +269,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
         }
       }
     }
-  }//estatematch
+  }
 
 
   ".registerTrust" should {
@@ -379,8 +379,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
         }
       }
     }
-  } //registerTrust
-
+  }
 
   ".registerEstate" should {
 
@@ -489,7 +488,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
         }
       }
     }
-  } //registerEstate
+  }
 
   ".getSubscriptionId" should {
 
@@ -572,11 +571,12 @@ class DesConnectorSpec extends BaseConnectorSpec {
         }
       }
     }
-  }//getSubscriptionId
+  }
 
   ".getTrustInfo" should {
 
     "return TrustFoundResponse" when {
+
       "des has returned a 200 with trust details" in {
         val utr = "1234567890"
         stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustResponseJson)
@@ -615,6 +615,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
     }
 
     "return InvalidUTRResponse" when {
+
       "des has returned a 400 with the code INVALID_UTR" in {
         val invalidUTR = "123456789"
         stubForGet(server, createTrustOrEstateEndpoint(invalidUTR), BAD_REQUEST,
@@ -631,6 +632,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
     }
 
     "return InvalidRegimeResponse" when {
+
       "des has returned a 400 with the code INVALID_REGIME" in {
         val utr = "1234567891"
         stubForGet(server, createTrustOrEstateEndpoint(utr), BAD_REQUEST,
@@ -647,6 +649,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
     }
 
     "return BadRequestResponse" when {
+
       "des has returned a 400 with a code which is not INVALID_UTR OR INVALID_REGIME" in {
         val utr = "1234567891"
         stubForGet(server, createTrustOrEstateEndpoint(utr), BAD_REQUEST,
@@ -663,6 +666,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
     }
 
     "return ResourceNotFoundResponse" when {
+
       "des has returned a 404" in {
         val utr = "1234567892"
         stubForGet(server, createTrustOrEstateEndpoint(utr), NOT_FOUND, "")
@@ -678,6 +682,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
     }
 
     "return InternalServerErrorResposne" when {
+
       "des has returned a 500 with the code SERVER_ERROR" in {
         val utr = "1234567893"
         stubForGet(server, createTrustOrEstateEndpoint(utr), INTERNAL_SERVER_ERROR, "")
@@ -693,6 +698,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
     }
 
     "return ServiceUnavailableResponse" when {
+
       "des has returned a 503 with the code SERVICE_UNAVAILABLE" in {
         val utr = "1234567894"
         stubForGet(server, createTrustOrEstateEndpoint(utr), SERVICE_UNAVAILABLE, "")
@@ -706,7 +712,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
         }
       }
     }
-  }//getTrustInfo
+  }
 
   ".getEstateInfo" should {
 
