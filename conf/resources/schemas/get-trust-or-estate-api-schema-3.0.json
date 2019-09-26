@@ -703,18 +703,6 @@
                 {
                     "type": "object",
                     "properties": {
-                        "safeId": {
-                            "$ref": "#/definitions/safeIdType"
-                        }
-                    },
-                    "required": [
-                        "safeId"
-                    ],
-                    "additionalProperties": false
-                },
-                {
-                    "type": "object",
-                    "properties": {
                         "nino": {
                             "$ref": "#/definitions/ninoType"
                         }
@@ -732,6 +720,9 @@
                         },
                         "address": {
                             "$ref": "#/definitions/addressType"
+                        },
+                        "safeId": {
+                            "$ref": "#/definitions/safeIdType"
                         }
                     },
                     "additionalProperties": false
@@ -744,18 +735,6 @@
                 {
                     "type": "object",
                     "properties": {
-                        "safeId": {
-                            "$ref": "#/definitions/safeIdType"
-                        }
-                    },
-                    "required": [
-                        "safeId"
-                    ],
-                    "additionalProperties": false
-                },
-                {
-                    "type": "object",
-                    "properties": {
                         "nino": {
                             "$ref": "#/definitions/ninoType"
                         }
@@ -773,6 +752,9 @@
                         },
                         "address": {
                             "$ref": "#/definitions/addressType"
+                        },
+                        "safeId": {
+                            "$ref": "#/definitions/safeIdType"
                         }
                     },
                     "required": [
@@ -786,18 +768,6 @@
         "identificationOrgType": {
             "type": "object",
             "oneOf": [
-                {
-                    "type": "object",
-                    "properties": {
-                        "safeId": {
-                            "$ref": "#/definitions/safeIdType"
-                        }
-                    },
-                    "required": [
-                        "safeId"
-                    ],
-                    "additionalProperties": false
-                },
                 {
                     "type": "object",
                     "properties": {
@@ -815,6 +785,9 @@
                     "properties": {
                         "address": {
                             "$ref": "#/definitions/addressType"
+                        },
+                        "safeId": {
+                            "$ref": "#/definitions/safeIdType"
                         }
                     },
                     "required": [
