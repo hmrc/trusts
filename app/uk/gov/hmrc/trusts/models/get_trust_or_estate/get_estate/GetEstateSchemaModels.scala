@@ -79,6 +79,7 @@ case class EstatePerRepOrgType(orgName: String,
                                entityStart: DateTime)
 
 object EstatePerRepOrgType {
+  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val estatePerRepOrgTypeFormat: Format[EstatePerRepOrgType] = Json.format[EstatePerRepOrgType]
 }
 
