@@ -192,7 +192,7 @@ case class CompanyType(lineNo: Option[String],
                        organisationName: String,
                        beneficiaryDiscretion: Option[Boolean],
                        beneficiaryShareOfIncome: Option[String],
-                       identification: IdentificationOrgType,
+                       identification: Option[IdentificationOrgType],
                        entityStart: DateTime,
                        entityEnd: Option[DateTime])
 
@@ -205,7 +205,7 @@ case class BeneficiaryTrustType(lineNo: Option[String],
                                 organisationName: String,
                                 beneficiaryDiscretion: Option[Boolean],
                                 beneficiaryShareOfIncome: Option[String],
-                                identification: IdentificationOrgType,
+                                identification: Option[IdentificationOrgType],
                                 entityStart: DateTime,
                                 entityEnd: Option[DateTime])
 
@@ -218,7 +218,7 @@ case class CharityType(lineNo: Option[String],
                        organisationName: String,
                        beneficiaryDiscretion: Option[Boolean],
                        beneficiaryShareOfIncome: Option[String],
-                       identification: IdentificationOrgType,
+                       identification: Option[IdentificationOrgType],
                        entityStart: DateTime,
                        entityEnd: Option[DateTime])
 
