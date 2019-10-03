@@ -363,7 +363,7 @@ class DesServiceSpec extends BaseSpec {
               Some(List(PropertyLandType(Some("Tokyo Campus"), Some(AddressType("10 Enderson Road ", "Cheapside", Some("Riverside "), Some("Boston "), Some("SN8 4DD"), "GB")), 1892090, 1699000))),
               Some(List(DisplaySharesType(Some("0"), "Smart Estates", Some("1234567890"), Some("Ordinary shares"), Some("Quoted"), Some(9891828)))),
               Some(List(DisplayBusinessAssetType("Lone Wolf Ltd", Some("1474839586"), "Travel Business", Some(AddressType("Suite 10", "Wealthy Arena", Some("Trafagar Square"), Some("London"), Some("SE2 2HB"), "GB")), Some(0)))),
-              Some(List(DisplayTrustPartnershipType(None, "Real Estates partnership", Some(dateTime)))), Some(List(OtherAssetType("Jewelries", 781720)))
+              Some(List(DisplayTrustPartnershipType(None, "Real Estates partnership", Some(dateTime)))), Some(List(DisplayOtherAssetType("Jewelries", Some(781720))))
             ))))
 
         when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustFoundResponse(getTrust, ResponseHeader("Processed", "1"))))
