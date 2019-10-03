@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.trusts.services
 
-import java.time.format.DateTimeFormatter
-
 import org.joda.time.format.DateTimeFormat
 import org.mockito.Matchers._
 import org.mockito.Mockito.when
@@ -25,7 +23,6 @@ import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
-import uk.gov.hmrc.trusts.models.{get_trust_or_estate, _}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
@@ -314,51 +311,60 @@ class DesServiceSpec extends BaseSpec {
               Some(DeedOfVariation.AbsoluteInterestUnderWill), Some(true), Some(dateTime)),
             DisplayTrustEntitiesType(
               Some(List(DisplayTrustNaturalPersonType("1", Some("01"), NameType("Nicola", Some("Andrey"), "Jackson"), Some(dateTime),
-              Some(DisplayTrustIdentificationType(Some("2222200000000"),
-              None, None, None)), "2017-02-28"))),
+                Some(DisplayTrustIdentificationType(Some("2222200000000"),
+                  None, None, None)), "2017-02-28"))),
               DisplayTrustBeneficiaryType(
                 Some(List(DisplayTrustIndividualDetailsType("1", Some("01"), NameType("Nicola", Some("Andrey"), "Jackson"), Some(dateTime), vulnerableBeneficiary = true, Some("Director"), Some(true), Some("0"),
-              Some(DisplayTrustIdentificationType(Some("2222200000000"), None, None, None)),
-              "2017-02-28"))),
-              Some(List(
-                DisplayTrustCompanyType("1", Some("01"), "", Some(true), Some("0"),
-                  Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28"))),
-              Some(List(
-                DisplayTrustBeneficiaryTrustType("1", Some("01"), "Nelson Ltd ", Some(true), Some("0"),
-                  Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28"))),
-              Some(List(
-                DisplayTrustCharityType("1", Some("01"), "Nelson Ltd", Some(true), Some("0"),
-                  Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28"))),
-              Some(List(
-                DisplayTrustUnidentifiedType("1", Some("01"), "Reserve money", Some(true), Some("0"), "2017-02-28"))),
-              Some(List(
-                DisplayTrustLargeType("1", Some("01"), "Nelson Ltd", "This is a must", Some("This is a must"), Some("This is a must"), Some("This is a must"), Some("This is a must"), "0",
-                  Some(
-                    DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), Some(true), Some("0"), "2017-02-28"))),
-              Some(List(
-                DisplayTrustOtherType("1", Some("01"), "Joint Fund", Some(AddressType("1010 EASY ST", "OTTAWA", Some("ONTARIO"), Some("ONTARIO"), Some("K1A 0B1"), "GB")), Some(true), Some("0"), "2017-02-28")))),
+                  Some(DisplayTrustIdentificationType(Some("2222200000000"), None, None, None)),
+                  "2017-02-28"))),
+                Some(List(
+                  DisplayTrustCompanyType("1", Some("01"), "", Some(true), Some("0"),
+                    Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28"))),
+                Some(List(
+                  DisplayTrustBeneficiaryTrustType("1", Some("01"), "Nelson Ltd ", Some(true), Some("0"),
+                    Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28"))),
+                Some(List(
+                  DisplayTrustCharityType("1", Some("01"), "Nelson Ltd", Some(true), Some("0"),
+                    Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28"))),
+                Some(List(
+                  DisplayTrustUnidentifiedType("1", Some("01"), "Reserve money", Some(true), Some("0"), "2017-02-28"))),
+                Some(List(
+                  DisplayTrustLargeType("1", Some("01"), "Nelson Ltd", "This is a must", Some("This is a must"), Some("This is a must"), Some("This is a must"), Some("This is a must"), "0",
+                    Some(
+                      DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), Some(true), Some("0"), "2017-02-28"))),
+                Some(List(
+                  DisplayTrustOtherType("1", Some("01"), "Joint Fund", Some(AddressType("1010 EASY ST", "OTTAWA", Some("ONTARIO"), Some("ONTARIO"), Some("K1A 0B1"), "GB")), Some(true), Some("0"), "2017-02-28")))),
               Some(DisplayTrustWillType("1", Some("01"), NameType("James", Some("Kingsley"), "Bond"), Some(dateTime), Some(dateTime),
                 Some(DisplayTrustIdentification(Some("2222200000000"), None, None)),
                 "2017-02-28")), DisplayTrustLeadTrusteeType(None, None),
               Some(List(
                 DisplayTrustTrusteeType(
-                  Some(DisplayTrustTrusteeIndividualType("1", Some("01"), NameType("Tamara", Some("Hingis"), "Jones"), Some(dateTime), Some("+447456788112"),
-                    Some(DisplayTrustIdentificationType(
-                      Some("2222200000000"), None, None, None)), "2017-02-28")), Some(DisplayTrustTrusteeOrgType("1", None, "MyOrg Incorporated", Some("+447456788112"), Some("a"),
-                    Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28"))))),
-              Some(DisplayTrustProtectorsType(Some(List(DisplayTrustProtector("1", Some("01"), NameType("Bruce", Some("Bob"), "Branson"), Some(dateTime),
+                  Some(
+                    DisplayTrustTrusteeIndividualType("1", Some("01"), NameType("Tamara", Some("Hingis"), "Jones"), Some(dateTime), Some("+447456788112"), Some(DisplayTrustIdentificationType(Some("2222200000000"), None, None, None)), "2017-02-28")
+                  ),
+                  Some(
+                    DisplayTrustTrusteeOrgType("1", None, "MyOrg Incorporated", Some("+447456788112"), Some("a"), Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28")
+                  )
+                )
+              )),
+              Some(
+                DisplayTrustProtectorsType(Some(List(DisplayTrustProtector("1", Some("01"), NameType("Bruce", Some("Bob"), "Branson"), Some(dateTime),
                 Some(DisplayTrustIdentificationType(Some("2222200000000"), None, None, None)), "2017-02-28"))),
                 Some(List(DisplayTrustProtectorCompany("1", Some("01"), "Raga Dandy",
-                  Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28"))))),
-              Some(DisplayTrustSettlors(Some(List(DisplayTrustSettlor("1", Some("01"), NameType("Bruce", Some("Bob"), "Branson"), Some(dateTime),
+                  Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28"))))
+              ),
+              Some(
+                DisplayTrustSettlors(Some(List(DisplayTrustSettlor("1", Some("01"), NameType("Bruce", Some("Bob"), "Branson"), Some(dateTime),
                 Some(DisplayTrustIdentificationType(Some("2222200000000"), None, None, None)), "2017-02-28"))),
-                Some(List(DisplayTrustSettlorCompany("1", Some("01"), "Completors Limited", Some("Trading"), Some(true), Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28")))))),
+                Some(List(DisplayTrustSettlorCompany("1", Some("01"), "Completors Limited", Some("Trading"), Some(true), Some(DisplayTrustIdentificationOrgType(Some("2222200000000"), None, None)), "2017-02-28"))))
+              )),
             DisplayTrustAssets(
               Some(List(AssetMonetaryAmount(0))),
               Some(List(PropertyLandType(Some("Tokyo Campus"), Some(AddressType("10 Enderson Road ", "Cheapside", Some("Riverside "), Some("Boston "), Some("SN8 4DD"), "GB")), 1892090, 1699000))),
-              Some(List(SharesType("0", "Smart Estates", "Ordinary shares", "Quoted", 9891828))),
+              Some(List(DisplaySharesType(Some("0"), "Smart Estates", Some("1234567890"), Some("Ordinary shares"), Some("Quoted"), Some(9891828)))),
               Some(List(BusinessAssetType("Lone Wolf Ltd", Some("Travel Business"), AddressType("Suite 10", "Wealthy Arena", Some("Trafagar Square"), Some("London"), Some("SE2 2HB"), "GB"), 0))),
-              Some(List(DisplayTrustPartnershipType(None, "Real Estates partnership", Some(dateTime)))), Some(List(OtherAssetType("Jewelries", 781720)))))))
+              Some(List(DisplayTrustPartnershipType(None, "Real Estates partnership", Some(dateTime)))), Some(List(OtherAssetType("Jewelries", 781720)))
+            ))))
 
         when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustFoundResponse(getTrust, ResponseHeader("Processed", "1"))))
 

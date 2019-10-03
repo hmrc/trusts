@@ -18,13 +18,6 @@ package uk.gov.hmrc.trusts.models
 
 import play.api.libs.json.Json
 
-/*case class RegistrationDesResponse(trn:String)
-
-object RegistrationDesResponse {
-  implicit val formats = Json.format[DesResponse]
-}*/
-
-
 case class DesResponse(`match`:Boolean)
 object DesResponse {
   implicit val formats = Json.format[DesResponse]
