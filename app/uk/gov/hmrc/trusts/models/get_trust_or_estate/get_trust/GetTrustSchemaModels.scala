@@ -402,7 +402,7 @@ object DisplayTrustPartnershipType {
 case class DisplayTrustAssets(monetary: Option[List[AssetMonetaryAmount]],
                               propertyOrLand: Option[List[PropertyLandType]],
                               shares: Option[List[DisplaySharesType]],
-                              business: Option[List[BusinessAssetType]],
+                              business: Option[List[DisplayBusinessAssetType]],
                               partnerShip: Option[List[DisplayTrustPartnershipType]],
                               other: Option[List[OtherAssetType]])
 
@@ -419,4 +419,14 @@ case class DisplaySharesType(numberOfShares: Option[String],
 
 object DisplaySharesType {
   implicit val sharesTypeFormat: Format[DisplaySharesType] = Json.format[DisplaySharesType]
+}
+
+case class DisplayBusinessAssetType(orgName: String,
+                                    utr: Option[String],
+                                    businessDescription: String,
+                                    address: Option[AddressType],
+                                    businessValue: Option[Long])
+
+object DisplayBusinessAssetType {
+  implicit val businessAssetTypeFormat: Format[DisplayBusinessAssetType] = Json.format[DisplayBusinessAssetType]
 }
