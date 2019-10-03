@@ -20,7 +20,6 @@ import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.IdentificationType
 import uk.gov.hmrc.trusts.utils.Implicits._
 
 case class TrustVariation(
@@ -232,7 +231,7 @@ case class WillType(
                      name: NameType,
                      dateOfBirth: Option[DateTime],
                      dateOfDeath: Option[DateTime],
-                     identification: Option[Identification],
+                     identification: Option[IdentificationType],
                      entityStart: DateTime,
                      entityEnd: Option[DateTime]
                    )
@@ -454,4 +453,14 @@ case class OtherAssetType(description: String,
 
 object OtherAssetType {
   implicit val otherAssetTypeFormat: Format[OtherAssetType] = Json.format[OtherAssetType]
+}
+
+
+case class IdentificationType(nino: Option[String],
+                              passport: Option[PassportType],
+                              address: Option[AddressType],
+                              safeId: Option[String])
+
+object IdentificationType {
+  implicit val identificationTypeFormat: Format[IdentificationType] = Json.format[IdentificationType]
 }

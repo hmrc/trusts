@@ -19,8 +19,8 @@ package uk.gov.hmrc.trusts.models.variation
 import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.IdentificationOrgType
 import uk.gov.hmrc.trusts.models.{AgentDetails, Correspondence, Declaration, NameType}
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.{IdentificationOrgType, IdentificationType}
 import uk.gov.hmrc.trusts.utils.Constants.dateTimePattern
 
 case class EstateVariation(
