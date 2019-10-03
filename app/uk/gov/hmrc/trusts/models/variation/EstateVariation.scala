@@ -20,7 +20,7 @@ import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.{AgentDetails, Correspondence, Declaration, NameType}
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.{Identification, IdentificationOrgType, IdentificationType}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.{IdentificationOrgType, IdentificationType}
 import uk.gov.hmrc.trusts.utils.Constants.dateTimePattern
 
 case class EstateVariation(
@@ -134,7 +134,7 @@ case class EstateWillType(  lineNo: Option[String],
                             name: NameType,
                             dateOfBirth: Option[DateTime],
                             dateOfDeath: DateTime,
-                            identification: Option[Identification],
+                            identification: Option[IdentificationType],
                             entityStart: DateTime,
                             entityEnd: Option[DateTime]
                          )

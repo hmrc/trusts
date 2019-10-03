@@ -46,14 +46,6 @@ object IdentificationType {
   implicit val identificationTypeFormat: Format[IdentificationType] = Json.format[IdentificationType]
 }
 
-case class Identification(nino: Option[String],
-                          address: Option[AddressType],
-                          safeId: Option[String])
-
-object Identification {
-  implicit val identificationFormat: Format[Identification] = Json.format[Identification]
-}
-
 case class IdentificationOrgType(utr: Option[String],
                                  address: Option[AddressType],
                                  safeId: Option[String])

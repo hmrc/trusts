@@ -86,7 +86,7 @@ object EstatePerRepOrgType {
 case class EstateWillType(name: NameType,
                           dateOfBirth: Option[DateTime],
                           dateOfDeath: DateTime,
-                          identification: Option[Identification],
+                          identification: Option[IdentificationType],
                           lineNo: String,
                           bpMatchStatus: Option[String],
                           entityStart: DateTime)
