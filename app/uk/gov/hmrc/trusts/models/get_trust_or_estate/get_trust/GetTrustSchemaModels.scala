@@ -194,7 +194,7 @@ case class DisplayTrustWillType(lineNo: String,
                                 name: NameType,
                                 dateOfBirth: Option[DateTime],
                                 dateOfDeath: Option[DateTime],
-                                identification: Option[DisplayTrustIdentification],
+                                identification: Option[DisplayTrustIdentificationType],
                                 entityStart: String)
 
 object DisplayTrustWillType {
@@ -379,14 +379,6 @@ case class DisplayTrustIdentificationOrgType(safeId: Option[String],
 
 object DisplayTrustIdentificationOrgType {
   implicit val trustBeneficiaryIdentificationFormat: Format[DisplayTrustIdentificationOrgType] = Json.format[DisplayTrustIdentificationOrgType]
-}
-
-case class DisplayTrustIdentification(safeId: Option[String],
-                                      nino: Option[String],
-                                      address: Option[AddressType])
-
-object DisplayTrustIdentification {
-  implicit val identificationFormat: Format[DisplayTrustIdentification] = Json.format[DisplayTrustIdentification]
 }
 
 case class DisplayTrustPartnershipType(utr: Option[String],

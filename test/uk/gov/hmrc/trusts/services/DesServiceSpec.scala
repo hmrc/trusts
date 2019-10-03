@@ -335,7 +335,7 @@ class DesServiceSpec extends BaseSpec {
                 Some(List(
                   DisplayTrustOtherType("1", Some("01"), "Joint Fund", Some(AddressType("1010 EASY ST", "OTTAWA", Some("ONTARIO"), Some("ONTARIO"), Some("K1A 0B1"), "GB")), Some(true), Some("0"), "2017-02-28")))),
               Some(DisplayTrustWillType("1", Some("01"), NameType("James", Some("Kingsley"), "Bond"), Some(dateTime), Some(dateTime),
-                Some(DisplayTrustIdentification(Some("2222200000000"), None, None)),
+                Some(DisplayTrustIdentificationType(Some("2222200000000"), None, None, None)),
                 "2017-02-28")), DisplayTrustLeadTrusteeType(None, None),
               Some(List(
                 DisplayTrustTrusteeType(
