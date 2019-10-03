@@ -154,7 +154,6 @@ class DesConnectorSpec extends BaseConnectorSpec {
     }
   }
 
-
   ".checkExistingEstate" should {
 
     "return Matched " when {
@@ -270,7 +269,6 @@ class DesConnectorSpec extends BaseConnectorSpec {
       }
     }
   }
-
 
   ".registerTrust" should {
 
@@ -586,17 +584,16 @@ class DesConnectorSpec extends BaseConnectorSpec {
         application.stop()
 
         whenReady(futureResult) { result =>
-          val expectedResult = Json.fromJson[TrustFoundResponse](getTrustResponse) match {
-            case JsSuccess(data, _) => {
-               data
-            }
-            case JsError(errors) => {
-              fail("Json could not be parsed to TrustFoundResponse model")
-            }
-          }
 
-          Json.toJson(expectedResult) mustBe expectedParsedJson
+          val expectedResult = Json.fromJson[TrustFoundResponse](getTrustResponse).get
+
           result mustBe expectedResult
+
+          result match {
+            case TrustFoundResponse(Some(trust), _) =>
+              trust.trust.assets.shares.get.head.utr mustBe Some("2134514321")
+            case _ => fail
+          }
         }
       }
 
