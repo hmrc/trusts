@@ -57,9 +57,7 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
   val CORRELATION_HEADER = "CorrelationId"
   val OLD_CORRELATION_HEADER = "Correlation-Id"
 
-  def correlationId = UUID.randomUUID().toString
-
-  private def desHeaders : Seq[(String, String)] =
+  private def desHeaders(correlationId : String) : Seq[(String, String)] =
     Seq(
       HeaderNames.AUTHORIZATION -> s"Bearer ${config.desToken}",
       CONTENT_TYPE -> CONTENT_TYPE_JSON,
@@ -70,7 +68,12 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
   override def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest)
                                  : Future[ExistingCheckResponse] = {
-    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
+
+    val correlationId = UUID.randomUUID().toString
+
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
+
+    Logger.info(s"[DesConnector] matching trust for correlationId: $correlationId")
 
     val response = http.POST[JsValue, ExistingCheckResponse](matchTrustsEndpoint, Json.toJson(existingTrustCheckRequest))
     (implicitly[Writes[JsValue]], ExistingCheckResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
@@ -80,7 +83,11 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
   override def checkExistingEstate(existingEstateCheckRequest: ExistingCheckRequest)
   : Future[ExistingCheckResponse] = {
-    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
+    val correlationId = UUID.randomUUID().toString
+
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
+
+    Logger.info(s"[DesConnector] matching estate for correlationId: $correlationId")
 
     val response = http.POST[JsValue, ExistingCheckResponse](matchEstatesEndpoint, Json.toJson(existingEstateCheckRequest))
     (implicitly[Writes[JsValue]], ExistingCheckResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
@@ -90,7 +97,11 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
   override def registerTrust(registration: Registration)
                             : Future[RegistrationResponse] = {
-    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
+    val correlationId = UUID.randomUUID().toString
+
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
+
+    Logger.info(s"[DesConnector] registering trust for correlationId: $correlationId")
 
     val response = http.POST[JsValue, RegistrationResponse](trustRegistrationEndpoint, Json.toJson(registration))
     (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
@@ -99,7 +110,12 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
   }
 
   override def registerEstate(registration: EstateRegistration): Future[RegistrationResponse] = {
-    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
+    val correlationId = UUID.randomUUID().toString
+
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
+
+    Logger.info(s"[DesConnector] registering estate for correlationId: $correlationId")
+
     val response = http.POST[JsValue, RegistrationResponse](estateRegistrationEndpoint, Json.toJson(registration))
     (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
     response
@@ -107,7 +123,9 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
 
   override def getSubscriptionId(trn: String): Future[SubscriptionIdResponse] = {
 
-    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
+    val correlationId = UUID.randomUUID().toString
+
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
     val subscriptionIdEndpointUrl = s"$trustsServiceUrl/trn/$trn/subscription"
     Logger.debug(s"[getSubscriptionId] Sending get subscription id request to DES, url=$subscriptionIdEndpointUrl")
@@ -119,21 +137,31 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
   }
 
   override def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
+    val correlationId = UUID.randomUUID().toString
 
-    implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
+    implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
+
+    Logger.info(s"[DesConnector] getting playback for trust for correlationId: $correlationId")
 
     http.GET[GetTrustResponse](createGetTrustOrEstateEndpoint(utr))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)
   }
 
   override def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse] = {
+    val correlationId = UUID.randomUUID().toString
 
-    implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
+    implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
+
+    Logger.info(s"[DesConnector] getting playback for estate for correlationId: $correlationId")
 
     http.GET[GetEstateResponse](createGetTrustOrEstateEndpoint(utr))(GetEstateResponse.httpReads, implicitly[HeaderCarrier](hc), global)
   }
 
   override def trustVariation(trustVariations: TrustVariation)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
-    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
+    val correlationId = UUID.randomUUID().toString
+
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
+
+    Logger.info(s"[DesConnector] submitting trust variation for correlationId: $correlationId")
 
      http.POST[JsValue, VariationResponse](trustVariationsEndpoint, Json.toJson(trustVariations))(
        implicitly[Writes[JsValue]], VariationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
@@ -141,7 +169,11 @@ class DesConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends DesCon
   }
 
   override def estateVariation(estateVariations: EstateVariation)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
-    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders)
+    val correlationId = UUID.randomUUID().toString
+
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
+
+    Logger.info(s"[DesConnector] submitting estate variation for correlationId: $correlationId")
 
     http.POST[JsValue, VariationResponse](estateVariationsEndpoint, Json.toJson(estateVariations))(
       implicitly[Writes[JsValue]], VariationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
