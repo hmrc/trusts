@@ -84,6 +84,11 @@
               "line4": "Town or city",
               "postCode": "Z99 2YY",
               "country": "GB"
+            },
+            "passport": {
+              "number": "1234567890",
+              "expirationDate": "2020-10-10",
+              "countryOfIssue": "US"
             }
           }
         }

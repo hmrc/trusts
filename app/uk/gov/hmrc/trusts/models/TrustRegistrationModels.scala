@@ -282,7 +282,8 @@ object IdentificationOrgType {
 }
 
 case class Identification(nino: Option[String],
-                          address: Option[AddressType])
+                          address: Option[AddressType],
+                          passport: Option[PassportType])
 
 object Identification {
   implicit val identificationFormat: Format[Identification] = Json.format[Identification]
