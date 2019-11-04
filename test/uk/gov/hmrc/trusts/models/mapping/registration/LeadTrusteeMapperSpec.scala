@@ -77,5 +77,4 @@ class LeadTrusteeMapperSpec  extends BaseSpec with DataExamples {
       }
     }
   }
-
 }

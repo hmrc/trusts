@@ -31,6 +31,4 @@ class RegistrationMapperSpec extends BaseSpec with DataExamples {
        (desRegistration \ "details" \ "trust").get.as[Trust].details mustBe apiRegistration.trust.details
     }
   }
-
-
 }
