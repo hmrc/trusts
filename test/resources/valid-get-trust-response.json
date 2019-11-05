@@ -194,7 +194,6 @@
             "entityStart": "2017-02-28"
           },
           "leadTrustee": {
-            "leadTrusteeInd": {
               "lineNo": "1",
               "bpMatchStatus": "01",
               "name": {
@@ -209,7 +208,6 @@
                 "nino": "NH111111A"
               },
               "entityStart": "2017-02-28"
-            }
           },
           "trustees": [
             {

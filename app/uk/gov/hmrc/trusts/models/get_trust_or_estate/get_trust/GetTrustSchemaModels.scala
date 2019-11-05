@@ -125,7 +125,23 @@ object DisplayTrustLeadTrusteeType {
   implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
 
   implicit val writes: Writes[DisplayTrustLeadTrusteeType] = Json.writes[DisplayTrustLeadTrusteeType]
-  implicit val reads: Reads[DisplayTrustLeadTrusteeType] = Json.reads[DisplayTrustLeadTrusteeType]
+
+  implicit object LeadTrusteeReadFormat extends Reads[DisplayTrustLeadTrusteeType] {
+
+    override def reads(json: JsValue): JsResult[DisplayTrustLeadTrusteeType] = {
+      json.validate[DisplayTrustLeadTrusteeIndType].map {
+        leadTrusteeInd =>
+          DisplayTrustLeadTrusteeType(leadTrusteeInd = Some(leadTrusteeInd))
+      }.orElse {
+        json.validate[DisplayTrustLeadTrusteeOrgType].map {
+          org =>
+            DisplayTrustLeadTrusteeType(leadTrusteeOrg = Some(org))
+        }
+      }
+    }
+  }
+
+  implicit val leadTrusteeFormats: Reads[DisplayTrustLeadTrusteeType] = LeadTrusteeReadFormat
 }
 
 case class DisplayTrustBeneficiaryType(individualDetails: Option[List[DisplayTrustIndividualDetailsType]],
