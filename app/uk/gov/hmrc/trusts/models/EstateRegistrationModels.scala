@@ -102,7 +102,7 @@ object EstatePerRepOrgType {
 case class EstateWillType(name: NameType,
                           dateOfBirth: Option[DateTime],
                           dateOfDeath: DateTime,
-                          identification: Option[Identification])
+                          identification: Option[IdentificationType])
 
 object EstateWillType {
   implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
