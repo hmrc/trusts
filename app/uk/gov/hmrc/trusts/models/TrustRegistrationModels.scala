@@ -281,14 +281,6 @@ object IdentificationOrgType {
   implicit val trustBeneficiaryIdentificationFormat: Format[IdentificationOrgType] = Json.format[IdentificationOrgType]
 }
 
-case class Identification(nino: Option[String],
-                          address: Option[AddressType],
-                          passport: Option[PassportType])
-
-object Identification {
-  implicit val identificationFormat: Format[Identification] = Json.format[Identification]
-}
-
 case class CharityType(organisationName: String,
                        beneficiaryDiscretion: Option[Boolean],
                        beneficiaryShareOfIncome: Option[String],
@@ -488,7 +480,7 @@ object AddressType {
 case class WillType(name: NameType,
                     dateOfBirth: Option[DateTime],
                     dateOfDeath: Option[DateTime],
-                    identification: Option[Identification])
+                    identification: Option[IdentificationType])
 
 object WillType {
   implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
