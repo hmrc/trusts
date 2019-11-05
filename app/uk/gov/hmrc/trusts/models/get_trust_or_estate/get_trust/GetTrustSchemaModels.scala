@@ -61,7 +61,7 @@ object DisplayTrust {
 case class DisplayTrustEntitiesType(naturalPerson: Option[List[DisplayTrustNaturalPersonType]],
                                     beneficiary: DisplayTrustBeneficiaryType,
                                     deceased: Option[DisplayTrustWillType],
-                                    leadTrustees: DisplayTrustLeadTrusteeType,
+                                    leadTrustee: DisplayTrustLeadTrusteeType,
                                     trustees: Option[List[DisplayTrustTrusteeType]],
                                     protectors: Option[DisplayTrustProtectorsType],
                                     settlors: Option[DisplayTrustSettlors])
@@ -124,29 +124,8 @@ object DisplayTrustLeadTrusteeType {
 
   implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
 
-  implicit object LeadTrusteeFormats extends Format[DisplayTrustLeadTrusteeType] {
-
-    override def writes(o: DisplayTrustLeadTrusteeType): JsValue = {
-      o.leadTrusteeInd match {
-        case Some(indLeadTrutee) => Json.toJson(indLeadTrutee)
-        case None => Json.toJson(o.leadTrusteeOrg)
-      }
-    }
-
-    override def reads(json: JsValue): JsResult[DisplayTrustLeadTrusteeType] = {
-      json.validate[DisplayTrustLeadTrusteeIndType].map {
-        leadTrusteeInd =>
-          DisplayTrustLeadTrusteeType(leadTrusteeInd = Some(leadTrusteeInd))
-      }.orElse {
-        json.validate[DisplayTrustLeadTrusteeOrgType].map {
-          org =>
-            DisplayTrustLeadTrusteeType(leadTrusteeOrg = Some(org))
-        }
-      }
-    }
-  }
-
-  implicit val leadTrusteeFormats: Format[DisplayTrustLeadTrusteeType] = LeadTrusteeFormats
+  implicit val writes: Writes[DisplayTrustLeadTrusteeType] = Json.writes[DisplayTrustLeadTrusteeType]
+  implicit val reads: Reads[DisplayTrustLeadTrusteeType] = Json.reads[DisplayTrustLeadTrusteeType]
 }
 
 case class DisplayTrustBeneficiaryType(individualDetails: Option[List[DisplayTrustIndividualDetailsType]],

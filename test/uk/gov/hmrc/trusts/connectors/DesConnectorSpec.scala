@@ -592,7 +592,6 @@ class DesConnectorSpec extends BaseConnectorSpec {
           result match {
             case TrustFoundResponse(Some(trust), _) =>
               trust.trust.assets.shares.get.head.utr mustBe Some("2134514321")
-
               trust.trust.assets.business.get.head.orgName mustBe "Lone Wolf Ltd"
               trust.trust.assets.business.get.head.utr mustBe Some("2134514322")
               trust.trust.assets.business.get.head.businessDescription mustBe "Travel Business"
