@@ -576,6 +576,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
     "return TrustFoundResponse" when {
 
       "des has returned a 200 with trust details" in {
+
         val utr = "1234567890"
         stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustResponseJson)
 
@@ -596,6 +597,8 @@ class DesConnectorSpec extends BaseConnectorSpec {
               trust.trust.assets.business.get.head.utr mustBe Some("2134514322")
               trust.trust.assets.business.get.head.businessDescription mustBe "Travel Business"
               trust.trust.assets.business.get.head.address.get.line1 mustBe "Suite 10"
+
+              trust.trust.entities.leadTrustee.leadTrusteeInd.get.name.firstName mustBe "Jimmy"
             case _ => fail
           }
         }

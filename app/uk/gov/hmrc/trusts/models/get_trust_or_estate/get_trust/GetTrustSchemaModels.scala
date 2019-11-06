@@ -68,7 +68,28 @@ case class DisplayTrustEntitiesType(naturalPerson: Option[List[DisplayTrustNatur
 
 object DisplayTrustEntitiesType {
 
-  implicit val trustEntitiesTypeFormat: Format[DisplayTrustEntitiesType] = Json.format[DisplayTrustEntitiesType]
+  implicit val displayTrustEntitiesTypeReads : Reads[DisplayTrustEntitiesType] = (
+    (__ \ "naturalPerson").readNullable[List[DisplayTrustNaturalPersonType]] and
+    (__ \ "beneficiary").read[DisplayTrustBeneficiaryType] and
+    (__ \ "deceased").readNullable[DisplayTrustWillType] and
+    (__ \ "leadTrustees").read[DisplayTrustLeadTrusteeType] and
+    (__ \ "trustees").readNullable[List[DisplayTrustTrusteeType]] and
+    (__ \ "protectors").readNullable[DisplayTrustProtectorsType] and
+    (__ \ "settlors").readNullable[DisplayTrustSettlors]
+  )(
+    (natural, beneficiary, deceased, leadTrustee, trustees, protectors, settlors) =>
+      DisplayTrustEntitiesType(
+        natural,
+        beneficiary,
+        deceased,
+        leadTrustee,
+        trustees,
+        protectors,
+        settlors
+      )
+  )
+
+  implicit val trustEntitiesTypeWrites: Writes[DisplayTrustEntitiesType] = Json.writes[DisplayTrustEntitiesType]
 }
 
 case class DisplayTrustNaturalPersonType(lineNo: String,
@@ -126,9 +147,10 @@ object DisplayTrustLeadTrusteeType {
 
   implicit val writes: Writes[DisplayTrustLeadTrusteeType] = Json.writes[DisplayTrustLeadTrusteeType]
 
-  implicit object LeadTrusteeReadFormat extends Reads[DisplayTrustLeadTrusteeType] {
+  object LeadTrusteeReads extends Reads[DisplayTrustLeadTrusteeType] {
 
     override def reads(json: JsValue): JsResult[DisplayTrustLeadTrusteeType] = {
+
       json.validate[DisplayTrustLeadTrusteeIndType].map {
         leadTrusteeInd =>
           DisplayTrustLeadTrusteeType(leadTrusteeInd = Some(leadTrusteeInd))
@@ -141,7 +163,7 @@ object DisplayTrustLeadTrusteeType {
     }
   }
 
-  implicit val leadTrusteeFormats: Reads[DisplayTrustLeadTrusteeType] = LeadTrusteeReadFormat
+  implicit val reads : Reads[DisplayTrustLeadTrusteeType] = LeadTrusteeReads
 }
 
 case class DisplayTrustBeneficiaryType(individualDetails: Option[List[DisplayTrustIndividualDetailsType]],
