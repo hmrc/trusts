@@ -61,14 +61,35 @@ object DisplayTrust {
 case class DisplayTrustEntitiesType(naturalPerson: Option[List[DisplayTrustNaturalPersonType]],
                                     beneficiary: DisplayTrustBeneficiaryType,
                                     deceased: Option[DisplayTrustWillType],
-                                    leadTrustees: DisplayTrustLeadTrusteeType,
+                                    leadTrustee: DisplayTrustLeadTrusteeType,
                                     trustees: Option[List[DisplayTrustTrusteeType]],
                                     protectors: Option[DisplayTrustProtectorsType],
                                     settlors: Option[DisplayTrustSettlors])
 
 object DisplayTrustEntitiesType {
 
-  implicit val trustEntitiesTypeFormat: Format[DisplayTrustEntitiesType] = Json.format[DisplayTrustEntitiesType]
+  implicit val displayTrustEntitiesTypeReads : Reads[DisplayTrustEntitiesType] = (
+    (__ \ "naturalPerson").readNullable[List[DisplayTrustNaturalPersonType]] and
+    (__ \ "beneficiary").read[DisplayTrustBeneficiaryType] and
+    (__ \ "deceased").readNullable[DisplayTrustWillType] and
+    (__ \ "leadTrustees").read[DisplayTrustLeadTrusteeType] and
+    (__ \ "trustees").readNullable[List[DisplayTrustTrusteeType]] and
+    (__ \ "protectors").readNullable[DisplayTrustProtectorsType] and
+    (__ \ "settlors").readNullable[DisplayTrustSettlors]
+  )(
+    (natural, beneficiary, deceased, leadTrustee, trustees, protectors, settlors) =>
+      DisplayTrustEntitiesType(
+        natural,
+        beneficiary,
+        deceased,
+        leadTrustee,
+        trustees,
+        protectors,
+        settlors
+      )
+  )
+
+  implicit val trustEntitiesTypeWrites: Writes[DisplayTrustEntitiesType] = Json.writes[DisplayTrustEntitiesType]
 }
 
 case class DisplayTrustNaturalPersonType(lineNo: String,
@@ -124,16 +145,12 @@ object DisplayTrustLeadTrusteeType {
 
   implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
 
-  implicit object LeadTrusteeFormats extends Format[DisplayTrustLeadTrusteeType] {
+  implicit val writes: Writes[DisplayTrustLeadTrusteeType] = Json.writes[DisplayTrustLeadTrusteeType]
 
-    override def writes(o: DisplayTrustLeadTrusteeType): JsValue = {
-      o.leadTrusteeInd match {
-        case Some(indLeadTrutee) => Json.toJson(indLeadTrutee)
-        case None => Json.toJson(o.leadTrusteeOrg)
-      }
-    }
+  object LeadTrusteeReads extends Reads[DisplayTrustLeadTrusteeType] {
 
     override def reads(json: JsValue): JsResult[DisplayTrustLeadTrusteeType] = {
+
       json.validate[DisplayTrustLeadTrusteeIndType].map {
         leadTrusteeInd =>
           DisplayTrustLeadTrusteeType(leadTrusteeInd = Some(leadTrusteeInd))
@@ -146,7 +163,7 @@ object DisplayTrustLeadTrusteeType {
     }
   }
 
-  implicit val leadTrusteeFormats: Format[DisplayTrustLeadTrusteeType] = LeadTrusteeFormats
+  implicit val reads : Reads[DisplayTrustLeadTrusteeType] = LeadTrusteeReads
 }
 
 case class DisplayTrustBeneficiaryType(individualDetails: Option[List[DisplayTrustIndividualDetailsType]],

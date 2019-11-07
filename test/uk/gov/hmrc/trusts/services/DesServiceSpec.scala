@@ -336,7 +336,9 @@ class DesServiceSpec extends BaseSpec {
                   DisplayTrustOtherType("1", Some("01"), "Joint Fund", Some(AddressType("1010 EASY ST", "OTTAWA", Some("ONTARIO"), Some("ONTARIO"), Some("K1A 0B1"), "GB")), Some(true), Some("0"), "2017-02-28")))),
               Some(DisplayTrustWillType("1", Some("01"), NameType("James", Some("Kingsley"), "Bond"), Some(dateTime), Some(dateTime),
                 Some(DisplayTrustIdentificationType(Some("2222200000000"), None, None, None)),
-                "2017-02-28")), DisplayTrustLeadTrusteeType(None, None),
+                "2017-02-28")), DisplayTrustLeadTrusteeType(
+                Some(DisplayTrustLeadTrusteeIndType("1", Some("01"), NameType("Jimmy", Some("Hingis"), "Jones"), dateTime, "+447456788112", Some("a"), DisplayTrustIdentificationType(None, Some("NH111111A"), None, None), "2017-02-28"))
+                , None),
               Some(List(
                 DisplayTrustTrusteeType(
                   Some(
@@ -369,7 +371,6 @@ class DesServiceSpec extends BaseSpec {
         when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustFoundResponse(getTrust, ResponseHeader("Processed", "1"))))
 
         val futureResult = SUT.getTrustInfo(utr)
-
         whenReady(futureResult) { result =>
           result mustBe TrustFoundResponse(getTrust, ResponseHeader("Processed", "1"))
         }
