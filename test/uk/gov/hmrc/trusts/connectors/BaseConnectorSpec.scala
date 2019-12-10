@@ -107,4 +107,11 @@ class BaseConnectorSpec extends BaseSpec {
        | "reason": "Submission has not passed validation. Invalid CorrelationId."
        |}""".stripMargin)
 
+  val jsonResponse204: JsValue = Json.parse(
+    s"""
+       |{
+       | "code": "NO_CONTENT",
+       | "reason": "No Conent."
+       |}""".stripMargin)
+
 }

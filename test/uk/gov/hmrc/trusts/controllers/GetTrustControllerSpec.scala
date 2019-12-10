@@ -118,6 +118,21 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
       }
     }
 
+    "return 204 - NoContent" when {
+      "the get endpoint returns a NotEnoughDataResponse" in {
+
+        when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(NotEnoughDataResponse))
+
+        val utr = "6666666666"
+        val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).auditErrorResponse(mockEq("GetTrust"), any[JsValue], any[String], any[String])(any())
+          status(result) mustBe NO_CONTENT
+        }
+      }
+    }
+
     "return 500 - InternalServerError" when {
       "the get endpoint returns a InvalidUTRResponse" in {
 

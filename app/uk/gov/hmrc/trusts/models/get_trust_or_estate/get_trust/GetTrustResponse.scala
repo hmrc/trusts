@@ -50,7 +50,7 @@ object GetTrustResponse {
               case JsSuccess(trustFound,_) => trustFound
               case JsError(errors) =>
                 Logger.info(s"[GetTrustResponse] Cannot parse as TrustFoundResponse due to $errors")
-                InternalServerErrorResponse
+                NotEnoughDataResponse
             }
           case BAD_REQUEST =>
             response.json.asOpt[DesErrorResponse] match {

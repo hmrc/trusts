@@ -669,6 +669,22 @@ class DesConnectorSpec extends BaseConnectorSpec {
       }
     }
 
+    "return NotEnoughDataResponse" when {
+
+      "des has returned a 204" in {
+        val utr = "6666666666"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, Json.stringify(jsonResponse204))
+
+        val futureResult = connector.getTrustInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe NotEnoughDataResponse
+        }
+      }
+    }
+
     "return ResourceNotFoundResponse" when {
 
       "des has returned a 404" in {
