@@ -63,6 +63,10 @@ class GetTrustController @Inject()(identify: IdentifierAction,
           auditService.auditErrorResponse(TrustAuditing.GET_TRUST, Json.obj("utr" -> utr), request.identifier, "Bad Request received from DES.")
           InternalServerError
 
+        case _: NotEnoughDataResponse.type =>
+          auditService.auditErrorResponse(TrustAuditing.GET_TRUST, Json.obj("utr" -> utr), request.identifier, "Missing mandatory field received from DES.")
+          NoContent
+
         case _: ResourceNotFoundResponse.type =>
           auditService.auditErrorResponse(TrustAuditing.GET_TRUST, Json.obj("utr" -> utr), request.identifier, "Not Found received from DES.")
           NotFound

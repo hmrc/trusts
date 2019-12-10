@@ -31,4 +31,6 @@ case object ResourceNotFoundResponse extends GetTrustResponse with GetEstateResp
 
 case object InternalServerErrorResponse extends GetTrustResponse with GetEstateResponse
 
+case object NotEnoughDataResponse extends GetTrustResponse with GetEstateResponse
+
 case object ServiceUnavailableResponse extends GetTrustResponse with GetEstateResponse
