@@ -52,7 +52,7 @@
   },
     "trust": {
       "details": {
-        "startDate": "2020-01-01",
+        "startDate": "2099-01-01",
         "administrationCountry": "GB",
         "residentialStatus": {
           "uk": {
@@ -63,7 +63,7 @@
         "typeOfTrust": "Will Trust or Intestacy Trust",
         "deedOfVariation": "Previously there was only an absolute interest under the will",
         "interVivos": false,
-        "efrbsStartDate": "2020-01-01"
+        "efrbsStartDate": "2099-01-01"
       },
       "entities": {
         "naturalPerson": [

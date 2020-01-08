@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -179,14 +179,26 @@ class ValidationServiceSpec extends BaseSpec
     }
 
     "return a list of validaton errors for trusts " when {
+
       "json request is valid but failed in business rules for trust start date, efrbs start date " in {
         val jsonString = JsonUtils.getJsonFromFile("trust-business-validation-fail.json")
-        validator.validate[Registration](jsonString).left.get.size mustBe 8
+        val errors = validator.validate[Registration](jsonString).left.get
+
+        errors.map(_.message) mustBe List(
+          "Trusts start date must be today or in the past.",
+          "Trusts efrbs start date can be provided for Employment Related trust only.",
+          "Trusts efrbs start date must be today or in the past.",
+          "NINO is already used for another individual trustee.",
+          "NINO is already used for another individual trustee.",
+          "Utr is already used for another business trustee.",
+          "Business trustee utr is same as trust utr.",
+          "Business trustee utr is same as trust utr."
+        )
       }
 
       "individual trustees has same NINO " in {
         val jsonString = JsonUtils.getJsonFromFile("trust-business-validation-fail.json")
-        val errorList =validator.validate[Registration](jsonString).left.get.
+        val errorList = validator.validate[Registration](jsonString).left.get.
           filter(_.message=="NINO is already used for another individual trustee.")
         errorList.size mustBe 2
       }
