@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
         val duplicatesNino = findDuplicates(ninoList).reverse
         Logger.info(s"[indTrusteesDuplicateNino] Number of Duplicate Nino found : ${duplicatesNino.size} ")
         duplicatesNino.map {
-          case (nino, index) =>
+          case (_, index) =>
             Some(TrustsValidationError(s"NINO is already used for another individual trustee.",
               s"/trust/entities/trustees/$index/trusteeInd/identification/nino"))
         }
@@ -85,7 +85,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
         val duplicatesNino = findDuplicates(ninoList).reverse
         Logger.info(s"[indBeneficiariesDuplicateNino] Number of Duplicate Nino found : ${duplicatesNino.size} ")
         duplicatesNino.map {
-          case (nino, index) =>
+          case (_, index) =>
             Some(TrustsValidationError(s"NINO is already used for another individual beneficiary.",
               s"/trust/entities/beneficiary/individualDetails/$index/identification/nino"))
         }
