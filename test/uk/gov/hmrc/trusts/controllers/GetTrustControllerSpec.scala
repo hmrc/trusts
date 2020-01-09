@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.trusts.controllers
 
-import org.mockito.Matchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.Mockito.{reset, verify, when, times}
 import org.scalatest.BeforeAndAfter
 import play.api.libs.json.JsValue

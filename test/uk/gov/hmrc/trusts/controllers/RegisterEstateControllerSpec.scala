@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.trusts.controllers
 
-import org.mockito.Matchers
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{when, _}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.Json
@@ -218,7 +218,7 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
   }
 
   private def mockRosmResponse(response : TaxEnrolmentSuscriberResponse) = {
-    when(rosmPatternService.enrolAndLogResult(Matchers.eq(estateTrnResponse), any())(any[HeaderCarrier]))
+    when(rosmPatternService.enrolAndLogResult(ArgumentMatchers.eq(estateTrnResponse), any())(any[HeaderCarrier]))
       .thenReturn(Future.successful(response))
   }
 }

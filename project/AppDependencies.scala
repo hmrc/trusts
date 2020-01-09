@@ -5,21 +5,21 @@ import sbt._
 
 object AppDependencies {
 
-  val compile = Seq(
+  val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc" %% "bootstrap-play-25" % "4.11.0",
-    "com.github.java-json-tools" % "json-schema-validator" % "2.2.8"
+    "uk.gov.hmrc"                 %% "bootstrap-play-25"      % "5.1.0",
+    "com.github.java-json-tools"   % "json-schema-validator"  % "2.2.12"
   )
 
-  def test(scope: String = "test") = Seq(
-    "uk.gov.hmrc" %% "hmrctest" % "3.8.0-play-25" % scope,
-    "org.scalatest" %% "scalatest" % "3.0.4" % scope,
-    "org.pegdown" % "pegdown" % "1.6.0" % scope,
-    "com.github.tomakehurst" % "wiremock-standalone" % "2.17.0",
-    "org.mockito" % "mockito-core" % "1.10.19",
-    "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1",
-    "com.typesafe.play" %% "play-test" % PlayVersion.current % scope
+  val test: Seq[ModuleID] = Seq(
+    "com.github.tomakehurst"   % "wiremock-standalone"  % "2.25.1",
+    "org.mockito"              % "mockito-core"         % "3.2.4",
+    "org.scalatestplus.play"  %% "scalatestplus-play"   % "2.0.1",
+    "org.pegdown"              % "pegdown"              % "1.6.0",
+    "org.scalatest"           %% "scalatest"            % "3.0.4",
+    "uk.gov.hmrc"             %% "hmrctest"             % "3.9.0-play-25",
+    "com.typesafe.play"       %% "play-test"            % PlayVersion.current
+  ).map(_ % "test")
 
-  )
-
+  val all: Seq[ModuleID] = compile ++ test
 }

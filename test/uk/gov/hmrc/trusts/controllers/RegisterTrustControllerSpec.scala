@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.trusts.controllers
 
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{when, _}
 import play.api.libs.json.Json
 import play.api.test.Helpers.{status, _}

@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.services
 
 import org.joda.time.format.DateTimeFormat
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.when
 import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.connector.DesConnector

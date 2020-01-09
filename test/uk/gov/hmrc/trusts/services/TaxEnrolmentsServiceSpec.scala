@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.trusts.services
 
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when, _}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import uk.gov.hmrc.http.HeaderCarrier

@@ -18,8 +18,8 @@ package uk.gov.hmrc.trusts.controllers
 
 import java.util.UUID
 
-import org.mockito.Matchers._
-import org.mockito.Matchers.{eq => Meq}
+import org.mockito.ArgumentMatchers._
+import org.mockito.ArgumentMatchers.{eq => Meq}
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfter
 import play.api.libs.json.Json
