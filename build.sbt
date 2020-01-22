@@ -23,14 +23,24 @@ lazy val microservice = Project(appName, file("."))
   .settings(majorVersion := 0)
   .settings(PlayKeys.playDefaultPort := 9782)
   .settings(
-    libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test(),
+    libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
   )
   .settings(
     publishingSettings ++ scoverageSettings: _*
   )
   .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "resources")
-  .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
+  .configs(IntegrationTest)
+  .settings(inConfig(IntegrationTest)(itSettings): _*)
   .settings(
     resolvers += Resolver.jcenterRepo
   )
+
+
+lazy val itSettings = Defaults.itSettings ++ Seq(
+  unmanagedSourceDirectories   := Seq(
+    baseDirectory.value / "it"
+  ),
+  parallelExecution            := false,
+  fork                         := true
+)
