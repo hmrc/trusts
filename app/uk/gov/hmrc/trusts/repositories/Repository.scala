@@ -20,6 +20,7 @@ import java.time.LocalDateTime
 
 import akka.stream.Materializer
 import javax.inject.Inject
+import org.slf4j.LoggerFactory
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.indexes.{Index, IndexType}
@@ -37,12 +38,16 @@ class Repository @Inject()(
                                           dateFormatter: DateFormatter
                                         )(implicit ec: ExecutionContext, m: Materializer)  {
 
+  private val logger = LoggerFactory.getLogger("application" + classOf[Repository].getCanonicalName)
   private val collectionName: String = "trusts"
-
   private val cacheTtl = config.ttlInSeconds
 
   private def collection: Future[JSONCollection] =
-    mongo.database.map(_.collection[JSONCollection](collectionName))
+    for {
+      _ <- ensureIndexes
+      res <- mongo.database.map(_.collection[JSONCollection](collectionName))
+    } yield res
+
 
   private val lastUpdatedIndex = Index(
     key = Seq("updatedAt" -> IndexType.Ascending),
@@ -55,13 +60,13 @@ class Repository @Inject()(
     name = Some("id-index")
   )
 
-  val started : Future[Unit] = {
-    Future.sequence {
-      Seq(
-        collection.map(_.indexesManager.ensure(lastUpdatedIndex)),
-        collection.map(_.indexesManager.ensure(idIndex))
-      )
-    }.map(_ => ())
+  private lazy val ensureIndexes = {
+    logger.info("Ensuring collection indexes")
+    for {
+      collection              <- mongo.database.map(_.collection[JSONCollection](collectionName))
+      createdLastUpdatedIndex <- collection.indexesManager.ensure(lastUpdatedIndex)
+      createdIdIndex          <- collection.indexesManager.ensure(idIndex)
+    } yield createdLastUpdatedIndex && createdIdIndex
   }
 
   def get(utr: String, internalId: String): Future[Option[JsValue]] = {

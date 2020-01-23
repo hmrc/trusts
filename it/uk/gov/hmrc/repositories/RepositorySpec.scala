@@ -26,7 +26,6 @@ class RepositorySpec extends FreeSpec with MustMatchers with ScalaFutures with I
       running(application) {
 
         val repository = application.injector.instanceOf[Repository]
-        repository.started.futureValue
 
         val storedOk = repository.set("UTRUTRUTR", "InternalId", data)
         storedOk.futureValue mustBe true
@@ -34,7 +33,7 @@ class RepositorySpec extends FreeSpec with MustMatchers with ScalaFutures with I
         val retrieved = repository.get("UTRUTRUTR", "InternalId")
           .map(_.getOrElse(fail("The record was not found in the database")))
 
-         whenReady(retrieved)(_ mustBe data)
+         retrieved.futureValue mustBe data
       }
 
       dropTheDatabase()
