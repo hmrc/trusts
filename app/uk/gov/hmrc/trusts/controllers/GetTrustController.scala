@@ -36,7 +36,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   def get(utr: String): Action[AnyContent] = (ValidateUTRAction(utr) andThen identify).async {
     implicit request =>
 
-      desService.getTrustInfo(utr) map {
+      desService.getTrustInfo(utr, request.identifier) map {
 
         case trustFoundResponse: TrustFoundResponse =>
 

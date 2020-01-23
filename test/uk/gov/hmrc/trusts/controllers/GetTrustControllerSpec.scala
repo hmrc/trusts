@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.controllers
 
 import org.mockito.Matchers.{any, eq => mockEq}
-import org.mockito.Mockito.{reset, verify, when, times}
+import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatest.BeforeAndAfter
 import play.api.libs.json.JsValue
 import play.api.test.FakeRequest
@@ -65,7 +65,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
 
         val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), auditService, desService)
 
-        when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustFoundResponse(None, ResponseHeader("Parked", "1"))))
+        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustFoundResponse(None, ResponseHeader("Parked", "1"))))
 
         when(mockConfig.auditingEnabled).thenReturn(false)
 
@@ -82,7 +82,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
 
         val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), auditService, desService)
 
-        when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustFoundResponse(None, ResponseHeader("Parked", "1"))))
+        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustFoundResponse(None, ResponseHeader("Parked", "1"))))
 
         when(mockConfig.auditingEnabled).thenReturn(true)
 
@@ -96,7 +96,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
 
     "return 200 - Ok" in {
 
-      when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustFoundResponse(None, ResponseHeader("Parked", "1"))))
+      when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustFoundResponse(None, ResponseHeader("Parked", "1"))))
 
       val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 
@@ -121,7 +121,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
     "return 204 - NoContent" when {
       "the get endpoint returns a NotEnoughDataResponse" in {
 
-        when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(NotEnoughDataResponse))
+        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(NotEnoughDataResponse))
 
         val utr = "6666666666"
         val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
@@ -137,7 +137,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
       "the get endpoint returns a InvalidUTRResponse" in {
 
 
-        when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(InvalidUTRResponse))
+        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(InvalidUTRResponse))
 
         val utr = "1234567890"
         val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$invalidUTR"))
@@ -151,7 +151,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
       "the get endpoint returns a InvalidRegimeResponse" in {
 
 
-        when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(InvalidRegimeResponse))
+        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(InvalidRegimeResponse))
 
         val utr = "1234567890"
         val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
@@ -165,7 +165,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
       "the get endpoint returns a BadRequestResponse" in {
 
 
-        when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(BadRequestResponse))
+        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(BadRequestResponse))
 
         val utr = "1234567890"
         val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
@@ -179,7 +179,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
       "the get endpoint returns a ResourceNotFoundResponse" in {
 
 
-        when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(ResourceNotFoundResponse))
+        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(ResourceNotFoundResponse))
 
         val utr = "1234567890"
         val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
@@ -192,7 +192,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
 
       "the get endpoint returns a InternalServerErrorResponse" in {
 
-        when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(InternalServerErrorResponse))
+        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(InternalServerErrorResponse))
 
         val utr = "1234567890"
         val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
@@ -206,7 +206,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
       "the get endpoint returns a ServiceUnavailableResponse" in {
 
 
-        when(desService.getTrustInfo(any())(any())).thenReturn(Future.successful(ServiceUnavailableResponse))
+        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(ServiceUnavailableResponse))
 
         val utr = "1234567890"
         val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))

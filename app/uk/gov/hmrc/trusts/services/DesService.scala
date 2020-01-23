@@ -24,37 +24,39 @@ import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.GetEstateResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustResponse
 import uk.gov.hmrc.trusts.models.variation.{EstateVariation, TrustVariation, VariationResponse}
+import uk.gov.hmrc.trusts.repositories.Repository
 
 import scala.concurrent.Future
 
 
-class DesServiceImpl @Inject()(val desConnector: DesConnector) extends DesService {
+class DesService @Inject()(val desConnector: DesConnector, val repository: Repository)  {
 
-  override def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest)
+  def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest)
                                  (implicit hc: HeaderCarrier): Future[ExistingCheckResponse] = {
     desConnector.checkExistingTrust(existingTrustCheckRequest)
   }
 
-  override def checkExistingEstate(existingEstateCheckRequest: ExistingCheckRequest)
+  def checkExistingEstate(existingEstateCheckRequest: ExistingCheckRequest)
                                  (implicit hc: HeaderCarrier): Future[ExistingCheckResponse] = {
     desConnector.checkExistingEstate(existingEstateCheckRequest)
   }
 
-  override def registerTrust(registration: Registration)
+  def registerTrust(registration: Registration)
                             (implicit hc: HeaderCarrier): Future[RegistrationResponse] = {
     desConnector.registerTrust(registration)
   }
 
-  override def registerEstate(estateRegistration: EstateRegistration)
+  def registerEstate(estateRegistration: EstateRegistration)
                             (implicit hc: HeaderCarrier): Future[RegistrationResponse] = {
     desConnector.registerEstate(estateRegistration)
   }
 
-  override def getSubscriptionId(trn: String)(implicit hc: HeaderCarrier): Future[SubscriptionIdResponse] = {
+  def getSubscriptionId(trn: String)(implicit hc: HeaderCarrier): Future[SubscriptionIdResponse] = {
     desConnector.getSubscriptionId(trn)
   }
 
-  def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
+  def getTrustInfo(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
+    repository.get(utr, internalId)
     desConnector.getTrustInfo(utr)
   }
 
@@ -70,22 +72,3 @@ class DesServiceImpl @Inject()(val desConnector: DesConnector) extends DesServic
 }
 
 
-@ImplementedBy(classOf[DesServiceImpl])
-trait DesService {
-
-  def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest)(implicit hc: HeaderCarrier): Future[ExistingCheckResponse]
-  def checkExistingEstate(existingEstateCheckRequest: ExistingCheckRequest)(implicit hc: HeaderCarrier): Future[ExistingCheckResponse]
-
-  def registerTrust(registration: Registration)(implicit hc: HeaderCarrier): Future[RegistrationResponse]
-
-  def registerEstate(estateRegistration: EstateRegistration)(implicit hc: HeaderCarrier): Future[RegistrationResponse]
-
-  def getSubscriptionId(trn: String)(implicit hc: HeaderCarrier): Future[SubscriptionIdResponse]
-
-  def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse]
-  def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse]
-
-  def trustVariation(trustVariation: TrustVariation)(implicit hc: HeaderCarrier): Future[VariationResponse]
-
-  def estateVariation(estateVariation: EstateVariation)(implicit hc: HeaderCarrier): Future[VariationResponse]
-}
