@@ -70,8 +70,13 @@ class Repository @Inject()(
       "id" -> createKey(utr, internalId)
     )
 
-    collection.flatMap {
-      _.find(selector, None).one[JsObject]
+    collection.flatMap {collection =>
+
+      collection.find(selector, None).one[JsObject].map(opt =>
+        for  {
+          x <- opt
+          y <- (x \ "etmpData").toOption
+        } yield y.as[JsObject])
     }
   }
 
