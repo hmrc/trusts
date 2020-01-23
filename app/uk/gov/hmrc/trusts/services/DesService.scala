@@ -18,6 +18,7 @@ package uk.gov.hmrc.trusts.services
 
 import com.google.inject.ImplementedBy
 import javax.inject.Inject
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.models._
@@ -55,9 +56,9 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Repos
     desConnector.getSubscriptionId(trn)
   }
 
-  def getTrustInfo(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
+  def getTrustInfo(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[JsValue] = {
     repository.get(utr, internalId)
-    desConnector.getTrustInfo(utr)
+    desConnector.getTrustInfoJson(utr)
   }
 
   def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse] = {
