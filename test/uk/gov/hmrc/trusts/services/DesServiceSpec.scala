@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.services
 
 import org.mockito.Matchers._
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Mockito.{times, verify, when, verifyZeroInteractions}
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.connector.DesConnector
@@ -34,18 +34,21 @@ import scala.concurrent.Future
 
 class DesServiceSpec extends BaseSpec {
 
-  lazy val request = ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
-  private val mockConnector = mock[DesConnector]
-  private val mockRepository = mock[Repository]
+  private trait DesServiceFixture {
+    lazy val request = ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
+    val mockConnector: DesConnector = mock[DesConnector]
+    val mockRepository: Repository = mock[Repository]
+    when(mockRepository.get(any[String], any[String])).thenReturn(Future.successful(None))
 
-  private val myId = "myId"
+    val myId = "myId"
 
-  private val SUT = new DesService(mockConnector, mockRepository)
+    val SUT = new DesService(mockConnector, mockRepository)
+  }
 
   ".checkExistingTrust" should {
 
     "return Matched " when {
-      "connector returns Matched." in {
+      "connector returns Matched." in new DesServiceFixture {
         when(mockConnector.checkExistingTrust(request)).
           thenReturn(Future.successful(Matched))
         val futureResult = SUT.checkExistingTrust(request)
@@ -56,7 +59,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return NotMatched " when {
-      "connector returns NotMatched." in {
+      "connector returns NotMatched." in new DesServiceFixture {
         when(mockConnector.checkExistingTrust(request)).
           thenReturn(Future.successful(NotMatched))
         val futureResult = SUT.checkExistingTrust(request)
@@ -67,7 +70,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return BadRequest " when {
-      "connector returns BadRequest." in {
+      "connector returns BadRequest." in new DesServiceFixture {
         when(mockConnector.checkExistingTrust(request)).
           thenReturn(Future.successful(BadRequest))
         val futureResult = SUT.checkExistingTrust(request)
@@ -78,7 +81,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return AlreadyRegistered " when {
-      "connector returns AlreadyRegistered." in {
+      "connector returns AlreadyRegistered." in new DesServiceFixture {
         when(mockConnector.checkExistingTrust(request)).
           thenReturn(Future.successful(AlreadyRegistered))
         val futureResult = SUT.checkExistingTrust(request)
@@ -89,7 +92,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return ServiceUnavailable " when {
-      "connector returns ServiceUnavailable." in {
+      "connector returns ServiceUnavailable." in new DesServiceFixture {
         when(mockConnector.checkExistingTrust(request)).
           thenReturn(Future.successful(ServiceUnavailable))
         val futureResult = SUT.checkExistingTrust(request)
@@ -101,7 +104,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return ServerError " when {
-      "connector returns ServerError." in {
+      "connector returns ServerError." in new DesServiceFixture {
         when(mockConnector.checkExistingTrust(request)).
           thenReturn(Future.successful(ServerError))
         val futureResult = SUT.checkExistingTrust(request)
@@ -115,7 +118,7 @@ class DesServiceSpec extends BaseSpec {
 
   ".checkExistingEstate" should {
     "return Matched " when {
-      "connector returns Matched." in {
+      "connector returns Matched." in new DesServiceFixture {
         when(mockConnector.checkExistingEstate(request)).
           thenReturn(Future.successful(Matched))
         val futureResult = SUT.checkExistingEstate(request)
@@ -127,7 +130,7 @@ class DesServiceSpec extends BaseSpec {
 
 
     "return NotMatched " when {
-      "connector returns NotMatched." in {
+      "connector returns NotMatched." in new DesServiceFixture {
         when(mockConnector.checkExistingEstate(request)).
           thenReturn(Future.successful(NotMatched))
         val futureResult = SUT.checkExistingEstate(request)
@@ -138,7 +141,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return BadRequest " when {
-      "connector returns BadRequest." in {
+      "connector returns BadRequest." in new DesServiceFixture {
         when(mockConnector.checkExistingEstate(request)).
           thenReturn(Future.successful(BadRequest))
         val futureResult = SUT.checkExistingEstate(request)
@@ -149,7 +152,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return AlreadyRegistered " when {
-      "connector returns AlreadyRegistered." in {
+      "connector returns AlreadyRegistered." in new DesServiceFixture {
         when(mockConnector.checkExistingEstate(request)).
           thenReturn(Future.successful(AlreadyRegistered))
         val futureResult = SUT.checkExistingEstate(request)
@@ -160,7 +163,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return ServiceUnavailable " when {
-      "connector returns ServiceUnavailable." in {
+      "connector returns ServiceUnavailable." in new DesServiceFixture {
         when(mockConnector.checkExistingEstate(request)).
           thenReturn(Future.successful(ServiceUnavailable))
         val futureResult = SUT.checkExistingEstate(request)
@@ -172,7 +175,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return ServerError " when {
-      "connector returns ServerError." in {
+      "connector returns ServerError." in new DesServiceFixture {
         when(mockConnector.checkExistingEstate(request)).
           thenReturn(Future.successful(ServerError))
         val futureResult = SUT.checkExistingEstate(request)
@@ -187,7 +190,7 @@ class DesServiceSpec extends BaseSpec {
   ".registerTrust" should {
 
     "return SuccessRegistrationResponse " when {
-      "connector returns SuccessRegistrationResponse." in {
+      "connector returns SuccessRegistrationResponse." in new DesServiceFixture {
         when(mockConnector.registerTrust(registrationRequest)).
           thenReturn(Future.successful(RegistrationTrnResponse("trn123")))
         val futureResult = SUT.registerTrust(registrationRequest)
@@ -198,7 +201,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return AlreadyRegisteredException " when {
-      "connector returns  AlreadyRegisteredException." in {
+      "connector returns  AlreadyRegisteredException." in new DesServiceFixture {
         when(mockConnector.registerTrust(registrationRequest)).
           thenReturn(Future.failed(AlreadyRegisteredException))
         val futureResult = SUT.registerTrust(registrationRequest)
@@ -210,7 +213,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return same Exception " when {
-      "connector returns  exception." in {
+      "connector returns  exception." in new DesServiceFixture {
         when(mockConnector.registerTrust(registrationRequest)).
           thenReturn(Future.failed(InternalServerErrorException("")))
         val futureResult = SUT.registerTrust(registrationRequest)
@@ -226,7 +229,7 @@ class DesServiceSpec extends BaseSpec {
   ".registerEstate" should {
 
     "return RegistrationTrnResponse " when {
-      "connector returns RegistrationTrnResponse." in {
+      "connector returns RegistrationTrnResponse." in new DesServiceFixture {
         when(mockConnector.registerEstate(estateRegRequest)).
           thenReturn(Future.successful(RegistrationTrnResponse("trn123")))
         val futureResult = SUT.registerEstate(estateRegRequest)
@@ -237,7 +240,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return AlreadyRegisteredException " when {
-      "connector returns  AlreadyRegisteredException." in {
+      "connector returns  AlreadyRegisteredException." in new DesServiceFixture {
         when(mockConnector.registerEstate(estateRegRequest)).
           thenReturn(Future.failed(AlreadyRegisteredException))
         val futureResult = SUT.registerEstate(estateRegRequest)
@@ -249,7 +252,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return same Exception " when {
-      "connector returns  exception." in {
+      "connector returns  exception." in new DesServiceFixture {
         when(mockConnector.registerEstate(estateRegRequest)).
           thenReturn(Future.failed(InternalServerErrorException("")))
         val futureResult = SUT.registerEstate(estateRegRequest)
@@ -265,7 +268,7 @@ class DesServiceSpec extends BaseSpec {
   ".getSubscriptionId" should {
 
     "return SubscriptionIdResponse " when {
-      "connector returns SubscriptionIdResponse." in {
+      "connector returns SubscriptionIdResponse." in new DesServiceFixture {
         when(mockConnector.getSubscriptionId("trn123456789")).
           thenReturn(Future.successful(SubscriptionIdResponse("123456789")))
         val futureResult = SUT.getSubscriptionId("trn123456789")
@@ -276,7 +279,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return same Exception " when {
-      "connector returns  exception." in {
+      "connector returns  exception." in new DesServiceFixture {
         when(mockConnector.getSubscriptionId("trn123456789")).
           thenReturn(Future.failed(InternalServerErrorException("")))
         val futureResult = SUT.getSubscriptionId("trn123456789")
@@ -291,44 +294,42 @@ class DesServiceSpec extends BaseSpec {
   ".getTrustInfo" should {
 
     "return TrustFoundResponse" when {
-
-      "TrustFoundResponse is returned from DES Connector with a Processed flag and a trust body when not cached" in {
-
-
+      "TrustFoundResponse is returned from DES Connector with a Processed flag and a trust body when not cached" in new DesServiceFixture {
         val utr = "1234567890"
-        val getTrustJsonData = getTrustResponse
+        val fullEtmpResponseJson = getTrustResponse
+        val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
 
         when(mockRepository.get(any[String], any[String])).thenReturn(Future.successful(None))
         when(mockConnector.getTrustInfo(any())(any()))
-          .thenReturn(Future.successful(TrustProcessedResponse(getTrustJsonData, ResponseHeader("Processed", "1"))))
+          .thenReturn(Future.successful(TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))))
 
         val futureResult = SUT.getTrustInfo(utr, myId)
         whenReady(futureResult) { result =>
-          result mustBe TrustProcessedResponse(getTrustJsonData, ResponseHeader("Processed", "1"))
-          verify(mockRepository, times(1)).get(utr, myId)
-          verify(mockRepository, times(1)).set(utr, myId, getTrustJsonData)
+          result mustBe TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))
+          verify(mockRepository, times(1)).set(utr, myId, fullEtmpResponseJson)
         }
       }
 
-      "TrustFoundResponse is returned from repository with a Processed flag and a trust body when cached" ignore {
-
+      "TrustFoundResponse is returned from repository with a Processed flag and a trust body when cached" in new DesServiceFixture {
         val utr = "1234567890"
-        val id = "myId"
 
-        val getTrust = (getTrustResponse \ "trustOrEstateDisplay").as[JsValue]
+        val fullEtmpResponseJson = getTrustResponse
+        val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
 
-        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustProcessedResponse(getTrust, ResponseHeader("Processed", "1"))))
+        when(mockRepository.get(any[String], any[String])).thenReturn(Future.successful(Some(fullEtmpResponseJson)))
+        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.failed(new Exception("Connector should not have been called")))
 
-        val futureResult = SUT.getTrustInfo(utr, id)
+        val futureResult = SUT.getTrustInfo(utr, myId)
         whenReady(futureResult) { result =>
-          result mustBe TrustProcessedResponse(getTrust, ResponseHeader("Processed", "1"))
+          result mustBe TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))
+          verifyZeroInteractions(mockConnector)
         }
       }
     }
 
     "return TrustFoundResponse" when {
 
-      "TrustFoundResponse is returned from DES Connector" in {
+      "TrustFoundResponse is returned from DES Connector" in new DesServiceFixture {
 
         val utr = "1234567890"
 
@@ -344,7 +345,7 @@ class DesServiceSpec extends BaseSpec {
 
     "return InvalidUTRResponse" when {
 
-      "InvalidUTRResponse is returned from DES Connector" in {
+      "InvalidUTRResponse is returned from DES Connector" in new DesServiceFixture {
 
         when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(InvalidUTRResponse))
 
@@ -358,7 +359,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return InvalidRegimeResponse" when {
-      "InvalidRegimeResponse is returned from DES Connector" in {
+      "InvalidRegimeResponse is returned from DES Connector" in new DesServiceFixture {
 
         when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(InvalidRegimeResponse))
 
@@ -372,7 +373,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return BadRequestResponse" when {
-      "BadRequestResponse is returned from DES Connector" in {
+      "BadRequestResponse is returned from DES Connector" in new DesServiceFixture {
 
         when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(BadRequestResponse))
 
@@ -386,7 +387,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return ResourceNotFoundResponse" when {
-      "ResourceNotFoundResponse is returned from DES Connector" in {
+      "ResourceNotFoundResponse is returned from DES Connector" in new DesServiceFixture {
 
         when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(ResourceNotFoundResponse))
 
@@ -400,7 +401,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return InternalServerErrorResponse" when {
-      "InternalServerErrorResponse is returned from DES Connector" in {
+      "InternalServerErrorResponse is returned from DES Connector" in new DesServiceFixture {
 
         when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(InternalServerErrorResponse))
 
@@ -414,7 +415,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return ServiceUnavailableResponse" when {
-      "ServiceUnavailableResponse is returned from DES Connector" in {
+      "ServiceUnavailableResponse is returned from DES Connector" in new DesServiceFixture {
 
         when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(ServiceUnavailableResponse))
 
@@ -430,7 +431,7 @@ class DesServiceSpec extends BaseSpec {
 
   ".getEstateInfo" should {
     "return EstateFoundResponse" when {
-      "EstateFoundResponse is returned from DES Connector" in {
+      "EstateFoundResponse is returned from DES Connector" in new DesServiceFixture {
 
         val utr = "1234567890"
 
@@ -445,7 +446,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return InvalidUTRResponse" when {
-      "InvalidUTRResponse is returned from DES Connector" in {
+      "InvalidUTRResponse is returned from DES Connector" in new DesServiceFixture {
 
         when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(InvalidUTRResponse))
 
@@ -459,7 +460,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return InvalidRegimeResponse" when {
-      "InvalidRegimeResponse is returned from DES Connector" in {
+      "InvalidRegimeResponse is returned from DES Connector" in new DesServiceFixture {
 
         when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(InvalidRegimeResponse))
 
@@ -473,7 +474,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return BadRequestResponse" when {
-      "BadRequestResponse is returned from DES Connector" in {
+      "BadRequestResponse is returned from DES Connector" in new DesServiceFixture {
 
         when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(BadRequestResponse))
 
@@ -487,7 +488,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return ResourceNotFoundResponse" when {
-      "ResourceNotFoundResponse is returned from DES Connector" in {
+      "ResourceNotFoundResponse is returned from DES Connector" in new DesServiceFixture {
 
         when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(ResourceNotFoundResponse))
 
@@ -501,7 +502,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return InternalServerErrorResponse" when {
-      "InternalServerErrorResponse is returned from DES Connector" in {
+      "InternalServerErrorResponse is returned from DES Connector" in new DesServiceFixture {
 
         when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(InternalServerErrorResponse))
 
@@ -515,7 +516,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return ServiceUnavailableResponse" when {
-      "ServiceUnavailableResponse is returned from DES Connector" in {
+      "ServiceUnavailableResponse is returned from DES Connector" in new DesServiceFixture {
 
         when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(ServiceUnavailableResponse))
 
@@ -532,7 +533,7 @@ class DesServiceSpec extends BaseSpec {
   ".trustVariation" should {
     "return a VariationTvnResponse" when {
 
-      "connector returns VariationResponse." in {
+      "connector returns VariationResponse." in new DesServiceFixture {
 
         when(mockConnector.trustVariation(trustVariationsRequest)).
           thenReturn(Future.successful(VariationResponse("tvn123")))
@@ -548,7 +549,7 @@ class DesServiceSpec extends BaseSpec {
 
       "return DuplicateSubmissionException" when {
 
-        "connector returns  DuplicateSubmissionException." in {
+        "connector returns  DuplicateSubmissionException." in new DesServiceFixture {
 
           when(mockConnector.trustVariation(trustVariationsRequest)).
             thenReturn(Future.failed(DuplicateSubmissionException))
@@ -564,7 +565,7 @@ class DesServiceSpec extends BaseSpec {
       }
 
       "return same Exception " when {
-        "connector returns  exception." in {
+        "connector returns  exception." in new DesServiceFixture {
 
           when(mockConnector.trustVariation(trustVariationsRequest)).
             thenReturn(Future.failed(InternalServerErrorException("")))
@@ -584,7 +585,7 @@ class DesServiceSpec extends BaseSpec {
   ".estateVariation" should {
     "return a VariationTvnResponse" when {
 
-      "connector returns VariationResponse." in {
+      "connector returns VariationResponse." in new DesServiceFixture {
 
         when(mockConnector.estateVariation(estateVariationsRequest)).
           thenReturn(Future.successful(VariationResponse("tvn123")))
@@ -600,7 +601,7 @@ class DesServiceSpec extends BaseSpec {
 
       "return DuplicateSubmissionException" when {
 
-        "connector returns  DuplicateSubmissionException." in {
+        "connector returns  DuplicateSubmissionException." in new DesServiceFixture {
 
           when(mockConnector.estateVariation(estateVariationsRequest)).
             thenReturn(Future.failed(DuplicateSubmissionException))
@@ -616,7 +617,7 @@ class DesServiceSpec extends BaseSpec {
       }
 
       "return same Exception " when {
-        "connector returns  exception." in {
+        "connector returns  exception." in new DesServiceFixture {
 
           when(mockConnector.estateVariation(estateVariationsRequest)).
             thenReturn(Future.failed(InternalServerErrorException("")))

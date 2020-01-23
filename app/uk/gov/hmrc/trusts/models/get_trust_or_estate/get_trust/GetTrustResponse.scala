@@ -31,13 +31,20 @@ trait GetTrustSuccessResponse extends GetTrustResponse {
 case class TrustProcessedResponse(getTrust: JsValue,
                               responseHeader: ResponseHeader) extends GetTrustSuccessResponse
 
+object TrustProcessedResponse {
+  val mongoWrites: Writes[TrustProcessedResponse] = new Writes[TrustProcessedResponse] {
+    override def writes(o: TrustProcessedResponse): JsValue = Json.obj(
+      "responseHeader" -> Json.toJson(o.responseHeader)(ResponseHeader.mongoWrites),
+      "trustOrEstateDisplay" -> o.getTrust)
+  }
+}
+
 case class TrustFoundResponse(responseHeader: ResponseHeader) extends GetTrustSuccessResponse
 
 object GetTrustSuccessResponse {
   implicit val writes: Writes[GetTrustSuccessResponse] = Writes{
-    case TrustProcessedResponse(trust, header) =>Json.obj( "trustOrEstateDisplay" -> trust,
-    "responseHeader" -> header)
-    case TrustFoundResponse(header) =>Json.obj("responseHeader" -> header)
+    case TrustProcessedResponse(trust, header) =>Json.obj("responseHeader" -> header, "trustOrEstateDisplay" -> trust)
+    case TrustFoundResponse(header) => Json.obj("responseHeader" -> header)
   }
 
   implicit val reads: Reads[GetTrustSuccessResponse] = new Reads[GetTrustSuccessResponse] {

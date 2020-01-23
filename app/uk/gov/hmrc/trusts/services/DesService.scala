@@ -17,15 +17,16 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.GetEstateResponse
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustResponse, GetTrustSuccessResponse, TrustFoundResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.models.variation.{EstateVariation, TrustVariation, VariationResponse}
 import uk.gov.hmrc.trusts.repositories.Repository
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
@@ -55,12 +56,22 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Repos
     desConnector.getSubscriptionId(trn)
   }
 
-  def getTrustInfo(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
-    repository.get(utr, internalId)
+  private def refreshCacheAndGetTrustInfo(utr: String, internalId: String)(implicit hc: HeaderCarrier) = {
+      desConnector.getTrustInfo(utr).map {
+        case response:TrustProcessedResponse =>
+          repository.set(utr, internalId, Json.toJson(response)(TrustProcessedResponse.mongoWrites))
+          response
+        case x => x
+      }
+  }
 
-    desConnector.getTrustInfo(utr).map {
-      case x@TrustProcessedResponse(json, _) => repository.set(utr, internalId, json);x
-      case x => x
+  def getTrustInfo(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
+    repository.get(utr, internalId).flatMap {
+      case Some(x) => x.validate[GetTrustSuccessResponse].fold(
+        errs => Future.failed[GetTrustResponse](new Exception(errs.toString)),
+        response => Future.successful(response)
+      )
+      case None => refreshCacheAndGetTrustInfo(utr, internalId)
     }
   }
 
