@@ -136,14 +136,14 @@ class DesConnector @Inject()(http: WSHttp, config: AppConfig) {
     response
   }
 
-  def getTrustInfoJson(utr: String)(implicit hc: HeaderCarrier): Future[JsValue] = {
+  def getTrustInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
     val correlationId = UUID.randomUUID().toString
 
     implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
-    Logger.info(s"[DesConnector] getting playback json for trust for correlationId: $correlationId")
+    Logger.info(s"[DesConnector] getting playback for trust for correlationId: $correlationId")
 
-    http.GET[JsValue](createGetTrustOrEstateEndpoint(utr))
+    http.GET[GetTrustResponse](createGetTrustOrEstateEndpoint(utr))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)
   }
   
   def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse] = {

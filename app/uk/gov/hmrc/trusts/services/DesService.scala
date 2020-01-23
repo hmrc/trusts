@@ -58,7 +58,7 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Repos
 
   def getTrustInfo(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[JsValue] = {
     repository.get(utr, internalId)
-    desConnector.getTrustInfoJson(utr)
+    desConnector.getTrustInfo(utr)
   }
 
   def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse] = {
