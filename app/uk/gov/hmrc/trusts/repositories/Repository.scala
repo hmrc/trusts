@@ -64,7 +64,7 @@ class Repository @Inject()(
     }.map(_ => ())
   }
 
-  def get(utr: String, internalId: String): Future[Option[JsObject]] = {
+  def get(utr: String, internalId: String): Future[Option[JsValue]] = {
 
     val selector = Json.obj(
       "id" -> createKey(utr, internalId)
@@ -74,9 +74,9 @@ class Repository @Inject()(
 
       collection.find(selector, None).one[JsObject].map(opt =>
         for  {
-          x <- opt
-          y <- (x \ "etmpData").toOption
-        } yield y.as[JsObject])
+          document <- opt
+          etmpData <- (document \ "etmpData").toOption
+        } yield etmpData)
     }
   }
 
@@ -84,7 +84,7 @@ class Repository @Inject()(
     (utr + '-' + internalId)
   }
 
-  def set(utr: String, internalId: String, data: JsObject): Future[Boolean] = {
+  def set(utr: String, internalId: String, data: JsValue): Future[Boolean] = {
 
     val selector = Json.obj(
       "id" -> createKey(utr, internalId)
