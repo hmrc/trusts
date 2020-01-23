@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.trusts.connectors
 
-import play.api.libs.json.{Format, JsError, JsSuccess, Json, Reads, Writes}
+import play.api.libs.json.{Format, JsError, JsSuccess, JsValue, Json, Reads, Writes}
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions.{AlreadyRegisteredException, _}
 import uk.gov.hmrc.trusts.models.ExistingCheckRequest._
@@ -27,6 +27,8 @@ import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.variation.{EstateVariation, TrustVariation, VariationResponse}
+
+import scala.concurrent.Future
 
 class DesConnectorSpec extends BaseConnectorSpec {
 
@@ -580,25 +582,19 @@ class DesConnectorSpec extends BaseConnectorSpec {
         val utr = "1234567890"
         stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustResponseJson)
 
-        val futureResult = connector.getTrustInfoJson(utr)
+        val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(utr)
 
         application.stop()
 
         whenReady(futureResult) { result =>
 
-          val expectedResult = Json.fromJson[TrustFoundResponse](getTrustResponse).get
-
-          result mustBe expectedResult
+          val expectedHeader: ResponseHeader = (getTrustResponse \ "responseHeader").as[ResponseHeader]
+          val expectedJson = (getTrustResponse \ "trustOrEstateDisplay").as[JsValue]
 
           result match {
-            case TrustFoundResponse(Some(trust), _) =>
-              trust.trust.assets.shares.get.head.utr mustBe Some("2134514321")
-              trust.trust.assets.business.get.head.orgName mustBe "Lone Wolf Ltd"
-              trust.trust.assets.business.get.head.utr mustBe Some("2134514322")
-              trust.trust.assets.business.get.head.businessDescription mustBe "Travel Business"
-              trust.trust.assets.business.get.head.address.get.line1 mustBe "Suite 10"
-
-              trust.trust.entities.leadTrustee.leadTrusteeInd.get.name.firstName mustBe "Jimmy"
+            case r:TrustProcessedResponse =>
+              r.responseHeader mustBe expectedHeader
+              r.getTrust mustBe expectedJson
             case _ => fail
           }
         }
@@ -608,12 +604,12 @@ class DesConnectorSpec extends BaseConnectorSpec {
         val utr = "1234567800"
         stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustOrEstateProcessingResponseJson)
 
-        val futureResult = connector.getTrustInfoJson(utr)
+        val futureResult = connector.getTrustInfo(utr)
 
         application.stop()
 
         whenReady(futureResult) { result =>
-          result mustBe TrustFoundResponse(None, ResponseHeader("In Processing", "1"))
+          result mustBe TrustFoundResponse(ResponseHeader("In Processing", "1"))
         }
       }
     }
@@ -625,7 +621,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
         stubForGet(server, createTrustOrEstateEndpoint(invalidUTR), BAD_REQUEST,
                    Json.stringify(jsonResponse400InvalidUTR))
 
-        val futureResult = connector.getTrustInfoJson(invalidUTR)
+        val futureResult = connector.getTrustInfo(invalidUTR)
 
         application.stop()
 
@@ -642,7 +638,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
         stubForGet(server, createTrustOrEstateEndpoint(utr), BAD_REQUEST,
                    Json.stringify(jsonResponse400InvalidRegime))
 
-        val futureResult = connector.getTrustInfoJson(utr)
+        val futureResult = connector.getTrustInfo(utr)
 
         application.stop()
 
@@ -659,7 +655,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
         stubForGet(server, createTrustOrEstateEndpoint(utr), BAD_REQUEST,
           Json.stringify(jsonResponse400))
 
-        val futureResult = connector.getTrustInfoJson(utr)
+        val futureResult = connector.getTrustInfo(utr)
 
         application.stop()
 
@@ -675,7 +671,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
         val utr = "6666666666"
         stubForGet(server, createTrustOrEstateEndpoint(utr), OK, Json.stringify(jsonResponse204))
 
-        val futureResult = connector.getTrustInfoJson(utr)
+        val futureResult = connector.getTrustInfo(utr)
 
         application.stop()
 
@@ -691,7 +687,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
         val utr = "1234567892"
         stubForGet(server, createTrustOrEstateEndpoint(utr), NOT_FOUND, "")
 
-        val futureResult = connector.getTrustInfoJson(utr)
+        val futureResult = connector.getTrustInfo(utr)
 
         application.stop()
 
@@ -707,7 +703,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
         val utr = "1234567893"
         stubForGet(server, createTrustOrEstateEndpoint(utr), INTERNAL_SERVER_ERROR, "")
 
-        val futureResult = connector.getTrustInfoJson(utr)
+        val futureResult = connector.getTrustInfo(utr)
 
         application.stop()
 
@@ -723,7 +719,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
         val utr = "1234567894"
         stubForGet(server, createTrustOrEstateEndpoint(utr), SERVICE_UNAVAILABLE, "")
 
-        val futureResult = connector.getTrustInfoJson(utr)
+        val futureResult = connector.getTrustInfo(utr)
 
         application.stop()
 

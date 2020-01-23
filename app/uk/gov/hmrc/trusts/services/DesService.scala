@@ -16,16 +16,15 @@
 
 package uk.gov.hmrc.trusts.services
 
-import com.google.inject.ImplementedBy
 import javax.inject.Inject
-import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.GetEstateResponse
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustResponse
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.models.variation.{EstateVariation, TrustVariation, VariationResponse}
 import uk.gov.hmrc.trusts.repositories.Repository
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
@@ -56,9 +55,13 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Repos
     desConnector.getSubscriptionId(trn)
   }
 
-  def getTrustInfo(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[JsValue] = {
+  def getTrustInfo(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
     repository.get(utr, internalId)
-    desConnector.getTrustInfo(utr)
+
+    desConnector.getTrustInfo(utr).map {
+      case x@TrustProcessedResponse(json, _) => repository.set(utr, internalId, json);x
+      case x => x
+    }
   }
 
   def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse] = {

@@ -65,7 +65,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
 
         val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), auditService, desService)
 
-        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustFoundResponse(None, ResponseHeader("Parked", "1"))))
+        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
         when(mockConfig.auditingEnabled).thenReturn(false)
 
@@ -82,7 +82,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
 
         val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), auditService, desService)
 
-        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustFoundResponse(None, ResponseHeader("Parked", "1"))))
+        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
         when(mockConfig.auditingEnabled).thenReturn(true)
 
@@ -96,7 +96,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with JsonReque
 
     "return 200 - Ok" in {
 
-      when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustFoundResponse(None, ResponseHeader("Parked", "1"))))
+      when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
       val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 
