@@ -19,18 +19,18 @@ package uk.gov.hmrc.trusts.models.get_trust_or_estate
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.GetEstateResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustResponse
 
-sealed trait ErrorResponse
+sealed trait ErrorResponse extends GetTrustResponse with GetEstateResponse
 
-case object InvalidUTRResponse extends GetTrustResponse with GetEstateResponse
+case object InvalidUTRResponse extends ErrorResponse
 
-case object InvalidRegimeResponse extends GetTrustResponse with GetEstateResponse
+case object InvalidRegimeResponse extends ErrorResponse
 
-case object BadRequestResponse extends GetTrustResponse with GetEstateResponse
+case object BadRequestResponse extends ErrorResponse
 
-case object ResourceNotFoundResponse extends GetTrustResponse with GetEstateResponse
+case object ResourceNotFoundResponse extends ErrorResponse
 
-case object InternalServerErrorResponse extends GetTrustResponse with GetEstateResponse
+case object InternalServerErrorResponse extends ErrorResponse
 
-case object NotEnoughDataResponse extends GetTrustResponse with GetEstateResponse
+case object NotEnoughDataResponse extends ErrorResponse
 
-case object ServiceUnavailableResponse extends GetTrustResponse with GetEstateResponse
+case object ServiceUnavailableResponse extends ErrorResponse
