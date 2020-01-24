@@ -573,7 +573,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
     }
   }
 
-  ".getTrustInfoJson" ignore {
+  ".getTrustInfoJson" when {
 
     "return TrustFoundResponse" when {
 
