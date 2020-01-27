@@ -19,9 +19,10 @@ package uk.gov.hmrc.trusts.transformers
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
+import uk.gov.hmrc.trusts.models.Declaration
 
 class DeclareNoChangeTransformer {
-  def transform(beforeJson: JsValue): JsResult[JsValue] = {
+  def transform(beforeJson: JsValue, declaration: Declaration): JsResult[JsValue] = {
 
     val trusteeField: String = {
       val namePath = (__ \ 'trustOrEstateDisplay \ 'details \ 'trust \ 'entities \ 'leadTrustees \ 'name).json.pick[JsObject]
@@ -35,15 +36,20 @@ class DeclareNoChangeTransformer {
     val trustFromPath = (__ \ 'trustOrEstateDisplay \ 'applicationType ).json.prune andThen
       (__ \ 'trustOrEstateDisplay \ 'details \ 'trust \ 'entities \ 'leadTrustees).json.update( of[JsObject]
         .map{ a => Json.arr(Json.obj(trusteeField -> a )) }) andThen
+      (__ \ 'trustOrEstateDisplay \ 'declaration).json.prune andThen
       (__ \ 'trustOrEstateDisplay ).json.pick
+
     val trustToPath = (__ ).json
 
     val headerFromPath = (__ \ 'responseHeader \ 'formBundleNo ).json.pick
     val headerToPath = (__ \ 'reqHeader \ 'formBundleNo ).json
 
+    val declarationInsert = (__ \ 'declaration).json.put(Json.toJson(declaration))
+
     val formBundleNoTransformer: Reads[JsObject] = {
       trustToPath.copyFrom(trustFromPath) and
-        headerToPath.copyFrom(headerFromPath)
+        headerToPath.copyFrom(headerFromPath) and
+        declarationInsert
       }.reduce
 
     beforeJson.transform(formBundleNoTransformer)

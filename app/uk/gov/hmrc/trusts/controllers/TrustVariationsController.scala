@@ -18,12 +18,15 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
 import play.api.Logger
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsSuccess, JsValue, Json}
+import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
+import uk.gov.hmrc.trusts.models.Declaration
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
+import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 import uk.gov.hmrc.trusts.models.variation.TrustVariation
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, ValidationService}
 import uk.gov.hmrc.trusts.transformers.DeclareNoChangeTransformer
@@ -44,11 +47,11 @@ class TrustVariationsController @Inject()(
                                     ) extends TrustsBaseController with ValidationUtil {
 
   def trustVariation() = identify.async(parse.json) {
-    implicit request =>
+    implicit request => {
 
       val payload = request.body.toString()
 
-      validator.get(config.variationsApiSchema).validate[TrustVariation](payload).fold(
+      validator.get(config.variationsApiSchema).validate[TrustVariation](payload).fold[Future[Result]](
         errors => {
           Logger.error(s"[variations] trusts validation errors from request body $errors.")
 
@@ -61,44 +64,39 @@ class TrustVariationsController @Inject()(
 
           Future.successful(invalidRequestErrorResponse)
         },
-        variationRequest => {
-          desService.trustVariation(Json.toJson(variationRequest)) map { response =>
-
-            auditService.audit(
-              TrustAuditing.TRUST_VARIATION,
-              Json.toJson(variationRequest),
-              request.identifier,
-              Json.toJson(response)
-            )
-
-            Ok(Json.toJson(response))
-
-          } recover responseHandler.recoverFromException(TrustAuditing.TRUST_VARIATION)
-        }
+        variationRequest => doSubmit(Json.toJson(variationRequest))
       )
-
+    }
   }
 
   def noChange(utr: String) = identify.async(parse.json) {
     implicit request =>
-      desService.getTrustInfo(utr, request.identifier).flatMap {
-        case TrustProcessedResponse(data, _) =>
-          declareNoChangeTransformer.transform(data) match {
-            case JsSuccess(value, _) => desService.trustVariation(value) map { response =>
-
-              auditService.audit(
-                TrustAuditing.TRUST_VARIATION,
-                value,
-                request.identifier,
-                Json.toJson(response)
-              )
-
-              Ok(Json.toJson(response))
-
-            } recover responseHandler.recoverFromException(TrustAuditing.TRUST_VARIATION)
+      request.body.validate[Declaration].fold(
+        _ => Future.successful(BadRequest),
+        declaration => {
+          desService.getTrustInfo(utr, request.identifier).flatMap {
+            case TrustProcessedResponse(data, _) =>
+              declareNoChangeTransformer.transform(data, declaration) match {
+                case JsSuccess(value, _) => doSubmit(value)
+              }
           }
-      }
+        }
+      )
+  }
 
+  private def doSubmit(value: JsValue)(implicit request: IdentifierRequest[JsValue]) : Future[Result] = {
+    desService.trustVariation(value) map { response =>
+
+      auditService.audit(
+        TrustAuditing.TRUST_VARIATION,
+        value,
+        request.identifier,
+        Json.toJson(response)
+      )
+
+      Ok(Json.toJson(response))
+
+    } recover responseHandler.recoverFromException(TrustAuditing.TRUST_VARIATION)
   }
 }
 
