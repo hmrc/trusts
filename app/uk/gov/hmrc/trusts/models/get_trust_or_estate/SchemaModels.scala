@@ -30,7 +30,15 @@ case class ResponseHeader(status: String,
                           formBundleNo: String)
 
 object ResponseHeader {
-  implicit val writes: Writes[ResponseHeader] = Json.writes[ResponseHeader]
+  implicit val apiWrites: Writes[ResponseHeader] = Json.writes[ResponseHeader]
+
+  val mongoWrites: Writes[ResponseHeader] = new Writes[ResponseHeader] {
+    override def writes(header: ResponseHeader): JsValue = Json.obj(
+      "dfmcaReturnUserStatus" -> header.status,
+      "formBundleNo" -> header.formBundleNo
+    )
+  }
+
   implicit val reads: Reads[ResponseHeader] = (
     (JsPath \ "dfmcaReturnUserStatus").read[String] and
       (JsPath \ "formBundleNo").read[String]

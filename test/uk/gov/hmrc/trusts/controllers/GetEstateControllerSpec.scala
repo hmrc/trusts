@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.controllers
 
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.{reset, times, verify, when}
-import org.scalatest.BeforeAndAfter
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
 import play.api.libs.json.JsValue
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -34,7 +34,7 @@ import uk.gov.hmrc.trusts.services.{AuditService, DesService, FakeAuditService}
 
 import scala.concurrent.Future
 
-class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter {
+class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach{
 
   lazy val desService: DesService = mock[DesService]
   lazy val mockedAuditService: AuditService = mock[AuditService]

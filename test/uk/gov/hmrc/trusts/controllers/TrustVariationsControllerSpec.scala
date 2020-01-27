@@ -21,7 +21,7 @@ import java.util.UUID
 import org.mockito.Matchers._
 import org.mockito.Matchers.{eq => Meq}
 import org.mockito.Mockito._
-import org.scalatest.BeforeAndAfter
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
@@ -37,7 +37,7 @@ import uk.gov.hmrc.trusts.utils.Headers
 
 import scala.concurrent.Future
 
-class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter {
+class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach {
 
   lazy val mockDesService: DesService = mock[DesService]
 

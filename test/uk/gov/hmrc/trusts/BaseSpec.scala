@@ -40,12 +40,11 @@ class BaseSpec extends WordSpec
   with JsonRequests
   with BeforeAndAfter
   with GuiceOneServerPerSuite
-  with WireMockHelper
   with Inside {
 
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
 
-  def application = applicationBuilder().build()
+  lazy val application = applicationBuilder().build()
 
   def injector = application.injector
 
@@ -55,11 +54,6 @@ class BaseSpec extends WordSpec
     new GuiceApplicationBuilder()
       .configure(
         Seq(
-          "microservice.services.des-trusts.port" -> server.port(),
-          "microservice.services.des-estates.port" -> server.port(),
-          "microservice.services.des-display-trust-or-estate.port" -> server.port(),
-          "microservice.services.des-vary-trust-or-estate.port" -> server.port(),
-          "microservice.services.tax-enrolments.port" -> server.port(),
           "metrics.enabled" -> false,
           "auditing.enabled" -> false): _*
       )
@@ -85,49 +79,6 @@ class BaseSpec extends WordSpec
         .withBody(payload)
     }
   }
-
-  def stubForPost(server: WireMockServer,
-                  url: String,
-                  requestBody: String,
-                  returnStatus: Int,
-                  responseBody: String,
-                  delayResponse: Int = 0) = {
-
-    server.stubFor(post(urlEqualTo(url))
-      .withHeader(CONTENT_TYPE, containing("application/json"))
-      .withHeader("Environment", containing("dev"))
-      .withRequestBody(equalTo(requestBody))
-      .willReturn(
-        aResponse()
-          .withStatus(returnStatus)
-          .withBody(responseBody).withFixedDelay(delayResponse)))
-  }
-
-
-  def stubForGet(server: WireMockServer,
-                 url: String, returnStatus: Int,
-                 responseBody: String,
-                 delayResponse: Int = 0) = {
-    server.stubFor(get(urlEqualTo(url))
-      .withHeader("content-Type", containing("application/json"))
-      .willReturn(
-        aResponse()
-          .withStatus(returnStatus)
-          .withBody(responseBody).withFixedDelay(delayResponse)))
-  }
-
-  def stubForPut(server: WireMockServer,
-                 url: String,
-                 returnStatus: Int,
-                 delayResponse: Int = 0) = {
-    server.stubFor(put(urlEqualTo(url))
-      .withHeader("content-Type", containing("application/json"))
-      .willReturn(
-        aResponse()
-          .withStatus(returnStatus)
-          .withFixedDelay(delayResponse)))
-  }
-
 }
 
 
