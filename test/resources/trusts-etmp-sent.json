@@ -232,18 +232,6 @@
       }
     }
   },
-  "agentDetails": {
-    "arn": "AARN1234567",
-    "agentName": "Mr. xys abcde",
-    "agentAddress": {
-      "line1": "line1",
-      "line2": "line2",
-      "postCode": "TF3 2BX",
-      "country": "GB"
-    },
-    "agentTelephoneNumber": "07912180120",
-    "clientReference": "clientReference"
-  },
   "reqHeader": {
     "formBundleNo": "000012387218"
   }

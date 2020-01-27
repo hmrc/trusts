@@ -38,15 +38,11 @@ class DeclareNoChangeTransformer {
       (__ \ 'trustOrEstateDisplay ).json.pick
     val trustToPath = (__ ).json
 
-    val agentFromPath = (__ \ 'agentDetails ).json.pick
-    val agentToPath = (__ \ 'agentDetails ).json
-
     val headerFromPath = (__ \ 'responseHeader \ 'formBundleNo ).json.pick
     val headerToPath = (__ \ 'reqHeader \ 'formBundleNo ).json
 
     val formBundleNoTransformer: Reads[JsObject] = {
       trustToPath.copyFrom(trustFromPath) and
-        agentToPath.copyFrom(agentFromPath) and
         headerToPath.copyFrom(headerFromPath)
       }.reduce
 
