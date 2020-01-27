@@ -18,11 +18,10 @@ package uk.gov.hmrc.trusts.controllers
 
 import java.util.UUID
 
-import org.mockito.Matchers._
-import org.mockito.Matchers.{eq => Meq}
+import org.mockito.Matchers.{eq => Meq, _}
 import org.mockito.Mockito._
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.http.HeaderCarrier
@@ -31,8 +30,9 @@ import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
-import uk.gov.hmrc.trusts.models.variation.{TrustVariation, VariationResponse}
+import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, ValidationService}
+import uk.gov.hmrc.trusts.transformers.DeclareNoChangeTransformer
 import uk.gov.hmrc.trusts.utils.Headers
 
 import scala.concurrent.Future
@@ -49,6 +49,8 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
   val auditService = new AuditService(mockAuditConnector, mockConfig)
   val validationService = new ValidationService()
 
+  val transformer = injector.instanceOf[DeclareNoChangeTransformer]
+
   val responseHandler = new VariationsResponseHandler(mockAuditService)
 
   override def beforeEach() = {
@@ -57,7 +59,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
 
   private def trustVariationsController = {
-    val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig, responseHandler)
+    val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig, transformer, responseHandler)
     SUT
   }
 
@@ -69,7 +71,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       "not perform auditing" when {
         "the feature toggle is set to false" in {
 
-          when(mockDesService.trustVariation(any[TrustVariation])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[JsValue])(any[HeaderCarrier]))
             .thenReturn(Future.successful(VariationResponse(tvnResponse)))
 
           when(mockConfig.auditingEnabled).thenReturn(false)
@@ -77,7 +79,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
           val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
 
-          val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig, responseHandler)
+          val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig, transformer, responseHandler)
 
           val result = SUT.trustVariation()(
             postRequestWithPayload(requestPayLoad, withDraftId = false)
@@ -95,7 +97,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
         "the feature toggle is set to true" in {
 
-          when(mockDesService.trustVariation(any[TrustVariation])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[JsValue])(any[HeaderCarrier]))
             .thenReturn(Future.successful(VariationResponse(tvnResponse)))
 
           when(mockConfig.auditingEnabled).thenReturn(true)
@@ -103,7 +105,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
           val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
 
-          val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, auditService, validationService, mockConfig, responseHandler)
+          val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, auditService, validationService, mockConfig, transformer, responseHandler)
 
           val result = SUT.trustVariation()(
             postRequestWithPayload(requestPayLoad, withDraftId = false)
@@ -121,7 +123,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
         "individual user called the register endpoint with a valid json payload " in {
 
-          when(mockDesService.trustVariation(any[TrustVariation])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[JsValue])(any[HeaderCarrier]))
             .thenReturn(Future.successful(VariationResponse(tvnResponse)))
 
           when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)
@@ -181,7 +183,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
         "input request fails business validation" in {
 
-          when(mockDesService.trustVariation(any[TrustVariation])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[JsValue])(any[HeaderCarrier]))
             .thenReturn(Future.failed(BadRequestException))
 
           when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)
@@ -204,7 +206,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
         "invalid correlation id is provided in the headers" in {
 
-          when(mockDesService.trustVariation(any[TrustVariation])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[JsValue])(any[HeaderCarrier]))
             .thenReturn(Future.failed(InvalidCorrelationIdException))
 
           when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)
@@ -236,7 +238,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       "return a Conflict" when {
         "submission with same correlation id is submitted." in {
 
-          when(mockDesService.trustVariation(any[TrustVariation])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[JsValue])(any[HeaderCarrier]))
             .thenReturn(Future.failed(DuplicateSubmissionException))
 
           when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)
@@ -269,7 +271,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
         "the register endpoint called and something goes wrong." in {
 
-          when(mockDesService.trustVariation(any[TrustVariation])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[JsValue])(any[HeaderCarrier]))
             .thenReturn(Future.failed(InternalServerErrorException("some error")))
 
           when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)
@@ -302,7 +304,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       "return service unavailable" when {
         "the des returns Service Unavailable as dependent service is down. " in {
 
-          when(mockDesService.trustVariation(any[TrustVariation])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[JsValue])(any[HeaderCarrier]))
             .thenReturn(Future.failed(ServiceNotAvailableException("dependent service is down")))
 
           when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)

@@ -934,7 +934,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
         val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
         stubForPost(server, url, requestBody, OK, """{"tvn": "XXTVN1234567890"}""")
 
-        val futureResult = connector.trustVariation(trustVariationsRequest)
+        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest))
 
         application.stop()
 
@@ -955,7 +955,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
         val requestBody = Json.stringify(Json.toJson(variation))
         stubForPost(server, url, requestBody, BAD_REQUEST, Json.stringify(jsonResponse400))
 
-        val futureResult = connector.trustVariation(variation)
+        val futureResult = connector.trustVariation(Json.toJson(variation))
 
         application.stop()
 
@@ -972,7 +972,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
         val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
 
         stubForPost(server, url, requestBody, CONFLICT, Json.stringify(jsonResponse409DuplicateCorrelation))
-        val futureResult = connector.trustVariation(trustVariationsRequest)
+        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest))
 
         whenReady(futureResult.failed) {
           result => result mustBe an[InternalServerErrorException]
@@ -985,7 +985,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
         val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
 
         stubForPost(server, url, requestBody, BAD_REQUEST, Json.stringify(jsonResponse400CorrelationId))
-        val futureResult = connector.trustVariation(trustVariationsRequest)
+        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest))
 
         application.stop()
 
@@ -1001,7 +1001,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
 
         stubForPost(server, url, requestBody, SERVICE_UNAVAILABLE, Json.stringify(jsonResponse503))
 
-        val futureResult = connector.trustVariation(trustVariationsRequest)
+        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest))
 
         application.stop()
 
@@ -1017,7 +1017,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
 
         stubForPost(server, url, requestBody, INTERNAL_SERVER_ERROR, Json.stringify(jsonResponse500))
 
-        val futureResult = connector.trustVariation(trustVariationsRequest)
+        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest))
 
         application.stop()
 
