@@ -18,6 +18,7 @@ package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
 import play.api.libs.json.{JsValue, Json}
+import org.slf4j.LoggerFactory
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.models._
@@ -31,6 +32,8 @@ import scala.concurrent.Future
 
 
 class DesService @Inject()(val desConnector: DesConnector, val repository: Repository)  {
+
+  private val logger = LoggerFactory.getLogger("application." + classOf[DesService].getCanonicalName)
 
   def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest)
                                  (implicit hc: HeaderCarrier): Future[ExistingCheckResponse] = {
@@ -57,6 +60,7 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Repos
   }
 
   private def refreshCacheAndGetTrustInfo(utr: String, internalId: String)(implicit hc: HeaderCarrier) = {
+      logger.debug("Retrieving Trust Info from DES")
       desConnector.getTrustInfo(utr).map {
         case response:TrustProcessedResponse =>
           repository.set(utr, internalId, Json.toJson(response)(TrustProcessedResponse.mongoWrites))
@@ -66,6 +70,7 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Repos
   }
 
   def getTrustInfo(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
+    logger.debug("Getting trust Info")
     repository.get(utr, internalId).flatMap {
       case Some(x) => x.validate[GetTrustSuccessResponse].fold(
         errs => Future.failed[GetTrustResponse](new Exception(errs.toString)),

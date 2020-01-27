@@ -42,8 +42,10 @@ object TrustProcessedResponse {
 case class TrustFoundResponse(responseHeader: ResponseHeader) extends GetTrustSuccessResponse
 
 object GetTrustSuccessResponse {
+
+
   implicit val writes: Writes[GetTrustSuccessResponse] = Writes{
-    case TrustProcessedResponse(trust, header) =>Json.obj("responseHeader" -> header, "trustOrEstateDisplay" -> trust)
+    case TrustProcessedResponse(trust, header) =>Json.obj("responseHeader" -> header, "getTrust" -> Json.toJson(trust.as[GetTrust]))
     case TrustFoundResponse(header) => Json.obj("responseHeader" -> header)
   }
 
