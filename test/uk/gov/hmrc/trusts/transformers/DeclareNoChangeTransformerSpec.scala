@@ -17,52 +17,23 @@
 package uk.gov.hmrc.trusts.transformers
 
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
-import play.api.libs.json._
 import uk.gov.hmrc.trusts.utils.JsonUtils
-
-class DeclareNoChangeTransformer {
-  def transform(beforeJson: JsValue): JsResult[JsValue] = {
-
-    val fromPath = (__ \ 'responseHeader \ 'formBundleNo ).json
-    val toPath = (__ \ 'reqHeader \ 'formBundleNo).json
-
-    val formBundleNoTransformer = toPath.copyFrom(fromPath.pick)
-    beforeJson.transform(formBundleNoTransformer)
-  }
-}
 
 class DeclareNoChangeTransformerSpec extends FreeSpec with MustMatchers with OptionValues {
   "the no change transformer should" - {
-    "copy the formBundleNo from the response header to the request header" in {
-      val beforeJson: JsValue = Json.parse(
-        """
-          |{
-          |"responseHeader": {
-          |    "dfmcaReturnUserStatus": "Processed",
-          |    "formBundleNo": "000012387218"
-          |  }
-          |}
-          |""".stripMargin)
-      val afterJson = Json.parse(
-        """
-          |{
-          |"reqHeader": {
-          |    "formBundleNo": "000012387218"
-          |  }
-          |}
-          |""".stripMargin)
-      val transformer = new DeclareNoChangeTransformer
 
-      val result: JsResult[JsValue] = transformer.transform(beforeJson)
-      result match {
-        case JsSuccess(json, _) => json mustBe afterJson
-        case JsError(errors) => println(s"Errors: $errors")
-      }
-    }
-
-    "do it all" ignore {
+    "transform json successfully for an org" in {
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json")
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent.json")
+      val transformer = new DeclareNoChangeTransformer
+
+      val result = transformer.transform(beforeJson)
+      result.asOpt.value mustBe afterJson
+    }
+
+    "transform json successfully for an individual" in {
+      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-individual.json")
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual.json")
       val transformer = new DeclareNoChangeTransformer
 
       val result = transformer.transform(beforeJson)
