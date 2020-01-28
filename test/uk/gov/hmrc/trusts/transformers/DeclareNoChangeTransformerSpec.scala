@@ -17,6 +17,7 @@
 package uk.gov.hmrc.trusts.transformers
 
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.models.{AddressType, Declaration, NameType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
@@ -27,19 +28,21 @@ class DeclareNoChangeTransformerSpec extends FreeSpec with MustMatchers with Opt
 
     "transform json successfully for an org lead trustee" in {
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json")
+      val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent.json")
       val transformer = new DeclareNoChangeTransformer
 
-      val result = transformer.transform(beforeJson, declaration)
+      val result = transformer.transform(trustResponse, declaration)
       result.asOpt.value mustBe afterJson
     }
 
     "transform json successfully for an individual lead trustee" in {
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-individual.json")
+      val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual.json")
       val transformer = new DeclareNoChangeTransformer
 
-      val result = transformer.transform(beforeJson, declaration)
+      val result = transformer.transform(trustResponse, declaration)
       result.asOpt.value mustBe afterJson
     }
   }

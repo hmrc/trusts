@@ -75,8 +75,8 @@ class TrustVariationsController @Inject()(
         _ => Future.successful(BadRequest),
         declaration => {
           desService.getTrustInfo(utr, request.identifier).flatMap {
-            case TrustProcessedResponse(data, _) =>
-              declareNoChangeTransformer.transform(data, declaration) match {
+            case response: TrustProcessedResponse =>
+              declareNoChangeTransformer.transform(response, declaration) match {
                 case JsSuccess(value, _) => doSubmit(value)
               }
           }
