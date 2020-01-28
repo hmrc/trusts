@@ -32,6 +32,8 @@ import scala.concurrent.Future
 
 
 class DesService @Inject()(val desConnector: DesConnector, val repository: Repository)  {
+  def getTrustInfoFormBundleNo(utr: String): Future[String] = ???
+
 
   private val logger = LoggerFactory.getLogger("application." + classOf[DesService].getCanonicalName)
 
