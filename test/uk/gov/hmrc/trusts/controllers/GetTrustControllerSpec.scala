@@ -119,6 +119,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
     }
 
     "return 204 - NoContent" when {
+
       "the get endpoint returns a NotEnoughDataResponse" in {
 
         when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(NotEnoughDataResponse))
