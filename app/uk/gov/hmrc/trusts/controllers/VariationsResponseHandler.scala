@@ -20,11 +20,10 @@ import javax.inject.Inject
 import play.api.libs.json.JsValue
 import play.api.mvc.Result
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.exceptions.{DuplicateSubmissionException, InvalidCorrelationIdException, ServiceNotAvailableException}
-import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
+import uk.gov.hmrc.trusts.exceptions.{DuplicateSubmissionException, EtmpDataStaleException, InvalidCorrelationIdException, ServiceNotAvailableException}
 import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 import uk.gov.hmrc.trusts.services.AuditService
-import uk.gov.hmrc.trusts.utils.ErrorResponses.{duplicateSubmissionErrorResponse, internalServerErrorErrorResponse, invalidCorrelationIdErrorResponse, serviceUnavailableErrorResponse}
+import uk.gov.hmrc.trusts.utils.ErrorResponses._
 
 class VariationsResponseHandler @Inject()(auditService: AuditService) {
 
@@ -62,6 +61,9 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) {
       )
 
       serviceUnavailableErrorResponse
+
+    case EtmpDataStaleException =>
+      etmpDataStaleErrorResponse
 
     case _ =>
 

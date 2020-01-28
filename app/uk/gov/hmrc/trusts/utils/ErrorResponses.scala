@@ -48,4 +48,7 @@ object ErrorResponses {
 
   def serviceUnavailableErrorResponse =
     ServiceUnavailable(doErrorResponse("SERVICE_UNAVAILABLE", "Service unavailable."))
+
+  def etmpDataStaleErrorResponse =
+    BadRequest(doErrorResponse("ETMP_DATA_STALE", "ETMP returned a changed form bundle number for the trust."))
 }
