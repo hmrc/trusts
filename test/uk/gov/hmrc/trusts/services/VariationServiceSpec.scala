@@ -30,40 +30,42 @@ import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.models.{AddressType, Declaration, NameType}
 import uk.gov.hmrc.trusts.transformers.DeclareNoChangeTransformer
 import uk.gov.hmrc.trusts.utils.JsonRequests
+import uk.gov.hmrc.trusts.exceptions.EtmpDataStaleException
 
 import scala.concurrent.Future
 
 class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar with ScalaFutures with MustMatchers {
 
   implicit  val hc: HeaderCarrier = new HeaderCarrier
+  private val formBundleNo = "001234567890"
+  val utr = "1234567890"
+  val internalId = "InternalId"
+  val fullEtmpResponseJson = getTrustResponse
+  val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
+  val transformedJson = Json.obj("field" -> "value")
+
+  val declaration = Declaration(
+    NameType("Handy", None, "Andy"),
+    AddressType("Line1", "Line2", Some("Line3"), None, Some("POSTCODE"), "GB")
+  )
 
   "Declare no change" should {
-//    "Fail if the form bundle number has changed" ignore {}
-//    "Gets Authoritative info direct from DES" ignore {}
-    "Gets Info from Cache with deltas applied" in {
-      val utr = "1234567890"
-      val internalId = "InternalId"
-      val fullEtmpResponseJson = getTrustResponse
-      val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
+    "Submits data correctly when version matches" in {
       val desService = mock[DesService]
       val auditService = mock[AuditService]
       val transformer = mock[DeclareNoChangeTransformer]
 
+      when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
+
       when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))(any[HeaderCarrier]())).thenReturn(Future.successful(
-        TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1234567890"))
+        TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
       ))
 
       when(desService.trustVariation(any())(any[HeaderCarrier])).thenReturn(Future.successful(
         VariationResponse("TVN34567890")
       ))
 
-      val transformedJson = Json.obj("field" -> "value")
       when(transformer.transform(any(),any())).thenReturn(JsSuccess(transformedJson))
-
-      val declaration = Declaration(
-        NameType("Handy", None, "Andy"),
-        AddressType("Line1", "Line2", Some("Line3"), None, Some("POSTCODE"), "GB")
-      )
 
       val OUT = new VariationService(desService, transformer, auditService)
 
@@ -74,6 +76,31 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
         verify(desService, times(1)).trustVariation(arg.capture())(any[HeaderCarrier])
         arg.getValue mustBe transformedJson
       }}
+    }
+  }
+  "Fail if the etmp data version doesn't match our submission data" in {
+    val desService = mock[DesService]
+    val auditService = mock[AuditService]
+    val transformer = mock[DeclareNoChangeTransformer]
+
+    when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful("31415900000"))
+
+    when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))(any[HeaderCarrier]())).thenReturn(Future.successful(
+      TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
+    ))
+
+    when(desService.trustVariation(any())(any[HeaderCarrier])).thenReturn(Future.successful(
+      VariationResponse("TVN34567890")
+    ))
+
+    when(transformer.transform(any(),any())).thenReturn(JsSuccess(transformedJson))
+
+    val OUT = new VariationService(desService, transformer, auditService)
+
+    whenReady(OUT.submitDeclareNoChange(utr, internalId, declaration).failed) {exception => {
+      exception mustBe an[EtmpDataStaleException.type]
+      verify(desService, times(0)).trustVariation(any())(any[HeaderCarrier])
+    }
     }
   }
 }

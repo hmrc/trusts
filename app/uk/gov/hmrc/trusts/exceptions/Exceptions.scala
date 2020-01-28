@@ -21,6 +21,7 @@ case class InternalServerErrorException(message : String )  extends Exception(me
 case object AlreadyRegisteredException extends Exception("Already registered")
 case object DuplicateSubmissionException extends Exception("Duplicate submission")
 case object InvalidCorrelationIdException extends Exception("Invalid correlation ID")
+case object EtmpDataStaleException extends Exception("Etmp data is stale")
 case object NotFoundException extends Exception("Not found")
 case object NoMatchException extends Exception("No matched")
 case object BadRequestException extends Exception("Bad request")

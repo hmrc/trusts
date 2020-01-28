@@ -20,23 +20,31 @@ import javax.inject.Inject
 import play.api.libs.json.{JsSuccess, JsValue, Json}
 import play.api.mvc.Result
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.trusts.exceptions.EtmpDataStaleException
 import uk.gov.hmrc.trusts.models.Declaration
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.transformers.DeclareNoChangeTransformer
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class VariationService @Inject()(desService: DesService, declareNoChangeTransformer: DeclareNoChangeTransformer, auditService: AuditService) {
 
   def submitDeclareNoChange(utr:String, internalId: String,  declaration: Declaration)(implicit hc:HeaderCarrier): Future[VariationResponse] = {
     desService.getTrustInfo(utr, internalId).flatMap {
-      case TrustProcessedResponse(data, _) =>
-        declareNoChangeTransformer.transform(data, declaration) match {
-          case JsSuccess(value, _) => doSubmit(value, internalId)
+      case TrustProcessedResponse(data, header) =>
+        desService.getTrustInfoFormBundleNo(utr).flatMap {
+          formBundleNo =>
+            if (formBundleNo == header.formBundleNo) {
+              declareNoChangeTransformer.transform(data, declaration) match {
+                case JsSuccess(value, _) => doSubmit(value, internalId)
+              }
+            } else {
+              Future.failed(EtmpDataStaleException)
+            }
         }
     }
   }
