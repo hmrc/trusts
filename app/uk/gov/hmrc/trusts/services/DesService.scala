@@ -17,8 +17,8 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
-import play.api.libs.json.{JsValue, Json}
 import org.slf4j.LoggerFactory
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.models._
@@ -87,7 +87,7 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Repos
   }
 
   def trustVariation(trustVariation: JsValue)(implicit hc: HeaderCarrier): Future[VariationResponse] =
-    desConnector.trustVariation(trustVariation)
+    desConnector.trustVariation(trustVariation: JsValue)
 
   def estateVariation(estateVariation: EstateVariation)(implicit hc: HeaderCarrier): Future[VariationResponse] =
     desConnector.estateVariation(estateVariation: EstateVariation)

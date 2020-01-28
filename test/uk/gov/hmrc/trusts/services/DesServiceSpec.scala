@@ -17,8 +17,8 @@
 package uk.gov.hmrc.trusts.services
 
 import org.mockito.Matchers._
-import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
-import play.api.libs.json.{JsValue, Json}
+import org.mockito.Mockito.{times, verify, when, verifyZeroInteractions}
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions._
@@ -535,10 +535,10 @@ class DesServiceSpec extends BaseSpec {
 
       "connector returns VariationResponse." in new DesServiceFixture {
 
-        when(mockConnector.trustVariation(Json.toJson(trustVariationsRequest))).
+        when(mockConnector.trustVariation(trustVariationsRequest)).
           thenReturn(Future.successful(VariationResponse("tvn123")))
 
-        val futureResult = SUT.trustVariation(Json.toJson(trustVariationsRequest))
+        val futureResult = SUT.trustVariation(trustVariationsRequest)
 
         whenReady(futureResult) {
           result => result mustBe VariationResponse("tvn123")
@@ -551,10 +551,10 @@ class DesServiceSpec extends BaseSpec {
 
         "connector returns  DuplicateSubmissionException." in new DesServiceFixture {
 
-          when(mockConnector.trustVariation(Json.toJson(trustVariationsRequest))).
+          when(mockConnector.trustVariation(trustVariationsRequest)).
             thenReturn(Future.failed(DuplicateSubmissionException))
 
-          val futureResult = SUT.trustVariation(Json.toJson(trustVariationsRequest))
+          val futureResult = SUT.trustVariation(trustVariationsRequest)
 
           whenReady(futureResult.failed) {
             result => result mustBe DuplicateSubmissionException
@@ -567,10 +567,10 @@ class DesServiceSpec extends BaseSpec {
       "return same Exception " when {
         "connector returns  exception." in new DesServiceFixture {
 
-          when(mockConnector.trustVariation(Json.toJson(trustVariationsRequest))).
+          when(mockConnector.trustVariation(trustVariationsRequest)).
             thenReturn(Future.failed(InternalServerErrorException("")))
 
-          val futureResult = SUT.trustVariation(Json.toJson(trustVariationsRequest))
+          val futureResult = SUT.trustVariation(trustVariationsRequest)
 
           whenReady(futureResult.failed) {
             result => result mustBe an[InternalServerErrorException]

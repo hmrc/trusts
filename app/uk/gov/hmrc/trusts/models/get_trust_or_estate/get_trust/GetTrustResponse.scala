@@ -54,7 +54,13 @@ object GetTrustSuccessResponse {
       val header = (json \ "responseHeader").validate[ResponseHeader]
       (json \ "trustOrEstateDisplay").toOption match {
         case None => header.map(TrustFoundResponse)
-        case Some(x) => header.map(h => TrustProcessedResponse(x, h))
+        case Some(x) =>
+          x.validate[GetTrust] match {
+            case JsSuccess(_, _) =>
+              header.map(h => TrustProcessedResponse(x, h))
+            case x : JsError => x
+          }
+
       }
     }
   }
