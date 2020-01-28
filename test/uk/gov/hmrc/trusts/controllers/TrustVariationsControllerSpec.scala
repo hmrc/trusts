@@ -31,7 +31,7 @@ import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
-import uk.gov.hmrc.trusts.services.{AuditService, DesService, ValidationService}
+import uk.gov.hmrc.trusts.services.{AuditService, DesService, ValidationService, VariationService}
 import uk.gov.hmrc.trusts.transformers.DeclareNoChangeTransformer
 import uk.gov.hmrc.trusts.utils.Headers
 
@@ -49,7 +49,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
   val auditService = new AuditService(mockAuditConnector, mockConfig)
   val validationService = new ValidationService()
 
-  val transformer = injector.instanceOf[DeclareNoChangeTransformer]
+  val mockVariationService = mock[VariationService]
 
   val responseHandler = new VariationsResponseHandler(mockAuditService)
 
@@ -59,7 +59,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
 
   private def trustVariationsController = {
-    val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig, transformer, responseHandler)
+    val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig, mockVariationService, responseHandler)
     SUT
   }
 
@@ -79,7 +79,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
           val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
 
-          val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig, transformer, responseHandler)
+          val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig, mockVariationService, responseHandler)
 
           val result = SUT.trustVariation()(
             postRequestWithPayload(requestPayLoad, withDraftId = false)
@@ -105,7 +105,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
           val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
 
-          val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, auditService, validationService, mockConfig, transformer, responseHandler)
+          val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, auditService, validationService, mockConfig, mockVariationService, responseHandler)
 
           val result = SUT.trustVariation()(
             postRequestWithPayload(requestPayLoad, withDraftId = false)

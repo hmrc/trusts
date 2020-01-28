@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.repositories
 import java.time.LocalDateTime
 
 import akka.stream.Materializer
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoApi
@@ -32,6 +32,7 @@ import uk.gov.hmrc.trusts.utils.DateFormatter
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class Repository @Inject()(
                                           mongo: ReactiveMongoApi,
                                           config: AppConfig,
