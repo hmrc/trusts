@@ -131,6 +131,7 @@
                 "middleName": "William",
                 "lastName": "O'Connor"
               },
+              "dateOfBirth":"1956-02-12",
               "phoneNumber": "0754545454",
               "email": "me@you.com",
               "identification": {
