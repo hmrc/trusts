@@ -614,6 +614,23 @@ class DesConnectorSpec extends BaseConnectorSpec {
       }
     }
 
+    "return NotEnoughData" when {
+
+      "json does not validate as GetData model" in {
+        val utr = "123456789"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustMalformedJsonResponse)
+
+        val futureResult = connector.getTrustInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe NotEnoughDataResponse
+        }
+      }
+
+    }
+
     "return InvalidUTRResponse" when {
 
       "des has returned a 400 with the code INVALID_UTR" in {

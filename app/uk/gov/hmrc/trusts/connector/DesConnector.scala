@@ -163,7 +163,7 @@ class DesConnector @Inject()(http: WSHttp, config: AppConfig) {
 
     Logger.info(s"[DesConnector] submitting trust variation for correlationId: $correlationId")
 
-     http.POST[JsValue, VariationResponse](trustVariationsEndpoint, trustVariations)(
+     http.POST[JsValue, VariationResponse](trustVariationsEndpoint, Json.toJson(trustVariations))(
        implicitly[Writes[JsValue]], VariationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
 
   }
