@@ -24,39 +24,33 @@ import uk.gov.hmrc.trusts.models.Declaration
 class DeclareNoChangeTransformer {
   def transform(beforeJson: JsValue, declaration: Declaration): JsResult[JsValue] = {
 
-    val matchFromPath = (__ \ 'getTrust \ 'matchData ).json.pick
-    val matchToPath = (__ \ 'matchData ).json
+    val trusteeField: String = {
+      val namePath = (__ \ 'trustOrEstateDisplay \ 'details \ 'trust \ 'entities \ 'leadTrustees \ 'name).json.pick[JsObject]
 
-    val corrFromPath = (__ \ 'getTrust \ 'correspondence ).json.pick
-    val corrToPath = (__ \ 'correspondence ).json
+      beforeJson.transform(namePath) match {
+        case JsSuccess(_, _) => "leadTrusteeInd"
+        case _ => "leadTrusteeOrg"
+      }
+    }
 
-    val leadTrusteeFromPath = (__ \ 'getTrust \ 'trust \ 'entities \ 'leadTrustee).json.update( of[JsObject]
-      .map{ leadTrustee => Json.arr( leadTrustee ) }) andThen
-      (__ \ 'getTrust \ 'trust \ 'entities \ 'leadTrustee).json.pick
-    val leadTrusteeToPath = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees).json
+    val trustFromPath = (__ \ 'trustOrEstateDisplay \ 'applicationType ).json.prune andThen
+      (__ \ 'trustOrEstateDisplay \ 'details \ 'trust \ 'entities \ 'leadTrustees).json.update( of[JsObject]
+        .map{ a => Json.arr(Json.obj(trusteeField -> a )) }) andThen
+      (__ \ 'trustOrEstateDisplay \ 'declaration).json.prune andThen
+      (__ \ 'trustOrEstateDisplay ).json.pick
 
-    val trustFromPath =
-      (__ \ 'getTrust \ 'declaration).json.prune andThen
-      (__ \ 'getTrust \ 'matchData).json.prune andThen
-      (__ \ 'getTrust \ 'correspondence).json.prune andThen
-        (__ \ 'getTrust \ 'trust \ 'entities \ 'leadTrustee).json.prune andThen
-      (__ \ 'getTrust ).json.pick
-
-    val trustToPath = (__ \ 'details ).json
+    val trustToPath = (__ ).json
 
     val headerFromPath = (__ \ 'responseHeader \ 'formBundleNo ).json.pick
     val headerToPath = (__ \ 'reqHeader \ 'formBundleNo ).json
 
-    val declarationInsert = (__ \ 'declaration ).json.put(Json.toJson(declaration))
+    val declarationInsert = (__ \ 'declaration).json.put(Json.toJson(declaration))
 
     val formBundleNoTransformer: Reads[JsObject] = {
-      matchToPath.copyFrom(matchFromPath) and
-      corrToPath.copyFrom(corrFromPath) and
-      declarationInsert and
-      leadTrusteeToPath.copyFrom(leadTrusteeFromPath) and
       trustToPath.copyFrom(trustFromPath) and
-      headerToPath.copyFrom(headerFromPath)
-    }.reduce
+        headerToPath.copyFrom(headerFromPath) and
+        declarationInsert
+      }.reduce
 
     beforeJson.transform(formBundleNoTransformer)
   }

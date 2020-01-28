@@ -26,7 +26,7 @@ class DeclareNoChangeTransformerSpec extends FreeSpec with MustMatchers with Opt
     val declaration = Declaration(NameType("First", None, "Last"), AddressType("Line1", "Line2", Some("Line3"), None, Some("POSTCODE"), "GB"))
 
     "transform json successfully for an org lead trustee" in {
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-from-cache.json")
+      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json")
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent.json")
       val transformer = new DeclareNoChangeTransformer
 
@@ -35,7 +35,7 @@ class DeclareNoChangeTransformerSpec extends FreeSpec with MustMatchers with Opt
     }
 
     "transform json successfully for an individual lead trustee" in {
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-individual-received-from-cache.json")
+      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-individual.json")
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual.json")
       val transformer = new DeclareNoChangeTransformer
 
