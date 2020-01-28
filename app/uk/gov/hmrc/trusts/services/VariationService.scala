@@ -16,11 +16,13 @@
 
 package uk.gov.hmrc.trusts.services
 
+
 import javax.inject.Inject
-import play.api.libs.json.{JsSuccess, JsValue, Json}
+import org.slf4j.LoggerFactory
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.Result
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.exceptions.EtmpDataStaleException
+import uk.gov.hmrc.trusts.exceptions.{EtmpDataStaleException, InternalServerErrorException}
 import uk.gov.hmrc.trusts.models.Declaration
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
@@ -32,24 +34,26 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class VariationService @Inject()(desService: DesService, declareNoChangeTransformer: DeclareNoChangeTransformer, auditService: AuditService) {
+  val logger = LoggerFactory.getLogger("application" + this.getClass.getCanonicalName)
 
-  def submitDeclareNoChange(utr:String, internalId: String,  declaration: Declaration)(implicit hc:HeaderCarrier): Future[VariationResponse] = {
+  def submitDeclareNoChange(utr: String, internalId: String, declaration: Declaration)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
     desService.getTrustInfo(utr, internalId).flatMap {
       case TrustProcessedResponse(data, header) =>
-        desService.getTrustInfoFormBundleNo(utr).flatMap {
-          formBundleNo =>
-            if (formBundleNo == header.formBundleNo) {
-              declareNoChangeTransformer.transform(data, declaration) match {
-                case JsSuccess(value, _) => doSubmit(value, internalId)
+        desService.getTrustInfoFormBundleNo(utr)
+          .filter(_ == header.formBundleNo)
+          .flatMap { _ =>
+            declareNoChangeTransformer.transform(data, declaration) match {
+              case JsSuccess(value, _) => doSubmit(value, internalId)
+              case JsError(errors) => {
+                logger.error("Problem transforming data for no change submission " + errors.toString())
+                Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
               }
-            } else {
-              Future.failed(EtmpDataStaleException)
             }
-        }
+          }.recoverWith { case _:NoSuchElementException => Future.failed(EtmpDataStaleException) }
     }
   }
 
-  private def doSubmit(value: JsValue, internalId: String)(implicit hc:HeaderCarrier) : Future[VariationResponse] = {
+  private def doSubmit(value: JsValue, internalId: String)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
     desService.trustVariation(value) map { response =>
 
       auditService.audit(
