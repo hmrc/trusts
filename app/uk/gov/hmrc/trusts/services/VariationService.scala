@@ -38,11 +38,11 @@ class VariationService @Inject()(desService: DesService, declareNoChangeTransfor
 
   def submitDeclareNoChange(utr: String, internalId: String, declaration: Declaration)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
     desService.getTrustInfo(utr, internalId).flatMap {
-      case TrustProcessedResponse(data, header) =>
+      case response: TrustProcessedResponse =>
         desService.getTrustInfoFormBundleNo(utr)
-          .filter(_ == header.formBundleNo)
+          .filter(_ == response.responseHeader.formBundleNo)
           .flatMap { _ =>
-            declareNoChangeTransformer.transform(data, declaration) match {
+            declareNoChangeTransformer.transform(response, declaration) match {
               case JsSuccess(value, _) => doSubmit(value, internalId)
               case JsError(errors) => {
                 logger.error("Problem transforming data for no change submission " + errors.toString())

@@ -57,8 +57,10 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
 
       when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
 
+      val response = TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
+
       when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))(any[HeaderCarrier]())).thenReturn(Future.successful(
-        TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
+        response
       ))
 
       when(desService.trustVariation(any())(any[HeaderCarrier])).thenReturn(Future.successful(
@@ -71,7 +73,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
 
       whenReady(OUT.submitDeclareNoChange(utr, internalId, declaration)) {variationResponse => {
         variationResponse mustBe VariationResponse("TVN34567890")
-        verify(transformer, times(1)).transform(trustInfoJson, declaration)
+        verify(transformer, times(1)).transform(response, declaration)
         val arg: ArgumentCaptor[JsValue] = ArgumentCaptor.forClass(classOf[JsValue])
         verify(desService, times(1)).trustVariation(arg.capture())(any[HeaderCarrier])
         arg.getValue mustBe transformedJson
