@@ -18,9 +18,10 @@ package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.connector.DesConnector
+import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.GetEstateResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustResponse, GetTrustSuccessResponse, TrustFoundResponse, TrustProcessedResponse}
@@ -34,6 +35,15 @@ import scala.concurrent.Future
 class DesService @Inject()(val desConnector: DesConnector, val repository: Repository)  {
 
   private val logger = LoggerFactory.getLogger("application." + classOf[DesService].getCanonicalName)
+
+  def getTrustInfoFormBundleNo(utr: String)(implicit hc:HeaderCarrier): Future[String] =
+    desConnector.getTrustInfo(utr).map {
+      case response: GetTrustSuccessResponse => response.responseHeader.formBundleNo
+      case response =>
+        val msg = s"Failed to retrieve latest form bundle no from ETMP : $response"
+        logger.warn(msg)
+        throw InternalServerErrorException(s"Submission could not proceed, $msg")
+    }
 
   def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest)
                                  (implicit hc: HeaderCarrier): Future[ExistingCheckResponse] = {
@@ -84,8 +94,8 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Repos
     desConnector.getEstateInfo(utr)
   }
 
-  def trustVariation(trustVariation: TrustVariation)(implicit hc: HeaderCarrier): Future[VariationResponse] =
-    desConnector.trustVariation(trustVariation: TrustVariation)
+  def trustVariation(trustVariation: JsValue)(implicit hc: HeaderCarrier): Future[VariationResponse] =
+    desConnector.trustVariation(trustVariation: JsValue)
 
   def estateVariation(estateVariation: EstateVariation)(implicit hc: HeaderCarrier): Future[VariationResponse] =
     desConnector.estateVariation(estateVariation: EstateVariation)

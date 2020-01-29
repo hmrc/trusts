@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.services
 
 import org.mockito.Matchers._
-import org.mockito.Mockito.{times, verify, when, verifyZeroInteractions}
+import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.connector.DesConnector
@@ -29,6 +29,7 @@ import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundRespo
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.repositories.Repository
+import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
 
@@ -186,6 +187,18 @@ class DesServiceSpec extends BaseSpec {
     }
   }
 
+  ".getTrustInfoFormBundleNo should return formBundle No from ETMP Data" in {
+    val etmpData = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
+    val mockDesconnector = mock[DesConnector]
+    val mockRepository = mock[Repository]
+    when(mockDesconnector.getTrustInfo(any())(any())).thenReturn(Future.successful(etmpData))
+
+    val OUT = new DesService(mockDesconnector, mockRepository)
+
+    whenReady(OUT.getTrustInfoFormBundleNo("75464876")) {formBundleNo =>
+      formBundleNo mustBe etmpData.responseHeader.formBundleNo
+    }
+  }
 
   ".registerTrust" should {
 

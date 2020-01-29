@@ -20,58 +20,58 @@ import javax.inject.Inject
 import play.api.libs.json.JsValue
 import play.api.mvc.Result
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.exceptions.{DuplicateSubmissionException, InvalidCorrelationIdException, ServiceNotAvailableException}
-import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
+import uk.gov.hmrc.trusts.exceptions.{DuplicateSubmissionException, EtmpCacheDataStaleException, InvalidCorrelationIdException, ServiceNotAvailableException}
 import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 import uk.gov.hmrc.trusts.services.AuditService
-import uk.gov.hmrc.trusts.utils.ErrorResponses.{duplicateSubmissionErrorResponse, internalServerErrorErrorResponse, invalidCorrelationIdErrorResponse, serviceUnavailableErrorResponse}
+import uk.gov.hmrc.trusts.utils.ErrorResponses._
 
 class VariationsResponseHandler @Inject()(auditService: AuditService) {
 
   def recoverFromException(auditType: String)(implicit request: IdentifierRequest[JsValue],hc: HeaderCarrier): PartialFunction[Throwable, Result] = {
 
     case InvalidCorrelationIdException =>
-
       auditService.auditErrorResponse(
         auditType,
         request.body,
         request.identifier,
         errorReason = "Submission has not passed validation. Invalid CorrelationId."
       )
-
       invalidCorrelationIdErrorResponse
 
     case DuplicateSubmissionException =>
-
       auditService.auditErrorResponse(
         auditType,
         request.body,
         request.identifier,
         errorReason = "Duplicate Correlation Id was submitted."
       )
-
       duplicateSubmissionErrorResponse
 
     case ServiceNotAvailableException(_) =>
-
       auditService.auditErrorResponse(
         auditType,
         request.body,
         request.identifier,
         errorReason = "Service unavailable."
       )
-
       serviceUnavailableErrorResponse
 
-    case _ =>
+    case EtmpCacheDataStaleException =>
+      auditService.auditErrorResponse(
+        auditType,
+        request.body,
+        request.identifier,
+        errorReason = "Cached ETMP data stale."
+      )
+      etmpDataStaleErrorResponse
 
+    case _ =>
       auditService.auditErrorResponse(
         auditType,
         request.body,
         request.identifier,
         errorReason = "Internal server error."
       )
-
       internalServerErrorErrorResponse
   }
 

@@ -156,7 +156,7 @@ class DesConnector @Inject()(http: WSHttp, config: AppConfig) {
     http.GET[GetEstateResponse](createGetTrustOrEstateEndpoint(utr))(GetEstateResponse.httpReads, implicitly[HeaderCarrier](hc), global)
   }
 
-  def trustVariation(trustVariations: TrustVariation)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
+  def trustVariation(trustVariations: JsValue)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
     val correlationId = UUID.randomUUID().toString
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))

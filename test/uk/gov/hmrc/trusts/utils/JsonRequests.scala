@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.trusts.utils
 
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.variation.{EstateVariation, TrustVariation}
 
@@ -36,7 +37,7 @@ trait JsonRequests extends JsonUtils {
   lazy val validEstateVariationsRequestJson  =  getJsonFromFile("valid-estate-variation-api.json")
   lazy val invalidEstateVariationsRequestJson = getJsonFromFile("invalid-estate-variation-api.json")
 
-  lazy val trustVariationsRequest = getJsonValueFromFile("valid-trusts-variations-api.json").validate[TrustVariation].get
+  lazy val trustVariationsRequest = getJsonValueFromFile("valid-trusts-variations-api.json").validate[JsValue].get
   lazy val invalidTrustVariationsRequest = getJsonValueFromFile("invalid-payload-trusts-variations.json")
 
   lazy val estateVariationsRequest = getJsonValueFromFile("valid-estate-variation-api.json").validate[EstateVariation].get
