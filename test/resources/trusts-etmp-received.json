@@ -21,6 +21,18 @@
       },
       "phoneNumber": "+4423400342"
     },
+    "yearsReturns": {
+      "returns": [
+        {
+          "taxReturnYear": "18",
+          "taxConsequence": true
+        },
+        {
+          "taxReturnYear": "19",
+          "taxConsequence": true
+        }
+      ]
+    },
     "declaration": {
       "name": {
         "firstName": "Abram",
