@@ -22,6 +22,7 @@ import org.mockito.Matchers.{eq => Meq, _}
 import org.mockito.Mockito._
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
 import play.api.libs.json.{JsValue, Json}
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.http.HeaderCarrier
@@ -30,6 +31,7 @@ import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
+import uk.gov.hmrc.trusts.models.{AddressType, Declaration, NameType}
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, ValidationService, VariationService}
 import uk.gov.hmrc.trusts.transformers.DeclareNoChangeTransformer
@@ -59,7 +61,14 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
 
   private def trustVariationsController = {
-    val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig, mockVariationService, responseHandler)
+    val SUT = new TrustVariationsController(
+      new FakeIdentifierAction(Organisation),
+      mockDesService,
+      mockAuditService,
+      validationService,
+      mockConfig,
+      mockVariationService,
+      responseHandler)
     SUT
   }
 
@@ -299,6 +308,30 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
         }
 
+      }
+
+      "Return bad request when declaring No change and there is a form bundle number mismatch" in {
+        val SUT = trustVariationsController
+        val declaration = Declaration(
+          NameType("firstname", None, "Surname"),
+          AddressType("Line1", "Line2", Some("Line3"), None, Some("POSTCODE"), "GB")
+        )
+
+        when(mockVariationService.submitDeclareNoChange(any(), any(), any())(any()))
+          .thenReturn(Future.failed(EtmpCacheDataStaleException))
+
+        val result = SUT.noChange("1234567890")(
+          FakeRequest("POST", "/no-change/1234567890").withBody(Json.toJson(declaration))
+        )
+
+        status(result) mustBe BAD_REQUEST
+
+        verify(mockAuditService).auditErrorResponse(
+          Meq(trustVariationsAuditEvent),
+          any(),
+          Meq("id"),
+          Meq("Cached ETMP data stale.")
+        )(any())
       }
 
       "return service unavailable" when {

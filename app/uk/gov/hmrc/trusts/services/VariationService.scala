@@ -21,7 +21,7 @@ import javax.inject.Inject
 import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.exceptions.{EtmpDataStaleException, InternalServerErrorException}
+import uk.gov.hmrc.trusts.exceptions.{EtmpCacheDataStaleException, InternalServerErrorException}
 import uk.gov.hmrc.trusts.models.Declaration
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
@@ -42,7 +42,7 @@ class VariationService @Inject()(desService: DesService, declareNoChangeTransfor
       case tpr:TrustProcessedResponse if tpr.responseHeader.formBundleNo == fbn =>
         response.asInstanceOf[TrustProcessedResponse]
       case _:TrustProcessedResponse =>
-        throw EtmpDataStaleException
+        throw EtmpCacheDataStaleException
       case _ =>
         throw InternalServerErrorException("Submission could not proceed, Trust data was not in a processed state")
     }

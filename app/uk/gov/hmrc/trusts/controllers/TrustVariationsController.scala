@@ -83,7 +83,7 @@ class TrustVariationsController @Inject()(
   }
 
   def noChange(utr: String) = identify.async(parse.json) {
-    implicit request =>
+    implicit request => {
       request.body.validate[Declaration].fold(
         _ => Future.successful(BadRequest),
         declaration => {
@@ -92,6 +92,7 @@ class TrustVariationsController @Inject()(
             .map(response => Ok(Json.toJson(response)))
         } recover responseHandler.recoverFromException(TrustAuditing.TRUST_VARIATION)
       )
+    }
   }
 }
 

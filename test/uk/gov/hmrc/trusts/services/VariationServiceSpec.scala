@@ -30,7 +30,7 @@ import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.models.{AddressType, Declaration, NameType}
 import uk.gov.hmrc.trusts.transformers.DeclareNoChangeTransformer
 import uk.gov.hmrc.trusts.utils.JsonRequests
-import uk.gov.hmrc.trusts.exceptions.EtmpDataStaleException
+import uk.gov.hmrc.trusts.exceptions.EtmpCacheDataStaleException
 
 import scala.concurrent.Future
 
@@ -100,7 +100,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
     val OUT = new VariationService(desService, transformer, auditService)
 
     whenReady(OUT.submitDeclareNoChange(utr, internalId, declaration).failed) {exception => {
-      exception mustBe an[EtmpDataStaleException.type]
+      exception mustBe an[EtmpCacheDataStaleException.type]
       verify(desService, times(0)).trustVariation(any())(any[HeaderCarrier])
     }
     }
