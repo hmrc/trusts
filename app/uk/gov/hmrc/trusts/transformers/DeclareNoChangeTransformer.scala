@@ -38,6 +38,7 @@ class DeclareNoChangeTransformer {
       (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees).json.update( of[JsObject]
         .map{ a => Json.arr(Json.obj(trusteeField -> a )) }) andThen
       (__ \ 'declaration).json.prune andThen
+      (__ \ 'yearsReturns).json.prune andThen
       (__).json.pick
 
     val trustToPath = (__).json
