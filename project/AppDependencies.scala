@@ -1,12 +1,12 @@
 import play.core.PlayVersion
 import play.sbt.PlayImport._
-import sbt.Keys.libraryDependencies
 import sbt._
 
 object AppDependencies {
 
   val compile: Seq[ModuleID] = Seq(
     ws,
+    "org.reactivemongo"           %% "play2-reactivemongo"    % "0.18.3-play25",
     "uk.gov.hmrc"                 %% "bootstrap-play-25"      % "5.1.0",
     "com.github.java-json-tools"   % "json-schema-validator"  % "2.2.12"
   )

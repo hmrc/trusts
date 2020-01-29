@@ -16,11 +16,27 @@
 
 package uk.gov.hmrc.trusts.connectors
 
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, containing, equalTo, get, post, put, urlEqualTo}
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
+import play.api.test.Helpers.CONTENT_TYPE
 import uk.gov.hmrc.trusts.BaseSpec
+import uk.gov.hmrc.trusts.utils.WireMockHelper
 
+class BaseConnectorSpec extends BaseSpec with WireMockHelper {
 
-class BaseConnectorSpec extends BaseSpec {
+  override def applicationBuilder(): GuiceApplicationBuilder = {
+    super.applicationBuilder()
+      .configure(
+        Seq(
+          "microservice.services.des-trusts.port" -> server.port(),
+          "microservice.services.des-estates.port" -> server.port(),
+          "microservice.services.des-display-trust-or-estate.port" -> server.port(),
+          "microservice.services.des-vary-trust-or-estate.port" -> server.port(),
+          "microservice.services.tax-enrolments.port" -> server.port()
+        ): _*)
+  }
 
   val jsonResponse400: JsValue = Json.parse(
     s"""
@@ -113,5 +129,49 @@ class BaseConnectorSpec extends BaseSpec {
        | "code": "NO_CONTENT",
        | "reason": "No Conent."
        |}""".stripMargin)
+
+
+  def stubForPost(server: WireMockServer,
+                  url: String,
+                  requestBody: String,
+                  returnStatus: Int,
+                  responseBody: String,
+                  delayResponse: Int = 0) = {
+
+    server.stubFor(post(urlEqualTo(url))
+      .withHeader(CONTENT_TYPE, containing("application/json"))
+      .withHeader("Environment", containing("dev"))
+      .withRequestBody(equalTo(requestBody))
+      .willReturn(
+        aResponse()
+          .withStatus(returnStatus)
+          .withBody(responseBody).withFixedDelay(delayResponse)))
+  }
+
+
+  def stubForGet(server: WireMockServer,
+                 url: String, returnStatus: Int,
+                 responseBody: String,
+                 delayResponse: Int = 0) = {
+    server.stubFor(get(urlEqualTo(url))
+      .withHeader("content-Type", containing("application/json"))
+      .willReturn(
+        aResponse()
+          .withStatus(returnStatus)
+          .withBody(responseBody).withFixedDelay(delayResponse)))
+  }
+
+  def stubForPut(server: WireMockServer,
+                 url: String,
+                 returnStatus: Int,
+                 delayResponse: Int = 0) = {
+    server.stubFor(put(urlEqualTo(url))
+      .withHeader("content-Type", containing("application/json"))
+      .willReturn(
+        aResponse()
+          .withStatus(returnStatus)
+          .withFixedDelay(delayResponse)))
+  }
+
 
 }

@@ -18,39 +18,66 @@ package uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust
 
 import play.api.Logger
 import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK, SERVICE_UNAVAILABLE}
-import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
-import uk.gov.hmrc.trusts.models.get_trust_or_estate._
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.{ResponseHeader, _}
 
 trait GetTrustResponse
+trait GetTrustSuccessResponse extends GetTrustResponse {
+  def responseHeader: ResponseHeader
+}
 
-case class TrustFoundResponse(getTrust: Option[GetTrust],
-                              responseHeader: ResponseHeader) extends GetTrustResponse
+case class TrustProcessedResponse(getTrust: JsValue,
+                              responseHeader: ResponseHeader) extends GetTrustSuccessResponse
 
-object TrustFoundResponse {
-  implicit val writes: Writes[TrustFoundResponse] = Json.writes[TrustFoundResponse]
-  implicit val reads: Reads[TrustFoundResponse] = (
-    (JsPath \ "trustOrEstateDisplay").readNullable[GetTrust] and
-    (JsPath \ "responseHeader").read[ResponseHeader]
-  )(TrustFoundResponse.apply _)
+object TrustProcessedResponse {
+  val mongoWrites: Writes[TrustProcessedResponse] = new Writes[TrustProcessedResponse] {
+    override def writes(o: TrustProcessedResponse): JsValue = Json.obj(
+      "responseHeader" -> Json.toJson(o.responseHeader)(ResponseHeader.mongoWrites),
+      "trustOrEstateDisplay" -> o.getTrust)
+  }
+}
+
+case class TrustFoundResponse(responseHeader: ResponseHeader) extends GetTrustSuccessResponse
+
+object GetTrustSuccessResponse {
+
+
+  implicit val writes: Writes[GetTrustSuccessResponse] = Writes{
+    case TrustProcessedResponse(trust, header) =>Json.obj("responseHeader" -> header, "getTrust" -> Json.toJson(trust.as[GetTrust]))
+    case TrustFoundResponse(header) => Json.obj("responseHeader" -> header)
+  }
+
+  implicit val reads: Reads[GetTrustSuccessResponse] = new Reads[GetTrustSuccessResponse] {
+    override def reads(json: JsValue): JsResult[GetTrustSuccessResponse] = {
+      val header = (json \ "responseHeader").validate[ResponseHeader]
+      (json \ "trustOrEstateDisplay").toOption match {
+        case None => header.map(TrustFoundResponse)
+        case Some(x) =>
+          x.validate[GetTrust] match {
+            case JsSuccess(_, _) =>
+              header.map(h => TrustProcessedResponse(x, h))
+            case x : JsError => x
+          }
+
+      }
+    }
+  }
 }
 
 object GetTrustResponse {
-
   implicit lazy val httpReads: HttpReads[GetTrustResponse] =
     new HttpReads[GetTrustResponse] {
       override def read(method: String, url: String, response: HttpResponse): GetTrustResponse = {
         Logger.info(s"[GetTrustResponse]  response status received from des: ${response.status}")
         response.status match {
           case OK =>
-            response.json.validate[TrustFoundResponse] match {
+            response.json.validate[GetTrustSuccessResponse] match {
               case JsSuccess(trustFound,_) => trustFound
               case JsError(errors) =>
-                Logger.info(s"[GetTrustResponse] Cannot parse as TrustFoundResponse due to $errors")
-                NotEnoughDataResponse
+                  Logger.info(s"[GetTrustResponse] Cannot parse as TrustFoundResponse due to $errors")
+                  NotEnoughDataResponse
             }
           case BAD_REQUEST =>
             response.json.asOpt[DesErrorResponse] match {

@@ -1,0 +1,142 @@
+{
+  "responseHeader": {
+    "dfmcaReturnUserStatus": "Processed",
+    "formBundleNo": "000001234567"
+  },
+  "trustOrEstateDisplay": {
+    "applicationType": "01",
+    "matchData": {
+      "utr": "6666666666"
+    },
+    "correspondence": {
+      "abroadIndicator": false,
+      "name": "BAD REQUEST",
+      "address": {
+        "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+        "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+        "line3": "1234567890 QwErTyUiOp ,.(/)&'- name",
+        "line4": "1234567890 QwErTyUiOp ,.(/)&'- name",
+        "postCode": "SR2 7UY",
+        "country": "GB"
+      },
+      "phoneNumber": "+123456789012345678"
+    },
+    "yearsReturns": {
+      "returns": [
+        {
+          "taxReturnYear": "18",
+          "taxConsequence": true
+        },
+        {
+          "taxReturnYear": "19",
+          "taxConsequence": true
+        }
+      ]
+    },
+    "declaration": {
+      "name": {
+        "firstName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+        "lastName": "1234567890 QwErTyUiOp ,.(/)&'- name"
+      },
+      "address": {
+        "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+        "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+        "line3": "1234567890 QwErTyUiOp ,.(/)&'- name",
+        "line4": "1234567890 QwErTyUiOp ,.(/)&'- name",
+        "postCode": "SR2 7UY",
+        "country": "GB"
+      }
+    },
+    "details": {
+      "trust": {
+        "details": {
+          "startDate": "2017-04-06",
+          "administrationCountry": "GB",
+          "residentialStatus": {
+            "nonUK": {
+              "sch5atcgga92": false,
+              "s218ihta84": false
+            }
+          },
+          "typeOfTrust": "Deed of Variation Trust or Family Arrangement",
+          "deedOfVariation": "Replaced the will trust"
+        },
+        "entities": {
+          "beneficiary": {
+            "charity": [
+              {
+                "lineNo": "1",
+                "bpMatchStatus": "01",
+                "entityStart": "2019-02-28",
+                "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "beneficiaryDiscretion": false,
+                "beneficiaryShareOfIncome": "100",
+                "identification": {
+                  "address": {
+                    "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                    "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                    "line3": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                    "country": "DE"
+                  }
+                }
+              }
+            ]
+          },
+          "leadTrustees": {
+          },
+          "trustees": [
+            {
+              "trusteeOrg": {
+                "lineNo": "1",
+                "bpMatchStatus": "01",
+                "entityStart": "2019-02-28",
+                "name": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "identification": {
+                  "address": {
+                    "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                    "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                    "line3": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                    "line4": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                    "postCode": "SR2 7UY",
+                    "country": "GB"
+                  }
+                }
+              }
+            }
+          ],
+          "protectors": {
+            "protectorCompany": [
+              {
+                "lineNo": "1",
+                "bpMatchStatus": "01",
+                "entityStart": "2019-02-28",
+                "name": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "identification": {
+                  "utr": "1234567891"
+                }
+              }
+            ]
+          },
+          "settlors": {
+            "settlorCompany": [
+              {
+                "lineNo": "1",
+                "bpMatchStatus": "01",
+                "entityStart": "2019-02-28",
+                "name": "1234567890 QwErTyUiOp ,.(/)&'- name"
+              }
+            ]
+          }
+        },
+        "assets": {
+          "other": [
+            {
+              "description": "1234567890&`'^ -QWERTYqwertyzxcvbnmasdfghjklpoiuypoiuytr",
+              "value": 999999999999
+            }
+          ]
+        }
+      }
+    }
+  }
+}
