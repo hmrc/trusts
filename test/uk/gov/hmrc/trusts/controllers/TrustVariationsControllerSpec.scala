@@ -325,6 +325,10 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
         )
 
         status(result) mustBe BAD_REQUEST
+        contentAsJson(result) mustBe Json.obj(
+          "code" -> "ETMP_DATA_STALE",
+          "message" -> "ETMP returned a changed form bundle number for the trust."
+        )
 
         verify(mockAuditService).auditErrorResponse(
           Meq(trustVariationsAuditEvent),
