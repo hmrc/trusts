@@ -18,18 +18,25 @@ package uk.gov.hmrc.trusts.transformers
 
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
-import play.api.libs.json.{JsValue, Json, __}
-import uk.gov.hmrc.trusts.models.IdentificationOrgType
-import uk.gov.hmrc.trusts.models.variation.{LeadTrusteeOrgType, LeadTrusteeType}
+import play.api.libs.json.{JsValue, Json, Writes, __}
+import uk.gov.hmrc.trusts.models.{IdentificationOrgType, NameType}
+import uk.gov.hmrc.trusts.models.variation.{IdentificationType, LeadTrusteeIndType, LeadTrusteeOrgType, LeadTrusteeType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class ModifyLeadTrusteeTransform(leadTrustee: LeadTrusteeType) extends DeltaTransform {
   override def applyTransform(input: JsValue): JsValue = {
+    leadTrustee match {
+      case LeadTrusteeType(None, Some(lead)) => setLeadTrustee(input, lead)
+      case LeadTrusteeType(Some(lead), None) => setLeadTrustee(input, lead)
+    }
+  }
+
+  private def setLeadTrustee[A](input: JsValue, lead: A)(implicit writes: Writes[A]) = {
     val leadTrusteesPath = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees)
 
     input.transform(
       leadTrusteesPath.json.prune andThen
-      leadTrusteesPath.json.put(Json.toJson(leadTrustee.leadTrusteeOrg))
+        leadTrusteesPath.json.put(Json.toJson(lead))
     ).asOpt.get
   }
 }
@@ -37,7 +44,7 @@ class ModifyLeadTrusteeTransform(leadTrustee: LeadTrusteeType) extends DeltaTran
 class ModifyLeadTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionValues {
   "the modify lead transformer should" - {
 
-    "successfully modify a lead trustee's details" in {
+    "successfully set a new org lead trustee's details" in {
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-before.json")
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-after-org.json")
       val orgAddress = None
@@ -60,5 +67,29 @@ class ModifyLeadTrusteeTransformSpec extends FreeSpec with MustMatchers with Opt
       val result = transformer.applyTransform(beforeJson)
       result mustBe afterJson
     }
+    "successfully set a new ind lead trustee's details" in {
+      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-before.json")
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-after-ind.json")
+      val newTrusteeIndInfo = LeadTrusteeIndType(
+        lineNo = Some("newLineNo"),
+        bpMatchStatus = Some("newMatchStatus"),
+        name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
+        phoneNumber = "newPhone",
+        email = Some("newEmail"),
+        dateOfBirth = new DateTime(1965, 2, 10, 12, 30),
+        identification = IdentificationType(Some("newNino"), None, None, None),
+        entityStart = new DateTime(2012, 3, 14, 12, 30),
+        entityEnd = None
+      )
+      val newTrusteeInfo = LeadTrusteeType(
+        leadTrusteeInd = Some(newTrusteeIndInfo),
+        leadTrusteeOrg = None
+      )
+      val transformer = new ModifyLeadTrusteeTransform(newTrusteeInfo)
+
+      val result = transformer.applyTransform(beforeJson)
+      result mustBe afterJson
+    }
+
   }
 }
