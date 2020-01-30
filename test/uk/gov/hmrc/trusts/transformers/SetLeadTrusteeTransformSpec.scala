@@ -22,7 +22,7 @@ import uk.gov.hmrc.trusts.models.variation.{IdentificationType, LeadTrusteeIndTy
 import uk.gov.hmrc.trusts.models.{IdentificationOrgType, NameType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class ModifyLeadTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionValues {
+class SetLeadTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionValues {
   "the modify lead transformer should" - {
 
     "successfully set a new org lead trustee's details" in {
@@ -43,7 +43,7 @@ class ModifyLeadTrusteeTransformSpec extends FreeSpec with MustMatchers with Opt
         leadTrusteeInd = None,
         leadTrusteeOrg = Some(newTrusteeOrgInfo)
       )
-      val transformer = new ModifyLeadTrusteeTransform(newTrusteeInfo)
+      val transformer = new SetLeadTrusteeTransform(newTrusteeInfo)
 
       val result = transformer.applyTransform(beforeJson)
       result mustBe afterJson
@@ -66,7 +66,7 @@ class ModifyLeadTrusteeTransformSpec extends FreeSpec with MustMatchers with Opt
         leadTrusteeInd = Some(newTrusteeIndInfo),
         leadTrusteeOrg = None
       )
-      val transformer = new ModifyLeadTrusteeTransform(newTrusteeInfo)
+      val transformer = new SetLeadTrusteeTransform(newTrusteeInfo)
 
       val result = transformer.applyTransform(beforeJson)
       result mustBe afterJson

@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.transformers
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.variation.LeadTrusteeType
 
-class ModifyLeadTrusteeTransform(leadTrustee: LeadTrusteeType) extends DeltaTransform {
+class SetLeadTrusteeTransform(leadTrustee: LeadTrusteeType) extends DeltaTransform {
   override def applyTransform(input: JsValue): JsValue = {
     leadTrustee match {
       case LeadTrusteeType(None, Some(lead)) => setLeadTrustee(input, lead)
@@ -32,7 +32,7 @@ class ModifyLeadTrusteeTransform(leadTrustee: LeadTrusteeType) extends DeltaTran
 
     input.transform(
       leadTrusteesPath.json.prune andThen
-        leadTrusteesPath.json.put(Json.toJson(lead))
+      leadTrusteesPath.json.put(Json.toJson(lead))
     ).asOpt.get
   }
 }
