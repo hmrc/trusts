@@ -18,28 +18,9 @@ package uk.gov.hmrc.trusts.transformers
 
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
-import play.api.libs.json.{JsValue, Json, Writes, __}
-import uk.gov.hmrc.trusts.models.{IdentificationOrgType, NameType}
 import uk.gov.hmrc.trusts.models.variation.{IdentificationType, LeadTrusteeIndType, LeadTrusteeOrgType, LeadTrusteeType}
+import uk.gov.hmrc.trusts.models.{IdentificationOrgType, NameType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
-
-class ModifyLeadTrusteeTransform(leadTrustee: LeadTrusteeType) extends DeltaTransform {
-  override def applyTransform(input: JsValue): JsValue = {
-    leadTrustee match {
-      case LeadTrusteeType(None, Some(lead)) => setLeadTrustee(input, lead)
-      case LeadTrusteeType(Some(lead), None) => setLeadTrustee(input, lead)
-    }
-  }
-
-  private def setLeadTrustee[A](input: JsValue, lead: A)(implicit writes: Writes[A]) = {
-    val leadTrusteesPath = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees)
-
-    input.transform(
-      leadTrusteesPath.json.prune andThen
-        leadTrusteesPath.json.put(Json.toJson(lead))
-    ).asOpt.get
-  }
-}
 
 class ModifyLeadTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionValues {
   "the modify lead transformer should" - {
