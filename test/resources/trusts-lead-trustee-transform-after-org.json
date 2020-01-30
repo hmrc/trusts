@@ -1,0 +1,19 @@
+{
+  "details":{
+    "trust":{
+      "entities":{
+        "leadTrustees":{
+          "lineNo":"newLineNo",
+          "bpMatchStatus":"newMatchStatus",
+          "name":"newName",
+          "phoneNumber":"newPhone",
+          "email":"newEmail",
+          "identification":{
+            "utr":"newUtr"
+          },
+          "entityStart":"2012-03-14"
+        }
+      }
+    }
+  }
+}
