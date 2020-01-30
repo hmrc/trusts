@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.transformers
 
 import play.api.libs.json.{JsPath, JsValue}
 
-sealed trait DeltaTransform {
+trait DeltaTransform {
   def applyTransform(input: JsValue): JsValue
 }
 
