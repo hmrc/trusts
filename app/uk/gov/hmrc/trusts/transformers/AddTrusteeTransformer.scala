@@ -15,30 +15,27 @@
  */
 
 package uk.gov.hmrc.trusts.transformers
-import play.api.libs.json._
 import play.api.libs.json.Reads._
+import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.variation.TrusteeType
-import play.api.libs.functional.syntax._
 
 class AddTrusteeTransformer(newTrustee: TrusteeType) extends DeltaTransform {
 
   override def applyTransform(input: JsValue): JsValue = {
 
     val trustees: Reads[JsObject] =
-
-      (__ \ 'details \ 'trust \ 'entities \ 'trustees).json.update( of[JsArray].map { trustees =>
-        (newTrustee.trusteeInd, newTrustee.trusteeOrg) match {
-          case (Some(individual), None) => trustees :+ Json.obj("trusteeInd" -> Json.toJson(individual))
-          case (None, Some(organisation)) => trustees :+ Json.obj("trusteeOrg" -> Json.toJson(organisation))
+      (__ \ 'details \ 'trust \ 'entities \ 'trustees).json.update( of[JsArray]
+        .map {
+          trustees => (newTrustee.trusteeInd, newTrustee.trusteeOrg) match {
+            case (Some(individual), None) => trustees :+ Json.obj("trusteeInd" -> Json.toJson(individual))
+            case (None, Some(organisation)) => trustees :+ Json.obj("trusteeOrg" -> Json.toJson(organisation))
+          }
         }
-      }
+      )
+
+    input.transform(trustees).fold(
+      errors  => throw new Exception(s"Failed to transform Json with the following errors: $errors"),
+      valid   => valid
     )
-
-    val updatedJson: Reads[JsObject] = {
-      (__).json.copyFrom((__).json.pick) and
-        trustees
-      }.reduce
-
-    input.transform(updatedJson).fold( invalid => throw new Exception("Something went wrong"), valid => valid)
   }
 }
