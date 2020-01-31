@@ -31,8 +31,8 @@ class SetLeadTrusteeTransform(leadTrustee: LeadTrusteeType) extends DeltaTransfo
     val leadTrusteesPath = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees)
 
     input.transform(
-      leadTrusteesPath.json.prune andThen
-      leadTrusteesPath.json.put(Json.toJson(lead))
+        leadTrusteesPath.json.prune andThen
+        (__).json.update(leadTrusteesPath.json.put(Json.toJson(lead)))
     ).asOpt.get
   }
 }
