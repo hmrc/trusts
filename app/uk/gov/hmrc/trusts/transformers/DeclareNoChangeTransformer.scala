@@ -43,10 +43,6 @@ class DeclareNoChangeTransformer {
   private val pathToLeadTrustees: JsPath = __ \ 'details \ 'trust \ 'entities \ 'leadTrustees
   private val pickLeadTrustee = pathToLeadTrustees.json.pick
 
-  private def getLeadTrustee(json: JsValue): JsResult[JsValue] = {
-    json.transform(pickLeadTrustee)
-  }
-
   private def trusteeField(json: JsValue): String = determineTrusteeField(pathToLeadTrustees, json)
 
   private def determineTrusteeField(rootPath: JsPath, json: JsValue): String = {
@@ -65,8 +61,9 @@ class DeclareNoChangeTransformer {
   }
 
   private def addPreviousLeadTrustee(newJson: JsValue, originalJson: JsValue) = {
-    val newLeadTrustee: JsResult[JsValue] = getLeadTrustee(newJson)
-    val originalLeadTrustee: JsResult[JsValue] = getLeadTrustee(originalJson)
+    val newLeadTrustee = newJson.transform(pickLeadTrustee)
+    val originalLeadTrustee = originalJson.transform(pickLeadTrustee)
+
     (newLeadTrustee, originalLeadTrustee) match {
       case (JsSuccess(newLeadTrusteeJson, _), JsSuccess(originalLeadTrusteeJson, _))
         if (newLeadTrusteeJson != originalLeadTrusteeJson) =>
