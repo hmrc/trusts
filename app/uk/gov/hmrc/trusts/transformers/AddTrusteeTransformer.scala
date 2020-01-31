@@ -27,8 +27,9 @@ class AddTrusteeTransformer(newTrustee: TrusteeType) extends DeltaTransform {
       (__ \ 'details \ 'trust \ 'entities \ 'trustees).json.update( of[JsArray]
         .map {
           trustees => (newTrustee.trusteeInd, newTrustee.trusteeOrg) match {
-            case (Some(individual), None) => trustees :+ Json.obj("trusteeInd" -> Json.toJson(individual))
-            case (None, Some(organisation)) => trustees :+ Json.obj("trusteeOrg" -> Json.toJson(organisation))
+            case (Some(individual), _)    => trustees :+ Json.obj("trusteeInd" -> Json.toJson(individual))
+            case (_, Some(organisation))  => trustees :+ Json.obj("trusteeOrg" -> Json.toJson(organisation))
+            case _                        => trustees
           }
         }
       )
