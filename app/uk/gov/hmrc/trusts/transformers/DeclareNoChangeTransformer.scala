@@ -30,12 +30,12 @@ class DeclareNoChangeTransformer {
 
     responseJson.transform(
       (__ \ 'applicationType).json.prune andThen
-      (__ \ 'declaration).json.prune andThen
-      (__ \ 'yearsReturns).json.prune andThen
-      convertLeadTrustee(responseJson) andThen
-      addPreviousLeadTrustee(responseJson, originalJson) andThen
-      insertReqFormBundleNo(responseHeader.formBundleNo) andThen
-      insertDeclaration(declaration)
+        (__ \ 'declaration).json.prune andThen
+        (__ \ 'yearsReturns).json.prune andThen
+        convertLeadTrustee(responseJson) andThen
+        addPreviousLeadTrustee(responseJson, originalJson) andThen
+        putNewValue(__ \ 'reqHeader \ 'formBundleNo, JsString(responseHeader.formBundleNo)) andThen
+        putNewValue(__ \ 'declaration, Json.toJson(declaration))
     )
   }
 
@@ -78,10 +78,4 @@ class DeclareNoChangeTransformer {
 
   private def putNewValue(path: JsPath, value: JsValue ): Reads[JsObject] =
     { allContent.copyFrom(pickAllContent) and path.json.put(value) }.reduce
-
-  private def insertReqFormBundleNo(bundleNo: String): Reads[JsObject] =
-    putNewValue(__ \ 'reqHeader \ 'formBundleNo, JsString(bundleNo))
-
-  private def insertDeclaration(declaration: Declaration): Reads[JsObject] =
-    putNewValue(__ \ 'declaration, Json.toJson(declaration))
 }
