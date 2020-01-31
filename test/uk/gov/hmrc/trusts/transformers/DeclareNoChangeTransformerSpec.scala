@@ -32,7 +32,7 @@ class DeclareNoChangeTransformerSpec extends FreeSpec with MustMatchers with Opt
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent.json")
       val transformer = new DeclareNoChangeTransformer
 
-      val result = transformer.transform(trustResponse, declaration)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declaration)
       result.asOpt.value mustBe afterJson
     }
 
@@ -42,7 +42,7 @@ class DeclareNoChangeTransformerSpec extends FreeSpec with MustMatchers with Opt
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual.json")
       val transformer = new DeclareNoChangeTransformer
 
-      val result = transformer.transform(trustResponse, declaration)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declaration)
       result.asOpt.value mustBe afterJson
     }
   }

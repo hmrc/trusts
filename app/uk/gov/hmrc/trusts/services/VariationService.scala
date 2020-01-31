@@ -48,7 +48,7 @@ class VariationService @Inject()(desService: DesService, declareNoChangeTransfor
     }
 
     checkedResponse.flatMap { response =>
-      declareNoChangeTransformer.transform(response, declaration) match {
+      declareNoChangeTransformer.transform(response, response.getTrust, declaration) match {
         case JsSuccess(value, _) => doSubmit(value, internalId)
         case JsError(errors) => {
           logger.error("Problem transforming data for no change submission " + errors.toString())

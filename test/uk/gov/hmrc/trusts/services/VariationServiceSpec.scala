@@ -36,15 +36,15 @@ import scala.concurrent.Future
 
 class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar with ScalaFutures with MustMatchers {
 
-  implicit  val hc: HeaderCarrier = new HeaderCarrier
+  private implicit  val hc: HeaderCarrier = new HeaderCarrier
   private val formBundleNo = "001234567890"
-  val utr = "1234567890"
-  val internalId = "InternalId"
-  val fullEtmpResponseJson = getTrustResponse
-  val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
-  val transformedJson = Json.obj("field" -> "value")
+  private val utr = "1234567890"
+  private val internalId = "InternalId"
+  private val fullEtmpResponseJson = getTrustResponse
+  private val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
+  private val transformedJson = Json.obj("field" -> "value")
 
-  val declaration = Declaration(
+  private val declaration = Declaration(
     NameType("Handy", None, "Andy"),
     AddressType("Line1", "Line2", Some("Line3"), None, Some("POSTCODE"), "GB")
   )
@@ -67,13 +67,13 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
         VariationResponse("TVN34567890")
       ))
 
-      when(transformer.transform(any(),any())).thenReturn(JsSuccess(transformedJson))
+      when(transformer.transform(any(),any(),any())).thenReturn(JsSuccess(transformedJson))
 
       val OUT = new VariationService(desService, transformer, auditService)
 
       whenReady(OUT.submitDeclareNoChange(utr, internalId, declaration)) {variationResponse => {
         variationResponse mustBe VariationResponse("TVN34567890")
-        verify(transformer, times(1)).transform(response, declaration)
+        verify(transformer, times(1)).transform(response, response.getTrust, declaration)
         val arg: ArgumentCaptor[JsValue] = ArgumentCaptor.forClass(classOf[JsValue])
         verify(desService, times(1)).trustVariation(arg.capture())(any[HeaderCarrier])
         arg.getValue mustBe transformedJson
@@ -95,7 +95,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
       VariationResponse("TVN34567890")
     ))
 
-    when(transformer.transform(any(),any())).thenReturn(JsSuccess(transformedJson))
+    when(transformer.transform(any(),any(),any())).thenReturn(JsSuccess(transformedJson))
 
     val OUT = new VariationService(desService, transformer, auditService)
 
