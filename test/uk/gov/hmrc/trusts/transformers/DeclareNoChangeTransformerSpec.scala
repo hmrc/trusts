@@ -45,5 +45,19 @@ class DeclareNoChangeTransformerSpec extends FreeSpec with MustMatchers with Opt
       val result = transformer.transform(trustResponse, trustResponse.getTrust, declaration)
       result.asOpt.value mustBe afterJson
     }
+
+    "transform json successfully for a lead trustee when the trustee has changed" in {
+      val originalJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json")
+      val originalResponse = originalJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
+
+      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-individual.json")
+      val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
+
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual-with-prev-org.json")
+      val transformer = new DeclareNoChangeTransformer
+
+      val result = transformer.transform(trustResponse, originalResponse.getTrust, declaration)
+      result.asOpt.value mustBe afterJson
+    }
   }
 }
