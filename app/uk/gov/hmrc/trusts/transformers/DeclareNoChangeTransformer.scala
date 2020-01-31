@@ -39,7 +39,6 @@ class DeclareNoChangeTransformer {
 
   private val allContent = (__).json
   private val pickAllContent = allContent.pick
-  private val pickAllForCopy = allContent.copyFrom(pickAllContent)
   private val pathToLeadTrustees: JsPath = __ \ 'details \ 'trust \ 'entities \ 'leadTrustees
   private val pickLeadTrustee = pathToLeadTrustees.json.pick
 
@@ -79,14 +78,12 @@ class DeclareNoChangeTransformer {
     (__ \ 'declaration).json.prune andThen
     (__ \ 'yearsReturns).json.prune
 
-  private def insertReqFormBundleNo(bundleNo: String): Reads[JsObject] = {
-    pickAllForCopy and
-      (__ \ 'reqHeader \ 'formBundleNo ).json.put(JsString(bundleNo))
-    }.reduce
+  private def putNewValue(path: JsPath, value: JsValue ): Reads[JsObject] =
+    { allContent.copyFrom(pickAllContent) and path.json.put(value) }.reduce
 
-  private def insertDeclaration(declaration: Declaration): Reads[JsObject] = {
-    pickAllForCopy and
-      (__ \ 'declaration).json.put(Json.toJson(declaration))
-    }.reduce
+  private def insertReqFormBundleNo(bundleNo: String): Reads[JsObject] =
+    putNewValue(__ \ 'reqHeader \ 'formBundleNo, JsString(bundleNo))
 
+  private def insertDeclaration(declaration: Declaration): Reads[JsObject] =
+    putNewValue(__ \ 'declaration, Json.toJson(declaration))
 }
