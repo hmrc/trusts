@@ -16,43 +16,30 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
+import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.Declaration
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 
 class DeclareNoChangeTransformer {
 
   def transform(response: TrustProcessedResponse, originalJson: JsValue, declaration: Declaration): JsResult[JsValue] = {
-
     val responseJson = response.getTrust
-
-    val trustFromPath = (__ \ 'applicationType ).json.prune andThen
-      (__ \ 'declaration).json.prune andThen
-      (__ \ 'yearsReturns).json.prune andThen
-      (__).json.pick
-
-    val trustToPath = (__).json
-
-    val setReqFormBundleNo = (__ \ 'reqHeader \ 'formBundleNo ).json.put(JsString(response.responseHeader.formBundleNo))
-
-    val insertDeclaration = (__ \ 'declaration).json.put(Json.toJson(declaration))
-
-    val formBundleNoTransformer: Reads[JsObject] = {
-      trustToPath.copyFrom(trustFromPath) and
-        setReqFormBundleNo and
-        insertDeclaration
-      }.reduce
+    val responseHeader = response.responseHeader
 
     for {
-      converted <- responseJson.transform(convertLeadTrustee(responseJson))
+      pruned <- responseJson.transform(pruneStuff)
+      converted <- pruned.transform(convertLeadTrustee(responseJson))
       added <- converted.transform(addPreviousLeadTrustee(responseJson, originalJson))
-      result <- added.transform(formBundleNoTransformer)
-    } yield result
+      bundled <- added.transform(insertReqFormBundleNo(responseHeader.formBundleNo))
+      declared <- bundled.transform(insertDeclaration(declaration))
+    } yield declared
   }
 
-  private val doNothing = (__).json.pick
+  private val allContent = (__).json
+  private val pickAllContent = allContent.pick
+  private val pickAllForCopy = allContent.copyFrom(pickAllContent)
   private val pickLeadTrustee = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees).json.pick
 
   private def getLeadTrustee(json: JsValue): JsResult[JsValue] = {
@@ -83,10 +70,25 @@ class DeclareNoChangeTransformer {
       case (JsSuccess(newLeadTrusteeJson, _), JsSuccess(originalLeadTrusteeJson, _))
         if (newLeadTrusteeJson != originalLeadTrusteeJson) =>
           addPreviousLeadTrusteeAsExpiredStep(originalLeadTrusteeJson)
-      case _ => doNothing
+      case _ => pickAllContent
     }
   }
 
   private def convertLeadTrustee(json: JsValue): Reads[JsObject] = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees).json.update( of[JsObject]
     .map{ a => Json.arr(Json.obj(trusteeField(json) -> a )) })
+
+  private val pruneStuff = (__ \ 'applicationType ).json.prune andThen
+    (__ \ 'declaration).json.prune andThen
+    (__ \ 'yearsReturns).json.prune
+
+  private def insertReqFormBundleNo(bundleNo: String): Reads[JsObject] = {
+    pickAllForCopy and
+      (__ \ 'reqHeader \ 'formBundleNo ).json.put(JsString(bundleNo))
+    }.reduce
+
+  private def insertDeclaration(declaration: Declaration): Reads[JsObject] = {
+    pickAllForCopy and
+      (__ \ 'declaration).json.put(Json.toJson(declaration))
+    }.reduce
+
 }
