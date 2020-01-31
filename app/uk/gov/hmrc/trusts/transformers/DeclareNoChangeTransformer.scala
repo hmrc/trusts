@@ -28,13 +28,15 @@ class DeclareNoChangeTransformer {
     val responseJson = response.getTrust
     val responseHeader = response.responseHeader
 
-    for {
-      pruned <- responseJson.transform(pruneStuff)
-      converted <- pruned.transform(convertLeadTrustee(responseJson))
-      added <- converted.transform(addPreviousLeadTrustee(responseJson, originalJson))
-      bundled <- added.transform(insertReqFormBundleNo(responseHeader.formBundleNo))
-      declared <- bundled.transform(insertDeclaration(declaration))
-    } yield declared
+    responseJson.transform(
+      (__ \ 'applicationType).json.prune andThen
+      (__ \ 'declaration).json.prune andThen
+      (__ \ 'yearsReturns).json.prune andThen
+      convertLeadTrustee(responseJson) andThen
+      addPreviousLeadTrustee(responseJson, originalJson) andThen
+      insertReqFormBundleNo(responseHeader.formBundleNo) andThen
+      insertDeclaration(declaration)
+    )
   }
 
   private val allContent = (__).json
@@ -73,10 +75,6 @@ class DeclareNoChangeTransformer {
 
   private def convertLeadTrustee(json: JsValue): Reads[JsObject] = pathToLeadTrustees.json.update( of[JsObject]
     .map{ a => Json.arr(Json.obj(trusteeField(json) -> a )) })
-
-  private val pruneStuff = (__ \ 'applicationType ).json.prune andThen
-    (__ \ 'declaration).json.prune andThen
-    (__ \ 'yearsReturns).json.prune
 
   private def putNewValue(path: JsPath, value: JsValue ): Reads[JsObject] =
     { allContent.copyFrom(pickAllContent) and path.json.put(value) }.reduce
