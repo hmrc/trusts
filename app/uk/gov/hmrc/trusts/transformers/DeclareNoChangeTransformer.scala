@@ -39,8 +39,6 @@ class DeclareNoChangeTransformer {
     )
   }
 
-  private val allContent = (__).json
-  private val pickAllContent = allContent.pick
   private val pathToLeadTrustees: JsPath = __ \ 'details \ 'trust \ 'entities \ 'leadTrustees
   private val pickLeadTrustee = pathToLeadTrustees.json.pick
 
@@ -69,7 +67,7 @@ class DeclareNoChangeTransformer {
       case (JsSuccess(newLeadTrusteeJson, _), JsSuccess(originalLeadTrusteeJson, _))
         if (newLeadTrusteeJson != originalLeadTrusteeJson) =>
           addPreviousLeadTrusteeAsExpiredStep(originalLeadTrusteeJson)
-      case _ => pickAllContent
+      case _ => (__).json.pick
     }
   }
 
@@ -77,5 +75,5 @@ class DeclareNoChangeTransformer {
     .map{ a => Json.arr(Json.obj(trusteeField(json) -> a )) })
 
   private def putNewValue(path: JsPath, value: JsValue ): Reads[JsObject] =
-    { allContent.copyFrom(pickAllContent) and path.json.put(value) }.reduce
+    (__).json.update(path.json.put(value))
 }
