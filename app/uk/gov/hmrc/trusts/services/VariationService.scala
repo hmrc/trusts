@@ -18,6 +18,7 @@ package uk.gov.hmrc.trusts.services
 
 
 import javax.inject.Inject
+import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -48,12 +49,11 @@ class VariationService @Inject()(desService: DesService, declareNoChangeTransfor
     }
 
     checkedResponse.flatMap { response =>
-      declareNoChangeTransformer.transform(response, response.getTrust, declaration) match {
+      declareNoChangeTransformer.transform(response, response.getTrust, declaration, new DateTime()) match {
         case JsSuccess(value, _) => doSubmit(value, internalId)
-        case JsError(errors) => {
-          logger.error("Problem transforming data for no change submission " + errors.toString())
+        case JsError(errors) =>
+          logger.error("Problem transforming data for ETMP submission " + errors.toString())
           Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
-        }
       }
     }
   }

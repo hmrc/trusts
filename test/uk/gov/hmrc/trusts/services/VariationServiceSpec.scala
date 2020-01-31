@@ -16,21 +16,22 @@
 
 package uk.gov.hmrc.trusts.services
 
+import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
+import org.mockito.Matchers.{any, eq => equalTo}
+import org.mockito.Mockito.{times, verify, when}
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{MustMatchers, WordSpec}
 import play.api.libs.json.{JsSuccess, JsValue, Json}
-import org.mockito.Mockito.{times, verify, when}
-import org.mockito.Matchers.{any, eq => equalTo}
-import org.scalatest.concurrent.ScalaFutures
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.trusts.exceptions.EtmpCacheDataStaleException
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.models.{AddressType, Declaration, NameType}
 import uk.gov.hmrc.trusts.transformers.DeclareNoChangeTransformer
 import uk.gov.hmrc.trusts.utils.JsonRequests
-import uk.gov.hmrc.trusts.exceptions.EtmpCacheDataStaleException
 
 import scala.concurrent.Future
 
@@ -67,13 +68,13 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
         VariationResponse("TVN34567890")
       ))
 
-      when(transformer.transform(any(),any(),any())).thenReturn(JsSuccess(transformedJson))
+      when(transformer.transform(any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
 
       val OUT = new VariationService(desService, transformer, auditService)
 
       whenReady(OUT.submitDeclareNoChange(utr, internalId, declaration)) {variationResponse => {
         variationResponse mustBe VariationResponse("TVN34567890")
-        verify(transformer, times(1)).transform(response, response.getTrust, declaration)
+        verify(transformer, times(1)).transform(response, response.getTrust, declaration, new DateTime())
         val arg: ArgumentCaptor[JsValue] = ArgumentCaptor.forClass(classOf[JsValue])
         verify(desService, times(1)).trustVariation(arg.capture())(any[HeaderCarrier])
         arg.getValue mustBe transformedJson
@@ -95,7 +96,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
       VariationResponse("TVN34567890")
     ))
 
-    when(transformer.transform(any(),any(),any())).thenReturn(JsSuccess(transformedJson))
+    when(transformer.transform(any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
 
     val OUT = new VariationService(desService, transformer, auditService)
 

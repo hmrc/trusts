@@ -16,15 +16,19 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import play.api.libs.functional.syntax._
+import org.joda.time.DateTime
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.Declaration
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
+import uk.gov.hmrc.trusts.utils.Implicits._
 
 class DeclareNoChangeTransformer {
 
-  def transform(response: TrustProcessedResponse, originalJson: JsValue, declaration: Declaration): JsResult[JsValue] = {
+  def transform(response: TrustProcessedResponse,
+                originalJson: JsValue,
+                declaration: Declaration,
+                date: DateTime): JsResult[JsValue] = {
     val responseJson = response.getTrust
     val responseHeader = response.responseHeader
 
@@ -33,7 +37,7 @@ class DeclareNoChangeTransformer {
         (__ \ 'declaration).json.prune andThen
         (__ \ 'yearsReturns).json.prune andThen
         convertLeadTrustee(responseJson) andThen
-        addPreviousLeadTrustee(responseJson, originalJson) andThen
+        addPreviousLeadTrustee(responseJson, originalJson, date) andThen
         putNewValue(__ \ 'reqHeader \ 'formBundleNo, JsString(responseHeader.formBundleNo)) andThen
         putNewValue(__ \ 'declaration, Json.toJson(declaration))
     )
@@ -53,20 +57,26 @@ class DeclareNoChangeTransformer {
     }
   }
 
-  private def addPreviousLeadTrusteeAsExpiredStep(oldJson: JsValue) = {
-    val trusteeField = determineTrusteeField(__, oldJson)
-    pathToLeadTrustees.json.update( of[JsArray]
-      .map{ a => a:+ Json.obj(trusteeField -> oldJson ) })
+  private def addPreviousLeadTrusteeAsExpiredStep(previousLeadTrusteeJson: JsValue, date: DateTime) = {
+    val trusteeField = determineTrusteeField(__, previousLeadTrusteeJson)
+    previousLeadTrusteeJson.transform(__.json.update(
+      (__ \ 'entityEnd).json.put(Json.toJson(date))
+    )).fold(
+      _ => ???,
+      endedJson => {
+        pathToLeadTrustees.json.update(of[JsArray]
+          .map { a => a :+ Json.obj(trusteeField -> endedJson) })
+      })
   }
 
-  private def addPreviousLeadTrustee(newJson: JsValue, originalJson: JsValue) = {
+  private def addPreviousLeadTrustee(newJson: JsValue, originalJson: JsValue, date: DateTime) = {
     val newLeadTrustee = newJson.transform(pickLeadTrustee)
     val originalLeadTrustee = originalJson.transform(pickLeadTrustee)
 
     (newLeadTrustee, originalLeadTrustee) match {
       case (JsSuccess(newLeadTrusteeJson, _), JsSuccess(originalLeadTrusteeJson, _))
         if (newLeadTrusteeJson != originalLeadTrusteeJson) =>
-          addPreviousLeadTrusteeAsExpiredStep(originalLeadTrusteeJson)
+          addPreviousLeadTrusteeAsExpiredStep(originalLeadTrusteeJson, date)
       case _ => (__).json.pick
     }
   }

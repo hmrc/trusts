@@ -16,12 +16,15 @@
 
 package uk.gov.hmrc.trusts.transformers
 
+import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.models.{AddressType, Declaration, NameType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class DeclareNoChangeTransformerSpec extends FreeSpec with MustMatchers with OptionValues {
+  val entityEnd = new DateTime(2020, 1, 30, 15, 0)
+
   "the no change transformer should" - {
 
     val declaration = Declaration(NameType("First", None, "Last"), AddressType("Line1", "Line2", Some("Line3"), None, Some("POSTCODE"), "GB"))
@@ -32,7 +35,7 @@ class DeclareNoChangeTransformerSpec extends FreeSpec with MustMatchers with Opt
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent.json")
       val transformer = new DeclareNoChangeTransformer
 
-      val result = transformer.transform(trustResponse, trustResponse.getTrust, declaration)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declaration, entityEnd)
       result.asOpt.value mustBe afterJson
     }
 
@@ -42,7 +45,7 @@ class DeclareNoChangeTransformerSpec extends FreeSpec with MustMatchers with Opt
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual.json")
       val transformer = new DeclareNoChangeTransformer
 
-      val result = transformer.transform(trustResponse, trustResponse.getTrust, declaration)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declaration, entityEnd)
       result.asOpt.value mustBe afterJson
     }
 
@@ -56,7 +59,7 @@ class DeclareNoChangeTransformerSpec extends FreeSpec with MustMatchers with Opt
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual-with-prev-org.json")
       val transformer = new DeclareNoChangeTransformer
 
-      val result = transformer.transform(trustResponse, originalResponse.getTrust, declaration)
+      val result = transformer.transform(trustResponse, originalResponse.getTrust, declaration, entityEnd)
       result.asOpt.value mustBe afterJson
     }
   }
