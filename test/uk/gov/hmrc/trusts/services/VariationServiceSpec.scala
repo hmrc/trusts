@@ -27,7 +27,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
-import uk.gov.hmrc.trusts.models.{AddressType, Declaration, NameType}
+import uk.gov.hmrc.trusts.models.{AddressType, Declaration, DeclarationForApi, NameType}
 import uk.gov.hmrc.trusts.transformers.DeclareNoChangeTransformer
 import uk.gov.hmrc.trusts.utils.JsonRequests
 import uk.gov.hmrc.trusts.exceptions.EtmpCacheDataStaleException
@@ -48,6 +48,8 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
     NameType("Handy", None, "Andy"),
     AddressType("Line1", "Line2", Some("Line3"), None, Some("POSTCODE"), "GB")
   )
+
+  val declarationForApi = DeclarationForApi(declaration, None)
 
   "Declare no change" should {
     "Submits data correctly when version matches" in {
@@ -71,9 +73,9 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
 
       val OUT = new VariationService(desService, transformer, auditService)
 
-      whenReady(OUT.submitDeclareNoChange(utr, internalId, declaration)) {variationResponse => {
+      whenReady(OUT.submitDeclareNoChange(utr, internalId, declarationForApi)) {variationResponse => {
         variationResponse mustBe VariationResponse("TVN34567890")
-        verify(transformer, times(1)).transform(response, declaration)
+        verify(transformer, times(1)).transform(response, declarationForApi)
         val arg: ArgumentCaptor[JsValue] = ArgumentCaptor.forClass(classOf[JsValue])
         verify(desService, times(1)).trustVariation(arg.capture())(any[HeaderCarrier])
         arg.getValue mustBe transformedJson
@@ -99,7 +101,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
 
     val OUT = new VariationService(desService, transformer, auditService)
 
-    whenReady(OUT.submitDeclareNoChange(utr, internalId, declaration).failed) {exception => {
+    whenReady(OUT.submitDeclareNoChange(utr, internalId, declarationForApi).failed) {exception => {
       exception mustBe an[EtmpCacheDataStaleException.type]
       verify(desService, times(0)).trustVariation(any())(any[HeaderCarrier])
     }

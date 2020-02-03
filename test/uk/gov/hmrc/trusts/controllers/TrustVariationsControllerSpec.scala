@@ -31,7 +31,7 @@ import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
-import uk.gov.hmrc.trusts.models.{AddressType, Declaration, NameType}
+import uk.gov.hmrc.trusts.models.{AddressType, Declaration, DeclarationForApi, NameType}
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, ValidationService, VariationService}
 import uk.gov.hmrc.trusts.transformers.DeclareNoChangeTransformer
@@ -317,11 +317,13 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
           AddressType("Line1", "Line2", Some("Line3"), None, Some("POSTCODE"), "GB")
         )
 
+        val declarationForApi = DeclarationForApi(declaration, None)
+
         when(mockVariationService.submitDeclareNoChange(any(), any(), any())(any()))
           .thenReturn(Future.failed(EtmpCacheDataStaleException))
 
         val result = SUT.noChange("1234567890")(
-          FakeRequest("POST", "/no-change/1234567890").withBody(Json.toJson(declaration))
+          FakeRequest("POST", "/no-change/1234567890").withBody(Json.toJson(declarationForApi))
         )
 
         status(result) mustBe BAD_REQUEST

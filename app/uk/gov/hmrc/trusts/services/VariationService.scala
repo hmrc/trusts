@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.{EtmpCacheDataStaleException, InternalServerErrorException}
-import uk.gov.hmrc.trusts.models.Declaration
+import uk.gov.hmrc.trusts.models.{Declaration, DeclarationForApi}
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
@@ -34,7 +34,7 @@ import scala.concurrent.Future
 class VariationService @Inject()(desService: DesService, declareNoChangeTransformer: DeclareNoChangeTransformer, auditService: AuditService) {
   private val logger = LoggerFactory.getLogger("application" + this.getClass.getCanonicalName)
 
-  def submitDeclareNoChange(utr: String, internalId: String, declaration: Declaration)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
+  def submitDeclareNoChange(utr: String, internalId: String, declaration: DeclarationForApi)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
     val checkedResponse = for {
       response <- desService.getTrustInfo(utr, internalId)
       fbn <- desService.getTrustInfoFormBundleNo(utr)
@@ -50,10 +50,9 @@ class VariationService @Inject()(desService: DesService, declareNoChangeTransfor
     checkedResponse.flatMap { response =>
       declareNoChangeTransformer.transform(response, declaration) match {
         case JsSuccess(value, _) => doSubmit(value, internalId)
-        case JsError(errors) => {
+        case JsError(errors) =>
           logger.error("Problem transforming data for no change submission " + errors.toString())
           Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
-        }
       }
     }
   }
