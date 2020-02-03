@@ -82,9 +82,9 @@ class TrustVariationsController @Inject()(
     implicit request => {
       request.body.validate[DeclarationForApi].fold(
         _ => Future.successful(BadRequest),
-        declarationWithAgentDetails => {
+        declarationForApi => {
           variationService
-            .submitDeclareNoChange(utr, request.identifier, declarationWithAgentDetails)
+            .submitDeclareNoChange(utr, request.identifier, declarationForApi)
             .map(response => Ok(Json.toJson(response)))
         } recover responseHandler.recoverFromException(TrustAuditing.TRUST_VARIATION)
       )

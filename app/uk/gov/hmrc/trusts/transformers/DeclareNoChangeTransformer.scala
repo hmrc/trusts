@@ -46,22 +46,22 @@ class DeclareNoChangeTransformer {
     val setReqFormBundleNo = (__ \ 'reqHeader \ 'formBundleNo ).json.put(JsString(response.responseHeader.formBundleNo))
 
     val insertDeclaration = (__ \ 'declaration).json.put(Json.toJson(declaration.declaration))
-    val insertAgentDetails =
-      if (declaration.agentDetails.isDefined) {
-        (__ \ 'agentDetails).json.put(Json.toJson(declaration.agentDetails))
-      }
-      else {
-        (__ \ 'agentDetails).json.put(Json.obj()) andThen
-        (__ \ 'agentDetails).json.prune
-      }
 
     val formBundleNoTransformer: Reads[JsObject] = {
       trustToPath.copyFrom(trustFromPath) and
         setReqFormBundleNo and
-        insertDeclaration and
-        insertAgentDetails
+        insertDeclaration
       }.reduce
 
-    response.getTrust.transform(formBundleNoTransformer)
+    val transformer = if (declaration.agentDetails.isDefined) {
+      formBundleNoTransformer andThen
+        (__).json.update(
+          (__ \ 'agentDetails).json.put(Json.toJson(declaration.agentDetails.get))
+        )
+    } else {
+      formBundleNoTransformer
+    }
+
+    response.getTrust.transform(transformer)
   }
 }
