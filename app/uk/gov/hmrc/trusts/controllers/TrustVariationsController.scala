@@ -18,18 +18,14 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
 import play.api.Logger
-import play.api.libs.json.{JsSuccess, JsValue, Json}
-import play.api.mvc.{Request, Result}
+import play.api.libs.json.Json
+import play.api.mvc.Result
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
-import uk.gov.hmrc.trusts.exceptions._
-import uk.gov.hmrc.trusts.models.Declaration
+import uk.gov.hmrc.trusts.models.{Declaration, DeclarationWithAgentDetails}
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
-import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 import uk.gov.hmrc.trusts.models.variation.TrustVariation
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, ValidationService, VariationService}
-import uk.gov.hmrc.trusts.transformers.DeclareNoChangeTransformer
 import uk.gov.hmrc.trusts.utils.ErrorResponses._
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
@@ -84,11 +80,11 @@ class TrustVariationsController @Inject()(
 
   def noChange(utr: String) = identify.async(parse.json) {
     implicit request => {
-      request.body.validate[Declaration].fold(
+      request.body.validate[DeclarationWithAgentDetails].fold(
         _ => Future.successful(BadRequest),
-        declaration => {
+        declarationWithAgentDetails => {
           variationService
-            .submitDeclareNoChange(utr, request.identifier, declaration)
+            .submitDeclareNoChange(utr, request.identifier, declarationWithAgentDetails.declaration)
             .map(response => Ok(Json.toJson(response)))
         } recover responseHandler.recoverFromException(TrustAuditing.TRUST_VARIATION)
       )

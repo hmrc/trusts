@@ -50,10 +50,9 @@ class VariationService @Inject()(desService: DesService, declareNoChangeTransfor
     checkedResponse.flatMap { response =>
       declareNoChangeTransformer.transform(response, declaration) match {
         case JsSuccess(value, _) => doSubmit(value, internalId)
-        case JsError(errors) => {
+        case JsError(errors) =>
           logger.error("Problem transforming data for no change submission " + errors.toString())
           Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
-        }
       }
     }
   }
