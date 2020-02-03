@@ -22,7 +22,7 @@ import play.api.libs.json.Json
 import play.api.mvc.Result
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
-import uk.gov.hmrc.trusts.models.{Declaration, DeclarationWithAgentDetails}
+import uk.gov.hmrc.trusts.models.{Declaration, DeclarationForApi}
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.variation.TrustVariation
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, ValidationService, VariationService}
@@ -80,11 +80,11 @@ class TrustVariationsController @Inject()(
 
   def noChange(utr: String) = identify.async(parse.json) {
     implicit request => {
-      request.body.validate[DeclarationWithAgentDetails].fold(
+      request.body.validate[DeclarationForApi].fold(
         _ => Future.successful(BadRequest),
         declarationWithAgentDetails => {
           variationService
-            .submitDeclareNoChange(utr, request.identifier, declarationWithAgentDetails.declaration)
+            .submitDeclareNoChange(utr, request.identifier, declarationWithAgentDetails)
             .map(response => Ok(Json.toJson(response)))
         } recover responseHandler.recoverFromException(TrustAuditing.TRUST_VARIATION)
       )

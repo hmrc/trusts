@@ -101,11 +101,11 @@ object Declaration {
   implicit val declarationFormat: Format[Declaration] = Json.format[Declaration]
 }
 
-case class DeclarationWithAgentDetails(declaration: Declaration,
-                                       agentDetails: AgentDetails)
+case class DeclarationForApi(declaration: Declaration,
+                             agentDetails: Option[AgentDetails])
 
-object DeclarationWithAgentDetails {
-  implicit val declarationWithAgentDetailsFormat: Format[DeclarationWithAgentDetails] = Json.format[DeclarationWithAgentDetails]
+object DeclarationForApi {
+  implicit val declarationForApiFormat: Format[DeclarationForApi] = Json.format[DeclarationForApi]
 }
 
 case class Trust(

@@ -19,11 +19,11 @@ package uk.gov.hmrc.trusts.transformers
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
-import uk.gov.hmrc.trusts.models.Declaration
+import uk.gov.hmrc.trusts.models.{Declaration, DeclarationForApi}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 
 class DeclareNoChangeTransformer {
-  def transform(response: TrustProcessedResponse, declaration: Declaration): JsResult[JsValue] = {
+  def transform(response: TrustProcessedResponse, declaration: DeclarationForApi): JsResult[JsValue] = {
 
     val trusteeField: String = {
       val namePath = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees \ 'name).json.pick[JsObject]
@@ -45,12 +45,21 @@ class DeclareNoChangeTransformer {
 
     val setReqFormBundleNo = (__ \ 'reqHeader \ 'formBundleNo ).json.put(JsString(response.responseHeader.formBundleNo))
 
-    val insertDeclaration = (__ \ 'declaration).json.put(Json.toJson(declaration))
+    val insertDeclaration = (__ \ 'declaration).json.put(Json.toJson(declaration.declaration))
+    val insertAgentDetails =
+      if (declaration.agentDetails.isDefined) {
+        (__ \ 'agentDetails).json.put(Json.toJson(declaration.agentDetails))
+      }
+      else {
+        (__ \ 'agentDetails).json.put(Json.obj()) andThen
+        (__ \ 'agentDetails).json.prune
+      }
 
     val formBundleNoTransformer: Reads[JsObject] = {
       trustToPath.copyFrom(trustFromPath) and
         setReqFormBundleNo and
-        insertDeclaration
+        insertDeclaration and
+        insertAgentDetails
       }.reduce
 
     response.getTrust.transform(formBundleNoTransformer)
