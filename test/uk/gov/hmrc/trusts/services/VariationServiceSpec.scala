@@ -74,7 +74,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
 
       whenReady(OUT.submitDeclareNoChange(utr, internalId, declaration)) {variationResponse => {
         variationResponse mustBe VariationResponse("TVN34567890")
-        verify(transformer, times(1)).transform(response, response.getTrust, declaration, new DateTime())
+        verify(transformer, times(1)).transform(equalTo(response), equalTo(response.getTrust), equalTo(declaration), any())
         val arg: ArgumentCaptor[JsValue] = ArgumentCaptor.forClass(classOf[JsValue])
         verify(desService, times(1)).trustVariation(arg.capture())(any[HeaderCarrier])
         arg.getValue mustBe transformedJson
