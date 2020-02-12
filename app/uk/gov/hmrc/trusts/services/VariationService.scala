@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.{EtmpCacheDataStaleException, InternalServerErrorException}
-import uk.gov.hmrc.trusts.models.DeclarationForAPI
+import uk.gov.hmrc.trusts.models.DeclarationForApi
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models.variation.VariationResponse

@@ -79,7 +79,7 @@ class DeclareNoChangeTransformerSpec extends FreeSpec with MustMatchers with Opt
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual-with-agent-details.json")
       val transformer = new DeclareNoChangeTransformer
 
-      val result = transformer.transform(trustResponse, declarationForApi)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, entityEnd)
       result.asOpt.value mustBe afterJson
     }
   }

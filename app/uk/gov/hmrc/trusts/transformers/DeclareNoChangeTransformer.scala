@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.transformers
 import org.joda.time.DateTime
 import play.api.libs.json.Reads._
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.Declaration
+import uk.gov.hmrc.trusts.models.{Declaration, DeclarationForApi}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.utils.Implicits._
 
@@ -36,7 +36,7 @@ class DeclareNoChangeTransformer {
         (__ \ 'agentDetails).json.put(Json.toJson(declaration.agentDetails.get))
       )
     } else {
-      (__).json.pick()
+      (__).json.pick[JsObject]
     }
     responseJson.transform(
       (__ \ 'applicationType).json.prune andThen
@@ -44,9 +44,9 @@ class DeclareNoChangeTransformer {
         (__ \ 'yearsReturns).json.prune andThen
         convertLeadTrustee(responseJson) andThen
         addPreviousLeadTrustee(responseJson, originalJson, date) andThen
-        agentTransformer andThen
         putNewValue(__ \ 'reqHeader \ 'formBundleNo, JsString(responseHeader.formBundleNo)) andThen
-        putNewValue(__ \ 'declaration, Json.toJson(declaration))
+        putNewValue(__ \ 'declaration, Json.toJson(declaration.declaration)) andThen
+        agentTransformer
     )
   }
 
