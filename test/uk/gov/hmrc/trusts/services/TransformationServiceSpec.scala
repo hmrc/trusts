@@ -30,24 +30,33 @@ import uk.gov.hmrc.trusts.transformers.{ComposedDeltaTransform, SetLeadTrusteeIn
 import scala.concurrent.Future
 
 class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures {
-  val repository = mock[TransformationRepository]
 
-  val service = new TransformationService(repository)
+  val newTrusteeInfo = DisplayTrustLeadTrusteeIndType(
+    lineNo = "newLineNo",
+    bpMatchStatus = Some("newMatchStatus"),
+    name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
+    dateOfBirth = new DateTime(1965, 2, 10, 12, 30),
+    phoneNumber = "newPhone",
+    email = Some("newEmail"),
+    identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
+    entityStart = "2012-03-14"
+  )
+
+  val existingTrusteeInfo = DisplayTrustLeadTrusteeIndType(
+    lineNo = "newLineNo",
+    bpMatchStatus = Some("newMatchStatus"),
+    name = NameType("existingFirstName", Some("existingMiddleName"), "existingLastName"),
+    dateOfBirth = new DateTime(1965, 2, 10, 12, 30),
+    phoneNumber = "newPhone",
+    email = Some("newEmail"),
+    identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
+    entityStart = "2002-03-14"
+  )
 
   "the transformation service" - {
-    "must write a corresponding transform to the transformation repository" in {
-
-
-      val newTrusteeInfo = DisplayTrustLeadTrusteeIndType(
-        lineNo = "newLineNo",
-        bpMatchStatus = Some("newMatchStatus"),
-        name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-        dateOfBirth = new DateTime(1965, 2, 10, 12, 30),
-        phoneNumber = "newPhone",
-        email = Some("newEmail"),
-        identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-        entityStart = "2012-03-14"
-      )
+    "must write a corresponding transform to the transformation repository with no existing transforms" in {
+      val repository = mock[TransformationRepository]
+      val service = new TransformationService(repository)
 
       when(repository.get(any(), any())).thenReturn(Future.successful(None))
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
@@ -61,5 +70,44 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
       }
     }
+    "must write a corresponding transform to the transformation repository with existing empty transforms" in {
+
+      val repository = mock[TransformationRepository]
+      val service = new TransformationService(repository)
+
+      when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(Nil))))
+      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+
+      val result = service.addAmendLeadTrustee("utr", "internalId", DisplayTrustLeadTrusteeType(Some(newTrusteeInfo), None))
+      whenReady(result) { _ =>
+
+        verify(repository).set("utr",
+          "internalId",
+          ComposedDeltaTransform(Seq(SetLeadTrusteeIndTransform(newTrusteeInfo))))
+
+      }
+    }
+
+    "must write a corresponding transform to the transformation repository with existing transforms" in {
+
+      val repository = mock[TransformationRepository]
+      val service = new TransformationService(repository)
+
+      val existingTransforms = Seq(SetLeadTrusteeIndTransform(existingTrusteeInfo))
+      when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
+      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+
+      val result = service.addAmendLeadTrustee("utr", "internalId", DisplayTrustLeadTrusteeType(Some(newTrusteeInfo), None))
+      whenReady(result) { _ =>
+
+        verify(repository).set("utr",
+          "internalId",
+          ComposedDeltaTransform(Seq(
+            SetLeadTrusteeIndTransform(existingTrusteeInfo),
+            SetLeadTrusteeIndTransform(newTrusteeInfo))))
+
+      }
+    }
+
   }
 }

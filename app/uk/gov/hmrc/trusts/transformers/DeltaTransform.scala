@@ -39,6 +39,8 @@ case class ComposedDeltaTransform(deltaTransforms: Seq[DeltaTransform]) extends 
   override def applyTransform(input: JsValue): JsValue = {
     deltaTransforms.foldLeft(input)((cur, xform) => xform.applyTransform(cur))
   }
+
+  def :+(transform: DeltaTransform) = ComposedDeltaTransform(deltaTransforms :+ transform)
 }
 
 object ComposedDeltaTransform {
