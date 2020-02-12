@@ -1,0 +1,25 @@
+{
+  "details":{
+    "trust":{
+      "entities":{
+        "leadTrustees":{
+          "lineNo":"newLineNo",
+          "bpMatchStatus":"newMatchStatus",
+          "name":{
+            "firstName":"newFirstName",
+            "middleName":"newMiddleName",
+            "lastName":"newLastName"
+          },
+          "dateOfBirth": "1965-02-10",
+          "phoneNumber":"newPhone",
+          "email":"newEmail",
+          "identification":{
+            "nino":"newNino"
+          },
+          "entityStart":"2012-03-14"
+        }
+      }
+    }
+  },
+  "otherfields" : "exist"
+}

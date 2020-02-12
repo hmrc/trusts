@@ -16,12 +16,15 @@
 
 package uk.gov.hmrc.trusts.transformers
 
+import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.models.{AddressType, AgentDetails, Declaration, DeclarationForApi, NameType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class DeclareNoChangeTransformerSpec extends FreeSpec with MustMatchers with OptionValues {
+  val entityEnd = new DateTime(2020, 1, 30, 15, 0)
+
   "the no change transformer should" - {
 
     val declaration = Declaration(NameType("First", None, "Last"), AddressType("Line1", "Line2", Some("Line3"), None, Some("POSTCODE"), "GB"))
@@ -33,7 +36,7 @@ class DeclareNoChangeTransformerSpec extends FreeSpec with MustMatchers with Opt
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent.json")
       val transformer = new DeclareNoChangeTransformer
 
-      val result = transformer.transform(trustResponse, declarationForApi)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, entityEnd)
       result.asOpt.value mustBe afterJson
     }
 
@@ -43,7 +46,21 @@ class DeclareNoChangeTransformerSpec extends FreeSpec with MustMatchers with Opt
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual.json")
       val transformer = new DeclareNoChangeTransformer
 
-      val result = transformer.transform(trustResponse, declarationForApi)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, entityEnd)
+      result.asOpt.value mustBe afterJson
+    }
+
+    "transform json successfully for a lead trustee when the trustee has changed" in {
+      val originalJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json")
+      val originalResponse = originalJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
+
+      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-individual.json")
+      val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
+
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual-with-prev-org.json")
+      val transformer = new DeclareNoChangeTransformer
+
+      val result = transformer.transform(trustResponse, originalResponse.getTrust, declarationForApi, entityEnd)
       result.asOpt.value mustBe afterJson
     }
 

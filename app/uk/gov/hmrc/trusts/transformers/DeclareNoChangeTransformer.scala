@@ -16,52 +16,81 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
+import org.joda.time.DateTime
 import play.api.libs.json.Reads._
-import uk.gov.hmrc.trusts.models.{Declaration, DeclarationForApi}
+import play.api.libs.json._
+import uk.gov.hmrc.trusts.models.Declaration
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
+import uk.gov.hmrc.trusts.utils.Implicits._
 
 class DeclareNoChangeTransformer {
-  def transform(response: TrustProcessedResponse, declaration: DeclarationForApi): JsResult[JsValue] = {
 
-    val trusteeField: String = {
-      val namePath = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees \ 'name).json.pick[JsObject]
-
-      response.getTrust.transform(namePath) match {
-        case JsSuccess(_, _) => "leadTrusteeInd"
-        case _ => "leadTrusteeOrg"
-      }
-    }
-
-    val trustFromPath = (__ \ 'applicationType ).json.prune andThen
-      (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees).json.update( of[JsObject]
-        .map{ a => Json.arr(Json.obj(trusteeField -> a )) }) andThen
-      (__ \ 'declaration).json.prune andThen
-      (__ \ 'yearsReturns).json.prune andThen
-      (__).json.pick
-
-    val trustToPath = (__).json
-
-    val setReqFormBundleNo = (__ \ 'reqHeader \ 'formBundleNo ).json.put(JsString(response.responseHeader.formBundleNo))
-
-    val insertDeclaration = (__ \ 'declaration).json.put(Json.toJson(declaration.declaration))
-
-    val formBundleNoTransformer: Reads[JsObject] = {
-      trustToPath.copyFrom(trustFromPath) and
-        setReqFormBundleNo and
-        insertDeclaration
-      }.reduce
-
-    val transformer = if (declaration.agentDetails.isDefined) {
-      formBundleNoTransformer andThen
-        (__).json.update(
-          (__ \ 'agentDetails).json.put(Json.toJson(declaration.agentDetails.get))
-        )
+  def transform(response: TrustProcessedResponse,
+                originalJson: JsValue,
+                declaration: DeclarationForApi,
+                date: DateTime): JsResult[JsValue] = {
+    val responseJson = response.getTrust
+    val responseHeader = response.responseHeader
+    val agentTransformer = if (declaration.agentDetails.isDefined) {
+      (__).json.update(
+        (__ \ 'agentDetails).json.put(Json.toJson(declaration.agentDetails.get))
+      )
     } else {
-      formBundleNoTransformer
+      (__).json.pick()
     }
-
-    response.getTrust.transform(transformer)
+    responseJson.transform(
+      (__ \ 'applicationType).json.prune andThen
+        (__ \ 'declaration).json.prune andThen
+        (__ \ 'yearsReturns).json.prune andThen
+        convertLeadTrustee(responseJson) andThen
+        addPreviousLeadTrustee(responseJson, originalJson, date) andThen
+        agentTransformer andThen
+        putNewValue(__ \ 'reqHeader \ 'formBundleNo, JsString(responseHeader.formBundleNo)) andThen
+        putNewValue(__ \ 'declaration, Json.toJson(declaration))
+    )
   }
+
+  private val pathToLeadTrustees: JsPath = __ \ 'details \ 'trust \ 'entities \ 'leadTrustees
+  private val pickLeadTrustee = pathToLeadTrustees.json.pick
+
+  private def trusteeField(json: JsValue): String = determineTrusteeField(pathToLeadTrustees, json)
+
+  private def determineTrusteeField(rootPath: JsPath, json: JsValue): String = {
+    val namePath = (rootPath \ 'name).json.pick[JsObject]
+
+    json.transform(namePath) match {
+      case JsSuccess(_, _) => "leadTrusteeInd"
+      case _ => "leadTrusteeOrg"
+    }
+  }
+
+  private def addPreviousLeadTrusteeAsExpiredStep(previousLeadTrusteeJson: JsValue, date: DateTime) = {
+    val trusteeField = determineTrusteeField(__, previousLeadTrusteeJson)
+    previousLeadTrusteeJson.transform(__.json.update(
+      (__ \ 'entityEnd).json.put(Json.toJson(date))
+    )).fold(
+      _ => ???,
+      endedJson => {
+        pathToLeadTrustees.json.update(of[JsArray]
+          .map { a => a :+ Json.obj(trusteeField -> endedJson) })
+      })
+  }
+
+  private def addPreviousLeadTrustee(newJson: JsValue, originalJson: JsValue, date: DateTime) = {
+    val newLeadTrustee = newJson.transform(pickLeadTrustee)
+    val originalLeadTrustee = originalJson.transform(pickLeadTrustee)
+
+    (newLeadTrustee, originalLeadTrustee) match {
+      case (JsSuccess(newLeadTrusteeJson, _), JsSuccess(originalLeadTrusteeJson, _))
+        if (newLeadTrusteeJson != originalLeadTrusteeJson) =>
+          addPreviousLeadTrusteeAsExpiredStep(originalLeadTrusteeJson, date)
+      case _ => (__).json.pick
+    }
+  }
+
+  private def convertLeadTrustee(json: JsValue): Reads[JsObject] = pathToLeadTrustees.json.update( of[JsObject]
+    .map{ a => Json.arr(Json.obj(trusteeField(json) -> a )) })
+
+  private def putNewValue(path: JsPath, value: JsValue ): Reads[JsObject] =
+    (__).json.update(path.json.put(value))
 }
