@@ -10,4 +10,6 @@ GET         /:utr                                      uk.gov.hmrc.trusts.contro
 
 POST        /variation                            uk.gov.hmrc.trusts.controllers.TrustVariationsController.trustVariation
 
-POST        /no-change/:utr                             uk.gov.hmrc.trusts.controllers.TrustVariationsController.noChange(utr: String)
+POST        /no-change/:utr                              uk.gov.hmrc.trusts.controllers.TrustVariationsController.noChange(utr: String)
+
+POST        /amend-lead-trustee                         uk.gov.hmrc.trusts.controllers.ChangeController.amendLeadTrustee

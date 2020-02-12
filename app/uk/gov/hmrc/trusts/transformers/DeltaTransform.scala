@@ -16,14 +16,31 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import play.api.libs.json.{JsPath, JsValue}
+import play.api.libs.json._
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustLeadTrusteeType
 
 trait DeltaTransform {
   def applyTransform(input: JsValue): JsValue
 }
 
-class ComposedDeltaTransform(deltaTransforms: Seq[DeltaTransform]) extends DeltaTransform {
+object DeltaTransform {
+  implicit val reads: Reads[DeltaTransform] = Reads[DeltaTransform](
+    value => {
+      JsSuccess(value.as[SetLeadTrusteeIndTransform])
+    }
+  )
+  implicit val writes: Writes[DeltaTransform] = Writes[DeltaTransform] {
+    case transform: SetLeadTrusteeIndTransform => Json.toJson(transform)(SetLeadTrusteeIndTransform.format)
+    case _ => throw new Exception("something went wrong")
+  }
+}
+
+case class ComposedDeltaTransform(deltaTransforms: Seq[DeltaTransform]) extends DeltaTransform {
   override def applyTransform(input: JsValue): JsValue = {
     deltaTransforms.foldLeft(input)((cur, xform) => xform.applyTransform(cur))
   }
+}
+
+object ComposedDeltaTransform {
+  implicit val format: Format[ComposedDeltaTransform] = Json.format[ComposedDeltaTransform]
 }
