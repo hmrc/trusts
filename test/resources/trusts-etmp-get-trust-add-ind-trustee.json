@@ -25,7 +25,8 @@
       {
         "taxReturnYear":"19",
         "taxConsequence":true
-      }]
+      }
+    ]
   },
   "declaration":{
     "name":{
@@ -72,7 +73,8 @@
               "nino":"KC287812"
             },
             "entityStart":"1998-02-12"
-          }],
+          }
+        ],
         "beneficiary":{
           "individualDetails":[
             {
@@ -102,7 +104,8 @@
                 }
               },
               "entityStart":"1998-02-12"
-            }],
+            }
+          ],
           "other":[
             {
               "lineNo":"1",
@@ -115,7 +118,8 @@
               },
               "description":"Lorem ipsum",
               "entityStart":"1998-02-12"
-            }]
+            }
+          ]
         },
         "deceased":{
           "lineNo":"1",
@@ -161,11 +165,18 @@
           },
           {
             "trusteeInd":{
-            "name":{
-              "firstName":"FirstName",
-              "lastName":"Surname"
-            },
-            "entityStart":"2020-01-30"
+              "lineNo":"lineNo",
+              "bpMatchStatus":"bpMatchStatus",
+              "name":{
+                "firstName":"New",
+                "lastName":"Trustee"
+              },
+              "dateOfBirth":"2000-01-01",
+              "phoneNumber":"phoneNumber",
+              "identification":{
+                "nino":"nino"
+              },
+              "entityStart":"entityStart"
             }
           }
         ],
@@ -183,7 +194,8 @@
                 "nino":"ST019091"
               },
               "entityStart":"1998-02-12"
-            }],
+            }
+          ],
           "settlorCompany":[
             {
               "lineNo":"1",
@@ -194,14 +206,16 @@
                 "utr":"5465416546"
               },
               "entityStart":"1998-02-12"
-            }]
+            }
+          ]
         }
       },
       "assets":{
         "monetary":[
           {
             "assetMonetaryAmount":100000
-          }],
+          }
+        ],
         "propertyOrLand":[
           {
             "buildingLandName":"ACB House",
@@ -214,7 +228,8 @@
             },
             "valueFull":1000000,
             "valuePrevious":200000
-          }],
+          }
+        ],
         "shares":[
           {
             "numberOfShares":"100",
@@ -223,18 +238,21 @@
             "shareClass":"Ordinary shares",
             "typeOfShare":"Quoted",
             "value":4584545
-          }],
+          }
+        ],
         "partnerShip":[
           {
             "utr":"5456456221",
             "description":"Partnership Trade",
             "partnershipStart":"2001-01-01"
-          }],
+          }
+        ],
         "other":[
           {
             "description":"Lorem ipsum anum",
             "value":1982372
-          }]
+          }
+        ]
       }
     }
   }
