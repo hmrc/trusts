@@ -17,9 +17,11 @@
 package uk.gov.hmrc.trusts.transformers
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeIndType, DisplayTrustLeadTrusteeType}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustLeadTrusteeIndType
 
-case class SetLeadTrusteeIndTransform(leadTrustee: DisplayTrustLeadTrusteeIndType) extends DeltaTransform {
+case class SetLeadTrusteeIndTransform(
+                                       leadTrustee: DisplayTrustLeadTrusteeIndType,
+                                       serialisedType: DeltaType = SetLeadTrusteeIndDeltaType) extends DeltaTransform {
   override def applyTransform(input: JsValue): JsValue = {
     setLeadTrustee(input, leadTrustee)
   }

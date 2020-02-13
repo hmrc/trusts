@@ -17,21 +17,46 @@
 package uk.gov.hmrc.trusts.transformers
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustLeadTrusteeType
 
 trait DeltaTransform {
   def applyTransform(input: JsValue): JsValue
 }
 
+sealed class DeltaType(val myType: String)
+
+object DeltaType {
+  implicit val writes: Writes[DeltaType] = Writes[DeltaType] {
+    t => JsString(t.myType)
+  }
+  implicit val reads: Reads[DeltaType] = Reads[DeltaType] {
+    case JsString(AddTrusteeDeltaType.myType) => JsSuccess(AddTrusteeDeltaType)
+    case JsString(SetLeadTrusteeIndDeltaType.myType) => JsSuccess(SetLeadTrusteeIndDeltaType)
+  }
+}
+
+case object AddTrusteeDeltaType extends DeltaType("AddTrusteeDeltaType")
+case object SetLeadTrusteeIndDeltaType extends DeltaType("SetLeadTrusteeIndDeltaType")
+
+case class SerialisedDeltaTransform(serialisedType: DeltaType)
+
+object SerialisedDeltaTransform {
+  implicit val format: Format[SerialisedDeltaTransform] = Json.format[SerialisedDeltaTransform]
+}
+
 object DeltaTransform {
   implicit val reads: Reads[DeltaTransform] = Reads[DeltaTransform](
     value => {
-      JsSuccess(value.as[SetLeadTrusteeIndTransform])
+      value.as[SerialisedDeltaTransform].serialisedType match {
+        case AddTrusteeDeltaType => JsSuccess(value.as[AddTrusteeTransformer])
+        case SetLeadTrusteeIndDeltaType => JsSuccess(value.as[SetLeadTrusteeIndTransform])
+        case _ => throw new Exception(s"Don't know how to deserialise transform: $value")
+      }
     }
   )
   implicit val writes: Writes[DeltaTransform] = Writes[DeltaTransform] {
     case transform: SetLeadTrusteeIndTransform => Json.toJson(transform)(SetLeadTrusteeIndTransform.format)
-    case _ => throw new Exception("something went wrong")
+    case transform: AddTrusteeTransformer => Json.toJson(transform)(AddTrusteeTransformer.format)
+    case transform => throw new Exception(s"Don't know how to serialise transform: $transform")
   }
 }
 

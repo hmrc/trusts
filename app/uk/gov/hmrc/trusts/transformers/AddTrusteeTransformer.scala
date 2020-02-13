@@ -17,20 +17,18 @@
 package uk.gov.hmrc.trusts.transformers
 import play.api.libs.json.Reads._
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.variation.TrusteeType
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustTrusteeIndividualType
 
-class AddTrusteeTransformer(newTrustee: TrusteeType) extends DeltaTransform {
+case class AddTrusteeTransformer(
+                                  trustee: DisplayTrustTrusteeIndividualType,
+                                  serialisedType: DeltaType = AddTrusteeDeltaType) extends DeltaTransform {
 
   override def applyTransform(input: JsValue): JsValue = {
 
     val trustees: Reads[JsObject] =
       (__ \ 'details \ 'trust \ 'entities \ 'trustees).json.update( of[JsArray]
         .map {
-          trustees => (newTrustee.trusteeInd, newTrustee.trusteeOrg) match {
-            case (Some(individual), _)    => trustees :+ Json.obj("trusteeInd" -> Json.toJson(individual))
-            case (_, Some(organisation))  => trustees :+ Json.obj("trusteeOrg" -> Json.toJson(organisation))
-            case _                        => trustees
-          }
+          trustees => trustees :+ Json.obj("trusteeInd" -> Json.toJson(trustee))
         }
       )
 
@@ -39,4 +37,9 @@ class AddTrusteeTransformer(newTrustee: TrusteeType) extends DeltaTransform {
       valid   => valid
     )
   }
+}
+
+
+object AddTrusteeTransformer {
+  implicit val format: Format[AddTrusteeTransformer] = Json.format[AddTrusteeTransformer]
 }
