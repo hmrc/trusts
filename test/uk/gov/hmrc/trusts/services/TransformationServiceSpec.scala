@@ -126,7 +126,11 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       val repository = mock[TransformationRepository]
       val service = new TransformationService(repository)
 
-      val existingTransforms = Seq(SetLeadTrusteeIndTransform(unitTestTrusteeInfo))
+      val existingTransforms = Seq(
+        SetLeadTrusteeIndTransform(existingTrusteeInfo),
+        SetLeadTrusteeIndTransform(newTrusteeInfo),
+        SetLeadTrusteeIndTransform(unitTestTrusteeInfo)
+      )
       when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
