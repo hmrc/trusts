@@ -22,7 +22,7 @@ import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustSuccessR
 import uk.gov.hmrc.trusts.models.{AddressType, AgentDetails, Declaration, DeclarationForApi, NameType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class DeclareNoChangeTransformerSpec extends FreeSpec with MustMatchers with OptionValues {
+class DeclarationTransformerSpec extends FreeSpec with MustMatchers with OptionValues {
   val entityEnd = new DateTime(2020, 1, 30, 15, 0)
 
   "the no change transformer should" - {
@@ -34,7 +34,7 @@ class DeclareNoChangeTransformerSpec extends FreeSpec with MustMatchers with Opt
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json")
       val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent.json")
-      val transformer = new DeclareNoChangeTransformer
+      val transformer = new DeclarationTransformer
 
       val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, entityEnd)
       result.asOpt.value mustBe afterJson
@@ -44,7 +44,7 @@ class DeclareNoChangeTransformerSpec extends FreeSpec with MustMatchers with Opt
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-individual.json")
       val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual.json")
-      val transformer = new DeclareNoChangeTransformer
+      val transformer = new DeclarationTransformer
 
       val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, entityEnd)
       result.asOpt.value mustBe afterJson
@@ -58,7 +58,7 @@ class DeclareNoChangeTransformerSpec extends FreeSpec with MustMatchers with Opt
       val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
 
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual-with-prev-org.json")
-      val transformer = new DeclareNoChangeTransformer
+      val transformer = new DeclarationTransformer
 
       val result = transformer.transform(trustResponse, originalResponse.getTrust, declarationForApi, entityEnd)
       result.asOpt.value mustBe afterJson
@@ -77,7 +77,7 @@ class DeclareNoChangeTransformerSpec extends FreeSpec with MustMatchers with Opt
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-individual.json")
       val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual-with-agent-details.json")
-      val transformer = new DeclareNoChangeTransformer
+      val transformer = new DeclarationTransformer
 
       val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, entityEnd)
       result.asOpt.value mustBe afterJson

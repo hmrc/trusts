@@ -27,7 +27,7 @@ import uk.gov.hmrc.trusts.models.DeclarationForApi
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
-import uk.gov.hmrc.trusts.transformers.DeclareNoChangeTransformer
+import uk.gov.hmrc.trusts.transformers.DeclarationTransformer
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -35,25 +35,23 @@ import scala.concurrent.Future
 class VariationService @Inject()(
                                   desService: DesService,
                                   transformationService: TransformationService,
-                                  declareNoChangeTransformer: DeclareNoChangeTransformer,
+                                  declarationTransformer: DeclarationTransformer,
                                   auditService: AuditService) {
   private val logger = LoggerFactory.getLogger("application" + this.getClass.getCanonicalName)
 
   def submitDeclaration(utr: String, internalId: String, declaration: DeclarationForApi)
                        (implicit hc: HeaderCarrier): Future[VariationResponse] = {
 
-    getCachedTrustData(utr, internalId).flatMap {
-      originalResponse =>
-        transformationService.applyTransformations(utr, internalId, originalResponse.getTrust).flatMap {
-          transformedJson =>
-            val response = TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
-            declareNoChangeTransformer.transform(response, originalResponse.getTrust, declaration, new DateTime()) match {
-              case JsSuccess(value, _) => doSubmit(value, internalId)
-              case JsError(errors) =>
-                logger.error("Problem transforming data for ETMP submission " + errors.toString())
-                Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
-            }
+    getCachedTrustData(utr, internalId).flatMap { originalResponse =>
+      transformationService.applyTransformations(utr, internalId, originalResponse.getTrust).flatMap { transformedJson =>
+        val response = TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
+        declarationTransformer.transform(response, originalResponse.getTrust, declaration, new DateTime()) match {
+          case JsSuccess(value, _) => doSubmit(value, internalId)
+          case JsError(errors) =>
+            logger.error("Problem transforming data for ETMP submission " + errors.toString())
+            Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
         }
+      }
     }
   }
 

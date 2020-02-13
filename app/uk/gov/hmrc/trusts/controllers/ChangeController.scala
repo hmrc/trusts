@@ -34,9 +34,7 @@ class ChangeController @Inject()(
   def amendLeadTrustee(utr: String) = identify.async(parse.json) {
     implicit request => {
 
-      val payload = request.body
-
-      payload.validate[DisplayTrustLeadTrusteeType] match {
+      request.body.validate[DisplayTrustLeadTrusteeType] match {
         case JsSuccess(model, _) =>
           transformationService.addAmendLeadTrustee(utr, request.identifier, model)
           Future.successful(Ok)

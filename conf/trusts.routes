@@ -1,15 +1,15 @@
 # microservice specific routes
 
-POST        /check                                     uk.gov.hmrc.trusts.controllers.CheckTrustController.checkExistingTrust
+POST        /check                                      uk.gov.hmrc.trusts.controllers.CheckTrustController.checkExistingTrust
 
-POST        /register                                  uk.gov.hmrc.trusts.controllers.RegisterTrustController.registration
+POST        /register                                   uk.gov.hmrc.trusts.controllers.RegisterTrustController.registration
 
-POST        /tax-enrolment/callback/subscriptions      uk.gov.hmrc.trusts.controllers.TaxEnrolmentCallbackController.subscriptionCallback
+POST        /tax-enrolment/callback/subscriptions       uk.gov.hmrc.trusts.controllers.TaxEnrolmentCallbackController.subscriptionCallback
 
-GET         /:utr                                      uk.gov.hmrc.trusts.controllers.GetTrustController.get(utr: String)
+GET         /:utr                                       uk.gov.hmrc.trusts.controllers.GetTrustController.get(utr: String)
 
-POST        /variation                            uk.gov.hmrc.trusts.controllers.TrustVariationsController.trustVariation
+POST        /variation                                  uk.gov.hmrc.trusts.controllers.TrustVariationsController.trustVariation
 
-POST        /no-change/:utr                              uk.gov.hmrc.trusts.controllers.TrustVariationsController.noChange(utr: String)
+POST        /no-change/:utr                             uk.gov.hmrc.trusts.controllers.TrustVariationsController.noChange(utr: String)
 
-POST        /amend-lead-trustee/:utr                         uk.gov.hmrc.trusts.controllers.ChangeController.amendLeadTrustee(utr: String)
+POST        /amend-lead-trustee/:utr                    uk.gov.hmrc.trusts.controllers.ChangeController.amendLeadTrustee(utr: String)

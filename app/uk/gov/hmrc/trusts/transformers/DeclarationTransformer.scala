@@ -23,7 +23,7 @@ import uk.gov.hmrc.trusts.models.{Declaration, DeclarationForApi}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.utils.Implicits._
 
-class DeclareNoChangeTransformer {
+class DeclarationTransformer {
 
   def transform(response: TrustProcessedResponse,
                 originalJson: JsValue,

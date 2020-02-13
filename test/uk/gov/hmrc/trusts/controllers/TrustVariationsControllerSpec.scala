@@ -34,7 +34,7 @@ import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.{AddressType, Declaration, DeclarationForApi, NameType}
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, ValidationService, VariationService}
-import uk.gov.hmrc.trusts.transformers.DeclareNoChangeTransformer
+import uk.gov.hmrc.trusts.transformers.DeclarationTransformer
 import uk.gov.hmrc.trusts.utils.Headers
 
 import scala.concurrent.Future

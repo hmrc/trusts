@@ -30,7 +30,7 @@ import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.models.{AddressType, Declaration, DeclarationForApi, NameType}
-import uk.gov.hmrc.trusts.transformers.DeclareNoChangeTransformer
+import uk.gov.hmrc.trusts.transformers.DeclarationTransformer
 import uk.gov.hmrc.trusts.utils.JsonRequests
 
 import scala.concurrent.Future
@@ -58,7 +58,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
       val desService = mock[DesService]
       val transformationService = mock[TransformationService]
       val auditService = mock[AuditService]
-      val transformer = mock[DeclareNoChangeTransformer]
+      val transformer = mock[DeclarationTransformer]
 
       when(transformationService.applyTransformations(any(), any(), any())).thenReturn(Future.successful(transformedEtmpResponseJson))
 
@@ -94,7 +94,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
     val desService = mock[DesService]
     val transformationService = mock[TransformationService]
     val auditService = mock[AuditService]
-    val transformer = mock[DeclareNoChangeTransformer]
+    val transformer = mock[DeclarationTransformer]
 
     when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful("31415900000"))
 
