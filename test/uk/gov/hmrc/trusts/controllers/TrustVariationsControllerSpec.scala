@@ -319,7 +319,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
         val declarationForApi = DeclarationForApi(declaration, None)
 
-        when(mockVariationService.submitDeclareNoChange(any(), any(), any())(any()))
+        when(mockVariationService.submitDeclaration(any(), any(), any())(any()))
           .thenReturn(Future.failed(EtmpCacheDataStaleException))
 
         val result = SUT.noChange("1234567890")(

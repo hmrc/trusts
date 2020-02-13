@@ -42,6 +42,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
   private val utr = "1234567890"
   private val internalId = "InternalId"
   private val fullEtmpResponseJson = getTrustResponse
+  private val transformedEtmpResponseJson = Json.obj()
   private val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
   private val transformedJson = Json.obj("field" -> "value")
 
@@ -55,8 +56,11 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
   "Declare no change" should {
     "Submits data correctly when version matches" in {
       val desService = mock[DesService]
+      val transformationService = mock[TransformationService]
       val auditService = mock[AuditService]
       val transformer = mock[DeclareNoChangeTransformer]
+
+      when(transformationService.applyTransformations(any(), any(), any())).thenReturn(Future.successful(transformedEtmpResponseJson))
 
       when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
 
@@ -72,11 +76,14 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
 
       when(transformer.transform(any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
 
-      val OUT = new VariationService(desService, transformer, auditService)
+      val OUT = new VariationService(desService, transformationService, transformer, auditService)
 
-      whenReady(OUT.submitDeclareNoChange(utr, internalId, declarationForApi)) {variationResponse => {
+      val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
+
+      whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { variationResponse => {
         variationResponse mustBe VariationResponse("TVN34567890")
-        verify(transformer, times(1)).transform(equalTo(response), equalTo(response.getTrust), equalTo(declarationForApi), any())
+        verify(transformationService, times( 1)).applyTransformations(equalTo(utr), equalTo(internalId), equalTo(trustInfoJson))
+        verify(transformer, times(1)).transform(equalTo(transformedResponse), equalTo(response.getTrust), equalTo(declarationForApi), any())
         val arg: ArgumentCaptor[JsValue] = ArgumentCaptor.forClass(classOf[JsValue])
         verify(desService, times(1)).trustVariation(arg.capture())(any[HeaderCarrier])
         arg.getValue mustBe transformedJson
@@ -85,10 +92,13 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
   }
   "Fail if the etmp data version doesn't match our submission data" in {
     val desService = mock[DesService]
+    val transformationService = mock[TransformationService]
     val auditService = mock[AuditService]
     val transformer = mock[DeclareNoChangeTransformer]
 
     when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful("31415900000"))
+
+    when(transformationService.applyTransformations(any(), any(), any())).thenReturn(Future.successful(transformedEtmpResponseJson))
 
     when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))(any[HeaderCarrier]())).thenReturn(Future.successful(
       TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
@@ -100,9 +110,9 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
 
     when(transformer.transform(any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
 
-    val OUT = new VariationService(desService, transformer, auditService)
+    val OUT = new VariationService(desService, transformationService, transformer, auditService)
 
-    whenReady(OUT.submitDeclareNoChange(utr, internalId, declarationForApi).failed) {exception => {
+    whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { exception => {
       exception mustBe an[EtmpCacheDataStaleException.type]
       verify(desService, times(0)).trustVariation(any())(any[HeaderCarrier])
     }

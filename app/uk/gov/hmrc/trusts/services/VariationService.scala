@@ -32,29 +32,42 @@ import uk.gov.hmrc.trusts.transformers.DeclareNoChangeTransformer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class VariationService @Inject()(desService: DesService, declareNoChangeTransformer: DeclareNoChangeTransformer, auditService: AuditService) {
+class VariationService @Inject()(
+                                  desService: DesService,
+                                  transformationService: TransformationService,
+                                  declareNoChangeTransformer: DeclareNoChangeTransformer,
+                                  auditService: AuditService) {
   private val logger = LoggerFactory.getLogger("application" + this.getClass.getCanonicalName)
 
-  def submitDeclareNoChange(utr: String, internalId: String, declaration: DeclarationForApi)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
-    val checkedResponse = for {
+  def submitDeclaration(utr: String, internalId: String, declaration: DeclarationForApi)
+                       (implicit hc: HeaderCarrier): Future[VariationResponse] = {
+
+    getCachedTrustData(utr, internalId).flatMap {
+      originalResponse =>
+        transformationService.applyTransformations(utr, internalId, originalResponse.getTrust).flatMap {
+          transformedJson =>
+            val response = TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
+            declareNoChangeTransformer.transform(response, originalResponse.getTrust, declaration, new DateTime()) match {
+              case JsSuccess(value, _) => doSubmit(value, internalId)
+              case JsError(errors) =>
+                logger.error("Problem transforming data for ETMP submission " + errors.toString())
+                Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
+            }
+        }
+    }
+  }
+
+  private def getCachedTrustData(utr: String, internalId: String)(implicit hc: HeaderCarrier) = {
+    for {
       response <- desService.getTrustInfo(utr, internalId)
       fbn <- desService.getTrustInfoFormBundleNo(utr)
     } yield response match {
-      case tpr:TrustProcessedResponse if tpr.responseHeader.formBundleNo == fbn =>
+      case tpr: TrustProcessedResponse if tpr.responseHeader.formBundleNo == fbn =>
         response.asInstanceOf[TrustProcessedResponse]
-      case _:TrustProcessedResponse =>
+      case _: TrustProcessedResponse =>
         throw EtmpCacheDataStaleException
       case _ =>
         throw InternalServerErrorException("Submission could not proceed, Trust data was not in a processed state")
-    }
-
-    checkedResponse.flatMap { response =>
-      declareNoChangeTransformer.transform(response, response.getTrust, declaration, new DateTime()) match {
-        case JsSuccess(value, _) => doSubmit(value, internalId)
-        case JsError(errors) =>
-          logger.error("Problem transforming data for ETMP submission " + errors.toString())
-          Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
-      }
     }
   }
 
