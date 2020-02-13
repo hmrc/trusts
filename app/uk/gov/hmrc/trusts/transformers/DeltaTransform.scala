@@ -26,11 +26,13 @@ trait DeltaTransform {
 object DeltaTransform {
   implicit val reads: Reads[DeltaTransform] = Reads[DeltaTransform](
     value => {
-      JsSuccess(value.as[SetLeadTrusteeIndTransform])
+      JsSuccess(value.validate[SetLeadTrusteeIndTransform] orElse
+        value.validate[SetLeadTrusteeOrgTransform]).asOpt.get
     }
   )
   implicit val writes: Writes[DeltaTransform] = Writes[DeltaTransform] {
     case transform: SetLeadTrusteeIndTransform => Json.toJson(transform)(SetLeadTrusteeIndTransform.format)
+    case transform: SetLeadTrusteeOrgTransform => Json.toJson(transform)(SetLeadTrusteeOrgTransform.format)
     case _ => throw new Exception("something went wrong")
   }
 }

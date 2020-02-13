@@ -34,4 +34,6 @@ case class SetLeadTrusteeOrgTransform(leadTrustee: DisplayTrustLeadTrusteeOrgTyp
   }
 }
 
-
+object SetLeadTrusteeOrgTransform {
+  implicit val format: Format[SetLeadTrusteeOrgTransform] = Json.format[SetLeadTrusteeOrgTransform]
+}
