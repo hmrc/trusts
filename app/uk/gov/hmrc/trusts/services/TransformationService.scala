@@ -17,6 +17,8 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
+import play.api.libs.json.JsValue
+import play.mvc.BodyParser.Json
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustLeadTrusteeType
 import uk.gov.hmrc.trusts.repositories.TransformationRepository
 import uk.gov.hmrc.trusts.transformers.{ComposedDeltaTransform, DeltaTransform, SetLeadTrusteeIndTransform}
@@ -25,6 +27,13 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class TransformationService @Inject()(repository: TransformationRepository){
+  def applyTransformations(utr: String, internalId: String, json: JsValue): Future[JsValue] = {
+    repository.get(utr, internalId).map {
+      case None => json
+      case Some(transformations) => transformations.applyTransform(json)
+    }
+  }
+
   def addAmendLeadTrustee(utr: String, internalId: String, newLeadTrustee: DisplayTrustLeadTrusteeType): Future[Unit] = {
     addNewTransform(utr, internalId, newLeadTrustee match {
       case DisplayTrustLeadTrusteeType(Some(trusteeInd), None) => SetLeadTrusteeIndTransform(trusteeInd)
