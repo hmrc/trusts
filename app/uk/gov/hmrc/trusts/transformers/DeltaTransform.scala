@@ -22,48 +22,33 @@ trait DeltaTransform {
   def applyTransform(input: JsValue): JsValue
 }
 
-sealed trait DeltaType {
-  val myType: String = this.toString
-}
+case class SerialisedDeltaTransformWrapper(serialisedType: String, json: JsValue)
 
-object DeltaType {
-  implicit val writes: Writes[DeltaType] = Writes[DeltaType] {
-    t => JsString(t.myType)
-  }
-  implicit val reads: Reads[DeltaType] = Reads[DeltaType] {
-    case JsString(AddTrusteeDeltaType.myType) => JsSuccess(AddTrusteeDeltaType)
-    case JsString(SetLeadTrusteeIndDeltaType.myType) => JsSuccess(SetLeadTrusteeIndDeltaType)
-    case JsString(SetLeadTrusteeOrgDeltaType.myType) => JsSuccess(SetLeadTrusteeOrgDeltaType)
-  }
-}
-
-case object AddTrusteeDeltaType extends DeltaType
-case object SetLeadTrusteeIndDeltaType extends DeltaType
-case object SetLeadTrusteeOrgDeltaType extends DeltaType
-
-case class SerialisedDeltaTransform(serialisedType: DeltaType)
-
-object SerialisedDeltaTransform {
-  implicit val format: Format[SerialisedDeltaTransform] = Json.format[SerialisedDeltaTransform]
+object SerialisedDeltaTransformWrapper {
+  implicit val format: Format[SerialisedDeltaTransformWrapper] = Json.format[SerialisedDeltaTransformWrapper]
 }
 
 object DeltaTransform {
   implicit val reads: Reads[DeltaTransform] = Reads[DeltaTransform](
     value => {
-      value.as[SerialisedDeltaTransform].serialisedType match {
-        case AddTrusteeDeltaType => JsSuccess(value.as[AddTrusteeTransformer])
-        case SetLeadTrusteeIndDeltaType => JsSuccess(value.as[SetLeadTrusteeIndTransform])
-        case SetLeadTrusteeOrgDeltaType => JsSuccess(value.as[SetLeadTrusteeOrgTransform])
+      value.as[SerialisedDeltaTransformWrapper] match {
+        case SerialisedDeltaTransformWrapper("AddTrusteeTransformer", json) => JsSuccess(json.as[AddTrusteeTransformer])
+        case SerialisedDeltaTransformWrapper("SetLeadTrusteeIndTransform", json) => JsSuccess(json.as[SetLeadTrusteeIndTransform])
+        case SerialisedDeltaTransformWrapper("SetLeadTrusteeOrgTransform", json) => JsSuccess(json.as[SetLeadTrusteeOrgTransform])
         case _ => throw new Exception(s"Don't know how to deserialise transform: $value")
       }
     }
   )
-  implicit val writes: Writes[DeltaTransform] = Writes[DeltaTransform] {
-    case transform: SetLeadTrusteeIndTransform => Json.toJson(transform)(SetLeadTrusteeIndTransform.format)
-    case transform: SetLeadTrusteeOrgTransform => Json.toJson(transform)(SetLeadTrusteeOrgTransform.format)
-    case transform: AddTrusteeTransformer => Json.toJson(transform)(AddTrusteeTransformer.format)
-    case transform => throw new Exception(s"Don't know how to serialise transform: $transform")
+  implicit val writes: Writes[DeltaTransform] = Writes[DeltaTransform] { t =>
+    val transformWrapper = t match {
+      case transform: SetLeadTrusteeIndTransform => SerialisedDeltaTransformWrapper("SetLeadTrusteeIndTransform", Json.toJson(transform)(SetLeadTrusteeIndTransform.format))
+      case transform: SetLeadTrusteeOrgTransform => SerialisedDeltaTransformWrapper("SetLeadTrusteeOrgTransform", Json.toJson(transform)(SetLeadTrusteeOrgTransform.format))
+      case transform: AddTrusteeTransformer => SerialisedDeltaTransformWrapper("AddTrusteeTransformer", Json.toJson(transform)(AddTrusteeTransformer.format))
+      case transform => throw new Exception(s"Don't know how to serialise transform: $transform")
+    }
+    Json.toJson(transformWrapper)
   }
+
 }
 
 case class ComposedDeltaTransform(deltaTransforms: Seq[DeltaTransform]) extends DeltaTransform {
