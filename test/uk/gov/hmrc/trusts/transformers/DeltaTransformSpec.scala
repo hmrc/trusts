@@ -33,8 +33,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         """{
           |        "deltaTransforms" : [
           |            {
-          |                "serialisedType" : "SetLeadTrusteeIndTransform",
-          |                "json" : {
+          |                "SetLeadTrusteeIndTransform" : {
           |                    "leadTrustee" : {
           |                        "lineNo" : "",
           |                        "name" : {
@@ -50,8 +49,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |                }
           |            },
           |            {
-          |                "serialisedType" : "AddTrusteeTransformer",
-          |                "json" : {
+          |                "AddTrusteeTransformer" : {
           |                    "trustee" : {
           |                        "lineNo" : "lineNo",
           |                        "bpMatchStatus" : "bpMatchStatus",
@@ -95,7 +93,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
       )
       )
       Json.toJson(data) mustEqual json
-     // json.as[ComposedDeltaTransform] mustEqual data
+      json.as[ComposedDeltaTransform] mustEqual data
     }
 
 

@@ -16,39 +16,33 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import play.api.libs.json._
+import play.api.libs.json.{JsValue, _}
 
 trait DeltaTransform {
   def applyTransform(input: JsValue): JsValue
 }
 
-case class SerialisedDeltaTransformWrapper(serialisedType: String, json: JsValue)
-
-object SerialisedDeltaTransformWrapper {
-  implicit val format: Format[SerialisedDeltaTransformWrapper] = Json.format[SerialisedDeltaTransformWrapper]
-}
-
 object DeltaTransform {
   implicit val reads: Reads[DeltaTransform] = Reads[DeltaTransform](
     value => {
-      value.as[SerialisedDeltaTransformWrapper] match {
-        case SerialisedDeltaTransformWrapper("AddTrusteeTransformer", json) => JsSuccess(json.as[AddTrusteeTransformer])
-        case SerialisedDeltaTransformWrapper("SetLeadTrusteeIndTransform", json) => JsSuccess(json.as[SetLeadTrusteeIndTransform])
-        case SerialisedDeltaTransformWrapper("SetLeadTrusteeOrgTransform", json) => JsSuccess(json.as[SetLeadTrusteeOrgTransform])
+      value.as[JsObject] match {
+        case json if json.keys.contains("SetLeadTrusteeIndTransform") => JsSuccess((json \ "SetLeadTrusteeIndTransform").as[SetLeadTrusteeIndTransform])
+        case json if json.keys.contains("SetLeadTrusteeOrgTransform") => JsSuccess((json \ "SetLeadTrusteeOrgTransform").as[SetLeadTrusteeOrgTransform])
+        case json if json.keys.contains("AddTrusteeTransformer") => JsSuccess((json \ "AddTrusteeTransformer").as[AddTrusteeTransformer])
         case _ => throw new Exception(s"Don't know how to deserialise transform: $value")
       }
     }
   )
+
   implicit val writes: Writes[DeltaTransform] = Writes[DeltaTransform] { t =>
     val transformWrapper = t match {
-      case transform: SetLeadTrusteeIndTransform => SerialisedDeltaTransformWrapper("SetLeadTrusteeIndTransform", Json.toJson(transform)(SetLeadTrusteeIndTransform.format))
-      case transform: SetLeadTrusteeOrgTransform => SerialisedDeltaTransformWrapper("SetLeadTrusteeOrgTransform", Json.toJson(transform)(SetLeadTrusteeOrgTransform.format))
-      case transform: AddTrusteeTransformer => SerialisedDeltaTransformWrapper("AddTrusteeTransformer", Json.toJson(transform)(AddTrusteeTransformer.format))
+      case transform: SetLeadTrusteeIndTransform => Json.obj("SetLeadTrusteeIndTransform" -> Json.toJson(transform)(SetLeadTrusteeIndTransform.format))
+      case transform: SetLeadTrusteeOrgTransform => Json.obj("SetLeadTrusteeOrgTransform" -> Json.toJson(transform)(SetLeadTrusteeOrgTransform.format))
+      case transform: AddTrusteeTransformer => Json.obj("AddTrusteeTransformer"-> Json.toJson(transform)(AddTrusteeTransformer.format))
       case transform => throw new Exception(s"Don't know how to serialise transform: $transform")
     }
     Json.toJson(transformWrapper)
   }
-
 }
 
 case class ComposedDeltaTransform(deltaTransforms: Seq[DeltaTransform]) extends DeltaTransform {
