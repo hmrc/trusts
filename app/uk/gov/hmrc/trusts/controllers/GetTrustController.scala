@@ -98,7 +98,6 @@ class GetTrustController @Inject()(identify: IdentifierAction,
           Future.successful(errorResponses.getOrElse(err, InternalServerError))
       }.recover {
         case ex =>
-          println(s"ex = $ex")
           logger.error("Failed to get trust info", ex)
           InternalServerError
       }

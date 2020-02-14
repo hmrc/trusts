@@ -4,13 +4,13 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
+import play.api.test.Helpers.running
 import reactivemongo.api.{DefaultDB, MongoConnection, MongoDriver}
 import uk.gov.hmrc.trusts.repositories.Repository
-import org.scalatest.Assertions.fail
-import scala.concurrent.Future
-import play.api.test.Helpers.running
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 
 class RepositorySpec extends FreeSpec with MustMatchers with ScalaFutures with IntegrationPatience {
@@ -41,7 +41,9 @@ class RepositorySpec extends FreeSpec with MustMatchers with ScalaFutures with I
   }
 
   private lazy val appBuilder =  new GuiceApplicationBuilder().configure(Seq(
-    "mongodb.uri" -> connectionString
+    "mongodb.uri" -> connectionString,
+    "metrics.enabled" -> false,
+    "auditing.enabled" -> false
   ): _*)
 
   val data = Json.obj("testField" -> "testValue")
@@ -58,5 +60,4 @@ class RepositorySpec extends FreeSpec with MustMatchers with ScalaFutures with I
     } yield database
   }
 
-  def dropTheDatabase(): Future[Unit] = database.map(_.drop())
-}
+  def dropTheDatabase(): Unit = Await.ready(database.map(_.drop()), Duration.Inf)}

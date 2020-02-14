@@ -12,8 +12,8 @@ import uk.gov.hmrc.trusts.repositories.TransformationRepository
 import uk.gov.hmrc.trusts.transformers.{AddTrusteeTransformer, ComposedDeltaTransform, SetLeadTrusteeIndTransform}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutures with IntegrationPatience {
   private val connectionString = "mongodb://localhost:27017/transform-integration"
@@ -21,7 +21,7 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutur
   "a transform repository" - {
     "must be able to store and retrieve a payload" in {
 
-//      dropTheDatabase()
+      dropTheDatabase()
 
       val application = appBuilder.build()
 
@@ -38,12 +38,14 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutur
          retrieved.futureValue mustBe data
       }
 
-//      dropTheDatabase()
+      dropTheDatabase()
     }
   }
 
   private lazy val appBuilder =  new GuiceApplicationBuilder().configure(Seq(
-    "mongodb.uri" -> connectionString
+    "mongodb.uri" -> connectionString,
+    "metrics.enabled" -> false,
+    "auditing.enabled" -> false
   ): _*)
 
   val data = ComposedDeltaTransform(Seq(SetLeadTrusteeIndTransform(
@@ -81,5 +83,4 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutur
     } yield database
   }
 
-  def dropTheDatabase(): Future[Unit] = database.map(_.drop())
-}
+  def dropTheDatabase(): Unit = Await.ready(database.map(_.drop()), Duration.Inf)}
