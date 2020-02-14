@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.controllers
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
@@ -28,8 +28,8 @@ import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustFoundResponse
-import uk.gov.hmrc.trusts.services.{AuditService, DesService}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrust, GetTrustSuccessResponse, TrustFoundResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService}
 import uk.gov.hmrc.trusts.utils.JsonRequests
 
 import scala.concurrent.Future
@@ -42,6 +42,8 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
   val mockAuditConnector = mock[AuditConnector]
   val mockConfig = mock[AppConfig]
 
+  val mockTransformationService = mock[TransformationService]
+
   val auditService = new AuditService(mockAuditConnector, mockConfig)
 
 
@@ -50,7 +52,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
   }
 
   private def getTrustController = {
-    val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), mockedAuditService, desService)
+    val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), mockedAuditService, desService, mockTransformationService)
     SUT
   }
 
@@ -63,7 +65,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
     "not perform auditing" when {
       "the feature toggle is set to false" in {
 
-        val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), auditService, desService)
+        val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), auditService, desService, mockTransformationService)
 
         when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
@@ -80,7 +82,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
     "perform auditing" when {
       "the feature toggle is set to true" in {
 
-        val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), auditService, desService)
+        val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), auditService, desService, mockTransformationService)
 
         when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
@@ -94,7 +96,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
       }
     }
 
-    "return 200 - Ok" in {
+    "return 200 - Ok with parked content" in {
 
       when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
@@ -102,8 +104,30 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
       whenReady(result) { _ =>
         verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+        verify(mockTransformationService, times(0)).applyTransformations(any(), any(), any())
         status(result) mustBe OK
         contentType(result) mustBe Some(JSON)
+      }
+    }
+
+    "return 200 - Ok with processed content" in {
+
+      val response =  getTrustResponse.as[GetTrustSuccessResponse]
+      val processedResponse = response.asInstanceOf[TrustProcessedResponse]
+      val transformedContent = getTransformedTrustResponse
+
+      when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
+
+      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])).thenReturn(Future.successful(transformedContent))
+
+      val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
+
+      whenReady(result) { _ =>
+        verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+        verify(mockTransformationService).applyTransformations(mockEq(utr), mockEq("id"), mockEq(processedResponse.getTrust))
+        status(result) mustBe OK
+        contentType(result) mustBe Some(JSON)
+        contentAsJson(result) mustBe getTransformedApiResponse
       }
     }
 

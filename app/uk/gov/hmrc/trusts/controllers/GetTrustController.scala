@@ -22,18 +22,20 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Result}
 import play.mvc.Http.Response
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
-import uk.gov.hmrc.trusts.services.{AuditService, DesService}
+import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService}
 import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUTRAction}
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.{BadRequestResponse, _}
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustResponse, GetTrustSuccessResponse, TrustProcessedResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
 class GetTrustController @Inject()(identify: IdentifierAction,
                                    auditService: AuditService,
-                                   desService: DesService) extends BaseController {
+                                   desService: DesService,
+                                   transformationService: TransformationService) extends BaseController {
   private val logger = LoggerFactory.getLogger("application." + classOf[GetTrustController].getCanonicalName)
 
 
@@ -55,7 +57,23 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   def get(utr: String): Action[AnyContent] = (ValidateUTRAction(utr) andThen identify).async {
     implicit request =>
 
-      desService.getTrustInfo(utr, request.identifier).map {
+      desService.getTrustInfo(utr, request.identifier).flatMap {
+
+        case response: TrustProcessedResponse =>
+          transformationService.applyTransformations(utr, request.identifier, response.getTrust).map {
+            transformedJson =>
+              val transformedResponse = TrustProcessedResponse(transformedJson, response.responseHeader)
+              val responseJson = Json.toJson(transformedResponse)
+
+              auditService.audit(
+                event = TrustAuditing.GET_TRUST,
+                request = Json.obj("utr" -> utr),
+                internalId = request.identifier,
+                response = responseJson
+              )
+
+              Ok(responseJson)
+          }
 
         case response: GetTrustSuccessResponse =>
 
@@ -68,7 +86,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
             response = responseJson
           )
 
-          Ok(responseJson)
+          Future.successful(Ok(responseJson))
 
         case err =>
           auditService.auditErrorResponse(
@@ -77,9 +95,10 @@ class GetTrustController @Inject()(identify: IdentifierAction,
             request.identifier,
             errorAuditMessages.getOrElse(err, "UNKNOWN")
           )
-          errorResponses.getOrElse(err, InternalServerError)
+          Future.successful(errorResponses.getOrElse(err, InternalServerError))
       }.recover {
         case ex =>
+          println(s"ex = $ex")
           logger.error("Failed to get trust info", ex)
           InternalServerError
       }
