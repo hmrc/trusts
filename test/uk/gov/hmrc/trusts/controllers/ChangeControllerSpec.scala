@@ -36,7 +36,7 @@ class ChangeControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures 
   "the change controller" - {
     "must add a new amend lead trustee transform" in {
       val transformationService = mock[TransformationService]
-      val controller = new ChangeController(identifierAction, transformationService)
+      val controller = new TransformationController(identifierAction, transformationService)
 
       val newTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
         lineNo = "newLineNo",
@@ -63,7 +63,7 @@ class ChangeControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures 
     }
     "must return an error for malformed json" in {
       val transformationService = mock[TransformationService]
-      val controller = new ChangeController(identifierAction, transformationService)
+      val controller = new TransformationController(identifierAction, transformationService)
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
