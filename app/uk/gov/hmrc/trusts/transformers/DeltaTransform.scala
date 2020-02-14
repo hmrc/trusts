@@ -22,7 +22,9 @@ trait DeltaTransform {
   def applyTransform(input: JsValue): JsValue
 }
 
-sealed class DeltaType(val myType: String)
+sealed trait DeltaType {
+  val myType: String = this.toString
+}
 
 object DeltaType {
   implicit val writes: Writes[DeltaType] = Writes[DeltaType] {
@@ -31,11 +33,13 @@ object DeltaType {
   implicit val reads: Reads[DeltaType] = Reads[DeltaType] {
     case JsString(AddTrusteeDeltaType.myType) => JsSuccess(AddTrusteeDeltaType)
     case JsString(SetLeadTrusteeIndDeltaType.myType) => JsSuccess(SetLeadTrusteeIndDeltaType)
+    case JsString(SetLeadTrusteeOrgDeltaType.myType) => JsSuccess(SetLeadTrusteeOrgDeltaType)
   }
 }
 
-case object AddTrusteeDeltaType extends DeltaType("AddTrusteeDeltaType")
-case object SetLeadTrusteeIndDeltaType extends DeltaType("SetLeadTrusteeIndDeltaType")
+case object AddTrusteeDeltaType extends DeltaType
+case object SetLeadTrusteeIndDeltaType extends DeltaType
+case object SetLeadTrusteeOrgDeltaType extends DeltaType
 
 case class SerialisedDeltaTransform(serialisedType: DeltaType)
 
@@ -49,12 +53,14 @@ object DeltaTransform {
       value.as[SerialisedDeltaTransform].serialisedType match {
         case AddTrusteeDeltaType => JsSuccess(value.as[AddTrusteeTransformer])
         case SetLeadTrusteeIndDeltaType => JsSuccess(value.as[SetLeadTrusteeIndTransform])
+        case SetLeadTrusteeOrgDeltaType => JsSuccess(value.as[SetLeadTrusteeOrgTransform])
         case _ => throw new Exception(s"Don't know how to deserialise transform: $value")
       }
     }
   )
   implicit val writes: Writes[DeltaTransform] = Writes[DeltaTransform] {
     case transform: SetLeadTrusteeIndTransform => Json.toJson(transform)(SetLeadTrusteeIndTransform.format)
+    case transform: SetLeadTrusteeOrgTransform => Json.toJson(transform)(SetLeadTrusteeOrgTransform.format)
     case transform: AddTrusteeTransformer => Json.toJson(transform)(AddTrusteeTransformer.format)
     case transform => throw new Exception(s"Don't know how to serialise transform: $transform")
   }
