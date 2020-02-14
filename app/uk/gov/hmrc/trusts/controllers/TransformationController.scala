@@ -18,30 +18,27 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
 import play.api.libs.json.{JsError, JsSuccess}
-import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustLeadTrusteeType
-import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService, ValidationService, VariationService}
+import uk.gov.hmrc.trusts.services.TransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class ChangeController @Inject()(
+class TransformationController @Inject()(
                                   identify: IdentifierAction,
                                   transformationService: TransformationService
-                                  ) extends TrustsBaseController with ValidationUtil {
+                                  )(implicit val executionContext: ExecutionContext) extends TrustsBaseController with ValidationUtil {
 
   def amendLeadTrustee(utr: String) = identify.async(parse.json) {
     implicit request => {
-
       request.body.validate[DisplayTrustLeadTrusteeType] match {
         case JsSuccess(model, _) =>
-          transformationService.addAmendLeadTrustee(utr, request.identifier, model)
-          Future.successful(Ok)
-
-        case JsError(errors) =>
+          transformationService.addAmendLeadTrustee(utr, request.identifier, model) map { _ =>
+            Ok
+          }
+        case JsError(_) =>
           Future.successful(BadRequest)
-
       }
     }
   }

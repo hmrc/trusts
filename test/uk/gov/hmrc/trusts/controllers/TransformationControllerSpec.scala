@@ -18,9 +18,10 @@ package uk.gov.hmrc.trusts.controllers
 
 import org.joda.time.DateTime
 import org.mockito.Mockito._
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.mockito.Matchers.{eq => eqTo, _}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
+import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
@@ -30,13 +31,16 @@ import uk.gov.hmrc.trusts.models.NameType
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType, DisplayTrustLeadTrusteeType}
 import uk.gov.hmrc.trusts.services.TransformationService
 
-class ChangeControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers {
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+class TransformationControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers {
   val identifierAction = new FakeIdentifierAction(Agent)
 
   "the change controller" - {
     "must add a new amend lead trustee transform" in {
       val transformationService = mock[TransformationService]
-      val controller = new ChangeController(identifierAction, transformationService)
+      val controller = new TransformationController(identifierAction, transformationService)
 
       val newTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
         lineNo = "newLineNo",
@@ -49,13 +53,17 @@ class ChangeControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures 
         entityStart = "2012-03-14"
       )
 
+      when(transformationService.addAmendLeadTrustee(any(), any(), any()))
+        .thenReturn(Future.successful(()))
+
       val newTrusteeInfo = DisplayTrustLeadTrusteeType(Some(newTrusteeIndInfo), None)
 
       val request = FakeRequest("POST", "path")
           .withBody(Json.toJson(newTrusteeIndInfo))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
-      var result = controller.amendLeadTrustee("aUTR").apply(request)
+      val result = controller.amendLeadTrustee("aUTR").apply(request)
+
       whenReady(result) { value =>
         status(result) mustBe OK
         verify(transformationService).addAmendLeadTrustee("aUTR", "id", newTrusteeInfo)
@@ -63,7 +71,7 @@ class ChangeControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures 
     }
     "must return an error for malformed json" in {
       val transformationService = mock[TransformationService]
-      val controller = new ChangeController(identifierAction, transformationService)
+      val controller = new TransformationController(identifierAction, transformationService)
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
