@@ -120,7 +120,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
       when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])).thenReturn(Future.successful(JsSuccess(transformedContent)))
 
-      val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
+      val result = getTrustController.get(utr, true).apply(FakeRequest(GET, s"/trusts/$utr"))
 
       whenReady(result) { _ =>
         verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())

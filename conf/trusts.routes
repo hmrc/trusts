@@ -6,7 +6,9 @@ POST        /register                                   uk.gov.hmrc.trusts.contr
 
 POST        /tax-enrolment/callback/subscriptions       uk.gov.hmrc.trusts.controllers.TaxEnrolmentCallbackController.subscriptionCallback
 
-GET         /:utr                                       uk.gov.hmrc.trusts.controllers.GetTrustController.get(utr: String)
+GET         /:utr                                       uk.gov.hmrc.trusts.controllers.GetTrustController.get(utr: String, applyTransforms: Boolean = false)
+
+GET         /:utr/transformed                           uk.gov.hmrc.trusts.controllers.GetTrustController.get(utr: String, applyTransforms: Boolean = true)
 
 POST        /variation                                  uk.gov.hmrc.trusts.controllers.TrustVariationsController.trustVariation
 

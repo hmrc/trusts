@@ -54,12 +54,12 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     ResourceNotFoundResponse -> NotFound
   )
 
-  def get(utr: String): Action[AnyContent] = (ValidateUTRAction(utr) andThen identify).async {
+  def get(utr: String, applyTransformations: Boolean = false): Action[AnyContent] = (ValidateUTRAction(utr) andThen identify).async {
     implicit request =>
 
       desService.getTrustInfo(utr, request.identifier).flatMap {
 
-        case response: TrustProcessedResponse =>
+        case response: TrustProcessedResponse if applyTransformations =>
           transformationService.applyTransformations(utr, request.identifier, response.getTrust).map {
             case JsSuccess(transformedJson, _) =>
               val transformedResponse = TrustProcessedResponse(transformedJson, response.responseHeader)

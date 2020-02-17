@@ -63,7 +63,7 @@ class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures 
         .build()
 
       running(application) {
-        val result = route(application, FakeRequest(GET, "/trusts/5174384721")).get
+        val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
         status(result) mustBe OK
         contentAsJson(result) mustBe expectedInitialGetJson
 
@@ -74,7 +74,7 @@ class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures 
         val amendResult = route(application, amendRequest).get
         status(amendResult) mustBe OK
 
-        val newResult = route(application, FakeRequest(GET, "/trusts/5174384721")).get
+        val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
         status(newResult) mustBe OK
         contentAsJson(newResult) mustBe expectedGetAfterAmendLeadTrusteeJson
       }
