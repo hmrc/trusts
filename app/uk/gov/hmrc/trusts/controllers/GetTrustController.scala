@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
-import play.api.libs.json.Json
+import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.mvc.{Action, AnyContent, Result}
 import play.mvc.Http.Response
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
@@ -61,7 +61,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
 
         case response: TrustProcessedResponse =>
           transformationService.applyTransformations(utr, request.identifier, response.getTrust).map {
-            transformedJson =>
+            case JsSuccess(transformedJson, _) =>
               val transformedResponse = TrustProcessedResponse(transformedJson, response.responseHeader)
               val responseJson = Json.toJson(transformedResponse)
 
@@ -73,6 +73,9 @@ class GetTrustController @Inject()(identify: IdentifierAction,
               )
 
               Ok(responseJson)
+            case JsError(errors) =>
+              logger.error("Failed to transform trust info", errors)
+              InternalServerError
           }
 
         case response: GetTrustSuccessResponse =>

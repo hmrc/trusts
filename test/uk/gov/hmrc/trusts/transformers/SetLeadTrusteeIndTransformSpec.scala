@@ -18,6 +18,7 @@ package uk.gov.hmrc.trusts.transformers
 
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import play.api.libs.json.JsSuccess
 import uk.gov.hmrc.trusts.models.NameType
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
@@ -40,7 +41,7 @@ class SetLeadTrusteeIndTransformSpec extends FreeSpec with MustMatchers with Opt
       )
       val transformer = SetLeadTrusteeIndTransform(newTrusteeInfo)
 
-      val result = transformer.applyTransform(beforeJson)
+      val result = transformer.applyTransform(beforeJson).get
       result mustBe afterJson
     }
 

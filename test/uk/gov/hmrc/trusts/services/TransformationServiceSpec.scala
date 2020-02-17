@@ -25,7 +25,7 @@ import uk.gov.hmrc.trusts.repositories.TransformationRepository
 import org.mockito.Mockito._
 import org.mockito.Matchers._
 import org.scalatest.concurrent.ScalaFutures
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsResult, JsSuccess, JsValue}
 import uk.gov.hmrc.trusts.transformers.{ComposedDeltaTransform, SetLeadTrusteeIndTransform}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
@@ -137,10 +137,10 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-before.json")
       val afterJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-after-ind.json")
 
-      val result: Future[JsValue] = service.applyTransformations("utr", "internalId", beforeJson)
+      val result: Future[JsResult[JsValue]] = service.applyTransformations("utr", "internalId", beforeJson)
 
       whenReady(result) {
-        r => r mustEqual afterJson
+        r => r.get mustEqual afterJson
       }
     }
     "must transform json data when no current transforms" in {
@@ -152,10 +152,10 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-before.json")
 
-      val result: Future[JsValue] = service.applyTransformations("utr", "internalId", beforeJson)
+      val result: Future[JsResult[JsValue]] = service.applyTransformations("utr", "internalId", beforeJson)
 
       whenReady(result) {
-        r => r mustEqual beforeJson
+        r => r.get mustEqual beforeJson
       }
     }
   }

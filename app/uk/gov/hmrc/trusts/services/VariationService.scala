@@ -43,7 +43,8 @@ class VariationService @Inject()(
                        (implicit hc: HeaderCarrier): Future[VariationResponse] = {
 
     getCachedTrustData(utr, internalId).flatMap { originalResponse =>
-      transformationService.applyTransformations(utr, internalId, originalResponse.getTrust).flatMap { transformedJson =>
+      transformationService.applyTransformations(utr, internalId, originalResponse.getTrust).flatMap {
+        case JsSuccess(transformedJson, _) =>
         val response = TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
         declarationTransformer.transform(response, originalResponse.getTrust, declaration, new DateTime()) match {
           case JsSuccess(value, _) => doSubmit(value, internalId)
@@ -51,6 +52,9 @@ class VariationService @Inject()(
             logger.error("Problem transforming data for ETMP submission " + errors.toString())
             Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
         }
+        case JsError(errors) =>
+          logger.error("Failed to transform trust info", errors)
+          Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
       }
     }
   }

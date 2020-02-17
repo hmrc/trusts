@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.controllers
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsSuccess, JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
@@ -118,7 +118,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
       when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
 
-      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])).thenReturn(Future.successful(transformedContent))
+      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])).thenReturn(Future.successful(JsSuccess(transformedContent)))
 
       val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 

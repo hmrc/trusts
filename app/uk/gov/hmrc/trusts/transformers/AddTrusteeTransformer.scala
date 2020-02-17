@@ -21,7 +21,7 @@ import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustTrust
 
 case class AddTrusteeTransformer(trustee: DisplayTrustTrusteeIndividualType) extends DeltaTransform {
 
-  override def applyTransform(input: JsValue): JsValue = {
+  override def applyTransform(input: JsValue): JsResult[JsValue] = {
 
     val trustees: Reads[JsObject] =
       (__ \ 'details \ 'trust \ 'entities \ 'trustees).json.update( of[JsArray]
@@ -30,10 +30,7 @@ case class AddTrusteeTransformer(trustee: DisplayTrustTrusteeIndividualType) ext
         }
       )
 
-    input.transform(trustees).fold(
-      errors  => throw new Exception(s"Failed to transform Json with the following errors: $errors"),
-      valid   => valid
-    )
+    input.transform(trustees)
   }
 }
 

@@ -20,7 +20,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustLeadTrusteeIndType
 
 case class SetLeadTrusteeIndTransform( leadTrustee: DisplayTrustLeadTrusteeIndType) extends DeltaTransform {
-  override def applyTransform(input: JsValue): JsValue = {
+  override def applyTransform(input: JsValue): JsResult[JsValue] = {
     setLeadTrustee(input, leadTrustee)
   }
 
@@ -30,7 +30,7 @@ case class SetLeadTrusteeIndTransform( leadTrustee: DisplayTrustLeadTrusteeIndTy
     input.transform(
         leadTrusteesPath.json.prune andThen
         (__).json.update(leadTrusteesPath.json.put(Json.toJson(lead)))
-    ).asOpt.get
+    )
   }
 }
 

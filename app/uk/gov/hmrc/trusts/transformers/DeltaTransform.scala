@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.transformers
 import play.api.libs.json.{JsValue, _}
 
 trait DeltaTransform {
-  def applyTransform(input: JsValue): JsValue
+  def applyTransform(input: JsValue): JsResult[JsValue]
 }
 
 object DeltaTransform {
@@ -46,8 +46,8 @@ object DeltaTransform {
 }
 
 case class ComposedDeltaTransform(deltaTransforms: Seq[DeltaTransform]) extends DeltaTransform {
-  override def applyTransform(input: JsValue): JsValue = {
-    deltaTransforms.foldLeft(input)((cur, xform) => xform.applyTransform(cur))
+  override def applyTransform(input: JsValue): JsResult[JsValue] = {
+    deltaTransforms.foldLeft[JsResult[JsValue]](JsSuccess(input))((cur, xform) => cur.flatMap(xform.applyTransform))
   }
 
   def :+(transform: DeltaTransform) = ComposedDeltaTransform(deltaTransforms :+ transform)

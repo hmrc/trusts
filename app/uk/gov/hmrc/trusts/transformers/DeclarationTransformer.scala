@@ -19,8 +19,8 @@ package uk.gov.hmrc.trusts.transformers
 import org.joda.time.DateTime
 import play.api.libs.json.Reads._
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.{Declaration, DeclarationForApi, NameType}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
+import uk.gov.hmrc.trusts.models.{DeclarationForApi, NameType}
 import uk.gov.hmrc.trusts.utils.Implicits._
 
 class DeclarationTransformer {
@@ -58,7 +58,7 @@ class DeclarationTransformer {
   private def determineTrusteeField(rootPath: JsPath, json: JsValue): String = {
     val namePath = (rootPath \ 'name).json.pick[JsObject]
 
-    json.transform(namePath) match {
+    json.transform(namePath).flatMap(_.validate[NameType]) match {
       case JsSuccess(_, _) => "leadTrusteeInd"
       case _ => "leadTrusteeOrg"
     }

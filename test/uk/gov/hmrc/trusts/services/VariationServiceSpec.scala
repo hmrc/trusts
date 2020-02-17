@@ -60,7 +60,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
       val auditService = mock[AuditService]
       val transformer = mock[DeclarationTransformer]
 
-      when(transformationService.applyTransformations(any(), any(), any())).thenReturn(Future.successful(transformedEtmpResponseJson))
+      when(transformationService.applyTransformations(any(), any(), any())).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
 
       when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
 
@@ -98,7 +98,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
 
     when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful("31415900000"))
 
-    when(transformationService.applyTransformations(any(), any(), any())).thenReturn(Future.successful(transformedEtmpResponseJson))
+    when(transformationService.applyTransformations(any(), any(), any())).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
 
     when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))(any[HeaderCarrier]())).thenReturn(Future.successful(
       TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))

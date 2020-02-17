@@ -17,6 +17,7 @@
 package uk.gov.hmrc.trusts.transformers
 
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import play.api.libs.json.JsSuccess
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationOrgType, DisplayTrustLeadTrusteeOrgType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
@@ -37,7 +38,7 @@ class SetLeadTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with Opt
       )
       val transformer = SetLeadTrusteeOrgTransform(newTrusteeInfo)
 
-      val result = transformer.applyTransform(beforeJson)
+      val result = transformer.applyTransform(beforeJson).get
       result mustBe afterJson
     }
 
