@@ -60,4 +60,4 @@ class RepositorySpec extends FreeSpec with MustMatchers with ScalaFutures with I
     } yield database
   }
 
-  def dropTheDatabase(): Unit = Await.ready(database.map(_.drop()), Duration.Inf)}
+  def dropTheDatabase(): Unit = Await.result(database.flatMap(_.drop()), Duration.Inf)}
