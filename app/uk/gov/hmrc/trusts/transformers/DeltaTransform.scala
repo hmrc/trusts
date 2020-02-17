@@ -26,19 +26,19 @@ object DeltaTransform {
   implicit val reads: Reads[DeltaTransform] = Reads[DeltaTransform](
     value => {
       value.as[JsObject] match {
-        case json if json.keys.contains("SetLeadTrusteeIndTransform") => JsSuccess((json \ "SetLeadTrusteeIndTransform").as[SetLeadTrusteeIndTransform])
-        case json if json.keys.contains("SetLeadTrusteeOrgTransform") => JsSuccess((json \ "SetLeadTrusteeOrgTransform").as[SetLeadTrusteeOrgTransform])
-        case json if json.keys.contains("AddTrusteeTransformer") => JsSuccess((json \ "AddTrusteeTransformer").as[AddTrusteeTransformer])
+        case json if json.keys.contains("SetLeadTrusteeIndTransform") => (json \ "SetLeadTrusteeIndTransform").validate[SetLeadTrusteeIndTransform]
+        case json if json.keys.contains("SetLeadTrusteeOrgTransform") => (json \ "SetLeadTrusteeOrgTransform").validate[SetLeadTrusteeOrgTransform]
+        case json if json.keys.contains("AddTrusteeTransformer")      => (json \ "AddTrusteeTransformer").validate[AddTrusteeTransformer]
         case _ => throw new Exception(s"Don't know how to deserialise transform: $value")
       }
     }
   )
 
-  implicit val writes: Writes[DeltaTransform] = Writes[DeltaTransform] { t =>
-    val transformWrapper = t match {
-      case transform: SetLeadTrusteeIndTransform => Json.obj("SetLeadTrusteeIndTransform" -> Json.toJson(transform)(SetLeadTrusteeIndTransform.format))
-      case transform: SetLeadTrusteeOrgTransform => Json.obj("SetLeadTrusteeOrgTransform" -> Json.toJson(transform)(SetLeadTrusteeOrgTransform.format))
-      case transform: AddTrusteeTransformer => Json.obj("AddTrusteeTransformer"-> Json.toJson(transform)(AddTrusteeTransformer.format))
+  implicit val writes: Writes[DeltaTransform] = Writes[DeltaTransform] { deltaTransform =>
+    val transformWrapper = deltaTransform match {
+      case transform: SetLeadTrusteeIndTransform  => Json.obj("SetLeadTrusteeIndTransform" -> Json.toJson(transform)(SetLeadTrusteeIndTransform.format))
+      case transform: SetLeadTrusteeOrgTransform  => Json.obj("SetLeadTrusteeOrgTransform" -> Json.toJson(transform)(SetLeadTrusteeOrgTransform.format))
+      case transform: AddTrusteeTransformer       => Json.obj("AddTrusteeTransformer"-> Json.toJson(transform)(AddTrusteeTransformer.format))
       case transform => throw new Exception(s"Don't know how to serialise transform: $transform")
     }
     Json.toJson(transformWrapper)

@@ -69,7 +69,7 @@ class DeclarationTransformer {
     previousLeadTrusteeJson.transform(__.json.update(
       (__ \ 'entityEnd).json.put(Json.toJson(date))
     )).fold(
-      _ => ???,
+      errors => throw JsResultException(errors),
       endedJson => {
         pathToLeadTrustees.json.update(of[JsArray]
           .map { a => a :+ Json.obj(trusteeField -> endedJson) })
