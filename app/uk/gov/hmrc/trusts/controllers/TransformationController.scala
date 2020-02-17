@@ -34,7 +34,7 @@ class TransformationController @Inject()(
     implicit request => {
       request.body.validate[DisplayTrustLeadTrusteeType] match {
         case JsSuccess(model, _) =>
-          transformationService.addAmendLeadTrustee(utr, request.identifier, model) map { _ =>
+          transformationService.addAmendLeadTrusteeTransformer(utr, request.identifier, model) map { _ =>
             Ok
           }
         case JsError(_) =>

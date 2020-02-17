@@ -75,7 +75,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       when(repository.get(any(), any())).thenReturn(Future.successful(None))
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
-      val result = service.addAmendLeadTrustee("utr", "internalId", DisplayTrustLeadTrusteeType(Some(newTrusteeInfo), None))
+      val result = service.addAmendLeadTrusteeTransformer("utr", "internalId", DisplayTrustLeadTrusteeType(Some(newTrusteeInfo), None))
       whenReady(result) { _ =>
 
         verify(repository).set("utr",
@@ -92,7 +92,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(Nil))))
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
-      val result = service.addAmendLeadTrustee("utr", "internalId", DisplayTrustLeadTrusteeType(Some(newTrusteeInfo), None))
+      val result = service.addAmendLeadTrusteeTransformer("utr", "internalId", DisplayTrustLeadTrusteeType(Some(newTrusteeInfo), None))
       whenReady(result) { _ =>
 
         verify(repository).set("utr",
@@ -111,7 +111,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
-      val result = service.addAmendLeadTrustee("utr", "internalId", DisplayTrustLeadTrusteeType(Some(newTrusteeInfo), None))
+      val result = service.addAmendLeadTrusteeTransformer("utr", "internalId", DisplayTrustLeadTrusteeType(Some(newTrusteeInfo), None))
       whenReady(result) { _ =>
 
         verify(repository).set("utr",

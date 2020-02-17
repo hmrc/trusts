@@ -53,7 +53,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
         entityStart = "2012-03-14"
       )
 
-      when(transformationService.addAmendLeadTrustee(any(), any(), any()))
+      when(transformationService.addAmendLeadTrusteeTransformer(any(), any(), any()))
         .thenReturn(Future.successful(()))
 
       val newTrusteeInfo = DisplayTrustLeadTrusteeType(Some(newTrusteeIndInfo), None)
@@ -66,7 +66,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
 
       whenReady(result) { value =>
         status(result) mustBe OK
-        verify(transformationService).addAmendLeadTrustee("aUTR", "id", newTrusteeInfo)
+        verify(transformationService).addAmendLeadTrusteeTransformer("aUTR", "id", newTrusteeInfo)
       }
     }
     "must return an error for malformed json" in {

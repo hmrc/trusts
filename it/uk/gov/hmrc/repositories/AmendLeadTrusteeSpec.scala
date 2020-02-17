@@ -91,8 +91,8 @@ class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures 
 
   lazy val connection = for {
     uri <- MongoConnection.parseURI(connectionString)
-    y <- MongoDriver().connection(uri, true)
-  } yield y
+    connection <- MongoDriver().connection(uri, true)
+  } yield connection
 
   def database: Future[DefaultDB] = {
     for {

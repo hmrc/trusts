@@ -41,7 +41,7 @@ class TransformationRepository @Inject()(
                           )(implicit ec: ExecutionContext, m: Materializer)  {
 
   private val logger = LoggerFactory.getLogger("application." + getClass.getCanonicalName)
-  private val collectionName: String = "variationDeltas"
+  private val collectionName: String = "transforms"
   private val cacheTtl = config.ttlInSeconds
 
   private def collection: Future[JSONCollection] =
