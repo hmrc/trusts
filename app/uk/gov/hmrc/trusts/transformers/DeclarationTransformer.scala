@@ -64,19 +64,19 @@ class DeclarationTransformer {
     }
   }
 
-  private def addPreviousLeadTrusteeAsExpiredStep(previousLeadTrusteeJson: JsValue, date: DateTime) = {
+  private def addPreviousLeadTrusteeAsExpiredStep(previousLeadTrusteeJson: JsValue, date: DateTime): Reads[JsObject] = {
     val trusteeField = determineTrusteeField(__, previousLeadTrusteeJson)
     previousLeadTrusteeJson.transform(__.json.update(
       (__ \ 'entityEnd).json.put(Json.toJson(date))
     )).fold(
-      errors => throw JsResultException(errors),
+      errors => Reads(_ => JsError(errors)),
       endedJson => {
         pathToLeadTrustees.json.update(of[JsArray]
           .map { a => a :+ Json.obj(trusteeField -> endedJson) })
       })
   }
 
-  private def addPreviousLeadTrustee(newJson: JsValue, originalJson: JsValue, date: DateTime) = {
+  private def addPreviousLeadTrustee(newJson: JsValue, originalJson: JsValue, date: DateTime): Reads[JsObject] = {
     val newLeadTrustee = newJson.transform(pickLeadTrustee)
     val originalLeadTrustee = originalJson.transform(pickLeadTrustee)
 
@@ -84,7 +84,7 @@ class DeclarationTransformer {
       case (JsSuccess(newLeadTrusteeJson, _), JsSuccess(originalLeadTrusteeJson, _))
         if (newLeadTrusteeJson != originalLeadTrusteeJson) =>
           addPreviousLeadTrusteeAsExpiredStep(originalLeadTrusteeJson, date)
-      case _ => (__).json.pick
+      case _ => (__).json.pick[JsObject]
     }
   }
 
