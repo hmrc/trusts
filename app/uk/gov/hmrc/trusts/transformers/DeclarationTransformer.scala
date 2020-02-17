@@ -42,6 +42,7 @@ class DeclarationTransformer {
       (__ \ 'applicationType).json.prune andThen
         (__ \ 'declaration).json.prune andThen
         (__ \ 'yearsReturns).json.prune andThen
+        removeEmptyLineNo(responseJson) andThen
         convertLeadTrustee(responseJson) andThen
         addPreviousLeadTrustee(responseJson, originalJson, date) andThen
         putNewValue(__ \ 'reqHeader \ 'formBundleNo, JsString(responseHeader.formBundleNo)) andThen
@@ -61,6 +62,14 @@ class DeclarationTransformer {
     json.transform(namePath).flatMap(_.validate[NameType]) match {
       case JsSuccess(_, _) => "leadTrusteeInd"
       case _ => "leadTrusteeOrg"
+    }
+  }
+
+  private def removeEmptyLineNo(json: JsValue): Reads[JsObject] ={
+    val lineNoPath = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees \ 'lineNo)
+    json.transform(lineNoPath.json.pick[JsString]) match {
+      case JsSuccess(JsString(""), _) => lineNoPath.json.prune
+      case _ => (__).json.pick[JsObject]
     }
   }
 

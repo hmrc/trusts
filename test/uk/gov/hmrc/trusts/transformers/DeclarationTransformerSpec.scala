@@ -54,7 +54,7 @@ class DeclarationTransformerSpec extends FreeSpec with MustMatchers with OptionV
       val originalJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json")
       val originalResponse = originalJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
 
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-individual.json")
+      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-transformed-individual.json")
       val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
 
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual-with-prev-org.json")
