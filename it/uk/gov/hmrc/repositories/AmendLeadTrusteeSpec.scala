@@ -101,5 +101,5 @@ class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures 
     } yield database
   }
 
-  def dropTheDatabase(): Unit = Await.ready(database.map(_.drop()), Duration.Inf)
+  def dropTheDatabase(): Future[Unit] = Await.ready(database.flatMap(_.drop()), Duration.Inf)
 }
