@@ -62,20 +62,22 @@ class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures 
         ): _*)
         .build()
 
-      val result = route(application, FakeRequest(GET, "/trusts/5174384721")).get
-      status(result) mustBe OK
-      contentAsJson(result) mustBe expectedInitialGetJson
+      running(application) {
+        val result = route(application, FakeRequest(GET, "/trusts/5174384721")).get
+        status(result) mustBe OK
+        contentAsJson(result) mustBe expectedInitialGetJson
 
-      val amendRequest = FakeRequest("POST", "/trusts/amend-lead-trustee/5174384721")
-        .withBody(Json.toJson(newTrusteeIndInfo))
-        .withHeaders(CONTENT_TYPE -> "application/json")
+        val amendRequest = FakeRequest("POST", "/trusts/amend-lead-trustee/5174384721")
+          .withBody(Json.toJson(newTrusteeIndInfo))
+          .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val amendResult = route(application, amendRequest).get
-      status(amendResult) mustBe OK
+        val amendResult = route(application, amendRequest).get
+        status(amendResult) mustBe OK
 
-      val newResult = route(application, FakeRequest(GET, "/trusts/5174384721")).get
-      status(newResult) mustBe OK
-      contentAsJson(newResult) mustBe expectedGetAfterAmendLeadTrusteeJson
+        val newResult = route(application, FakeRequest(GET, "/trusts/5174384721")).get
+        status(newResult) mustBe OK
+        contentAsJson(newResult) mustBe expectedGetAfterAmendLeadTrusteeJson
+      }
 
       dropTheDatabase()
     }
