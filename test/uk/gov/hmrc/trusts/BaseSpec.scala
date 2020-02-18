@@ -62,9 +62,6 @@ class BaseSpec extends WordSpec
     .withHeaders(Headers.DraftRegistrationId -> UUID.randomUUID().toString)
     .withBody(Json.parse("{}"))
 
-  implicit val defaultPatience =
-    PatienceConfig(timeout = Span(5, Seconds), interval = Span(500, Millis))
-
   def postRequestWithPayload(payload: JsValue, withDraftId: Boolean = true): FakeRequest[JsValue] = {
     if (withDraftId) {
       FakeRequest("POST", "/trusts/register")
