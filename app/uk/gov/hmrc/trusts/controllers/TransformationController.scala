@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.controllers
 import javax.inject.Inject
 import play.api.libs.json.{JsError, JsSuccess}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustLeadTrusteeType
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeType, DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType, DisplayTrustTrusteeType}
 import uk.gov.hmrc.trusts.services.TransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
@@ -38,6 +38,27 @@ class TransformationController @Inject()(
             Ok
           }
         case JsError(_) =>
+          Future.successful(BadRequest)
+      }
+    }
+  }
+
+  def addTrustee(utr: String) = identify.async(parse.json) {
+    implicit request => {
+
+      val trusteeInd = request.body.validateOpt[DisplayTrustTrusteeIndividualType].getOrElse(None)
+      val trusteeOrg = request.body.validateOpt[DisplayTrustTrusteeOrgType].getOrElse(None)
+
+      (trusteeInd, trusteeOrg) match {
+        case (Some(ind), _) =>
+          transformationService.addAddTrusteeTransformer(utr, request.identifier, DisplayTrustTrusteeType(Some(ind), None)) map { _ =>
+            Ok
+          }
+        case (_, Some(org)) =>
+          transformationService.addAddTrusteeTransformer(utr, request.identifier, DisplayTrustTrusteeType(None, Some(org))) map { _ =>
+            Ok
+          }
+        case _ =>
           Future.successful(BadRequest)
       }
     }
