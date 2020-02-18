@@ -23,9 +23,6 @@ import uk.gov.hmrc.trusts.models.TaxEnrolmentSuccess
 
 class TaxEnrolmentConnectorSpec extends BaseConnectorSpec {
 
-  implicit val defaultPatience =
-    PatienceConfig(timeout = Span(5, Seconds), interval = Span(15, Millis))
-
   lazy val connector: TaxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
 
   ".enrolSubscriber" should {
