@@ -9,7 +9,7 @@ import reactivemongo.api.{DefaultDB, MongoConnection, MongoDriver}
 import uk.gov.hmrc.trusts.models.NameType
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType, DisplayTrustTrusteeIndividualType}
 import uk.gov.hmrc.trusts.repositories.TransformationRepository
-import uk.gov.hmrc.trusts.transformers.{AddTrusteeTransformer, ComposedDeltaTransform, SetLeadTrusteeIndTransform}
+import uk.gov.hmrc.trusts.transformers.{AddTrusteeIndTransform, ComposedDeltaTransform, SetLeadTrusteeIndTransform}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -59,7 +59,7 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutur
         DisplayTrustIdentificationType(None, None, None, None),
         "now"
       )),
-    AddTrusteeTransformer(DisplayTrustTrusteeIndividualType(
+    AddTrusteeIndTransform(DisplayTrustTrusteeIndividualType(
       "lineNo",
       Some("bpMatchStatus"),
       NameType("New", None, "Trustee"),

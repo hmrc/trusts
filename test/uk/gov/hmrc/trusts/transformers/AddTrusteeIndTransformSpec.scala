@@ -18,12 +18,11 @@ package uk.gov.hmrc.trusts.transformers
 
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
-import play.api.libs.json.JsSuccess
 import uk.gov.hmrc.trusts.models.NameType
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustTrusteeIndividualType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class AddTrusteeTransformerSpec extends FreeSpec with MustMatchers with OptionValues {
+class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionValues {
   "the add trustee transformer should" - {
 
     "add a new individual trustee" in {
@@ -40,7 +39,7 @@ class AddTrusteeTransformerSpec extends FreeSpec with MustMatchers with OptionVa
 
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-add-ind-trustee.json")
 
-      val transformer = new AddTrusteeTransformer(t)
+      val transformer = new AddTrusteeIndTransform(t)
 
       val result = transformer.applyTransform(trustJson).get
 

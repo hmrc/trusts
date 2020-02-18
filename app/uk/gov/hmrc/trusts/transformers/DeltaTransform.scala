@@ -28,7 +28,7 @@ object DeltaTransform {
       value.as[JsObject] match {
         case json if json.keys.contains("SetLeadTrusteeIndTransform") => (json \ "SetLeadTrusteeIndTransform").validate[SetLeadTrusteeIndTransform]
         case json if json.keys.contains("SetLeadTrusteeOrgTransform") => (json \ "SetLeadTrusteeOrgTransform").validate[SetLeadTrusteeOrgTransform]
-        case json if json.keys.contains("AddTrusteeTransformer")      => (json \ "AddTrusteeTransformer").validate[AddTrusteeTransformer]
+        case json if json.keys.contains("AddTrusteeIndTransform")      => (json \ "AddTrusteeIndTransform").validate[AddTrusteeIndTransform]
         case _ => throw new Exception(s"Don't know how to deserialise transform: $value")
       }
     }
@@ -38,7 +38,7 @@ object DeltaTransform {
     val transformWrapper = deltaTransform match {
       case transform: SetLeadTrusteeIndTransform  => Json.obj("SetLeadTrusteeIndTransform" -> Json.toJson(transform)(SetLeadTrusteeIndTransform.format))
       case transform: SetLeadTrusteeOrgTransform  => Json.obj("SetLeadTrusteeOrgTransform" -> Json.toJson(transform)(SetLeadTrusteeOrgTransform.format))
-      case transform: AddTrusteeTransformer       => Json.obj("AddTrusteeTransformer"-> Json.toJson(transform)(AddTrusteeTransformer.format))
+      case transform: AddTrusteeIndTransform       => Json.obj("AddTrusteeIndTransform"-> Json.toJson(transform)(AddTrusteeIndTransform.format))
       case transform => throw new Exception(s"Don't know how to serialise transform: $transform")
     }
     Json.toJson(transformWrapper)

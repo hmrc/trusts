@@ -65,7 +65,7 @@ class DeclarationTransformer {
     }
   }
 
-  private def removeEmptyLineNo(json: JsValue): Reads[JsObject] ={
+  private def removeEmptyLineNo(json: JsValue): Reads[JsObject] = {
     val lineNoPath = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees \ 'lineNo)
     json.transform(lineNoPath.json.pick[JsString]) match {
       case JsSuccess(JsString(""), _) => lineNoPath.json.prune

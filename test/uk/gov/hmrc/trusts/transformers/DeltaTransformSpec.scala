@@ -49,7 +49,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |                }
           |            },
           |            {
-          |                "AddTrusteeTransformer" : {
+          |                "AddTrusteeIndTransform" : {
           |                    "trustee" : {
           |                        "lineNo" : "lineNo",
           |                        "bpMatchStatus" : "bpMatchStatus",
@@ -81,7 +81,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           DisplayTrustIdentificationType(None, None, None, None),
           "now"
         )),
-        AddTrusteeTransformer(DisplayTrustTrusteeIndividualType(
+        AddTrusteeIndTransform(DisplayTrustTrusteeIndividualType(
           "lineNo",
           Some("bpMatchStatus"),
           NameType("New", None, "Trustee"),
