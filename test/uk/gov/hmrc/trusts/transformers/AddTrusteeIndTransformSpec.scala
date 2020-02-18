@@ -45,5 +45,30 @@ class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionV
 
       result mustBe afterJson
     }
+
+    "fail to add a new individual trustee when there are 25 or more existing trustees" in {
+
+      val t = DisplayTrustTrusteeIndividualType("lineNo",
+        Some("bpMatchStatus"),
+        NameType("New", None, "Trustee"),
+        Some(DateTime.parse("2000-01-01")),
+        Some("phoneNumber"),
+        Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
+        "entityStart")
+
+      val json = JsonUtils.getJsonValueFromFile("trusts-etmp-max-trustees.json")
+
+      val transformer = new AddTrusteeIndTransform(t)
+
+      val result = try {
+        transformer.applyTransform(json).get
+      }
+      catch {
+        case x: Exception => x.getMessage
+      }
+
+      result mustBe "Adding a trustee would exceed the maximum allowed amount of 25"
+
+    }
   }
 }

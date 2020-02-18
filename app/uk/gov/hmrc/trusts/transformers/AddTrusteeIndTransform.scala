@@ -23,14 +23,25 @@ case class AddTrusteeIndTransform(trustee: DisplayTrustTrusteeIndividualType) ex
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
 
-    val trustees: Reads[JsObject] =
-      (__ \ 'details \ 'trust \ 'entities \ 'trustees).json.update( of[JsArray]
-        .map {
-          trustees => trustees :+ Json.obj("trusteeInd" -> Json.toJson(trustee))
-        }
-      )
+    val path = (__ \ 'details \ 'trust \ 'entities \ 'trustees).json
 
-    input.transform(trustees)
+    input.transform(path.pick[JsArray]) match {
+      case JsSuccess(value, _) =>
+        if (value.value.size < 25) {
+          val trustees: Reads[JsObject] =
+            path.update( of[JsArray]
+              .map {
+                trustees => trustees :+ Json.obj("trusteeInd" -> Json.toJson(trustee))
+              }
+            )
+          input.transform(trustees)
+        }
+        else {
+          throw new Exception("Adding a trustee would exceed the maximum allowed amount of 25")
+        }
+      case JsError(errors) =>
+        throw JsResultException(errors)
+    }
   }
 }
 
