@@ -50,6 +50,7 @@ trait JsonRequests extends JsonUtils {
   lazy val getTrustResponse = getJsonValueFromFile("valid-get-trust-response.json")
   lazy val getTransformedTrustResponse = getJsonValueFromFile("transformed-get-trust-response.json")
   lazy val getTransformedApiResponse = getJsonValueFromFile("trust-transformed-get-api-result.json")
+  lazy val getTransformedLeadTrusteeResponse = getJsonValueFromFile("trust-transformed-get-lead-trustee-result.json")
 
   lazy val getEstateResponseJson = getJsonFromFile("valid-get-estate-response.json")
   lazy val getEstateExpectedResponse = getJsonValueFromFile("valid-get-estate-expected-response.json")

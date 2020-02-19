@@ -10,6 +10,8 @@ GET         /:utr                                       uk.gov.hmrc.trusts.contr
 
 GET         /:utr/transformed                           uk.gov.hmrc.trusts.controllers.GetTrustController.get(utr: String, applyTransforms: Boolean = true)
 
+GET         /:utr/transformed/lead-trustee              uk.gov.hmrc.trusts.controllers.GetTrustController.getLeadTrustee(utr: String)
+
 POST        /variation                                  uk.gov.hmrc.trusts.controllers.TrustVariationsController.trustVariation
 
 POST        /no-change/:utr                             uk.gov.hmrc.trusts.controllers.TrustVariationsController.noChange(utr: String)

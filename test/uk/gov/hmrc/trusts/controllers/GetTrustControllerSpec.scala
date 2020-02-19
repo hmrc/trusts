@@ -48,7 +48,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
 
   override def afterEach() =  {
-    reset(mockedAuditService, desService, mockAuditConnector, mockConfig)
+    reset(mockedAuditService, desService, mockAuditConnector, mockConfig, mockTransformationService)
   }
 
   private def getTrustController = {
@@ -243,4 +243,28 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
       }
     }
   }
+  ".getLeadTrustee" should {
+    "return 200 - Ok with processed content" in {
+
+      val response =  getTrustResponse.as[GetTrustSuccessResponse]
+      val processedResponse = response.asInstanceOf[TrustProcessedResponse]
+      val transformedContent = getTransformedTrustResponse
+
+      when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
+
+      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])).thenReturn(Future.successful(JsSuccess(transformedContent)))
+
+      val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/lead-trustee"))
+
+      whenReady(result) { _ =>
+        verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+        verify(mockTransformationService).applyTransformations(mockEq(utr), mockEq("id"), mockEq(processedResponse.getTrust))
+        status(result) mustBe OK
+        contentType(result) mustBe Some(JSON)
+        contentAsJson(result) mustBe getTransformedLeadTrusteeResponse
+      }
+    }
+
+  }
+
 }
