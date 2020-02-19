@@ -244,6 +244,16 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
     }
   }
   ".getLeadTrustee" should {
+    "return 403 - Forbidden with parked content" in {
+
+      when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
+
+      val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/lead-trustee"))
+
+      whenReady(result) { _ =>
+        status(result) mustBe FORBIDDEN
+      }
+    }
     "return 200 - Ok with processed content" in {
 
       val response =  getTrustResponse.as[GetTrustSuccessResponse]
@@ -264,7 +274,16 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
         contentAsJson(result) mustBe getTransformedLeadTrusteeResponse
       }
     }
+    "return 500 - Internal server error for invalid content" in {
 
+      when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+
+      val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/lead-trustee"))
+      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])).thenReturn(Future.successful(JsSuccess(Json.obj())))
+
+      whenReady(result) { _ =>
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+    }
   }
-
 }
