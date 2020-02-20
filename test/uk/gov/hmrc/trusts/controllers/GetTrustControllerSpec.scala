@@ -34,7 +34,7 @@ import uk.gov.hmrc.trusts.utils.JsonRequests
 
 import scala.concurrent.Future
 
-class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach with JsonRequests{
+class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach with JsonRequests {
 
   lazy val desService: DesService = mock[DesService]
   lazy val mockedAuditService: AuditService = mock[AuditService]
@@ -45,7 +45,6 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
   val mockTransformationService = mock[TransformationService]
 
   val auditService = new AuditService(mockAuditConnector, mockConfig)
-
 
   override def afterEach() =  {
     reset(mockedAuditService, desService, mockAuditConnector, mockConfig, mockTransformationService)
@@ -112,7 +111,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
     "return 200 - Ok with processed content" in {
 
-      val response =  getTrustResponse.as[GetTrustSuccessResponse]
+      val response = getTrustResponse.as[GetTrustSuccessResponse]
       val processedResponse = response.asInstanceOf[TrustProcessedResponse]
       val transformedContent = getTransformedTrustResponse
 
@@ -244,6 +243,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
     }
   }
   ".getLeadTrustee" should {
+
     "return 403 - Forbidden with parked content" in {
 
       when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
@@ -285,5 +285,53 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
     }
+  }
+
+  ".getTrustees" should {
+
+    "return 403 - Forbidden with parked content" in {
+
+      when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
+
+      val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/trustees"))
+
+      whenReady(result) { _ =>
+        status(result) mustBe FORBIDDEN
+      }
+    }
+
+    "return 200 - Ok with processed content" in {
+
+      val response =  getTrustResponse.as[GetTrustSuccessResponse]
+      val processedResponse = response.asInstanceOf[TrustProcessedResponse]
+      val transformedContent = getTransformedTrustResponse
+
+      when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
+
+      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])).thenReturn(Future.successful(JsSuccess(transformedContent)))
+
+      val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/trustees"))
+
+      whenReady(result) { _ =>
+        verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+        verify(mockTransformationService).applyTransformations(mockEq(utr), mockEq("id"), mockEq(processedResponse.getTrust))
+        status(result) mustBe OK
+        contentType(result) mustBe Some(JSON)
+        contentAsJson(result) mustBe getTransformedTrusteesResponse
+      }
+    }
+
+    "return 500 - Internal server error for invalid content" in {
+
+      when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+
+      val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/trustees"))
+      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])).thenReturn(Future.successful(JsSuccess(Json.obj())))
+
+      whenReady(result) { _ =>
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+    }
+
   }
 }

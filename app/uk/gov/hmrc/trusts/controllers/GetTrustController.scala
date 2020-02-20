@@ -18,16 +18,14 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsError, JsPath, JsSuccess, JsValue, Json}
+import play.api.libs.json.{JsError, JsPath, JsSuccess, Json}
 import play.api.mvc.{Action, AnyContent, Result}
-import play.mvc.Http.Response
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
-import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService}
 import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUTRAction}
-import uk.gov.hmrc.trusts.models.LeadTrusteeType
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.{BadRequestResponse, _}
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeType, GetTrustResponse, GetTrustSuccessResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -69,6 +67,21 @@ class GetTrustController @Inject()(identify: IdentifierAction,
           json => {
             val leadTrustee = json.as[DisplayTrustLeadTrusteeType]
             Ok(Json.toJson(leadTrustee))
+          }
+        )
+      case _ => Forbidden
+    }
+
+  def getTrustees(utr: String) : Action[AnyContent] =
+    doGet(utr, applyTransformations = true) {
+      case processed: TrustProcessedResponse =>
+        val pick = (JsPath \ 'details \ 'trust \ 'entities \ 'trustees).json.pick
+
+        processed.getTrust.transform(pick).fold(
+          _ => InternalServerError,
+          json => {
+            val trustees = json.as[List[DisplayTrustTrusteeType]]
+            Ok(Json.toJson(trustees))
           }
         )
       case _ => Forbidden
