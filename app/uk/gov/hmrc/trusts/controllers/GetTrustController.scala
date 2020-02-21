@@ -65,8 +65,10 @@ class GetTrustController @Inject()(identify: IdentifierAction,
         processed.getTrust.transform(pick).fold(
           _ => InternalServerError,
           json => {
-            val leadTrustee = json.as[DisplayTrustLeadTrusteeType]
-            Ok(Json.toJson(leadTrustee))
+            Ok(json.as[DisplayTrustLeadTrusteeType] match {
+              case DisplayTrustLeadTrusteeType(Some(leadTrusteeInd), None) => Json.toJson(leadTrusteeInd)
+              case DisplayTrustLeadTrusteeType(None, Some(leadTrusteeOrg)) => Json.toJson(leadTrusteeOrg)
+            })
           }
         )
       case _ => Forbidden
@@ -79,9 +81,11 @@ class GetTrustController @Inject()(identify: IdentifierAction,
 
         processed.getTrust.transform(pick).fold(
           _ => InternalServerError,
-          json => {
-            val trustees = json.as[List[DisplayTrustTrusteeType]]
-            Ok(Json.toJson(trustees))
+          trustees => {
+
+            val response = Json.obj("trustees" -> trustees.as[List[DisplayTrustTrusteeType]])
+
+            Ok(Json.toJson(response))
           }
         )
       case _ => Forbidden
