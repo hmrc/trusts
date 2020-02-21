@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.trusts.controllers
 
+import java.time.LocalDate
+
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsError, JsPath, JsSuccess, Json}
@@ -69,6 +71,19 @@ class GetTrustController @Inject()(identify: IdentifierAction,
               case DisplayTrustLeadTrusteeType(Some(leadTrusteeInd), None) => Json.toJson(leadTrusteeInd)
               case DisplayTrustLeadTrusteeType(None, Some(leadTrusteeOrg)) => Json.toJson(leadTrusteeOrg)
             })
+          }
+        )
+      case _ => Forbidden
+    }
+
+  def getTrustSetupDate(utr: String): Action[AnyContent] =
+    doGet(utr, applyTransformations = true) {
+      case processed: TrustProcessedResponse =>
+        val pick = (JsPath \ 'details \ 'trust \ 'details \ 'startDate).json.pick
+        processed.getTrust.transform(pick).fold(
+          _ => InternalServerError,
+          json => {
+            Ok(Json.obj("startDate" -> json))
           }
         )
       case _ => Forbidden
