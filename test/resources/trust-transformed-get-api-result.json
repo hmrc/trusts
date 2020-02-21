@@ -225,7 +225,9 @@
                 "safeId": "2222200000000"
               },
               "entityStart": "2017-02-28"
-            },
+            }
+          },
+          {
             "trusteeOrg": {
               "lineNo": "1",
               "name": "MyOrg Incorporated",

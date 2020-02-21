@@ -14,6 +14,8 @@ GET         /:utr/transformed/lead-trustee              uk.gov.hmrc.trusts.contr
 
 GET         /:utr/trust-start-date                      uk.gov.hmrc.trusts.controllers.GetTrustController.getTrustSetupDate(utr: String)
 
+GET         /:utr/transformed/trustees                  uk.gov.hmrc.trusts.controllers.GetTrustController.getTrustees(utr: String)
+
 POST        /variation                                  uk.gov.hmrc.trusts.controllers.TrustVariationsController.trustVariation
 
 POST        /no-change/:utr                             uk.gov.hmrc.trusts.controllers.TrustVariationsController.noChange(utr: String)

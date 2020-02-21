@@ -25,7 +25,7 @@ import play.api.mvc.{Action, AnyContent, Result}
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUTRAction}
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeType, GetTrustResponse, GetTrustSuccessResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.{BadRequestResponse, _}
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService}
 
@@ -84,6 +84,23 @@ class GetTrustController @Inject()(identify: IdentifierAction,
           _ => InternalServerError,
           json => {
             Ok(Json.obj("startDate" -> json))
+          }
+        )
+      case _ => Forbidden
+    }
+
+  def getTrustees(utr: String) : Action[AnyContent] =
+    doGet(utr, applyTransformations = true) {
+      case processed: TrustProcessedResponse =>
+        val pick = (JsPath \ 'details \ 'trust \ 'entities \ 'trustees).json.pick
+
+        processed.getTrust.transform(pick).fold(
+          _ => InternalServerError,
+          trustees => {
+
+            val response = Json.obj("trustees" -> trustees.as[List[DisplayTrustTrusteeType]])
+
+            Ok(Json.toJson(response))
           }
         )
       case _ => Forbidden
