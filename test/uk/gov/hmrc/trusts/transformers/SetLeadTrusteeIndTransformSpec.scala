@@ -37,7 +37,7 @@ class SetLeadTrusteeIndTransformSpec extends FreeSpec with MustMatchers with Opt
         phoneNumber = "newPhone",
         email = Some("newEmail"),
         identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-        entityStart = "2012-03-14"
+        entityStart = DateTime.parse("2012-03-14")
       )
       val transformer = SetLeadTrusteeIndTransform(newTrusteeInfo)
 

@@ -18,9 +18,10 @@ package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
 import play.api.libs.json.{JsResult, JsSuccess, JsValue}
+import uk.gov.hmrc.trusts.models.RemoveTrustee
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeType, DisplayTrustTrusteeType}
 import uk.gov.hmrc.trusts.repositories.TransformationRepository
-import uk.gov.hmrc.trusts.transformers.{AddTrusteeIndTransform, ComposedDeltaTransform, DeltaTransform, SetLeadTrusteeIndTransform, SetLeadTrusteeOrgTransform}
+import uk.gov.hmrc.trusts.transformers._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -44,6 +45,10 @@ class TransformationService @Inject()(repository: TransformationRepository){
     addNewTransform(utr, internalId, newTrustee match {
       case DisplayTrustTrusteeType(Some(trusteeInd), None) => AddTrusteeIndTransform(trusteeInd)
     })
+  }
+
+  def addRemoveTrusteeTransformer(utr: String, internalId: String, remove: RemoveTrustee) : Future[Unit] = {
+    addNewTransform(utr, internalId, RemoveTrusteeTransform(remove.trustee, remove.endDate))
   }
 
   private def addNewTransform(utr: String, internalId: String, newTransform: DeltaTransform) = {

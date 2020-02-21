@@ -16,12 +16,13 @@
 
 package uk.gov.hmrc.trusts.transformers
 
+import java.time.LocalDate
+
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.Json
-import uk.gov.hmrc.trusts.models.NameType
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType, DisplayTrustTrusteeIndividualType}
-import uk.gov.hmrc.trusts.utils.JsonUtils
+import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType, DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeType}
 
 class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
@@ -44,7 +45,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |                        "dateOfBirth" : "2000-01-01",
           |                        "phoneNumber" : "",
           |                        "identification" : {},
-          |                        "entityStart" : "now"
+          |                        "entityStart" : "2000-01-01"
           |                    }
           |                }
           |            },
@@ -62,35 +63,72 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |                        "identification" : {
           |                            "nino" : "nino"
           |                        },
-          |                        "entityStart" : "entityStart"
+          |                        "entityStart" : "2000-01-01"
           |                    }
           |                }
+          |            },
+          |            {
+          |               "RemoveTrusteeTransform": {
+          |                 "trustee" : {
+          |                     "trusteeInd": {
+          |                        "lineNo" : "1",
+          |                        "bpMatchStatus" : "01",
+          |                        "name" : {
+          |                            "firstName" : "New",
+          |                            "lastName" : "Trustee"
+          |                        },
+          |                        "dateOfBirth" : "2000-01-01",
+          |                        "phoneNumber" : "phoneNumber",
+          |                        "identification" : {
+          |                            "nino" : "nino"
+          |                        },
+          |                        "entityStart" : "2000-01-01"
+        |                        }
+          |                    },
+          |                    "endDate": "2010-01-01"
+          |               }
           |            }
           |        ]
           |    }
           |""".stripMargin)
 
-      val data = ComposedDeltaTransform(Seq(SetLeadTrusteeIndTransform(
-        DisplayTrustLeadTrusteeIndType(
-          "",
-          None,
-          NameType("New", Some("lead"), "Trustee"),
-          DateTime.parse("2000-01-01"),
-          "",
-          None,
-          DisplayTrustIdentificationType(None, None, None, None),
-          "now"
-        )),
-        AddTrusteeIndTransform(DisplayTrustTrusteeIndividualType(
-          "lineNo",
-          Some("bpMatchStatus"),
-          NameType("New", None, "Trustee"),
-          Some(DateTime.parse("2000-01-01")),
-          Some("phoneNumber"),
-          Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-          "entityStart"
-        ))
-      )
+      val data = ComposedDeltaTransform(Seq(
+        SetLeadTrusteeIndTransform(
+          DisplayTrustLeadTrusteeIndType(
+            "",
+            None,
+            NameType("New", Some("lead"), "Trustee"),
+            DateTime.parse("2000-01-01"),
+            "",
+            None,
+            DisplayTrustIdentificationType(None, None, None, None),
+            DateTime.parse("2000-01-01")
+          )),
+        AddTrusteeIndTransform(
+          DisplayTrustTrusteeIndividualType(
+            "lineNo",
+            Some("bpMatchStatus"),
+            NameType("New", None, "Trustee"),
+            Some(DateTime.parse("2000-01-01")),
+            Some("phoneNumber"),
+            Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
+            DateTime.parse("2000-01-01")
+          )),
+        RemoveTrusteeTransform(
+            trustee = DisplayTrustTrusteeType(
+              trusteeInd = Some(DisplayTrustTrusteeIndividualType(
+              lineNo = "1",
+              bpMatchStatus = Some("01"),
+              name = NameType("New", None, "Trustee"),
+              dateOfBirth = Some(DateTime.parse("2000-01-01")),
+              phoneNumber = Some("phoneNumber"),
+              identification = Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
+              entityStart = DateTime.parse("2000-01-01")
+            )),
+            trusteeOrg = None),
+            endDate = LocalDate.parse("2010-01-01")
+          )
+        )
       )
       Json.toJson(data) mustEqual json
       json.as[ComposedDeltaTransform] mustEqual data

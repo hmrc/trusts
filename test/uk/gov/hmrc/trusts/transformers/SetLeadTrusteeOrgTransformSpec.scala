@@ -16,12 +16,13 @@
 
 package uk.gov.hmrc.trusts.transformers
 
+import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
-import play.api.libs.json.JsSuccess
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationOrgType, DisplayTrustLeadTrusteeOrgType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class SetLeadTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionValues {
+
   "the modify lead transformer should" - {
 
     "successfully set a new org lead trustee's details" in {
@@ -34,7 +35,7 @@ class SetLeadTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with Opt
         phoneNumber = "newPhone",
         email = Some("newEmail"),
         identification = DisplayTrustIdentificationOrgType(None, Some("newUtr"), None),
-        entityStart = "2012-03-14"
+        entityStart = DateTime.parse("2012-03-14")
       )
       val transformer = SetLeadTrusteeOrgTransform(newTrusteeInfo)
 

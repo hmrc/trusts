@@ -146,6 +146,7 @@
           {
             "trusteeInd":{
               "lineNo":"1",
+              "bpMatchStatus": "01",
               "name":{
                 "firstName":"John",
                 "middleName":"William",
@@ -158,7 +159,8 @@
               "phoneNumber":"0121546546",
               "entityStart":"1998-02-12"
             }
-          }],
+          }
+        ],
         "settlors":{
           "settlor":[
             {

@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.trusts.controllers
 
+import java.time.LocalDate
+
 import org.joda.time.DateTime
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -27,7 +29,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.NameType
+import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.services.TransformationService
 
@@ -38,6 +40,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
   val identifierAction = new FakeIdentifierAction(Agent)
 
   "amend lead trustee" - {
+
     "must add a new amend lead trustee transform" in {
       val transformationService = mock[TransformationService]
       val controller = new TransformationController(identifierAction, transformationService)
@@ -50,7 +53,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
         phoneNumber = "newPhone",
         email = Some("newEmail"),
         identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-        entityStart = "2012-03-14"
+        entityStart = DateTime.parse("2012-03-14")
       )
 
       when(transformationService.addAmendLeadTrusteeTransformer(any(), any(), any()))
@@ -85,6 +88,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
   }
 
   "add trustee" - {
+
     "must add a new add trustee transform" in {
       val transformationService = mock[TransformationService]
       val controller = new TransformationController(identifierAction, transformationService)
@@ -96,7 +100,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
         dateOfBirth = Some(new DateTime(1965, 2, 10, 0, 0)),
         phoneNumber = Some("newPhone"),
         identification = Some(DisplayTrustIdentificationType(None, Some("newNino"), None, None)),
-        entityStart = "2012-03-14"
+        entityStart = DateTime.parse("2012-03-14")
       )
 
       when(transformationService.addAddTrusteeTransformer(any(), any(), any()))
@@ -126,6 +130,45 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
       val result = controller.addTrustee("aUTR").apply(request)
       whenReady(result) { _ =>
         status(result) mustBe BAD_REQUEST
+      }
+    }
+  }
+
+  "remove trustee" - {
+
+    "must add a 'remove trustee' transform" in {
+
+      val transformationService = mock[TransformationService]
+      val controller = new TransformationController(identifierAction, transformationService)
+
+      val payload = RemoveTrustee(
+        trustee = DisplayTrustTrusteeType(
+          trusteeInd = Some(DisplayTrustTrusteeIndividualType(
+            lineNo = "1",
+            bpMatchStatus = Some("01"),
+            name = NameType("First", None, "Trustee"),
+            dateOfBirth = Some(DateTime.parse("2010-10-10")),
+            phoneNumber = Some("+446464647"),
+            identification = None,
+            entityStart = DateTime.parse("2019-05-06")
+          )),
+          trusteeOrg = None
+        ),
+        endDate = LocalDate.of(2020, 1, 10)
+      )
+
+      when(transformationService.addRemoveTrusteeTransformer(any(), any(), any()))
+        .thenReturn(Future.successful(()))
+
+      val request = FakeRequest("DELETE", "path")
+        .withBody(Json.toJson(payload))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.removeTrustee("aUTR").apply(request)
+
+      whenReady(result) { value =>
+        status(result) mustBe OK
+        verify(transformationService).addRemoveTrusteeTransformer("aUTR", "id", payload)
       }
     }
   }

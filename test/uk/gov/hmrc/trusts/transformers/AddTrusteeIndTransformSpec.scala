@@ -23,6 +23,7 @@ import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIden
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionValues {
+
   "the add trustee transformer should" - {
 
     "add a new individual trustee" in {
@@ -33,7 +34,7 @@ class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionV
         Some(DateTime.parse("2000-01-01")),
         Some("phoneNumber"),
         Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-        "entityStart")
+        DateTime.parse("1990-10-10"))
 
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
@@ -54,7 +55,7 @@ class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionV
         Some(DateTime.parse("2000-01-01")),
         Some("phoneNumber"),
         Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-        "entityStart")
+        DateTime.parse("1990-10-10"))
 
       val json = JsonUtils.getJsonValueFromFile("trusts-etmp-max-trustees.json")
 

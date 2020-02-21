@@ -19,6 +19,7 @@ package uk.gov.hmrc.trusts.controllers
 import javax.inject.Inject
 import play.api.libs.json.{JsError, JsSuccess}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
+import uk.gov.hmrc.trusts.models.RemoveTrustee
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeType, DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType, DisplayTrustTrusteeType}
 import uk.gov.hmrc.trusts.services.TransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
@@ -35,6 +36,19 @@ class TransformationController @Inject()(
       request.body.validate[DisplayTrustLeadTrusteeType] match {
         case JsSuccess(model, _) =>
           transformationService.addAmendLeadTrusteeTransformer(utr, request.identifier, model) map { _ =>
+            Ok
+          }
+        case JsError(_) =>
+          Future.successful(BadRequest)
+      }
+    }
+  }
+
+  def removeTrustee(utr: String) = identify.async(parse.json) {
+    implicit request => {
+      request.body.validate[RemoveTrustee] match {
+        case JsSuccess(model, _) =>
+          transformationService.addRemoveTrusteeTransformer(utr, request.identifier, model) map { _ =>
             Ok
           }
         case JsError(_) =>

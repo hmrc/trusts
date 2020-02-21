@@ -112,7 +112,7 @@ case class DisplayTrustLeadTrusteeIndType(
                                            phoneNumber: String,
                                            email: Option[String] = None,
                                            identification: DisplayTrustIdentificationType,
-                                           entityStart: String
+                                           entityStart: DateTime
                                          )
 
 object DisplayTrustLeadTrusteeIndType {
@@ -129,10 +129,11 @@ case class DisplayTrustLeadTrusteeOrgType(
                                            phoneNumber: String,
                                            email: Option[String] = None,
                                            identification: DisplayTrustIdentificationOrgType,
-                                           entityStart: String
+                                           entityStart: DateTime
                                          )
 
 object DisplayTrustLeadTrusteeOrgType {
+  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val leadTrusteeOrgTypeFormat: Format[DisplayTrustLeadTrusteeOrgType] = Json.format[DisplayTrustLeadTrusteeOrgType]
 }
 
@@ -302,6 +303,7 @@ case class DisplayTrustTrusteeOrgType(lineNo: String,
                                       entityStart: String)
 
 object DisplayTrustTrusteeOrgType {
+  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val trusteeOrgTypeFormat: Format[DisplayTrustTrusteeOrgType] = Json.format[DisplayTrustTrusteeOrgType]
 }
 
@@ -311,7 +313,7 @@ case class DisplayTrustTrusteeIndividualType(lineNo: String,
                                              dateOfBirth: Option[DateTime],
                                              phoneNumber: Option[String],
                                              identification: Option[DisplayTrustIdentificationType],
-                                             entityStart: String)
+                                             entityStart: DateTime)
 
 object DisplayTrustTrusteeIndividualType {
 
