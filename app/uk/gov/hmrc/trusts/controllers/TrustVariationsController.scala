@@ -82,6 +82,14 @@ class TrustVariationsController @Inject()(
     implicit request => {
       request.body.validate[DeclarationForApi].fold(
         errors => {
+
+          auditService.audit(
+            TrustAuditing.TRUST_VARIATION,
+            Json.obj("declaration" ->request.body),
+            request.identifier,
+            Json.toJson(Json.obj())
+          )
+
           Logger.error(s"[TrustsVariationController][declare no change] unable to parse json as DeclarationForApi, $errors")
           Future.successful(BadRequest)
         },
