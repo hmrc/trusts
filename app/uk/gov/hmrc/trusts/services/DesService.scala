@@ -26,13 +26,13 @@ import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.GetEstateResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustResponse, GetTrustSuccessResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.models.variation.{EstateVariation, VariationResponse}
-import uk.gov.hmrc.trusts.repositories.Repository
+import uk.gov.hmrc.trusts.repositories.CacheRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
-class DesService @Inject()(val desConnector: DesConnector, val repository: Repository)  {
+class DesService @Inject()(val desConnector: DesConnector, val repository: CacheRepository)  {
 
   def getTrustInfoFormBundleNo(utr: String)(implicit hc:HeaderCarrier): Future[String] =
     desConnector.getTrustInfo(utr).map {
