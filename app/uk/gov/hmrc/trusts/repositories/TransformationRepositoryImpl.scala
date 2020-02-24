@@ -35,7 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class TransformationRepositoryImpl @Inject()(
-                            mongo: ReactiveMongoApi,
+                            mongo: MongoDriver,
                             config: AppConfig,
                             dateFormatter: DateFormatter
                           )(implicit ec: ExecutionContext, m: Materializer) extends TransformationRepository {
@@ -47,7 +47,7 @@ class TransformationRepositoryImpl @Inject()(
   private def collection: Future[JSONCollection] =
     for {
       _ <- ensureIndexes
-      res <- mongo.database.map(_.collection[JSONCollection](collectionName))
+      res <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
     } yield res
 
 
@@ -65,7 +65,7 @@ class TransformationRepositoryImpl @Inject()(
   private lazy val ensureIndexes = {
     logger.info("Ensuring collection indexes")
     for {
-      collection              <- mongo.database.map(_.collection[JSONCollection](collectionName))
+      collection              <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
       createdLastUpdatedIndex <- collection.indexesManager.ensure(lastUpdatedIndex)
       createdIdIndex          <- collection.indexesManager.ensure(idIndex)
     } yield createdLastUpdatedIndex && createdIdIndex

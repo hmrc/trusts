@@ -22,7 +22,6 @@ import akka.stream.Materializer
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
 import play.api.libs.json._
-import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.BSONDocument
 import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
@@ -34,7 +33,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class CacheRepositoryImpl @Inject()(
-                                          mongo: ReactiveMongoApi,
+                                          mongo: MongoDriver,
                                           config: AppConfig,
                                           dateFormatter: DateFormatter
                                         )(implicit ec: ExecutionContext, m: Materializer) extends CacheRepository {
@@ -46,7 +45,7 @@ class CacheRepositoryImpl @Inject()(
   private def collection: Future[JSONCollection] =
     for {
       _ <- ensureIndexes
-      res <- mongo.database.map(_.collection[JSONCollection](collectionName))
+      res <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
     } yield res
 
 
@@ -64,7 +63,7 @@ class CacheRepositoryImpl @Inject()(
   private lazy val ensureIndexes = {
     logger.info("Ensuring collection indexes")
     for {
-      collection              <- mongo.database.map(_.collection[JSONCollection](collectionName))
+      collection              <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
       createdLastUpdatedIndex <- collection.indexesManager.ensure(lastUpdatedIndex)
       createdIdIndex          <- collection.indexesManager.ensure(idIndex)
     } yield createdLastUpdatedIndex && createdIdIndex
