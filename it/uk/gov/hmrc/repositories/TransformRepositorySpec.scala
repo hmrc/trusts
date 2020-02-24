@@ -48,8 +48,6 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutur
     "auditing.enabled" -> false
   ): _*)
 
-  val dateTime = new DateTime(2016, 12, 24, 0, 0, 0)
-
   val data = ComposedDeltaTransform(Seq(SetLeadTrusteeIndTransform(
     DisplayTrustLeadTrusteeIndType(
         "",
@@ -59,7 +57,7 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutur
         "",
         None,
         DisplayTrustIdentificationType(None, None, None, None),
-      dateTime
+        DateTime.parse("2010-10-10")
       )),
     AddTrusteeIndTransform(DisplayTrustTrusteeIndividualType(
       "lineNo",
@@ -68,7 +66,7 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutur
       Some(DateTime.parse("2000-01-01")),
       Some("phoneNumber"),
       Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-      dateTime
+      DateTime.parse("2010-10-10")
     ))
     )
   )

@@ -19,8 +19,8 @@ package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
 import org.joda.time.DateTime
-import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
+import play.api.Logger
+import play.api.libs.json.{JsError, JsNull, JsSuccess, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.{EtmpCacheDataStaleException, InternalServerErrorException}
 import uk.gov.hmrc.trusts.models.DeclarationForApi
@@ -37,7 +37,6 @@ class VariationService @Inject()(
                                   transformationService: TransformationService,
                                   declarationTransformer: DeclarationTransformer,
                                   auditService: AuditService) {
-  private val logger = LoggerFactory.getLogger("application" + this.getClass.getCanonicalName)
 
   def submitDeclaration(utr: String, internalId: String, declaration: DeclarationForApi)
                        (implicit hc: HeaderCarrier): Future[VariationResponse] = {
@@ -47,13 +46,15 @@ class VariationService @Inject()(
         case JsSuccess(transformedJson, _) =>
         val response = TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
         declarationTransformer.transform(response, originalResponse.getTrust, declaration, new DateTime()) match {
-          case JsSuccess(value, _) => doSubmit(value, internalId)
+          case JsSuccess(value, _) =>
+            Logger.info(s"[VariationService] successfully transformed json for declaration")
+            doSubmit(value, internalId)
           case JsError(errors) =>
-            logger.error("Problem transforming data for ETMP submission " + errors.toString())
+            Logger.error("Problem transforming data for ETMP submission " + errors.toString())
             Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
         }
         case JsError(errors) =>
-          logger.error("Failed to transform trust info", errors)
+          Logger.error(s"Failed to transform trust info $errors")
           Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
       }
     }
@@ -65,16 +66,29 @@ class VariationService @Inject()(
       fbn <- desService.getTrustInfoFormBundleNo(utr)
     } yield response match {
       case tpr: TrustProcessedResponse if tpr.responseHeader.formBundleNo == fbn =>
+        Logger.info(s"[VariationService][submitDeclareNoChange] returning TrustProcessedResponse")
         response.asInstanceOf[TrustProcessedResponse]
       case _: TrustProcessedResponse =>
+        Logger.info(s"[VariationService][submitDeclareNoChange] ETMP cached data in mongo has become stale, rejecting submission")
         throw EtmpCacheDataStaleException
       case _ =>
+        Logger.warn(s"[VariationService][submitDeclareNoChange] Trust was not in a processed state")
         throw InternalServerErrorException("Submission could not proceed, Trust data was not in a processed state")
     }
   }
 
   private def doSubmit(value: JsValue, internalId: String)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
+
+    auditService.audit(
+      TrustAuditing.TRUST_VARIATION_ATTEMPT,
+      value,
+      internalId,
+      Json.toJson(Json.obj())
+    )
+
     desService.trustVariation(value) map { response =>
+
+      Logger.info(s"[VariationService][doSubmit] variation submitted")
 
       auditService.audit(
         TrustAuditing.TRUST_VARIATION,

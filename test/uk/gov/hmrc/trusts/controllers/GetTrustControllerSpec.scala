@@ -23,6 +23,7 @@ import play.api.libs.json.{JsSuccess, JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.config.AppConfig
@@ -103,7 +104,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
       whenReady(result) { _ =>
         verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-        verify(mockTransformationService, times(0)).applyTransformations(any(), any(), any())
+        verify(mockTransformationService, times(0)).applyTransformations(any(), any(), any())(any[HeaderCarrier])
         status(result) mustBe OK
         contentType(result) mustBe Some(JSON)
       }
@@ -117,13 +118,13 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
       when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
 
-      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])).thenReturn(Future.successful(JsSuccess(transformedContent)))
+      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedContent)))
 
       val result = getTrustController.get(utr, true).apply(FakeRequest(GET, s"/trusts/$utr"))
 
       whenReady(result) { _ =>
         verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-        verify(mockTransformationService).applyTransformations(mockEq(utr), mockEq("id"), mockEq(processedResponse.getTrust))
+        verify(mockTransformationService).applyTransformations(mockEq(utr), mockEq("id"), mockEq(processedResponse.getTrust))(any[HeaderCarrier])
         status(result) mustBe OK
         contentType(result) mustBe Some(JSON)
         contentAsJson(result) mustBe getTransformedApiResponse
@@ -229,7 +230,6 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
       "the get endpoint returns a ServiceUnavailableResponse" in {
 
-
         when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(ServiceUnavailableResponse))
 
         val utr = "1234567890"
@@ -262,13 +262,13 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
       when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
 
-      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])).thenReturn(Future.successful(JsSuccess(transformedContent)))
+      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedContent)))
 
       val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/lead-trustee"))
 
       whenReady(result) { _ =>
         verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-        verify(mockTransformationService).applyTransformations(mockEq(utr), mockEq("id"), mockEq(processedResponse.getTrust))
+        verify(mockTransformationService).applyTransformations(mockEq(utr), mockEq("id"), mockEq(processedResponse.getTrust))(any[HeaderCarrier])
         status(result) mustBe OK
         contentType(result) mustBe Some(JSON)
         contentAsJson(result) mustBe getTransformedLeadTrusteeResponse
@@ -279,7 +279,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
       when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
       val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/lead-trustee"))
-      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])).thenReturn(Future.successful(JsSuccess(Json.obj())))
+      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(Json.obj())))
 
       whenReady(result) { _ =>
         status(result) mustBe INTERNAL_SERVER_ERROR
@@ -306,13 +306,13 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
       when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
 
-      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])).thenReturn(Future.successful(JsSuccess(transformedContent)))
+      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedContent)))
 
       val result = getTrustController.getTrustSetupDate(utr).apply(FakeRequest(GET, s"/trusts/$utr/trust-start-date"))
 
       whenReady(result) { _ =>
         verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-        verify(mockTransformationService).applyTransformations(mockEq(utr), mockEq("id"), mockEq(processedResponse.getTrust))
+        verify(mockTransformationService).applyTransformations(mockEq(utr), mockEq("id"), mockEq(processedResponse.getTrust))(any[HeaderCarrier])
         status(result) mustBe OK
         contentType(result) mustBe Some(JSON)
         contentAsJson(result) mustBe Json.parse("""{"startDate":"1920-03-28"}""")
@@ -323,7 +323,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
       when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
       val result = getTrustController.getTrustSetupDate(utr).apply(FakeRequest(GET, s"/trusts/$utr/trust-start-date"))
-      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])).thenReturn(Future.successful(JsSuccess(Json.obj())))
+      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(Json.obj())))
 
       whenReady(result) { _ =>
         status(result) mustBe INTERNAL_SERVER_ERROR
@@ -352,13 +352,13 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
       when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
 
-      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])).thenReturn(Future.successful(JsSuccess(transformedContent)))
+      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])(any())).thenReturn(Future.successful(JsSuccess(transformedContent)))
 
       val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/trustees"))
 
       whenReady(result) { _ =>
         verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-        verify(mockTransformationService).applyTransformations(mockEq(utr), mockEq("id"), mockEq(processedResponse.getTrust))
+        verify(mockTransformationService).applyTransformations(mockEq(utr), mockEq("id"), mockEq(processedResponse.getTrust))(any[HeaderCarrier])
         status(result) mustBe OK
         contentType(result) mustBe Some(JSON)
         contentAsJson(result) mustBe getTransformedTrusteesResponse
@@ -370,7 +370,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
       when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
       val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/trustees"))
-      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])).thenReturn(Future.successful(JsSuccess(Json.obj())))
+      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])(any())).thenReturn(Future.successful(JsSuccess(Json.obj())))
 
       whenReady(result) { _ =>
         status(result) mustBe INTERNAL_SERVER_ERROR

@@ -18,11 +18,17 @@ package uk.gov.hmrc.trusts.config
 
 import com.google.inject.AbstractModule
 import uk.gov.hmrc.trusts.controllers.actions.{AuthenticatedIdentifierAction, IdentifierAction}
+import uk.gov.hmrc.trusts.repositories._
 
 class Module extends AbstractModule {
 
   override def configure(): Unit = {
     // For session based storage instead of cred based, change to SessionIdentifierAction
     bind(classOf[IdentifierAction]).to(classOf[AuthenticatedIdentifierAction]).asEagerSingleton()
+
+    bind(classOf[MongoDriver]).to(classOf[TrustsMongoDriver]).asEagerSingleton()
+
+    bind(classOf[TransformationRepository]).to(classOf[TransformationRepositoryImpl]).asEagerSingleton()
+    bind(classOf[CacheRepository]).to(classOf[CacheRepositoryImpl]).asEagerSingleton()
   }
 }

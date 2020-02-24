@@ -34,11 +34,11 @@ import uk.gov.hmrc.trusts.utils.DateFormatter
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TransformationRepository @Inject()(
-                            mongo: ReactiveMongoApi,
+class TransformationRepositoryImpl @Inject()(
+                            mongo: MongoDriver,
                             config: AppConfig,
                             dateFormatter: DateFormatter
-                          )(implicit ec: ExecutionContext, m: Materializer)  {
+                          )(implicit ec: ExecutionContext, m: Materializer) extends TransformationRepository {
 
   private val logger = LoggerFactory.getLogger("application." + getClass.getCanonicalName)
   private val collectionName: String = "transforms"
@@ -47,7 +47,7 @@ class TransformationRepository @Inject()(
   private def collection: Future[JSONCollection] =
     for {
       _ <- ensureIndexes
-      res <- mongo.database.map(_.collection[JSONCollection](collectionName))
+      res <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
     } yield res
 
 
@@ -65,13 +65,13 @@ class TransformationRepository @Inject()(
   private lazy val ensureIndexes = {
     logger.info("Ensuring collection indexes")
     for {
-      collection              <- mongo.database.map(_.collection[JSONCollection](collectionName))
+      collection              <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
       createdLastUpdatedIndex <- collection.indexesManager.ensure(lastUpdatedIndex)
       createdIdIndex          <- collection.indexesManager.ensure(idIndex)
     } yield createdLastUpdatedIndex && createdIdIndex
   }
 
-  def get(utr: String, internalId: String): Future[Option[ComposedDeltaTransform]] = {
+  override def get(utr: String, internalId: String): Future[Option[ComposedDeltaTransform]] = {
 
     val selector = Json.obj(
       "id" -> createKey(utr, internalId)
@@ -91,7 +91,7 @@ class TransformationRepository @Inject()(
     (utr + '-' + internalId)
   }
 
-  def set(utr: String, internalId: String, transforms: ComposedDeltaTransform): Future[Boolean] = {
+  override def set(utr: String, internalId: String, transforms: ComposedDeltaTransform): Future[Boolean] = {
 
     val selector = Json.obj(
       "id" -> createKey(utr, internalId)
@@ -111,4 +111,12 @@ class TransformationRepository @Inject()(
       }
     }
   }
+}
+
+trait TransformationRepository {
+
+  def get(utr: String, internalId: String): Future[Option[ComposedDeltaTransform]]
+
+  def set(utr: String, internalId: String, transforms: ComposedDeltaTransform): Future[Boolean]
+
 }

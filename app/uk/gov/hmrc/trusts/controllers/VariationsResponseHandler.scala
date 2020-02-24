@@ -17,6 +17,7 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
+import play.api.Logger
 import play.api.libs.json.JsValue
 import play.api.mvc.Result
 import uk.gov.hmrc.http.HeaderCarrier
@@ -30,6 +31,7 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) {
   def recoverFromException(auditType: String)(implicit request: IdentifierRequest[JsValue],hc: HeaderCarrier): PartialFunction[Throwable, Result] = {
 
     case InvalidCorrelationIdException =>
+      Logger.error(s"[ErrorHandler] InvalidCorrelationIdException returned")
       auditService.auditErrorResponse(
         auditType,
         request.body,
@@ -39,6 +41,7 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) {
       invalidCorrelationIdErrorResponse
 
     case DuplicateSubmissionException =>
+      Logger.error(s"[ErrorHandler] DuplicateSubmissionException returned")
       auditService.auditErrorResponse(
         auditType,
         request.body,
@@ -48,6 +51,7 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) {
       duplicateSubmissionErrorResponse
 
     case ServiceNotAvailableException(_) =>
+      Logger.error(s"[ErrorHandler] ServiceNotAvailableException returned")
       auditService.auditErrorResponse(
         auditType,
         request.body,
@@ -57,6 +61,7 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) {
       serviceUnavailableErrorResponse
 
     case EtmpCacheDataStaleException =>
+      Logger.error(s"[ErrorHandler] EtmpCacheDataStaleException returned")
       auditService.auditErrorResponse(
         auditType,
         request.body,
@@ -65,12 +70,14 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) {
       )
       etmpDataStaleErrorResponse
 
-    case _ =>
+    case e =>
+      Logger.error(s"[ErrorHandler] Exception returned ${e.getMessage}")
+
       auditService.auditErrorResponse(
         auditType,
         request.body,
         request.identifier,
-        errorReason = "Internal server error."
+        errorReason = s"${e.getMessage}"
       )
       internalServerErrorErrorResponse
   }

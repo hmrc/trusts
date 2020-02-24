@@ -22,7 +22,6 @@ import akka.stream.Materializer
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
 import play.api.libs.json._
-import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.BSONDocument
 import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
@@ -33,20 +32,20 @@ import uk.gov.hmrc.trusts.utils.DateFormatter
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class Repository @Inject()(
-                                          mongo: ReactiveMongoApi,
+class CacheRepositoryImpl @Inject()(
+                                          mongo: MongoDriver,
                                           config: AppConfig,
                                           dateFormatter: DateFormatter
-                                        )(implicit ec: ExecutionContext, m: Materializer)  {
+                                        )(implicit ec: ExecutionContext, m: Materializer) extends CacheRepository {
 
-  private val logger = LoggerFactory.getLogger("application" + classOf[Repository].getCanonicalName)
+  private val logger = LoggerFactory.getLogger("application" + classOf[CacheRepositoryImpl].getCanonicalName)
   private val collectionName: String = "trusts"
   private val cacheTtl = config.ttlInSeconds
 
   private def collection: Future[JSONCollection] =
     for {
       _ <- ensureIndexes
-      res <- mongo.database.map(_.collection[JSONCollection](collectionName))
+      res <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
     } yield res
 
 
@@ -64,13 +63,13 @@ class Repository @Inject()(
   private lazy val ensureIndexes = {
     logger.info("Ensuring collection indexes")
     for {
-      collection              <- mongo.database.map(_.collection[JSONCollection](collectionName))
+      collection              <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
       createdLastUpdatedIndex <- collection.indexesManager.ensure(lastUpdatedIndex)
       createdIdIndex          <- collection.indexesManager.ensure(idIndex)
     } yield createdLastUpdatedIndex && createdIdIndex
   }
 
-  def get(utr: String, internalId: String): Future[Option[JsValue]] = {
+  override def get(utr: String, internalId: String): Future[Option[JsValue]] = {
 
     val selector = Json.obj(
       "id" -> createKey(utr, internalId)
@@ -90,7 +89,7 @@ class Repository @Inject()(
     (utr + '-' + internalId)
   }
 
-  def set(utr: String, internalId: String, data: JsValue): Future[Boolean] = {
+  override def set(utr: String, internalId: String, data: JsValue): Future[Boolean] = {
 
     val selector = Json.obj(
       "id" -> createKey(utr, internalId)
@@ -110,4 +109,12 @@ class Repository @Inject()(
       }
     }
   }
+}
+
+trait CacheRepository {
+
+  def get(utr: String, internalId: String): Future[Option[JsValue]]
+
+  def set(utr: String, internalId: String, data: JsValue): Future[Boolean]
+
 }
