@@ -40,7 +40,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
       case Some(transformations) =>
 
         auditService.audit(
-          event = TrustAuditing.TRUST_TRANFORMATIONS,
+          event = TrustAuditing.TRUST_TRANSFORMATIONS,
           request = Json.toJson(Json.obj()),
           internalId = internalId,
           response = Json.obj(
