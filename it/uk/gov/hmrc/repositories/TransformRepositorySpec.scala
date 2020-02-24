@@ -57,7 +57,7 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutur
         "",
         None,
         DisplayTrustIdentificationType(None, None, None, None),
-        "now"
+      DateTime.now()
       )),
     AddTrusteeIndTransform(DisplayTrustTrusteeIndividualType(
       "lineNo",
@@ -66,7 +66,7 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutur
       Some(DateTime.parse("2000-01-01")),
       Some("phoneNumber"),
       Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-      "entityStart"
+      DateTime.now()
     ))
     )
   )
