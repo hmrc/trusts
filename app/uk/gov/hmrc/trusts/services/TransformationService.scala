@@ -18,8 +18,10 @@ package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
 import play.api.Logger
-import play.api.libs.json.{JsResult, JsSuccess, JsValue}
+import play.api.libs.json.{JsResult, JsSuccess, JsValue, Json}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.RemoveTrustee
+import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeType, DisplayTrustTrusteeType}
 import uk.gov.hmrc.trusts.repositories.TransformationRepository
 import uk.gov.hmrc.trusts.transformers._
@@ -27,13 +29,26 @@ import uk.gov.hmrc.trusts.transformers._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TransformationService @Inject()(repository: TransformationRepository){
-  def applyTransformations(utr: String, internalId: String, json: JsValue): Future[JsResult[JsValue]] = {
+class TransformationService @Inject()(repository: TransformationRepository,
+                                      auditService: AuditService){
+
+  def applyTransformations(utr: String, internalId: String, json: JsValue)(implicit hc : HeaderCarrier): Future[JsResult[JsValue]] = {
     repository.get(utr, internalId).map {
       case None =>
         Logger.info(s"[TransformationService] no transformations to apply")
         JsSuccess(json)
       case Some(transformations) =>
+
+        auditService.audit(
+          event = TrustAuditing.TRUST_TRANSFORMATIONS,
+          request = Json.toJson(Json.obj()),
+          internalId = internalId,
+          response = Json.obj(
+            "transformations" -> transformations,
+            "data" -> json
+          )
+        )
+
         Logger.info(s"[TransformationService] applying transformations")
         transformations.applyTransform(json)
     }

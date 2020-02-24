@@ -20,7 +20,7 @@ package uk.gov.hmrc.trusts.services
 import javax.inject.Inject
 import org.joda.time.DateTime
 import play.api.Logger
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
+import play.api.libs.json.{JsError, JsNull, JsSuccess, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.{EtmpCacheDataStaleException, InternalServerErrorException}
 import uk.gov.hmrc.trusts.models.DeclarationForApi
@@ -78,6 +78,14 @@ class VariationService @Inject()(
   }
 
   private def doSubmit(value: JsValue, internalId: String)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
+
+    auditService.audit(
+      TrustAuditing.TRUST_VARIATION_ATTEMPT,
+      value,
+      internalId,
+      Json.toJson(Json.obj())
+    )
+
     desService.trustVariation(value) map { response =>
 
       Logger.info(s"[VariationService][doSubmit] variation submitted")
