@@ -63,7 +63,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
       val auditService = app.injector.instanceOf[FakeAuditService]
       val transformer = mock[DeclarationTransformer]
 
-      when(transformationService.applyTransformations(any(), any(), any())).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
+      when(transformationService.applyTransformations(any(), any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
 
       when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
 
@@ -85,7 +85,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
 
       whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { variationResponse => {
         variationResponse mustBe VariationResponse("TVN34567890")
-        verify(transformationService, times( 1)).applyTransformations(equalTo(utr), equalTo(internalId), equalTo(trustInfoJson))
+        verify(transformationService, times( 1)).applyTransformations(equalTo(utr), equalTo(internalId), equalTo(trustInfoJson))(any[HeaderCarrier])
         verify(transformer, times(1)).transform(equalTo(transformedResponse), equalTo(response.getTrust), equalTo(declarationForApi), any())
         val arg: ArgumentCaptor[JsValue] = ArgumentCaptor.forClass(classOf[JsValue])
         verify(desService, times(1)).trustVariation(arg.capture())(any[HeaderCarrier])
@@ -101,7 +101,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
 
     when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful("31415900000"))
 
-    when(transformationService.applyTransformations(any(), any(), any())).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
+    when(transformationService.applyTransformations(any(), any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
 
     when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))(any[HeaderCarrier]())).thenReturn(Future.successful(
       TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
