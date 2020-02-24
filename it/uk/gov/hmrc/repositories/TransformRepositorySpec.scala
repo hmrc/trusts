@@ -7,7 +7,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers.running
 import reactivemongo.api.{DefaultDB, MongoConnection, MongoDriver}
 import uk.gov.hmrc.trusts.models.NameType
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType, DisplayTrustTrusteeIndividualType}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustIdentificationType
 import uk.gov.hmrc.trusts.repositories.TransformationRepository
 import uk.gov.hmrc.trusts.transformers.{AddTrusteeIndTransform, ComposedDeltaTransform, SetLeadTrusteeIndTransform}
 

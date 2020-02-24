@@ -28,19 +28,20 @@ import reactivemongo.bson.BSONDocument
 import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
 import reactivemongo.play.json.collection.JSONCollection
 import uk.gov.hmrc.trusts.config.AppConfig
+import uk.gov.hmrc.trusts.transformers.{ComposedDeltaTransform, DeltaTransform}
 import uk.gov.hmrc.trusts.utils.DateFormatter
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class Repository @Inject()(
-                                          mongo: ReactiveMongoApi,
-                                          config: AppConfig,
-                                          dateFormatter: DateFormatter
-                                        )(implicit ec: ExecutionContext, m: Materializer)  {
+class TransformationRepositoryImpl @Inject()(
+                            mongo: ReactiveMongoApi,
+                            config: AppConfig,
+                            dateFormatter: DateFormatter
+                          )(implicit ec: ExecutionContext, m: Materializer) extends TransformationRepository {
 
-  private val logger = LoggerFactory.getLogger("application" + classOf[Repository].getCanonicalName)
-  private val collectionName: String = "trusts"
+  private val logger = LoggerFactory.getLogger("application." + getClass.getCanonicalName)
+  private val collectionName: String = "transforms"
   private val cacheTtl = config.ttlInSeconds
 
   private def collection: Future[JSONCollection] =
@@ -52,7 +53,7 @@ class Repository @Inject()(
 
   private val lastUpdatedIndex = Index(
     key = Seq("updatedAt" -> IndexType.Ascending),
-    name = Some("etmp-data-updated-at-index"),
+    name = Some("transformation-data-updated-at-index"),
     options = BSONDocument("expireAfterSeconds" -> cacheTtl)
   )
 
@@ -70,7 +71,7 @@ class Repository @Inject()(
     } yield createdLastUpdatedIndex && createdIdIndex
   }
 
-  def get(utr: String, internalId: String): Future[Option[JsValue]] = {
+  override def get(utr: String, internalId: String): Future[Option[ComposedDeltaTransform]] = {
 
     val selector = Json.obj(
       "id" -> createKey(utr, internalId)
@@ -81,8 +82,8 @@ class Repository @Inject()(
       collection.find(selector, None).one[JsObject].map(opt =>
         for  {
           document <- opt
-          etmpData <- (document \ "etmpData").toOption
-        } yield etmpData)
+          transforms <- (document \ "transforms").asOpt[ComposedDeltaTransform]
+        } yield transforms)
     }
   }
 
@@ -90,7 +91,7 @@ class Repository @Inject()(
     (utr + '-' + internalId)
   }
 
-  def set(utr: String, internalId: String, data: JsValue): Future[Boolean] = {
+  override def set(utr: String, internalId: String, transforms: ComposedDeltaTransform): Future[Boolean] = {
 
     val selector = Json.obj(
       "id" -> createKey(utr, internalId)
@@ -100,14 +101,22 @@ class Repository @Inject()(
       "$set" -> Json.obj(
         "id" -> createKey(utr, internalId),
         "updatedAt" -> LocalDateTime.now,
-        "etmpData" -> data
+        "transforms" -> Json.toJson(transforms)
       )
     )
 
     collection.flatMap {
       _.update(ordered = false).one(selector, modifier, upsert = true, multi = false).map {
-            result => result.ok
+        result => result.ok
       }
     }
   }
+}
+
+trait TransformationRepository {
+
+  def get(utr: String, internalId: String): Future[Option[ComposedDeltaTransform]]
+
+  def set(utr: String, internalId: String, transforms: ComposedDeltaTransform): Future[Boolean]
+
 }
