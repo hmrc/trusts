@@ -81,8 +81,8 @@ class TrustVariationsController @Inject()(
   def noChange(utr: String) = identify.async(parse.json) {
     implicit request => {
       request.body.validate[DeclarationForApi].fold(
-        _ => {
-          Logger.error(s"[TrustsVariationController][declare no change] unable to parse json as DeclarationForApi")
+        errors => {
+          Logger.error(s"[TrustsVariationController][declare no change] unable to parse json as DeclarationForApi, $errors")
           Future.successful(BadRequest)
         },
         declarationForApi => {
