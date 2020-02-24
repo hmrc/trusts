@@ -1,13 +1,27 @@
 # microservice specific routes
 
-POST        /check                                     uk.gov.hmrc.trusts.controllers.CheckTrustController.checkExistingTrust
+POST        /check                                      uk.gov.hmrc.trusts.controllers.CheckTrustController.checkExistingTrust
 
-POST        /register                                  uk.gov.hmrc.trusts.controllers.RegisterTrustController.registration
+POST        /register                                   uk.gov.hmrc.trusts.controllers.RegisterTrustController.registration
 
-POST        /tax-enrolment/callback/subscriptions      uk.gov.hmrc.trusts.controllers.TaxEnrolmentCallbackController.subscriptionCallback
+POST        /tax-enrolment/callback/subscriptions       uk.gov.hmrc.trusts.controllers.TaxEnrolmentCallbackController.subscriptionCallback
 
-GET         /:utr                                      uk.gov.hmrc.trusts.controllers.GetTrustController.get(utr: String)
+GET         /:utr                                       uk.gov.hmrc.trusts.controllers.GetTrustController.get(utr: String, applyTransforms: Boolean = false)
 
-POST        /variation                            uk.gov.hmrc.trusts.controllers.TrustVariationsController.trustVariation
+GET         /:utr/transformed                           uk.gov.hmrc.trusts.controllers.GetTrustController.get(utr: String, applyTransforms: Boolean = true)
+
+GET         /:utr/transformed/lead-trustee              uk.gov.hmrc.trusts.controllers.GetTrustController.getLeadTrustee(utr: String)
+
+GET         /:utr/trust-start-date                      uk.gov.hmrc.trusts.controllers.GetTrustController.getTrustSetupDate(utr: String)
+
+GET         /:utr/transformed/trustees                  uk.gov.hmrc.trusts.controllers.GetTrustController.getTrustees(utr: String)
+
+POST        /variation                                  uk.gov.hmrc.trusts.controllers.TrustVariationsController.trustVariation
 
 POST        /no-change/:utr                             uk.gov.hmrc.trusts.controllers.TrustVariationsController.noChange(utr: String)
+
+POST        /amend-lead-trustee/:utr                    uk.gov.hmrc.trusts.controllers.TransformationController.amendLeadTrustee(utr: String)
+
+POST        /add-trustee/:utr                           uk.gov.hmrc.trusts.controllers.TransformationController.addTrustee(utr: String)
+
+DELETE      /:utr/trustee                               uk.gov.hmrc.trusts.controllers.TransformationController.removeTrustee(utr: String)

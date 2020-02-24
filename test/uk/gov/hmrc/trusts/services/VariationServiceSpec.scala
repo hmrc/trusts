@@ -16,35 +16,37 @@
 
 package uk.gov.hmrc.trusts.services
 
+import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
+import org.mockito.Matchers.{any, eq => equalTo}
+import org.mockito.Mockito.{times, verify, when}
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{MustMatchers, WordSpec}
 import play.api.libs.json.{JsSuccess, JsValue, Json}
-import org.mockito.Mockito.{times, verify, when}
-import org.mockito.Matchers.{any, eq => equalTo}
-import org.scalatest.concurrent.ScalaFutures
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.trusts.exceptions.EtmpCacheDataStaleException
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.models.{AddressType, Declaration, DeclarationForApi, NameType}
-import uk.gov.hmrc.trusts.transformers.DeclareNoChangeTransformer
+import uk.gov.hmrc.trusts.transformers.DeclarationTransformer
 import uk.gov.hmrc.trusts.utils.JsonRequests
-import uk.gov.hmrc.trusts.exceptions.EtmpCacheDataStaleException
 
 import scala.concurrent.Future
 
 class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar with ScalaFutures with MustMatchers {
 
-  implicit  val hc: HeaderCarrier = new HeaderCarrier
+  private implicit  val hc: HeaderCarrier = new HeaderCarrier
   private val formBundleNo = "001234567890"
-  val utr = "1234567890"
-  val internalId = "InternalId"
-  val fullEtmpResponseJson = getTrustResponse
-  val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
-  val transformedJson = Json.obj("field" -> "value")
+  private val utr = "1234567890"
+  private val internalId = "InternalId"
+  private val fullEtmpResponseJson = getTrustResponse
+  private val transformedEtmpResponseJson = Json.parse("""{ "field": "Arbitrary transformed JSON" }""")
+  private val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
+  private val transformedJson = Json.obj("field" -> "value")
 
-  val declaration = Declaration(
+  private val declaration = Declaration(
     NameType("Handy", None, "Andy"),
     AddressType("Line1", "Line2", Some("Line3"), None, Some("POSTCODE"), "GB")
   )
@@ -54,8 +56,11 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
   "Declare no change" should {
     "Submits data correctly when version matches" in {
       val desService = mock[DesService]
+      val transformationService = mock[TransformationService]
       val auditService = mock[AuditService]
-      val transformer = mock[DeclareNoChangeTransformer]
+      val transformer = mock[DeclarationTransformer]
+
+      when(transformationService.applyTransformations(any(), any(), any())).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
 
       when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
 
@@ -69,13 +74,16 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
         VariationResponse("TVN34567890")
       ))
 
-      when(transformer.transform(any(),any())).thenReturn(JsSuccess(transformedJson))
+      when(transformer.transform(any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
 
-      val OUT = new VariationService(desService, transformer, auditService)
+      val OUT = new VariationService(desService, transformationService, transformer, auditService)
 
-      whenReady(OUT.submitDeclareNoChange(utr, internalId, declarationForApi)) {variationResponse => {
+      val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
+
+      whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { variationResponse => {
         variationResponse mustBe VariationResponse("TVN34567890")
-        verify(transformer, times(1)).transform(response, declarationForApi)
+        verify(transformationService, times( 1)).applyTransformations(equalTo(utr), equalTo(internalId), equalTo(trustInfoJson))
+        verify(transformer, times(1)).transform(equalTo(transformedResponse), equalTo(response.getTrust), equalTo(declarationForApi), any())
         val arg: ArgumentCaptor[JsValue] = ArgumentCaptor.forClass(classOf[JsValue])
         verify(desService, times(1)).trustVariation(arg.capture())(any[HeaderCarrier])
         arg.getValue mustBe transformedJson
@@ -84,10 +92,13 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
   }
   "Fail if the etmp data version doesn't match our submission data" in {
     val desService = mock[DesService]
+    val transformationService = mock[TransformationService]
     val auditService = mock[AuditService]
-    val transformer = mock[DeclareNoChangeTransformer]
+    val transformer = mock[DeclarationTransformer]
 
     when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful("31415900000"))
+
+    when(transformationService.applyTransformations(any(), any(), any())).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
 
     when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))(any[HeaderCarrier]())).thenReturn(Future.successful(
       TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
@@ -97,11 +108,11 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
       VariationResponse("TVN34567890")
     ))
 
-    when(transformer.transform(any(),any())).thenReturn(JsSuccess(transformedJson))
+    when(transformer.transform(any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
 
-    val OUT = new VariationService(desService, transformer, auditService)
+    val OUT = new VariationService(desService, transformationService, transformer, auditService)
 
-    whenReady(OUT.submitDeclareNoChange(utr, internalId, declarationForApi).failed) {exception => {
+    whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { exception => {
       exception mustBe an[EtmpCacheDataStaleException.type]
       verify(desService, times(0)).trustVariation(any())(any[HeaderCarrier])
     }

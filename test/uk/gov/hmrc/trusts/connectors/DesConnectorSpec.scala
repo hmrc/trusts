@@ -714,7 +714,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
       }
     }
 
-    "return InternalServerErrorResposne" when {
+    "return InternalServerErrorResponse" when {
 
       "des has returned a 500 with the code SERVER_ERROR" in {
         val utr = "1234567893"
@@ -910,7 +910,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
       }
     }
 
-    "return InternalServerErrorResposne" when {
+    "return InternalServerErrorResponse" when {
       "des has returned a 500 with the code SERVER_ERROR" in {
         val utr = "1234567893"
         stubForGet(server, createTrustOrEstateEndpoint(utr), INTERNAL_SERVER_ERROR, "")

@@ -18,42 +18,58 @@ package uk.gov.hmrc.trusts.services
 
 
 import javax.inject.Inject
+import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.{EtmpCacheDataStaleException, InternalServerErrorException}
-import uk.gov.hmrc.trusts.models.{Declaration, DeclarationForApi}
+import uk.gov.hmrc.trusts.models.DeclarationForApi
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
-import uk.gov.hmrc.trusts.transformers.DeclareNoChangeTransformer
+import uk.gov.hmrc.trusts.transformers.DeclarationTransformer
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class VariationService @Inject()(desService: DesService, declareNoChangeTransformer: DeclareNoChangeTransformer, auditService: AuditService) {
+class VariationService @Inject()(
+                                  desService: DesService,
+                                  transformationService: TransformationService,
+                                  declarationTransformer: DeclarationTransformer,
+                                  auditService: AuditService) {
   private val logger = LoggerFactory.getLogger("application" + this.getClass.getCanonicalName)
 
-  def submitDeclareNoChange(utr: String, internalId: String, declaration: DeclarationForApi)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
-    val checkedResponse = for {
+  def submitDeclaration(utr: String, internalId: String, declaration: DeclarationForApi)
+                       (implicit hc: HeaderCarrier): Future[VariationResponse] = {
+
+    getCachedTrustData(utr, internalId).flatMap { originalResponse =>
+      transformationService.applyTransformations(utr, internalId, originalResponse.getTrust).flatMap {
+        case JsSuccess(transformedJson, _) =>
+        val response = TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
+        declarationTransformer.transform(response, originalResponse.getTrust, declaration, new DateTime()) match {
+          case JsSuccess(value, _) => doSubmit(value, internalId)
+          case JsError(errors) =>
+            logger.error("Problem transforming data for ETMP submission " + errors.toString())
+            Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
+        }
+        case JsError(errors) =>
+          logger.error("Failed to transform trust info", errors)
+          Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
+      }
+    }
+  }
+
+  private def getCachedTrustData(utr: String, internalId: String)(implicit hc: HeaderCarrier) = {
+    for {
       response <- desService.getTrustInfo(utr, internalId)
       fbn <- desService.getTrustInfoFormBundleNo(utr)
     } yield response match {
-      case tpr:TrustProcessedResponse if tpr.responseHeader.formBundleNo == fbn =>
+      case tpr: TrustProcessedResponse if tpr.responseHeader.formBundleNo == fbn =>
         response.asInstanceOf[TrustProcessedResponse]
-      case _:TrustProcessedResponse =>
+      case _: TrustProcessedResponse =>
         throw EtmpCacheDataStaleException
       case _ =>
         throw InternalServerErrorException("Submission could not proceed, Trust data was not in a processed state")
-    }
-
-    checkedResponse.flatMap { response =>
-      declareNoChangeTransformer.transform(response, declaration) match {
-        case JsSuccess(value, _) => doSubmit(value, internalId)
-        case JsError(errors) =>
-          logger.error("Problem transforming data for no change submission " + errors.toString())
-          Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
-      }
     }
   }
 

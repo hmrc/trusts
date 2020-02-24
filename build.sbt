@@ -5,6 +5,8 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 import uk.gov.hmrc.SbtArtifactory
 
+lazy val IntegrationTest = config("it") extend(Test)
+
 val appName = "trusts"
 
 lazy val scoverageSettings = {
