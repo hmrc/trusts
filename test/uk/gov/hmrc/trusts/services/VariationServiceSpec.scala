@@ -17,24 +17,25 @@
 package uk.gov.hmrc.trusts.services
 
 import org.mockito.ArgumentCaptor
+import org.mockito.Matchers.{any, eq => equalTo}
+import org.mockito.Mockito.{times, verify, when}
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{MustMatchers, WordSpec}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsSuccess, JsValue, Json}
-import org.mockito.Mockito.{times, verify, when}
-import org.mockito.Matchers.{any, eq => equalTo}
-import org.scalatest.concurrent.ScalaFutures
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.trusts.exceptions.EtmpCacheDataStaleException
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.models.{AddressType, Declaration, DeclarationForApi, NameType}
 import uk.gov.hmrc.trusts.transformers.DeclareNoChangeTransformer
 import uk.gov.hmrc.trusts.utils.JsonRequests
-import uk.gov.hmrc.trusts.exceptions.EtmpCacheDataStaleException
 
 import scala.concurrent.Future
 
-class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar with ScalaFutures with MustMatchers {
+class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar with ScalaFutures with MustMatchers with GuiceOneAppPerSuite {
 
   implicit  val hc: HeaderCarrier = new HeaderCarrier
   private val formBundleNo = "001234567890"
@@ -52,9 +53,11 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
   val declarationForApi = DeclarationForApi(declaration, None)
 
   "Declare no change" should {
+    
     "Submits data correctly when version matches" in {
+
       val desService = mock[DesService]
-      val auditService = mock[AuditService]
+      val fakeAuditService = app.injector.instanceOf[FakeAuditService]
       val transformer = mock[DeclareNoChangeTransformer]
 
       when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
@@ -71,7 +74,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
 
       when(transformer.transform(any(),any())).thenReturn(JsSuccess(transformedJson))
 
-      val OUT = new VariationService(desService, transformer, auditService)
+      val OUT = new VariationService(desService, transformer, fakeAuditService)
 
       whenReady(OUT.submitDeclareNoChange(utr, internalId, declarationForApi)) {variationResponse => {
         variationResponse mustBe VariationResponse("TVN34567890")
