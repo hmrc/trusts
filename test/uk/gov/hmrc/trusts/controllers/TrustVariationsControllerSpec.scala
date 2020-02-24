@@ -31,10 +31,9 @@ import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
-import uk.gov.hmrc.trusts.models.{AddressType, Declaration, DeclarationForApi, NameType}
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
+import uk.gov.hmrc.trusts.models.{AddressType, Declaration, DeclarationForApi, NameType}
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, ValidationService, VariationService}
-import uk.gov.hmrc.trusts.transformers.DeclareNoChangeTransformer
 import uk.gov.hmrc.trusts.utils.Headers
 
 import scala.concurrent.Future
@@ -319,7 +318,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
         val declarationForApi = DeclarationForApi(declaration, None)
 
-        when(mockVariationService.submitDeclareNoChange(any(), any(), any())(any()))
+        when(mockVariationService.submitDeclaration(any(), any(), any())(any()))
           .thenReturn(Future.failed(EtmpCacheDataStaleException))
 
         val result = SUT.noChange("1234567890")(
