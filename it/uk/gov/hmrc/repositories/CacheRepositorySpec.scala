@@ -6,14 +6,14 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.Helpers.running
 import reactivemongo.api.{DefaultDB, MongoConnection, MongoDriver}
-import uk.gov.hmrc.trusts.repositories.Repository
+import uk.gov.hmrc.trusts.repositories.CacheRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 
-class RepositorySpec extends FreeSpec with MustMatchers with ScalaFutures with IntegrationPatience {
+class CacheRepositorySpec extends FreeSpec with MustMatchers with ScalaFutures with IntegrationPatience {
   private val connectionString = "mongodb://localhost:27017/trusts-integration"
 
   "a playback repository" - {
@@ -25,7 +25,7 @@ class RepositorySpec extends FreeSpec with MustMatchers with ScalaFutures with I
 
       running(application) {
 
-        val repository = application.injector.instanceOf[Repository]
+        val repository = application.injector.instanceOf[CacheRepository]
 
         val storedOk = repository.set("UTRUTRUTR", "InternalId", data)
         storedOk.futureValue mustBe true

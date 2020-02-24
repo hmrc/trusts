@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models.auditing
+package uk.gov.hmrc.trusts.repositories
 
-object TrustAuditing {
+import javax.inject.{Inject, Singleton}
+import play.modules.reactivemongo.ReactiveMongoApi
 
-  val TRUST_REGISTRATION_SUBMITTED = "TrustRegistrationSubmitted"
-  val ESTATE_REGISTRATION_SUBMITTED = "EstateRegistrationSubmitted"
+@Singleton
+class TrustsMongoDriver @Inject()(val api : ReactiveMongoApi) extends MongoDriver
 
-  val GET_TRUST = "GetTrust"
-  val GET_ESTATE = "GetEstate"
-
-  val TRUST_VARIATION = "TrustVariation"
-  val TRUST_VARIATION_ATTEMPT = "TrustVariationAttempt"
-  val TRUST_TRANSFORMATIONS = "TrustTransformations"
-  val ESTATE_VARIATION = "EstateVariation"
-
+sealed trait MongoDriver {
+  val api : ReactiveMongoApi
 }

@@ -81,7 +81,18 @@ class TrustVariationsController @Inject()(
   def noChange(utr: String) = identify.async(parse.json) {
     implicit request => {
       request.body.validate[DeclarationForApi].fold(
-        _ => Future.successful(BadRequest),
+        errors => {
+
+          auditService.audit(
+            TrustAuditing.TRUST_VARIATION,
+            Json.obj("declaration" ->request.body),
+            request.identifier,
+            Json.toJson(Json.obj())
+          )
+
+          Logger.error(s"[TrustsVariationController][declare no change] unable to parse json as DeclarationForApi, $errors")
+          Future.successful(BadRequest)
+        },
         declarationForApi => {
           variationService
             .submitDeclaration(utr, request.identifier, declarationForApi)

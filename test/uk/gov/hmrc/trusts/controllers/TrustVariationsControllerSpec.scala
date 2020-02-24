@@ -297,7 +297,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
             Meq(trustVariationsAuditEvent),
             any(),
             Meq("id"),
-            Meq("Internal server error.")
+            any()
           )(any())
 
           val output = contentAsJson(result)

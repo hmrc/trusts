@@ -28,7 +28,7 @@ import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
-import uk.gov.hmrc.trusts.repositories.Repository
+import uk.gov.hmrc.trusts.repositories.CacheRepositoryImpl
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
@@ -38,7 +38,7 @@ class DesServiceSpec extends BaseSpec {
   private trait DesServiceFixture {
     lazy val request = ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
     val mockConnector: DesConnector = mock[DesConnector]
-    val mockRepository: Repository = mock[Repository]
+    val mockRepository: CacheRepositoryImpl = mock[CacheRepositoryImpl]
     when(mockRepository.get(any[String], any[String])).thenReturn(Future.successful(None))
 
     val myId = "myId"
@@ -190,7 +190,7 @@ class DesServiceSpec extends BaseSpec {
   ".getTrustInfoFormBundleNo should return formBundle No from ETMP Data" in {
     val etmpData = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
     val mockDesconnector = mock[DesConnector]
-    val mockRepository = mock[Repository]
+    val mockRepository = mock[CacheRepositoryImpl]
     when(mockDesconnector.getTrustInfo(any())(any())).thenReturn(Future.successful(etmpData))
 
     val OUT = new DesService(mockDesconnector, mockRepository)
