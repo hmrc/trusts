@@ -3,8 +3,6 @@
     "trust":{
       "entities":{
         "leadTrustees":{
-          "lineNo":"newLineNo",
-          "bpMatchStatus":"newMatchStatus",
           "name":{
             "firstName":"newFirstName",
             "middleName":"newMiddleName",
@@ -15,8 +13,7 @@
           "email":"newEmail",
           "identification":{
             "nino":"newNino"
-          },
-          "entityStart":"2012-03-14"
+          }
         }
       }
     }

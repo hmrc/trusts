@@ -18,26 +18,24 @@ package uk.gov.hmrc.trusts.transformers
 
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
-import play.api.libs.json.JsSuccess
 import uk.gov.hmrc.trusts.models.NameType
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class SetLeadTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionValues {
   "the modify lead transformer should" - {
-
     "successfully set a new ind lead trustee's details" in {
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-before.json")
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-after-ind.json")
       val newTrusteeInfo = DisplayTrustLeadTrusteeIndType(
-        lineNo = "newLineNo",
-        bpMatchStatus = Some("newMatchStatus"),
+        lineNo = Some("newLineNo"),
+        bpMatchStatus = Some("MatchStatus"),
         name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
         dateOfBirth = new DateTime(1965, 2, 10, 12, 30),
         phoneNumber = "newPhone",
         email = Some("newEmail"),
         identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-        entityStart = DateTime.parse("2012-03-14")
+        entityStart = Some(new DateTime(2007, 12, 25, 12, 34))
       )
       val transformer = SetLeadTrusteeIndTransform(newTrusteeInfo)
 

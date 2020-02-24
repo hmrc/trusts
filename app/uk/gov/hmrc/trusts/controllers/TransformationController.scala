@@ -17,6 +17,7 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
+import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsError, JsSuccess}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveTrustee
@@ -30,6 +31,8 @@ class TransformationController @Inject()(
                                   identify: IdentifierAction,
                                   transformationService: TransformationService
                                   )(implicit val executionContext: ExecutionContext) extends TrustsBaseController with ValidationUtil {
+  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+
 
   def amendLeadTrustee(utr: String) = identify.async(parse.json) {
     implicit request => {
@@ -38,7 +41,8 @@ class TransformationController @Inject()(
           transformationService.addAmendLeadTrusteeTransformer(utr, request.identifier, model) map { _ =>
             Ok
           }
-        case JsError(_) =>
+        case JsError(errors) =>
+          logger.warn(s"Supplied Lead trustee could not be read as DisplayTrustLeadTrusteeType - $errors")
           Future.successful(BadRequest)
       }
     }
