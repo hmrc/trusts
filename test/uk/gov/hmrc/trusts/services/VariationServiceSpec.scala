@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.trusts.services
 
-import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{MustMatchers, WordSpec}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsSuccess, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.EtmpCacheDataStaleException
@@ -35,7 +35,7 @@ import uk.gov.hmrc.trusts.utils.JsonRequests
 
 import scala.concurrent.Future
 
-class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar with ScalaFutures with MustMatchers {
+class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar with ScalaFutures with MustMatchers with GuiceOneAppPerSuite {
 
   private implicit  val hc: HeaderCarrier = new HeaderCarrier
   private val formBundleNo = "001234567890"
@@ -54,10 +54,13 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
   val declarationForApi = DeclarationForApi(declaration, None)
 
   "Declare no change" should {
+    
     "Submits data correctly when version matches" in {
+
       val desService = mock[DesService]
+
       val transformationService = mock[TransformationService]
-      val auditService = mock[AuditService]
+      val auditService = app.injector.instanceOf[FakeAuditService]
       val transformer = mock[DeclarationTransformer]
 
       when(transformationService.applyTransformations(any(), any(), any())).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))

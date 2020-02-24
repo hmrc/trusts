@@ -17,6 +17,7 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
+import play.api.Logger
 import play.api.libs.json.{JsResult, JsSuccess, JsValue}
 import uk.gov.hmrc.trusts.models.RemoveTrustee
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeType, DisplayTrustTrusteeType}
@@ -29,8 +30,12 @@ import scala.concurrent.Future
 class TransformationService @Inject()(repository: TransformationRepository){
   def applyTransformations(utr: String, internalId: String, json: JsValue): Future[JsResult[JsValue]] = {
     repository.get(utr, internalId).map {
-      case None => JsSuccess(json)
-      case Some(transformations) => transformations.applyTransform(json)
+      case None =>
+        Logger.info(s"[TransformationService] no transformations to apply")
+        JsSuccess(json)
+      case Some(transformations) =>
+        Logger.info(s"[TransformationService] applying transformations")
+        transformations.applyTransform(json)
     }
   }
 

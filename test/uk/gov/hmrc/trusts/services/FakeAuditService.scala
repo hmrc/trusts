@@ -17,14 +17,25 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.models.{Registration, RegistrationResponse}
+import uk.gov.hmrc.trusts.models.{EstateRegistration, Registration, RegistrationResponse}
 
 class FakeAuditService @Inject()(auditConnector: AuditConnector, config: AppConfig)
   extends AuditService(auditConnector, config) {
 
-  override def audit(event: String, registration: Registration, draftId: String, internalId: String, response: RegistrationResponse)(implicit hc: HeaderCarrier): Unit = ()
+  override def audit(event: String, registration: Registration, draftId: String, internalId: String, response: RegistrationResponse)
+                    (implicit hc: HeaderCarrier): Unit = ()
+
+  override def audit(event: String, registration: EstateRegistration, draftId: String, internalId: String, response: RegistrationResponse)
+                    (implicit hc: HeaderCarrier): Unit = ()
+
+  override def audit(event: String, request: JsValue, internalId: String, response: JsValue)
+                    (implicit hc: HeaderCarrier): Unit = ()
+
+  override def auditErrorResponse(eventName: String, request: JsValue, internalId: String, errorReason: String)
+                                 (implicit hc: HeaderCarrier): Unit = ()
 
 }

@@ -17,15 +17,15 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
+import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.GetEstateResponse
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustResponse, GetTrustSuccessResponse, TrustFoundResponse, TrustProcessedResponse}
-import uk.gov.hmrc.trusts.models.variation.{EstateVariation, TrustVariation, VariationResponse}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustResponse, GetTrustSuccessResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.variation.{EstateVariation, VariationResponse}
 import uk.gov.hmrc.trusts.repositories.Repository
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,14 +34,12 @@ import scala.concurrent.Future
 
 class DesService @Inject()(val desConnector: DesConnector, val repository: Repository)  {
 
-  private val logger = LoggerFactory.getLogger("application." + classOf[DesService].getCanonicalName)
-
   def getTrustInfoFormBundleNo(utr: String)(implicit hc:HeaderCarrier): Future[String] =
     desConnector.getTrustInfo(utr).map {
       case response: GetTrustSuccessResponse => response.responseHeader.formBundleNo
       case response =>
         val msg = s"Failed to retrieve latest form bundle no from ETMP : $response"
-        logger.warn(msg)
+        Logger.warn(msg)
         throw InternalServerErrorException(s"Submission could not proceed, $msg")
     }
 
@@ -70,7 +68,8 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Repos
   }
 
   private def refreshCacheAndGetTrustInfo(utr: String, internalId: String)(implicit hc: HeaderCarrier) = {
-      logger.debug("Retrieving Trust Info from DES")
+      Logger.debug("Retrieving Trust Info from DES")
+      Logger.info(s"[DesService][refreshCacheAndGetTrustInfo] refreshing cache")
       desConnector.getTrustInfo(utr).map {
         case response:TrustProcessedResponse =>
           repository.set(utr, internalId, Json.toJson(response)(TrustProcessedResponse.mongoWrites))
@@ -80,11 +79,16 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Repos
   }
 
   def getTrustInfo(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
-    logger.debug("Getting trust Info")
+    Logger.debug("Getting trust Info")
     repository.get(utr, internalId).flatMap {
       case Some(x) => x.validate[GetTrustSuccessResponse].fold(
-        errs => Future.failed[GetTrustResponse](new Exception(errs.toString)),
-        response => Future.successful(response)
+        errs => {
+          Logger.error(s"[DesService] unable to parse json from cache as GetTrustSuccessResponse $errs")
+          Future.failed[GetTrustResponse](new Exception(errs.toString))
+        },
+        response => {
+          Future.successful(response)
+        }
       )
       case None => refreshCacheAndGetTrustInfo(utr, internalId)
     }
