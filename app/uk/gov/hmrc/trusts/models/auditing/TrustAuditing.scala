@@ -25,6 +25,7 @@ object TrustAuditing {
   val GET_ESTATE = "GetEstate"
 
   val TRUST_VARIATION = "TrustVariation"
+  val TRUST_VARIATION_ATTEMPT = "TrustVariationAttempt"
   val ESTATE_VARIATION = "EstateVariation"
 
 }
