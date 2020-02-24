@@ -72,11 +72,12 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) {
 
     case e =>
       Logger.error(s"[ErrorHandler] Exception returned ${e.getMessage}")
+
       auditService.auditErrorResponse(
         auditType,
         request.body,
         request.identifier,
-        errorReason = "Internal server error."
+        errorReason = s"${e.getMessage}"
       )
       internalServerErrorErrorResponse
   }
