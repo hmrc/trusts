@@ -8,7 +8,7 @@ object AppDependencies {
 
   val compile = Seq(
     ws,
-    "org.reactivemongo" %% "play2-reactivemongo" % "0.18.3-play25",
+    "org.reactivemongo" %% "play2-reactivemongo" % "0.18.8-play25",
     "uk.gov.hmrc" %% "bootstrap-play-25" % "4.11.0",
     "com.github.java-json-tools" % "json-schema-validator" % "2.2.8"
   )
