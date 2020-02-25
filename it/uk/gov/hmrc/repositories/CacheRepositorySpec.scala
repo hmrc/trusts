@@ -2,15 +2,16 @@ package uk.gov.hmrc.repositories
 
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FreeSpec, MustMatchers}
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.Helpers.running
-import reactivemongo.api.{DefaultDB, MongoConnection, MongoDriver}
-import uk.gov.hmrc.trusts.repositories.CacheRepository
+import reactivemongo.api.MongoConnection
+import uk.gov.hmrc.trusts.repositories.{CacheRepository, TrustsMongoDriver}
 
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
 
 
 class CacheRepositorySpec extends FreeSpec with MustMatchers with ScalaFutures with IntegrationPatience {
@@ -19,24 +20,26 @@ class CacheRepositorySpec extends FreeSpec with MustMatchers with ScalaFutures w
   "a playback repository" - {
     "must be able to store and retrieve a payload" in {
 
-      dropTheDatabase()
-
       val application = appBuilder.build()
 
       running(application) {
+        getConnection(application).map { connection =>
 
-        val repository = application.injector.instanceOf[CacheRepository]
+          dropTheDatabase(connection)
 
-        val storedOk = repository.set("UTRUTRUTR", "InternalId", data)
-        storedOk.futureValue mustBe true
+          val repository = application.injector.instanceOf[CacheRepository]
 
-        val retrieved = repository.get("UTRUTRUTR", "InternalId")
-          .map(_.getOrElse(fail("The record was not found in the database")))
+          val storedOk = repository.set("UTRUTRUTR", "InternalId", data)
+          storedOk.futureValue mustBe true
 
-         retrieved.futureValue mustBe data
+          val retrieved = repository.get("UTRUTRUTR", "InternalId")
+            .map(_.getOrElse(fail("The record was not found in the database")))
+
+          retrieved.futureValue mustBe data
+
+          dropTheDatabase(connection)
+        }
       }
-
-      dropTheDatabase()
     }
   }
 
@@ -48,16 +51,21 @@ class CacheRepositorySpec extends FreeSpec with MustMatchers with ScalaFutures w
 
   val data = Json.obj("testField" -> "testValue")
 
-  lazy val connection = for {
-    uri <- MongoConnection.parseURI(connectionString)
-    y <- MongoDriver().connection(uri, true)
-  } yield y
-
-  def database: Future[DefaultDB] = {
-    for {
-      connection <- Future.fromTry(connection)
-      database   <- connection.database("trusts-integration")
-    } yield database
+  private def getDatabase(connection: MongoConnection) = {
+    connection.database("transform-integration")
   }
 
-  def dropTheDatabase(): Unit = Await.result(database.flatMap(_.drop()), Duration.Inf)}
+  private def getConnection(application: Application) = {
+    val mongoDriver = application.injector.instanceOf[TrustsMongoDriver]
+    lazy val connection = for {
+      uri <- MongoConnection.parseURI(connectionString)
+      connection <- mongoDriver.api.driver.connection(uri, true)
+    } yield connection
+    connection
+  }
+
+  def dropTheDatabase(connection: MongoConnection): Unit = {
+    Await.result(getDatabase(connection).flatMap(_.drop()), Duration.Inf)
+  }
+
+}

@@ -3,17 +3,18 @@ package uk.gov.hmrc.repositories
 import org.joda.time.DateTime
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FreeSpec, MustMatchers}
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers.running
-import reactivemongo.api.{DefaultDB, MongoConnection, MongoDriver}
+import reactivemongo.api.MongoConnection
 import uk.gov.hmrc.trusts.models.NameType
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType, DisplayTrustTrusteeIndividualType}
-import uk.gov.hmrc.trusts.repositories.TransformationRepository
+import uk.gov.hmrc.trusts.repositories.{TransformationRepository, TrustsMongoDriver}
 import uk.gov.hmrc.trusts.transformers.{AddTrusteeIndTransform, ComposedDeltaTransform, SetLeadTrusteeIndTransform}
 
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
 
 class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutures with IntegrationPatience {
   private val connectionString = "mongodb://localhost:27017/transform-integration"
@@ -21,28 +22,30 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutur
   "a transform repository" - {
     "must be able to store and retrieve a payload" in {
 
-      dropTheDatabase()
-
       val application = appBuilder.build()
 
       running(application) {
+        getConnection(application).map { connection =>
 
-        val repository = application.injector.instanceOf[TransformationRepository]
+          dropTheDatabase(connection)
 
-        val storedOk = repository.set("UTRUTRUTR", "InternalId", data)
-        storedOk.futureValue mustBe true
+          val repository = application.injector.instanceOf[TransformationRepository]
 
-        val retrieved = repository.get("UTRUTRUTR", "InternalId")
-          .map(_.getOrElse(fail("The record was not found in the database")))
+          val storedOk = repository.set("UTRUTRUTR", "InternalId", data)
+          storedOk.futureValue mustBe true
 
-         retrieved.futureValue mustBe data
+          val retrieved = repository.get("UTRUTRUTR", "InternalId")
+            .map(_.getOrElse(fail("The record was not found in the database")))
+
+          retrieved.futureValue mustBe data
+
+          dropTheDatabase(connection)
+        }
       }
-
-      dropTheDatabase()
     }
   }
 
-  private lazy val appBuilder =  new GuiceApplicationBuilder().configure(Seq(
+  private lazy val appBuilder = new GuiceApplicationBuilder().configure(Seq(
     "mongodb.uri" -> connectionString,
     "metrics.enabled" -> false,
     "auditing.enabled" -> false
@@ -50,15 +53,15 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutur
 
   val data = ComposedDeltaTransform(Seq(SetLeadTrusteeIndTransform(
     DisplayTrustLeadTrusteeIndType(
-        Some(""),
-        None,
-        NameType("New", Some("lead"), "Trustee"),
-        DateTime.parse("2000-01-01"),
-        "",
-        None,
-        DisplayTrustIdentificationType(None, None, None, None),
-        Some(DateTime.parse("2010-10-10"))
-      )),
+      Some(""),
+      None,
+      NameType("New", Some("lead"), "Trustee"),
+      DateTime.parse("2000-01-01"),
+      "",
+      None,
+      DisplayTrustIdentificationType(None, None, None, None),
+      Some(DateTime.parse("2010-10-10"))
+    )),
     AddTrusteeIndTransform(DisplayTrustTrusteeIndividualType(
       "lineNo",
       Some("bpMatchStatus"),
@@ -68,19 +71,23 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutur
       Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
       DateTime.parse("2010-10-10")
     ))
-    )
+  )
   )
 
-  lazy val connection = for {
-    uri <- MongoConnection.parseURI(connectionString)
-    y <- MongoDriver().connection(uri, true)
-  } yield y
-
-  def database: Future[DefaultDB] = {
-    for {
-      connection <- Future.fromTry(connection)
-      database   <- connection.database("transform-integration")
-    } yield database
+  private def getDatabase(connection: MongoConnection) = {
+    connection.database("transform-integration")
   }
 
-  def dropTheDatabase(): Unit = Await.result(database.flatMap(_.drop()), Duration.Inf)}
+  private def getConnection(application: Application) = {
+    val mongoDriver = application.injector.instanceOf[TrustsMongoDriver]
+    lazy val connection = for {
+      uri <- MongoConnection.parseURI(connectionString)
+      connection <- mongoDriver.api.driver.connection(uri, true)
+    } yield connection
+    connection
+  }
+
+  def dropTheDatabase(connection: MongoConnection): Unit = {
+    Await.result(getDatabase(connection).flatMap(_.drop()), Duration.Inf)
+  }
+}
