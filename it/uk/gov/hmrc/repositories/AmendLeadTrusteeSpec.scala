@@ -35,14 +35,14 @@ class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures 
       dropTheDatabase()
 
       val newTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
-        lineNo = "newLineNo",
+        lineNo = Some("newLineNo"),
         bpMatchStatus = Some("newMatchStatus"),
         name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
         dateOfBirth = new DateTime(1965, 2, 10, 0, 0),
         phoneNumber = "newPhone",
         email = Some("newEmail"),
         identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-        entityStart = DateTime.parse("2012-03-14")
+        entityStart = Some(DateTime.parse("2012-03-14"))
       )
 
       val expectedGetAfterAmendLeadTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-after-amend-lead-trustee.json")

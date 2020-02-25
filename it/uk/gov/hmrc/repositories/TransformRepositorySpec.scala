@@ -50,14 +50,14 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutur
 
   val data = ComposedDeltaTransform(Seq(SetLeadTrusteeIndTransform(
     DisplayTrustLeadTrusteeIndType(
-        "",
+        Some(""),
         None,
         NameType("New", Some("lead"), "Trustee"),
         DateTime.parse("2000-01-01"),
         "",
         None,
         DisplayTrustIdentificationType(None, None, None, None),
-        DateTime.parse("2010-10-10")
+        Some(DateTime.parse("2010-10-10"))
       )),
     AddTrusteeIndTransform(DisplayTrustTrusteeIndividualType(
       "lineNo",
