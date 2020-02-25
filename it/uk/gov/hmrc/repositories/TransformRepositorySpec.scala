@@ -40,7 +40,7 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutur
           retrieved.futureValue mustBe data
 
           dropTheDatabase(connection)
-        }
+        }.get
       }
     }
   }

@@ -31,8 +31,7 @@ case class SetLeadTrusteeIndTransform( leadTrustee: DisplayTrustLeadTrusteeIndTy
         leadTrusteesPath.json.prune andThen
         (__).json.update(leadTrusteesPath.json.put(Json.toJson(lead))) andThen
         (leadTrusteesPath \ 'lineNo).json.prune andThen
-        (leadTrusteesPath \ 'bpMatchStatus).json.prune andThen
-        (leadTrusteesPath \ 'entityStart).json.prune
+        (leadTrusteesPath \ 'bpMatchStatus).json.prune
     )
   }
 }

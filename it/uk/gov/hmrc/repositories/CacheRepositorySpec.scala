@@ -38,7 +38,7 @@ class CacheRepositorySpec extends FreeSpec with MustMatchers with ScalaFutures w
           retrieved.futureValue mustBe data
 
           dropTheDatabase(connection)
-        }
+        }.get
       }
     }
   }

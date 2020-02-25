@@ -81,7 +81,7 @@ class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures 
           contentAsJson(newResult) mustBe expectedGetAfterAmendLeadTrusteeJson
 
           dropTheDatabase(connection)
-        }
+        }.get
       }
     }
   }
@@ -93,7 +93,7 @@ class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures 
   private val connectionString = "mongodb://localhost:27017/trusts-integration"
 
   private def getDatabase(connection: MongoConnection) = {
-    connection.database("transform-integration")
+    connection.database("trusts-integration")
   }
 
   private def getConnection(application: Application) = {
