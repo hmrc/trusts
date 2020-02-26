@@ -71,32 +71,28 @@ class RemoveTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures wit
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val trusteeToRemove = RemoveTrustee(
-            trustee = DisplayTrustTrusteeType(
-              trusteeInd = Some(
-                DisplayTrustTrusteeIndividualType(
-                  lineNo = Some("1"),
-                  bpMatchStatus = None,
-                  name = NameType(
-                    firstName = "John",
-                    middleName = Some("William"),
-                    lastName = "O'Connor"
-                  ),
-                  dateOfBirth = Some(DateTime.parse("1956-02-12")),
-                  phoneNumber = Some("0121546546"),
-                  identification = Some(DisplayTrustIdentificationType(
-                    nino = Some("ST123456"),
-                    safeId = None,
-                    passport = None,
-                    address = None
-                  )),
-                  entityStart = DateTime.parse("1998-02-12")
-                )
-              ),
-              trusteeOrg = None
-            ),
-            endDate = DateTime.parse("2010-10-10")
-          )
+          val trusteeToRemove = Json.parse(
+            """
+              |{
+              |	"trustee": {
+              |		"trusteeInd": {
+              |			"lineNo": "1",
+              |			"entityStart": "1998-02-12",
+              |			"name": {
+              |       "firstName": "John",
+              |       "middleName": "William",
+              |       "lastName": "O'Connor"
+              |     },
+              |     "dateOfBirth": "1956-02-12",
+              |			"identification": {
+              |				"nino": "ST123456"
+              |			},
+              |     "phoneNumber":"0121546546"
+              |		}
+              |	},
+              |	"endDate": "2010-10-10"
+              |}
+              |""".stripMargin)
 
           val amendRequest = FakeRequest(DELETE, "/trusts/5174384721/trustee")
             .withBody(Json.toJson(trusteeToRemove))
