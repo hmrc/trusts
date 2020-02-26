@@ -38,14 +38,14 @@ import scala.concurrent.Future
 class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with GuiceOneAppPerSuite {
 
   val newLeadTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
-    lineNo = "newLineNo",
+    lineNo = Some("newLineNo"),
     bpMatchStatus = Some("newMatchStatus"),
     name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
     dateOfBirth = new DateTime(1965, 2, 10, 12, 30),
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-    entityStart = DateTime.parse("2012-03-14")
+    entityStart = Some(DateTime.parse("2012-03-14"))
   )
 
   val newTrusteeIndInfo = DisplayTrustTrusteeIndividualType(
@@ -59,25 +59,25 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
   )
 
   val existingLeadTrusteeInfo = DisplayTrustLeadTrusteeIndType(
-    lineNo = "newLineNo",
+    lineNo = Some("newLineNo"),
     bpMatchStatus = Some("newMatchStatus"),
     name = NameType("existingFirstName", Some("existingMiddleName"), "existingLastName"),
     dateOfBirth = new DateTime(1965, 2, 10, 12, 30),
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-    entityStart = DateTime.parse("2002-03-14")
+    entityStart = Some(DateTime.parse("2002-03-14"))
   )
 
   val unitTestTrusteeInfo = DisplayTrustLeadTrusteeIndType(
-    lineNo = "newLineNo",
+    lineNo = Some("newLineNo"),
     bpMatchStatus = Some("newMatchStatus"),
     name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
     dateOfBirth = new DateTime(1965, 2, 10, 12, 30),
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-    entityStart = DateTime.parse("2012-03-14")
+    entityStart = Some(DateTime.parse("2012-03-14"))
   )
 
   val existingTrusteeIndividualInfo = DisplayTrustTrusteeIndividualType(

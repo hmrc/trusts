@@ -36,7 +36,6 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |            {
           |                "SetLeadTrusteeIndTransform" : {
           |                    "leadTrustee" : {
-          |                        "lineNo" : "",
           |                        "name" : {
           |                            "firstName" : "New",
           |                            "middleName" : "lead",
@@ -44,8 +43,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |                        },
           |                        "dateOfBirth" : "2000-01-01",
           |                        "phoneNumber" : "",
-          |                        "identification" : {},
-          |                        "entityStart" : "2000-01-01"
+          |                        "identification" : {}
           |                    }
           |                }
           |            },
@@ -95,14 +93,14 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
       val data = ComposedDeltaTransform(Seq(
         SetLeadTrusteeIndTransform(
           DisplayTrustLeadTrusteeIndType(
-            "",
+            None,
             None,
             NameType("New", Some("lead"), "Trustee"),
             DateTime.parse("2000-01-01"),
             "",
             None,
             DisplayTrustIdentificationType(None, None, None, None),
-            DateTime.parse("2000-01-01")
+            None
           )),
         AddTrusteeIndTransform(
           DisplayTrustTrusteeIndividualType(
