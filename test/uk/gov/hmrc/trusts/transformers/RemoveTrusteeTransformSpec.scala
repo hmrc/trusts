@@ -89,6 +89,36 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
 
     }
 
+    "remove a newly added organisation trustee" in {
+
+      val t = DisplayTrustTrusteeOrgType(
+        lineNo = None,
+        bpMatchStatus = None,
+        name = "Amazon",
+        phoneNumber = Some("0121546546"),
+        identification = Some(DisplayTrustIdentificationOrgType(None, Some("1234567890"), None)),
+        entityStart = DateTime.parse("1998-02-12"),
+        email = None
+      )
+
+      val endDate = DateTime.parse("2010-10-15")
+
+      val trustee = DisplayTrustTrusteeType(
+        trusteeInd = None,
+        trusteeOrg = Some(t)
+      )
+
+      val cachedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-org-cached-newly-added.json")
+
+      val transformedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-remove-trustee-ind.json")
+
+      val transformer = new RemoveTrusteeTransform(trustee, endDate)
+
+      val result = transformer.applyTransform(cachedJson).get
+
+      result mustBe transformedJson
+    }
+
     "remove an already known organisation trustee" in {
 
       val t = DisplayTrustTrusteeOrgType(
