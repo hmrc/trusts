@@ -52,7 +52,7 @@ class CacheRepositorySpec extends FreeSpec with MustMatchers with ScalaFutures w
   val data = Json.obj("testField" -> "testValue")
 
   private def getDatabase(connection: MongoConnection) = {
-    connection.database("transform-integration")
+    connection.database("trusts-integration")
   }
 
   private def getConnection(application: Application) = {
