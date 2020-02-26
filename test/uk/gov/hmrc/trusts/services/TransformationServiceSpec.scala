@@ -49,7 +49,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
   )
 
   val newTrusteeIndInfo = DisplayTrustTrusteeIndividualType(
-    lineNo = "newLineNo",
+    lineNo = Some("newLineNo"),
     bpMatchStatus = Some("newMatchStatus"),
     name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
     dateOfBirth = Some(new DateTime(1965, 2, 10, 12, 30)),
@@ -81,7 +81,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
   )
 
   val existingTrusteeIndividualInfo = DisplayTrustTrusteeIndividualType(
-    lineNo = "1",
+    lineNo = Some("1"),
     bpMatchStatus = Some("01"),
     name = NameType("John", Some("William"), "O'Connor"),
     dateOfBirth = Some(DateTime.parse("1956-02-12")),
@@ -142,7 +142,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
           trusteeInd = Some(existingTrusteeIndividualInfo),
           trusteeOrg = None
         ),
-        endDate = LocalDate.parse("2010-10-10")
+        endDate = DateTime.parse("2010-10-10")
       )
 
       val result = service.addRemoveTrusteeTransformer("utr", "internalId", payload)
@@ -168,7 +168,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
           trusteeInd = Some(existingTrusteeIndividualInfo),
           trusteeOrg = None
         ),
-        endDate = LocalDate.parse("2010-10-10")
+        endDate = DateTime.parse("2010-10-10")
       )
 
       val result = service.addRemoveTrusteeTransformer("utr", "internalId", payload)

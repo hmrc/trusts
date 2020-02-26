@@ -104,7 +104,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           )),
         AddTrusteeIndTransform(
           DisplayTrustTrusteeIndividualType(
-            "lineNo",
+            Some("lineNo"),
             Some("bpMatchStatus"),
             NameType("New", None, "Trustee"),
             Some(DateTime.parse("2000-01-01")),
@@ -115,7 +115,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         RemoveTrusteeTransform(
             trustee = DisplayTrustTrusteeType(
               trusteeInd = Some(DisplayTrustTrusteeIndividualType(
-              lineNo = "1",
+              lineNo = Some("1"),
               bpMatchStatus = Some("01"),
               name = NameType("New", None, "Trustee"),
               dateOfBirth = Some(DateTime.parse("2000-01-01")),
@@ -124,7 +124,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
               entityStart = DateTime.parse("2000-01-01")
             )),
             trusteeOrg = None),
-            endDate = LocalDate.parse("2010-01-01")
+            endDate = DateTime.parse("2010-01-01")
           )
         )
       )
