@@ -67,11 +67,10 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
 
       val result = controller.amendLeadTrustee("aUTR").apply(request)
 
-      whenReady(result) { value =>
-        status(result) mustBe OK
-        verify(transformationService).addAmendLeadTrusteeTransformer("aUTR", "id", newTrusteeInfo)
-      }
+      status(result) mustBe OK
+      verify(transformationService).addAmendLeadTrusteeTransformer("aUTR", "id", newTrusteeInfo)
     }
+    
     "must return an error for malformed json" in {
       val transformationService = mock[TransformationService]
       val controller = new TransformationController(identifierAction, transformationService)
@@ -81,9 +80,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val result = controller.amendLeadTrustee("aUTR").apply(request)
-      whenReady(result) { _ =>
-        status(result) mustBe BAD_REQUEST
-      }
+      status(result) mustBe BAD_REQUEST
     }
   }
 
@@ -114,11 +111,10 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
 
       val result = controller.addTrustee("aUTR").apply(request)
 
-      whenReady(result) { value =>
-        status(result) mustBe OK
-        verify(transformationService).addAddTrusteeTransformer("aUTR", "id", newTrusteeInfo)
-      }
+      status(result) mustBe OK
+      verify(transformationService).addAddTrusteeTransformer("aUTR", "id", newTrusteeInfo)
     }
+
     "must return an error for malformed json" in {
       val transformationService = mock[TransformationService]
       val controller = new TransformationController(identifierAction, transformationService)
@@ -128,9 +124,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val result = controller.addTrustee("aUTR").apply(request)
-      whenReady(result) { _ =>
-        status(result) mustBe BAD_REQUEST
-      }
+      status(result) mustBe BAD_REQUEST
     }
   }
 
@@ -166,10 +160,8 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
 
       val result = controller.removeTrustee("aUTR").apply(request)
 
-      whenReady(result) { value =>
-        status(result) mustBe OK
-        verify(transformationService).addRemoveTrusteeTransformer("aUTR", "id", payload)
-      }
+      status(result) mustBe OK
+      verify(transformationService).addRemoveTrusteeTransformer("aUTR", "id", payload)
     }
   }
 }
