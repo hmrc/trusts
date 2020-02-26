@@ -30,15 +30,7 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
 
     "remove an already known individual trustee" in {
 
-      val t = DisplayTrustTrusteeIndividualType(
-        lineNo = "1",
-        bpMatchStatus = Some("01"),
-        name = NameType("John", Some("William"), "O'Connor"),
-        dateOfBirth = Some(DateTime.parse("1956-02-12")),
-        phoneNumber = Some("0121546546"),
-        identification = Some(DisplayTrustIdentificationType(None, Some("ST123456"), None, None)),
-        entityStart = DateTime.parse("1998-02-12")
-      )
+      val t = DisplayTrustTrusteeIndividualType(lineNo = Some("1"), bpMatchStatus = Some("01"), name = NameType("John", Some("William"), "O'Connor"), dateOfBirth = Some(DateTime.parse("1956-02-12")), phoneNumber = Some("0121546546"), identification = Some(DisplayTrustIdentificationType(None, Some("ST123456"), None, None)), entityStart = DateTime.parse("1998-02-12"))
 
       val endDate = LocalDate.of(2010, 10, 15)
 

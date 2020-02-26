@@ -307,7 +307,7 @@ object DisplayTrustTrusteeOrgType {
   implicit val trusteeOrgTypeFormat: Format[DisplayTrustTrusteeOrgType] = Json.format[DisplayTrustTrusteeOrgType]
 }
 
-case class DisplayTrustTrusteeIndividualType(lineNo: String,
+case class DisplayTrustTrusteeIndividualType(lineNo: Option[String],
                                              bpMatchStatus: Option[String],
                                              name: NameType,
                                              dateOfBirth: Option[DateTime],
