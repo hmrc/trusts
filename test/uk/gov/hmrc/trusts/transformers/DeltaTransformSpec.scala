@@ -103,26 +103,10 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
             None
           )),
         AddTrusteeIndTransform(
-          DisplayTrustTrusteeIndividualType(
-            "lineNo",
-            Some("bpMatchStatus"),
-            NameType("New", None, "Trustee"),
-            Some(DateTime.parse("2000-01-01")),
-            Some("phoneNumber"),
-            Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-            DateTime.parse("2000-01-01")
-          )),
+          DisplayTrustTrusteeIndividualType(Some("lineNo"), Some("bpMatchStatus"), NameType("New", None, "Trustee"), Some(DateTime.parse("2000-01-01")), Some("phoneNumber"), Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)), DateTime.parse("2000-01-01"))),
         RemoveTrusteeTransform(
             trustee = DisplayTrustTrusteeType(
-              trusteeInd = Some(DisplayTrustTrusteeIndividualType(
-              lineNo = "1",
-              bpMatchStatus = Some("01"),
-              name = NameType("New", None, "Trustee"),
-              dateOfBirth = Some(DateTime.parse("2000-01-01")),
-              phoneNumber = Some("phoneNumber"),
-              identification = Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-              entityStart = DateTime.parse("2000-01-01")
-            )),
+              trusteeInd = Some(DisplayTrustTrusteeIndividualType(lineNo = Some("1"), bpMatchStatus = Some("01"), name = NameType("New", None, "Trustee"), dateOfBirth = Some(DateTime.parse("2000-01-01")), phoneNumber = Some("phoneNumber"), identification = Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)), entityStart = DateTime.parse("2000-01-01"))),
             trusteeOrg = None),
             endDate = LocalDate.parse("2010-01-01")
           )
