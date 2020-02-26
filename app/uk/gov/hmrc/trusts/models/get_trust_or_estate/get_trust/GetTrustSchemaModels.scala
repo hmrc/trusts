@@ -294,13 +294,13 @@ object DisplayTrustTrusteeType {
   implicit val trusteeTypeFormat: Format[DisplayTrustTrusteeType] = Json.format[DisplayTrustTrusteeType]
 }
 
-case class DisplayTrustTrusteeOrgType(lineNo: String,
+case class DisplayTrustTrusteeOrgType(lineNo: Option[String],
                                       bpMatchStatus: Option[String],
                                       name: String,
                                       phoneNumber: Option[String] = None,
                                       email: Option[String] = None,
                                       identification: Option[DisplayTrustIdentificationOrgType],
-                                      entityStart: String)
+                                      entityStart: DateTime)
 
 object DisplayTrustTrusteeOrgType {
   implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))

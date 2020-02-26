@@ -20,6 +20,7 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutur
   private val connectionString = "mongodb://localhost:27017/transform-integration"
 
   "a transform repository" - {
+
     "must be able to store and retrieve a payload" in {
 
       val application = appBuilder.build()
@@ -63,7 +64,15 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutur
       DisplayTrustIdentificationType(None, None, None, None),
       Some(DateTime.parse("2010-10-10"))
     )),
-    AddTrusteeIndTransform(DisplayTrustTrusteeIndividualType(Some("lineNo"), Some("bpMatchStatus"), NameType("New", None, "Trustee"), Some(DateTime.parse("2000-01-01")), Some("phoneNumber"), Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)), DateTime.parse("2010-10-10")))
+    AddTrusteeIndTransform(DisplayTrustTrusteeIndividualType(
+      Some("lineNo"),
+      Some("bpMatchStatus"),
+      NameType("New", None, "Trustee"),
+      Some(DateTime.parse("2000-01-01")),
+      Some("phoneNumber"),
+      Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
+      DateTime.parse("2010-10-10")
+    ))
   )
   )
 

@@ -90,7 +90,15 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
       val transformationService = mock[TransformationService]
       val controller = new TransformationController(identifierAction, transformationService)
 
-      val newTrusteeIndInfo = DisplayTrustTrusteeIndividualType(lineNo = None, bpMatchStatus = Some("newMatchStatus"), name = NameType("newFirstName", Some("newMiddleName"), "newLastName"), dateOfBirth = Some(new DateTime(1965, 2, 10, 0, 0)), phoneNumber = Some("newPhone"), identification = Some(DisplayTrustIdentificationType(None, Some("newNino"), None, None)), entityStart = DateTime.parse("2012-03-14"))
+      val newTrusteeIndInfo = DisplayTrustTrusteeIndividualType(
+        lineNo = Some("newLineNo"),
+        bpMatchStatus = Some("newMatchStatus"),
+        name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
+        dateOfBirth = Some(new DateTime(1965, 2, 10, 0, 0)),
+        phoneNumber = Some("newPhone"),
+        identification = Some(DisplayTrustIdentificationType(None, Some("newNino"), None, None)),
+        entityStart = DateTime.parse("2012-03-14")
+      )
 
       when(transformationService.addAddTrusteeTransformer(any(), any(), any()))
         .thenReturn(Future.successful(()))
@@ -129,10 +137,18 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
 
       val payload = RemoveTrustee(
         trustee = DisplayTrustTrusteeType(
-          trusteeInd = Some(DisplayTrustTrusteeIndividualType(lineNo = Some("1"), bpMatchStatus = Some("01"), name = NameType("First", None, "Trustee"), dateOfBirth = Some(DateTime.parse("2010-10-10")), phoneNumber = Some("+446464647"), identification = None, entityStart = DateTime.parse("2019-05-06"))),
+          trusteeInd = Some(DisplayTrustTrusteeIndividualType(
+            lineNo = Some("1"),
+            bpMatchStatus = Some("01"),
+            name = NameType("First", None, "Trustee"),
+            dateOfBirth = Some(DateTime.parse("2010-10-10")),
+            phoneNumber = Some("+446464647"),
+            identification = None,
+            entityStart = DateTime.parse("2019-05-06")
+          )),
           trusteeOrg = None
         ),
-        endDate = LocalDate.of(2020, 1, 10)
+        endDate = DateTime.parse("2020-01-10")
       )
 
       when(transformationService.addRemoveTrusteeTransformer(any(), any(), any()))

@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.trusts.controllers
 
-import java.time.LocalDate
-
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsError, JsPath, JsSuccess, Json}
