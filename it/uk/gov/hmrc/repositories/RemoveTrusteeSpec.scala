@@ -28,14 +28,24 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-class RemoveLeadTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar {
+class RemoveTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar {
 
-  val getTrustResponseFromDES: GetTrustSuccessResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
-  val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+  trait TrusteeIndividualFixture {
+    val getTrustResponseFromDES: GetTrustSuccessResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
+
+    val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+  }
+
+  trait TrusteeOrgFixture {
+    val getTrustWithOrgTrustees : GetTrustSuccessResponse =
+      JsonUtils.getJsonValueFromFile("trusts-etmp-received-trustees-org.json").as[GetTrustSuccessResponse]
+
+    val expectedInitialGetTrusteeOrgJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-initial-trustee-org.json")
+  }
 
   "a remove trustee call" - {
 
-    "must return amended data in a subsequent 'get' call" in {
+    "must return amended data in a subsequent 'get' call for trustee individual" in new TrusteeIndividualFixture {
 
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
@@ -65,7 +75,7 @@ class RemoveLeadTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures
             trustee = DisplayTrustTrusteeType(
               trusteeInd = Some(
                 DisplayTrustTrusteeIndividualType(
-                  lineNo = "1",
+                  lineNo = Some("1"),
                   bpMatchStatus = None,
                   name = NameType(
                     firstName = "John",
@@ -95,10 +105,73 @@ class RemoveLeadTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures
           val amendResult = route(application, amendRequest).get
           status(amendResult) mustBe OK
 
-          val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+          val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed/trustees")).get
           status(newResult) mustBe OK
 
-          val trustees: List[JsValue] = (contentAsJson(newResult) \ "getTrust" \ "trust" \ "entities" \ "trustees").as[List[JsValue]]
+          val trustees: List[JsValue] = (contentAsJson(newResult) \ "trustees").as[List[JsValue]]
+          trustees mustBe empty
+
+          dropTheDatabase(connection)
+        }
+      }.get
+    }
+
+    "must return amended data in a subsequent 'get' call for trustee business" in new TrusteeOrgFixture {
+
+      val stubbedDesConnector = mock[DesConnector]
+      when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustWithOrgTrustees))
+
+      val application = new GuiceApplicationBuilder()
+        .overrides(
+          bind[IdentifierAction].toInstance(new FakeIdentifierAction(Organisation)),
+          bind[DesConnector].toInstance(stubbedDesConnector)
+        )
+        .configure(Seq(
+          "mongodb.uri" -> connectionString,
+          "metrics.enabled" -> false,
+          "auditing.enabled" -> false
+        ): _*)
+        .build()
+
+      running(application) {
+
+        getConnection(application).map { connection =>
+          dropTheDatabase(connection)
+
+          val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+          status(result) mustBe OK
+          contentAsJson(result) mustBe expectedInitialGetTrusteeOrgJson
+
+          val trusteeToRemove = Json.parse(
+            """
+              |{
+              |	"trustee": {
+              |		"trusteeOrg": {
+              |			"lineNo": "1",
+              |			"bpMatchStatus": "01",
+              |			"entityStart": "1998-02-12",
+              |			"name": "Amazon",
+              |			"identification": {
+              |				"utr": "1234567890"
+              |			},
+              |     "phoneNumber":"0121546546"
+              |		}
+              |	},
+              |	"endDate": "2010-10-10"
+              |}
+              |""".stripMargin)
+
+          val amendRequest = FakeRequest(DELETE, "/trusts/5174384721/trustee")
+            .withBody(Json.toJson(trusteeToRemove))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val amendResult = route(application, amendRequest).get
+          status(amendResult) mustBe OK
+
+          val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed/trustees")).get
+          status(newResult) mustBe OK
+
+          val trustees: List[JsValue] = (contentAsJson(newResult) \ "trustees").as[List[JsValue]]
           trustees mustBe empty
 
           dropTheDatabase(connection)
