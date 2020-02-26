@@ -101,7 +101,13 @@ object Declaration {
   implicit val declarationFormat: Format[Declaration] = Json.format[Declaration]
 }
 
-case class DeclarationForApi(declaration: Declaration,
+case class DeclarationName(name: NameType)
+
+object DeclarationName {
+  implicit val declarationFormat: Format[DeclarationName] = Json.format[DeclarationName]
+}
+
+case class DeclarationForApi(declaration: DeclarationName,
                              agentDetails: Option[AgentDetails])
 
 object DeclarationForApi {

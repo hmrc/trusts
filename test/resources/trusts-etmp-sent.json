@@ -21,10 +21,10 @@
       "lastName": "Last"
     },
     "address": {
-      "line1": "Line1",
-      "line2": "Line2",
-      "line3": "Line3",
-      "postCode": "POSTCODE",
+      "line1": "1344 Army Road",
+      "line2": "Suite 111",
+      "line4": "Telford",
+      "postCode": "TF1 5DR",
       "country": "GB"
     }
   },

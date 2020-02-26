@@ -20,7 +20,7 @@ import org.joda.time.DateTime
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
-import uk.gov.hmrc.trusts.models.{DeclarationForApi, NameType}
+import uk.gov.hmrc.trusts.models.{AddressType, Declaration, DeclarationForApi, NameType}
 import uk.gov.hmrc.trusts.utils.Implicits._
 
 class DeclarationTransformer {
@@ -38,15 +38,27 @@ class DeclarationTransformer {
     } else {
       (__).json.pick[JsObject]
     }
+
+    val declarationAddress =
+      if (declaration.agentDetails.isDefined)
+        declaration.agentDetails.get.agentAddress
+      else
+          responseJson.transform((pathToLeadTrustees \ 'identification \ 'address).json.pick) match {
+          case JsSuccess(value, _) => value.as[AddressType]
+          case JsError(_) => ???
+        }
+
+    val newDeclaration = Declaration(declaration.declaration.name, declarationAddress)
     responseJson.transform(
       (__ \ 'applicationType).json.prune andThen
         (__ \ 'declaration).json.prune andThen
         (__ \ 'yearsReturns).json.prune andThen
+        fixLeadTrusteeAddress(responseJson, pathToLeadTrustees) andThen
         removeEmptyLineNo(responseJson) andThen
         convertLeadTrustee(responseJson) andThen
         addPreviousLeadTrustee(responseJson, originalJson, date) andThen
         putNewValue(__ \ 'reqHeader \ 'formBundleNo, JsString(responseHeader.formBundleNo)) andThen
-        putNewValue(__ \ 'declaration, Json.toJson(declaration.declaration)) andThen
+        putNewValue(__ \ 'declaration, Json.toJson(newDeclaration)) andThen
         agentTransformer
     )
   }
@@ -55,6 +67,14 @@ class DeclarationTransformer {
   private val pickLeadTrustee = pathToLeadTrustees.json.pick
 
   private def trusteeField(json: JsValue): String = determineTrusteeField(pathToLeadTrustees, json)
+
+  private def fixLeadTrusteeAddress(leadTrusteeJson: JsValue, leadTrusteePath: JsPath) = {
+    if (leadTrusteeJson.transform((leadTrusteePath \ 'identification \ 'utr).json.pick).isSuccess ||
+        leadTrusteeJson.transform((leadTrusteePath \ 'identification \ 'nino).json.pick).isSuccess)
+      (leadTrusteePath \ 'identification \ 'address).json.prune
+    else
+      __.json.pick
+  }
 
   private def determineTrusteeField(rootPath: JsPath, json: JsValue): String = {
     val namePath = (rootPath \ 'name).json.pick[JsObject]
@@ -92,7 +112,12 @@ class DeclarationTransformer {
     (newLeadTrustee, originalLeadTrustee) match {
       case (JsSuccess(newLeadTrusteeJson, _), JsSuccess(originalLeadTrusteeJson, _))
         if (newLeadTrusteeJson != originalLeadTrusteeJson) =>
-          addPreviousLeadTrusteeAsExpiredStep(originalLeadTrusteeJson, date)
+          val reads = fixLeadTrusteeAddress(originalLeadTrusteeJson, __)
+          val fixedLeadTrusteeJson = originalLeadTrusteeJson.transform(reads) match {
+            case JsSuccess(value, _) => value
+            case JsError(_) => originalLeadTrusteeJson
+          }
+          addPreviousLeadTrusteeAsExpiredStep(fixedLeadTrusteeJson, date)
       case _ => (__).json.pick[JsObject]
     }
   }

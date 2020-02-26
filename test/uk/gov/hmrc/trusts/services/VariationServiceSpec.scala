@@ -29,7 +29,7 @@ import uk.gov.hmrc.trusts.exceptions.EtmpCacheDataStaleException
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
-import uk.gov.hmrc.trusts.models.{AddressType, Declaration, DeclarationForApi, NameType}
+import uk.gov.hmrc.trusts.models.{DeclarationForApi, DeclarationName, NameType}
 import uk.gov.hmrc.trusts.transformers.DeclarationTransformer
 import uk.gov.hmrc.trusts.utils.JsonRequests
 
@@ -46,9 +46,8 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
   private val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
   private val transformedJson = Json.obj("field" -> "value")
 
-  private val declaration = Declaration(
-    NameType("Handy", None, "Andy"),
-    AddressType("Line1", "Line2", Some("Line3"), None, Some("POSTCODE"), "GB")
+  private val declaration = DeclarationName(
+    NameType("Handy", None, "Andy")
   )
 
   val declarationForApi = DeclarationForApi(declaration, None)
