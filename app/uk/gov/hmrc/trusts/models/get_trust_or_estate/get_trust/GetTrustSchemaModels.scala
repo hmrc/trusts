@@ -105,14 +105,14 @@ object DisplayTrustNaturalPersonType {
 }
 
 case class DisplayTrustLeadTrusteeIndType(
-                                           lineNo: String,
+                                           lineNo: Option[String],
                                            bpMatchStatus: Option[String],
                                            name: NameType,
                                            dateOfBirth: DateTime,
                                            phoneNumber: String,
                                            email: Option[String] = None,
                                            identification: DisplayTrustIdentificationType,
-                                           entityStart: DateTime
+                                           entityStart: Option[DateTime]
                                          )
 
 object DisplayTrustLeadTrusteeIndType {
