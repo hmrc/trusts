@@ -124,7 +124,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
               entityStart = DateTime.parse("2000-01-01")
             )),
             trusteeOrg = None),
-            endDate = LocalDate.parse("2010-01-01")
+            endDate = DateTime.parse("2010-01-01")
           )
         )
       )

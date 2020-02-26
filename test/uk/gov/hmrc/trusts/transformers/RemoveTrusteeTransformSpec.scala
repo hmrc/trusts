@@ -40,7 +40,7 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
         entityStart = DateTime.parse("1998-02-12")
       )
 
-      val endDate = LocalDate.of(2010, 10, 15)
+      val endDate = DateTime.parse("2010-10-15")
 
       val trustee = DisplayTrustTrusteeType(
         trusteeInd = Some(t),

@@ -15,12 +15,12 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import reactivemongo.api.{DefaultDB, MongoConnection, MongoDriver}
+import reactivemongo.api.MongoConnection
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeType, GetTrustSuccessResponse}
-import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee}
+import uk.gov.hmrc.trusts.models._
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.repositories.TrustsMongoDriver
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
@@ -85,7 +85,7 @@ class RemoveLeadTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures
               ),
               trusteeOrg = None
             ),
-            endDate = LocalDate.parse("2010-10-10")
+            endDate = DateTime.parse("2010-10-10")
           )
 
           val amendRequest = FakeRequest(DELETE, "/trusts/5174384721/trustee")

@@ -148,7 +148,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
           )),
           trusteeOrg = None
         ),
-        endDate = LocalDate.of(2020, 1, 10)
+        endDate = DateTime.parse("2020-01-10")
       )
 
       when(transformationService.addRemoveTrusteeTransformer(any(), any(), any()))
