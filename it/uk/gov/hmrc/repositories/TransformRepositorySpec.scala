@@ -48,7 +48,8 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutur
   private lazy val appBuilder = new GuiceApplicationBuilder().configure(Seq(
     "mongodb.uri" -> connectionString,
     "metrics.enabled" -> false,
-    "auditing.enabled" -> false
+    "auditing.enabled" -> false,
+    "mongo-async-driver.akka.log-dead-letters" -> 0
   ): _*)
 
   val data = ComposedDeltaTransform(Seq(SetLeadTrusteeIndTransform(
