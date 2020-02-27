@@ -29,13 +29,13 @@ class AmendLeadTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with O
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-before.json")
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-after-org.json")
       val newTrusteeInfo = DisplayTrustLeadTrusteeOrgType(
-        lineNo = "newLineNo",
+        lineNo = Some("newLineNo"),
         bpMatchStatus = Some("newMatchStatus"),
         name = "newName",
         phoneNumber = "newPhone",
         email = Some("newEmail"),
         identification = DisplayTrustIdentificationOrgType(None, Some("newUtr"), None),
-        entityStart = DateTime.parse("2012-03-14")
+        None
       )
       val transformer = AmendLeadTrusteeOrgTransform(newTrusteeInfo)
 
