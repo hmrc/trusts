@@ -111,9 +111,9 @@ class GetTrustController @Inject()(identify: IdentifierAction,
         desService.getTrustInfo(utr, request.identifier).flatMap {
 
           case response: TrustProcessedResponse if applyTransformations =>
-            transformationService.applyTransformations(utr, request.identifier, response.getTrust).map {
+            transformationService.populateLeadTrusteeAddress(response.getTrust) match {
               case JsSuccess(transformedJson, _) =>
-                transformationService.populateLeadTrusteeAddress(transformedJson) match {
+                transformationService.applyTransformations(utr, request.identifier, transformedJson).map {
                   case JsSuccess(transformedJson, _) =>
                     val transformedResponse = TrustProcessedResponse(transformedJson, response.responseHeader)
 
@@ -132,7 +132,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
 
               case JsError(errors) =>
                 logger.error("Failed to transform trust info", errors)
-                InternalServerError
+                Future.successful(InternalServerError)
             }
 
           case response: GetTrustSuccessResponse =>

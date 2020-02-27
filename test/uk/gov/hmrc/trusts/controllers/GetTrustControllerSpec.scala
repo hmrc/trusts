@@ -120,7 +120,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
       when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedContent)))
 
-      when(mockTransformationService.populateLeadTrusteeAddress(any[JsValue])).thenReturn(JsSuccess(transformedContent))
+      when(mockTransformationService.populateLeadTrusteeAddress(any[JsValue])).thenReturn(JsSuccess(processedResponse.getTrust))
       val result = getTrustController.get(utr, true).apply(FakeRequest(GET, s"/trusts/$utr"))
 
       whenReady(result) { _ =>
@@ -264,7 +264,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
       when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
 
       when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedContent)))
-      when(mockTransformationService.populateLeadTrusteeAddress(any[JsValue])).thenReturn(JsSuccess(transformedContent))
+      when(mockTransformationService.populateLeadTrusteeAddress(any[JsValue])).thenReturn(JsSuccess(processedResponse.getTrust))
 
       val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/lead-trustee"))
 
@@ -309,7 +309,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
       when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
 
       when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedContent)))
-      when(mockTransformationService.populateLeadTrusteeAddress(any[JsValue])).thenReturn(JsSuccess(transformedContent))
+      when(mockTransformationService.populateLeadTrusteeAddress(any[JsValue])).thenReturn(JsSuccess(processedResponse.getTrust))
 
       val result = getTrustController.getTrustSetupDate(utr).apply(FakeRequest(GET, s"/trusts/$utr/trust-start-date"))
 
@@ -356,7 +356,7 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
       when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
 
       when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])(any())).thenReturn(Future.successful(JsSuccess(transformedContent)))
-      when(mockTransformationService.populateLeadTrusteeAddress(any[JsValue])).thenReturn(JsSuccess(transformedContent))
+      when(mockTransformationService.populateLeadTrusteeAddress(any[JsValue])).thenReturn(JsSuccess(processedResponse.getTrust))
       
       val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/trustees"))
 
