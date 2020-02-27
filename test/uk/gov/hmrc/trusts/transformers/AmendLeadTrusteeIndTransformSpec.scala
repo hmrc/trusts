@@ -35,13 +35,12 @@ class AmendLeadTrusteeIndTransformSpec extends FreeSpec with MustMatchers with O
         phoneNumber = "newPhone",
         email = Some("newEmail"),
         identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-        entityStart = Some(new DateTime(2012, 3, 14, 12, 34))
+        entityStart = None
       )
       val transformer = AmendLeadTrusteeIndTransform(newTrusteeInfo)
 
       val result = transformer.applyTransform(beforeJson).get
       result mustBe afterJson
     }
-
   }
 }

@@ -24,15 +24,22 @@ case class AmendLeadTrusteeIndTransform(leadTrustee: DisplayTrustLeadTrusteeIndT
     setLeadTrustee(input, leadTrustee)
   }
 
-  private def setLeadTrustee[A](input: JsValue, lead: A)(implicit writes: Writes[A]) = {
+  private def setLeadTrustee(input: JsValue, lead: DisplayTrustLeadTrusteeIndType) = {
     val leadTrusteesPath = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees)
+    val entityStartPath = leadTrusteesPath \ 'entityStart
 
-    input.transform(
-        leadTrusteesPath.json.prune andThen
-        (__).json.update(leadTrusteesPath.json.put(Json.toJson(lead))) andThen
-        (leadTrusteesPath \ 'lineNo).json.prune andThen
-        (leadTrusteesPath \ 'bpMatchStatus).json.prune
-    )
+    val entityStartPick = entityStartPath.json.pick
+    input.transform(entityStartPick) match {
+      case JsSuccess(entityStart, _) =>
+        input.transform(
+          leadTrusteesPath.json.prune andThen
+            (__).json.update(leadTrusteesPath.json.put(Json.toJson(lead))) andThen
+            (__).json.update(entityStartPath.json.put(entityStart)) andThen
+            (leadTrusteesPath \ 'lineNo).json.prune andThen
+            (leadTrusteesPath \ 'bpMatchStatus).json.prune
+        )
+      case e: JsError => e
+    }
   }
 }
 
