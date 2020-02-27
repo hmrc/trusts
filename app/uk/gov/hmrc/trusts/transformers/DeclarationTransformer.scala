@@ -37,7 +37,7 @@ class DeclarationTransformer {
       (__ \ 'applicationType).json.prune andThen
         (__ \ 'declaration).json.prune andThen
         (__ \ 'yearsReturns).json.prune andThen
-        updateCorrespondence andThen
+        updateCorrespondence(responseJson) andThen
         fixLeadTrusteeAddress(responseJson, pathToLeadTrustees) andThen
         removeEmptyLineNo(responseJson) andThen
         convertLeadTrustee(responseJson) andThen
@@ -48,21 +48,25 @@ class DeclarationTransformer {
     )
   }
 
-  def updateCorrespondence(): Reads[JsObject] = {
-    pathToCorrespondenceAddress.json.prune andThen
-      pathToCorrespondencePhoneNumber.json.prune andThen
-      __.json.update(pathToCorrespondenceAddress.json.copyFrom(pathToLeadTrusteeAddress.json.pick)) andThen
-      __.json.update(pathToCorrespondencePhoneNumber.json.copyFrom(pathToLeadTrusteePhoneNumber.json.pick))
-  }
-
   private val pathToLeadTrustees: JsPath = __ \ 'details \ 'trust \ 'entities \ 'leadTrustees
   private val pathToLeadTrusteeAddress = pathToLeadTrustees \ 'identification \ 'address
   private val pathToLeadTrusteePhoneNumber = pathToLeadTrustees \ 'phoneNumber
+  private val pathToLeadTrusteeCountry = pathToLeadTrusteeAddress \ 'country
   private val pathToCorrespondenceAddress = __ \ 'correspondence \ 'address
   private val pathToCorrespondencePhoneNumber = __ \ 'correspondence \ 'phoneNumber
   private val pickLeadTrustee = pathToLeadTrustees.json.pick
 
   private def trusteeField(json: JsValue): String = determineTrusteeField(pathToLeadTrustees, json)
+
+  private def updateCorrespondence(responseJson: JsValue): Reads[JsObject] = {
+    val leadTrusteeCountry = responseJson.transform(pathToLeadTrusteeCountry.json.pick)
+    val inUk = leadTrusteeCountry.isError || leadTrusteeCountry.get == JsString("GB")
+    pathToCorrespondenceAddress.json.prune andThen
+      pathToCorrespondencePhoneNumber.json.prune andThen
+      putNewValue(__ \ 'correspondence \ 'abroadIndicator, JsBoolean(!inUk)) andThen
+      __.json.update(pathToCorrespondenceAddress.json.copyFrom(pathToLeadTrusteeAddress.json.pick)) andThen
+      __.json.update(pathToCorrespondencePhoneNumber.json.copyFrom(pathToLeadTrusteePhoneNumber.json.pick))
+  }
 
   private def fixLeadTrusteeAddress(leadTrusteeJson: JsValue, leadTrusteePath: JsPath) = {
     if (leadTrusteeJson.transform((leadTrusteePath \ 'identification \ 'utr).json.pick).isSuccess ||
