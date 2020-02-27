@@ -258,5 +258,16 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
         r => r.get mustEqual beforeJson
       }
     }
+    "must apply the correspondence address to the lead trustee's address if it doesn't have one" in {
+      val repository = mock[TransformationRepositoryImpl]
+      val service = new TransformationService(repository, auditService)
+
+      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-and-correspondence-address.json")
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-and-correspondence-address-after.json")
+
+      val result: JsResult[JsValue] = service.populateLeadTrusteeAddress(beforeJson)
+
+      result.get mustEqual afterJson
+    }
   }
 }

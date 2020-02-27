@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
 import play.api.Logger
-import play.api.libs.json.{JsResult, JsSuccess, JsValue, Json}
+import play.api.libs.json.{JsPath, JsResult, JsSuccess, JsValue, Json, __}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.RemoveTrustee
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
@@ -51,6 +51,18 @@ class TransformationService @Inject()(repository: TransformationRepository,
 
         Logger.info(s"[TransformationService] applying transformations")
         transformations.applyTransform(json)
+    }
+  }
+
+  def populateLeadTrusteeAddress(beforeJson: JsValue): JsResult[JsValue] = {
+    val pathToLeadTrusteeAddress = __ \ 'details \ 'trust \ 'entities \ 'leadTrustees \ 'identification \ 'address
+
+    if (beforeJson.transform(pathToLeadTrusteeAddress.json.pick).isSuccess)
+      JsSuccess(beforeJson)
+    else {
+      val pathToCorrespondenceAddress = __ \ 'correspondence \ 'address
+      val copyAddress = __.json.update(pathToLeadTrusteeAddress.json.copyFrom(pathToCorrespondenceAddress.json.pick))
+      beforeJson.transform(copyAddress)
     }
   }
 
