@@ -19,27 +19,9 @@ package uk.gov.hmrc.trusts.transformers
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustLeadTrusteeIndType
 
-case class AmendLeadTrusteeIndTransform(leadTrustee: DisplayTrustLeadTrusteeIndType) extends DeltaTransform {
+case class AmendLeadTrusteeIndTransform(leadTrustee: DisplayTrustLeadTrusteeIndType) extends DeltaTransform with AmendLeadTrusteeCommon {
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    setLeadTrustee(input, leadTrustee)
-  }
-
-  private def setLeadTrustee(input: JsValue, lead: DisplayTrustLeadTrusteeIndType) = {
-    val leadTrusteesPath = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees)
-    val entityStartPath = leadTrusteesPath \ 'entityStart
-
-    val entityStartPick = entityStartPath.json.pick
-    input.transform(entityStartPick) match {
-      case JsSuccess(entityStart, _) =>
-        input.transform(
-          leadTrusteesPath.json.prune andThen
-            (__).json.update(leadTrusteesPath.json.put(Json.toJson(lead))) andThen
-            (__).json.update(entityStartPath.json.put(entityStart)) andThen
-            (leadTrusteesPath \ 'lineNo).json.prune andThen
-            (leadTrusteesPath \ 'bpMatchStatus).json.prune
-        )
-      case e: JsError => e
-    }
+    setLeadTrustee(input, Json.toJson(leadTrustee))
   }
 }
 
