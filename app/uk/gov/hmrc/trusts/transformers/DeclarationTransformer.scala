@@ -49,6 +49,7 @@ class DeclarationTransformer {
   }
 
   def updateCorrespondenceAddress(json: JsValue): Reads[JsObject] = {
+    pathToCorrespondenceAddress.json.prune andThen
     __.json.update(pathToCorrespondenceAddress.json.copyFrom(pathToLeadTrusteeAddress.json.pick))
   }
 
