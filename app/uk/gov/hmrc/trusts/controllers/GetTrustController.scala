@@ -113,16 +113,23 @@ class GetTrustController @Inject()(identify: IdentifierAction,
           case response: TrustProcessedResponse if applyTransformations =>
             transformationService.applyTransformations(utr, request.identifier, response.getTrust).map {
               case JsSuccess(transformedJson, _) =>
-                val transformedResponse = TrustProcessedResponse(transformedJson, response.responseHeader)
+                transformationService.populateLeadTrusteeAddress(transformedJson) match {
+                  case JsSuccess(transformedJson, _) =>
+                    val transformedResponse = TrustProcessedResponse(transformedJson, response.responseHeader)
 
-                auditService.audit(
-                  event = TrustAuditing.GET_TRUST,
-                  request = Json.obj("utr" -> utr),
-                  internalId = request.identifier,
-                  response = Json.toJson(transformedResponse)
-                )
+                    auditService.audit(
+                      event = TrustAuditing.GET_TRUST,
+                      request = Json.obj("utr" -> utr),
+                      internalId = request.identifier,
+                      response = Json.toJson(transformedResponse)
+                    )
 
-                handleResult(transformedResponse)
+                    handleResult(transformedResponse)
+                  case JsError(errors) =>
+                    logger.error("Failed to populate lead trustee address", errors)
+                    InternalServerError
+                }
+
               case JsError(errors) =>
                 logger.error("Failed to transform trust info", errors)
                 InternalServerError
