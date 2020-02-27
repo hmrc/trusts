@@ -18,26 +18,26 @@ package uk.gov.hmrc.trusts.transformers
 
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationOrgType, DisplayTrustLeadTrusteeOrgType}
+import uk.gov.hmrc.trusts.models.NameType
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class SetLeadTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionValues {
-
+class AmendLeadTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionValues {
   "the modify lead transformer should" - {
-
-    "successfully set a new org lead trustee's details" in {
+    "successfully set a new ind lead trustee's details" in {
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-before.json")
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-after-org.json")
-      val newTrusteeInfo = DisplayTrustLeadTrusteeOrgType(
-        lineNo = "newLineNo",
-        bpMatchStatus = Some("newMatchStatus"),
-        name = "newName",
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-after-ind.json")
+      val newTrusteeInfo = DisplayTrustLeadTrusteeIndType(
+        lineNo = Some("newLineNo"),
+        bpMatchStatus = Some("MatchStatus"),
+        name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
+        dateOfBirth = new DateTime(1965, 2, 10, 12, 30),
         phoneNumber = "newPhone",
         email = Some("newEmail"),
-        identification = DisplayTrustIdentificationOrgType(None, Some("newUtr"), None),
-        entityStart = DateTime.parse("2012-03-14")
+        identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
+        entityStart = Some(new DateTime(2012, 3, 14, 12, 34))
       )
-      val transformer = SetLeadTrusteeOrgTransform(newTrusteeInfo)
+      val transformer = AmendLeadTrusteeIndTransform(newTrusteeInfo)
 
       val result = transformer.applyTransform(beforeJson).get
       result mustBe afterJson

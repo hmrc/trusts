@@ -10,7 +10,7 @@ import reactivemongo.api.MongoConnection
 import uk.gov.hmrc.trusts.models.NameType
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType, DisplayTrustTrusteeIndividualType}
 import uk.gov.hmrc.trusts.repositories.{TransformationRepository, TrustsMongoDriver}
-import uk.gov.hmrc.trusts.transformers.{AddTrusteeIndTransform, ComposedDeltaTransform, SetLeadTrusteeIndTransform}
+import uk.gov.hmrc.trusts.transformers.{AddTrusteeIndTransform, ComposedDeltaTransform, AmendLeadTrusteeIndTransform}
 
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -53,7 +53,7 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutur
     "mongo-async-driver.akka.log-dead-letters" -> 0
   ): _*)
 
-  val data = ComposedDeltaTransform(Seq(SetLeadTrusteeIndTransform(
+  val data = ComposedDeltaTransform(Seq(AmendLeadTrusteeIndTransform(
     DisplayTrustLeadTrusteeIndType(
       Some(""),
       None,
