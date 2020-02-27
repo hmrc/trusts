@@ -62,8 +62,8 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
       val auditService = app.injector.instanceOf[FakeAuditService]
       val transformer = mock[DeclarationTransformer]
 
+      when(transformationService.populateLeadTrusteeAddress(any[JsValue])).thenReturn(JsSuccess(trustInfoJson))
       when(transformationService.applyTransformations(any(), any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
-
       when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
 
       val response = TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
