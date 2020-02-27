@@ -78,7 +78,7 @@ class TrustVariationsController @Inject()(
     }
   }
 
-  def noChange(utr: String) = identify.async(parse.json) {
+  def declare(utr: String) = identify.async(parse.json) {
     implicit request => {
       request.body.validate[DeclarationForApi].fold(
         errors => {
