@@ -40,19 +40,27 @@ class DeclarationTransformer {
     }
 
     val declarationAddress =
-      if (declaration.agentDetails.isDefined)
+      if (declaration.agentDetails.isDefined) {
         declaration.agentDetails.get.agentAddress
-      else
-          responseJson.transform((pathToLeadTrustees \ 'identification \ 'address).json.pick) match {
-          case JsSuccess(value, _) => value.as[AddressType]
-          case JsError(_) => ???
+      }
+      else {
+        val leadTrusteeAddress = responseJson.transform(pathToLeadTrusteeAddress.json.pick)
+        val correspondenceAddress = responseJson.transform(pathToCorrespondenceAddress.json.pick)
+        (leadTrusteeAddress, correspondenceAddress) match {
+          case (JsSuccess(value, _), _) => value.as[AddressType]
+          case (_, JsSuccess(value, _)) => value.as[AddressType]
+          case _ => ???
         }
+      }
+
 
     val newDeclaration = Declaration(declaration.declaration.name, declarationAddress)
+
     responseJson.transform(
       (__ \ 'applicationType).json.prune andThen
         (__ \ 'declaration).json.prune andThen
         (__ \ 'yearsReturns).json.prune andThen
+        updateCorrespondenceAddress(responseJson) andThen
         fixLeadTrusteeAddress(responseJson, pathToLeadTrustees) andThen
         removeEmptyLineNo(responseJson) andThen
         convertLeadTrustee(responseJson) andThen
@@ -63,7 +71,13 @@ class DeclarationTransformer {
     )
   }
 
+  def updateCorrespondenceAddress(json: JsValue): Reads[JsObject] = {
+    __.json.update(pathToCorrespondenceAddress.json.copyFrom(pathToLeadTrusteeAddress.json.pick))
+  }
+
   private val pathToLeadTrustees: JsPath = __ \ 'details \ 'trust \ 'entities \ 'leadTrustees
+  private val pathToLeadTrusteeAddress = pathToLeadTrustees \ 'identification \ 'address
+  private val pathToCorrespondenceAddress = __ \ 'correspondence \ 'address
   private val pickLeadTrustee = pathToLeadTrustees.json.pick
 
   private def trusteeField(json: JsValue): String = determineTrusteeField(pathToLeadTrustees, json)

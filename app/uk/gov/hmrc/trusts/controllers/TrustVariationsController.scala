@@ -22,7 +22,7 @@ import play.api.libs.json.Json
 import play.api.mvc.Result
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
-import uk.gov.hmrc.trusts.models.{Declaration, DeclarationForApi}
+import uk.gov.hmrc.trusts.models.DeclarationForApi
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.variation.TrustVariation
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, ValidationService, VariationService}

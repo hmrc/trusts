@@ -18,7 +18,7 @@ GET         /:utr/transformed/trustees                  uk.gov.hmrc.trusts.contr
 
 POST        /variation                                  uk.gov.hmrc.trusts.controllers.TrustVariationsController.trustVariation
 
-POST        /declare/:utr                             uk.gov.hmrc.trusts.controllers.TrustVariationsController.declare(utr: String)
+POST        /declare/:utr                               uk.gov.hmrc.trusts.controllers.TrustVariationsController.declare(utr: String)
 
 POST        /amend-lead-trustee/:utr                    uk.gov.hmrc.trusts.controllers.TransformationController.amendLeadTrustee(utr: String)
 
