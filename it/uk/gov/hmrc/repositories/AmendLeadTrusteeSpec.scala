@@ -53,7 +53,7 @@ class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures 
             Some("TF1 5DR"),
             "GB"
           ))),
-        entityStart = None
+          None
       )
 
       val expectedGetAfterAmendLeadTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-after-amend-lead-trustee.json")

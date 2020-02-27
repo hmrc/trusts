@@ -37,7 +37,7 @@ class DeclarationTransformer {
       (__ \ 'applicationType).json.prune andThen
         (__ \ 'declaration).json.prune andThen
         (__ \ 'yearsReturns).json.prune andThen
-        updateCorrespondenceAddress(responseJson) andThen
+        updateCorrespondence andThen
         fixLeadTrusteeAddress(responseJson, pathToLeadTrustees) andThen
         removeEmptyLineNo(responseJson) andThen
         convertLeadTrustee(responseJson) andThen
@@ -48,14 +48,18 @@ class DeclarationTransformer {
     )
   }
 
-  def updateCorrespondenceAddress(json: JsValue): Reads[JsObject] = {
+  def updateCorrespondence(): Reads[JsObject] = {
     pathToCorrespondenceAddress.json.prune andThen
-    __.json.update(pathToCorrespondenceAddress.json.copyFrom(pathToLeadTrusteeAddress.json.pick))
+      pathToCorrespondencePhoneNumber.json.prune andThen
+      __.json.update(pathToCorrespondenceAddress.json.copyFrom(pathToLeadTrusteeAddress.json.pick)) andThen
+      __.json.update(pathToCorrespondencePhoneNumber.json.copyFrom(pathToLeadTrusteePhoneNumber.json.pick))
   }
 
   private val pathToLeadTrustees: JsPath = __ \ 'details \ 'trust \ 'entities \ 'leadTrustees
   private val pathToLeadTrusteeAddress = pathToLeadTrustees \ 'identification \ 'address
+  private val pathToLeadTrusteePhoneNumber = pathToLeadTrustees \ 'phoneNumber
   private val pathToCorrespondenceAddress = __ \ 'correspondence \ 'address
+  private val pathToCorrespondencePhoneNumber = __ \ 'correspondence \ 'phoneNumber
   private val pickLeadTrustee = pathToLeadTrustees.json.pick
 
   private def trusteeField(json: JsValue): String = determineTrusteeField(pathToLeadTrustees, json)
