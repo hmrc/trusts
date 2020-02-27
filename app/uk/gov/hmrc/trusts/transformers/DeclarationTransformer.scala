@@ -20,7 +20,7 @@ import org.joda.time.DateTime
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
-import uk.gov.hmrc.trusts.models.{AddressType, Declaration, DeclarationForApi, NameType}
+import uk.gov.hmrc.trusts.models.{AddressType, AgentDetails, Declaration, DeclarationForApi, NameType}
 import uk.gov.hmrc.trusts.utils.Implicits._
 
 class DeclarationTransformer {
@@ -29,32 +29,9 @@ class DeclarationTransformer {
                 originalJson: JsValue,
                 declaration: DeclarationForApi,
                 date: DateTime): JsResult[JsValue] = {
+
     val responseJson = response.getTrust
     val responseHeader = response.responseHeader
-    val agentTransformer = if (declaration.agentDetails.isDefined) {
-      (__).json.update(
-        (__ \ 'agentDetails).json.put(Json.toJson(declaration.agentDetails.get))
-      )
-    } else {
-      (__).json.pick[JsObject]
-    }
-
-    val declarationAddress =
-      if (declaration.agentDetails.isDefined) {
-        declaration.agentDetails.get.agentAddress
-      }
-      else {
-        val leadTrusteeAddress = responseJson.transform(pathToLeadTrusteeAddress.json.pick)
-        val correspondenceAddress = responseJson.transform(pathToCorrespondenceAddress.json.pick)
-        (leadTrusteeAddress, correspondenceAddress) match {
-          case (JsSuccess(value, _), _) => value.as[AddressType]
-          case (_, JsSuccess(value, _)) => value.as[AddressType]
-          case _ => ???
-        }
-      }
-
-
-    val newDeclaration = Declaration(declaration.declaration.name, declarationAddress)
 
     responseJson.transform(
       (__ \ 'applicationType).json.prune andThen
@@ -66,8 +43,8 @@ class DeclarationTransformer {
         convertLeadTrustee(responseJson) andThen
         addPreviousLeadTrustee(responseJson, originalJson, date) andThen
         putNewValue(__ \ 'reqHeader \ 'formBundleNo, JsString(responseHeader.formBundleNo)) andThen
-        putNewValue(__ \ 'declaration, Json.toJson(newDeclaration)) andThen
-        agentTransformer
+        addDeclaration(declaration, responseJson) andThen
+        addAgentIfDefined(declaration.agentDetails)
     )
   }
 
@@ -141,4 +118,30 @@ class DeclarationTransformer {
 
   private def putNewValue(path: JsPath, value: JsValue ): Reads[JsObject] =
     (__).json.update(path.json.put(value))
+
+
+  private def declarationAddress(agentDetails: Option[AgentDetails], responseJson: JsValue) =
+    if (agentDetails.isDefined)
+      agentDetails.get.agentAddress
+    else
+      responseJson.transform((pathToLeadTrustees \ 'identification \ 'address).json.pick) match {
+        case JsSuccess(value, _) => value.as[AddressType]
+        case JsError(_) => ???
+      }
+
+  private def addDeclaration(declarationForApi: DeclarationForApi, responseJson: JsValue) = {
+    val declarationToSend = Declaration(
+      declarationForApi.declaration.name,
+      declarationAddress(declarationForApi.agentDetails, responseJson))
+    putNewValue(__ \ 'declaration, Json.toJson(declarationToSend))
+  }
+
+  private def addAgentIfDefined(agentDetails: Option[AgentDetails]) = if (agentDetails.isDefined) {
+    (__).json.update(
+      (__ \ 'agentDetails).json.put(Json.toJson(agentDetails.get))
+    )
+  } else {
+    (__).json.pick[JsObject]
+  }
+
 }
