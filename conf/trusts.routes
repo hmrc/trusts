@@ -24,4 +24,4 @@ POST        /amend-lead-trustee/:utr                    uk.gov.hmrc.trusts.contr
 
 POST        /add-trustee/:utr                           uk.gov.hmrc.trusts.controllers.TransformationController.addTrustee(utr: String)
 
-DELETE      /:utr/trustee                               uk.gov.hmrc.trusts.controllers.TransformationController.removeTrustee(utr: String)
+POST      /remove-trustee/:utr                               uk.gov.hmrc.trusts.controllers.TransformationController.removeTrustee(utr: String)

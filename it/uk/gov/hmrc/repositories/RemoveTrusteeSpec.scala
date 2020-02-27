@@ -94,7 +94,7 @@ class RemoveTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures wit
               |}
               |""".stripMargin)
 
-          val amendRequest = FakeRequest(DELETE, "/trusts/5174384721/trustee")
+          val amendRequest = FakeRequest(POST, "/trusts/remove-trustee/5174384721")
             .withBody(Json.toJson(trusteeToRemove))
             .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -157,7 +157,7 @@ class RemoveTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures wit
               |}
               |""".stripMargin)
 
-          val amendRequest = FakeRequest(DELETE, "/trusts/5174384721/trustee")
+          val amendRequest = FakeRequest(POST, "/trusts/remove-trustee/5174384721")
             .withBody(Json.toJson(trusteeToRemove))
             .withHeaders(CONTENT_TYPE -> "application/json")
 
