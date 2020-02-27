@@ -27,7 +27,7 @@ class DeclarationTransformer {
 
   def transform(response: TrustProcessedResponse,
                 originalJson: JsValue,
-                declaration: DeclarationForApi,
+                declarationForApi: DeclarationForApi,
                 date: DateTime): JsResult[JsValue] = {
 
     val responseJson = response.getTrust
@@ -43,8 +43,8 @@ class DeclarationTransformer {
         convertLeadTrustee(responseJson) andThen
         addPreviousLeadTrustee(responseJson, originalJson, date) andThen
         putNewValue(__ \ 'reqHeader \ 'formBundleNo, JsString(responseHeader.formBundleNo)) andThen
-        addDeclaration(declaration, responseJson) andThen
-        addAgentIfDefined(declaration.agentDetails)
+        addDeclaration(declarationForApi, responseJson) andThen
+        addAgentIfDefined(declarationForApi.agentDetails)
     )
   }
 
@@ -132,7 +132,8 @@ class DeclarationTransformer {
   private def addDeclaration(declarationForApi: DeclarationForApi, responseJson: JsValue) = {
     val declarationToSend = Declaration(
       declarationForApi.declaration.name,
-      declarationAddress(declarationForApi.agentDetails, responseJson))
+      declarationAddress(declarationForApi.agentDetails, responseJson)
+    )
     putNewValue(__ \ 'declaration, Json.toJson(declarationToSend))
   }
 
