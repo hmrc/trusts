@@ -16,13 +16,11 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import java.time.LocalDate
-
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.Json
-import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee}
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType, DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeType}
+import uk.gov.hmrc.trusts.models.NameType
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType, DisplayTrustTrusteeIndividualType}
 
 class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 

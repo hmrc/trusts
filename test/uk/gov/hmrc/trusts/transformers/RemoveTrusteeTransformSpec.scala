@@ -24,7 +24,7 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
 
   "the remove trustee transformer must" - {
 
-    "remove an already known individual trustee" in {
+    "remove a trustee at the head of the list" in {
 
       val endDate = DateTime.parse("2010-10-15")
 
@@ -39,15 +39,15 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
       result mustBe transformedJson
     }
 
-    "remove a newly added individual trustee" in {
+    "remove a trustee at the tail of the list" in {
 
       val endDate = DateTime.parse("2010-10-15")
 
       val cachedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-newly-added-trustee.json")
 
-      val transformedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
+      val transformedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-transformed-trustee-at-tail-removed.json")
 
-      val transformer = new RemoveTrusteeTransform(endDate, index = 0)
+      val transformer = new RemoveTrusteeTransform(endDate, index = 1)
 
       val result = transformer.applyTransform(cachedJson).get
 
@@ -55,35 +55,22 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
 
     }
 
-    "remove a newly added organisation trustee" in {
+    "remove a trustee at an index and persist the remaining trustees" in {
 
       val endDate = DateTime.parse("2010-10-15")
 
-      val cachedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-org-cached-newly-added.json")
+      val cachedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-multiple-trustees.json")
 
-      val transformedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-remove-trustee-ind.json")
+      val transformedJson = JsonUtils.getJsonValueFromFile("trusts-transformed-trustee-removed-at-index.json")
 
-      val transformer = new RemoveTrusteeTransform(endDate = endDate, index = 0)
-
-      val result = transformer.applyTransform(cachedJson).get
-
-      result mustBe transformedJson
-    }
-
-    "remove an already known organisation trustee" in {
-
-      val endDate = DateTime.parse("2010-10-15")
-
-      val cachedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-org-cached.json")
-
-      val transformedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-remove-trustee-ind.json")
-
-      val transformer = new RemoveTrusteeTransform(endDate = endDate, index = 0)
+      val transformer = new RemoveTrusteeTransform(endDate, index = 1)
 
       val result = transformer.applyTransform(cachedJson).get
 
       result mustBe transformedJson
+
     }
+
   }
 
 }

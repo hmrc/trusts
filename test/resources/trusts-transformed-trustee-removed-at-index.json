@@ -144,13 +144,35 @@
         },
         "trustees":[
           {
-            "trusteeOrg": {
-              "name": "Amazon",
-              "identification":{
-                "utr": "1234567890"
+            "trusteeInd":{
+              "name":{
+                "firstName":"John",
+                "middleName":"William",
+                "lastName":"O'Connor"
               },
-              "phoneNumber":"0121546546",
+              "dateOfBirth":"1956-02-12",
+              "identification":{
+                "nino":"ST123456"
+              },
               "entityStart":"1998-02-12"
+            }
+          },
+          {
+            "trusteeOrg": {
+              "name": "Trustee Org 1",
+              "phoneNumber": "0121546546",
+              "identification": {
+                "utr": "5465416546"
+              }
+            }
+          },
+          {
+            "trusteeOrg": {
+              "name": "Trustee Org 2",
+              "phoneNumber": "0121546546",
+              "identification": {
+                "utr": "5465416546"
+              }
             }
           }
         ],
