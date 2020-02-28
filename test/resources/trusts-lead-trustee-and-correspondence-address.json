@@ -1,4 +1,17 @@
 {
+  "correspondence": {
+    "abroadIndicator": true,
+    "name": "Nelson James",
+    "address": {
+      "line1": "1010 EASY ST",
+      "line2": "OTTAWA",
+      "line3": "ONTARIO",
+      "line4": "ONTARIO",
+      "postCode": "K1A 0B1",
+      "country": "GB"
+    },
+    "phoneNumber": "+10392019203"
+  },
   "details":{
     "trust":{
       "entities":{
@@ -7,7 +20,7 @@
           "bpMatchStatus":"01",
           "name":"Trust Services LTD",
           "phoneNumber":"0754545454",
-          "email":"me@you.com",
+        "email":"me@you.com",
           "identification":{
             "utr":"5465416546"
           },

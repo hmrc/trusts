@@ -166,8 +166,6 @@
           },
           {
             "trusteeInd":{
-              "lineNo":"lineNo",
-              "bpMatchStatus":"bpMatchStatus",
               "name":{
                 "firstName":"New",
                 "lastName":"Trustee"

@@ -3,15 +3,13 @@
     "trust":{
       "entities":{
         "leadTrustees":{
-          "lineNo":"newLineNo",
-          "bpMatchStatus":"newMatchStatus",
           "name":"newName",
           "phoneNumber":"newPhone",
           "email":"newEmail",
           "identification":{
             "utr":"newUtr"
           },
-          "entityStart":"2012-03-14"
+          "entityStart":"1998-02-12"
         }
       }
     }

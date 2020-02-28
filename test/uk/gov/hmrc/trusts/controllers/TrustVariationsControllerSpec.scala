@@ -32,7 +32,7 @@ import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
-import uk.gov.hmrc.trusts.models.{AddressType, Declaration, DeclarationForApi, NameType}
+import uk.gov.hmrc.trusts.models.{DeclarationForApi, DeclarationName, NameType}
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, ValidationService, VariationService}
 import uk.gov.hmrc.trusts.utils.Headers
 
@@ -311,9 +311,8 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
       "Return bad request when declaring No change and there is a form bundle number mismatch" in {
         val SUT = trustVariationsController
-        val declaration = Declaration(
-          NameType("firstname", None, "Surname"),
-          AddressType("Line1", "Line2", Some("Line3"), None, Some("POSTCODE"), "GB")
+        val declaration = DeclarationName(
+          NameType("firstname", None, "Surname")
         )
 
         val declarationForApi = DeclarationForApi(declaration, None)
@@ -321,7 +320,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
         when(mockVariationService.submitDeclaration(any(), any(), any())(any()))
           .thenReturn(Future.failed(EtmpCacheDataStaleException))
 
-        val result = SUT.noChange("1234567890")(
+        val result = SUT.declare("1234567890")(
           FakeRequest("POST", "/no-change/1234567890").withBody(Json.toJson(declarationForApi))
         )
 

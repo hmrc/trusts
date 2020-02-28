@@ -19,15 +19,15 @@ package uk.gov.hmrc.trusts.transformers
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
-import uk.gov.hmrc.trusts.models.{AddressType, AgentDetails, Declaration, DeclarationForApi, NameType}
+import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class DeclarationTransformerSpec extends FreeSpec with MustMatchers with OptionValues {
   val entityEnd = new DateTime(2020, 1, 30, 15, 0)
 
-  "the no change transformer should" - {
+  "the declaration transformer should" - {
 
-    val declaration = Declaration(NameType("First", None, "Last"), AddressType("Line1", "Line2", Some("Line3"), None, Some("POSTCODE"), "GB"))
+    val declaration = DeclarationName(NameType("First", None, "Last"))
     val declarationForApi = DeclarationForApi(declaration, None)
 
     "transform json successfully for an org lead trustee" in {

@@ -137,9 +137,17 @@
             "phoneNumber": "newPhone",
             "email": "newEmail",
             "identification": {
-              "nino": "newNino"
+              "nino": "newNino",
+              "address": {
+                "country": "GB",
+                "line1": "1344 Army Road",
+                "line2": "Suite 111",
+                "line3": "Telford",
+                "line4": "Shropshire",
+                "postCode": "TF1 5DR"
+              }
             },
-            "entityStart": "2012-03-14"
+            "entityStart": "1998-02-12"
           }
         },
         "trustees": [

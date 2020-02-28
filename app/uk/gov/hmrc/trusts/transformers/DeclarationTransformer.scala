@@ -20,41 +20,60 @@ import org.joda.time.DateTime
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
-import uk.gov.hmrc.trusts.models.{DeclarationForApi, NameType}
+import uk.gov.hmrc.trusts.models.{AddressType, AgentDetails, Declaration, DeclarationForApi, NameType}
 import uk.gov.hmrc.trusts.utils.Implicits._
 
 class DeclarationTransformer {
 
   def transform(response: TrustProcessedResponse,
                 originalJson: JsValue,
-                declaration: DeclarationForApi,
+                declarationForApi: DeclarationForApi,
                 date: DateTime): JsResult[JsValue] = {
+
     val responseJson = response.getTrust
     val responseHeader = response.responseHeader
-    val agentTransformer = if (declaration.agentDetails.isDefined) {
-      (__).json.update(
-        (__ \ 'agentDetails).json.put(Json.toJson(declaration.agentDetails.get))
-      )
-    } else {
-      (__).json.pick[JsObject]
-    }
+
     responseJson.transform(
       (__ \ 'applicationType).json.prune andThen
         (__ \ 'declaration).json.prune andThen
         (__ \ 'yearsReturns).json.prune andThen
-        removeEmptyLineNo(responseJson) andThen
+        updateCorrespondence(responseJson) andThen
+        fixLeadTrusteeAddress(responseJson, pathToLeadTrustees) andThen
         convertLeadTrustee(responseJson) andThen
         addPreviousLeadTrustee(responseJson, originalJson, date) andThen
         putNewValue(__ \ 'reqHeader \ 'formBundleNo, JsString(responseHeader.formBundleNo)) andThen
-        putNewValue(__ \ 'declaration, Json.toJson(declaration.declaration)) andThen
-        agentTransformer
+        addDeclaration(declarationForApi, responseJson) andThen
+        addAgentIfDefined(declarationForApi.agentDetails)
     )
   }
 
   private val pathToLeadTrustees: JsPath = __ \ 'details \ 'trust \ 'entities \ 'leadTrustees
+  private val pathToLeadTrusteeAddress = pathToLeadTrustees \ 'identification \ 'address
+  private val pathToLeadTrusteePhoneNumber = pathToLeadTrustees \ 'phoneNumber
+  private val pathToLeadTrusteeCountry = pathToLeadTrusteeAddress \ 'country
+  private val pathToCorrespondenceAddress = __ \ 'correspondence \ 'address
+  private val pathToCorrespondencePhoneNumber = __ \ 'correspondence \ 'phoneNumber
   private val pickLeadTrustee = pathToLeadTrustees.json.pick
 
   private def trusteeField(json: JsValue): String = determineTrusteeField(pathToLeadTrustees, json)
+
+  private def updateCorrespondence(responseJson: JsValue): Reads[JsObject] = {
+    val leadTrusteeCountry = responseJson.transform(pathToLeadTrusteeCountry.json.pick)
+    val inUk = leadTrusteeCountry.isError || leadTrusteeCountry.get == JsString("GB")
+    pathToCorrespondenceAddress.json.prune andThen
+      pathToCorrespondencePhoneNumber.json.prune andThen
+      putNewValue(__ \ 'correspondence \ 'abroadIndicator, JsBoolean(!inUk)) andThen
+      __.json.update(pathToCorrespondenceAddress.json.copyFrom(pathToLeadTrusteeAddress.json.pick)) andThen
+      __.json.update(pathToCorrespondencePhoneNumber.json.copyFrom(pathToLeadTrusteePhoneNumber.json.pick))
+  }
+
+  private def fixLeadTrusteeAddress(leadTrusteeJson: JsValue, leadTrusteePath: JsPath) = {
+    if (leadTrusteeJson.transform((leadTrusteePath \ 'identification \ 'utr).json.pick).isSuccess ||
+        leadTrusteeJson.transform((leadTrusteePath \ 'identification \ 'nino).json.pick).isSuccess)
+      (leadTrusteePath \ 'identification \ 'address).json.prune
+    else
+      __.json.pick
+  }
 
   private def determineTrusteeField(rootPath: JsPath, json: JsValue): String = {
     val namePath = (rootPath \ 'name).json.pick[JsObject]
@@ -62,14 +81,6 @@ class DeclarationTransformer {
     json.transform(namePath).flatMap(_.validate[NameType]) match {
       case JsSuccess(_, _) => "leadTrusteeInd"
       case _ => "leadTrusteeOrg"
-    }
-  }
-
-  private def removeEmptyLineNo(json: JsValue): Reads[JsObject] = {
-    val lineNoPath = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees \ 'lineNo)
-    json.transform(lineNoPath.json.pick[JsString]) match {
-      case JsSuccess(JsString(""), _) => lineNoPath.json.prune
-      case _ => (__).json.pick[JsObject]
     }
   }
 
@@ -92,7 +103,12 @@ class DeclarationTransformer {
     (newLeadTrustee, originalLeadTrustee) match {
       case (JsSuccess(newLeadTrusteeJson, _), JsSuccess(originalLeadTrusteeJson, _))
         if (newLeadTrusteeJson != originalLeadTrusteeJson) =>
-          addPreviousLeadTrusteeAsExpiredStep(originalLeadTrusteeJson, date)
+          val reads = fixLeadTrusteeAddress(originalLeadTrusteeJson, __)
+          val fixedLeadTrusteeJson = originalLeadTrusteeJson.transform(reads) match {
+            case JsSuccess(value, _) => value
+            case JsError(_) => originalLeadTrusteeJson
+          }
+          addPreviousLeadTrusteeAsExpiredStep(fixedLeadTrusteeJson, date)
       case _ => (__).json.pick[JsObject]
     }
   }
@@ -102,4 +118,31 @@ class DeclarationTransformer {
 
   private def putNewValue(path: JsPath, value: JsValue ): Reads[JsObject] =
     (__).json.update(path.json.put(value))
+
+
+  private def declarationAddress(agentDetails: Option[AgentDetails], responseJson: JsValue) =
+    if (agentDetails.isDefined)
+      agentDetails.get.agentAddress
+    else
+      responseJson.transform((pathToLeadTrustees \ 'identification \ 'address).json.pick) match {
+        case JsSuccess(value, _) => value.as[AddressType]
+        case JsError(_) => ???
+      }
+
+  private def addDeclaration(declarationForApi: DeclarationForApi, responseJson: JsValue) = {
+    val declarationToSend = Declaration(
+      declarationForApi.declaration.name,
+      declarationAddress(declarationForApi.agentDetails, responseJson)
+    )
+    putNewValue(__ \ 'declaration, Json.toJson(declarationToSend))
+  }
+
+  private def addAgentIfDefined(agentDetails: Option[AgentDetails]) = if (agentDetails.isDefined) {
+    (__).json.update(
+      (__ \ 'agentDetails).json.put(Json.toJson(agentDetails.get))
+    )
+  } else {
+    (__).json.pick[JsObject]
+  }
+
 }

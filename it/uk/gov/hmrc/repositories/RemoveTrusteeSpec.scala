@@ -58,7 +58,8 @@ class RemoveTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures wit
         .configure(Seq(
           "mongodb.uri" -> connectionString,
           "metrics.enabled" -> false,
-          "auditing.enabled" -> false
+          "auditing.enabled" -> false,
+          "mongo-async-driver.akka.log-dead-letters" -> 0
         ): _*)
         .build()
 
@@ -125,7 +126,8 @@ class RemoveTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures wit
         .configure(Seq(
           "mongodb.uri" -> connectionString,
           "metrics.enabled" -> false,
-          "auditing.enabled" -> false
+          "auditing.enabled" -> false,
+          "mongo-async-driver.akka.log-dead-letters" -> 0
         ): _*)
         .build()
 

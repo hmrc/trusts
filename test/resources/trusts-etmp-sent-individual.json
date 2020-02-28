@@ -13,7 +13,7 @@
       "postCode": "TF1 5DR",
       "country": "GB"
     },
-    "phoneNumber": "+4423400342"
+    "phoneNumber": "0754545454"
   },
   "declaration": {
     "name": {
@@ -21,10 +21,11 @@
       "lastName": "Last"
     },
     "address": {
-      "line1": "Line1",
-      "line2": "Line2",
-      "line3": "Line3",
-      "postCode": "POSTCODE",
+      "line1": "1344 Army Road",
+      "line2": "Suite 111",
+      "line3": "Telford",
+      "line4": "Shropshire",
+      "postCode": "TF1 5DR",
       "country": "GB"
     }
   },

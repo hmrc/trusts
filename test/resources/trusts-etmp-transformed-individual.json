@@ -129,7 +129,6 @@
             "entityStart": "1998-02-12"
           },
           "leadTrustees": {
-            "lineNo": "",
             "name": {
               "firstName": "David",
               "middleName": "William",
@@ -139,7 +138,12 @@
             "phoneNumber": "0754545454",
             "email": "me@you.com",
             "identification": {
-              "nino": "AB123456"
+              "nino": "AB123456",
+              "address": {
+                "line1": "1345 Army Road",
+                "line2": "Foreign City",
+                "country": "DE"
+              }
             },
             "entityStart": "1998-02-12"
           },

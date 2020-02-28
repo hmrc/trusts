@@ -41,23 +41,29 @@ class VariationService @Inject()(
   def submitDeclaration(utr: String, internalId: String, declaration: DeclarationForApi)
                        (implicit hc: HeaderCarrier): Future[VariationResponse] = {
 
-    getCachedTrustData(utr, internalId).flatMap { originalResponse =>
-      transformationService.applyTransformations(utr, internalId, originalResponse.getTrust).flatMap {
-        case JsSuccess(transformedJson, _) =>
-        val response = TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
-        declarationTransformer.transform(response, originalResponse.getTrust, declaration, new DateTime()) match {
-          case JsSuccess(value, _) =>
-            Logger.info(s"[VariationService] successfully transformed json for declaration")
-            doSubmit(value, internalId)
-          case JsError(errors) =>
-            Logger.error("Problem transforming data for ETMP submission " + errors.toString())
-            Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
-        }
+    getCachedTrustData(utr, internalId).flatMap { originalResponse: TrustProcessedResponse =>
+      transformationService.populateLeadTrusteeAddress(originalResponse.getTrust) match {
+        case JsSuccess(originalJson, _) =>
+          transformationService.applyTransformations(utr, internalId, originalJson).flatMap {
+            case JsSuccess(transformedJson, _) =>
+              val response = TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
+              declarationTransformer.transform(response, originalJson, declaration, new DateTime()) match {
+                case JsSuccess(value, _) =>
+                  Logger.info(s"[VariationService] successfully transformed json for declaration")
+                  doSubmit(value, internalId)
+                case JsError(errors) =>
+                  Logger.error("Problem transforming data for ETMP submission " + errors.toString())
+                  Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
+              }
+            case JsError(errors) =>
+              Logger.error(s"Failed to transform trust info $errors")
+              Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
+          }
         case JsError(errors) =>
-          Logger.error(s"Failed to transform trust info $errors")
+          Logger.error(s"Failed to populate lead trustee address $errors")
           Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
       }
-    }
+   }
   }
 
   private def getCachedTrustData(utr: String, internalId: String)(implicit hc: HeaderCarrier) = {

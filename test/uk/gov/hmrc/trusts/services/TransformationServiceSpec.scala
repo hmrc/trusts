@@ -30,7 +30,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee}
 import uk.gov.hmrc.trusts.repositories.TransformationRepositoryImpl
-import uk.gov.hmrc.trusts.transformers.{AddTrusteeIndTransform, ComposedDeltaTransform, RemoveTrusteeTransform, SetLeadTrusteeIndTransform}
+import uk.gov.hmrc.trusts.transformers.{AddTrusteeIndTransform, ComposedDeltaTransform, RemoveTrusteeTransform, AmendLeadTrusteeIndTransform}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
@@ -108,7 +108,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
         verify(repository).set("utr",
           "internalId",
-          ComposedDeltaTransform(Seq(SetLeadTrusteeIndTransform(newLeadTrusteeIndInfo))))
+          ComposedDeltaTransform(Seq(AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo))))
 
       }
     }
@@ -159,7 +159,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       val repository = mock[TransformationRepositoryImpl]
       val service = new TransformationService(repository, auditService)
 
-      val existingTransforms = Seq(SetLeadTrusteeIndTransform(existingLeadTrusteeInfo))
+      val existingTransforms = Seq(AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo))
       when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
@@ -178,7 +178,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
         verify(repository).set("utr",
           "internalId",
           ComposedDeltaTransform(Seq(
-            SetLeadTrusteeIndTransform(existingLeadTrusteeInfo),
+            AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo),
             RemoveTrusteeTransform(payload.trustee, payload.endDate)
           )))
       }
@@ -197,7 +197,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
         verify(repository).set("utr",
           "internalId",
-          ComposedDeltaTransform(Seq(SetLeadTrusteeIndTransform(newLeadTrusteeIndInfo))))
+          ComposedDeltaTransform(Seq(AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo))))
 
       }
     }
@@ -207,7 +207,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       val repository = mock[TransformationRepositoryImpl]
       val service = new TransformationService(repository, auditService)
 
-      val existingTransforms = Seq(SetLeadTrusteeIndTransform(existingLeadTrusteeInfo))
+      val existingTransforms = Seq(AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo))
       when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
@@ -217,8 +217,8 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
         verify(repository).set("utr",
           "internalId",
           ComposedDeltaTransform(Seq(
-            SetLeadTrusteeIndTransform(existingLeadTrusteeInfo),
-            SetLeadTrusteeIndTransform(newLeadTrusteeIndInfo))))
+            AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo),
+            AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo))))
 
       }
     }
@@ -227,9 +227,9 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       val service = new TransformationService(repository, auditService)
 
       val existingTransforms = Seq(
-        SetLeadTrusteeIndTransform(existingLeadTrusteeInfo),
-        SetLeadTrusteeIndTransform(newLeadTrusteeIndInfo),
-        SetLeadTrusteeIndTransform(unitTestTrusteeInfo)
+        AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo),
+        AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo),
+        AmendLeadTrusteeIndTransform(unitTestTrusteeInfo)
       )
       when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
@@ -257,6 +257,17 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       whenReady(result) {
         r => r.get mustEqual beforeJson
       }
+    }
+    "must apply the correspondence address to the lead trustee's address if it doesn't have one" in {
+      val repository = mock[TransformationRepositoryImpl]
+      val service = new TransformationService(repository, auditService)
+
+      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-and-correspondence-address.json")
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-and-correspondence-address-after.json")
+
+      val result: JsResult[JsValue] = service.populateLeadTrusteeAddress(beforeJson)
+
+      result.get mustEqual afterJson
     }
   }
 }
