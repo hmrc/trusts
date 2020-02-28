@@ -82,6 +82,25 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
       result mustBe cachedJson
     }
 
+    "remove multiple trustees in a sequence of transformations (shrinking list)" in {
+
+      val endDate = DateTime.parse("2010-10-15")
+
+      // 4 trustees in the list, last index is 3
+      val cachedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-multiple-trustees.json")
+
+      val transformedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-multiple-trustees-removed.json")
+
+      // remove trustee individual
+      val firstTrusteeRemoved = new RemoveTrusteeTransform(endDate, index = 0).applyTransform(cachedJson).get
+
+      // remove trutee organisation
+      val result = new RemoveTrusteeTransform(endDate, 1).applyTransform(firstTrusteeRemoved).get
+
+      result mustBe transformedJson
+
+    }
+
   }
 
 }
