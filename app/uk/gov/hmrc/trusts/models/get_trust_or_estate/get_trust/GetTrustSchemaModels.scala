@@ -123,13 +123,13 @@ object DisplayTrustLeadTrusteeIndType {
 }
 
 case class DisplayTrustLeadTrusteeOrgType(
-                                           lineNo: String,
+                                           lineNo: Option[String],
                                            bpMatchStatus: Option[String],
                                            name: String,
                                            phoneNumber: String,
                                            email: Option[String] = None,
                                            identification: DisplayTrustIdentificationOrgType,
-                                           entityStart: DateTime
+                                           entityStart: Option[DateTime]
                                          )
 
 object DisplayTrustLeadTrusteeOrgType {

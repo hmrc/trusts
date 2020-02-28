@@ -91,7 +91,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |""".stripMargin)
 
       val data = ComposedDeltaTransform(Seq(
-        SetLeadTrusteeIndTransform(
+        AmendLeadTrusteeIndTransform(
           DisplayTrustLeadTrusteeIndType(
             None,
             None,

@@ -19,23 +19,12 @@ package uk.gov.hmrc.trusts.transformers
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustLeadTrusteeIndType
 
-case class SetLeadTrusteeIndTransform( leadTrustee: DisplayTrustLeadTrusteeIndType) extends DeltaTransform {
+case class AmendLeadTrusteeIndTransform(leadTrustee: DisplayTrustLeadTrusteeIndType) extends DeltaTransform with AmendLeadTrusteeCommon {
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    setLeadTrustee(input, leadTrustee)
-  }
-
-  private def setLeadTrustee[A](input: JsValue, lead: A)(implicit writes: Writes[A]) = {
-    val leadTrusteesPath = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees)
-
-    input.transform(
-        leadTrusteesPath.json.prune andThen
-        (__).json.update(leadTrusteesPath.json.put(Json.toJson(lead))) andThen
-        (leadTrusteesPath \ 'lineNo).json.prune andThen
-        (leadTrusteesPath \ 'bpMatchStatus).json.prune
-    )
+    setLeadTrustee(input, Json.toJson(leadTrustee))
   }
 }
 
-object SetLeadTrusteeIndTransform {
-  implicit val format: Format[SetLeadTrusteeIndTransform] = Json.format[SetLeadTrusteeIndTransform]
+object AmendLeadTrusteeIndTransform {
+  implicit val format: Format[AmendLeadTrusteeIndTransform] = Json.format[AmendLeadTrusteeIndTransform]
 }

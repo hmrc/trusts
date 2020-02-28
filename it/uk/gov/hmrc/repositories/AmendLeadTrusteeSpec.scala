@@ -17,7 +17,7 @@ import reactivemongo.api.MongoConnection
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import uk.gov.hmrc.trusts.models.NameType
+import uk.gov.hmrc.trusts.models.{AddressType, NameType}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType, GetTrustSuccessResponse}
 import uk.gov.hmrc.trusts.repositories.TrustsMongoDriver
 import uk.gov.hmrc.trusts.utils.JsonUtils
@@ -35,14 +35,25 @@ class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures 
     "must return amended data in a subsequent 'get' call" in {
 
       val newTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
-        lineNo = Some("newLineNo"),
-        bpMatchStatus = Some("newMatchStatus"),
+        lineNo = None,
+        bpMatchStatus = None,
         name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
         dateOfBirth = new DateTime(1965, 2, 10, 0, 0),
         phoneNumber = "newPhone",
         email = Some("newEmail"),
-        identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-        entityStart = Some(DateTime.parse("2012-03-14"))
+        identification = DisplayTrustIdentificationType(
+          None,
+          Some("newNino"),
+          None,
+          Some(AddressType(
+            "1344 Army Road",
+            "Suite 111",
+            Some("Telford"),
+            Some("Shropshire"),
+            Some("TF1 5DR"),
+            "GB"
+          ))),
+          None
       )
 
       val expectedGetAfterAmendLeadTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-after-amend-lead-trustee.json")
@@ -58,7 +69,8 @@ class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures 
         .configure(Seq(
           "mongodb.uri" -> connectionString,
           "metrics.enabled" -> false,
-          "auditing.enabled" -> false
+          "auditing.enabled" -> false,
+          "mongo-async-driver.akka.log-dead-letters" -> 0
         ): _*)
         .build()
 

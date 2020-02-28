@@ -70,7 +70,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
       status(result) mustBe OK
       verify(transformationService).addAmendLeadTrusteeTransformer("aUTR", "id", newTrusteeInfo)
     }
-    
+
     "must return an error for malformed json" in {
       val transformationService = mock[TransformationService]
       val controller = new TransformationController(identifierAction, transformationService)

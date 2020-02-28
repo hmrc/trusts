@@ -46,7 +46,8 @@ class CacheRepositorySpec extends FreeSpec with MustMatchers with ScalaFutures w
   private lazy val appBuilder =  new GuiceApplicationBuilder().configure(Seq(
     "mongodb.uri" -> connectionString,
     "metrics.enabled" -> false,
-    "auditing.enabled" -> false
+    "auditing.enabled" -> false,
+    "mongo-async-driver.akka.log-dead-letters" -> 0
   ): _*)
 
   val data = Json.obj("testField" -> "testValue")

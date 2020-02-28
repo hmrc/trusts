@@ -28,8 +28,8 @@ class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionV
 
     "add a new individual trustee" in {
 
-      val t = DisplayTrustTrusteeIndividualType(Some("lineNo"),
-        Some("bpMatchStatus"),
+      val t = DisplayTrustTrusteeIndividualType(None,
+        None,
         NameType("New", None, "Trustee"),
         Some(DateTime.parse("2000-01-01")),
         Some("phoneNumber"),
@@ -49,8 +49,8 @@ class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionV
 
     "fail to add a new individual trustee when there are 25 or more existing trustees" in {
 
-      val t = DisplayTrustTrusteeIndividualType(Some("lineNo"),
-        Some("bpMatchStatus"),
+      val t = DisplayTrustTrusteeIndividualType(None,
+        None,
         NameType("New", None, "Trustee"),
         Some(DateTime.parse("2000-01-01")),
         Some("phoneNumber"),

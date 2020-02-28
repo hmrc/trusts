@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
 import play.api.Logger
-import play.api.libs.json.{JsResult, JsSuccess, JsValue, Json}
+import play.api.libs.json.{JsPath, JsResult, JsSuccess, JsValue, Json, __}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.RemoveTrustee
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
@@ -54,10 +54,22 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
+  def populateLeadTrusteeAddress(beforeJson: JsValue): JsResult[JsValue] = {
+    val pathToLeadTrusteeAddress = __ \ 'details \ 'trust \ 'entities \ 'leadTrustees \ 'identification \ 'address
+
+    if (beforeJson.transform(pathToLeadTrusteeAddress.json.pick).isSuccess)
+      JsSuccess(beforeJson)
+    else {
+      val pathToCorrespondenceAddress = __ \ 'correspondence \ 'address
+      val copyAddress = __.json.update(pathToLeadTrusteeAddress.json.copyFrom(pathToCorrespondenceAddress.json.pick))
+      beforeJson.transform(copyAddress)
+    }
+  }
+
   def addAmendLeadTrusteeTransformer(utr: String, internalId: String, newLeadTrustee: DisplayTrustLeadTrusteeType): Future[Unit] = {
     addNewTransform(utr, internalId, newLeadTrustee match {
-      case DisplayTrustLeadTrusteeType(Some(trusteeInd), None) => SetLeadTrusteeIndTransform(trusteeInd)
-      case DisplayTrustLeadTrusteeType(None, Some(trusteeOrg)) => SetLeadTrusteeOrgTransform(trusteeOrg)
+      case DisplayTrustLeadTrusteeType(Some(trusteeInd), None) => AmendLeadTrusteeIndTransform(trusteeInd)
+      case DisplayTrustLeadTrusteeType(None, Some(trusteeOrg)) => AmendLeadTrusteeOrgTransform(trusteeOrg)
     })
   }
 
