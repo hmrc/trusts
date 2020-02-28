@@ -137,12 +137,11 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       when(repository.get(any(), any())).thenReturn(Future.successful(None))
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
+      val endDate = DateTime.parse("2010-10-10")
+
       val payload = RemoveTrustee(
-        trustee = DisplayTrustTrusteeType(
-          trusteeInd = Some(existingTrusteeIndividualInfo),
-          trusteeOrg = None
-        ),
-        endDate = DateTime.parse("2010-10-10")
+        endDate = endDate,
+        index = 0
       )
 
       val result = service.addRemoveTrusteeTransformer("utr", "internalId", payload)
@@ -151,7 +150,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
         verify(repository).set("utr",
           "internalId",
-          ComposedDeltaTransform(Seq(RemoveTrusteeTransform(payload.trustee, payload.endDate))))
+          ComposedDeltaTransform(Seq(RemoveTrusteeTransform(endDate, index = 0))))
       }
     }
 
@@ -163,12 +162,11 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
+      val endDate = DateTime.parse("2010-10-10")
+
       val payload = RemoveTrustee(
-        trustee = DisplayTrustTrusteeType(
-          trusteeInd = Some(existingTrusteeIndividualInfo),
-          trusteeOrg = None
-        ),
-        endDate = DateTime.parse("2010-10-10")
+        endDate = endDate,
+        index = 0
       )
 
       val result = service.addRemoveTrusteeTransformer("utr", "internalId", payload)
@@ -179,7 +177,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
           "internalId",
           ComposedDeltaTransform(Seq(
             AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo),
-            RemoveTrusteeTransform(payload.trustee, payload.endDate)
+            RemoveTrusteeTransform(endDate, index = 0)
           )))
       }
     }

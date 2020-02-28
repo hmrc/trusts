@@ -67,24 +67,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |            },
           |            {
           |               "RemoveTrusteeTransform": {
-          |                 "trustee" : {
-          |                     "trusteeInd": {
-          |                        "lineNo" : "1",
-          |                        "bpMatchStatus" : "01",
-          |                        "name" : {
-          |                            "firstName" : "New",
-          |                            "lastName" : "Trustee"
-          |                        },
-          |                        "dateOfBirth" : "2000-01-01",
-          |                        "phoneNumber" : "phoneNumber",
-          |                        "identification" : {
-          |                            "nino" : "nino"
-          |                        },
-          |                        "entityStart" : "2000-01-01"
-        |                        }
-          |                    },
-          |                    "endDate": "2010-01-01"
-          |               }
+          |                 "index": 0,
+          |                 "endDate": "2010-01-01"
+          |                }
           |            }
           |        ]
           |    }
@@ -113,18 +98,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
             DateTime.parse("2000-01-01")
           )),
         RemoveTrusteeTransform(
-            trustee = DisplayTrustTrusteeType(
-              trusteeInd = Some(DisplayTrustTrusteeIndividualType(
-              lineNo = Some("1"),
-              bpMatchStatus = Some("01"),
-              name = NameType("New", None, "Trustee"),
-              dateOfBirth = Some(DateTime.parse("2000-01-01")),
-              phoneNumber = Some("phoneNumber"),
-              identification = Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-              entityStart = DateTime.parse("2000-01-01")
-            )),
-            trusteeOrg = None),
-            endDate = DateTime.parse("2010-01-01")
+            endDate = DateTime.parse("2010-01-01"),
+            index = 0
           )
         )
       )
