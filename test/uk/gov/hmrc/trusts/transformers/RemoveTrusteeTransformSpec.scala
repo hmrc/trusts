@@ -52,7 +52,6 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
       val result = transformer.applyTransform(cachedJson).get
 
       result mustBe transformedJson
-
     }
 
     "remove a trustee at an index and persist the remaining trustees" in {
@@ -68,7 +67,19 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
       val result = transformer.applyTransform(cachedJson).get
 
       result mustBe transformedJson
+    }
 
+    "do not remove any trustees when removing an index which is index out of bounds" in {
+      val endDate = DateTime.parse("2010-10-15")
+
+      // 4 trustees in the list, last index is 3
+      val cachedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-multiple-trustees.json")
+
+      val transformer = new RemoveTrusteeTransform(endDate, index = 4)
+
+      val result = transformer.applyTransform(cachedJson).get
+
+      result mustBe cachedJson
     }
 
   }
