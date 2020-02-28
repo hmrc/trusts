@@ -87,6 +87,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
   "add trustee" - {
 
     "must add a new add trustee transform" in {
+
       val transformationService = mock[TransformationService]
       val controller = new TransformationController(identifierAction, transformationService)
 
@@ -136,19 +137,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
       val controller = new TransformationController(identifierAction, transformationService)
 
       val payload = RemoveTrustee(
-        trustee = DisplayTrustTrusteeType(
-          trusteeInd = Some(DisplayTrustTrusteeIndividualType(
-            lineNo = Some("1"),
-            bpMatchStatus = Some("01"),
-            name = NameType("First", None, "Trustee"),
-            dateOfBirth = Some(DateTime.parse("2010-10-10")),
-            phoneNumber = Some("+446464647"),
-            identification = None,
-            entityStart = DateTime.parse("2019-05-06")
-          )),
-          trusteeOrg = None
-        ),
-        endDate = DateTime.parse("2020-01-10")
+        endDate = DateTime.parse("2020-01-10"), index = 0
       )
 
       when(transformationService.addRemoveTrusteeTransformer(any(), any(), any()))
