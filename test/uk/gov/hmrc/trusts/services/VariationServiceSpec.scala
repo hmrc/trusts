@@ -55,7 +55,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
 
   "Declare no change" should {
     
-    "Submits data correctly when version matches" in {
+    "submit data correctly when the version matches, and then reset the cache" in {
 
       val desService = mock[DesService]
 
@@ -93,6 +93,8 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
         verify(transformer, times(1)).transform(equalTo(transformedResponse), equalTo(response.getTrust), equalTo(declarationForApi), any())
         val arg: ArgumentCaptor[JsValue] = ArgumentCaptor.forClass(classOf[JsValue])
         verify(desService, times(1)).trustVariation(arg.capture())(any[HeaderCarrier])
+        verify(mockCacheRepository, times(1)).resetCache(any(), any())
+        verify(mockTransformationRepository, times(1)).resetCache(any(), any())
         arg.getValue mustBe transformedJson
       }}
     }
@@ -118,8 +120,6 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
     ))
 
     when(transformer.transform(any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
-    when(mockCacheRepository.resetCache(any(), any())).thenReturn(Future.successful(Some(Json.obj())))
-    when(mockTransformationRepository.resetCache(any(), any())).thenReturn(Future.successful(Some(Json.obj())))
 
     val OUT = new VariationService(desService, transformationService, transformer, mockCacheRepository, mockTransformationRepository, auditService)
 
