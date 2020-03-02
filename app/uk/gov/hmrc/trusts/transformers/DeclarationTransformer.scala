@@ -104,11 +104,11 @@ class DeclarationTransformer {
       case (JsSuccess(newLeadTrusteeJson, _), JsSuccess(originalLeadTrusteeJson, _))
         if (newLeadTrusteeJson != originalLeadTrusteeJson) =>
           val reads = fixLeadTrusteeAddress(originalLeadTrusteeJson, __)
-          val fixedLeadTrusteeJson = originalLeadTrusteeJson.transform(reads) match {
-            case JsSuccess(value, _) => value
-            case JsError(_) => originalLeadTrusteeJson
+          originalLeadTrusteeJson.transform(reads) match {
+            case JsSuccess(value, _) => addPreviousLeadTrusteeAsExpiredStep(value, date)
+            case e: JsError => Reads(_ => e)
           }
-          addPreviousLeadTrusteeAsExpiredStep(fixedLeadTrusteeJson, date)
+
       case _ => (__).json.pick[JsObject]
     }
   }
@@ -118,7 +118,6 @@ class DeclarationTransformer {
 
   private def putNewValue(path: JsPath, value: JsValue ): Reads[JsObject] =
     (__).json.update(path.json.put(value))
-
 
   private def declarationAddress(agentDetails: Option[AgentDetails], responseJson: JsValue) =
     if (agentDetails.isDefined)
