@@ -22,6 +22,7 @@ import akka.stream.Materializer
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
 import play.api.libs.json._
+import reactivemongo.api.WriteConcern
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.BSONDocument
 import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
@@ -109,6 +110,16 @@ class CacheRepositoryImpl @Inject()(
       }
     }
   }
+
+  override def resetCache(utr: String, internalId: String): Future[Option[JsObject]] = {
+    val selector = Json.obj(
+      "id" -> createKey(utr, internalId)
+    )
+
+    collection.flatMap(_.findAndRemove(selector, None, None, WriteConcern.Default, None, None, Seq.empty).map(
+      _.value
+    ))
+  }
 }
 
 trait CacheRepository {
@@ -117,4 +128,5 @@ trait CacheRepository {
 
   def set(utr: String, internalId: String, data: JsValue): Future[Boolean]
 
+  def resetCache(utr: String, internalId: String): Future[Option[JsObject]]
 }
