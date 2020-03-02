@@ -18,48 +18,47 @@ package uk.gov.hmrc.trusts.transformers
 
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
-import uk.gov.hmrc.trusts.models.NameType
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustTrusteeIndividualType}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationOrgType, DisplayTrustTrusteeOrgType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionValues {
+class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
   "the add trustee transformer should" - {
 
-    "add a new individual trustee" in {
+    "add a new org trustee" in {
 
-      val t = DisplayTrustTrusteeIndividualType(None,
+      val t = DisplayTrustTrusteeOrgType(None,
         None,
-        NameType("New", None, "Trustee"),
-        Some(DateTime.parse("2000-01-01")),
-        Some("phoneNumber"),
-        Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-        DateTime.parse("1990-10-10"))
+        "Company Name",
+        None,
+        None,
+        None,
+        DateTime.parse("2020-01-30"))
 
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-add-ind-trustee.json")
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-add-org-trustee.json")
 
-      val transformer = new AddTrusteeIndTransform(t)
+      val transformer = AddTrusteeOrgTransform(t)
 
       val result = transformer.applyTransform(trustJson).get
 
       result mustBe afterJson
     }
 
-    "fail to add a new individual trustee when there are 25 or more existing trustees" in {
+    "fail to add a new org trustee when there are 25 or more existing trustees" in {
 
-      val t = DisplayTrustTrusteeIndividualType(None,
+      val t = DisplayTrustTrusteeOrgType(None,
         None,
-        NameType("New", None, "Trustee"),
-        Some(DateTime.parse("2000-01-01")),
+        "New Trustee",
         Some("phoneNumber"),
-        Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
+        None,
+        Some(DisplayTrustIdentificationOrgType(None, Some("utr"), None)),
         DateTime.parse("1990-10-10"))
 
       val json = JsonUtils.getJsonValueFromFile("trusts-etmp-max-trustees.json")
 
-      val transformer = new AddTrusteeIndTransform(t)
+      val transformer = AddTrusteeOrgTransform(t)
 
       val thrown = intercept[Exception] (transformer.applyTransform(json).get)
 

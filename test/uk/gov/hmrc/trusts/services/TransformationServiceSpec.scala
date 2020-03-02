@@ -30,7 +30,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee}
 import uk.gov.hmrc.trusts.repositories.TransformationRepositoryImpl
-import uk.gov.hmrc.trusts.transformers.{AddTrusteeIndTransform, ComposedDeltaTransform, RemoveTrusteeTransform, AmendLeadTrusteeIndTransform}
+import uk.gov.hmrc.trusts.transformers.{AddTrusteeIndTransform, AddTrusteeOrgTransform, AmendLeadTrusteeIndTransform, ComposedDeltaTransform, RemoveTrusteeTransform}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
@@ -55,6 +55,15 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     dateOfBirth = Some(new DateTime(1965, 2, 10, 12, 30)),
     phoneNumber = Some("newPhone"),
     identification = Some(DisplayTrustIdentificationType(None, Some("newNino"), None, None)),
+    entityStart = DateTime.parse("2012-03-14")
+  )
+
+  val newTrusteeOrgInfo = DisplayTrustTrusteeOrgType(
+    lineNo = Some("newLineNo"),
+    bpMatchStatus = Some("newMatchStatus"),
+    name = "newCompanyName",
+    phoneNumber = Some("newPhone"),
+    identification = Some(DisplayTrustIdentificationOrgType(None, Some("newUtr"), None)),
     entityStart = DateTime.parse("2012-03-14")
   )
 
@@ -126,6 +135,23 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
         verify(repository).set("utr",
           "internalId",
           ComposedDeltaTransform(Seq(AddTrusteeIndTransform(newTrusteeIndInfo))))
+
+      }
+    }
+
+    "must write an add trustee org transform to the transformation repository with no existing transforms" in {
+      val repository = mock[TransformationRepositoryImpl]
+      val service = new TransformationService(repository, auditService)
+
+      when(repository.get(any(), any())).thenReturn(Future.successful(None))
+      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+
+      val result = service.addAddTrusteeTransformer("utr", "internalId", DisplayTrustTrusteeType(None, Some(newTrusteeOrgInfo)))
+      whenReady(result) { _ =>
+
+        verify(repository).set("utr",
+          "internalId",
+          ComposedDeltaTransform(Seq(AddTrusteeOrgTransform(newTrusteeOrgInfo))))
 
       }
     }
