@@ -18,10 +18,9 @@ package uk.gov.hmrc.trusts.transformers
 
 import org.joda.time.DateTime
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustTrusteeType
 import uk.gov.hmrc.trusts.utils.Constants.dateTimePattern
 
-case class RemoveTrusteeTransform(trustee: DisplayTrustTrusteeType, endDate: DateTime) extends DeltaTransform {
+case class RemoveTrusteeTransform(endDate: DateTime, index: Int) extends DeltaTransform {
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     val trusteePath = (__ \ 'details \ 'trust \ 'entities \ 'trustees).json
@@ -29,14 +28,14 @@ case class RemoveTrusteeTransform(trustee: DisplayTrustTrusteeType, endDate: Dat
     input.transform(trusteePath.pick) match {
       case JsSuccess(json, _) =>
 
-        val trustees = json.as[List[DisplayTrustTrusteeType]]
-        val filtered = trustees.filterNot(_ == trustee)
-        val trusteesRemovedAsJson = Json.toJson(filtered)
+        val array = json.as[JsArray]
+
+        val filtered = array.value.take(index) ++ array.value.drop(index + 1)
 
         input.transform(
           trusteePath.prune andThen
             JsPath.json.update {
-              trusteePath.put(Json.toJson(trusteesRemovedAsJson))
+              trusteePath.put(Json.toJson(filtered))
             }
         )
 

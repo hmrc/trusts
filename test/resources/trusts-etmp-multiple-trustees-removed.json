@@ -144,13 +144,29 @@
         },
         "trustees":[
           {
-            "trusteeOrg": {
-              "name": "Amazon",
+            "trusteeInd":{
+              "lineNo":"1",
+              "bpMatchStatus": "01",
+              "name":{
+                "firstName":"John",
+                "middleName":"William",
+                "lastName":"O'Connor"
+              },
+              "dateOfBirth":"1956-02-12",
               "identification":{
-                "utr": "1234567890"
+                "nino":"ST123456"
               },
               "phoneNumber":"0121546546",
               "entityStart":"1998-02-12"
+            }
+          },
+          {
+            "trusteeOrg": {
+              "name": "Trustee Org 2",
+              "phoneNumber": "0121546546",
+              "identification": {
+                "utr": "5465416546"
+              }
             }
           }
         ],
