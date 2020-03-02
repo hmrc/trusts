@@ -30,6 +30,7 @@ import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.models.{DeclarationForApi, DeclarationName, NameType}
+import uk.gov.hmrc.trusts.repositories.{CacheRepository, TransformationRepository}
 import uk.gov.hmrc.trusts.transformers.DeclarationTransformer
 import uk.gov.hmrc.trusts.utils.JsonRequests
 
@@ -61,10 +62,14 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
       val transformationService = mock[TransformationService]
       val auditService = app.injector.instanceOf[FakeAuditService]
       val transformer = mock[DeclarationTransformer]
+      val mockCacheRepository = mock[CacheRepository]
+      val mockTransformationRepository = mock[TransformationRepository]
 
       when(transformationService.populateLeadTrusteeAddress(any[JsValue])).thenReturn(JsSuccess(trustInfoJson))
       when(transformationService.applyTransformations(any(), any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
       when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
+      when(mockCacheRepository.resetCache(any(), any())).thenReturn(Future.successful(Some(Json.obj())))
+      when(mockTransformationRepository.resetCache(any(), any())).thenReturn(Future.successful(Some(Json.obj())))
 
       val response = TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
 
@@ -78,7 +83,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
 
       when(transformer.transform(any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
 
-      val OUT = new VariationService(desService, transformationService, transformer, auditService)
+      val OUT = new VariationService(desService, transformationService, transformer, mockCacheRepository, mockTransformationRepository, auditService)
 
       val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
 
@@ -97,6 +102,8 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
     val transformationService = mock[TransformationService]
     val auditService = mock[AuditService]
     val transformer = mock[DeclarationTransformer]
+    val mockCacheRepository = mock[CacheRepository]
+    val mockTransformationRepository = mock[TransformationRepository]
 
     when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful("31415900000"))
 
@@ -111,8 +118,10 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
     ))
 
     when(transformer.transform(any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
+    when(mockCacheRepository.resetCache(any(), any())).thenReturn(Future.successful(Some(Json.obj())))
+    when(mockTransformationRepository.resetCache(any(), any())).thenReturn(Future.successful(Some(Json.obj())))
 
-    val OUT = new VariationService(desService, transformationService, transformer, auditService)
+    val OUT = new VariationService(desService, transformationService, transformer, mockCacheRepository, mockTransformationRepository, auditService)
 
     whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { exception => {
       exception mustBe an[EtmpCacheDataStaleException.type]

@@ -27,6 +27,7 @@ import uk.gov.hmrc.trusts.models.DeclarationForApi
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
+import uk.gov.hmrc.trusts.repositories.{CacheRepository, TransformationRepository}
 import uk.gov.hmrc.trusts.transformers.DeclarationTransformer
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -36,6 +37,8 @@ class VariationService @Inject()(
                                   desService: DesService,
                                   transformationService: TransformationService,
                                   declarationTransformer: DeclarationTransformer,
+                                  cacheRepository: CacheRepository,
+                                  transformationRepository: TransformationRepository,
                                   auditService: AuditService) {
 
   def submitDeclaration(utr: String, internalId: String, declaration: DeclarationForApi)
@@ -50,7 +53,7 @@ class VariationService @Inject()(
               declarationTransformer.transform(response, originalJson, declaration, new DateTime()) match {
                 case JsSuccess(value, _) =>
                   Logger.info(s"[VariationService] successfully transformed json for declaration")
-                  doSubmit(value, internalId)
+                  doSubmit(utr, value, internalId)
                 case JsError(errors) =>
                   Logger.error("Problem transforming data for ETMP submission " + errors.toString())
                   Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
@@ -72,18 +75,18 @@ class VariationService @Inject()(
       fbn <- desService.getTrustInfoFormBundleNo(utr)
     } yield response match {
       case tpr: TrustProcessedResponse if tpr.responseHeader.formBundleNo == fbn =>
-        Logger.info(s"[VariationService][submitDeclareNoChange] returning TrustProcessedResponse")
+        Logger.info(s"[VariationService][submitDeclaration] returning TrustProcessedResponse")
         response.asInstanceOf[TrustProcessedResponse]
       case _: TrustProcessedResponse =>
-        Logger.info(s"[VariationService][submitDeclareNoChange] ETMP cached data in mongo has become stale, rejecting submission")
+        Logger.info(s"[VariationService][submitDeclaration] ETMP cached data in mongo has become stale, rejecting submission")
         throw EtmpCacheDataStaleException
       case _ =>
-        Logger.warn(s"[VariationService][submitDeclareNoChange] Trust was not in a processed state")
+        Logger.warn(s"[VariationService][submitDeclaration] Trust was not in a processed state")
         throw InternalServerErrorException("Submission could not proceed, Trust data was not in a processed state")
     }
   }
 
-  private def doSubmit(value: JsValue, internalId: String)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
+  private def doSubmit(utr: String, value: JsValue, internalId: String)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
 
     auditService.audit(
       TrustAuditing.TRUST_VARIATION_ATTEMPT,
@@ -103,6 +106,8 @@ class VariationService @Inject()(
         Json.toJson(response)
       )
 
+      transformationRepository.resetCache(utr, internalId)
+      cacheRepository.resetCache(utr, internalId)
       response
     }
   }
