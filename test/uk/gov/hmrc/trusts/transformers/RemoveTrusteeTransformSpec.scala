@@ -18,9 +18,12 @@ package uk.gov.hmrc.trusts.transformers
 
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import play.api.libs.json._
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionValues  {
+
+  private val originalTrusteeJson = Json.obj("field1" -> "value1", "field2" -> "value2")
 
   "the remove trustee transformer must" - {
 
@@ -32,7 +35,7 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
 
       val transformedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-remove-trustee-ind.json")
 
-      val transformer = new RemoveTrusteeTransform(endDate = endDate, index = 0)
+      val transformer = new RemoveTrusteeTransform(endDate = endDate, index = 0, originalTrusteeJson)
 
       val result = transformer.applyTransform(cachedJson).get
 
@@ -47,7 +50,7 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
 
       val transformedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-transformed-trustee-at-tail-removed.json")
 
-      val transformer = new RemoveTrusteeTransform(endDate, index = 1)
+      val transformer = new RemoveTrusteeTransform(endDate, index = 1, originalTrusteeJson)
 
       val result = transformer.applyTransform(cachedJson).get
 
@@ -62,20 +65,20 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
 
       val transformedJson = JsonUtils.getJsonValueFromFile("trusts-transformed-trustee-removed-at-index.json")
 
-      val transformer = new RemoveTrusteeTransform(endDate, index = 1)
+      val transformer = new RemoveTrusteeTransform(endDate, index = 1, originalTrusteeJson)
 
       val result = transformer.applyTransform(cachedJson).get
 
       result mustBe transformedJson
     }
 
-    "do not remove any trustees when removing an index which is index out of bounds" in {
+    "dnot remove any trustees when removing an index which is index out of bounds" in {
       val endDate = DateTime.parse("2010-10-15")
 
       // 4 trustees in the list, last index is 3
       val cachedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-multiple-trustees.json")
 
-      val transformer = new RemoveTrusteeTransform(endDate, index = 4)
+      val transformer = new RemoveTrusteeTransform(endDate, index = 4, originalTrusteeJson)
 
       val result = transformer.applyTransform(cachedJson).get
 
@@ -92,13 +95,41 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
       val transformedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-multiple-trustees-removed.json")
 
       // remove trustee individual
-      val firstTrusteeRemoved = new RemoveTrusteeTransform(endDate, index = 0).applyTransform(cachedJson).get
+      val firstTrusteeRemoved = new RemoveTrusteeTransform(endDate, index = 0, originalTrusteeJson).applyTransform(cachedJson).get
 
-      // remove trutee organisation
-      val result = new RemoveTrusteeTransform(endDate, 1).applyTransform(firstTrusteeRemoved).get
+      // remove trustee organisation
+      val result = new RemoveTrusteeTransform(endDate, 1, originalTrusteeJson).applyTransform(firstTrusteeRemoved).get
 
       result mustBe transformedJson
 
+    }
+
+    "re-add the original JSON with its end date at declaration time" in {
+      val originalTrusteeOrgJson = Json.parse(
+        """
+          |{
+          |  "trusteeOrg": {
+          |    "name": "Trustee Org 1",
+          |    "phoneNumber": "0121546546",
+          |    "identification": {
+          |      "utr": "5465416546"
+          |    }
+          |  }
+          |}
+          |""".stripMargin)
+      val endDate = DateTime.parse("2010-10-15")
+
+      val cachedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-multiple-trustees.json")
+
+      val transformedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-multiple-trustees-removed-declared.json")
+
+      // remove trustee organisation
+      val transform = new RemoveTrusteeTransform(endDate, 2, originalTrusteeOrgJson)
+
+      val result = transform.applyTransform(cachedJson).get
+      val declaredResult = transform.applyDeclarationTransform(result).get
+
+      declaredResult mustBe transformedJson
     }
 
   }

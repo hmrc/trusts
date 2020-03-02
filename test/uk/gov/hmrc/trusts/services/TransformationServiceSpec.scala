@@ -25,12 +25,12 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.{JsResult, JsValue}
+import play.api.libs.json.{JsResult, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee}
 import uk.gov.hmrc.trusts.repositories.TransformationRepositoryImpl
-import uk.gov.hmrc.trusts.transformers.{AddTrusteeIndTransform, ComposedDeltaTransform, RemoveTrusteeTransform, AmendLeadTrusteeIndTransform}
+import uk.gov.hmrc.trusts.transformers.{AddTrusteeIndTransform, AmendLeadTrusteeIndTransform, ComposedDeltaTransform, RemoveTrusteeTransform}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
@@ -94,6 +94,8 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
   implicit val hc : HeaderCarrier = HeaderCarrier()
 
+  private val originalJson = Json.obj()
+
   "the transformation service" - {
 
     "must write an amend lead trustee transform to the transformation repository with no existing transforms" in {
@@ -150,7 +152,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
         verify(repository).set("utr",
           "internalId",
-          ComposedDeltaTransform(Seq(RemoveTrusteeTransform(endDate, index = 0))))
+          ComposedDeltaTransform(Seq(RemoveTrusteeTransform(endDate, index = 0, originalJson))))
       }
     }
 
@@ -177,7 +179,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
           "internalId",
           ComposedDeltaTransform(Seq(
             AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo),
-            RemoveTrusteeTransform(endDate, index = 0)
+            RemoveTrusteeTransform(endDate, index = 0, originalJson)
           )))
       }
     }

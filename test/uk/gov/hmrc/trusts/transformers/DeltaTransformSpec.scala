@@ -53,7 +53,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
       val removeTrusteeTransform = RemoveTrusteeTransform(
         endDate = DateTime.parse("2010-01-01"),
-        index = 0
+        index = 0,
+        Json.obj()
       )
 
       val json = Json.parse(

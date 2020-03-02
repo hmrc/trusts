@@ -80,7 +80,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
   }
 
   def addRemoveTrusteeTransformer(utr: String, internalId: String, remove: RemoveTrustee) : Future[Unit] = {
-    addNewTransform(utr, internalId, RemoveTrusteeTransform(remove.endDate, remove.index))
+    addNewTransform(utr, internalId, RemoveTrusteeTransform(remove.endDate, remove.index, Json.obj()))
   }
 
   private def addNewTransform(utr: String, internalId: String, newTransform: DeltaTransform) = {
