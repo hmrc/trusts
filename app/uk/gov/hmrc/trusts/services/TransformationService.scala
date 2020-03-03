@@ -20,6 +20,7 @@ import javax.inject.Inject
 import play.api.Logger
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models.RemoveTrustee
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.InternalServerErrorResponse
@@ -40,7 +41,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
           case JsSuccess(fixed, _) =>
             applyTransformations(utr, internalId, fixed).map {
               case JsSuccess(transformed, _) => TrustProcessedResponse(transformed, response.responseHeader)
-              case JsError(errors) => InternalServerErrorResponse
+              case JsError(_) => InternalServerErrorResponse
             }
 
         }
@@ -95,8 +96,17 @@ class TransformationService @Inject()(repository: TransformationRepository,
     })
   }
 
-  def addRemoveTrusteeTransformer(utr: String, internalId: String, remove: RemoveTrustee) : Future[Unit] = {
-    addNewTransform(utr, internalId, RemoveTrusteeTransform(remove.endDate, remove.index, Json.obj()))
+  def addRemoveTrusteeTransformer(utr: String, internalId: String, remove: RemoveTrustee)(implicit hc: HeaderCarrier) : Future[Unit] = {
+    getTransformedData(utr, internalId).map {
+      case TrustProcessedResponse(transformedJson, _) =>
+        val trusteePath = (__ \ 'details \ 'trust \ 'entities \ 'trustees \ remove.index).json
+        transformedJson.transform(trusteePath.pick) match {
+          case JsSuccess(trusteeJson, _) => addNewTransform(utr, internalId, RemoveTrusteeTransform(remove.endDate, remove.index, trusteeJson))
+          case JsError(_) => Future.failed(InternalServerErrorException(s"Could not pick trustee at index ${remove.index}."))
+        }
+
+      case _ => Future.failed(InternalServerErrorException("Trust is not in processed state."))
+    }
   }
 
   private def addNewTransform(utr: String, internalId: String, newTransform: DeltaTransform) = {

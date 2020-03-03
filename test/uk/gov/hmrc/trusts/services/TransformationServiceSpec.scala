@@ -23,14 +23,13 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
-import play.api.libs.json.{JsResult, JsSuccess, JsValue, Json}
+import play.api.libs.json.{JsResult, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.{AddressType, NameType, RemoveTrustee}
 import uk.gov.hmrc.trusts.repositories.TransformationRepositoryImpl
 import uk.gov.hmrc.trusts.transformers.{AddTrusteeIndTransform, AmendLeadTrusteeIndTransform, ComposedDeltaTransform, RemoveTrusteeTransform}
-import uk.gov.hmrc.trusts.utils.JsonUtils
-import uk.gov.hmrc.trusts.utils.JsonRequests
+import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
 
 import scala.concurrent.Future
 
@@ -95,7 +94,21 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
   private implicit val hc : HeaderCarrier = HeaderCarrier()
 
-  private val originalJson = Json.obj()
+  private val trustee1Json = Json.parse(
+    """
+      |           {
+      |              "trusteeOrg": {
+      |                "lineNo": "1",
+      |                "name": "MyOrg Incorporated",
+      |                "phoneNumber": "+447456788112",
+      |                "email": "a",
+      |                "identification": {
+      |                  "safeId": "2222200000000"
+      |                },
+      |                "entityStart": "2017-02-28"
+      |              }
+      |            }
+      |""".stripMargin)
 
   "the transformation service" - {
 
@@ -134,8 +147,14 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     }
 
     "must write a RemoveTrustee transform to the transformation repository with no existing transforms" in {
+      val response = getTrustResponse.as[GetTrustSuccessResponse]
+      val processedResponse = response.asInstanceOf[TrustProcessedResponse]
+      val desService = mock[DesService]
+
+      when (desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(processedResponse))
+
       val repository = mock[TransformationRepositoryImpl]
-      val service = new TransformationService(repository, mock[DesService], auditService)
+      val service = new TransformationService(repository, desService, auditService)
 
       when(repository.get(any(), any())).thenReturn(Future.successful(None))
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
@@ -144,7 +163,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
       val payload = RemoveTrustee(
         endDate = endDate,
-        index = 0
+        index = 1
       )
 
       val result = service.addRemoveTrusteeTransformer("utr", "internalId", payload)
@@ -153,13 +172,19 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
         verify(repository).set("utr",
           "internalId",
-          ComposedDeltaTransform(Seq(RemoveTrusteeTransform(endDate, index = 0, originalJson))))
+          ComposedDeltaTransform(Seq(RemoveTrusteeTransform(endDate, index = 1, trustee1Json))))
       }
     }
 
     "must write a RemoveTrustee transform to the transformation repository with existing transforms" in {
+      val response = getTrustResponse.as[GetTrustSuccessResponse]
+      val processedResponse = response.asInstanceOf[TrustProcessedResponse]
+      val desService = mock[DesService]
+
+      when (desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(processedResponse))
+
       val repository = mock[TransformationRepositoryImpl]
-      val service = new TransformationService(repository, mock[DesService], auditService)
+      val service = new TransformationService(repository, desService, auditService)
 
       val existingTransforms = Seq(AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo))
       when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
@@ -169,7 +194,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
       val payload = RemoveTrustee(
         endDate = endDate,
-        index = 0
+        index = 1
       )
 
       val result = service.addRemoveTrusteeTransformer("utr", "internalId", payload)
@@ -180,7 +205,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
           "internalId",
           ComposedDeltaTransform(Seq(
             AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo),
-            RemoveTrusteeTransform(endDate, index = 0, originalJson)
+            RemoveTrusteeTransform(endDate, index = 1, trustee1Json)
           )))
       }
     }

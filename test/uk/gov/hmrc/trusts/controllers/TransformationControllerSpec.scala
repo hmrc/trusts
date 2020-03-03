@@ -16,10 +16,8 @@
 
 package uk.gov.hmrc.trusts.controllers
 
-import java.time.LocalDate
-
 import org.joda.time.DateTime
-import org.mockito.Matchers._
+import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
@@ -28,9 +26,10 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee}
 import uk.gov.hmrc.trusts.services.TransformationService
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -133,6 +132,8 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
 
     "must add a 'remove trustee' transform" in {
 
+      implicit val hc: HeaderCarrier = HeaderCarrier()
+
       val transformationService = mock[TransformationService]
       val controller = new TransformationController(identifierAction, transformationService)
 
@@ -140,7 +141,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
         endDate = DateTime.parse("2020-01-10"), index = 0
       )
 
-      when(transformationService.addRemoveTrusteeTransformer(any(), any(), any()))
+      when(transformationService.addRemoveTrusteeTransformer(any(), any(), any())(any()))
         .thenReturn(Future.successful(()))
 
       val request = FakeRequest("DELETE", "path")
@@ -150,7 +151,11 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
       val result = controller.removeTrustee("aUTR").apply(request)
 
       status(result) mustBe OK
-      verify(transformationService).addRemoveTrusteeTransformer("aUTR", "id", payload)
+      verify(transformationService).addRemoveTrusteeTransformer(
+        equalTo("aUTR"),
+        equalTo("id"),
+        equalTo(payload))(any[HeaderCarrier])
+
     }
   }
 }
