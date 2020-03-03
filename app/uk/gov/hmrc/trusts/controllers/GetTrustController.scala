@@ -104,39 +104,16 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       case _ => Forbidden
     }
 
-  private def doGet(utr: String, applyTransformations: Boolean)(handleResult: GetTrustSuccessResponse => Result) = {
+  private def doGet(utr: String, applyTransformations: Boolean)(handleResult: GetTrustSuccessResponse => Result): Action[AnyContent] = {
     (ValidateUTRAction(utr) andThen identify).async {
       implicit request =>
 
-        desService.getTrustInfo(utr, request.identifier).flatMap {
+        val data =
+          if (applyTransformations) transformationService.getTransformedData(utr, request.identifier)
+          else desService.getTrustInfo(utr, request.identifier)
 
-          case response: TrustProcessedResponse if applyTransformations =>
-            transformationService.populateLeadTrusteeAddress(response.getTrust) match {
-              case JsSuccess(transformedJson, _) =>
-                transformationService.applyTransformations(utr, request.identifier, transformedJson).map {
-                  case JsSuccess(transformedJson, _) =>
-                    val transformedResponse = TrustProcessedResponse(transformedJson, response.responseHeader)
-
-                    auditService.audit(
-                      event = TrustAuditing.GET_TRUST,
-                      request = Json.obj("utr" -> utr),
-                      internalId = request.identifier,
-                      response = Json.toJson(transformedResponse)
-                    )
-
-                    handleResult(transformedResponse)
-                  case JsError(errors) =>
-                    logger.error("Failed to populate lead trustee address", errors)
-                    InternalServerError
-                }
-
-              case JsError(errors) =>
-                logger.error("Failed to transform trust info", errors)
-                Future.successful(InternalServerError)
-            }
-
+        data.flatMap {
           case response: GetTrustSuccessResponse =>
-
             auditService.audit(
               event = TrustAuditing.GET_TRUST,
               request = Json.obj("utr" -> utr),
