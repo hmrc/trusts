@@ -43,7 +43,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
               case JsSuccess(transformed, _) => TrustProcessedResponse(transformed, response.responseHeader)
               case JsError(_) => InternalServerErrorResponse
             }
-
+          case JsError(_) => Future.successful(InternalServerErrorResponse)
         }
       case response => Future.successful(response)
     }
