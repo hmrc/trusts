@@ -18,11 +18,11 @@ package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
 import play.api.Logger
-import play.api.libs.json.{JsPath, JsResult, JsSuccess, JsValue, Json, __}
+import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.RemoveTrustee
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeType, DisplayTrustTrusteeType}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeType, DisplayTrustTrusteeType, GetTrustResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.repositories.TransformationRepository
 import uk.gov.hmrc.trusts.transformers._
 
@@ -30,7 +30,17 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TransformationService @Inject()(repository: TransformationRepository,
+                                      desService: DesService,
                                       auditService: AuditService){
+  def getTransformedData(utr: String, internalId: String)(implicit hc : HeaderCarrier): Future[GetTrustResponse] = {
+    desService.getTrustInfo(utr, internalId).map {
+      case response: TrustProcessedResponse =>
+        populateLeadTrusteeAddress(response.getTrust) match {
+          case JsSuccess(data, _) => TrustProcessedResponse(data, response.responseHeader)
+        }
+      case response => response
+    }
+  }
 
   def applyTransformations(utr: String, internalId: String, json: JsValue)(implicit hc : HeaderCarrier): Future[JsResult[JsValue]] = {
     repository.get(utr, internalId).map {
