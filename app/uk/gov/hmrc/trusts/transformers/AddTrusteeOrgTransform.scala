@@ -46,4 +46,6 @@ case class AddTrusteeOrgTransform(trustee: DisplayTrustTrusteeOrgType) extends D
   }
 }
 
-
+object AddTrusteeOrgTransform {
+  implicit val format: Format[AddTrusteeOrgTransform] = Json.format[AddTrusteeOrgTransform]
+}
