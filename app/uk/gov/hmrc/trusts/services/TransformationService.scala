@@ -49,7 +49,14 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
-  def applyTransformations(utr: String, internalId: String, json: JsValue)(implicit hc : HeaderCarrier): Future[JsResult[JsValue]] = {
+  private def applyTransformations(utr: String, internalId: String, json: JsValue)(implicit hc : HeaderCarrier): Future[JsResult[JsValue]] = {
+    repository.get(utr, internalId).map {
+      case None => JsSuccess(json)
+      case Some(transformations) => transformations.applyTransform(json)
+    }
+  }
+
+  def applyDeclarationTransformations(utr: String, internalId: String, json: JsValue)(implicit hc : HeaderCarrier): Future[JsResult[JsValue]] = {
     repository.get(utr, internalId).map {
       case None =>
         Logger.info(s"[TransformationService] no transformations to apply")
@@ -67,7 +74,10 @@ class TransformationService @Inject()(repository: TransformationRepository,
         )
 
         Logger.info(s"[TransformationService] applying transformations")
-        transformations.applyTransform(json)
+        transformations.applyTransform(json) match {
+          case JsSuccess(json, _) => transformations.applyDeclarationTransform(json)
+          case e => e
+        }
     }
   }
 

@@ -47,7 +47,7 @@ class VariationService @Inject()(
     getCachedTrustData(utr, internalId).flatMap { originalResponse: TrustProcessedResponse =>
       transformationService.populateLeadTrusteeAddress(originalResponse.getTrust) match {
         case JsSuccess(originalJson, _) =>
-          transformationService.applyTransformations(utr, internalId, originalJson).flatMap {
+          transformationService.applyDeclarationTransformations(utr, internalId, originalJson).flatMap {
             case JsSuccess(transformedJson, _) =>
               val response = TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
               declarationTransformer.transform(response, originalJson, declaration, new DateTime()) match {

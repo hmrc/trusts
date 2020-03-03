@@ -263,7 +263,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-before.json")
       val afterJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-after-ind.json")
 
-      val result: Future[JsResult[JsValue]] = service.applyTransformations("utr", "internalId", beforeJson)
+      val result: Future[JsResult[JsValue]] = service.applyDeclarationTransformations("utr", "internalId", beforeJson)
 
       whenReady(result) {
         r => r.get mustEqual afterJson
@@ -278,7 +278,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-before.json")
 
-      val result: Future[JsResult[JsValue]] = service.applyTransformations("utr", "internalId", beforeJson)
+      val result: Future[JsResult[JsValue]] = service.applyDeclarationTransformations("utr", "internalId", beforeJson)
 
       whenReady(result) {
         r => r.get mustEqual beforeJson
