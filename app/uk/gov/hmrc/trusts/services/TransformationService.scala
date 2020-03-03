@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models.RemoveTrustee
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.InternalServerErrorResponse
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.TransformationErrorResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeType, DisplayTrustTrusteeType, GetTrustResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.repositories.TransformationRepository
 import uk.gov.hmrc.trusts.transformers._
@@ -41,9 +41,9 @@ class TransformationService @Inject()(repository: TransformationRepository,
           case JsSuccess(fixed, _) =>
             applyTransformations(utr, internalId, fixed).map {
               case JsSuccess(transformed, _) => TrustProcessedResponse(transformed, response.responseHeader)
-              case JsError(_) => InternalServerErrorResponse
+              case JsError(errors) => TransformationErrorResponse(errors.toString)
             }
-          case JsError(_) => Future.successful(InternalServerErrorResponse)
+          case JsError(errors) => Future.successful(TransformationErrorResponse(errors.toString))
         }
       case response => Future.successful(response)
     }
