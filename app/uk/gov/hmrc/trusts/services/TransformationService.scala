@@ -22,6 +22,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.RemoveTrustee
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.InternalServerErrorResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeType, DisplayTrustTrusteeType, GetTrustResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.repositories.TransformationRepository
 import uk.gov.hmrc.trusts.transformers._
@@ -33,12 +34,17 @@ class TransformationService @Inject()(repository: TransformationRepository,
                                       desService: DesService,
                                       auditService: AuditService){
   def getTransformedData(utr: String, internalId: String)(implicit hc : HeaderCarrier): Future[GetTrustResponse] = {
-    desService.getTrustInfo(utr, internalId).map {
+    desService.getTrustInfo(utr, internalId).flatMap {
       case response: TrustProcessedResponse =>
         populateLeadTrusteeAddress(response.getTrust) match {
-          case JsSuccess(data, _) => TrustProcessedResponse(data, response.responseHeader)
+          case JsSuccess(fixed, _) =>
+            applyTransformations(utr, internalId, fixed).map {
+              case JsSuccess(transformed, _) => TrustProcessedResponse(transformed, response.responseHeader)
+              case JsError(errors) => InternalServerErrorResponse
+            }
+
         }
-      case response => response
+      case response => Future.successful(response)
     }
   }
 
