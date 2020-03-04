@@ -72,7 +72,7 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
       result mustBe transformedJson
     }
 
-    "dnot remove any trustees when removing an index which is index out of bounds" in {
+    "don't remove any trustees when removing an index which is index out of bounds" in {
       val endDate = DateTime.parse("2010-10-15")
 
       // 4 trustees in the list, last index is 3
@@ -104,8 +104,8 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
 
     }
 
-    "re-add the original JSON with its end date at declaration time" in {
-      val originalTrusteeOrgJson = Json.parse(
+    "re-add the original JSON with its end date at declaration time if has start date" in {
+      val originalTrusteeOrg1Json = Json.parse(
         """
           |{
           |  "trusteeOrg": {
@@ -118,19 +118,38 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
           |  }
           |}
           |""".stripMargin)
+
+      val originalTrusteeOrg2Json = Json.parse(
+        """
+          |{
+          |  "trusteeOrg": {
+          |    "name": "Trustee Org 2",
+          |    "phoneNumber": "0121546546",
+          |    "identification": {
+          |      "utr": "5465416546"
+          |    }
+          |  }
+          |}
+          |
+          |""".stripMargin)
+
       val endDate = DateTime.parse("2010-10-15")
 
       val cachedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-multiple-trustees.json")
 
       val transformedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-multiple-trustees-removed-declared.json")
 
-      // remove trustee organisation
-      val transform = new RemoveTrusteeTransform(endDate, 2, originalTrusteeOrgJson)
+      val transform1 = new RemoveTrusteeTransform(endDate, 2, originalTrusteeOrg1Json)
+      val transform2 = new RemoveTrusteeTransform(endDate, 2, originalTrusteeOrg2Json)
 
-      val result = transform.applyTransform(cachedJson).get
-      val declaredResult = transform.applyDeclarationTransform(result).get
+      val declaredResult = for {
+        result <- transform1.applyTransform(cachedJson)
+        result <- transform2.applyTransform(result)
+        result <- transform1.applyDeclarationTransform(result)
+        result <- transform2.applyDeclarationTransform(result)
+      } yield result
 
-      declaredResult mustBe transformedJson
+      declaredResult.get mustBe transformedJson
     }
 
   }

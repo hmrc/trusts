@@ -47,21 +47,29 @@ case class RemoveTrusteeTransform(endDate: DateTime, index: Int, originalTrustee
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    originalTrusteeJson.transform(addEntityEnd(originalTrusteeJson, endDate)) match {
-      case JsSuccess(endedTrusteeJson, _) =>
-        val trustees: Reads[JsObject] =
-          trusteePath.update( of[JsArray]
-            .map {
-              trustees => trustees :+ endedTrusteeJson
-            }
-          )
-        input.transform(trustees)
+    if (hasEntityStartDate(originalTrusteeJson)) {
+      originalTrusteeJson.transform(addEntityEnd(originalTrusteeJson, endDate)) match {
+        case JsSuccess(endedTrusteeJson, _) =>
+          val trustees: Reads[JsObject] =
+            trusteePath.update(of[JsArray]
+              .map {
+                trustees => trustees :+ endedTrusteeJson
+              }
+            )
+          input.transform(trustees)
 
-      case e: JsError => e
+        case e: JsError => e
+      }
     }
+    else JsSuccess(input)
   }
 
-  private def addEntityEnd(originalJson: JsValue, endDate: DateTime) = {
+  private def hasEntityStartDate(json: JsValue): Boolean = {
+    json.transform((__ \ 'trusteeInd \ 'entityStart).json.pick).isSuccess |
+      json.transform((__ \ 'trusteeOrg \ 'entityStart).json.pick).isSuccess
+  }
+
+  private def addEntityEnd(originalJson: JsValue, endDate: DateTime): Reads[JsObject] = {
     val entityEndPath =
       if (originalJson.transform((__ \ 'trusteeInd).json.pick).isSuccess)
         (__ \ 'trusteeInd \ 'entityEnd).json

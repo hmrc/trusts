@@ -176,15 +176,6 @@
           },
           {
             "trusteeOrg": {
-              "name": "Trustee Org 2",
-              "phoneNumber": "0121546546",
-              "identification": {
-                "utr": "5465416546"
-              }
-            }
-          },
-          {
-            "trusteeOrg": {
               "name": "Trustee Org 1",
               "phoneNumber": "0121546546",
               "identification": {
