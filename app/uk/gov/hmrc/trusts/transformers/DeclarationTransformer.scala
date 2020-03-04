@@ -41,13 +41,16 @@ class DeclarationTransformer {
         fixLeadTrusteeAddress(responseJson, pathToLeadTrustees) andThen
         convertLeadTrustee(responseJson) andThen
         addPreviousLeadTrustee(responseJson, originalJson, date) andThen
+        pruneEmptyTrustees(responseJson) andThen
         putNewValue(__ \ 'reqHeader \ 'formBundleNo, JsString(responseHeader.formBundleNo)) andThen
         addDeclaration(declarationForApi, responseJson) andThen
         addAgentIfDefined(declarationForApi.agentDetails)
     )
   }
 
-  private val pathToLeadTrustees: JsPath = __ \ 'details \ 'trust \ 'entities \ 'leadTrustees
+  private val pathToEntities: JsPath = __ \ 'details \ 'trust \ 'entities
+  private val pathToLeadTrustees: JsPath =  pathToEntities \ 'leadTrustees
+  private val pathToTrustees: JsPath = pathToEntities \ 'trustees
   private val pathToLeadTrusteeAddress = pathToLeadTrustees \ 'identification \ 'address
   private val pathToLeadTrusteePhoneNumber = pathToLeadTrustees \ 'phoneNumber
   private val pathToLeadTrusteeCountry = pathToLeadTrusteeAddress \ 'country
@@ -109,7 +112,7 @@ class DeclarationTransformer {
             case e: JsError => Reads(_ => e)
           }
 
-      case _ => (__).json.pick[JsObject]
+      case _ => __.json.pick[JsObject]
     }
   }
 
@@ -117,7 +120,7 @@ class DeclarationTransformer {
     .map{ a => Json.arr(Json.obj(trusteeField(json) -> a )) })
 
   private def putNewValue(path: JsPath, value: JsValue ): Reads[JsObject] =
-    (__).json.update(path.json.put(value))
+    __.json.update(path.json.put(value))
 
   private def declarationAddress(agentDetails: Option[AgentDetails], responseJson: JsValue) =
     if (agentDetails.isDefined)
@@ -128,6 +131,14 @@ class DeclarationTransformer {
         case JsError(_) => ???
       }
 
+  private def pruneEmptyTrustees(responseJson: JsValue) = {
+    val pickTrusteesArray = pathToTrustees.json.pick[JsArray]
+    responseJson.transform(pickTrusteesArray) match {
+      case JsSuccess(JsArray(Nil), _) => pathToTrustees.json.prune
+      case _ => __.json.pick[JsObject]
+    }
+  }
+
   private def addDeclaration(declarationForApi: DeclarationForApi, responseJson: JsValue) = {
     val declarationToSend = Declaration(
       declarationForApi.declaration.name,
@@ -137,11 +148,11 @@ class DeclarationTransformer {
   }
 
   private def addAgentIfDefined(agentDetails: Option[AgentDetails]) = if (agentDetails.isDefined) {
-    (__).json.update(
+    __.json.update(
       (__ \ 'agentDetails).json.put(Json.toJson(agentDetails.get))
     )
   } else {
-    (__).json.pick[JsObject]
+    __.json.pick[JsObject]
   }
 
 }
