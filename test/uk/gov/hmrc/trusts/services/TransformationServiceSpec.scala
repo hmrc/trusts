@@ -281,7 +281,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-before.json")
-      val afterJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-after-ind.json")
+      val afterJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-after-ind-and-remove.json")
 
       val result: Future[JsResult[JsValue]] = service.applyDeclarationTransformations("utr", "internalId", beforeJson)
 

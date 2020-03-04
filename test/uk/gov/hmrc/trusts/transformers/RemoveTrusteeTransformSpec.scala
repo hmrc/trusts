@@ -113,7 +113,8 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
           |    "phoneNumber": "0121546546",
           |    "identification": {
           |      "utr": "5465416546"
-          |    }
+          |    },
+          |    "entityStart":"1998-02-12"
           |  }
           |}
           |""".stripMargin)

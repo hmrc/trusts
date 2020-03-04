@@ -3,15 +3,32 @@
     "trust":{
       "entities":{
         "leadTrustees":{
-          "name":"newName",
+          "name":{
+            "firstName":"newFirstName",
+            "middleName":"newMiddleName",
+            "lastName":"newLastName"
+          },
+          "dateOfBirth": "1965-02-10",
           "phoneNumber":"newPhone",
           "email":"newEmail",
           "identification":{
-            "utr":"newUtr"
+            "nino":"newNino"
           },
           "entityStart":"1998-02-12"
         },
         "trustees": [
+          {
+            "trusteeOrg": {
+              "lineNo": "1",
+              "name": "MyOrg Incorporated",
+              "phoneNumber": "+447456788112",
+              "email": "a",
+              "identification": {
+                "safeId": "2222200000000"
+              },
+              "entityStart": "2017-02-28"
+            }
+          },
           {
             "trusteeInd": {
               "lineNo": "1",
@@ -26,19 +43,8 @@
                 "safeId": "2222200000000"
               },
               "phoneNumber": "+447456788112",
-              "entityStart": "2017-02-28"
-            }
-          },
-          {
-            "trusteeOrg": {
-              "lineNo": "1",
-              "name": "MyOrg Incorporated",
-              "phoneNumber": "+447456788112",
-              "email": "a",
-              "identification": {
-                "safeId": "2222200000000"
-              },
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "entityEnd": "2019-12-21"
             }
           }
         ]
