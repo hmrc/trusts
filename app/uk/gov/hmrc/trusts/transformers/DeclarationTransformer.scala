@@ -42,12 +42,15 @@ class DeclarationTransformer {
         convertLeadTrustee(responseJson) andThen
         addPreviousLeadTrustee(responseJson, originalJson, date) andThen
         putNewValue(__ \ 'reqHeader \ 'formBundleNo, JsString(responseHeader.formBundleNo)) andThen
+        pruneEmptyTrustees(responseJson) andThen
         addDeclaration(declarationForApi, responseJson) andThen
         addAgentIfDefined(declarationForApi.agentDetails)
     )
   }
 
-  private val pathToLeadTrustees: JsPath = __ \ 'details \ 'trust \ 'entities \ 'leadTrustees
+  private val pathToEntities: JsPath = __ \ 'details \ 'trust \ 'entities
+  private val pathToLeadTrustees: JsPath =  pathToEntities \ 'leadTrustees
+  private val pathToTrustees: JsPath = pathToEntities \ 'trustees
   private val pathToLeadTrusteeAddress = pathToLeadTrustees \ 'identification \ 'address
   private val pathToLeadTrusteePhoneNumber = pathToLeadTrustees \ 'phoneNumber
   private val pathToLeadTrusteeCountry = pathToLeadTrusteeAddress \ 'country
@@ -127,6 +130,14 @@ class DeclarationTransformer {
         case JsSuccess(value, _) => value.as[AddressType]
         case JsError(_) => ???
       }
+
+  private def pruneEmptyTrustees(responseJson: JsValue) = {
+    val pickTrusteesArray = pathToTrustees.json.pick[JsArray]
+    responseJson.transform(pickTrusteesArray) match {
+      case JsSuccess(JsArray(Nil), _) => pathToTrustees.json.prune
+      case _ => __.json.pick
+    }
+  }
 
   private def addDeclaration(declarationForApi: DeclarationForApi, responseJson: JsValue) = {
     val declarationToSend = Declaration(
