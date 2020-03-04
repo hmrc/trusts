@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
 import play.api.Logger
-import play.api.libs.json.{JsPath, JsResult, JsSuccess, JsValue, Json, __}
+import play.api.libs.json.{JsObject, JsPath, JsResult, JsSuccess, JsValue, Json, __}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.RemoveTrustee
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
@@ -92,5 +92,9 @@ class TransformationService @Inject()(repository: TransformationRepository,
         composedTransform :+ newTransform
 
     }.flatMap(newTransforms => repository.set(utr, internalId, newTransforms).map(_ => ()))
+  }
+
+  def removeAllTransformations(utr: String, internalId: String): Future[Option[JsObject]] = {
+    repository.resetCache(utr, internalId)
   }
 }

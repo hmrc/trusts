@@ -40,7 +40,7 @@ class DesServiceSpec extends BaseSpec {
     val mockConnector: DesConnector = mock[DesConnector]
     val mockRepository: CacheRepositoryImpl = mock[CacheRepositoryImpl]
     when(mockRepository.get(any[String], any[String])).thenReturn(Future.successful(None))
-
+    when(mockRepository.resetCache(any[String], any[String])).thenReturn(Future.successful(None))
     val myId = "myId"
 
     val SUT = new DesService(mockConnector, mockRepository)
@@ -313,6 +313,7 @@ class DesServiceSpec extends BaseSpec {
         val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
 
         when(mockRepository.get(any[String], any[String])).thenReturn(Future.successful(None))
+        when(mockRepository.resetCache(any[String], any[String])).thenReturn(Future.successful(None))
         when(mockConnector.getTrustInfo(any())(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))))
 

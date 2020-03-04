@@ -32,9 +32,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
-class DesService @Inject()(val desConnector: DesConnector, val repository: CacheRepository)  {
+class DesService @Inject()(val desConnector: DesConnector, val repository: CacheRepository) {
 
-  def getTrustInfoFormBundleNo(utr: String)(implicit hc:HeaderCarrier): Future[String] =
+  def getTrustInfoFormBundleNo(utr: String)(implicit hc: HeaderCarrier): Future[String] =
     desConnector.getTrustInfo(utr).map {
       case response: GetTrustSuccessResponse => response.responseHeader.formBundleNo
       case response =>
@@ -44,22 +44,22 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Cache
     }
 
   def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest)
-                                 (implicit hc: HeaderCarrier): Future[ExistingCheckResponse] = {
+                        (implicit hc: HeaderCarrier): Future[ExistingCheckResponse] = {
     desConnector.checkExistingTrust(existingTrustCheckRequest)
   }
 
   def checkExistingEstate(existingEstateCheckRequest: ExistingCheckRequest)
-                                 (implicit hc: HeaderCarrier): Future[ExistingCheckResponse] = {
+                         (implicit hc: HeaderCarrier): Future[ExistingCheckResponse] = {
     desConnector.checkExistingEstate(existingEstateCheckRequest)
   }
 
   def registerTrust(registration: Registration)
-                            (implicit hc: HeaderCarrier): Future[RegistrationResponse] = {
+                   (implicit hc: HeaderCarrier): Future[RegistrationResponse] = {
     desConnector.registerTrust(registration)
   }
 
   def registerEstate(estateRegistration: EstateRegistration)
-                            (implicit hc: HeaderCarrier): Future[RegistrationResponse] = {
+                    (implicit hc: HeaderCarrier): Future[RegistrationResponse] = {
     desConnector.registerEstate(estateRegistration)
   }
 
@@ -67,15 +67,18 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Cache
     desConnector.getSubscriptionId(trn)
   }
 
-  private def refreshCacheAndGetTrustInfo(utr: String, internalId: String)(implicit hc: HeaderCarrier) = {
-      Logger.debug("Retrieving Trust Info from DES")
-      Logger.info(s"[DesService][refreshCacheAndGetTrustInfo] refreshing cache")
+  def refreshCacheAndGetTrustInfo(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
+    Logger.debug("Retrieving Trust Info from DES")
+    Logger.info(s"[DesService][refreshCacheAndGetTrustInfo] refreshing cache")
+
+    repository.resetCache(utr, internalId).flatMap { _ =>
       desConnector.getTrustInfo(utr).map {
-        case response:TrustProcessedResponse =>
+        case response: TrustProcessedResponse =>
           repository.set(utr, internalId, Json.toJson(response)(TrustProcessedResponse.mongoWrites))
           response
         case x => x
       }
+    }
   }
 
   def getTrustInfo(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {

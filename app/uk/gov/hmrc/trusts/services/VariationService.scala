@@ -95,7 +95,7 @@ class VariationService @Inject()(
       Json.toJson(Json.obj())
     )
 
-    desService.trustVariation(value) flatMap { response =>
+    desService.trustVariation(value) map { response =>
 
       Logger.info(s"[VariationService][doSubmit] variation submitted")
 
@@ -106,10 +106,6 @@ class VariationService @Inject()(
         Json.toJson(response)
       )
 
-      for {
-        _ <- transformationRepository.resetCache(utr, internalId)
-        _ <- cacheRepository.resetCache(utr, internalId)
-      } yield
       response
     }
   }
