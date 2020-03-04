@@ -41,8 +41,8 @@ class DeclarationTransformer {
         fixLeadTrusteeAddress(responseJson, pathToLeadTrustees) andThen
         convertLeadTrustee(responseJson) andThen
         addPreviousLeadTrustee(responseJson, originalJson, date) andThen
-        putNewValue(__ \ 'reqHeader \ 'formBundleNo, JsString(responseHeader.formBundleNo)) andThen
         pruneEmptyTrustees(responseJson) andThen
+        putNewValue(__ \ 'reqHeader \ 'formBundleNo, JsString(responseHeader.formBundleNo)) andThen
         addDeclaration(declarationForApi, responseJson) andThen
         addAgentIfDefined(declarationForApi.agentDetails)
     )
@@ -112,7 +112,7 @@ class DeclarationTransformer {
             case e: JsError => Reads(_ => e)
           }
 
-      case _ => (__).json.pick[JsObject]
+      case _ => __.json.pick[JsObject]
     }
   }
 
@@ -120,7 +120,7 @@ class DeclarationTransformer {
     .map{ a => Json.arr(Json.obj(trusteeField(json) -> a )) })
 
   private def putNewValue(path: JsPath, value: JsValue ): Reads[JsObject] =
-    (__).json.update(path.json.put(value))
+    __.json.update(path.json.put(value))
 
   private def declarationAddress(agentDetails: Option[AgentDetails], responseJson: JsValue) =
     if (agentDetails.isDefined)
@@ -135,7 +135,7 @@ class DeclarationTransformer {
     val pickTrusteesArray = pathToTrustees.json.pick[JsArray]
     responseJson.transform(pickTrusteesArray) match {
       case JsSuccess(JsArray(Nil), _) => pathToTrustees.json.prune
-      case _ => __.json.pick
+      case _ => __.json.pick[JsObject]
     }
   }
 
@@ -148,11 +148,11 @@ class DeclarationTransformer {
   }
 
   private def addAgentIfDefined(agentDetails: Option[AgentDetails]) = if (agentDetails.isDefined) {
-    (__).json.update(
+    __.json.update(
       (__ \ 'agentDetails).json.put(Json.toJson(agentDetails.get))
     )
   } else {
-    (__).json.pick[JsObject]
+    __.json.pick[JsObject]
   }
 
 }
