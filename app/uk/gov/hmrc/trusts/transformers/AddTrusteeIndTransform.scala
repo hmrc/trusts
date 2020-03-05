@@ -40,6 +40,7 @@ case class AddTrusteeIndTransform(trustee: DisplayTrustTrusteeIndividualType) ex
           throw new Exception("Adding a trustee would exceed the maximum allowed amount of 25")
         }
       case JsError(errors) =>
+        // TODO, this should be a put as the document may not have the trustees array, but we want to add them in (only started with a lead trustee)
         throw JsResultException(errors)
     }
   }
