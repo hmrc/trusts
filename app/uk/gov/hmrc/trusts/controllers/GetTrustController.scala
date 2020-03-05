@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsError, JsPath, JsSuccess, Json}
+import play.api.libs.json.{JsArray, JsError, JsPath, JsSuccess, Json}
 import play.api.mvc.{Action, AnyContent, Result}
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUTRAction}
@@ -98,7 +98,10 @@ class GetTrustController @Inject()(identify: IdentifierAction,
         val pick = (JsPath \ 'details \ 'trust \ 'entities \ 'trustees).json.pick
 
         processed.getTrust.transform(pick).fold(
-          _ => InternalServerError,
+          _ => {
+            val nilResponse = Json.obj("trustees" -> JsArray())
+            Ok(Json.toJson(nilResponse))
+          },
           trustees => {
 
             val response = Json.obj("trustees" -> trustees.as[List[DisplayTrustTrusteeType]])
