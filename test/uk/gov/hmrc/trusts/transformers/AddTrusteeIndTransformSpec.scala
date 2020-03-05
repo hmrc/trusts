@@ -28,7 +28,7 @@ class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionV
 
     "add a new individual trustee" in {
 
-      val t = DisplayTrustTrusteeIndividualType(None,
+      val trustee = DisplayTrustTrusteeIndividualType(None,
         None,
         NameType("New", None, "Trustee"),
         Some(DateTime.parse("2000-01-01")),
@@ -40,7 +40,7 @@ class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionV
 
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-add-ind-trustee.json")
 
-      val transformer = new AddTrusteeIndTransform(t)
+      val transformer = new AddTrusteeIndTransform(trustee, alreadyAdded = 0)
 
       val result = transformer.applyTransform(trustJson).get
 
@@ -49,7 +49,7 @@ class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionV
 
     "fail to add a new individual trustee when there are 25 or more existing trustees" in {
 
-      val t = DisplayTrustTrusteeIndividualType(None,
+      val trustee = DisplayTrustTrusteeIndividualType(None,
         None,
         NameType("New", None, "Trustee"),
         Some(DateTime.parse("2000-01-01")),
@@ -59,12 +59,31 @@ class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionV
 
       val json = JsonUtils.getJsonValueFromFile("trusts-etmp-max-trustees.json")
 
-      val transformer = new AddTrusteeIndTransform(t)
+      val transformer = new AddTrusteeIndTransform(trustee, alreadyAdded = 0)
 
       val thrown = intercept[Exception] (transformer.applyTransform(json).get)
 
       thrown.getMessage mustBe "Adding a trustee would exceed the maximum allowed amount of 25"
 
+    }
+
+    "fail to add a new individual trustee when there are 25 or more existing trustees or existing AddTrustee transformers" in {
+
+      val trustee = DisplayTrustTrusteeIndividualType(None,
+        None,
+        NameType("New", None, "Trustee"),
+        Some(DateTime.parse("2000-01-01")),
+        Some("phoneNumber"),
+        Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
+        DateTime.parse("1990-10-10"))
+
+      val json = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
+
+      val transformer = new AddTrusteeIndTransform(trustee, alreadyAdded = 24)
+
+      val thrown = intercept[Exception] (transformer.applyTransform(json).get)
+
+      thrown.getMessage mustBe "Adding a trustee would exceed the maximum allowed amount of 25"
     }
   }
 }

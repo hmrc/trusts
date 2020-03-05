@@ -60,7 +60,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |                            "nino" : "nino"
           |                        },
           |                        "entityStart" : "2000-01-01"
-          |                    }
+          |                    },
+          |                    "alreadyAdded":0
           |                }
           |            },
           |            {
@@ -94,7 +95,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
             Some("phoneNumber"),
             Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
             DateTime.parse("2000-01-01")
-          )),
+          ), alreadyAdded = 0),
         RemoveTrusteeTransform(
             endDate = DateTime.parse("2010-01-01"),
             index = 0

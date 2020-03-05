@@ -30,9 +30,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TransformationService @Inject()(repository: TransformationRepository,
-                                      auditService: AuditService){
+                                      auditService: AuditService) {
 
-  def applyTransformations(utr: String, internalId: String, json: JsValue)(implicit hc : HeaderCarrier): Future[JsResult[JsValue]] = {
+  def applyTransformations(utr: String, internalId: String, json: JsValue)(implicit hc: HeaderCarrier): Future[JsResult[JsValue]] = {
     repository.get(utr, internalId).map {
       case None =>
         Logger.info(s"[TransformationService] no transformations to apply")
@@ -74,13 +74,15 @@ class TransformationService @Inject()(repository: TransformationRepository,
   }
 
   def addAddTrusteeTransformer(utr: String, internalId: String, newTrustee: DisplayTrustTrusteeType): Future[Unit] = {
-    addNewTransform(utr, internalId, newTrustee match {
-      case DisplayTrustTrusteeType(Some(trusteeInd), None) => AddTrusteeIndTransform(trusteeInd)
-      case DisplayTrustTrusteeType(None, Some(trusteeOrg)) => AddTrusteeOrgTransform(trusteeOrg)
-    })
+    countTrusteeTransformers(utr, internalId).map { alreadyAddedTrustees =>
+      addNewTransform(utr, internalId, newTrustee match {
+        case DisplayTrustTrusteeType(Some(trusteeInd), None) => AddTrusteeIndTransform(trusteeInd, alreadyAddedTrustees)
+        case DisplayTrustTrusteeType(None, Some(trusteeOrg)) => AddTrusteeOrgTransform(trusteeOrg, alreadyAddedTrustees)
+      })
+    }
   }
 
-  def addRemoveTrusteeTransformer(utr: String, internalId: String, remove: RemoveTrustee) : Future[Unit] = {
+  def addRemoveTrusteeTransformer(utr: String, internalId: String, remove: RemoveTrustee): Future[Unit] = {
     addNewTransform(utr, internalId, RemoveTrusteeTransform(remove.endDate, remove.index))
   }
 
@@ -97,5 +99,22 @@ class TransformationService @Inject()(repository: TransformationRepository,
 
   def removeAllTransformations(utr: String, internalId: String): Future[Option[JsObject]] = {
     repository.resetCache(utr, internalId)
+  }
+
+  private def countTrusteeTransformers(utr: String, internalId: String): Future[Int] = {
+    repository.get(utr, internalId).map {
+      case Some(composedTransform) =>
+
+        val addTrusteeCount = composedTransform.deltaTransforms.collect {
+        case addTrustees@(_: AddTrusteeIndTransform | _: AddTrusteeOrgTransform) => addTrustees
+      }.size
+
+        val RemoveTrusteeCount = composedTransform.deltaTransforms.collect {
+          case removeTrustees: RemoveTrusteeTransform => removeTrustees
+        }.size
+
+        addTrusteeCount - RemoveTrusteeCount
+      case None => 0
+    }
   }
 }

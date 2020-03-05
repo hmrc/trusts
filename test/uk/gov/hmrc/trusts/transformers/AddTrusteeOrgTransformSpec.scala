@@ -27,7 +27,7 @@ class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionV
 
     "add a new org trustee" in {
 
-      val t = DisplayTrustTrusteeOrgType(None,
+      val trustee = DisplayTrustTrusteeOrgType(None,
         None,
         "Company Name",
         None,
@@ -39,7 +39,7 @@ class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionV
 
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-add-org-trustee.json")
 
-      val transformer = AddTrusteeOrgTransform(t)
+      val transformer = AddTrusteeOrgTransform(trustee, alreadyAdded = 0)
 
       val result = transformer.applyTransform(trustJson).get
 
@@ -48,7 +48,7 @@ class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionV
 
     "fail to add a new org trustee when there are 25 or more existing trustees" in {
 
-      val t = DisplayTrustTrusteeOrgType(None,
+      val trustee = DisplayTrustTrusteeOrgType(None,
         None,
         "New Trustee",
         Some("phoneNumber"),
@@ -58,12 +58,31 @@ class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionV
 
       val json = JsonUtils.getJsonValueFromFile("trusts-etmp-max-trustees.json")
 
-      val transformer = AddTrusteeOrgTransform(t)
+      val transformer = AddTrusteeOrgTransform(trustee, alreadyAdded = 0)
 
       val thrown = intercept[Exception] (transformer.applyTransform(json).get)
 
       thrown.getMessage mustBe "Adding a trustee would exceed the maximum allowed amount of 25"
 
+    }
+
+    "fail to add a new individual trustee when there are 25 or more existing trustees or existing AddTrustee transformers" in {
+
+      val trustee = DisplayTrustTrusteeOrgType(None,
+        None,
+        "New Trustee",
+        Some("phoneNumber"),
+        None,
+        Some(DisplayTrustIdentificationOrgType(None, Some("utr"), None)),
+        DateTime.parse("1990-10-10"))
+
+      val json = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
+
+      val transformer = new AddTrusteeOrgTransform(trustee, alreadyAdded = 24)
+
+      val thrown = intercept[Exception] (transformer.applyTransform(json).get)
+
+      thrown.getMessage mustBe "Adding a trustee would exceed the maximum allowed amount of 25"
     }
   }
 }

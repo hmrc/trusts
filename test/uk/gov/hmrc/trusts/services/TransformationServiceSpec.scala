@@ -134,8 +134,27 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
         verify(repository).set("utr",
           "internalId",
-          ComposedDeltaTransform(Seq(AddTrusteeIndTransform(newTrusteeIndInfo))))
+          ComposedDeltaTransform(Seq(AddTrusteeIndTransform(newTrusteeIndInfo, alreadyAdded = 0))))
 
+      }
+    }
+
+    "must write an add trustee ind transform to the transformation repository with an existing transform" in {
+      val repository = mock[TransformationRepositoryImpl]
+      val service = new TransformationService(repository, auditService)
+
+      val existingTransforms = Seq(AddTrusteeIndTransform(existingTrusteeIndividualInfo, 0))
+      when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
+      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+
+      val result = service.addAddTrusteeTransformer("utr", "internalId", DisplayTrustTrusteeType(Some(newTrusteeIndInfo), None))
+      whenReady(result) { _ =>
+
+        verify(repository).set("utr",
+          "internalId",
+          ComposedDeltaTransform(Seq(
+            AddTrusteeIndTransform(existingTrusteeIndividualInfo, alreadyAdded = 0),
+            AddTrusteeIndTransform(newTrusteeIndInfo, alreadyAdded = 1))))
       }
     }
 
@@ -151,8 +170,33 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
         verify(repository).set("utr",
           "internalId",
-          ComposedDeltaTransform(Seq(AddTrusteeOrgTransform(newTrusteeOrgInfo))))
+          ComposedDeltaTransform(Seq(AddTrusteeOrgTransform(newTrusteeOrgInfo, alreadyAdded = 0))))
 
+      }
+    }
+
+    "must write an add trustee org transform to the transformation repository with existing transforms" in {
+      val repository = mock[TransformationRepositoryImpl]
+      val service = new TransformationService(repository, auditService)
+      val endDate = DateTime.parse("2010-10-10")
+
+      val existingTransforms = Seq(
+        AddTrusteeIndTransform(existingTrusteeIndividualInfo, 0),
+        AddTrusteeIndTransform(existingTrusteeIndividualInfo, 1),
+        RemoveTrusteeTransform(endDate, index = 0))
+      when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
+      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+
+      val result = service.addAddTrusteeTransformer("utr", "internalId", DisplayTrustTrusteeType(None, Some(newTrusteeOrgInfo)))
+      whenReady(result) { _ =>
+
+        verify(repository).set("utr",
+          "internalId",
+          ComposedDeltaTransform(Seq(
+            AddTrusteeIndTransform(existingTrusteeIndividualInfo, alreadyAdded = 0),
+            AddTrusteeIndTransform(existingTrusteeIndividualInfo, alreadyAdded = 1),
+            RemoveTrusteeTransform(endDate, index = 0),
+            AddTrusteeOrgTransform(newTrusteeOrgInfo, alreadyAdded = 1))))
       }
     }
 
