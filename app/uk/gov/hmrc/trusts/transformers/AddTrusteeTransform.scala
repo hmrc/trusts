@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.transformers
 
 import play.api.libs.json.Reads.of
-import play.api.libs.json.{JsArray, JsError, JsObject, JsResult, JsResultException, JsSuccess, JsValue, Json, Reads, __}
+import play.api.libs.json.{JsArray, JsError, JsObject, JsPath, JsResult, JsResultException, JsSuccess, JsValue, Json, Reads, __}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType}
 
 trait AddTrusteeTransform {
@@ -37,7 +37,7 @@ trait AddTrusteeTransform {
           val trustees: Reads[JsObject] =
             path.update( of[JsArray]
               .map {
-                trustees => trustees :+ Json.obj(entityKey -> Json.toJson(trusteeAsJson))
+                trustees => trustees :+ Json.obj(entityKey -> trusteeAsJson)
               }
             )
           input.transform(trustees)
@@ -45,9 +45,12 @@ trait AddTrusteeTransform {
         else {
           throw new Exception("Adding a trustee would exceed the maximum allowed amount of 25")
         }
-      case JsError(errors) =>
-        // TODO, this should be a put as the document may not have the trustees array, but we want to add them in (only started with a lead trustee)
-        throw JsResultException(errors)
+      case JsError(_) =>
+        input.transform(__.json.update {
+          path.put(JsArray(
+            Seq(Json.obj(entityKey -> trusteeAsJson)))
+          )
+        })
     }
   }
 

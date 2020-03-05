@@ -26,6 +26,26 @@ class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionV
 
   "the add trustee transformer should" - {
 
+    "add a new individual trustee when there are no trustees existing" in {
+      val t = DisplayTrustTrusteeIndividualType(None,
+        None,
+        NameType("New", None, "Trustee"),
+        Some(DateTime.parse("2000-01-01")),
+        Some("phoneNumber"),
+        Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
+        DateTime.parse("1990-10-10"))
+
+      val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-no-trustees.json")
+
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-trustees-after-add.json")
+
+      val transformer = new AddTrusteeIndTransform(t)
+
+      val result = transformer.applyTransform(trustJson).get
+
+      result mustBe afterJson
+    }
+
     "add a new individual trustee" in {
 
       val t = DisplayTrustTrusteeIndividualType(None,
