@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
 import play.api.Logger
-import play.api.libs.json._
+import play.api.libs.json.{JsObject, JsResult, JsSuccess, JsValue, Json, __, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models.RemoveTrustee
@@ -103,6 +103,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
   def addAddTrusteeTransformer(utr: String, internalId: String, newTrustee: DisplayTrustTrusteeType): Future[Unit] = {
     addNewTransform(utr, internalId, newTrustee match {
       case DisplayTrustTrusteeType(Some(trusteeInd), None) => AddTrusteeIndTransform(trusteeInd)
+      case DisplayTrustTrusteeType(None, Some(trusteeOrg)) => AddTrusteeOrgTransform(trusteeOrg)
     })
   }
 
@@ -128,5 +129,9 @@ class TransformationService @Inject()(repository: TransformationRepository,
         composedTransform :+ newTransform
 
     }.flatMap(newTransforms => repository.set(utr, internalId, newTransforms).map(_ => ()))
+  }
+
+  def removeAllTransformations(utr: String, internalId: String): Future[Option[JsObject]] = {
+    repository.resetCache(utr, internalId)
   }
 }

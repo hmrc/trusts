@@ -53,6 +53,11 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     ResourceNotFoundResponse -> NotFound
   )
 
+  def getFromEtmp(utr: String): Action[AnyContent] =
+    doGet(utr, applyTransformations = false, refreshEtmpData = true) {
+      result: GetTrustSuccessResponse => Ok(Json.toJson(result))
+    }
+
   def get(utr: String, applyTransformations: Boolean = false): Action[AnyContent] =
     doGet(utr, applyTransformations) {
       result: GetTrustSuccessResponse => Ok(Json.toJson(result))
@@ -104,13 +109,15 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       case _ => Forbidden
     }
 
-  private def doGet(utr: String, applyTransformations: Boolean)(handleResult: GetTrustSuccessResponse => Result): Action[AnyContent] = {
+  private def doGet(utr: String, applyTransformations: Boolean, refreshEtmpData: Boolean = false)(handleResult: GetTrustSuccessResponse => Result): Action[AnyContent] = {
     (ValidateUTRAction(utr) andThen identify).async {
       implicit request =>
 
-        val data =
-          if (applyTransformations) transformationService.getTransformedData(utr, request.identifier)
-          else desService.getTrustInfo(utr, request.identifier)
+        val data = if (applyTransformations) {
+            transformationService.getTransformedData(utr, request.identifier)
+          } else {
+            desService.getTrustInfo(utr, request.identifier)
+          }
 
         data.flatMap {
           case response: GetTrustSuccessResponse =>

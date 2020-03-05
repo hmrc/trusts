@@ -78,6 +78,7 @@ class TransformationController @Inject()(
             Ok
           }
         case _ =>
+          logger.error("[TransformationController][addTrustee] Supplied json could not be read as an individual or organisation trustee")
           Future.successful(BadRequest)
       }
     }
