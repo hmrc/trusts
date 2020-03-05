@@ -300,7 +300,8 @@ case class DisplayTrustTrusteeOrgType(lineNo: Option[String],
                                       phoneNumber: Option[String] = None,
                                       email: Option[String] = None,
                                       identification: Option[DisplayTrustIdentificationOrgType],
-                                      entityStart: DateTime)
+                                      entityStart: DateTime,
+                                      provisional: Boolean)
 
 object DisplayTrustTrusteeOrgType {
   implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))

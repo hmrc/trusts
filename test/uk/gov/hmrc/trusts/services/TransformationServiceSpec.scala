@@ -64,7 +64,9 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     name = "newCompanyName",
     phoneNumber = Some("newPhone"),
     identification = Some(DisplayTrustIdentificationOrgType(None, Some("newUtr"), None)),
-    entityStart = DateTime.parse("2012-03-14")
+    entityStart = DateTime.parse("2012-03-14"),
+    email = None,
+    provisional = true
   )
 
   val existingLeadTrusteeInfo = DisplayTrustLeadTrusteeIndType(
