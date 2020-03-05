@@ -21,7 +21,7 @@ import play.api.libs.json.Reads.of
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.utils.Constants.dateTimePattern
 
-case class RemoveTrusteeTransform(endDate: DateTime, index: Int, originalTrusteeJson: JsValue) extends DeltaTransform {
+case class RemoveTrusteeTransform(endDate: DateTime, index: Int, trusteeToRemove: JsValue) extends DeltaTransform {
   implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
 
   private val trusteePath = (__ \ 'details \ 'trust \ 'entities \ 'trustees).json
@@ -47,8 +47,8 @@ case class RemoveTrusteeTransform(endDate: DateTime, index: Int, originalTrustee
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    if (hasEntityStartDate(originalTrusteeJson)) {
-      originalTrusteeJson.transform(addEntityEnd(originalTrusteeJson, endDate)) match {
+    if (isKnownToEtmp(trusteeToRemove)) {
+      trusteeToRemove.transform(addEntityEnd(trusteeToRemove, endDate)) match {
         case JsSuccess(endedTrusteeJson, _) =>
           val trustees: Reads[JsObject] =
             trusteePath.update(of[JsArray]
@@ -60,23 +60,25 @@ case class RemoveTrusteeTransform(endDate: DateTime, index: Int, originalTrustee
 
         case e: JsError => e
       }
+    } else {
+      super.applyDeclarationTransform(input)
     }
-    else JsSuccess(input)
   }
 
-  private def hasEntityStartDate(json: JsValue): Boolean = {
-    json.transform((__ \ 'trusteeInd \ 'entityStart).json.pick).isSuccess |
-      json.transform((__ \ 'trusteeOrg \ 'entityStart).json.pick).isSuccess
+  private def isKnownToEtmp(json: JsValue): Boolean = {
+    json.transform((__ \ 'trusteeInd \ 'lineNo).json.pick).isSuccess |
+      json.transform((__ \ 'trusteeOrg \ 'lineNo).json.pick).isSuccess
   }
 
-  private def addEntityEnd(originalJson: JsValue, endDate: DateTime): Reads[JsObject] = {
+  private def addEntityEnd(trusteeToRemove: JsValue, endDate: DateTime): Reads[JsObject] = {
     val entityEndPath =
-      if (originalJson.transform((__ \ 'trusteeInd).json.pick).isSuccess)
+      if (trusteeToRemove.transform((__ \ 'trusteeInd).json.pick).isSuccess) {
         (__ \ 'trusteeInd \ 'entityEnd).json
-      else
+      } else {
         (__ \ 'trusteeOrg \ 'entityEnd).json
+      }
 
-    (__).json.update(entityEndPath.put(Json.toJson(endDate)))
+    __.json.update(entityEndPath.put(Json.toJson(endDate)))
   }
 }
 

@@ -73,11 +73,16 @@ class TransformationService @Inject()(repository: TransformationRepository,
           )
         )
 
-        Logger.info(s"[TransformationService] applying transformations")
-        transformations.applyTransform(json) match {
-          case JsSuccess(json, _) => transformations.applyDeclarationTransform(json)
-          case e => e
-        }
+        for {
+          initial <- {
+            Logger.info(s"[TransformationService] applying transformations")
+            transformations.applyTransform(json)
+          }
+          transformed <- {
+            Logger.info(s"[TransformationService] applying declaration transformations")
+            transformations.applyDeclarationTransform(initial)
+          }
+        } yield transformed
     }
   }
 

@@ -158,12 +158,19 @@
             }
           },
           {
-            "trusteeOrg": {
-              "name": "Trustee Org 1",
-              "phoneNumber": "0121546546",
-              "identification": {
-                "utr": "5465416546"
+            "trusteeInd":{
+              "lineNo":"1",
+              "bpMatchStatus": "01",
+              "name":{
+                "firstName":"John",
+                "middleName":"William",
+                "lastName":"O'Connor"
               },
+              "dateOfBirth":"1956-02-12",
+              "identification":{
+                "nino":"ST123456"
+              },
+              "phoneNumber":"0121546546",
               "entityStart":"1998-02-12"
             }
           },
@@ -173,7 +180,8 @@
               "phoneNumber": "0121546546",
               "identification": {
                 "utr": "5465416546"
-              }
+              },
+              "entityStart":"1998-02-12"
             }
           }
         ],
