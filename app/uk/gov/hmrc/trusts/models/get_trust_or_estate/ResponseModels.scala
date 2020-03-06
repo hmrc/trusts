@@ -34,3 +34,5 @@ case object InternalServerErrorResponse extends ErrorResponse
 case object NotEnoughDataResponse extends ErrorResponse
 
 case object ServiceUnavailableResponse extends ErrorResponse
+
+case class TransformationErrorResponse(errors: String) extends ErrorResponse

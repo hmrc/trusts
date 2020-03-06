@@ -28,83 +28,60 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
     "serialise and deserialise json correctly" in {
 
+      val amendLeadTrusteeTransform = AmendLeadTrusteeIndTransform(
+        DisplayTrustLeadTrusteeIndType(
+          None,
+          None,
+          NameType("New", Some("lead"), "Trustee"),
+          DateTime.parse("2000-01-01"),
+          "",
+          None,
+          DisplayTrustIdentificationType(None, None, None, None),
+          None
+        ))
+
+      val addTrusteeTransform = AddTrusteeIndTransform(
+        DisplayTrustTrusteeIndividualType(
+          Some("lineNo"),
+          Some("bpMatchStatus"),
+          NameType("New", None, "Trustee"),
+          Some(DateTime.parse("2000-01-01")),
+          Some("phoneNumber"),
+          Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
+          DateTime.parse("2000-01-01")
+        ))
+
+      val removeTrusteeTransform = RemoveTrusteeTransform(
+        endDate = DateTime.parse("2010-01-01"),
+        index = 0,
+        Json.obj()
+      )
+
       val json = Json.parse(
-        """{
+        s"""{
           |        "deltaTransforms" : [
           |            {
-          |                "AmendLeadTrusteeIndTransform" : {
-          |                    "leadTrustee" : {
-          |                        "name" : {
-          |                            "firstName" : "New",
-          |                            "middleName" : "lead",
-          |                            "lastName" : "Trustee"
-          |                        },
-          |                        "dateOfBirth" : "2000-01-01",
-          |                        "phoneNumber" : "",
-          |                        "identification" : {}
-          |                    }
-          |                }
+          |                "AmendLeadTrusteeIndTransform": ${Json.toJson(amendLeadTrusteeTransform)}
           |            },
           |            {
-          |                "AddTrusteeIndTransform" : {
-          |                    "trustee" : {
-          |                        "lineNo" : "lineNo",
-          |                        "bpMatchStatus" : "bpMatchStatus",
-          |                        "name" : {
-          |                            "firstName" : "New",
-          |                            "lastName" : "Trustee"
-          |                        },
-          |                        "dateOfBirth" : "2000-01-01",
-          |                        "phoneNumber" : "phoneNumber",
-          |                        "identification" : {
-          |                            "nino" : "nino"
-          |                        },
-          |                        "entityStart" : "2000-01-01"
-          |                    }
-          |                }
+          |                "AddTrusteeIndTransform": ${Json.toJson(addTrusteeTransform)}
           |            },
           |            {
-          |               "RemoveTrusteeTransform": {
-          |                 "index": 0,
-          |                 "endDate": "2010-01-01"
-          |                }
+          |               "RemoveTrusteeTransform": ${Json.toJson(removeTrusteeTransform)}
           |            }
           |        ]
           |    }
           |""".stripMargin)
 
       val data = ComposedDeltaTransform(Seq(
-        AmendLeadTrusteeIndTransform(
-          DisplayTrustLeadTrusteeIndType(
-            None,
-            None,
-            NameType("New", Some("lead"), "Trustee"),
-            DateTime.parse("2000-01-01"),
-            "",
-            None,
-            DisplayTrustIdentificationType(None, None, None, None),
-            None
-          )),
-        AddTrusteeIndTransform(
-          DisplayTrustTrusteeIndividualType(
-            Some("lineNo"),
-            Some("bpMatchStatus"),
-            NameType("New", None, "Trustee"),
-            Some(DateTime.parse("2000-01-01")),
-            Some("phoneNumber"),
-            Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-            DateTime.parse("2000-01-01")
-          )),
-        RemoveTrusteeTransform(
-            endDate = DateTime.parse("2010-01-01"),
-            index = 0
-          )
+          amendLeadTrusteeTransform,
+          addTrusteeTransform,
+          removeTrusteeTransform
         )
       )
+
       Json.toJson(data) mustEqual json
       json.as[ComposedDeltaTransform] mustEqual data
     }
-
-
   }
 }

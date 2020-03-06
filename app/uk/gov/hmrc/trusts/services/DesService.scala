@@ -67,6 +67,12 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Cache
     desConnector.getSubscriptionId(trn)
   }
 
+  def resetCache(utr: String, internalId: String) : Future[Unit] = {
+    repository.resetCache(utr, internalId).map { _ =>
+      Future.successful(())
+    }
+  }
+
   def refreshCacheAndGetTrustInfo(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
     Logger.debug("Retrieving Trust Info from DES")
     Logger.info(s"[DesService][refreshCacheAndGetTrustInfo] refreshing cache")

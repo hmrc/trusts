@@ -79,7 +79,7 @@ trait PromoteTrusteeCommon {
 
         for {
           promotedTrusteeJson <- promoteTrustee
-          removedTrusteeJson <- RemoveTrusteeTransform(DateTime.now, index).applyTransform(promotedTrusteeJson)
+          removedTrusteeJson <- RemoveTrusteeTransform(DateTime.now, index, Json.obj()).applyTransform(promotedTrusteeJson)
         } yield removedTrusteeJson
 
       case error: JsError => error

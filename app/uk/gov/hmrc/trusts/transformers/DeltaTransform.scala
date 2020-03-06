@@ -20,6 +20,7 @@ import play.api.libs.json.{JsValue, _}
 
 trait DeltaTransform {
   def applyTransform(input: JsValue): JsResult[JsValue]
+  def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = JsSuccess(input)
 }
 
 object DeltaTransform {
@@ -54,6 +55,9 @@ case class ComposedDeltaTransform(deltaTransforms: Seq[DeltaTransform]) extends 
     deltaTransforms.foldLeft[JsResult[JsValue]](JsSuccess(input))((cur, xform) => cur.flatMap(xform.applyTransform))
   }
 
+  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
+    deltaTransforms.foldLeft[JsResult[JsValue]](JsSuccess(input))((cur, xform) => cur.flatMap(xform.applyDeclarationTransform))
+  }
   def :+(transform: DeltaTransform) = ComposedDeltaTransform(deltaTransforms :+ transform)
 }
 

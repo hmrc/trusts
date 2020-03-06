@@ -44,8 +44,13 @@ trait AddTrusteeCommon {
         else {
           throw new Exception("Adding a trustee would exceed the maximum allowed amount of 25")
         }
-      case JsError(errors) =>
-        throw JsResultException(errors)
+      case JsError(_) =>
+        input.transform(__.json.update {
+          path.put(JsArray(
+            Seq(Json.obj(trusteeType.toString -> newTrustee)))
+          )
+        })
+
     }
   }
 }
