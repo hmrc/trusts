@@ -112,39 +112,47 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       case _ => Forbidden
     }
 
+  private def resetCacheIfRequested(utr: String, internalId: String, refreshEtmpData: Boolean) = {
+    if (refreshEtmpData) desService.resetCache(utr, internalId)
+    else Future.successful(())
+  }
+
   private def doGet(utr: String, applyTransformations: Boolean, refreshEtmpData: Boolean = false)(handleResult: GetTrustSuccessResponse => Result): Action[AnyContent] = {
     (ValidateUTRAction(utr) andThen identify).async {
       implicit request =>
 
-        val data = if (applyTransformations) {
+        resetCacheIfRequested(utr, request.identifier, refreshEtmpData).flatMap { _ =>
+
+          val data = if (applyTransformations) {
             transformationService.getTransformedData(utr, request.identifier)
           } else {
             desService.getTrustInfo(utr, request.identifier)
           }
 
-        data.flatMap {
-          case response: GetTrustSuccessResponse =>
-            auditService.audit(
-              event = TrustAuditing.GET_TRUST,
-              request = Json.obj("utr" -> utr),
-              internalId = request.identifier,
-              response = Json.toJson(response)
-            )
+          data.flatMap {
+            case response: GetTrustSuccessResponse =>
+              auditService.audit(
+                event = TrustAuditing.GET_TRUST,
+                request = Json.obj("utr" -> utr),
+                internalId = request.identifier,
+                response = Json.toJson(response)
+              )
 
-            Future.successful(handleResult(response))
+              Future.successful(handleResult(response))
 
-          case err =>
-            auditService.auditErrorResponse(
-              TrustAuditing.GET_TRUST,
-              Json.obj("utr" -> utr),
-              request.identifier,
-              errorAuditMessages.getOrElse(err, "UNKNOWN")
-            )
-            Future.successful(errorResponses.getOrElse(err, InternalServerError))
-        }.recover {
-          case ex =>
-            logger.error("Failed to get trust info", ex)
-            InternalServerError
+            case err =>
+              auditService.auditErrorResponse(
+                TrustAuditing.GET_TRUST,
+                Json.obj("utr" -> utr),
+                request.identifier,
+                errorAuditMessages.getOrElse(err, "UNKNOWN")
+              )
+              Future.successful(errorResponses.getOrElse(err, InternalServerError))
+          }.recover {
+            case ex =>
+              logger.error("Failed to get trust info", ex)
+              InternalServerError
+          }
         }
     }
   }

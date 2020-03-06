@@ -21,14 +21,13 @@ import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Span}
-import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach, Inside, MustMatchers, WordSpec}
+import org.scalatest._
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
@@ -62,6 +61,26 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar with MustMatcher
 
   val invalidUTR = "1234567"
   val utr = "1234567890"
+
+  ".getFromEtmp" should {
+    "reset the cache before calling get" in {
+
+      val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), auditService, desService, transformationService)
+
+      val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
+      when(desService.resetCache(any(), any()))
+        .thenReturn(Future.successful(()))
+
+      when(desService.getTrustInfo(any(), any())(any()))
+        .thenReturn(Future.successful(response))
+
+      val result = SUT.getFromEtmp(utr).apply(FakeRequest(GET, s"/trusts/$utr/refresh"))
+
+      whenReady(result) { _ =>
+        verify(desService).resetCache(utr, "id")
+      }
+    }
+  }
 
   ".get" should {
 
