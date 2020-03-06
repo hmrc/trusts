@@ -16,19 +16,18 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import play.api.libs.json.Reads.of
-import play.api.libs.json.{JsArray, JsError, JsObject, JsPath, JsResult, JsResultException, JsSuccess, JsValue, Json, Reads, __}
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType}
+import play.api.libs.json.Reads._
+import play.api.libs.json._
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustTrusteeIndividualType
 
-trait AddTrusteeTransform {
+trait AddTrusteeCommon {
 
-  def transform(input: JsValue, trustee : DisplayTrustTrusteeIndividualType) : JsResult[JsValue] =
-    applyTransform(input, Json.toJson(trustee), "trusteeInd")
+  sealed abstract class TrusteeType(trustee: String) { override val toString: String = trustee }
+  final case object TrusteeInd extends TrusteeType("trusteeInd")
+  final case object TrusteeOrg extends TrusteeType("trusteeOrg")
 
-  def transform(input: JsValue, trustee : DisplayTrustTrusteeOrgType) : JsResult[JsValue] =
-    applyTransform(input, Json.toJson(trustee), "trusteeOrg")
+  def addTrustee(input: JsValue, newTrustee: JsValue, trusteeType: TrusteeType): JsResult[JsValue] = {
 
-  private def applyTransform(input: JsValue, trusteeAsJson : JsValue, entityKey: String) = {
     val path = (__ \ 'details \ 'trust \ 'entities \ 'trustees).json
 
     input.transform(path.pick[JsArray]) match {
@@ -37,7 +36,7 @@ trait AddTrusteeTransform {
           val trustees: Reads[JsObject] =
             path.update( of[JsArray]
               .map {
-                trustees => trustees :+ Json.obj(entityKey -> trusteeAsJson)
+                trustees => trustees :+ Json.obj(trusteeType.toString -> newTrustee)
               }
             )
           input.transform(trustees)
@@ -48,10 +47,10 @@ trait AddTrusteeTransform {
       case JsError(_) =>
         input.transform(__.json.update {
           path.put(JsArray(
-            Seq(Json.obj(entityKey -> trusteeAsJson)))
+            Seq(Json.obj(trusteeType.toString -> newTrustee)))
           )
         })
+
     }
   }
-
 }

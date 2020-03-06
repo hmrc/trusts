@@ -128,6 +128,54 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
     }
   }
 
+  "promote trustee" - {
+
+    "must add a new promote trustee transform" in {
+
+      val transformationService = mock[TransformationService]
+      val controller = new TransformationController(identifierAction, transformationService)
+      val index = 3
+
+      val newTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
+        lineNo = Some("newLineNo"),
+        bpMatchStatus = Some("newMatchStatus"),
+        name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
+        dateOfBirth = new DateTime(1965, 2, 10, 0, 0),
+        phoneNumber = "newPhone",
+        email = Some("newEmail"),
+        identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
+        entityStart = Some(DateTime.parse("2012-03-14"))
+      )
+
+      when(transformationService.addPromoteTrusteeTransformer(any(), any(), any(), any()))
+        .thenReturn(Future.successful(()))
+
+      val newTrusteeInfo = DisplayTrustLeadTrusteeType(Some(newTrusteeIndInfo), None)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(newTrusteeIndInfo))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.promoteTrustee("aUTR", index).apply(request)
+
+      status(result) mustBe OK
+      verify(transformationService).addPromoteTrusteeTransformer("aUTR", "id", index, newTrusteeInfo)
+    }
+
+    "must return an error for malformed json" in {
+      val transformationService = mock[TransformationService]
+      val controller = new TransformationController(identifierAction, transformationService)
+      val index = 3
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.parse("{}"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.promoteTrustee("aUTR", index).apply(request)
+      status(result) mustBe BAD_REQUEST
+    }
+  }
+
   "remove trustee" - {
 
     "must add a 'remove trustee' transform" in {

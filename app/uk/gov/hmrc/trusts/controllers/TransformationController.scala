@@ -22,16 +22,16 @@ import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveTrustee
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeType, DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType, DisplayTrustTrusteeType}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeIndType, DisplayTrustLeadTrusteeOrgType, DisplayTrustLeadTrusteeType, DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType, DisplayTrustTrusteeType}
 import uk.gov.hmrc.trusts.services.TransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class TransformationController @Inject()(
-                                  identify: IdentifierAction,
-                                  transformationService: TransformationService
-                                  )(implicit val executionContext: ExecutionContext) extends TrustsBaseController with ValidationUtil {
+                                          identify: IdentifierAction,
+                                          transformationService: TransformationService
+                                        )(implicit val executionContext: ExecutionContext) extends TrustsBaseController with ValidationUtil {
   private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
 
 
@@ -79,6 +79,34 @@ class TransformationController @Inject()(
           }
         case _ =>
           logger.error("[TransformationController][addTrustee] Supplied json could not be read as an individual or organisation trustee")
+          Future.successful(BadRequest)
+      }
+    }
+  }
+
+  def promoteTrustee(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
+    implicit request => {
+
+      val leadTrusteeInd = request.body.validateOpt[DisplayTrustLeadTrusteeIndType].getOrElse(None)
+      val leadTrusteeOrg = request.body.validateOpt[DisplayTrustLeadTrusteeOrgType].getOrElse(None)
+
+      (leadTrusteeInd, leadTrusteeOrg) match {
+        case (Some(ind), _) =>
+          transformationService.addPromoteTrusteeTransformer(
+            utr,
+            request.identifier,
+            index,
+            DisplayTrustLeadTrusteeType(Some(ind), None)
+          ).map(_ => Ok)
+        case (_, Some(org)) =>
+          transformationService.addPromoteTrusteeTransformer(
+            utr,
+            request.identifier,
+            index,
+            DisplayTrustLeadTrusteeType(None, Some(org))
+          ).map(_ => Ok)
+        case _ =>
+          logger.error("[TransformationController][promoteTrustee] Supplied json could not be read as an individual or organisation lead trustee")
           Future.successful(BadRequest)
       }
     }

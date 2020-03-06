@@ -84,6 +84,8 @@ case class RemoveTrusteeTransform(endDate: DateTime, index: Int, trusteeToRemove
 
 object RemoveTrusteeTransform {
 
+  val key = "RemoveTrusteeTransform"
+
   implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
 
   implicit val format: Format[RemoveTrusteeTransform] = Json.format[RemoveTrusteeTransform]
