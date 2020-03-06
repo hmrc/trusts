@@ -30,7 +30,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee}
 import uk.gov.hmrc.trusts.repositories.TransformationRepositoryImpl
-import uk.gov.hmrc.trusts.transformers.{AddTrusteeIndTransform, AddTrusteeOrgTransform, AmendLeadTrusteeIndTransform, ComposedDeltaTransform, RemoveTrusteeTransform}
+import uk.gov.hmrc.trusts.transformers.{AddTrusteeIndTransform, AddTrusteeOrgTransform, AmendLeadTrusteeIndTransform, ComposedDeltaTransform, PromoteTrusteeIndTransform, PromoteTrusteeOrgTransform, RemoveTrusteeTransform}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
@@ -45,6 +45,16 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
+    entityStart = Some(DateTime.parse("2012-03-14"))
+  )
+
+  val newLeadTrusteeOrgInfo = DisplayTrustLeadTrusteeOrgType(
+    lineNo = Some("newLineNo"),
+    bpMatchStatus = Some("newMatchStatus"),
+    name = "Company Name",
+    phoneNumber = "newPhone",
+    email = Some("newEmail"),
+    identification = DisplayTrustIdentificationOrgType(None, Some("UTR"), None),
     entityStart = Some(DateTime.parse("2012-03-14"))
   )
 
@@ -153,6 +163,40 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
           "internalId",
           ComposedDeltaTransform(Seq(AddTrusteeOrgTransform(newTrusteeOrgInfo))))
 
+      }
+    }
+
+    "must write a promote trustee ind transform to the transformation repository with no existing transforms" in {
+      val repository = mock[TransformationRepositoryImpl]
+      val service = new TransformationService(repository, auditService)
+      val index = 3
+
+      when(repository.get(any(), any())).thenReturn(Future.successful(None))
+      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+
+      val result = service.addPromoteTrusteeTransformer("utr", "internalId", index, DisplayTrustLeadTrusteeType(Some(newLeadTrusteeIndInfo), None))
+      whenReady(result) { _ =>
+
+        verify(repository).set("utr",
+          "internalId",
+          ComposedDeltaTransform(Seq(PromoteTrusteeIndTransform(index = 3, newLeadTrusteeIndInfo))))
+      }
+    }
+
+    "must write a promote trustee org transform to the transformation repository with no existing transforms" in {
+      val repository = mock[TransformationRepositoryImpl]
+      val service = new TransformationService(repository, auditService)
+      val index = 3
+
+      when(repository.get(any(), any())).thenReturn(Future.successful(None))
+      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+
+      val result = service.addPromoteTrusteeTransformer("utr", "internalId", index, DisplayTrustLeadTrusteeType(None, Some(newLeadTrusteeOrgInfo)))
+      whenReady(result) { _ =>
+
+        verify(repository).set("utr",
+          "internalId",
+          ComposedDeltaTransform(Seq(PromoteTrusteeOrgTransform(index, newLeadTrusteeOrgInfo))))
       }
     }
 

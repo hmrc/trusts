@@ -32,7 +32,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         """{
           |        "deltaTransforms" : [
           |            {
-          |                "SetLeadTrusteeIndTransform" : {
+          |                "AmendLeadTrusteeIndTransform" : {
           |                    "leadTrustee" : {
           |                        "name" : {
           |                            "firstName" : "New",
