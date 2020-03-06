@@ -25,3 +25,10 @@ case class PromoteTrusteeOrgTransform(index: Int, newLeadTrustee: DisplayTrustLe
     transform(input, index, Json.toJson(newLeadTrustee))
   }
 }
+
+object PromoteTrusteeOrgTransform {
+
+  val key = "PromoteTrusteeOrgTransform"
+
+  implicit val format: Format[PromoteTrusteeOrgTransform] = Json.format[PromoteTrusteeOrgTransform]
+}

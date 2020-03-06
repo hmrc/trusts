@@ -26,5 +26,8 @@ case class AmendLeadTrusteeOrgTransform(leadTrustee: DisplayTrustLeadTrusteeOrgT
 }
 
 object AmendLeadTrusteeOrgTransform {
+
+  val key = "AmendLeadTrusteeOrgTransform"
+
   implicit val format: Format[AmendLeadTrusteeOrgTransform] = Json.format[AmendLeadTrusteeOrgTransform]
 }
