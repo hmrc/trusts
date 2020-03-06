@@ -104,7 +104,12 @@ class GetTrustController @Inject()(identify: IdentifierAction,
           },
           trustees => {
 
-            val response = Json.obj("trustees" -> trustees.as[List[DisplayTrustTrusteeType]])
+            val response = Json.obj("trustees" -> trustees.as[List[DisplayTrustTrusteeType]].map( trustee =>
+              trustee.copy(
+                trusteeInd = trustee.trusteeInd.map(_.copy(provisional = Some(false))),
+                trusteeOrg = trustee.trusteeOrg.map(_.copy(provisional = Some(false)))
+              )
+            ))
 
             Ok(Json.toJson(response))
           }

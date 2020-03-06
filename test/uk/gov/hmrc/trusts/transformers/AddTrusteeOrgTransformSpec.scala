@@ -57,7 +57,7 @@ class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionV
         None,
         None,
         DateTime.parse("2020-01-30"),
-        None
+        Some(true)
       )
 
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
@@ -85,7 +85,7 @@ class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionV
           None
         )),
         DateTime.parse("1990-10-10"),
-        None
+        Some(true)
       )
 
       val json = JsonUtils.getJsonValueFromFile("trusts-etmp-max-trustees.json")

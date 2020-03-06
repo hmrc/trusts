@@ -173,7 +173,8 @@
           {
             "trusteeOrg":{
               "name": "Company Name",
-              "entityStart":"2020-01-30"
+              "entityStart":"2020-01-30",
+              "provisional": true
             }
           }
         ]

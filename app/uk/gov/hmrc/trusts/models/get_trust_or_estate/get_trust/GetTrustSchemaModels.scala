@@ -315,7 +315,9 @@ case class DisplayTrustTrusteeIndividualType(lineNo: Option[String],
                                              dateOfBirth: Option[DateTime],
                                              phoneNumber: Option[String],
                                              identification: Option[DisplayTrustIdentificationType],
-                                             entityStart: DateTime)
+                                             entityStart: DateTime,
+                                             provisional: Option[Boolean]
+                                            )
 
 object DisplayTrustTrusteeIndividualType {
 

@@ -43,7 +43,8 @@ trait PromoteTrusteeCommon {
           Some(indLead.dateOfBirth),
           Some(indLead.phoneNumber),
           Some(indLead.identification),
-          indLead.entityStart.get
+          indLead.entityStart.get,
+          None
         )
 
         AddTrusteeIndTransform(demotedTrustee).applyTransform(input)

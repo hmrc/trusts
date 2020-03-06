@@ -65,7 +65,8 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     dateOfBirth = Some(new DateTime(1965, 2, 10, 12, 30)),
     phoneNumber = Some("newPhone"),
     identification = Some(DisplayTrustIdentificationType(None, Some("newNino"), None, None)),
-    entityStart = DateTime.parse("2012-03-14")
+    entityStart = DateTime.parse("2012-03-14"),
+    None
   )
 
   val newTrusteeOrgInfo = DisplayTrustTrusteeOrgType(
@@ -112,7 +113,8 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     dateOfBirth = Some(DateTime.parse("1956-02-12")),
     phoneNumber = Some("0121546546"),
     identification = Some(DisplayTrustIdentificationType(None, Some("ST123456"), None, None)),
-    entityStart = DateTime.parse("1998-02-12")
+    entityStart = DateTime.parse("1998-02-12"),
+    None
   )
 
   private val auditService = mock[AuditService]
