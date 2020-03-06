@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.trusts.controllers
 
+import java.time.LocalDate
+
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
@@ -96,14 +98,16 @@ class TransformationController @Inject()(
             utr,
             request.identifier,
             index,
-            DisplayTrustLeadTrusteeType(Some(ind), None)
+            DisplayTrustLeadTrusteeType(Some(ind), None),
+            LocalDate.now()
           ).map(_ => Ok)
         case (_, Some(org)) =>
           transformationService.addPromoteTrusteeTransformer(
             utr,
             request.identifier,
             index,
-            DisplayTrustLeadTrusteeType(None, Some(org))
+            DisplayTrustLeadTrusteeType(None, Some(org)),
+            LocalDate.now()
           ).map(_ => Ok)
         case _ =>
           logger.error("[TransformationController][promoteTrustee] Supplied json could not be read as an individual or organisation lead trustee")

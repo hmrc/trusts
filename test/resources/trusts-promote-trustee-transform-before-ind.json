@@ -21,6 +21,7 @@
         "trustees":[
           {
             "trusteeInd":{
+              "lineNo": "1",
               "name":{
                 "firstName":"John",
                 "middleName":"William",
@@ -45,6 +46,7 @@
           },
           {
             "trusteeOrg": {
+              "lineNo": "2",
               "name": "Trustee Org 2",
               "phoneNumber": "0121546546",
               "identification": {

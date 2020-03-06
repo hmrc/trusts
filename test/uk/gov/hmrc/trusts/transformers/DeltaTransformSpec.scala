@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.trusts.transformers
 
+import java.time.LocalDate
+
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.Json
@@ -52,7 +54,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         ))
 
       val removeTrusteeTransform = RemoveTrusteeTransform(
-        endDate = DateTime.parse("2010-01-01"),
+        endDate = LocalDate.parse("2010-01-01"),
         index = 0,
         Json.obj()
       )

@@ -16,14 +16,10 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import org.joda.time.DateTime
+import java.time.LocalDate
+
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{
-  DisplayTrustLeadTrusteeIndType,
-  DisplayTrustLeadTrusteeOrgType,
-  DisplayTrustTrusteeIndividualType,
-  DisplayTrustTrusteeOrgType
-}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeIndType, DisplayTrustLeadTrusteeOrgType, DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType}
 
 trait PromoteTrusteeCommon {
 
@@ -79,10 +75,14 @@ trait PromoteTrusteeCommon {
 
         for {
           promotedTrusteeJson <- promoteTrustee
-          removedTrusteeJson <- RemoveTrusteeTransform(DateTime.now, index, Json.obj()).applyTransform(promotedTrusteeJson)
+          removedTrusteeJson <- RemoveTrusteeTransform(LocalDate.now, index, Json.obj()).applyTransform(promotedTrusteeJson)
         } yield removedTrusteeJson
 
       case error: JsError => error
     }
+  }
+
+  def declarationTransform(input: JsValue, endDate: LocalDate, index: Int, originalTrusteeJson: JsValue): JsResult[JsValue] = {
+    RemoveTrusteeTransform(endDate, index, originalTrusteeJson).applyDeclarationTransform(input)
   }
 }
