@@ -18,11 +18,13 @@ package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
 import play.api.Logger
-import play.api.libs.json.{JsObject, JsPath, JsResult, JsSuccess, JsValue, Json, __}
+import play.api.libs.json.{JsObject, JsResult, JsSuccess, JsValue, Json, __, _}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models.RemoveTrustee
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeType, DisplayTrustTrusteeType}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.TransformationErrorResponse
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeType, DisplayTrustTrusteeType, GetTrustResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.repositories.TransformationRepository
 import uk.gov.hmrc.trusts.transformers._
 
@@ -30,9 +32,31 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TransformationService @Inject()(repository: TransformationRepository,
+                                      desService: DesService,
                                       auditService: AuditService){
+  def getTransformedData(utr: String, internalId: String)(implicit hc : HeaderCarrier): Future[GetTrustResponse] = {
+    desService.getTrustInfo(utr, internalId).flatMap {
+      case response: TrustProcessedResponse =>
+        populateLeadTrusteeAddress(response.getTrust) match {
+          case JsSuccess(fixed, _) =>
+            applyTransformations(utr, internalId, fixed).map {
+              case JsSuccess(transformed, _) => TrustProcessedResponse(transformed, response.responseHeader)
+              case JsError(errors) => TransformationErrorResponse(errors.toString)
+            }
+          case JsError(errors) => Future.successful(TransformationErrorResponse(errors.toString))
+        }
+      case response => Future.successful(response)
+    }
+  }
 
-  def applyTransformations(utr: String, internalId: String, json: JsValue)(implicit hc : HeaderCarrier): Future[JsResult[JsValue]] = {
+  private def applyTransformations(utr: String, internalId: String, json: JsValue)(implicit hc : HeaderCarrier): Future[JsResult[JsValue]] = {
+    repository.get(utr, internalId).map {
+      case None => JsSuccess(json)
+      case Some(transformations) => transformations.applyTransform(json)
+    }
+  }
+
+  def applyDeclarationTransformations(utr: String, internalId: String, json: JsValue)(implicit hc : HeaderCarrier): Future[JsResult[JsValue]] = {
     repository.get(utr, internalId).map {
       case None =>
         Logger.info(s"[TransformationService] no transformations to apply")
@@ -49,8 +73,16 @@ class TransformationService @Inject()(repository: TransformationRepository,
           )
         )
 
-        Logger.info(s"[TransformationService] applying transformations")
-        transformations.applyTransform(json)
+        for {
+          initial <- {
+            Logger.info(s"[TransformationService] applying transformations")
+            transformations.applyTransform(json)
+          }
+          transformed <- {
+            Logger.info(s"[TransformationService] applying declaration transformations")
+            transformations.applyDeclarationTransform(initial)
+          }
+        } yield transformed
     }
   }
 
@@ -73,6 +105,13 @@ class TransformationService @Inject()(repository: TransformationRepository,
     })
   }
 
+  def addPromoteTrusteeTransformer(utr: String, internalId: String, index: Int, newLeadTrustee: DisplayTrustLeadTrusteeType): Future[Unit] = {
+    addNewTransform(utr, internalId, newLeadTrustee match {
+      case DisplayTrustLeadTrusteeType(Some(trusteeInd), None) => PromoteTrusteeIndTransform(index, trusteeInd)
+      case DisplayTrustLeadTrusteeType(None, Some(trusteeOrg)) => PromoteTrusteeOrgTransform(index, trusteeOrg)
+    })
+  }
+
   def addAddTrusteeTransformer(utr: String, internalId: String, newTrustee: DisplayTrustTrusteeType): Future[Unit] = {
     addNewTransform(utr, internalId, newTrustee match {
       case DisplayTrustTrusteeType(Some(trusteeInd), None) => AddTrusteeIndTransform(trusteeInd)
@@ -80,8 +119,17 @@ class TransformationService @Inject()(repository: TransformationRepository,
     })
   }
 
-  def addRemoveTrusteeTransformer(utr: String, internalId: String, remove: RemoveTrustee) : Future[Unit] = {
-    addNewTransform(utr, internalId, RemoveTrusteeTransform(remove.endDate, remove.index))
+  def addRemoveTrusteeTransformer(utr: String, internalId: String, remove: RemoveTrustee)(implicit hc: HeaderCarrier) : Future[Unit] = {
+    getTransformedData(utr, internalId).map {
+      case TrustProcessedResponse(transformedJson, _) =>
+        val trusteePath = (__ \ 'details \ 'trust \ 'entities \ 'trustees \ remove.index).json
+        transformedJson.transform(trusteePath.pick) match {
+          case JsSuccess(trusteeJson, _) => addNewTransform(utr, internalId, RemoveTrusteeTransform(remove.endDate, remove.index, trusteeJson))
+          case JsError(_) => Future.failed(InternalServerErrorException(s"Could not pick trustee at index ${remove.index}."))
+        }
+
+      case _ => Future.failed(InternalServerErrorException("Trust is not in processed state."))
+    }
   }
 
   private def addNewTransform(utr: String, internalId: String, newTransform: DeltaTransform) = {

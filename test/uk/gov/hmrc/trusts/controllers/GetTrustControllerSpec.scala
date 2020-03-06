@@ -18,56 +18,80 @@ package uk.gov.hmrc.trusts.controllers
 
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.{reset, times, verify, when}
-import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
-import play.api.libs.json.{JsSuccess, JsValue, Json}
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.mockito.MockitoSugar
+import org.scalatest.time.{Millis, Span}
+import org.scalatest._
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrust, GetTrustSuccessResponse, TrustFoundResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{TrustFoundResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService}
 import uk.gov.hmrc.trusts.utils.JsonRequests
 
 import scala.concurrent.Future
 
-class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach with JsonRequests {
+class GetTrustControllerSpec extends WordSpec with MockitoSugar with MustMatchers with BeforeAndAfter with BeforeAndAfterEach with JsonRequests with Inside with ScalaFutures {
+  private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 
-  lazy val desService: DesService = mock[DesService]
-  lazy val mockedAuditService: AuditService = mock[AuditService]
+  private val desService: DesService = mock[DesService]
+  private val mockedAuditService: AuditService = mock[AuditService]
 
-  val mockAuditConnector = mock[AuditConnector]
-  val mockConfig = mock[AppConfig]
+  private val mockAuditConnector = mock[AuditConnector]
+  private val mockConfig = mock[AppConfig]
 
-  val mockTransformationService = mock[TransformationService]
+  private val transformationService = mock[TransformationService]
 
-  val auditService = new AuditService(mockAuditConnector, mockConfig)
+  private val auditService = new AuditService(mockAuditConnector, mockConfig)
 
-  override def afterEach() =  {
-    reset(mockedAuditService, desService, mockAuditConnector, mockConfig, mockTransformationService)
+  override def afterEach(): Unit =  {
+    reset(mockedAuditService, desService, mockAuditConnector, mockConfig, transformationService)
   }
 
   private def getTrustController = {
-    val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), mockedAuditService, desService, mockTransformationService)
+    val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), mockedAuditService, desService, transformationService)
     SUT
   }
 
-
   val invalidUTR = "1234567"
   val utr = "1234567890"
+
+  ".getFromEtmp" should {
+    "reset the cache before calling get" in {
+
+      val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), auditService, desService, transformationService)
+
+      val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
+      when(desService.resetCache(any(), any()))
+        .thenReturn(Future.successful(()))
+
+      when(desService.getTrustInfo(any(), any())(any()))
+        .thenReturn(Future.successful(response))
+
+      val result = SUT.getFromEtmp(utr).apply(FakeRequest(GET, s"/trusts/$utr/refresh"))
+
+      whenReady(result) { _ =>
+        verify(desService).resetCache(utr, "id")
+      }
+    }
+  }
 
   ".get" should {
 
     "not perform auditing" when {
       "the feature toggle is set to false" in {
 
-        val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), auditService, desService, mockTransformationService)
+        val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), auditService, desService, transformationService)
 
-        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
+        val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
+        when(desService.getTrustInfo(any(), any())(any()))
+          .thenReturn(Future.successful(response))
 
         when(mockConfig.auditingEnabled).thenReturn(false)
 
@@ -82,9 +106,10 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
     "perform auditing" when {
       "the feature toggle is set to true" in {
 
-        val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), auditService, desService, mockTransformationService)
+        val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), auditService, desService, transformationService)
 
-        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
+        when(desService.getTrustInfo(any(), any())(any()))
+          .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
         when(mockConfig.auditingEnabled).thenReturn(true)
 
@@ -104,7 +129,6 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
       whenReady(result) { _ =>
         verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-        verify(mockTransformationService, times(0)).applyTransformations(any(), any(), any())(any[HeaderCarrier])
         status(result) mustBe OK
         contentType(result) mustBe Some(JSON)
       }
@@ -112,20 +136,16 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
     "return 200 - Ok with processed content" in {
 
-      val response = getTrustResponse.as[GetTrustSuccessResponse]
-      val processedResponse = response.asInstanceOf[TrustProcessedResponse]
-      val transformedContent = getTransformedTrustResponse
+      val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-      when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
+      when(transformationService.getTransformedData(any[String], any[String])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(processedResponse))
 
-      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedContent)))
-
-      when(mockTransformationService.populateLeadTrusteeAddress(any[JsValue])).thenReturn(JsSuccess(processedResponse.getTrust))
-      val result = getTrustController.get(utr, true).apply(FakeRequest(GET, s"/trusts/$utr"))
+      val result = getTrustController.get(utr, applyTransformations = true).apply(FakeRequest(GET, s"/trusts/$utr"))
 
       whenReady(result) { _ =>
         verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-        verify(mockTransformationService).applyTransformations(mockEq(utr), mockEq("id"), mockEq(processedResponse.getTrust))(any[HeaderCarrier])
+        verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any[HeaderCarrier])
         status(result) mustBe OK
         contentType(result) mustBe Some(JSON)
         contentAsJson(result) mustBe getTransformedApiResponse
@@ -147,9 +167,9 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
       "the get endpoint returns a NotEnoughDataResponse" in {
 
-        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(NotEnoughDataResponse))
+        when(desService.getTrustInfo(any(), any())(any()))
+          .thenReturn(Future.successful(NotEnoughDataResponse))
 
-        val utr = "6666666666"
         val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 
         whenReady(result) { _ =>
@@ -162,10 +182,9 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
     "return 500 - InternalServerError" when {
       "the get endpoint returns a InvalidUTRResponse" in {
 
+        when(desService.getTrustInfo(any(), any())(any()))
+          .thenReturn(Future.successful(InvalidUTRResponse))
 
-        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(InvalidUTRResponse))
-
-        val utr = "1234567890"
         val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$invalidUTR"))
 
         whenReady(result) { _ =>
@@ -174,13 +193,12 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
         }
       }
 
-      "the get endpoint returns a InvalidRegimeResponse" in {
+      "the get endpoint returns an InvalidRegimeResponse" in {
 
+        when(desService.getTrustInfo(any(), any())(any()))
+          .thenReturn(Future.successful(InvalidRegimeResponse))
 
-        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(InvalidRegimeResponse))
-
-        val utr = "1234567890"
-        val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
+       val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).auditErrorResponse(mockEq("GetTrust"), any[JsValue], any[String], any[String])(any())
@@ -190,10 +208,9 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
       "the get endpoint returns a BadRequestResponse" in {
 
+        when(desService.getTrustInfo(any(), any())(any()))
+          .thenReturn(Future.successful(BadRequestResponse))
 
-        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(BadRequestResponse))
-
-        val utr = "1234567890"
         val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 
         whenReady(result) { _ =>
@@ -204,10 +221,9 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
       "the get endpoint returns a ResourceNotFoundResponse" in {
 
+        when(desService.getTrustInfo(any(), any())(any()))
+          .thenReturn(Future.successful(ResourceNotFoundResponse))
 
-        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(ResourceNotFoundResponse))
-
-        val utr = "1234567890"
         val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 
         whenReady(result) { _ =>
@@ -218,9 +234,9 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
       "the get endpoint returns a InternalServerErrorResponse" in {
 
-        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(InternalServerErrorResponse))
+        when(desService.getTrustInfo(any(), any())(any()))
+          .thenReturn(Future.successful(InternalServerErrorResponse))
 
-        val utr = "1234567890"
         val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 
         whenReady(result) { _ =>
@@ -231,10 +247,10 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
       "the get endpoint returns a ServiceUnavailableResponse" in {
 
-        when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(ServiceUnavailableResponse))
+        when(desService.getTrustInfo(any(), any())(any()))
+          .thenReturn(Future.successful(ServiceUnavailableResponse))
 
-        val utr = "1234567890"
-        val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
+         val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).auditErrorResponse(mockEq("GetTrust"), any[JsValue], any[String], any[String])(any())
@@ -247,7 +263,8 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
     "return 403 - Forbidden with parked content" in {
 
-      when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
+      when(transformationService.getTransformedData(any(), any())(any()))
+        .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
       val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/lead-trustee"))
 
@@ -257,20 +274,15 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
     }
     "return 200 - Ok with processed content" in {
 
-      val response =  getTrustResponse.as[GetTrustSuccessResponse]
-      val processedResponse = response.asInstanceOf[TrustProcessedResponse]
-      val transformedContent = getTransformedTrustResponse
+      val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-      when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
-
-      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedContent)))
-      when(mockTransformationService.populateLeadTrusteeAddress(any[JsValue])).thenReturn(JsSuccess(processedResponse.getTrust))
+      when(transformationService.getTransformedData(any[String], any[String])(any[HeaderCarrier])).thenReturn(Future.successful(processedResponse))
 
       val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/lead-trustee"))
 
       whenReady(result) { _ =>
         verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-        verify(mockTransformationService).applyTransformations(mockEq(utr), mockEq("id"), mockEq(processedResponse.getTrust))(any[HeaderCarrier])
+        verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any[HeaderCarrier])
         status(result) mustBe OK
         contentType(result) mustBe Some(JSON)
         contentAsJson(result) mustBe getTransformedLeadTrusteeResponse
@@ -278,10 +290,10 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
     }
     "return 500 - Internal server error for invalid content" in {
 
-      when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+      when(transformationService.getTransformedData(any(), any())(any()))
+        .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
       val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/lead-trustee"))
-      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(Json.obj())))
 
       whenReady(result) { _ =>
         status(result) mustBe INTERNAL_SERVER_ERROR
@@ -292,7 +304,8 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
   ".getTrustSetupDate" should {
     "return 403 - Forbidden with parked content" in {
 
-      when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
+      when(transformationService.getTransformedData(any(), any())(any()))
+        .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
       val result = getTrustController.getTrustSetupDate(utr).apply(FakeRequest(GET, s"/trusts/$utr/trust-start-date"))
 
@@ -302,20 +315,16 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
     }
     "return 200 - Ok with processed content" in {
 
-      val response =  getTrustResponse.as[GetTrustSuccessResponse]
-      val processedResponse = response.asInstanceOf[TrustProcessedResponse]
-      val transformedContent = getTransformedTrustResponse
+      val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-      when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
-
-      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedContent)))
-      when(mockTransformationService.populateLeadTrusteeAddress(any[JsValue])).thenReturn(JsSuccess(processedResponse.getTrust))
+      when(transformationService.getTransformedData(any[String], any[String])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(processedResponse))
 
       val result = getTrustController.getTrustSetupDate(utr).apply(FakeRequest(GET, s"/trusts/$utr/trust-start-date"))
 
       whenReady(result) { _ =>
         verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-        verify(mockTransformationService).applyTransformations(mockEq(utr), mockEq("id"), mockEq(processedResponse.getTrust))(any[HeaderCarrier])
+        verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any[HeaderCarrier])
         status(result) mustBe OK
         contentType(result) mustBe Some(JSON)
         contentAsJson(result) mustBe Json.parse("""{"startDate":"1920-03-28"}""")
@@ -323,10 +332,10 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
     }
     "return 500 - Internal server error for invalid content" in {
 
-      when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+      when(transformationService.getTransformedData(any(), any())(any()))
+        .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
       val result = getTrustController.getTrustSetupDate(utr).apply(FakeRequest(GET, s"/trusts/$utr/trust-start-date"))
-      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(Json.obj())))
 
       whenReady(result) { _ =>
         status(result) mustBe INTERNAL_SERVER_ERROR
@@ -338,7 +347,8 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
     "return 403 - Forbidden with parked content" in {
 
-      when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
+      when(transformationService.getTransformedData(any(), any())(any()))
+        .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
       val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/trustees"))
 
@@ -349,20 +359,16 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
     "return 200 - Ok with processed content" in {
 
-      val response =  getTrustResponse.as[GetTrustSuccessResponse]
-      val processedResponse = response.asInstanceOf[TrustProcessedResponse]
-      val transformedContent = getTransformedTrustResponse
+      val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-      when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
-
-      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])(any())).thenReturn(Future.successful(JsSuccess(transformedContent)))
-      when(mockTransformationService.populateLeadTrusteeAddress(any[JsValue])).thenReturn(JsSuccess(processedResponse.getTrust))
+      when(transformationService.getTransformedData(any[String], any[String])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(processedResponse))
       
       val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/trustees"))
 
       whenReady(result) { _ =>
         verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-        verify(mockTransformationService).applyTransformations(mockEq(utr), mockEq("id"), mockEq(processedResponse.getTrust))(any[HeaderCarrier])
+        verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any[HeaderCarrier])
         status(result) mustBe OK
         contentType(result) mustBe Some(JSON)
         contentAsJson(result) mustBe getTransformedTrusteesResponse
@@ -371,10 +377,10 @@ class GetTrustControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAnd
 
     "return 500 - Internal server error for invalid content" in {
 
-      when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+      when(transformationService.getTransformedData(any(), any())(any()))
+        .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
       val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/trustees"))
-      when(mockTransformationService.applyTransformations(any[String], any[String], any[JsValue])(any())).thenReturn(Future.successful(JsSuccess(Json.obj())))
 
       whenReady(result) { _ =>
         status(result) mustBe INTERNAL_SERVER_ERROR

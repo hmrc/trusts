@@ -1,0 +1,60 @@
+{
+  "details":{
+    "trust":{
+      "entities":{
+        "leadTrustees":{
+          "name":{
+            "firstName":"John",
+            "middleName":"William",
+            "lastName":"O'Connor"
+          },
+          "dateOfBirth": "1956-02-12",
+          "phoneNumber":"Phone",
+          "email":"Email",
+          "identification":{
+            "nino":"ST123456"
+          },
+          "entityStart":"2000-01-01"
+        },
+        "trustees":[
+          {
+            "trusteeOrg": {
+              "name": "Trustee Org 1",
+              "phoneNumber": "0121546546",
+              "identification": {
+                "utr": "5465416546"
+              },
+              "entityStart":"1999-01-01"
+            }
+          },
+          {
+            "trusteeOrg": {
+              "name": "Trustee Org 2",
+              "phoneNumber": "0121546546",
+              "identification": {
+                "utr": "5465416546"
+              },
+              "entityStart":"2000-01-01"
+            }
+          },
+          {
+            "trusteeInd":{
+              "name":{
+                "firstName":"FirstName",
+                "middleName":"MiddleName",
+                "lastName":"LastName"
+              },
+              "dateOfBirth":"1965-02-10",
+              "phoneNumber":"Phone",
+              "identification":{
+                "nino":"Nino"
+              },
+              "entityStart":"1998-02-12"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "otherfields" : "exist"
+}

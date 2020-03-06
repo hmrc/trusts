@@ -25,6 +25,26 @@ class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionV
 
   "the add trustee transformer should" - {
 
+    "add a new organisation trustee when there are no trustees existing" in {
+      val t = DisplayTrustTrusteeOrgType(None,
+        None,
+        "Company Name",
+        None,
+        None,
+        None,
+        DateTime.parse("2020-01-30"))
+
+      val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-no-trustees.json")
+
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-trustees-after-org-add.json")
+
+      val transformer = AddTrusteeOrgTransform(t)
+
+      val result = transformer.applyTransform(trustJson).get
+
+      result mustBe afterJson
+    }
+
     "add a new org trustee" in {
 
       val t = DisplayTrustTrusteeOrgType(None,

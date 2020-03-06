@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsError, JsPath, JsSuccess, Json}
+import play.api.libs.json.{JsArray, JsError, JsPath, JsSuccess, Json}
 import play.api.mvc.{Action, AnyContent, Result}
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUTRAction}
@@ -98,7 +98,10 @@ class GetTrustController @Inject()(identify: IdentifierAction,
         val pick = (JsPath \ 'details \ 'trust \ 'entities \ 'trustees).json.pick
 
         processed.getTrust.transform(pick).fold(
-          _ => InternalServerError,
+          _ => {
+            val nilResponse = Json.obj("trustees" -> JsArray())
+            Ok(Json.toJson(nilResponse))
+          },
           trustees => {
 
             val response = Json.obj("trustees" -> trustees.as[List[DisplayTrustTrusteeType]])
@@ -109,68 +112,47 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       case _ => Forbidden
     }
 
-  private def doGet(utr: String, applyTransformations: Boolean, refreshEtmpData: Boolean = false)(handleResult: GetTrustSuccessResponse => Result) = {
+  private def resetCacheIfRequested(utr: String, internalId: String, refreshEtmpData: Boolean) = {
+    if (refreshEtmpData) desService.resetCache(utr, internalId)
+    else Future.successful(())
+  }
+
+  private def doGet(utr: String, applyTransformations: Boolean, refreshEtmpData: Boolean = false)(handleResult: GetTrustSuccessResponse => Result): Action[AnyContent] = {
     (ValidateUTRAction(utr) andThen identify).async {
       implicit request =>
 
-        val getTrustData: Future[GetTrustResponse] = if (refreshEtmpData) {
-          transformationService.removeAllTransformations(utr, request.identifier).flatMap { _ =>
-          desService.refreshCacheAndGetTrustInfo(utr, request.identifier)
+        resetCacheIfRequested(utr, request.identifier, refreshEtmpData).flatMap { _ =>
+
+          val data = if (applyTransformations) {
+            transformationService.getTransformedData(utr, request.identifier)
+          } else {
+            desService.getTrustInfo(utr, request.identifier)
           }
-        } else {
-          desService.getTrustInfo(utr, request.identifier)
-        }
 
-        getTrustData.flatMap {
+          data.flatMap {
+            case response: GetTrustSuccessResponse =>
+              auditService.audit(
+                event = TrustAuditing.GET_TRUST,
+                request = Json.obj("utr" -> utr),
+                internalId = request.identifier,
+                response = Json.toJson(response)
+              )
 
-          case response: TrustProcessedResponse if applyTransformations =>
-            transformationService.populateLeadTrusteeAddress(response.getTrust) match {
-              case JsSuccess(transformedJson, _) =>
-                transformationService.applyTransformations(utr, request.identifier, transformedJson).map {
-                  case JsSuccess(transformedJson, _) =>
-                    val transformedResponse = TrustProcessedResponse(transformedJson, response.responseHeader)
+              Future.successful(handleResult(response))
 
-                    auditService.audit(
-                      event = TrustAuditing.GET_TRUST,
-                      request = Json.obj("utr" -> utr),
-                      internalId = request.identifier,
-                      response = Json.toJson(transformedResponse)
-                    )
-
-                    handleResult(transformedResponse)
-                  case JsError(errors) =>
-                    logger.error("Failed to populate lead trustee address", errors)
-                    InternalServerError
-                }
-
-              case JsError(errors) =>
-                logger.error("Failed to transform trust info", errors)
-                Future.successful(InternalServerError)
-            }
-
-          case response: GetTrustSuccessResponse =>
-
-            auditService.audit(
-              event = TrustAuditing.GET_TRUST,
-              request = Json.obj("utr" -> utr),
-              internalId = request.identifier,
-              response = Json.toJson(response)
-            )
-
-            Future.successful(handleResult(response))
-
-          case err =>
-            auditService.auditErrorResponse(
-              TrustAuditing.GET_TRUST,
-              Json.obj("utr" -> utr),
-              request.identifier,
-              errorAuditMessages.getOrElse(err, "UNKNOWN")
-            )
-            Future.successful(errorResponses.getOrElse(err, InternalServerError))
-        }.recover {
-          case ex =>
-            logger.error("Failed to get trust info", ex)
-            InternalServerError
+            case err =>
+              auditService.auditErrorResponse(
+                TrustAuditing.GET_TRUST,
+                Json.obj("utr" -> utr),
+                request.identifier,
+                errorAuditMessages.getOrElse(err, "UNKNOWN")
+              )
+              Future.successful(errorResponses.getOrElse(err, InternalServerError))
+          }.recover {
+            case ex =>
+              logger.error("Failed to get trust info", ex)
+              InternalServerError
+          }
         }
     }
   }
