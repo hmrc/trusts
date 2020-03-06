@@ -57,7 +57,8 @@ trait PromoteTrusteeCommon {
           Some(orgLead.phoneNumber),
           orgLead.email,
           Some(orgLead.identification),
-          orgLead.entityStart.get
+          orgLead.entityStart.get,
+          None
         )
 
         AddTrusteeOrgTransform(demotedTrustee).applyTransform(input)

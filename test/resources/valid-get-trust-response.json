@@ -224,8 +224,7 @@
                   "safeId": "2222200000000"
                 },
                 "phoneNumber": "+447456788112",
-                "entityStart": "2017-02-28",
-                "provisional": false
+                "entityStart": "2017-02-28"
               }
             },
             {
@@ -237,8 +236,7 @@
                 "identification": {
                   "safeId": "2222200000000"
                 },
-                "entityStart": "2017-02-28",
-                "provisional": true
+                "entityStart": "2017-02-28"
               }
             }
           ],
