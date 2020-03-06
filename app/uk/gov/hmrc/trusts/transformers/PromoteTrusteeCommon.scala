@@ -18,7 +18,12 @@ package uk.gov.hmrc.trusts.transformers
 
 import org.joda.time.DateTime
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeIndType, DisplayTrustLeadTrusteeOrgType, DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{
+  DisplayTrustLeadTrusteeIndType,
+  DisplayTrustLeadTrusteeOrgType,
+  DisplayTrustTrusteeIndividualType,
+  DisplayTrustTrusteeOrgType
+}
 
 trait PromoteTrusteeCommon {
 
@@ -63,7 +68,6 @@ trait PromoteTrusteeCommon {
     demotedTrusteeJson match {
       case JsSuccess(value, _) =>
 
-
         val leadTrusteesPath = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees)
 
             val promoteTrustee = value.transform(
@@ -72,7 +76,6 @@ trait PromoteTrusteeCommon {
                 (leadTrusteesPath \ 'lineNo).json.prune andThen
                 (leadTrusteesPath \ 'bpMatchStatus).json.prune
             )
-
 
         for {
           promotedTrusteeJson <- promoteTrustee
@@ -83,5 +86,3 @@ trait PromoteTrusteeCommon {
     }
   }
 }
-
-

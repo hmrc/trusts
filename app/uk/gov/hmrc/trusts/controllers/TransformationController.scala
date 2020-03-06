@@ -29,9 +29,9 @@ import uk.gov.hmrc.trusts.utils.ValidationUtil
 import scala.concurrent.{ExecutionContext, Future}
 
 class TransformationController @Inject()(
-                                  identify: IdentifierAction,
-                                  transformationService: TransformationService
-                                  )(implicit val executionContext: ExecutionContext) extends TrustsBaseController with ValidationUtil {
+                                          identify: IdentifierAction,
+                                          transformationService: TransformationService
+                                        )(implicit val executionContext: ExecutionContext) extends TrustsBaseController with ValidationUtil {
   private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
 
 
@@ -92,13 +92,19 @@ class TransformationController @Inject()(
 
       (leadTrusteeInd, leadTrusteeOrg) match {
         case (Some(ind), _) =>
-          transformationService.addPromoteTrusteeTransformer(utr, request.identifier, index, DisplayTrustLeadTrusteeType(Some(ind), None)) map { _ =>
-            Ok
-          }
+          transformationService.addPromoteTrusteeTransformer(
+            utr,
+            request.identifier,
+            index,
+            DisplayTrustLeadTrusteeType(Some(ind), None)
+          ).map(_ => Ok)
         case (_, Some(org)) =>
-          transformationService.addPromoteTrusteeTransformer(utr, request.identifier, index, DisplayTrustLeadTrusteeType(None, Some(org))) map { _ =>
-            Ok
-          }
+          transformationService.addPromoteTrusteeTransformer(
+            utr,
+            request.identifier,
+            index,
+            DisplayTrustLeadTrusteeType(None, Some(org))
+          ).map(_ => Ok)
         case _ =>
           logger.error("[TransformationController][promoteTrustee] Supplied json could not be read as an individual or organisation lead trustee")
           Future.successful(BadRequest)

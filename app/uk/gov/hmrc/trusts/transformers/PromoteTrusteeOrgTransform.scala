@@ -19,7 +19,9 @@ package uk.gov.hmrc.trusts.transformers
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustLeadTrusteeOrgType
 
-case class PromoteTrusteeOrgTransform(index: Int, newLeadTrustee: DisplayTrustLeadTrusteeOrgType) extends DeltaTransform with PromoteTrusteeCommon {
+case class PromoteTrusteeOrgTransform(index: Int,
+                                      newLeadTrustee: DisplayTrustLeadTrusteeOrgType
+                                     ) extends DeltaTransform with PromoteTrusteeCommon {
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     transform(input, index, Json.toJson(newLeadTrustee))
