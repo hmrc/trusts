@@ -301,7 +301,7 @@ case class DisplayTrustTrusteeOrgType(lineNo: Option[String],
                                       email: Option[String] = None,
                                       identification: Option[DisplayTrustIdentificationOrgType],
                                       entityStart: DateTime,
-                                      provisional: Option[Boolean]
+                                      provisional: Option[Boolean] = Some(false)
                                      )
 
 object DisplayTrustTrusteeOrgType {
@@ -316,7 +316,7 @@ case class DisplayTrustTrusteeIndividualType(lineNo: Option[String],
                                              phoneNumber: Option[String],
                                              identification: Option[DisplayTrustIdentificationType],
                                              entityStart: DateTime,
-                                             provisional: Option[Boolean]
+                                             provisional: Option[Boolean] = Some(false)
                                             )
 
 object DisplayTrustTrusteeIndividualType {

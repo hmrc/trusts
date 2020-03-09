@@ -24,9 +24,12 @@ import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class PromoteTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionValues {
   "the promote trustee ind transformer should" - {
+
     "successfully promote a trustee to lead and demote the existing lead trustee" in {
+
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-promote-trustee-transform-before-ind.json")
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-promote-trustee-transform-after-ind.json")
+
       val newTrusteeInfo = DisplayTrustLeadTrusteeIndType(
         lineNo = None,
         bpMatchStatus = None,
@@ -37,6 +40,7 @@ class PromoteTrusteeIndTransformSpec extends FreeSpec with MustMatchers with Opt
         identification = DisplayTrustIdentificationType(None, Some("ST123456"), None, None),
         entityStart = Some(new DateTime(2000, 1, 1, 12, 30))
       )
+      
       val transformer = PromoteTrusteeIndTransform(index = 0, newLeadTrustee = newTrusteeInfo)
 
       val result = transformer.applyTransform(beforeJson).get

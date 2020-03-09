@@ -21,6 +21,8 @@
         "trustees":[
           {
             "trusteeInd":{
+              "lineNo":"1",
+              "bpMatchStatus": "01",
               "name":{
                 "firstName":"John",
                 "middleName":"William",
@@ -35,6 +37,8 @@
           },
           {
             "trusteeOrg": {
+              "lineNo":"2",
+              "bpMatchStatus": "01",
               "name": "Trustee Org 1",
               "phoneNumber": "0121546546",
               "identification": {
@@ -45,6 +49,8 @@
           },
           {
             "trusteeOrg": {
+              "lineNo":"3",
+              "bpMatchStatus": "01",
               "name": "Trustee Org 2",
               "phoneNumber": "0121546546",
               "identification": {

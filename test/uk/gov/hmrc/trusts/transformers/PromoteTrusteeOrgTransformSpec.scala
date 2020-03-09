@@ -23,6 +23,7 @@ import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class PromoteTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionValues {
   "the promote trustee org transformer should" - {
+
     "successfully promote a trustee to lead and demote the existing lead trustee" in {
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-promote-trustee-transform-before-ind.json")
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-promote-trustee-transform-after-org.json")
