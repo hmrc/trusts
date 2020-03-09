@@ -24,17 +24,17 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-class RemoveTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar {
+class AddTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar {
 
   trait JsonFixtures {
 
     val getTrustResponseFromDES : JsValue = JsonUtils
-      .getJsonValueFromFile("trusts-etmp-received-multiple-trustees.json")
+      .getJsonValueFromFile("trusts-etmp-received-empty-trustees.json")
   }
 
-  "a remove trustee call" - {
+  "an add trustee call" - {
 
-    "must return amended data in a subsequent 'get' call" in new JsonFixtures {
+    "must return amended data in a subsequent 'get' call with provisional flags" in new JsonFixtures {
 
       val stubbedDesConnector = mock[DesConnector]
 
@@ -58,27 +58,29 @@ class RemoveTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures wit
         getConnection(application).map { connection =>
           dropTheDatabase(connection)
 
+          // Ensure passes schema
           val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
           status(result) mustBe OK
 
-          val removeAtIndex = Json.parse(
+          val addTrusteeJson = Json.parse(
             """
               |{
-              |	"index": 0,
-              |	"endDate": "2010-10-10"
+              |	"name": {
+              |   "firstName": "Adam",
+              |   "lastName": "Last"
+              | },
+              | "entityStart": "2020-03-03"
               |}
               |""".stripMargin)
 
-          val amendRequest = FakeRequest(PUT, "/trusts/5174384721/trustees/remove")
-            .withBody(Json.toJson(removeAtIndex))
+          val amendRequest = FakeRequest(POST, "/trusts/add-trustee/5174384721")
+            .withBody(addTrusteeJson)
             .withHeaders(CONTENT_TYPE -> "application/json")
 
-          val firstRemoveResult = route(application, amendRequest).get
-          status(firstRemoveResult) mustBe OK
+          val addedResponse = route(application, amendRequest).get
+          status(addedResponse) mustBe OK
 
-          val secondRemoveResult = route(application, amendRequest).get
-          status(secondRemoveResult) mustBe OK
-
+          // ensure they're in the trust response with the provisional flag
           val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed/trustees")).get
           status(newResult) mustBe OK
 
@@ -87,14 +89,13 @@ class RemoveTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures wit
             """
               |[
               |            {
-              |              "trusteeOrg": {
-              |                "name": "Trustee Org 2",
-              |                "phoneNumber": "0121546546",
-              |                "identification": {
-              |                  "utr": "5465416546"
+              |              "trusteeInd": {
+              |                "name": {
+              |                 "firstName": "Adam",
+              |                 "lastName": "Last"
               |                },
-              |                "entityStart": "1998-02-12",
-              |                "provisional": false
+              |                "entityStart": "2020-03-03",
+              |                "provisional": true
               |              }
               |            }
               |]

@@ -301,8 +301,16 @@ case class DisplayTrustTrusteeOrgType(lineNo: Option[String],
                                       email: Option[String] = None,
                                       identification: Option[DisplayTrustIdentificationOrgType],
                                       entityStart: DateTime,
-                                      provisional: Option[Boolean] = Some(false)
-                                     )
+                                      provisional: Option[Boolean]
+                                     ) {
+  def withProvisional = {
+    if(this.provisional.isDefined) {
+      this
+    } else {
+      this.copy(provisional = Some(false))
+    }
+  }
+}
 
 object DisplayTrustTrusteeOrgType {
   implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
@@ -316,8 +324,18 @@ case class DisplayTrustTrusteeIndividualType(lineNo: Option[String],
                                              phoneNumber: Option[String],
                                              identification: Option[DisplayTrustIdentificationType],
                                              entityStart: DateTime,
-                                             provisional: Option[Boolean] = Some(false)
-                                            )
+                                             provisional: Option[Boolean]
+                                            ) {
+
+  def withProvisional = {
+    if(this.provisional.isDefined) {
+      this
+    } else {
+      this.copy(provisional = Some(false))
+    }
+  }
+
+}
 
 object DisplayTrustTrusteeIndividualType {
 
