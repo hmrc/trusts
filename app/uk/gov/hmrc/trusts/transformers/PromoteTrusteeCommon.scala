@@ -22,15 +22,35 @@ import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeIndType, DisplayTrustLeadTrusteeOrgType, DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType}
 
 trait PromoteTrusteeCommon {
+  private val leadTrusteesPath = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees)
 
-  def transform(input: JsValue, index: Int, newLeadTrustee: JsValue): JsResult[JsValue] = {
+  def transform(input: JsValue, index: Int, newLeadTrustee: JsValue, originalTrusteeJson: JsValue): JsResult[JsValue] = {
 
-    val leadTrusteesPath = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees)
+    for {
+      promotedTrusteeJson <- input.transform(promoteTrustee(newLeadTrustee))
+      removedTrusteeJson <- removeTrusteeTransform(index, originalTrusteeJson).applyTransform(promotedTrusteeJson)
+      demotedTrusteeJson <- demoteLeadTrusteeTransform(input).applyTransform(removedTrusteeJson)
+    } yield demotedTrusteeJson
+  }
 
+  private def removeTrusteeTransform(index: Int, originalTrusteeJson: JsValue) = {
+    val removeTrusteeTransform = RemoveTrusteeTransform(LocalDate.now, index, originalTrusteeJson)
+    removeTrusteeTransform
+  }
+
+  private def promoteTrustee(newLeadTrustee: JsValue) = {
+    val promoteTransform = leadTrusteesPath.json.prune andThen
+      (__).json.update(leadTrusteesPath.json.put(newLeadTrustee)) andThen
+      (leadTrusteesPath \ 'lineNo).json.prune andThen
+      (leadTrusteesPath \ 'bpMatchStatus).json.prune
+    promoteTransform
+  }
+
+  private def demoteLeadTrusteeTransform(input: JsValue): DeltaTransform = {
     val oldLeadIndTrustee = input.transform(leadTrusteesPath.json.pick).flatMap(_.validate[DisplayTrustLeadTrusteeIndType]).asOpt
     val oldLeadOrgTrustee = input.transform(leadTrusteesPath.json.pick).flatMap(_.validate[DisplayTrustLeadTrusteeOrgType]).asOpt
 
-    val demotedTrusteeJson = (oldLeadIndTrustee, oldLeadOrgTrustee) match {
+    (oldLeadIndTrustee, oldLeadOrgTrustee) match {
       case (Some(indLead), None) =>
         val demotedTrustee = DisplayTrustTrusteeIndividualType(
           None,
@@ -42,7 +62,7 @@ trait PromoteTrusteeCommon {
           indLead.entityStart.get
         )
 
-        AddTrusteeIndTransform(demotedTrustee).applyTransform(input)
+        AddTrusteeIndTransform(demotedTrustee)
 
       case (None, Some(orgLead)) =>
 
@@ -56,29 +76,9 @@ trait PromoteTrusteeCommon {
           orgLead.entityStart.get
         )
 
-        AddTrusteeOrgTransform(demotedTrustee).applyTransform(input)
+        AddTrusteeOrgTransform(demotedTrustee)
 
       case _ => throw new Exception("Existing Lead trustee could not be identified")
-    }
-
-    demotedTrusteeJson match {
-      case JsSuccess(value, _) =>
-
-        val leadTrusteesPath = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees)
-
-            val promoteTrustee = value.transform(
-              leadTrusteesPath.json.prune andThen
-                (__).json.update(leadTrusteesPath.json.put(newLeadTrustee)) andThen
-                (leadTrusteesPath \ 'lineNo).json.prune andThen
-                (leadTrusteesPath \ 'bpMatchStatus).json.prune
-            )
-
-        for {
-          promotedTrusteeJson <- promoteTrustee
-          removedTrusteeJson <- RemoveTrusteeTransform(LocalDate.now, index, Json.obj()).applyTransform(promotedTrusteeJson)
-        } yield removedTrusteeJson
-
-      case error: JsError => error
     }
   }
 

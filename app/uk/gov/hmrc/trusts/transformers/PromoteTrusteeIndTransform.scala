@@ -28,7 +28,7 @@ case class PromoteTrusteeIndTransform(index: Int,
                                      ) extends DeltaTransform with PromoteTrusteeCommon {
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    transform(input, index, Json.toJson(newLeadTrustee))
+    transform(input, index, Json.toJson(newLeadTrustee), originalTrusteeJson)
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
