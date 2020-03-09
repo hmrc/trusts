@@ -92,7 +92,7 @@ class PromoteLeadTrusteeSpec extends FreeSpec with MustMatchers with ScalaFuture
           status(newResult) mustBe OK
           contentAsJson(newResult) mustBe expectedGetAfterPromoteTrusteeJson
 
-//          dropTheDatabase(connection)
+          dropTheDatabase(connection)
         }.get
       }
     }
