@@ -26,11 +26,13 @@ trait PromoteTrusteeCommon {
 
   def transform(input: JsValue, index: Int, newLeadTrustee: JsValue, originalTrusteeJson: JsValue): JsResult[JsValue] = {
 
+    val removeTrusteeTransform = RemoveTrusteeTransform(LocalDate.now, index, originalTrusteeJson)
+
     trusteeEntityStart(originalTrusteeJson) match {
       case JsSuccess(entityStart, _) =>
         for {
           promotedTrusteeJson <- input.transform(promoteTrustee(newLeadTrustee, entityStart))
-          removedTrusteeJson <- removeTrusteeTransform(index, originalTrusteeJson).applyTransform(promotedTrusteeJson)
+          removedTrusteeJson <- removeTrusteeTransform.applyTransform(promotedTrusteeJson)
           demotedTrusteeJson <- demoteLeadTrusteeTransform(input).applyTransform(removedTrusteeJson)
         } yield demotedTrusteeJson
       case e: JsError => e
@@ -40,11 +42,6 @@ trait PromoteTrusteeCommon {
   private def trusteeEntityStart(trusteeJson: JsValue) = {
     trusteeJson.transform((__ \ 'trusteeInd \ 'entityStart).json.pick) orElse
       trusteeJson.transform((__ \ 'trusteeOrg \ 'entityStart).json.pick)
-  }
-
-  private def removeTrusteeTransform(index: Int, originalTrusteeJson: JsValue) = {
-    val removeTrusteeTransform = RemoveTrusteeTransform(LocalDate.now, index, originalTrusteeJson)
-    removeTrusteeTransform
   }
 
   private def promoteTrustee(newLeadTrustee: JsValue, entityStart: JsValue) = {
