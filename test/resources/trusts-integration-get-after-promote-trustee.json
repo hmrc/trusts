@@ -156,14 +156,6 @@
               "phoneNumber": "0754545454",
               "email": "me@you.com",
               "identification": {
-                "address": {
-                  "country": "GB",
-                  "line1": "1344 Army Road",
-                  "line2": "Suite 111",
-                  "line3": "Telford",
-                  "line4": "Shropshire",
-                  "postCode": "TF1 5DR"
-                },
                 "utr": "5465416546"
               },
               "entityStart": "1998-02-12"

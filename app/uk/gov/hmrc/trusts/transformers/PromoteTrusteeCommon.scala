@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeIndType, DisplayTrustLeadTrusteeOrgType, DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationOrgType, DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType, DisplayTrustLeadTrusteeOrgType, DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType}
 
 trait PromoteTrusteeCommon {
   private val leadTrusteesPath = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees)
@@ -64,7 +64,7 @@ trait PromoteTrusteeCommon {
           indLead.name,
           Some(indLead.dateOfBirth),
           Some(indLead.phoneNumber),
-          Some(indLead.identification),
+          Some(getIdentification(indLead.identification)),
           indLead.entityStart.get
         )
 
@@ -78,13 +78,31 @@ trait PromoteTrusteeCommon {
           orgLead.name,
           Some(orgLead.phoneNumber),
           orgLead.email,
-          Some(orgLead.identification),
+          Some(getIdentification(orgLead.identification)),
           orgLead.entityStart.get
         )
 
         AddTrusteeOrgTransform(demotedTrustee)
 
       case _ => throw new Exception("Existing Lead trustee could not be identified")
+    }
+  }
+
+  private def getIdentification(identification: DisplayTrustIdentificationType): DisplayTrustIdentificationType = {
+    if (identification.nino.isDefined) {
+      DisplayTrustIdentificationType(identification.safeId, identification.nino, identification.passport, None)
+    }
+    else {
+      identification
+    }
+  }
+
+  private def getIdentification(identification: DisplayTrustIdentificationOrgType): DisplayTrustIdentificationOrgType = {
+    if (identification.utr.isDefined) {
+      DisplayTrustIdentificationOrgType(identification.safeId, identification.utr, None)
+    }
+    else {
+      identification
     }
   }
 
