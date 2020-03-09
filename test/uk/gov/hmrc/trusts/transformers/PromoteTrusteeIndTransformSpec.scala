@@ -72,7 +72,7 @@ class PromoteTrusteeIndTransformSpec extends FreeSpec with MustMatchers with Opt
       phoneNumber = "Phone",
       email = Some("Email"),
       identification = DisplayTrustIdentificationType(None, Some("ST123456"), None, None),
-      entityStart = Some(new DateTime(2000, 1, 1, 12, 30))
+      entityStart = None
     )
     PromoteTrusteeIndTransform(index = 0, newLeadTrustee = newTrusteeInfo, LocalDate.of(2020, 2, 28), trustee0Json)
   }
