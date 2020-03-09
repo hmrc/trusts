@@ -30,17 +30,18 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
     "serialise and deserialise json correctly" in {
 
-      val amendLeadTrusteeTransform = AmendLeadTrusteeIndTransform(
-        DisplayTrustLeadTrusteeIndType(
-          None,
-          None,
-          NameType("New", Some("lead"), "Trustee"),
-          DateTime.parse("2000-01-01"),
-          "",
-          None,
-          DisplayTrustIdentificationType(None, None, None, None),
-          None
-        ))
+      val newLeadTrustee = DisplayTrustLeadTrusteeIndType(
+        None,
+        None,
+        NameType("New", Some("lead"), "Trustee"),
+        DateTime.parse("2000-01-01"),
+        "",
+        None,
+        DisplayTrustIdentificationType(None, None, None, None),
+        None
+      )
+
+      val amendLeadTrusteeTransform = AmendLeadTrusteeIndTransform(newLeadTrustee)
 
       val addTrusteeTransform = AddTrusteeIndTransform(
         DisplayTrustTrusteeIndividualType(
@@ -59,6 +60,13 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         Json.obj()
       )
 
+      val promoteTrusteeTransform = PromoteTrusteeIndTransform(
+        2,
+        newLeadTrustee,
+        LocalDate.parse("2012-02-06"),
+        Json.obj()
+      )
+
       val json = Json.parse(
         s"""{
           |        "deltaTransforms" : [
@@ -70,6 +78,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |            },
           |            {
           |               "RemoveTrusteeTransform": ${Json.toJson(removeTrusteeTransform)}
+          |            },
+          |            {
+          |               "PromoteTrusteeIndTransform": ${Json.toJson(promoteTrusteeTransform)}
           |            }
           |        ]
           |    }
@@ -78,7 +89,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
       val data = ComposedDeltaTransform(Seq(
           amendLeadTrusteeTransform,
           addTrusteeTransform,
-          removeTrusteeTransform
+          removeTrusteeTransform,
+          promoteTrusteeTransform
         )
       )
 
