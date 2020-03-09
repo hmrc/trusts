@@ -16,31 +16,64 @@
 
 package uk.gov.hmrc.trusts.transformers
 
+import java.time.LocalDate
+
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.models.NameType
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class PromoteTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionValues {
+
+  private val trustee0Json = Json.parse(
+    """
+      |{
+      |   "trusteeInd":{
+      |     "lineNo": "1",
+      |     "name":{
+      |       "firstName":"John",
+      |       "middleName":"William",
+      |       "lastName":"O'Connor"
+      |     },
+      |     "dateOfBirth":"1956-02-12",
+      |     "identification":{
+      |       "nino":"ST123456"
+      |     },
+      |     "entityStart":"2000-01-01"
+      |   }
+      |}
+      |""".stripMargin)
+
   "the promote trustee ind transformer should" - {
     "successfully promote a trustee to lead and demote the existing lead trustee" in {
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-promote-trustee-transform-before-ind.json")
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-promote-trustee-transform-after-ind.json")
-      val newTrusteeInfo = DisplayTrustLeadTrusteeIndType(
-        lineNo = None,
-        bpMatchStatus = None,
-        name = NameType("John", Some("William"), "O'Connor"),
-        dateOfBirth = new DateTime(1956, 2, 12, 12, 30),
-        phoneNumber = "Phone",
-        email = Some("Email"),
-        identification = DisplayTrustIdentificationType(None, Some("ST123456"), None, None),
-        entityStart = Some(new DateTime(2000, 1, 1, 12, 30))
-      )
-      val transformer = PromoteTrusteeIndTransform(index = 0, newLeadTrustee = newTrusteeInfo)
 
-      val result = transformer.applyTransform(beforeJson).get
+      val result = transformToTest.applyTransform(beforeJson).get
       result mustBe afterJson
     }
+    "re-add the removed trustee with an end date at declaration time if it existed before" in {
+      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-promote-trustee-transform-after-ind.json")
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-promote-trustee-transform-after-ind-declare.json")
+
+      val result = transformToTest.applyDeclarationTransform(beforeJson).get
+      result mustBe afterJson
+    }
+  }
+
+  private def transformToTest = {
+    val newTrusteeInfo = DisplayTrustLeadTrusteeIndType(
+      lineNo = None,
+      bpMatchStatus = None,
+      name = NameType("John", Some("William"), "O'Connor"),
+      dateOfBirth = new DateTime(1956, 2, 12, 12, 30),
+      phoneNumber = "Phone",
+      email = Some("Email"),
+      identification = DisplayTrustIdentificationType(None, Some("ST123456"), None, None),
+      entityStart = None
+    )
+    PromoteTrusteeIndTransform(index = 0, newLeadTrustee = newTrusteeInfo, LocalDate.of(2020, 2, 28), trustee0Json)
   }
 }

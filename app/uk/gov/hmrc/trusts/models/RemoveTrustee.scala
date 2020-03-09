@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.trusts.models
 
-import org.joda.time.DateTime
+import java.time.LocalDate
+
 import play.api.libs.json.{Format, Json}
 
-case class RemoveTrustee(endDate: DateTime, index: Int)
+case class RemoveTrustee(endDate: LocalDate, index: Int)
 
 object RemoveTrustee {
   implicit val formats : Format[RemoveTrustee] = Json.format[RemoveTrustee]

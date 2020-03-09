@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.trusts.services
 
+import java.time.LocalDate
+
 import javax.inject.Inject
 import play.api.Logger
 import play.api.libs.json.{JsObject, JsResult, JsSuccess, JsValue, Json, __, _}
@@ -105,11 +107,20 @@ class TransformationService @Inject()(repository: TransformationRepository,
     })
   }
 
-  def addPromoteTrusteeTransformer(utr: String, internalId: String, index: Int, newLeadTrustee: DisplayTrustLeadTrusteeType): Future[Unit] = {
-    addNewTransform(utr, internalId, newLeadTrustee match {
-      case DisplayTrustLeadTrusteeType(Some(trusteeInd), None) => PromoteTrusteeIndTransform(index, trusteeInd)
-      case DisplayTrustLeadTrusteeType(None, Some(trusteeOrg)) => PromoteTrusteeOrgTransform(index, trusteeOrg)
-    })
+  def addPromoteTrusteeTransformer(
+                                    utr: String,
+                                    internalId: String,
+                                    index: Int,
+                                    newLeadTrustee: DisplayTrustLeadTrusteeType,
+                                    endDate: LocalDate)(implicit hc: HeaderCarrier): Future[Unit] = {
+    getTrusteeAtIndex(utr, internalId, index).map {
+      case JsSuccess(trusteeJson: JsValue, _) =>
+        addNewTransform(utr, internalId, newLeadTrustee match {
+          case DisplayTrustLeadTrusteeType(Some(trusteeInd), None) => PromoteTrusteeIndTransform(index, trusteeInd, endDate, trusteeJson)
+          case DisplayTrustLeadTrusteeType(None, Some(trusteeOrg)) => PromoteTrusteeOrgTransform(index, trusteeOrg, endDate, trusteeJson)
+        })
+      case JsError(_) => Future.failed(InternalServerErrorException(s"Could not pick trustee at index ${index}."))
+      }
   }
 
   def addAddTrusteeTransformer(utr: String, internalId: String, newTrustee: DisplayTrustTrusteeType): Future[Unit] = {
@@ -120,14 +131,17 @@ class TransformationService @Inject()(repository: TransformationRepository,
   }
 
   def addRemoveTrusteeTransformer(utr: String, internalId: String, remove: RemoveTrustee)(implicit hc: HeaderCarrier) : Future[Unit] = {
+    getTrusteeAtIndex(utr, internalId, remove.index).map {
+      case JsSuccess(trusteeJson: JsValue, _) => addNewTransform(utr, internalId, RemoveTrusteeTransform(remove.endDate, remove.index, trusteeJson))
+      case JsError(_) => Future.failed(InternalServerErrorException(s"Could not pick trustee at index ${remove.index}."))
+    }
+  }
+
+  private def getTrusteeAtIndex(utr: String, internalId: String, index: Int)(implicit hc: HeaderCarrier) = {
     getTransformedData(utr, internalId).map {
       case TrustProcessedResponse(transformedJson, _) =>
-        val trusteePath = (__ \ 'details \ 'trust \ 'entities \ 'trustees \ remove.index).json
-        transformedJson.transform(trusteePath.pick) match {
-          case JsSuccess(trusteeJson, _) => addNewTransform(utr, internalId, RemoveTrusteeTransform(remove.endDate, remove.index, trusteeJson))
-          case JsError(_) => Future.failed(InternalServerErrorException(s"Could not pick trustee at index ${remove.index}."))
-        }
-
+        val trusteePath = (__ \ 'details \ 'trust \ 'entities \ 'trustees \ index).json
+        transformedJson.transform(trusteePath.pick)
       case _ => Future.failed(InternalServerErrorException("Trust is not in processed state."))
     }
   }
@@ -140,7 +154,11 @@ class TransformationService @Inject()(repository: TransformationRepository,
       case Some(composedTransform) =>
         composedTransform :+ newTransform
 
-    }.flatMap(newTransforms => repository.set(utr, internalId, newTransforms).map(_ => ()))
+    }.flatMap(newTransforms => repository.set(utr, internalId, newTransforms).map(_ => ())).recoverWith {
+      case e =>
+        Logger.error(s"[TransformationService] exception adding new transform: ${e.getMessage}")
+        Future.failed(e)
+    }
   }
 
   def removeAllTransformations(utr: String, internalId: String): Future[Option[JsObject]] = {
