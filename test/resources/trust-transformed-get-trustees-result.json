@@ -15,12 +15,13 @@
         },
         "phoneNumber": "+447456788112",
         "entityStart": "2017-02-28",
-        "provisional": false
+        "provisional": true
       }
     },
     {
       "trusteeOrg": {
         "lineNo": "1",
+        "bpMatchStatus": "01",
         "name": "MyOrg Incorporated",
         "phoneNumber": "+447456788112",
         "email": "a",
@@ -28,7 +29,7 @@
           "safeId": "2222200000000"
         },
         "entityStart": "2017-02-28",
-        "provisional": false
+        "provisional": true
       }
     }
   ]

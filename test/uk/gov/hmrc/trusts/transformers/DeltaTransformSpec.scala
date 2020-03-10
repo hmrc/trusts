@@ -51,8 +51,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           Some(DateTime.parse("2000-01-01")),
           Some("phoneNumber"),
           Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-          DateTime.parse("2000-01-01"),
-          None
+          DateTime.parse("2000-01-01")
         ))
 
       val removeTrusteeTransform = RemoveTrusteeTransform(

@@ -99,8 +99,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
         dateOfBirth = Some(new DateTime(1965, 2, 10, 0, 0)),
         phoneNumber = Some("newPhone"),
         identification = Some(DisplayTrustIdentificationType(None, Some("newNino"), None, None)),
-        entityStart = DateTime.parse("2012-03-14"),
-        None
+        entityStart = DateTime.parse("2012-03-14")
       )
 
       when(transformationService.addAddTrusteeTransformer(any(), any(), any()))

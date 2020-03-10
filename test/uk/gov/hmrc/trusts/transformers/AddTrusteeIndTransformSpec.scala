@@ -33,8 +33,7 @@ class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionV
         Some(DateTime.parse("2000-01-01")),
         Some("phoneNumber"),
         Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-        DateTime.parse("1990-10-10"),
-        None
+        DateTime.parse("1990-10-10")
       )
 
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-no-trustees.json")
@@ -56,8 +55,7 @@ class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionV
         Some(DateTime.parse("2000-01-01")),
         Some("phoneNumber"),
         Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-        DateTime.parse("1990-10-10"),
-        None
+        DateTime.parse("1990-10-10")
       )
 
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
@@ -79,8 +77,7 @@ class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionV
         Some(DateTime.parse("2000-01-01")),
         Some("phoneNumber"),
         Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-        DateTime.parse("1990-10-10"),
-        None
+        DateTime.parse("1990-10-10")
       )
 
       val json = JsonUtils.getJsonValueFromFile("trusts-etmp-max-trustees.json")

@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsArray, JsError, JsPath, JsSuccess, Json}
+import play.api.libs.json.{JsArray, JsError, JsNull, JsPath, JsSuccess, Json}
 import play.api.mvc.{Action, AnyContent, Result}
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUTRAction}
@@ -92,30 +92,29 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       case _ => Forbidden
     }
 
+  def transformTrusteesToMaintainJson = {
+
+  }
+
   def getTrustees(utr: String) : Action[AnyContent] =
     doGet(utr, applyTransformations = true) {
       case processed: TrustProcessedResponse =>
 
-        val pick = (JsPath \ 'details \ 'trust \ 'entities \ 'trustees).json.pick
+        processed.transform match {
+          case transformed: TrustProcessedResponse =>
 
-        processed.getTrust.transform(pick).fold(
-          _ => {
-            val nilResponse = Json.obj("trustees" -> JsArray())
-            Ok(Json.toJson(nilResponse))
-          },
-          trustees => {
+            val pick = (JsPath \ 'details \ 'trust \ 'entities \ 'trustees).json.pick
 
-            val response = Json.obj(
-              "trustees" -> trustees.as[List[DisplayTrustTrusteeType]].map(trustee =>
-                trustee.copy(
-                trusteeInd = trustee.trusteeInd.map(_.withProvisional),
-                trusteeOrg = trustee.trusteeOrg.map(_.withProvisional)
-              ))
+            transformed.getTrust.transform(pick).fold(
+              _ => {
+                Ok(Json.obj("trustees" -> JsArray()))
+              },
+              trustees =>
+                Ok(trustees)
             )
-
-            Ok(response)
-          }
-        )
+          case _ =>
+            Forbidden
+        }
       case _ => Forbidden
     }
 
@@ -124,7 +123,9 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     else Future.successful(())
   }
 
-  private def doGet(utr: String, applyTransformations: Boolean, refreshEtmpData: Boolean = false)(handleResult: GetTrustSuccessResponse => Result): Action[AnyContent] = {
+  private def doGet(utr: String, applyTransformations: Boolean, refreshEtmpData: Boolean = false)
+                   (handleResult: GetTrustSuccessResponse => Result): Action[AnyContent] = {
+
     (ValidateUTRAction(utr) andThen identify).async {
       implicit request =>
 

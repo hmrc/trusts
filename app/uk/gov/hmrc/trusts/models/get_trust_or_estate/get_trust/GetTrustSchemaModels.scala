@@ -300,21 +300,27 @@ case class DisplayTrustTrusteeOrgType(lineNo: Option[String],
                                       phoneNumber: Option[String] = None,
                                       email: Option[String] = None,
                                       identification: Option[DisplayTrustIdentificationOrgType],
-                                      entityStart: DateTime,
-                                      provisional: Option[Boolean]
-                                     ) {
-  def withProvisional = {
-    if(this.provisional.isDefined) {
-      this
-    } else {
-      this.copy(provisional = Some(false))
-    }
-  }
-}
+                                      entityStart: DateTime)
 
 object DisplayTrustTrusteeOrgType {
+
   implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val trusteeOrgTypeFormat: Format[DisplayTrustTrusteeOrgType] = Json.format[DisplayTrustTrusteeOrgType]
+
+  import uk.gov.hmrc.trusts.models.JsonWithoutNulls._
+
+  val writeToMaintain : Writes[DisplayTrustTrusteeOrgType] = new Writes[DisplayTrustTrusteeOrgType] {
+    override def writes(o: DisplayTrustTrusteeOrgType): JsValue = Json.obj(
+      "lineNo" -> o.lineNo,
+      "bpMatchStatus" -> o.bpMatchStatus,
+      "name" -> o.name,
+      "phoneNumber" -> o.phoneNumber,
+      "email" -> o.email,
+      "identification" -> o.identification,
+      "entityStart" -> o.entityStart,
+      "provisional" -> o.lineNo.isDefined
+    ).withoutNulls
+  }
 }
 
 case class DisplayTrustTrusteeIndividualType(lineNo: Option[String],
@@ -323,24 +329,28 @@ case class DisplayTrustTrusteeIndividualType(lineNo: Option[String],
                                              dateOfBirth: Option[DateTime],
                                              phoneNumber: Option[String],
                                              identification: Option[DisplayTrustIdentificationType],
-                                             entityStart: DateTime,
-                                             provisional: Option[Boolean]
-                                            ) {
-
-  def withProvisional = {
-    if(this.provisional.isDefined) {
-      this
-    } else {
-      this.copy(provisional = Some(false))
-    }
-  }
-
-}
+                                             entityStart: DateTime
+                                            )
 
 object DisplayTrustTrusteeIndividualType {
 
+  import uk.gov.hmrc.trusts.models.JsonWithoutNulls._
+
   implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val trusteeIndividualTypeFormat: Format[DisplayTrustTrusteeIndividualType] = Json.format[DisplayTrustTrusteeIndividualType]
+
+  val writeToMaintain : Writes[DisplayTrustTrusteeIndividualType] = new Writes[DisplayTrustTrusteeIndividualType] {
+    override def writes(o: DisplayTrustTrusteeIndividualType): JsValue = Json.obj(
+      "lineNo" -> o.lineNo,
+      "bpMatchStatus" -> o.bpMatchStatus,
+      "name" -> o.name,
+      "dateOfBirth" -> o.dateOfBirth,
+      "phoneNumber" -> o.phoneNumber,
+      "identification" -> o.identification,
+      "entityStart" -> o.entityStart,
+      "provisional" -> o.lineNo.isDefined
+    ).withoutNulls
+  }
 }
 
 

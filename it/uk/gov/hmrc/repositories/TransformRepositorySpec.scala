@@ -71,8 +71,7 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with ScalaFutur
       Some(DateTime.parse("2000-01-01")),
       Some("phoneNumber"),
       Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-      DateTime.parse("2010-10-10"),
-      None
+      DateTime.parse("2010-10-10")
     ))
   )
   )
