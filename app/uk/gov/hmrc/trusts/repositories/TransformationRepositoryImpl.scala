@@ -101,7 +101,7 @@ class TransformationRepositoryImpl @Inject()(
     val modifier = Json.obj(
       "$set" -> Json.obj(
         "id" -> createKey(utr, internalId),
-        "updatedAt" -> LocalDateTime.now,
+        "updatedAt" -> Json.obj("$date" -> LocalDateTime.now),
         "transforms" -> Json.toJson(transforms)
       )
     )

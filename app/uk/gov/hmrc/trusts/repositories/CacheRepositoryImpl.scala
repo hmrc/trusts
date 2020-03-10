@@ -37,7 +37,7 @@ class CacheRepositoryImpl @Inject()(
                                           mongo: MongoDriver,
                                           config: AppConfig,
                                           dateFormatter: DateFormatter
-                                        )(implicit ec: ExecutionContext, m: Materializer) extends CacheRepository {
+                                   )(implicit ec: ExecutionContext, m: Materializer) extends CacheRepository {
 
   private val logger = LoggerFactory.getLogger("application" + classOf[CacheRepositoryImpl].getCanonicalName)
   private val collectionName: String = "trusts"
@@ -99,7 +99,7 @@ class CacheRepositoryImpl @Inject()(
     val modifier = Json.obj(
       "$set" -> Json.obj(
         "id" -> createKey(utr, internalId),
-        "updatedAt" -> LocalDateTime.now,
+        "updatedAt" ->  Json.obj("$date" -> LocalDateTime.now),
         "etmpData" -> data
       )
     )
