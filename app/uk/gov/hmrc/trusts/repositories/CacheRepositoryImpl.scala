@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.trusts.repositories
 
-import java.sql.Timestamp
 import java.time.LocalDateTime
 
 import akka.stream.Materializer
@@ -96,7 +95,7 @@ class CacheRepositoryImpl @Inject()(
     val selector = Json.obj(
       "id" -> createKey(utr, internalId)
     )
-    
+
     val modifier = Json.obj(
       "$set" -> Json.obj(
         "id" -> createKey(utr, internalId),

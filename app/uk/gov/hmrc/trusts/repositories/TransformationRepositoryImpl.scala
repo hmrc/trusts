@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.trusts.repositories
 
-import java.sql.Timestamp
 import java.time.LocalDateTime
 
 import akka.stream.Materializer
