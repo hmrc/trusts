@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.trusts.repositories
 
+import java.sql.Timestamp
 import java.time.LocalDateTime
 
 import akka.stream.Materializer
@@ -101,7 +102,7 @@ class TransformationRepositoryImpl @Inject()(
     val modifier = Json.obj(
       "$set" -> Json.obj(
         "id" -> createKey(utr, internalId),
-        "updatedAt" -> LocalDateTime.now,
+        "updatedAt" -> Json.obj("$date" -> LocalDateTime.now),
         "transforms" -> Json.toJson(transforms)
       )
     )

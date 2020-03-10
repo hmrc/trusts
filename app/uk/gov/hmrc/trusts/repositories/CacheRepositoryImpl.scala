@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.trusts.repositories
 
+import java.sql.Timestamp
 import java.time.LocalDateTime
 
 import akka.stream.Materializer
@@ -37,7 +38,7 @@ class CacheRepositoryImpl @Inject()(
                                           mongo: MongoDriver,
                                           config: AppConfig,
                                           dateFormatter: DateFormatter
-                                        )(implicit ec: ExecutionContext, m: Materializer) extends CacheRepository {
+                                   )(implicit ec: ExecutionContext, m: Materializer) extends CacheRepository {
 
   private val logger = LoggerFactory.getLogger("application" + classOf[CacheRepositoryImpl].getCanonicalName)
   private val collectionName: String = "trusts"
@@ -95,11 +96,11 @@ class CacheRepositoryImpl @Inject()(
     val selector = Json.obj(
       "id" -> createKey(utr, internalId)
     )
-
+    
     val modifier = Json.obj(
       "$set" -> Json.obj(
         "id" -> createKey(utr, internalId),
-        "updatedAt" -> LocalDateTime.now,
+        "updatedAt" ->  Json.obj("$date" -> LocalDateTime.now),
         "etmpData" -> data
       )
     )
