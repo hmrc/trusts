@@ -16,12 +16,14 @@
 
 package uk.gov.hmrc.trusts.transformers
 
+import java.time.LocalDate
+
 import org.joda.time.DateTime
 import play.api.libs.json.Reads.of
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.utils.Constants.dateTimePattern
 
-case class RemoveTrusteeTransform(endDate: DateTime, index: Int, trusteeToRemove: JsValue) extends DeltaTransform {
+case class RemoveTrusteeTransform(endDate: LocalDate, index: Int, trusteeToRemove: JsValue) extends DeltaTransform {
   implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
 
   private val trusteePath = (__ \ 'details \ 'trust \ 'entities \ 'trustees).json
@@ -70,7 +72,7 @@ case class RemoveTrusteeTransform(endDate: DateTime, index: Int, trusteeToRemove
       json.transform((__ \ 'trusteeOrg \ 'lineNo).json.pick).isSuccess
   }
 
-  private def addEntityEnd(trusteeToRemove: JsValue, endDate: DateTime): Reads[JsObject] = {
+  private def addEntityEnd(trusteeToRemove: JsValue, endDate: LocalDate): Reads[JsObject] = {
     val entityEndPath =
       if (trusteeToRemove.transform((__ \ 'trusteeInd).json.pick).isSuccess) {
         (__ \ 'trusteeInd \ 'entityEnd).json

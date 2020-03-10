@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import org.joda.time.DateTime
+import java.time.LocalDate
+
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.utils.JsonUtils
@@ -29,7 +30,7 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
 
     "remove a trustee at the head of the list" in {
 
-      val endDate = DateTime.parse("2010-10-15")
+      val endDate = LocalDate.parse("2010-10-15")
 
       val cachedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
@@ -44,7 +45,7 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
 
     "remove a trustee at the tail of the list" in {
 
-      val endDate = DateTime.parse("2010-10-15")
+      val endDate = LocalDate.parse("2010-10-15")
 
       val cachedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-newly-added-trustee.json")
 
@@ -59,7 +60,7 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
 
     "remove a trustee at an index and persist the remaining trustees" in {
 
-      val endDate = DateTime.parse("2010-10-15")
+      val endDate = LocalDate.parse("2010-10-15")
 
       val cachedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-multiple-trustees.json")
 
@@ -87,7 +88,7 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
     }
 
     "don't remove any trustees when removing an index which is index out of bounds" in {
-      val endDate = DateTime.parse("2010-10-15")
+      val endDate = LocalDate.parse("2010-10-15")
 
       // 4 trustees in the list, last index is 3
       val cachedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-multiple-trustees.json")
@@ -101,7 +102,7 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
 
     "remove multiple trustees in a sequence of transformations (shrinking list)" in {
 
-      val endDate = DateTime.parse("2010-10-15")
+      val endDate = LocalDate.parse("2010-10-15")
 
       // 4 trustees in the list, last index is 3
       val cachedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-multiple-trustees.json")
@@ -154,7 +155,7 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionV
           |          }
           |""".stripMargin)
 
-      val endDate = DateTime.parse("2010-10-15")
+      val endDate = LocalDate.parse("2010-10-15")
 
       val cachedEtmp = JsonUtils.getJsonValueFromFile("trusts-etmp-multiple-trustees.json")
 

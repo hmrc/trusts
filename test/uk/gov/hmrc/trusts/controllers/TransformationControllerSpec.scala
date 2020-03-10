@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.trusts.controllers
 
+import java.time.LocalDate
+
 import org.joda.time.DateTime
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito._
@@ -148,7 +150,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
         entityStart = Some(DateTime.parse("2012-03-14"))
       )
 
-      when(transformationService.addPromoteTrusteeTransformer(any(), any(), any(), any()))
+      when(transformationService.addPromoteTrusteeTransformer(any(), any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(()))
 
       val newTrusteeInfo = DisplayTrustLeadTrusteeType(Some(newTrusteeIndInfo), None)
@@ -160,7 +162,12 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
       val result = controller.promoteTrustee("aUTR", index).apply(request)
 
       status(result) mustBe OK
-      verify(transformationService).addPromoteTrusteeTransformer("aUTR", "id", index, newTrusteeInfo)
+      verify(transformationService).addPromoteTrusteeTransformer(
+        equalTo("aUTR"),
+        equalTo("id"),
+        equalTo(index),
+        equalTo(newTrusteeInfo),
+        any())(any())
     }
 
     "must return an error for malformed json" in {
@@ -187,7 +194,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
       val controller = new TransformationController(identifierAction, transformationService)
 
       val payload = RemoveTrustee(
-        endDate = DateTime.parse("2020-01-10"), index = 0
+        endDate = LocalDate.parse("2020-01-10"), index = 0
       )
 
       when(transformationService.addRemoveTrusteeTransformer(any(), any(), any())(any()))

@@ -27,6 +27,8 @@ object DeltaTransform {
   implicit val reads: Reads[DeltaTransform] = Reads[DeltaTransform](
     value => {
       value.as[JsObject] match {
+        case json if json.keys.contains(PromoteTrusteeIndTransform.key) => (json \ PromoteTrusteeIndTransform.key).validate[PromoteTrusteeIndTransform]
+        case json if json.keys.contains(PromoteTrusteeOrgTransform.key) => (json \ PromoteTrusteeOrgTransform.key).validate[PromoteTrusteeOrgTransform]
         case json if json.keys.contains(AmendLeadTrusteeIndTransform.key) => (json \ AmendLeadTrusteeIndTransform.key).validate[AmendLeadTrusteeIndTransform]
         case json if json.keys.contains(AmendLeadTrusteeOrgTransform.key) => (json \ AmendLeadTrusteeOrgTransform.key).validate[AmendLeadTrusteeOrgTransform]
         case json if json.keys.contains(AddTrusteeIndTransform.key)      => (json \ AddTrusteeIndTransform.key).validate[AddTrusteeIndTransform]
@@ -39,6 +41,8 @@ object DeltaTransform {
 
   implicit val writes: Writes[DeltaTransform] = Writes[DeltaTransform] { deltaTransform =>
     val transformWrapper = deltaTransform match {
+      case transform: PromoteTrusteeIndTransform  => Json.obj(PromoteTrusteeIndTransform.key -> Json.toJson(transform)(PromoteTrusteeIndTransform.format))
+      case transform: PromoteTrusteeOrgTransform  => Json.obj(PromoteTrusteeOrgTransform.key -> Json.toJson(transform)(PromoteTrusteeOrgTransform.format))
       case transform: AmendLeadTrusteeIndTransform  => Json.obj(AmendLeadTrusteeIndTransform.key -> Json.toJson(transform)(AmendLeadTrusteeIndTransform.format))
       case transform: AmendLeadTrusteeOrgTransform  => Json.obj(AmendLeadTrusteeOrgTransform.key -> Json.toJson(transform)(AmendLeadTrusteeOrgTransform.format))
       case transform: AddTrusteeIndTransform      => Json.obj(AddTrusteeIndTransform.key -> Json.toJson(transform)(AddTrusteeIndTransform.format))

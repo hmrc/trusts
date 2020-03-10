@@ -3,33 +3,35 @@
     "trust":{
       "entities":{
         "leadTrustees":{
-          "name":"Trustee Org 1",
-          "phoneNumber":"0121546546",
-          "identification":{
-            "utr":"5465416546"
+          "name":{
+            "firstName":"John",
+            "middleName":"William",
+            "lastName":"O'Connor"
           },
-          "entityStart":"1999-01-01"
+          "dateOfBirth": "1956-02-12",
+          "phoneNumber":"Phone",
+          "email":"Email",
+          "identification":{
+            "nino":"ST123456"
+          },
+          "entityStart":"2000-01-01"
         },
         "trustees":[
           {
-            "trusteeInd":{
-              "lineNo": "1",
+            "trusteeOrg": {
+              "lineNo": "2",
               "bpMatchStatus": "01",
-              "name":{
-                "firstName":"John",
-                "middleName":"William",
-                "lastName":"O'Connor"
+              "name": "Trustee Org 1",
+              "phoneNumber": "0121546546",
+              "identification": {
+                "utr": "5465416546"
               },
-              "dateOfBirth":"1956-02-12",
-              "identification":{
-                "nino":"ST123456"
-              },
-              "entityStart":"2000-01-01"
+              "entityStart":"1999-01-01"
             }
           },
           {
             "trusteeOrg": {
-              "lineNo":"3",
+              "lineNo": "3",
               "bpMatchStatus": "01",
               "name": "Trustee Org 2",
               "phoneNumber": "0121546546",
@@ -53,6 +55,22 @@
               },
               "entityStart":"1998-02-12",
               "provisional": true
+            }
+          },
+          {
+            "trusteeInd":{
+              "lineNo": "1",
+              "name":{
+                "firstName":"John",
+                "middleName":"William",
+                "lastName":"O'Connor"
+              },
+              "dateOfBirth":"1956-02-12",
+              "identification":{
+                "nino":"ST123456"
+              },
+              "entityStart":"2000-01-01",
+              "entityEnd": "2020-02-28"
             }
           }
         ]

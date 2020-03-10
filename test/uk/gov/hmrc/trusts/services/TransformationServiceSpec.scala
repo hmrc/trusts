@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.trusts.services
 
+import java.time.LocalDate
+
 import org.joda.time.DateTime
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -191,36 +193,55 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     }
 
     "must write a promote trustee ind transform to the transformation repository with no existing transforms" in {
+      val response = getTrustResponse.as[GetTrustSuccessResponse]
+      val processedResponse = response.asInstanceOf[TrustProcessedResponse]
+      val desService = mock[DesService]
+
+      when (desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(processedResponse))
+
       val repository = mock[TransformationRepositoryImpl]
-      val service = new TransformationService(repository, mock[DesService], auditService)
-      val index = 3
+      val service = new TransformationService(repository, desService, auditService)
+      val index = 1
 
       when(repository.get(any(), any())).thenReturn(Future.successful(None))
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
-      val result = service.addPromoteTrusteeTransformer("utr", "internalId", index, DisplayTrustLeadTrusteeType(Some(newLeadTrusteeIndInfo), None))
+      val endDate = LocalDate.of(2014, 3, 14)
+      val result = service.addPromoteTrusteeTransformer("utr", "internalId", index, DisplayTrustLeadTrusteeType(Some(newLeadTrusteeIndInfo), None), endDate)
       whenReady(result) { _ =>
 
         verify(repository).set("utr",
           "internalId",
-          ComposedDeltaTransform(Seq(PromoteTrusteeIndTransform(index = 3, newLeadTrusteeIndInfo))))
+          ComposedDeltaTransform(Seq(PromoteTrusteeIndTransform(index, newLeadTrusteeIndInfo, endDate, trustee1Json))))
       }
     }
 
     "must write a promote trustee org transform to the transformation repository with no existing transforms" in {
+      val response = getTrustResponse.as[GetTrustSuccessResponse]
+      val processedResponse = response.asInstanceOf[TrustProcessedResponse]
+      val desService = mock[DesService]
+
+      when (desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(processedResponse))
+
       val repository = mock[TransformationRepositoryImpl]
-      val service = new TransformationService(repository, mock[DesService], auditService)
-      val index = 3
+      val service = new TransformationService(repository, desService, auditService)
+      val index = 1
 
       when(repository.get(any(), any())).thenReturn(Future.successful(None))
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+      val endDate = LocalDate.of(2013, 6, 28)
 
-      val result = service.addPromoteTrusteeTransformer("utr", "internalId", index, DisplayTrustLeadTrusteeType(None, Some(newLeadTrusteeOrgInfo)))
+      val result = service.addPromoteTrusteeTransformer(
+        "utr",
+        "internalId",
+        index,
+        DisplayTrustLeadTrusteeType(None, Some(newLeadTrusteeOrgInfo)),
+        endDate)
       whenReady(result) { _ =>
 
         verify(repository).set("utr",
           "internalId",
-          ComposedDeltaTransform(Seq(PromoteTrusteeOrgTransform(index, newLeadTrusteeOrgInfo))))
+          ComposedDeltaTransform(Seq(PromoteTrusteeOrgTransform(index, newLeadTrusteeOrgInfo, endDate, trustee1Json))))
       }
     }
 
@@ -237,7 +258,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       when(repository.get(any(), any())).thenReturn(Future.successful(None))
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
-      val endDate = DateTime.parse("2010-10-10")
+      val endDate = LocalDate.parse("2010-10-10")
 
       val payload = RemoveTrustee(
         endDate = endDate,
@@ -268,7 +289,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
-      val endDate = DateTime.parse("2010-10-10")
+      val endDate = LocalDate.parse("2010-10-10")
 
       val payload = RemoveTrustee(
         endDate = endDate,
@@ -352,7 +373,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
           |""".stripMargin)
 
       val existingTransforms = Seq(
-        RemoveTrusteeTransform(DateTime.parse("2019-12-21"), 0, originalTrusteeJson),
+        RemoveTrusteeTransform(LocalDate.parse("2019-12-21"), 0, originalTrusteeJson),
         AmendLeadTrusteeIndTransform(unitTestTrusteeInfo)
       )
       when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
