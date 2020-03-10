@@ -158,7 +158,8 @@
               "identification": {
                 "utr": "5465416546"
               },
-              "entityStart": "1998-02-12"
+              "entityStart": "1998-02-12",
+              "provisional": true
             }
           }
         ],

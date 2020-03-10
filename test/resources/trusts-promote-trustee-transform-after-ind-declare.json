@@ -19,6 +19,8 @@
         "trustees":[
           {
             "trusteeOrg": {
+              "lineNo": "2",
+              "bpMatchStatus": "01",
               "name": "Trustee Org 1",
               "phoneNumber": "0121546546",
               "identification": {
@@ -29,7 +31,8 @@
           },
           {
             "trusteeOrg": {
-              "lineNo": "2",
+              "lineNo": "3",
+              "bpMatchStatus": "01",
               "name": "Trustee Org 2",
               "phoneNumber": "0121546546",
               "identification": {
@@ -50,7 +53,8 @@
               "identification":{
                 "nino":"Nino"
               },
-              "entityStart":"1998-02-12"
+              "entityStart":"1998-02-12",
+              "provisional": true
             }
           },
           {

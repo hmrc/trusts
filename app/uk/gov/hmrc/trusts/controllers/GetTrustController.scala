@@ -95,6 +95,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   def getTrustees(utr: String) : Action[AnyContent] =
     doGet(utr, applyTransformations = true) {
       case processed: TrustProcessedResponse =>
+
         val pick = (JsPath \ 'details \ 'trust \ 'entities \ 'trustees).json.pick
 
         processed.getTrust.transform(pick).fold(
@@ -104,9 +105,15 @@ class GetTrustController @Inject()(identify: IdentifierAction,
           },
           trustees => {
 
-            val response = Json.obj("trustees" -> trustees.as[List[DisplayTrustTrusteeType]])
+            val response = Json.obj(
+              "trustees" -> trustees.as[List[DisplayTrustTrusteeType]].map(trustee =>
+                trustee.copy(
+                trusteeInd = trustee.trusteeInd.map(_.withProvisional),
+                trusteeOrg = trustee.trusteeOrg.map(_.withProvisional)
+              ))
+            )
 
-            Ok(Json.toJson(response))
+            Ok(response)
           }
         )
       case _ => Forbidden

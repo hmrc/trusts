@@ -32,7 +32,9 @@ class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionV
         None,
         None,
         None,
-        DateTime.parse("2020-01-30"))
+        DateTime.parse("2020-01-30"),
+        None
+      )
 
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-no-trustees.json")
 
@@ -47,13 +49,16 @@ class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionV
 
     "add a new org trustee" in {
 
-      val t = DisplayTrustTrusteeOrgType(None,
+      val t = DisplayTrustTrusteeOrgType(
+        None,
         None,
         "Company Name",
         None,
         None,
         None,
-        DateTime.parse("2020-01-30"))
+        DateTime.parse("2020-01-30"),
+        Some(true)
+      )
 
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
@@ -68,13 +73,20 @@ class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionV
 
     "fail to add a new org trustee when there are 25 or more existing trustees" in {
 
-      val t = DisplayTrustTrusteeOrgType(None,
+      val t = DisplayTrustTrusteeOrgType(
+        None,
         None,
         "New Trustee",
         Some("phoneNumber"),
         None,
-        Some(DisplayTrustIdentificationOrgType(None, Some("utr"), None)),
-        DateTime.parse("1990-10-10"))
+        Some(DisplayTrustIdentificationOrgType(
+          None,
+          Some("utr"),
+          None
+        )),
+        DateTime.parse("1990-10-10"),
+        Some(true)
+      )
 
       val json = JsonUtils.getJsonValueFromFile("trusts-etmp-max-trustees.json")
 

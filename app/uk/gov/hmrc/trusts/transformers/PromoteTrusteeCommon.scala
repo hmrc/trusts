@@ -65,7 +65,8 @@ trait PromoteTrusteeCommon {
           Some(indLead.dateOfBirth),
           Some(indLead.phoneNumber),
           Some(getIdentification(indLead.identification)),
-          indLead.entityStart.get
+          indLead.entityStart.get,
+          None
         )
 
         AddTrusteeIndTransform(demotedTrustee)
@@ -79,7 +80,8 @@ trait PromoteTrusteeCommon {
           Some(orgLead.phoneNumber),
           orgLead.email,
           Some(getIdentification(orgLead.identification)),
-          orgLead.entityStart.get
+          orgLead.entityStart.get,
+          None
         )
 
         AddTrusteeOrgTransform(demotedTrustee)

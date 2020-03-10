@@ -21,7 +21,7 @@ import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustTrust
 case class AddTrusteeIndTransform(trustee: DisplayTrustTrusteeIndividualType) extends DeltaTransform with AddTrusteeCommon {
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addTrustee(input, Json.toJson(trustee), TrusteeInd)
+    addTrustee(input, Json.toJson(trustee.copy(provisional = Some(true))), TrusteeInd)
   }
 }
 
