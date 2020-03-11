@@ -92,10 +92,6 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       case _ => Forbidden
     }
 
-  def transformTrusteesToMaintainJson = {
-
-  }
-
   def getTrustees(utr: String) : Action[AnyContent] =
     doGet(utr, applyTransformations = true) {
       case processed: TrustProcessedResponse =>
