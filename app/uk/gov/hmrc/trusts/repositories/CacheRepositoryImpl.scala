@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.trusts.repositories
 
+import java.sql.Timestamp
 import java.time.LocalDateTime
 
 import akka.stream.Materializer
@@ -99,7 +100,7 @@ class CacheRepositoryImpl @Inject()(
     val modifier = Json.obj(
       "$set" -> Json.obj(
         "id" -> createKey(utr, internalId),
-        "updatedAt" ->  Json.obj("$date" -> LocalDateTime.now),
+        "updatedAt" ->  Json.obj("$date" -> Timestamp.valueOf(LocalDateTime.now())),
         "etmpData" -> data
       )
     )
