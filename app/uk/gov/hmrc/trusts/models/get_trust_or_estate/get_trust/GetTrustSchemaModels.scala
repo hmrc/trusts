@@ -318,7 +318,7 @@ object DisplayTrustTrusteeOrgType {
       "email" -> o.email,
       "identification" -> o.identification,
       "entityStart" -> o.entityStart,
-      "provisional" -> o.lineNo.isDefined
+      "provisional" -> o.lineNo.isEmpty
     ).withoutNulls
   }
 }
@@ -348,7 +348,7 @@ object DisplayTrustTrusteeIndividualType {
       "phoneNumber" -> o.phoneNumber,
       "identification" -> o.identification,
       "entityStart" -> o.entityStart,
-      "provisional" -> o.lineNo.isDefined
+      "provisional" -> o.lineNo.isEmpty
     ).withoutNulls
   }
 }

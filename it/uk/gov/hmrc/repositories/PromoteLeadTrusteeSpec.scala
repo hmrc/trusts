@@ -32,6 +32,7 @@ class PromoteLeadTrusteeSpec extends FreeSpec with MustMatchers with ScalaFuture
   val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
 
   "a promote lead trustee call" - {
+
     "must return amended data in a subsequent 'get' call" in {
 
       val newTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
