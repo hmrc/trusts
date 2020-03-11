@@ -23,10 +23,6 @@ case class AddTrusteeIndTransform(trustee: DisplayTrustTrusteeIndividualType) ex
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     addTrustee(input, Json.toJson(trustee), TrusteeInd)
   }
-
-  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    addTrustee(input, Json.toJson(trustee), TrusteeInd)
-  }
 }
 
 object AddTrusteeIndTransform {
