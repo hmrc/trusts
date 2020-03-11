@@ -32,12 +32,13 @@ trait GetTrustSuccessResponse extends GetTrustResponse {
 case class TrustProcessedResponse(getTrust: JsValue,
                               responseHeader: ResponseHeader) extends GetTrustSuccessResponse {
 
-  def transform : GetTrustResponse = {
+  def transform : JsResult[TrustProcessedResponse] = {
     getTrust.transform(
       Trustees.transform(getTrust)
     ).map {
-      json => TrustProcessedResponse(json, responseHeader)
-    }.getOrElse(InternalServerErrorResponse)
+      json =>
+        TrustProcessedResponse(json, responseHeader)
+    }
   }
 
 }

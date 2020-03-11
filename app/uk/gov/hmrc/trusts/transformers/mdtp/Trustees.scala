@@ -26,26 +26,27 @@ object Trustees {
   def transform(response : JsValue) : Reads[JsObject] = {
     response.transform(pathToTrustees.json.pick).fold(
       _ => {
-        pathToTrustees.json.put(JsArray())
+        JsPath.json.update(
+          pathToTrustees.json.put(JsArray())
+        )
       },
       trustees => {
 
-        val trusteesUpdated = Json.obj(
-          "trustees" -> trustees.as[List[DisplayTrustTrusteeType]].map {
-            case DisplayTrustTrusteeType(Some(trusteeInd), None) =>
-              Json.obj(
-                "trusteeInd" -> Json.toJson(trusteeInd)(DisplayTrustTrusteeIndividualType.writeToMaintain)
-              )
-            case DisplayTrustTrusteeType(None, Some(trusteeOrg)) =>
-              Json.obj(
-                "trusteeOrg" -> Json.toJson(trusteeOrg)(DisplayTrustTrusteeOrgType.writeToMaintain)
-              )
-            case _ => JsNull
-          }
-        )
+        val trusteesUpdated = JsArray(trustees.as[List[DisplayTrustTrusteeType]].map {
+          case DisplayTrustTrusteeType(Some(trusteeInd), None) =>
+            Json.obj(
+              "trusteeInd" -> Json.toJson(trusteeInd)(DisplayTrustTrusteeIndividualType.writeToMaintain)
+            )
+          case DisplayTrustTrusteeType(None, Some(trusteeOrg)) =>
+            Json.obj(
+              "trusteeOrg" -> Json.toJson(trusteeOrg)(DisplayTrustTrusteeOrgType.writeToMaintain)
+            )
+        })
 
-        pathToTrustees.json.prune andThen
-          pathToTrustees.json.put(trusteesUpdated)
+        JsPath.json.update(
+          pathToTrustees.json.prune andThen
+            pathToTrustees.json.put(trusteesUpdated)
+        )
       }
     )
   }
