@@ -95,19 +95,13 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   def getTrustees(utr: String) : Action[AnyContent] =
     doGet(utr, applyTransformations = true) {
       case processed: TrustProcessedResponse =>
-
         processed.transform match {
           case transformed: TrustProcessedResponse =>
 
-            val pick = (JsPath \ 'details \ 'trust \ 'entities \ 'trustees).json.pick
+            val path = (JsPath \ 'details \ 'trust \ 'entities \ 'trustees).json.pick
 
-            transformed.getTrust.transform(pick).fold(
-              _ => {
-                Ok(Json.obj("trustees" -> JsArray()))
-              },
-              trustees =>
-                Ok(trustees)
-            )
+            val default = Json.obj("trustees" -> JsArray())
+            Ok(transformed.getTrust.transform(path).getOrElse(default))
           case _ =>
             Forbidden
         }
@@ -115,8 +109,11 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
 
   private def resetCacheIfRequested(utr: String, internalId: String, refreshEtmpData: Boolean) = {
-    if (refreshEtmpData) desService.resetCache(utr, internalId)
-    else Future.successful(())
+    if (refreshEtmpData) {
+      desService.resetCache(utr, internalId)
+    } else {
+      Future.successful(())
+    }
   }
 
   private def doGet(utr: String, applyTransformations: Boolean, refreshEtmpData: Boolean = false)
