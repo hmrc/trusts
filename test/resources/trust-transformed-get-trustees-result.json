@@ -21,6 +21,7 @@
     {
       "trusteeOrg": {
         "lineNo": "1",
+        "bpMatchStatus": "01",
         "name": "MyOrg Incorporated",
         "phoneNumber": "+447456788112",
         "email": "a",

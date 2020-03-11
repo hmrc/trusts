@@ -63,6 +63,7 @@ case class RemoveTrusteeTransform(endDate: LocalDate, index: Int, trusteeToRemov
         case e: JsError => e
       }
     } else {
+      // Do not add the trustee back into the record
       super.applyDeclarationTransform(input)
     }
   }

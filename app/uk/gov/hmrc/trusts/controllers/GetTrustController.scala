@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsArray, JsError, JsPath, JsSuccess, Json}
+import play.api.libs.json.{JsArray, JsError, JsNull, JsPath, JsSuccess, Json}
 import play.api.mvc.{Action, AnyContent, Result}
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUTRAction}
@@ -95,36 +95,30 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   def getTrustees(utr: String) : Action[AnyContent] =
     doGet(utr, applyTransformations = true) {
       case processed: TrustProcessedResponse =>
+        processed.transform match {
+          case transformed: TrustProcessedResponse =>
 
-        val pick = (JsPath \ 'details \ 'trust \ 'entities \ 'trustees).json.pick
+            val path = (JsPath \ 'details \ 'trust \ 'entities \ 'trustees).json.pick
 
-        processed.getTrust.transform(pick).fold(
-          _ => {
-            val nilResponse = Json.obj("trustees" -> JsArray())
-            Ok(Json.toJson(nilResponse))
-          },
-          trustees => {
-
-            val response = Json.obj(
-              "trustees" -> trustees.as[List[DisplayTrustTrusteeType]].map(trustee =>
-                trustee.copy(
-                trusteeInd = trustee.trusteeInd.map(_.withProvisional),
-                trusteeOrg = trustee.trusteeOrg.map(_.withProvisional)
-              ))
-            )
-
-            Ok(response)
-          }
-        )
+            val default = Json.obj("trustees" -> JsArray())
+            Ok(transformed.getTrust.transform(path).getOrElse(default))
+          case _ =>
+            Forbidden
+        }
       case _ => Forbidden
     }
 
   private def resetCacheIfRequested(utr: String, internalId: String, refreshEtmpData: Boolean) = {
-    if (refreshEtmpData) desService.resetCache(utr, internalId)
-    else Future.successful(())
+    if (refreshEtmpData) {
+      desService.resetCache(utr, internalId)
+    } else {
+      Future.successful(())
+    }
   }
 
-  private def doGet(utr: String, applyTransformations: Boolean, refreshEtmpData: Boolean = false)(handleResult: GetTrustSuccessResponse => Result): Action[AnyContent] = {
+  private def doGet(utr: String, applyTransformations: Boolean, refreshEtmpData: Boolean = false)
+                   (handleResult: GetTrustSuccessResponse => Result): Action[AnyContent] = {
+
     (ValidateUTRAction(utr) andThen identify).async {
       implicit request =>
 

@@ -175,8 +175,7 @@
               "identification":{
                 "nino":"nino"
               },
-              "entityStart":"1990-10-10",
-              "provisional": true
+              "entityStart":"1990-10-10"
             }
           }
         ],

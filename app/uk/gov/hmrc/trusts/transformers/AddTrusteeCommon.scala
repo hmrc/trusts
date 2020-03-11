@@ -36,7 +36,9 @@ trait AddTrusteeCommon {
           val trustees: Reads[JsObject] =
             path.update( of[JsArray]
               .map {
-                trustees => trustees :+ Json.obj(trusteeType.toString -> newTrustee)
+                trustees => trustees :+ Json.obj(
+                  trusteeType.toString -> newTrustee
+                )
               }
             )
           input.transform(trustees)

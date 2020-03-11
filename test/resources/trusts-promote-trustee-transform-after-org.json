@@ -51,8 +51,7 @@
               "identification":{
                 "nino":"Nino"
               },
-              "entityStart":"1998-02-12",
-              "provisional": true
+              "entityStart":"1998-02-12"
             }
           }
         ]

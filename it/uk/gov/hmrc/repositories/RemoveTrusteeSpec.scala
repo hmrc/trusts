@@ -94,7 +94,7 @@ class RemoveTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures wit
               |                  "utr": "5465416546"
               |                },
               |                "entityStart": "1998-02-12",
-              |                "provisional": false
+              |                "provisional": true
               |              }
               |            }
               |]

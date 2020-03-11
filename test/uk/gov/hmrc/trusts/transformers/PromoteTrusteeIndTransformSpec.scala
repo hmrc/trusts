@@ -47,6 +47,7 @@ class PromoteTrusteeIndTransformSpec extends FreeSpec with MustMatchers with Opt
       |""".stripMargin)
 
   "the promote trustee ind transformer should" - {
+
     "successfully promote a trustee to lead and demote the existing lead trustee" in {
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-promote-trustee-transform-before-ind.json")
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-promote-trustee-transform-after-ind.json")

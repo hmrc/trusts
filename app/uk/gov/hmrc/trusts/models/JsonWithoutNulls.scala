@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.transformers
-import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustTrusteeIndividualType
+package uk.gov.hmrc.trusts.models
 
-case class AddTrusteeIndTransform(trustee: DisplayTrustTrusteeIndividualType) extends DeltaTransform with AddTrusteeCommon {
+import play.api.libs.json.{JsNull, JsObject, JsValue}
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addTrustee(input, Json.toJson(trustee), TrusteeInd)
+object JsonWithoutNulls {
+
+  implicit class JsonWithoutNullValues(json: JsValue) {
+
+    def withoutNulls : JsValue = json match {
+      case JsObject(fields) =>
+        JsObject(fields.flatMap {
+          case (_, JsNull) => None
+          case notNullField @ (_, value) => Some(notNullField)
+        })
+      case other => other
+    }
+
   }
-}
 
-object AddTrusteeIndTransform {
-
-  val key = "AddTrusteeIndTransform"
-
-  implicit val format: Format[AddTrusteeIndTransform] = Json.format[AddTrusteeIndTransform]
 }

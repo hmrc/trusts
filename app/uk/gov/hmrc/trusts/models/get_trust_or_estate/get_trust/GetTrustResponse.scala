@@ -22,6 +22,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.{ResponseHeader, _}
+import uk.gov.hmrc.trusts.transformers.mdtp.Trustees
 
 trait GetTrustResponse
 trait GetTrustSuccessResponse extends GetTrustResponse {
@@ -29,7 +30,17 @@ trait GetTrustSuccessResponse extends GetTrustResponse {
 }
 
 case class TrustProcessedResponse(getTrust: JsValue,
-                              responseHeader: ResponseHeader) extends GetTrustSuccessResponse
+                              responseHeader: ResponseHeader) extends GetTrustSuccessResponse {
+
+  def transform : GetTrustResponse = {
+    getTrust.transform(
+      Trustees.transform(getTrust)
+    ).map {
+      json => TrustProcessedResponse(json, responseHeader)
+    }.getOrElse(InternalServerErrorResponse)
+  }
+
+}
 
 object TrustProcessedResponse {
   val mongoWrites: Writes[TrustProcessedResponse] = new Writes[TrustProcessedResponse] {
@@ -45,7 +56,7 @@ object GetTrustSuccessResponse {
 
 
   implicit val writes: Writes[GetTrustSuccessResponse] = Writes{
-    case TrustProcessedResponse(trust, header) =>Json.obj("responseHeader" -> header, "getTrust" -> Json.toJson(trust.as[GetTrust]))
+    case TrustProcessedResponse(trust, header) => Json.obj("responseHeader" -> header, "getTrust" -> Json.toJson(trust.as[GetTrust]))
     case TrustFoundResponse(header) => Json.obj("responseHeader" -> header)
   }
 

@@ -167,8 +167,7 @@
           {
             "trusteeOrg": {
               "name": "Company Name",
-              "entityStart": "2020-01-30",
-              "provisional": true
+              "entityStart": "2020-01-30"
             }
           }
         ],
