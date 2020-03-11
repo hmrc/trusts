@@ -22,6 +22,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.{ResponseHeader, _}
+import uk.gov.hmrc.trusts.transformers.mdtp.Trustees
 
 trait GetTrustResponse
 trait GetTrustSuccessResponse extends GetTrustResponse {
