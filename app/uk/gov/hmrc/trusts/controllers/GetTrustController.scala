@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsArray, JsError, JsNull, JsPath, JsSuccess, Json}
+import play.api.libs.json.{JsArray, JsError, JsNull, JsPath, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, Result}
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUTRAction}
@@ -95,17 +95,22 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   def getTrustees(utr: String) : Action[AnyContent] =
     doGet(utr, applyTransformations = true) {
       case processed: TrustProcessedResponse =>
-        processed.transform match {
+        processed.transform.map {
           case transformed: TrustProcessedResponse =>
 
-            val path = (JsPath \ 'details \ 'trust \ 'entities \ 'trustees).json.pick
+            val pickTrustees = (JsPath \ 'details \ 'trust \ 'entities \ 'trustees).json.pick
 
-            val default = Json.obj("trustees" -> JsArray())
-            Ok(transformed.getTrust.transform(path).getOrElse(default))
+            def insertIntoObject(json : JsValue) = Json.obj("trustees" -> json)
+
+            Ok(transformed
+              .getTrust.transform(pickTrustees)
+              .map(insertIntoObject)
+              .getOrElse(insertIntoObject(JsArray())))
           case _ =>
-            Forbidden
-        }
-      case _ => Forbidden
+            InternalServerError
+        }.getOrElse(InternalServerError)
+      case _ =>
+        Forbidden
     }
 
   private def resetCacheIfRequested(utr: String, internalId: String, refreshEtmpData: Boolean) = {
