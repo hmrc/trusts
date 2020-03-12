@@ -107,6 +107,13 @@ class TransformationService @Inject()(repository: TransformationRepository,
     })
   }
 
+  def addAmendTrusteeTransformer(utr: String, index: Int, internalId: String, trustee: DisplayTrustTrusteeType): Future[Unit] = {
+    addNewTransform(utr, internalId, trustee match {
+      case DisplayTrustTrusteeType(Some(trusteeInd), None) => AmendTrusteeIndTransform(index, trusteeInd)
+      case DisplayTrustTrusteeType(None, Some(trusteeOrg)) => AmendTrusteeOrgTransform(index, trusteeOrg)
+    })
+  }
+
   def addPromoteTrusteeTransformer(
                                     utr: String,
                                     internalId: String,
