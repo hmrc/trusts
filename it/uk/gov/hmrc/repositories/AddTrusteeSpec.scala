@@ -29,7 +29,7 @@ class AddTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures with M
   trait JsonFixtures {
 
     val getTrustResponseFromDES : JsValue = JsonUtils
-      .getJsonValueFromFile("trusts-etmp-received-empty-trustees.json")
+      .getJsonValueFromFile("trusts-etmp-received-no-trustees.json")
   }
 
   "an add trustee call" - {
