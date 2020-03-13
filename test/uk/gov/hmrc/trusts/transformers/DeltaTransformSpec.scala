@@ -22,7 +22,7 @@ import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.models.NameType
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType, DisplayTrustTrusteeIndividualType}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationOrgType, DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType, DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType}
 
 class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
@@ -41,18 +41,29 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         None
       )
 
+      val newTrusteeInd = DisplayTrustTrusteeIndividualType(
+        Some("lineNo"),
+        Some("bpMatchStatus"),
+        NameType("New", None, "Trustee"),
+        Some(DateTime.parse("2000-01-01")),
+        Some("phoneNumber"),
+        Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
+        DateTime.parse("2000-01-01")
+      )
+
+      val newTrusteeOrg = DisplayTrustTrusteeOrgType(
+        Some("lineNo"),
+        Some("bpMatchStatus"),
+        "New Trustee",
+        Some("phoneNumber"),
+        Some("email"),
+        Some(DisplayTrustIdentificationOrgType(None, Some("utr"), None)),
+        DateTime.parse("2000-01-01")
+      )
+
       val amendLeadTrusteeTransform = AmendLeadTrusteeIndTransform(newLeadTrustee)
 
-      val addTrusteeTransform = AddTrusteeIndTransform(
-        DisplayTrustTrusteeIndividualType(
-          Some("lineNo"),
-          Some("bpMatchStatus"),
-          NameType("New", None, "Trustee"),
-          Some(DateTime.parse("2000-01-01")),
-          Some("phoneNumber"),
-          Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-          DateTime.parse("2000-01-01")
-        ))
+      val addTrusteeTransform = AddTrusteeIndTransform(newTrusteeInd)
 
       val removeTrusteeTransform = RemoveTrusteeTransform(
         endDate = LocalDate.parse("2010-01-01"),
@@ -66,6 +77,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         LocalDate.parse("2012-02-06"),
         Json.obj()
       )
+
+      val amendTrusteeIndTransform = AmendTrusteeIndTransform(0, newTrusteeInd)
+      val amendTrusteeOrgTransform = AmendTrusteeOrgTransform(0, newTrusteeOrg)
 
       val json = Json.parse(
         s"""{
@@ -81,6 +95,12 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |            },
           |            {
           |               "PromoteTrusteeIndTransform": ${Json.toJson(promoteTrusteeTransform)}
+          |            },
+          |            {
+          |               "AmendTrusteeIndTransform": ${Json.toJson(amendTrusteeIndTransform)}
+          |            },
+          |            {
+          |               "AmendTrusteeOrgTransform": ${Json.toJson(amendTrusteeOrgTransform)}
           |            }
           |        ]
           |    }
@@ -90,7 +110,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           amendLeadTrusteeTransform,
           addTrusteeTransform,
           removeTrusteeTransform,
-          promoteTrusteeTransform
+          promoteTrusteeTransform,
+          amendTrusteeIndTransform,
+          amendTrusteeOrgTransform
         )
       )
 

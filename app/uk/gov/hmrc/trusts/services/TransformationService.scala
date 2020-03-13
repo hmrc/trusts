@@ -23,6 +23,7 @@ import play.api.Logger
 import play.api.libs.json.{JsObject, JsResult, JsSuccess, JsValue, Json, __, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
+import uk.gov.hmrc.trusts.models.ExistingCheckResponse.BadRequest
 import uk.gov.hmrc.trusts.models.RemoveTrustee
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.TransformationErrorResponse
@@ -104,6 +105,13 @@ class TransformationService @Inject()(repository: TransformationRepository,
     addNewTransform(utr, internalId, newLeadTrustee match {
       case DisplayTrustLeadTrusteeType(Some(trusteeInd), None) => AmendLeadTrusteeIndTransform(trusteeInd)
       case DisplayTrustLeadTrusteeType(None, Some(trusteeOrg)) => AmendLeadTrusteeOrgTransform(trusteeOrg)
+    })
+  }
+
+  def addAmendTrusteeTransformer(utr: String, index: Int, internalId: String, trustee: DisplayTrustTrusteeType): Future[Unit] = {
+    addNewTransform(utr, internalId, trustee match {
+      case DisplayTrustTrusteeType(Some(trusteeInd), None) => AmendTrusteeIndTransform(index, trusteeInd)
+      case DisplayTrustTrusteeType(None, Some(trusteeOrg)) => AmendTrusteeOrgTransform(index, trusteeOrg)
     })
   }
 

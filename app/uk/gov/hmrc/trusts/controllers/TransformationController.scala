@@ -86,6 +86,24 @@ class TransformationController @Inject()(
     }
   }
 
+  def amendTrustee(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
+    implicit request => {
+      request.body.validate[DisplayTrustTrusteeType] match {
+        case JsSuccess(model, _) =>
+          model match {
+            case DisplayTrustTrusteeType(None, None) => Future.successful(BadRequest)
+            case _ => transformationService.addAmendTrusteeTransformer(utr, index, request.identifier, model) map { _ =>
+              Ok
+            }
+          }
+
+        case JsError(errors) =>
+          logger.warn(s"Supplied trustee could not be read as DisplayTrustTrusteeType - $errors")
+          Future.successful(BadRequest)
+      }
+    }
+  }
+
   def promoteTrustee(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
 

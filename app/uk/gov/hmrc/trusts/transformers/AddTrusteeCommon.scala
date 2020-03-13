@@ -18,15 +18,11 @@ package uk.gov.hmrc.trusts.transformers
 
 import play.api.libs.json.Reads._
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustTrusteeIndividualType
+import uk.gov.hmrc.trusts.models.TrusteeIndOrOrg
 
 trait AddTrusteeCommon {
 
-  sealed abstract class TrusteeType(trustee: String) { override val toString: String = trustee }
-  final case object TrusteeInd extends TrusteeType("trusteeInd")
-  final case object TrusteeOrg extends TrusteeType("trusteeOrg")
-
-  def addTrustee(input: JsValue, newTrustee: JsValue, trusteeType: TrusteeType): JsResult[JsValue] = {
+  def addTrustee(input: JsValue, newTrustee: JsValue, trusteeType: TrusteeIndOrOrg): JsResult[JsValue] = {
 
     val path = (__ \ 'details \ 'trust \ 'entities \ 'trustees).json
 
