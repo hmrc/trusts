@@ -17,14 +17,11 @@
 package uk.gov.hmrc.trusts.transformers
 
 import play.api.libs.json._
+import uk.gov.hmrc.trusts.models.TrusteeIndOrOrg
 
 trait AmendTrusteeCommon {
 
-  sealed abstract class TrusteeType(trustee: String) { override val toString: String = trustee }
-  final case object TrusteeInd extends TrusteeType("trusteeInd")
-  final case object TrusteeOrg extends TrusteeType("trusteeOrg")
-
-  def transform(index: Int, input: JsValue, newTrusteeDetails: JsValue, trusteeType: TrusteeType): JsResult[JsValue] = {
+  def transform(index: Int, input: JsValue, newTrusteeDetails: JsValue, trusteeType: TrusteeIndOrOrg): JsResult[JsValue] = {
     val trusteePath = __ \ 'details \ 'trust \ 'entities \ 'trustees
 
     input.transform(trusteePath.json.pick) match {

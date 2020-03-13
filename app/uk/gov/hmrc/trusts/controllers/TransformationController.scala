@@ -90,11 +90,15 @@ class TransformationController @Inject()(
     implicit request => {
       request.body.validate[DisplayTrustTrusteeType] match {
         case JsSuccess(model, _) =>
-          transformationService.addAmendTrusteeTransformer(utr, index, request.identifier, model) map { _ =>
-            Ok
+          model match {
+            case DisplayTrustTrusteeType(None, None) => Future.successful(BadRequest)
+            case _ => transformationService.addAmendTrusteeTransformer(utr, index, request.identifier, model) map { _ =>
+              Ok
+            }
           }
+
         case JsError(errors) =>
-          logger.warn(s"Supplied trustee could not be read as DisplayTrustLeadTrusteeType - $errors")
+          logger.warn(s"Supplied trustee could not be read as DisplayTrustTrusteeType - $errors")
           Future.successful(BadRequest)
       }
     }

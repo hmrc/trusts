@@ -467,5 +467,23 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
         r => r mustEqual expectedResponse
       }
     }
+
+    "must write an amend trustee transform to the transformation repository with no existing transforms" in {
+      val index = 0
+      val repository = mock[TransformationRepositoryImpl]
+      val service = new TransformationService(repository, mock[DesService], auditService)
+
+      when(repository.get(any(), any())).thenReturn(Future.successful(None))
+      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+
+      val result = service.addAmendTrusteeTransformer("utr", index, "internalId", DisplayTrustTrusteeType(Some(newTrusteeIndInfo), None))
+      whenReady(result) { _ =>
+
+        verify(repository).set("utr",
+          "internalId",
+          ComposedDeltaTransform(Seq(AmendTrusteeIndTransform(index, newTrusteeIndInfo))))
+
+      }
+    }
   }
 }

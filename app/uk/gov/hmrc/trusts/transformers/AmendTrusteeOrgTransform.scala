@@ -17,6 +17,7 @@
 package uk.gov.hmrc.trusts.transformers
 
 import play.api.libs.json._
+import uk.gov.hmrc.trusts.models.TrusteeOrg
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustTrusteeOrgType
 
 case class AmendTrusteeOrgTransform(index: Int,
