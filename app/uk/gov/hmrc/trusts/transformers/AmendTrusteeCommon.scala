@@ -16,30 +16,75 @@
 
 package uk.gov.hmrc.trusts.transformers
 
+import java.time.LocalDate
+
+import org.joda.time.DateTime
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.TrusteeIndOrOrg
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType, DisplayTrustTrusteeType}
 
 trait AmendTrusteeCommon {
 
-  def transform(index: Int, input: JsValue, newTrusteeDetails: JsValue, trusteeType: TrusteeIndOrOrg): JsResult[JsValue] = {
+  def transform(index: Int, originalJson: JsValue, newTrusteeDetails: JsValue): JsResult[JsValue] = {
+
+    val trusteeToRemove = getOriginalTrustee(originalJson, index)
+
+    val entityStartDate = getEntityStartDate(trusteeToRemove)
+
+    for {
+      trusteeRemovedJson <- RemoveTrusteeTransform(LocalDate.now(), index, trusteeToRemove).applyTransform(originalJson)
+      trusteeAddedJson <- addTrustee(newTrusteeDetails, trusteeRemovedJson, entityStartDate)
+    } yield {
+      trusteeAddedJson
+    }
+  }
+
+  private def addTrustee(newTrustee: JsValue, updatedJson: JsValue, entityStart: DateTime): JsResult[JsValue] = {
+    val indTrustee = newTrustee.validate[DisplayTrustTrusteeIndividualType].asOpt
+    val orgTrustee = newTrustee.validate[DisplayTrustTrusteeOrgType].asOpt
+
+    (indTrustee, orgTrustee) match {
+      case (Some(ind), None) =>
+        AddTrusteeIndTransform(
+          ind.copy(entityStart = entityStart)
+        ).applyTransform(updatedJson)
+      case (None, Some(org)) =>
+        AddTrusteeOrgTransform(
+          org.copy(entityStart = entityStart)
+        ).applyTransform(updatedJson)
+      case _ => throw new Exception("Existing trustee could not be identified")
+    }
+  }
+
+  private def getEntityStartDate(trusteeToRemove: JsValue): DateTime = {
+
+    trusteeToRemove.validate[DisplayTrustTrusteeType].asOpt match {
+      case Some(DisplayTrustTrusteeType(Some(ind), None)) => ind.entityStart
+      case Some(DisplayTrustTrusteeType(None, Some(org))) => org.entityStart
+      case _ => throw new Exception("Existing trustee could not be identified")
+    }
+  }
+
+  private def getOriginalTrustee(input: JsValue, index: Int): JsValue = {
     val trusteePath = __ \ 'details \ 'trust \ 'entities \ 'trustees
 
     input.transform(trusteePath.json.pick) match {
 
       case JsSuccess(json, _) =>
 
-        val array = json.as[JsArray]
+        val list = json.as[JsArray].value.toList
+        list(index).validate[JsValue] match {
+          case JsSuccess(value, _) =>
+            value
 
-        val updated = (array.value.take(index) :+ Json.obj(trusteeType.toString -> newTrusteeDetails)) ++ array.value.drop(index + 1)
-
-        input.transform(
-          trusteePath.json.prune andThen
-            JsPath.json.update {
-              trusteePath.json.put(Json.toJson(updated))
-            }
-        )
-
-      case e: JsError => e
+          case JsError(errors) =>
+            throw JsResultException(errors)
+        }
+      case JsError(errors) =>
+        throw JsResultException(errors)
     }
+  }
+
+  def declarationTransform(input: JsValue, endDate: LocalDate, index: Int, originalTrusteeJson: JsValue): JsResult[JsValue] = {
+    RemoveTrusteeTransform(endDate, index, originalTrusteeJson).applyDeclarationTransform(input)
   }
 }

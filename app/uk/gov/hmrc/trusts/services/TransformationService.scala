@@ -23,7 +23,6 @@ import play.api.Logger
 import play.api.libs.json.{JsObject, JsResult, JsSuccess, JsValue, Json, __, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
-import uk.gov.hmrc.trusts.models.ExistingCheckResponse.BadRequest
 import uk.gov.hmrc.trusts.models.RemoveTrustee
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.TransformationErrorResponse
@@ -85,7 +84,9 @@ class TransformationService @Inject()(repository: TransformationRepository,
             Logger.info(s"[TransformationService] applying declaration transformations")
             transformations.applyDeclarationTransform(initial)
           }
-        } yield transformed
+        } yield {
+          transformed
+        }
     }
   }
 
@@ -108,11 +109,19 @@ class TransformationService @Inject()(repository: TransformationRepository,
     })
   }
 
-  def addAmendTrusteeTransformer(utr: String, index: Int, internalId: String, trustee: DisplayTrustTrusteeType): Future[Unit] = {
-    addNewTransform(utr, internalId, trustee match {
-      case DisplayTrustTrusteeType(Some(trusteeInd), None) => AmendTrusteeIndTransform(index, trusteeInd)
-      case DisplayTrustTrusteeType(None, Some(trusteeOrg)) => AmendTrusteeOrgTransform(index, trusteeOrg)
-    })
+  def addAmendTrusteeTransformer(utr: String,
+                                 index: Int,
+                                 internalId: String,
+                                 newTrustee: DisplayTrustTrusteeType
+                                )(implicit hc: HeaderCarrier): Future[Unit] = {
+    getTrusteeAtIndex(utr, internalId, index).map {
+      case JsSuccess(trusteeJson: JsValue, _) =>
+        addNewTransform(utr, internalId, newTrustee match {
+          case DisplayTrustTrusteeType(Some(trusteeInd), None) => AmendTrusteeIndTransform(index, trusteeInd, trusteeJson)
+          case DisplayTrustTrusteeType(None, Some(trusteeOrg)) => AmendTrusteeOrgTransform(index, trusteeOrg, trusteeJson)
+        })
+      case JsError(_) => Future.failed(InternalServerErrorException(s"Could not pick trustee at index ${index}."))
+    }
   }
 
   def addPromoteTrusteeTransformer(
@@ -128,7 +137,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
           case DisplayTrustLeadTrusteeType(None, Some(trusteeOrg)) => PromoteTrusteeOrgTransform(index, trusteeOrg, endDate, trusteeJson)
         })
       case JsError(_) => Future.failed(InternalServerErrorException(s"Could not pick trustee at index ${index}."))
-      }
+    }
   }
 
   def addAddTrusteeTransformer(utr: String, internalId: String, newTrustee: DisplayTrustTrusteeType): Future[Unit] = {

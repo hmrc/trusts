@@ -232,7 +232,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
         entityStart = DateTime.parse("2012-03-14")
       )
 
-      when(transformationService.addAmendTrusteeTransformer(any(), any(), any(), any()))
+      when(transformationService.addAmendTrusteeTransformer(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(()))
 
       val newTrusteeInfo = DisplayTrustTrusteeType(Some(newTrusteeIndInfo), None)
@@ -244,7 +244,12 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
       val result = controller.amendTrustee("aUTR", index).apply(request)
 
       status(result) mustBe OK
-      verify(transformationService).addAmendTrusteeTransformer("aUTR", index, "id", newTrusteeInfo)
+      verify(transformationService).addAmendTrusteeTransformer(
+        equalTo("aUTR"),
+        equalTo(index),
+        equalTo("id"),
+        equalTo(newTrusteeInfo)
+      )(any())
     }
 
     "must add a new amend trustee transform for a trustee org" in {
@@ -261,7 +266,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
         entityStart = DateTime.parse("2012-03-14")
       )
 
-      when(transformationService.addAmendTrusteeTransformer(any(), any(), any(), any()))
+      when(transformationService.addAmendTrusteeTransformer(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(()))
 
       val newTrusteeInfo = DisplayTrustTrusteeType(None, Some(newTrusteeOrgInfo))
@@ -273,7 +278,13 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
       val result = controller.amendTrustee("aUTR", index).apply(request)
 
       status(result) mustBe OK
-      verify(transformationService).addAmendTrusteeTransformer("aUTR", index, "id", newTrusteeInfo)
+      verify(transformationService).addAmendTrusteeTransformer(
+        equalTo("aUTR"),
+        equalTo(index),
+        equalTo("id"),
+        equalTo(newTrusteeInfo)
+      )(any())
+
     }
 
     "must return an error for malformed json" in {

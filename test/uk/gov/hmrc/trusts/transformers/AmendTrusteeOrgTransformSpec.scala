@@ -18,6 +18,7 @@ package uk.gov.hmrc.trusts.transformers
 
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationOrgType, DisplayTrustTrusteeOrgType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
@@ -35,7 +36,24 @@ class AmendTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with Optio
         identification = Some(DisplayTrustIdentificationOrgType(None, Some("newUtr"), None)),
         entityStart = new DateTime(2019, 2, 10, 12, 30)
       )
-      val transformer = AmendTrusteeOrgTransform(1, newTrusteeInfo)
+
+      val originalTrusteeInfo = Json.parse(
+        """
+          |{
+          |   "trusteeOrg":{
+          |     "lineNo": "1",
+          |     "bpMatchStatus": "01",
+          |     "name": "MyOrg Incorporated",
+          |     "phoneNumber": "+447456788112",
+          |     "identification":{
+          |       "utr": "1234567890"
+          |     },
+          |     "entityStart": "2017-02-28"
+          |   }
+          |}
+          |""".stripMargin)
+
+      val transformer = AmendTrusteeOrgTransform(1, newTrusteeInfo, originalTrusteeInfo)
 
       val result = transformer.applyTransform(beforeJson).get
       result mustBe afterJson
