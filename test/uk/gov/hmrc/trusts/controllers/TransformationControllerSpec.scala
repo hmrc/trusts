@@ -218,7 +218,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
 
     val index = 0
 
-    "must add a new amend trustee transform" in {
+    "must add a new amend trustee transform for a trustee ind" in {
       val transformationService = mock[TransformationService]
       val controller = new TransformationController(identifierAction, transformationService)
 
@@ -238,7 +238,36 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
       val newTrusteeInfo = DisplayTrustTrusteeType(Some(newTrusteeIndInfo), None)
 
       val request = FakeRequest("POST", "path")
-        .withBody(Json.toJson(newTrusteeInfo))
+        .withBody(Json.toJson(newTrusteeIndInfo))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendTrustee("aUTR", index).apply(request)
+
+      status(result) mustBe OK
+      verify(transformationService).addAmendTrusteeTransformer("aUTR", index, "id", newTrusteeInfo)
+    }
+
+    "must add a new amend trustee transform for a trustee org" in {
+      val transformationService = mock[TransformationService]
+      val controller = new TransformationController(identifierAction, transformationService)
+
+      val newTrusteeOrgInfo = DisplayTrustTrusteeOrgType(
+        lineNo = Some("newLineNo"),
+        bpMatchStatus = Some("newMatchStatus"),
+        name = "newFirstName newLastName",
+        phoneNumber = Some("newPhone"),
+        email = Some("newEmail"),
+        identification = Some(DisplayTrustIdentificationOrgType(None, Some("newUtr"), None)),
+        entityStart = DateTime.parse("2012-03-14")
+      )
+
+      when(transformationService.addAmendTrusteeTransformer(any(), any(), any(), any()))
+        .thenReturn(Future.successful(()))
+
+      val newTrusteeInfo = DisplayTrustTrusteeType(None, Some(newTrusteeOrgInfo))
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(newTrusteeOrgInfo))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val result = controller.amendTrustee("aUTR", index).apply(request)
