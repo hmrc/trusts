@@ -18,7 +18,7 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import uk.gov.hmrc.trusts.models.NameType
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeType, GetTrustSuccessResponse}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustTrusteeIndividualType, GetTrustSuccessResponse}
 import uk.gov.hmrc.trusts.repositories.TrustsMongoDriver
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
@@ -34,26 +34,21 @@ class AmendTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures with
   "an amend trustee call" - {
     "must return amended data in a subsequent 'get' call" in {
 
-      val newTrusteeIndInfo = DisplayTrustTrusteeType(
-        Some(
-          DisplayTrustTrusteeIndividualType(
-            lineNo = Some("newLineNo"),
-            bpMatchStatus = Some("newMatchStatus"),
-            name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-            dateOfBirth = Some(new DateTime(1965, 2, 12, 0, 0)),
-            phoneNumber = Some("newPhone"),
-            identification = Some(
-              DisplayTrustIdentificationType(
-                None,
-                Some("newNino"),
-                None,
-                None
-              )
-            ),
-            entityStart = new DateTime(1998, 2, 12, 0, 0)
+      val newTrusteeIndInfo = DisplayTrustTrusteeIndividualType(
+        lineNo = Some("newLineNo"),
+        bpMatchStatus = None,
+        name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
+        dateOfBirth = Some(new DateTime(1965, 2, 12, 0, 0)),
+        phoneNumber = Some("newPhone"),
+        identification = Some(
+          DisplayTrustIdentificationType(
+            None,
+            Some("newNino"),
+            None,
+            None
           )
         ),
-        None
+        entityStart = new DateTime(1998, 2, 12, 0, 0)
       )
 
       val expectedGetAfterAmendTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-after-amend-trustee.json")
