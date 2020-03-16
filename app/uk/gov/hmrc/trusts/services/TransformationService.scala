@@ -84,9 +84,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
             Logger.info(s"[TransformationService] applying declaration transformations")
             transformations.applyDeclarationTransform(initial)
           }
-        } yield {
-          transformed
-        }
+        } yield transformed
     }
   }
 
