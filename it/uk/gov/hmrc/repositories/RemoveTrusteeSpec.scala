@@ -94,7 +94,7 @@ class RemoveTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar wit
 
           dropTheDatabase(connection)
         }
-      }.get
+      }
     }
   }
 
