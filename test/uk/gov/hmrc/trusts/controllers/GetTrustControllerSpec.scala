@@ -38,6 +38,7 @@ import uk.gov.hmrc.trusts.utils.JsonRequests
 import scala.concurrent.Future
 
 class GetTrustControllerSpec extends WordSpec with MockitoSugar with MustMatchers with BeforeAndAfter with BeforeAndAfterEach with JsonRequests with Inside with ScalaFutures {
+
   private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 
   private val desService: DesService = mock[DesService]
@@ -259,6 +260,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar with MustMatcher
       }
     }
   }
+
   ".getLeadTrustee" should {
 
     "return 403 - Forbidden with parked content" in {
@@ -388,4 +390,51 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar with MustMatcher
     }
 
   }
+
+  ".getBeneficiaries" should {
+
+    "return 403 - Forbidden with parked content" in {
+
+      when(transformationService.getTransformedData(any(), any())(any()))
+        .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
+
+      val result = getTrustController.getBeneficiaries(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/beneficiaries"))
+
+      whenReady(result) { _ =>
+        status(result) mustBe FORBIDDEN
+      }
+    }
+
+    "return 200 - Ok with processed content" in {
+
+      val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+
+      when(transformationService.getTransformedData(any[String], any[String])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(processedResponse))
+
+      val result = getTrustController.getBeneficiaries(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/beneficiaries"))
+
+      whenReady(result) { _ =>
+        verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+        verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any[HeaderCarrier])
+        status(result) mustBe OK
+        contentType(result) mustBe Some(JSON)
+        contentAsJson(result) mustBe getTransformedBeneficiariesResponse
+      }
+    }
+
+    "return 500 - Internal server error for invalid content" in {
+
+      when(transformationService.getTransformedData(any(), any())(any()))
+        .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+
+      val result = getTrustController.getBeneficiaries(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/beneficiaries"))
+
+      whenReady(result) { _ =>
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+    }
+
+  }
 }
+
