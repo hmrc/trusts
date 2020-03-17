@@ -1,21 +1,13 @@
 package uk.gov.hmrc.repositories
 
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FreeSpec, MustMatchers}
-import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.Helpers.running
-import reactivemongo.api.MongoConnection
-import uk.gov.hmrc.trusts.repositories.{CacheRepository, TrustsMongoDriver}
-
-import scala.concurrent.Await
+import uk.gov.hmrc.trusts.repositories.CacheRepository
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.Duration
 
-
-class CacheRepositorySpec extends FreeSpec with MustMatchers with ScalaFutures with IntegrationPatience {
-  private val connectionString = "mongodb://localhost:27017/trusts-integration"
+class CacheRepositorySpec extends FreeSpec with MustMatchers with TransformIntegrationTest {
 
   "a playback repository" - {
     "must be able to store and retrieve a payload" in {
@@ -51,22 +43,5 @@ class CacheRepositorySpec extends FreeSpec with MustMatchers with ScalaFutures w
   ): _*)
 
   val data = Json.obj("testField" -> "testValue")
-
-  private def getDatabase(connection: MongoConnection) = {
-    connection.database("trusts-integration")
-  }
-
-  private def getConnection(application: Application) = {
-    val mongoDriver = application.injector.instanceOf[TrustsMongoDriver]
-    lazy val connection = for {
-      uri <- MongoConnection.parseURI(connectionString)
-      connection <- mongoDriver.api.driver.connection(uri, true)
-    } yield connection
-    connection
-  }
-
-  def dropTheDatabase(connection: MongoConnection): Unit = {
-    Await.result(getDatabase(connection).flatMap(_.drop()), Duration.Inf)
-  }
 
 }
