@@ -27,7 +27,7 @@ case class AmendTrusteeOrgTransform(index: Int,
                                    ) extends DeltaTransform with AmendTrusteeCommon {
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    transform(index, input, Json.toJson(trustee))
+    transform(index, input, originalTrusteeJson, Json.toJson(trustee))
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
