@@ -94,7 +94,7 @@ class AddTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar with T
               |""".stripMargin)
 
           dropTheDatabase(connection)
-        }
+        }.get
       }
     }
 

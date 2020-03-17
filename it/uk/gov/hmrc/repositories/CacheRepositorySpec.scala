@@ -30,7 +30,7 @@ class CacheRepositorySpec extends FreeSpec with MustMatchers with TransformInteg
           retrieved.futureValue mustBe data
 
           dropTheDatabase(connection)
-        }
+        }.get
       }
     }
   }

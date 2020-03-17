@@ -86,7 +86,7 @@ class PromoteLeadTrusteeSpec extends FreeSpec with MustMatchers with MockitoSuga
           contentAsJson(newResult) mustBe expectedGetAfterPromoteTrusteeJson
 
           dropTheDatabase(connection)
-        }
+        }.get
       }
     }
   }

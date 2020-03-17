@@ -80,7 +80,7 @@ class AmendTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar with
           contentAsJson(newResult) mustBe expectedGetAfterAmendTrusteeJson
 
           dropTheDatabase(connection)
-        }
+        }.get
       }
     }
   }
