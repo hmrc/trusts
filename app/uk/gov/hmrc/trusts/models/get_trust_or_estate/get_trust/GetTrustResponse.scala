@@ -88,7 +88,7 @@ object GetTrustResponse {
             response.json.validate[GetTrustSuccessResponse] match {
               case JsSuccess(trustFound,_) => trustFound
               case JsError(errors) =>
-                  Logger.info(s"[GetTrustResponse] Cannot parse as TrustFoundResponse due to $errors")
+                  Logger.error(s"[GetTrustResponse] Cannot parse as TrustFoundResponse due to $errors")
                   NotEnoughDataResponse
             }
           case BAD_REQUEST =>
