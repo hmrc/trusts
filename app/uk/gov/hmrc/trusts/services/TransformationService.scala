@@ -166,7 +166,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
       case Some(composedTransform) =>
         composedTransform :+ newTransform
 
-    }.flatMap(newTransforms => repository.set(utr, internalId, newTransforms)).recoverWith {
+    }.flatMap(newTransforms => repository.set(utr, internalId, newTransforms).map(_ => ())).recoverWith {
       case e =>
         Logger.error(s"[TransformationService] exception adding new transform: ${e.getMessage}")
         Future.failed(e)
