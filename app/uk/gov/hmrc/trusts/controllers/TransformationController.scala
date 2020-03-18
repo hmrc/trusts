@@ -88,17 +88,21 @@ class TransformationController @Inject()(
 
   def amendTrustee(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
-      request.body.validate[DisplayTrustTrusteeType] match {
-        case JsSuccess(model, _) =>
-          model match {
-            case DisplayTrustTrusteeType(None, None) => Future.successful(BadRequest)
-            case _ => transformationService.addAmendTrusteeTransformer(utr, index, request.identifier, model) map { _ =>
-              Ok
-            }
-          }
 
-        case JsError(errors) =>
-          logger.warn(s"Supplied trustee could not be read as DisplayTrustTrusteeType - $errors")
+      val trusteeInd = request.body.validateOpt[DisplayTrustTrusteeIndividualType].getOrElse(None)
+      val trusteeOrg = request.body.validateOpt[DisplayTrustTrusteeOrgType].getOrElse(None)
+
+      (trusteeInd, trusteeOrg) match {
+        case (Some(ind), _) =>
+          transformationService.addAmendTrusteeTransformer(utr, index, request.identifier, DisplayTrustTrusteeType(Some(ind), None)) map { _ =>
+            Ok
+          }
+        case (_, Some(org)) =>
+          transformationService.addAmendTrusteeTransformer(utr, index, request.identifier, DisplayTrustTrusteeType(None, Some(org))) map { _ =>
+            Ok
+          }
+        case _ =>
+          logger.error("[TransformationController][amendTrustee] Supplied json could not be read as an individual or organisation trustee")
           Future.successful(BadRequest)
       }
     }
