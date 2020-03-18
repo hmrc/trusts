@@ -19,14 +19,11 @@ package uk.gov.hmrc.trusts.services
 import java.time.LocalDate
 
 import javax.inject.Inject
-import play.api.Logger
-import play.api.libs.json.{JsObject, JsResult, JsSuccess, JsValue, Json, __, _}
+import play.api.libs.json.{JsSuccess, JsValue, __, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models.RemoveTrustee
-import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.TransformationErrorResponse
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeType, DisplayTrustTrusteeType, GetTrustResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeType, DisplayTrustTrusteeType, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.repositories.TransformationRepository
 import uk.gov.hmrc.trusts.transformers._
 
@@ -44,11 +41,19 @@ class TrusteeTransformationService @Inject()(repository: TransformationRepositor
     })
   }
 
-  def addAmendTrusteeTransformer(utr: String, index: Int, internalId: String, trustee: DisplayTrustTrusteeType): Future[Unit] = {
-    addNewTransform(utr, internalId, trustee match {
-      case DisplayTrustTrusteeType(Some(trusteeInd), None) => AmendTrusteeIndTransform(index, trusteeInd)
-      case DisplayTrustTrusteeType(None, Some(trusteeOrg)) => AmendTrusteeOrgTransform(index, trusteeOrg)
-    })
+  def addAmendTrusteeTransformer(utr: String,
+                                 index: Int,
+                                 internalId: String,
+                                 newTrustee: DisplayTrustTrusteeType
+                                )(implicit hc: HeaderCarrier): Future[Unit] = {
+    getTrusteeAtIndex(utr, internalId, index).flatMap {
+      case JsSuccess(trusteeJson: JsValue, _) =>
+        addNewTransform(utr, internalId, newTrustee match {
+          case DisplayTrustTrusteeType(Some(trusteeInd), None) => AmendTrusteeIndTransform(index, trusteeInd, trusteeJson)
+          case DisplayTrustTrusteeType(None, Some(trusteeOrg)) => AmendTrusteeOrgTransform(index, trusteeOrg, trusteeJson)
+        })
+      case JsError(_) => Future.failed(InternalServerErrorException(s"Could not pick trustee at index ${index}."))
+    }
   }
 
   def addPromoteTrusteeTransformer(
@@ -57,14 +62,14 @@ class TrusteeTransformationService @Inject()(repository: TransformationRepositor
                                     index: Int,
                                     newLeadTrustee: DisplayTrustLeadTrusteeType,
                                     endDate: LocalDate)(implicit hc: HeaderCarrier): Future[Unit] = {
-    getTrusteeAtIndex(utr, internalId, index).map {
+    getTrusteeAtIndex(utr, internalId, index).flatMap {
       case JsSuccess(trusteeJson: JsValue, _) =>
         addNewTransform(utr, internalId, newLeadTrustee match {
           case DisplayTrustLeadTrusteeType(Some(trusteeInd), None) => PromoteTrusteeIndTransform(index, trusteeInd, endDate, trusteeJson)
           case DisplayTrustLeadTrusteeType(None, Some(trusteeOrg)) => PromoteTrusteeOrgTransform(index, trusteeOrg, endDate, trusteeJson)
         })
       case JsError(_) => Future.failed(InternalServerErrorException(s"Could not pick trustee at index ${index}."))
-      }
+    }
   }
 
   def addAddTrusteeTransformer(utr: String, internalId: String, newTrustee: DisplayTrustTrusteeType): Future[Unit] = {
@@ -75,7 +80,7 @@ class TrusteeTransformationService @Inject()(repository: TransformationRepositor
   }
 
   def addRemoveTrusteeTransformer(utr: String, internalId: String, remove: RemoveTrustee)(implicit hc: HeaderCarrier) : Future[Unit] = {
-    getTrusteeAtIndex(utr, internalId, remove.index).map {
+    getTrusteeAtIndex(utr, internalId, remove.index).flatMap {
       case JsSuccess(trusteeJson: JsValue, _) => addNewTransform(utr, internalId, RemoveTrusteeTransform(remove.endDate, remove.index, trusteeJson))
       case JsError(_) => Future.failed(InternalServerErrorException(s"Could not pick trustee at index ${remove.index}."))
     }

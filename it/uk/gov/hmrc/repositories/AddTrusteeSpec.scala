@@ -2,34 +2,26 @@ package uk.gov.hmrc.repositories
 
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
-import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsArray, JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import reactivemongo.api.MongoConnection
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.repositories.TrustsMongoDriver
 import uk.gov.hmrc.trusts.utils.JsonUtils
+import scala.concurrent.Future
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
-
-class AddTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar {
+class AddTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar with TransformIntegrationTest {
 
   trait JsonFixtures {
 
     val getTrustResponseFromDES : JsValue = JsonUtils
-      .getJsonValueFromFile("trusts-etmp-received-empty-trustees.json")
+      .getJsonValueFromFile("trusts-etmp-received-no-trustees.json")
   }
 
   "an add trustee call" - {
@@ -102,32 +94,9 @@ class AddTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures with M
               |""".stripMargin)
 
           dropTheDatabase(connection)
-        }
-      }.get
+        }.get
+      }
     }
 
-  }
-
-  // We must be quite patient.
-  implicit val defaultPatience = PatienceConfig(timeout = Span(30, Seconds), interval = Span(500, Millis))
-
-  // Database boilerplate
-  private val connectionString = "mongodb://localhost:27017/trusts-integration"
-
-  private def getDatabase(connection: MongoConnection) = {
-    connection.database("trusts-integration")
-  }
-
-  private def getConnection(application: Application) = {
-    val mongoDriver = application.injector.instanceOf[TrustsMongoDriver]
-    lazy val connection = for {
-      uri <- MongoConnection.parseURI(connectionString)
-      connection <- mongoDriver.api.driver.connection(uri, true)
-    } yield connection
-    connection
-  }
-
-  def dropTheDatabase(connection: MongoConnection): Unit = {
-    Await.result(getDatabase(connection).flatMap(_.drop()), Duration.Inf)
   }
 }

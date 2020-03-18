@@ -20,12 +20,12 @@ import java.time.LocalDate
 
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsError, JsString, JsSuccess, JsValue}
+import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveTrustee
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.services.{BeneficiaryTransformationService, TrusteeTransformationService}
+import uk.gov.hmrc.trusts.services.TrusteeTransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -80,7 +80,7 @@ class TrusteeTransformationController @Inject()(
             Ok
           }
         case _ =>
-          logger.error("[TransformationController][addTrustee] Supplied json could not be read as an individual or organisation trustee")
+          logger.error("[TrusteeTransformationController][addTrustee] Supplied json could not be read as an individual or organisation trustee")
           Future.successful(BadRequest)
       }
     }
@@ -88,17 +88,21 @@ class TrusteeTransformationController @Inject()(
 
   def amendTrustee(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
-      request.body.validate[DisplayTrustTrusteeType] match {
-        case JsSuccess(model, _) =>
-          model match {
-            case DisplayTrustTrusteeType(None, None) => Future.successful(BadRequest)
-            case _ => trusteeTransformationService.addAmendTrusteeTransformer(utr, index, request.identifier, model) map { _ =>
-              Ok
-            }
-          }
 
-        case JsError(errors) =>
-          logger.warn(s"Supplied trustee could not be read as DisplayTrustTrusteeType - $errors")
+      val trusteeInd = request.body.validateOpt[DisplayTrustTrusteeIndividualType].getOrElse(None)
+      val trusteeOrg = request.body.validateOpt[DisplayTrustTrusteeOrgType].getOrElse(None)
+
+      (trusteeInd, trusteeOrg) match {
+        case (Some(ind), _) =>
+          trusteeTransformationService.addAmendTrusteeTransformer(utr, index, request.identifier, DisplayTrustTrusteeType(Some(ind), None)) map { _ =>
+            Ok
+          }
+        case (_, Some(org)) =>
+          trusteeTransformationService.addAmendTrusteeTransformer(utr, index, request.identifier, DisplayTrustTrusteeType(None, Some(org))) map { _ =>
+            Ok
+          }
+        case _ =>
+          logger.error("[TrusteeTransformationController][amendTrustee] Supplied json could not be read as an individual or organisation trustee")
           Future.successful(BadRequest)
       }
     }
@@ -128,7 +132,7 @@ class TrusteeTransformationController @Inject()(
             LocalDate.now()
           ).map(_ => Ok)
         case _ =>
-          logger.error("[TransformationController][promoteTrustee] Supplied json could not be read as an individual or organisation lead trustee")
+          logger.error("[TrusteeTransformationController][promoteTrustee] Supplied json could not be read as an individual or organisation lead trustee")
           Future.successful(BadRequest)
       }
     }

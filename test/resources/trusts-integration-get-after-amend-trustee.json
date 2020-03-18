@@ -160,7 +160,6 @@
           {
             "trusteeInd": {
               "lineNo": "newLineNo",
-              "bpMatchStatus": "newMatchStatus",
               "name": {
                 "firstName": "newFirstName",
                 "middleName": "newMiddleName",

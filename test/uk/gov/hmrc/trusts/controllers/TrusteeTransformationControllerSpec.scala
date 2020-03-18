@@ -171,7 +171,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
 
     "must return an error for malformed json" in {
       val trusteeTransformationService = mock[TrusteeTransformationService]
-      
+
       val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService)
       val index = 3
 
@@ -219,7 +219,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
 
     val index = 0
 
-    "must add a new amend trustee transform" in {
+    "must add a new amend trustee transform for a trustee ind" in {
       val trusteeTransformationService = mock[TrusteeTransformationService]
       val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService)
 
@@ -233,19 +233,59 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         entityStart = DateTime.parse("2012-03-14")
       )
 
-      when(trusteeTransformationService.addAmendTrusteeTransformer(any(), any(), any(), any()))
+      when(trusteeTransformationService.addAmendTrusteeTransformer(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(()))
 
       val newTrusteeInfo = DisplayTrustTrusteeType(Some(newTrusteeIndInfo), None)
 
       val request = FakeRequest("POST", "path")
-        .withBody(Json.toJson(newTrusteeInfo))
+        .withBody(Json.toJson(newTrusteeIndInfo))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val result = controller.amendTrustee("aUTR", index).apply(request)
 
       status(result) mustBe OK
-      verify(trusteeTransformationService).addAmendTrusteeTransformer("aUTR", index, "id", newTrusteeInfo)
+      verify(trusteeTransformationService).addAmendTrusteeTransformer(
+        equalTo("aUTR"),
+        equalTo(index),
+        equalTo("id"),
+        equalTo(newTrusteeInfo)
+      )(any())
+    }
+
+    "must add a new amend trustee transform for a trustee org" in {
+      val trusteeTransformationService = mock[TrusteeTransformationService]
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService)
+
+      val newTrusteeOrgInfo = DisplayTrustTrusteeOrgType(
+        lineNo = Some("newLineNo"),
+        bpMatchStatus = Some("newMatchStatus"),
+        name = "newFirstName newLastName",
+        phoneNumber = Some("newPhone"),
+        email = Some("newEmail"),
+        identification = Some(DisplayTrustIdentificationOrgType(None, Some("newUtr"), None)),
+        entityStart = DateTime.parse("2012-03-14")
+      )
+
+      when(trusteeTransformationService.addAmendTrusteeTransformer(any(), any(), any(), any())(any()))
+        .thenReturn(Future.successful(()))
+
+      val newTrusteeInfo = DisplayTrustTrusteeType(None, Some(newTrusteeOrgInfo))
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(newTrusteeOrgInfo))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendTrustee("aUTR", index).apply(request)
+
+      status(result) mustBe OK
+      verify(trusteeTransformationService).addAmendTrusteeTransformer(
+        equalTo("aUTR"),
+        equalTo(index),
+        equalTo("id"),
+        equalTo(newTrusteeInfo)
+      )(any())
+
     }
 
     "must return an error for malformed json" in {

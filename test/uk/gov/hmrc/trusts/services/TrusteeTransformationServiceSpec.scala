@@ -95,32 +95,32 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     entityStart = Some(DateTime.parse("2002-03-14"))
   )
 
-  val unitTestTrusteeInfo = DisplayTrustLeadTrusteeIndType(
-    lineNo = Some("newLineNo"),
-    bpMatchStatus = Some("newMatchStatus"),
-    name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-    dateOfBirth = new DateTime(1965, 2, 10, 12, 30),
-    phoneNumber = "newPhone",
-    email = Some("newEmail"),
-    identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-    entityStart = Some(DateTime.parse("2012-03-14"))
-  )
-
-  val existingTrusteeIndividualInfo = DisplayTrustTrusteeIndividualType(
-    lineNo = Some("1"),
-    bpMatchStatus = Some("01"),
-    name = NameType("John", Some("William"), "O'Connor"),
-    dateOfBirth = Some(DateTime.parse("1956-02-12")),
-    phoneNumber = Some("0121546546"),
-    identification = Some(DisplayTrustIdentificationType(None, Some("ST123456"), None, None)),
-    entityStart = DateTime.parse("1998-02-12")
-  )
-
   private val auditService = mock[AuditService]
 
   private implicit val hc : HeaderCarrier = HeaderCarrier()
 
-  private val trustee1Json = Json.parse(
+  private val originalTrusteeIndJson = Json.parse(
+    """
+      |{
+      |            "trusteeInd": {
+      |              "lineNo": "1",
+      |              "bpMatchStatus": "01",
+      |              "name": {
+      |                "firstName": "Tamara",
+      |                "middleName": "Hingis",
+      |                "lastName": "Jones"
+      |              },
+      |              "dateOfBirth": "1965-02-28",
+      |              "identification": {
+      |                "safeId": "2222200000000"
+      |              },
+      |              "phoneNumber": "+447456788112",
+      |              "entityStart": "2017-02-28"
+      |            }
+      |          }
+      |""".stripMargin)
+
+  private val originalTrusteeOrgJson = Json.parse(
     """
       |           {
       |              "trusteeOrg": {
@@ -136,7 +136,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       |            }
       |""".stripMargin)
 
-  "the trustee transformation service" - {
+  "the transformation service" - {
 
     "must write an amend lead trustee transform to the transformation repository with no existing transforms" in {
       val repository = mock[TransformationRepositoryImpl]
@@ -209,7 +209,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
         verify(repository).set("utr",
           "internalId",
-          ComposedDeltaTransform(Seq(PromoteTrusteeIndTransform(index, newLeadTrusteeIndInfo, endDate, trustee1Json))))
+          ComposedDeltaTransform(Seq(PromoteTrusteeIndTransform(index, newLeadTrusteeIndInfo, endDate, originalTrusteeOrgJson))))
       }
     }
 
@@ -238,7 +238,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
         verify(repository).set("utr",
           "internalId",
-          ComposedDeltaTransform(Seq(PromoteTrusteeOrgTransform(index, newLeadTrusteeOrgInfo, endDate, trustee1Json))))
+          ComposedDeltaTransform(Seq(PromoteTrusteeOrgTransform(index, newLeadTrusteeOrgInfo, endDate, originalTrusteeOrgJson))))
       }
     }
 
@@ -268,7 +268,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
         verify(repository).set("utr",
           "internalId",
-          ComposedDeltaTransform(Seq(RemoveTrusteeTransform(endDate, index = 1, trustee1Json))))
+          ComposedDeltaTransform(Seq(RemoveTrusteeTransform(endDate, index = 1, originalTrusteeOrgJson))))
       }
     }
 
@@ -301,7 +301,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
           "internalId",
           ComposedDeltaTransform(Seq(
             AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo),
-            RemoveTrusteeTransform(endDate, index = 1, trustee1Json)
+            RemoveTrusteeTransform(endDate, index = 1, originalTrusteeOrgJson)
           )))
       }
     }
@@ -345,11 +345,16 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       }
     }
 
-
     "must write an amend trustee transform to the transformation repository with no existing transforms" in {
+      val response = getTrustResponse.as[GetTrustSuccessResponse]
+      val processedResponse = response.asInstanceOf[TrustProcessedResponse]
+      val desService = mock[DesService]
+
+      when (desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(processedResponse))
+
       val index = 0
       val repository = mock[TransformationRepositoryImpl]
-      val service = new TrusteeTransformationService(repository, mock[DesService], auditService)
+      val service = new TrusteeTransformationService(repository, desService, auditService)
 
       when(repository.get(any(), any())).thenReturn(Future.successful(None))
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
@@ -359,27 +364,8 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
         verify(repository).set("utr",
           "internalId",
-          ComposedDeltaTransform(Seq(AmendTrusteeIndTransform(index, newTrusteeIndInfo))))
-
-      }
-    }
-
-    "must write an amend unidentified beneficiary transform to the transformation repository with no existing transforms" in {
-      val index = 0
-      val repository = mock[TransformationRepositoryImpl]
-      val service = new BeneficiaryTransformationService(repository, mock[DesService], auditService)
-      val newDescription = "Some Description"
-
-      when(repository.get(any(), any())).thenReturn(Future.successful(None))
-      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
-
-      val result = service.addAmendUnidentifiedBeneficiaryTransformer("utr", index, "internalId", newDescription)
-      whenReady(result) { _ =>
-
-        verify(repository).set("utr",
-          "internalId",
-          ComposedDeltaTransform(Seq(AmendUnidentifiedBeneficiaryTransform(index, newDescription))))
-
+          ComposedDeltaTransform(Seq(AmendTrusteeIndTransform(index, newTrusteeIndInfo, originalTrusteeIndJson)))
+        )
       }
     }
   }

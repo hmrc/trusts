@@ -84,6 +84,16 @@ class DeclarationTransformerSpec extends FreeSpec with MustMatchers with OptionV
     }
 
     "transform json successfully when no trustees" in {
+      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-no-trustees.json")
+      val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-pruned-trustees.json")
+      val transformer = new DeclarationTransformer
+
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, entityEnd)
+      result.asOpt.value mustBe afterJson
+    }
+
+    "remove trustees field if trustees list is empty" in {
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-empty-trustees.json")
       val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-pruned-trustees.json")

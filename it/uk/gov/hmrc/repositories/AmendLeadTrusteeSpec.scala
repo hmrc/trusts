@@ -3,30 +3,22 @@ package uk.gov.hmrc.repositories
 import org.joda.time.DateTime
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
-import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import reactivemongo.api.MongoConnection
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import uk.gov.hmrc.trusts.models.{AddressType, NameType}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType, GetTrustSuccessResponse}
-import uk.gov.hmrc.trusts.repositories.TrustsMongoDriver
+import uk.gov.hmrc.trusts.models.{AddressType, NameType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
+import scala.concurrent.Future
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
-
-class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar {
+class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar with TransformIntegrationTest {
 
   val getTrustResponseFromDES: GetTrustSuccessResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
   val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
@@ -96,28 +88,5 @@ class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with ScalaFutures 
         }.get
       }
     }
-  }
-
-  // We must be quite patient.
-  implicit val defaultPatience = PatienceConfig(timeout = Span(30, Seconds), interval = Span(500, Millis))
-
-  // Database boilerplate
-  private val connectionString = "mongodb://localhost:27017/trusts-integration"
-
-  private def getDatabase(connection: MongoConnection) = {
-    connection.database("trusts-integration")
-  }
-
-  private def getConnection(application: Application) = {
-    val mongoDriver = application.injector.instanceOf[TrustsMongoDriver]
-    lazy val connection = for {
-      uri <- MongoConnection.parseURI(connectionString)
-      connection <- mongoDriver.api.driver.connection(uri, true)
-    } yield connection
-    connection
-  }
-
-  def dropTheDatabase(connection: MongoConnection): Unit = {
-    Await.result(getDatabase(connection).flatMap(_.drop()), Duration.Inf)
   }
 }
