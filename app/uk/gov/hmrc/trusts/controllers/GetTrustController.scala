@@ -113,6 +113,27 @@ class GetTrustController @Inject()(identify: IdentifierAction,
         Forbidden
     }
 
+  def getBeneficiaries(utr: String) : Action[AnyContent] =
+    doGet(utr, applyTransformations = true) {
+      case processed: TrustProcessedResponse =>
+        processed.transform.map {
+          case transformed: TrustProcessedResponse =>
+
+            val pickBeneficiaries = (JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary).json.pick
+
+            def insertIntoObject(json : JsValue) = Json.obj("beneficiary" -> json)
+
+            Ok(transformed
+              .getTrust.transform(pickBeneficiaries)
+              .map(insertIntoObject)
+              .getOrElse(insertIntoObject(JsArray())))
+          case _ =>
+            InternalServerError
+        }.getOrElse(InternalServerError)
+      case _ =>
+        Forbidden
+    }
+
   private def resetCacheIfRequested(utr: String, internalId: String, refreshEtmpData: Boolean) = {
     if (refreshEtmpData) {
       desService.resetCache(utr, internalId)
