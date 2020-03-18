@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.transformers
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.UnidentifiedType
+import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
 
 case class AmendUnidentifiedBeneficiaryTransform(index: Int, description: String) extends DeltaTransform {
 
