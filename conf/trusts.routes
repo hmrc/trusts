@@ -22,14 +22,14 @@ POST        /variation                                          uk.gov.hmrc.trus
 
 POST        /declare/:utr                                       uk.gov.hmrc.trusts.controllers.TrustVariationsController.declare(utr: String)
 
-POST        /amend-lead-trustee/:utr                            uk.gov.hmrc.trusts.controllers.TransformationController.amendLeadTrustee(utr: String)
+POST        /amend-lead-trustee/:utr                            uk.gov.hmrc.trusts.controllers.TrusteeTransformationController.amendLeadTrustee(utr: String)
 
-POST        /add-trustee/:utr                                   uk.gov.hmrc.trusts.controllers.TransformationController.addTrustee(utr: String)
+POST        /add-trustee/:utr                                   uk.gov.hmrc.trusts.controllers.TrusteeTransformationController.addTrustee(utr: String)
 
-POST        /amend-trustee/:utr/:index                          uk.gov.hmrc.trusts.controllers.TransformationController.amendTrustee(utr: String, index: Int)
+POST        /amend-trustee/:utr/:index                          uk.gov.hmrc.trusts.controllers.TrusteeTransformationController.amendTrustee(utr: String, index: Int)
 
-POST        /promote-trustee/:utr/:index                        uk.gov.hmrc.trusts.controllers.TransformationController.promoteTrustee(utr: String, index: Int)
+POST        /promote-trustee/:utr/:index                        uk.gov.hmrc.trusts.controllers.TrusteeTransformationController.promoteTrustee(utr: String, index: Int)
 
-PUT         /:utr/trustees/remove                               uk.gov.hmrc.trusts.controllers.TransformationController.removeTrustee(utr: String)
+PUT         /:utr/trustees/remove                               uk.gov.hmrc.trusts.controllers.TrusteeTransformationController.removeTrustee(utr: String)
 
-POST        /amend-unidentified-beneficiary/:utr/:index         uk.gov.hmrc.trusts.controllers.TransformationController.amendUnidentifiedBeneficiary(utr: String, index: Int)
+POST        /amend-unidentified-beneficiary/:utr/:index         uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendUnidentifiedBeneficiary(utr: String, index: Int)
