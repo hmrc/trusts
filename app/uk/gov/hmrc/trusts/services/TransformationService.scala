@@ -112,7 +112,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
                                  internalId: String,
                                  newTrustee: DisplayTrustTrusteeType
                                 )(implicit hc: HeaderCarrier): Future[Unit] = {
-    getTrusteeAtIndex(utr, internalId, index).map {
+    getTrusteeAtIndex(utr, internalId, index).flatMap {
       case JsSuccess(trusteeJson: JsValue, _) =>
         addNewTransform(utr, internalId, newTrustee match {
           case DisplayTrustTrusteeType(Some(trusteeInd), None) => AmendTrusteeIndTransform(index, trusteeInd, trusteeJson)
@@ -128,7 +128,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
                                     index: Int,
                                     newLeadTrustee: DisplayTrustLeadTrusteeType,
                                     endDate: LocalDate)(implicit hc: HeaderCarrier): Future[Unit] = {
-    getTrusteeAtIndex(utr, internalId, index).map {
+    getTrusteeAtIndex(utr, internalId, index).flatMap {
       case JsSuccess(trusteeJson: JsValue, _) =>
         addNewTransform(utr, internalId, newLeadTrustee match {
           case DisplayTrustLeadTrusteeType(Some(trusteeInd), None) => PromoteTrusteeIndTransform(index, trusteeInd, endDate, trusteeJson)
@@ -146,7 +146,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
   }
 
   def addRemoveTrusteeTransformer(utr: String, internalId: String, remove: RemoveTrustee)(implicit hc: HeaderCarrier) : Future[Unit] = {
-    getTrusteeAtIndex(utr, internalId, remove.index).map {
+    getTrusteeAtIndex(utr, internalId, remove.index).flatMap {
       case JsSuccess(trusteeJson: JsValue, _) => addNewTransform(utr, internalId, RemoveTrusteeTransform(remove.endDate, remove.index, trusteeJson))
       case JsError(_) => Future.failed(InternalServerErrorException(s"Could not pick trustee at index ${remove.index}."))
     }
