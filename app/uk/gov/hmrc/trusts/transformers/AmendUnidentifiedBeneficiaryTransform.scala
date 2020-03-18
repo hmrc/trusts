@@ -17,8 +17,7 @@
 package uk.gov.hmrc.trusts.transformers
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.TrusteeInd
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustTrusteeIndividualType
+import uk.gov.hmrc.trusts.models.UnidentifiedType
 
 case class AmendUnidentifiedBeneficiaryTransform(index: Int, description: String) extends DeltaTransform {
 
@@ -29,9 +28,11 @@ case class AmendUnidentifiedBeneficiaryTransform(index: Int, description: String
 
       case JsSuccess(json, _) =>
 
+        val updatedBeneficiaryDetails = getOriginalBeneficiaryDetails(input, index).copy(description = description)
+
         val array = json.as[JsArray]
 
-        val updated = ??? //(array.value.take(index) :+ Json.obj(trusteeType.toString -> newTrusteeDetails)) ++ array.value.drop(index + 1)
+        val updated = (array.value.take(index) :+ Json.toJson(updatedBeneficiaryDetails)) ++ array.value.drop(index + 1)
 
         input.transform(
           unidentifiedBeneficiaryPath.json.prune andThen
@@ -43,7 +44,29 @@ case class AmendUnidentifiedBeneficiaryTransform(index: Int, description: String
       case e: JsError => e
     }
   }
+
+  private def getOriginalBeneficiaryDetails(input: JsValue, index: Int): UnidentifiedType = {
+    val unidentifiedBeneficiaryPath = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'unidentified
+
+    input.transform(unidentifiedBeneficiaryPath.json.pick) match {
+
+      case JsSuccess(json, _) =>
+
+        val list = json.as[JsArray].value.toList
+
+        list(index).validate[UnidentifiedType] match {
+          case JsSuccess(value, _) =>
+            value
+
+          case JsError(errors) =>
+            throw JsResultException(errors)
+        }
+      case JsError(errors) =>
+        throw JsResultException(errors)
+    }
+  }
 }
+
 
 
 object AmendUnidentifiedBeneficiaryTransform {
