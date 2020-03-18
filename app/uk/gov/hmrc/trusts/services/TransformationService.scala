@@ -145,6 +145,10 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
+  def addAmendUnidentifiedBeneficiaryTransformer(utr: String, index: Int, internalId: String, description: String): Future[Unit] = {
+    addNewTransform(utr, internalId, AmendUnidentifiedBeneficiaryTransform(index, description))
+  }
+
   private def getTrusteeAtIndex(utr: String, internalId: String, index: Int)(implicit hc: HeaderCarrier) = {
     getTransformedData(utr, internalId).map {
       case TrustProcessedResponse(transformedJson, _) =>
@@ -162,7 +166,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
       case Some(composedTransform) =>
         composedTransform :+ newTransform
 
-    }.flatMap(newTransforms => repository.set(utr, internalId, newTransforms).map(_ => ())).recoverWith {
+    }.flatMap(newTransforms => repository.set(utr, internalId, newTransforms)).recoverWith {
       case e =>
         Logger.error(s"[TransformationService] exception adding new transform: ${e.getMessage}")
         Future.failed(e)

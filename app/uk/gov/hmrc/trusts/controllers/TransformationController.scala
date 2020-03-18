@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsError, JsSuccess, JsValue}
+import play.api.libs.json.{JsError, JsString, JsSuccess, JsValue}
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveTrustee
@@ -129,6 +129,20 @@ class TransformationController @Inject()(
           ).map(_ => Ok)
         case _ =>
           logger.error("[TransformationController][promoteTrustee] Supplied json could not be read as an individual or organisation lead trustee")
+          Future.successful(BadRequest)
+      }
+    }
+  }
+
+  def amendUnidentifiedBeneficiary(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
+    implicit request => {
+      request.body.validate[JsString] match {
+        case JsSuccess(description, _) =>
+          transformationService.addAmendUnidentifiedBeneficiaryTransformer(utr, index, request.identifier, description.value) map { _ =>
+            Ok
+          }
+        case JsError(errors) =>
+          logger.warn(s"Supplied description could not be read as a JsString - $errors")
           Future.successful(BadRequest)
       }
     }

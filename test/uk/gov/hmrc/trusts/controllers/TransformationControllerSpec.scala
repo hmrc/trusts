@@ -259,4 +259,40 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
       status(result) mustBe BAD_REQUEST
     }
   }
+
+  "amend unidentified beneficiary" - {
+
+    val index = 0
+
+    "must add a new amend unidentified beneficiary transform" in {
+      val transformationService = mock[TransformationService]
+      val controller = new TransformationController(identifierAction, transformationService)
+
+      val newDescription = "Some new description"
+
+      when(transformationService.addAmendUnidentifiedBeneficiaryTransformer(any(), any(), any(), any()))
+        .thenReturn(Future.successful(()))
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(newDescription))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendUnidentifiedBeneficiary("aUTR", index).apply(request)
+
+      status(result) mustBe OK
+      verify(transformationService).addAmendUnidentifiedBeneficiaryTransformer("aUTR", index, "id", newDescription)
+    }
+
+    "must return an error for malformed json" in {
+      val transformationService = mock[TransformationService]
+      val controller = new TransformationController(identifierAction, transformationService)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.parse("{}"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendUnidentifiedBeneficiary("aUTR", index).apply(request)
+      status(result) mustBe BAD_REQUEST
+    }
+  }
 }

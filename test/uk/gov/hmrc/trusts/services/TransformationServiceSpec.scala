@@ -485,5 +485,24 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
       }
     }
+
+    "must write an amend unidentified beneficiary transform to the transformation repository with no existing transforms" in {
+      val index = 0
+      val repository = mock[TransformationRepositoryImpl]
+      val service = new TransformationService(repository, mock[DesService], auditService)
+      val newDescription = "Some Description"
+
+      when(repository.get(any(), any())).thenReturn(Future.successful(None))
+      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+
+      val result = service.addAmendUnidentifiedBeneficiaryTransformer("utr", index, "internalId", newDescription)
+      whenReady(result) { _ =>
+
+        verify(repository).set("utr",
+          "internalId",
+          ComposedDeltaTransform(Seq(AmendUnidentifiedBeneficiaryTransform(index, newDescription))))
+
+      }
+    }
   }
 }
