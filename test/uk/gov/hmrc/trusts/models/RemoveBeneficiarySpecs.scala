@@ -30,7 +30,7 @@ class RemoveBeneficiarySpecs extends WordSpec with MustMatchers {
         "index" -> 6
       )
 
-      json.as[RemoveBeneficiary] mustBe (RemoveBeneficiary.UnidentifiedBeneficiary(LocalDate.of(2019, 12, 31), 6))
+      json.as[RemoveBeneficiary] mustBe (RemoveBeneficiary.Unidentified(LocalDate.of(2019, 12, 31), 6))
     }
 
     "beneficiary is IndividualType" in {
@@ -40,7 +40,7 @@ class RemoveBeneficiarySpecs extends WordSpec with MustMatchers {
         "index" -> 6
       )
 
-      json.as[RemoveBeneficiary] mustBe (RemoveBeneficiary.IndividualBeneficiary(LocalDate.of(2019, 12, 31), 6))
+      json.as[RemoveBeneficiary] mustBe (RemoveBeneficiary.Individual(LocalDate.of(2019, 12, 31), 6))
     }
   }
 

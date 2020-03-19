@@ -96,7 +96,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
-  def addNewTransform(utr: String, internalId: String, newTransform: DeltaTransform) = {
+  def addNewTransform(utr: String, internalId: String, newTransform: DeltaTransform) : Future[Unit] = {
     repository.get(utr, internalId).map {
       case None =>
         ComposedDeltaTransform(Seq(newTransform))

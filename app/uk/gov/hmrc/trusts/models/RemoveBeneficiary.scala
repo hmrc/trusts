@@ -30,12 +30,12 @@ sealed trait RemoveBeneficiary {
 }
 
 object RemoveBeneficiary {
-  case class UnidentifiedBeneficiary(endDate: LocalDate, index: Int) extends RemoveBeneficiary
-  case class IndividualBeneficiary(endDate: LocalDate, index: Int) extends RemoveBeneficiary
+  case class Unidentified(endDate: LocalDate, index: Int) extends RemoveBeneficiary
+  case class Individual(endDate: LocalDate, index: Int) extends RemoveBeneficiary
 
   private val builders: Map[String, (LocalDate, Int) => RemoveBeneficiary] = Map(
-    "unidentified" -> UnidentifiedBeneficiary.apply,
-    "individual" -> IndividualBeneficiary.apply
+    "unidentified" -> Unidentified.apply,
+    "individual" -> Individual.apply
   )
 
   private val validateBeneficiaryType = Reads.filter[String](ValidationError("Unexpected Beneficiary Type"))(builders.contains)

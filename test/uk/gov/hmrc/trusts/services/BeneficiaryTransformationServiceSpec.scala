@@ -28,10 +28,11 @@ import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee}
+import uk.gov.hmrc.trusts.models.{NameType, RemoveBeneficiary, RemoveTrustee}
 import uk.gov.hmrc.trusts.repositories.TransformationRepositoryImpl
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.utils.JsonRequests
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
@@ -42,6 +43,19 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
   private implicit val hc : HeaderCarrier = HeaderCarrier()
 
   "the beneficiary transformation service" - {
+
+    "must add a new remove beneficiary transform using the transformation service" in {
+      val transformationService = mock[TransformationService]
+      val service = new BeneficiaryTransformationService(transformationService)
+
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
+
+      val result = service.removeBeneficiary("utr", "internalId", RemoveBeneficiary.Individual(LocalDate.of(2013, 2, 20), 23))
+      whenReady(result) { _ =>
+        verify(transformationService).addNewTransform("utr",
+          "internalId", RemoveBeneficiariesTransform.Individual(LocalDate.of(2013, 2, 20), 23))
+      }
+    }
 
     "must add a new amend unidentified beneficiary transform using the transformation service" in {
       val index = 0

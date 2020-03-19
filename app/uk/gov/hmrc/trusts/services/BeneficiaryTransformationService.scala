@@ -17,14 +17,22 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
+import uk.gov.hmrc.trusts.models.{RemoveBeneficiary, Success}
 import uk.gov.hmrc.trusts.transformers._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class BeneficiaryTransformationService @Inject()(transformationService: TransformationService) {
+class BeneficiaryTransformationService @Inject()(transformationService: TransformationService)(implicit ec:ExecutionContext) {
+  def removeBeneficiary(utr: String, internalId: String, removeBeneficiary: RemoveBeneficiary) : Future[Success.type] = {
+    transformationService.addNewTransform (utr, internalId,
+      removeBeneficiary match {
+        case RemoveBeneficiary.Unidentified(endDate, index) => RemoveBeneficiariesTransform.Unidentified(endDate, index)
+        case RemoveBeneficiary.Individual(endDate, index)   => RemoveBeneficiariesTransform.Individual(endDate, index)
+      }
+    ).map(_ => Success)
+  }
 
   def addAmendUnidentifiedBeneficiaryTransformer(utr: String, index: Int, internalId: String, description: String): Future[Unit] = {
     transformationService.addNewTransform(utr, internalId, AmendUnidentifiedBeneficiaryTransform(index, description))
   }
-
 }
