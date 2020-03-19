@@ -16,17 +16,13 @@
 
 package uk.gov.hmrc.trusts.services
 
-import java.time.LocalDate
-
 import javax.inject.Inject
 import play.api.Logger
 import play.api.libs.json.{JsObject, JsResult, JsSuccess, JsValue, Json, __, _}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
-import uk.gov.hmrc.trusts.models.RemoveTrustee
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.TransformationErrorResponse
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeType, DisplayTrustTrusteeType, GetTrustResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.repositories.TransformationRepository
 import uk.gov.hmrc.trusts.transformers._
 
@@ -100,7 +96,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
-  protected def addNewTransform(utr: String, internalId: String, newTransform: DeltaTransform) = {
+  def addNewTransform(utr: String, internalId: String, newTransform: DeltaTransform) = {
     repository.get(utr, internalId).map {
       case None =>
         ComposedDeltaTransform(Seq(newTransform))

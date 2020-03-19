@@ -17,17 +17,14 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
-import uk.gov.hmrc.trusts.repositories.TransformationRepository
 import uk.gov.hmrc.trusts.transformers._
 
 import scala.concurrent.Future
 
-class BeneficiaryTransformationService @Inject()(repository: TransformationRepository,
-                                                 desService: DesService,
-                                                 auditService: AuditService) extends TransformationService(repository, desService, auditService){
+class BeneficiaryTransformationService @Inject()(transformationService: TransformationService) {
 
   def addAmendUnidentifiedBeneficiaryTransformer(utr: String, index: Int, internalId: String, description: String): Future[Unit] = {
-    addNewTransform(utr, internalId, AmendUnidentifiedBeneficiaryTransform(index, description))
+    transformationService.addNewTransform(utr, internalId, AmendUnidentifiedBeneficiaryTransform(index, description))
   }
 
 }

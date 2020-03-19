@@ -39,27 +39,23 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
   // Removing the usage of GuiceOneAppPerSuite started timing out a test without this.
   private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 
-  private val auditService = mock[AuditService]
-
   private implicit val hc : HeaderCarrier = HeaderCarrier()
 
   "the beneficiary transformation service" - {
 
-    "must write an amend unidentified beneficiary transform to the transformation repository with no existing transforms" in {
+    "must add a new amend unidentified beneficiary transform using the transformation service" in {
       val index = 0
-      val repository = mock[TransformationRepositoryImpl]
-      val service = new BeneficiaryTransformationService(repository, mock[DesService], auditService)
+      val transformationService = mock[TransformationService]
+      val service = new BeneficiaryTransformationService(transformationService)
       val newDescription = "Some Description"
 
-      when(repository.get(any(), any())).thenReturn(Future.successful(None))
-      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
 
       val result = service.addAmendUnidentifiedBeneficiaryTransformer("utr", index, "internalId", newDescription)
       whenReady(result) { _ =>
 
-        verify(repository).set("utr",
-          "internalId",
-          ComposedDeltaTransform(Seq(AmendUnidentifiedBeneficiaryTransform(index, newDescription))))
+        verify(transformationService).addNewTransform("utr",
+          "internalId", AmendUnidentifiedBeneficiaryTransform(index, newDescription))
       }
     }
   }

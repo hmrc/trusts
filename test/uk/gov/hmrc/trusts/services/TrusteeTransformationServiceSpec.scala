@@ -84,19 +84,6 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     entityStart = DateTime.parse("2012-03-14")
   )
 
-  val existingLeadTrusteeInfo = DisplayTrustLeadTrusteeIndType(
-    lineNo = Some("newLineNo"),
-    bpMatchStatus = Some("newMatchStatus"),
-    name = NameType("existingFirstName", Some("existingMiddleName"), "existingLastName"),
-    dateOfBirth = new DateTime(1965, 2, 10, 12, 30),
-    phoneNumber = "newPhone",
-    email = Some("newEmail"),
-    identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-    entityStart = Some(DateTime.parse("2002-03-14"))
-  )
-
-  private val auditService = mock[AuditService]
-
   private implicit val hc : HeaderCarrier = HeaderCarrier()
 
   private val originalTrusteeIndJson = Json.parse(
@@ -136,96 +123,89 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       |            }
       |""".stripMargin)
 
-  "the transformation service" - {
+  "the trustee transformation service" - {
 
-    "must write an amend lead trustee transform to the transformation repository with no existing transforms" in {
-      val repository = mock[TransformationRepositoryImpl]
-      val service = new TrusteeTransformationService(repository, mock[DesService], auditService)
+    "must add a new amend lead trustee transform using the transformation service" in {
+      
+      val transformationService = mock[TransformationService]
+      val service = new TrusteeTransformationService(transformationService)
 
-      when(repository.get(any(), any())).thenReturn(Future.successful(None))
-      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
 
       val result = service.addAmendLeadTrusteeTransformer("utr", "internalId", DisplayTrustLeadTrusteeType(Some(newLeadTrusteeIndInfo), None))
       whenReady(result) { _ =>
 
-        verify(repository).set("utr",
-          "internalId",
-          ComposedDeltaTransform(Seq(AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo))))
+        verify(transformationService).addNewTransform("utr",
+          "internalId",AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo))
 
       }
     }
 
-    "must write an add trustee ind transform to the transformation repository with no existing transforms" in {
-      val repository = mock[TransformationRepositoryImpl]
-      val service = new TrusteeTransformationService(repository, mock[DesService], auditService)
+    "must add a new add trustee ind transform using the transformation service" in {
+      
+      val transformationService = mock[TransformationService]
+      val service = new TrusteeTransformationService(transformationService)
 
-      when(repository.get(any(), any())).thenReturn(Future.successful(None))
-      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
 
       val result = service.addAddTrusteeTransformer("utr", "internalId", DisplayTrustTrusteeType(Some(newTrusteeIndInfo), None))
       whenReady(result) { _ =>
 
-        verify(repository).set("utr",
-          "internalId",
-          ComposedDeltaTransform(Seq(AddTrusteeIndTransform(newTrusteeIndInfo))))
+        verify(transformationService).addNewTransform("utr",
+          "internalId", AddTrusteeIndTransform(newTrusteeIndInfo))
 
       }
     }
 
-    "must write an add trustee org transform to the transformation repository with no existing transforms" in {
-      val repository = mock[TransformationRepositoryImpl]
-      val service = new TrusteeTransformationService(repository, mock[DesService], auditService)
+    "must add a new add trustee org transform using the transformation service" in {
+      
+      val transformationService = mock[TransformationService]
+      val service = new TrusteeTransformationService(transformationService)
 
-      when(repository.get(any(), any())).thenReturn(Future.successful(None))
-      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
 
       val result = service.addAddTrusteeTransformer("utr", "internalId", DisplayTrustTrusteeType(None, Some(newTrusteeOrgInfo)))
       whenReady(result) { _ =>
 
-        verify(repository).set("utr",
-          "internalId",
-          ComposedDeltaTransform(Seq(AddTrusteeOrgTransform(newTrusteeOrgInfo))))
+        verify(transformationService).addNewTransform("utr",
+          "internalId", AddTrusteeOrgTransform(newTrusteeOrgInfo))
 
       }
     }
 
-    "must write a promote trustee ind transform to the transformation repository with no existing transforms" in {
+    "must write a promote trustee ind transform using the transformation service" in {
       val response = getTrustResponse.as[GetTrustSuccessResponse]
       val processedResponse = response.asInstanceOf[TrustProcessedResponse]
-      val desService = mock[DesService]
 
-      when (desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(processedResponse))
+      val transformationService = mock[TransformationService]
+      val service = new TrusteeTransformationService(transformationService)
 
-      val repository = mock[TransformationRepositoryImpl]
-      val service = new TrusteeTransformationService(repository, desService, auditService)
+      when(transformationService.getTransformedData(any(), any())(any())).thenReturn(Future.successful(processedResponse))
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
+
       val index = 1
-
-      when(repository.get(any(), any())).thenReturn(Future.successful(None))
-      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
       val endDate = LocalDate.of(2014, 3, 14)
       val result = service.addPromoteTrusteeTransformer("utr", "internalId", index, DisplayTrustLeadTrusteeType(Some(newLeadTrusteeIndInfo), None), endDate)
       whenReady(result) { _ =>
 
-        verify(repository).set("utr",
-          "internalId",
-          ComposedDeltaTransform(Seq(PromoteTrusteeIndTransform(index, newLeadTrusteeIndInfo, endDate, originalTrusteeOrgJson))))
+        verify(transformationService).addNewTransform("utr",
+          "internalId", PromoteTrusteeIndTransform(index, newLeadTrusteeIndInfo, endDate, originalTrusteeOrgJson))
       }
     }
 
-    "must write a promote trustee org transform to the transformation repository with no existing transforms" in {
+    "must write a promote trustee org transform using the transformation service" in {
       val response = getTrustResponse.as[GetTrustSuccessResponse]
       val processedResponse = response.asInstanceOf[TrustProcessedResponse]
-      val desService = mock[DesService]
 
-      when (desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(processedResponse))
+      val transformationService = mock[TransformationService]
+      val service = new TrusteeTransformationService(transformationService)
 
-      val repository = mock[TransformationRepositoryImpl]
-      val service = new TrusteeTransformationService(repository, desService, auditService)
+      when(transformationService.getTransformedData(any(), any())(any())).thenReturn(Future.successful(processedResponse))
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
+
       val index = 1
 
-      when(repository.get(any(), any())).thenReturn(Future.successful(None))
-      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
       val endDate = LocalDate.of(2013, 6, 28)
 
       val result = service.addPromoteTrusteeTransformer(
@@ -236,24 +216,20 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
         endDate)
       whenReady(result) { _ =>
 
-        verify(repository).set("utr",
-          "internalId",
-          ComposedDeltaTransform(Seq(PromoteTrusteeOrgTransform(index, newLeadTrusteeOrgInfo, endDate, originalTrusteeOrgJson))))
+        verify(transformationService).addNewTransform("utr",
+          "internalId", PromoteTrusteeOrgTransform(index, newLeadTrusteeOrgInfo, endDate, originalTrusteeOrgJson))
       }
     }
 
-    "must write a RemoveTrustee transform to the transformation repository with no existing transforms" in {
+    "must write a RemoveTrustee transform using the transformation service" in {
       val response = getTrustResponse.as[GetTrustSuccessResponse]
       val processedResponse = response.asInstanceOf[TrustProcessedResponse]
-      val desService = mock[DesService]
 
-      when (desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(processedResponse))
+      val transformationService = mock[TransformationService]
+      val service = new TrusteeTransformationService(transformationService)
 
-      val repository = mock[TransformationRepositoryImpl]
-      val service = new TrusteeTransformationService(repository, desService, auditService)
-
-      when(repository.get(any(), any())).thenReturn(Future.successful(None))
-      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+      when(transformationService.getTransformedData(any(), any())(any())).thenReturn(Future.successful(processedResponse))
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
 
       val endDate = LocalDate.parse("2010-10-10")
 
@@ -266,106 +242,46 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
       whenReady(result) { _ =>
 
-        verify(repository).set("utr",
-          "internalId",
-          ComposedDeltaTransform(Seq(RemoveTrusteeTransform(endDate, index = 1, originalTrusteeOrgJson))))
+        verify(transformationService).addNewTransform("utr",
+          "internalId", RemoveTrusteeTransform(endDate, index = 1, originalTrusteeOrgJson))
       }
     }
 
-    "must write a RemoveTrustee transform to the transformation repository with existing transforms" in {
-      val response = getTrustResponse.as[GetTrustSuccessResponse]
-      val processedResponse = response.asInstanceOf[TrustProcessedResponse]
-      val desService = mock[DesService]
 
-      when (desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(processedResponse))
+    "must write a corresponding transform using the transformation service" in {
 
-      val repository = mock[TransformationRepositoryImpl]
-      val service = new TrusteeTransformationService(repository, desService, auditService)
+      
+      val transformationService = mock[TransformationService]
+      val service = new TrusteeTransformationService(transformationService)
 
-      val existingTransforms = Seq(AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo))
-      when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
-      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
-
-      val endDate = LocalDate.parse("2010-10-10")
-
-      val payload = RemoveTrustee(
-        endDate = endDate,
-        index = 1
-      )
-
-      val result = service.addRemoveTrusteeTransformer("utr", "internalId", payload)
-
-      whenReady(result) { _ =>
-
-        verify(repository).set("utr",
-          "internalId",
-          ComposedDeltaTransform(Seq(
-            AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo),
-            RemoveTrusteeTransform(endDate, index = 1, originalTrusteeOrgJson)
-          )))
-      }
-    }
-
-    "must write a corresponding transform to the transformation repository with existing empty transforms" in {
-
-      val repository = mock[TransformationRepositoryImpl]
-      val service = new TrusteeTransformationService(repository, mock[DesService], auditService)
-
-      when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(Nil))))
-      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
 
       val result = service.addAmendLeadTrusteeTransformer("utr", "internalId", DisplayTrustLeadTrusteeType(Some(newLeadTrusteeIndInfo), None))
       whenReady(result) { _ =>
 
-        verify(repository).set("utr",
-          "internalId",
-          ComposedDeltaTransform(Seq(AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo))))
+        verify(transformationService).addNewTransform("utr",
+          "internalId", AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo))
 
       }
     }
 
-    "must write a corresponding transform to the transformation repository with existing transforms" in {
-
-      val repository = mock[TransformationRepositoryImpl]
-      val service = new TrusteeTransformationService(repository, mock[DesService], auditService)
-
-      val existingTransforms = Seq(AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo))
-      when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
-      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
-
-      val result = service.addAmendLeadTrusteeTransformer("utr", "internalId", DisplayTrustLeadTrusteeType(Some(newLeadTrusteeIndInfo), None))
-      whenReady(result) { _ =>
-
-        verify(repository).set("utr",
-          "internalId",
-          ComposedDeltaTransform(Seq(
-            AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo),
-            AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo))))
-
-      }
-    }
-
-    "must write an amend trustee transform to the transformation repository with no existing transforms" in {
+    "must add a new amend trustee transform using the transformation service" in {
       val response = getTrustResponse.as[GetTrustSuccessResponse]
       val processedResponse = response.asInstanceOf[TrustProcessedResponse]
-      val desService = mock[DesService]
-
-      when (desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(processedResponse))
 
       val index = 0
-      val repository = mock[TransformationRepositoryImpl]
-      val service = new TrusteeTransformationService(repository, desService, auditService)
+      
+      val transformationService = mock[TransformationService]
+      val service = new TrusteeTransformationService(transformationService)
 
-      when(repository.get(any(), any())).thenReturn(Future.successful(None))
-      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+      when(transformationService.getTransformedData(any(), any())(any())).thenReturn(Future.successful(processedResponse))
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
 
       val result = service.addAmendTrusteeTransformer("utr", index, "internalId", DisplayTrustTrusteeType(Some(newTrusteeIndInfo), None))
       whenReady(result) { _ =>
 
-        verify(repository).set("utr",
-          "internalId",
-          ComposedDeltaTransform(Seq(AmendTrusteeIndTransform(index, newTrusteeIndInfo, originalTrusteeIndJson)))
-        )
+        verify(transformationService).addNewTransform("utr",
+          "internalId", AmendTrusteeIndTransform(index, newTrusteeIndInfo, originalTrusteeIndJson))
       }
     }
   }

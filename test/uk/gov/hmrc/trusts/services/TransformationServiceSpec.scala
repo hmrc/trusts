@@ -53,7 +53,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
   private val auditService = mock[AuditService]
 
-  private implicit val hc : HeaderCarrier = HeaderCarrier()
+  private implicit val hc: HeaderCarrier = HeaderCarrier()
 
   private val originalTrusteeIndJson = Json.parse(
     """
@@ -92,107 +92,166 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       |            }
       |""".stripMargin)
 
+  val existingLeadTrusteeInfo = DisplayTrustLeadTrusteeIndType(
+    lineNo = Some("newLineNo"),
+    bpMatchStatus = Some("newMatchStatus"),
+    name = NameType("existingFirstName", Some("existingMiddleName"), "existingLastName"),
+    dateOfBirth = new DateTime(1965, 2, 10, 12, 30),
+    phoneNumber = "newPhone",
+    email = Some("newEmail"),
+    identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
+    entityStart = Some(DateTime.parse("2002-03-14"))
+  )
 
-    "must transform json data with the current transforms" in {
+  val newLeadTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
+    lineNo = Some("newLineNo"),
+    bpMatchStatus = Some("newMatchStatus"),
+    name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
+    dateOfBirth = new DateTime(1965, 2, 10, 12, 30),
+    phoneNumber = "newPhone",
+    email = Some("newEmail"),
+    identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
+    entityStart = Some(DateTime.parse("2012-03-14"))
+  )
+
+  "must transform json data with the current transforms" in {
+    val repository = mock[TransformationRepositoryImpl]
+    val service = new TransformationService(repository, mock[DesService], auditService)
+
+    val existingTransforms = Seq(
+      RemoveTrusteeTransform(LocalDate.parse("2019-12-21"), 0, originalTrusteeIndJson),
+      AmendLeadTrusteeIndTransform(unitTestTrusteeInfo)
+    )
+    when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
+    when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+
+    val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-before.json")
+    val afterJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-after-ind-and-remove.json")
+
+    val result: Future[JsResult[JsValue]] = service.applyDeclarationTransformations("utr", "internalId", beforeJson)
+
+    whenReady(result) {
+      r => r.get mustEqual afterJson
+    }
+  }
+  "must transform json data when no current transforms" in {
+    val repository = mock[TransformationRepositoryImpl]
+    val service = new TransformationService(repository, mock[DesService], auditService)
+
+    when(repository.get(any(), any())).thenReturn(Future.successful(None))
+    when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+
+    val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-before.json")
+
+    val result: Future[JsResult[JsValue]] = service.applyDeclarationTransformations("utr", "internalId", beforeJson)
+
+    whenReady(result) {
+      r => r.get mustEqual beforeJson
+    }
+  }
+  "must apply the correspondence address to the lead trustee's address if it doesn't have one" in {
+    val repository = mock[TransformationRepositoryImpl]
+    val service = new TransformationService(repository, mock[DesService], auditService)
+
+    val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-and-correspondence-address.json")
+    val afterJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-and-correspondence-address-after.json")
+
+    val result: JsResult[JsValue] = service.populateLeadTrusteeAddress(beforeJson)
+
+    result.get mustEqual afterJson
+  }
+  "must fix lead trustee address of ETMP json read from DES service" in {
+    val response = getTrustResponse.as[GetTrustSuccessResponse]
+    val processedResponse = response.asInstanceOf[TrustProcessedResponse]
+    val desService = mock[DesService]
+    when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
+
+    val transformedJson = JsonUtils.getJsonValueFromFile("valid-get-trust-response-transformed.json")
+    val expectedResponse = TrustProcessedResponse(transformedJson, processedResponse.responseHeader)
+
+    val repository = mock[TransformationRepositoryImpl]
+    when(repository.get(any(), any())).thenReturn(Future.successful(None))
+    val service = new TransformationService(repository, desService, auditService)
+    val result = service.getTransformedData("utr", "internalId")
+    whenReady(result) {
+      r => r mustEqual expectedResponse
+    }
+  }
+  "must apply transformations to ETMP json read from DES service" in {
+    val response = getTrustResponse.as[GetTrustSuccessResponse]
+    val processedResponse = response.asInstanceOf[TrustProcessedResponse]
+    val desService = mock[DesService]
+    when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
+
+    val newLeadTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
+      lineNo = None,
+      bpMatchStatus = None,
+      name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
+      dateOfBirth = new DateTime(1965, 2, 10, 0, 0),
+      phoneNumber = "newPhone",
+      email = Some("newEmail"),
+      identification = DisplayTrustIdentificationType(
+        None,
+        Some("newNino"),
+        None,
+        Some(AddressType("newLine1", "newLine2", None, None, Some("NE1 2LA"), "GB"))),
+      entityStart = None
+    )
+
+    val existingTransforms = Seq(
+      AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo)
+    )
+
+    val repository = mock[TransformationRepositoryImpl]
+
+    when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
+
+    val transformedJson = JsonUtils.getJsonValueFromFile("valid-get-trust-response-transformed-with-amend.json")
+    val expectedResponse = TrustProcessedResponse(transformedJson, processedResponse.responseHeader)
+
+    val service = new TransformationService(repository, desService, auditService)
+
+    val result = service.getTransformedData("utr", "internalId")
+    whenReady(result) {
+      r => r mustEqual expectedResponse
+    }
+  }
+
+  "addNewTransform" - {
+
+    "must write a corresponding transform to the transformation repository with no existing transforms" in {
       val repository = mock[TransformationRepositoryImpl]
       val service = new TransformationService(repository, mock[DesService], auditService)
 
-      val existingTransforms = Seq(
-        RemoveTrusteeTransform(LocalDate.parse("2019-12-21"), 0, originalTrusteeIndJson),
-        AmendLeadTrusteeIndTransform(unitTestTrusteeInfo)
-      )
+      when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(Nil))))
+      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+
+      val result = service.addNewTransform("utr", "internalId", AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo))
+      whenReady(result) { _ =>
+
+        verify(repository).set("utr",
+          "internalId",
+          ComposedDeltaTransform(Seq(AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo))))
+      }
+    }
+
+    "must write a corresponding transform to the transformation repository with existing transforms" in {
+      val repository = mock[TransformationRepositoryImpl]
+      val service = new TransformationService(repository, mock[DesService], auditService)
+
+      val existingTransforms = Seq(AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo))
       when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-before.json")
-      val afterJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-after-ind-and-remove.json")
+      val result = service.addNewTransform("utr", "internalId", AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo))
+      whenReady(result) { _ =>
 
-      val result: Future[JsResult[JsValue]] = service.applyDeclarationTransformations("utr", "internalId", beforeJson)
-
-      whenReady(result) {
-        r => r.get mustEqual afterJson
+        verify(repository).set("utr",
+          "internalId",
+          ComposedDeltaTransform(Seq(
+            AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo),
+            AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo))))
       }
     }
-    "must transform json data when no current transforms" in {
-      val repository = mock[TransformationRepositoryImpl]
-      val service = new TransformationService(repository, mock[DesService], auditService)
-
-      when(repository.get(any(), any())).thenReturn(Future.successful(None))
-      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
-
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-before.json")
-
-      val result: Future[JsResult[JsValue]] = service.applyDeclarationTransformations("utr", "internalId", beforeJson)
-
-      whenReady(result) {
-        r => r.get mustEqual beforeJson
-      }
-    }
-    "must apply the correspondence address to the lead trustee's address if it doesn't have one" in {
-      val repository = mock[TransformationRepositoryImpl]
-      val service = new TransformationService(repository, mock[DesService], auditService)
-
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-and-correspondence-address.json")
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-and-correspondence-address-after.json")
-
-      val result: JsResult[JsValue] = service.populateLeadTrusteeAddress(beforeJson)
-
-      result.get mustEqual afterJson
-    }
-    "must fix lead trustee address of ETMP json read from DES service" in {
-      val response = getTrustResponse.as[GetTrustSuccessResponse]
-      val processedResponse = response.asInstanceOf[TrustProcessedResponse]
-      val desService = mock[DesService]
-      when (desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
-
-      val transformedJson = JsonUtils.getJsonValueFromFile("valid-get-trust-response-transformed.json")
-      val expectedResponse = TrustProcessedResponse(transformedJson, processedResponse.responseHeader)
-
-      val repository = mock[TransformationRepositoryImpl]
-      when(repository.get(any(), any())).thenReturn(Future.successful(None))
-      val service = new TransformationService(repository, desService, auditService)
-      val result = service.getTransformedData("utr", "internalId")
-      whenReady(result) {
-        r => r mustEqual expectedResponse
-      }
-    }
-    "must apply transformations to ETMP json read from DES service" in {
-      val response = getTrustResponse.as[GetTrustSuccessResponse]
-      val processedResponse = response.asInstanceOf[TrustProcessedResponse]
-      val desService = mock[DesService]
-      when (desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
-
-      val newLeadTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
-        lineNo = None,
-        bpMatchStatus = None,
-        name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-        dateOfBirth = new DateTime(1965, 2, 10, 0, 0),
-        phoneNumber = "newPhone",
-        email = Some("newEmail"),
-        identification = DisplayTrustIdentificationType(
-          None,
-          Some("newNino"),
-          None,
-          Some(AddressType("newLine1", "newLine2", None, None, Some("NE1 2LA"), "GB"))),
-        entityStart = None
-      )
-
-      val existingTransforms = Seq(
-        AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo)
-      )
-
-      val repository = mock[TransformationRepositoryImpl]
-
-      when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
-
-      val transformedJson = JsonUtils.getJsonValueFromFile("valid-get-trust-response-transformed-with-amend.json")
-      val expectedResponse = TrustProcessedResponse(transformedJson, processedResponse.responseHeader)
-
-      val service = new TransformationService(repository, desService, auditService)
-
-      val result = service.getTransformedData("utr", "internalId")
-      whenReady(result) {
-        r => r mustEqual expectedResponse
-      }
-    }
+  }
 }
