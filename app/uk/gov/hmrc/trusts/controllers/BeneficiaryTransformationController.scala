@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsError, JsString, JsSuccess, JsValue}
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
-import uk.gov.hmrc.trusts.models.RemoveTrustee
+import uk.gov.hmrc.trusts.models.{RemoveBeneficiary, RemoveTrustee}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.services.{BeneficiaryTransformationService, TrusteeTransformationService}
 import uk.gov.hmrc.trusts.utils.ValidationUtil
@@ -46,6 +46,20 @@ class BeneficiaryTransformationController @Inject()(
         case JsError(errors) =>
           logger.warn(s"Supplied description could not be read as a JsString - $errors")
           Future.successful(BadRequest)
+      }
+    }
+  }
+
+
+  def removeUnidentifiedBeneficiary(utr: String): Action[JsValue] = identify.async(parse.json) {
+    implicit request => {
+      request.body.validate[RemoveBeneficiary] match { case _ => ???
+//        case JsSuccess(model, _) =>
+//          //beneficiaryTransformationService.addRemoveBeneficiaryTransformer(utr, request.identifier, model) map { _ =>
+//          Ok
+//        //}
+//        case JsError(_) =>
+//          Future.successful(BadRequest)
       }
     }
   }

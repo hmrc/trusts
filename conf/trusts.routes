@@ -35,3 +35,5 @@ POST        /promote-trustee/:utr/:index                        uk.gov.hmrc.trus
 PUT         /:utr/trustees/remove                               uk.gov.hmrc.trusts.controllers.TrusteeTransformationController.removeTrustee(utr: String)
 
 POST        /amend-unidentified-beneficiary/:utr/:index         uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendUnidentifiedBeneficiary(utr: String, index: Int)
+
+PUT        /:utr/beneficiaries/remove                           uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.removeUnidentifiedBeneficiary(utr: String)
