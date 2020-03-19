@@ -31,6 +31,7 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
 import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee}
 import uk.gov.hmrc.trusts.services.{BeneficiaryTransformationService, TrusteeTransformationService}
 
@@ -40,7 +41,7 @@ import scala.concurrent.Future
 class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers {
   val identifierAction = new FakeIdentifierAction(Agent)
 
-  "amend unidentified beneficiary" - {
+  "Amend unidentified beneficiary" - {
 
     val index = 0
 
@@ -72,6 +73,48 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val result = controller.amendUnidentifiedBeneficiary("aUTR", index).apply(request)
+      status(result) mustBe BAD_REQUEST
+    }
+  }
+
+  "Add unidentified beneficiary" - {
+
+    "must add a new add unidentified beneficiary transform" in {
+      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+
+      val newBeneficiary = UnidentifiedType(
+        None,
+        None,
+        "Some description",
+        None,
+        None,
+        DateTime.parse("2010-01-01"),
+        None
+      )
+
+      when(beneficiaryTransformationService.addAddUnidentifiedBeneficiaryTransformer(any(), any(), any()))
+        .thenReturn(Future.successful(()))
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(newBeneficiary))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.addUnidentifiedBeneficiary("aUTR").apply(request)
+
+      status(result) mustBe OK
+      verify(beneficiaryTransformationService).addAddUnidentifiedBeneficiaryTransformer("aUTR", "id", newBeneficiary)
+    }
+
+    "must return an error for malformed json" in {
+      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.parse("{}"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.addUnidentifiedBeneficiary("aUTR").apply(request)
       status(result) mustBe BAD_REQUEST
     }
   }

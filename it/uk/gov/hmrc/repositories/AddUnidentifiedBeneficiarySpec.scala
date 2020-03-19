@@ -7,7 +7,7 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsString, JsValue}
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
@@ -18,17 +18,24 @@ import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
 
-class AmendUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar with TransformIntegrationTest {
+class AddUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar with TransformIntegrationTest {
 
   val getTrustResponseFromDES: GetTrustSuccessResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
   val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
 
-  "an amend unidentified beneficiary call" - {
+  "an add unidentified beneficiary call" - {
     "must return amended data in a subsequent 'get' call" in {
 
-      val newDescription = "Updated description"
+      val newBeneficiaryJson = Json.parse(
+        """
+          |{
+          | "description": "New Beneficiary Description",
+          | "entityStart": "2020-01-01"
+          |}
+          |""".stripMargin
+      )
 
-      val expectedGetAfterAmendBeneficiaryJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-after-amend-unidentified-beneficiary.json")
+      val expectedGetAfterAddBeneficiaryJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-after-add-unidentified-beneficiary.json")
 
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
@@ -53,16 +60,16 @@ class AmendUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with S
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val amendRequest = FakeRequest(POST, "/trusts/amend-unidentified-beneficiary/5174384721/0")
-            .withBody(JsString(newDescription))
+          val addRequest = FakeRequest(POST, "/trusts/add-unidentified-beneficiary/5174384721")
+            .withBody(newBeneficiaryJson)
             .withHeaders(CONTENT_TYPE -> "application/json")
 
-          val amendResult = route(application, amendRequest).get
-          status(amendResult) mustBe OK
+          val addResult = route(application, addRequest).get
+          status(addResult) mustBe OK
 
           val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
           status(newResult) mustBe OK
-          contentAsJson(newResult) mustBe expectedGetAfterAmendBeneficiaryJson
+          contentAsJson(newResult) mustBe expectedGetAfterAddBeneficiaryJson
 
           dropTheDatabase(connection)
         }.get
