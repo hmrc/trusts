@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsArray, JsError, JsNull, JsPath, JsSuccess, JsValue, Json}
+import play.api.libs.json.{JsArray, JsPath, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, Result}
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUTRAction}
@@ -80,51 +80,24 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
 
   def getTrustSetupDate(utr: String): Action[AnyContent] =
-    doGet(utr, applyTransformations = true) {
-      case processed: TrustProcessedResponse =>
-        val pick = (JsPath \ 'details \ 'trust \ 'details \ 'startDate).json.pick
-        processed.getTrust.transform(pick).fold(
-          _ => InternalServerError,
-          json => {
-            Ok(Json.obj("startDate" -> json))
-          }
-        )
-      case _ => Forbidden
-    }
+    getItemAtPath(utr, (JsPath \ 'details \ 'trust \ 'details \ 'startDate), "startDate")
 
   def getTrustees(utr: String) : Action[AnyContent] =
-    doGet(utr, applyTransformations = true) {
-      case processed: TrustProcessedResponse =>
-        processed.transform.map {
-          case transformed: TrustProcessedResponse =>
-
-            val pickTrustees = (JsPath \ 'details \ 'trust \ 'entities \ 'trustees).json.pick
-
-            def insertIntoObject(json : JsValue) = Json.obj("trustees" -> json)
-
-            Ok(transformed
-              .getTrust.transform(pickTrustees)
-              .map(insertIntoObject)
-              .getOrElse(insertIntoObject(JsArray())))
-          case _ =>
-            InternalServerError
-        }.getOrElse(InternalServerError)
-      case _ =>
-        Forbidden
-    }
+    getItemAtPath(utr, (JsPath \ 'details \ 'trust \ 'entities \ 'trustees), "trustees")
 
   def getBeneficiaries(utr: String) : Action[AnyContent] =
+    getItemAtPath(utr, (JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary), "beneficiary")
+
+  private def getItemAtPath(utr: String, path: JsPath, fieldName: String) = {
     doGet(utr, applyTransformations = true) {
       case processed: TrustProcessedResponse =>
         processed.transform.map {
           case transformed: TrustProcessedResponse =>
 
-            val pickBeneficiaries = (JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary).json.pick
-
-            def insertIntoObject(json : JsValue) = Json.obj("beneficiary" -> json)
+            def insertIntoObject(json: JsValue) = Json.obj(fieldName -> json)
 
             Ok(transformed
-              .getTrust.transform(pickBeneficiaries)
+              .getTrust.transform(path.json.pick)
               .map(insertIntoObject)
               .getOrElse(insertIntoObject(JsArray())))
           case _ =>
@@ -133,6 +106,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       case _ =>
         Forbidden
     }
+  }
 
   private def resetCacheIfRequested(utr: String, internalId: String, refreshEtmpData: Boolean) = {
     if (refreshEtmpData) {
