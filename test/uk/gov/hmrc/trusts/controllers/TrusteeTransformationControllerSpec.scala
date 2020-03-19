@@ -32,19 +32,19 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee}
-import uk.gov.hmrc.trusts.services.TransformationService
+import uk.gov.hmrc.trusts.services.{BeneficiaryTransformationService, TransformationService, TrusteeTransformationService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TransformationControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers {
+class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers {
   val identifierAction = new FakeIdentifierAction(Agent)
 
   "amend lead trustee" - {
 
     "must add a new amend lead trustee transform" in {
-      val transformationService = mock[TransformationService]
-      val controller = new TransformationController(identifierAction, transformationService)
+      val trusteeTransformationService = mock[TrusteeTransformationService]
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService)
 
       val newTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
         lineNo = Some("newLineNo"),
@@ -57,7 +57,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
         entityStart = Some(DateTime.parse("2012-03-14"))
       )
 
-      when(transformationService.addAmendLeadTrusteeTransformer(any(), any(), any()))
+      when(trusteeTransformationService.addAmendLeadTrusteeTransformer(any(), any(), any()))
         .thenReturn(Future.successful(()))
 
       val newTrusteeInfo = DisplayTrustLeadTrusteeType(Some(newTrusteeIndInfo), None)
@@ -69,12 +69,12 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
       val result = controller.amendLeadTrustee("aUTR").apply(request)
 
       status(result) mustBe OK
-      verify(transformationService).addAmendLeadTrusteeTransformer("aUTR", "id", newTrusteeInfo)
+      verify(trusteeTransformationService).addAmendLeadTrusteeTransformer("aUTR", "id", newTrusteeInfo)
     }
 
     "must return an error for malformed json" in {
-      val transformationService = mock[TransformationService]
-      val controller = new TransformationController(identifierAction, transformationService)
+      val trusteeTransformationService = mock[TrusteeTransformationService]
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService)
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -89,8 +89,8 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
 
     "must add a new add trustee transform" in {
 
-      val transformationService = mock[TransformationService]
-      val controller = new TransformationController(identifierAction, transformationService)
+      val trusteeTransformationService = mock[TrusteeTransformationService]
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService)
 
       val newTrusteeIndInfo = DisplayTrustTrusteeIndividualType(
         lineNo = Some("newLineNo"),
@@ -102,7 +102,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
         entityStart = DateTime.parse("2012-03-14")
       )
 
-      when(transformationService.addAddTrusteeTransformer(any(), any(), any()))
+      when(trusteeTransformationService.addAddTrusteeTransformer(any(), any(), any()))
         .thenReturn(Future.successful(()))
 
       val newTrusteeInfo = DisplayTrustTrusteeType(Some(newTrusteeIndInfo), None)
@@ -114,12 +114,12 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
       val result = controller.addTrustee("aUTR").apply(request)
 
       status(result) mustBe OK
-      verify(transformationService).addAddTrusteeTransformer("aUTR", "id", newTrusteeInfo)
+      verify(trusteeTransformationService).addAddTrusteeTransformer("aUTR", "id", newTrusteeInfo)
     }
 
     "must return an error for malformed json" in {
-      val transformationService = mock[TransformationService]
-      val controller = new TransformationController(identifierAction, transformationService)
+      val trusteeTransformationService = mock[TrusteeTransformationService]
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService)
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -134,8 +134,8 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
 
     "must add a new promote trustee transform" in {
 
-      val transformationService = mock[TransformationService]
-      val controller = new TransformationController(identifierAction, transformationService)
+      val trusteeTransformationService = mock[TrusteeTransformationService]
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService)
       val index = 3
 
       val newTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
@@ -149,7 +149,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
         entityStart = Some(DateTime.parse("2012-03-14"))
       )
 
-      when(transformationService.addPromoteTrusteeTransformer(any(), any(), any(), any(), any())(any()))
+      when(trusteeTransformationService.addPromoteTrusteeTransformer(any(), any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(()))
 
       val newTrusteeInfo = DisplayTrustLeadTrusteeType(Some(newTrusteeIndInfo), None)
@@ -161,7 +161,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
       val result = controller.promoteTrustee("aUTR", index).apply(request)
 
       status(result) mustBe OK
-      verify(transformationService).addPromoteTrusteeTransformer(
+      verify(trusteeTransformationService).addPromoteTrusteeTransformer(
         equalTo("aUTR"),
         equalTo("id"),
         equalTo(index),
@@ -170,8 +170,9 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
     }
 
     "must return an error for malformed json" in {
-      val transformationService = mock[TransformationService]
-      val controller = new TransformationController(identifierAction, transformationService)
+      val trusteeTransformationService = mock[TrusteeTransformationService]
+
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService)
       val index = 3
 
       val request = FakeRequest("POST", "path")
@@ -189,14 +190,14 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
 
-      val transformationService = mock[TransformationService]
-      val controller = new TransformationController(identifierAction, transformationService)
+      val trusteeTransformationService = mock[TrusteeTransformationService]
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService)
 
       val payload = RemoveTrustee(
         endDate = LocalDate.parse("2020-01-10"), index = 0
       )
 
-      when(transformationService.addRemoveTrusteeTransformer(any(), any(), any())(any()))
+      when(trusteeTransformationService.addRemoveTrusteeTransformer(any(), any(), any())(any()))
         .thenReturn(Future.successful(()))
 
       val request = FakeRequest("DELETE", "path")
@@ -206,7 +207,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
       val result = controller.removeTrustee("aUTR").apply(request)
 
       status(result) mustBe OK
-      verify(transformationService).addRemoveTrusteeTransformer(
+      verify(trusteeTransformationService).addRemoveTrusteeTransformer(
         equalTo("aUTR"),
         equalTo("id"),
         equalTo(payload))(any[HeaderCarrier])
@@ -219,8 +220,8 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
     val index = 0
 
     "must add a new amend trustee transform for a trustee ind" in {
-      val transformationService = mock[TransformationService]
-      val controller = new TransformationController(identifierAction, transformationService)
+      val trusteeTransformationService = mock[TrusteeTransformationService]
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService)
 
       val newTrusteeIndInfo = DisplayTrustTrusteeIndividualType(
         lineNo = Some("newLineNo"),
@@ -232,7 +233,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
         entityStart = DateTime.parse("2012-03-14")
       )
 
-      when(transformationService.addAmendTrusteeTransformer(any(), any(), any(), any())(any()))
+      when(trusteeTransformationService.addAmendTrusteeTransformer(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(()))
 
       val newTrusteeInfo = DisplayTrustTrusteeType(Some(newTrusteeIndInfo), None)
@@ -244,7 +245,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
       val result = controller.amendTrustee("aUTR", index).apply(request)
 
       status(result) mustBe OK
-      verify(transformationService).addAmendTrusteeTransformer(
+      verify(trusteeTransformationService).addAmendTrusteeTransformer(
         equalTo("aUTR"),
         equalTo(index),
         equalTo("id"),
@@ -253,8 +254,8 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
     }
 
     "must add a new amend trustee transform for a trustee org" in {
-      val transformationService = mock[TransformationService]
-      val controller = new TransformationController(identifierAction, transformationService)
+      val trusteeTransformationService = mock[TrusteeTransformationService]
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService)
 
       val newTrusteeOrgInfo = DisplayTrustTrusteeOrgType(
         lineNo = Some("newLineNo"),
@@ -266,7 +267,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
         entityStart = DateTime.parse("2012-03-14")
       )
 
-      when(transformationService.addAmendTrusteeTransformer(any(), any(), any(), any())(any()))
+      when(trusteeTransformationService.addAmendTrusteeTransformer(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(()))
 
       val newTrusteeInfo = DisplayTrustTrusteeType(None, Some(newTrusteeOrgInfo))
@@ -278,7 +279,7 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
       val result = controller.amendTrustee("aUTR", index).apply(request)
 
       status(result) mustBe OK
-      verify(transformationService).addAmendTrusteeTransformer(
+      verify(trusteeTransformationService).addAmendTrusteeTransformer(
         equalTo("aUTR"),
         equalTo(index),
         equalTo("id"),
@@ -288,8 +289,8 @@ class TransformationControllerSpec extends FreeSpec with MockitoSugar with Scala
     }
 
     "must return an error for malformed json" in {
-      val transformationService = mock[TransformationService]
-      val controller = new TransformationController(identifierAction, transformationService)
+      val trusteeTransformationService = mock[TrusteeTransformationService]
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService)
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
