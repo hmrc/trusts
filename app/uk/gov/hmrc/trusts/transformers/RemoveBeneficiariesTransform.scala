@@ -17,10 +17,23 @@
 package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
-import play.api.libs.json.{JsResult, JsValue}
+import play.api.libs.json.{JsArray, JsResult, JsValue, Reads, __}
 
 sealed trait RemoveBeneficiariesTransform extends DeltaTransform {
-  override def applyTransform(input: JsValue): JsResult[JsValue] = ???
+  def index : Int
+
+  override def applyTransform(input: JsValue): JsResult[JsValue] = {
+    val removeFromArray = __.json.pick[JsArray].map { arr =>
+        JsArray(
+          arr.value.zipWithIndex.filterNot(_._2 == index).map(_._1)
+        )
+    }
+
+    val xform = (__ \ "trustOrEstateDisplay" \ "details" \ "trust" \
+      "entities" \ "beneficiary" \ "unidentified" ).json.update(removeFromArray)
+
+    input.transform(xform)
+  }
 }
 
 object RemoveBeneficiariesTransform {
