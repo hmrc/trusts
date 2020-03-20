@@ -245,7 +245,7 @@ object DisplayTrustCharityType {
 }
 
 
-case class DisplayTrustUnidentifiedType(lineNo: String,
+case class DisplayTrustUnidentifiedType(lineNo: Option[String],
                                         bpMatchStatus: Option[String],
                                         description: String,
                                         beneficiaryDiscretion: Option[Boolean],
