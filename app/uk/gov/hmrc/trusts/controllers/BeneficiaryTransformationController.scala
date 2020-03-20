@@ -16,17 +16,13 @@
 
 package uk.gov.hmrc.trusts.controllers
 
-import java.time.LocalDate
-
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsError, JsString, JsSuccess, JsValue}
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
-import uk.gov.hmrc.trusts.models.RemoveTrustee
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
-import uk.gov.hmrc.trusts.services.{BeneficiaryTransformationService, TrusteeTransformationService}
+import uk.gov.hmrc.trusts.services.BeneficiaryTransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
 import scala.concurrent.{ExecutionContext, Future}
