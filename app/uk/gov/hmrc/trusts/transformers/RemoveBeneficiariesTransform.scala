@@ -17,7 +17,9 @@
 package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
-import play.api.libs.json.{JsArray, JsResult, JsValue, Reads, __}
+import play.api.data.validation.ValidationError
+import play.api.libs.json.{Format, JsArray, JsResult, JsValue, Reads, Writes, __}
+import play.api.libs.functional.syntax._
 
 sealed trait RemoveBeneficiariesTransform extends DeltaTransform {
   def index : Int
@@ -37,6 +39,36 @@ sealed trait RemoveBeneficiariesTransform extends DeltaTransform {
 }
 
 object RemoveBeneficiariesTransform {
+  val key = "RemoveBeneficiariesTransform"
+
+  private val builders: Map[String, (LocalDate, Int) => RemoveBeneficiariesTransform] = Map(
+    "unidentified" -> Unidentified.apply,
+    "individual" -> Individual.apply
+  )
+
+  private val validateBeneficiaryType = Reads.filter[String](ValidationError("Unexpected Beneficiary Type in transform reads"))(builders.contains)
+
+  implicit val reads: Reads[RemoveBeneficiariesTransform] = Reads (js => {
+    val x =    ((__ \ "type").read(validateBeneficiaryType) and
+      (__ \ "endDate").read[LocalDate] and
+      (__ \ "index").read[Int]).apply((typ, endDate, index) => builders(typ)(endDate, index))
+
+    println(js)
+    js.validate[RemoveBeneficiariesTransform](x)
+  })
+
+
+
+  implicit val writes: Writes[RemoveBeneficiariesTransform] =
+    ((__ \ "type").write[String] and
+      (__ \ "endDate").write[LocalDate] and
+      (__ \ "index").write[Int]).apply { (rb:RemoveBeneficiariesTransform) => rb match {
+        case RemoveBeneficiariesTransform.Unidentified(endDate, index) => ("unidentified", endDate, index)
+        case RemoveBeneficiariesTransform.Individual(endDate, index) => ("individual", endDate, index)
+    }}
+
+  implicit val format: Format[RemoveBeneficiariesTransform] = Format(reads, writes)
+
   case class Unidentified(endDate: LocalDate, index: Int) extends RemoveBeneficiariesTransform
   case class Individual(endDate: LocalDate, index: Int) extends RemoveBeneficiariesTransform
 }

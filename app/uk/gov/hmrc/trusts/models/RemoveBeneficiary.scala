@@ -45,7 +45,6 @@ object RemoveBeneficiary {
     (__ \ "endDate").read[LocalDate] and
     (__ \ "index").read[Int]).apply((typ, endDate, index) => builders(typ)(endDate, index))
 
-
   implicit val writes: Writes[RemoveBeneficiary] =
     ((__ \ "type").write[String] and
     (__ \ "endDate").write[LocalDate] and
