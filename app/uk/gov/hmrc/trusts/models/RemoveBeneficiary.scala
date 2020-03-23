@@ -44,4 +44,14 @@ object RemoveBeneficiary {
     ((__ \ "type").read(validateBeneficiaryType) and
     (__ \ "endDate").read[LocalDate] and
     (__ \ "index").read[Int]).apply((typ, endDate, index) => builders(typ)(endDate, index))
+
+
+  implicit val writes: Writes[RemoveBeneficiary] =
+    ((__ \ "type").write[String] and
+    (__ \ "endDate").write[LocalDate] and
+    (__ \ "index").write[Int]).apply { (rb:RemoveBeneficiary) => rb match {
+    case RemoveBeneficiary.Unidentified(endDate, index) => ("unidentified", endDate, index)
+    case RemoveBeneficiary.Individual(endDate, index) => ("individual", endDate, index)
+  }}
+
  }

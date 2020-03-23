@@ -19,9 +19,15 @@ package uk.gov.hmrc.trusts.models
 import java.time.LocalDate
 
 import org.scalatest.{MustMatchers, WordSpec}
-import play.api.libs.json.{JsError, Json}
+import play.api.libs.json.{JsError, JsSuccess, Json}
 
 class RemoveBeneficiarySpecs extends WordSpec with MustMatchers {
+  "Can round trip throuh Json" in {
+    val OUT = RemoveBeneficiary.Unidentified(LocalDate.of(1478, 12, 31), 67)
+
+    Json.toJson(OUT).validate[RemoveBeneficiary] mustBe JsSuccess(OUT)
+  }
+
   "Can deserialise" when {
     "beneficiary is unidentified" in {
       val json = Json.obj(
