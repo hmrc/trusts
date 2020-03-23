@@ -17,6 +17,7 @@
 package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
+import org.slf4j.LoggerFactory
 import play.api.data.validation.ValidationError
 import play.api.libs.json.{Format, JsArray, JsResult, JsValue, Reads, Writes, __}
 import play.api.libs.functional.syntax._
@@ -25,14 +26,16 @@ sealed trait RemoveBeneficiariesTransform extends DeltaTransform {
   def index : Int
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
+
     val removeFromArray = __.json.pick[JsArray].map { arr =>
         JsArray(
           arr.value.zipWithIndex.filterNot(_._2 == index).map(_._1)
         )
     }
+    val path = (__ \ "details" \ "trust" \
+      "entities" \ "beneficiary" \ "unidentified" )
 
-    val xform = (__ \ "trustOrEstateDisplay" \ "details" \ "trust" \
-      "entities" \ "beneficiary" \ "unidentified" ).json.update(removeFromArray)
+    val xform = path.json.update(removeFromArray)
 
     input.transform(xform)
   }
