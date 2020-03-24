@@ -58,7 +58,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
     val adder = (__ \ "details" \ "trust" \ "entities" \ "beneficiary" \ beneficiaryType).json
       .put(JsArray(beneficiaryData))
 
-    Json.obj().as[JsObject](__.json.update(adder))
+    baseJson.as[JsObject](__.json.update(adder))
   }
 
 

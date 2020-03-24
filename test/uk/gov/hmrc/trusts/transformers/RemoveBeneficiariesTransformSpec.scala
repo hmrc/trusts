@@ -39,7 +39,7 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
   private def beneficiaryJson(value1 : String, endDate: Option[LocalDate] = None, withLineNo: Boolean = true) = {
     val a = Json.obj("field1" -> value1, "field2" -> "value20")
 
-    val b = if (endDate.isDefined) {a.deepMerge(Json.obj("endDate" -> endDate.get))
+    val b = if (endDate.isDefined) {a.deepMerge(Json.obj("entityEnd" -> endDate.get))
     } else {a}
 
     if (withLineNo) {b.deepMerge(Json.obj("lineNo" -> 12))}
@@ -52,7 +52,7 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
     val adder = (__ \ "details" \ "trust" \ "entities" \ "beneficiary" \ beneficiaryType).json
       .put(JsArray(beneficiaryData))
 
-    Json.obj().as[JsObject](__.json.update(adder))
+    baseJson.as[JsObject](__.json.update(adder))
   }
 
   "Remove Beneficiary Transforms should round trip through JSON as part of Composed Transform" in {

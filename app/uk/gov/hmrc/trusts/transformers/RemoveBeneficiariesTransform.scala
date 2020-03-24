@@ -46,7 +46,7 @@ sealed trait RemoveBeneficiariesTransform extends DeltaTransform {
     super.applyDeclarationTransform(input)
 
     if (isKnownToEtmp(beneficiaryData)) {
-      val newBeneficiary = beneficiaryData.deepMerge(Json.obj("endDate" -> endDate))
+      val newBeneficiary = beneficiaryData.deepMerge(Json.obj("entityEnd" -> endDate))
       val appendToArray = __.json.pick[JsArray].map (_.append(newBeneficiary))
       val xform = path.json.update(appendToArray)
       input.transform(xform)
