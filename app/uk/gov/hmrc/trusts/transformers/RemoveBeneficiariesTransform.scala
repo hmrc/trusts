@@ -17,34 +17,53 @@
 package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
-import org.slf4j.LoggerFactory
 import play.api.data.validation.ValidationError
-import play.api.libs.json.{Format, JsArray, JsResult, JsValue, Reads, Writes, __}
+import play.api.libs.json.{Format, JsArray, JsObject, JsResult, JsValue, Json, Reads, Writes, __}
 import play.api.libs.functional.syntax._
 
 sealed trait RemoveBeneficiariesTransform extends DeltaTransform {
   def index : Int
+  def beneficiaryData : JsObject
+  def endDate : LocalDate
+  def beneficiaryType : String
+
+  private lazy val path = (__ \ "details" \ "trust" \
+    "entities" \ "beneficiary" \ beneficiaryType )
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-
     val removeFromArray = __.json.pick[JsArray].map { arr =>
         JsArray(
           arr.value.zipWithIndex.filterNot(_._2 == index).map(_._1)
         )
     }
-    val path = (__ \ "details" \ "trust" \
-      "entities" \ "beneficiary" \ "unidentified" )
 
     val xform = path.json.update(removeFromArray)
 
     input.transform(xform)
+  }
+
+  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
+    super.applyDeclarationTransform(input)
+
+    if (isKnownToEtmp(beneficiaryData)) {
+      val newBeneficiary = beneficiaryData.deepMerge(Json.obj("endDate" -> endDate))
+      val appendToArray = __.json.pick[JsArray].map (_.append(newBeneficiary))
+      val xform = path.json.update(appendToArray)
+      input.transform(xform)
+    } else {
+      ???
+    }
+  }
+
+  private def isKnownToEtmp(json: JsValue): Boolean = {
+    json.transform((__ \ 'lineNo).json.pick).isSuccess
   }
 }
 
 object RemoveBeneficiariesTransform {
   val key = "RemoveBeneficiariesTransform"
 
-  private val builders: Map[String, (LocalDate, Int) => RemoveBeneficiariesTransform] = Map(
+  private val builders: Map[String, (LocalDate, Int, JsObject) => RemoveBeneficiariesTransform] = Map(
     "unidentified" -> Unidentified.apply,
     "individual" -> Individual.apply
   )
@@ -54,24 +73,28 @@ object RemoveBeneficiariesTransform {
   implicit val reads: Reads[RemoveBeneficiariesTransform] = Reads (js => {
     val x =    ((__ \ "type").read(validateBeneficiaryType) and
       (__ \ "endDate").read[LocalDate] and
-      (__ \ "index").read[Int]).apply((typ, endDate, index) => builders(typ)(endDate, index))
+      (__ \ "index").read[Int] and
+      (__ \ "beneficiaryData").read[JsObject]).apply((typ, endDate, index, data) => builders(typ)(endDate, index, data))
 
-    println(js)
     js.validate[RemoveBeneficiariesTransform](x)
   })
-
-
 
   implicit val writes: Writes[RemoveBeneficiariesTransform] =
     ((__ \ "type").write[String] and
       (__ \ "endDate").write[LocalDate] and
-      (__ \ "index").write[Int]).apply { (rb:RemoveBeneficiariesTransform) => rb match {
-        case RemoveBeneficiariesTransform.Unidentified(endDate, index) => ("unidentified", endDate, index)
-        case RemoveBeneficiariesTransform.Individual(endDate, index) => ("individual", endDate, index)
+      (__ \ "index").write[Int] and
+      (__ \ "beneficiaryData").write[JsObject]).apply { (rb:RemoveBeneficiariesTransform) => rb match {
+        case RemoveBeneficiariesTransform.Unidentified(endDate, index, data) => ("unidentified", endDate, index, data)
+        case RemoveBeneficiariesTransform.Individual(endDate, index, data) => ("individual", endDate, index, data)
     }}
 
   implicit val format: Format[RemoveBeneficiariesTransform] = Format(reads, writes)
 
-  case class Unidentified(endDate: LocalDate, index: Int) extends RemoveBeneficiariesTransform
-  case class Individual(endDate: LocalDate, index: Int) extends RemoveBeneficiariesTransform
+  case class Unidentified(endDate: LocalDate, index: Int, beneficiaryData: JsObject) extends RemoveBeneficiariesTransform {
+    val beneficiaryType = "unidentified"
+  }
+
+  case class Individual(endDate: LocalDate, index: Int, beneficiaryData: JsObject) extends RemoveBeneficiariesTransform {
+    val beneficiaryType = "individual"
+  }
 }

@@ -17,6 +17,10 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
+import play.api.libs.json.{Json, __}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models.{RemoveBeneficiary, Success}
 import uk.gov.hmrc.trusts.transformers._
 
@@ -24,10 +28,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class BeneficiaryTransformationService @Inject()(transformationService: TransformationService)(implicit ec:ExecutionContext) {
   def removeBeneficiary(utr: String, internalId: String, removeBeneficiary: RemoveBeneficiary) : Future[Success.type] = {
+    //val beneficiaryData = getBeneficiaryAtIndex(utr, )
+
     transformationService.addNewTransform (utr, internalId,
       removeBeneficiary match {
-        case RemoveBeneficiary.Unidentified(endDate, index) => RemoveBeneficiariesTransform.Unidentified(endDate, index)
-        case RemoveBeneficiary.Individual(endDate, index)   => RemoveBeneficiariesTransform.Individual(endDate, index)
+        case RemoveBeneficiary.Unidentified(endDate, index) => RemoveBeneficiariesTransform.Unidentified(endDate, index, Json.obj())
+        case RemoveBeneficiary.Individual(endDate, index)   => RemoveBeneficiariesTransform.Individual(endDate, index, Json.obj())
       }
     ).map(_ => Success)
   }
@@ -35,4 +41,13 @@ class BeneficiaryTransformationService @Inject()(transformationService: Transfor
   def addAmendUnidentifiedBeneficiaryTransformer(utr: String, index: Int, internalId: String, description: String): Future[Unit] = {
     transformationService.addNewTransform(utr, internalId, AmendUnidentifiedBeneficiaryTransform(index, description))
   }
+
+//  private def getBeneficiaryAtIndex(utr: String, internalId: String, index: Int)(implicit hc: HeaderCarrier) = {
+//    transformationService.getTransformedData(utr, internalId).map {
+//      case TrustProcessedResponse(transformedJson, _) =>
+//        val beneficiaryPath = (__ \ 'details \ 'trust \ 'entities \ 'beneficiary \ index).json
+//        transformedJson.transform(beneficiaryPath.pick)
+//      case _ => Future.failed(InternalServerErrorException("Trust is not in processed state."))
+//    }
+//  }
 }

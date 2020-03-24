@@ -27,33 +27,36 @@ import uk.gov.hmrc.trusts.utils.JsonUtils
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
+import play.api.libs.json.Json.JsValueWrapper
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
 class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with OptionValues with ScalaFutures with MockitoSugar {
 
-  private def beneficiaryJson(value1 : String, endDate: Option[LocalDate] = None) = {
-    if (endDate.isDefined) {
-      Json.obj("field1" -> value1, "field2" -> "value20", "endDate" -> endDate.get)
-    } else {
-      Json.obj("field1" -> value1, "field2" -> "value20")
-    }
+  private def beneficiaryJson(value1 : String, endDate: Option[LocalDate] = None, withLineNo: Boolean = true) = {
+    val a = Json.obj("field1" -> value1, "field2" -> "value20")
+
+    val b = if (endDate.isDefined) {a.deepMerge(Json.obj("endDate" -> endDate.get))
+    } else {a}
+
+    if (withLineNo) {b.deepMerge(Json.obj("lineNo" -> 12))}
+    else {b}
   }
 
   def buildInputJson(beneficiaryType: String, beneficiaryData: Seq[JsValue]) = {
     val baseJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-    val adder = (__ \ "trustOrEstateDisplay" \ "details" \ "trust" \ "entities" \ "beneficiary" \ beneficiaryType).json
+    val adder = (__ \ "details" \ "trust" \ "entities" \ "beneficiary" \ beneficiaryType).json
       .put(JsArray(beneficiaryData))
 
-    baseJson.as[JsObject](__.json.update(adder))
+    Json.obj().as[JsObject](__.json.update(adder))
   }
 
   "Remove Beneficiary Transforms should round trip through JSON as part of Composed Transform" in {
     val OUT = ComposedDeltaTransform(Seq(
-      RemoveBeneficiariesTransform.Unidentified(LocalDate.of(1563, 10, 23), 56),
-      RemoveBeneficiariesTransform.Individual(LocalDate.of(2317, 12, 21), 12)
+      RemoveBeneficiariesTransform.Unidentified(LocalDate.of(1563, 10, 23), 56, beneficiaryJson("Blah Blah Blah")),
+      RemoveBeneficiariesTransform.Individual(LocalDate.of(2317, 12, 21), 12, beneficiaryJson("Foo"))
     ))
 
     Json.toJson(OUT).validate[ComposedDeltaTransform] match {
@@ -75,7 +78,7 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
         beneficiaryJson("Three")
       ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiariesTransform.Unidentified(LocalDate.of(2018, 4, 21), 1)))
+      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiariesTransform.Unidentified(LocalDate.of(2018, 4, 21), 1, Json.obj())))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe expectedOutput
@@ -90,13 +93,15 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
         beneficiaryJson("Three")
       ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiariesTransform.Unidentified(LocalDate.of(2018, 4, 21), 10)))
+      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiariesTransform.Unidentified(LocalDate.of(2018, 4, 21), 10, Json.obj())))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
         case _ => fail("Transform failed")
       }
     }
+
+
 
     "not affect the document if the index is too low" in {
       val inputJson = buildInputJson("unidentified", Seq(
@@ -105,7 +110,7 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
         beneficiaryJson("Three")
       ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiariesTransform.Unidentified(LocalDate.of(2018, 4, 21), -1)))
+      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiariesTransform.Unidentified(LocalDate.of(2018, 4, 21), -1, Json.obj())))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
@@ -115,7 +120,7 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
   }
 
   "the remove unidentified beneficiary declaration transform must" - {
-    "set an end date on  an unidentified beneficiary from the list that is sent to ETMP" ignore {
+    "set an end date on  an unidentified beneficiary from the list that is sent to ETMP" in {
       val inputJson = buildInputJson("unidentified", Seq(
         beneficiaryJson("One"),
         beneficiaryJson("Two"),
@@ -124,14 +129,46 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
 
       val expectedOutput = buildInputJson("unidentified", Seq(
         beneficiaryJson("One"),
-        beneficiaryJson("two", Some(LocalDate.of(2018, 4, 21))),
-        beneficiaryJson("Three")
+        beneficiaryJson("Three"),
+        beneficiaryJson("Two", Some(LocalDate.of(2018, 4, 21)))
+
       ))
 
       val repo = mock[TransformationRepository]
       val desService = mock[DesService]
       val auditService = mock[AuditService]
-      val transforms = Seq(RemoveBeneficiariesTransform.Unidentified(LocalDate.of(2018, 4, 21), 1))
+      val transforms = Seq(RemoveBeneficiariesTransform.Unidentified(LocalDate.of(2018, 4, 21), 1, beneficiaryJson("Two")))
+      when(repo.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))
+
+      val SUT = new TransformationService(repo, desService, auditService)
+
+      SUT.applyDeclarationTransformations("UTRUTRUTR", "InternalId", inputJson)(HeaderCarrier()).futureValue match {
+        case JsSuccess(value, _) => value mustBe expectedOutput
+        case _ => fail("Transform failed")
+      }
+    }
+
+    "ignore a beneficiary that was added then removed" ignore {
+      val inputJson = buildInputJson("unidentified", Seq(
+        beneficiaryJson("One"),
+        beneficiaryJson("Two"),
+        beneficiaryJson("Three")
+      ))
+
+      val expectedOutput = buildInputJson("unidentified", Seq(
+        beneficiaryJson("One"),
+        beneficiaryJson("Three"),
+        beneficiaryJson("Two", Some(LocalDate.of(2018, 4, 21)))
+
+      ))
+
+
+      val repo = mock[TransformationRepository]
+      val desService = mock[DesService]
+      val auditService = mock[AuditService]
+      val transforms = Seq(
+        RemoveBeneficiariesTransform.Unidentified(LocalDate.of(2018, 4, 21), 1, beneficiaryJson("Two"))
+      )
       when(repo.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))
 
       val SUT = new TransformationService(repo, desService, auditService)
@@ -149,7 +186,7 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
         beneficiaryJson("Three")
       ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiariesTransform.Unidentified(LocalDate.of(2018, 4, 21), 10)))
+      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiariesTransform.Unidentified(LocalDate.of(2018, 4, 21), 10, Json.obj())))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
@@ -164,7 +201,7 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
         beneficiaryJson("Three")
       ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiariesTransform.Unidentified(LocalDate.of(2018, 4, 21), -1)))
+      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiariesTransform.Unidentified(LocalDate.of(2018, 4, 21), -1, Json.obj())))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson

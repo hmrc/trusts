@@ -25,15 +25,16 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsArray, JsObject, JsValue, Json, __}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.{NameType, RemoveBeneficiary, RemoveTrustee}
 import uk.gov.hmrc.trusts.repositories.TransformationRepositoryImpl
 import uk.gov.hmrc.trusts.transformers._
-import uk.gov.hmrc.trusts.utils.JsonRequests
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonRequests {
@@ -42,18 +43,43 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
   private implicit val hc : HeaderCarrier = HeaderCarrier()
 
+  private def beneficiaryJson(value1 : String, endDate: Option[LocalDate] = None) = {
+    if (endDate.isDefined) {
+      Json.obj("field1" -> value1, "field2" -> "value20", "endDate" -> endDate.get, "lineNo" -> 65)
+    } else {
+      Json.obj("field1" -> value1, "field2" -> "value20", "lineNo" -> 65)
+    }
+  }
+
+  def buildInputJson(beneficiaryType: String, beneficiaryData: Seq[JsValue]) = {
+    val baseJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
+
+    val adder = (__ \ "details" \ "trust" \ "entities" \ "beneficiary" \ beneficiaryType).json
+      .put(JsArray(beneficiaryData))
+
+    Json.obj().as[JsObject](__.json.update(adder))
+  }
+
+
   "the beneficiary transformation service" - {
 
     "must add a new remove beneficiary transform using the transformation service" in {
       val transformationService = mock[TransformationService]
       val service = new BeneficiaryTransformationService(transformationService)
+      val beneficiary = beneficiaryJson("Blah Blah Blah")
 
-      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
+      when(transformationService.addNewTransform(any(), any(), any()))
+        .thenReturn(Future.successful(()))
+      when(transformationService.getTransformedData(any(), any())(any()))
+        .thenReturn(Future.successful(TrustProcessedResponse(
+          buildInputJson("individual", Seq(beneficiary)),
+          ResponseHeader("status", "formBundlNo")
+        )))
 
       val result = service.removeBeneficiary("utr", "internalId", RemoveBeneficiary.Individual(LocalDate.of(2013, 2, 20), 23))
       whenReady(result) { _ =>
         verify(transformationService).addNewTransform("utr",
-          "internalId", RemoveBeneficiariesTransform.Individual(LocalDate.of(2013, 2, 20), 23))
+          "internalId", RemoveBeneficiariesTransform.Individual(LocalDate.of(2013, 2, 20), 23, beneficiary))
       }
     }
 
