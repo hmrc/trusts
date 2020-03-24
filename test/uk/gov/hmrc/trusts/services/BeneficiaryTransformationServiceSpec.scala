@@ -29,6 +29,7 @@ import play.api.libs.json.{JsArray, JsObject, JsValue, Json, __}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
 import uk.gov.hmrc.trusts.models.{NameType, RemoveBeneficiary, RemoveTrustee}
 import uk.gov.hmrc.trusts.repositories.TransformationRepositoryImpl
 import uk.gov.hmrc.trusts.transformers._
@@ -96,6 +97,29 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
         verify(transformationService).addNewTransform("utr",
           "internalId", AmendUnidentifiedBeneficiaryTransform(index, newDescription))
+      }
+    }
+
+    "must add a new add unidentified beneficiary transform using the transformation service" in {
+      val transformationService = mock[TransformationService]
+      val service = new BeneficiaryTransformationService(transformationService)
+      val newBeneficiary = UnidentifiedType(
+        None,
+        None,
+        "Some description",
+        None,
+        None,
+        DateTime.parse("2010-01-01"),
+        None
+      )
+
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
+
+      val result = service.addAddUnidentifiedBeneficiaryTransformer("utr", "internalId", newBeneficiary)
+      whenReady(result) { _ =>
+
+        verify(transformationService).addNewTransform("utr",
+          "internalId", AddUnidentifiedBeneficiaryTransform(newBeneficiary))
       }
     }
   }

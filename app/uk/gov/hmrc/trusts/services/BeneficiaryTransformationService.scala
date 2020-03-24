@@ -21,6 +21,8 @@ import play.api.libs.json.{Json, __}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
+
+import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
 import uk.gov.hmrc.trusts.models.{RemoveBeneficiary, Success}
 import uk.gov.hmrc.trusts.transformers._
 
@@ -50,4 +52,10 @@ class BeneficiaryTransformationService @Inject()(transformationService: Transfor
 //      case _ => Future.failed(InternalServerErrorException("Trust is not in processed state."))
 //    }
 //  }
+
+  def addAddUnidentifiedBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: UnidentifiedType): Future[Unit] = {
+    transformationService.addNewTransform(utr, internalId, AddUnidentifiedBeneficiaryTransform(newBeneficiary))
+  }
+
+
 }

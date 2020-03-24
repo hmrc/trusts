@@ -82,7 +82,7 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe expectedOutput
-        case _ => fail("Transform failed")
+        case JsError(errors) => fail(s"Transform failed: $errors")
       }
     }
 
