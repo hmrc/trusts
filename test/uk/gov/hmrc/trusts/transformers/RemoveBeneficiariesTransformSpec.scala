@@ -18,6 +18,7 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
+import org.joda.time.DateTime
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json._
@@ -29,6 +30,7 @@ import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json.Json.JsValueWrapper
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
 
 import scala.concurrent.Future
 
@@ -148,18 +150,11 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
       }
     }
 
-    "ignore a beneficiary that was added then removed" ignore {
+    "ignore a beneficiary that was added then removed" in {
       val inputJson = buildInputJson("unidentified", Seq(
         beneficiaryJson("One"),
         beneficiaryJson("Two"),
         beneficiaryJson("Three")
-      ))
-
-      val expectedOutput = buildInputJson("unidentified", Seq(
-        beneficiaryJson("One"),
-        beneficiaryJson("Three"),
-        beneficiaryJson("Two", Some(LocalDate.of(2018, 4, 21)))
-
       ))
 
 
@@ -167,19 +162,21 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
       val desService = mock[DesService]
       val auditService = mock[AuditService]
       val transforms = Seq(
-        RemoveBeneficiariesTransform.Unidentified(LocalDate.of(2018, 4, 21), 1, beneficiaryJson("Two"))
+        AddUnidentifiedBeneficiaryTransform(UnidentifiedType(None, None, "Description", None, None, DateTime.parse("1967-12-30T12:00:00Z"), None)),
+        RemoveBeneficiariesTransform.Unidentified(LocalDate.of(2018, 4, 21), 3, beneficiaryJson("Two", None, false))
       )
+
       when(repo.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))
 
       val SUT = new TransformationService(repo, desService, auditService)
 
       SUT.applyDeclarationTransformations("UTRUTRUTR", "InternalId", inputJson)(HeaderCarrier()).futureValue match {
-        case JsSuccess(value, _) => value mustBe expectedOutput
+        case JsSuccess(value, _) => value mustBe inputJson
         case _ => fail("Transform failed")
       }
     }
 
-    "not affect the document if the index is too high" ignore {
+    "not affect the document if the index is too high" in {
       val inputJson = buildInputJson("unidentified", Seq(
         beneficiaryJson("One"),
         beneficiaryJson("Two"),
@@ -194,7 +191,7 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
       }
     }
 
-    "not affect the document if the index is too low" ignore {
+    "not affect the document if the index is too low" in {
       val inputJson = buildInputJson("unidentified", Seq(
         beneficiaryJson("One"),
         beneficiaryJson("Two"),
