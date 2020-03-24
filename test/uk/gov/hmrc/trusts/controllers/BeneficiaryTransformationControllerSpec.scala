@@ -28,12 +28,10 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
-import uk.gov.hmrc.trusts.models.{NameType, RemoveBeneficiary, RemoveTrustee, Success}
-import uk.gov.hmrc.trusts.services.{BeneficiaryTransformationService, TrusteeTransformationService}
+import uk.gov.hmrc.trusts.models.{RemoveBeneficiary, Success}
+import uk.gov.hmrc.trusts.services.{BeneficiaryTransformationService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -82,7 +80,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
       val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
 
-      when(beneficiaryTransformationService.removeBeneficiary(any(), any(), any()))
+      when(beneficiaryTransformationService.removeBeneficiary(any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
@@ -96,7 +94,11 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       val result = controller.removeBeneficiary("UTRUTRUTR").apply(request)
 
       status(result) mustBe OK
-      verify(beneficiaryTransformationService).removeBeneficiary("UTRUTRUTR", "id", RemoveBeneficiary.Unidentified(LocalDate.of(2018, 2, 24), 24))
+      verify(beneficiaryTransformationService)
+        .removeBeneficiary(
+          equalTo("UTRUTRUTR"),
+          equalTo("id"),
+          equalTo(RemoveBeneficiary.Unidentified(LocalDate.of(2018, 2, 24), 24)))(any())
     }
 
     "return an error when json is invalid" in {

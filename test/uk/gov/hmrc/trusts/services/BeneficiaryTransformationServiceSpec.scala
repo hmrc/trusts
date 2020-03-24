@@ -62,7 +62,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
   }
 
 
-  "the beneficiary transformation service" - {
+  "The beneficiary transformation service" - {
 
     "must add a new remove beneficiary transform using the transformation service" in {
       val transformationService = mock[TransformationService]
@@ -77,10 +77,10 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
           ResponseHeader("status", "formBundlNo")
         )))
 
-      val result = service.removeBeneficiary("utr", "internalId", RemoveBeneficiary.Individual(LocalDate.of(2013, 2, 20), 23))
+      val result = service.removeBeneficiary("utr", "internalId", RemoveBeneficiary.Individual(LocalDate.of(2013, 2, 20), 0))
       whenReady(result) { _ =>
         verify(transformationService).addNewTransform("utr",
-          "internalId", RemoveBeneficiariesTransform.Individual(LocalDate.of(2013, 2, 20), 23, beneficiary))
+          "internalId", RemoveBeneficiariesTransform.Individual(LocalDate.of(2013, 2, 20), 0, beneficiary))
       }
     }
 

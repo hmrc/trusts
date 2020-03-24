@@ -27,11 +27,12 @@ import play.api.libs.json.Reads
 sealed trait RemoveBeneficiary {
   def endDate: LocalDate
   def index: Int
+  def beneficiaryType: String
 }
 
 object RemoveBeneficiary {
-  case class Unidentified(endDate: LocalDate, index: Int) extends RemoveBeneficiary
-  case class Individual(endDate: LocalDate, index: Int) extends RemoveBeneficiary
+  case class Unidentified(endDate: LocalDate, index: Int) extends RemoveBeneficiary {val beneficiaryType = "unidentified"}
+  case class Individual(endDate: LocalDate, index: Int) extends RemoveBeneficiary {val beneficiaryType = "individual"}
 
   private val builders: Map[String, (LocalDate, Int) => RemoveBeneficiary] = Map(
     "unidentified" -> Unidentified.apply,
