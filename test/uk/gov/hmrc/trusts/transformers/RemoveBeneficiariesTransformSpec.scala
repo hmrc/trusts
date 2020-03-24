@@ -44,7 +44,7 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
   def buildInputJson(beneficiaryType: String, beneficiaryData: Seq[JsValue]) = {
     val baseJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-    val adder = (__ \ "trustOrEstateDisplay" \ "details" \ "trust" \ "entities" \ "beneficiary" \ beneficiaryType).json
+    val adder = (__ \ "details" \ "trust" \ "entities" \ "beneficiary" \ beneficiaryType).json
       .put(JsArray(beneficiaryData))
 
     baseJson.as[JsObject](__.json.update(adder))
@@ -79,7 +79,7 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe expectedOutput
-        case _ => fail("Transform failed")
+        case JsError(errors) => fail(s"Transform failed: $errors")
       }
     }
 
