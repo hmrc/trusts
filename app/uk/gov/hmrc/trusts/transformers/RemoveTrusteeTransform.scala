@@ -36,7 +36,7 @@ case class RemoveTrusteeTransform(endDate: LocalDate, index: Int, trusteeToRemov
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    if (isKnownToEtmp(trusteeToRemove)) {
+    if (trusteeIsKnownToEtmp(trusteeToRemove)) {
       trusteeToRemove.transform(addEntityEnd(trusteeToRemove, endDate)) match {
         case JsSuccess(endedTrusteeJson, _) =>
           val trustees: Reads[JsObject] =
@@ -55,7 +55,7 @@ case class RemoveTrusteeTransform(endDate: LocalDate, index: Int, trusteeToRemov
     }
   }
 
-  private def isKnownToEtmp(json: JsValue): Boolean = {
+  private def trusteeIsKnownToEtmp(json: JsValue): Boolean = {
     json.transform((__ \ 'trusteeInd \ 'lineNo).json.pick).isSuccess |
       json.transform((__ \ 'trusteeOrg \ 'lineNo).json.pick).isSuccess
   }

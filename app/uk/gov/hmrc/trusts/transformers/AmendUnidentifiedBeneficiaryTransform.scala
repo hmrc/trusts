@@ -18,11 +18,9 @@ package uk.gov.hmrc.trusts.transformers
 
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
-import uk.gov.hmrc.trusts.transformers.beneficiaries.AmendBeneficiariesCommon
 
 case class AmendUnidentifiedBeneficiaryTransform(index: Int, description: String)
   extends DeltaTransform
-  with AmendBeneficiariesCommon
   with JsonOperations {
 
   import uk.gov.hmrc.trusts.models.variation.UnidentifiedType._
@@ -30,7 +28,7 @@ case class AmendUnidentifiedBeneficiaryTransform(index: Int, description: String
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     val unidentifiedBeneficiaryPath = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'unidentified
 
-    val amended = getBeneficiary[UnidentifiedType](input, index, "unidentified")
+    val amended = getTypeAtPosition[UnidentifiedType](input, unidentifiedBeneficiaryPath, index)
       .copy(description = description)
 
     amendAtPosition(input, unidentifiedBeneficiaryPath, index, Json.toJson(amended))

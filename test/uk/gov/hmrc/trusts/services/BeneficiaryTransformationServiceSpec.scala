@@ -141,13 +141,36 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
         None
       )
 
+      val original: JsValue = Json.parse(
+        """
+          |{
+          |  "lineNo": "1",
+          |  "bpMatchStatus": "01",
+          |  "name": {
+          |    "firstName": "First 2",
+          |    "lastName": "Last 2"
+          |  },
+          |  "vulnerableBeneficiary": true,
+          |  "identification": {
+          |    "nino": "JP1212122A"
+          |  },
+          |  "entityStart": "2018-02-28"
+          |}
+          |""".stripMargin)
+
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
+
+      when(transformationService.getTransformedData(any(), any())(any()))
+        .thenReturn(Future.successful(TrustProcessedResponse(
+          buildInputJson("individualDetails", Seq(original)),
+          ResponseHeader("status", "formBundlNo")
+        )))
 
       val result = service.addAmendIndividualBeneficiaryTransformer("utr", index, "internalId", newIndividual)
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",
-          "internalId", AmendIndividualBeneficiaryTransform(index, newIndividual))
+          "internalId", AmendIndividualBeneficiaryTransform(index, newIndividual, original))
       }
     }
   }

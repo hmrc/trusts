@@ -31,7 +31,8 @@ import scala.util.{Failure, Try}
 class BeneficiaryTransformationService @Inject()(
                                                   transformationService: TransformationService
                                                 )
-                                                (implicit ec:ExecutionContext) {
+                                                (implicit ec:ExecutionContext)
+  extends JsonOperations {
 
   def removeBeneficiary(utr: String, internalId: String, removeBeneficiary: RemoveBeneficiary)
                        (implicit hc: HeaderCarrier) : Future[Success.type] = {
@@ -80,9 +81,19 @@ class BeneficiaryTransformationService @Inject()(
   def addAmendIndividualBeneficiaryTransformer(utr: String,
                                                index: Int,
                                                internalId: String,
-                                               amend: IndividualDetailsType) : Future[Unit] = {
-    transformationService.addNewTransform(utr, internalId, AmendIndividualBeneficiaryTransform(index, amend))
-  }
+                                               amend: IndividualDetailsType)
+                                              (implicit hc: HeaderCarrier): Future[Success.type] = {
+    getTransformedTrustJson(utr, internalId)
+      .map(findBeneficiaryJson(_, "individualDetails", index))
+      .flatMap(Future.fromTry)
+      .flatMap { beneficiaryJson =>
 
+        transformationService.addNewTransform(
+          utr,
+          internalId,
+          AmendIndividualBeneficiaryTransform(index, amend, beneficiaryJson)
+        ).map(_ => Success)
+      }
+  }
 
 }

@@ -28,6 +28,7 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.variation.{IndividualDetailsType, UnidentifiedType}
 import uk.gov.hmrc.trusts.models.{NameType, RemoveBeneficiary, Success}
@@ -162,6 +163,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
     val index = 0
 
     "must add a new amend individual beneficiary transform" in {
+
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
       val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
 
@@ -179,8 +181,8 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None
       )
 
-      when(beneficiaryTransformationService.addAmendIndividualBeneficiaryTransformer(any(), any(), any(), any()))
-        .thenReturn(Future.successful(()))
+      when(beneficiaryTransformationService.addAmendIndividualBeneficiaryTransformer(any(), any(), any(), any())(any()))
+        .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(newIndividual))
@@ -189,7 +191,13 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       val result = controller.amendIndividualBeneficiary("aUTR", index).apply(request)
 
       status(result) mustBe OK
-      verify(beneficiaryTransformationService).addAmendIndividualBeneficiaryTransformer("aUTR", index, "id", newIndividual)
+      verify(beneficiaryTransformationService)
+        .addAmendIndividualBeneficiaryTransformer(
+          equalTo("aUTR"),
+          equalTo(index),
+          equalTo("id"),
+          equalTo(newIndividual)
+        )(any())
     }
 
     "must return an error for malformed json" in {

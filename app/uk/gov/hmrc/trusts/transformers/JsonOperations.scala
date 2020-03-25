@@ -16,9 +16,66 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import play.api.libs.json.{JsArray, JsError, JsPath, JsResult, JsSuccess, JsValue, Json}
+import play.api.libs.json._
 
 trait JsonOperations {
+
+  def isKnownToEtmp(json: JsValue): Boolean = {
+    json.transform((__ \ 'lineNo).json.pick).isSuccess
+  }
+
+  def getTypeAtPosition[T](input: JsValue,
+                           path: JsPath,
+                           index: Int)
+                       (implicit reads: Reads[T]): T = {
+
+    input.transform(path.json.pick) match {
+
+      case JsSuccess(json, _) =>
+
+        val list = json.as[JsArray].value.toList
+
+        list(index).validate[T] match {
+          case JsSuccess(value, _) =>
+            value
+
+          case JsError(errors) =>
+            throw JsResultException(errors)
+        }
+      case JsError(errors) =>
+        throw JsResultException(errors)
+    }
+  }
+
+  def addToList(input: JsValue,
+                path: JsPath,
+                jsonToAdd: JsValue) : JsResult[JsValue] = {
+
+    import play.api.libs.json._
+
+    input.transform(path.json.pick[JsArray]) match {
+      case JsSuccess(value, _) =>
+        if (value.value.size < 25) {
+          val trustees: Reads[JsObject] =
+            path.json.update(Reads.of[JsArray].map { array =>
+                array :+ jsonToAdd
+              }
+            )
+          input.transform(trustees)
+        }
+        else {
+          throw new Exception(s"Adding an item to $path would exceed the maximum allowed amount of 25")
+        }
+      case JsError(_) =>
+        input.transform(__.json.update {
+          path.json.put(JsArray(
+            Seq(jsonToAdd))
+          )
+        })
+
+    }
+  }
+
 
   def amendAtPosition(input : JsValue, path: JsPath, index: Int, newValue: JsValue) : JsResult[JsValue] = {
     input.transform(path.json.pick) match {
