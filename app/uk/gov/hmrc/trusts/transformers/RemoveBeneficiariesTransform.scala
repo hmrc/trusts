@@ -41,8 +41,6 @@ case class RemoveBeneficiariesTransform(
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    super.applyDeclarationTransform(input)
-
     if (isKnownToEtmp(beneficiaryData)) {
       val newBeneficiary = beneficiaryData.deepMerge(Json.obj("entityEnd" -> endDate))
       val appendToArray = __.json.pick[JsArray].map (_.append(newBeneficiary))
