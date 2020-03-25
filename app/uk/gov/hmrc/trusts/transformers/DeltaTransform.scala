@@ -38,6 +38,7 @@ object DeltaTransform {
         case json if json.keys.contains(AmendTrusteeOrgTransform.key)    => (json \ AmendTrusteeOrgTransform.key).validate[AmendTrusteeOrgTransform]
         case json if json.keys.contains(AmendUnidentifiedBeneficiaryTransform.key)    => (json \ AmendUnidentifiedBeneficiaryTransform.key).validate[AmendUnidentifiedBeneficiaryTransform]
         case json if json.keys.contains(AddUnidentifiedBeneficiaryTransform.key)    => (json \ AddUnidentifiedBeneficiaryTransform.key).validate[AddUnidentifiedBeneficiaryTransform]
+        case json if json.keys.contains(AddIndividualBeneficiaryTransform.key)    => (json \ AddIndividualBeneficiaryTransform.key).validate[AddIndividualBeneficiaryTransform]
         case _ => throw new Exception(s"Don't know how to deserialise transform: $value")
       }
     }
@@ -56,6 +57,7 @@ object DeltaTransform {
       case transform: AmendTrusteeOrgTransform    => Json.obj(AmendTrusteeOrgTransform.key -> Json.toJson(transform)(AmendTrusteeOrgTransform.format))
       case transform: AmendUnidentifiedBeneficiaryTransform    => Json.obj(AmendUnidentifiedBeneficiaryTransform.key -> Json.toJson(transform)(AmendUnidentifiedBeneficiaryTransform.format))
       case transform: AddUnidentifiedBeneficiaryTransform    => Json.obj(AddUnidentifiedBeneficiaryTransform.key -> Json.toJson(transform)(AddUnidentifiedBeneficiaryTransform.format))
+      case transform: AddIndividualBeneficiaryTransform    => Json.obj(AddIndividualBeneficiaryTransform.key -> Json.toJson(transform)(AddIndividualBeneficiaryTransform.format))
       case transform => throw new Exception(s"Don't know how to serialise transform: $transform")
     }
     Json.toJson(transformWrapper)
