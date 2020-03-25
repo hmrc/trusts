@@ -16,38 +16,13 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import play.api.libs.json.Reads.of
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.variation.IndividualDetailsType
 
-case class AddIndividualBeneficiaryTransform(newBeneficiary: IndividualDetailsType) extends DeltaTransform {
+case class AddIndividualBeneficiaryTransform(newBeneficiary: IndividualDetailsType) extends DeltaTransform with AddBeneficiaryCommon {
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    val path = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'individualDetails
-
-    input.transform(path.json.pick[JsArray]) match {
-
-      case JsSuccess(value, _) =>
-
-        if (value.value.size < 25) {
-          val individualBeneficiaries: Reads[JsObject] =
-            path.json.update(of[JsArray]
-              .map {
-                individualBeneficiaries => individualBeneficiaries :+ Json.toJson(newBeneficiary)
-              }
-            )
-          input.transform(individualBeneficiaries)
-        }
-        else {
-          throw new Exception("Adding an individual beneficiary would exceed the maximum allowed amount of 25")
-        }
-      case JsError(_) =>
-        input.transform(__.json.update {
-          path.json.put(JsArray(
-            Seq(Json.toJson(newBeneficiary)))
-          )
-        })
-    }
+    addBeneficiary(input, Json.toJson(newBeneficiary), "individualDetails")
   }
 }
 
