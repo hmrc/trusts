@@ -17,11 +17,11 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
+import uk.gov.hmrc.trusts.models.variation.{IndividualDetailsType, UnidentifiedType}
 import play.api.libs.json.{JsObject, JsValue, __}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
-import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
 import uk.gov.hmrc.trusts.models.{RemoveBeneficiary, Success}
 import uk.gov.hmrc.trusts.transformers._
 
@@ -64,10 +64,11 @@ class BeneficiaryTransformationService @Inject()(transformationService: Transfor
     transformationService.addNewTransform(utr, internalId, AmendUnidentifiedBeneficiaryTransform(index, description))
   }
 
-
   def addAddUnidentifiedBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: UnidentifiedType): Future[Unit] = {
     transformationService.addNewTransform(utr, internalId, AddUnidentifiedBeneficiaryTransform(newBeneficiary))
   }
 
-
+  def addAddIndividualBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: IndividualDetailsType): Future[Unit] = {
+    transformationService.addNewTransform(utr, internalId, AddIndividualBeneficiaryTransform(newBeneficiary))
+  }
 }

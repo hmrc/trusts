@@ -16,14 +16,13 @@
 
 package uk.gov.hmrc.trusts.controllers
 
-
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsError, JsString, JsSuccess, JsValue}
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveBeneficiary
-import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
+import uk.gov.hmrc.trusts.models.variation.{IndividualDetailsType, UnidentifiedType}
 import uk.gov.hmrc.trusts.services.BeneficiaryTransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
@@ -67,6 +66,24 @@ class BeneficiaryTransformationController @Inject()(
           }
         case JsError(errors) =>
           logger.warn(s"[BeneficiaryTransformationController][addUnidentifiedBeneficiary] Supplied json could not be read as an Unidentified Beneficiary - $errors")
+          Future.successful(BadRequest)
+      }
+    }
+  }
+
+  def addIndividualBeneficiary(utr: String): Action[JsValue] = identify.async(parse.json) {
+    implicit request => {
+      request.body.validate[IndividualDetailsType] match {
+        case JsSuccess(newBeneficiary, _) =>
+          beneficiaryTransformationService.addAddIndividualBeneficiaryTransformer(
+            utr,
+            request.identifier,
+            newBeneficiary
+          ) map { _ =>
+            Ok
+          }
+        case JsError(errors) =>
+          logger.warn(s"[BeneficiaryTransformationController][addIndividualBeneficiary] Supplied json could not be read as an Individual Beneficiary - $errors")
           Future.successful(BadRequest)
       }
     }
