@@ -51,7 +51,6 @@ case class AmendIndividualBeneficiaryTransform(
       } yield r
 
     } else {
-      // Don't duplicate the beneficiary back into the record
       applyTransform(input)
     }
   }

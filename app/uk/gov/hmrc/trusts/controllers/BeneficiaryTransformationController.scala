@@ -99,8 +99,8 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[BeneficiaryTransformationController][amendUnidentifiedBeneficiary]" +
-            s" Supplied description could not be read as a JsString - $errors")
+          logger.warn(s"[BeneficiaryTransformationController][amendIndividualBeneficiary]" +
+            s" Supplied payload could not be read as a IndividualDetailsType - $errors")
           Future.successful(BadRequest)
       }
   }
