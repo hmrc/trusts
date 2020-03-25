@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsError, JsString, JsSuccess, JsValue}
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
+import uk.gov.hmrc.trusts.models.RemoveBeneficiary
 import uk.gov.hmrc.trusts.models.variation.{IndividualDetailsType, UnidentifiedType}
 import uk.gov.hmrc.trusts.services.BeneficiaryTransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
@@ -84,6 +85,18 @@ class BeneficiaryTransformationController @Inject()(
         case JsError(errors) =>
           logger.warn(s"[BeneficiaryTransformationController][addIndividualBeneficiary] Supplied json could not be read as an Individual Beneficiary - $errors")
           Future.successful(BadRequest)
+      }
+    }
+  }
+
+  def removeBeneficiary(utr: String): Action[JsValue] = identify.async(parse.json) {
+    implicit request => {
+      request.body.validate[RemoveBeneficiary] match {
+        case JsSuccess(beneficiary, _) =>
+          beneficiaryTransformationService.removeBeneficiary(utr, request.identifier, beneficiary) map { _ =>
+          Ok
+        }
+        case JsError(_) => Future.successful(BadRequest)
       }
     }
   }

@@ -64,13 +64,16 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar with MustMatcher
   val utr = "1234567890"
 
   ".getFromEtmp" should {
-    "reset the cache before calling get" in {
+    "reset the cache and clear transforms before calling get" in {
 
       val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), auditService, desService, transformationService)
 
       val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
       when(desService.resetCache(any(), any()))
         .thenReturn(Future.successful(()))
+
+      when(transformationService.removeAllTransformations(any(), any()))
+        .thenReturn(Future.successful(None))
 
       when(desService.getTrustInfo(any(), any())(any()))
         .thenReturn(Future.successful(response))
@@ -79,6 +82,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar with MustMatcher
 
       whenReady(result) { _ =>
         verify(desService).resetCache(utr, "id")
+        verify(transformationService).removeAllTransformations(utr, "id")
       }
     }
   }
