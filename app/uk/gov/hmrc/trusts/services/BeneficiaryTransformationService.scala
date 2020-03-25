@@ -80,8 +80,8 @@ class BeneficiaryTransformationService @Inject()(
   def addAmendIndividualBeneficiaryTransformer(utr: String,
                                                index: Int,
                                                internalId: String,
-                                               newBeneficiary: IndividualDetailsType) : Future[Unit] = {
-    Future.successful(())
+                                               amend: IndividualDetailsType) : Future[Unit] = {
+    transformationService.addNewTransform(utr, internalId, AmendIndividualBeneficiaryTransform(index, amend))
   }
 
 

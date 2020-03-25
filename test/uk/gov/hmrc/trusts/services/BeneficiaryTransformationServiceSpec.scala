@@ -29,7 +29,7 @@ import play.api.libs.json.{JsArray, JsObject, JsValue, Json, __}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
+import uk.gov.hmrc.trusts.models.variation.{IndividualDetailsType, UnidentifiedType}
 import uk.gov.hmrc.trusts.models.{NameType, RemoveBeneficiary, RemoveTrustee}
 import uk.gov.hmrc.trusts.repositories.TransformationRepositoryImpl
 import uk.gov.hmrc.trusts.transformers._
@@ -120,6 +120,34 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
         verify(transformationService).addNewTransform("utr",
           "internalId", AddUnidentifiedBeneficiaryTransform(newBeneficiary))
+      }
+    }
+
+    "must add a new amend individual beneficiary transform using the transformation service" in {
+      val index = 0
+      val transformationService = mock[TransformationService]
+      val service = new BeneficiaryTransformationService(transformationService)
+      val newIndividual = IndividualDetailsType(
+        None,
+        None,
+        NameType("First", None, "Last"),
+        None,
+        vulnerableBeneficiary = false,
+        None,
+        None,
+        None,
+        None,
+        DateTime.parse("2010-01-01"),
+        None
+      )
+
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
+
+      val result = service.addAmendIndividualBeneficiaryTransformer("utr", index, "internalId", newIndividual)
+      whenReady(result) { _ =>
+
+        verify(transformationService).addNewTransform("utr",
+          "internalId", AmendIndividualBeneficiaryTransform(index, newIndividual))
       }
     }
   }
