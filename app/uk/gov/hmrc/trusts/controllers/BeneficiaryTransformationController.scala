@@ -19,11 +19,11 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsError, JsString, JsSuccess, JsValue}
+import play.api.libs.json.{JsError, JsString, JsSuccess, JsValue, Json}
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveBeneficiary
-import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
+import uk.gov.hmrc.trusts.models.variation.{IndividualDetailsType, UnidentifiedType}
 import uk.gov.hmrc.trusts.services.BeneficiaryTransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
@@ -48,7 +48,8 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[BeneficiaryTransformationController][amendUnidentifiedBeneficiary] Supplied description could not be read as a JsString - $errors")
+          logger.warn(s"[BeneficiaryTransformationController][amendUnidentifiedBeneficiary]" +
+            s" Supplied description could not be read as a JsString - $errors")
           Future.successful(BadRequest)
       }
     }
@@ -66,7 +67,8 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[BeneficiaryTransformationController][addUnidentifiedBeneficiary] Supplied json could not be read as an Unidentified Beneficiary - $errors")
+          logger.warn(s"[BeneficiaryTransformationController][addUnidentifiedBeneficiary] " +
+            s"Supplied json could not be read as an Unidentified Beneficiary - $errors")
           Future.successful(BadRequest)
       }
     }
@@ -82,5 +84,24 @@ class BeneficiaryTransformationController @Inject()(
         case JsError(_) => Future.successful(BadRequest)
       }
     }
+  }
+
+  def amendIndividualBeneficiary(utr: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
+    implicit request =>
+      request.body.validate[IndividualDetailsType] match {
+        case JsSuccess(individual, _) =>
+          beneficiaryTransformationService.addAmendIndividualBeneficiaryTransformer(
+            utr,
+            index,
+            request.identifier,
+            individual
+          ) map { _ =>
+            Ok
+          }
+        case JsError(errors) =>
+          logger.warn(s"[BeneficiaryTransformationController][amendUnidentifiedBeneficiary]" +
+            s" Supplied description could not be read as a JsString - $errors")
+          Future.successful(BadRequest)
+      }
   }
 }

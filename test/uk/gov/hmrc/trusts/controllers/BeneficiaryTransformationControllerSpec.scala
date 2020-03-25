@@ -24,14 +24,14 @@ import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
-import uk.gov.hmrc.trusts.models.{RemoveBeneficiary, Success}
-import uk.gov.hmrc.trusts.services.{BeneficiaryTransformationService}
+import uk.gov.hmrc.trusts.models.variation.{IndividualDetailsType, UnidentifiedType}
+import uk.gov.hmrc.trusts.models.{NameType, RemoveBeneficiary, Success}
+import uk.gov.hmrc.trusts.services.BeneficiaryTransformationService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -153,6 +153,54 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val result = controller.addUnidentifiedBeneficiary("aUTR").apply(request)
+      status(result) mustBe BAD_REQUEST
+    }
+  }
+
+  "Amend individual beneficiary" - {
+
+    val index = 0
+
+    "must add a new amend individual beneficiary transform" in {
+      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+
+      val newIndividual = IndividualDetailsType(
+        None,
+        None,
+        NameType("First", None, "Last"),
+        None,
+        vulnerableBeneficiary = false,
+        None,
+        None,
+        None,
+        None,
+        DateTime.parse("2010-01-01"),
+        None
+      )
+
+      when(beneficiaryTransformationService.addAmendIndividualBeneficiaryTransformer(any(), any(), any(), any()))
+        .thenReturn(Future.successful(()))
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(newIndividual))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendIndividualBeneficiary("aUTR", index).apply(request)
+
+      status(result) mustBe OK
+      verify(beneficiaryTransformationService).addAmendIndividualBeneficiaryTransformer("aUTR", index, "id", newIndividual)
+    }
+
+    "must return an error for malformed json" in {
+      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.parse("{}"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendIndividualBeneficiary("aUTR", index).apply(request)
       status(result) mustBe BAD_REQUEST
     }
   }
