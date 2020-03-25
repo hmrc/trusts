@@ -28,7 +28,7 @@ import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
+import uk.gov.hmrc.trusts.models.variation.{IdentificationType, IndividualDetailsType, UnidentifiedType}
 import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee}
 import uk.gov.hmrc.trusts.repositories.TransformationRepositoryImpl
 import uk.gov.hmrc.trusts.transformers._
@@ -80,6 +80,32 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
         verify(transformationService).addNewTransform("utr",
           "internalId", AddUnidentifiedBeneficiaryTransform(newBeneficiary))
+      }
+    }
+
+    "must add a new add individual beneficiary transform using the transformation service" in {
+      val transformationService = mock[TransformationService]
+      val service = new BeneficiaryTransformationService(transformationService)
+      val newBeneficiary = IndividualDetailsType(None,
+        None,
+        NameType("First", None, "Last"),
+        Some(DateTime.parse("2000-01-01")),
+        false,
+        None,
+        None,
+        None,
+        Some(IdentificationType(Some("nino"), None, None, None)),
+        DateTime.parse("1990-10-10"),
+        None
+      )
+
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
+
+      val result = service.addAddIndividualBeneficiaryTransformer("utr", "internalId", newBeneficiary)
+      whenReady(result) { _ =>
+
+        verify(transformationService).addNewTransform("utr",
+          "internalId", AddIndividualBeneficiaryTransform(newBeneficiary))
       }
     }
   }
