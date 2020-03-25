@@ -33,16 +33,16 @@ class BeneficiaryTransformationService @Inject()(transformationService: Transfor
     getTransformedTrustJson(utr, internalId)
       .map(findBeneficiaryJson(_, removeBeneficiary.`type`, removeBeneficiary.index))
       .flatMap(Future.fromTry)
-    .flatMap {beneficiaryJson =>
-      transformationService.addNewTransform (utr, internalId,
-          RemoveBeneficiariesTransform(
-            removeBeneficiary.index,
-            beneficiaryJson,
-            removeBeneficiary.endDate,
-            removeBeneficiary.`type`
-          )
-      ).map(_ => Success)
-    }
+      .flatMap {beneficiaryJson =>
+        transformationService.addNewTransform (utr, internalId,
+            RemoveBeneficiariesTransform(
+              removeBeneficiary.index,
+              beneficiaryJson,
+              removeBeneficiary.endDate,
+              removeBeneficiary.`type`
+            )
+        ).map(_ => Success)
+      }
   }
 
   private def getTransformedTrustJson(utr: String, internalId: String)(implicit hc:HeaderCarrier) = {
