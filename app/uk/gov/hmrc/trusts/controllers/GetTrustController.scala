@@ -110,6 +110,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
 
   private def resetCacheIfRequested(utr: String, internalId: String, refreshEtmpData: Boolean) = {
     if (refreshEtmpData) {
+      transformationService.removeAllTransformations(utr, internalId)
       desService.resetCache(utr, internalId)
     } else {
       Future.successful(())
