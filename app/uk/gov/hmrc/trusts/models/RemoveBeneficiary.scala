@@ -18,40 +18,17 @@ package uk.gov.hmrc.trusts.models
 
 import java.time.LocalDate
 
-import play.api.data.validation.ValidationError
 import play.api.libs.json._
-import play.api.libs.json.Reads._
-import play.api.libs.functional.syntax._
-import play.api.libs.json.Reads
 
-sealed trait RemoveBeneficiary {
-  def endDate: LocalDate
-  def index: Int
-  def beneficiaryType: String
-}
+case class RemoveBeneficiary (endDate: LocalDate, index: Int, `type`: String)
 
 object RemoveBeneficiary {
-  case class Unidentified(endDate: LocalDate, index: Int) extends RemoveBeneficiary {val beneficiaryType = "unidentified"}
-  case class Individual(endDate: LocalDate, index: Int) extends RemoveBeneficiary {val beneficiaryType = "individual"}
-
-  private val builders: Map[String, (LocalDate, Int) => RemoveBeneficiary] = Map(
-    "unidentified" -> Unidentified.apply,
-    "individual" -> Individual.apply
+  val validBeneficiaryTypes = Seq(
+    "unidentified", "individualDetails"
   )
 
-  private val validateBeneficiaryType = Reads.filter[String](ValidationError("Unexpected Beneficiary Type"))(builders.contains)
+  val reads = Json.reads[RemoveBeneficiary].filter(rb => validBeneficiaryTypes.contains(rb.`type`))
+  val writes = Json.writes[RemoveBeneficiary]
 
-  implicit val reads: Reads[RemoveBeneficiary] =
-    ((__ \ "type").read(validateBeneficiaryType) and
-    (__ \ "endDate").read[LocalDate] and
-    (__ \ "index").read[Int]).apply((typ, endDate, index) => builders(typ)(endDate, index))
-
-  implicit val writes: Writes[RemoveBeneficiary] =
-    ((__ \ "type").write[String] and
-    (__ \ "endDate").write[LocalDate] and
-    (__ \ "index").write[Int]).apply { (rb:RemoveBeneficiary) => rb match {
-    case RemoveBeneficiary.Unidentified(endDate, index) => ("unidentified", endDate, index)
-    case RemoveBeneficiary.Individual(endDate, index) => ("individual", endDate, index)
-  }}
-
+  implicit val formats: Format[RemoveBeneficiary] = Format(reads, writes)
  }

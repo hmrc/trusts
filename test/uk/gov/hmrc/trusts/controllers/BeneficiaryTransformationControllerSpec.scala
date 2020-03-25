@@ -98,7 +98,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         .removeBeneficiary(
           equalTo("UTRUTRUTR"),
           equalTo("id"),
-          equalTo(RemoveBeneficiary.Unidentified(LocalDate.of(2018, 2, 24), 24)))(any())
+          equalTo(RemoveBeneficiary(LocalDate.of(2018, 2, 24), 24, "unidentified")))(any())
     }
 
     "return an error when json is invalid" in {

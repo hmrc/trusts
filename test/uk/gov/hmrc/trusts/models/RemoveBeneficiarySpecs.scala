@@ -23,7 +23,7 @@ import play.api.libs.json.{JsError, JsSuccess, Json}
 
 class RemoveBeneficiarySpecs extends WordSpec with MustMatchers {
   "Can round trip throuh Json" in {
-    val OUT = RemoveBeneficiary.Unidentified(LocalDate.of(1478, 12, 31), 67)
+    val OUT = RemoveBeneficiary(LocalDate.of(1478, 12, 31), 67, "unidentified")
 
     Json.toJson(OUT).validate[RemoveBeneficiary] mustBe JsSuccess(OUT)
   }
@@ -36,17 +36,17 @@ class RemoveBeneficiarySpecs extends WordSpec with MustMatchers {
         "index" -> 6
       )
 
-      json.as[RemoveBeneficiary] mustBe (RemoveBeneficiary.Unidentified(LocalDate.of(2019, 12, 31), 6))
+      json.as[RemoveBeneficiary] mustBe (RemoveBeneficiary(LocalDate.of(2019, 12, 31), 6, "unidentified"))
     }
 
     "beneficiary is IndividualType" in {
       val json = Json.obj(
-        "type" -> "individual",
+        "type" -> "individualDetails",
         "endDate" -> LocalDate.of(2019, 12, 31),
         "index" -> 6
       )
 
-      json.as[RemoveBeneficiary] mustBe (RemoveBeneficiary.Individual(LocalDate.of(2019, 12, 31), 6))
+      json.as[RemoveBeneficiary] mustBe (RemoveBeneficiary(LocalDate.of(2019, 12, 31), 6, "individualDetails"))
     }
   }
 

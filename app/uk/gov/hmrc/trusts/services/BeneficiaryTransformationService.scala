@@ -31,8 +31,7 @@ class BeneficiaryTransformationService @Inject()(transformationService: Transfor
   def removeBeneficiary(utr: String, internalId: String, removeBeneficiary: RemoveBeneficiary)(implicit hc: HeaderCarrier) : Future[Success.type] = {
     transformationService.getTransformedData(utr, internalId).flatMap {
       case TrustProcessedResponse(json, _) =>
-        println(json)
-        val beneficiaryPath = (__ \ 'details \ 'trust \ 'entities \ 'beneficiary \ removeBeneficiary.beneficiaryType \ removeBeneficiary.index).json
+        val beneficiaryPath = (__ \ 'details \ 'trust \ 'entities \ 'beneficiary \ removeBeneficiary.`type` \ removeBeneficiary.index).json
         json.transform(beneficiaryPath.pick).fold(
           _ => Future.failed(InternalServerErrorException("Could not locate beneficiary at index")),
           value => Future.successful(value.as[JsObject])
@@ -40,10 +39,13 @@ class BeneficiaryTransformationService @Inject()(transformationService: Transfor
       case _ => Future.failed(InternalServerErrorException("Trust is not in processed state."))
     }.flatMap {beneficiaryJson =>
       transformationService.addNewTransform (utr, internalId,
-        removeBeneficiary match {
-          case RemoveBeneficiary.Unidentified(endDate, index) => RemoveBeneficiariesTransform.Unidentified(endDate, index, beneficiaryJson)
-          case RemoveBeneficiary.Individual(endDate, index)   => RemoveBeneficiariesTransform.Individual(endDate, index, beneficiaryJson)
-        }
+          RemoveBeneficiariesTransform(
+            removeBeneficiary.index,
+            beneficiaryJson,
+            removeBeneficiary.endDate,
+            removeBeneficiary.`type`
+          )
+
       ).map(_ => Success)
     }
   }

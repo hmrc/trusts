@@ -73,14 +73,14 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
         .thenReturn(Future.successful(()))
       when(transformationService.getTransformedData(any(), any())(any()))
         .thenReturn(Future.successful(TrustProcessedResponse(
-          buildInputJson("individual", Seq(beneficiary)),
+          buildInputJson("individualDetails", Seq(beneficiary)),
           ResponseHeader("status", "formBundlNo")
         )))
 
-      val result = service.removeBeneficiary("utr", "internalId", RemoveBeneficiary.Individual(LocalDate.of(2013, 2, 20), 0))
+      val result = service.removeBeneficiary("utr", "internalId", RemoveBeneficiary(LocalDate.of(2013, 2, 20), 0, "individualDetails"))
       whenReady(result) { _ =>
         verify(transformationService).addNewTransform("utr",
-          "internalId", RemoveBeneficiariesTransform.Individual(LocalDate.of(2013, 2, 20), 0, beneficiary))
+          "internalId", RemoveBeneficiariesTransform(0, beneficiary, LocalDate.of(2013, 2, 20), "individualDetails"))
       }
     }
 
