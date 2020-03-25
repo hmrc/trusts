@@ -58,5 +58,11 @@ case class AmendIndividualBeneficiaryTransform(
 
 }
 
+object AmendIndividualBeneficiaryTransform {
+  val key = "AmendIndividualBeneficiaryTransform"
+
+  implicit val format: Format[AmendIndividualBeneficiaryTransform] = Json.format[AmendIndividualBeneficiaryTransform]
+}
+
 
 
