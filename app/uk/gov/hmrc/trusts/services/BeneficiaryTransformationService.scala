@@ -17,19 +17,57 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
+import play.api.libs.json.{JsObject, JsValue, __}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
+import uk.gov.hmrc.trusts.models.{RemoveBeneficiary, Success}
 import uk.gov.hmrc.trusts.transformers._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Try}
 
-class BeneficiaryTransformationService @Inject()(transformationService: TransformationService) {
+class BeneficiaryTransformationService @Inject()(transformationService: TransformationService)(implicit ec:ExecutionContext) {
+  def removeBeneficiary(utr: String, internalId: String, removeBeneficiary: RemoveBeneficiary)(implicit hc: HeaderCarrier) : Future[Success.type] = {
+    getTransformedTrustJson(utr, internalId)
+      .map(findBeneficiaryJson(_, removeBeneficiary.`type`, removeBeneficiary.index))
+      .flatMap(Future.fromTry)
+      .flatMap {beneficiaryJson =>
+        transformationService.addNewTransform (utr, internalId,
+            RemoveBeneficiariesTransform(
+              removeBeneficiary.index,
+              beneficiaryJson,
+              removeBeneficiary.endDate,
+              removeBeneficiary.`type`
+            )
+        ).map(_ => Success)
+      }
+  }
+
+  private def getTransformedTrustJson(utr: String, internalId: String)(implicit hc:HeaderCarrier) = {
+    transformationService.getTransformedData(utr, internalId).flatMap {
+      case TrustProcessedResponse(json, _) => Future.successful(json.as[JsObject])
+      case _ => Future.failed(InternalServerErrorException("Trust is not in processed state."))
+    }
+  }
+
+  private def findBeneficiaryJson(json: JsValue, beneficiaryType: String, index:Int ): Try[JsObject] = {
+    val beneficiaryPath = (__ \ 'details \ 'trust \ 'entities \ 'beneficiary \ beneficiaryType \ index).json
+    json.transform(beneficiaryPath.pick).fold(
+      _ => Failure(InternalServerErrorException("Could not locate beneficiary at index")),
+      value => scala.util.Success(value.as[JsObject])
+    )
+  }
 
   def addAmendUnidentifiedBeneficiaryTransformer(utr: String, index: Int, internalId: String, description: String): Future[Unit] = {
     transformationService.addNewTransform(utr, internalId, AmendUnidentifiedBeneficiaryTransform(index, description))
   }
 
+
   def addAddUnidentifiedBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: UnidentifiedType): Future[Unit] = {
     transformationService.addNewTransform(utr, internalId, AddUnidentifiedBeneficiaryTransform(newBeneficiary))
   }
+
 
 }

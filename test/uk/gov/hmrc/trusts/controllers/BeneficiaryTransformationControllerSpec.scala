@@ -28,12 +28,10 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
-import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee}
-import uk.gov.hmrc.trusts.services.{BeneficiaryTransformationService, TrusteeTransformationService}
+import uk.gov.hmrc.trusts.models.{RemoveBeneficiary, Success}
+import uk.gov.hmrc.trusts.services.{BeneficiaryTransformationService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -75,6 +73,46 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       val result = controller.amendUnidentifiedBeneficiary("aUTR", index).apply(request)
       status(result) mustBe BAD_REQUEST
     }
+  }
+
+  "remove Beneficiary" - {
+    "add an new remove beneficiary transform " in {
+      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+
+      when(beneficiaryTransformationService.removeBeneficiary(any(), any(), any())(any()))
+        .thenReturn(Future.successful(Success))
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.obj(
+          "type" -> "unidentified",
+          "endDate" -> LocalDate.of(2018, 2, 24),
+          "index" -> 24
+        ))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.removeBeneficiary("UTRUTRUTR").apply(request)
+
+      status(result) mustBe OK
+      verify(beneficiaryTransformationService)
+        .removeBeneficiary(
+          equalTo("UTRUTRUTR"),
+          equalTo("id"),
+          equalTo(RemoveBeneficiary(LocalDate.of(2018, 2, 24), 24, "unidentified")))(any())
+    }
+
+    "return an error when json is invalid" in {
+      val OUT = new BeneficiaryTransformationController(identifierAction, mock[BeneficiaryTransformationService])
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.obj("field" -> "value"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = OUT.removeBeneficiary("UTRUTRUTR")(request)
+
+      status(result) mustBe BAD_REQUEST
+    }
+
   }
 
   "Add unidentified beneficiary" - {
