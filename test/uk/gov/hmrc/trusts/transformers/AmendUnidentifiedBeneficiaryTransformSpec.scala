@@ -20,7 +20,9 @@ import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AmendUnidentifiedBeneficiaryTransformSpec extends FreeSpec with MustMatchers with OptionValues {
+
   "AmendUnidentifiedBeneficiaryTransform should" - {
+
     "successfully update a beneficiary's details" in {
 
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-unidentified-beneficiary-transform-before.json")

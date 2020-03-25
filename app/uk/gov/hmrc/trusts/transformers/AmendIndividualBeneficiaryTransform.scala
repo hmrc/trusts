@@ -18,11 +18,20 @@ package uk.gov.hmrc.trusts.transformers
 
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.variation.IndividualDetailsType
+import uk.gov.hmrc.trusts.transformers.beneficiaries.AmendBeneficiariesCommon
 
-case class AmendIndividualBeneficiaryTransform(index: Int, individualDetailsType: IndividualDetailsType) extends DeltaTransform {
+case class AmendIndividualBeneficiaryTransform(
+                                                index: Int,
+                                                amended: IndividualDetailsType,
+                                                original: JsValue
+                                              )
+  extends DeltaTransform
+  with AmendBeneficiariesCommon
+  with JsonOperations {
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    JsSuccess(input)
+    val path = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'individualDetails
+    amendAtPosition(input, path, index, Json.toJson(amended))
   }
 
 }
