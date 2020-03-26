@@ -38,6 +38,8 @@ case class RemoveTrusteeTransform(endDate: LocalDate, index: Int, trusteeToRemov
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
     if (trusteeIsKnownToEtmp(trusteeToRemove)) {
       trusteeToRemove.transform(addEntityEnd(trusteeToRemove, endDate)) match {
+
+        // Todo can this be refactored to use JsonOperations?
         case JsSuccess(endedTrusteeJson, _) =>
           val trustees: Reads[JsObject] =
             trusteePath.json.update(of[JsArray]

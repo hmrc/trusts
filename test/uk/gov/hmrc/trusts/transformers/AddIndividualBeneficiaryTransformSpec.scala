@@ -72,7 +72,7 @@ class AddIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers w
 
       val thrown = intercept[Exception] (transformer.applyTransform(json).get)
 
-      thrown.getMessage mustBe "Adding an individualDetails beneficiary would exceed the maximum allowed amount of 25"
+      thrown.getMessage mustBe "Adding an item to /details/trust/entities/beneficiary/individualDetails would exceed the maximum allowed amount of 25"
 
     }
   }

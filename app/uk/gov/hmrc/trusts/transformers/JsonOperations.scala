@@ -76,7 +76,6 @@ trait JsonOperations {
     }
   }
 
-
   def amendAtPosition(input : JsValue, path: JsPath, index: Int, newValue: JsValue) : JsResult[JsValue] = {
     input.transform(path.json.pick) match {
 

@@ -19,10 +19,14 @@ package uk.gov.hmrc.trusts.transformers
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
 
-case class AddUnidentifiedBeneficiaryTransform(newBeneficiary: UnidentifiedType) extends DeltaTransform with AddBeneficiaryCommon {
+case class AddUnidentifiedBeneficiaryTransform(newBeneficiary: UnidentifiedType)
+  extends DeltaTransform
+  with JsonOperations {
+
+  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ "unidentified"
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addBeneficiary(input, Json.toJson(newBeneficiary), "unidentified")
+    addToList(input, path, Json.toJson(newBeneficiary))
   }
 }
 

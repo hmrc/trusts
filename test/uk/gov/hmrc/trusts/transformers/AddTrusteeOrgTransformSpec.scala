@@ -91,7 +91,7 @@ class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionV
 
       val thrown = intercept[Exception] (transformer.applyTransform(json).get)
 
-      thrown.getMessage mustBe "Adding a trustee would exceed the maximum allowed amount of 25"
+      thrown.getMessage mustBe "Adding an item to /details/trust/entities/trustees would exceed the maximum allowed amount of 25"
 
     }
   }
