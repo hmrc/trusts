@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.trusts.transformers
 
+import java.time.LocalDate
+
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.{JsValue, Json}
@@ -75,7 +77,7 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
             |}
             |""".stripMargin)
 
-        val transformer = AmendIndividualBeneficiaryTransform(1, amended, original)
+        val transformer = AmendIndividualBeneficiaryTransform(1, amended, original, LocalDate.parse("2020-03-25"))
 
         val result = transformer.applyTransform(beforeJson).get
         result mustBe afterJson
@@ -133,7 +135,7 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
             |}
             |""".stripMargin)
 
-        val transformer = AmendIndividualBeneficiaryTransform(1, amended, original)
+        val transformer = AmendIndividualBeneficiaryTransform(1, amended, original, endDate = LocalDate.parse("2020-03-25"))
 
         val result = transformer.applyDeclarationTransform(beforeJson).get
         result mustBe afterJson
@@ -172,7 +174,7 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
             |}
             |""".stripMargin)
 
-        val transformer = AmendIndividualBeneficiaryTransform(2, amended, original)
+        val transformer = AmendIndividualBeneficiaryTransform(2, amended, original, endDate = LocalDate.parse("2020-03-25"))
 
         val result = transformer.applyDeclarationTransform(beforeJson).get
         result mustBe afterJson

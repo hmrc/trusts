@@ -24,7 +24,8 @@ import uk.gov.hmrc.trusts.models.variation.IndividualDetailsType
 case class AmendIndividualBeneficiaryTransform(
                                                 index: Int,
                                                 amended: IndividualDetailsType,
-                                                original: JsValue
+                                                original: JsValue,
+                                                endDate: LocalDate
                                               )
   extends DeltaTransform
   with JsonOperations {
@@ -38,7 +39,7 @@ case class AmendIndividualBeneficiaryTransform(
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
     if (isKnownToEtmp(original)) {
       val beneficiaryWithEndDate = original.as[JsObject]
-        .deepMerge(Json.obj("entityEnd" -> Json.toJson(LocalDate.now())))
+        .deepMerge(Json.obj("entityEnd" -> Json.toJson(endDate)))
 
       for {
         updated <- amendAtPosition(input, path, index, beneficiaryWithEndDate)

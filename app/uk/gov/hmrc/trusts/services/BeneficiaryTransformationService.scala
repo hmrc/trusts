@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.trusts.services
 
+import java.time.LocalDate
+
 import javax.inject.Inject
 import play.api.libs.json.{JsObject, JsValue, __}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -73,7 +75,6 @@ class BeneficiaryTransformationService @Inject()(
     transformationService.addNewTransform(utr, internalId, AmendUnidentifiedBeneficiaryTransform(index, description))
   }
 
-
   def addAddUnidentifiedBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: UnidentifiedType): Future[Unit] = {
     transformationService.addNewTransform(utr, internalId, AddUnidentifiedBeneficiaryTransform(newBeneficiary))
   }
@@ -91,9 +92,13 @@ class BeneficiaryTransformationService @Inject()(
         transformationService.addNewTransform(
           utr,
           internalId,
-          AmendIndividualBeneficiaryTransform(index, amend, beneficiaryJson)
+          AmendIndividualBeneficiaryTransform(index, amend, beneficiaryJson, LocalDate.now)
         ).map(_ => Success)
       }
+  }
+
+  def addAddIndividualBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: IndividualDetailsType): Future[Unit] = {
+    transformationService.addNewTransform(utr, internalId, AddIndividualBeneficiaryTransform(newBeneficiary))
   }
 
 }
