@@ -24,6 +24,7 @@ class AmendUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with S
   val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
 
   "an amend unidentified beneficiary call" - {
+
     "must return amended data in a subsequent 'get' call" in {
 
       val newDescription = "Updated description"
@@ -48,6 +49,7 @@ class AmendUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with S
 
       running(application) {
         getConnection(application).map { connection =>
+
           dropTheDatabase(connection)
           val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
           status(result) mustBe OK

@@ -38,7 +38,7 @@ class BeneficiaryTransformationController @Inject()(
     implicit request => {
       request.body.validate[JsString] match {
         case JsSuccess(description, _) =>
-          beneficiaryTransformationService.addAmendUnidentifiedBeneficiaryTransformer(
+          beneficiaryTransformationService.amendUnidentifiedBeneficiaryTransformer(
             utr,
             index,
             request.identifier,
@@ -58,7 +58,7 @@ class BeneficiaryTransformationController @Inject()(
     implicit request => {
       request.body.validate[UnidentifiedType] match {
         case JsSuccess(newBeneficiary, _) =>
-          beneficiaryTransformationService.addAddUnidentifiedBeneficiaryTransformer(
+          beneficiaryTransformationService.addUnidentifiedBeneficiaryTransformer(
             utr,
             request.identifier,
             newBeneficiary
@@ -77,7 +77,7 @@ class BeneficiaryTransformationController @Inject()(
     implicit request => {
       request.body.validate[IndividualDetailsType] match {
         case JsSuccess(newBeneficiary, _) =>
-          beneficiaryTransformationService.addAddIndividualBeneficiaryTransformer(
+          beneficiaryTransformationService.addIndividualBeneficiaryTransformer(
             utr,
             request.identifier,
             newBeneficiary
@@ -107,7 +107,7 @@ class BeneficiaryTransformationController @Inject()(
     implicit request =>
       request.body.validate[IndividualDetailsType] match {
         case JsSuccess(individual, _) =>
-          beneficiaryTransformationService.addAmendIndividualBeneficiaryTransformer(
+          beneficiaryTransformationService.amendIndividualBeneficiaryTransformer(
             utr,
             index,
             request.identifier,

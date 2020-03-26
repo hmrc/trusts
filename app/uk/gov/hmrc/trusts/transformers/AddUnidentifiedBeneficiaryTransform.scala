@@ -23,7 +23,7 @@ case class AddUnidentifiedBeneficiaryTransform(newBeneficiary: UnidentifiedType)
   extends DeltaTransform
   with JsonOperations {
 
-  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ "unidentified"
+  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'unidentified
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     addToList(input, path, Json.toJson(newBeneficiary))

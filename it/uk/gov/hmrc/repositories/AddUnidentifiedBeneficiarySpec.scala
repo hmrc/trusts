@@ -24,6 +24,7 @@ class AddUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with Sca
   val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
 
   "an add unidentified beneficiary call" - {
+
     "must return amended data in a subsequent 'get' call" in {
 
       val newBeneficiaryJson = Json.parse(
@@ -55,7 +56,9 @@ class AddUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with Sca
 
       running(application) {
         getConnection(application).map { connection =>
+
           dropTheDatabase(connection)
+
           val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson

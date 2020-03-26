@@ -92,7 +92,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
 
-      val result = service.addAmendUnidentifiedBeneficiaryTransformer("utr", index, "internalId", newDescription)
+      val result = service.amendUnidentifiedBeneficiaryTransformer("utr", index, "internalId", newDescription)
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",
@@ -115,7 +115,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
 
-      val result = service.addAddUnidentifiedBeneficiaryTransformer("utr", "internalId", newBeneficiary)
+      val result = service.addUnidentifiedBeneficiaryTransformer("utr", "internalId", newBeneficiary)
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",
@@ -166,7 +166,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
             ResponseHeader("status", "formBundlNo")
           )))
 
-        val result = service.addAmendIndividualBeneficiaryTransformer("utr", index, "internalId", newIndividual)
+        val result = service.amendIndividualBeneficiaryTransformer("utr", index, "internalId", newIndividual)
         whenReady(result) { _ =>
 
           verify(transformationService).addNewTransform(
@@ -195,7 +195,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
 
-      val result = service.addAddIndividualBeneficiaryTransformer("utr", "internalId", newBeneficiary)
+      val result = service.addIndividualBeneficiaryTransformer("utr", "internalId", newBeneficiary)
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",

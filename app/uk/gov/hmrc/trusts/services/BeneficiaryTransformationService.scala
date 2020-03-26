@@ -71,19 +71,19 @@ class BeneficiaryTransformationService @Inject()(
     )
   }
 
-  def addAmendUnidentifiedBeneficiaryTransformer(utr: String, index: Int, internalId: String, description: String): Future[Unit] = {
+  def amendUnidentifiedBeneficiaryTransformer(utr: String, index: Int, internalId: String, description: String): Future[Unit] = {
     transformationService.addNewTransform(utr, internalId, AmendUnidentifiedBeneficiaryTransform(index, description))
   }
 
-  def addAddUnidentifiedBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: UnidentifiedType): Future[Unit] = {
+  def addUnidentifiedBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: UnidentifiedType): Future[Unit] = {
     transformationService.addNewTransform(utr, internalId, AddUnidentifiedBeneficiaryTransform(newBeneficiary))
   }
 
-  def addAmendIndividualBeneficiaryTransformer(utr: String,
-                                               index: Int,
-                                               internalId: String,
-                                               amend: IndividualDetailsType)
-                                              (implicit hc: HeaderCarrier): Future[Success.type] = {
+  def amendIndividualBeneficiaryTransformer(utr: String,
+                                            index: Int,
+                                            internalId: String,
+                                            amend: IndividualDetailsType)
+                                           (implicit hc: HeaderCarrier): Future[Success.type] = {
     getTransformedTrustJson(utr, internalId)
       .map(findBeneficiaryJson(_, "individualDetails", index))
       .flatMap(Future.fromTry)
@@ -97,7 +97,7 @@ class BeneficiaryTransformationService @Inject()(
       }
   }
 
-  def addAddIndividualBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: IndividualDetailsType): Future[Unit] = {
+  def addIndividualBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: IndividualDetailsType): Future[Unit] = {
     transformationService.addNewTransform(utr, internalId, AddIndividualBeneficiaryTransform(newBeneficiary))
   }
 

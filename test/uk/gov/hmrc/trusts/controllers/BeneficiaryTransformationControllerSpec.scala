@@ -49,7 +49,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
       val newDescription = "Some new description"
 
-      when(beneficiaryTransformationService.addAmendUnidentifiedBeneficiaryTransformer(any(), any(), any(), any()))
+      when(beneficiaryTransformationService.amendUnidentifiedBeneficiaryTransformer(any(), any(), any(), any()))
         .thenReturn(Future.successful(()))
 
       val request = FakeRequest("POST", "path")
@@ -59,7 +59,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       val result = controller.amendUnidentifiedBeneficiary("aUTR", index).apply(request)
 
       status(result) mustBe OK
-      verify(beneficiaryTransformationService).addAmendUnidentifiedBeneficiaryTransformer("aUTR", index, "id", newDescription)
+      verify(beneficiaryTransformationService).amendUnidentifiedBeneficiaryTransformer("aUTR", index, "id", newDescription)
     }
 
     "must return an error for malformed json" in {
@@ -131,7 +131,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None
       )
 
-      when(beneficiaryTransformationService.addAddUnidentifiedBeneficiaryTransformer(any(), any(), any()))
+      when(beneficiaryTransformationService.addUnidentifiedBeneficiaryTransformer(any(), any(), any()))
         .thenReturn(Future.successful(()))
 
       val request = FakeRequest("POST", "path")
@@ -141,7 +141,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       val result = controller.addUnidentifiedBeneficiary("aUTR").apply(request)
 
       status(result) mustBe OK
-      verify(beneficiaryTransformationService).addAddUnidentifiedBeneficiaryTransformer("aUTR", "id", newBeneficiary)
+      verify(beneficiaryTransformationService).addUnidentifiedBeneficiaryTransformer("aUTR", "id", newBeneficiary)
     }
 
     "must return an error for malformed json" in {
@@ -180,7 +180,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None
       )
 
-      when(beneficiaryTransformationService.addAmendIndividualBeneficiaryTransformer(any(), any(), any(), any())(any()))
+      when(beneficiaryTransformationService.amendIndividualBeneficiaryTransformer(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
@@ -191,7 +191,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
       status(result) mustBe OK
       verify(beneficiaryTransformationService)
-        .addAmendIndividualBeneficiaryTransformer(
+        .amendIndividualBeneficiaryTransformer(
           equalTo("aUTR"),
           equalTo(index),
           equalTo("id"),
@@ -233,7 +233,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None
       )
 
-      when(beneficiaryTransformationService.addAddIndividualBeneficiaryTransformer(any(), any(), any()))
+      when(beneficiaryTransformationService.addIndividualBeneficiaryTransformer(any(), any(), any()))
         .thenReturn(Future.successful(()))
 
       val request = FakeRequest("POST", "path")
@@ -243,7 +243,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       val result = controller.addIndividualBeneficiary("aUTR").apply(request)
 
       status(result) mustBe OK
-      verify(beneficiaryTransformationService).addAddIndividualBeneficiaryTransformer("aUTR", "id", newBeneficiary)
+      verify(beneficiaryTransformationService).addIndividualBeneficiaryTransformer("aUTR", "id", newBeneficiary)
     }
 
     "must return an error for malformed json" in {
