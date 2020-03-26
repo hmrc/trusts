@@ -50,7 +50,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       val newDescription = "Some new description"
 
       when(beneficiaryTransformationService.amendUnidentifiedBeneficiaryTransformer(any(), any(), any(), any()))
-        .thenReturn(Future.successful(()))
+        .thenReturn(Future.successful(true))
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(newDescription))
@@ -132,7 +132,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       )
 
       when(beneficiaryTransformationService.addUnidentifiedBeneficiaryTransformer(any(), any(), any()))
-        .thenReturn(Future.successful(()))
+        .thenReturn(Future.successful(true))
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(newBeneficiary))
@@ -234,7 +234,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       )
 
       when(beneficiaryTransformationService.addIndividualBeneficiaryTransformer(any(), any(), any()))
-        .thenReturn(Future.successful(()))
+        .thenReturn(Future.successful(true))
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(newBeneficiary))

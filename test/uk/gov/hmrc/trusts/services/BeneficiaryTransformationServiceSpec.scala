@@ -70,7 +70,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
       val beneficiary = beneficiaryJson("Blah Blah Blah")
 
       when(transformationService.addNewTransform(any(), any(), any()))
-        .thenReturn(Future.successful(()))
+        .thenReturn(Future.successful(true))
       when(transformationService.getTransformedData(any(), any())(any()))
         .thenReturn(Future.successful(TrustProcessedResponse(
           buildInputJson("individualDetails", Seq(beneficiary)),
@@ -90,7 +90,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
       val service = new BeneficiaryTransformationService(transformationService)
       val newDescription = "Some Description"
 
-      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
       val result = service.amendUnidentifiedBeneficiaryTransformer("utr", index, "internalId", newDescription)
       whenReady(result) { _ =>
@@ -113,7 +113,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
         None
       )
 
-      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
       val result = service.addUnidentifiedBeneficiaryTransformer("utr", "internalId", newBeneficiary)
       whenReady(result) { _ =>
@@ -158,7 +158,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
             |}
             |""".stripMargin)
 
-        when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
+        when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
         when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(
@@ -193,7 +193,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
         None
       )
 
-      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
       val result = service.addIndividualBeneficiaryTransformer("utr", "internalId", newBeneficiary)
       whenReady(result) { _ =>

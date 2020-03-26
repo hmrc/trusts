@@ -71,11 +71,11 @@ class BeneficiaryTransformationService @Inject()(
     )
   }
 
-  def amendUnidentifiedBeneficiaryTransformer(utr: String, index: Int, internalId: String, description: String): Future[Unit] = {
+  def amendUnidentifiedBeneficiaryTransformer(utr: String, index: Int, internalId: String, description: String): Future[Boolean] = {
     transformationService.addNewTransform(utr, internalId, AmendUnidentifiedBeneficiaryTransform(index, description))
   }
 
-  def addUnidentifiedBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: UnidentifiedType): Future[Unit] = {
+  def addUnidentifiedBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: UnidentifiedType): Future[Boolean] = {
     transformationService.addNewTransform(utr, internalId, AddUnidentifiedBeneficiaryTransform(newBeneficiary))
   }
 
@@ -97,7 +97,7 @@ class BeneficiaryTransformationService @Inject()(
       }
   }
 
-  def addIndividualBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: IndividualDetailsType): Future[Unit] = {
+  def addIndividualBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: IndividualDetailsType): Future[Boolean] = {
     transformationService.addNewTransform(utr, internalId, AddIndividualBeneficiaryTransform(newBeneficiary))
   }
 

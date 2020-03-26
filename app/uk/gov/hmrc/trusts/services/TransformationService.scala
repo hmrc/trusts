@@ -96,7 +96,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
-  def addNewTransform(utr: String, internalId: String, newTransform: DeltaTransform) : Future[Unit] = {
+  def addNewTransform(utr: String, internalId: String, newTransform: DeltaTransform) : Future[Boolean] = {
     repository.get(utr, internalId).map {
       case None =>
         ComposedDeltaTransform(Seq(newTransform))
@@ -104,7 +104,8 @@ class TransformationService @Inject()(repository: TransformationRepository,
       case Some(composedTransform) =>
         composedTransform :+ newTransform
 
-    }.flatMap(newTransforms => repository.set(utr, internalId, newTransforms).map(_ => ())).recoverWith {
+    }.flatMap(newTransforms =>
+      repository.set(utr, internalId, newTransforms)).recoverWith {
       case e =>
         Logger.error(s"[TransformationService] exception adding new transform: ${e.getMessage}")
         Future.failed(e)

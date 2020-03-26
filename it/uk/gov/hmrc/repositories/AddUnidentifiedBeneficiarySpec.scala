@@ -20,8 +20,11 @@ import scala.concurrent.Future
 
 class AddUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar with TransformIntegrationTest {
 
-  val getTrustResponseFromDES: GetTrustSuccessResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
-  val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+  lazy val getTrustResponseFromDES: GetTrustSuccessResponse =
+    JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
+
+  lazy val expectedInitialGetJson: JsValue =
+    JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
 
   "an add unidentified beneficiary call" - {
 
@@ -36,7 +39,8 @@ class AddUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with Sca
           |""".stripMargin
       )
 
-      val expectedGetAfterAddBeneficiaryJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-after-add-unidentified-beneficiary.json")
+      lazy val expectedGetAfterAddBeneficiaryJson: JsValue =
+        JsonUtils.getJsonValueFromFile("trusts-integration-get-after-add-unidentified-beneficiary.json")
 
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))

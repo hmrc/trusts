@@ -18,10 +18,13 @@ import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
 
-class AddIndividualBeneficiarySpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar with TransformIntegrationTest {
+class AddIndividualBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar with TransformIntegrationTest {
 
-  val getTrustResponseFromDES: GetTrustSuccessResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
-  val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+  lazy val getTrustResponseFromDES: GetTrustSuccessResponse =
+    JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
+
+  lazy val expectedInitialGetJson: JsValue =
+    JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
 
   "an add individual beneficiary call" - {
     "must return amended data in a subsequent 'get' call" in {
@@ -43,7 +46,8 @@ class AddIndividualBeneficiarySpec extends FreeSpec with MustMatchers with Scala
           |""".stripMargin
       )
 
-      val expectedGetAfterAddBeneficiaryJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-after-add-individual-beneficiary.json")
+      lazy val expectedGetAfterAddBeneficiaryJson: JsValue =
+        JsonUtils.getJsonValueFromFile("trusts-integration-get-after-add-individual-beneficiary.json")
 
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
@@ -64,6 +68,7 @@ class AddIndividualBeneficiarySpec extends FreeSpec with MustMatchers with Scala
       running(application) {
         getConnection(application).map { connection =>
           dropTheDatabase(connection)
+
           val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
