@@ -25,8 +25,33 @@ import uk.gov.hmrc.trusts.models.get_trust_or_estate.{ResponseHeader, _}
 import uk.gov.hmrc.trusts.transformers.mdtp.Trustees
 
 trait GetTrustResponse
+
 trait GetTrustSuccessResponse extends GetTrustResponse {
   def responseHeader: ResponseHeader
+}
+
+object GetTrustSuccessResponse {
+
+  implicit val writes: Writes[GetTrustSuccessResponse] = Writes{
+    case TrustProcessedResponse(trust, header) => Json.obj("responseHeader" -> header, "getTrust" -> Json.toJson(trust.as[GetTrust]))
+    case TrustFoundResponse(header) => Json.obj("responseHeader" -> header)
+  }
+
+  implicit val reads: Reads[GetTrustSuccessResponse] = new Reads[GetTrustSuccessResponse] {
+    override def reads(json: JsValue): JsResult[GetTrustSuccessResponse] = {
+      val header = (json \ "responseHeader").validate[ResponseHeader]
+      (json \ "trustOrEstateDisplay").toOption match {
+        case None => header.map(TrustFoundResponse)
+        case Some(x) =>
+          x.validate[GetTrust] match {
+            case JsSuccess(_, _) =>
+              header.map(h => TrustProcessedResponse(x, h))
+            case x : JsError => x
+          }
+
+      }
+    }
+  }
 }
 
 case class TrustProcessedResponse(getTrust: JsValue,
@@ -53,36 +78,11 @@ object TrustProcessedResponse {
 
 case class TrustFoundResponse(responseHeader: ResponseHeader) extends GetTrustSuccessResponse
 
-object GetTrustSuccessResponse {
-
-
-  implicit val writes: Writes[GetTrustSuccessResponse] = Writes{
-    case TrustProcessedResponse(trust, header) => Json.obj("responseHeader" -> header, "getTrust" -> Json.toJson(trust.as[GetTrust]))
-    case TrustFoundResponse(header) => Json.obj("responseHeader" -> header)
-  }
-
-  implicit val reads: Reads[GetTrustSuccessResponse] = new Reads[GetTrustSuccessResponse] {
-    override def reads(json: JsValue): JsResult[GetTrustSuccessResponse] = {
-      val header = (json \ "responseHeader").validate[ResponseHeader]
-      (json \ "trustOrEstateDisplay").toOption match {
-        case None => header.map(TrustFoundResponse)
-        case Some(x) =>
-          x.validate[GetTrust] match {
-            case JsSuccess(_, _) =>
-              header.map(h => TrustProcessedResponse(x, h))
-            case x : JsError => x
-          }
-
-      }
-    }
-  }
-}
-
 object GetTrustResponse {
-  implicit lazy val httpReads: HttpReads[GetTrustResponse] =
-    new HttpReads[GetTrustResponse] {
+
+  implicit lazy val httpReads: HttpReads[GetTrustResponse] = new HttpReads[GetTrustResponse] {
       override def read(method: String, url: String, response: HttpResponse): GetTrustResponse = {
-        Logger.info(s"[GetTrustResponse]  response status received from des: ${response.status}")
+        Logger.info(s"[GetTrustResponse] response status received from des: ${response.status}")
         response.status match {
           case OK =>
             response.json.validate[GetTrustSuccessResponse] match {

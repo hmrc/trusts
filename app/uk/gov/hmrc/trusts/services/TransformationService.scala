@@ -37,8 +37,13 @@ class TransformationService @Inject()(repository: TransformationRepository,
       case response: TrustProcessedResponse =>
         populateLeadTrusteeAddress(response.getTrust) match {
           case JsSuccess(fixed, _) =>
+
+            println(s"fixed up lead trustee $fixed")
+
             applyTransformations(utr, internalId, fixed).map {
-              case JsSuccess(transformed, _) => TrustProcessedResponse(transformed, response.responseHeader)
+              case JsSuccess(transformed, _) =>
+
+                TrustProcessedResponse(transformed, response.responseHeader)
               case JsError(errors) => TransformationErrorResponse(errors.toString)
             }
           case JsError(errors) => Future.successful(TransformationErrorResponse(errors.toString))
@@ -49,8 +54,16 @@ class TransformationService @Inject()(repository: TransformationRepository,
 
   private def applyTransformations(utr: String, internalId: String, json: JsValue)(implicit hc : HeaderCarrier): Future[JsResult[JsValue]] = {
     repository.get(utr, internalId).map {
-      case None => JsSuccess(json)
-      case Some(transformations) => transformations.applyTransform(json)
+      case None =>
+
+        println(s"no transformations to apply")
+
+        JsSuccess(json)
+      case Some(transformations) =>
+
+        println(s"applying transforms $transformations")
+
+        transformations.applyTransform(json)
     }
   }
 
