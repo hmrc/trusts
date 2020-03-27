@@ -23,12 +23,18 @@ import play.api.libs.json._
 case class RemoveBeneficiary (endDate: LocalDate, index: Int, `type`: String)
 
 object RemoveBeneficiary {
-  val validBeneficiaryTypes = Seq(
-    "unidentified", "individualDetails"
+  val validBeneficiaryTypes: Seq[String] = Seq(
+    "individualDetails",
+    "unidentified",
+    "company",
+    "large",
+    "trust",
+    "charity",
+    "other"
   )
 
-  val reads = Json.reads[RemoveBeneficiary].filter(rb => validBeneficiaryTypes.contains(rb.`type`))
-  val writes = Json.writes[RemoveBeneficiary]
+  val reads: Reads[RemoveBeneficiary] = Json.reads[RemoveBeneficiary].filter(rb => validBeneficiaryTypes.contains(rb.`type`))
+  val writes: OWrites[RemoveBeneficiary] = Json.writes[RemoveBeneficiary]
 
   implicit val formats: Format[RemoveBeneficiary] = Format(reads, writes)
- }
+}
