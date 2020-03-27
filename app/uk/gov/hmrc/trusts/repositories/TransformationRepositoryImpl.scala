@@ -95,8 +95,6 @@ class TransformationRepositoryImpl @Inject()(
 
   override def set(utr: String, internalId: String, transforms: ComposedDeltaTransform): Future[Boolean] = {
 
-    println(s"setting transforms $transforms")
-
     val selector = Json.obj(
       "id" -> createKey(utr, internalId)
     )

@@ -58,20 +58,14 @@ class AddUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with Sca
         ): _*)
         .build()
 
-      println(s"parsed test file to render $getTrustResponseFromDES")
-
       running(application) {
         getConnection(application).map { connection =>
 
           dropTheDatabase(connection)
 
-          println(s"initial get \n")
-
           val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
           status(result) mustBe OK
           contentAsJson(result) mustEqual expectedInitialGetJson
-
-          println(s"adding get \n")
 
           val addRequest = FakeRequest(POST, "/trusts/add-unidentified-beneficiary/5174384721")
             .withBody(newBeneficiaryJson)
@@ -79,9 +73,6 @@ class AddUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with Sca
 
           val addResult = route(application, addRequest).get
           status(addResult) mustBe OK
-
-
-          println(s"final get \n")
 
           val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
           status(newResult) mustBe OK

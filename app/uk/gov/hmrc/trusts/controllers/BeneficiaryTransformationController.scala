@@ -59,8 +59,6 @@ class BeneficiaryTransformationController @Inject()(
       request.body.validate[UnidentifiedType] match {
         case JsSuccess(newBeneficiary, _) =>
 
-          println(s"parsed unidentified beneficiary $newBeneficiary")
-
           beneficiaryTransformationService.addUnidentifiedBeneficiaryTransformer(
             utr,
             request.identifier,

@@ -38,8 +38,6 @@ class TransformationService @Inject()(repository: TransformationRepository,
         populateLeadTrusteeAddress(response.getTrust) match {
           case JsSuccess(fixed, _) =>
 
-            println(s"fixed up lead trustee $fixed")
-
             applyTransformations(utr, internalId, fixed).map {
               case JsSuccess(transformed, _) =>
 
@@ -55,14 +53,8 @@ class TransformationService @Inject()(repository: TransformationRepository,
   private def applyTransformations(utr: String, internalId: String, json: JsValue)(implicit hc : HeaderCarrier): Future[JsResult[JsValue]] = {
     repository.get(utr, internalId).map {
       case None =>
-
-        println(s"no transformations to apply")
-
         JsSuccess(json)
       case Some(transformations) =>
-
-        println(s"applying transforms $transformations")
-
         transformations.applyTransform(json)
     }
   }
@@ -100,9 +92,9 @@ class TransformationService @Inject()(repository: TransformationRepository,
   def populateLeadTrusteeAddress(beforeJson: JsValue): JsResult[JsValue] = {
     val pathToLeadTrusteeAddress = __ \ 'details \ 'trust \ 'entities \ 'leadTrustees \ 'identification \ 'address
 
-    if (beforeJson.transform(pathToLeadTrusteeAddress.json.pick).isSuccess)
+    if (beforeJson.transform(pathToLeadTrusteeAddress.json.pick).isSuccess) {
       JsSuccess(beforeJson)
-    else {
+    } else {
       val pathToCorrespondenceAddress = __ \ 'correspondence \ 'address
       val copyAddress = __.json.update(pathToLeadTrusteeAddress.json.copyFrom(pathToCorrespondenceAddress.json.pick))
       beforeJson.transform(copyAddress)
