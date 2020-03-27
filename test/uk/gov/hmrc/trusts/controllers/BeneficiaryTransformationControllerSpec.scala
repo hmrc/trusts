@@ -29,11 +29,9 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.variation.{IdentificationType, IndividualDetailsType, UnidentifiedType}
 import uk.gov.hmrc.trusts.models.{NameType, RemoveBeneficiary, Success}
-import uk.gov.hmrc.trusts.services.{BeneficiaryTransformationService, TrusteeTransformationService}
-import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
+import uk.gov.hmrc.trusts.services.BeneficiaryTransformationService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -51,8 +49,8 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
       val newDescription = "Some new description"
 
-      when(beneficiaryTransformationService.addAmendUnidentifiedBeneficiaryTransformer(any(), any(), any(), any()))
-        .thenReturn(Future.successful(()))
+      when(beneficiaryTransformationService.amendUnidentifiedBeneficiaryTransformer(any(), any(), any(), any()))
+        .thenReturn(Future.successful(true))
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(newDescription))
@@ -61,7 +59,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       val result = controller.amendUnidentifiedBeneficiary("aUTR", index).apply(request)
 
       status(result) mustBe OK
-      verify(beneficiaryTransformationService).addAmendUnidentifiedBeneficiaryTransformer("aUTR", index, "id", newDescription)
+      verify(beneficiaryTransformationService).amendUnidentifiedBeneficiaryTransformer("aUTR", index, "id", newDescription)
     }
 
     "must return an error for malformed json" in {
@@ -133,8 +131,8 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None
       )
 
-      when(beneficiaryTransformationService.addAddUnidentifiedBeneficiaryTransformer(any(), any(), any()))
-        .thenReturn(Future.successful(()))
+      when(beneficiaryTransformationService.addUnidentifiedBeneficiaryTransformer(any(), any(), any()))
+        .thenReturn(Future.successful(true))
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(newBeneficiary))
@@ -143,7 +141,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       val result = controller.addUnidentifiedBeneficiary("aUTR").apply(request)
 
       status(result) mustBe OK
-      verify(beneficiaryTransformationService).addAddUnidentifiedBeneficiaryTransformer("aUTR", "id", newBeneficiary)
+      verify(beneficiaryTransformationService).addUnidentifiedBeneficiaryTransformer("aUTR", "id", newBeneficiary)
     }
 
     "must return an error for malformed json" in {
@@ -157,6 +155,63 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       val result = controller.addUnidentifiedBeneficiary("aUTR").apply(request)
       status(result) mustBe BAD_REQUEST
     }
+  }
+
+  "Amend individual beneficiary" - {
+
+    val index = 0
+
+    "must add a new amend individual beneficiary transform" in {
+
+      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+
+      val newIndividual = IndividualDetailsType(
+        None,
+        None,
+        NameType("First", None, "Last"),
+        None,
+        vulnerableBeneficiary = false,
+        None,
+        None,
+        None,
+        None,
+        DateTime.parse("2010-01-01"),
+        None
+      )
+
+      when(beneficiaryTransformationService.amendIndividualBeneficiaryTransformer(any(), any(), any(), any())(any()))
+        .thenReturn(Future.successful(Success))
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(newIndividual))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendIndividualBeneficiary("aUTR", index).apply(request)
+
+      status(result) mustBe OK
+      verify(beneficiaryTransformationService)
+        .amendIndividualBeneficiaryTransformer(
+          equalTo("aUTR"),
+          equalTo(index),
+          equalTo("id"),
+          equalTo(newIndividual)
+        )(any())
+
+    }
+
+    "must return an error for malformed json" in {
+      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.parse("{}"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendIndividualBeneficiary("aUTR", index).apply(request)
+      status(result) mustBe BAD_REQUEST
+    }
+
   }
 
   "Add individual beneficiary" - {
@@ -178,8 +233,8 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None
       )
 
-      when(beneficiaryTransformationService.addAddIndividualBeneficiaryTransformer(any(), any(), any()))
-        .thenReturn(Future.successful(()))
+      when(beneficiaryTransformationService.addIndividualBeneficiaryTransformer(any(), any(), any()))
+        .thenReturn(Future.successful(true))
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(newBeneficiary))
@@ -188,7 +243,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       val result = controller.addIndividualBeneficiary("aUTR").apply(request)
 
       status(result) mustBe OK
-      verify(beneficiaryTransformationService).addAddIndividualBeneficiaryTransformer("aUTR", "id", newBeneficiary)
+      verify(beneficiaryTransformationService).addIndividualBeneficiaryTransformer("aUTR", "id", newBeneficiary)
     }
 
     "must return an error for malformed json" in {

@@ -28,7 +28,7 @@ trait TransformIntegrationTest extends ScalaFutures {
     } yield connection
   }
 
-  def dropTheDatabase(connection: MongoConnection): Unit = {
+  def dropTheDatabase(connection: MongoConnection) = {
     Await.result(getDatabase(connection).flatMap(_.drop()), Duration.Inf)
   }
 

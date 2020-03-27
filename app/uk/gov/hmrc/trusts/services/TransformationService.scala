@@ -37,8 +37,11 @@ class TransformationService @Inject()(repository: TransformationRepository,
       case response: TrustProcessedResponse =>
         populateLeadTrusteeAddress(response.getTrust) match {
           case JsSuccess(fixed, _) =>
+
             applyTransformations(utr, internalId, fixed).map {
-              case JsSuccess(transformed, _) => TrustProcessedResponse(transformed, response.responseHeader)
+              case JsSuccess(transformed, _) =>
+
+                TrustProcessedResponse(transformed, response.responseHeader)
               case JsError(errors) => TransformationErrorResponse(errors.toString)
             }
           case JsError(errors) => Future.successful(TransformationErrorResponse(errors.toString))
@@ -49,8 +52,10 @@ class TransformationService @Inject()(repository: TransformationRepository,
 
   private def applyTransformations(utr: String, internalId: String, json: JsValue)(implicit hc : HeaderCarrier): Future[JsResult[JsValue]] = {
     repository.get(utr, internalId).map {
-      case None => JsSuccess(json)
-      case Some(transformations) => transformations.applyTransform(json)
+      case None =>
+        JsSuccess(json)
+      case Some(transformations) =>
+        transformations.applyTransform(json)
     }
   }
 
@@ -87,16 +92,16 @@ class TransformationService @Inject()(repository: TransformationRepository,
   def populateLeadTrusteeAddress(beforeJson: JsValue): JsResult[JsValue] = {
     val pathToLeadTrusteeAddress = __ \ 'details \ 'trust \ 'entities \ 'leadTrustees \ 'identification \ 'address
 
-    if (beforeJson.transform(pathToLeadTrusteeAddress.json.pick).isSuccess)
+    if (beforeJson.transform(pathToLeadTrusteeAddress.json.pick).isSuccess) {
       JsSuccess(beforeJson)
-    else {
+    } else {
       val pathToCorrespondenceAddress = __ \ 'correspondence \ 'address
       val copyAddress = __.json.update(pathToLeadTrusteeAddress.json.copyFrom(pathToCorrespondenceAddress.json.pick))
       beforeJson.transform(copyAddress)
     }
   }
 
-  def addNewTransform(utr: String, internalId: String, newTransform: DeltaTransform) : Future[Unit] = {
+  def addNewTransform(utr: String, internalId: String, newTransform: DeltaTransform) : Future[Boolean] = {
     repository.get(utr, internalId).map {
       case None =>
         ComposedDeltaTransform(Seq(newTransform))
@@ -104,7 +109,8 @@ class TransformationService @Inject()(repository: TransformationRepository,
       case Some(composedTransform) =>
         composedTransform :+ newTransform
 
-    }.flatMap(newTransforms => repository.set(utr, internalId, newTransforms).map(_ => ())).recoverWith {
+    }.flatMap(newTransforms =>
+      repository.set(utr, internalId, newTransforms)).recoverWith {
       case e =>
         Logger.error(s"[TransformationService] exception adding new transform: ${e.getMessage}")
         Future.failed(e)

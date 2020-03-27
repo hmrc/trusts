@@ -16,14 +16,19 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import play.api.libs.json._
+import play.api.libs.json.{Json, _}
 import uk.gov.hmrc.trusts.models.TrusteeOrg
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustTrusteeOrgType
 
-case class AddTrusteeOrgTransform(trustee: DisplayTrustTrusteeOrgType) extends DeltaTransform with AddTrusteeCommon {
+case class AddTrusteeOrgTransform(trustee: DisplayTrustTrusteeOrgType) extends DeltaTransform
+  with JsonOperations {
+
+  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'trustees
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addTrustee(input, Json.toJson(trustee), TrusteeOrg)
+    addToList(input, path, Json.obj(
+      TrusteeOrg.toString -> Json.toJson(trustee)
+    ))
   }
 }
 

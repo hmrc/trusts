@@ -19,19 +19,19 @@ package uk.gov.hmrc.trusts.services
 import java.time.LocalDate
 
 import org.joda.time.DateTime
+import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
-import play.api.libs.json.{JsArray, JsObject, JsValue, Json, __}
+import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.variation.{IdentificationType, IndividualDetailsType, UnidentifiedType}
-import uk.gov.hmrc.trusts.models.{NameType, RemoveBeneficiary, RemoveTrustee}
-import uk.gov.hmrc.trusts.repositories.TransformationRepositoryImpl
+import uk.gov.hmrc.trusts.models.{NameType, RemoveBeneficiary}
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
 
@@ -70,7 +70,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
       val beneficiary = beneficiaryJson("Blah Blah Blah")
 
       when(transformationService.addNewTransform(any(), any(), any()))
-        .thenReturn(Future.successful(()))
+        .thenReturn(Future.successful(true))
       when(transformationService.getTransformedData(any(), any())(any()))
         .thenReturn(Future.successful(TrustProcessedResponse(
           buildInputJson("individualDetails", Seq(beneficiary)),
@@ -90,9 +90,9 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
       val service = new BeneficiaryTransformationService(transformationService)
       val newDescription = "Some Description"
 
-      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      val result = service.addAmendUnidentifiedBeneficiaryTransformer("utr", index, "internalId", newDescription)
+      val result = service.amendUnidentifiedBeneficiaryTransformer("utr", index, "internalId", newDescription)
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",
@@ -113,13 +113,67 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
         None
       )
 
-      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      val result = service.addAddUnidentifiedBeneficiaryTransformer("utr", "internalId", newBeneficiary)
+      val result = service.addUnidentifiedBeneficiaryTransformer("utr", "internalId", newBeneficiary)
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",
           "internalId", AddUnidentifiedBeneficiaryTransform(newBeneficiary))
+      }
+    }
+
+    "must add a new amend individual beneficiary transform using the transformation service" in {
+        val index = 0
+        val transformationService = mock[TransformationService]
+        val service = new BeneficiaryTransformationService(transformationService)
+        val newIndividual = IndividualDetailsType(
+          None,
+          None,
+          NameType("First", None, "Last"),
+          None,
+          vulnerableBeneficiary = false,
+          None,
+          None,
+          None,
+          None,
+          DateTime.parse("2010-01-01"),
+          None
+        )
+
+        val original: JsValue = Json.parse(
+          """
+            |{
+            |  "lineNo": "1",
+            |  "bpMatchStatus": "01",
+            |  "name": {
+            |    "firstName": "First 2",
+            |    "lastName": "Last 2"
+            |  },
+            |  "vulnerableBeneficiary": true,
+            |  "identification": {
+            |    "nino": "JP1212122A"
+            |  },
+            |  "entityStart": "2018-02-28"
+            |}
+            |""".stripMargin)
+
+        when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+        when(transformationService.getTransformedData(any(), any())(any()))
+          .thenReturn(Future.successful(TrustProcessedResponse(
+            buildInputJson("individualDetails", Seq(original)),
+            ResponseHeader("status", "formBundlNo")
+          )))
+
+        val result = service.amendIndividualBeneficiaryTransformer("utr", index, "internalId", newIndividual)
+        whenReady(result) { _ =>
+
+          verify(transformationService).addNewTransform(
+            Matchers.eq("utr"),
+            Matchers.eq("internalId"),
+            Matchers.eq(AmendIndividualBeneficiaryTransform(index, newIndividual, original, LocalDate.now))
+          )
       }
     }
 
@@ -139,9 +193,9 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
         None
       )
 
-      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(()))
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      val result = service.addAddIndividualBeneficiaryTransformer("utr", "internalId", newBeneficiary)
+      val result = service.addIndividualBeneficiaryTransformer("utr", "internalId", newBeneficiary)
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",

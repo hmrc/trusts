@@ -23,37 +23,26 @@ import play.api.libs.json.Reads.of
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.utils.Constants.dateTimePattern
 
-case class RemoveTrusteeTransform(endDate: LocalDate, index: Int, trusteeToRemove: JsValue) extends DeltaTransform {
+case class RemoveTrusteeTransform(endDate: LocalDate, index: Int, trusteeToRemove: JsValue)
+  extends DeltaTransform
+  with JsonOperations {
+
   implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
 
-  private val trusteePath = (__ \ 'details \ 'trust \ 'entities \ 'trustees).json
+  private val trusteePath = (__ \ 'details \ 'trust \ 'entities \ 'trustees)
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-
-    input.transform(trusteePath.pick) match {
-      case JsSuccess(json, _) =>
-
-        val array = json.as[JsArray]
-
-        val filtered = array.value.take(index) ++ array.value.drop(index + 1)
-
-        input.transform(
-          trusteePath.prune andThen
-            JsPath.json.update {
-              trusteePath.put(Json.toJson(filtered))
-            }
-        )
-
-      case e: JsError => e
-    }
+    removeAtPosition(input, trusteePath, index, trusteeToRemove)
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    if (isKnownToEtmp(trusteeToRemove)) {
+    if (trusteeIsKnownToEtmp(trusteeToRemove)) {
       trusteeToRemove.transform(addEntityEnd(trusteeToRemove, endDate)) match {
+
+        // Todo can this be refactored to use JsonOperations?
         case JsSuccess(endedTrusteeJson, _) =>
           val trustees: Reads[JsObject] =
-            trusteePath.update(of[JsArray]
+            trusteePath.json.update(of[JsArray]
               .map {
                 trustees => trustees :+ endedTrusteeJson
               }
@@ -68,7 +57,7 @@ case class RemoveTrusteeTransform(endDate: LocalDate, index: Int, trusteeToRemov
     }
   }
 
-  private def isKnownToEtmp(json: JsValue): Boolean = {
+  private def trusteeIsKnownToEtmp(json: JsValue): Boolean = {
     json.transform((__ \ 'trusteeInd \ 'lineNo).json.pick).isSuccess |
       json.transform((__ \ 'trusteeOrg \ 'lineNo).json.pick).isSuccess
   }

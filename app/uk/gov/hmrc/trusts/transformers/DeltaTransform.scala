@@ -39,6 +39,7 @@ object DeltaTransform {
         case json if json.keys.contains(AmendUnidentifiedBeneficiaryTransform.key)    => (json \ AmendUnidentifiedBeneficiaryTransform.key).validate[AmendUnidentifiedBeneficiaryTransform]
         case json if json.keys.contains(RemoveBeneficiariesTransform.key)    => (json \ RemoveBeneficiariesTransform.key).validate[RemoveBeneficiariesTransform]
         case json if json.keys.contains(AddUnidentifiedBeneficiaryTransform.key)    => (json \ AddUnidentifiedBeneficiaryTransform.key).validate[AddUnidentifiedBeneficiaryTransform]
+        case json if json.keys.contains(AmendIndividualBeneficiaryTransform.key) => (json \ AmendIndividualBeneficiaryTransform.key).validate[AmendIndividualBeneficiaryTransform]
         case json if json.keys.contains(AddIndividualBeneficiaryTransform.key)    => (json \ AddIndividualBeneficiaryTransform.key).validate[AddIndividualBeneficiaryTransform]
         case _ => throw new Exception(s"Don't know how to deserialise transform: $value")
       }
@@ -47,19 +48,20 @@ object DeltaTransform {
 
   implicit val writes: Writes[DeltaTransform] = Writes[DeltaTransform] { deltaTransform =>
     val transformWrapper = deltaTransform match {
-      case transform: PromoteTrusteeIndTransform  => Json.obj(PromoteTrusteeIndTransform.key -> Json.toJson(transform)(PromoteTrusteeIndTransform.format))
-      case transform: PromoteTrusteeOrgTransform  => Json.obj(PromoteTrusteeOrgTransform.key -> Json.toJson(transform)(PromoteTrusteeOrgTransform.format))
-      case transform: AmendLeadTrusteeIndTransform  => Json.obj(AmendLeadTrusteeIndTransform.key -> Json.toJson(transform)(AmendLeadTrusteeIndTransform.format))
-      case transform: AmendLeadTrusteeOrgTransform  => Json.obj(AmendLeadTrusteeOrgTransform.key -> Json.toJson(transform)(AmendLeadTrusteeOrgTransform.format))
-      case transform: AddTrusteeIndTransform      => Json.obj(AddTrusteeIndTransform.key -> Json.toJson(transform)(AddTrusteeIndTransform.format))
-      case transform: AddTrusteeOrgTransform      => Json.obj(AddTrusteeOrgTransform.key -> Json.toJson(transform)(AddTrusteeOrgTransform.format))
-      case transform: RemoveTrusteeTransform      => Json.obj(RemoveTrusteeTransform.key -> Json.toJson(transform)(RemoveTrusteeTransform.format))
-      case transform: AmendTrusteeIndTransform    => Json.obj(AmendTrusteeIndTransform.key -> Json.toJson(transform)(AmendTrusteeIndTransform.format))
-      case transform: AmendTrusteeOrgTransform    => Json.obj(AmendTrusteeOrgTransform.key -> Json.toJson(transform)(AmendTrusteeOrgTransform.format))
-      case transform: AmendUnidentifiedBeneficiaryTransform    => Json.obj(AmendUnidentifiedBeneficiaryTransform.key -> Json.toJson(transform)(AmendUnidentifiedBeneficiaryTransform.format))
-      case transform: RemoveBeneficiariesTransform    => Json.obj(RemoveBeneficiariesTransform.key -> Json.toJson(transform)(RemoveBeneficiariesTransform.format))
-      case transform: AddUnidentifiedBeneficiaryTransform    => Json.obj(AddUnidentifiedBeneficiaryTransform.key -> Json.toJson(transform)(AddUnidentifiedBeneficiaryTransform.format))
-      case transform: AddIndividualBeneficiaryTransform    => Json.obj(AddIndividualBeneficiaryTransform.key -> Json.toJson(transform)(AddIndividualBeneficiaryTransform.format))
+      case transform: PromoteTrusteeIndTransform            => Json.obj(PromoteTrusteeIndTransform.key -> Json.toJson(transform)(PromoteTrusteeIndTransform.format))
+      case transform: PromoteTrusteeOrgTransform            => Json.obj(PromoteTrusteeOrgTransform.key -> Json.toJson(transform)(PromoteTrusteeOrgTransform.format))
+      case transform: AmendLeadTrusteeIndTransform          => Json.obj(AmendLeadTrusteeIndTransform.key -> Json.toJson(transform)(AmendLeadTrusteeIndTransform.format))
+      case transform: AmendLeadTrusteeOrgTransform          => Json.obj(AmendLeadTrusteeOrgTransform.key -> Json.toJson(transform)(AmendLeadTrusteeOrgTransform.format))
+      case transform: AddTrusteeIndTransform                => Json.obj(AddTrusteeIndTransform.key -> Json.toJson(transform)(AddTrusteeIndTransform.format))
+      case transform: AddTrusteeOrgTransform                => Json.obj(AddTrusteeOrgTransform.key -> Json.toJson(transform)(AddTrusteeOrgTransform.format))
+      case transform: RemoveTrusteeTransform                => Json.obj(RemoveTrusteeTransform.key -> Json.toJson(transform)(RemoveTrusteeTransform.format))
+      case transform: AmendTrusteeIndTransform              => Json.obj(AmendTrusteeIndTransform.key -> Json.toJson(transform)(AmendTrusteeIndTransform.format))
+      case transform: AmendTrusteeOrgTransform              => Json.obj(AmendTrusteeOrgTransform.key -> Json.toJson(transform)(AmendTrusteeOrgTransform.format))
+      case transform: AmendUnidentifiedBeneficiaryTransform => Json.obj(AmendUnidentifiedBeneficiaryTransform.key -> Json.toJson(transform)(AmendUnidentifiedBeneficiaryTransform.format))
+      case transform: RemoveBeneficiariesTransform          => Json.obj(RemoveBeneficiariesTransform.key -> Json.toJson(transform)(RemoveBeneficiariesTransform.format))
+      case transform: AddUnidentifiedBeneficiaryTransform   => Json.obj(AddUnidentifiedBeneficiaryTransform.key -> Json.toJson(transform)(AddUnidentifiedBeneficiaryTransform.format))
+      case transform: AmendIndividualBeneficiaryTransform   => Json.obj(AmendIndividualBeneficiaryTransform.key -> Json.toJson(transform)(AmendIndividualBeneficiaryTransform.format))
+      case transform: AddIndividualBeneficiaryTransform     => Json.obj(AddIndividualBeneficiaryTransform.key -> Json.toJson(transform)(AddIndividualBeneficiaryTransform.format))
       case transform => throw new Exception(s"Don't know how to serialise transform: $transform")
     }
     Json.toJson(transformWrapper)

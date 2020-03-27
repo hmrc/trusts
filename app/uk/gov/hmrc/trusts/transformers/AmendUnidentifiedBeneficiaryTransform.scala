@@ -19,51 +19,19 @@ package uk.gov.hmrc.trusts.transformers
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
 
-case class AmendUnidentifiedBeneficiaryTransform(index: Int, description: String) extends DeltaTransform {
+case class AmendUnidentifiedBeneficiaryTransform(index: Int, description: String)
+  extends DeltaTransform
+  with JsonOperations {
+
+  import uk.gov.hmrc.trusts.models.variation.UnidentifiedType._
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     val unidentifiedBeneficiaryPath = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'unidentified
 
-    input.transform(unidentifiedBeneficiaryPath.json.pick) match {
+    val amended = getTypeAtPosition[UnidentifiedType](input, unidentifiedBeneficiaryPath, index)
+      .copy(description = description)
 
-      case JsSuccess(json, _) =>
-
-        val updatedBeneficiaryDetails = getOriginalBeneficiaryDetails(input, index).copy(description = description)
-
-        val array = json.as[JsArray]
-
-        val updated = (array.value.take(index) :+ Json.toJson(updatedBeneficiaryDetails)) ++ array.value.drop(index + 1)
-
-        input.transform(
-          unidentifiedBeneficiaryPath.json.prune andThen
-            JsPath.json.update {
-              unidentifiedBeneficiaryPath.json.put(Json.toJson(updated))
-            }
-        )
-
-      case e: JsError => e
-    }
-  }
-
-  private def getOriginalBeneficiaryDetails(input: JsValue, index: Int): UnidentifiedType = {
-    val unidentifiedBeneficiaryPath = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'unidentified
-
-    input.transform(unidentifiedBeneficiaryPath.json.pick) match {
-
-      case JsSuccess(json, _) =>
-
-        val list = json.as[JsArray].value.toList
-
-        list(index).validate[UnidentifiedType] match {
-          case JsSuccess(value, _) =>
-            value
-
-          case JsError(errors) =>
-            throw JsResultException(errors)
-        }
-      case JsError(errors) =>
-        throw JsResultException(errors)
-    }
+    amendAtPosition(input, unidentifiedBeneficiaryPath, index, Json.toJson(amended))
   }
 }
 

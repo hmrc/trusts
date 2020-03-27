@@ -31,7 +31,7 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee}
+import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee, Success}
 import uk.gov.hmrc.trusts.services.{BeneficiaryTransformationService, TransformationService, TrusteeTransformationService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -58,7 +58,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
       )
 
       when(trusteeTransformationService.addAmendLeadTrusteeTransformer(any(), any(), any()))
-        .thenReturn(Future.successful(()))
+        .thenReturn(Future.successful(Success))
 
       val newTrusteeInfo = DisplayTrustLeadTrusteeType(Some(newTrusteeIndInfo), None)
 
@@ -103,7 +103,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
       )
 
       when(trusteeTransformationService.addAddTrusteeTransformer(any(), any(), any()))
-        .thenReturn(Future.successful(()))
+        .thenReturn(Future.successful(Success))
 
       val newTrusteeInfo = DisplayTrustTrusteeType(Some(newTrusteeIndInfo), None)
 
@@ -150,7 +150,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
       )
 
       when(trusteeTransformationService.addPromoteTrusteeTransformer(any(), any(), any(), any(), any())(any()))
-        .thenReturn(Future.successful(()))
+        .thenReturn(Future.successful(Success))
 
       val newTrusteeInfo = DisplayTrustLeadTrusteeType(Some(newTrusteeIndInfo), None)
 
@@ -198,7 +198,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
       )
 
       when(trusteeTransformationService.addRemoveTrusteeTransformer(any(), any(), any())(any()))
-        .thenReturn(Future.successful(()))
+        .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("DELETE", "path")
         .withBody(Json.toJson(payload))
@@ -234,7 +234,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
       )
 
       when(trusteeTransformationService.addAmendTrusteeTransformer(any(), any(), any(), any())(any()))
-        .thenReturn(Future.successful(()))
+        .thenReturn(Future.successful(Success))
 
       val newTrusteeInfo = DisplayTrustTrusteeType(Some(newTrusteeIndInfo), None)
 
@@ -268,7 +268,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
       )
 
       when(trusteeTransformationService.addAmendTrusteeTransformer(any(), any(), any(), any())(any()))
-        .thenReturn(Future.successful(()))
+        .thenReturn(Future.successful(Success))
 
       val newTrusteeInfo = DisplayTrustTrusteeType(None, Some(newTrusteeOrgInfo))
 

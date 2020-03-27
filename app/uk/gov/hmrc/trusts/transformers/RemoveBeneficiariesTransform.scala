@@ -22,8 +22,13 @@ import play.api.libs.json.{Format, JsArray, JsObject, JsResult, JsSuccess, JsVal
 import play.api.libs.functional.syntax._
 
 case class RemoveBeneficiariesTransform(
-   index : Int, beneficiaryData : JsObject, endDate : LocalDate, beneficiaryType : String) extends DeltaTransform {
-
+                                         index : Int,
+                                         beneficiaryData : JsObject,
+                                         endDate : LocalDate,
+                                         beneficiaryType : String
+                                       )
+  extends DeltaTransform
+  with JsonOperations {
 
   private lazy val path = (__ \ "details" \ "trust" \
     "entities" \ "beneficiary" \ beneficiaryType )
@@ -49,10 +54,6 @@ case class RemoveBeneficiariesTransform(
     } else {
       JsSuccess(input)
     }
-  }
-
-  private def isKnownToEtmp(json: JsValue): Boolean = {
-    json.transform((__ \ 'lineNo).json.pick).isSuccess
   }
 }
 

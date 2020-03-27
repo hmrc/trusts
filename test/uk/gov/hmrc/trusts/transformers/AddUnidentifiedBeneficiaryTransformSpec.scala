@@ -74,8 +74,7 @@ class AddUnidentifiedBeneficiaryTransformSpec extends FreeSpec with MustMatchers
 
       val thrown = intercept[Exception] (transformer.applyTransform(json).get)
 
-      thrown.getMessage mustBe "Adding an unidentified beneficiary would exceed the maximum allowed amount of 25"
-
+      thrown.getMessage mustBe "Adding an item to /details/trust/entities/beneficiary/unidentified would exceed the maximum allowed amount of 25"
     }
   }
 }

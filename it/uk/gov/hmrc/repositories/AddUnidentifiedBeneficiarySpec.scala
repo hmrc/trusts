@@ -20,10 +20,14 @@ import scala.concurrent.Future
 
 class AddUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar with TransformIntegrationTest {
 
-  val getTrustResponseFromDES: GetTrustSuccessResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
-  val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+  lazy val getTrustResponseFromDES: GetTrustSuccessResponse =
+    JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
+
+  lazy val expectedInitialGetJson: JsValue =
+    JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
 
   "an add unidentified beneficiary call" - {
+
     "must return amended data in a subsequent 'get' call" in {
 
       val newBeneficiaryJson = Json.parse(
@@ -35,7 +39,8 @@ class AddUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with Sca
           |""".stripMargin
       )
 
-      val expectedGetAfterAddBeneficiaryJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-after-add-unidentified-beneficiary.json")
+      lazy val expectedGetAfterAddBeneficiaryJson: JsValue =
+        JsonUtils.getJsonValueFromFile("trusts-integration-get-after-add-unidentified-beneficiary.json")
 
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
@@ -55,10 +60,12 @@ class AddUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with Sca
 
       running(application) {
         getConnection(application).map { connection =>
+
           dropTheDatabase(connection)
+
           val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
           status(result) mustBe OK
-          contentAsJson(result) mustBe expectedInitialGetJson
+          contentAsJson(result) mustEqual expectedInitialGetJson
 
           val addRequest = FakeRequest(POST, "/trusts/add-unidentified-beneficiary/5174384721")
             .withBody(newBeneficiaryJson)
@@ -69,7 +76,7 @@ class AddUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with Sca
 
           val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
           status(newResult) mustBe OK
-          contentAsJson(newResult) mustBe expectedGetAfterAddBeneficiaryJson
+          contentAsJson(newResult) mustEqual expectedGetAfterAddBeneficiaryJson
 
           dropTheDatabase(connection)
         }.get

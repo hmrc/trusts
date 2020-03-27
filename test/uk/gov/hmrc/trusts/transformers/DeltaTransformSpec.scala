@@ -23,6 +23,7 @@ import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.models.NameType
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationOrgType, DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType, DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType}
+import uk.gov.hmrc.trusts.models.variation.IndividualDetailsType
 
 class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
@@ -61,6 +62,20 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         DateTime.parse("2000-01-01")
       )
 
+      val individualBeneficiary = IndividualDetailsType(
+        lineNo = None,
+        bpMatchStatus = None,
+        NameType("Amended New First 3", None, "Amended New Last 3"),
+        dateOfBirth = None,
+        vulnerableBeneficiary = true,
+        None,
+        None,
+        None,
+        None,
+        DateTime.parse("2018-02-28"),
+        None
+      )
+
       val amendLeadTrusteeTransform = AmendLeadTrusteeIndTransform(newLeadTrustee)
 
       val addTrusteeTransform = AddTrusteeIndTransform(newTrusteeInd)
@@ -80,6 +95,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
       val amendTrusteeIndTransform = AmendTrusteeIndTransform(0, newTrusteeInd, Json.obj())
       val amendTrusteeOrgTransform = AmendTrusteeOrgTransform(0, newTrusteeOrg, Json.obj())
+
+      val amendIndividualBenTransform = AmendIndividualBeneficiaryTransform(0, individualBeneficiary, Json.obj(), LocalDate.parse("2020-03-25"))
 
       val json = Json.parse(
         s"""{
@@ -101,6 +118,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |            },
           |            {
           |               "AmendTrusteeOrgTransform": ${Json.toJson(amendTrusteeOrgTransform)}
+          |            },
+          |            {
+          |               "AmendIndividualBeneficiaryTransform": ${Json.toJson(amendIndividualBenTransform)}
           |            }
           |        ]
           |    }
@@ -112,7 +132,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           removeTrusteeTransform,
           promoteTrusteeTransform,
           amendTrusteeIndTransform,
-          amendTrusteeOrgTransform
+          amendTrusteeOrgTransform,
+          amendIndividualBenTransform
         )
       )
 

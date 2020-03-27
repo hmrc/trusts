@@ -19,10 +19,15 @@ import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.TrusteeInd
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustTrusteeIndividualType
 
-case class AddTrusteeIndTransform(trustee: DisplayTrustTrusteeIndividualType) extends DeltaTransform with AddTrusteeCommon {
+case class AddTrusteeIndTransform(trustee: DisplayTrustTrusteeIndividualType) extends DeltaTransform
+  with JsonOperations {
+
+  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'trustees
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addTrustee(input, Json.toJson(trustee), TrusteeInd)
+    addToList(input, path, Json.obj(
+      TrusteeInd.toString -> Json.toJson(trustee)
+    ))
   }
 }
 
