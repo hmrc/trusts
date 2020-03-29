@@ -90,22 +90,22 @@ class VariationService @Inject()(
 
   private def doSubmit(utr: String, value: JsValue, internalId: String)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
 
-    val reformattedValue = value.applyRules()
+    val payload = value.applyRules()
 
     auditService.audit(
       TrustAuditing.TRUST_VARIATION_ATTEMPT,
-      reformattedValue,
+      payload,
       internalId,
       Json.toJson(Json.obj())
     )
 
-    desService.trustVariation(reformattedValue) map { response =>
+    desService.trustVariation(payload) map { response =>
 
       Logger.info(s"[VariationService][doSubmit] variation submitted")
 
       auditService.audit(
         TrustAuditing.TRUST_VARIATION,
-        reformattedValue,
+        payload,
         internalId,
         Json.toJson(response)
       )
