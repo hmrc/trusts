@@ -20,7 +20,7 @@ package uk.gov.hmrc.trusts.services
 import javax.inject.Inject
 import org.joda.time.DateTime
 import play.api.Logger
-import play.api.libs.json.{JsError, JsNull, JsSuccess, JsValue, Json}
+import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.{EtmpCacheDataStaleException, InternalServerErrorException}
 import uk.gov.hmrc.trusts.models.DeclarationForApi
@@ -29,9 +29,11 @@ import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedRes
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.repositories.{CacheRepository, TransformationRepository}
 import uk.gov.hmrc.trusts.transformers.DeclarationTransformer
+import uk.gov.hmrc.trusts.utils.JsonOps._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
 
 class VariationService @Inject()(
                                   desService: DesService,
@@ -88,20 +90,22 @@ class VariationService @Inject()(
 
   private def doSubmit(utr: String, value: JsValue, internalId: String)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
 
+    val reformattedValue = value.applyRules()
+
     auditService.audit(
       TrustAuditing.TRUST_VARIATION_ATTEMPT,
-      value,
+      reformattedValue,
       internalId,
       Json.toJson(Json.obj())
     )
 
-    desService.trustVariation(value) map { response =>
+    desService.trustVariation(reformattedValue) map { response =>
 
       Logger.info(s"[VariationService][doSubmit] variation submitted")
 
       auditService.audit(
         TrustAuditing.TRUST_VARIATION,
-        value,
+        reformattedValue,
         internalId,
         Json.toJson(response)
       )

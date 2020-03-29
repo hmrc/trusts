@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.utils
 
 import play.api.libs.json._
 
-object JsValueOps {
+object JsonOps {
 
   type JsPath = Seq[Either[Int,String]]
   type JsEntry = (JsPath, JsValue)
@@ -32,15 +32,11 @@ object JsValueOps {
   }
 
   implicit class JsValueOps(underlying: JsValue) {
-    /**
-     * Traverse underlying json based on given partially defined function `f` only on scalar values, like:
-     * null, string or number.
-     *
-     * @param f function
-     * @return updated json
-     */
+
     def traverse(f: JsTraverse): JsValue = {
+
       def traverseRec(prefix: JsPath, value: JsValue): JsValue = {
+
         val lifted: JsValue => JsValue = value => f.lift(prefix -> value).getOrElse(value)
         value match {
           case JsNull => lifted(JsNull)
@@ -60,7 +56,12 @@ object JsValueOps {
             JsObject(updatedFields)
         }
       }
+
       traverseRec(Nil, underlying)
     }
+
+    def applyRules(): JsValue = underlying.traverse {
+        case (path, JsString(phone)) if path.isEndsWith("phoneNumber") => JsString(phone.replaceAll("[(][0-9]*[)]", ""))
+      }
   }
 }
