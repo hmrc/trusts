@@ -61,7 +61,7 @@ object JsonOps {
     }
 
     def applyRules(): JsValue = underlying.traverse {
-        case (path, JsString(phone)) if path.isEndsWith("phoneNumber") => JsString(phone.replaceAll("[(][0-9]*[)]", ""))
+        case (path, JsString(phone)) if path.isEndsWith("phoneNumber") => JsString(phone.replaceAll("(0)", ""))
       }
   }
 }
