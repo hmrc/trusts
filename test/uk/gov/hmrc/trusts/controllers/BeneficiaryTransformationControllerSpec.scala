@@ -29,7 +29,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.variation.{IdentificationType, IndividualDetailsType, UnidentifiedType}
+import uk.gov.hmrc.trusts.models.variation.{CharityType, IdentificationType, IndividualDetailsType, UnidentifiedType}
 import uk.gov.hmrc.trusts.models.{NameType, RemoveBeneficiary, Success}
 import uk.gov.hmrc.trusts.services.BeneficiaryTransformationService
 
@@ -257,5 +257,59 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       val result = controller.addIndividualBeneficiary("aUTR").apply(request)
       status(result) mustBe BAD_REQUEST
     }
+  }
+
+  "Amend charity beneficiary" - {
+
+    val index = 0
+
+    "must add a new amend charity beneficiary transform" in {
+
+      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+
+      val newCharity = CharityType(
+        None,
+        None,
+        "Charity Name",
+        None,
+        None,
+        None,
+        DateTime.parse("2010-01-01"),
+        None
+      )
+
+      when(beneficiaryTransformationService.amendCharityBeneficiaryTransformer(any(), any(), any(), any())(any()))
+        .thenReturn(Future.successful(Success))
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(newCharity))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendCharityBeneficiary("aUTR", index).apply(request)
+
+      status(result) mustBe OK
+      verify(beneficiaryTransformationService)
+        .amendCharityBeneficiaryTransformer(
+          equalTo("aUTR"),
+          equalTo(index),
+          equalTo("id"),
+          equalTo(newCharity)
+        )(any())
+
+    }
+
+    "must return an error for malformed json" in {
+      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.parse("{}"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendCharityBeneficiary("aUTR", index).apply(request)
+      status(result) mustBe BAD_REQUEST
+    }
+
   }
 }
