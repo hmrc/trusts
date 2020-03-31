@@ -235,7 +235,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.getTransformedData(any(), any())(any()))
         .thenReturn(Future.successful(TrustProcessedResponse(
-          buildInputJson("charityType", Seq(original)),
+          buildInputJson("charity", Seq(original)),
           ResponseHeader("status", "formBundleNo")
         )))
 

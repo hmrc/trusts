@@ -107,7 +107,7 @@ class BeneficiaryTransformationService @Inject()(
                                             amend: CharityType)
                                            (implicit hc: HeaderCarrier): Future[Success.type] = {
     getTransformedTrustJson(utr, internalId)
-      .map(findBeneficiaryJson(_, "charityType", index))
+      .map(findBeneficiaryJson(_, "charity", index))
       .flatMap(Future.fromTry)
       .flatMap { beneficiaryJson =>
 

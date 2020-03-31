@@ -46,7 +46,7 @@
           }
         ],
         "beneficiary": {
-          "charityType": [
+          "charity": [
             {
               "lineNo": "1",
               "bpMatchStatus": "01",
