@@ -37,23 +37,7 @@ case class AmendIndividualBeneficiaryTransform(
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    if (isKnownToEtmp(original)) {
-      val beneficiaryWithEndDate = original.as[JsObject]
-        .deepMerge(Json.obj("entityEnd" -> Json.toJson(endDate)))
-
-      for {
-        updated <- amendAtPosition(input, path, index, beneficiaryWithEndDate)
-        amendedAsJson = Json.toJson(amended)
-        pruned <- amendedAsJson.transform {
-            (__ \ 'lineNo).json.prune andThen
-            (__ \ 'bpMatchStatus).json.prune
-        }
-        r <- addToList(updated, path, pruned)
-      } yield r
-
-    } else {
-      applyTransform(input)
-    }
+    endEntity(input, path, original, endDate)
   }
 
 }

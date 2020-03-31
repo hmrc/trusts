@@ -37,8 +37,8 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
         val afterJson = JsonUtils.getJsonValueFromFile("trusts-individual-beneficiary-transform-after.json")
 
         val amended = IndividualDetailsType(
-          lineNo = Some("2"),
-          bpMatchStatus = Some("01"),
+          lineNo = None,
+          bpMatchStatus = None,
           NameType("First 2", None, "Last 2"),
           None,
           vulnerableBeneficiary = false,
@@ -55,7 +55,7 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
             address = None,
             safeId = None
           )),
-          DateTime.parse("2010-01-01"),
+          DateTime.parse("2018-02-28"),
           None
         )
 
@@ -95,8 +95,8 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
           JsonUtils.getJsonValueFromFile("trusts-individual-beneficiary-transform-after-declaration.json")
 
         val amended = IndividualDetailsType(
-          lineNo = Some("2"),
-          bpMatchStatus = Some("01"),
+          lineNo = None,
+          bpMatchStatus = None,
           NameType("Updated First 2", None, "Updated Last 2"),
           dateOfBirth = Some(DateTime.parse("2012-01-01")),
           vulnerableBeneficiary = false,
@@ -113,7 +113,7 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
             address = None,
             safeId = None
           )),
-          DateTime.parse("2010-01-01"),
+          DateTime.parse("2018-02-28"),
           None
         )
 
@@ -137,7 +137,8 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
 
         val transformer = AmendIndividualBeneficiaryTransform(1, amended, original, endDate = LocalDate.parse("2020-03-25"))
 
-        val result = transformer.applyDeclarationTransform(beforeJson).get
+        val applied = transformer.applyTransform(beforeJson).get
+        val result = transformer.applyDeclarationTransform(applied).get
         result mustBe afterJson
       }
 
@@ -176,7 +177,8 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
 
         val transformer = AmendIndividualBeneficiaryTransform(2, amended, original, endDate = LocalDate.parse("2020-03-25"))
 
-        val result = transformer.applyDeclarationTransform(beforeJson).get
+        val applied = transformer.applyTransform(beforeJson).get
+        val result = transformer.applyDeclarationTransform(applied).get
         result mustBe afterJson
       }
 

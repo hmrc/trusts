@@ -58,31 +58,6 @@
               "entityStart": "2018-02-28"
             },
             {
-              "lineNo": "2",
-              "bpMatchStatus": "01",
-              "name": {
-                "firstName": "First 2",
-                "lastName": "Last 2"
-              },
-              "dateOfBirth": "2010-05-03",
-              "vulnerableBeneficiary": true,
-              "identification": {
-                "nino": "JP1212122A"
-              },
-              "entityStart": "2018-02-28",
-              "entityEnd": "2020-03-25"
-            },
-            {
-              "lineNo": "3",
-              "bpMatchStatus": "01",
-              "name": {
-                "firstName": "First 3",
-                "lastName": "Last 3"
-              },
-              "vulnerableBeneficiary": false,
-              "entityStart": "2018-02-28"
-            },
-            {
               "name": {
                 "firstName": "Updated First 2",
                 "lastName": "Updated Last 2"
@@ -96,7 +71,32 @@
                   "countryOfIssue": "DE"
                 }
               },
-              "entityStart": "2010-01-01"
+              "entityStart": "2018-02-28"
+            },
+            {
+              "lineNo": "3",
+              "bpMatchStatus": "01",
+              "name": {
+                "firstName": "First 3",
+                "lastName": "Last 3"
+              },
+              "vulnerableBeneficiary": false,
+              "entityStart": "2018-02-28"
+            },
+            {
+              "lineNo": "2",
+              "bpMatchStatus": "01",
+              "name": {
+                "firstName": "First 2",
+                "lastName": "Last 2"
+              },
+              "dateOfBirth": "2010-05-03",
+              "vulnerableBeneficiary": true,
+              "identification": {
+                "nino": "JP1212122A"
+              },
+              "entityStart": "2018-02-28",
+              "entityEnd": "2020-03-25"
             }
           ]
         }
