@@ -19,43 +19,14 @@ package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.variation.IndividualDetailsType
 
 case class AmendIndividualBeneficiaryTransform(
                                                 index: Int,
-                                                amended: IndividualDetailsType,
+                                                amended: JsValue,
                                                 original: JsValue,
                                                 endDate: LocalDate
-                                              )
-  extends DeltaTransform
-  with JsonOperations {
-
-  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'individualDetails
-
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    amendAtPosition(input, path, index, Json.toJson(amended))
-  }
-
-  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    if (isKnownToEtmp(original)) {
-      val beneficiaryWithEndDate = original.as[JsObject]
-        .deepMerge(Json.obj("entityEnd" -> Json.toJson(endDate)))
-
-      for {
-        updated <- amendAtPosition(input, path, index, beneficiaryWithEndDate)
-        amendedAsJson = Json.toJson(amended)
-        pruned <- amendedAsJson.transform {
-            (__ \ 'lineNo).json.prune andThen
-            (__ \ 'bpMatchStatus).json.prune
-        }
-        r <- addToList(updated, path, pruned)
-      } yield r
-
-    } else {
-      applyTransform(input)
-    }
-  }
-
+                                              ) extends AmendBeneficiaryTransform {
+  override val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'individualDetails
 }
 
 object AmendIndividualBeneficiaryTransform {
@@ -63,6 +34,3 @@ object AmendIndividualBeneficiaryTransform {
 
   implicit val format: Format[AmendIndividualBeneficiaryTransform] = Json.format[AmendIndividualBeneficiaryTransform]
 }
-
-
-

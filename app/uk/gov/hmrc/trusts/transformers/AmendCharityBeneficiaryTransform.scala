@@ -23,39 +23,13 @@ import uk.gov.hmrc.trusts.models.variation.CharityType
 
 case class AmendCharityBeneficiaryTransform(
                                                 index: Int,
-                                                amended: CharityType,
+                                                amended: JsValue,
                                                 original: JsValue,
                                                 endDate: LocalDate
                                               )
-  extends DeltaTransform
-    with JsonOperations {
+  extends AmendBeneficiaryTransform {
 
-  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'charity
-
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    amendAtPosition(input, path, index, Json.toJson(amended))
-  }
-
-  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    if (isKnownToEtmp(original)) {
-      val beneficiaryWithEndDate = original.as[JsObject]
-        .deepMerge(Json.obj("entityEnd" -> Json.toJson(endDate)))
-
-      for {
-        updated <- amendAtPosition(input, path, index, beneficiaryWithEndDate)
-        amendedAsJson = Json.toJson(amended)
-        pruned <- amendedAsJson.transform {
-          (__ \ 'lineNo).json.prune andThen
-            (__ \ 'bpMatchStatus).json.prune
-        }
-        r <- addToList(updated, path, pruned)
-      } yield r
-
-    } else {
-      applyTransform(input)
-    }
-  }
-
+  override val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'charity
 }
 
 object AmendCharityBeneficiaryTransform {
@@ -63,6 +37,4 @@ object AmendCharityBeneficiaryTransform {
 
   implicit val format: Format[AmendCharityBeneficiaryTransform] = Json.format[AmendCharityBeneficiaryTransform]
 }
-
-
 
