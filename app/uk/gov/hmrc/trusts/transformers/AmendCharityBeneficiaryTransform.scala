@@ -30,7 +30,7 @@ case class AmendCharityBeneficiaryTransform(
   extends DeltaTransform
     with JsonOperations {
 
-  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'charityType
+  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'charity
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     amendAtPosition(input, path, index, Json.toJson(amended))
