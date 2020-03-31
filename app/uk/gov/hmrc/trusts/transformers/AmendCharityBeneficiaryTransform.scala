@@ -23,22 +23,13 @@ import uk.gov.hmrc.trusts.models.variation.CharityType
 
 case class AmendCharityBeneficiaryTransform(
                                                 index: Int,
-                                                amended: CharityType,
+                                                amended: JsValue,
                                                 original: JsValue,
                                                 endDate: LocalDate
                                               )
-  extends DeltaTransform
-    with JsonOperations {
+  extends AmendBeneficiaryTransform {
 
-  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'charity
-
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    amendAtPosition(input, path, index, Json.toJson(amended))
-  }
-
-  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    endEntity(input, path, original, endDate)
-  }
+  override val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'charity
 }
 
 object AmendCharityBeneficiaryTransform {
@@ -46,6 +37,4 @@ object AmendCharityBeneficiaryTransform {
 
   implicit val format: Format[AmendCharityBeneficiaryTransform] = Json.format[AmendCharityBeneficiaryTransform]
 }
-
-
 

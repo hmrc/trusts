@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.services
 import java.time.LocalDate
 
 import javax.inject.Inject
-import play.api.libs.json.{JsObject, JsValue, __}
+import play.api.libs.json.{JsObject, JsValue, Json, __}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
@@ -92,7 +92,7 @@ class BeneficiaryTransformationService @Inject()(
         transformationService.addNewTransform(
           utr,
           internalId,
-          AmendIndividualBeneficiaryTransform(index, amend, beneficiaryJson, LocalDate.now)
+          AmendIndividualBeneficiaryTransform(index, Json.toJson(amend), beneficiaryJson, LocalDate.now)
         ).map(_ => Success)
       }
   }
@@ -102,9 +102,9 @@ class BeneficiaryTransformationService @Inject()(
   }
 
   def amendCharityBeneficiaryTransformer(utr: String,
-                                            index: Int,
-                                            internalId: String,
-                                            amend: CharityType)
+                                         index: Int,
+                                         internalId: String,
+                                         amended: CharityType)
                                            (implicit hc: HeaderCarrier): Future[Success.type] = {
     getTransformedTrustJson(utr, internalId)
       .map(findBeneficiaryJson(_, "charity", index))
@@ -114,7 +114,7 @@ class BeneficiaryTransformationService @Inject()(
         transformationService.addNewTransform(
           utr,
           internalId,
-          AmendCharityBeneficiaryTransform(index, amend, beneficiaryJson, LocalDate.now)
+          AmendCharityBeneficiaryTransform(index, Json.toJson(amended), beneficiaryJson, LocalDate.now)
         ).map(_ => Success)
       }
   }
