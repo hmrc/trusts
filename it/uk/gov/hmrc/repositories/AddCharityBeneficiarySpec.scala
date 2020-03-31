@@ -35,7 +35,12 @@ class AddCharityBeneficiarySpec extends FreeSpec with MustMatchers with MockitoS
           |  "beneficiaryDiscretion": false,
           |  "beneficiaryShareOfIncome": "50",
           |  "identification": {
-          |    "utr": "1234567890"
+          |    "address": {
+          |      "line1": "Line 1",
+          |      "line2": "Line 2",
+          |      "postCode": "NE1 1NE",
+          |      "country": "GB"
+          |    }
           |  },
           |  "entityStart": "2019-02-03"
           |}
