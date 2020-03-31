@@ -37,23 +37,10 @@ class AddCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers with
 
   "the add charity beneficiary transformer should" - {
 
-    "add a new charity beneficiary when there are no beneficiaries existing" ignore {
+    "add a new charity beneficiary" in {
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-only-other-benfeciary.json")
 
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-individual-beneficiary.json")
-
-      val transformer = new AddCharityBeneficiaryTransform(newBeneficiary)
-
-      val result = transformer.applyTransform(trustJson).get
-
-      result mustBe afterJson
-    }
-
-    "add a new charity beneficiary" ignore {
-
-      val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
-
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-second-individual-beneficiary.json")
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-charity-beneficiary.json")
 
       val transformer = new AddCharityBeneficiaryTransform(newBeneficiary)
 
