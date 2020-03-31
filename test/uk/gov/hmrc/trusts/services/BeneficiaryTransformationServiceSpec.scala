@@ -30,7 +30,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.{IdentificationType, IndividualDetailsType, UnidentifiedType}
+import uk.gov.hmrc.trusts.models.variation.{CharityType, IdentificationType, IndividualDetailsType, UnidentifiedType}
 import uk.gov.hmrc.trusts.models.{NameType, RemoveBeneficiary}
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
@@ -200,6 +200,53 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
         verify(transformationService).addNewTransform("utr",
           "internalId", AddIndividualBeneficiaryTransform(newBeneficiary))
+      }
+    }
+
+    "must add a new amend charity beneficiary transform using the transformation service" in {
+      val index = 0
+      val transformationService = mock[TransformationService]
+      val service = new BeneficiaryTransformationService(transformationService)
+      val newCharity = CharityType(
+        None,
+        None,
+        "Charity Name",
+        None,
+        None,
+        None,
+        DateTime.parse("2010-01-01"),
+        None
+      )
+
+      val original: JsValue = Json.parse(
+        """
+          |{
+          |  "lineNo": "1",
+          |  "bpMatchStatus": "01",
+          |  "name": "Original name",
+          |  "identification": {
+          |    "utr": "1234567890"
+          |  },
+          |  "entityStart": "2018-02-28"
+          |}
+          |""".stripMargin)
+
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+      when(transformationService.getTransformedData(any(), any())(any()))
+        .thenReturn(Future.successful(TrustProcessedResponse(
+          buildInputJson("charityType", Seq(original)),
+          ResponseHeader("status", "formBundleNo")
+        )))
+
+      val result = service.amendCharityBeneficiaryTransformer("utr", index, "internalId", newCharity)
+      whenReady(result) { _ =>
+
+        verify(transformationService).addNewTransform(
+          Matchers.eq("utr"),
+          Matchers.eq("internalId"),
+          Matchers.eq(AmendCharityBeneficiaryTransform(index, newCharity, original, LocalDate.now))
+        )
       }
     }
   }
