@@ -123,6 +123,24 @@ class BeneficiaryTransformationController @Inject()(
       }
   }
 
+  def addCharityBeneficiary(utr: String): Action[JsValue] = identify.async(parse.json) {
+    implicit request => {
+      request.body.validate[CharityType] match {
+        case JsSuccess(newBeneficiary, _) =>
+          beneficiaryTransformationService.addCharityBeneficiaryTransformer(
+            utr,
+            request.identifier,
+            newBeneficiary
+          ) map { _ =>
+            Ok
+          }
+        case JsError(errors) =>
+          logger.warn(s"[BeneficiaryTransformationController][addCharityBeneficiary] Supplied json could not be read as an Charity Beneficiary - $errors")
+          Future.successful(BadRequest)
+      }
+    }
+  }
+
   def amendCharityBeneficiary(utr: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
     implicit request =>
       request.body.validate[CharityType] match {
