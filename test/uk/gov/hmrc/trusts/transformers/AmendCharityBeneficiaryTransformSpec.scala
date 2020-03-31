@@ -37,8 +37,8 @@ class AmendCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers wi
         val afterJson = JsonUtils.getJsonValueFromFile("trusts-charity-beneficiary-transform-after.json")
 
         val amended = CharityType(
-          lineNo = Some("2"),
-          bpMatchStatus = Some("01"),
+          lineNo = None,
+          bpMatchStatus = None,
           "Charity Name",
           None,
           None,
@@ -46,7 +46,7 @@ class AmendCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers wi
             utr = Some("1234567890"),
             address = None
           )),
-          DateTime.parse("2010-01-01"),
+          DateTime.parse("2018-02-28"),
           None
         )
 
@@ -63,7 +63,7 @@ class AmendCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers wi
             |}
             |""".stripMargin)
 
-        val transformer = AmendCharityBeneficiaryTransform(1, amended, original, LocalDate.parse("2020-03-25"))
+        val transformer = AmendCharityBeneficiaryTransform(1, Json.toJson(amended), original, LocalDate.parse("2020-03-25"))
 
         val result = transformer.applyTransform(beforeJson).get
         result mustBe afterJson
@@ -81,8 +81,8 @@ class AmendCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers wi
           JsonUtils.getJsonValueFromFile("trusts-charity-beneficiary-transform-after-declaration.json")
 
         val amended = CharityType(
-          lineNo = Some("2"),
-          bpMatchStatus = Some("01"),
+          lineNo = None,
+          bpMatchStatus = None,
           "Updated Charity Name",
           None,
           None,
@@ -90,7 +90,7 @@ class AmendCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers wi
             utr = Some("1234567890"),
             address = None
           )),
-          DateTime.parse("2010-01-01"),
+          DateTime.parse("2018-02-28"),
           None
         )
 
@@ -107,9 +107,10 @@ class AmendCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers wi
             |}
             |""".stripMargin)
 
-        val transformer = AmendCharityBeneficiaryTransform(1, amended, original, endDate = LocalDate.parse("2020-03-25"))
+        val transformer = AmendCharityBeneficiaryTransform(1, Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"))
 
-        val result = transformer.applyDeclarationTransform(beforeJson).get
+        val applied = transformer.applyTransform(beforeJson).get
+        val result = transformer.applyDeclarationTransform(applied).get
         result mustBe afterJson
       }
 
@@ -139,9 +140,10 @@ class AmendCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers wi
             |}
             |""".stripMargin)
 
-        val transformer = AmendCharityBeneficiaryTransform(2, amended, original, endDate = LocalDate.parse("2020-03-25"))
+        val transformer = AmendCharityBeneficiaryTransform(2, Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"))
 
-        val result = transformer.applyDeclarationTransform(beforeJson).get
+        val applied = transformer.applyTransform(beforeJson).get
+        val result = transformer.applyDeclarationTransform(applied).get
         result mustBe afterJson
       }
 

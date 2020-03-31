@@ -52,7 +52,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
     }
   }
 
-  def buildInputJson(beneficiaryType: String, beneficiaryData: Seq[JsValue]) = {
+  def buildInputJson(beneficiaryType: String, beneficiaryData: Seq[JsValue]): JsObject = {
     val baseJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
     val adder = (__ \ "details" \ "trust" \ "entities" \ "beneficiary" \ beneficiaryType).json
@@ -172,7 +172,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
           verify(transformationService).addNewTransform(
             Matchers.eq("utr"),
             Matchers.eq("internalId"),
-            Matchers.eq(AmendIndividualBeneficiaryTransform(index, newIndividual, original, LocalDate.now))
+            Matchers.eq(AmendIndividualBeneficiaryTransform(index, Json.toJson(newIndividual), original, LocalDate.now))
           )
       }
     }
@@ -184,7 +184,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
         None,
         NameType("First", None, "Last"),
         Some(DateTime.parse("2000-01-01")),
-        false,
+        vulnerableBeneficiary = false,
         None,
         None,
         None,
@@ -245,7 +245,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
         verify(transformationService).addNewTransform(
           Matchers.eq("utr"),
           Matchers.eq("internalId"),
-          Matchers.eq(AmendCharityBeneficiaryTransform(index, newCharity, original, LocalDate.now))
+          Matchers.eq(AmendCharityBeneficiaryTransform(index, Json.toJson(newCharity), original, LocalDate.now))
         )
       }
     }

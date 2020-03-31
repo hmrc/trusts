@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.trusts.transformers
 
+import java.time.LocalDate
+
 import play.api.libs.json._
 
 trait JsonOperations {
@@ -44,6 +46,16 @@ trait JsonOperations {
         }
       case JsError(errors) =>
         throw JsResultException(errors)
+    }
+  }
+
+   def endEntity(input: JsValue, path: JsPath, entityJson: JsValue, endDate: LocalDate) = {
+    if (isKnownToEtmp(entityJson)) {
+      val entityWithEndDate = entityJson.as[JsObject]
+        .deepMerge(Json.obj("entityEnd" -> Json.toJson(endDate)))
+      addToList(input, path, entityWithEndDate)
+    } else {
+      JsSuccess(input)
     }
   }
 
