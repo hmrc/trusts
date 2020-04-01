@@ -232,7 +232,7 @@ object DisplayTrustBeneficiaryTrustType {
   implicit val beneficiaryTrustTypeFormat: Format[DisplayTrustBeneficiaryTrustType] = Json.format[DisplayTrustBeneficiaryTrustType]
 }
 
-case class DisplayTrustCharityType(lineNo: String,
+case class DisplayTrustCharityType(lineNo: Option[String],
                                    bpMatchStatus: Option[String],
                                    organisationName: String,
                                    beneficiaryDiscretion: Option[Boolean],
