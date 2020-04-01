@@ -51,21 +51,21 @@
               "lineNo":"1",
               "bpMatchStatus": "01",
               "description": "Some Description",
-            "beneficiaryShareOfIncome": "25%",
+            "beneficiaryShareOfIncome": "25",
             "entityStart": "2017-02-28"
             },
             {
               "lineNo":"2",
               "bpMatchStatus": "01",
               "description": "Some Description 2",
-              "beneficiaryShareOfIncome": "25%",
+              "beneficiaryShareOfIncome": "25",
               "entityStart": "2018-02-28"
             },
             {
               "lineNo":"3",
               "bpMatchStatus": "01",
               "description": "Some Description 3",
-              "beneficiaryShareOfIncome": "50%",
+              "beneficiaryShareOfIncome": "50",
               "entityStart": "2019-02-28"
             }
           ]

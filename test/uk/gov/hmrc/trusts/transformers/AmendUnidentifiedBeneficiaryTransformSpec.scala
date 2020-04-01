@@ -16,22 +16,53 @@
 
 package uk.gov.hmrc.trusts.transformers
 
+import java.time.LocalDate
+
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AmendUnidentifiedBeneficiaryTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
   "AmendUnidentifiedBeneficiaryTransform should" - {
 
-    "successfully update a beneficiary's details" in {
+    "before declaration" - {
 
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-unidentified-beneficiary-transform-before.json")
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-unidentified-beneficiary-transform-after.json")
-      val newDescription = "This description has been updated"
-      val transformer = AmendUnidentifiedBeneficiaryTransform(1, newDescription)
+      "successfully update a beneficiary's details" in {
 
-      val result = transformer.applyTransform(beforeJson).get
-      result mustBe afterJson
+        val originalJson = Json.parse(
+          """
+            |{
+            |  "lineNo":"2",
+            |  "bpMatchStatus": "01",
+            |  "description": "Some Description 2",
+            |  "beneficiaryShareOfIncome": "25",
+            |  "entityStart": "2018-02-28"
+            |}
+            |""".stripMargin)
+
+        val beforeJson = JsonUtils.getJsonValueFromFile("trusts-unidentified-beneficiary-transform-before.json")
+        val afterJson = JsonUtils.getJsonValueFromFile("trusts-unidentified-beneficiary-transform-after.json")
+        val newDescription = "This description has been updated"
+        val transformer = AmendUnidentifiedBeneficiaryTransform(1, newDescription, originalJson, LocalDate.now())
+
+        val result = transformer.applyTransform(beforeJson).get
+        result mustBe afterJson
+      }
     }
+
+//    "at declaration time" - {
+//
+//      "set an end date for the original beneficiary, adding in the amendment as a new beneficiary for a beneficiary known by etmp" in {
+//        val beforeJson = JsonUtils.getJsonValueFromFile("trusts-unidentified-beneficiary-transform-before.json")
+//        val afterJson = JsonUtils.getJsonValueFromFile("trusts-unidentified-beneficiary-transform-after-declaration.json")
+//        val newDescription = "This description has been updated"
+//        val transformer = AmendUnidentifiedBeneficiaryTransform(1, newDescription)
+//
+//        val transformed = transformer.applyTransform(beforeJson).get
+//        val result = transformer.applyDeclarationTransform(transformed)
+//        result mustBe afterJson
+//      }
+//    }
   }
 }

@@ -119,7 +119,7 @@
               "lineNo":"1",
               "bpMatchStatus": "01",
               "description": "Some Description",
-              "beneficiaryShareOfIncome": "25%",
+              "beneficiaryShareOfIncome": "25",
               "entityStart": "2017-02-28"
             }
           ]
