@@ -89,14 +89,29 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
       val transformationService = mock[TransformationService]
       val service = new BeneficiaryTransformationService(transformationService)
       val newDescription = "Some Description"
+      val originalBeneficiaryJson = Json.toJson(UnidentifiedType(
+        None,
+        None,
+        "Some description",
+        None,
+        None,
+        DateTime.parse("2010-01-01"),
+        None
+      ))
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+      when(transformationService.getTransformedData(any(), any())(any()))
+        .thenReturn(Future.successful(TrustProcessedResponse(
+          buildInputJson("unidentified", Seq(originalBeneficiaryJson)),
+          ResponseHeader("status", "formBundlNo")
+        )))
 
       val result = service.amendUnidentifiedBeneficiaryTransformer("utr", index, "internalId", newDescription)
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",
-          "internalId", AmendUnidentifiedBeneficiaryTransform(index, newDescription))
+          "internalId", AmendUnidentifiedBeneficiaryTransform(index, newDescription, originalBeneficiaryJson, LocalDate.now()))
       }
     }
 

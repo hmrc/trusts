@@ -3,8 +3,10 @@ package uk.gov.hmrc.repositories
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
 import reactivemongo.api.{DefaultDB, MongoConnection}
 import uk.gov.hmrc.trusts.repositories.TrustsMongoDriver
+
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -28,8 +30,15 @@ trait TransformIntegrationTest extends ScalaFutures {
     } yield connection
   }
 
-  def dropTheDatabase(connection: MongoConnection) = {
+  def dropTheDatabase(connection: MongoConnection): Unit = {
     Await.result(getDatabase(connection).flatMap(_.drop()), Duration.Inf)
   }
+
+  lazy val applicationBuilder: GuiceApplicationBuilder = new GuiceApplicationBuilder().configure(Seq(
+    "mongodb.uri" -> connectionString,
+    "metrics.enabled" -> false,
+    "auditing.enabled" -> false,
+    "mongo-async-driver.akka.log-dead-letters" -> 0
+  ): _*)
 
 }

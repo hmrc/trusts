@@ -16,26 +16,18 @@
 
 package uk.gov.hmrc.trusts.transformers
 
+import java.time.LocalDate
+
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
 
-case class AmendUnidentifiedBeneficiaryTransform(index: Int, description: String)
-  extends DeltaTransform
-  with JsonOperations {
+case class AmendUnidentifiedBeneficiaryTransform(index: Int, description: String, original: JsValue, endDate: LocalDate)
+  extends AmendBeneficiaryTransform {
 
-  import uk.gov.hmrc.trusts.models.variation.UnidentifiedType._
+  override val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'unidentified
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    val unidentifiedBeneficiaryPath = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'unidentified
-
-    val amended = getTypeAtPosition[UnidentifiedType](input, unidentifiedBeneficiaryPath, index)
-      .copy(description = description)
-
-    amendAtPosition(input, unidentifiedBeneficiaryPath, index, Json.toJson(amended))
-  }
+  override val amended: JsValue = original.as[JsObject]
+    .deepMerge(Json.obj("description" -> description)) - "lineNo" - "bpMatchStatus"
 }
-
-
 
 object AmendUnidentifiedBeneficiaryTransform {
 

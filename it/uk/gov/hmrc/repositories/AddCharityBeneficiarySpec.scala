@@ -5,7 +5,6 @@ import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -53,17 +52,11 @@ class AddCharityBeneficiarySpec extends FreeSpec with MustMatchers with MockitoS
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
 
-      val application = new GuiceApplicationBuilder()
+      val application = applicationBuilder
         .overrides(
           bind[IdentifierAction].toInstance(new FakeIdentifierAction(Organisation)),
           bind[DesConnector].toInstance(stubbedDesConnector)
         )
-        .configure(Seq(
-          "mongodb.uri" -> connectionString,
-          "metrics.enabled" -> false,
-          "auditing.enabled" -> false,
-          "mongo-async-driver.akka.log-dead-letters" -> 0
-        ): _*)
         .build()
 
       running(application) {

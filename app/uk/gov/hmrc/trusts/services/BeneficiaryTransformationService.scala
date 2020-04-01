@@ -71,8 +71,16 @@ class BeneficiaryTransformationService @Inject()(
     )
   }
 
-  def amendUnidentifiedBeneficiaryTransformer(utr: String, index: Int, internalId: String, description: String): Future[Boolean] = {
-    transformationService.addNewTransform(utr, internalId, AmendUnidentifiedBeneficiaryTransform(index, description))
+  def amendUnidentifiedBeneficiaryTransformer(utr: String, index: Int, internalId: String, description: String)
+                                             (implicit hc: HeaderCarrier): Future[Success.type] = {
+    getTransformedTrustJson(utr, internalId)
+    .map(findBeneficiaryJson(_, "unidentified", index))
+      .flatMap(Future.fromTry)
+      .flatMap { beneficiaryJson =>
+
+      transformationService.addNewTransform(utr, internalId, AmendUnidentifiedBeneficiaryTransform(index, description, beneficiaryJson, LocalDate.now))
+        .map(_ => Success)
+      }
   }
 
   def addUnidentifiedBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: UnidentifiedType): Future[Boolean] = {

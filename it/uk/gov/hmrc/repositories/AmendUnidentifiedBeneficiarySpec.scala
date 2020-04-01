@@ -6,7 +6,6 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsString, JsValue}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -34,17 +33,11 @@ class AmendUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with S
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
 
-      val application = new GuiceApplicationBuilder()
+      val application = applicationBuilder
         .overrides(
           bind[IdentifierAction].toInstance(new FakeIdentifierAction(Organisation)),
           bind[DesConnector].toInstance(stubbedDesConnector)
         )
-        .configure(Seq(
-          "mongodb.uri" -> connectionString,
-          "metrics.enabled" -> false,
-          "auditing.enabled" -> false,
-          "mongo-async-driver.akka.log-dead-letters" -> 0
-        ): _*)
         .build()
 
       running(application) {
