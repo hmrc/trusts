@@ -35,6 +35,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
+import uk.gov.hmrc.trusts.utils.JsonOps._
+
 class RegisterTrustController @Inject()(desService: DesService, config: AppConfig,
                                         validationService: ValidationService,
                                         identify: IdentifierAction,
@@ -47,7 +49,7 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
 
       val draftIdOption = request.headers.get(Headers.DraftRegistrationId)
 
-      val payload = request.body.toString
+      val payload = request.body.applyRules().toString
 
       validationService
         .get(config.trustsApiRegistrationSchema)
