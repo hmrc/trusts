@@ -109,7 +109,7 @@ trait JsonOperations {
     }
   }
 
-  def removeAtPosition(input : JsValue, path: JsPath, index: Int, newValue: JsValue) : JsResult[JsValue] = {
+  def removeAtPosition(input : JsValue, path: JsPath, index: Int) : JsResult[JsValue] = {
 
     input.transform(path.json.pick) match {
       case JsSuccess(json, _) =>
@@ -117,13 +117,16 @@ trait JsonOperations {
         val array = json.as[JsArray]
 
         val filtered = array.value.take(index) ++ array.value.drop(index + 1)
-
-        input.transform(
-          path.json.prune andThen
-            JsPath.json.update {
-              path.json.put(Json.toJson(filtered))
-            }
-        )
+        if (filtered.isEmpty) {
+          input.transform(path.json.prune)
+        } else {
+          input.transform(
+            path.json.prune andThen
+              JsPath.json.update {
+                path.json.put(Json.toJson(filtered))
+              }
+          )
+        }
 
       case e: JsError => e
     }

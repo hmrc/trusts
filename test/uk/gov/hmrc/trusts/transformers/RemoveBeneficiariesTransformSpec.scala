@@ -19,18 +19,17 @@ package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
 import org.joda.time.DateTime
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
-import play.api.libs.json._
-import uk.gov.hmrc.trusts.repositories.TransformationRepository
-import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService}
-import uk.gov.hmrc.trusts.utils.JsonUtils
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
-import play.api.libs.json.Json.JsValueWrapper
+import org.scalatest.mockito.MockitoSugar
+import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
+import uk.gov.hmrc.trusts.repositories.TransformationRepository
+import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService}
+import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
 
@@ -46,7 +45,7 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
     else {b}
   }
 
-  def buildInputJson(beneficiaryType: String, beneficiaryData: Seq[JsValue]) = {
+  private def buildInputJson(beneficiaryType: String, beneficiaryData: Seq[JsValue]) = {
     val baseJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
     val adder = (__ \ "details" \ "trust" \ "entities" \ "beneficiary" \ beneficiaryType).json
@@ -103,8 +102,6 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
       }
     }
 
-
-
     "not affect the document if the index is too low" in {
       val inputJson = buildInputJson("unidentified", Seq(
         beneficiaryJson("One"),
@@ -119,6 +116,24 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
         case _ => fail("Transform failed")
       }
     }
+    "remove the section if the last beneficiary in that section is removed" in {
+      val inputJson = buildInputJson("charity", Seq(
+        beneficiaryJson("One")
+      ))
+
+      val transforms = Seq(
+        RemoveBeneficiariesTransform(0, beneficiaryJson("One", None, false), LocalDate.of(2018, 4, 21), "charity")
+      )
+
+      val OUT = ComposedDeltaTransform(transforms)
+
+      OUT.applyTransform(inputJson) match {
+        case JsSuccess(value, _) => value.transform(
+          (JsPath()  \ "details" \ "trust" \ "entities" \ "beneficiary" \ "charity"  ).json.pick).isError mustBe true
+        case _ => fail("Transform failed")
+      }
+    }
+
   }
 
   "the remove unidentified beneficiary declaration transform must" - {
@@ -156,7 +171,6 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
         beneficiaryJson("Two"),
         beneficiaryJson("Three")
       ))
-
 
       val repo = mock[TransformationRepository]
       val desService = mock[DesService]
