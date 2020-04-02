@@ -22,7 +22,7 @@ import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatest.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsString, JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, GET, POST, contentAsJson, route, running, status}
@@ -68,6 +68,11 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
 
           status(addCharityBeneficiary(application)) mustBe OK
           status(addIndividualBeneficiary(application)) mustBe OK
+          status(addUnidentifiedBeneficiary(application)) mustBe OK
+          status(amendUnidentifiedBeneficiary(application)) mustBe OK
+          status(removeCharityBeneficiary(application)) mustBe OK
+          status(amendCharityBeneficiary(application)) mustBe OK
+          status(removeOtherBeneficiary(application)) mustBe OK
 
           val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
           status(newResult) mustBe OK
@@ -91,6 +96,7 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
         |    "address": {
         |      "line1": "Line 1",
         |      "line2": "Line 2",
+        |      "line3": "Line 3 to be killed later",
         |      "postCode": "NE1 1NE",
         |      "country": "GB"
         |    }
@@ -127,6 +133,90 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
 
     val addRequest = FakeRequest(POST, "/trusts/add-individual-beneficiary/5174384721")
       .withBody(newBeneficiaryJson)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+
+    route(application, addRequest).get
+  }
+
+  private def addUnidentifiedBeneficiary(application: Application) = {
+    val newBeneficiaryJson = Json.parse(
+      """
+        |{
+        | "description": "New Beneficiary Description",
+        | "entityStart": "2020-01-01"
+        |}
+        |""".stripMargin
+    )
+
+    val addRequest = FakeRequest(POST, "/trusts/add-unidentified-beneficiary/5174384721")
+      .withBody(newBeneficiaryJson)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+
+    route(application, addRequest).get
+  }
+
+  private def amendUnidentifiedBeneficiary(application: Application) = {
+    val addRequest = FakeRequest(POST, "/trusts/amend-unidentified-beneficiary/5174384721/0")
+      .withBody(JsString("Amended Beneficiary Description"))
+      .withHeaders(CONTENT_TYPE -> "application/json")
+
+    route(application, addRequest).get
+  }
+
+  private def removeCharityBeneficiary(application: Application) = {
+    val removeJson = Json.parse(
+      """
+        |{
+        | "endDate": "2014-03-12",
+        | "index": 0,
+        | "type": "charity"
+        |}
+        |""".stripMargin)
+    val addRequest = FakeRequest(PUT, "/trusts/5174384721/beneficiaries/remove")
+      .withBody(removeJson)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+
+    route(application, addRequest).get
+  }
+
+  private def amendCharityBeneficiary(application: Application) = {
+    val amendedBeneficiaryJson = Json.parse(
+      """
+        |{
+        |  "organisationName": "Nice Charity 2",
+        |  "beneficiaryDiscretion": false,
+        |  "beneficiaryShareOfIncome": "50",
+        |  "identification": {
+        |    "address": {
+        |      "line1": "Line 1",
+        |      "line2": "Line 2",
+        |      "postCode": "NE1 1NE",
+        |      "country": "GB"
+        |    }
+        |  },
+        |  "entityStart": "2019-02-03"
+        |}
+        |""".stripMargin
+    )
+
+    val addRequest = FakeRequest(POST, "/trusts/amend-charity-beneficiary/5174384721/0")
+      .withBody(amendedBeneficiaryJson)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+
+    route(application, addRequest).get
+  }
+
+  private def removeOtherBeneficiary(application: Application) = {
+    val removeJson = Json.parse(
+      """
+        |{
+        | "endDate": "2014-03-12",
+        | "index": 0,
+        | "type": "other"
+        |}
+        |""".stripMargin)
+    val addRequest = FakeRequest(PUT, "/trusts/5174384721/beneficiaries/remove")
+      .withBody(removeJson)
       .withHeaders(CONTENT_TYPE -> "application/json")
 
     route(application, addRequest).get

@@ -69,13 +69,7 @@
         "beneficiary": {
           "charity": [
             {
-              "lineNo": "1",
-              "bpMatchStatus": "01",
-              "organisationName": "Charity 1",
-              "entityStart": "2001-01-01"
-            },
-            {
-              "organisationName": "Charity 2",
+              "organisationName": "Nice Charity 2",
               "beneficiaryDiscretion": false,
               "beneficiaryShareOfIncome": "50",
               "identification": {
@@ -131,27 +125,15 @@
               "entityStart":"1990-10-10"
             }
           ],
-          "other": [
-            {
-              "lineNo": "1",
-              "description": "Lorem ipsum",
-              "address": {
-                "line1": "1344 Army Road",
-                "line2": "Suite 111",
-                "line4": "Telford",
-                "postCode": "TF1 5DR",
-                "country": "GB"
-              },
-              "entityStart": "1998-02-12"
-            }
-          ],
           "unidentified": [
             {
-              "lineNo":"1",
-              "bpMatchStatus": "01",
-              "description": "Some Description",
+              "description": "Amended Beneficiary Description",
               "beneficiaryShareOfIncome": "25",
               "entityStart": "2017-02-28"
+            },
+            {
+              "description": "New Beneficiary Description",
+              "entityStart": "2020-01-01"
             }
           ]
         },
