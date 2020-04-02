@@ -52,6 +52,10 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
     }
   }
 
+  object LocalDateMock extends LocalDateService {
+    override def now: LocalDate = LocalDate.of(1999, 3, 14)
+  }
+
   def buildInputJson(beneficiaryType: String, beneficiaryData: Seq[JsValue]): JsObject = {
     val baseJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
@@ -66,7 +70,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
     "must add a new remove beneficiary transform using the transformation service" in {
       val transformationService = mock[TransformationService]
-      val service = new BeneficiaryTransformationService(transformationService)
+      val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
       val beneficiary = beneficiaryJson("Blah Blah Blah")
 
       when(transformationService.addNewTransform(any(), any(), any()))
@@ -87,7 +91,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
     "must add a new amend unidentified beneficiary transform using the transformation service" in {
       val index = 0
       val transformationService = mock[TransformationService]
-      val service = new BeneficiaryTransformationService(transformationService)
+      val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
       val newDescription = "Some Description"
       val originalBeneficiaryJson = Json.toJson(UnidentifiedType(
         None,
@@ -111,13 +115,13 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",
-          "internalId", AmendUnidentifiedBeneficiaryTransform(index, newDescription, originalBeneficiaryJson, LocalDate.now()))
+          "internalId", AmendUnidentifiedBeneficiaryTransform(index, newDescription, originalBeneficiaryJson, LocalDateMock.now))
       }
     }
 
     "must add a new add unidentified beneficiary transform using the transformation service" in {
       val transformationService = mock[TransformationService]
-      val service = new BeneficiaryTransformationService(transformationService)
+      val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
       val newBeneficiary = UnidentifiedType(
         None,
         None,
@@ -141,7 +145,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
     "must add a new amend individual beneficiary transform using the transformation service" in {
         val index = 0
         val transformationService = mock[TransformationService]
-        val service = new BeneficiaryTransformationService(transformationService)
+        val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
         val newIndividual = IndividualDetailsType(
           None,
           None,
@@ -187,14 +191,14 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
           verify(transformationService).addNewTransform(
             Matchers.eq("utr"),
             Matchers.eq("internalId"),
-            Matchers.eq(AmendIndividualBeneficiaryTransform(index, Json.toJson(newIndividual), original, LocalDate.now))
+            Matchers.eq(AmendIndividualBeneficiaryTransform(index, Json.toJson(newIndividual), original, LocalDateMock.now))
           )
       }
     }
 
     "must add a new add individual beneficiary transform using the transformation service" in {
       val transformationService = mock[TransformationService]
-      val service = new BeneficiaryTransformationService(transformationService)
+      val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
       val newBeneficiary = IndividualDetailsType(None,
         None,
         NameType("First", None, "Last"),
@@ -220,7 +224,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
     "must add a new add charity beneficiary transform using the transformation service" in {
       val transformationService = mock[TransformationService]
-      val service = new BeneficiaryTransformationService(transformationService)
+      val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
       val newBeneficiary = CharityType(
         None,
         None,
@@ -245,7 +249,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
     "must add a new amend charity beneficiary transform using the transformation service" in {
       val index = 0
       val transformationService = mock[TransformationService]
-      val service = new BeneficiaryTransformationService(transformationService)
+      val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
       val newCharity = CharityType(
         None,
         None,
@@ -284,7 +288,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
         verify(transformationService).addNewTransform(
           Matchers.eq("utr"),
           Matchers.eq("internalId"),
-          Matchers.eq(AmendCharityBeneficiaryTransform(index, Json.toJson(newCharity), original, LocalDate.now))
+          Matchers.eq(AmendCharityBeneficiaryTransform(index, Json.toJson(newCharity), original, LocalDateMock.now))
         )
       }
     }
