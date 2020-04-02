@@ -16,37 +16,48 @@
 
 package uk.gov.hmrc.transformations
 
+import java.time.LocalDate
+
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.mockito.ArgumentCaptor
 import org.scalatest.mockito.MockitoSugar
+import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsString, JsValue, Json}
-import play.api.mvc.Result
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{CONTENT_TYPE, GET, POST, contentAsJson, route, running, status}
+import play.api.test.Helpers.{CONTENT_TYPE, GET, POST, contentAsJson, route, running, status, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.repositories.TransformIntegrationTest
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustSuccessResponse
+import uk.gov.hmrc.trusts.models.variation.VariationResponse
+import uk.gov.hmrc.trusts.services.LocalDateService
 import uk.gov.hmrc.trusts.utils.JsonUtils
-import play.api.test.Helpers._
 
 import scala.concurrent.Future
 
 class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar with TransformIntegrationTest {
-  lazy val getTrustResponseFromDES: GetTrustSuccessResponse =
+  private lazy val getTrustResponseFromDES: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
-  lazy val expectedInitialGetJson: JsValue =
+  private lazy val expectedInitialGetJson: JsValue =
     JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+
+  private object TestLocalDateService extends LocalDateService {
+    override def now: LocalDate = LocalDate.of(2020, 4, 1)
+  }
 
   "doing a bunch of beneficiary transforms" - {
     "must return amended data in a subsequent 'get' call" in {
       lazy val expectedGetAfterAddBeneficiaryJson: JsValue =
         JsonUtils.getJsonValueFromFile("trusts-integration-get-after-combo-beneficiary.json")
+
+      lazy val expectedDeclaredBeneficiaryJson: JsValue =
+        JsonUtils.getJsonValueFromFile("trusts-integration-declared-combo-beneficiary.json")
+
 
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
@@ -54,7 +65,8 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
       val application = applicationBuilder
         .overrides(
           bind[IdentifierAction].toInstance(new FakeIdentifierAction(Organisation)),
-          bind[DesConnector].toInstance(stubbedDesConnector)
+          bind[DesConnector].toInstance(stubbedDesConnector),
+          bind[LocalDateService].toInstance(TestLocalDateService)
         )
         .build()
 
@@ -77,6 +89,29 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
           val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
           status(newResult) mustBe OK
           contentAsJson(newResult) mustBe expectedGetAfterAddBeneficiaryJson
+
+          lazy val variationResponse = VariationResponse("TVN12345678")
+          val payloadCaptor = ArgumentCaptor.forClass(classOf[JsValue])
+
+          when(stubbedDesConnector.trustVariation(payloadCaptor.capture())(any())).thenReturn(Future.successful(variationResponse))
+
+          val declaration = Json.parse(
+            """
+              |{
+              | "declaration": {
+              |     "name": { "firstName": "John", "lastName": "Doe" }
+              | }
+              |}
+              |""".stripMargin)
+
+          val declareRequest = FakeRequest(POST, "/trusts/declare/5174384721")
+            .withBody(declaration)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val declareResult = route(application, declareRequest).get
+          status(declareResult) mustBe OK
+
+          payloadCaptor.getValue mustBe expectedDeclaredBeneficiaryJson
 
           dropTheDatabase(connection)
         }.get
@@ -210,7 +245,7 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
     val removeJson = Json.parse(
       """
         |{
-        | "endDate": "2014-03-12",
+        | "endDate": "2014-03-16",
         | "index": 0,
         | "type": "other"
         |}

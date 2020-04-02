@@ -1,0 +1,291 @@
+{
+  "correspondence": {
+    "abroadIndicator": false,
+    "address": {
+      "country": "GB",
+      "line1": "1344 Army Road",
+      "line2": "Suite 111",
+      "line3": "Telford",
+      "line4": "Shropshire",
+      "postCode": "TF1 5DR"
+    },
+    "name": "Abram James",
+    "phoneNumber": "0754545454"
+  },
+  "declaration": {
+    "address": {
+      "country": "GB",
+      "line1": "1344 Army Road",
+      "line2": "Suite 111",
+      "line3": "Telford",
+      "line4": "Shropshire",
+      "postCode": "TF1 5DR"
+    },
+    "name": {
+      "firstName": "John",
+      "lastName": "Doe"
+    }
+  },
+  "details": {
+    "trust": {
+      "assets": {
+        "monetary": [
+          {
+            "assetMonetaryAmount": 100000
+          }
+        ],
+        "other": [
+          {
+            "description": "Lorem ipsum anum",
+            "value": 1982372
+          }
+        ],
+        "partnerShip": [
+          {
+            "description": "Partnership Trade",
+            "partnershipStart": "2001-01-01",
+            "utr": "5456456221"
+          }
+        ],
+        "propertyOrLand": [
+          {
+            "address": {
+              "country": "GB",
+              "line1": "1344 Army Road",
+              "line2": "Suite 111",
+              "line4": "Telford",
+              "postCode": "TF1 5DR"
+            },
+            "buildingLandName": "ACB House",
+            "valueFull": 1000000,
+            "valuePrevious": 200000
+          }
+        ],
+        "shares": [
+          {
+            "numberOfShares": "100",
+            "orgName": "Mock Org LTD",
+            "shareClass": "Ordinary shares",
+            "typeOfShare": "Quoted",
+            "utr": "5465416546",
+            "value": 4584545
+          }
+        ]
+      },
+      "details": {
+        "administrationCountry": "GB",
+        "deedOfVariation": "Previously there was only an absolute interest under the will",
+        "efrbsStartDate": "2001-01-01",
+        "interVivos": false,
+        "residentialStatus": {
+          "uk": {
+            "preOffShore": "AD",
+            "scottishLaw": false
+          }
+        },
+        "startDate": "2001-01-01",
+        "typeOfTrust": "Will Trust or Intestacy Trust"
+      },
+      "entities": {
+        "beneficiary": {
+          "charity": [
+            {
+              "beneficiaryDiscretion": false,
+              "beneficiaryShareOfIncome": "50",
+              "entityStart": "2019-02-03",
+              "identification": {
+                "address": {
+                  "country": "GB",
+                  "line1": "Line 1",
+                  "line2": "Line 2",
+                  "postCode": "NE1 1NE"
+                }
+              },
+              "organisationName": "Nice Charity 2"
+            },
+            {
+              "bpMatchStatus": "01",
+              "entityEnd": "2014-03-12",
+              "entityStart": "2001-01-01",
+              "lineNo": "1",
+              "organisationName": "Charity 1"
+            }
+          ],
+          "individualDetails": [
+            {
+              "beneficiaryDiscretion": true,
+              "beneficiaryShareOfIncome": "100",
+              "beneficiaryType": "Director",
+              "dateOfBirth": "2001-01-01",
+              "entityStart": "1998-02-12",
+              "identification": {
+                "address": {
+                  "country": "GB",
+                  "line1": "1344 Army Road",
+                  "line2": "Suite 111",
+                  "line4": "Telford",
+                  "postCode": "TF1 5DR"
+                },
+                "passport": {
+                  "countryOfIssue": "GB",
+                  "expirationDate": "2001-01-01",
+                  "number": "abcdefgh"
+                }
+              },
+              "lineNo": "1",
+              "name": {
+                "firstName": "John",
+                "lastName": "O'Connor",
+                "middleName": "William"
+              },
+              "vulnerableBeneficiary": true
+            },
+            {
+              "dateOfBirth": "2000-01-01",
+              "entityStart": "1990-10-10",
+              "identification": {
+                "nino": "nino"
+              },
+              "name": {
+                "firstName": "First",
+                "lastName": "Last"
+              },
+              "vulnerableBeneficiary": false
+            }
+          ],
+          "other": [
+            {
+              "address": {
+                "country": "GB",
+                "line1": "1344 Army Road",
+                "line2": "Suite 111",
+                "line4": "Telford",
+                "postCode": "TF1 5DR"
+              },
+              "description": "Lorem ipsum",
+              "entityEnd": "2014-03-16",
+              "entityStart": "1998-02-12",
+              "lineNo": "1"
+            }
+          ],
+          "unidentified": [
+            {
+              "beneficiaryShareOfIncome": "25",
+              "description": "Amended Beneficiary Description",
+              "entityStart": "2017-02-28"
+            },
+            {
+              "description": "New Beneficiary Description",
+              "entityStart": "2020-01-01"
+            },
+            {
+              "beneficiaryShareOfIncome": "25",
+              "bpMatchStatus": "01",
+              "description": "Some Description",
+              "entityEnd": "2020-04-01",
+              "entityStart": "2017-02-28",
+              "lineNo": "1"
+            }
+          ]
+        },
+        "deceased": {
+          "dateOfBirth": "1956-02-12",
+          "dateOfDeath": "2016-01-01",
+          "entityStart": "1998-02-12",
+          "identification": {
+            "nino": "KC456736"
+          },
+          "lineNo": "1",
+          "name": {
+            "firstName": "John",
+            "lastName": "O'Connor",
+            "middleName": "William"
+          }
+        },
+        "leadTrustees": [
+          {
+            "leadTrusteeOrg": {
+              "bpMatchStatus": "01",
+              "email": "me@you.com",
+              "entityStart": "1998-02-12",
+              "identification": {
+                "utr": "5465416546"
+              },
+              "lineNo": "1",
+              "name": "Trust Services LTD",
+              "phoneNumber": "0754545454"
+            }
+          }
+        ],
+        "naturalPerson": [
+          {
+            "dateOfBirth": "1956-02-12",
+            "entityStart": "1998-02-12",
+            "identification": {
+              "nino": "KC287812"
+            },
+            "lineNo": "1",
+            "name": {
+              "firstName": "John",
+              "lastName": "O'Connor",
+              "middleName": "William"
+            }
+          }
+        ],
+        "settlors": {
+          "settlor": [
+            {
+              "dateOfBirth": "2001-01-01",
+              "entityStart": "1998-02-12",
+              "identification": {
+                "nino": "ST019091"
+              },
+              "lineNo": "1",
+              "name": {
+                "firstName": "abcdefghijkl",
+                "lastName": "abcde",
+                "middleName": "abcdefghijklmn"
+              }
+            }
+          ],
+          "settlorCompany": [
+            {
+              "companyTime": false,
+              "companyType": "Trading",
+              "entityStart": "1998-02-12",
+              "identification": {
+                "utr": "5465416546"
+              },
+              "lineNo": "1",
+              "name": "abcdefghijklmnopqr"
+            }
+          ]
+        },
+        "trustees": [
+          {
+            "trusteeInd": {
+              "dateOfBirth": "1956-02-12",
+              "entityStart": "1998-02-12",
+              "identification": {
+                "nino": "ST123456"
+              },
+              "lineNo": "1",
+              "name": {
+                "firstName": "John",
+                "lastName": "O'Connor",
+                "middleName": "William"
+              },
+              "phoneNumber": "0121546546"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "matchData": {
+    "utr": "5465416546"
+  },
+  "reqHeader": {
+    "formBundleNo": "000012387218"
+  }
+}
