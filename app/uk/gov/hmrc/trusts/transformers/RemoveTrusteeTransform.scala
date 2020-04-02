@@ -18,37 +18,23 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import org.joda.time.DateTime
 import play.api.libs.json.Reads.of
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.utils.Constants.dateTimePattern
 
 case class RemoveTrusteeTransform(endDate: LocalDate, index: Int, trusteeToRemove: JsValue)
   extends DeltaTransform
-  with JsonOperations {
-
-  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
+    with JsonOperations {
 
   private val trusteePath = (__ \ 'details \ 'trust \ 'entities \ 'trustees)
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    removeAtPosition(input, trusteePath, index, trusteeToRemove)
+    removeAtPosition(input, trusteePath, index)
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
     if (trusteeIsKnownToEtmp(trusteeToRemove)) {
       trusteeToRemove.transform(addEntityEnd(trusteeToRemove, endDate)) match {
-
-        // Todo can this be refactored to use JsonOperations?
-        case JsSuccess(endedTrusteeJson, _) =>
-          val trustees: Reads[JsObject] =
-            trusteePath.json.update(of[JsArray]
-              .map {
-                trustees => trustees :+ endedTrusteeJson
-              }
-            )
-          input.transform(trustees)
-
+        case JsSuccess(endedTrusteeJson, _) => addToList(input, trusteePath, endedTrusteeJson)
         case e: JsError => e
       }
     } else {
@@ -77,8 +63,6 @@ case class RemoveTrusteeTransform(endDate: LocalDate, index: Int, trusteeToRemov
 object RemoveTrusteeTransform {
 
   val key = "RemoveTrusteeTransform"
-
-  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
 
   implicit val format: Format[RemoveTrusteeTransform] = Json.format[RemoveTrusteeTransform]
 }

@@ -34,15 +34,7 @@ case class RemoveBeneficiariesTransform(
     "entities" \ "beneficiary" \ beneficiaryType )
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    val removeFromArray = __.json.pick[JsArray].map { arr =>
-        JsArray(
-          arr.value.zipWithIndex.filterNot(_._2 == index).map(_._1)
-        )
-    }
-
-    val xform = path.json.update(removeFromArray)
-
-    input.transform(xform)
+    removeAtPosition(input, path, index)
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
