@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.trusts.services
 
-import java.time.LocalDate
-
 import javax.inject.Inject
 import play.api.libs.json.{JsObject, JsValue, Json, __}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -31,7 +29,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}
 
 class BeneficiaryTransformationService @Inject()(
-                                                  transformationService: TransformationService
+                                                  transformationService: TransformationService,
+                                                  localDateService: LocalDateService
                                                 )
                                                 (implicit ec:ExecutionContext)
   extends JsonOperations {
@@ -78,7 +77,7 @@ class BeneficiaryTransformationService @Inject()(
       .flatMap(Future.fromTry)
       .flatMap { beneficiaryJson =>
 
-      transformationService.addNewTransform(utr, internalId, AmendUnidentifiedBeneficiaryTransform(index, description, beneficiaryJson, LocalDate.now))
+      transformationService.addNewTransform(utr, internalId, AmendUnidentifiedBeneficiaryTransform(index, description, beneficiaryJson, localDateService.now))
         .map(_ => Success)
       }
   }
@@ -100,7 +99,7 @@ class BeneficiaryTransformationService @Inject()(
         transformationService.addNewTransform(
           utr,
           internalId,
-          AmendIndividualBeneficiaryTransform(index, Json.toJson(amend), beneficiaryJson, LocalDate.now)
+          AmendIndividualBeneficiaryTransform(index, Json.toJson(amend), beneficiaryJson, localDateService.now)
         ).map(_ => Success)
       }
   }
@@ -126,7 +125,7 @@ class BeneficiaryTransformationService @Inject()(
         transformationService.addNewTransform(
           utr,
           internalId,
-          AmendCharityBeneficiaryTransform(index, Json.toJson(amended), beneficiaryJson, LocalDate.now)
+          AmendCharityBeneficiaryTransform(index, Json.toJson(amended), beneficiaryJson, localDateService.now)
         ).map(_ => Success)
       }
   }
