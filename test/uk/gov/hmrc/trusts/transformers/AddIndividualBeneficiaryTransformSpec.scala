@@ -64,16 +64,5 @@ class AddIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers w
       result mustBe afterJson
     }
 
-    "fail to add a new individual beneficiary when there are 25 or more existing beneficiaries" in {
-
-      val json = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-max-individual-beneficiary.json")
-
-      val transformer = new AddIndividualBeneficiaryTransform(newBeneficiary)
-
-      val thrown = intercept[Exception] (transformer.applyTransform(json).get)
-
-      thrown.getMessage mustBe "Adding an item to /details/trust/entities/beneficiary/individualDetails would exceed the maximum allowed amount of 25"
-
-    }
   }
 }
