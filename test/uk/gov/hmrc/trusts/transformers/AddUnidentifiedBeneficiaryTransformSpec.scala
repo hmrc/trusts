@@ -66,15 +66,5 @@ class AddUnidentifiedBeneficiaryTransformSpec extends FreeSpec with MustMatchers
       result mustBe afterJson
     }
 
-    "fail to add a new unidentified beneficiary when there are 25 or more existing beneficiaries" in {
-
-      val json = JsonUtils.getJsonValueFromFile("trusts-etmp-max-unidentified-beneficiaries.json")
-
-      val transformer = new AddUnidentifiedBeneficiaryTransform(newBeneficiary)
-
-      val thrown = intercept[Exception] (transformer.applyTransform(json).get)
-
-      thrown.getMessage mustBe "Adding an item to /details/trust/entities/beneficiary/unidentified would exceed the maximum allowed amount of 25"
-    }
   }
 }

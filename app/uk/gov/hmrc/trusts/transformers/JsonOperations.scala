@@ -66,20 +66,15 @@ trait JsonOperations {
     import play.api.libs.json._
 
     input.transform(path.json.pick[JsArray]) match {
-      case JsSuccess(value, _) =>
+      case JsSuccess(_, _) =>
 
-        if (value.value.size < 25) {
-          val updatedItems: Reads[JsObject] = path.json.update(
-            Reads.of[JsArray].map { array =>
-                array :+ jsonToAdd
-              }
-            )
+        val updatedItems: Reads[JsObject] = path.json.update(
+          Reads.of[JsArray].map { array =>
+              array :+ jsonToAdd
+            }
+          )
 
-          input.transform(updatedItems)
-        }
-        else {
-          throw new Exception(s"Adding an item to $path would exceed the maximum allowed amount of 25")
-        }
+        input.transform(updatedItems)
       case JsError(_) =>
         input.transform(__.json.update {
           path.json.put(JsArray(

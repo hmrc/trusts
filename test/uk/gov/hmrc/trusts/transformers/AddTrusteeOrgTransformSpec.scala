@@ -69,30 +69,5 @@ class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionV
       result mustBe afterJson
     }
 
-    "fail to add a new org trustee when there are 25 or more existing trustees" in {
-
-      val t = DisplayTrustTrusteeOrgType(
-        None,
-        None,
-        "New Trustee",
-        Some("phoneNumber"),
-        None,
-        Some(DisplayTrustIdentificationOrgType(
-          None,
-          Some("utr"),
-          None
-        )),
-        DateTime.parse("1990-10-10")
-      )
-
-      val json = JsonUtils.getJsonValueFromFile("trusts-etmp-max-trustees.json")
-
-      val transformer = AddTrusteeOrgTransform(t)
-
-      val thrown = intercept[Exception] (transformer.applyTransform(json).get)
-
-      thrown.getMessage mustBe "Adding an item to /details/trust/entities/trustees would exceed the maximum allowed amount of 25"
-
-    }
   }
 }
