@@ -23,6 +23,7 @@ import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.{ResponseHeader, _}
 import uk.gov.hmrc.trusts.transformers.mdtp.Trustees
+import uk.gov.hmrc.trusts.transformers.mdtp.beneficiaries.Beneficiaries
 
 trait GetTrustResponse
 
@@ -59,7 +60,8 @@ case class TrustProcessedResponse(getTrust: JsValue,
 
   def transform : JsResult[TrustProcessedResponse] = {
     getTrust.transform(
-      Trustees.transform(getTrust)
+      Trustees.transform(getTrust) andThen
+      Beneficiaries.transform(getTrust)
     ).map {
       json =>
         TrustProcessedResponse(json, responseHeader)

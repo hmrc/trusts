@@ -22,6 +22,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.{MatchData, ResponseHeader}
 import uk.gov.hmrc.trusts.utils.Constants.dateTimePattern
+import uk.gov.hmrc.trusts.models.JsonWithoutNulls._
 
 case class GetTrust(matchData: MatchData,
                     correspondence: Correspondence,
@@ -194,10 +195,27 @@ case class DisplayTrustIndividualDetailsType(lineNo: Option[String],
 object DisplayTrustIndividualDetailsType {
   implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val individualDetailsTypeFormat: Format[DisplayTrustIndividualDetailsType] = Json.format[DisplayTrustIndividualDetailsType]
+
+  val writeToMaintain : Writes[DisplayTrustIndividualDetailsType] = new Writes[DisplayTrustIndividualDetailsType] {
+    override def writes(o: DisplayTrustIndividualDetailsType): JsValue = Json.obj(
+      "lineNo" -> o.lineNo,
+      "bpMatchStatus" -> o.bpMatchStatus,
+      "name" -> o.name,
+      "dateOfBirth" -> o.dateOfBirth,
+      "vulnerableBeneficiary" -> o.vulnerableBeneficiary,
+      "beneficiaryType" -> o.beneficiaryType,
+      "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
+      "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
+      "identification" -> o.identification,
+      "entityStart" -> o.entityStart,
+      "provisional" -> o.lineNo.isEmpty
+    ).withoutNulls
+  }
 }
 
 case class DisplayTrustCompanyType(lineNo: String,
-                                   bpMatchStatus: Option[String], organisationName: String,
+                                   bpMatchStatus: Option[String],
+                                   organisationName: String,
                                    beneficiaryDiscretion: Option[Boolean],
                                    beneficiaryShareOfIncome: Option[String],
                                    identification: Option[DisplayTrustIdentificationOrgType],
@@ -205,6 +223,19 @@ case class DisplayTrustCompanyType(lineNo: String,
 
 object DisplayTrustCompanyType {
   implicit val companyTypeFormat: Format[DisplayTrustCompanyType] = Json.format[DisplayTrustCompanyType]
+
+  val writeToMaintain : Writes[DisplayTrustCompanyType] = new Writes[DisplayTrustCompanyType] {
+    override def writes(o: DisplayTrustCompanyType): JsValue = Json.obj(
+      "lineNo" -> o.lineNo,
+      "bpMatchStatus" -> o.bpMatchStatus,
+      "organisationName" -> o.organisationName,
+      "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
+      "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
+      "identification" -> o.identification,
+      "entityStart" -> o.entityStart,
+      "provisional" -> o.lineNo.isEmpty
+    ).withoutNulls
+  }
 }
 
 case class DisplayTrustWillType(lineNo: String,
@@ -230,6 +261,19 @@ case class DisplayTrustBeneficiaryTrustType(lineNo: String,
 
 object DisplayTrustBeneficiaryTrustType {
   implicit val beneficiaryTrustTypeFormat: Format[DisplayTrustBeneficiaryTrustType] = Json.format[DisplayTrustBeneficiaryTrustType]
+
+  val writeToMaintain : Writes[DisplayTrustBeneficiaryTrustType] = new Writes[DisplayTrustBeneficiaryTrustType] {
+    override def writes(o: DisplayTrustBeneficiaryTrustType): JsValue = Json.obj(
+      "lineNo" -> o.lineNo,
+      "bpMatchStatus" -> o.bpMatchStatus,
+      "organisationName" -> o.organisationName,
+      "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
+      "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
+      "identification" -> o.identification,
+      "entityStart" -> o.entityStart,
+      "provisional" -> o.lineNo.isEmpty
+    ).withoutNulls
+  }
 }
 
 case class DisplayTrustCharityType(lineNo: Option[String],
@@ -242,6 +286,19 @@ case class DisplayTrustCharityType(lineNo: Option[String],
 
 object DisplayTrustCharityType {
   implicit val charityTypeFormat: Format[DisplayTrustCharityType] = Json.format[DisplayTrustCharityType]
+
+  val writeToMaintain : Writes[DisplayTrustCharityType] = new Writes[DisplayTrustCharityType] {
+    override def writes(o: DisplayTrustCharityType): JsValue = Json.obj(
+      "lineNo" -> o.lineNo,
+      "bpMatchStatus" -> o.bpMatchStatus,
+      "organisationName" -> o.organisationName,
+      "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
+      "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
+      "identification" -> o.identification,
+      "entityStart" -> o.entityStart,
+      "provisional" -> o.lineNo.isEmpty
+    ).withoutNulls
+  }
 }
 
 
@@ -254,6 +311,18 @@ case class DisplayTrustUnidentifiedType(lineNo: Option[String],
 
 object DisplayTrustUnidentifiedType {
   implicit val unidentifiedTypeFormat: Format[DisplayTrustUnidentifiedType] = Json.format[DisplayTrustUnidentifiedType]
+
+  val writeToMaintain : Writes[DisplayTrustUnidentifiedType] = new Writes[DisplayTrustUnidentifiedType] {
+    override def writes(o: DisplayTrustUnidentifiedType): JsValue = Json.obj(
+      "lineNo" -> o.lineNo,
+      "bpMatchStatus" -> o.bpMatchStatus,
+      "description" -> o.description,
+      "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
+      "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
+      "entityStart" -> o.entityStart,
+      "provisional" -> o.lineNo.isEmpty
+    ).withoutNulls
+  }
 }
 
 
@@ -273,6 +342,25 @@ case class DisplayTrustLargeType(lineNo: String,
 
 object DisplayTrustLargeType {
   implicit val largeTypeFormat: Format[DisplayTrustLargeType] = Json.format[DisplayTrustLargeType]
+
+  val writeToMaintain : Writes[DisplayTrustLargeType] = new Writes[DisplayTrustLargeType] {
+    override def writes(o: DisplayTrustLargeType): JsValue = Json.obj(
+      "lineNo" -> o.lineNo,
+      "bpMatchStatus" -> o.bpMatchStatus,
+      "organisationName" -> o.organisationName,
+      "description" -> o.description,
+      "description1" -> o.description1,
+      "description2" -> o.description2,
+      "description3" -> o.description3,
+      "description4" -> o.description4,
+      "numberOfBeneficiary" -> o.numberOfBeneficiary,
+      "identification" -> o.identification,
+      "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
+      "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
+      "entityStart" -> o.entityStart,
+      "provisional" -> o.lineNo.isEmpty
+    ).withoutNulls
+  }
 }
 
 case class DisplayTrustOtherType(lineNo: String,
@@ -285,6 +373,19 @@ case class DisplayTrustOtherType(lineNo: String,
 
 object DisplayTrustOtherType {
   implicit val otherTypeFormat: Format[DisplayTrustOtherType] = Json.format[DisplayTrustOtherType]
+
+  val writeToMaintain : Writes[DisplayTrustOtherType] = new Writes[DisplayTrustOtherType] {
+    override def writes(o: DisplayTrustOtherType): JsValue = Json.obj(
+      "lineNo" -> o.lineNo,
+      "bpMatchStatus" -> o.bpMatchStatus,
+      "description" -> o.description,
+      "address" -> o.address,
+      "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
+      "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
+      "entityStart" -> o.entityStart,
+      "provisional" -> o.lineNo.isEmpty
+    ).withoutNulls
+  }
 }
 
 case class DisplayTrustTrusteeType(trusteeInd: Option[DisplayTrustTrusteeIndividualType],
@@ -306,8 +407,6 @@ object DisplayTrustTrusteeOrgType {
 
   implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val trusteeOrgTypeFormat: Format[DisplayTrustTrusteeOrgType] = Json.format[DisplayTrustTrusteeOrgType]
-
-  import uk.gov.hmrc.trusts.models.JsonWithoutNulls._
 
   val writeToMaintain : Writes[DisplayTrustTrusteeOrgType] = new Writes[DisplayTrustTrusteeOrgType] {
     override def writes(o: DisplayTrustTrusteeOrgType): JsValue = Json.obj(
