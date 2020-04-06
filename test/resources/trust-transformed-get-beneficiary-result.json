@@ -17,7 +17,8 @@
         "identification": {
           "safeId": "2222200000000"
         },
-        "entityStart": "2017-02-28"
+        "entityStart": "2017-02-28",
+        "provisional": false
       }
     ],
     "company": [
@@ -30,7 +31,8 @@
         "identification": {
           "safeId": "2222200000000"
         },
-        "entityStart": "2017-02-28"
+        "entityStart": "2017-02-28",
+        "provisional": false
       }
     ],
     "trust": [
@@ -43,7 +45,8 @@
         "identification": {
           "safeId": "2222200000000"
         },
-        "entityStart": "2017-02-28"
+        "entityStart": "2017-02-28",
+        "provisional": false
       }
     ],
     "charity": [
@@ -56,7 +59,8 @@
         "identification": {
           "safeId": "2222200000000"
         },
-        "entityStart": "2017-02-28"
+        "entityStart": "2017-02-28",
+        "provisional": false
       }
     ],
     "unidentified": [
@@ -66,7 +70,8 @@
         "description": "Reserve money",
         "beneficiaryDiscretion": true,
         "beneficiaryShareOfIncome": "0",
-        "entityStart": "2017-02-28"
+        "entityStart": "2017-02-28",
+        "provisional": false
       }
     ],
     "large": [
@@ -85,7 +90,8 @@
         },
         "beneficiaryDiscretion": true,
         "beneficiaryShareOfIncome": "0",
-        "entityStart": "2017-02-28"
+        "entityStart": "2017-02-28",
+        "provisional": false
       }
     ],
     "other": [
@@ -103,7 +109,8 @@
         },
         "beneficiaryDiscretion": true,
         "beneficiaryShareOfIncome": "0",
-        "entityStart": "2017-02-28"
+        "entityStart": "2017-02-28",
+        "provisional": false
       }
     ]
   }
