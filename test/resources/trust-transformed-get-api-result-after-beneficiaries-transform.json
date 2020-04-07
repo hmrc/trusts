@@ -1,0 +1,70 @@
+{
+  "individualDetails": [
+    {
+      "name": {
+        "firstName": "John",
+        "middleName": "William",
+        "lastName": "O'Connor"
+      },
+      "provisional": false,
+      "entityStart": "1998-02-12",
+      "lineNo": "1",
+      "vulnerableBeneficiary": true
+    }
+  ],
+  "company": [
+    {
+      "bpMatchStatus": "01",
+      "provisional": false,
+      "entityStart": "2017-02-28",
+      "lineNo": "1",
+      "organisationName": "Company"
+    }
+  ],
+  "trust": [
+    {
+      "bpMatchStatus": "01",
+      "provisional": false,
+      "entityStart": "2017-02-28",
+      "lineNo": "1",
+      "organisationName": "Trust"
+    }
+  ],
+  "charity": [
+    {
+      "bpMatchStatus": "01",
+      "provisional": false,
+      "entityStart": "2017-02-28",
+      "lineNo": "1",
+      "organisationName": "Charity"
+    }
+  ],
+  "unidentified": [
+    {
+      "bpMatchStatus": "01",
+      "provisional": false,
+      "description": "Unidentified",
+      "entityStart": "2017-02-28",
+      "lineNo": "1"
+    }
+  ],
+  "large": [
+    {
+      "bpMatchStatus": "01",
+      "provisional": false,
+      "description": "Description",
+      "entityStart": "2017-02-28",
+      "lineNo": "1",
+      "organisationName": "Large",
+      "numberOfBeneficiary": "0"
+    }
+  ],
+  "other": [
+    {
+      "lineNo": "1",
+      "description": "Lorem ipsum",
+      "entityStart": "1998-02-12",
+      "provisional": false
+    }
+  ]
+}

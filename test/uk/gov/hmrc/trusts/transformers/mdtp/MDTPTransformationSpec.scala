@@ -38,6 +38,18 @@ class MDTPTransformationSpec extends FreeSpec with MustMatchers {
       result.getTrust.transform((JsPath \ 'details \ 'trust \ 'entities \ 'trustees).json.pick).get mustBe afterJson
     }
 
+    "must transform beneficiaries" in {
+
+      val etmpResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-one-of-each-beneficiary.json")
+      val afterJson = JsonUtils.getJsonValueFromFile("trust-transformed-get-api-result-after-beneficiaries-transform.json")
+
+      val processedResponse = TrustProcessedResponse(etmpResponse, ResponseHeader("Processed", "1"))
+
+      val result = processedResponse.transform.get
+
+      result.getTrust.transform((JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary).json.pick).get mustBe afterJson
+    }
+
   }
 
 }
