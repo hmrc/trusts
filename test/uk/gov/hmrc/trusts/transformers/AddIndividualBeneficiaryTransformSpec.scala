@@ -40,7 +40,7 @@ class AddIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers w
   "the add individual beneficiary transformer should" - {
 
     "add a new individual beneficiary when there are no beneficiaries existing" in {
-      val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-only-other-benfeciary.json")
+      val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-only-other-beneficiary.json")
 
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-individual-beneficiary.json")
 

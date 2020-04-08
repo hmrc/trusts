@@ -27,22 +27,23 @@ object DeltaTransform {
   implicit val reads: Reads[DeltaTransform] = Reads[DeltaTransform](
     value => {
       value.as[JsObject] match {
-        case json if json.keys.contains(PromoteTrusteeIndTransform.key) => (json \ PromoteTrusteeIndTransform.key).validate[PromoteTrusteeIndTransform]
-        case json if json.keys.contains(PromoteTrusteeOrgTransform.key) => (json \ PromoteTrusteeOrgTransform.key).validate[PromoteTrusteeOrgTransform]
-        case json if json.keys.contains(AmendLeadTrusteeIndTransform.key) => (json \ AmendLeadTrusteeIndTransform.key).validate[AmendLeadTrusteeIndTransform]
-        case json if json.keys.contains(AmendLeadTrusteeOrgTransform.key) => (json \ AmendLeadTrusteeOrgTransform.key).validate[AmendLeadTrusteeOrgTransform]
-        case json if json.keys.contains(AddTrusteeIndTransform.key)      => (json \ AddTrusteeIndTransform.key).validate[AddTrusteeIndTransform]
-        case json if json.keys.contains(AddTrusteeOrgTransform.key)      => (json \ AddTrusteeOrgTransform.key).validate[AddTrusteeOrgTransform]
-        case json if json.keys.contains(RemoveTrusteeTransform.key)      => (json \ RemoveTrusteeTransform.key).validate[RemoveTrusteeTransform]
-        case json if json.keys.contains(AmendTrusteeIndTransform.key)    => (json \ AmendTrusteeIndTransform.key).validate[AmendTrusteeIndTransform]
-        case json if json.keys.contains(AmendTrusteeOrgTransform.key)    => (json \ AmendTrusteeOrgTransform.key).validate[AmendTrusteeOrgTransform]
-        case json if json.keys.contains(AmendUnidentifiedBeneficiaryTransform.key)    => (json \ AmendUnidentifiedBeneficiaryTransform.key).validate[AmendUnidentifiedBeneficiaryTransform]
-        case json if json.keys.contains(RemoveBeneficiariesTransform.key)    => (json \ RemoveBeneficiariesTransform.key).validate[RemoveBeneficiariesTransform]
+        case json if json.keys.contains(PromoteTrusteeIndTransform.key)             => (json \ PromoteTrusteeIndTransform.key).validate[PromoteTrusteeIndTransform]
+        case json if json.keys.contains(PromoteTrusteeOrgTransform.key)             => (json \ PromoteTrusteeOrgTransform.key).validate[PromoteTrusteeOrgTransform]
+        case json if json.keys.contains(AmendLeadTrusteeIndTransform.key)           => (json \ AmendLeadTrusteeIndTransform.key).validate[AmendLeadTrusteeIndTransform]
+        case json if json.keys.contains(AmendLeadTrusteeOrgTransform.key)           => (json \ AmendLeadTrusteeOrgTransform.key).validate[AmendLeadTrusteeOrgTransform]
+        case json if json.keys.contains(AddTrusteeIndTransform.key)                 => (json \ AddTrusteeIndTransform.key).validate[AddTrusteeIndTransform]
+        case json if json.keys.contains(AddTrusteeOrgTransform.key)                 => (json \ AddTrusteeOrgTransform.key).validate[AddTrusteeOrgTransform]
+        case json if json.keys.contains(RemoveTrusteeTransform.key)                 => (json \ RemoveTrusteeTransform.key).validate[RemoveTrusteeTransform]
+        case json if json.keys.contains(AmendTrusteeIndTransform.key)               => (json \ AmendTrusteeIndTransform.key).validate[AmendTrusteeIndTransform]
+        case json if json.keys.contains(AmendTrusteeOrgTransform.key)               => (json \ AmendTrusteeOrgTransform.key).validate[AmendTrusteeOrgTransform]
+        case json if json.keys.contains(AmendUnidentifiedBeneficiaryTransform.key)  => (json \ AmendUnidentifiedBeneficiaryTransform.key).validate[AmendUnidentifiedBeneficiaryTransform]
+        case json if json.keys.contains(RemoveBeneficiariesTransform.key)           => (json \ RemoveBeneficiariesTransform.key).validate[RemoveBeneficiariesTransform]
         case json if json.keys.contains(AddUnidentifiedBeneficiaryTransform.key)    => (json \ AddUnidentifiedBeneficiaryTransform.key).validate[AddUnidentifiedBeneficiaryTransform]
-        case json if json.keys.contains(AmendIndividualBeneficiaryTransform.key) => (json \ AmendIndividualBeneficiaryTransform.key).validate[AmendIndividualBeneficiaryTransform]
-        case json if json.keys.contains(AddIndividualBeneficiaryTransform.key)    => (json \ AddIndividualBeneficiaryTransform.key).validate[AddIndividualBeneficiaryTransform]
-        case json if json.keys.contains(AddCharityBeneficiaryTransform.key)    => (json \ AddCharityBeneficiaryTransform.key).validate[AddCharityBeneficiaryTransform]
-        case json if json.keys.contains(AmendCharityBeneficiaryTransform.key) => (json \ AmendCharityBeneficiaryTransform.key).validate[AmendCharityBeneficiaryTransform]
+        case json if json.keys.contains(AmendIndividualBeneficiaryTransform.key)    => (json \ AmendIndividualBeneficiaryTransform.key).validate[AmendIndividualBeneficiaryTransform]
+        case json if json.keys.contains(AddIndividualBeneficiaryTransform.key)      => (json \ AddIndividualBeneficiaryTransform.key).validate[AddIndividualBeneficiaryTransform]
+        case json if json.keys.contains(AddCharityBeneficiaryTransform.key)         => (json \ AddCharityBeneficiaryTransform.key).validate[AddCharityBeneficiaryTransform]
+        case json if json.keys.contains(AmendCharityBeneficiaryTransform.key)       => (json \ AmendCharityBeneficiaryTransform.key).validate[AmendCharityBeneficiaryTransform]
+        case json if json.keys.contains(AddOtherBeneficiaryTransform.key)           => (json \ AddOtherBeneficiaryTransform.key).validate[AddOtherBeneficiaryTransform]
         case _ => throw new Exception(s"Don't know how to deserialise transform: $value")
       }
     }
@@ -66,6 +67,7 @@ object DeltaTransform {
       case transform: AddIndividualBeneficiaryTransform     => Json.obj(AddIndividualBeneficiaryTransform.key -> Json.toJson(transform)(AddIndividualBeneficiaryTransform.format))
       case transform: AddCharityBeneficiaryTransform        => Json.obj(AddCharityBeneficiaryTransform.key -> Json.toJson(transform)(AddCharityBeneficiaryTransform.format))
       case transform: AmendCharityBeneficiaryTransform      => Json.obj(AmendCharityBeneficiaryTransform.key -> Json.toJson(transform)(AmendCharityBeneficiaryTransform.format))
+      case transform: AddOtherBeneficiaryTransform          => Json.obj(AddOtherBeneficiaryTransform.key -> Json.toJson(transform)(AddOtherBeneficiaryTransform.format))
       case transform => throw new Exception(s"Don't know how to serialise transform: $transform")
     }
     Json.toJson(transformWrapper)

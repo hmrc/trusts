@@ -19,30 +19,30 @@ package uk.gov.hmrc.trusts.transformers
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType}
-import uk.gov.hmrc.trusts.models.variation.{CharityType, IdentificationType, IndividualDetailsType}
+import uk.gov.hmrc.trusts.models.variation.{CharityType, IdentificationType, IndividualDetailsType, OtherType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class AddCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers with OptionValues {
+class AddOtherBeneficiaryTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
-  val newBeneficiary = CharityType(
+  val newBeneficiary = OtherType(
     None,
     None,
-    "Charity",
+    "Other",
+    Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
     Some(false),
-    Some("50"),
-    Some(IdentificationOrgType(None, Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")))),
+    None,
     DateTime.parse("1990-10-10"),
     None
   )
 
-  "the add charity beneficiary transformer should" - {
+  "the add other beneficiary transformer should" - {
 
     "add a new charity beneficiary" in {
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-only-other-beneficiary.json")
 
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-charity-beneficiary.json")
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-other-beneficiary.json")
 
-      val transformer = new AddCharityBeneficiaryTransform(newBeneficiary)
+      val transformer = new AddOtherBeneficiaryTransform(newBeneficiary)
 
       val result = transformer.applyTransform(trustJson).get
 
