@@ -29,7 +29,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.variation.{CharityType, IdentificationType, IndividualDetailsType, UnidentifiedType}
+import uk.gov.hmrc.trusts.models.variation.{CharityType, IdentificationType, IndividualDetailsType, OtherType, UnidentifiedType}
 import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType, RemoveBeneficiary, Success}
 import uk.gov.hmrc.trusts.services.BeneficiaryTransformationService
 
@@ -358,5 +358,48 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       status(result) mustBe BAD_REQUEST
     }
 
+  }
+
+  "Add other beneficiary" - {
+
+    "must add a new add other beneficiary transform" in {
+      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+
+      val newBeneficiary = OtherType(
+        None,
+        None,
+        "Other",
+        Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
+        Some(false),
+        None,
+        DateTime.parse("1990-10-10"),
+        None
+      )
+
+      when(beneficiaryTransformationService.addOtherBeneficiaryTransformer(any(), any(), any()))
+        .thenReturn(Future.successful(true))
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(newBeneficiary))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.addOtherBeneficiary("aUTR").apply(request)
+
+      status(result) mustBe OK
+      verify(beneficiaryTransformationService).addOtherBeneficiaryTransformer("aUTR", "id", newBeneficiary)
+    }
+
+    "must return an error for malformed json" in {
+      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.parse("{}"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.addOtherBeneficiary("aUTR").apply(request)
+      status(result) mustBe BAD_REQUEST
+    }
   }
 }

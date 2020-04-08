@@ -363,7 +363,7 @@ object DisplayTrustLargeType {
   }
 }
 
-case class DisplayTrustOtherType(lineNo: String,
+case class DisplayTrustOtherType(lineNo: Option[String],
                                  bpMatchStatus: Option[String],
                                  description: String,
                                  address: Option[AddressType],
