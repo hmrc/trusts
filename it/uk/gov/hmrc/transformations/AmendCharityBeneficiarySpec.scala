@@ -92,7 +92,7 @@ class AmendCharityBeneficiarySpec extends FreeSpec with MustMatchers with Mockit
           contentAsJson(newResult) mustEqual expectedGetAfterAmendBeneficiaryJson
 
           dropTheDatabase(connection)
-        }
+        }.get
       }
 
     }
