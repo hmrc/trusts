@@ -254,7 +254,7 @@ object LeadTrusteeType {
 
 
 case class BeneficiaryType(individualDetails: Option[List[IndividualDetailsType]],
-                           company: Option[List[CompanyType]],
+                           company: Option[List[BeneficiaryCompanyType]],
                            trust: Option[List[BeneficiaryTrustType]],
                            charity: Option[List[BeneficiaryCharityType]],
                            unidentified: Option[List[UnidentifiedType]],
@@ -335,13 +335,13 @@ object OtherType {
   implicit val otherTypeFormat: Format[OtherType] = Json.format[OtherType]
 }
 
-case class CompanyType(organisationName: String,
-                       beneficiaryDiscretion: Option[Boolean],
-                       beneficiaryShareOfIncome: Option[String],
-                       identification: Option[IdentificationOrgType])
+case class BeneficiaryCompanyType(organisationName: String,
+                                  beneficiaryDiscretion: Option[Boolean],
+                                  beneficiaryShareOfIncome: Option[String],
+                                  identification: Option[IdentificationOrgType])
 
-object CompanyType {
-  implicit val companyTypeFormat: Format[CompanyType] = Json.format[CompanyType]
+object BeneficiaryCompanyType {
+  implicit val companyTypeFormat: Format[BeneficiaryCompanyType] = Json.format[BeneficiaryCompanyType]
 }
 
 case class NaturalPersonType(name: NameType,
