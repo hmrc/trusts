@@ -103,7 +103,7 @@ class AmendIndividualBeneficiarySpec extends FreeSpec with MustMatchers with Moc
           contentAsJson(newResult) mustEqual expectedGetAfterAmendBeneficiaryJson
 
           dropTheDatabase(connection)
-        }
+        }.get
       }
 
     }
