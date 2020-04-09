@@ -135,7 +135,7 @@ class BeneficiaryTransformationService @Inject()(
   }
 
   def addCompanyBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: BeneficiaryCompanyType): Future[Boolean] = {
-    Future.successful(false)
+    transformationService.addNewTransform(utr, internalId, AddCompanyBeneficiaryTransform(newBeneficiary))
   }
 
 }
