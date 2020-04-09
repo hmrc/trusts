@@ -20,20 +20,20 @@ import java.time.LocalDate
 
 import play.api.libs.json._
 
-case class AmendCharityBeneficiaryTransform(
-                                                index: Int,
-                                                amended: JsValue,
-                                                original: JsValue,
-                                                endDate: LocalDate
-                                              )
+case class AmendOtherBeneficiaryTransform(
+                                             index: Int,
+                                             amended: JsValue,
+                                             original: JsValue,
+                                             endDate: LocalDate
+                                           )
   extends AmendBeneficiaryTransform {
 
-  override val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'charity
+  override val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'other
 }
 
-object AmendCharityBeneficiaryTransform {
-  val key = "AmendCharityBeneficiaryTransform"
+object AmendOtherBeneficiaryTransform {
+  val key = "AmendOtherBeneficiaryTransform"
 
-  implicit val format: Format[AmendCharityBeneficiaryTransform] = Json.format[AmendCharityBeneficiaryTransform]
+  implicit val format: Format[AmendOtherBeneficiaryTransform] = Json.format[AmendOtherBeneficiaryTransform]
 }
 

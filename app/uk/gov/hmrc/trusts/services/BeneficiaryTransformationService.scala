@@ -133,4 +133,22 @@ class BeneficiaryTransformationService @Inject()(
   def addOtherBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: OtherType): Future[Boolean] = {
     transformationService.addNewTransform(utr, internalId, AddOtherBeneficiaryTransform(newBeneficiary))
   }
+
+  def amendOtherBeneficiaryTransformer(utr: String,
+                                         index: Int,
+                                         internalId: String,
+                                         amended: OtherType)
+                                        (implicit hc: HeaderCarrier): Future[Success.type] = {
+    getTransformedTrustJson(utr, internalId)
+      .map(findBeneficiaryJson(_, "other", index))
+      .flatMap(Future.fromTry)
+      .flatMap { beneficiaryJson =>
+
+        transformationService.addNewTransform(
+          utr,
+          internalId,
+          AmendOtherBeneficiaryTransform(index, Json.toJson(amended), beneficiaryJson, localDateService.now)
+        ).map(_ => Success)
+      }
+  }
 }

@@ -1,0 +1,89 @@
+{
+  "details":{
+    "trust":{
+      "entities":{
+        "leadTrustees":{
+          "lineNo":"1",
+          "bpMatchStatus":"01",
+          "name":"Trust Services LTD",
+          "phoneNumber":"0754545454",
+          "email":"me@you.com",
+          "identification":{
+            "utr":"5465416546"
+          },
+          "entityStart":"1998-02-12"
+        },
+        "trustees": [
+          {
+            "trusteeInd": {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "name": {
+                "firstName": "Tamara",
+                "middleName": "Hingis",
+                "lastName": "Jones"
+              },
+              "dateOfBirth": "1965-02-28",
+              "identification": {
+                "nino": "AA000000A"
+              },
+              "phoneNumber": "+447456788112",
+              "entityStart": "2017-02-28"
+            }
+          },
+          {
+            "trusteeOrg": {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "name": "MyOrg Incorporated",
+              "phoneNumber": "+447456788112",
+              "email": "a",
+              "identification": {
+                "utr": "1234567890"
+              },
+              "entityStart": "2017-02-28"
+            }
+          }
+        ],
+        "beneficiary": {
+          "other":[
+            {
+              "lineNo":"1",
+              "description":"Other 1",
+              "address":{
+                "line1":"House 1",
+                "line2":"Street 2",
+                "postCode":"NE1 1NE",
+                "country":"GB"
+              },
+              "entityStart":"2018-02-12"
+            },
+            {
+              "description":"Amended Description",
+              "address":{
+                "line1":"Amended House",
+                "line2":"Amended Street",
+                "postCode":"NE1 1EN",
+                "country":"GB"
+              },
+              "beneficiaryDiscretion":false,
+              "entityStart":"2019-02-12"
+            },
+            {
+              "lineNo":"3",
+              "description":"Other 3",
+              "address":{
+                "line1":"House 3",
+                "line2":"Street 2",
+                "postCode":"NE1 1NE",
+                "country":"GB"
+              },
+              "entityStart":"2020-02-12"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "otherfields" : "exist"
+}
