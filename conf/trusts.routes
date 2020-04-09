@@ -14,7 +14,7 @@ GET         /:utr/transformed                                   uk.gov.hmrc.trus
 
 GET         /:utr/transformed/lead-trustee                      uk.gov.hmrc.trusts.controllers.GetTrustController.getLeadTrustee(utr: String)
 
-GET         /:utr/trust-start-date                              uk.gov.hmrc.trusts.controllers.GetTrustController.getTrustSetupDate(utr: String)
+GET         /:utr/trust-details                                 uk.gov.hmrc.trusts.controllers.GetTrustController.getTrustDetails(utr: String)
 
 GET         /:utr/transformed/beneficiaries                     uk.gov.hmrc.trusts.controllers.GetTrustController.getBeneficiaries(utr: String)
 
