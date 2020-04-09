@@ -446,4 +446,58 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       status(result) mustBe BAD_REQUEST
     }
   }
+
+  "Amend other beneficiary" - {
+
+    val index = 0
+
+    "must add a new amend other beneficiary transform" in {
+
+      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+
+      val newOther = OtherType(
+        None,
+        None,
+        "Other Name",
+        None,
+        None,
+        None,
+        DateTime.parse("2010-01-01"),
+        None
+      )
+
+      when(beneficiaryTransformationService.amendOtherBeneficiaryTransformer(any(), any(), any(), any())(any()))
+        .thenReturn(Future.successful(Success))
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(newOther))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendOtherBeneficiary("aUTR", index).apply(request)
+
+      status(result) mustBe OK
+      verify(beneficiaryTransformationService)
+        .amendOtherBeneficiaryTransformer(
+          equalTo("aUTR"),
+          equalTo(index),
+          equalTo("id"),
+          equalTo(newOther)
+        )(any())
+
+    }
+
+    "must return an error for malformed json" in {
+      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.parse("{}"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendOtherBeneficiary("aUTR", index).apply(request)
+      status(result) mustBe BAD_REQUEST
+    }
+
+  }
 }

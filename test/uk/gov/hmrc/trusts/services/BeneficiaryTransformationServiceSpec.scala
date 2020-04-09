@@ -342,4 +342,54 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
       }
     }
   }
+
+  "must add a new amend other beneficiary transform using the transformation service" in {
+    val index = 0
+    val transformationService = mock[TransformationService]
+    val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
+    val newBeneficiary = OtherType(
+      None,
+      None,
+      "Other",
+      Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
+      Some(false),
+      None,
+      DateTime.parse("1990-10-10"),
+      None
+    )
+
+    val original: JsValue = Json.parse(
+      """
+        |{
+        |  "lineNo": "1",
+        |  "bpMatchStatus": "01",
+        |  "description":"Other 1",
+        |  "address":{
+        |    "line1":"House 1",
+        |    "line2":"Street 2",
+        |    "postCode":"NE1 1NE",
+        |    "country":"GB"
+        |  },
+        |  "entityStart":"2018-02-12"
+        |}
+        |""".stripMargin)
+
+    when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+    when(transformationService.getTransformedData(any(), any())(any()))
+      .thenReturn(Future.successful(TrustProcessedResponse(
+        buildInputJson("other", Seq(original)),
+        ResponseHeader("status", "formBundleNo")
+      )))
+
+    val result = service.amendOtherBeneficiaryTransformer("utr", index, "internalId", newBeneficiary)
+    whenReady(result) { _ =>
+
+      verify(transformationService).addNewTransform(
+        Matchers.eq("utr"),
+        Matchers.eq("internalId"),
+        Matchers.eq(AmendOtherBeneficiaryTransform(index, Json.toJson(newBeneficiary), original, LocalDateMock.now))
+      )
+    }
+  }
 }
