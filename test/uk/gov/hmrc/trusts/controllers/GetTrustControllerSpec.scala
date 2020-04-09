@@ -307,13 +307,13 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar with MustMatcher
     }
   }
 
-  ".getTrustSetupDate" should {
+  ".getTrustDetails" should {
     "return 403 - Forbidden with parked content" in {
 
       when(transformationService.getTransformedData(any(), any())(any()))
         .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
-      val result = getTrustController.getTrustSetupDate(utr).apply(FakeRequest(GET, s"/trusts/$utr/trust-start-date"))
+      val result = getTrustController.getTrustDetails(utr).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
 
       whenReady(result) { _ =>
         status(result) mustBe FORBIDDEN
@@ -326,14 +326,30 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar with MustMatcher
       when(transformationService.getTransformedData(any[String], any[String])(any[HeaderCarrier]))
         .thenReturn(Future.successful(processedResponse))
 
-      val result = getTrustController.getTrustSetupDate(utr).apply(FakeRequest(GET, s"/trusts/$utr/trust-start-date"))
+      val result = getTrustController.getTrustDetails(utr).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
 
       whenReady(result) { _ =>
         verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
         verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any[HeaderCarrier])
         status(result) mustBe OK
         contentType(result) mustBe Some(JSON)
-        contentAsJson(result) mustBe Json.parse("""{"startDate":"1920-03-28"}""")
+        contentAsJson(result) mustBe Json.parse(
+          """
+            |{
+            | "startDate":"1920-03-28",
+            | "lawCountry":"AD",
+            | "administrationCountry":"GB",
+            | "residentialStatus": {
+            |   "uk":{
+            |     "scottishLaw":false,
+            |     "preOffShore":"GB"
+            |   }
+            | },
+            | "typeOfTrust":"Will Trust or Intestacy Trust",
+            | "deedOfVariation":"Previously there was only an absolute interest under the will",
+            | "interVivos":true,
+            | "efrbsStartDate": "1920-02-28"
+            |}""".stripMargin)
       }
     }
     "return 500 - Internal server error for invalid content" in {
@@ -341,7 +357,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar with MustMatcher
       when(transformationService.getTransformedData(any(), any())(any()))
         .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
-      val result = getTrustController.getTrustSetupDate(utr).apply(FakeRequest(GET, s"/trusts/$utr/trust-start-date"))
+      val result = getTrustController.getTrustDetails(utr).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
 
       whenReady(result) { _ =>
         status(result) mustBe INTERNAL_SERVER_ERROR

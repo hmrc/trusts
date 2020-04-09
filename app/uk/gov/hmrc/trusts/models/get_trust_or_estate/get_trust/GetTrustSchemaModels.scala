@@ -169,7 +169,7 @@ object DisplayTrustLeadTrusteeType {
 }
 
 case class DisplayTrustBeneficiaryType(individualDetails: Option[List[DisplayTrustIndividualDetailsType]],
-                                       company: Option[List[DisplayTrustCompanyType]],
+                                       company: Option[List[DisplayTrustBeneficiaryCompanyType]],
                                        trust: Option[List[DisplayTrustBeneficiaryTrustType]],
                                        charity: Option[List[DisplayTrustCharityType]],
                                        unidentified: Option[List[DisplayTrustUnidentifiedType]],
@@ -213,19 +213,19 @@ object DisplayTrustIndividualDetailsType {
   }
 }
 
-case class DisplayTrustCompanyType(lineNo: String,
-                                   bpMatchStatus: Option[String],
-                                   organisationName: String,
-                                   beneficiaryDiscretion: Option[Boolean],
-                                   beneficiaryShareOfIncome: Option[String],
-                                   identification: Option[DisplayTrustIdentificationOrgType],
-                                   entityStart: String)
+case class DisplayTrustBeneficiaryCompanyType(lineNo: Option[String],
+                                              bpMatchStatus: Option[String],
+                                              organisationName: String,
+                                              beneficiaryDiscretion: Option[Boolean],
+                                              beneficiaryShareOfIncome: Option[String],
+                                              identification: Option[DisplayTrustIdentificationOrgType],
+                                              entityStart: String)
 
-object DisplayTrustCompanyType {
-  implicit val companyTypeFormat: Format[DisplayTrustCompanyType] = Json.format[DisplayTrustCompanyType]
+object DisplayTrustBeneficiaryCompanyType {
+  implicit val companyTypeFormat: Format[DisplayTrustBeneficiaryCompanyType] = Json.format[DisplayTrustBeneficiaryCompanyType]
 
-  val writeToMaintain : Writes[DisplayTrustCompanyType] = new Writes[DisplayTrustCompanyType] {
-    override def writes(o: DisplayTrustCompanyType): JsValue = Json.obj(
+  val writeToMaintain : Writes[DisplayTrustBeneficiaryCompanyType] = new Writes[DisplayTrustBeneficiaryCompanyType] {
+    override def writes(o: DisplayTrustBeneficiaryCompanyType): JsValue = Json.obj(
       "lineNo" -> o.lineNo,
       "bpMatchStatus" -> o.bpMatchStatus,
       "organisationName" -> o.organisationName,

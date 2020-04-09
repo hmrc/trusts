@@ -112,9 +112,9 @@ object NaturalPersonType {
 
 case class BeneficiaryType(
                             individualDetails: Option[List[IndividualDetailsType]],
-                            company: Option[List[CompanyType]],
+                            company: Option[List[BeneficiaryCompanyType]],
                             trust: Option[List[BeneficiaryTrustType]],
-                            charity: Option[List[CharityType]],
+                            charity: Option[List[BeneficiaryCharityType]],
                             unidentified: Option[List[UnidentifiedType]],
                             large: Option[List[LargeType]],
                             other: Option[List[OtherType]]
@@ -186,17 +186,17 @@ object IndividualDetailsType {
   implicit val individualDetailsTypeFormat: Format[IndividualDetailsType] = Json.format[IndividualDetailsType]
 }
 
-case class CompanyType(lineNo: Option[String],
-                       bpMatchStatus: Option[String],
-                       organisationName: String,
-                       beneficiaryDiscretion: Option[Boolean],
-                       beneficiaryShareOfIncome: Option[String],
-                       identification: Option[IdentificationOrgType],
-                       entityStart: DateTime,
-                       entityEnd: Option[DateTime])
+case class BeneficiaryCompanyType(lineNo: Option[String],
+                                  bpMatchStatus: Option[String],
+                                  organisationName: String,
+                                  beneficiaryDiscretion: Option[Boolean],
+                                  beneficiaryShareOfIncome: Option[String],
+                                  identification: Option[IdentificationOrgType],
+                                  entityStart: DateTime,
+                                  entityEnd: Option[DateTime])
 
-object CompanyType {
-  implicit val companyTypeFormat: Format[CompanyType] = Json.format[CompanyType]
+object BeneficiaryCompanyType {
+  implicit val companyTypeFormat: Format[BeneficiaryCompanyType] = Json.format[BeneficiaryCompanyType]
 }
 
 case class BeneficiaryTrustType(lineNo: Option[String],
@@ -212,17 +212,17 @@ object BeneficiaryTrustType {
   implicit val beneficiaryTrustTypeFormat: Format[BeneficiaryTrustType] = Json.format[BeneficiaryTrustType]
 }
 
-case class CharityType(lineNo: Option[String],
-                       bpMatchStatus: Option[String],
-                       organisationName: String,
-                       beneficiaryDiscretion: Option[Boolean],
-                       beneficiaryShareOfIncome: Option[String],
-                       identification: Option[IdentificationOrgType],
-                       entityStart: DateTime,
-                       entityEnd: Option[DateTime])
+case class BeneficiaryCharityType(lineNo: Option[String],
+                                  bpMatchStatus: Option[String],
+                                  organisationName: String,
+                                  beneficiaryDiscretion: Option[Boolean],
+                                  beneficiaryShareOfIncome: Option[String],
+                                  identification: Option[IdentificationOrgType],
+                                  entityStart: DateTime,
+                                  entityEnd: Option[DateTime])
 
-object CharityType {
-  implicit val charityTypeFormat: Format[CharityType] = Json.format[CharityType]
+object BeneficiaryCharityType {
+  implicit val charityTypeFormat: Format[BeneficiaryCharityType] = Json.format[BeneficiaryCharityType]
 }
 
 case class WillType(

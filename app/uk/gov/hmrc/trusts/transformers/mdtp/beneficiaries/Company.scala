@@ -32,9 +32,9 @@ object Company {
       },
       beneficiaries => {
 
-        val beneficiariesUpdated = JsArray(beneficiaries.as[List[DisplayTrustCompanyType]].map {
+        val beneficiariesUpdated = JsArray(beneficiaries.as[List[DisplayTrustBeneficiaryCompanyType]].map {
           beneficiary =>
-            Json.toJson(beneficiary)(DisplayTrustCompanyType.writeToMaintain)
+            Json.toJson(beneficiary)(DisplayTrustBeneficiaryCompanyType.writeToMaintain)
         })
 
         JsPath.json.update(

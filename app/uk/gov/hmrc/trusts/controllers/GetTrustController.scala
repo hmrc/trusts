@@ -79,22 +79,28 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       case _ => Forbidden
     }
 
-  def getTrustSetupDate(utr: String): Action[AnyContent] =
-    getItemAtPath(utr, (JsPath \ 'details \ 'trust \ 'details \ 'startDate), "startDate")
+  def getTrustDetails(utr: String): Action[AnyContent] =
+    getItemAtPath(utr, JsPath \ 'details \ 'trust \ 'details)
 
   def getTrustees(utr: String) : Action[AnyContent] =
-    getItemAtPath(utr, (JsPath \ 'details \ 'trust \ 'entities \ 'trustees), "trustees")
+    getItemAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'trustees, "trustees")
 
   def getBeneficiaries(utr: String) : Action[AnyContent] =
-    getItemAtPath(utr, (JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary), "beneficiary")
+    getItemAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary, "beneficiary")
 
-  private def getItemAtPath(utr: String, path: JsPath, fieldName: String) = {
+  private def getItemAtPath(utr: String, path: JsPath, fieldName: String): Action[AnyContent] = {
+    getItemAtPath(utr, path, json => Json.obj(fieldName -> json))
+  }
+
+  private def getItemAtPath(utr: String, path: JsPath): Action[AnyContent] = {
+    getItemAtPath(utr, path, json => json)
+  }
+
+  private def getItemAtPath(utr: String, path: JsPath, insertIntoObject: JsValue => JsValue): Action[AnyContent] = {
     doGet(utr, applyTransformations = true) {
       case processed: TrustProcessedResponse =>
         processed.transform.map {
           case transformed: TrustProcessedResponse =>
-
-            def insertIntoObject(json: JsValue) = Json.obj(fieldName -> json)
 
             Ok(transformed
               .getTrust.transform(path.json.pick)

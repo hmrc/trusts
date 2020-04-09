@@ -14,7 +14,7 @@ GET         /:utr/transformed                                   uk.gov.hmrc.trus
 
 GET         /:utr/transformed/lead-trustee                      uk.gov.hmrc.trusts.controllers.GetTrustController.getLeadTrustee(utr: String)
 
-GET         /:utr/trust-start-date                              uk.gov.hmrc.trusts.controllers.GetTrustController.getTrustSetupDate(utr: String)
+GET         /:utr/trust-details                                 uk.gov.hmrc.trusts.controllers.GetTrustController.getTrustDetails(utr: String)
 
 GET         /:utr/transformed/beneficiaries                     uk.gov.hmrc.trusts.controllers.GetTrustController.getBeneficiaries(utr: String)
 
@@ -49,5 +49,7 @@ POST        /amend-charity-beneficiary/:utr/:index              uk.gov.hmrc.trus
 POST        /add-other-beneficiary/:utr                         uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.addOtherBeneficiary(utr: String)
 
 POST        /amend-other-beneficiary/:utr/:index                uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendOtherBeneficiary(utr: String, index: Int)
+
+POST        /add-company-beneficiary/:utr                       uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.addCompanyBeneficiary(utr: String)
 
 PUT         /:utr/beneficiaries/remove                          uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.removeBeneficiary(utr: String)

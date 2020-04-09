@@ -17,22 +17,22 @@
 package uk.gov.hmrc.trusts.transformers
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.variation.BeneficiaryCharityType
+import uk.gov.hmrc.trusts.models.variation.BeneficiaryCompanyType
 
-case class AddCharityBeneficiaryTransform(newBeneficiary: BeneficiaryCharityType)
+case class AddCompanyBeneficiaryTransform(newBeneficiary: BeneficiaryCompanyType)
   extends DeltaTransform
   with JsonOperations {
 
-  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'charity
+  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'company
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     addToList(input, path, Json.toJson(newBeneficiary))
   }
 }
 
-object AddCharityBeneficiaryTransform {
+object AddCompanyBeneficiaryTransform {
 
-  val key = "AddCharityBeneficiaryTransform"
+  val key = "AddCompanyBeneficiaryTransform"
 
-  implicit val format: Format[AddCharityBeneficiaryTransform] = Json.format[AddCharityBeneficiaryTransform]
+  implicit val format: Format[AddCompanyBeneficiaryTransform] = Json.format[AddCompanyBeneficiaryTransform]
 }

@@ -19,6 +19,7 @@ package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
 import play.api.libs.json._
+import uk.gov.hmrc.trusts.models.variation.BeneficiaryCharityType
 
 case class AmendCharityBeneficiaryTransform(
                                                 index: Int,
