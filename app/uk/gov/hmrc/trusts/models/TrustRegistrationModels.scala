@@ -256,7 +256,7 @@ object LeadTrusteeType {
 case class BeneficiaryType(individualDetails: Option[List[IndividualDetailsType]],
                            company: Option[List[CompanyType]],
                            trust: Option[List[BeneficiaryTrustType]],
-                           charity: Option[List[CharityType]],
+                           charity: Option[List[BeneficiaryCharityType]],
                            unidentified: Option[List[UnidentifiedType]],
                            large: Option[List[LargeType]],
                            other: Option[List[OtherType]])
@@ -294,13 +294,13 @@ object IdentificationOrgType {
   implicit val trustBeneficiaryIdentificationFormat: Format[IdentificationOrgType] = Json.format[IdentificationOrgType]
 }
 
-case class CharityType(organisationName: String,
-                       beneficiaryDiscretion: Option[Boolean],
-                       beneficiaryShareOfIncome: Option[String],
-                       identification: Option[IdentificationOrgType])
+case class BeneficiaryCharityType(organisationName: String,
+                                  beneficiaryDiscretion: Option[Boolean],
+                                  beneficiaryShareOfIncome: Option[String],
+                                  identification: Option[IdentificationOrgType])
 
-object CharityType {
-  implicit val charityTypeFormat: Format[CharityType] = Json.format[CharityType]
+object BeneficiaryCharityType {
+  implicit val charityTypeFormat: Format[BeneficiaryCharityType] = Json.format[BeneficiaryCharityType]
 }
 
 case class UnidentifiedType(description: String,

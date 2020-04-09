@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.transformers
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType}
-import uk.gov.hmrc.trusts.models.variation.{CharityType, IdentificationType, IndividualDetailsType, OtherType}
+import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, IdentificationType, IndividualDetailsType, OtherType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AddOtherBeneficiaryTransformSpec extends FreeSpec with MustMatchers with OptionValues {

@@ -22,7 +22,7 @@ import play.api.libs.json.{JsError, JsString, JsSuccess, JsValue, Json}
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveBeneficiary
-import uk.gov.hmrc.trusts.models.variation.{CharityType, IndividualDetailsType, OtherType, UnidentifiedType}
+import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, IndividualDetailsType, OtherType, UnidentifiedType}
 import uk.gov.hmrc.trusts.services.BeneficiaryTransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
@@ -125,7 +125,7 @@ class BeneficiaryTransformationController @Inject()(
 
   def addCharityBeneficiary(utr: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
-      request.body.validate[CharityType] match {
+      request.body.validate[BeneficiaryCharityType] match {
         case JsSuccess(newBeneficiary, _) =>
           beneficiaryTransformationService.addCharityBeneficiaryTransformer(
             utr,
@@ -143,7 +143,7 @@ class BeneficiaryTransformationController @Inject()(
 
   def amendCharityBeneficiary(utr: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
     implicit request =>
-      request.body.validate[CharityType] match {
+      request.body.validate[BeneficiaryCharityType] match {
         case JsSuccess(charity, _) =>
           beneficiaryTransformationService.amendCharityBeneficiaryTransformer(
             utr,

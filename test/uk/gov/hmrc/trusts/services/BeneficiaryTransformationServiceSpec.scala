@@ -30,7 +30,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.{CharityType, IdentificationType, IndividualDetailsType, OtherType, UnidentifiedType}
+import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, IdentificationType, IndividualDetailsType, OtherType, UnidentifiedType}
 import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType, RemoveBeneficiary}
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
@@ -225,7 +225,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
     "must add a new add charity beneficiary transform using the transformation service" in {
       val transformationService = mock[TransformationService]
       val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
-      val newBeneficiary = CharityType(
+      val newBeneficiary = BeneficiaryCharityType(
         None,
         None,
         "Charity",
@@ -250,7 +250,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
       val index = 0
       val transformationService = mock[TransformationService]
       val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
-      val newCharity = CharityType(
+      val newCharity = BeneficiaryCharityType(
         None,
         None,
         "Charity Name",

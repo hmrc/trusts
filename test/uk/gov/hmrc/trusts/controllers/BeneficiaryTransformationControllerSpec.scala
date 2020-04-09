@@ -29,7 +29,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.variation.{CharityType, IdentificationType, IndividualDetailsType, OtherType, UnidentifiedType}
+import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, IdentificationType, IndividualDetailsType, OtherType, UnidentifiedType}
 import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType, RemoveBeneficiary, Success}
 import uk.gov.hmrc.trusts.services.BeneficiaryTransformationService
 
@@ -269,7 +269,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
       val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
 
-      val newBeneficiary = CharityType(
+      val newBeneficiary = BeneficiaryCharityType(
         None,
         None,
         "Charity",
@@ -315,7 +315,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
       val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
 
-      val newCharity = CharityType(
+      val newCharity = BeneficiaryCharityType(
         None,
         None,
         "Charity Name",

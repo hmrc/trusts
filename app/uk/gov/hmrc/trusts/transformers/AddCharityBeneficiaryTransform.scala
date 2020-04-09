@@ -17,9 +17,9 @@
 package uk.gov.hmrc.trusts.transformers
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.variation.CharityType
+import uk.gov.hmrc.trusts.models.variation.BeneficiaryCharityType
 
-case class AddCharityBeneficiaryTransform(newBeneficiary: CharityType)
+case class AddCharityBeneficiaryTransform(newBeneficiary: BeneficiaryCharityType)
   extends DeltaTransform
   with JsonOperations {
 

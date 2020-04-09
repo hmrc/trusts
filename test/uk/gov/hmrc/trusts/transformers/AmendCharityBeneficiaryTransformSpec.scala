@@ -22,7 +22,7 @@ import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.trusts.models.IdentificationOrgType
-import uk.gov.hmrc.trusts.models.variation.CharityType
+import uk.gov.hmrc.trusts.models.variation.BeneficiaryCharityType
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AmendCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers with OptionValues {
@@ -36,7 +36,7 @@ class AmendCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers wi
         val beforeJson = JsonUtils.getJsonValueFromFile("trusts-charity-beneficiary-transform-before.json")
         val afterJson = JsonUtils.getJsonValueFromFile("trusts-charity-beneficiary-transform-after.json")
 
-        val amended = CharityType(
+        val amended = BeneficiaryCharityType(
           lineNo = None,
           bpMatchStatus = None,
           "Charity Name",
@@ -80,7 +80,7 @@ class AmendCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers wi
         val afterJson =
           JsonUtils.getJsonValueFromFile("trusts-charity-beneficiary-transform-after-declaration.json")
 
-        val amended = CharityType(
+        val amended = BeneficiaryCharityType(
           lineNo = None,
           bpMatchStatus = None,
           "Updated Charity Name",
@@ -121,7 +121,7 @@ class AmendCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers wi
         val afterJson =
           JsonUtils.getJsonValueFromFile("trusts-new-charity-beneficiary-transform-after-declaration.json")
 
-        val amended = CharityType(
+        val amended = BeneficiaryCharityType(
           lineNo = None,
           bpMatchStatus = None,
           "Amended Charity Name",
