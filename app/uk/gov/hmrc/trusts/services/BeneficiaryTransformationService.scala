@@ -21,7 +21,7 @@ import play.api.libs.json.{JsObject, JsValue, Json, __}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
-import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, IndividualDetailsType, OtherType, UnidentifiedType}
+import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, IndividualDetailsType, OtherType, UnidentifiedType, BeneficiaryCompanyType}
 import uk.gov.hmrc.trusts.models.{RemoveBeneficiary, Success}
 import uk.gov.hmrc.trusts.transformers._
 
@@ -133,4 +133,9 @@ class BeneficiaryTransformationService @Inject()(
   def addOtherBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: OtherType): Future[Boolean] = {
     transformationService.addNewTransform(utr, internalId, AddOtherBeneficiaryTransform(newBeneficiary))
   }
+
+  def addCompanyBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: BeneficiaryCompanyType): Future[Boolean] = {
+    Future.successful(false)
+  }
+
 }

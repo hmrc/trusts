@@ -22,7 +22,7 @@ import play.api.libs.json.{JsError, JsString, JsSuccess, JsValue, Json}
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveBeneficiary
-import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, IndividualDetailsType, OtherType, UnidentifiedType}
+import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryCompanyType, IndividualDetailsType, OtherType, UnidentifiedType}
 import uk.gov.hmrc.trusts.services.BeneficiaryTransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
@@ -135,7 +135,7 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[BeneficiaryTransformationController][addCharityBeneficiary] Supplied json could not be read as an Charity Beneficiary - $errors")
+          logger.warn(s"[BeneficiaryTransformationController][addCharityBeneficiary] Supplied json could not be read as a Charity Beneficiary - $errors")
           Future.successful(BadRequest)
       }
     }
@@ -177,4 +177,23 @@ class BeneficiaryTransformationController @Inject()(
       }
     }
   }
+
+  def addCompanyBeneficiary(utr: String): Action[JsValue] = identify.async(parse.json) {
+    implicit request => {
+      request.body.validate[BeneficiaryCompanyType] match {
+        case JsSuccess(newBeneficiary, _) =>
+          beneficiaryTransformationService.addCompanyBeneficiaryTransformer(
+            utr,
+            request.identifier,
+            newBeneficiary
+          ) map { _ =>
+            Ok
+          }
+        case JsError(errors) =>
+          logger.warn(s"[BeneficiaryTransformationController][addCompanyBeneficiary] Supplied json could not be read as a Company Beneficiary - $errors")
+          Future.successful(BadRequest)
+      }
+    }
+  }
+
 }
