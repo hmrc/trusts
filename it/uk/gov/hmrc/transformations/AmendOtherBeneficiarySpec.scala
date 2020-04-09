@@ -95,7 +95,7 @@ class AmendOtherBeneficiarySpec extends FreeSpec with MustMatchers with MockitoS
           contentAsJson(newResult) mustEqual expectedGetAfterAmendBeneficiaryJson
 
           dropTheDatabase(connection)
-        }
+        }.get
       }
 
     }
