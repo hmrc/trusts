@@ -29,3 +29,10 @@ case class AddCompanyBeneficiaryTransform(newBeneficiary: BeneficiaryCompanyType
     addToList(input, path, Json.toJson(newBeneficiary))
   }
 }
+
+object AddCompanyBeneficiaryTransform {
+
+  val key = "AddCompanyBeneficiaryTransform"
+
+  implicit val format: Format[AddCompanyBeneficiaryTransform] = Json.format[AddCompanyBeneficiaryTransform]
+}
