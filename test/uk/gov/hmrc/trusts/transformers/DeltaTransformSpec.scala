@@ -119,6 +119,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         UnidentifiedType(None, None, "desc", None, None, DateTime.parse("2010-10-10"), None)
       )
 
+      val addIndividualBeneficiaryTransform = AddIndividualBeneficiaryTransform(individualBeneficiary)
+
       val json = Json.parse(
         s"""{
           |        "deltaTransforms" : [
@@ -151,6 +153,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |            },
           |            {
           |               "AddUnidentifiedBeneficiaryTransform": ${Json.toJson(addUnidentifiedBeneficiaryTransform)}
+          |            },
+          |            {
+          |               "AddIndividualBeneficiaryTransform": ${Json.toJson(addIndividualBeneficiaryTransform)}
           |            }
           |        ]
           |    }
@@ -166,7 +171,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           amendTrusteeOrgTransform,
           amendIndividualBenTransform,
           addTrustBeneficiaryTransform,
-          addUnidentifiedBeneficiaryTransform
+          addUnidentifiedBeneficiaryTransform,
+          addIndividualBeneficiaryTransform
         )
       )
 
