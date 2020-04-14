@@ -215,4 +215,23 @@ class BeneficiaryTransformationController @Inject()(
     }
   }
 
+  def amendCompanyBeneficiary(utr: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
+    implicit request =>
+      request.body.validate[BeneficiaryCompanyType] match {
+        case JsSuccess(companyBeneficiary, _) =>
+          beneficiaryTransformationService.amendCompanyBeneficiaryTransformer(
+            utr,
+            index,
+            request.identifier,
+            companyBeneficiary
+          ) map { _ =>
+            Ok
+          }
+        case JsError(errors) =>
+          logger.warn(s"[BeneficiaryTransformationController][amendCompanyBeneficiary]" +
+            s" Supplied payload could not be read as a BeneficiaryCompanyType - $errors")
+          Future.successful(BadRequest)
+      }
+  }
+
 }
