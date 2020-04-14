@@ -21,9 +21,9 @@ import java.time.LocalDate
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.Json
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryTrustType, IndividualDetailsType, UnidentifiedType}
 import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType}
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationOrgType, DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType, DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType}
-import uk.gov.hmrc.trusts.models.variation.{BeneficiaryTrustType, IndividualDetailsType, UnidentifiedType}
 
 class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
@@ -88,6 +88,22 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         DateTime.parse("1990-10-10"),
         None
       )
+
+      val amendCharityBeneficiaryTransform = {
+        val originalCharityBeneficiary = BeneficiaryCharityType(
+          None, None, "Organisation Name", Some(true),
+          None, None, DateTime.parse("2010-02-23"), None
+        )
+        val newCharityBeneficiary = BeneficiaryCharityType(
+          None, None, "New Organisation Name", Some(true),
+          None, None, DateTime.parse("2010-02-23"), None
+        )
+        AmendCharityBeneficiaryTransform(
+          3,
+          Json.toJson(newCharityBeneficiary),
+          Json.toJson(originalCharityBeneficiary),
+          LocalDate.of(2016, 6, 23))
+      }
 
       val addTrustBeneficiaryTransform = AddTrustBeneficiaryTransform(newTrustBeneficiary)
 
@@ -156,6 +172,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |            },
           |            {
           |               "AddIndividualBeneficiaryTransform": ${Json.toJson(addIndividualBeneficiaryTransform)}
+          |             },
+          |             {
+          |               "AmendCharityBeneficiaryTransform": ${Json.toJson(amendCharityBeneficiaryTransform)}
           |            }
           |        ]
           |    }
@@ -172,7 +191,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           amendIndividualBenTransform,
           addTrustBeneficiaryTransform,
           addUnidentifiedBeneficiaryTransform,
-          addIndividualBeneficiaryTransform
+          addIndividualBeneficiaryTransform,
+          amendCharityBeneficiaryTransform
         )
       )
 
