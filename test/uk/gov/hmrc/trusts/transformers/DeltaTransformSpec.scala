@@ -42,6 +42,18 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         None
       )
 
+      val newLeadTrusteeOrg = DisplayTrustLeadTrusteeOrgType(
+        None,
+        None,
+        "Organisation",
+        "phoneNumber",
+        None,
+        DisplayTrustIdentificationOrgType(
+          None, Some("utr"), None
+        ),
+        None
+      )
+
       val newTrusteeInd = DisplayTrustTrusteeIndividualType(
         Some("lineNo"),
         Some("bpMatchStatus"),
@@ -109,6 +121,10 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
       val amendLeadTrusteeIndTransform = AmendLeadTrusteeIndTransform(newLeadTrustee)
 
+      val amendLeadTrusteeOrgTransform = AmendLeadTrusteeOrgTransform(
+        newLeadTrusteeOrg
+      )
+
       val addTrusteeIndTransform = AddTrusteeIndTransform(newTrusteeInd)
 
       val addTrusteeOrgTransform = AddTrusteeOrgTransform(newTrusteeOrg)
@@ -161,6 +177,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |                "AmendLeadTrusteeIndTransform": ${Json.toJson(amendLeadTrusteeIndTransform)}
           |            },
           |            {
+          |                "AmendLeadTrusteeOrgTransform": ${Json.toJson(amendLeadTrusteeOrgTransform)}
+          |            },
+          |            {
           |                "AddTrusteeIndTransform": ${Json.toJson(addTrusteeIndTransform)}
           |            },
           |            {
@@ -208,6 +227,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
       val data = ComposedDeltaTransform(Seq(
           amendLeadTrusteeIndTransform,
+          amendLeadTrusteeOrgTransform,
           addTrusteeIndTransform,
           addTrusteeOrgTransform,
           removeTrusteeTransform,
