@@ -30,6 +30,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
   "DeltaTransform" - {
 
     "serialise and deserialise json correctly" in {
+      val genericOriginalData = Json.obj("originalKeys" -> "originalData")
+      val genericAmendedData = Json.obj("newKeys" -> "newData")
+      val amendedDate = LocalDate.of(2012, 3, 14)
 
       val newLeadTrustee = DisplayTrustLeadTrusteeIndType(
         None,
@@ -89,22 +92,6 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         None
       )
 
-      val amendCharityBeneficiaryTransform = {
-        val originalCharityBeneficiary = BeneficiaryCharityType(
-          None, None, "Organisation Name", Some(true),
-          None, None, DateTime.parse("2010-02-23"), None
-        )
-        val newCharityBeneficiary = BeneficiaryCharityType(
-          None, None, "New Organisation Name", Some(true),
-          None, None, DateTime.parse("2010-02-23"), None
-        )
-        AmendCharityBeneficiaryTransform(
-          3,
-          Json.toJson(newCharityBeneficiary),
-          Json.toJson(originalCharityBeneficiary),
-          LocalDate.of(2016, 6, 23))
-      }
-
       val addTrustBeneficiaryTransform = AddTrustBeneficiaryTransform(newTrustBeneficiary)
 
       val amendLeadTrusteeTransform = AmendLeadTrusteeIndTransform(newLeadTrustee)
@@ -126,6 +113,10 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
       val amendTrusteeIndTransform = AmendTrusteeIndTransform(0, newTrusteeInd, Json.obj())
       val amendTrusteeOrgTransform = AmendTrusteeOrgTransform(0, newTrusteeOrg, Json.obj())
+
+      val amendCharityBeneficiaryTransform = AmendCharityBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate)
+      val amendOtherBeneficiaryTransform = AmendOtherBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate)
+      val amendUnidentifiedBeneficiaryTransform = AmendUnidentifiedBeneficiaryTransform(0, "New Description", genericOriginalData, amendedDate)
 
       val amendIndividualBenTransform = AmendIndividualBeneficiaryTransform(0, Json.toJson(individualBeneficiary), Json.obj(), LocalDate.parse("2020-03-25"))
 
@@ -158,6 +149,12 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |            },
           |            {
           |               "AmendCharityBeneficiaryTransform": ${Json.toJson(amendCharityBeneficiaryTransform)}
+          |            },
+          |            {
+          |               "AmendOtherBeneficiaryTransform": ${Json.toJson(amendOtherBeneficiaryTransform)}
+          |            },
+          |            {
+          |               "AmendUnidentifiedBeneficiaryTransform": ${Json.toJson(amendUnidentifiedBeneficiaryTransform)}
           |            }
           |        ]
           |    }
@@ -172,7 +169,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           amendTrusteeOrgTransform,
           amendIndividualBenTransform,
           addTrustBeneficiaryTransform,
-          amendCharityBeneficiaryTransform
+          amendCharityBeneficiaryTransform,
+          amendOtherBeneficiaryTransform,
+          amendUnidentifiedBeneficiaryTransform
         )
       )
 
