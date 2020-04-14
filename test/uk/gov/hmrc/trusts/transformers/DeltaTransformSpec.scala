@@ -107,7 +107,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
       val addTrustBeneficiaryTransform = AddTrustBeneficiaryTransform(newTrustBeneficiary)
 
-      val amendLeadTrusteeTransform = AmendLeadTrusteeIndTransform(newLeadTrustee)
+      val amendLeadTrusteeIndTransform = AmendLeadTrusteeIndTransform(newLeadTrustee)
 
       val addTrusteeIndTransform = AddTrusteeIndTransform(newTrusteeInd)
 
@@ -158,7 +158,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         s"""{
           |        "deltaTransforms" : [
           |            {
-          |                "AmendLeadTrusteeIndTransform": ${Json.toJson(amendLeadTrusteeTransform)}
+          |                "AmendLeadTrusteeIndTransform": ${Json.toJson(amendLeadTrusteeIndTransform)}
           |            },
           |            {
           |                "AddTrusteeIndTransform": ${Json.toJson(addTrusteeIndTransform)}
@@ -207,7 +207,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |""".stripMargin)
 
       val data = ComposedDeltaTransform(Seq(
-          amendLeadTrusteeTransform,
+          amendLeadTrusteeIndTransform,
           addTrusteeIndTransform,
           addTrusteeOrgTransform,
           removeTrusteeTransform,
