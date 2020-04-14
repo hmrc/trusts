@@ -18,13 +18,13 @@ package uk.gov.hmrc.trusts.transformers
 
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
-import uk.gov.hmrc.trusts.models.variation.BeneficiaryCompanyType
+import uk.gov.hmrc.trusts.models.variation.BeneficiaryTrustType
 import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class AddCompanyBeneficiaryTransformSpec extends FreeSpec with MustMatchers with OptionValues {
+class AddTrustBeneficiaryTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
-  val newBeneficiary = BeneficiaryCompanyType(
+  val newBeneficiary = BeneficiaryTrustType(
     None,
     None,
     "Organisation Name",
@@ -38,14 +38,14 @@ class AddCompanyBeneficiaryTransformSpec extends FreeSpec with MustMatchers with
   )
 
 
-  "the add company beneficiary transformer should" - {
+  "the add trust beneficiary transformer should" - {
 
-    "add a new company beneficiary" in {
+    "add a new trust beneficiary" in {
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-only-other-beneficiary.json")
 
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-company-beneficiary.json")
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-trust-beneficiary.json")
 
-      val transformer = new AddCompanyBeneficiaryTransform(newBeneficiary)
+      val transformer = new AddTrustBeneficiaryTransform(newBeneficiary)
 
       val result = transformer.applyTransform(trustJson).get
 
