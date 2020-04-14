@@ -142,6 +142,13 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         Json.obj()
       )
 
+      val promoteTrusteeOrgTransform = PromoteTrusteeOrgTransform(
+        2,
+        newLeadTrusteeOrg,
+        LocalDate.parse("2012-02-06"),
+        Json.obj()
+      )
+
       val amendTrusteeIndTransform = AmendTrusteeIndTransform(0, newTrusteeInd, Json.obj())
       val amendTrusteeOrgTransform = AmendTrusteeOrgTransform(0, newTrusteeOrg, Json.obj())
 
@@ -192,6 +199,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |               "PromoteTrusteeIndTransform": ${Json.toJson(promoteTrusteeIndTransform)}
           |            },
           |            {
+          |               "PromoteTrusteeOrgTransform": ${Json.toJson(promoteTrusteeOrgTransform)}
+          |            },
+          |            {
           |               "AmendTrusteeIndTransform": ${Json.toJson(amendTrusteeIndTransform)}
           |            },
           |            {
@@ -232,6 +242,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           addTrusteeOrgTransform,
           removeTrusteeTransform,
           promoteTrusteeIndTransform,
+          promoteTrusteeOrgTransform,
           amendTrusteeIndTransform,
           amendTrusteeOrgTransform,
           amendIndividualBenTransform,

@@ -34,7 +34,7 @@ object DeltaTransform {
     value =>
       (
         readsForTransform[PromoteTrusteeIndTransform](PromoteTrusteeIndTransform.key) orElse
-        readsForTransform[PromoteTrusteeOrgTransform](PromoteTrusteeIndTransform.key) orElse
+        readsForTransform[PromoteTrusteeOrgTransform](PromoteTrusteeOrgTransform.key) orElse
         readsForTransform[AmendLeadTrusteeIndTransform](AmendLeadTrusteeIndTransform.key) orElse
         readsForTransform[AmendLeadTrusteeOrgTransform](AmendLeadTrusteeOrgTransform.key) orElse
         readsForTransform[AddTrusteeIndTransform](AddTrusteeIndTransform.key) orElse
