@@ -30,7 +30,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryCompanyType, IdentificationType, IndividualDetailsType, OtherType, UnidentifiedType}
+import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryCompanyType, BeneficiaryTrustType, IdentificationType, IndividualDetailsType, OtherType, UnidentifiedType}
 import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType, RemoveBeneficiary}
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
@@ -340,6 +340,32 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
         verify(transformationService).addNewTransform("utr",
           "internalId", AddCompanyBeneficiaryTransform(newBeneficiary))
       }
+    }
+  }
+
+  "must add a new add trust beneficiary transform using the transformation service" in {
+    val transformationService = mock[TransformationService]
+    val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
+    val newBeneficiary = BeneficiaryTrustType(
+      None,
+      None,
+      "Organisation Name",
+      Some(false),
+      Some("50"),
+      Some(IdentificationOrgType(
+        Some("company utr"),
+        Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")))),
+      DateTime.parse("1990-10-10"),
+      None
+    )
+
+    when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+    val result = service.addTrustBeneficiaryTransformer("utr", "internalId", newBeneficiary)
+    whenReady(result) { _ =>
+
+      verify(transformationService).addNewTransform("utr",
+        "internalId", AddTrustBeneficiaryTransform(newBeneficiary))
     }
   }
 
