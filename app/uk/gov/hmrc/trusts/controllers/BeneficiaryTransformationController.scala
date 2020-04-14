@@ -22,7 +22,7 @@ import play.api.libs.json.{JsError, JsString, JsSuccess, JsValue, Json}
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveBeneficiary
-import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryCompanyType, IndividualDetailsType, OtherType, UnidentifiedType}
+import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryCompanyType, BeneficiaryTrustType, IndividualDetailsType, OtherType, UnidentifiedType}
 import uk.gov.hmrc.trusts.services.BeneficiaryTransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
@@ -213,6 +213,23 @@ class BeneficiaryTransformationController @Inject()(
           Future.successful(BadRequest)
       }
     }
+  }
+
+  def addTrustBeneficiary(utr: String) : Action[JsValue] = identify.async(parse.json) {
+    implicit request =>
+      request.body.validate[BeneficiaryTrustType] match {
+        case JsSuccess(newBeneficiary, _) =>
+          beneficiaryTransformationService.addTrustBeneficiaryTransformer(
+            utr,
+            request.identifier,
+            newBeneficiary
+          ) map { _ =>
+            Ok
+          }
+        case JsError(errors) =>
+          logger.warn(s"[BeneficiaryTransformationController][addTrustBeneficiary] Supplied json could not be read as a Trust Beneficiary - $errors")
+          Future.successful(BadRequest)
+      }
   }
 
 }
