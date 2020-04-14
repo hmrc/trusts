@@ -23,7 +23,7 @@ import play.api.libs.functional.syntax._
 
 case class RemoveBeneficiariesTransform(
                                          index : Int,
-                                         beneficiaryData : JsObject,
+                                         beneficiaryData : JsValue,
                                          endDate : LocalDate,
                                          beneficiaryType : String
                                        )
