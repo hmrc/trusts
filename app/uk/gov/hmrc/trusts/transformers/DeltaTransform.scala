@@ -20,12 +20,13 @@ import play.api.libs.json.{JsValue, _}
 
 trait DeltaTransform {
   def applyTransform(input: JsValue): JsResult[JsValue]
+
   def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = JsSuccess(input)
 }
 
 object DeltaTransform {
 
-  private def readsForTransform[T](key : String)(implicit reads: Reads[T]) : PartialFunction[JsObject, JsResult[T]] = {
+  private def readsForTransform[T](key: String)(implicit reads: Reads[T]): PartialFunction[JsObject, JsResult[T]] = {
     case json if json.keys.contains(key) =>
       (json \ key).validate[T]
   }
@@ -34,54 +35,93 @@ object DeltaTransform {
     value =>
       (
         readsForTransform[PromoteTrusteeIndTransform](PromoteTrusteeIndTransform.key) orElse
-        readsForTransform[PromoteTrusteeOrgTransform](PromoteTrusteeOrgTransform.key) orElse
-        readsForTransform[AmendLeadTrusteeIndTransform](AmendLeadTrusteeIndTransform.key) orElse
-        readsForTransform[AmendLeadTrusteeOrgTransform](AmendLeadTrusteeOrgTransform.key) orElse
-        readsForTransform[AddTrusteeIndTransform](AddTrusteeIndTransform.key) orElse
-        readsForTransform[AddTrusteeOrgTransform](AddTrusteeOrgTransform.key) orElse
-        readsForTransform[RemoveTrusteeTransform](RemoveTrusteeTransform.key) orElse
-        readsForTransform[AmendTrusteeIndTransform](AmendTrusteeIndTransform.key) orElse
-        readsForTransform[AmendTrusteeOrgTransform](AmendTrusteeOrgTransform.key) orElse
-        readsForTransform[AmendUnidentifiedBeneficiaryTransform](AmendUnidentifiedBeneficiaryTransform.key) orElse
-        readsForTransform[RemoveBeneficiariesTransform](RemoveBeneficiariesTransform.key) orElse
-        readsForTransform[AddUnidentifiedBeneficiaryTransform](AddUnidentifiedBeneficiaryTransform.key) orElse
-        readsForTransform[AmendIndividualBeneficiaryTransform](AmendIndividualBeneficiaryTransform.key) orElse
-        readsForTransform[AddIndividualBeneficiaryTransform](AddIndividualBeneficiaryTransform.key) orElse
-        readsForTransform[AddCharityBeneficiaryTransform](AddCharityBeneficiaryTransform.key) orElse
-        readsForTransform[AmendCharityBeneficiaryTransform](AmendCharityBeneficiaryTransform.key) orElse
-        readsForTransform[AddOtherBeneficiaryTransform](AddOtherBeneficiaryTransform.key) orElse
-        readsForTransform[AmendOtherBeneficiaryTransform](AmendOtherBeneficiaryTransform.key) orElse
-        readsForTransform[AddCompanyBeneficiaryTransform](AddCompanyBeneficiaryTransform.key) orElse
-        readsForTransform[AddTrustBeneficiaryTransform](AddTrustBeneficiaryTransform.key)
-      )(value.as[JsObject]) orElse(throw new Exception(s"Don't know how to deserialise transform: $value"))
+          readsForTransform[PromoteTrusteeOrgTransform](PromoteTrusteeOrgTransform.key) orElse
+          readsForTransform[AmendLeadTrusteeIndTransform](AmendLeadTrusteeIndTransform.key) orElse
+          readsForTransform[AmendLeadTrusteeOrgTransform](AmendLeadTrusteeOrgTransform.key) orElse
+          readsForTransform[AddTrusteeIndTransform](AddTrusteeIndTransform.key) orElse
+          readsForTransform[AddTrusteeOrgTransform](AddTrusteeOrgTransform.key) orElse
+          readsForTransform[RemoveTrusteeTransform](RemoveTrusteeTransform.key) orElse
+          readsForTransform[AmendTrusteeIndTransform](AmendTrusteeIndTransform.key) orElse
+          readsForTransform[AmendTrusteeOrgTransform](AmendTrusteeOrgTransform.key) orElse
+          readsForTransform[AmendUnidentifiedBeneficiaryTransform](AmendUnidentifiedBeneficiaryTransform.key) orElse
+          readsForTransform[RemoveBeneficiariesTransform](RemoveBeneficiariesTransform.key) orElse
+          readsForTransform[AddUnidentifiedBeneficiaryTransform](AddUnidentifiedBeneficiaryTransform.key) orElse
+          readsForTransform[AmendIndividualBeneficiaryTransform](AmendIndividualBeneficiaryTransform.key) orElse
+          readsForTransform[AddIndividualBeneficiaryTransform](AddIndividualBeneficiaryTransform.key) orElse
+          readsForTransform[AddCharityBeneficiaryTransform](AddCharityBeneficiaryTransform.key) orElse
+          readsForTransform[AmendCharityBeneficiaryTransform](AmendCharityBeneficiaryTransform.key) orElse
+          readsForTransform[AddOtherBeneficiaryTransform](AddOtherBeneficiaryTransform.key) orElse
+          readsForTransform[AmendOtherBeneficiaryTransform](AmendOtherBeneficiaryTransform.key) orElse
+          readsForTransform[AddCompanyBeneficiaryTransform](AddCompanyBeneficiaryTransform.key) orElse
+          readsForTransform[AddTrustBeneficiaryTransform](AddTrustBeneficiaryTransform.key)
+        ) (value.as[JsObject]) orElse (throw new Exception(s"Don't know how to deserialise transform"))
   )
 
-  implicit val writes: Writes[DeltaTransform] = Writes[DeltaTransform] { deltaTransform =>
-    val transformWrapper = deltaTransform match {
-      case transform: PromoteTrusteeIndTransform            => Json.obj(PromoteTrusteeIndTransform.key -> Json.toJson(transform)(PromoteTrusteeIndTransform.format))
-      case transform: PromoteTrusteeOrgTransform            => Json.obj(PromoteTrusteeOrgTransform.key -> Json.toJson(transform)(PromoteTrusteeOrgTransform.format))
-      case transform: AmendLeadTrusteeIndTransform          => Json.obj(AmendLeadTrusteeIndTransform.key -> Json.toJson(transform)(AmendLeadTrusteeIndTransform.format))
-      case transform: AmendLeadTrusteeOrgTransform          => Json.obj(AmendLeadTrusteeOrgTransform.key -> Json.toJson(transform)(AmendLeadTrusteeOrgTransform.format))
-      case transform: AddTrusteeIndTransform                => Json.obj(AddTrusteeIndTransform.key -> Json.toJson(transform)(AddTrusteeIndTransform.format))
-      case transform: AddTrusteeOrgTransform                => Json.obj(AddTrusteeOrgTransform.key -> Json.toJson(transform)(AddTrusteeOrgTransform.format))
-      case transform: RemoveTrusteeTransform                => Json.obj(RemoveTrusteeTransform.key -> Json.toJson(transform)(RemoveTrusteeTransform.format))
-      case transform: AmendTrusteeIndTransform              => Json.obj(AmendTrusteeIndTransform.key -> Json.toJson(transform)(AmendTrusteeIndTransform.format))
-      case transform: AmendTrusteeOrgTransform              => Json.obj(AmendTrusteeOrgTransform.key -> Json.toJson(transform)(AmendTrusteeOrgTransform.format))
-      case transform: AmendUnidentifiedBeneficiaryTransform => Json.obj(AmendUnidentifiedBeneficiaryTransform.key -> Json.toJson(transform)(AmendUnidentifiedBeneficiaryTransform.format))
-      case transform: RemoveBeneficiariesTransform          => Json.obj(RemoveBeneficiariesTransform.key -> Json.toJson(transform)(RemoveBeneficiariesTransform.format))
-      case transform: AddUnidentifiedBeneficiaryTransform   => Json.obj(AddUnidentifiedBeneficiaryTransform.key -> Json.toJson(transform)(AddUnidentifiedBeneficiaryTransform.format))
-      case transform: AmendIndividualBeneficiaryTransform   => Json.obj(AmendIndividualBeneficiaryTransform.key -> Json.toJson(transform)(AmendIndividualBeneficiaryTransform.format))
-      case transform: AddIndividualBeneficiaryTransform     => Json.obj(AddIndividualBeneficiaryTransform.key -> Json.toJson(transform)(AddIndividualBeneficiaryTransform.format))
-      case transform: AddCharityBeneficiaryTransform        => Json.obj(AddCharityBeneficiaryTransform.key -> Json.toJson(transform)(AddCharityBeneficiaryTransform.format))
-      case transform: AmendCharityBeneficiaryTransform      => Json.obj(AmendCharityBeneficiaryTransform.key -> Json.toJson(transform)(AmendCharityBeneficiaryTransform.format))
-      case transform: AddOtherBeneficiaryTransform          => Json.obj(AddOtherBeneficiaryTransform.key -> Json.toJson(transform)(AddOtherBeneficiaryTransform.format))
-      case transform: AmendOtherBeneficiaryTransform        => Json.obj(AmendOtherBeneficiaryTransform.key -> Json.toJson(transform)(AmendOtherBeneficiaryTransform.format))
-      case transform: AddCompanyBeneficiaryTransform        => Json.obj(AddCompanyBeneficiaryTransform.key -> Json.toJson(transform)(AddCompanyBeneficiaryTransform.format))
-      case transform: AddTrustBeneficiaryTransform        => Json.obj(AddTrustBeneficiaryTransform.key -> Json.toJson(transform)(AddTrustBeneficiaryTransform.format))
-      case transform => throw new Exception(s"Don't know how to serialise transform: $transform")
-    }
-    Json.toJson(transformWrapper)
+  def trusteeWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+    case transform: PromoteTrusteeIndTransform =>
+      Json.obj(PromoteTrusteeIndTransform.key -> Json.toJson(transform)(PromoteTrusteeIndTransform.format))
+    case transform: PromoteTrusteeOrgTransform =>
+      Json.obj(PromoteTrusteeOrgTransform.key -> Json.toJson(transform)(PromoteTrusteeOrgTransform.format))
+    case transform: AmendLeadTrusteeIndTransform =>
+      Json.obj(AmendLeadTrusteeIndTransform.key -> Json.toJson(transform)(AmendLeadTrusteeIndTransform.format))
+    case transform: AmendLeadTrusteeOrgTransform =>
+      Json.obj(AmendLeadTrusteeOrgTransform.key -> Json.toJson(transform)(AmendLeadTrusteeOrgTransform.format))
+    case transform: AmendTrusteeIndTransform =>
+      Json.obj(AmendTrusteeIndTransform.key -> Json.toJson(transform)(AmendTrusteeIndTransform.format))
+    case transform: AmendTrusteeOrgTransform =>
+      Json.obj(AmendTrusteeOrgTransform.key -> Json.toJson(transform)(AmendTrusteeOrgTransform.format))
+    case transform: AddTrusteeIndTransform =>
+      Json.obj(AddTrusteeIndTransform.key -> Json.toJson(transform)(AddTrusteeIndTransform.format))
+    case transform: AddTrusteeOrgTransform =>
+      Json.obj(AddTrusteeOrgTransform.key -> Json.toJson(transform)(AddTrusteeOrgTransform.format))
+    case transform: RemoveTrusteeTransform =>
+      Json.obj(RemoveTrusteeTransform.key -> Json.toJson(transform)(RemoveTrusteeTransform.format))
   }
+
+  def addBeneficiariesWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+    case transform: AddUnidentifiedBeneficiaryTransform =>
+      Json.obj(AddUnidentifiedBeneficiaryTransform.key -> Json.toJson(transform)(AddUnidentifiedBeneficiaryTransform.format))
+    case transform: AddIndividualBeneficiaryTransform =>
+      Json.obj(AddIndividualBeneficiaryTransform.key -> Json.toJson(transform)(AddIndividualBeneficiaryTransform.format))
+    case transform: AddCharityBeneficiaryTransform =>
+      Json.obj(AddCharityBeneficiaryTransform.key -> Json.toJson(transform)(AddCharityBeneficiaryTransform.format))
+    case transform: AddOtherBeneficiaryTransform =>
+      Json.obj(AddOtherBeneficiaryTransform.key -> Json.toJson(transform)(AddOtherBeneficiaryTransform.format))
+    case transform: AddCompanyBeneficiaryTransform =>
+      Json.obj(AddCompanyBeneficiaryTransform.key -> Json.toJson(transform)(AddCompanyBeneficiaryTransform.format))
+    case transform: AddTrustBeneficiaryTransform =>
+      Json.obj(AddTrustBeneficiaryTransform.key -> Json.toJson(transform)(AddTrustBeneficiaryTransform.format))
+  }
+
+  def amendBeneficiariesWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+    case transform: AmendUnidentifiedBeneficiaryTransform =>
+      Json.obj(AmendUnidentifiedBeneficiaryTransform.key -> Json.toJson(transform)(AmendUnidentifiedBeneficiaryTransform.format))
+    case transform: AmendIndividualBeneficiaryTransform =>
+      Json.obj(AmendIndividualBeneficiaryTransform.key -> Json.toJson(transform)(AmendIndividualBeneficiaryTransform.format))
+    case transform: AmendCharityBeneficiaryTransform =>
+      Json.obj(AmendCharityBeneficiaryTransform.key -> Json.toJson(transform)(AmendCharityBeneficiaryTransform.format))
+    case transform: AmendOtherBeneficiaryTransform =>
+      Json.obj(AmendOtherBeneficiaryTransform.key -> Json.toJson(transform)(AmendOtherBeneficiaryTransform.format))
+  }
+
+  def removeBeneficiariesWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
+    case transform: RemoveBeneficiariesTransform =>
+      Json.obj(RemoveBeneficiariesTransform.key -> Json.toJson(transform)(RemoveBeneficiariesTransform.format))
+  }
+
+  def defaultWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+    case transform => throw new Exception(s"Don't know how to serialise transform - $transform")
+  }
+
+  implicit val writes: Writes[DeltaTransform] = Writes[DeltaTransform] { deltaTransform =>
+    (trusteeWrites orElse
+      addBeneficiariesWrites orElse
+      amendBeneficiariesWrites orElse
+      removeBeneficiariesWrites orElse
+      defaultWrites
+      ).apply(deltaTransform)
+  }
+
 }
 
 case class ComposedDeltaTransform(deltaTransforms: Seq[DeltaTransform]) extends DeltaTransform {
@@ -92,7 +132,8 @@ case class ComposedDeltaTransform(deltaTransforms: Seq[DeltaTransform]) extends 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
     deltaTransforms.foldLeft[JsResult[JsValue]](JsSuccess(input))((cur, xform) => cur.flatMap(xform.applyDeclarationTransform))
   }
-  def :+(transform: DeltaTransform) = ComposedDeltaTransform(deltaTransforms :+ transform)
+
+  def :+(transform: DeltaTransform): ComposedDeltaTransform = ComposedDeltaTransform(deltaTransforms :+ transform)
 }
 
 object ComposedDeltaTransform {
