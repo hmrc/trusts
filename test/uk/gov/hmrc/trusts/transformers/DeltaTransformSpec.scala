@@ -21,9 +21,9 @@ import java.time.LocalDate
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.Json
-import uk.gov.hmrc.trusts.models.NameType
+import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationOrgType, DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType, DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType}
-import uk.gov.hmrc.trusts.models.variation.IndividualDetailsType
+import uk.gov.hmrc.trusts.models.variation.{BeneficiaryTrustType, IndividualDetailsType}
 
 class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
@@ -76,6 +76,21 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         None
       )
 
+      val newTrustBeneficiary = BeneficiaryTrustType(
+        None,
+        None,
+        "Organisation Name",
+        Some(false),
+        Some("50"),
+        Some(IdentificationOrgType(
+          Some("company utr"),
+          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")))),
+        DateTime.parse("1990-10-10"),
+        None
+      )
+
+      val addTrustBeneficiaryTransform = AddTrustBeneficiaryTransform(newTrustBeneficiary)
+
       val amendLeadTrusteeTransform = AmendLeadTrusteeIndTransform(newLeadTrustee)
 
       val addTrusteeTransform = AddTrusteeIndTransform(newTrusteeInd)
@@ -121,6 +136,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |            },
           |            {
           |               "AmendIndividualBeneficiaryTransform": ${Json.toJson(amendIndividualBenTransform)}
+          |            },
+          |            {
+          |               "AddTrustBeneficiaryTransform": ${Json.toJson(addTrustBeneficiaryTransform)}
           |            }
           |        ]
           |    }
@@ -133,7 +151,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           promoteTrusteeTransform,
           amendTrusteeIndTransform,
           amendTrusteeOrgTransform,
-          amendIndividualBenTransform
+          amendIndividualBenTransform,
+          addTrustBeneficiaryTransform
         )
       )
 
