@@ -24,32 +24,36 @@ trait DeltaTransform {
 }
 
 object DeltaTransform {
+
+  private def readsForTransform[T](key : String)(implicit reads: Reads[T]) : PartialFunction[JsObject, JsResult[T]] = {
+    case json if json.keys.contains(key) =>
+      (json \ key).validate[T]
+  }
+
   implicit val reads: Reads[DeltaTransform] = Reads[DeltaTransform](
-    value => {
-      value.as[JsObject] match {
-        case json if json.keys.contains(PromoteTrusteeIndTransform.key)             => (json \ PromoteTrusteeIndTransform.key).validate[PromoteTrusteeIndTransform]
-        case json if json.keys.contains(PromoteTrusteeOrgTransform.key)             => (json \ PromoteTrusteeOrgTransform.key).validate[PromoteTrusteeOrgTransform]
-        case json if json.keys.contains(AmendLeadTrusteeIndTransform.key)           => (json \ AmendLeadTrusteeIndTransform.key).validate[AmendLeadTrusteeIndTransform]
-        case json if json.keys.contains(AmendLeadTrusteeOrgTransform.key)           => (json \ AmendLeadTrusteeOrgTransform.key).validate[AmendLeadTrusteeOrgTransform]
-        case json if json.keys.contains(AddTrusteeIndTransform.key)                 => (json \ AddTrusteeIndTransform.key).validate[AddTrusteeIndTransform]
-        case json if json.keys.contains(AddTrusteeOrgTransform.key)                 => (json \ AddTrusteeOrgTransform.key).validate[AddTrusteeOrgTransform]
-        case json if json.keys.contains(RemoveTrusteeTransform.key)                 => (json \ RemoveTrusteeTransform.key).validate[RemoveTrusteeTransform]
-        case json if json.keys.contains(AmendTrusteeIndTransform.key)               => (json \ AmendTrusteeIndTransform.key).validate[AmendTrusteeIndTransform]
-        case json if json.keys.contains(AmendTrusteeOrgTransform.key)               => (json \ AmendTrusteeOrgTransform.key).validate[AmendTrusteeOrgTransform]
-        case json if json.keys.contains(AmendUnidentifiedBeneficiaryTransform.key)  => (json \ AmendUnidentifiedBeneficiaryTransform.key).validate[AmendUnidentifiedBeneficiaryTransform]
-        case json if json.keys.contains(RemoveBeneficiariesTransform.key)           => (json \ RemoveBeneficiariesTransform.key).validate[RemoveBeneficiariesTransform]
-        case json if json.keys.contains(AddUnidentifiedBeneficiaryTransform.key)    => (json \ AddUnidentifiedBeneficiaryTransform.key).validate[AddUnidentifiedBeneficiaryTransform]
-        case json if json.keys.contains(AmendIndividualBeneficiaryTransform.key)    => (json \ AmendIndividualBeneficiaryTransform.key).validate[AmendIndividualBeneficiaryTransform]
-        case json if json.keys.contains(AddIndividualBeneficiaryTransform.key)      => (json \ AddIndividualBeneficiaryTransform.key).validate[AddIndividualBeneficiaryTransform]
-        case json if json.keys.contains(AddCharityBeneficiaryTransform.key)         => (json \ AddCharityBeneficiaryTransform.key).validate[AddCharityBeneficiaryTransform]
-        case json if json.keys.contains(AmendCharityBeneficiaryTransform.key)       => (json \ AmendCharityBeneficiaryTransform.key).validate[AmendCharityBeneficiaryTransform]
-        case json if json.keys.contains(AddOtherBeneficiaryTransform.key)           => (json \ AddOtherBeneficiaryTransform.key).validate[AddOtherBeneficiaryTransform]
-        case json if json.keys.contains(AmendOtherBeneficiaryTransform.key)         => (json \ AmendOtherBeneficiaryTransform.key).validate[AmendOtherBeneficiaryTransform]
-        case json if json.keys.contains(AddCompanyBeneficiaryTransform.key)         => (json \ AddCompanyBeneficiaryTransform.key).validate[AddCompanyBeneficiaryTransform]
-        case json if json.keys.contains(AddTrustBeneficiaryTransform.key)         => (json \ AddTrustBeneficiaryTransform.key).validate[AddTrustBeneficiaryTransform]
-        case _ => throw new Exception(s"Don't know how to deserialise transform: $value")
-      }
-    }
+    value =>
+      (
+        readsForTransform[PromoteTrusteeIndTransform](PromoteTrusteeIndTransform.key) orElse
+        readsForTransform[PromoteTrusteeOrgTransform](PromoteTrusteeIndTransform.key) orElse
+        readsForTransform[AmendLeadTrusteeIndTransform](AmendLeadTrusteeIndTransform.key) orElse
+        readsForTransform[AmendLeadTrusteeOrgTransform](AmendLeadTrusteeOrgTransform.key) orElse
+        readsForTransform[AddTrusteeIndTransform](AddTrusteeIndTransform.key) orElse
+        readsForTransform[AddTrusteeOrgTransform](AddTrusteeOrgTransform.key) orElse
+        readsForTransform[RemoveTrusteeTransform](RemoveTrusteeTransform.key) orElse
+        readsForTransform[AmendTrusteeIndTransform](AmendTrusteeIndTransform.key) orElse
+        readsForTransform[AmendTrusteeOrgTransform](AmendTrusteeOrgTransform.key) orElse
+        readsForTransform[AmendUnidentifiedBeneficiaryTransform](AmendUnidentifiedBeneficiaryTransform.key) orElse
+        readsForTransform[RemoveBeneficiariesTransform](RemoveBeneficiariesTransform.key) orElse
+        readsForTransform[AddUnidentifiedBeneficiaryTransform](AddUnidentifiedBeneficiaryTransform.key) orElse
+        readsForTransform[AmendIndividualBeneficiaryTransform](AmendIndividualBeneficiaryTransform.key) orElse
+        readsForTransform[AddIndividualBeneficiaryTransform](AddIndividualBeneficiaryTransform.key) orElse
+        readsForTransform[AddCharityBeneficiaryTransform](AddCharityBeneficiaryTransform.key) orElse
+        readsForTransform[AmendCharityBeneficiaryTransform](AmendCharityBeneficiaryTransform.key) orElse
+        readsForTransform[AddOtherBeneficiaryTransform](AddOtherBeneficiaryTransform.key) orElse
+        readsForTransform[AmendOtherBeneficiaryTransform](AmendOtherBeneficiaryTransform.key) orElse
+        readsForTransform[AddCompanyBeneficiaryTransform](AddCompanyBeneficiaryTransform.key) orElse
+        readsForTransform[AddTrustBeneficiaryTransform](AddTrustBeneficiaryTransform.key)
+      )(value.as[JsObject]) orElse(throw new Exception(s"Don't know how to deserialise transform: $value"))
   )
 
   implicit val writes: Writes[DeltaTransform] = Writes[DeltaTransform] { deltaTransform =>
