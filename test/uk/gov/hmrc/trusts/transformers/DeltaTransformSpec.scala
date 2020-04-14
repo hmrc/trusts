@@ -22,7 +22,7 @@ import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryTrustType, IndividualDetailsType, OtherType, UnidentifiedType}
+import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryCompanyType, BeneficiaryTrustType, IndividualDetailsType, OtherType, UnidentifiedType}
 import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType}
 
 class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
@@ -150,6 +150,10 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         )
       )
 
+      val addCompanyBeneficiaryTransform = AddCompanyBeneficiaryTransform(
+        BeneficiaryCompanyType(None, None, "Organisation", None, None, None, DateTime.parse("2010-02-23"), None)
+      )
+
       val json = Json.parse(
         s"""{
           |        "deltaTransforms" : [
@@ -192,8 +196,11 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |            {
           |               "AddCharityBeneficiaryTransform": ${Json.toJson(addCharityBeneficiaryTransform)}
           |            },
-          |                        {
+          |            {
           |               "AddOtherBeneficiaryTransform": ${Json.toJson(addOtherBeneficiaryTransform)}
+          |            },
+          |            {
+          |               "AddCompanyBeneficiaryTransform": ${Json.toJson(addCompanyBeneficiaryTransform)}
           |            }
           |        ]
           |    }
@@ -213,7 +220,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           addIndividualBeneficiaryTransform,
           amendCharityBeneficiaryTransform,
           addCharityBeneficiaryTransform,
-          addOtherBeneficiaryTransform
+          addOtherBeneficiaryTransform,
+          addCompanyBeneficiaryTransform
         )
       )
 
