@@ -46,6 +46,7 @@ object DeltaTransform {
         case json if json.keys.contains(AddOtherBeneficiaryTransform.key)           => (json \ AddOtherBeneficiaryTransform.key).validate[AddOtherBeneficiaryTransform]
         case json if json.keys.contains(AmendOtherBeneficiaryTransform.key)         => (json \ AmendOtherBeneficiaryTransform.key).validate[AmendOtherBeneficiaryTransform]
         case json if json.keys.contains(AddCompanyBeneficiaryTransform.key)         => (json \ AddCompanyBeneficiaryTransform.key).validate[AddCompanyBeneficiaryTransform]
+        case json if json.keys.contains(AmendTrustBeneficiaryTransform.key)         => (json \ AmendTrustBeneficiaryTransform.key).validate[AmendTrustBeneficiaryTransform]
         case _ => throw new Exception(s"Don't know how to deserialise transform: $value")
       }
     }
