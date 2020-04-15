@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import org.joda.time.DateTime
+import java.time.LocalDate
+
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import uk.gov.hmrc.trusts.models.NameType
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType}
@@ -31,7 +32,7 @@ class AmendLeadTrusteeIndTransformSpec extends FreeSpec with MustMatchers with O
         lineNo = Some("newLineNo"),
         bpMatchStatus = Some("MatchStatus"),
         name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-        dateOfBirth = new DateTime(1965, 2, 10, 12, 30),
+        dateOfBirth = LocalDate.of(1965, 2, 10),
         phoneNumber = "newPhone",
         email = Some("newEmail"),
         identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),

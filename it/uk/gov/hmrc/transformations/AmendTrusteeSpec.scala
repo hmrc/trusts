@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.transformations
 
-import org.joda.time.DateTime
+import java.time.LocalDate
+
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
@@ -47,7 +48,7 @@ class AmendTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar with
         lineNo = Some("newLineNo"),
         bpMatchStatus = None,
         name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-        dateOfBirth = Some(new DateTime(1965, 2, 12, 0, 0)),
+        dateOfBirth = Some(LocalDate.of(1965, 2, 12)),
         phoneNumber = Some("newPhone"),
         identification = Some(
           DisplayTrustIdentificationType(
@@ -57,7 +58,7 @@ class AmendTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar with
             None
           )
         ),
-        entityStart = new DateTime(1998, 2, 12, 0, 0)
+        entityStart = LocalDate.of(1998, 2, 12)
       )
 
       val expectedGetAfterAmendTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-after-amend-trustee.json")

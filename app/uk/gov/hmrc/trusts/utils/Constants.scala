@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.trusts.utils
 
-
 object Constants {
 
   val ALREADY_REGISTERED_CODE = "ALREADY_REGISTERED"
@@ -29,13 +28,11 @@ object Constants {
   val INTERNAL_SERVER_ERROR_MESSAGE = "Internal server error."
 
 
-  val INSUFFICiENT_ENROLMENT_MESSAGE = "Insufficient enrolment for authorised user."
+  val INSUFFICIENT_ENROLMENT_MESSAGE = "Insufficient enrolment for authorised user."
   val UNAUTHORISED = "UNAUTHORISED"
 
   val NO_DRAFT_ID = "NO_DRAFT_ID"
   val NO_DRAFT_ID_MESSAGE = "No draft registration identifier provided."
-
-  val dateTimePattern = "yyyy-MM-dd"
 
   val CONTENT_TYPE = "Content-Type"
   val CONTENT_TYPE_JSON = "application/json; charset=utf-8"

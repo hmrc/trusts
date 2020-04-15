@@ -18,7 +18,6 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import org.joda.time.DateTime
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType, DisplayTrustTrusteeType}
 
@@ -38,7 +37,7 @@ trait AmendTrusteeCommon {
     }
   }
 
-  private def addTrustee(newTrustee: JsValue, updatedJson: JsValue, entityStart: DateTime): JsResult[JsValue] = {
+  private def addTrustee(newTrustee: JsValue, updatedJson: JsValue, entityStart: LocalDate): JsResult[JsValue] = {
     val indTrustee = newTrustee.validate[DisplayTrustTrusteeIndividualType].asOpt
     val orgTrustee = newTrustee.validate[DisplayTrustTrusteeOrgType].asOpt
 
@@ -55,7 +54,7 @@ trait AmendTrusteeCommon {
     }
   }
 
-  private def getEntityStartDate(trusteeToRemove: JsValue): DateTime = {
+  private def getEntityStartDate(trusteeToRemove: JsValue): LocalDate = {
 
     trusteeToRemove.validate[DisplayTrustTrusteeType].asOpt match {
       case Some(DisplayTrustTrusteeType(Some(ind), None)) => ind.entityStart

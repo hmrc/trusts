@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import org.joda.time.DateTime
+import java.time.LocalDate
+
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import uk.gov.hmrc.trusts.models.NameType
 import uk.gov.hmrc.trusts.models.variation.{IdentificationType, IndividualDetailsType}
@@ -27,13 +28,13 @@ class AddIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers w
   val newBeneficiary = IndividualDetailsType(None,
     None,
     NameType("First", None, "Last"),
-    Some(DateTime.parse("2000-01-01")),
+    Some(LocalDate.parse("2000-01-01")),
     false,
     None,
     None,
     None,
     Some(IdentificationType(Some("nino"), None, None, None)),
-    DateTime.parse("1990-10-10"),
+    LocalDate.parse("1990-10-10"),
     None
   )
 

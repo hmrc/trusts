@@ -18,7 +18,6 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
@@ -39,7 +38,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         None,
         None,
         NameType("New", Some("lead"), "Trustee"),
-        DateTime.parse("2000-01-01"),
+        LocalDate.parse("2000-01-01"),
         "",
         None,
         DisplayTrustIdentificationType(None, None, None, None),
@@ -62,10 +61,10 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         Some("lineNo"),
         Some("bpMatchStatus"),
         NameType("New", None, "Trustee"),
-        Some(DateTime.parse("2000-01-01")),
+        Some(LocalDate.parse("2000-01-01")),
         Some("phoneNumber"),
         Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-        DateTime.parse("2000-01-01")
+        LocalDate.parse("2000-01-01")
       )
 
       val newTrusteeOrg = DisplayTrustTrusteeOrgType(
@@ -75,7 +74,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         Some("phoneNumber"),
         Some("email"),
         Some(DisplayTrustIdentificationOrgType(None, Some("utr"), None)),
-        DateTime.parse("2000-01-01")
+        LocalDate.parse("2000-01-01")
       )
 
       val individualBeneficiary = IndividualDetailsType(
@@ -88,7 +87,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         None,
         None,
         None,
-        DateTime.parse("2018-02-28"),
+        LocalDate.parse("2018-02-28"),
         None
       )
 
@@ -101,7 +100,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         Some(IdentificationOrgType(
           Some("company utr"),
           Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")))),
-        DateTime.parse("1990-10-10"),
+        LocalDate.parse("1990-10-10"),
         None
       )
 
@@ -151,7 +150,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
       val amendIndividualBenTransform = AmendIndividualBeneficiaryTransform(0, Json.toJson(individualBeneficiary), Json.obj(), LocalDate.parse("2020-03-25"))
 
       val addUnidentifiedBeneficiaryTransform = AddUnidentifiedBeneficiaryTransform(
-        UnidentifiedType(None, None, "desc", None, None, DateTime.parse("2010-10-10"), None)
+        UnidentifiedType(None, None, "desc", None, None, LocalDate.parse("2010-10-10"), None)
       )
 
       val addIndividualBeneficiaryTransform = AddIndividualBeneficiaryTransform(individualBeneficiary)
@@ -159,18 +158,18 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
       val addCharityBeneficiaryTransform = AddCharityBeneficiaryTransform(
         BeneficiaryCharityType(
           None, None, "New Organisation Name", Some(true),
-          None, None, DateTime.parse("2010-02-23"), None
+          None, None, LocalDate.parse("2010-02-23"), None
         )
       )
 
       val addOtherBeneficiaryTransform = AddOtherBeneficiaryTransform(
         OtherType(
-          None, None, "description", None, None, None, DateTime.parse("2010-02-23"), None
+          None, None, "description", None, None, None, LocalDate.parse("2010-02-23"), None
         )
       )
 
       val addCompanyBeneficiaryTransform = AddCompanyBeneficiaryTransform(
-        BeneficiaryCompanyType(None, None, "Organisation", None, None, None, DateTime.parse("2010-02-23"), None)
+        BeneficiaryCompanyType(None, None, "Organisation", None, None, None, LocalDate.parse("2010-02-23"), None)
       )
 
       val removeBeneficiariesTransform = RemoveBeneficiariesTransform(3, Json.toJson(individualBeneficiary), LocalDate.parse("2012-02-06"), "BeneficiaryType")

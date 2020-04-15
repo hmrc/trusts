@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import org.joda.time.DateTime
+import java.time.LocalDate
+
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import uk.gov.hmrc.trusts.models.NameType
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustTrusteeIndividualType}
@@ -30,10 +31,10 @@ class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionV
       val t = DisplayTrustTrusteeIndividualType(None,
         None,
         NameType("New", None, "Trustee"),
-        Some(DateTime.parse("2000-01-01")),
+        Some(LocalDate.parse("2000-01-01")),
         Some("phoneNumber"),
         Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-        DateTime.parse("1990-10-10")
+        LocalDate.parse("1990-10-10")
       )
 
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-no-trustees.json")
@@ -52,10 +53,10 @@ class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionV
       val t = DisplayTrustTrusteeIndividualType(None,
         None,
         NameType("New", None, "Trustee"),
-        Some(DateTime.parse("2000-01-01")),
+        Some(LocalDate.parse("2000-01-01")),
         Some("phoneNumber"),
         Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-        DateTime.parse("1990-10-10")
+        LocalDate.parse("1990-10-10")
       )
 
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")

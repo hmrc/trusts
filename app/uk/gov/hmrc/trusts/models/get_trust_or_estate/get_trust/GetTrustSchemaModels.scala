@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust
 
-import org.joda.time.DateTime
+import java.time.LocalDate
+
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.{MatchData, ResponseHeader}
-import uk.gov.hmrc.trusts.utils.Constants.dateTimePattern
 import uk.gov.hmrc.trusts.models.JsonWithoutNulls._
 
 case class GetTrust(matchData: MatchData,
@@ -96,12 +96,11 @@ object DisplayTrustEntitiesType {
 case class DisplayTrustNaturalPersonType(lineNo: String,
                                          bpMatchStatus: Option[String],
                                          name: NameType,
-                                         dateOfBirth: Option[DateTime],
+                                         dateOfBirth: Option[LocalDate],
                                          identification: Option[DisplayTrustIdentificationType],
                                          entityStart: String)
 
 object DisplayTrustNaturalPersonType {
-  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val naturalPersonTypeFormat: Format[DisplayTrustNaturalPersonType] = Json.format[DisplayTrustNaturalPersonType]
 }
 
@@ -109,16 +108,15 @@ case class DisplayTrustLeadTrusteeIndType(
                                            lineNo: Option[String],
                                            bpMatchStatus: Option[String],
                                            name: NameType,
-                                           dateOfBirth: DateTime,
+                                           dateOfBirth: LocalDate,
                                            phoneNumber: String,
                                            email: Option[String] = None,
                                            identification: DisplayTrustIdentificationType,
-                                           entityStart: Option[DateTime]
+                                           entityStart: Option[LocalDate]
                                          )
 
 object DisplayTrustLeadTrusteeIndType {
 
-  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val leadTrusteeIndTypeFormat: Format[DisplayTrustLeadTrusteeIndType] = Json.format[DisplayTrustLeadTrusteeIndType]
 
 }
@@ -130,11 +128,10 @@ case class DisplayTrustLeadTrusteeOrgType(
                                            phoneNumber: String,
                                            email: Option[String] = None,
                                            identification: DisplayTrustIdentificationOrgType,
-                                           entityStart: Option[DateTime]
+                                           entityStart: Option[LocalDate]
                                          )
 
 object DisplayTrustLeadTrusteeOrgType {
-  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val leadTrusteeOrgTypeFormat: Format[DisplayTrustLeadTrusteeOrgType] = Json.format[DisplayTrustLeadTrusteeOrgType]
 }
 
@@ -144,8 +141,6 @@ case class DisplayTrustLeadTrusteeType(
                                       )
 
 object DisplayTrustLeadTrusteeType {
-
-  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
 
   implicit val writes: Writes[DisplayTrustLeadTrusteeType] = Json.writes[DisplayTrustLeadTrusteeType]
 
@@ -184,7 +179,7 @@ object DisplayTrustBeneficiaryType {
 case class DisplayTrustIndividualDetailsType(lineNo: Option[String],
                                              bpMatchStatus: Option[String],
                                              name: NameType,
-                                             dateOfBirth: Option[DateTime],
+                                             dateOfBirth: Option[LocalDate],
                                              vulnerableBeneficiary: Boolean,
                                              beneficiaryType: Option[String],
                                              beneficiaryDiscretion: Option[Boolean],
@@ -193,7 +188,6 @@ case class DisplayTrustIndividualDetailsType(lineNo: Option[String],
                                              entityStart: String)
 
 object DisplayTrustIndividualDetailsType {
-  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val individualDetailsTypeFormat: Format[DisplayTrustIndividualDetailsType] = Json.format[DisplayTrustIndividualDetailsType]
 
   val writeToMaintain : Writes[DisplayTrustIndividualDetailsType] = new Writes[DisplayTrustIndividualDetailsType] {
@@ -241,13 +235,12 @@ object DisplayTrustBeneficiaryCompanyType {
 case class DisplayTrustWillType(lineNo: String,
                                 bpMatchStatus: Option[String],
                                 name: NameType,
-                                dateOfBirth: Option[DateTime],
-                                dateOfDeath: Option[DateTime],
+                                dateOfBirth: Option[LocalDate],
+                                dateOfDeath: Option[LocalDate],
                                 identification: Option[DisplayTrustIdentificationType],
                                 entityStart: String)
 
 object DisplayTrustWillType {
-  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val willTypeFormat: Format[DisplayTrustWillType] = Json.format[DisplayTrustWillType]
 }
 
@@ -401,11 +394,10 @@ case class DisplayTrustTrusteeOrgType(lineNo: Option[String],
                                       phoneNumber: Option[String] = None,
                                       email: Option[String] = None,
                                       identification: Option[DisplayTrustIdentificationOrgType],
-                                      entityStart: DateTime)
+                                      entityStart: LocalDate)
 
 object DisplayTrustTrusteeOrgType {
 
-  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val trusteeOrgTypeFormat: Format[DisplayTrustTrusteeOrgType] = Json.format[DisplayTrustTrusteeOrgType]
 
   val writeToMaintain : Writes[DisplayTrustTrusteeOrgType] = new Writes[DisplayTrustTrusteeOrgType] {
@@ -425,17 +417,16 @@ object DisplayTrustTrusteeOrgType {
 case class DisplayTrustTrusteeIndividualType(lineNo: Option[String],
                                              bpMatchStatus: Option[String],
                                              name: NameType,
-                                             dateOfBirth: Option[DateTime],
+                                             dateOfBirth: Option[LocalDate],
                                              phoneNumber: Option[String],
                                              identification: Option[DisplayTrustIdentificationType],
-                                             entityStart: DateTime
+                                             entityStart: LocalDate
                                             )
 
 object DisplayTrustTrusteeIndividualType {
 
   import uk.gov.hmrc.trusts.models.JsonWithoutNulls._
 
-  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val trusteeIndividualTypeFormat: Format[DisplayTrustTrusteeIndividualType] = Json.format[DisplayTrustTrusteeIndividualType]
 
   val writeToMaintain : Writes[DisplayTrustTrusteeIndividualType] = new Writes[DisplayTrustTrusteeIndividualType] {
@@ -463,12 +454,11 @@ object DisplayTrustProtectorsType {
 case class DisplayTrustProtector(lineNo: String,
                                  bpMatchStatus: Option[String],
                                  name: NameType,
-                                 dateOfBirth: Option[DateTime],
+                                 dateOfBirth: Option[LocalDate],
                                  identification: Option[DisplayTrustIdentificationType],
                                  entityStart: String)
 
 object DisplayTrustProtector {
-  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val protectorFormat: Format[DisplayTrustProtector] = Json.format[DisplayTrustProtector]
 }
 
@@ -493,12 +483,11 @@ object DisplayTrustSettlors {
 case class DisplayTrustSettlor(lineNo: String,
                                bpMatchStatus: Option[String],
                                name: NameType,
-                               dateOfBirth: Option[DateTime],
+                               dateOfBirth: Option[LocalDate],
                                identification: Option[DisplayTrustIdentificationType],
                                entityStart: String)
 
 object DisplayTrustSettlor {
-  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val settlorFormat: Format[DisplayTrustSettlor] = Json.format[DisplayTrustSettlor]
 }
 
@@ -533,11 +522,10 @@ object DisplayTrustIdentificationOrgType {
 
 case class DisplayTrustPartnershipType(utr: Option[String],
                                        description: String,
-                                       partnershipStart: Option[DateTime])
+                                       partnershipStart: Option[LocalDate])
 
 object DisplayTrustPartnershipType {
 
-  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
   implicit val partnershipTypeFormat: Format[DisplayTrustPartnershipType] = Json.format[DisplayTrustPartnershipType]
 }
 

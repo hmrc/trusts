@@ -18,7 +18,6 @@ package uk.gov.hmrc.trusts.controllers
 
 import java.time.LocalDate
 
-import org.joda.time.DateTime
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -32,7 +31,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee, Success}
-import uk.gov.hmrc.trusts.services.{BeneficiaryTransformationService, LocalDateService, TransformationService, TrusteeTransformationService}
+import uk.gov.hmrc.trusts.services.{LocalDateService, TrusteeTransformationService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -54,11 +53,11 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         lineNo = Some("newLineNo"),
         bpMatchStatus = Some("newMatchStatus"),
         name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-        dateOfBirth = new DateTime(1965, 2, 10, 0, 0),
+        dateOfBirth = LocalDate.of(1965, 2, 10),
         phoneNumber = "newPhone",
         email = Some("newEmail"),
         identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-        entityStart = Some(DateTime.parse("2012-03-14"))
+        entityStart = Some(LocalDate.parse("2012-03-14"))
       )
 
       when(trusteeTransformationService.addAmendLeadTrusteeTransformer(any(), any(), any()))
@@ -100,10 +99,10 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         lineNo = Some("newLineNo"),
         bpMatchStatus = Some("newMatchStatus"),
         name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-        dateOfBirth = Some(new DateTime(1965, 2, 10, 0, 0)),
+        dateOfBirth = Some(LocalDate.of(1965, 2, 10)),
         phoneNumber = Some("newPhone"),
         identification = Some(DisplayTrustIdentificationType(None, Some("newNino"), None, None)),
-        entityStart = DateTime.parse("2012-03-14")
+        entityStart = LocalDate.parse("2012-03-14")
       )
 
       when(trusteeTransformationService.addAddTrusteeTransformer(any(), any(), any()))
@@ -146,11 +145,11 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         lineNo = Some("newLineNo"),
         bpMatchStatus = Some("newMatchStatus"),
         name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-        dateOfBirth = new DateTime(1965, 2, 10, 0, 0),
+        dateOfBirth = LocalDate.of(1965, 2, 10),
         phoneNumber = "newPhone",
         email = Some("newEmail"),
         identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-        entityStart = Some(DateTime.parse("2012-03-14"))
+        entityStart = Some(LocalDate.parse("2012-03-14"))
       )
 
       when(trusteeTransformationService.addPromoteTrusteeTransformer(any(), any(), any(), any(), any())(any()))
@@ -231,10 +230,10 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         lineNo = Some("newLineNo"),
         bpMatchStatus = Some("newMatchStatus"),
         name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-        dateOfBirth = Some(new DateTime(1965, 2, 10, 0, 0)),
+        dateOfBirth = Some(LocalDate.of(1965, 2, 10)),
         phoneNumber = Some("newPhone"),
         identification = Some(DisplayTrustIdentificationType(None, Some("newNino"), None, None)),
-        entityStart = DateTime.parse("2012-03-14")
+        entityStart = LocalDate.parse("2012-03-14")
       )
 
       when(trusteeTransformationService.addAmendTrusteeTransformer(any(), any(), any(), any())(any()))
@@ -268,7 +267,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         phoneNumber = Some("newPhone"),
         email = Some("newEmail"),
         identification = Some(DisplayTrustIdentificationOrgType(None, Some("newUtr"), None)),
-        entityStart = DateTime.parse("2012-03-14")
+        entityStart = LocalDate.parse("2012-03-14")
       )
 
       when(trusteeTransformationService.addAmendTrusteeTransformer(any(), any(), any(), any())(any()))

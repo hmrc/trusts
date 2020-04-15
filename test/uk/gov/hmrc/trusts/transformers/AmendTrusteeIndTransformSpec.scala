@@ -18,7 +18,6 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.models.NameType
@@ -36,10 +35,10 @@ class AmendTrusteeIndTransformSpec extends FreeSpec with MustMatchers with Optio
         lineNo = Some("newLineNo"),
         bpMatchStatus = Some("newMatchStatus"),
         name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-        dateOfBirth = Some(new DateTime(1965, 2, 10, 12, 30)),
+        dateOfBirth = Some(LocalDate.of(1965, 2, 10)),
         phoneNumber = Some("newPhone"),
         identification = Some(DisplayTrustIdentificationType(None, Some("newNino"), None, None)),
-        entityStart = new DateTime(2019, 2, 10, 12, 30)
+        entityStart = LocalDate.of(2019, 2, 10)
       )
 
       val originalTrusteeInfo = Json.parse(

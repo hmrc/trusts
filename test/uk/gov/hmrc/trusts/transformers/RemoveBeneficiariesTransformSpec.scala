@@ -18,7 +18,6 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import org.joda.time.DateTime
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
@@ -176,7 +175,7 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
       val desService = mock[DesService]
       val auditService = mock[AuditService]
       val transforms = Seq(
-        AddUnidentifiedBeneficiaryTransform(UnidentifiedType(None, None, "Description", None, None, DateTime.parse("1967-12-30T12:00:00Z"), None)),
+        AddUnidentifiedBeneficiaryTransform(UnidentifiedType(None, None, "Description", None, None, LocalDate.parse("1967-12-30"), None)),
         RemoveBeneficiariesTransform(3, beneficiaryJson("Two", None, false), LocalDate.of(2018, 4, 21), "unidentified")
       )
 

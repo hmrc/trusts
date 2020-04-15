@@ -18,25 +18,22 @@ package uk.gov.hmrc.trusts.services
 
 import java.time.LocalDate
 
-import org.joda.time.DateTime
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
-import play.api.libs.json.{JsResult, JsValue, Json}
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.{AddressType, NameType, RemoveTrustee}
-import uk.gov.hmrc.trusts.repositories.TransformationRepositoryImpl
+import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee}
 import uk.gov.hmrc.trusts.transformers._
-import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
+import uk.gov.hmrc.trusts.utils.JsonRequests
 
 import scala.concurrent.Future
 
 class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonRequests {
-  // Removing the usage of GuiceOneAppPerSuite started timing out a test without this.
   private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 
   private val currentDate: LocalDate = LocalDate.of(1999, 3, 14)
@@ -48,11 +45,11 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     lineNo = Some("newLineNo"),
     bpMatchStatus = Some("newMatchStatus"),
     name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-    dateOfBirth = new DateTime(1965, 2, 10, 12, 30),
+    dateOfBirth = LocalDate.of(1965, 2, 10),
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-    entityStart = Some(DateTime.parse("2012-03-14"))
+    entityStart = Some(LocalDate.parse("2012-03-14"))
   )
 
   val newLeadTrusteeOrgInfo = DisplayTrustLeadTrusteeOrgType(
@@ -62,17 +59,17 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = DisplayTrustIdentificationOrgType(None, Some("UTR"), None),
-    entityStart = Some(DateTime.parse("2012-03-14"))
+    entityStart = Some(LocalDate.parse("2012-03-14"))
   )
 
   val newTrusteeIndInfo = DisplayTrustTrusteeIndividualType(
     lineNo = Some("newLineNo"),
     bpMatchStatus = Some("newMatchStatus"),
     name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-    dateOfBirth = Some(new DateTime(1965, 2, 10, 12, 30)),
+    dateOfBirth = Some(LocalDate.of(1965, 2, 10)),
     phoneNumber = Some("newPhone"),
     identification = Some(DisplayTrustIdentificationType(None, Some("newNino"), None, None)),
-    entityStart = DateTime.parse("2012-03-14")
+    entityStart = LocalDate.parse("2012-03-14")
   )
 
   val newTrusteeOrgInfo = DisplayTrustTrusteeOrgType(
@@ -86,7 +83,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       Some("newUtr"),
       None)
     ),
-    entityStart = DateTime.parse("2012-03-14")
+    entityStart = LocalDate.parse("2012-03-14")
   )
 
   private implicit val hc : HeaderCarrier = HeaderCarrier()

@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import org.joda.time.DateTime
+import java.time.LocalDate
+
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
 import uk.gov.hmrc.trusts.utils.JsonUtils
@@ -28,7 +29,7 @@ class AddUnidentifiedBeneficiaryTransformSpec extends FreeSpec with MustMatchers
     "Some Description",
     None,
     None,
-    DateTime.parse("1990-10-10"),
+    LocalDate.parse("1990-10-10"),
     None
   )
 
@@ -52,7 +53,7 @@ class AddUnidentifiedBeneficiaryTransformSpec extends FreeSpec with MustMatchers
         "Some other description",
         None,
         None,
-        DateTime.parse("2000-10-10"),
+        LocalDate.parse("2000-10-10"),
         None
       )
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-unidentified-beneficiary.json")

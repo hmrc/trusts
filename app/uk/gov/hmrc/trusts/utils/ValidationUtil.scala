@@ -16,17 +16,17 @@
 
 package uk.gov.hmrc.trusts.utils
 
-import org.joda.time.DateTime
+import java.time.LocalDate
+
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.services.TrustsValidationError
 import uk.gov.hmrc.trusts.utils.TypeOfTrust.TypeOfTrust
 
 import scala.annotation.tailrec
-import scala.util.matching.Regex
 
 trait ValidationUtil {
 
-  def isNotFutureDate(date: DateTime, path: String, key: String): Option[TrustsValidationError] = {
+  def isNotFutureDate(date: LocalDate, path: String, key: String): Option[TrustsValidationError] = {
     if (isAfterToday(date)) {
       Some(TrustsValidationError(s"$key must be today or in the past.", path))
     } else {
@@ -34,15 +34,15 @@ trait ValidationUtil {
     }
   }
 
-  def isNotFutureDate(date: Option[DateTime], path: String, key: String): Option[TrustsValidationError] = {
+  def isNotFutureDate(date: Option[LocalDate], path: String, key: String): Option[TrustsValidationError] = {
     date flatMap {
       d =>
         isNotFutureDate(d, path, key)
     }
   }
 
-  def isAfterToday(date: DateTime): Boolean = {
-    date.isAfter(new DateTime().plusDays(1).withTimeAtStartOfDay())
+  def isAfterToday(date: LocalDate): Boolean = {
+    date.isAfter(LocalDate.now)
   }
 
   type ListOfItemsAtIndex = List[(String, Int)]
@@ -52,9 +52,8 @@ trait ValidationUtil {
     @tailrec
     def findDuplicateHelper(remaining: ListOfItemsAtIndex, duplicates: ListOfItemsAtIndex): ListOfItemsAtIndex = {
       remaining match {
-        case Nil => {
+        case Nil =>
           duplicates
-        }
         case head :: tail =>
           if (tail.exists(x => x._1 == head._1)) {
             findDuplicateHelper(tail, head :: duplicates)

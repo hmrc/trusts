@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.transformations
 
-import org.joda.time.DateTime
+import java.time.LocalDate
+
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
@@ -48,7 +49,7 @@ class PromoteLeadTrusteeSpec extends FreeSpec with MustMatchers with MockitoSuga
         lineNo = None,
         bpMatchStatus = None,
         name = NameType("John", Some("William"), "O'Connor"),
-        dateOfBirth = new DateTime(1965, 2, 10, 0, 0),
+        dateOfBirth = LocalDate.of(1965, 2, 10),
         phoneNumber = "newPhone",
         email = Some("newEmail"),
         identification = DisplayTrustIdentificationType(
