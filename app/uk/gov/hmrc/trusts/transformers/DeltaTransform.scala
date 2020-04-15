@@ -73,6 +73,7 @@ object DeltaTransform {
       case transform: AddOtherBeneficiaryTransform          => Json.obj(AddOtherBeneficiaryTransform.key -> Json.toJson(transform)(AddOtherBeneficiaryTransform.format))
       case transform: AmendOtherBeneficiaryTransform        => Json.obj(AmendOtherBeneficiaryTransform.key -> Json.toJson(transform)(AmendOtherBeneficiaryTransform.format))
       case transform: AddCompanyBeneficiaryTransform        => Json.obj(AddCompanyBeneficiaryTransform.key -> Json.toJson(transform)(AddCompanyBeneficiaryTransform.format))
+      case transform: AmendTrustBeneficiaryTransform        => Json.obj(AmendTrustBeneficiaryTransform.key -> Json.toJson(transform)(AmendTrustBeneficiaryTransform.format))
       case transform => throw new Exception(s"Don't know how to serialise transform: $transform")
     }
     Json.toJson(transformWrapper)
