@@ -16,19 +16,19 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import org.joda.time.DateTime
+import java.time.LocalDate
+
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
-import uk.gov.hmrc.trusts.models.{AddressType, AgentDetails, Declaration, DeclarationForApi, NameType}
-import uk.gov.hmrc.trusts.utils.Implicits._
+import uk.gov.hmrc.trusts.models._
 
 class DeclarationTransformer {
 
   def transform(response: TrustProcessedResponse,
                 originalJson: JsValue,
                 declarationForApi: DeclarationForApi,
-                date: DateTime): JsResult[JsValue] = {
+                date: LocalDate): JsResult[JsValue] = {
 
     val responseJson = response.getTrust
     val responseHeader = response.responseHeader
@@ -87,7 +87,7 @@ class DeclarationTransformer {
     }
   }
 
-  private def addPreviousLeadTrusteeAsExpiredStep(previousLeadTrusteeJson: JsValue, date: DateTime): Reads[JsObject] = {
+  private def addPreviousLeadTrusteeAsExpiredStep(previousLeadTrusteeJson: JsValue, date: LocalDate): Reads[JsObject] = {
     val trusteeField = determineTrusteeField(__, previousLeadTrusteeJson)
     previousLeadTrusteeJson.transform(__.json.update(
       (__ \ 'entityEnd).json.put(Json.toJson(date))
@@ -99,7 +99,7 @@ class DeclarationTransformer {
       })
   }
 
-  private def addPreviousLeadTrustee(newJson: JsValue, originalJson: JsValue, date: DateTime): Reads[JsObject] = {
+  private def addPreviousLeadTrustee(newJson: JsValue, originalJson: JsValue, date: LocalDate): Reads[JsObject] = {
     val newLeadTrustee = newJson.transform(pickLeadTrustee)
     val originalLeadTrustee = originalJson.transform(pickLeadTrustee)
 

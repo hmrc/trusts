@@ -18,7 +18,6 @@ package uk.gov.hmrc.trusts.services
 
 
 import javax.inject.Inject
-import org.joda.time.DateTime
 import play.api.Logger
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -41,7 +40,8 @@ class VariationService @Inject()(
                                   declarationTransformer: DeclarationTransformer,
                                   cacheRepository: CacheRepository,
                                   transformationRepository: TransformationRepository,
-                                  auditService: AuditService) {
+                                  auditService: AuditService,
+                                  localDateService: LocalDateService) {
 
   def submitDeclaration(utr: String, internalId: String, declaration: DeclarationForApi)
                        (implicit hc: HeaderCarrier): Future[VariationResponse] = {
@@ -52,7 +52,7 @@ class VariationService @Inject()(
           transformationService.applyDeclarationTransformations(utr, internalId, originalJson).flatMap {
             case JsSuccess(transformedJson, _) =>
               val response = TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
-              declarationTransformer.transform(response, originalJson, declaration, new DateTime()) match {
+              declarationTransformer.transform(response, originalJson, declaration, localDateService.now) match {
                 case JsSuccess(value, _) =>
                   Logger.info(s"[VariationService] successfully transformed json for declaration")
                   doSubmit(utr, value, internalId)
