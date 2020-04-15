@@ -67,6 +67,14 @@
           }
         ],
         "beneficiary": {
+          "company": [
+            {
+              "bpMatchStatus": "01",
+              "entityStart": "2001-01-01",
+              "lineNo": "1",
+              "organisationName": "Company 1"
+            }
+          ],
           "charity": [
             {
               "lineNo": "1",
