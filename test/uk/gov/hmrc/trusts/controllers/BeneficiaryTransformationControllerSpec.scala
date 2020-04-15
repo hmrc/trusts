@@ -18,7 +18,6 @@ package uk.gov.hmrc.trusts.controllers
 
 import java.time.LocalDate
 
-import org.joda.time.DateTime
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -131,7 +130,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         "Some description",
         None,
         None,
-        DateTime.parse("2010-01-01"),
+        LocalDate.parse("2010-01-01"),
         None
       )
 
@@ -180,7 +179,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None,
         None,
         None,
-        DateTime.parse("2010-01-01"),
+        LocalDate.parse("2010-01-01"),
         None
       )
 
@@ -227,13 +226,13 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       val newBeneficiary = IndividualDetailsType(None,
         None,
         NameType("First", None, "Last"),
-        Some(DateTime.parse("2000-01-01")),
+        Some(LocalDate.parse("2000-01-01")),
         vulnerableBeneficiary = false,
         None,
         None,
         None,
         Some(IdentificationType(Some("nino"), None, None, None)),
-        DateTime.parse("1990-10-10"),
+        LocalDate.parse("1990-10-10"),
         None
       )
 
@@ -276,7 +275,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         Some(false),
         Some("50"),
         Some(IdentificationOrgType(None, Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")))),
-        DateTime.parse("1990-10-10"),
+        LocalDate.parse("1990-10-10"),
         None
       )
 
@@ -322,7 +321,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None,
         None,
         None,
-        DateTime.parse("2010-01-01"),
+        LocalDate.parse("2010-01-01"),
         None
       )
 
@@ -373,7 +372,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
         Some(false),
         None,
-        DateTime.parse("1990-10-10"),
+        LocalDate.parse("1990-10-10"),
         None
       )
 
@@ -418,7 +417,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         Some(IdentificationOrgType(
           Some("company utr"),
           Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")))),
-        DateTime.parse("1990-10-10"),
+        LocalDate.parse("1990-10-10"),
         None
       )
 
@@ -464,7 +463,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None,
         None,
         None,
-        DateTime.parse("2010-01-01"),
+        LocalDate.parse("2010-01-01"),
         None
       )
 
@@ -517,7 +516,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         Some(IdentificationOrgType(
           Some("company utr"),
           Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")))),
-        DateTime.parse("1990-10-10"),
+        LocalDate.parse("1990-10-10"),
         None
       )
 
@@ -564,7 +563,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None,
         None,
         None,
-        DateTime.parse("2010-01-01"),
+        LocalDate.parse("2010-01-01"),
         None
       )
 
@@ -617,7 +616,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None,
         None,
         None,
-        DateTime.parse("2010-01-01"),
+        LocalDate.parse("2010-01-01"),
         None
       )
 

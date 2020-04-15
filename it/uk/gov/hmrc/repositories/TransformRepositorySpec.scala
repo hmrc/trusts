@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.repositories
 
-import org.joda.time.DateTime
+import java.time.LocalDate
+
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.test.Helpers.running
 import uk.gov.hmrc.trusts.models.NameType
@@ -62,11 +63,11 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with TransformI
           Some(""),
           None,
           NameType("New", Some("lead"), "Trustee"),
-          DateTime.parse("2000-01-01"),
+          LocalDate.parse("2000-01-01"),
           "",
           None,
           DisplayTrustIdentificationType(None, None, None, None),
-          Some(DateTime.parse("2010-10-10"))
+          Some(LocalDate.parse("2010-10-10"))
         )
       ),
       AddTrusteeIndTransform(
@@ -74,10 +75,10 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with TransformI
           Some("lineNo"),
           Some("bpMatchStatus"),
           NameType("New", None, "Trustee"),
-          Some(DateTime.parse("2000-01-01")),
+          Some(LocalDate.parse("2000-01-01")),
           Some("phoneNumber"),
           Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-          DateTime.parse("2010-10-10")
+          LocalDate.parse("2010-10-10")
         )
       )
     )

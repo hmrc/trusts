@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationOrgType, DisplayTrustLeadTrusteeOrgType}
 import uk.gov.hmrc.trusts.utils.JsonUtils

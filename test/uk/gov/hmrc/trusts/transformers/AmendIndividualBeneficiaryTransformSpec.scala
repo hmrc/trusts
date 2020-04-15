@@ -18,7 +18,6 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.trusts.models.{NameType, PassportType}
@@ -49,13 +48,13 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
             nino = None,
             passport = Some(PassportType(
               number = "123456789",
-              expirationDate = DateTime.parse("2025-01-01"),
+              expirationDate = LocalDate.parse("2025-01-01"),
               countryOfIssue = "DE"
             )),
             address = None,
             safeId = None
           )),
-          DateTime.parse("2018-02-28"),
+          LocalDate.parse("2018-02-28"),
           None
         )
 
@@ -98,7 +97,7 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
           lineNo = None,
           bpMatchStatus = None,
           NameType("Updated First 2", None, "Updated Last 2"),
-          dateOfBirth = Some(DateTime.parse("2012-01-01")),
+          dateOfBirth = Some(LocalDate.parse("2012-01-01")),
           vulnerableBeneficiary = false,
           None,
           None,
@@ -107,13 +106,13 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
             nino = None,
             passport = Some(PassportType(
               number = "123456789",
-              expirationDate = DateTime.parse("2025-01-01"),
+              expirationDate = LocalDate.parse("2025-01-01"),
               countryOfIssue = "DE"
             )),
             address = None,
             safeId = None
           )),
-          DateTime.parse("2018-02-28"),
+          LocalDate.parse("2018-02-28"),
           None
         )
 
@@ -159,7 +158,7 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
           None,
           None,
           None,
-          DateTime.parse("2018-02-28"),
+          LocalDate.parse("2018-02-28"),
           None
         )
 
@@ -181,9 +180,6 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
         val result = transformer.applyDeclarationTransform(applied).get
         result mustBe afterJson
       }
-
     }
-
   }
-
 }

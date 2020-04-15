@@ -18,7 +18,6 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.models.NameType
@@ -69,7 +68,7 @@ class PromoteTrusteeIndTransformSpec extends FreeSpec with MustMatchers with Opt
       lineNo = None,
       bpMatchStatus = None,
       name = NameType("John", Some("William"), "O'Connor"),
-      dateOfBirth = new DateTime(1956, 2, 12, 12, 30),
+      dateOfBirth = LocalDate.of(1956, 2, 12),
       phoneNumber = "Phone",
       email = Some("Email"),
       identification = DisplayTrustIdentificationType(None, Some("ST123456"), None, None),

@@ -18,7 +18,6 @@ package uk.gov.hmrc.trusts.services
 
 import java.time.LocalDate
 
-import org.joda.time.DateTime
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -28,7 +27,7 @@ import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.{JsResult, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.{AddressType, NameType, RemoveTrustee}
+import uk.gov.hmrc.trusts.models.{AddressType, NameType}
 import uk.gov.hmrc.trusts.repositories.TransformationRepositoryImpl
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
@@ -36,7 +35,6 @@ import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
 import scala.concurrent.Future
 
 class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonRequests {
-  // Removing the usage of GuiceOneAppPerSuite started timing out a test without this.
   private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 
 
@@ -44,11 +42,11 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     lineNo = Some("newLineNo"),
     bpMatchStatus = Some("newMatchStatus"),
     name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-    dateOfBirth = new DateTime(1965, 2, 10, 12, 30),
+    dateOfBirth = LocalDate.of(1965, 2, 10),
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-    entityStart = Some(DateTime.parse("2012-03-14"))
+    entityStart = Some(LocalDate.parse("2012-03-14"))
   )
 
   private val auditService = mock[AuditService]
@@ -76,42 +74,26 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       |          }
       |""".stripMargin)
 
-  private val originalTrusteeOrgJson = Json.parse(
-    """
-      |           {
-      |              "trusteeOrg": {
-      |                "lineNo": "1",
-      |                "name": "MyOrg Incorporated",
-      |                "phoneNumber": "+447456788112",
-      |                "email": "a",
-      |                "identification": {
-      |                  "safeId": "2222200000000"
-      |                },
-      |                "entityStart": "2017-02-28"
-      |              }
-      |            }
-      |""".stripMargin)
-
   val existingLeadTrusteeInfo = DisplayTrustLeadTrusteeIndType(
     lineNo = Some("newLineNo"),
     bpMatchStatus = Some("newMatchStatus"),
     name = NameType("existingFirstName", Some("existingMiddleName"), "existingLastName"),
-    dateOfBirth = new DateTime(1965, 2, 10, 12, 30),
+    dateOfBirth = LocalDate.of(1965, 2, 10),
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-    entityStart = Some(DateTime.parse("2002-03-14"))
+    entityStart = Some(LocalDate.parse("2002-03-14"))
   )
 
   val newLeadTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
     lineNo = Some("newLineNo"),
     bpMatchStatus = Some("newMatchStatus"),
     name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-    dateOfBirth = new DateTime(1965, 2, 10, 12, 30),
+    dateOfBirth = LocalDate.of(1965, 2, 10),
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-    entityStart = Some(DateTime.parse("2012-03-14"))
+    entityStart = Some(LocalDate.parse("2012-03-14"))
   )
 
   "must transform json data with the current transforms" in {
@@ -187,7 +169,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       lineNo = None,
       bpMatchStatus = None,
       name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-      dateOfBirth = new DateTime(1965, 2, 10, 0, 0),
+      dateOfBirth = LocalDate.of(1965, 2, 10),
       phoneNumber = "newPhone",
       email = Some("newEmail"),
       identification = DisplayTrustIdentificationType(

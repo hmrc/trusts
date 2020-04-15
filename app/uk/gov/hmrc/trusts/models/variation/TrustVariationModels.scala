@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.trusts.models.variation
 
-import org.joda.time.DateTime
+import java.time.LocalDate
+
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.utils.Implicits._
 
 case class TrustVariation(
                       matchData: MatchData,
@@ -28,7 +28,7 @@ case class TrustVariation(
                       declaration: Declaration,
                       details: Trust,
                       agentDetails: Option[AgentDetails] = None,
-                      trustEndDate: Option[DateTime],
+                      trustEndDate: Option[LocalDate],
                       reqHeader: ReqHeader
                     )
 
@@ -41,7 +41,7 @@ object TrustVariation {
         (__ \ "declaration").read[Declaration] and
         (__ \ "details" \ "trust").read[Trust] and
         (__ \ "agentDetails").readNullable[AgentDetails] and
-        (__ \ "trustEndDate").readNullable[DateTime] and
+        (__ \ "trustEndDate").readNullable[LocalDate] and
         (__ \ "reqHeader").read[ReqHeader]
       ) (TrustVariation.apply _)
   }
@@ -52,7 +52,7 @@ object TrustVariation {
       (JsPath \ "declaration").write[Declaration] and
       (JsPath \ "details" \ "trust").write[Trust] and
       (JsPath \ "agentDetails").writeNullable[AgentDetails] and
-      (JsPath \ "trustEndDate").writeNullable[DateTime] and
+      (JsPath \ "trustEndDate").writeNullable[LocalDate] and
       (JsPath \ "reqHeader").write[ReqHeader]
     ) (unlift(TrustVariation.unapply))
 
@@ -100,10 +100,10 @@ case class NaturalPersonType(
                               lineNo: Option[String],
                               bpMatchStatus: Option[String],
                               name: NameType,
-                              dateOfBirth: Option[DateTime],
+                              dateOfBirth: Option[LocalDate],
                               identification: Option[IdentificationType],
-                              entityStart: DateTime,
-                              entityEnd: Option[DateTime]
+                              entityStart: LocalDate,
+                              entityEnd: Option[LocalDate]
                             )
 
 object NaturalPersonType {
@@ -129,8 +129,8 @@ case class UnidentifiedType(lineNo: Option[String],
                             description: String,
                             beneficiaryDiscretion: Option[Boolean],
                             beneficiaryShareOfIncome: Option[String],
-                            entityStart: DateTime,
-                            entityEnd: Option[DateTime])
+                            entityStart: LocalDate,
+                            entityEnd: Option[LocalDate])
 
 object UnidentifiedType {
   implicit val unidentifiedTypeFormat: Format[UnidentifiedType] = Json.format[UnidentifiedType]
@@ -148,8 +148,8 @@ case class LargeType(lineNo: Option[String],
                      identification: Option[IdentificationOrgType],
                      beneficiaryDiscretion: Option[Boolean],
                      beneficiaryShareOfIncome: Option[String],
-                     entityStart: DateTime,
-                     entityEnd: Option[DateTime])
+                     entityStart: LocalDate,
+                     entityEnd: Option[LocalDate])
 
 object LargeType {
   implicit val largeTypeFormat: Format[LargeType] = Json.format[LargeType]
@@ -161,8 +161,8 @@ case class OtherType(lineNo: Option[String],
                      address: Option[AddressType],
                      beneficiaryDiscretion: Option[Boolean],
                      beneficiaryShareOfIncome: Option[String],
-                     entityStart: DateTime,
-                     entityEnd: Option[DateTime])
+                     entityStart: LocalDate,
+                     entityEnd: Option[LocalDate])
 
 object OtherType {
   implicit val otherTypeFormat: Format[OtherType] = Json.format[OtherType]
@@ -172,14 +172,14 @@ case class IndividualDetailsType(
                                   lineNo: Option[String],
                                   bpMatchStatus: Option[String],
                                   name: NameType,
-                                  dateOfBirth: Option[DateTime],
+                                  dateOfBirth: Option[LocalDate],
                                   vulnerableBeneficiary: Boolean,
                                   beneficiaryType: Option[String],
                                   beneficiaryDiscretion: Option[Boolean],
                                   beneficiaryShareOfIncome: Option[String],
                                   identification: Option[IdentificationType],
-                                  entityStart: DateTime,
-                                  entityEnd: Option[DateTime]
+                                  entityStart: LocalDate,
+                                  entityEnd: Option[LocalDate]
                                 )
 
 object IndividualDetailsType {
@@ -192,8 +192,8 @@ case class BeneficiaryCompanyType(lineNo: Option[String],
                                   beneficiaryDiscretion: Option[Boolean],
                                   beneficiaryShareOfIncome: Option[String],
                                   identification: Option[IdentificationOrgType],
-                                  entityStart: DateTime,
-                                  entityEnd: Option[DateTime])
+                                  entityStart: LocalDate,
+                                  entityEnd: Option[LocalDate])
 
 object BeneficiaryCompanyType {
   implicit val companyTypeFormat: Format[BeneficiaryCompanyType] = Json.format[BeneficiaryCompanyType]
@@ -205,8 +205,8 @@ case class BeneficiaryTrustType(lineNo: Option[String],
                                 beneficiaryDiscretion: Option[Boolean],
                                 beneficiaryShareOfIncome: Option[String],
                                 identification: Option[IdentificationOrgType],
-                                entityStart: DateTime,
-                                entityEnd: Option[DateTime])
+                                entityStart: LocalDate,
+                                entityEnd: Option[LocalDate])
 
 object BeneficiaryTrustType {
   implicit val beneficiaryTrustTypeFormat: Format[BeneficiaryTrustType] = Json.format[BeneficiaryTrustType]
@@ -218,8 +218,8 @@ case class BeneficiaryCharityType(lineNo: Option[String],
                                   beneficiaryDiscretion: Option[Boolean],
                                   beneficiaryShareOfIncome: Option[String],
                                   identification: Option[IdentificationOrgType],
-                                  entityStart: DateTime,
-                                  entityEnd: Option[DateTime])
+                                  entityStart: LocalDate,
+                                  entityEnd: Option[LocalDate])
 
 object BeneficiaryCharityType {
   implicit val charityTypeFormat: Format[BeneficiaryCharityType] = Json.format[BeneficiaryCharityType]
@@ -229,11 +229,11 @@ case class WillType(
                      lineNo: Option[String],
                      bpMatchStatus: Option[String],
                      name: NameType,
-                     dateOfBirth: Option[DateTime],
-                     dateOfDeath: Option[DateTime],
+                     dateOfBirth: Option[LocalDate],
+                     dateOfDeath: Option[LocalDate],
                      identification: Option[IdentificationType],
-                     entityStart: DateTime,
-                     entityEnd: Option[DateTime]
+                     entityStart: LocalDate,
+                     entityEnd: Option[LocalDate]
                    )
 
 object WillType {
@@ -244,12 +244,12 @@ case class LeadTrusteeIndType(
                                lineNo: Option[String],
                                bpMatchStatus: Option[String],
                                name: NameType,
-                               dateOfBirth: DateTime,
+                               dateOfBirth: LocalDate,
                                phoneNumber: String,
                                email: Option[String] = None,
                                identification: IdentificationType,
-                               entityStart: DateTime,
-                               entityEnd: Option[DateTime]
+                               entityStart: LocalDate,
+                               entityEnd: Option[LocalDate]
                              )
 
 object LeadTrusteeIndType {
@@ -265,8 +265,8 @@ case class LeadTrusteeOrgType(
                                phoneNumber: String,
                                email: Option[String] = None,
                                identification: IdentificationOrgType,
-                               entityStart: DateTime,
-                               entityEnd: Option[DateTime]
+                               entityStart: LocalDate,
+                               entityEnd: Option[LocalDate]
                              )
 
 object LeadTrusteeOrgType {
@@ -299,8 +299,8 @@ case class TrusteeOrgType(
                            phoneNumber: Option[String] = None,
                            email: Option[String] = None,
                            identification: Option[IdentificationOrgType],
-                           entityStart: DateTime,
-                           entityEnd: Option[DateTime]
+                           entityStart: LocalDate,
+                           entityEnd: Option[LocalDate]
                          )
 
 object TrusteeOrgType {
@@ -312,11 +312,11 @@ case class TrusteeIndividualType(
                                   lineNo: Option[String],
                                   bpMatchStatus: Option[String],
                                   name: NameType,
-                                  dateOfBirth: Option[DateTime],
+                                  dateOfBirth: Option[LocalDate],
                                   phoneNumber: Option[String],
                                   identification: Option[IdentificationType],
-                                  entityStart: DateTime,
-                                  entityEnd: Option[DateTime]
+                                  entityStart: LocalDate,
+                                  entityEnd: Option[LocalDate]
                                 )
 
 object TrusteeIndividualType {
@@ -335,10 +335,10 @@ case class Protector(
                       lineNo: Option[String],
                       bpMatchStatus: Option[String],
                       name: NameType,
-                      dateOfBirth: Option[DateTime],
+                      dateOfBirth: Option[LocalDate],
                       identification: Option[IdentificationType],
-                      entityStart: DateTime,
-                      entityEnd: Option[DateTime]
+                      entityStart: LocalDate,
+                      entityEnd: Option[LocalDate]
                     )
 
 object Protector {
@@ -352,8 +352,8 @@ case class ProtectorCompany(
                              bpMatchStatus: Option[String],
                              name: String,
                              identification: Option[IdentificationOrgType],
-                             entityStart: DateTime,
-                             entityEnd: Option[DateTime]
+                             entityStart: LocalDate,
+                             entityEnd: Option[LocalDate]
                            )
 
 object ProtectorCompany {
@@ -374,10 +374,10 @@ case class Settlor(
                     lineNo: Option[String],
                     bpMatchStatus: Option[String],
                     name: NameType,
-                    dateOfBirth: Option[DateTime],
+                    dateOfBirth: Option[LocalDate],
                     identification: Option[IdentificationType],
-                    entityStart: DateTime,
-                    entityEnd: Option[DateTime]
+                    entityStart: LocalDate,
+                    entityEnd: Option[LocalDate]
                   )
 
 object Settlor {
@@ -391,8 +391,8 @@ case class SettlorCompany(
                            companyType: Option[String],
                            companyTime: Option[Boolean],
                            identification: Option[IdentificationOrgType],
-                           entityStart: DateTime,
-                           entityEnd: Option[DateTime]
+                           entityStart: LocalDate,
+                           entityEnd: Option[LocalDate]
                          )
 
 object SettlorCompany {
@@ -440,7 +440,7 @@ object BusinessAssetType {
 case class PartnershipType(
                             utr: Option[String],
                             description: String,
-                            partnershipStart: Option[DateTime]
+                            partnershipStart: Option[LocalDate]
                           )
 
 object PartnershipType {

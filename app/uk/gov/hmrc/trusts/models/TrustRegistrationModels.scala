@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.trusts.models
 
-import org.joda.time.DateTime
+import java.time.LocalDate
+
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.utils.Constants._
 import uk.gov.hmrc.trusts.utils.DeedOfVariation.DeedOfVariation
 import uk.gov.hmrc.trusts.utils.TypeOfTrust.{Employment, TypeOfTrust}
 /**
@@ -142,11 +142,10 @@ object ProtectorsType {
 }
 
 case class Protector(name: NameType,
-                     dateOfBirth: Option[DateTime],
+                     dateOfBirth: Option[LocalDate],
                      identification: Option[IdentificationType])
 
 object Protector {
-  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val protectorFormat: Format[Protector] = Json.format[Protector]
 }
 
@@ -174,13 +173,11 @@ object TrusteeOrgType {
 }
 
 case class TrusteeIndividualType(name: NameType,
-                       dateOfBirth: Option[DateTime],
+                       dateOfBirth: Option[LocalDate],
                        phoneNumber: Option[String],
                        identification: Option[IdentificationType])
 
 object TrusteeIndividualType {
-
-  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val trusteeIndividualTypeFormat : Format[TrusteeIndividualType] = Json.format[TrusteeIndividualType]
 }
 
@@ -192,11 +189,10 @@ object Settlors {
 }
 
 case class Settlor(name: NameType,
-                   dateOfBirth: Option[DateTime],
+                   dateOfBirth: Option[LocalDate],
                    identification: Option[IdentificationType])
 
 object Settlor {
-  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val settlorFormat: Format[Settlor] = Json.format[Settlor]
 }
 
@@ -209,20 +205,17 @@ object SettlorCompany {
   implicit val settlorCompanyFormat: Format[SettlorCompany] = Json.format[SettlorCompany]
 }
 
-
 case class LeadTrusteeIndType (
                             name: NameType,
-                            dateOfBirth: DateTime ,
+                            dateOfBirth: LocalDate,
                             phoneNumber: String,
                             email: Option[String] = None,
                             identification: IdentificationType
                           )
 object LeadTrusteeIndType {
-
-  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val leadTrusteeIndTypeFormat: Format[LeadTrusteeIndType] = Json.format[LeadTrusteeIndType]
-
 }
+
 case class LeadTrusteeOrgType(
                                name: String,
                                phoneNumber: String,
@@ -240,8 +233,6 @@ case class LeadTrusteeType(
                           )
 
 object LeadTrusteeType {
-
-  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val leadTrusteeTypeReads:Reads[LeadTrusteeType] = Json.reads[LeadTrusteeType]
 
   implicit val leadTrusteeWritesToDes : Writes[LeadTrusteeType] = Writes {
@@ -266,7 +257,7 @@ object BeneficiaryType {
 }
 
 case class IndividualDetailsType(name: NameType,
-                                 dateOfBirth: Option[DateTime],
+                                 dateOfBirth: Option[LocalDate],
                                  vulnerableBeneficiary: Boolean,
                                  beneficiaryType: Option[String],
                                  beneficiaryDiscretion: Option[Boolean],
@@ -274,7 +265,6 @@ case class IndividualDetailsType(name: NameType,
                                  identification: Option[IdentificationType])
 
 object IndividualDetailsType {
-  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val individualDetailsTypeFormat: Format[IndividualDetailsType] = Json.format[IndividualDetailsType]
 }
 
@@ -345,11 +335,10 @@ object BeneficiaryCompanyType {
 }
 
 case class NaturalPersonType(name: NameType,
-                             dateOfBirth: Option[DateTime],
+                             dateOfBirth: Option[LocalDate],
                              identification: Option[IdentificationType])
 
 object NaturalPersonType {
-  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val naturalPersonTypeFormat: Format[NaturalPersonType] = Json.format[NaturalPersonType]
 }
 
@@ -361,22 +350,20 @@ object IdentificationType {
   implicit val identificationTypeFormat: Format[IdentificationType] = Json.format[IdentificationType]
 }
 
-case class TrustDetailsType(startDate: DateTime,
+case class TrustDetailsType(startDate: LocalDate,
                             lawCountry: Option[String],
                             administrationCountry: Option[String],
                             residentialStatus: Option[ResidentialStatusType],
                             typeOfTrust: TypeOfTrust,
                             deedOfVariation: Option[DeedOfVariation],
                             interVivos: Option[Boolean],
-                            efrbsStartDate: Option[DateTime]) {
+                            efrbsStartDate: Option[LocalDate]) {
 
   def isEmploymentRelatedTrust : Boolean = typeOfTrust == Employment
 
 }
 
 object TrustDetailsType {
-
-  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val trustDetailsTypeFormat: Format[TrustDetailsType] = Json.format[TrustDetailsType]
 }
 
@@ -431,11 +418,9 @@ object OtherAssetType {
 }
 
 case class PartnershipType(description: String,
-                           partnershipStart: DateTime)
+                           partnershipStart: LocalDate)
 
 object PartnershipType {
-
-  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val partnershipTypeFormat: Format[PartnershipType] = Json.format[PartnershipType]
 }
 
@@ -462,12 +447,10 @@ object YearsReturnType {
 
 
 case class PassportType(number: String,
-                        expirationDate: DateTime,
+                        expirationDate: LocalDate,
                         countryOfIssue: String)
 
 object PassportType {
-
-  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val passportTypeFormat: Format[PassportType] = Json.format[PassportType]
 }
 
@@ -491,12 +474,11 @@ object AddressType {
 }
 
 case class WillType(name: NameType,
-                    dateOfBirth: Option[DateTime],
-                    dateOfDeath: Option[DateTime],
+                    dateOfBirth: Option[LocalDate],
+                    dateOfDeath: Option[LocalDate],
                     identification: Option[IdentificationType])
 
 object WillType {
-  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val willTypeFormat: Format[WillType] = Json.format[WillType]
 }
 

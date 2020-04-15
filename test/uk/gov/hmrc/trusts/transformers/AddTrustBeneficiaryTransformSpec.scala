@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import org.joda.time.DateTime
+import java.time.LocalDate
+
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import uk.gov.hmrc.trusts.models.variation.BeneficiaryTrustType
 import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType}
@@ -33,10 +34,9 @@ class AddTrustBeneficiaryTransformSpec extends FreeSpec with MustMatchers with O
     Some(IdentificationOrgType(
       Some("company utr"),
       Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")))),
-    DateTime.parse("1990-10-10"),
+    LocalDate.parse("1990-10-10"),
     None
   )
-
 
   "the add trust beneficiary transformer should" - {
 
@@ -51,6 +51,5 @@ class AddTrustBeneficiaryTransformSpec extends FreeSpec with MustMatchers with O
 
       result mustBe afterJson
     }
-
   }
 }

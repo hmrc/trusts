@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import org.joda.time.DateTime
+import java.time.LocalDate
+
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationOrgType, DisplayTrustTrusteeOrgType}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustTrusteeOrgType
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionValues {
@@ -32,7 +33,7 @@ class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionV
         None,
         None,
         None,
-        DateTime.parse("2020-01-30")
+        LocalDate.parse("2020-01-30")
       )
 
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-no-trustees.json")
@@ -55,7 +56,7 @@ class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionV
         None,
         None,
         None,
-        DateTime.parse("2020-01-30")
+        LocalDate.parse("2020-01-30")
       )
 
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")

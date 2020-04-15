@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate
 
-import org.joda.time.DateTime
+import java.time.LocalDate
+
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.{Correspondence, Declaration, NameType}
-import uk.gov.hmrc.trusts.utils.Constants.dateTimePattern
 
 case class PersonalRepresentativeType (
                                         estatePerRepInd : Option[EstatePerRepIndType] = None,
@@ -29,7 +29,6 @@ case class PersonalRepresentativeType (
                                       )
 
 object PersonalRepresentativeType {
-  implicit val dateFormat: Format[DateTime] = Format[DateTime](Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern))
 
   implicit object PersonalRepFormats extends Format[PersonalRepresentativeType] {
 
@@ -57,16 +56,15 @@ object PersonalRepresentativeType {
 }
 
 case class EstatePerRepIndType(name: NameType,
-                               dateOfBirth: DateTime,
+                               dateOfBirth: LocalDate,
                                identification: IdentificationType,
                                phoneNumber: String,
                                email: Option[String],
                                lineNo: String,
                                bpMatchStatus: Option[String],
-                               entityStart: DateTime)
+                               entityStart: LocalDate)
 
 object EstatePerRepIndType {
-  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val estatePerRepIndTypeFormat: Format[EstatePerRepIndType] = Json.format[EstatePerRepIndType]
 }
 
@@ -76,23 +74,21 @@ case class EstatePerRepOrgType(orgName: String,
                                identification: IdentificationOrgType,
                                lineNo: String,
                                bpMatchStatus: Option[String],
-                               entityStart: DateTime)
+                               entityStart: LocalDate)
 
 object EstatePerRepOrgType {
-  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val estatePerRepOrgTypeFormat: Format[EstatePerRepOrgType] = Json.format[EstatePerRepOrgType]
 }
 
 case class EstateWillType(name: NameType,
-                          dateOfBirth: Option[DateTime],
-                          dateOfDeath: DateTime,
+                          dateOfBirth: Option[LocalDate],
+                          dateOfDeath: LocalDate,
                           identification: Option[IdentificationType],
                           lineNo: String,
                           bpMatchStatus: Option[String],
-                          entityStart: DateTime)
+                          entityStart: LocalDate)
 
 object EstateWillType {
-  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val estateWillTypeFormat: Format[EstateWillType] = Json.format[EstateWillType]
 }
 
@@ -104,11 +100,10 @@ object EntitiesType {
 }
 
 case class Estate(entities: EntitiesType,
-                  administrationEndDate: Option[DateTime],
+                  administrationEndDate: Option[LocalDate],
                   periodTaxDues: String)
 
 object Estate {
-  implicit val dateFormat: Format[DateTime] = Format[DateTime]( Reads.jodaDateReads(dateTimePattern), Writes.jodaDateWrites(dateTimePattern) )
   implicit val estateFormat: Format[Estate] = Json.format[Estate]
 }
 

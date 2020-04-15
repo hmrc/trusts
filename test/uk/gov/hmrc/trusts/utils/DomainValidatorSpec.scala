@@ -16,12 +16,10 @@
 
 package uk.gov.hmrc.trusts.utils
 
-import org.joda.time.DateTime
-import uk.gov.hmrc.trusts.BaseSpec
-import uk.gov.hmrc.trusts.models.{Registration, TrusteeType}
-import uk.gov.hmrc.trusts.models.Registration
-import uk.gov.hmrc.trusts.utils.TypeOfTrust._
+import java.time.LocalDate
 
+import uk.gov.hmrc.trusts.BaseSpec
+import uk.gov.hmrc.trusts.models.Registration
 
 class DomainValidatorSpec extends BaseSpec with DataExamples {
 
@@ -33,12 +31,12 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
     }
 
     "return None for today's date" in {
-      val registrationWithFutureStartDate = registrationWithStartDate(new DateTime())
+      val registrationWithFutureStartDate = registrationWithStartDate(LocalDate.now)
       SUT(registrationWithFutureStartDate).trustStartDateIsNotFutureDate mustBe None
     }
 
     "return validation error for tomorrow date" in {
-      val registrationWithFutureStartDate = registrationWithStartDate(new DateTime().plusDays(1))
+      val registrationWithFutureStartDate = registrationWithStartDate(LocalDate.now.plusDays(1))
       SUT(registrationWithFutureStartDate).trustStartDateIsNotFutureDate.get.message mustBe
         "Trusts start date must be today or in the past."
     }
@@ -46,17 +44,17 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
 
   "trustEfrbsDateIsNotFutureDate for employment related trust" should {
     "return None for valid date" in {
-      val request = registrationWithEfrbsStartDate(new DateTime().plusDays(-1000), TypeOfTrust.Employment)
+      val request = registrationWithEfrbsStartDate(LocalDate.now.plusDays(-1000), TypeOfTrust.Employment)
       SUT(request).trustEfrbsDateIsNotFutureDate mustBe None
     }
 
     "return None for today's date" in {
-      val request = registrationWithEfrbsStartDate(new DateTime(),TypeOfTrust.Employment)
+      val request = registrationWithEfrbsStartDate(LocalDate.now,TypeOfTrust.Employment)
       SUT(request).trustEfrbsDateIsNotFutureDate mustBe None
     }
 
     "return validation error for tomorrow date" in {
-      val request = registrationWithEfrbsStartDate(new DateTime().plusDays(1),TypeOfTrust.Employment)
+      val request = registrationWithEfrbsStartDate(LocalDate.now.plusDays(1),TypeOfTrust.Employment)
       SUT(request).trustEfrbsDateIsNotFutureDate.get.message mustBe
         "Trusts efrbs start date must be today or in the past."
     }
@@ -64,12 +62,12 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
 
   "validateEfrbsDate" should {
     "return None when efrbs date is provided for employment trusts" in {
-      val employmentRelatedTrust = registrationWithEfrbsStartDate(new DateTime().plusDays(1000),TypeOfTrust.Employment)
+      val employmentRelatedTrust = registrationWithEfrbsStartDate(LocalDate.now.plusDays(1000),TypeOfTrust.Employment)
       SUT(employmentRelatedTrust).validateEfrbsDate mustBe None
     }
 
     "return validation error when efrbs date is provided with any other trust except employment trusts" in {
-      val willTrust = registrationWithEfrbsStartDate(new DateTime().plusDays(1000), TypeOfTrust.Will)
+      val willTrust = registrationWithEfrbsStartDate(LocalDate.now.plusDays(1000), TypeOfTrust.Will)
       SUT(willTrust).validateEfrbsDate.get.message mustBe
         "Trusts efrbs start date can be provided for Employment Related trust only."
     }
@@ -183,7 +181,7 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
       response.flatten.zipWithIndex.map{
         case (error,index) =>
           error.message mustBe "NINO is already used for another individual beneficiary."
-          error.location mustBe s"/trust/entities/beneficiary/individualDetails/${index}/identification/nino"
+          error.location mustBe s"/trust/entities/beneficiary/individualDetails/$index/identification/nino"
       }
     }
   }
@@ -217,7 +215,7 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
       response.flatten.zipWithIndex.map{
         case (error,index) =>
           error.message mustBe "Passport number is already used for another individual beneficiary."
-          error.location mustBe s"/trust/entities/beneficiary/individualDetails/${index}/identification/passport/number"
+          error.location mustBe s"/trust/entities/beneficiary/individualDetails/$index/identification/passport/number"
       }
     }
   }

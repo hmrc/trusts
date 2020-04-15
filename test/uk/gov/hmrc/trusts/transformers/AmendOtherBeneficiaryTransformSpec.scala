@@ -18,7 +18,6 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.trusts.models.AddressType
@@ -43,7 +42,7 @@ class AmendOtherBeneficiaryTransformSpec extends FreeSpec with MustMatchers with
           Some(AddressType("Amended House", "Amended Street", None, None, Some("NE1 1EN"), "GB")),
           Some(false),
           None,
-          DateTime.parse("2019-02-12"),
+          LocalDate.parse("2019-02-12"),
           None
         )
 
@@ -86,7 +85,7 @@ class AmendOtherBeneficiaryTransformSpec extends FreeSpec with MustMatchers with
           Some(AddressType("Amended House", "Amended Street", None, None, Some("NE1 1EN"), "GB")),
           Some(false),
           None,
-          DateTime.parse("2019-02-12"),
+          LocalDate.parse("2019-02-12"),
           None
         )
 
@@ -126,7 +125,7 @@ class AmendOtherBeneficiaryTransformSpec extends FreeSpec with MustMatchers with
           Some(AddressType("Amended House", "Amended Street", None, None, Some("NE1 1EN"), "GB")),
           Some(false),
           None,
-          DateTime.parse("2020-02-12"),
+          LocalDate.parse("2020-02-12"),
           None
         )
 
@@ -144,9 +143,6 @@ class AmendOtherBeneficiaryTransformSpec extends FreeSpec with MustMatchers with
         val result = transformer.applyDeclarationTransform(applied).get
         result mustBe afterJson
       }
-
     }
-
   }
-
 }

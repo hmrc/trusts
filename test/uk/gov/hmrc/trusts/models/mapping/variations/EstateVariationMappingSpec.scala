@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.trusts.models.mapping.variations
 
-import org.joda.time.DateTime
+import java.time.LocalDate
+
 import org.scalatest.enablers.Definition
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.BaseSpec
@@ -41,7 +42,7 @@ class EstateVariationMappingSpec extends BaseSpec {
             model mustBe a[EstateVariation]
 
             model.details.administrationEndDate mustBe defined
-            model.details.administrationEndDate.get mustBe DateTime.parse("2017-06-01")
+            model.details.administrationEndDate.get mustBe LocalDate.parse("2017-06-01")
 
           case JsError(errors) =>
             fail(errors.toString())

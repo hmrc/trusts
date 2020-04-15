@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.trusts.models.mapping.registration
 
-import org.joda.time.DateTime
+import java.time.LocalDate
+
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.utils.DataExamples
@@ -36,7 +37,7 @@ class LeadTrusteeMapperSpec  extends BaseSpec with DataExamples {
         }
 
         "containing a date of birth" in {
-          (json \ "dateOfBirth").get.as[DateTime] mustBe domainLeadTrustee.leadTrusteeInd.get.dateOfBirth
+          (json \ "dateOfBirth").get.as[LocalDate] mustBe domainLeadTrustee.leadTrusteeInd.get.dateOfBirth
         }
 
         "containing an identification" in {
