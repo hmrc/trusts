@@ -78,9 +78,11 @@
           "trust": [
             {
               "lineNo": "1",
-              "bpMatchStatus": "01",
-              "organisationName": "Trust 1",
-              "entityStart": "2001-01-01"
+              "organisationName": "New Trust Name",
+              "identification": {
+                "utr": "1234567890"
+              },
+              "entityStart": "1998-02-12"
             }
           ],
           "individualDetails": [
@@ -115,15 +117,16 @@
           ],
           "other": [
             {
-              "description":"Amended Description",
-              "address":{
-                "line1":"Amended House",
-                "line2":"Amended Street",
-                "postCode":"NE1 1EN",
-                "country":"GB"
+              "lineNo": "1",
+              "description": "Lorem ipsum",
+              "address": {
+                "line1": "1344 Army Road",
+                "line2": "Suite 111",
+                "line4": "Telford",
+                "postCode": "TF1 5DR",
+                "country": "GB"
               },
-              "beneficiaryDiscretion":false,
-              "entityStart":"2019-02-12"
+              "entityStart": "1998-02-12"
             }
           ],
           "unidentified": [

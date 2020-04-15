@@ -30,7 +30,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryCompanyType, IdentificationType, IndividualDetailsType, OtherType, UnidentifiedType}
+import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryCompanyType, BeneficiaryTrustType, IdentificationType, IndividualDetailsType, OtherType, UnidentifiedType}
 import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType, RemoveBeneficiary}
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
@@ -389,6 +389,53 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
         Matchers.eq("utr"),
         Matchers.eq("internalId"),
         Matchers.eq(AmendOtherBeneficiaryTransform(index, Json.toJson(newBeneficiary), original, LocalDateMock.now))
+      )
+    }
+  }
+
+  "must add a new amend trust beneficiary transform using the transformation service" in {
+    val index = 0
+    val transformationService = mock[TransformationService]
+    val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
+    val newTrust = BeneficiaryTrustType(
+      None,
+      None,
+      "Trust Name",
+      None,
+      None,
+      None,
+      DateTime.parse("2010-01-01"),
+      None
+    )
+
+    val original: JsValue = Json.parse(
+      """
+        |{
+        |  "lineNo": "1",
+        |  "bpMatchStatus": "01",
+        |  "name": "Original name",
+        |  "identification": {
+        |    "utr": "1234567890"
+        |  },
+        |  "entityStart": "2018-02-28"
+        |}
+        |""".stripMargin)
+
+    when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+    when(transformationService.getTransformedData(any(), any())(any()))
+      .thenReturn(Future.successful(TrustProcessedResponse(
+        buildInputJson("trust", Seq(original)),
+        ResponseHeader("status", "formBundleNo")
+      )))
+
+    val result = service.amendTrustBeneficiaryTransformer("utr", index, "internalId", newTrust)
+    whenReady(result) { _ =>
+
+      verify(transformationService).addNewTransform(
+        Matchers.eq("utr"),
+        Matchers.eq("internalId"),
+        Matchers.eq(AmendTrustBeneficiaryTransform(index, Json.toJson(newTrust), original, LocalDateMock.now))
       )
     }
   }
