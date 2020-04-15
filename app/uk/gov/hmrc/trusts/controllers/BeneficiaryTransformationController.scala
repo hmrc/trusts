@@ -22,7 +22,7 @@ import play.api.libs.json.{JsError, JsString, JsSuccess, JsValue, Json}
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveBeneficiary
-import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryCompanyType, IndividualDetailsType, OtherType, UnidentifiedType}
+import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryCompanyType, BeneficiaryTrustType, IndividualDetailsType, OtherType, UnidentifiedType}
 import uk.gov.hmrc.trusts.services.BeneficiaryTransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
@@ -234,4 +234,22 @@ class BeneficiaryTransformationController @Inject()(
       }
   }
 
+  def amendTrustBeneficiary(utr: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
+    implicit request =>
+      request.body.validate[BeneficiaryTrustType] match {
+        case JsSuccess(charity, _) =>
+          beneficiaryTransformationService.amendTrustBeneficiaryTransformer(
+            utr,
+            index,
+            request.identifier,
+            charity
+          ) map { _ =>
+            Ok
+          }
+        case JsError(errors) =>
+          logger.warn(s"[BeneficiaryTransformationController][amendTrustBeneficiary]" +
+            s" Supplied payload could not be read as a BeneficiaryTrustType - $errors")
+          Future.successful(BadRequest)
+      }
+  }
 }

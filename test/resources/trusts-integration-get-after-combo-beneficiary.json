@@ -99,6 +99,14 @@
               "entityStart": "2019-02-03"
             }
           ],
+          "trust": [
+            {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "organisationName": "Trust 1",
+              "entityStart": "2001-01-01"
+            }
+          ],
           "individualDetails": [
             {
               "lineNo": "1",

@@ -54,4 +54,6 @@ POST        /add-company-beneficiary/:utr                       uk.gov.hmrc.trus
 
 POST        /amend-company-beneficiary/:utr/:index              uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendCompanyBeneficiary(utr: String, index: Int)
 
+POST        /amend-trust-beneficiary/:utr/:index                uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendTrustBeneficiary(utr: String, index: Int)
+
 PUT         /:utr/beneficiaries/remove                          uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.removeBeneficiary(utr: String)
