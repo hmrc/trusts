@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.trusts.controllers
 
-import java.time.LocalDate
-
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
@@ -25,14 +23,15 @@ import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveTrustee
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.services.TrusteeTransformationService
+import uk.gov.hmrc.trusts.services.{LocalDateService, TrusteeTransformationService}
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class TrusteeTransformationController @Inject()(
                                           identify: IdentifierAction,
-                                          trusteeTransformationService: TrusteeTransformationService
+                                          trusteeTransformationService: TrusteeTransformationService,
+                                          localDateService: LocalDateService
                                         )(implicit val executionContext: ExecutionContext) extends TrustsBaseController with ValidationUtil {
   private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
 
@@ -121,7 +120,7 @@ class TrusteeTransformationController @Inject()(
             request.identifier,
             index,
             DisplayTrustLeadTrusteeType(Some(ind), None),
-            LocalDate.now()
+            localDateService.now
           ).map(_ => Ok)
         case (_, Some(org)) =>
           trusteeTransformationService.addPromoteTrusteeTransformer(
@@ -129,7 +128,7 @@ class TrusteeTransformationController @Inject()(
             request.identifier,
             index,
             DisplayTrustLeadTrusteeType(None, Some(org)),
-            LocalDate.now()
+            localDateService.now
           ).map(_ => Ok)
         case _ =>
           logger.error("[TrusteeTransformationController][promoteTrustee] Supplied json could not be read as an individual or organisation lead trustee")
