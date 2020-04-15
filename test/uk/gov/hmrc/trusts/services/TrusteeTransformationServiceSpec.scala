@@ -39,8 +39,9 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
   // Removing the usage of GuiceOneAppPerSuite started timing out a test without this.
   private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 
+  private val currentDate: LocalDate = LocalDate.of(1999, 3, 14)
   private object LocalDateServiceStub extends LocalDateService {
-    override def now: LocalDate = LocalDate.of(1999, 3, 14)
+    override def now: LocalDate = currentDate
   }
 
   val newLeadTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
@@ -287,7 +288,8 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",
-          "internalId", AmendTrusteeIndTransform(index, newTrusteeIndInfo, originalTrusteeIndJson))
+          "internalId",
+          AmendTrusteeIndTransform(index, newTrusteeIndInfo, originalTrusteeIndJson, currentDate))
       }
     }
   }

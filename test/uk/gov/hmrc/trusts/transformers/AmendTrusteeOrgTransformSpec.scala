@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.trusts.transformers
 
+import java.time.LocalDate
+
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.Json
@@ -53,7 +55,11 @@ class AmendTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with Optio
           |}
           |""".stripMargin)
 
-      val transformer = AmendTrusteeOrgTransform(1, newTrusteeInfo, originalTrusteeInfo)
+      val transformer = AmendTrusteeOrgTransform(
+        1,
+        newTrusteeInfo,
+        originalTrusteeInfo,
+        LocalDate.of(2012, 2, 20))
 
       val result = transformer.applyTransform(beforeJson).get
       result mustBe afterJson

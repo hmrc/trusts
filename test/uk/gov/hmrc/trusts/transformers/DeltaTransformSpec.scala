@@ -139,8 +139,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         currentDate
       )
 
-      val amendTrusteeIndTransform = AmendTrusteeIndTransform(0, newTrusteeInd, Json.obj())
-      val amendTrusteeOrgTransform = AmendTrusteeOrgTransform(0, newTrusteeOrg, Json.obj())
+      val amendTrusteeIndTransform = AmendTrusteeIndTransform(0, newTrusteeInd, Json.obj(), currentDate)
+      val amendTrusteeOrgTransform = AmendTrusteeOrgTransform(0, newTrusteeOrg, Json.obj(), currentDate)
 
       val amendCharityBeneficiaryTransform = AmendCharityBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate)
       val amendOtherBeneficiaryTransform = AmendOtherBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate)

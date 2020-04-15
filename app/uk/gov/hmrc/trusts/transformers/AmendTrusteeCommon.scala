@@ -24,12 +24,14 @@ import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustTrus
 
 trait AmendTrusteeCommon {
 
+  val currentDate: LocalDate
+
   def transform(index: Int, originalJson: JsValue, originalTrusteeJson: JsValue, newTrusteeJson: JsValue): JsResult[JsValue] = {
 
     val entityStartDate = getEntityStartDate(originalTrusteeJson)
 
     for {
-      trusteeRemovedJson <- RemoveTrusteeTransform(LocalDate.now(), index, originalTrusteeJson).applyTransform(originalJson)
+      trusteeRemovedJson <- RemoveTrusteeTransform(currentDate, index, originalTrusteeJson).applyTransform(originalJson)
       trusteeAddedJson <- addTrustee(newTrusteeJson, trusteeRemovedJson, entityStartDate)
     } yield {
       trusteeAddedJson
