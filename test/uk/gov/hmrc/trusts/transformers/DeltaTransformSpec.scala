@@ -33,6 +33,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
       val genericOriginalData = Json.obj("originalKeys" -> "originalData")
       val genericAmendedData = Json.obj("newKeys" -> "newData")
       val amendedDate = LocalDate.of(2012, 3, 14)
+      val currentDate = LocalDate.of(2020, 4, 1)
 
       val newLeadTrustee = DisplayTrustLeadTrusteeIndType(
         None,
@@ -126,14 +127,16 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         2,
         newLeadTrustee,
         LocalDate.parse("2012-02-06"),
-        Json.obj()
+        Json.obj(),
+        currentDate
       )
 
       val promoteTrusteeOrgTransform = PromoteTrusteeOrgTransform(
         2,
         newLeadTrusteeOrg,
         LocalDate.parse("2012-02-06"),
-        Json.obj()
+        Json.obj(),
+        currentDate
       )
 
       val amendTrusteeIndTransform = AmendTrusteeIndTransform(0, newTrusteeInd, Json.obj())

@@ -24,7 +24,8 @@ import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustLeadT
 case class PromoteTrusteeIndTransform(index: Int,
                                       newLeadTrustee: DisplayTrustLeadTrusteeIndType,
                                       endDate: LocalDate,
-                                      originalTrusteeJson: JsValue
+                                      originalTrusteeJson: JsValue,
+                                      override val currentDate: LocalDate
                                      ) extends DeltaTransform with PromoteTrusteeCommon {
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {

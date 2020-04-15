@@ -75,6 +75,11 @@ class PromoteTrusteeIndTransformSpec extends FreeSpec with MustMatchers with Opt
       identification = DisplayTrustIdentificationType(None, Some("ST123456"), None, None),
       entityStart = None
     )
-    PromoteTrusteeIndTransform(index = 0, newLeadTrustee = newTrusteeInfo, LocalDate.of(2020, 2, 28), trustee0Json)
+    PromoteTrusteeIndTransform(
+      index = 0,
+      newLeadTrustee = newTrusteeInfo,
+      LocalDate.of(2020, 2, 28),
+      trustee0Json,
+      LocalDate.of(2020, 4, 1))
   }
 }

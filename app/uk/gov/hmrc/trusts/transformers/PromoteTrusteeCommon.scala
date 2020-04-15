@@ -24,9 +24,11 @@ import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIden
 trait PromoteTrusteeCommon {
   private val leadTrusteesPath = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees)
 
+  val currentDate: LocalDate
+
   def transform(input: JsValue, index: Int, newLeadTrustee: JsValue, originalTrusteeJson: JsValue): JsResult[JsValue] = {
 
-    val removeTrusteeTransform = RemoveTrusteeTransform(LocalDate.now, index, originalTrusteeJson)
+    val removeTrusteeTransform = RemoveTrusteeTransform(currentDate, index, originalTrusteeJson)
 
     trusteeEntityStart(originalTrusteeJson) match {
       case JsSuccess(entityStart, _) =>
