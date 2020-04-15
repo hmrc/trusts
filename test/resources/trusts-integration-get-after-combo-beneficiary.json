@@ -67,6 +67,22 @@
           }
         ],
         "beneficiary": {
+          "company": [
+            {
+              "organisationName": "Nice Company 2",
+              "beneficiaryDiscretion": false,
+              "beneficiaryShareOfIncome": "50",
+              "identification": {
+                "address": {
+                  "line1": "Line 1",
+                  "line2": "Line 2",
+                  "postCode": "NE1 1NE",
+                  "country": "GB"
+                }
+              },
+              "entityStart": "2019-02-03"
+            }
+          ],
           "charity": [
             {
               "organisationName": "Nice Charity 2",
