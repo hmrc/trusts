@@ -156,6 +156,10 @@ class BeneficiaryTransformationService @Inject()(
     transformationService.addNewTransform(utr, internalId, AddCompanyBeneficiaryTransform(newBeneficiary))
   }
 
+  def addTrustBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: BeneficiaryTrustType): Future[Boolean] = {
+    transformationService.addNewTransform(utr, internalId, AddTrustBeneficiaryTransform(newBeneficiary))
+  }
+
   def amendCompanyBeneficiaryTransformer(utr: String,
                                        index: Int,
                                        internalId: String,

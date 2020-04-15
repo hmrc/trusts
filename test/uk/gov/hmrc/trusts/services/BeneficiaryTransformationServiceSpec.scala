@@ -389,20 +389,46 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
       }
     }
 
-    "must add a new amend other beneficiary transform using the transformation service" in {
-      val index = 0
-      val transformationService = mock[TransformationService]
-      val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
-      val newBeneficiary = OtherType(
-        None,
-        None,
-        "Other",
-        Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
-        Some(false),
-        None,
-        DateTime.parse("1990-10-10"),
-        None
-      )
+  "must add a new add trust beneficiary transform using the transformation service" in {
+    val transformationService = mock[TransformationService]
+    val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
+    val newBeneficiary = BeneficiaryTrustType(
+      None,
+      None,
+      "Organisation Name",
+      Some(false),
+      Some("50"),
+      Some(IdentificationOrgType(
+        Some("company utr"),
+        Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")))),
+      DateTime.parse("1990-10-10"),
+      None
+    )
+
+    when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+    val result = service.addTrustBeneficiaryTransformer("utr", "internalId", newBeneficiary)
+    whenReady(result) { _ =>
+
+      verify(transformationService).addNewTransform("utr",
+        "internalId", AddTrustBeneficiaryTransform(newBeneficiary))
+    }
+  }
+
+  "must add a new amend other beneficiary transform using the transformation service" in {
+    val index = 0
+    val transformationService = mock[TransformationService]
+    val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
+    val newBeneficiary = OtherType(
+      None,
+      None,
+      "Other",
+      Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
+      Some(false),
+      None,
+      DateTime.parse("1990-10-10"),
+      None
+    )
 
       val original: JsValue = Json.parse(
         """

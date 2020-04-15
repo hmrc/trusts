@@ -21,15 +21,19 @@ import java.time.LocalDate
 import org.joda.time.DateTime
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.Json
-import uk.gov.hmrc.trusts.models.NameType
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationOrgType, DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType, DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType}
-import uk.gov.hmrc.trusts.models.variation.IndividualDetailsType
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryCompanyType, BeneficiaryTrustType, IndividualDetailsType, OtherType, UnidentifiedType}
+import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType}
 
 class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
   "DeltaTransform" - {
 
     "serialise and deserialise json correctly" in {
+      val genericOriginalData = Json.obj("originalKeys" -> "originalData")
+      val genericAmendedData = Json.obj("newKeys" -> "newData")
+      val amendedDate = LocalDate.of(2012, 3, 14)
+      val currentDate = LocalDate.of(2020, 4, 1)
 
       val newLeadTrustee = DisplayTrustLeadTrusteeIndType(
         None,
@@ -39,6 +43,18 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         "",
         None,
         DisplayTrustIdentificationType(None, None, None, None),
+        None
+      )
+
+      val newLeadTrusteeOrg = DisplayTrustLeadTrusteeOrgType(
+        None,
+        None,
+        "Organisation",
+        "phoneNumber",
+        None,
+        DisplayTrustIdentificationOrgType(
+          None, Some("utr"), None
+        ),
         None
       )
 
@@ -76,9 +92,30 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         None
       )
 
-      val amendLeadTrusteeTransform = AmendLeadTrusteeIndTransform(newLeadTrustee)
+      val newTrustBeneficiary = BeneficiaryTrustType(
+        None,
+        None,
+        "Organisation Name",
+        Some(false),
+        Some("50"),
+        Some(IdentificationOrgType(
+          Some("company utr"),
+          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")))),
+        DateTime.parse("1990-10-10"),
+        None
+      )
 
-      val addTrusteeTransform = AddTrusteeIndTransform(newTrusteeInd)
+      val addTrustBeneficiaryTransform = AddTrustBeneficiaryTransform(newTrustBeneficiary)
+
+      val amendLeadTrusteeIndTransform = AmendLeadTrusteeIndTransform(newLeadTrustee)
+
+      val amendLeadTrusteeOrgTransform = AmendLeadTrusteeOrgTransform(
+        newLeadTrusteeOrg
+      )
+
+      val addTrusteeIndTransform = AddTrusteeIndTransform(newTrusteeInd)
+
+      val addTrusteeOrgTransform = AddTrusteeOrgTransform(newTrusteeOrg)
 
       val removeTrusteeTransform = RemoveTrusteeTransform(
         endDate = LocalDate.parse("2010-01-01"),
@@ -86,32 +123,81 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         Json.obj()
       )
 
-      val promoteTrusteeTransform = PromoteTrusteeIndTransform(
+      val promoteTrusteeIndTransform = PromoteTrusteeIndTransform(
         2,
         newLeadTrustee,
         LocalDate.parse("2012-02-06"),
-        Json.obj()
+        Json.obj(),
+        currentDate
       )
 
-      val amendTrusteeIndTransform = AmendTrusteeIndTransform(0, newTrusteeInd, Json.obj())
-      val amendTrusteeOrgTransform = AmendTrusteeOrgTransform(0, newTrusteeOrg, Json.obj())
+      val promoteTrusteeOrgTransform = PromoteTrusteeOrgTransform(
+        2,
+        newLeadTrusteeOrg,
+        LocalDate.parse("2012-02-06"),
+        Json.obj(),
+        currentDate
+      )
+
+      val amendTrusteeIndTransform = AmendTrusteeIndTransform(0, newTrusteeInd, Json.obj(), currentDate)
+      val amendTrusteeOrgTransform = AmendTrusteeOrgTransform(0, newTrusteeOrg, Json.obj(), currentDate)
+
+      val amendCharityBeneficiaryTransform = AmendCharityBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate)
+      val amendCompanyBeneficiaryTransform = AmendCompanyBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate)
+      val amendOtherBeneficiaryTransform = AmendOtherBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate)
+      val amendTrustBeneficiaryTransform = AmendTrustBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate)
+      val amendUnidentifiedBeneficiaryTransform = AmendUnidentifiedBeneficiaryTransform(0, "New Description", genericOriginalData, amendedDate)
 
       val amendIndividualBenTransform = AmendIndividualBeneficiaryTransform(0, Json.toJson(individualBeneficiary), Json.obj(), LocalDate.parse("2020-03-25"))
+
+      val addUnidentifiedBeneficiaryTransform = AddUnidentifiedBeneficiaryTransform(
+        UnidentifiedType(None, None, "desc", None, None, DateTime.parse("2010-10-10"), None)
+      )
+
+      val addIndividualBeneficiaryTransform = AddIndividualBeneficiaryTransform(individualBeneficiary)
+
+      val addCharityBeneficiaryTransform = AddCharityBeneficiaryTransform(
+        BeneficiaryCharityType(
+          None, None, "New Organisation Name", Some(true),
+          None, None, DateTime.parse("2010-02-23"), None
+        )
+      )
+
+      val addOtherBeneficiaryTransform = AddOtherBeneficiaryTransform(
+        OtherType(
+          None, None, "description", None, None, None, DateTime.parse("2010-02-23"), None
+        )
+      )
+
+      val addCompanyBeneficiaryTransform = AddCompanyBeneficiaryTransform(
+        BeneficiaryCompanyType(None, None, "Organisation", None, None, None, DateTime.parse("2010-02-23"), None)
+      )
+
+      val removeBeneficiariesTransform = RemoveBeneficiariesTransform(3, Json.toJson(individualBeneficiary), LocalDate.parse("2012-02-06"), "BeneficiaryType")
 
       val json = Json.parse(
         s"""{
           |        "deltaTransforms" : [
           |            {
-          |                "AmendLeadTrusteeIndTransform": ${Json.toJson(amendLeadTrusteeTransform)}
+          |               "AmendLeadTrusteeIndTransform": ${Json.toJson(amendLeadTrusteeIndTransform)}
           |            },
           |            {
-          |                "AddTrusteeIndTransform": ${Json.toJson(addTrusteeTransform)}
+          |               "AmendLeadTrusteeOrgTransform": ${Json.toJson(amendLeadTrusteeOrgTransform)}
+          |            },
+          |            {
+          |               "AddTrusteeIndTransform": ${Json.toJson(addTrusteeIndTransform)}
+          |            },
+          |            {
+          |               "AddTrusteeOrgTransform": ${Json.toJson(addTrusteeOrgTransform)}
           |            },
           |            {
           |               "RemoveTrusteeTransform": ${Json.toJson(removeTrusteeTransform)}
           |            },
           |            {
-          |               "PromoteTrusteeIndTransform": ${Json.toJson(promoteTrusteeTransform)}
+          |               "PromoteTrusteeIndTransform": ${Json.toJson(promoteTrusteeIndTransform)}
+          |            },
+          |            {
+          |               "PromoteTrusteeOrgTransform": ${Json.toJson(promoteTrusteeOrgTransform)}
           |            },
           |            {
           |               "AmendTrusteeIndTransform": ${Json.toJson(amendTrusteeIndTransform)}
@@ -121,19 +207,70 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |            },
           |            {
           |               "AmendIndividualBeneficiaryTransform": ${Json.toJson(amendIndividualBenTransform)}
+          |            },
+          |            {
+          |               "AddTrustBeneficiaryTransform": ${Json.toJson(addTrustBeneficiaryTransform)}
+          |            },
+          |            {
+          |               "AddUnidentifiedBeneficiaryTransform": ${Json.toJson(addUnidentifiedBeneficiaryTransform)}
+          |            },
+          |            {
+          |               "AddIndividualBeneficiaryTransform": ${Json.toJson(addIndividualBeneficiaryTransform)}
+          |            },
+          |            {
+          |               "AmendCharityBeneficiaryTransform": ${Json.toJson(amendCharityBeneficiaryTransform)}
+          |            },
+          |            {
+          |               "AmendCompanyBeneficiaryTransform": ${Json.toJson(amendCompanyBeneficiaryTransform)}
+          |            },
+          |            {
+          |               "AmendOtherBeneficiaryTransform": ${Json.toJson(amendOtherBeneficiaryTransform)}
+          |            },
+          |            {
+          |               "AmendTrustBeneficiaryTransform": ${Json.toJson(amendTrustBeneficiaryTransform)}
+          |            },
+          |            {
+          |               "AmendUnidentifiedBeneficiaryTransform": ${Json.toJson(amendUnidentifiedBeneficiaryTransform)}
+          |            },
+          |            {
+          |               "AddCharityBeneficiaryTransform": ${Json.toJson(addCharityBeneficiaryTransform)}
+          |            },
+          |            {
+          |               "AddOtherBeneficiaryTransform": ${Json.toJson(addOtherBeneficiaryTransform)}
+          |            },
+          |            {
+          |               "AddCompanyBeneficiaryTransform": ${Json.toJson(addCompanyBeneficiaryTransform)}
+          |            },
+          |            {
+          |               "RemoveBeneficiariesTransform": ${Json.toJson(removeBeneficiariesTransform)}
           |            }
           |        ]
           |    }
           |""".stripMargin)
 
       val data = ComposedDeltaTransform(Seq(
-          amendLeadTrusteeTransform,
-          addTrusteeTransform,
+          amendLeadTrusteeIndTransform,
+          amendLeadTrusteeOrgTransform,
+          addTrusteeIndTransform,
+          addTrusteeOrgTransform,
           removeTrusteeTransform,
-          promoteTrusteeTransform,
+          promoteTrusteeIndTransform,
+          promoteTrusteeOrgTransform,
           amendTrusteeIndTransform,
           amendTrusteeOrgTransform,
-          amendIndividualBenTransform
+          amendIndividualBenTransform,
+          addTrustBeneficiaryTransform,
+          addUnidentifiedBeneficiaryTransform,
+          addIndividualBeneficiaryTransform,
+          amendCharityBeneficiaryTransform,
+          amendCompanyBeneficiaryTransform,
+          amendOtherBeneficiaryTransform,
+          amendTrustBeneficiaryTransform,
+          amendUnidentifiedBeneficiaryTransform,
+          addCharityBeneficiaryTransform,
+          addOtherBeneficiaryTransform,
+          addCompanyBeneficiaryTransform,
+          removeBeneficiariesTransform
         )
       )
 

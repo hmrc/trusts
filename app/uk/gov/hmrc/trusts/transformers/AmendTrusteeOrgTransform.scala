@@ -23,7 +23,8 @@ import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustTrust
 
 case class AmendTrusteeOrgTransform(index: Int,
                                     trustee: DisplayTrustTrusteeOrgType,
-                                    originalTrusteeJson: JsValue
+                                    originalTrusteeJson: JsValue,
+                                    override val currentDate: LocalDate
                                    ) extends DeltaTransform with AmendTrusteeCommon {
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
@@ -31,7 +32,7 @@ case class AmendTrusteeOrgTransform(index: Int,
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    declarationTransform(input, LocalDate.now(), index, originalTrusteeJson)
+    declarationTransform(input, currentDate, index, originalTrusteeJson)
   }
 }
 

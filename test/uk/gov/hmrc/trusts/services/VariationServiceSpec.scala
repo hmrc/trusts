@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.trusts.services
 
+import java.time.LocalDate
+
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito.{times, verify, when}
@@ -51,10 +53,14 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
     NameType("Handy", None, "Andy")
   )
 
+  object LocalDateServiceStub extends LocalDateService {
+    override def now: LocalDate = LocalDate.of(1999, 3, 14)
+  }
+
   val declarationForApi = DeclarationForApi(declaration, None)
 
   "Declare no change" should {
-    
+
     "submit data correctly when the version matches, and then reset the cache" in {
 
       val desService = mock[DesService]
@@ -81,7 +87,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
 
       when(transformer.transform(any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
 
-      val OUT = new VariationService(desService, transformationService, transformer, mockCacheRepository, mockTransformationRepository, auditService)
+      val OUT = new VariationService(desService, transformationService, transformer, mockCacheRepository, mockTransformationRepository, auditService, LocalDateServiceStub)
 
       val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
 
@@ -117,7 +123,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
 
     when(transformer.transform(any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
 
-    val OUT = new VariationService(desService, transformationService, transformer, mockCacheRepository, mockTransformationRepository, auditService)
+    val OUT = new VariationService(desService, transformationService, transformer, mockCacheRepository, mockTransformationRepository, auditService, LocalDateServiceStub)
 
     whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { exception => {
       exception mustBe an[EtmpCacheDataStaleException.type]

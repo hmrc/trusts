@@ -30,7 +30,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Try
 
-class TrusteeTransformationService @Inject()(transformationService: TransformationService) {
+class TrusteeTransformationService @Inject()(
+                                              transformationService: TransformationService,
+                                              localDateService: LocalDateService) {
 
   def addAmendLeadTrusteeTransformer(utr: String, internalId: String, newLeadTrustee: DisplayTrustLeadTrusteeType): Future[Success.type] = {
     transformationService.addNewTransform(utr, internalId, newLeadTrustee match {
@@ -48,10 +50,12 @@ class TrusteeTransformationService @Inject()(transformationService: Transformati
     getTrusteeAtIndex(utr, internalId, index).flatMap {
       case scala.util.Success(trusteeJson) =>
         transformationService.addNewTransform(utr, internalId, newTrustee match {
-          case DisplayTrustTrusteeType(Some(trusteeInd), None) => AmendTrusteeIndTransform(index, trusteeInd, trusteeJson)
-          case DisplayTrustTrusteeType(None, Some(trusteeOrg)) => AmendTrusteeOrgTransform(index, trusteeOrg, trusteeJson)
+          case DisplayTrustTrusteeType(Some(trusteeInd), None) =>
+            AmendTrusteeIndTransform(index, trusteeInd, trusteeJson, localDateService.now)
+          case DisplayTrustTrusteeType(None, Some(trusteeOrg)) =>
+            AmendTrusteeOrgTransform(index, trusteeOrg, trusteeJson, localDateService.now)
         }).map(_ => Success)
-      case scala.util.Failure(_) => Future.failed(InternalServerErrorException(s"Could not pick trustee at index ${index}."))
+      case scala.util.Failure(_) => Future.failed(InternalServerErrorException(s"Could not pick trustee at index $index."))
     }
   }
 
@@ -66,10 +70,12 @@ class TrusteeTransformationService @Inject()(transformationService: Transformati
     getTrusteeAtIndex(utr, internalId, index).flatMap {
       case scala.util.Success(trusteeJson) =>
         transformationService.addNewTransform(utr, internalId, newLeadTrustee match {
-          case DisplayTrustLeadTrusteeType(Some(trusteeInd), None) => PromoteTrusteeIndTransform(index, trusteeInd, endDate, trusteeJson)
-          case DisplayTrustLeadTrusteeType(None, Some(trusteeOrg)) => PromoteTrusteeOrgTransform(index, trusteeOrg, endDate, trusteeJson)
+          case DisplayTrustLeadTrusteeType(Some(trusteeInd), None) =>
+            PromoteTrusteeIndTransform(index, trusteeInd, endDate, trusteeJson, localDateService.now)
+          case DisplayTrustLeadTrusteeType(None, Some(trusteeOrg)) =>
+            PromoteTrusteeOrgTransform(index, trusteeOrg, endDate, trusteeJson, localDateService.now)
         }).map(_ => Success)
-      case scala.util.Failure(_) => Future.failed(InternalServerErrorException(s"Could not pick trustee at index ${index}."))
+      case scala.util.Failure(_) => Future.failed(InternalServerErrorException(s"Could not pick trustee at index $index."))
     }
   }
 

@@ -215,6 +215,23 @@ class BeneficiaryTransformationController @Inject()(
     }
   }
 
+  def addTrustBeneficiary(utr: String) : Action[JsValue] = identify.async(parse.json) {
+    implicit request =>
+      request.body.validate[BeneficiaryTrustType] match {
+        case JsSuccess(newBeneficiary, _) =>
+          beneficiaryTransformationService.addTrustBeneficiaryTransformer(
+            utr,
+            request.identifier,
+            newBeneficiary
+          ) map { _ =>
+            Ok
+          }
+        case JsError(errors) =>
+          logger.warn(s"[BeneficiaryTransformationController][addTrustBeneficiary] Supplied json could not be read as a Trust Beneficiary - $errors")
+          Future.successful(BadRequest)
+      }
+  }
+
   def amendCompanyBeneficiary(utr: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
     implicit request =>
       request.body.validate[BeneficiaryCompanyType] match {

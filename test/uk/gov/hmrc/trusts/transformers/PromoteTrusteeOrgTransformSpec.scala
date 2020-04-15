@@ -68,7 +68,12 @@ class PromoteTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with Opt
       identification = DisplayTrustIdentificationOrgType(None, Some("5465416546"), None),
       entityStart = None
     )
-    val transformer = PromoteTrusteeOrgTransform(index = 1, newLeadTrustee = newTrusteeInfo, LocalDate.of(2020, 2, 28), trustee1Json)
+    val transformer = PromoteTrusteeOrgTransform(
+      index = 1,
+      newLeadTrustee = newTrusteeInfo,
+      LocalDate.of(2020, 2, 28),
+      trustee1Json,
+      LocalDate.of(2020, 4, 1))
     transformer
   }
 }

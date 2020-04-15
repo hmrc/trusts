@@ -39,6 +39,11 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
   // Removing the usage of GuiceOneAppPerSuite started timing out a test without this.
   private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 
+  private val currentDate: LocalDate = LocalDate.of(1999, 3, 14)
+  private object LocalDateServiceStub extends LocalDateService {
+    override def now: LocalDate = currentDate
+  }
+
   val newLeadTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
     lineNo = Some("newLineNo"),
     bpMatchStatus = Some("newMatchStatus"),
@@ -128,7 +133,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     "must add a new amend lead trustee transform using the transformation service" in {
       
       val transformationService = mock[TransformationService]
-      val service = new TrusteeTransformationService(transformationService)
+      val service = new TrusteeTransformationService(transformationService, LocalDateServiceStub)
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
@@ -144,7 +149,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     "must add a new add trustee ind transform using the transformation service" in {
       
       val transformationService = mock[TransformationService]
-      val service = new TrusteeTransformationService(transformationService)
+      val service = new TrusteeTransformationService(transformationService, LocalDateServiceStub)
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
@@ -160,7 +165,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     "must add a new add trustee org transform using the transformation service" in {
       
       val transformationService = mock[TransformationService]
-      val service = new TrusteeTransformationService(transformationService)
+      val service = new TrusteeTransformationService(transformationService, LocalDateServiceStub)
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
@@ -178,7 +183,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       val processedResponse = response.asInstanceOf[TrustProcessedResponse]
 
       val transformationService = mock[TransformationService]
-      val service = new TrusteeTransformationService(transformationService)
+      val service = new TrusteeTransformationService(transformationService, LocalDateServiceStub)
 
       when(transformationService.getTransformedData(any(), any())(any())).thenReturn(Future.successful(processedResponse))
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
@@ -190,7 +195,8 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",
-          "internalId", PromoteTrusteeIndTransform(index, newLeadTrusteeIndInfo, endDate, originalTrusteeOrgJson))
+          "internalId",
+          PromoteTrusteeIndTransform(index, newLeadTrusteeIndInfo, endDate, originalTrusteeOrgJson, LocalDate.of(1999, 3, 14)))
       }
     }
 
@@ -199,7 +205,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       val processedResponse = response.asInstanceOf[TrustProcessedResponse]
 
       val transformationService = mock[TransformationService]
-      val service = new TrusteeTransformationService(transformationService)
+      val service = new TrusteeTransformationService(transformationService, LocalDateServiceStub)
 
       when(transformationService.getTransformedData(any(), any())(any())).thenReturn(Future.successful(processedResponse))
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
@@ -217,7 +223,8 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",
-          "internalId", PromoteTrusteeOrgTransform(index, newLeadTrusteeOrgInfo, endDate, originalTrusteeOrgJson))
+          "internalId",
+          PromoteTrusteeOrgTransform(index, newLeadTrusteeOrgInfo, endDate, originalTrusteeOrgJson, LocalDate.of(1999, 3, 14)))
       }
     }
 
@@ -226,7 +233,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       val processedResponse = response.asInstanceOf[TrustProcessedResponse]
 
       val transformationService = mock[TransformationService]
-      val service = new TrusteeTransformationService(transformationService)
+      val service = new TrusteeTransformationService(transformationService, LocalDateServiceStub)
 
       when(transformationService.getTransformedData(any(), any())(any())).thenReturn(Future.successful(processedResponse))
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
@@ -252,7 +259,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
       
       val transformationService = mock[TransformationService]
-      val service = new TrusteeTransformationService(transformationService)
+      val service = new TrusteeTransformationService(transformationService, LocalDateServiceStub)
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
@@ -272,7 +279,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       val index = 0
       
       val transformationService = mock[TransformationService]
-      val service = new TrusteeTransformationService(transformationService)
+      val service = new TrusteeTransformationService(transformationService, LocalDateServiceStub)
 
       when(transformationService.getTransformedData(any(), any())(any())).thenReturn(Future.successful(processedResponse))
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
@@ -281,7 +288,8 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",
-          "internalId", AmendTrusteeIndTransform(index, newTrusteeIndInfo, originalTrusteeIndJson))
+          "internalId",
+          AmendTrusteeIndTransform(index, newTrusteeIndInfo, originalTrusteeIndJson, currentDate))
       }
     }
   }
