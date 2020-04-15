@@ -50,8 +50,10 @@ object DeltaTransform {
           readsForTransform[AddIndividualBeneficiaryTransform](AddIndividualBeneficiaryTransform.key) orElse
           readsForTransform[AddCharityBeneficiaryTransform](AddCharityBeneficiaryTransform.key) orElse
           readsForTransform[AmendCharityBeneficiaryTransform](AmendCharityBeneficiaryTransform.key) orElse
+          readsForTransform[AmendCompanyBeneficiaryTransform](AmendCompanyBeneficiaryTransform.key) orElse
           readsForTransform[AddOtherBeneficiaryTransform](AddOtherBeneficiaryTransform.key) orElse
           readsForTransform[AmendOtherBeneficiaryTransform](AmendOtherBeneficiaryTransform.key) orElse
+          readsForTransform[AmendTrustBeneficiaryTransform](AmendTrustBeneficiaryTransform.key) orElse
           readsForTransform[AddCompanyBeneficiaryTransform](AddCompanyBeneficiaryTransform.key) orElse
           readsForTransform[AddTrustBeneficiaryTransform](AddTrustBeneficiaryTransform.key)
         ) (value.as[JsObject]) orElse (throw new Exception(s"Don't know how to deserialise transform"))
@@ -100,8 +102,12 @@ object DeltaTransform {
       Json.obj(AmendIndividualBeneficiaryTransform.key -> Json.toJson(transform)(AmendIndividualBeneficiaryTransform.format))
     case transform: AmendCharityBeneficiaryTransform =>
       Json.obj(AmendCharityBeneficiaryTransform.key -> Json.toJson(transform)(AmendCharityBeneficiaryTransform.format))
+    case transform: AmendCompanyBeneficiaryTransform =>
+      Json.obj(AmendCompanyBeneficiaryTransform.key -> Json.toJson(transform)(AmendCompanyBeneficiaryTransform.format))
     case transform: AmendOtherBeneficiaryTransform =>
       Json.obj(AmendOtherBeneficiaryTransform.key -> Json.toJson(transform)(AmendOtherBeneficiaryTransform.format))
+    case transform: AmendTrustBeneficiaryTransform =>
+      Json.obj(AmendTrustBeneficiaryTransform.key -> Json.toJson(transform)(AmendTrustBeneficiaryTransform.format))
   }
 
   def removeBeneficiariesWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {

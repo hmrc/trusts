@@ -232,4 +232,41 @@ class BeneficiaryTransformationController @Inject()(
       }
   }
 
+  def amendCompanyBeneficiary(utr: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
+    implicit request =>
+      request.body.validate[BeneficiaryCompanyType] match {
+        case JsSuccess(companyBeneficiary, _) =>
+          beneficiaryTransformationService.amendCompanyBeneficiaryTransformer(
+            utr,
+            index,
+            request.identifier,
+            companyBeneficiary
+          ) map { _ =>
+            Ok
+          }
+        case JsError(errors) =>
+          logger.warn(s"[BeneficiaryTransformationController][amendCompanyBeneficiary]" +
+            s" Supplied payload could not be read as a BeneficiaryCompanyType - $errors")
+          Future.successful(BadRequest)
+      }
+  }
+
+  def amendTrustBeneficiary(utr: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
+    implicit request =>
+      request.body.validate[BeneficiaryTrustType] match {
+        case JsSuccess(charity, _) =>
+          beneficiaryTransformationService.amendTrustBeneficiaryTransformer(
+            utr,
+            index,
+            request.identifier,
+            charity
+          ) map { _ =>
+            Ok
+          }
+        case JsError(errors) =>
+          logger.warn(s"[BeneficiaryTransformationController][amendTrustBeneficiary]" +
+            s" Supplied payload could not be read as a BeneficiaryTrustType - $errors")
+          Future.successful(BadRequest)
+      }
+  }
 }

@@ -85,6 +85,7 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
           status(removeCharityBeneficiary(application)) mustBe OK
           status(amendCharityBeneficiary(application)) mustBe OK
           status(removeOtherBeneficiary(application)) mustBe OK
+          status(amendCompanyBeneficiary(application)) mustBe OK
 
           val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
           status(newResult) mustBe OK
@@ -252,6 +253,33 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
         |""".stripMargin)
     val addRequest = FakeRequest(PUT, "/trusts/5174384721/beneficiaries/remove")
       .withBody(removeJson)
+      .withHeaders(CONTENT_TYPE -> "application/json")
+
+    route(application, addRequest).get
+  }
+
+  private def amendCompanyBeneficiary(application: Application) = {
+    val amendedBeneficiaryJson = Json.parse(
+      """
+        |{
+        |  "organisationName": "Nice Company 2",
+        |  "beneficiaryDiscretion": false,
+        |  "beneficiaryShareOfIncome": "50",
+        |  "identification": {
+        |    "address": {
+        |      "line1": "Line 1",
+        |      "line2": "Line 2",
+        |      "postCode": "NE1 1NE",
+        |      "country": "GB"
+        |    }
+        |  },
+        |  "entityStart": "2019-02-03"
+        |}
+        |""".stripMargin
+    )
+
+    val addRequest = FakeRequest(POST, "/trusts/amend-company-beneficiary/5174384721/0")
+      .withBody(amendedBeneficiaryJson)
       .withHeaders(CONTENT_TYPE -> "application/json")
 
     route(application, addRequest).get

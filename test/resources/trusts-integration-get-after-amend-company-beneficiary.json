@@ -70,9 +70,11 @@
           "company": [
             {
               "lineNo": "1",
-              "bpMatchStatus": "01",
-              "organisationName": "Company 1",
-              "entityStart": "2001-01-01"
+              "organisationName": "New Company Name",
+              "identification": {
+                "utr": "1234567890"
+              },
+              "entityStart": "1998-02-12"
             }
           ],
           "charity": [
@@ -83,29 +85,32 @@
               "entityStart": "2001-01-01"
             }
           ],
-          "trust": [
-            {
-              "lineNo": "1",
-              "bpMatchStatus": "01",
-              "organisationName": "Trust 1",
-              "entityStart": "2001-01-01"
-            }
-          ],
           "individualDetails": [
             {
               "lineNo": "1",
               "name": {
                 "firstName": "John",
                 "middleName": "William",
-                "lastName": "Wilson"
+                "lastName": "O'Connor"
               },
-              "dateOfBirth": "2010-01-01",
-              "vulnerableBeneficiary": false,
+              "dateOfBirth": "2001-01-01",
+              "vulnerableBeneficiary": true,
               "beneficiaryType": "Director",
               "beneficiaryDiscretion": true,
               "beneficiaryShareOfIncome": "100",
               "identification": {
-                "nino": "JP121212A"
+                "passport": {
+                  "number": "abcdefgh",
+                  "expirationDate": "2001-01-01",
+                  "countryOfIssue": "GB"
+                },
+                "address": {
+                  "line1": "1344 Army Road",
+                  "line2": "Suite 111",
+                  "line4": "Telford",
+                  "postCode": "TF1 5DR",
+                  "country": "GB"
+                }
               },
               "entityStart": "1998-02-12"
             }
@@ -131,6 +136,14 @@
               "description": "Some Description",
               "beneficiaryShareOfIncome": "25",
               "entityStart": "2017-02-28"
+            }
+          ],
+          "trust": [
+            {
+              "bpMatchStatus": "01",
+              "entityStart": "2001-01-01",
+              "lineNo": "1",
+              "organisationName": "Trust 1"
             }
           ]
         },

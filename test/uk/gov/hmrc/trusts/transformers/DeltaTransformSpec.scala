@@ -143,7 +143,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
       val amendTrusteeOrgTransform = AmendTrusteeOrgTransform(0, newTrusteeOrg, Json.obj(), currentDate)
 
       val amendCharityBeneficiaryTransform = AmendCharityBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate)
+      val amendCompanyBeneficiaryTransform = AmendCompanyBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate)
       val amendOtherBeneficiaryTransform = AmendOtherBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate)
+      val amendTrustBeneficiaryTransform = AmendTrustBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate)
       val amendUnidentifiedBeneficiaryTransform = AmendUnidentifiedBeneficiaryTransform(0, "New Description", genericOriginalData, amendedDate)
 
       val amendIndividualBenTransform = AmendIndividualBeneficiaryTransform(0, Json.toJson(individualBeneficiary), Json.obj(), LocalDate.parse("2020-03-25"))
@@ -177,16 +179,16 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         s"""{
           |        "deltaTransforms" : [
           |            {
-          |                "AmendLeadTrusteeIndTransform": ${Json.toJson(amendLeadTrusteeIndTransform)}
+          |               "AmendLeadTrusteeIndTransform": ${Json.toJson(amendLeadTrusteeIndTransform)}
           |            },
           |            {
-          |                "AmendLeadTrusteeOrgTransform": ${Json.toJson(amendLeadTrusteeOrgTransform)}
+          |               "AmendLeadTrusteeOrgTransform": ${Json.toJson(amendLeadTrusteeOrgTransform)}
           |            },
           |            {
-          |                "AddTrusteeIndTransform": ${Json.toJson(addTrusteeIndTransform)}
+          |               "AddTrusteeIndTransform": ${Json.toJson(addTrusteeIndTransform)}
           |            },
           |            {
-          |                "AddTrusteeOrgTransform": ${Json.toJson(addTrusteeOrgTransform)}
+          |               "AddTrusteeOrgTransform": ${Json.toJson(addTrusteeOrgTransform)}
           |            },
           |            {
           |               "RemoveTrusteeTransform": ${Json.toJson(removeTrusteeTransform)}
@@ -219,7 +221,13 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |               "AmendCharityBeneficiaryTransform": ${Json.toJson(amendCharityBeneficiaryTransform)}
           |            },
           |            {
+          |               "AmendCompanyBeneficiaryTransform": ${Json.toJson(amendCompanyBeneficiaryTransform)}
+          |            },
+          |            {
           |               "AmendOtherBeneficiaryTransform": ${Json.toJson(amendOtherBeneficiaryTransform)}
+          |            },
+          |            {
+          |               "AmendTrustBeneficiaryTransform": ${Json.toJson(amendTrustBeneficiaryTransform)}
           |            },
           |            {
           |               "AmendUnidentifiedBeneficiaryTransform": ${Json.toJson(amendUnidentifiedBeneficiaryTransform)}
@@ -255,7 +263,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           addUnidentifiedBeneficiaryTransform,
           addIndividualBeneficiaryTransform,
           amendCharityBeneficiaryTransform,
+          amendCompanyBeneficiaryTransform,
           amendOtherBeneficiaryTransform,
+          amendTrustBeneficiaryTransform,
           amendUnidentifiedBeneficiaryTransform,
           addCharityBeneficiaryTransform,
           addOtherBeneficiaryTransform,

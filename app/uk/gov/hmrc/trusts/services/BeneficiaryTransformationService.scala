@@ -160,4 +160,39 @@ class BeneficiaryTransformationService @Inject()(
     transformationService.addNewTransform(utr, internalId, AddTrustBeneficiaryTransform(newBeneficiary))
   }
 
+  def amendCompanyBeneficiaryTransformer(utr: String,
+                                       index: Int,
+                                       internalId: String,
+                                       amended: BeneficiaryCompanyType)
+                                      (implicit hc: HeaderCarrier): Future[Success.type] = {
+    getTransformedTrustJson(utr, internalId)
+      .map(findBeneficiaryJson(_, "company", index))
+      .flatMap(Future.fromTry)
+      .flatMap { beneficiaryJson =>
+
+        transformationService.addNewTransform(
+          utr,
+          internalId,
+          AmendCompanyBeneficiaryTransform(index, Json.toJson(amended), beneficiaryJson, localDateService.now)
+        ).map(_ => Success)
+      }
+  }
+
+  def amendTrustBeneficiaryTransformer(utr: String,
+                                         index: Int,
+                                         internalId: String,
+                                         amended: BeneficiaryTrustType)
+                                        (implicit hc: HeaderCarrier): Future[Success.type] = {
+    getTransformedTrustJson(utr, internalId)
+      .map(findBeneficiaryJson(_, "trust", index))
+      .flatMap(Future.fromTry)
+      .flatMap { beneficiaryJson =>
+
+        transformationService.addNewTransform(
+          utr,
+          internalId,
+          AmendTrustBeneficiaryTransform(index, Json.toJson(amended), beneficiaryJson, localDateService.now)
+        ).map(_ => Success)
+      }
+  }
 }
