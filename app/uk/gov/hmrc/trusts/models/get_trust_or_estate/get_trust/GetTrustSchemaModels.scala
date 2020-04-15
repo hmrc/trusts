@@ -251,7 +251,7 @@ object DisplayTrustWillType {
   implicit val willTypeFormat: Format[DisplayTrustWillType] = Json.format[DisplayTrustWillType]
 }
 
-case class DisplayTrustBeneficiaryTrustType(lineNo: String,
+case class DisplayTrustBeneficiaryTrustType(lineNo: Option[String],
                                             bpMatchStatus: Option[String],
                                             organisationName: String,
                                             beneficiaryDiscretion: Option[Boolean],
