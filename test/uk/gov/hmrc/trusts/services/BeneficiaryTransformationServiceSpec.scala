@@ -29,7 +29,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryCompanyType, BeneficiaryTrustType, IdentificationType, IndividualDetailsType, OtherType, UnidentifiedType}
+import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryCompanyType, BeneficiaryTrustType, IdentificationType, IndividualDetailsType, LargeType, OtherType, UnidentifiedType}
 import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType, RemoveBeneficiary}
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
@@ -508,6 +508,39 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
         Matchers.eq("internalId"),
         Matchers.eq(AmendTrustBeneficiaryTransform(index, Json.toJson(newTrust), original, LocalDateMock.now))
       )
+    }
+  }
+
+  "must add a new add large beneficiary transform using the transformation service" in {
+    val transformationService = mock[TransformationService]
+    val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
+    val newBeneficiary = LargeType(
+      None,
+      None,
+      "Name",
+      "Description",
+      None,
+      None,
+      None,
+      None,
+      "501",
+      Some(IdentificationOrgType(
+        None,
+        Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB"))
+      )),
+      None,
+      None,
+      LocalDate.parse("2010-01-01"),
+      None
+    )
+
+    when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+    val result = service.addLargeBeneficiaryTransformer("utr", "internalId", newBeneficiary)
+    whenReady(result) { _ =>
+
+      verify(transformationService).addNewTransform("utr",
+        "internalId", AddLargeBeneficiaryTransform(newBeneficiary))
     }
   }
 }
