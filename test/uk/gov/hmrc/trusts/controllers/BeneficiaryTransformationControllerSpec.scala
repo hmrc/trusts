@@ -652,4 +652,56 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       status(result) mustBe BAD_REQUEST
     }
   }
+
+  "Add large beneficiary" - {
+
+    "must add a new add large beneficiary transform" in {
+      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+
+      val newBeneficiary = LargeType(
+        None,
+        None,
+        "Name",
+        "Description",
+        None,
+        None,
+        None,
+        None,
+        "501",
+        Some(IdentificationOrgType(
+          None,
+          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB"))
+        )),
+        None,
+        None,
+        LocalDate.parse("2010-01-01"),
+        None
+      )
+
+      when(beneficiaryTransformationService.addLargeBeneficiaryTransformer(any(), any(), any()))
+        .thenReturn(Future.successful(true))
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(newBeneficiary))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.addLargeBeneficiary("aUTR").apply(request)
+
+      status(result) mustBe OK
+      verify(beneficiaryTransformationService).addLargeBeneficiaryTransformer("aUTR", "id", newBeneficiary)
+    }
+
+    "must return an error for malformed json" in {
+      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.parse("{}"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.addLargeBeneficiary("aUTR").apply(request)
+      status(result) mustBe BAD_REQUEST
+    }
+  }
 }

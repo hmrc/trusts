@@ -21,7 +21,7 @@ import java.time.LocalDate
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryCompanyType, BeneficiaryTrustType, IndividualDetailsType, OtherType, UnidentifiedType}
+import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryCompanyType, BeneficiaryTrustType, IndividualDetailsType, LargeType, OtherType, UnidentifiedType}
 import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType}
 
 class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
@@ -104,6 +104,26 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         None
       )
 
+      val newLargeBeneficiary = LargeType(
+        None,
+        None,
+        "Name",
+        "Description",
+        None,
+        None,
+        None,
+        None,
+        "501",
+        Some(IdentificationOrgType(
+          None,
+          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB"))
+        )),
+        None,
+        None,
+        LocalDate.parse("2010-01-01"),
+        None
+      )
+
       val addTrustBeneficiaryTransform = AddTrustBeneficiaryTransform(newTrustBeneficiary)
 
       val amendLeadTrusteeIndTransform = AmendLeadTrusteeIndTransform(newLeadTrustee)
@@ -171,6 +191,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
       val addCompanyBeneficiaryTransform = AddCompanyBeneficiaryTransform(
         BeneficiaryCompanyType(None, None, "Organisation", None, None, None, LocalDate.parse("2010-02-23"), None)
       )
+
+      val addLargeBeneficiaryTransform = AddLargeBeneficiaryTransform(newLargeBeneficiary)
 
       val removeBeneficiariesTransform = RemoveBeneficiariesTransform(3, Json.toJson(individualBeneficiary), LocalDate.parse("2012-02-06"), "BeneficiaryType")
 
@@ -241,6 +263,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |               "AddCompanyBeneficiaryTransform": ${Json.toJson(addCompanyBeneficiaryTransform)}
           |            },
           |            {
+          |               "AddLargeBeneficiaryTransform": ${Json.toJson(addLargeBeneficiaryTransform)}
+          |            },
+          |            {
           |               "RemoveBeneficiariesTransform": ${Json.toJson(removeBeneficiariesTransform)}
           |            }
           |        ]
@@ -269,6 +294,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           addCharityBeneficiaryTransform,
           addOtherBeneficiaryTransform,
           addCompanyBeneficiaryTransform,
+          addLargeBeneficiaryTransform,
           removeBeneficiariesTransform
         )
       )
