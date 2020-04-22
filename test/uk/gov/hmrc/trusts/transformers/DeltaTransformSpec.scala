@@ -194,6 +194,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
       val addLargeBeneficiaryTransform = AddLargeBeneficiaryTransform(newLargeBeneficiary)
 
+      val amendLargeBeneficiaryTransform = AmendLargeBeneficiaryTransform(0, Json.toJson(newLargeBeneficiary), Json.obj(), currentDate)
+
       val removeBeneficiariesTransform = RemoveBeneficiariesTransform(3, Json.toJson(individualBeneficiary), LocalDate.parse("2012-02-06"), "BeneficiaryType")
 
       val json = Json.parse(
@@ -266,6 +268,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |               "AddLargeBeneficiaryTransform": ${Json.toJson(addLargeBeneficiaryTransform)}
           |            },
           |            {
+          |               "AmendLargeBeneficiaryTransform": ${Json.toJson(amendLargeBeneficiaryTransform)}
+          |            },
+          |            {
           |               "RemoveBeneficiariesTransform": ${Json.toJson(removeBeneficiariesTransform)}
           |            }
           |        ]
@@ -295,6 +300,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           addOtherBeneficiaryTransform,
           addCompanyBeneficiaryTransform,
           addLargeBeneficiaryTransform,
+          amendLargeBeneficiaryTransform,
           removeBeneficiariesTransform
         )
       )

@@ -1,35 +1,40 @@
 {
-  "matchData": {
-    "utr": "5465416546"
+  "responseHeader": {
+    "status": "Processed",
+    "formBundleNo": "000012387218"
   },
-  "correspondence": {
-    "abroadIndicator": false,
-    "name": "Abram James",
-    "address": {
-      "line1": "1344 Army Road",
-      "line2": "Suite 111",
-      "line3": "Telford",
-      "line4": "Shropshire",
-      "postCode": "TF1 5DR",
-      "country": "GB"
+  "getTrust": {
+    "matchData": {
+      "utr": "5465416546"
     },
-    "phoneNumber": "0754545454"
-  },
-  "declaration": {
-    "name": {
-      "firstName": "First",
-      "lastName": "Last"
+    "correspondence": {
+      "abroadIndicator": false,
+      "name": "Abram James",
+      "address": {
+        "line1": "1344 Army Road",
+        "line2": "Suite 111",
+        "line3": "Telford",
+        "line4": "Shropshire",
+        "postCode": "TF1 5DR",
+        "country": "GB"
+      },
+      "phoneNumber": "+4423400342"
     },
-    "address": {
-      "line1": "1344 Army Road",
-      "line2": "Suite 111",
-      "line3": "Telford",
-      "line4": "Shropshire",
-      "postCode": "TF1 5DR",
-      "country": "GB"
-    }
-  },
-  "details": {
+    "declaration": {
+      "name": {
+        "firstName": "Abram",
+        "middleName": "Joe",
+        "lastName": "James"
+      },
+      "address": {
+        "line1": "1344 Army Road",
+        "line2": "Suite 111",
+        "line3": "Telford",
+        "line4": "Shropshire",
+        "postCode": "TF1 5DR",
+        "country": "GB"
+      }
+    },
     "trust": {
       "details": {
         "startDate": "2001-01-01",
@@ -119,6 +124,7 @@
           "other": [
             {
               "lineNo": "1",
+              "description": "Lorem ipsum",
               "address": {
                 "line1": "1344 Army Road",
                 "line2": "Suite 111",
@@ -126,7 +132,6 @@
                 "postCode": "TF1 5DR",
                 "country": "GB"
               },
-              "description": "Lorem ipsum",
               "entityStart": "1998-02-12"
             }
           ],
@@ -142,8 +147,7 @@
           "large": [
             {
               "lineNo":"1",
-              "bpMatchStatus": "01",
-              "organisationName": "Organisation Name",
+              "organisationName": "Amended Name",
               "identification": {
                 "address": {
                   "line1": "Line 1",
@@ -152,9 +156,9 @@
                   "country": "GB"
                 }
               },
-              "description": "Description",
+              "description": "Amended Description",
               "numberOfBeneficiary": "501",
-              "entityStart": "1990-10-10"
+              "entityStart": "2010-01-01"
             }
           ]
         },
@@ -172,22 +176,27 @@
           },
           "entityStart": "1998-02-12"
         },
-        "leadTrustees": [
-          {
-            "leadTrusteeOrg":
-            {
-              "lineNo": "1",
-              "bpMatchStatus": "01",
-              "name": "Trust Services LTD",
-              "phoneNumber": "0754545454",
-              "email": "me@you.com",
-              "identification": {
-                "utr": "5465416546"
+        "leadTrustee": {
+          "leadTrusteeOrg": {
+            "lineNo": "1",
+            "bpMatchStatus": "01",
+            "name": "Trust Services LTD",
+            "phoneNumber": "0754545454",
+            "email": "me@you.com",
+            "identification": {
+              "address": {
+                "country": "GB",
+                "line1": "1344 Army Road",
+                "line2": "Suite 111",
+                "line3": "Telford",
+                "line4": "Shropshire",
+                "postCode": "TF1 5DR"
               },
-              "entityStart": "1998-02-12"
-            }
+              "utr": "5465416546"
+            },
+            "entityStart": "1998-02-12"
           }
-        ],
+        },
         "trustees": [
           {
             "trusteeInd": {
@@ -198,10 +207,10 @@
                 "lastName": "O'Connor"
               },
               "dateOfBirth": "1956-02-12",
+              "phoneNumber": "0121546546",
               "identification": {
                 "nino": "ST123456"
               },
-              "phoneNumber": "0121546546",
               "entityStart": "1998-02-12"
             }
           }
@@ -281,8 +290,5 @@
         ]
       }
     }
-  },
-  "reqHeader": {
-    "formBundleNo": "000012387218"
   }
 }

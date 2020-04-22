@@ -704,4 +704,66 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       status(result) mustBe BAD_REQUEST
     }
   }
+
+  "Amend large beneficiary" - {
+
+    val index = 0
+
+    "must add a new amend large beneficiary transform" in {
+
+      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+
+      val newLargeBeneficiary = LargeType(
+        None,
+        None,
+        "Name",
+        "Description",
+        None,
+        None,
+        None,
+        None,
+        "501",
+        Some(IdentificationOrgType(
+          None,
+          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB"))
+        )),
+        None,
+        None,
+        LocalDate.parse("2010-01-01"),
+        None
+      )
+
+      when(beneficiaryTransformationService.amendLargeBeneficiaryTransformer(any(), any(), any(), any())(any()))
+        .thenReturn(Future.successful(Success))
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(newLargeBeneficiary))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendLargeBeneficiary("aUTR", index).apply(request)
+
+      status(result) mustBe OK
+      verify(beneficiaryTransformationService)
+        .amendLargeBeneficiaryTransformer(
+          equalTo("aUTR"),
+          equalTo(index),
+          equalTo("id"),
+          equalTo(newLargeBeneficiary)
+        )(any())
+
+    }
+
+    "must return an error for malformed json" in {
+      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.parse("{}"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendLargeBeneficiary("aUTR", index).apply(request)
+      status(result) mustBe BAD_REQUEST
+    }
+  }
 }

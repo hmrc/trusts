@@ -543,4 +543,67 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
         "internalId", AddLargeBeneficiaryTransform(newBeneficiary))
     }
   }
+
+  "must add a new amend large beneficiary transform using the transformation service" in {
+    val index = 0
+    val transformationService = mock[TransformationService]
+    val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
+    val newBeneficiary = LargeType(
+      None,
+      None,
+      "Amended Name",
+      "Amended Description",
+      None,
+      None,
+      None,
+      None,
+      "501",
+      Some(IdentificationOrgType(
+        None,
+        Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB"))
+      )),
+      None,
+      None,
+      LocalDate.parse("2010-01-01"),
+      None
+    )
+
+    val original: JsValue = Json.parse(
+      """
+        |{
+        |  "lineNo": "1",
+        |  "bpMatchStatus": "01",
+        |  "organisationName": "Name",
+        |  "identification": {
+        |    "address": {
+        |      "line1": "Line 1",
+        |      "line2": "Line 2",
+        |      "postCode": "NE1 1NE",
+        |      "country": "GB"
+        |    }
+        |  },
+        |  "description": "Description",
+        |  "numberOfBeneficiary": "501",
+        |  "entityStart": "2010-01-01"
+        |}
+        |""".stripMargin)
+
+    when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+    when(transformationService.getTransformedData(any(), any())(any()))
+      .thenReturn(Future.successful(TrustProcessedResponse(
+        buildInputJson("large", Seq(original)),
+        ResponseHeader("status", "formBundleNo")
+      )))
+
+    val result = service.amendLargeBeneficiaryTransformer("utr", index, "internalId", newBeneficiary)
+    whenReady(result) { _ =>
+
+      verify(transformationService).addNewTransform(
+        Matchers.eq("utr"),
+        Matchers.eq("internalId"),
+        Matchers.eq(AmendLargeBeneficiaryTransform(index, Json.toJson(newBeneficiary), original, LocalDateMock.now))
+      )
+    }
+  }
 }
