@@ -287,4 +287,23 @@ class BeneficiaryTransformationController @Inject()(
       }
     }
   }
+
+  def amendLargeBeneficiary(utr: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
+    implicit request =>
+      request.body.validate[LargeType] match {
+        case JsSuccess(largeBeneficiary, _) =>
+          beneficiaryTransformationService.amendLargeBeneficiaryTransformer(
+            utr,
+            index,
+            request.identifier,
+            largeBeneficiary
+          ) map { _ =>
+            Ok
+          }
+        case JsError(errors) =>
+          logger.warn(s"[BeneficiaryTransformationController][amendLargeBeneficiary]" +
+            s" Supplied payload could not be read as a LargeBeneficiary - $errors")
+          Future.successful(BadRequest)
+      }
+  }
 }

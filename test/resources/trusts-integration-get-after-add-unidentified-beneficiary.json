@@ -147,6 +147,24 @@
               "description": "New Beneficiary Description",
               "entityStart": "2020-01-01"
             }
+          ],
+          "large": [
+            {
+              "lineNo":"1",
+              "bpMatchStatus": "01",
+              "organisationName": "Organisation Name",
+              "identification": {
+                "address": {
+                  "line1": "Line 1",
+                  "line2": "Line 2",
+                  "postCode": "NE1 1NE",
+                  "country": "GB"
+                }
+              },
+              "description": "Description",
+              "numberOfBeneficiary": "501",
+              "entityStart": "1990-10-10"
+            }
           ]
         },
         "deceased": {

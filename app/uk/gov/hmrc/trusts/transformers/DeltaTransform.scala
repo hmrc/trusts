@@ -56,7 +56,8 @@ object DeltaTransform {
           readsForTransform[AmendTrustBeneficiaryTransform](AmendTrustBeneficiaryTransform.key) orElse
           readsForTransform[AddCompanyBeneficiaryTransform](AddCompanyBeneficiaryTransform.key) orElse
           readsForTransform[AddTrustBeneficiaryTransform](AddTrustBeneficiaryTransform.key) orElse
-          readsForTransform[AddLargeBeneficiaryTransform](AddLargeBeneficiaryTransform.key)
+          readsForTransform[AddLargeBeneficiaryTransform](AddLargeBeneficiaryTransform.key) orElse
+          readsForTransform[AmendLargeBeneficiaryTransform](AmendLargeBeneficiaryTransform.key)
         ) (value.as[JsObject]) orElse (throw new Exception(s"Don't know how to deserialise transform"))
   )
 
@@ -111,6 +112,8 @@ object DeltaTransform {
       Json.obj(AmendOtherBeneficiaryTransform.key -> Json.toJson(transform)(AmendOtherBeneficiaryTransform.format))
     case transform: AmendTrustBeneficiaryTransform =>
       Json.obj(AmendTrustBeneficiaryTransform.key -> Json.toJson(transform)(AmendTrustBeneficiaryTransform.format))
+    case transform: AmendLargeBeneficiaryTransform =>
+      Json.obj(AmendLargeBeneficiaryTransform.key -> Json.toJson(transform)(AmendLargeBeneficiaryTransform.format))
   }
 
   def removeBeneficiariesWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
