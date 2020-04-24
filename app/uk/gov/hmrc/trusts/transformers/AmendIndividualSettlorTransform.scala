@@ -17,7 +17,6 @@
 package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
-
 import play.api.libs.json._
 
 case class AmendIndividualSettlorTransform(
@@ -27,6 +26,14 @@ case class AmendIndividualSettlorTransform(
                                                 endDate: LocalDate
                                               ) extends AmendSettlorTransform {
   override val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'settlors \ 'settlor
+}
+
+object AmendIndividualSettlorTransform {
+
+  val key = "AmendIndividualSettlorTransform"
+
+  implicit val format: Format[AmendIndividualSettlorTransform] =
+    Json.format[AmendIndividualSettlorTransform]
 }
 
 
