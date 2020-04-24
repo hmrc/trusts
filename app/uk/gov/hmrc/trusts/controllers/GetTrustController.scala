@@ -88,6 +88,9 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   def getBeneficiaries(utr: String) : Action[AnyContent] =
     getItemAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary, "beneficiary")
 
+  def getSettlors(utr: String) : Action[AnyContent] =
+    getItemAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'settlors, "settlors")
+
   private def getItemAtPath(utr: String, path: JsPath, fieldName: String): Action[AnyContent] = {
     getItemAtPath(utr, path, json => Json.obj(fieldName -> json))
   }

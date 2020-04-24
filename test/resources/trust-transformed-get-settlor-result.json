@@ -1,0 +1,35 @@
+{
+  "settlors": {
+    "settlor": [
+      {
+        "lineNo": "1",
+        "bpMatchStatus": "01",
+        "name": {
+          "firstName": "Bruce",
+          "middleName": "Bob",
+          "lastName": "Branson"
+        },
+        "dateOfBirth": "1965-02-28",
+        "identification": {
+          "safeId": "2222200000000"
+        },
+        "entityStart": "2017-02-28",
+        "provisional": false
+      }
+    ],
+    "settlorCompany": [
+      {
+        "lineNo": "1",
+        "bpMatchStatus": "01",
+        "name": "Completors Limited ",
+        "companyType": "Trading",
+        "companyTime": true,
+        "identification": {
+          "safeId": "2222200000000"
+        },
+        "entityStart": "2017-02-28",
+        "provisional": false
+      }
+    ]
+  }
+}
