@@ -63,3 +63,5 @@ POST        /add-large-beneficiary/:utr                         uk.gov.hmrc.trus
 POST        /amend-large-beneficiary/:utr/:index                uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendLargeBeneficiary(utr: String, index: Int)
 
 PUT         /:utr/beneficiaries/remove                          uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.removeBeneficiary(utr: String)
+
+POST        /amend-individual-settlor/:utr/:index                         uk.gov.hmrc.trusts.controllers.SettlorTransformationController.amendIndividualSettlor(utr: String, index: Int)

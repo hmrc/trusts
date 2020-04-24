@@ -37,6 +37,8 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction)
       request.body.validate[Settlor] match {
         case JsSuccess(settlor, _) =>
 
+          // settlor value not used yet, return OK for now
+
           Future.successful(Ok)
         case JsError(errors) =>
           logger.warn(s"[SettlorTransformationController][amendIndividualSettlor]" +
