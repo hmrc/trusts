@@ -22,11 +22,13 @@ import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.variation.Settlor
+import uk.gov.hmrc.trusts.services.SettlorTransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SettlorTransformationController @Inject()(identify: IdentifierAction)
+class SettlorTransformationController @Inject()(identify: IdentifierAction,
+                                                transformService: SettlorTransformationService)
                                                (implicit val executionContext: ExecutionContext)
   extends TrustsBaseController with ValidationUtil {
 
@@ -37,9 +39,14 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction)
       request.body.validate[Settlor] match {
         case JsSuccess(settlor, _) =>
 
-          // settlor value not used yet, return OK for now
-
-          Future.successful(Ok)
+          transformService.amendIndividualSettlorTransformer(
+            utr,
+            index,
+            request.identifier,
+            settlor
+          ) map { _ =>
+            Ok
+          }
         case JsError(errors) =>
           logger.warn(s"[SettlorTransformationController][amendIndividualSettlor]" +
             s" Supplied json could not be read as a Settlor - $errors")

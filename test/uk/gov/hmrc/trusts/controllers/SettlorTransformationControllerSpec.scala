@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.controllers.actions
+package uk.gov.hmrc.trusts.controllers
 
 import java.time.LocalDate
 
+import org.mockito.Matchers.{any, eq => equalTo}
+import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
@@ -25,10 +27,12 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
-import uk.gov.hmrc.trusts.controllers.SettlorTransformationController
+import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.{variation, _}
+import uk.gov.hmrc.trusts.services.SettlorTransformationService
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class SettlorTransformationControllerSpec extends FreeSpec
   with MockitoSugar
@@ -43,9 +47,9 @@ class SettlorTransformationControllerSpec extends FreeSpec
 
     "must add a new amend individual settlor transform" in {
 
-//      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
+      val service = mock[SettlorTransformationService]
 
-      val controller = new SettlorTransformationController(identifierAction)
+      val controller = new SettlorTransformationController(identifierAction, service)
 
       val newSettlor = variation.Settlor(
         lineNo = None,
@@ -57,8 +61,8 @@ class SettlorTransformationControllerSpec extends FreeSpec
         entityEnd = None
       )
 
-//      when(beneficiaryTransformationService.amendUnidentifiedBeneficiaryTransformer(any(), any(), any(), any())(any()))
-//        .thenReturn(Future.successful(Success))
+      when(service.amendIndividualSettlorTransformer(any(), any(), any(), any())(any()))
+        .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(newSettlor))
@@ -68,16 +72,16 @@ class SettlorTransformationControllerSpec extends FreeSpec
 
       status(result) mustBe OK
 
-//      verify(beneficiaryTransformationService).amendUnidentifiedBeneficiaryTransformer(
-//        equalTo("aUTR"),
-//        equalTo(index),
-//        equalTo("id"),
-//        equalTo(newDescription))(any())
+      verify(service).amendIndividualSettlorTransformer(
+        equalTo("aUTR"),
+        equalTo(index),
+        equalTo("id"),
+        equalTo(newSettlor))(any())
     }
 
     "must return an error for malformed json" in {
-//      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new SettlorTransformationController(identifierAction)
+      val service = mock[SettlorTransformationService]
+      val controller = new SettlorTransformationController(identifierAction, service)
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
