@@ -66,4 +66,6 @@ POST        /amend-large-beneficiary/:utr/:index                uk.gov.hmrc.trus
 
 PUT         /:utr/beneficiaries/remove                          uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.removeBeneficiary(utr: String)
 
-PUT         /:utr/settlors/remove                               uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.removeBeneficiary(utr: String)
+POST        /amend-individual-settlor/:utr/:index               uk.gov.hmrc.trusts.controllers.SettlorTransformationController.amendIndividualSettlor(utr: String, index: Int)
+
+PUT         /:utr/settlors/remove                               uk.gov.hmrc.trusts.controllers.SettlorTransformationController.removeSettlor(utr: String)
