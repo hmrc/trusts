@@ -57,7 +57,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
   "The settlor transformation service" - {
 
-    "must add a new amend individual beneficiary transform" in {
+    "must add a new amend individual settlor transform" in {
       val index = 0
       val transformationService = mock[TransformationService]
       val service = new SettlorTransformationService(transformationService, LocalDateMock)
@@ -103,4 +103,52 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       }
     }
   }
+
+    "must add a new  individual settlor transform" in {
+
+      val transformationService = mock[TransformationService]
+      val service = new SettlorTransformationService(transformationService, LocalDateMock)
+
+      val newSettlor = variation.Settlor(
+        lineNo = None,
+        bpMatchStatus = None,
+        name = NameType("First", None, "Last"),
+        dateOfBirth = None,
+        identification = None,
+        entityStart = LocalDate.parse("2010-05-03"),
+        entityEnd = None
+      )
+
+      val originalSettlorJson = Json.toJson(
+        variation.Settlor(
+          lineNo = None,
+          bpMatchStatus = None,
+          name = NameType("Old", None, "Last"),
+          dateOfBirth = Some(LocalDate.parse("1990-02-01")),
+          identification = None,
+          entityStart = LocalDate.parse("2010-05-03"),
+          entityEnd = None
+        )
+      )
+
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+      when(transformationService.getTransformedData(any(), any())(any()))
+        .thenReturn(Future.successful(TrustProcessedResponse(
+          buildInputJson("settlor", Seq(originalSettlorJson)),
+          ResponseHeader("status", "formBundlNo")
+        )))
+
+      val result = service.addIndividualSettlorTransformer("utr", "internalId", newSettlor)
+      whenReady(result) { _ =>
+
+        verify(transformationService).addNewTransform(
+          "utr",
+          "internalId",
+          AddIndividualSettlorTransform(newSettlor)
+        )
+      }
+    }
+
 }
+

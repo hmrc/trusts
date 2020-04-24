@@ -55,4 +55,24 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
     }
   }
 
+  def addIndividualSettlor(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
+    implicit request => {
+      request.body.validate[Settlor] match {
+        case JsSuccess(settlor, _) =>
+
+          transformService.addIndividualSettlorTransformer(
+            utr,
+            request.identifier,
+            settlor
+          ) map { _ =>
+            Ok
+          }
+        case JsError(errors) =>
+          logger.warn(s"[SettlorTransformationController][addIndividualSettlor]" +
+            s" Supplied json could not be read as a Settlor - $errors")
+          Future.successful(BadRequest)
+      }
+    }
+  }
+
 }

@@ -69,4 +69,9 @@ class SettlorTransformationService @Inject()(
         ).map(_ => Success)
       }
   }
+
+  def addIndividualSettlorTransformer(utr: String, internalId: String, newSettlor: Settlor): Future[Success.type] = {
+    transformationService.addNewTransform(utr, internalId, AddIndividualSettlorTransform(newSettlor)).map(_ => Success)
+  }
+
 }
