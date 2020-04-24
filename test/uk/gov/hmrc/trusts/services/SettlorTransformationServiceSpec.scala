@@ -28,7 +28,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.{NameType, variation}
+import uk.gov.hmrc.trusts.models.{NameType, RemoveSettlor, variation}
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
 
@@ -41,6 +41,14 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
      PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 
   private implicit val hc : HeaderCarrier = HeaderCarrier()
+
+  private def settlorJson(value1 : String, endDate: Option[LocalDate] = None) = {
+    if (endDate.isDefined) {
+      Json.obj("field1" -> value1, "field2" -> "value20", "endDate" -> endDate.get, "lineNo" -> 65)
+    } else {
+      Json.obj("field1" -> value1, "field2" -> "value20", "lineNo" -> 65)
+    }
+  }
 
   object LocalDateMock extends LocalDateService {
     override def now: LocalDate = LocalDate.of(1999, 3, 14)
@@ -57,7 +65,27 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
   "The settlor transformation service" - {
 
-    "must add a new amend individual beneficiary transform" in {
+    "must add a new remove settlor transform using the transformation service" in {
+      val transformationService = mock[TransformationService]
+      val service = new SettlorTransformationService(transformationService, LocalDateMock)
+      val settlor = settlorJson("Blah Blah Blah")
+
+      when(transformationService.addNewTransform(any(), any(), any()))
+        .thenReturn(Future.successful(true))
+      when(transformationService.getTransformedData(any(), any())(any()))
+        .thenReturn(Future.successful(TrustProcessedResponse(
+          buildInputJson("settlor", Seq(settlor)),
+          ResponseHeader("status", "formBundlNo")
+        )))
+
+      val result = service.removeSettlor("utr", "internalId", RemoveSettlor(LocalDate.of(2013, 2, 20), 0, "settlor"))
+      whenReady(result) { _ =>
+        verify(transformationService).addNewTransform("utr",
+          "internalId", RemoveSettlorsTransform(0, settlor, LocalDate.of(2013, 2, 20), "settlor"))
+      }
+    }
+
+    "must add a new amend individual settlor transform" in {
       val index = 0
       val transformationService = mock[TransformationService]
       val service = new SettlorTransformationService(transformationService, LocalDateMock)
