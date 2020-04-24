@@ -1,0 +1,88 @@
+{
+  "details":{
+    "trust":{
+      "entities":{
+        "leadTrustees":{
+          "lineNo":"1",
+          "bpMatchStatus":"01",
+          "name":"Trust Services LTD",
+          "phoneNumber":"0754545454",
+          "email":"me@you.com",
+          "identification":{
+            "utr":"5465416546"
+          },
+          "entityStart":"1998-02-12"
+        },
+        "trustees": [
+          {
+            "trusteeInd": {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "name": {
+                "firstName": "Tamara",
+                "middleName": "Hingis",
+                "lastName": "Jones"
+              },
+              "dateOfBirth": "1965-02-28",
+              "identification": {
+                "nino": "AA000000A"
+              },
+              "phoneNumber": "+447456788112",
+              "entityStart": "2017-02-28"
+            }
+          },
+          {
+            "trusteeOrg": {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "name": "MyOrg Incorporated",
+              "phoneNumber": "+447456788112",
+              "email": "a",
+              "identification": {
+                "utr": "1234567890"
+              },
+              "entityStart": "2017-02-28"
+            }
+          }
+        ],
+        "beneficiary": {
+          "individualDetails": [
+            {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "name": {
+                "firstName": "First 1",
+                "lastName": "Last 1"
+              },
+              "vulnerableBeneficiary": false,
+              "entityStart": "2018-02-28"
+            }
+          ]
+        },
+        "settlors": {
+          "settlor": [
+            {
+              "name": {
+                "firstName": "First updated",
+                "lastName": "Last updated"
+              },
+              "entityStart": "2018-02-28"
+            },
+            {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "name": {
+                "firstName": "First",
+                "lastName": "Last"
+              },
+              "dateOfBirth": "2010-05-03",
+              "entityStart": "2018-02-28",
+              "entityEnd": "2020-03-25"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "otherfields" : "exist"
+}
