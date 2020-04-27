@@ -17,9 +17,9 @@
 package uk.gov.hmrc.trusts.transformers
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.variation.Settlor
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustSettlor
 
-case class AddIndividualSettlorTransform(newSettlor: Settlor)
+case class AddIndividualSettlorTransform(newSettlor: DisplayTrustSettlor)
   extends DeltaTransform
   with JsonOperations {
 
@@ -28,6 +28,7 @@ case class AddIndividualSettlorTransform(newSettlor: Settlor)
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     addToList(input, path, Json.toJson(newSettlor))
   }
+}
 
   object AddIndividualSettlorTransform {
 
@@ -35,4 +36,4 @@ case class AddIndividualSettlorTransform(newSettlor: Settlor)
 
     implicit val format: Format[AddIndividualSettlorTransform] = Json.format[AddIndividualSettlorTransform]
   }
-}
+

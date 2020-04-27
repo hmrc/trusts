@@ -22,6 +22,7 @@ import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveSettlor
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustSettlor
 import uk.gov.hmrc.trusts.models.variation.Settlor
 import uk.gov.hmrc.trusts.services.SettlorTransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
@@ -58,7 +59,7 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
 
   def addIndividualSettlor(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
-      request.body.validate[Settlor] match {
+      request.body.validate[DisplayTrustSettlor] match {
         case JsSuccess(settlor, _) =>
 
           transformService.addIndividualSettlorTransformer(

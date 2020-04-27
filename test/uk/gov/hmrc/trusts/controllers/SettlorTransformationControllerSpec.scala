@@ -28,6 +28,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustSettlor
 import uk.gov.hmrc.trusts.models.{variation, _}
 import uk.gov.hmrc.trusts.services.SettlorTransformationService
 
@@ -101,14 +102,13 @@ class SettlorTransformationControllerSpec extends FreeSpec
       val settlorTransformationService = mock[SettlorTransformationService]
       val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)
 
-      val newSettlor = variation.Settlor(
+      val newSettlor = DisplayTrustSettlor(
         lineNo = None,
         bpMatchStatus = None,
         name = NameType("First", None, "Last"),
         dateOfBirth = None,
         identification = None,
-        entityStart = LocalDate.parse("2010-05-03"),
-        entityEnd = None
+        entityStart = LocalDate.parse("2010-05-03")
       )
 
       val newDescription = "Some new description"
@@ -141,45 +141,5 @@ class SettlorTransformationControllerSpec extends FreeSpec
       val result = controller.addIndividualSettlor("aUTR", index).apply(request)
       status(result) mustBe BAD_REQUEST
     }
-  }
-
-  "remove Settlor" - {
-    "add an new remove settlor transform " in {
-      val settlorTransformationService = mock[SettlorTransformationService]
-      val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)
-
-      when(settlorTransformationService.removeSettlor(any(), any(), any())(any()))
-        .thenReturn(Future.successful(Success))
-
-      val request = FakeRequest("POST", "path")
-        .withBody(Json.obj(
-          "type" -> "settlor",
-          "endDate" -> LocalDate.of(2018, 2, 24),
-          "index" -> 24
-        ))
-        .withHeaders(CONTENT_TYPE -> "application/json")
-
-      val result = controller.removeSettlor("UTRUTRUTR").apply(request)
-
-      status(result) mustBe OK
-      verify(settlorTransformationService)
-        .removeSettlor(
-          equalTo("UTRUTRUTR"),
-          equalTo("id"),
-          equalTo(RemoveSettlor(LocalDate.of(2018, 2, 24), 24, "settlor")))(any())
-    }
-
-    "return an error when json is invalid" in {
-      val OUT = new SettlorTransformationController(identifierAction, mock[SettlorTransformationService])
-
-      val request = FakeRequest("POST", "path")
-        .withBody(Json.obj("field" -> "value"))
-        .withHeaders(CONTENT_TYPE -> "application/json")
-
-      val result = OUT.removeSettlor("UTRUTRUTR")(request)
-
-      status(result) mustBe BAD_REQUEST
-    }
-
   }
 }
