@@ -33,8 +33,8 @@ object Individual {
       settlors => {
 
         val settlorsUpdated = JsArray(settlors.as[List[DisplayTrustSettlor]].map {
-          beneficiary =>
-            Json.toJson(beneficiary)(DisplayTrustSettlor.writeToMaintain)
+          settlor =>
+            Json.toJson(settlor)(DisplayTrustSettlor.writeToMaintain)
         })
 
         JsPath.json.update(

@@ -21,9 +21,9 @@ import java.time.LocalDate
 import play.api.libs.json.{Format, JsResult, JsValue, Json, __}
 
 case class RemoveSettlorsTransform(index : Int,
-                                  beneficiaryData : JsValue,
-                                  endDate : LocalDate,
-                                  settlorType : String
+                                   settlorData : JsValue,
+                                   endDate : LocalDate,
+                                   settlorType : String
                                   ) extends DeltaTransform with JsonOperations {
 
   private lazy val path = __ \ "details" \ "trust" \ "entities" \ "settlors" \ settlorType
@@ -33,7 +33,7 @@ case class RemoveSettlorsTransform(index : Int,
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    endEntity(input, path, Json.toJson(beneficiaryData), endDate)
+    endEntity(input, path, Json.toJson(settlorData), endDate)
   }
 }
 
