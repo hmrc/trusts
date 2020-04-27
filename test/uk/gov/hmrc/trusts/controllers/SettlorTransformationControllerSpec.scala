@@ -142,4 +142,44 @@ class SettlorTransformationControllerSpec extends FreeSpec
       status(result) mustBe BAD_REQUEST
     }
   }
+
+  "remove Settlor" - {
+    "add an new remove settlor transform " in {
+      val settlorTransformationService = mock[SettlorTransformationService]
+      val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)
+
+      when(settlorTransformationService.removeSettlor(any(), any(), any())(any()))
+        .thenReturn(Future.successful(Success))
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.obj(
+          "type" -> "settlor",
+          "endDate" -> LocalDate.of(2018, 2, 24),
+          "index" -> 24
+        ))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.removeSettlor("UTRUTRUTR").apply(request)
+
+      status(result) mustBe OK
+      verify(settlorTransformationService)
+        .removeSettlor(
+          equalTo("UTRUTRUTR"),
+          equalTo("id"),
+          equalTo(RemoveSettlor(LocalDate.of(2018, 2, 24), 24, "settlor")))(any())
+    }
+
+    "return an error when json is invalid" in {
+      val OUT = new SettlorTransformationController(identifierAction, mock[SettlorTransformationService])
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.obj("field" -> "value"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = OUT.removeSettlor("UTRUTRUTR")(request)
+
+      status(result) mustBe BAD_REQUEST
+    }
+
+  }
 }

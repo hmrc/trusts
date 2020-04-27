@@ -124,6 +124,20 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
         None
       )
 
+      val settlor = DisplayTrustSettlor(
+        None,
+        None,
+        NameType("Individual", None, "Settlor"),
+        Some(LocalDate.parse("2000-01-01")),
+        Some(DisplayTrustIdentificationType(
+          None,
+          Some("nino"),
+          None,
+          None
+        )),
+        LocalDate.parse("2010-01-01")
+      )
+
       val addTrustBeneficiaryTransform = AddTrustBeneficiaryTransform(newTrustBeneficiary)
 
       val amendLeadTrusteeIndTransform = AmendLeadTrusteeIndTransform(newLeadTrustee)
@@ -197,6 +211,10 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
       val amendLargeBeneficiaryTransform = AmendLargeBeneficiaryTransform(0, Json.toJson(newLargeBeneficiary), Json.obj(), currentDate)
 
       val removeBeneficiariesTransform = RemoveBeneficiariesTransform(3, Json.toJson(individualBeneficiary), LocalDate.parse("2012-02-06"), "BeneficiaryType")
+
+      val amendIndividualSettlorTransform = AmendIndividualSettlorTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2020-03-25"))
+
+      val removeSettlorsTransform = RemoveSettlorsTransform(3, Json.toJson(settlor), LocalDate.parse("2012-02-06"), "settlor")
 
       val json = Json.parse(
         s"""{
@@ -272,6 +290,12 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |            },
           |            {
           |               "RemoveBeneficiariesTransform": ${Json.toJson(removeBeneficiariesTransform)}
+          |            },
+          |            {
+          |               "AmendIndividualSettlorTransform": ${Json.toJson(amendIndividualSettlorTransform)}
+          |            },
+          |            {
+          |               "RemoveSettlorsTransform": ${Json.toJson(removeSettlorsTransform)}
           |            }
           |        ]
           |    }
@@ -301,7 +325,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           addCompanyBeneficiaryTransform,
           addLargeBeneficiaryTransform,
           amendLargeBeneficiaryTransform,
-          removeBeneficiariesTransform
+          removeBeneficiariesTransform,
+          amendIndividualSettlorTransform,
+          removeSettlorsTransform
         )
       )
 
