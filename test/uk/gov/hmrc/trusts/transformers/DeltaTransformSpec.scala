@@ -21,7 +21,7 @@ import java.time.LocalDate
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryCompanyType, BeneficiaryTrustType, IndividualDetailsType, LargeType, OtherType, UnidentifiedType}
+import uk.gov.hmrc.trusts.models.variation._
 import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType}
 
 class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
@@ -200,6 +200,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
       val amendIndividualSettlorTransform = AmendIndividualSettlorTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2020-03-25"))
 
+      val amendBusinessSettlorTransform = AmendBusinessSettlorTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2020-03-25"))
+
       val json = Json.parse(
         s"""{
           |        "deltaTransforms" : [
@@ -277,6 +279,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |            },
           |            {
           |               "AmendIndividualSettlorTransform": ${Json.toJson(amendIndividualSettlorTransform)}
+          |            },
+          |            {
+          |               "AmendBusinessSettlorTransform": ${Json.toJson(amendBusinessSettlorTransform)}
           |            }
           |        ]
           |    }
@@ -307,7 +312,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           addLargeBeneficiaryTransform,
           amendLargeBeneficiaryTransform,
           removeBeneficiariesTransform,
-          amendIndividualSettlorTransform
+          amendIndividualSettlorTransform,
+          amendBusinessSettlorTransform
         )
       )
 

@@ -20,9 +20,9 @@ import javax.inject.Inject
 import play.api.libs.json.{JsObject, JsValue, Json, __}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
+import uk.gov.hmrc.trusts.models.Success
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models.variation._
-import uk.gov.hmrc.trusts.models.{RemoveBeneficiary, Success}
 import uk.gov.hmrc.trusts.transformers._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -66,6 +66,24 @@ class SettlorTransformationService @Inject()(
           utr,
           internalId,
           AmendIndividualSettlorTransform(index, Json.toJson(settlor), original, localDateService.now)
+        ).map(_ => Success)
+      }
+  }
+
+  def amendBusinessSettlorTransformer(utr: String,
+                                        index: Int,
+                                        internalId: String,
+                                        settlor: SettlorCompany)
+                                       (implicit hc: HeaderCarrier): Future[Success.type] =
+  {
+    getTransformedTrustJson(utr, internalId)
+      .map(findSettlorJson(_, "settlorCompany", index))
+      .flatMap(Future.fromTry)
+      .flatMap { original =>
+        transformationService.addNewTransform(
+          utr,
+          internalId,
+          AmendBusinessSettlorTransform(index, Json.toJson(settlor), original, localDateService.now)
         ).map(_ => Success)
       }
   }
