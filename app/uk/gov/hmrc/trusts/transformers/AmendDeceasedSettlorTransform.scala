@@ -19,12 +19,30 @@ package uk.gov.hmrc.trusts.transformers
 import play.api.libs.json._
 
 case class AmendDeceasedSettlorTransform(amended: JsValue,
-                                         original: JsValue) extends DeltaTransform
-  with JsonOperations {
+                                         original: JsValue) extends DeltaTransform {
 
   private val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'deceased
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = replaceObject(input, path, amended)
+  override def applyTransform(input: JsValue): JsResult[JsValue] = amend(input, path, amended)
+
+  private def amend(input: JsValue, path: JsPath, toReplaceWith: JsValue) : JsResult[JsValue] = {
+
+    for {
+      lineNo <- input.transform((path \ 'lineNo).json.pick)
+      bpMatchStatus <- input.transform((path \ 'bpMatchStatus).json.pick)
+      lineNoAndStatusPreserved <- input.transform(
+        path.json.prune andThen
+          JsPath.json.update {
+            path.json.put(toReplaceWith) andThen
+              (path \ 'lineNo).json.put(lineNo) andThen
+              (path \ 'bpMatchStatus).json.put(bpMatchStatus)
+          }
+      )
+    } yield {
+      lineNoAndStatusPreserved
+    }
+
+  }
 }
 
 object AmendDeceasedSettlorTransform {

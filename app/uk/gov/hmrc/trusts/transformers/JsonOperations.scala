@@ -127,13 +127,4 @@ trait JsonOperations {
     }
   }
 
-  def replaceObject(input: JsValue, path: JsPath, toReplaceWith: JsValue) : JsResult[JsValue] = {
-    input.transform(
-      path.json.prune andThen
-        JsPath.json.update {
-          path.json.put(toReplaceWith)
-        }
-    )
-  }
-
 }
