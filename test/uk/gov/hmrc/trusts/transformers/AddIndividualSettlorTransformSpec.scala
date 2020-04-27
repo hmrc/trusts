@@ -20,16 +20,16 @@ import java.time.LocalDate
 
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import uk.gov.hmrc.trusts.models.NameType
-import uk.gov.hmrc.trusts.models.variation.Settlor
+import uk.gov.hmrc.trusts.models.variation.{IdentificationType, Settlor}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AddIndividualSettlorTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
-  val newSettlor = Settlor(None,
+  val newSettlor = Settlor(Some("1"),
     None,
-    NameType("First", None, "Last"),
+    NameType("abcdefghijkl",Some("abcdefghijklmn"), "abcde"),
     Some(LocalDate.parse("2000-01-01")),
-    None,
+    Some(IdentificationType(Some("ST019091"),None,None,None)),
     LocalDate.parse("2002-01-01"),
     None
   )
@@ -37,9 +37,9 @@ class AddIndividualSettlorTransformSpec extends FreeSpec with MustMatchers with 
   "the add individual settlor transformer should" - {
 
     "add a new individual settlor when there are no settlor existing" in {
-      val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-only-other-beneficiary.json")
+      val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-only-other-settlor.json")
 
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-individual-beneficiary.json")
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-individual-settlor.json")
 
       val transformer = new AddIndividualSettlorTransform(newSettlor)
 
@@ -52,7 +52,7 @@ class AddIndividualSettlorTransformSpec extends FreeSpec with MustMatchers with 
 
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-second-individual-beneficiary.json")
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-second-individual-settlor.json")
 
       val transformer = new AddIndividualSettlorTransform(newSettlor)
 
