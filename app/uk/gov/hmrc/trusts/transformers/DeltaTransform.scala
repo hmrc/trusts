@@ -58,7 +58,9 @@ object DeltaTransform {
           readsForTransform[AddTrustBeneficiaryTransform](AddTrustBeneficiaryTransform.key) orElse
           readsForTransform[AddLargeBeneficiaryTransform](AddLargeBeneficiaryTransform.key) orElse
           readsForTransform[AmendLargeBeneficiaryTransform](AmendLargeBeneficiaryTransform.key) orElse
-          readsForTransform[AmendIndividualSettlorTransform](AmendIndividualSettlorTransform.key)
+          readsForTransform[AmendIndividualSettlorTransform](AmendIndividualSettlorTransform.key) orElse
+          readsForTransform[AmendLargeBeneficiaryTransform](AmendLargeBeneficiaryTransform.key) orElse
+          readsForTransform[RemoveSettlorsTransform](RemoveSettlorsTransform.key)
         ) (value.as[JsObject]) orElse (throw new Exception(s"Don't know how to deserialise transform"))
   )
 
@@ -127,6 +129,11 @@ object DeltaTransform {
       Json.obj(AmendIndividualSettlorTransform.key -> Json.toJson(transform)(AmendIndividualSettlorTransform.format))
   }
 
+  def removeSettlorsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
+    case transform: RemoveSettlorsTransform =>
+      Json.obj(RemoveSettlorsTransform.key -> Json.toJson(transform)(RemoveSettlorsTransform.format))
+  }
+
   def defaultWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
     case transform => throw new Exception(s"Don't know how to serialise transform - $transform")
   }
@@ -137,6 +144,7 @@ object DeltaTransform {
       amendBeneficiariesWrites orElse
       removeBeneficiariesWrites orElse
       amendSettlorsWrites orElse
+      removeSettlorsWrites orElse
       defaultWrites
       ).apply(deltaTransform)
   }
