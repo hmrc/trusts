@@ -34,35 +34,46 @@ object DeltaTransform {
   implicit val reads: Reads[DeltaTransform] = Reads[DeltaTransform](
     value =>
       (
-        readsForTransform[PromoteTrusteeIndTransform](PromoteTrusteeIndTransform.key) orElse
-          readsForTransform[PromoteTrusteeOrgTransform](PromoteTrusteeOrgTransform.key) orElse
-          readsForTransform[AmendLeadTrusteeIndTransform](AmendLeadTrusteeIndTransform.key) orElse
-          readsForTransform[AmendLeadTrusteeOrgTransform](AmendLeadTrusteeOrgTransform.key) orElse
-          readsForTransform[AddTrusteeIndTransform](AddTrusteeIndTransform.key) orElse
-          readsForTransform[AddTrusteeOrgTransform](AddTrusteeOrgTransform.key) orElse
-          readsForTransform[RemoveTrusteeTransform](RemoveTrusteeTransform.key) orElse
-          readsForTransform[AmendTrusteeIndTransform](AmendTrusteeIndTransform.key) orElse
-          readsForTransform[AmendTrusteeOrgTransform](AmendTrusteeOrgTransform.key) orElse
-          readsForTransform[AmendUnidentifiedBeneficiaryTransform](AmendUnidentifiedBeneficiaryTransform.key) orElse
-          readsForTransform[RemoveBeneficiariesTransform](RemoveBeneficiariesTransform.key) orElse
-          readsForTransform[AddUnidentifiedBeneficiaryTransform](AddUnidentifiedBeneficiaryTransform.key) orElse
-          readsForTransform[AmendIndividualBeneficiaryTransform](AmendIndividualBeneficiaryTransform.key) orElse
-          readsForTransform[AddIndividualBeneficiaryTransform](AddIndividualBeneficiaryTransform.key) orElse
-          readsForTransform[AddCharityBeneficiaryTransform](AddCharityBeneficiaryTransform.key) orElse
-          readsForTransform[AmendCharityBeneficiaryTransform](AmendCharityBeneficiaryTransform.key) orElse
-          readsForTransform[AmendCompanyBeneficiaryTransform](AmendCompanyBeneficiaryTransform.key) orElse
-          readsForTransform[AddOtherBeneficiaryTransform](AddOtherBeneficiaryTransform.key) orElse
-          readsForTransform[AmendOtherBeneficiaryTransform](AmendOtherBeneficiaryTransform.key) orElse
-          readsForTransform[AmendTrustBeneficiaryTransform](AmendTrustBeneficiaryTransform.key) orElse
-          readsForTransform[AddCompanyBeneficiaryTransform](AddCompanyBeneficiaryTransform.key) orElse
-          readsForTransform[AddTrustBeneficiaryTransform](AddTrustBeneficiaryTransform.key) orElse
-          readsForTransform[AddLargeBeneficiaryTransform](AddLargeBeneficiaryTransform.key) orElse
-          readsForTransform[AmendLargeBeneficiaryTransform](AmendLargeBeneficiaryTransform.key) orElse
-          readsForTransform[AmendIndividualSettlorTransform](AmendIndividualSettlorTransform.key) orElse
-          readsForTransform[AmendLargeBeneficiaryTransform](AmendLargeBeneficiaryTransform.key) orElse
-          readsForTransform[RemoveSettlorsTransform](RemoveSettlorsTransform.key)
-        ) (value.as[JsObject]) orElse (throw new Exception(s"Don't know how to deserialise transform"))
+        trusteeReads orElse
+        beneficiaryReads orElse
+        settlorReads
+      ) (value.as[JsObject]) orElse (throw new Exception(s"Don't know how to deserialise transform"))
   )
+
+  def trusteeReads[T <: DeltaTransform]: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
+    readsForTransform[PromoteTrusteeIndTransform](PromoteTrusteeIndTransform.key) orElse
+    readsForTransform[PromoteTrusteeOrgTransform](PromoteTrusteeOrgTransform.key) orElse
+    readsForTransform[AmendLeadTrusteeIndTransform](AmendLeadTrusteeIndTransform.key) orElse
+    readsForTransform[AmendLeadTrusteeOrgTransform](AmendLeadTrusteeOrgTransform.key) orElse
+    readsForTransform[AddTrusteeIndTransform](AddTrusteeIndTransform.key) orElse
+    readsForTransform[AddTrusteeOrgTransform](AddTrusteeOrgTransform.key) orElse
+    readsForTransform[AmendTrusteeIndTransform](AmendTrusteeIndTransform.key) orElse
+    readsForTransform[AmendTrusteeOrgTransform](AmendTrusteeOrgTransform.key) orElse
+    readsForTransform[RemoveTrusteeTransform](RemoveTrusteeTransform.key)
+  }
+
+  def beneficiaryReads[T <: DeltaTransform]: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
+    readsForTransform[AddUnidentifiedBeneficiaryTransform](AddUnidentifiedBeneficiaryTransform.key) orElse
+    readsForTransform[AmendUnidentifiedBeneficiaryTransform](AmendUnidentifiedBeneficiaryTransform.key) orElse
+    readsForTransform[AddIndividualBeneficiaryTransform](AddIndividualBeneficiaryTransform.key) orElse
+    readsForTransform[AmendIndividualBeneficiaryTransform](AmendIndividualBeneficiaryTransform.key) orElse
+    readsForTransform[AddCharityBeneficiaryTransform](AddCharityBeneficiaryTransform.key) orElse
+    readsForTransform[AmendCharityBeneficiaryTransform](AmendCharityBeneficiaryTransform.key) orElse
+    readsForTransform[AddTrustBeneficiaryTransform](AddTrustBeneficiaryTransform.key) orElse
+    readsForTransform[AmendTrustBeneficiaryTransform](AmendTrustBeneficiaryTransform.key) orElse
+    readsForTransform[AddCompanyBeneficiaryTransform](AddCompanyBeneficiaryTransform.key) orElse
+    readsForTransform[AmendCompanyBeneficiaryTransform](AmendCompanyBeneficiaryTransform.key) orElse
+    readsForTransform[AddLargeBeneficiaryTransform](AddLargeBeneficiaryTransform.key) orElse
+    readsForTransform[AmendLargeBeneficiaryTransform](AmendLargeBeneficiaryTransform.key) orElse
+    readsForTransform[AddOtherBeneficiaryTransform](AddOtherBeneficiaryTransform.key) orElse
+    readsForTransform[AmendOtherBeneficiaryTransform](AmendOtherBeneficiaryTransform.key) orElse
+    readsForTransform[RemoveBeneficiariesTransform](RemoveBeneficiariesTransform.key)
+  }
+
+  def settlorReads[T <: DeltaTransform]: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
+    readsForTransform[AmendIndividualSettlorTransform](AmendIndividualSettlorTransform.key) orElse
+    readsForTransform[RemoveSettlorsTransform](RemoveSettlorsTransform.key)
+  }
 
   def trusteeWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
     case transform: PromoteTrusteeIndTransform =>
