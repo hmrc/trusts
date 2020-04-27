@@ -327,7 +327,6 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           amendLargeBeneficiaryTransform,
           removeBeneficiariesTransform,
           amendIndividualSettlorTransform,
-          removeBeneficiariesTransform,
           removeSettlorsTransform
         )
       )
