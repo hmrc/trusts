@@ -20,12 +20,10 @@ import java.time.LocalDate
 
 import play.api.libs.json._
 
-case class AmendBusinessSettlorTransform(
-                                                index: Int,
-                                                amended: JsValue,
-                                                original: JsValue,
-                                                endDate: LocalDate
-                                              ) extends AmendSettlorTransform {
+case class AmendBusinessSettlorTransform(index: Int,
+                                         amended: JsValue,
+                                         original: JsValue,
+                                         endDate: LocalDate) extends AmendSettlorTransform {
   override val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'settlors \ 'settlorCompany
 }
 

@@ -232,7 +232,7 @@ object DisplayTrustBeneficiaryCompanyType {
   }
 }
 
-case class DisplayTrustWillType(lineNo: String,
+case class DisplayTrustWillType(lineNo: Option[String],
                                 bpMatchStatus: Option[String],
                                 name: NameType,
                                 dateOfBirth: Option[LocalDate],

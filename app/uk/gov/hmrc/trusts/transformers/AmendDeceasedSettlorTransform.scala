@@ -16,23 +16,23 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import java.time.LocalDate
+import play.api.libs.json._
 
-import play.api.libs.json.{JsPath, JsResult, JsValue, Json}
-
-trait AmendSettlorTransform extends DeltaTransform
+case class AmendDeceasedSettlorTransform(amended: JsValue,
+                                         original: JsValue) extends DeltaTransform
   with JsonOperations {
-  val index: Int
-  val amended: JsValue
-  val original: JsValue
-  val endDate: LocalDate
-  val path: JsPath
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    amendAtPosition(input, path, index, Json.toJson(amended))
-  }
+  private val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'deceased
 
-  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    endEntity(input, path, original, endDate)
-  }
+  override def applyTransform(input: JsValue): JsResult[JsValue] = replaceObject(input, path, amended)
 }
+
+object AmendDeceasedSettlorTransform {
+
+  val key = "AmendDeceasedSettlorTransform"
+
+  implicit val format: Format[AmendDeceasedSettlorTransform] =
+    Json.format[AmendDeceasedSettlorTransform]
+}
+
+

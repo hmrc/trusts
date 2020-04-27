@@ -22,7 +22,7 @@ import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveSettlor
-import uk.gov.hmrc.trusts.models.variation.{Settlor, SettlorCompany}
+import uk.gov.hmrc.trusts.models.variation.{Settlor, SettlorCompany, WillType}
 import uk.gov.hmrc.trusts.services.SettlorTransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
@@ -88,6 +88,17 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
         case JsError(_) => Future.successful(BadRequest)
       }
     }
+  }
+
+  def amendDeceasedSettlor(utr: String): Action[JsValue] = identify.async(parse.json) {
+    implicit request =>
+      request.body.validate[WillType] match {
+        case JsSuccess(settlor, _) =>
+          transformService.amendDeceasedSettlor(utr, request.identifier, settlor) map { _ =>
+            Ok
+          }
+        case JsError(_) => Future.successful(BadRequest)
+      }
   }
 
 }
