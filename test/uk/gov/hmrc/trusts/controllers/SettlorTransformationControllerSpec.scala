@@ -92,6 +92,60 @@ class SettlorTransformationControllerSpec extends FreeSpec
     }
   }
 
+
+  "Amend business settlor" - {
+
+    val index = 0
+
+    "must add a new amend business settlor transform" in {
+
+      val service = mock[SettlorTransformationService]
+
+      val controller = new SettlorTransformationController(identifierAction, service)
+
+      val newSettlor = variation.SettlorCompany(
+        lineNo = None,
+        bpMatchStatus = None,
+        name = "Company",
+        companyType = None,
+        companyTime = None,
+        identification = None,
+        entityStart = LocalDate.parse("2010-05-03"),
+        entityEnd = None
+      )
+
+      when(service.amendBusinessSettlorTransformer(any(), any(), any(), any())(any()))
+        .thenReturn(Future.successful(Success))
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(newSettlor))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendBusinessSettlor("aUTR", index).apply(request)
+
+      status(result) mustBe OK
+
+      verify(service).amendBusinessSettlorTransformer(
+        equalTo("aUTR"),
+        equalTo(index),
+        equalTo("id"),
+        equalTo(newSettlor))(any())
+    }
+
+    "must return an error for malformed json" in {
+      val service = mock[SettlorTransformationService]
+      val controller = new SettlorTransformationController(identifierAction, service)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.parse("{}"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendBusinessSettlor("aUTR", index).apply(request)
+      status(result) mustBe BAD_REQUEST
+    }
+
+  }
+
   "remove Settlor" - {
     "add an new remove settlor transform " in {
       val settlorTransformationService = mock[SettlorTransformationService]

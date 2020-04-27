@@ -130,5 +130,53 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
         )
       }
     }
+
+    "must add a new amend business beneficiary transform" in {
+      val index = 0
+      val transformationService = mock[TransformationService]
+      val service = new SettlorTransformationService(transformationService, LocalDateMock)
+
+      val newSettlor = variation.SettlorCompany(
+        lineNo = None,
+        bpMatchStatus = None,
+        name = "Company Ltd",
+        companyType = None,
+        companyTime = None,
+        identification = None,
+        entityStart = LocalDate.parse("2010-05-03"),
+        entityEnd = None
+      )
+
+      val originalSettlorJson = Json.toJson(
+        variation.SettlorCompany(
+          lineNo = None,
+          bpMatchStatus = None,
+          name = "Company",
+          companyTime = None,
+          companyType = None,
+          identification = None,
+          entityStart = LocalDate.parse("2010-05-03"),
+          entityEnd = None
+        )
+      )
+
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+      when(transformationService.getTransformedData(any(), any())(any()))
+        .thenReturn(
+          Future.successful(TrustProcessedResponse(buildInputJson("settlorCompany", Seq(originalSettlorJson)),
+          ResponseHeader("status", "formBundlNo")
+        )))
+
+      val result = service.amendBusinessSettlorTransformer("utr", index, "internalId", newSettlor)
+      whenReady(result) { _ =>
+
+        verify(transformationService).addNewTransform(
+          "utr",
+          "internalId",
+          AmendBusinessSettlorTransform(index, Json.toJson(newSettlor), originalSettlorJson, LocalDateMock.now)
+        )
+      }
+    }
   }
 }

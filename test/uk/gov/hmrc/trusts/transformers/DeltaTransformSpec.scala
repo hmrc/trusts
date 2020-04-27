@@ -21,7 +21,7 @@ import java.time.LocalDate
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryCompanyType, BeneficiaryTrustType, IndividualDetailsType, LargeType, OtherType, UnidentifiedType}
+import uk.gov.hmrc.trusts.models.variation._
 import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType}
 
 class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
@@ -214,7 +214,11 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
       val amendIndividualSettlorTransform = AmendIndividualSettlorTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2020-03-25"))
 
+
+      val amendBusinessSettlorTransform = AmendBusinessSettlorTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2020-03-25"))
+
       val removeSettlorsTransform = RemoveSettlorsTransform(3, Json.toJson(settlor), LocalDate.parse("2012-02-06"), "settlor")
+
 
       val json = Json.parse(
         s"""{
@@ -295,8 +299,11 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |               "AmendIndividualSettlorTransform": ${Json.toJson(amendIndividualSettlorTransform)}
           |            },
           |            {
+          |               "AmendBusinessSettlorTransform": ${Json.toJson(amendBusinessSettlorTransform)}
+          |            },
+          |            {
           |               "RemoveSettlorsTransform": ${Json.toJson(removeSettlorsTransform)}
-          |            }
+          |             }
           |        ]
           |    }
           |""".stripMargin)
@@ -327,6 +334,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           amendLargeBeneficiaryTransform,
           removeBeneficiariesTransform,
           amendIndividualSettlorTransform,
+          amendBusinessSettlorTransform,
           removeSettlorsTransform
         )
       )
