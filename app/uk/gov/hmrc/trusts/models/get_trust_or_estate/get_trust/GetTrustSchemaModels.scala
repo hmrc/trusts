@@ -478,12 +478,12 @@ object DisplayTrustSettlors {
   implicit val settlorsFormat: Format[DisplayTrustSettlors] = Json.format[DisplayTrustSettlors]
 }
 
-case class DisplayTrustSettlor(lineNo: String,
+case class DisplayTrustSettlor(lineNo: Option[String],
                                bpMatchStatus: Option[String],
                                name: NameType,
                                dateOfBirth: Option[LocalDate],
                                identification: Option[DisplayTrustIdentificationType],
-                               entityStart: String)
+                               entityStart: LocalDate)
 
 object DisplayTrustSettlor {
   implicit val settlorFormat: Format[DisplayTrustSettlor] = Json.format[DisplayTrustSettlor]
@@ -501,13 +501,13 @@ object DisplayTrustSettlor {
   }
 }
 
-case class DisplayTrustSettlorCompany(lineNo: String,
+case class DisplayTrustSettlorCompany(lineNo: Option[String],
                                       bpMatchStatus: Option[String],
                                       name: String,
                                       companyType: Option[String],
                                       companyTime: Option[Boolean],
                                       identification: Option[DisplayTrustIdentificationOrgType],
-                                      entityStart: String)
+                                      entityStart: LocalDate)
 
 object DisplayTrustSettlorCompany {
   implicit val settlorCompanyFormat: Format[DisplayTrustSettlorCompany] = Json.format[DisplayTrustSettlorCompany]
