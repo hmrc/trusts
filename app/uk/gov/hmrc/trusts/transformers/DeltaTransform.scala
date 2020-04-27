@@ -40,7 +40,7 @@ object DeltaTransform {
       ) (value.as[JsObject]) orElse (throw new Exception(s"Don't know how to deserialise transform"))
   )
 
-  def trusteeReads[T <: DeltaTransform]: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
+  def trusteeReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
     readsForTransform[PromoteTrusteeIndTransform](PromoteTrusteeIndTransform.key) orElse
     readsForTransform[PromoteTrusteeOrgTransform](PromoteTrusteeOrgTransform.key) orElse
     readsForTransform[AmendLeadTrusteeIndTransform](AmendLeadTrusteeIndTransform.key) orElse
@@ -52,7 +52,7 @@ object DeltaTransform {
     readsForTransform[RemoveTrusteeTransform](RemoveTrusteeTransform.key)
   }
 
-  def beneficiaryReads[T <: DeltaTransform]: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
+  def beneficiaryReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
     readsForTransform[AddUnidentifiedBeneficiaryTransform](AddUnidentifiedBeneficiaryTransform.key) orElse
     readsForTransform[AmendUnidentifiedBeneficiaryTransform](AmendUnidentifiedBeneficiaryTransform.key) orElse
     readsForTransform[AddIndividualBeneficiaryTransform](AddIndividualBeneficiaryTransform.key) orElse
@@ -70,7 +70,7 @@ object DeltaTransform {
     readsForTransform[RemoveBeneficiariesTransform](RemoveBeneficiariesTransform.key)
   }
 
-  def settlorReads[T <: DeltaTransform]: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
+  def settlorReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
     readsForTransform[AmendIndividualSettlorTransform](AmendIndividualSettlorTransform.key) orElse
     readsForTransform[RemoveSettlorsTransform](RemoveSettlorsTransform.key)
   }
