@@ -57,7 +57,7 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
     }
   }
 
-  def addIndividualSettlor(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
+  def addIndividualSettlor(utr: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[DisplayTrustSettlor] match {
         case JsSuccess(settlor, _) =>

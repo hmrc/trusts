@@ -120,7 +120,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
         .withBody(Json.toJson(newSettlor))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val result = controller.addIndividualSettlor("aUTR", index).apply(request)
+      val result = controller.addIndividualSettlor("aUTR").apply(request)
 
       status(result) mustBe OK
       verify(settlorTransformationService).addIndividualSettlorTransformer(
@@ -138,7 +138,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
         .withBody(Json.parse("{}"))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val result = controller.addIndividualSettlor("aUTR", index).apply(request)
+      val result = controller.addIndividualSettlor("aUTR").apply(request)
       status(result) mustBe BAD_REQUEST
     }
   }

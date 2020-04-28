@@ -73,8 +73,7 @@ object DeltaTransform {
   def settlorReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
     readsForTransform[AmendIndividualSettlorTransform](AmendIndividualSettlorTransform.key) orElse
     readsForTransform[AmendBusinessSettlorTransform](AmendBusinessSettlorTransform.key) orElse
-    readsForTransform[RemoveSettlorsTransform](RemoveSettlorsTransform.key)
-    readsForTransform[AddIndividualSettlorTransform](AddIndividualSettlorTransform.key) orElse
+    readsForTransform[RemoveSettlorsTransform](RemoveSettlorsTransform.key) orElse
     readsForTransform[AddIndividualSettlorTransform](AddIndividualSettlorTransform.key)
   }
 

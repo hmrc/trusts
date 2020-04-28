@@ -42,26 +42,27 @@ class AddIndividualSettlorSpec extends FreeSpec with MustMatchers with MockitoSu
     JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
 
   "an add individual settlor call" - {
-    "must return amended data in a subsequent 'get' call" in {
+    "must return add data in a subsequent 'get' call" in {
 
       val newSettlorJson = Json.parse(
         """
           |{
           |  "name":{
-          |    "firstName":"First",
-          |    "lastName":"Last"
+          |    "firstName":"abcdefghijkl",
+          |    "middleName":"abcdefghijklmn",
+          |    "lastName":"abcde"
           |  },
           |  "dateOfBirth":"2000-01-01",
           |  "identification": {
-          |    "nino": "nino"
+          |    "nino": "ST019091"
           |  },
-          |  "entityStart":"1990-10-10"
+          |  "entityStart":"2002-01-01"
           |}
           |""".stripMargin
       )
 
-      lazy val expectedGetAfterAddBeneficiaryJson: JsValue =
-        JsonUtils.getJsonValueFromFile("trusts-integration-get-after-add-individual-settlor.json")
+      lazy val expectedGetAfterAddSettlorJson: JsValue =
+        JsonUtils.getJsonValueFromFile("add-individual-settlor-after-etmp-call.json")
 
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
@@ -90,7 +91,7 @@ class AddIndividualSettlorSpec extends FreeSpec with MustMatchers with MockitoSu
 
           val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
           status(newResult) mustBe OK
-          contentAsJson(newResult) mustBe expectedGetAfterAddBeneficiaryJson
+          contentAsJson(newResult) mustBe expectedGetAfterAddSettlorJson
 
           dropTheDatabase(connection)
         }.get
