@@ -153,6 +153,7 @@
           ]
         },
         "deceased": {
+          "bpMatchStatus": "01",
           "lineNo": "1",
           "name": {
             "firstName": "John",
