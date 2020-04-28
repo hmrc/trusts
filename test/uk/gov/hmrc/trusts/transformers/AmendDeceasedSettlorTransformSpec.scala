@@ -16,12 +16,10 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import java.time.LocalDate
-
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.trusts.models.NameType
-import uk.gov.hmrc.trusts.models.variation.{AmendDeceasedSettlor, SettlorCompany}
+import uk.gov.hmrc.trusts.models.variation.AmendDeceasedSettlor
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AmendDeceasedSettlorTransformSpec extends FreeSpec with MustMatchers with OptionValues {
@@ -68,71 +66,40 @@ class AmendDeceasedSettlorTransformSpec extends FreeSpec with MustMatchers with 
       }
     }
 
-    "at declaration time" ignore {
+    "at declaration time" - {
 
-      "set an end date for the original beneficiary, adding in the amendment as a new settlor for a settlor known by etmp" in {
+      "amend a settlors details by replacing it, but retaining their start date, bpMatchStatus and lineNo" in {
 
-        val beforeJson =
-          JsonUtils.getJsonValueFromFile("trusts-business-settlor-transform-before.json")
+        val beforeJson = JsonUtils.getJsonValueFromFile("trusts-deceased-settlor-transform-before.json")
+        val afterJson = JsonUtils.getJsonValueFromFile("trusts-deceased-settlor-transform-after.json")
 
-        val afterJson =
-          JsonUtils.getJsonValueFromFile("trusts-business-settlor-transform-after-declaration.json")
-
-        val amended = SettlorCompany(
-          lineNo = None,
-          bpMatchStatus = None,
-          "New Company",
-          None,
-          None,
-          identification = None,
-          LocalDate.parse("2018-02-28"),
-          None
+        val amended = AmendDeceasedSettlor(
+          name = NameType("updated first", None, "updated last"),
+          dateOfBirth = None,
+          dateOfDeath = None,
+          identification = None
         )
 
         val original: JsValue = Json.parse(
           """
             |{
-            |  "lineNo": "1",
+            |  "lineNo":"1",
             |  "bpMatchStatus": "01",
-            |  "name": "Company",
-            |  "entityStart": "2018-02-28"
+            |  "name":{
+            |    "firstName":"John",
+            |    "middleName":"William",
+            |    "lastName":"O'Connor"
+            |  },
+            |  "dateOfBirth":"1956-02-12",
+            |  "dateOfDeath":"2016-01-01",
+            |  "identification":{
+            |    "nino":"KC456736"
+            |  },
+            |  "entityStart":"1998-02-12"
             |}
             |""".stripMargin)
 
-        val transformer = AmendBusinessSettlorTransform(0, Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"))
-
-        val applied = transformer.applyTransform(beforeJson).get
-        val result = transformer.applyDeclarationTransform(applied).get
-        result mustBe afterJson
-      }
-
-      "amend the new settlor that is not known to etmp" in {
-        val beforeJson =
-          JsonUtils.getJsonValueFromFile("trusts-new-business-settlor-transform-before.json")
-
-        val afterJson =
-          JsonUtils.getJsonValueFromFile("trusts-new-business-settlor-transform-after-declaration.json")
-
-        val amended = SettlorCompany(
-          lineNo = None,
-          bpMatchStatus = None,
-          "Second company updated",
-          None,
-          None,
-          identification = None,
-          LocalDate.parse("2020-02-28"),
-          None
-        )
-
-        val original: JsValue = Json.parse(
-          """
-            |{
-            |  "name": "Second",
-            |  "entityStart": "2020-02-28"
-            |}
-            |""".stripMargin)
-
-        val transformer = AmendBusinessSettlorTransform(1, Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"))
+        val transformer = AmendDeceasedSettlorTransform(Json.toJson(amended), original)
 
         val applied = transformer.applyTransform(beforeJson).get
         val result = transformer.applyDeclarationTransform(applied).get
