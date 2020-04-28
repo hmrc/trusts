@@ -92,4 +92,22 @@ class SettlorTransformationService @Inject()(
     transformationService.addNewTransform(utr, internalId, AddIndividualSettlorTransform(newSettlor)).map(_ => Success)
   }
 
+
+  def amendBusinessSettlorTransformer(utr: String,
+                                        index: Int,
+                                        internalId: String,
+                                        settlor: SettlorCompany)
+                                       (implicit hc: HeaderCarrier): Future[Success.type] =
+  {
+    getTransformedTrustJson(utr, internalId)
+      .map(findSettlorJson(_, "settlorCompany", index))
+      .flatMap(Future.fromTry)
+      .flatMap { original =>
+        transformationService.addNewTransform(
+          utr,
+          internalId,
+          AmendBusinessSettlorTransform(index, Json.toJson(settlor), original, localDateService.now)
+        ).map(_ => Success)
+      }
+  }
 }
