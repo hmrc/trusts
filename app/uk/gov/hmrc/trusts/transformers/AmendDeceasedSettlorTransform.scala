@@ -28,11 +28,11 @@ case class AmendDeceasedSettlorTransform(amended: JsValue,
   private def amend(input: JsValue, path: JsPath, toReplaceWith: JsValue) : JsResult[JsValue] = {
 
     for {
-      lineNo <- input.transform((path \ 'lineNo).json.pick)
-      bpMatchStatus <- input.transform((path \ 'bpMatchStatus).json.pick)
+      lineNo <- original.transform((__ \ 'lineNo).json.pick)
+      bpMatchStatus <- original.transform((__ \ 'bpMatchStatus).json.pick)
       lineNoAndStatusPreserved <- input.transform(
         path.json.prune andThen
-          JsPath.json.update {
+          __.json.update {
             path.json.put(toReplaceWith) andThen
               (path \ 'lineNo).json.put(lineNo) andThen
               (path \ 'bpMatchStatus).json.put(bpMatchStatus)

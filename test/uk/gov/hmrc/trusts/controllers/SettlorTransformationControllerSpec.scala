@@ -28,6 +28,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
+import uk.gov.hmrc.trusts.models.variation.AmendDeceasedSettlor
 import uk.gov.hmrc.trusts.models.{variation, _}
 import uk.gov.hmrc.trusts.services.SettlorTransformationService
 
@@ -193,15 +194,11 @@ class SettlorTransformationControllerSpec extends FreeSpec
 
       val controller = new SettlorTransformationController(identifierAction, service)
 
-      val amendedSettlor = variation.WillType(
-        lineNo = None,
-        bpMatchStatus = None,
+      val amendedSettlor = AmendDeceasedSettlor(
         name = NameType("First", None, "Last"),
         dateOfBirth = None,
         dateOfDeath = Some(LocalDate.parse("2015-05-03")),
-        identification = None,
-        entityStart = LocalDate.parse("2010-05-03"),
-        entityEnd = None
+        identification = None
       )
 
       when(service.amendDeceasedSettlor(any(), any(), any())(any()))

@@ -28,7 +28,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.WillType
+import uk.gov.hmrc.trusts.models.variation.{AmendDeceasedSettlor, WillType}
 import uk.gov.hmrc.trusts.models.{NameType, RemoveSettlor, variation}
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
@@ -184,21 +184,18 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       val transformationService = mock[TransformationService]
       val service = new SettlorTransformationService(transformationService, LocalDateMock)
 
-      val amendedDeceased = WillType(
-        lineNo = None,
-        bpMatchStatus = None,
+      val amendedSettlor = AmendDeceasedSettlor(
         name = NameType("First", None, "Last"),
         dateOfBirth = None,
         dateOfDeath = None,
-        identification = None,
-        entityStart = LocalDate.parse("2010-05-03"),
-        entityEnd = None
+        identification = None
       )
 
       val originalDeceased = Json.parse(
         """
           |{
           |  "lineNo":"1",
+          |  "bpMatchStatus": "01",
           |  "name":{
           |    "firstName":"John",
           |    "middleName":"William",
@@ -223,13 +220,13 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
             TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
           ))
 
-      val result = service.amendDeceasedSettlor("utr", "internalId", amendedDeceased)
+      val result = service.amendDeceasedSettlor("utr", "internalId", amendedSettlor)
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform(
           "utr",
           "internalId",
-          AmendDeceasedSettlorTransform(Json.toJson(amendedDeceased), originalDeceased)
+          AmendDeceasedSettlorTransform(Json.toJson(amendedSettlor), originalDeceased)
         )
       }
     }

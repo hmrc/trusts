@@ -116,7 +116,7 @@ class SettlorTransformationService @Inject()(
 
   def amendDeceasedSettlor(utr: String,
                            internalId : String,
-                           deceased: WillType)
+                           deceased: AmendDeceasedSettlor)
                           (implicit hc: HeaderCarrier): Future[Success.type] =
     {
       getTransformedTrustJson(utr, internalId)
