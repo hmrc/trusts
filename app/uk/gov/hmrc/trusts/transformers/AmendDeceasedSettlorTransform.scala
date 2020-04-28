@@ -30,16 +30,20 @@ case class AmendDeceasedSettlorTransform(amended: JsValue,
     for {
       lineNo <- original.transform((__ \ 'lineNo).json.pick)
       bpMatchStatus <- original.transform((__ \ 'bpMatchStatus).json.pick)
-      lineNoAndStatusPreserved <- input.transform(
+      entityStart <- original.transform((__ \ 'entityStart).json.pick)
+      lineNoAndStatusPreserved = toReplaceWith.as[JsObject] +
+        ("lineNo" -> lineNo) +
+        ("bpMatchStatus" -> bpMatchStatus) +
+        ("entityStart" -> entityStart)
+
+      trustWithAmendedDeceased <- input.transform(
         path.json.prune andThen
-          __.json.update {
-            path.json.put(toReplaceWith) andThen
-              (path \ 'lineNo).json.put(lineNo) andThen
-              (path \ 'bpMatchStatus).json.put(bpMatchStatus)
-          }
+        __.json.update {
+          path.json.put(lineNoAndStatusPreserved)
+        }
       )
     } yield {
-      lineNoAndStatusPreserved
+      trustWithAmendedDeceased
     }
 
   }
