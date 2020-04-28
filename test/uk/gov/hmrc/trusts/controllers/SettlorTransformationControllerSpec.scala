@@ -28,6 +28,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustSettlor
 import uk.gov.hmrc.trusts.models.{variation, _}
 import uk.gov.hmrc.trusts.services.SettlorTransformationService
 
@@ -92,7 +93,55 @@ class SettlorTransformationControllerSpec extends FreeSpec
     }
   }
 
+  "Add individual settlor" - {
 
+    val index = 0
+
+    "must add a new individual settlor transform" in {
+
+      val settlorTransformationService = mock[SettlorTransformationService]
+      val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)
+
+      val newSettlor = DisplayTrustSettlor(
+        lineNo = None,
+        bpMatchStatus = None,
+        name = NameType("First", None, "Last"),
+        dateOfBirth = None,
+        identification = None,
+        entityStart = LocalDate.parse("2010-05-03")
+      )
+
+      val newDescription = "Some new description"
+
+      when(settlorTransformationService.addIndividualSettlorTransformer(any(), any(), any()))
+        .thenReturn(Future.successful(Success))
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(newSettlor))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.addIndividualSettlor("aUTR").apply(request)
+
+      status(result) mustBe OK
+      verify(settlorTransformationService).addIndividualSettlorTransformer(
+        equalTo("aUTR"),
+        equalTo("id"),
+        equalTo(newSettlor))
+    }
+
+    "must return an error for malformed json" in {
+
+      val settlorTransformationService = mock[SettlorTransformationService]
+      val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.parse("{}"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.addIndividualSettlor("aUTR").apply(request)
+      status(result) mustBe BAD_REQUEST
+    }
+  }
   "Amend business settlor" - {
 
     val index = 0
