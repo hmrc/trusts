@@ -28,6 +28,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.variation.{AmendDeceasedSettlor, WillType}
 import uk.gov.hmrc.trusts.models.{NameType, RemoveSettlor, variation}
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
@@ -132,7 +133,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       }
     }
 
-    "must add a new amend business beneficiary transform" in {
+    "must add a new amend business settlor transform" in {
       val index = 0
       val transformationService = mock[TransformationService]
       val service = new SettlorTransformationService(transformationService, LocalDateMock)
@@ -176,6 +177,57 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
           "utr",
           "internalId",
           AmendBusinessSettlorTransform(index, Json.toJson(newSettlor), originalSettlorJson, LocalDateMock.now)
+        )
+      }
+    }
+
+    "must add a new amend deceased settlor transform" in {
+      val transformationService = mock[TransformationService]
+      val service = new SettlorTransformationService(transformationService, LocalDateMock)
+
+      val amendedSettlor = AmendDeceasedSettlor(
+        name = NameType("First", None, "Last"),
+        dateOfBirth = None,
+        dateOfDeath = None,
+        identification = None
+      )
+
+      val originalDeceased = Json.parse(
+        """
+          |{
+          |  "lineNo":"1",
+          |  "bpMatchStatus": "01",
+          |  "name":{
+          |    "firstName":"John",
+          |    "middleName":"William",
+          |    "lastName":"O'Connor"
+          |  },
+          |  "dateOfBirth":"1956-02-12",
+          |  "dateOfDeath":"2016-01-01",
+          |  "identification":{
+          |    "nino":"KC456736"
+          |  },
+          |  "entityStart":"1998-02-12"
+          |}
+          |""".stripMargin)
+
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+      val desResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
+
+      when(transformationService.getTransformedData(any(), any())(any()))
+        .thenReturn(
+          Future.successful(
+            TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
+          ))
+
+      val result = service.amendDeceasedSettlor("utr", "internalId", amendedSettlor)
+      whenReady(result) { _ =>
+
+        verify(transformationService).addNewTransform(
+          "utr",
+          "internalId",
+          AmendDeceasedSettlorTransform(Json.toJson(amendedSettlor), originalDeceased)
         )
       }
     }

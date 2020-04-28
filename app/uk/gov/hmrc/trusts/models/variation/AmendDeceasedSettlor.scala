@@ -14,25 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.transformers
+package uk.gov.hmrc.trusts.models.variation
 
 import java.time.LocalDate
 
-import play.api.libs.json.{JsPath, JsResult, JsValue, Json}
+import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.trusts.models.NameType
 
-trait AmendSettlorTransform extends DeltaTransform
-  with JsonOperations {
-  val index: Int
-  val amended: JsValue
-  val original: JsValue
-  val endDate: LocalDate
-  val path: JsPath
+case class AmendDeceasedSettlor(name: NameType,
+                                dateOfBirth: Option[LocalDate],
+                                dateOfDeath: Option[LocalDate],
+                                identification: Option[IdentificationType])
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    amendAtPosition(input, path, index, Json.toJson(amended))
-  }
+object AmendDeceasedSettlor {
 
-  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    endEntity(input, path, original, endDate)
-  }
+  implicit val formats : Format[AmendDeceasedSettlor] = Json.format[AmendDeceasedSettlor]
+
 }

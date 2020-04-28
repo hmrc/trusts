@@ -218,6 +218,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
       val removeSettlorsTransform = RemoveSettlorsTransform(3, Json.toJson(settlor), LocalDate.parse("2012-02-06"), "settlor")
 
+      val amendDeceasedSettlorTransform = AmendDeceasedSettlorTransform(Json.obj(), Json.obj())
+
       val addIndividualSettlorTransform = AddIndividualSettlorTransform(settlor)
 
       val json = Json.parse(
@@ -305,6 +307,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           |               "RemoveSettlorsTransform": ${Json.toJson(removeSettlorsTransform)}
           |            },
           |            {
+          |               "AmendDeceasedSettlorTransform": ${Json.toJson(amendDeceasedSettlorTransform)}
+          |             },
+          |             {
           |               "AddIndividualSettlorTransform": ${Json.toJson(addIndividualSettlorTransform)}
           |            }
           |        ]
@@ -339,6 +344,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers with OptionValues {
           amendIndividualSettlorTransform,
           amendBusinessSettlorTransform,
           removeSettlorsTransform,
+          amendDeceasedSettlorTransform,
           addIndividualSettlorTransform
         )
       )

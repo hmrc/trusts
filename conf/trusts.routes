@@ -72,4 +72,6 @@ POST        /amend-business-settlor/:utr/:index                         uk.gov.h
 
 PUT         /:utr/settlors/remove                               uk.gov.hmrc.trusts.controllers.SettlorTransformationController.removeSettlor(utr: String)
 
+POST        /amend-deceased-settlor/:utr        uk.gov.hmrc.trusts.controllers.SettlorTransformationController.amendDeceasedSettlor(utr: String)
+
 POST        /add-individual-settlor/:utr                        uk.gov.hmrc.trusts.controllers.SettlorTransformationController.addIndividualSettlor(utr: String)

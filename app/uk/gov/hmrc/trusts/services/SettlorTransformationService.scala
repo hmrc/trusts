@@ -70,6 +70,14 @@ class SettlorTransformationService @Inject()(
     )
   }
 
+  private def getDeceasedJson(json: JsValue): Try[JsObject] = {
+    val path = (__ \ 'details \ 'trust \ 'entities \ 'deceased).json
+    json.transform(path.pick).fold(
+      _ => Failure(InternalServerErrorException("Could not locate settlor at index")),
+      value => scala.util.Success(value.as[JsObject])
+    )
+  }
+
   def amendIndividualSettlorTransformer(utr: String,
                                         index: Int,
                                         internalId: String,
@@ -110,4 +118,21 @@ class SettlorTransformationService @Inject()(
         ).map(_ => Success)
       }
   }
+
+  def amendDeceasedSettlor(utr: String,
+                           internalId : String,
+                           deceased: AmendDeceasedSettlor)
+                          (implicit hc: HeaderCarrier): Future[Success.type] =
+    {
+      getTransformedTrustJson(utr, internalId)
+        .map(getDeceasedJson)
+        .flatMap(Future.fromTry)
+        .flatMap { original =>
+          transformationService.addNewTransform(
+            utr,
+            internalId,
+            AmendDeceasedSettlorTransform(Json.toJson(deceased), original)
+          ).map(_ => Success)
+        }
+    }
 }

@@ -28,6 +28,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
+import uk.gov.hmrc.trusts.models.variation.AmendDeceasedSettlor
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustSettlor
 import uk.gov.hmrc.trusts.models.{variation, _}
 import uk.gov.hmrc.trusts.services.SettlorTransformationService
@@ -95,8 +96,6 @@ class SettlorTransformationControllerSpec extends FreeSpec
 
   "Add individual settlor" - {
 
-    val index = 0
-
     "must add a new individual settlor transform" in {
 
       val settlorTransformationService = mock[SettlorTransformationService]
@@ -142,6 +141,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
       status(result) mustBe BAD_REQUEST
     }
   }
+
   "Amend business settlor" - {
 
     val index = 0
@@ -233,5 +233,50 @@ class SettlorTransformationControllerSpec extends FreeSpec
       status(result) mustBe BAD_REQUEST
     }
 
+  }
+
+  "Amend deceased settlor" - {
+
+    "must add a new amend deceased settlor transform" in {
+
+      val service = mock[SettlorTransformationService]
+
+      val controller = new SettlorTransformationController(identifierAction, service)
+
+      val amendedSettlor = AmendDeceasedSettlor(
+        name = NameType("First", None, "Last"),
+        dateOfBirth = None,
+        dateOfDeath = Some(LocalDate.parse("2015-05-03")),
+        identification = None
+      )
+
+      when(service.amendDeceasedSettlor(any(), any(), any())(any()))
+        .thenReturn(Future.successful(Success))
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(amendedSettlor))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendDeceasedSettlor("aUTR").apply(request)
+
+      status(result) mustBe OK
+
+      verify(service).amendDeceasedSettlor(
+        equalTo("aUTR"),
+        equalTo("id"),
+        equalTo(amendedSettlor))(any())
+    }
+
+    "must return an error for malformed json" in {
+      val service = mock[SettlorTransformationService]
+      val controller = new SettlorTransformationController(identifierAction, service)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.parse("{}"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendDeceasedSettlor("aUTR").apply(request)
+      status(result) mustBe BAD_REQUEST
+    }
   }
 }

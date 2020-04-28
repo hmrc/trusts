@@ -165,6 +165,7 @@
         },
         "deceased": {
           "lineNo": "1",
+          "bpMatchStatus": "01",
           "name": {
             "firstName": "John",
             "middleName": "William",

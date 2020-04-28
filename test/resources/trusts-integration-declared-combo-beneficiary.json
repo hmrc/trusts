@@ -238,6 +238,7 @@
           ]
         },
         "deceased": {
+          "bpMatchStatus": "01",
           "dateOfBirth": "1956-02-12",
           "dateOfDeath": "2016-01-01",
           "entityStart": "1998-02-12",
