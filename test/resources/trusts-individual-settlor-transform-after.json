@@ -62,6 +62,8 @@
         "settlors": {
           "settlor": [
             {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
               "name": {
                 "firstName": "First updated",
                 "lastName": "Last updated"

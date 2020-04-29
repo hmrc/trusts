@@ -63,7 +63,7 @@ class AmendBusinessSettlorTransformSpec extends FreeSpec with MustMatchers with 
       }
     }
 
-    "at declaration time" ignore {
+    "at declaration time" - {
 
       "set an end date for the original beneficiary, adding in the amendment as a new settlor for a settlor known by etmp" in {
 

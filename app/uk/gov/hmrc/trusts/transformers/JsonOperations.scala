@@ -22,8 +22,10 @@ import play.api.libs.json._
 
 trait JsonOperations {
 
+  def lineNoPick: Reads[JsValue] = (__ \ 'lineNo).json.pick
+
   def isKnownToEtmp(json: JsValue): Boolean = {
-    json.transform((__ \ 'lineNo).json.pick).isSuccess
+    json.transform(lineNoPick).isSuccess
   }
 
   def getTypeAtPosition[T](input: JsValue,
@@ -49,11 +51,9 @@ trait JsonOperations {
     }
   }
 
-   def endEntity(input: JsValue, path: JsPath, entityJson: JsValue, endDate: LocalDate) = {
+   def endEntity(input: JsValue, path: JsPath, entityJson: JsValue, endDate: LocalDate): JsResult[JsValue] = {
     if (isKnownToEtmp(entityJson)) {
-      val entityWithEndDate = entityJson.as[JsObject]
-        .deepMerge(Json.obj("entityEnd" -> Json.toJson(endDate)))
-      addToList(input, path, entityWithEndDate)
+      addToList(input, path, objectPlusField(entityJson,"entityEnd", Json.toJson(endDate)))
     } else {
       JsSuccess(input)
     }
@@ -127,4 +127,14 @@ trait JsonOperations {
     }
   }
 
+  def objectPlusField[A](json: JsValue, field: String, value: JsValue) : JsValue = json.as[JsObject] + (field -> value)
+
+  def copyField(original: JsValue, field: String, amended: JsValue): JsValue = {
+    val pickField = (__ \ field).json.pick
+
+    original.transform(pickField).fold(
+      _ => amended,
+      value => objectPlusField(amended, field, value)
+    )
+  }
 }

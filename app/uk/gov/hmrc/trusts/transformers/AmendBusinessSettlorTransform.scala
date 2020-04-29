@@ -34,6 +34,3 @@ object AmendBusinessSettlorTransform {
   implicit val format: Format[AmendBusinessSettlorTransform] =
     Json.format[AmendBusinessSettlorTransform]
 }
-
-
-

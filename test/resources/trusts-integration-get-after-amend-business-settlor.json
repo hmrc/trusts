@@ -235,6 +235,7 @@
           ],
           "settlorCompany": [
             {
+              "lineNo": "1",
               "name": "Updated Company",
               "entityStart": "1998-02-12"
             }
