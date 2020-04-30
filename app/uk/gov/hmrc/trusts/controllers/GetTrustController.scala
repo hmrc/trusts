@@ -97,35 +97,47 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   private def getArrayAtPath(utr: String, path: JsPath, fieldName: String): Action[AnyContent] = {
     getElementAtPath(utr,
       path,
-      json => Json.obj(fieldName -> json),
-      Json.obj(fieldName -> JsArray()))
+      Json.obj(fieldName -> JsArray())) {
+        json => Json.obj(fieldName -> json)
+      }
   }
 
   private def getItemAtPathAsArray(utr: String, path: JsPath, fieldName: String): Action[AnyContent] = {
     getElementAtPath(utr,
       path,
-      json => Json.obj(fieldName -> JsArray(Seq(json))),
-      Json.obj(fieldName -> JsArray()))
+      Json.obj(fieldName -> JsArray())) {
+        json => Json.obj(fieldName -> JsArray(Seq(json)))
+      }
   }
 
   private def getItemAtPath(utr: String, path: JsPath): Action[AnyContent] = {
-    getElementAtPath(utr, path, json => json, Json.obj())
+    getElementAtPath(utr,
+      path,
+      Json.obj()) {
+        json => json
+      }
   }
 
   private def getElementAtPath(
                              utr: String,
                              path: JsPath,
-                             insertIntoObject: JsValue => JsValue,
-                             defaultValue: JsValue): Action[AnyContent] = {
+                             defaultValue: JsValue)
+                              (insertIntoObject: JsValue => JsValue): Action[AnyContent] = {
+    getElementAtPath(utr) {
+      transformed => transformed
+        .transform(path.json.pick)
+        .map(insertIntoObject)
+        .getOrElse(defaultValue)
+    }
+  }
+
+  private def getElementAtPath(utr: String)
+                              (processObject: JsValue => JsValue): Action[AnyContent] = {
     doGet(utr, applyTransformations = true) {
       case processed: TrustProcessedResponse =>
         processed.transform.map {
           case transformed: TrustProcessedResponse =>
-
-            Ok(transformed
-              .getTrust.transform(path.json.pick)
-              .map(insertIntoObject)
-              .getOrElse(defaultValue))
+            Ok(processObject(transformed.getTrust))
           case _ =>
             InternalServerError
         }.getOrElse(InternalServerError)
@@ -133,6 +145,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
         Forbidden
     }
   }
+
 
   private def resetCacheIfRequested(utr: String, internalId: String, refreshEtmpData: Boolean) = {
     if (refreshEtmpData) {
