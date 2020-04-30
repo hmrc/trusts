@@ -22,7 +22,7 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
@@ -32,16 +32,16 @@ import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
 
-class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with OptionValues with ScalaFutures with MockitoSugar {
+class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar {
 
   private def beneficiaryJson(value1 : String, endDate: Option[LocalDate] = None, withLineNo: Boolean = true) = {
     val a = Json.obj("field1" -> value1, "field2" -> "value20")
 
     val b = if (endDate.isDefined) {a.deepMerge(Json.obj("entityEnd" -> endDate.get))
-    } else {a}
+    } else a
 
     if (withLineNo) {b.deepMerge(Json.obj("lineNo" -> 12))}
-    else {b}
+    else b
   }
 
   private def buildInputJson(beneficiaryType: String, beneficiaryData: Seq[JsValue]) = {
@@ -121,7 +121,7 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
       ))
 
       val transforms = Seq(
-        RemoveBeneficiariesTransform(0, beneficiaryJson("One", None, false), LocalDate.of(2018, 4, 21), "charity")
+        RemoveBeneficiariesTransform(0, beneficiaryJson("One", None, withLineNo = false), LocalDate.of(2018, 4, 21), "charity")
       )
 
       val OUT = ComposedDeltaTransform(transforms)
@@ -176,7 +176,7 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with O
       val auditService = mock[AuditService]
       val transforms = Seq(
         AddUnidentifiedBeneficiaryTransform(UnidentifiedType(None, None, "Description", None, None, LocalDate.parse("1967-12-30"), None)),
-        RemoveBeneficiariesTransform(3, beneficiaryJson("Two", None, false), LocalDate.of(2018, 4, 21), "unidentified")
+        RemoveBeneficiariesTransform(3, beneficiaryJson("Two", None, withLineNo = false), LocalDate.of(2018, 4, 21), "unidentified")
       )
 
       when(repo.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))

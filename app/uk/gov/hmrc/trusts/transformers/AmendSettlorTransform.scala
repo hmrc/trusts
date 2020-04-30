@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import play.api.libs.json.{JsPath, JsResult, JsValue, Json}
+import play.api.libs.json.{JsArray, JsDefined, JsNull, JsObject, JsPath, JsResult, JsSuccess, JsValue, Json, __}
 
 trait AmendSettlorTransform extends DeltaTransform
   with JsonOperations {
@@ -29,10 +29,41 @@ trait AmendSettlorTransform extends DeltaTransform
   val path: JsPath
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    amendAtPosition(input, path, index, Json.toJson(amended))
+    amendAtPosition(input, path, index, Json.toJson(preserveEtmpStatus(amended, original)))
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    endEntity(input, path, original, endDate)
+    original.transform(lineNoPick).fold(
+      _ => JsSuccess(input),
+      lineNo => {
+        stripEtmpStatusForMatching(input, lineNo).fold(
+          _ => endEntity(input, path, original, endDate),
+          newEntries => addEndedEntity(input, newEntries)
+        )
+      }
+    )
   }
+
+  private def addEndedEntity(input: JsValue, newEntities: Seq[JsObject]) = {
+    input.transform(__.json.update(
+      path.json.put(
+        JsArray(newEntities ++ Seq(objectPlusField(original, "entityEnd", Json.toJson(endDate))))
+      )
+    ))
+  }
+
+  private def stripEtmpStatusForMatching(input: JsValue, lineNo: JsValue) = {
+    input.transform(path.json.pick).map {
+      value =>
+        value.as[Seq[JsObject]].collect {
+          case x: JsObject if (x \ "lineNo" == JsDefined(lineNo)) => x - "lineNo" - "bpMatchStatus"
+          case x => x
+        }
+    }
+  }
+
+  private def preserveEtmpStatus(amended: JsValue, original: JsValue) : JsValue =
+    copyField(original, "lineNo",
+      copyField(original, "bpMatchStatus", amended)
+    )
 }

@@ -1,0 +1,19 @@
+{
+  "deceasedSettlors" : [
+    {
+      "lineNo": "1",
+      "bpMatchStatus": "01",
+      "name": {
+        "firstName": "James",
+        "middleName": "Kingsley",
+        "lastName": "Bond"
+      },
+      "dateOfBirth": "1965-02-28",
+      "dateOfDeath": "2018-02-28",
+      "identification": {
+        "safeId": "2222200000000"
+      },
+      "entityStart": "2017-02-28"
+    }
+  ]
+}

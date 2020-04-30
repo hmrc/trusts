@@ -18,13 +18,12 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.trusts.models.NameType
-import uk.gov.hmrc.trusts.models.variation.{Settlor, SettlorCompany}
+import uk.gov.hmrc.trusts.models.variation.SettlorCompany
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class AmendBusinessSettlorTransformSpec extends FreeSpec with MustMatchers with OptionValues {
+class AmendBusinessSettlorTransformSpec extends FreeSpec with MustMatchers {
 
   "AmendBusinessSettlorTransform should" - {
 
@@ -63,7 +62,7 @@ class AmendBusinessSettlorTransformSpec extends FreeSpec with MustMatchers with 
       }
     }
 
-    "at declaration time" ignore {
+    "at declaration time" - {
 
       "set an end date for the original beneficiary, adding in the amendment as a new settlor for a settlor known by etmp" in {
 

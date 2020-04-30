@@ -18,11 +18,11 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class AmendUnidentifiedBeneficiaryTransformSpec extends FreeSpec with MustMatchers with OptionValues {
+class AmendUnidentifiedBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
 
   private val originalJson = Json.parse(
     """

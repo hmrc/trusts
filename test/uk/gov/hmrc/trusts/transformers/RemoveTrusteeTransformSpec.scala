@@ -18,11 +18,11 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers with OptionValues  {
+class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers  {
 
   private val originalTrusteeJson = Json.obj("field1" -> "value1", "field2" -> "value2")
 
