@@ -29,7 +29,7 @@ import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.variation.AmendDeceasedSettlor
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustSettlor
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustSettlor, DisplayTrustSettlorCompany}
 import uk.gov.hmrc.trusts.models.{variation, _}
 import uk.gov.hmrc.trusts.services.SettlorTransformationService
 
@@ -138,6 +138,53 @@ class SettlorTransformationControllerSpec extends FreeSpec
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val result = controller.addIndividualSettlor("aUTR").apply(request)
+      status(result) mustBe BAD_REQUEST
+    }
+  }
+
+  "Add business settlor" - {
+
+    "must add a new business settlor transform" in {
+
+      val settlorTransformationService = mock[SettlorTransformationService]
+      val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)
+
+      val newCompanySettlor = DisplayTrustSettlorCompany(
+        lineNo = None,
+        bpMatchStatus = None,
+        name = "Test",
+        companyType = None,
+        identification = None,
+        entityStart = LocalDate.parse("2010-05-03"),
+        companyTime = None
+      )
+
+      when(settlorTransformationService.addBusinessSettlorTransformer(any(), any(), any()))
+        .thenReturn(Future.successful(Success))
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(newCompanySettlor))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.addBusinessSettlor("aUTR").apply(request)
+
+      status(result) mustBe OK
+      verify(settlorTransformationService).addBusinessSettlorTransformer(
+        equalTo("aUTR"),
+        equalTo("id"),
+        equalTo(newCompanySettlor))
+    }
+
+    "must return an error for malformed json" in {
+
+      val settlorTransformationService = mock[SettlorTransformationService]
+      val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.parse("{}"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.addBusinessSettlor("aUTR").apply(request)
       status(result) mustBe BAD_REQUEST
     }
   }

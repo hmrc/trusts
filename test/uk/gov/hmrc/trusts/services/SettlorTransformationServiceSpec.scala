@@ -26,10 +26,10 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.{IdentificationOrgType, ResponseHeader}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.variation.{AmendDeceasedSettlor, WillType}
-import uk.gov.hmrc.trusts.models.{NameType, RemoveSettlor, variation}
+import uk.gov.hmrc.trusts.models.{AddressType, NameType, RemoveSettlor, variation}
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
 
@@ -83,6 +83,54 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       whenReady(result) { _ =>
         verify(transformationService).addNewTransform("utr",
           "internalId", RemoveSettlorsTransform(0, settlor, LocalDate.of(2013, 2, 20), "settlor"))
+      }
+    }
+
+    "must add a new add individual settlor transform using the transformation service" in {
+      val transformationService = mock[TransformationService]
+      val service = new SettlorTransformationService(transformationService, LocalDateMock)
+      val newSettlor = DisplayTrustSettlor(
+        None,
+        None,
+        NameType("First", None, "Last"),
+        None,
+        None,
+        LocalDate.parse("1990-10-10")
+      )
+
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+      val result = service.addIndividualSettlorTransformer("utr", "internalId", newSettlor)
+      whenReady(result) { _ =>
+
+        verify(transformationService).addNewTransform("utr",
+          "internalId", AddIndividualSettlorTransform(newSettlor))
+      }
+    }
+
+    "must add a new add business settlor transform using the transformation service" in {
+      val transformationService = mock[TransformationService]
+      val service = new SettlorTransformationService(transformationService, LocalDateMock)
+      val newCompanySettlor = DisplayTrustSettlorCompany(
+        None,
+        None,
+        "Organisation Name",
+        None,
+        Some(false),
+        Some(DisplayTrustIdentificationOrgType(
+          None,
+          None,
+          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")))),
+        LocalDate.parse("1990-10-10")
+      )
+
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+      val result = service.addBusinessSettlorTransformer("utr", "internalId", newCompanySettlor)
+      whenReady(result) { _ =>
+
+        verify(transformationService).addNewTransform("utr",
+          "internalId", AddBuisnessSettlorTransform(newCompanySettlor))
       }
     }
 
