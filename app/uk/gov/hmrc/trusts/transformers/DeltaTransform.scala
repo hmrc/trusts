@@ -76,7 +76,7 @@ object DeltaTransform {
     readsForTransform[RemoveSettlorsTransform](RemoveSettlorsTransform.key) orElse
     readsForTransform[AmendDeceasedSettlorTransform](AmendDeceasedSettlorTransform.key) orElse
     readsForTransform[AddIndividualSettlorTransform](AddIndividualSettlorTransform.key) orElse
-    readsForTransform[AddCompanySettlorTransform](AddCompanySettlorTransform.key)
+    readsForTransform[AddBuisnessSettlorTransform](AddBuisnessSettlorTransform.key)
   }
 
   def trusteeWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
@@ -156,8 +156,8 @@ object DeltaTransform {
   def removeSettlorsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
     case transform: RemoveSettlorsTransform =>
       Json.obj(RemoveSettlorsTransform.key -> Json.toJson(transform)(RemoveSettlorsTransform.format))
-    case transform: AddCompanySettlorTransform =>
-      Json.obj(AddCompanySettlorTransform.key -> Json.toJson(transform)(AddCompanySettlorTransform.format))
+    case transform: AddBuisnessSettlorTransform =>
+      Json.obj(AddBuisnessSettlorTransform.key -> Json.toJson(transform)(AddBuisnessSettlorTransform.format))
   }
 
   def defaultWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {

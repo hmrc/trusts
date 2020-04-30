@@ -22,7 +22,7 @@ import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationOrgType, DisplayTrustSettlorCompany}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class AddCompanySettlorTransformSpec extends FreeSpec with MustMatchers with OptionValues {
+class AddBusinessSettlorTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
   val newCompanySettlor = DisplayTrustSettlorCompany(Some("1"),
     None,
@@ -33,27 +33,27 @@ class AddCompanySettlorTransformSpec extends FreeSpec with MustMatchers with Opt
     LocalDate.parse("2002-01-01")
   )
 
-  "the add company settlor transformer should" - {
+  "the add business settlor transformer should" - {
 
-    "add a new company settlor when there are no settlor existing" in {
-      val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-no-company-settlor.json")
+    "add a new business settlor when there are no settlor existing" in {
+      val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-no-business-settlor.json")
 
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-add-new-company-settlor.json")
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-add-new-business-settlor.json")
 
-      val transformer = new AddCompanySettlorTransform(newCompanySettlor)
+      val transformer = new AddBuisnessSettlorTransform(newCompanySettlor)
 
       val result = transformer.applyTransform(trustJson).get
 
       result mustBe afterJson
     }
 
-    "add a new company settlor" in {
+    "add a new business settlor" in {
 
-      val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-add-new-company-settlor.json")
+      val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-add-new-business-settlor.json")
 
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-add-second-company-settlor.json")
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-add-second-business-settlor.json")
 
-      val transformer = new AddCompanySettlorTransform(newCompanySettlor)
+      val transformer = new AddBuisnessSettlorTransform(newCompanySettlor)
 
       val result = transformer.applyTransform(trustJson).get
 

@@ -33,7 +33,7 @@ import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
 
-class AddCompanySettlorSpec extends FreeSpec with MustMatchers with MockitoSugar with TransformIntegrationTest {
+class AddBusinessSettlorSpec extends FreeSpec with MustMatchers with MockitoSugar with TransformIntegrationTest {
 
   lazy val getTrustResponseFromDES: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
@@ -41,7 +41,7 @@ class AddCompanySettlorSpec extends FreeSpec with MustMatchers with MockitoSugar
   lazy val expectedInitialGetJson: JsValue =
     JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
 
-  "an add company settlor call" - {
+  "an add business settlor call" - {
     "must return add data in a subsequent 'get' call" in {
 
       val newCompanySettlorJson = (
@@ -59,7 +59,7 @@ class AddCompanySettlorSpec extends FreeSpec with MustMatchers with MockitoSugar
       )
 
       lazy val expectedGetAfterAddSettlorJson: JsValue =
-        JsonUtils.getJsonValueFromFile("add-company-settlor-after-etmp-call.json")
+        JsonUtils.getJsonValueFromFile("add-business-settlor-after-etmp-call.json")
 
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))

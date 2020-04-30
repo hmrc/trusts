@@ -101,7 +101,7 @@ class SettlorTransformationService @Inject()(
   }
 
   def addBusinessSettlorTransformer(utr: String, internalId: String, newCompanySettlor: DisplayTrustSettlorCompany): Future[Success.type] = {
-    transformationService.addNewTransform(utr, internalId, AddCompanySettlorTransform(newCompanySettlor)).map(_ => Success)
+    transformationService.addNewTransform(utr, internalId, AddBuisnessSettlorTransform(newCompanySettlor)).map(_ => Success)
   }
 
   def amendBusinessSettlorTransformer(utr: String,

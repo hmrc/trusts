@@ -130,7 +130,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",
-          "internalId", AddCompanySettlorTransform(newCompanySettlor))
+          "internalId", AddBuisnessSettlorTransform(newCompanySettlor))
       }
     }
 

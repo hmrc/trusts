@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.transformers
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustSettlorCompany
 
-case class AddCompanySettlorTransform(newCompanySettlor: DisplayTrustSettlorCompany)
+case class AddBuisnessSettlorTransform(newCompanySettlor: DisplayTrustSettlorCompany)
   extends DeltaTransform
   with JsonOperations {
 
@@ -30,10 +30,10 @@ case class AddCompanySettlorTransform(newCompanySettlor: DisplayTrustSettlorComp
   }
 }
 
-object AddCompanySettlorTransform {
+object AddBuisnessSettlorTransform {
 
-  val key = "AddCompanySettlorTransform"
+  val key = "AddBuisnessSettlorTransform"
 
-  implicit val format: Format[AddCompanySettlorTransform] = Json.format[AddCompanySettlorTransform]
+  implicit val format: Format[AddBuisnessSettlorTransform] = Json.format[AddBuisnessSettlorTransform]
 }
 
