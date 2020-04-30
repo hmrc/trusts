@@ -22,26 +22,25 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.models.variation.UnidentifiedType
 import uk.gov.hmrc.trusts.repositories.TransformationRepository
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
 
-class RemoveSettlorsTransformSpec extends FreeSpec with MustMatchers with OptionValues with ScalaFutures with MockitoSugar {
+class RemoveSettlorsTransformSpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar {
 
   private def settlorJson(value1 : String, endDate: Option[LocalDate] = None, withLineNo: Boolean = true) = {
     val a = Json.obj("field1" -> value1, "field2" -> "value20")
 
     val b = if (endDate.isDefined) {a.deepMerge(Json.obj("entityEnd" -> endDate.get))
-    } else {a}
+    } else a
 
     if (withLineNo) {b.deepMerge(Json.obj("lineNo" -> 12))}
-    else {b}
+    else b
   }
 
   private def buildInputJson(settlorType: String, settlorData: Seq[JsValue]) = {
@@ -122,7 +121,7 @@ class RemoveSettlorsTransformSpec extends FreeSpec with MustMatchers with Option
       ))
 
       val transforms = Seq(
-        RemoveSettlorsTransform(0, settlorJson("One", None, false), LocalDate.of(2018, 4, 21), "settlor")
+        RemoveSettlorsTransform(0, settlorJson("One", None, withLineNo = false), LocalDate.of(2018, 4, 21), "settlor")
       )
 
       val OUT = ComposedDeltaTransform(transforms)

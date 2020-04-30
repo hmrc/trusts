@@ -36,8 +36,8 @@ trait AmendSettlorTransform extends DeltaTransform
     original.transform(lineNoPick).fold(
       _ => JsSuccess(input),
       lineNo => {
-        stripEtmpInfoForMatching(input, lineNo).fold(
-          _ => JsSuccess(input),
+        stripEtmpStatusForMatching(input, lineNo).fold(
+          _ => endEntity(input, path, original, endDate),
           newEntries => addEndedEntity(input, newEntries)
         )
       }
@@ -52,7 +52,7 @@ trait AmendSettlorTransform extends DeltaTransform
     ))
   }
 
-  private def stripEtmpInfoForMatching(input: JsValue, lineNo: JsValue) = {
+  private def stripEtmpStatusForMatching(input: JsValue, lineNo: JsValue) = {
     input.transform(path.json.pick).map {
       value =>
         value.as[Seq[JsObject]].collect {

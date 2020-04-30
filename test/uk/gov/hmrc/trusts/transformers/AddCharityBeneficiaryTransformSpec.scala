@@ -18,12 +18,12 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
-import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType}
-import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, IdentificationType, IndividualDetailsType}
+import org.scalatest.{FreeSpec, MustMatchers}
+import uk.gov.hmrc.trusts.models.variation.BeneficiaryCharityType
+import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class AddCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers with OptionValues {
+class AddCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
 
   val newBeneficiary = BeneficiaryCharityType(
     None,

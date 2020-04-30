@@ -18,12 +18,12 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import org.scalatest.{FreeSpec, MustMatchers}
 import uk.gov.hmrc.trusts.models.NameType
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class AmendLeadTrusteeIndTransformSpec extends FreeSpec with MustMatchers with OptionValues {
+class AmendLeadTrusteeIndTransformSpec extends FreeSpec with MustMatchers {
   "the modify lead transformer should" - {
     "successfully set a new ind lead trustee's details" in {
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-before.json")

@@ -18,12 +18,12 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import org.scalatest.{FreeSpec, MustMatchers}
 import uk.gov.hmrc.trusts.models.variation.LargeType
 import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class AddLargeBeneficiaryTransformSpec extends FreeSpec with MustMatchers with OptionValues {
+class AddLargeBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
 
   val newBeneficiary = LargeType(
     None,

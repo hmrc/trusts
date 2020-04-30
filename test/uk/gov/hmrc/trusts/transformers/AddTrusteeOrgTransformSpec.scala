@@ -18,11 +18,11 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import org.scalatest.{FreeSpec, MustMatchers}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustTrusteeOrgType
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionValues {
+class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {
 
   "the add trustee transformer should" - {
 

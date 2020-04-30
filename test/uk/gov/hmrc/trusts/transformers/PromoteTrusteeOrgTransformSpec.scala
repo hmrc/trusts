@@ -18,12 +18,12 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationOrgType, DisplayTrustLeadTrusteeOrgType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class PromoteTrusteeOrgTransformSpec extends FreeSpec with MustMatchers with OptionValues {
+class PromoteTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {
   private val trustee1Json = Json.parse(
     """
       |

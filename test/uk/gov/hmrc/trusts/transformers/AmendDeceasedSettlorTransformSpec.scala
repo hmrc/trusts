@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.trusts.models.NameType
 import uk.gov.hmrc.trusts.models.variation.AmendDeceasedSettlor
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class AmendDeceasedSettlorTransformSpec extends FreeSpec with MustMatchers with OptionValues {
+class AmendDeceasedSettlorTransformSpec extends FreeSpec with MustMatchers {
 
   "AmendDeceasedSettlorTransform should" - {
 
