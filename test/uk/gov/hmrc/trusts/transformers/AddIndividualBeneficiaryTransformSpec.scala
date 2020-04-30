@@ -18,18 +18,18 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import org.scalatest.{FreeSpec, MustMatchers}
 import uk.gov.hmrc.trusts.models.NameType
 import uk.gov.hmrc.trusts.models.variation.{IdentificationType, IndividualDetailsType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class AddIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers with OptionValues {
+class AddIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
 
   val newBeneficiary = IndividualDetailsType(None,
     None,
     NameType("First", None, "Last"),
     Some(LocalDate.parse("2000-01-01")),
-    false,
+    vulnerableBeneficiary = false,
     None,
     None,
     None,

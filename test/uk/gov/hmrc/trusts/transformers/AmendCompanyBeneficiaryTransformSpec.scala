@@ -18,13 +18,13 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.trusts.models.IdentificationOrgType
 import uk.gov.hmrc.trusts.models.variation.BeneficiaryCompanyType
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class AmendCompanyBeneficiaryTransformSpec extends FreeSpec with MustMatchers with OptionValues {
+class AmendCompanyBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
 
   "AmendCompanyBeneficiaryTransform should" - {
 

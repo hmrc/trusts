@@ -18,13 +18,12 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import org.scalatest.{FreeSpec, MustMatchers}
 import uk.gov.hmrc.trusts.models.NameType
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustSettlor}
-import uk.gov.hmrc.trusts.models.variation.IdentificationType
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class AddIndividualSettlorTransformSpec extends FreeSpec with MustMatchers with OptionValues {
+class AddIndividualSettlorTransformSpec extends FreeSpec with MustMatchers {
 
   val newSettlor = DisplayTrustSettlor(Some("1"),
     None,
