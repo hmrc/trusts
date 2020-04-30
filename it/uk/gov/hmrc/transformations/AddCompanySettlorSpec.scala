@@ -79,7 +79,7 @@ class AddCompanySettlorSpec extends FreeSpec with MustMatchers with MockitoSugar
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val addRequest = FakeRequest(POST, "/trusts/add-company-settlor/5465416546")
+          val addRequest = FakeRequest(POST, "/trusts/add-business-settlor/5465416546")
             .withBody(newCompanySettlorJson)
             .withHeaders(CONTENT_TYPE -> "application/json")
 

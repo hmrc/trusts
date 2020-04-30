@@ -77,12 +77,12 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
     }
   }
 
-  def addCompanySettlor(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def addBusinessSettlor(utr: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[DisplayTrustSettlorCompany] match {
         case JsSuccess(companySettlor, _) =>
 
-          transformService.addCompanySettlorTransformer(
+          transformService.addBusinessSettlorTransformer(
             utr,
             request.identifier,
             companySettlor
@@ -90,7 +90,7 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[SettlorTransformationController][addCompanySettlor]" +
+          logger.warn(s"[SettlorTransformationController][addBusinessSettlor]" +
             s" Supplied json could not be read as a Settlor - $errors")
           Future.successful(BadRequest)
       }

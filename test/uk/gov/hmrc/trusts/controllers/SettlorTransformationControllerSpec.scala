@@ -142,9 +142,9 @@ class SettlorTransformationControllerSpec extends FreeSpec
     }
   }
 
-  "Add company settlor" - {
+  "Add business settlor" - {
 
-    "must add a new company settlor transform" in {
+    "must add a new business settlor transform" in {
 
       val settlorTransformationService = mock[SettlorTransformationService]
       val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)
@@ -159,17 +159,17 @@ class SettlorTransformationControllerSpec extends FreeSpec
         companyTime = None
       )
 
-      when(settlorTransformationService.addCompanySettlorTransformer(any(), any(), any()))
+      when(settlorTransformationService.addBusinessSettlorTransformer(any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(newCompanySettlor))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val result = controller.addCompanySettlor("aUTR").apply(request)
+      val result = controller.addBusinessSettlor("aUTR").apply(request)
 
       status(result) mustBe OK
-      verify(settlorTransformationService).addCompanySettlorTransformer(
+      verify(settlorTransformationService).addBusinessSettlorTransformer(
         equalTo("aUTR"),
         equalTo("id"),
         equalTo(newCompanySettlor))
@@ -184,7 +184,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
         .withBody(Json.parse("{}"))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val result = controller.addCompanySettlor("aUTR").apply(request)
+      val result = controller.addBusinessSettlor("aUTR").apply(request)
       status(result) mustBe BAD_REQUEST
     }
   }

@@ -108,7 +108,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       }
     }
 
-    "must add a new add company settlor transform using the transformation service" in {
+    "must add a new add business settlor transform using the transformation service" in {
       val transformationService = mock[TransformationService]
       val service = new SettlorTransformationService(transformationService, LocalDateMock)
       val newCompanySettlor = DisplayTrustSettlorCompany(
@@ -126,7 +126,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      val result = service.addCompanySettlorTransformer("utr", "internalId", newCompanySettlor)
+      val result = service.addBusinessSettlorTransformer("utr", "internalId", newCompanySettlor)
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",

@@ -76,4 +76,4 @@ POST        /amend-deceased-settlor/:utr                        uk.gov.hmrc.trus
 
 POST        /add-individual-settlor/:utr                        uk.gov.hmrc.trusts.controllers.SettlorTransformationController.addIndividualSettlor(utr: String)
 
-POST        /add-company-settlor/:utr                           uk.gov.hmrc.trusts.controllers.SettlorTransformationController.addCompanySettlor(utr: String)
+POST        /add-business-settlor/:utr                           uk.gov.hmrc.trusts.controllers.SettlorTransformationController.addBusinessSettlor(utr: String)
