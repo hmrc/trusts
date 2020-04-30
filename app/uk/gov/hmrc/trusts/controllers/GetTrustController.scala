@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsArray, JsNull, JsPath, JsValue, Json}
+import play.api.libs.json.{JsArray, JsPath, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, Result}
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUTRAction}
@@ -83,39 +83,40 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     getItemAtPath(utr, JsPath \ 'details \ 'trust \ 'details)
 
   def getTrustees(utr: String) : Action[AnyContent] =
-    getItemAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'trustees, "trustees")
+    getArrayAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'trustees, "trustees")
 
   def getBeneficiaries(utr: String) : Action[AnyContent] =
-    getItemAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary, "beneficiary")
+    getArrayAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary, "beneficiary")
 
   def getSettlors(utr: String) : Action[AnyContent] =
-    getItemAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'settlors, "settlors")
+    getArrayAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'settlors, "settlors")
 
   def getDeceasedSettlor(utr: String) : Action[AnyContent] =
     getItemAtPathAsArray(utr, JsPath \ 'details \ 'trust \ 'entities \ 'deceased, "deceasedSettlors")
 
-  private def getItemAtPath(utr: String, path: JsPath, fieldName: String): Action[AnyContent] = {
-    getItemAtPath(utr, path, json => Json.obj(fieldName -> json))
-  }
-
-  private def insertNonNullAsArray(fieldName: String, value: JsValue) : JsValue = {
-    if (value == JsNull) {
-      Json.obj(fieldName -> JsArray())
-    }
-    else {
-      Json.obj(fieldName -> JsArray(Seq(value)))
-    }
+  private def getArrayAtPath(utr: String, path: JsPath, fieldName: String): Action[AnyContent] = {
+    getElementAtPath(utr,
+      path,
+      json => Json.obj(fieldName -> json),
+      Json.obj(fieldName -> JsArray()))
   }
 
   private def getItemAtPathAsArray(utr: String, path: JsPath, fieldName: String): Action[AnyContent] = {
-    getItemAtPath(utr, path, json => insertNonNullAsArray(fieldName, json), JsNull)
+    getElementAtPath(utr,
+      path,
+      json => Json.obj(fieldName -> JsArray(Seq(json))),
+      Json.obj(fieldName -> JsArray()))
   }
 
   private def getItemAtPath(utr: String, path: JsPath): Action[AnyContent] = {
-    getItemAtPath(utr, path, json => json)
+    getElementAtPath(utr, path, json => json, Json.obj())
   }
 
-  private def getItemAtPath(utr: String, path: JsPath, insertIntoObject: JsValue => JsValue, defaultObject: JsValue = JsArray()): Action[AnyContent] = {
+  private def getElementAtPath(
+                             utr: String,
+                             path: JsPath,
+                             insertIntoObject: JsValue => JsValue,
+                             defaultValue: JsValue): Action[AnyContent] = {
     doGet(utr, applyTransformations = true) {
       case processed: TrustProcessedResponse =>
         processed.transform.map {
@@ -124,7 +125,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
             Ok(transformed
               .getTrust.transform(path.json.pick)
               .map(insertIntoObject)
-              .getOrElse(insertIntoObject(defaultObject)))
+              .getOrElse(defaultValue))
           case _ =>
             InternalServerError
         }.getOrElse(InternalServerError)
