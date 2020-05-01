@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsArray, JsPath, JsValue, Json}
+import play.api.libs.json.{JsArray, JsObject, JsPath, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, Result}
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUTRAction}
@@ -89,10 +89,19 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     getArrayAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary, "beneficiary")
 
   def getSettlors(utr: String) : Action[AnyContent] =
-    getArrayAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'settlors, "settlors")
+    processTransformedData(utr) {
+      transformed =>
+        val settlorsPath = JsPath \ 'details \ 'trust \ 'entities \ 'settlors
+        val deceasedPath = JsPath \ 'details \ 'trust \ 'entities \ 'deceased
 
-  def getDeceasedSettlor(utr: String) : Action[AnyContent] =
-    getItemAtPathAsArray(utr, JsPath \ 'details \ 'trust \ 'entities \ 'deceased, "deceasedSettlors")
+        val settlors = transformed.transform(settlorsPath.json.pick).getOrElse(Json.obj())
+        val deceased = transformed.transform(deceasedPath.json.pick)
+        val amendedSettlors = deceased.map {
+          deceased => settlors.as[JsObject] + ("deceased" -> deceased)
+        }.getOrElse(settlors)
+
+        Json.obj("settlors" -> amendedSettlors)
+    }
 
   private def getArrayAtPath(utr: String, path: JsPath, fieldName: String): Action[AnyContent] = {
     getElementAtPath(utr,
@@ -123,7 +132,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
                              path: JsPath,
                              defaultValue: JsValue)
                               (insertIntoObject: JsValue => JsValue): Action[AnyContent] = {
-    getElementAtPath(utr) {
+    processTransformedData(utr) {
       transformed => transformed
         .transform(path.json.pick)
         .map(insertIntoObject)
@@ -131,7 +140,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
   }
 
-  private def getElementAtPath(utr: String)
+  private def processTransformedData(utr: String)
                               (processObject: JsValue => JsValue): Action[AnyContent] = {
     doGet(utr, applyTransformations = true) {
       case processed: TrustProcessedResponse =>
