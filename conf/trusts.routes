@@ -22,7 +22,7 @@ GET         /:utr/transformed/trustees                          uk.gov.hmrc.trus
 
 GET         /:utr/transformed/settlors                          uk.gov.hmrc.trusts.controllers.GetTrustController.getSettlors(utr: String)
 
-GET         /:utr/transformed/deceased-settlors                 uk.gov.hmrc.trusts.controllers.GetTrustController.getDeceasedSettlor(utr: String)
+GET         /:utr/transformed/deceased-settlor-death-recorded   uk.gov.hmrc.trusts.controllers.GetTrustController.getDeceasedSettlorDeathRecorded(utr: String)
 
 POST        /variation                                          uk.gov.hmrc.trusts.controllers.TrustVariationsController.trustVariation
 

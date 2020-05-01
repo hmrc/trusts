@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsArray, JsPath, JsValue, Json}
+import play.api.libs.json.{JsArray, JsBoolean, JsObject, JsPath, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, Result}
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUTRAction}
@@ -89,43 +89,63 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     getArrayAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary, "beneficiary")
 
   def getSettlors(utr: String) : Action[AnyContent] =
-    getArrayAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'settlors, "settlors")
+    processEtmpData(utr) {
+      transformed =>
+        val settlorsPath = JsPath \ 'details \ 'trust \ 'entities \ 'settlors
+        val deceasedPath = JsPath \ 'details \ 'trust \ 'entities \ 'deceased
 
-  def getDeceasedSettlor(utr: String) : Action[AnyContent] =
-    getItemAtPathAsArray(utr, JsPath \ 'details \ 'trust \ 'entities \ 'deceased, "deceasedSettlors")
+        val settlors = transformed.transform(settlorsPath.json.pick).getOrElse(Json.obj())
+        val deceased = transformed.transform(deceasedPath.json.pick)
+        val amendedSettlors = deceased.map {
+          deceased => settlors.as[JsObject] + ("deceased" -> deceased)
+        }.getOrElse(settlors)
+
+        Json.obj("settlors" -> amendedSettlors)
+    }
+
+  def getDeceasedSettlorDeathRecorded(utr: String) : Action[AnyContent] =
+    processEtmpData(utr, applyTransformations = false) {
+      etmpData =>
+        val deceasedDeathDatePath = JsPath \ 'details \ 'trust \ 'entities \ 'deceased \ 'dateOfDeath
+        JsBoolean(etmpData.transform(deceasedDeathDatePath.json.pick).isSuccess)
+    }
 
   private def getArrayAtPath(utr: String, path: JsPath, fieldName: String): Action[AnyContent] = {
     getElementAtPath(utr,
       path,
-      json => Json.obj(fieldName -> json),
-      Json.obj(fieldName -> JsArray()))
-  }
-
-  private def getItemAtPathAsArray(utr: String, path: JsPath, fieldName: String): Action[AnyContent] = {
-    getElementAtPath(utr,
-      path,
-      json => Json.obj(fieldName -> JsArray(Seq(json))),
-      Json.obj(fieldName -> JsArray()))
+      Json.obj(fieldName -> JsArray())) {
+        json => Json.obj(fieldName -> json)
+      }
   }
 
   private def getItemAtPath(utr: String, path: JsPath): Action[AnyContent] = {
-    getElementAtPath(utr, path, json => json, Json.obj())
+    getElementAtPath(utr,
+      path,
+      Json.obj()) {
+        json => json
+      }
   }
 
   private def getElementAtPath(
                              utr: String,
                              path: JsPath,
-                             insertIntoObject: JsValue => JsValue,
-                             defaultValue: JsValue): Action[AnyContent] = {
-    doGet(utr, applyTransformations = true) {
+                             defaultValue: JsValue)
+                              (insertIntoObject: JsValue => JsValue): Action[AnyContent] = {
+    processEtmpData(utr) {
+      transformed => transformed
+        .transform(path.json.pick)
+        .map(insertIntoObject)
+        .getOrElse(defaultValue)
+    }
+  }
+
+  private def processEtmpData(utr: String, applyTransformations: Boolean = true)
+                              (processObject: JsValue => JsValue): Action[AnyContent] = {
+    doGet(utr, applyTransformations) {
       case processed: TrustProcessedResponse =>
         processed.transform.map {
           case transformed: TrustProcessedResponse =>
-
-            Ok(transformed
-              .getTrust.transform(path.json.pick)
-              .map(insertIntoObject)
-              .getOrElse(defaultValue))
+            Ok(processObject(transformed.getTrust))
           case _ =>
             InternalServerError
         }.getOrElse(InternalServerError)
@@ -133,6 +153,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
         Forbidden
     }
   }
+
 
   private def resetCacheIfRequested(utr: String, internalId: String, refreshEtmpData: Boolean) = {
     if (refreshEtmpData) {
