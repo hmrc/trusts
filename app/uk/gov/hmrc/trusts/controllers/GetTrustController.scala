@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsArray, JsObject, JsPath, JsValue, Json}
+import play.api.libs.json.{JsArray, JsBoolean, JsObject, JsPath, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, Result}
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUTRAction}
@@ -89,7 +89,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     getArrayAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary, "beneficiary")
 
   def getSettlors(utr: String) : Action[AnyContent] =
-    processTransformedData(utr) {
+    processEtmpData(utr) {
       transformed =>
         val settlorsPath = JsPath \ 'details \ 'trust \ 'entities \ 'settlors
         val deceasedPath = JsPath \ 'details \ 'trust \ 'entities \ 'deceased
@@ -101,6 +101,13 @@ class GetTrustController @Inject()(identify: IdentifierAction,
         }.getOrElse(settlors)
 
         Json.obj("settlors" -> amendedSettlors)
+    }
+
+  def getDeceasedSettlorDeathRecorded(utr: String) : Action[AnyContent] =
+    processEtmpData(utr, applyTransformations = false) {
+      etmpData =>
+        val deceasedDeathDatePath = JsPath \ 'details \ 'trust \ 'entities \ 'deceased \ 'dateOfDeath
+        JsBoolean(etmpData.transform(deceasedDeathDatePath.json.pick).isSuccess)
     }
 
   private def getArrayAtPath(utr: String, path: JsPath, fieldName: String): Action[AnyContent] = {
@@ -124,7 +131,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
                              path: JsPath,
                              defaultValue: JsValue)
                               (insertIntoObject: JsValue => JsValue): Action[AnyContent] = {
-    processTransformedData(utr) {
+    processEtmpData(utr) {
       transformed => transformed
         .transform(path.json.pick)
         .map(insertIntoObject)
@@ -132,9 +139,9 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
   }
 
-  private def processTransformedData(utr: String)
+  private def processEtmpData(utr: String, applyTransformations: Boolean = true)
                               (processObject: JsValue => JsValue): Action[AnyContent] = {
-    doGet(utr, applyTransformations = true) {
+    doGet(utr, applyTransformations) {
       case processed: TrustProcessedResponse =>
         processed.transform.map {
           case transformed: TrustProcessedResponse =>
