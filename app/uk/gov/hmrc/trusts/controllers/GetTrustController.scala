@@ -111,14 +111,6 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       }
   }
 
-  private def getItemAtPathAsArray(utr: String, path: JsPath, fieldName: String): Action[AnyContent] = {
-    getElementAtPath(utr,
-      path,
-      Json.obj(fieldName -> JsArray())) {
-        json => Json.obj(fieldName -> JsArray(Seq(json)))
-      }
-  }
-
   private def getItemAtPath(utr: String, path: JsPath): Action[AnyContent] = {
     getElementAtPath(utr,
       path,
