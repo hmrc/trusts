@@ -126,7 +126,10 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
           transformService.removeSettlor(utr, request.identifier, settlor) map { _ =>
             Ok
           }
-        case JsError(_) => Future.successful(BadRequest)
+        case JsError(errors) =>
+          logger.warn(s"[SettlorTransformationController][removeSettlor]" +
+            s" Supplied json could not be read as a RemoveSettlor - $errors")
+          Future.successful(BadRequest)
       }
     }
   }
