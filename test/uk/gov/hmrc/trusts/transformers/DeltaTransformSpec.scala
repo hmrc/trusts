@@ -138,6 +138,20 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
         LocalDate.parse("2010-01-01")
       )
 
+      val protector = DisplayTrustProtector(
+        None,
+        None,
+        NameType("Individual", None, "Settlor"),
+        Some(LocalDate.parse("2000-01-01")),
+        Some(DisplayTrustIdentificationType(
+          None,
+          Some("nino"),
+          None,
+          None
+        )),
+        LocalDate.parse("2010-01-01")
+      )
+
       val addTrustBeneficiaryTransform = AddTrustBeneficiaryTransform(newTrustBeneficiary)
 
       val amendLeadTrusteeIndTransform = AmendLeadTrusteeIndTransform(newLeadTrustee)
@@ -221,6 +235,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
       val amendDeceasedSettlorTransform = AmendDeceasedSettlorTransform(Json.obj(), Json.obj())
 
       val addIndividualSettlorTransform = AddIndividualSettlorTransform(settlor)
+
+      val removeProtectorsTransform = RemoveProtectorsTransform(3, Json.toJson(protector), LocalDate.parse("2012-02-06"), "protector")
 
       val json = Json.parse(
         s"""{
@@ -308,9 +324,12 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           |            },
           |            {
           |               "AmendDeceasedSettlorTransform": ${Json.toJson(amendDeceasedSettlorTransform)}
-          |             },
-          |             {
+          |            },
+          |            {
           |               "AddIndividualSettlorTransform": ${Json.toJson(addIndividualSettlorTransform)}
+          |            },
+          |            {
+          |               "RemoveProtectorsTransform": ${Json.toJson(removeProtectorsTransform)}
           |            }
           |        ]
           |    }
@@ -345,7 +364,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           amendBusinessSettlorTransform,
           removeSettlorsTransform,
           amendDeceasedSettlorTransform,
-          addIndividualSettlorTransform
+          addIndividualSettlorTransform,
+          removeProtectorsTransform
         )
       )
 
