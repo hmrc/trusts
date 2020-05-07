@@ -1,0 +1,31 @@
+{
+  "settlor": [
+    {
+      "lineNo": "1",
+      "name": {
+        "firstName": "abcdefghijkl",
+        "middleName": "abcdefghijklmn",
+        "lastName": "abcde"
+      },
+      "dateOfBirth": "2001-01-01",
+      "identification": {
+        "nino": "ST019091"
+      },
+      "entityStart": "1998-02-12",
+      "provisional": false
+    }
+  ],
+  "settlorCompany": [
+    {
+      "lineNo": "1",
+      "name": "abcdefghijklmnopqr",
+      "companyType": "Trading",
+      "companyTime": false,
+      "identification": {
+        "utr": "5465416546"
+      },
+      "entityStart": "1998-02-12",
+      "provisional": false
+    }
+  ]
+}

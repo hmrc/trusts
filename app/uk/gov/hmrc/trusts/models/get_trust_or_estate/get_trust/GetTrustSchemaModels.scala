@@ -458,6 +458,18 @@ case class DisplayTrustProtector(lineNo: Option[String],
 
 object DisplayTrustProtector {
   implicit val protectorFormat: Format[DisplayTrustProtector] = Json.format[DisplayTrustProtector]
+
+  val writeToMaintain : Writes[DisplayTrustProtector] = new Writes[DisplayTrustProtector] {
+    override def writes(o: DisplayTrustProtector): JsValue = Json.obj(
+      "lineNo" -> o.lineNo,
+      "bpMatchStatus" -> o.bpMatchStatus,
+      "name" -> o.name,
+      "dateOfBirth" -> o.dateOfBirth,
+      "identification" -> o.identification,
+      "entityStart" -> o.entityStart,
+      "provisional" -> o.lineNo.isEmpty
+    ).withoutNulls
+  }
 }
 
 case class DisplayTrustProtectorCompany(lineNo: Option[String],
@@ -468,6 +480,17 @@ case class DisplayTrustProtectorCompany(lineNo: Option[String],
 
 object DisplayTrustProtectorCompany {
   implicit val protectorCompanyFormat: Format[DisplayTrustProtectorCompany] = Json.format[DisplayTrustProtectorCompany]
+
+  val writeToMaintain : Writes[DisplayTrustProtectorCompany] = new Writes[DisplayTrustProtectorCompany] {
+    override def writes(o: DisplayTrustProtectorCompany): JsValue = Json.obj(
+      "lineNo" -> o.lineNo,
+      "bpMatchStatus" -> o.bpMatchStatus,
+      "name" -> o.name,
+      "identification" -> o.identification,
+      "entityStart" -> o.entityStart,
+      "provisional" -> o.lineNo.isEmpty
+    ).withoutNulls
+  }
 }
 
 

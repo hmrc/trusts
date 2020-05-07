@@ -24,6 +24,7 @@ import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.{ResponseHeader, _}
 import uk.gov.hmrc.trusts.transformers.mdtp.Trustees
 import uk.gov.hmrc.trusts.transformers.mdtp.beneficiaries.Beneficiaries
+import uk.gov.hmrc.trusts.transformers.mdtp.protectors.Protectors
 import uk.gov.hmrc.trusts.transformers.mdtp.settlors.Settlors
 
 trait GetTrustResponse
@@ -63,7 +64,8 @@ case class TrustProcessedResponse(getTrust: JsValue,
     getTrust.transform(
       Trustees.transform(getTrust) andThen
       Beneficiaries.transform(getTrust) andThen
-      Settlors.transform(getTrust)
+      Settlors.transform(getTrust) andThen
+      Protectors.transform(getTrust)
     ).map {
       json =>
         TrustProcessedResponse(json, responseHeader)

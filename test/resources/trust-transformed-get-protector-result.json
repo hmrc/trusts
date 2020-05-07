@@ -13,7 +13,8 @@
         "identification": {
           "safeId": "2222200000000"
         },
-        "entityStart": "2017-02-28"
+        "entityStart": "2017-02-28",
+        "provisional": false
       }
     ],
     "protectorCompany": [
@@ -24,7 +25,8 @@
         "identification": {
           "safeId": "2222200000000"
         },
-        "entityStart": "2017-02-28"
+        "entityStart": "2017-02-28",
+        "provisional": false
       }
     ]
   }
