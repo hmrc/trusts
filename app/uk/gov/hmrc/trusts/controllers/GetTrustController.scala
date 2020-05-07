@@ -110,6 +110,9 @@ class GetTrustController @Inject()(identify: IdentifierAction,
         JsBoolean(etmpData.transform(deceasedDeathDatePath.json.pick).isSuccess)
     }
 
+  def getProtectors(utr: String) : Action[AnyContent] =
+    getArrayAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'protectors, "protectors")
+
   private def getArrayAtPath(utr: String, path: JsPath, fieldName: String): Action[AnyContent] = {
     getElementAtPath(utr,
       path,

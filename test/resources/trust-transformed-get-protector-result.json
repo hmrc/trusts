@@ -1,0 +1,31 @@
+{
+  "protectors": {
+    "protector": [
+      {
+        "lineNo": "1",
+        "bpMatchStatus": "01",
+        "name": {
+          "firstName": "Bruce",
+          "middleName": "Bob",
+          "lastName": "Branson"
+        },
+        "dateOfBirth": "1965-02-28",
+        "identification": {
+          "safeId": "2222200000000"
+        },
+        "entityStart": "2017-02-28"
+      }
+    ],
+    "protectorCompany": [
+      {
+        "lineNo": "1",
+        "bpMatchStatus": "01",
+        "name": "Raga Dandy",
+        "identification": {
+          "safeId": "2222200000000"
+        },
+        "entityStart": "2017-02-28"
+      }
+    ]
+  }
+}

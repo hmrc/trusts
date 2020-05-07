@@ -99,18 +99,12 @@ class RemoveProtectorSpec extends FreeSpec with MustMatchers with MockitoSugar w
           val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed/protectors")).get
           status(newResult) mustBe OK
 
-          val protectors = (contentAsJson(newResult) \ "protectors" \ "protector").as[JsArray]
+          val protectors = (contentAsJson(newResult) \ "protectors").as[JsValue]
+
           protectors mustBe Json.parse(
             """
-              |[
-              |]
-              |""".stripMargin)
-
-          val protectorCompanies = (contentAsJson(newResult) \ "protectors" \ "protectorCompany").as[JsArray]
-          protectorCompanies mustBe Json.parse(
-            """
-              |[
-              |]
+              |{
+              |}
               |""".stripMargin)
 
           dropTheDatabase(connection)
