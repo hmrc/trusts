@@ -22,6 +22,8 @@ GET         /:utr/transformed/trustees                          uk.gov.hmrc.trus
 
 GET         /:utr/transformed/settlors                          uk.gov.hmrc.trusts.controllers.GetTrustController.getSettlors(utr: String)
 
+GET         /:utr/transformed/protectors                        uk.gov.hmrc.trusts.controllers.GetTrustController.getProtectors(utr: String)
+
 GET         /:utr/transformed/deceased-settlor-death-recorded   uk.gov.hmrc.trusts.controllers.GetTrustController.getDeceasedSettlorDeathRecorded(utr: String)
 
 POST        /variation                                          uk.gov.hmrc.trusts.controllers.TrustVariationsController.trustVariation
@@ -78,4 +80,6 @@ POST        /amend-deceased-settlor/:utr                        uk.gov.hmrc.trus
 
 POST        /add-individual-settlor/:utr                        uk.gov.hmrc.trusts.controllers.SettlorTransformationController.addIndividualSettlor(utr: String)
 
-POST        /add-business-settlor/:utr                           uk.gov.hmrc.trusts.controllers.SettlorTransformationController.addBusinessSettlor(utr: String)
+POST        /add-business-settlor/:utr                          uk.gov.hmrc.trusts.controllers.SettlorTransformationController.addBusinessSettlor(utr: String)
+
+PUT         /:utr/protectors/remove                             uk.gov.hmrc.trusts.controllers.ProtectorTransformationController.removeProtector(utr: String)

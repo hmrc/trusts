@@ -449,25 +449,48 @@ object DisplayTrustProtectorsType {
   implicit val protectorsTypeFormat: Format[DisplayTrustProtectorsType] = Json.format[DisplayTrustProtectorsType]
 }
 
-case class DisplayTrustProtector(lineNo: String,
+case class DisplayTrustProtector(lineNo: Option[String],
                                  bpMatchStatus: Option[String],
                                  name: NameType,
                                  dateOfBirth: Option[LocalDate],
                                  identification: Option[DisplayTrustIdentificationType],
-                                 entityStart: String)
+                                 entityStart: LocalDate)
 
 object DisplayTrustProtector {
   implicit val protectorFormat: Format[DisplayTrustProtector] = Json.format[DisplayTrustProtector]
+
+  val writeToMaintain : Writes[DisplayTrustProtector] = new Writes[DisplayTrustProtector] {
+    override def writes(o: DisplayTrustProtector): JsValue = Json.obj(
+      "lineNo" -> o.lineNo,
+      "bpMatchStatus" -> o.bpMatchStatus,
+      "name" -> o.name,
+      "dateOfBirth" -> o.dateOfBirth,
+      "identification" -> o.identification,
+      "entityStart" -> o.entityStart,
+      "provisional" -> o.lineNo.isEmpty
+    ).withoutNulls
+  }
 }
 
-case class DisplayTrustProtectorCompany(lineNo: String,
+case class DisplayTrustProtectorCompany(lineNo: Option[String],
                                         bpMatchStatus: Option[String],
                                         name: String,
                                         identification: Option[DisplayTrustIdentificationOrgType],
-                                        entityStart: String)
+                                        entityStart: LocalDate)
 
 object DisplayTrustProtectorCompany {
   implicit val protectorCompanyFormat: Format[DisplayTrustProtectorCompany] = Json.format[DisplayTrustProtectorCompany]
+
+  val writeToMaintain : Writes[DisplayTrustProtectorCompany] = new Writes[DisplayTrustProtectorCompany] {
+    override def writes(o: DisplayTrustProtectorCompany): JsValue = Json.obj(
+      "lineNo" -> o.lineNo,
+      "bpMatchStatus" -> o.bpMatchStatus,
+      "name" -> o.name,
+      "identification" -> o.identification,
+      "entityStart" -> o.entityStart,
+      "provisional" -> o.lineNo.isEmpty
+    ).withoutNulls
+  }
 }
 
 
