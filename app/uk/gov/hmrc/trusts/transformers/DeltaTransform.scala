@@ -36,7 +36,8 @@ object DeltaTransform {
       (
         trusteeReads orElse
         beneficiaryReads orElse
-        settlorReads
+        settlorReads orElse
+        protectorReads
       ) (value.as[JsObject]) orElse (throw new Exception(s"Don't know how to deserialise transform"))
   )
 
@@ -71,12 +72,16 @@ object DeltaTransform {
   }
 
   def settlorReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
-    readsForTransform[AmendIndividualSettlorTransform](AmendIndividualSettlorTransform.key) orElse
-    readsForTransform[AmendBusinessSettlorTransform](AmendBusinessSettlorTransform.key) orElse
-    readsForTransform[RemoveSettlorsTransform](RemoveSettlorsTransform.key) orElse
-    readsForTransform[AmendDeceasedSettlorTransform](AmendDeceasedSettlorTransform.key) orElse
     readsForTransform[AddIndividualSettlorTransform](AddIndividualSettlorTransform.key) orElse
-    readsForTransform[AddBuisnessSettlorTransform](AddBuisnessSettlorTransform.key)
+    readsForTransform[AmendIndividualSettlorTransform](AmendIndividualSettlorTransform.key) orElse
+    readsForTransform[AddBuisnessSettlorTransform](AddBuisnessSettlorTransform.key) orElse
+    readsForTransform[AmendBusinessSettlorTransform](AmendBusinessSettlorTransform.key) orElse
+    readsForTransform[AmendDeceasedSettlorTransform](AmendDeceasedSettlorTransform.key) orElse
+    readsForTransform[RemoveSettlorsTransform](RemoveSettlorsTransform.key)
+  }
+
+  def protectorReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
+    readsForTransform[RemoveProtectorsTransform](RemoveProtectorsTransform.key)
   }
 
   def trusteeWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
@@ -134,9 +139,16 @@ object DeltaTransform {
       Json.obj(AmendLargeBeneficiaryTransform.key -> Json.toJson(transform)(AmendLargeBeneficiaryTransform.format))
   }
 
-  def removeBeneficiariesWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
+  def removeBeneficiariesWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
     case transform: RemoveBeneficiariesTransform =>
       Json.obj(RemoveBeneficiariesTransform.key -> Json.toJson(transform)(RemoveBeneficiariesTransform.format))
+  }
+
+  def addSettlorsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+    case transform: AddIndividualSettlorTransform =>
+      Json.obj(AddIndividualSettlorTransform.key -> Json.toJson(transform)(AddIndividualSettlorTransform.format))
+    case transform: AddBuisnessSettlorTransform =>
+      Json.obj(AddBuisnessSettlorTransform.key -> Json.toJson(transform)(AddBuisnessSettlorTransform.format))
   }
 
   def amendSettlorsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
@@ -148,16 +160,14 @@ object DeltaTransform {
       Json.obj(AmendDeceasedSettlorTransform.key -> Json.toJson(transform)(AmendDeceasedSettlorTransform.format))
   }
 
-  def addSettlorsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
-    case transform: AddIndividualSettlorTransform =>
-      Json.obj(AddIndividualSettlorTransform.key -> Json.toJson(transform)(AddIndividualSettlorTransform.format))
-  }
-
   def removeSettlorsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
     case transform: RemoveSettlorsTransform =>
       Json.obj(RemoveSettlorsTransform.key -> Json.toJson(transform)(RemoveSettlorsTransform.format))
-    case transform: AddBuisnessSettlorTransform =>
-      Json.obj(AddBuisnessSettlorTransform.key -> Json.toJson(transform)(AddBuisnessSettlorTransform.format))
+  }
+
+  def removeProtectorsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
+    case transform: RemoveProtectorsTransform =>
+      Json.obj(RemoveProtectorsTransform.key -> Json.toJson(transform)(RemoveProtectorsTransform.format))
   }
 
   def defaultWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
@@ -169,9 +179,10 @@ object DeltaTransform {
       addBeneficiariesWrites orElse
       amendBeneficiariesWrites orElse
       removeBeneficiariesWrites orElse
+      addSettlorsWrites orElse
       amendSettlorsWrites orElse
       removeSettlorsWrites orElse
-      addSettlorsWrites orElse
+      removeProtectorsWrites orElse
       defaultWrites
       ).apply(deltaTransform)
   }
