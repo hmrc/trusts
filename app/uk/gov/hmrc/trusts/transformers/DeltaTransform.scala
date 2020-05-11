@@ -81,6 +81,7 @@ object DeltaTransform {
   }
 
   def protectorReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
+    readsForTransform[AddIndividualProtectorTransform](AddIndividualProtectorTransform.key) orElse
     readsForTransform[RemoveProtectorsTransform](RemoveProtectorsTransform.key)
   }
 
@@ -165,6 +166,11 @@ object DeltaTransform {
       Json.obj(RemoveSettlorsTransform.key -> Json.toJson(transform)(RemoveSettlorsTransform.format))
   }
 
+  def addProtectorsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+    case transform: AddIndividualProtectorTransform =>
+      Json.obj(AddIndividualProtectorTransform.key -> Json.toJson(transform)(AddIndividualProtectorTransform.format))
+  }
+
   def removeProtectorsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
     case transform: RemoveProtectorsTransform =>
       Json.obj(RemoveProtectorsTransform.key -> Json.toJson(transform)(RemoveProtectorsTransform.format))
@@ -182,6 +188,7 @@ object DeltaTransform {
       addSettlorsWrites orElse
       amendSettlorsWrites orElse
       removeSettlorsWrites orElse
+      addProtectorsWrites orElse
       removeProtectorsWrites orElse
       defaultWrites
       ).apply(deltaTransform)
