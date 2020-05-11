@@ -17,10 +17,12 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
+import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveProtector
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustProtector
 import uk.gov.hmrc.trusts.services.ProtectorTransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
@@ -30,6 +32,8 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
                                                   transformService: ProtectorTransformationService)
                                                  (implicit val executionContext: ExecutionContext)
   extends TrustsBaseController with ValidationUtil {
+
+  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
 
   def removeProtector(utr: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
@@ -43,4 +47,23 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
     }
   }
 
+  def addIndividualProtector(utr: String): Action[JsValue] = identify.async(parse.json) {
+    implicit request => {
+      request.body.validate[DisplayTrustProtector] match {
+        case JsSuccess(protector, _) =>
+
+          transformService.addIndividualProtectorTransformer(
+            utr,
+            request.identifier,
+            protector
+          ) map { _ =>
+            Ok
+          }
+        case JsError(errors) =>
+          logger.warn(s"[ProtectorTransformationController][addIndividualProtector]" +
+            s" Supplied json could not be read as a Protector - $errors")
+          Future.successful(BadRequest)
+      }
+    }
+  }
 }

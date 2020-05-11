@@ -29,6 +29,7 @@ import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models._
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustProtector
 import uk.gov.hmrc.trusts.services.ProtectorTransformationService
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -41,6 +42,54 @@ class ProtectorTransformationControllerSpec extends FreeSpec
 
   val identifierAction = new FakeIdentifierAction(Agent)
 
+  "Add individual protector" - {
+
+    "must add a new individual protector transform" in {
+
+      val protectorTransformationService = mock[ProtectorTransformationService]
+      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)
+
+      val newProtector = DisplayTrustProtector(
+        lineNo = None,
+        bpMatchStatus = None,
+        name = NameType("First", None, "Last"),
+        dateOfBirth = None,
+        identification = None,
+        entityStart = LocalDate.parse("2010-05-03")
+      )
+
+      val newDescription = "Some new description"
+
+      when(protectorTransformationService.addIndividualProtectorTransformer(any(), any(), any()))
+        .thenReturn(Future.successful(Success))
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(newProtector))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.addIndividualProtector("aUTR").apply(request)
+
+      status(result) mustBe OK
+      verify(protectorTransformationService).addIndividualProtectorTransformer(
+        equalTo("aUTR"),
+        equalTo("id"),
+        equalTo(newProtector))
+    }
+
+    "must return an error for malformed json" in {
+
+      val protectorTransformationService = mock[ProtectorTransformationService]
+      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.parse("{}"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.addIndividualProtector("aUTR").apply(request)
+      status(result) mustBe BAD_REQUEST
+    }
+  }
+  
   "remove protector" - {
 
     "add a new remove protector transform " in {

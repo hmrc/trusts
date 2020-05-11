@@ -26,7 +26,7 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.models.RemoveProtector
+import uk.gov.hmrc.trusts.models.{NameType, RemoveProtector}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.transformers._
@@ -82,6 +82,28 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
       whenReady(result) { _ =>
         verify(transformationService).addNewTransform("utr",
           "internalId", RemoveProtectorsTransform(0, protector, LocalDate.of(2013, 2, 20), "protector"))
+      }
+    }
+
+    "must add a new add individual protector transform using the transformation service" in {
+      val transformationService = mock[TransformationService]
+      val service = new ProtectorTransformationService(transformationService)
+      val newProtector = DisplayTrustProtector(
+        None,
+        None,
+        NameType("First", None, "Last"),
+        None,
+        None,
+        LocalDate.parse("1990-10-10")
+      )
+
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+      val result = service.addIndividualProtectorTransformer("utr", "internalId", newProtector)
+      whenReady(result) { _ =>
+
+        verify(transformationService).addNewTransform("utr",
+          "internalId", AddIndividualProtectorTransform(newProtector))
       }
     }
   }
