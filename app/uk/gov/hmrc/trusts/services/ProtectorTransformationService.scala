@@ -20,7 +20,8 @@ import javax.inject.Inject
 import play.api.libs.json.{JsObject, JsValue, __}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustProtector, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustProtector, DisplayTrustProtectorCompany, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.variation.ProtectorCompany
 import uk.gov.hmrc.trusts.models.{RemoveProtector, Success}
 import uk.gov.hmrc.trusts.transformers._
 
@@ -46,6 +47,10 @@ class ProtectorTransformationService @Inject()(transformationService: Transforma
           )
         ).map(_ => Success)
       }
+  }
+
+  def addCompanyProtectorTransformer(utr: String, internalId: String, newProtectorCompany: DisplayTrustProtectorCompany): Future[Boolean] = {
+    transformationService.addNewTransform(utr, internalId, AddCompanyProtectorTransform(newProtectorCompany))
   }
 
   private def getTransformedTrustJson(utr: String, internalId: String)
