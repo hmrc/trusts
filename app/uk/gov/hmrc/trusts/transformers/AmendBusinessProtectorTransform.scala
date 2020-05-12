@@ -31,5 +31,5 @@ case class AmendBusinessProtectorTransform(index: Int,
 object AmendBusinessProtectorTransform {
   val key = "AmendBusinessProtectorTransform"
 
-  implicit val format: Format[AmendCompanyBeneficiaryTransform] = Json.format[AmendCompanyBeneficiaryTransform]
+  implicit val format: Format[AmendBusinessProtectorTransform] = Json.format[AmendBusinessProtectorTransform]
 }

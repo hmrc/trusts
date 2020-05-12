@@ -71,12 +71,12 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
   def amendBusinessProtector(utr: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
     implicit request =>
       request.body.validate[ProtectorCompany] match {
-        case JsSuccess(companyBeneficiary, _) =>
+        case JsSuccess(businessProtector, _) =>
           transformService.amendBusinessProtectorTransformer(
             utr,
             index,
             request.identifier,
-            companyBeneficiary
+            businessProtector
           ) map { _ =>
             Ok
           }

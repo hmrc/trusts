@@ -67,7 +67,7 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
 
     "must add a new remove protector transform using the transformation service" in {
       val transformationService = mock[TransformationService]
-      val service = new ProtectorTransformationService(transformationService)
+      val service = new ProtectorTransformationService(transformationService, LocalDateMock)
       val protector = protectorJson("Blah Blah Blah")
 
       when(transformationService.addNewTransform(any(), any(), any()))
@@ -87,7 +87,7 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
 
     "must add a new add individual protector transform using the transformation service" in {
       val transformationService = mock[TransformationService]
-      val service = new ProtectorTransformationService(transformationService)
+      val service = new ProtectorTransformationService(transformationService, LocalDateMock)
       val newProtector = DisplayTrustProtector(
         None,
         None,

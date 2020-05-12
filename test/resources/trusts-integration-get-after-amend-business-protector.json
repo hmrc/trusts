@@ -83,14 +83,6 @@
               "entityStart": "2001-01-01"
             }
           ],
-          "trust": [
-            {
-              "lineNo": "1",
-              "bpMatchStatus": "01",
-              "organisationName": "Trust 1",
-              "entityStart": "2001-01-01"
-            }
-          ],
           "individualDetails": [
             {
               "lineNo": "1",
@@ -142,6 +134,14 @@
               "description": "Some Description",
               "beneficiaryShareOfIncome": "25",
               "entityStart": "2017-02-28"
+            }
+          ],
+          "trust": [
+            {
+              "bpMatchStatus": "01",
+              "entityStart": "2001-01-01",
+              "lineNo": "1",
+              "organisationName": "Trust 1"
             }
           ],
           "large": [
@@ -217,35 +217,6 @@
             }
           }
         ],
-        "settlors": {
-          "settlor": [
-            {
-              "lineNo": "1",
-              "name": {
-                "firstName": "abcdefghijkl",
-                "middleName": "abcdefghijklmn",
-                "lastName": "abcde"
-              },
-              "dateOfBirth": "2001-01-01",
-              "identification": {
-                "nino": "ST019091"
-              },
-              "entityStart": "1998-02-12"
-            }
-          ],
-          "settlorCompany": [
-            {
-              "lineNo": "1",
-              "name": "abcdefghijklmnopqr",
-              "companyType": "Trading",
-              "companyTime": false,
-              "identification": {
-                "utr": "5465416546"
-              },
-              "entityStart": "1998-02-12"
-            }
-          ]
-        },
         "protectors": {
           "protector": [
             {
@@ -265,7 +236,7 @@
           "protectorCompany": [
             {
               "lineNo": "1",
-              "name": "abcdefghijklmnopqr",
+              "name": "New Protector Name",
               "identification": {
                 "utr": "5465416546"
               },

@@ -79,12 +79,12 @@ class ProtectorTransformationService @Inject()(transformationService: Transforma
     getTransformedTrustJson(utr, internalId)
       .map(findProtectorJson(_, "protectorCompany", index))
       .flatMap(Future.fromTry)
-      .flatMap { beneficiaryJson =>
+      .flatMap { protectorJson =>
 
         transformationService.addNewTransform(
           utr,
           internalId,
-          AmendBusinessProtectorTransform(index, Json.toJson(amended), beneficiaryJson, localDateService.now)
+          AmendBusinessProtectorTransform(index, Json.toJson(amended), protectorJson, localDateService.now)
         ).map(_ => Success)
       }
   }
