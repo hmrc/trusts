@@ -41,28 +41,20 @@ class AddCompanyProtectorSpec extends FreeSpec with MustMatchers with MockitoSug
   lazy val expectedInitialGetJson: JsValue =
     JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
 
-  "an add individual protector call" - {
+  "an add company protector call" - {
     "must return add data in a subsequent 'get' call" in {
 
-      val newProtectorJson = Json.parse(
+      val newCompanyProtectorJson = Json.parse(
         """
           |{
-          |  "name":{
-          |    "firstName":"abcdefghijkl",
-          |    "middleName":"abcdefghijklmn",
-          |    "lastName":"abcde"
-          |  },
-          |  "dateOfBirth":"2000-01-01",
-          |  "identification": {
-          |    "nino": "ST019091"
-          |  },
-          |  "entityStart":"2002-01-01"
+          | "entityStart": "2010-05-03",
+          | "name": "TestCompany"
           |}
           |""".stripMargin
       )
 
       lazy val expectedGetAfterAddProtectorJson: JsValue =
-        JsonUtils.getJsonValueFromFile("add-individual-protector-after-etmp-call.json")
+        JsonUtils.getJsonValueFromFile("add-company-protector-after-etmp-call.json")
 
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
@@ -78,18 +70,18 @@ class AddCompanyProtectorSpec extends FreeSpec with MustMatchers with MockitoSug
         getConnection(application).map { connection =>
           dropTheDatabase(connection)
 
-          val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+          val result = route(application, FakeRequest(GET, "/trusts/5465416546/transformed")).get
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val addRequest = FakeRequest(POST, "/trusts/add-individual-protector/5174384721")
-            .withBody(newProtectorJson)
+          val addRequest = FakeRequest(POST, "/trusts/add-company-protector/5465416546")
+            .withBody(newCompanyProtectorJson)
             .withHeaders(CONTENT_TYPE -> "application/json")
 
           val addResult = route(application, addRequest).get
           status(addResult) mustBe OK
 
-          val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+          val newResult = route(application, FakeRequest(GET, "/trusts/5465416546/transformed")).get
           status(newResult) mustBe OK
           contentAsJson(newResult) mustBe expectedGetAfterAddProtectorJson
 
