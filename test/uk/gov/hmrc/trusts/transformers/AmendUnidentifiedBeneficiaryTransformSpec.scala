@@ -43,8 +43,8 @@ class AmendUnidentifiedBeneficiaryTransformSpec extends FreeSpec with MustMatche
 
       "successfully update a beneficiary's details" in {
 
-        val beforeJson = JsonUtils.getJsonValueFromFile("trusts-unidentified-beneficiary-transform-before.json")
-        val afterJson = JsonUtils.getJsonValueFromFile("trusts-unidentified-beneficiary-transform-after.json")
+        val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-unidentified-beneficiary-transform-before.json")
+        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-unidentified-beneficiary-transform-after.json")
         val newDescription = "This description has been updated"
         val transformer = AmendUnidentifiedBeneficiaryTransform(1, newDescription, originalJson, endDate)
 
@@ -56,8 +56,8 @@ class AmendUnidentifiedBeneficiaryTransformSpec extends FreeSpec with MustMatche
     "at declaration time" - {
 
       "set an end date for the original beneficiary, adding in the amendment as a new beneficiary for a beneficiary known by etmp" in {
-        val beforeJson = JsonUtils.getJsonValueFromFile("trusts-unidentified-beneficiary-transform-before.json")
-        val afterJson = JsonUtils.getJsonValueFromFile("trusts-unidentified-beneficiary-transform-after-declaration.json")
+        val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-unidentified-beneficiary-transform-before.json")
+        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-unidentified-beneficiary-transform-after-declaration.json")
         val newDescription = "This description has been updated"
         val transformer = AmendUnidentifiedBeneficiaryTransform(1, newDescription, originalJson, endDate)
 

@@ -32,8 +32,8 @@ class AmendIndividualSettlorTransformSpec extends FreeSpec with MustMatchers {
 
       "amend a settlors details by replacing" in {
 
-        val beforeJson = JsonUtils.getJsonValueFromFile("trusts-individual-settlor-transform-before.json")
-        val afterJson = JsonUtils.getJsonValueFromFile("trusts-individual-settlor-transform-after.json")
+        val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-settlor-transform-before.json")
+        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-settlor-transform-after.json")
 
         val amended = Settlor(
           lineNo = None,
@@ -71,10 +71,10 @@ class AmendIndividualSettlorTransformSpec extends FreeSpec with MustMatchers {
       "set an end date for the original beneficiary, adding in the amendment as a new settlor for a settlor known by etmp" in {
 
         val beforeJson =
-          JsonUtils.getJsonValueFromFile("trusts-individual-settlor-transform-before.json")
+          JsonUtils.getJsonValueFromFile("transforms/trusts-individual-settlor-transform-before.json")
 
         val afterJson =
-          JsonUtils.getJsonValueFromFile("trusts-individual-settlor-transform-after-declaration.json")
+          JsonUtils.getJsonValueFromFile("transforms/trusts-individual-settlor-transform-after-declaration.json")
 
         val amended = Settlor(
           lineNo = None,
@@ -109,10 +109,10 @@ class AmendIndividualSettlorTransformSpec extends FreeSpec with MustMatchers {
 
       "amend the new settlor that is not known to etmp" in {
         val beforeJson =
-          JsonUtils.getJsonValueFromFile("trusts-new-individual-settlor-transform-before.json")
+          JsonUtils.getJsonValueFromFile("transforms/trusts-new-individual-settlor-transform-before.json")
 
         val afterJson =
-          JsonUtils.getJsonValueFromFile("trusts-new-individual-settlor-transform-after-declaration.json")
+          JsonUtils.getJsonValueFromFile("transforms/trusts-new-individual-settlor-transform-after-declaration.json")
 
         val amended = Settlor(
           lineNo = None,

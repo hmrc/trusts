@@ -26,8 +26,8 @@ import uk.gov.hmrc.trusts.utils.JsonUtils
 class AmendTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {
   "the modify transformer should" - {
     "successfully set a new trustee's details" in {
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-trustee-transform-before.json")
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-trustee-transform-after-org.json")
+      val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-trustee-transform-before.json")
+      val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-trustee-transform-after-org.json")
       val newTrusteeInfo = DisplayTrustTrusteeOrgType(
         lineNo = Some("newLineNo"),
         bpMatchStatus = Some("newMatchStatus"),

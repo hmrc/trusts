@@ -30,8 +30,8 @@ class AmendDeceasedSettlorTransformSpec extends FreeSpec with MustMatchers {
 
       "amend a settlors details by replacing it, but retaining their start date, bpMatchStatus and lineNo" in {
 
-        val beforeJson = JsonUtils.getJsonValueFromFile("trusts-deceased-settlor-transform-before.json")
-        val afterJson = JsonUtils.getJsonValueFromFile("trusts-deceased-settlor-transform-after.json")
+        val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-deceased-settlor-transform-before.json")
+        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-deceased-settlor-transform-after.json")
 
         val amended = AmendDeceasedSettlor(
           name = NameType("updated first", None, "updated last"),
@@ -70,8 +70,8 @@ class AmendDeceasedSettlorTransformSpec extends FreeSpec with MustMatchers {
 
       "amend a settlors details by replacing it, but retaining their start date, bpMatchStatus and lineNo" in {
 
-        val beforeJson = JsonUtils.getJsonValueFromFile("trusts-deceased-settlor-transform-before.json")
-        val afterJson = JsonUtils.getJsonValueFromFile("trusts-deceased-settlor-transform-after.json")
+        val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-deceased-settlor-transform-before.json")
+        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-deceased-settlor-transform-after.json")
 
         val amended = AmendDeceasedSettlor(
           name = NameType("updated first", None, "updated last"),

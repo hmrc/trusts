@@ -20,29 +20,25 @@ import java.time.LocalDate
 
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.trusts.models.variation.{IdentificationType, IndividualDetailsType}
+import uk.gov.hmrc.trusts.models.variation.{IdentificationType, IndividualDetailsType, Protector}
 import uk.gov.hmrc.trusts.models.{NameType, PassportType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
-class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
+class AmendIndividualProtectorTransformSpec extends FreeSpec with MustMatchers {
 
-  "AmendIndividualBeneficiaryTransform should" - {
+  "AmendIndividualProtectorTransform should" - {
 
     "before declaration" - {
 
-      "amend a beneficiaries details by replacing the beneficiary" in {
+      "amend a protector details by replacing the protector" in {
 
-        val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-beneficiary-transform-before.json")
-        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-beneficiary-transform-after.json")
+        val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-protector-transform-before.json")
+        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-protector-transform-after.json")
 
-        val amended = IndividualDetailsType(
+        val amended = Protector(
           lineNo = None,
           bpMatchStatus = None,
           NameType("First 2", None, "Last 2"),
-          None,
-          vulnerableBeneficiary = false,
-          None,
-          None,
           None,
           identification = Some(IdentificationType(
             nino = None,
@@ -68,7 +64,6 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
             |    "lastName": "Last 2"
             |  },
             |  "dateOfBirth": "2010-05-03",
-            |  "vulnerableBeneficiary": true,
             |  "identification": {
             |    "nino": "JP1212122A"
             |  },
@@ -76,7 +71,7 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
             |}
             |""".stripMargin)
 
-        val transformer = AmendIndividualBeneficiaryTransform(1, Json.toJson(amended), original, LocalDate.parse("2020-03-25"))
+        val transformer = AmendIndividualProtectorTransform(1, Json.toJson(amended), original, LocalDate.parse("2020-03-25"))
 
         val result = transformer.applyTransform(beforeJson).get
         result mustBe afterJson
@@ -85,23 +80,19 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
 
     "at declaration time" - {
 
-      "set an end date for the original beneficiary, adding in the amendment as a new beneficiary for a beneficiary known by etmp" in {
+      "set an end date for the original protector, adding in the amendment as a new protector for a protector known by etmp" in {
 
         val beforeJson =
-          JsonUtils.getJsonValueFromFile("transforms/trusts-individual-beneficiary-transform-before.json")
+          JsonUtils.getJsonValueFromFile("transforms/trusts-individual-protector-transform-before.json")
 
         val afterJson =
-          JsonUtils.getJsonValueFromFile("transforms/trusts-individual-beneficiary-transform-after-declaration.json")
+          JsonUtils.getJsonValueFromFile("transforms/trusts-individual-protector-transform-after-declaration.json")
 
-        val amended = IndividualDetailsType(
+        val amended = Protector(
           lineNo = None,
           bpMatchStatus = None,
           NameType("Updated First 2", None, "Updated Last 2"),
           dateOfBirth = Some(LocalDate.parse("2012-01-01")),
-          vulnerableBeneficiary = false,
-          None,
-          None,
-          None,
           identification = Some(IdentificationType(
             nino = None,
             passport = Some(PassportType(
@@ -126,7 +117,6 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
             |    "lastName": "Last 2"
             |  },
             |  "dateOfBirth": "2010-05-03",
-            |  "vulnerableBeneficiary": true,
             |  "identification": {
             |    "nino": "JP1212122A"
             |  },
@@ -134,30 +124,26 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
             |}
             |""".stripMargin)
 
-        val transformer = AmendIndividualBeneficiaryTransform(1, Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"))
+        val transformer = AmendIndividualProtectorTransform(1, Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"))
 
         val applied = transformer.applyTransform(beforeJson).get
         val result = transformer.applyDeclarationTransform(applied).get
         result mustBe afterJson
       }
 
-      "amend the new beneficiary that is not known to etmp" in {
+      "amend the new protector that is not known to etmp" in {
         val beforeJson =
-          JsonUtils.getJsonValueFromFile("transforms/trusts-new-individual-beneficiary-transform-before.json")
+          JsonUtils.getJsonValueFromFile("transforms/trusts-new-individual-protector-transform-before.json")
 
         val afterJson =
-          JsonUtils.getJsonValueFromFile("transforms/trusts-new-individual-beneficiary-transform-after-declaration.json")
+          JsonUtils.getJsonValueFromFile("transforms/trusts-new-individual-protector-transform-after-declaration.json")
 
-        val amended = IndividualDetailsType(
+        val amended = Protector(
           lineNo = None,
           bpMatchStatus = None,
           NameType("Amended New First 3", None, "Amended New Last 3"),
           dateOfBirth = None,
-          vulnerableBeneficiary = true,
-          None,
-          None,
-          None,
-          None,
+          identification = None,
           LocalDate.parse("2018-02-28"),
           None
         )
@@ -169,12 +155,11 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
             |    "firstName": "New First 3",
             |    "lastName": "New Last 3"
             |  },
-            |  "vulnerableBeneficiary": false,
             |  "entityStart": "2018-02-28"
             |}
             |""".stripMargin)
 
-        val transformer = AmendIndividualBeneficiaryTransform(2, Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"))
+        val transformer = AmendIndividualProtectorTransform(2, Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"))
 
         val applied = transformer.applyTransform(beforeJson).get
         val result = transformer.applyDeclarationTransform(applied).get

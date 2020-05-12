@@ -31,8 +31,8 @@ class AmendBusinessSettlorTransformSpec extends FreeSpec with MustMatchers {
 
       "amend a settlors details by replacing" in {
 
-        val beforeJson = JsonUtils.getJsonValueFromFile("trusts-business-settlor-transform-before.json")
-        val afterJson = JsonUtils.getJsonValueFromFile("trusts-business-settlor-transform-after.json")
+        val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-business-settlor-transform-before.json")
+        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-business-settlor-transform-after.json")
 
         val amended = SettlorCompany(
           lineNo = None,
@@ -67,10 +67,10 @@ class AmendBusinessSettlorTransformSpec extends FreeSpec with MustMatchers {
       "set an end date for the original beneficiary, adding in the amendment as a new settlor for a settlor known by etmp" in {
 
         val beforeJson =
-          JsonUtils.getJsonValueFromFile("trusts-business-settlor-transform-before.json")
+          JsonUtils.getJsonValueFromFile("transforms/trusts-business-settlor-transform-before.json")
 
         val afterJson =
-          JsonUtils.getJsonValueFromFile("trusts-business-settlor-transform-after-declaration.json")
+          JsonUtils.getJsonValueFromFile("transforms/trusts-business-settlor-transform-after-declaration.json")
 
         val amended = SettlorCompany(
           lineNo = None,
@@ -102,10 +102,10 @@ class AmendBusinessSettlorTransformSpec extends FreeSpec with MustMatchers {
 
       "amend the new settlor that is not known to etmp" in {
         val beforeJson =
-          JsonUtils.getJsonValueFromFile("trusts-new-business-settlor-transform-before.json")
+          JsonUtils.getJsonValueFromFile("transforms/trusts-new-business-settlor-transform-before.json")
 
         val afterJson =
-          JsonUtils.getJsonValueFromFile("trusts-new-business-settlor-transform-after-declaration.json")
+          JsonUtils.getJsonValueFromFile("transforms/trusts-new-business-settlor-transform-after-declaration.json")
 
         val amended = SettlorCompany(
           lineNo = None,

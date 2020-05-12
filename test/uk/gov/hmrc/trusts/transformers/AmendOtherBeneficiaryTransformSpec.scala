@@ -32,8 +32,8 @@ class AmendOtherBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
 
       "amend a beneficiaries details by replacing the beneficiary" in {
 
-        val beforeJson = JsonUtils.getJsonValueFromFile("trusts-other-beneficiary-transform-before.json")
-        val afterJson = JsonUtils.getJsonValueFromFile("trusts-other-beneficiary-transform-after.json")
+        val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-other-beneficiary-transform-before.json")
+        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-other-beneficiary-transform-after.json")
 
         val amended = OtherType(
           lineNo = None,
@@ -73,10 +73,10 @@ class AmendOtherBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
       "set an end date for the original beneficiary, adding in the amendment as a new beneficiary for a beneficiary known by etmp" in {
 
         val beforeJson =
-          JsonUtils.getJsonValueFromFile("trusts-other-beneficiary-transform-before.json")
+          JsonUtils.getJsonValueFromFile("transforms/trusts-other-beneficiary-transform-before.json")
 
         val afterJson =
-          JsonUtils.getJsonValueFromFile("trusts-other-beneficiary-transform-after-declaration.json")
+          JsonUtils.getJsonValueFromFile("transforms/trusts-other-beneficiary-transform-after-declaration.json")
 
         val amended = OtherType(
           lineNo = None,
@@ -113,10 +113,10 @@ class AmendOtherBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
 
       "amend the new beneficiary that is not known to etmp" in {
         val beforeJson =
-          JsonUtils.getJsonValueFromFile("trusts-new-other-beneficiary-transform-before.json")
+          JsonUtils.getJsonValueFromFile("transforms/trusts-new-other-beneficiary-transform-before.json")
 
         val afterJson =
-          JsonUtils.getJsonValueFromFile("trusts-new-other-beneficiary-transform-after-declaration.json")
+          JsonUtils.getJsonValueFromFile("transforms/trusts-new-other-beneficiary-transform-after-declaration.json")
 
         val amended = OtherType(
           lineNo = None,
