@@ -146,8 +146,8 @@
             }
           }
         ],
-        "protector": {
-          "company": [
+        "protectors": {
+          "protectorCompany": [
             {
               "entityStart": "2010-05-03",
               "name": "TestCompany"

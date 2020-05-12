@@ -74,7 +74,7 @@ class AddCompanyProtectorSpec extends FreeSpec with MustMatchers with MockitoSug
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val addRequest = FakeRequest(POST, "/trusts/add-company-protector/5465416546")
+          val addRequest = FakeRequest(POST, "/trusts/add-business-protector/5465416546")
             .withBody(newCompanyProtectorJson)
             .withHeaders(CONTENT_TYPE -> "application/json")
 
