@@ -85,4 +85,23 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
     }
   }
 
+
+  def amendBusinessProtector(utr: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
+    implicit request =>
+      request.body.validate[ProtectorCompany] match {
+        case JsSuccess(businessProtector, _) =>
+          transformService.amendBusinessProtectorTransformer(
+            utr,
+            index,
+            request.identifier,
+            businessProtector
+          ) map { _ =>
+            Ok
+          }
+        case JsError(errors) =>
+          logger.warn(s"[ProtectorTransformationController][amendBusinessProtector]" +
+            s" Supplied payload could not be read as a ProtectorCompany - $errors")
+          Future.successful(BadRequest)
+      }
+  }
 }

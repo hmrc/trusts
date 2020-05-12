@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
-import play.api.libs.json.{JsObject, JsValue, __}
+import play.api.libs.json.{JsObject, JsValue, Json, __}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustProtector, DisplayTrustProtectorCompany, TrustProcessedResponse}
@@ -28,8 +28,9 @@ import uk.gov.hmrc.trusts.transformers._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}
 
-class ProtectorTransformationService @Inject()(transformationService: TransformationService)
-                                              (implicit ec:ExecutionContext) extends JsonOperations {
+class ProtectorTransformationService @Inject()(transformationService: TransformationService,
+                                               localDateService: LocalDateService
+                                              )(implicit ec:ExecutionContext) extends JsonOperations {
 
   def removeProtector(utr: String, internalId: String, removeProtector: RemoveProtector)
                      (implicit hc: HeaderCarrier) : Future[Success.type] = {
@@ -72,5 +73,23 @@ class ProtectorTransformationService @Inject()(transformationService: Transforma
 
   def addIndividualProtectorTransformer(utr: String, internalId: String, newProtector: DisplayTrustProtector): Future[Success.type] = {
     transformationService.addNewTransform(utr, internalId, AddIndividualProtectorTransform(newProtector)).map(_ => Success)
+  }
+
+  def amendBusinessProtectorTransformer(utr: String,
+                                         index: Int,
+                                         internalId: String,
+                                         amended: ProtectorCompany
+                                       )(implicit hc: HeaderCarrier): Future[Success.type] = {
+    getTransformedTrustJson(utr, internalId)
+      .map(findProtectorJson(_, "protectorCompany", index))
+      .flatMap(Future.fromTry)
+      .flatMap { protectorJson =>
+
+        transformationService.addNewTransform(
+          utr,
+          internalId,
+          AmendBusinessProtectorTransform(index, Json.toJson(amended), protectorJson, localDateService.now)
+        ).map(_ => Success)
+      }
   }
 }

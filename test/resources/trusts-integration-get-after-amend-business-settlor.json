@@ -240,6 +240,33 @@
               "entityStart": "1998-02-12"
             }
           ]
+        },
+        "protectors": {
+          "protector": [
+            {
+              "lineNo": "1",
+              "name": {
+                "firstName": "abcdefghijkl",
+                "middleName": "abcdefghijklmn",
+                "lastName": "abcde"
+              },
+              "dateOfBirth": "2001-01-01",
+              "identification": {
+                "nino": "ST019091"
+              },
+              "entityStart": "1998-02-12"
+            }
+          ],
+          "protectorCompany": [
+            {
+              "lineNo": "1",
+              "name": "abcdefghijklmnopqr",
+              "identification": {
+                "utr": "5465416546"
+              },
+              "entityStart": "1998-02-12"
+            }
+          ]
         }
       },
       "assets": {
