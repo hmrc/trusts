@@ -24,7 +24,7 @@ case class AddCompanyProtectorTransform(newCompanyProtector: DisplayTrustProtect
   extends DeltaTransform
   with JsonOperations {
 
-  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'protector \ 'company
+  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'protectors \ 'protectorCompany
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     addToList(input, path, Json.toJson(newCompanyProtector))
