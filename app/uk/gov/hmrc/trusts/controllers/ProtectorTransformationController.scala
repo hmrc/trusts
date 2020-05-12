@@ -22,7 +22,8 @@ import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveProtector
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustProtector
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustProtector, DisplayTrustProtectorCompany}
+import uk.gov.hmrc.trusts.models.variation.ProtectorCompany
 import uk.gov.hmrc.trusts.services.ProtectorTransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
@@ -66,4 +67,22 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
       }
     }
   }
+  def addCompanyProtector(utr: String): Action[JsValue] = identify.async(parse.json) {
+    implicit request => {
+      request.body.validate[DisplayTrustProtectorCompany] match {
+        case JsSuccess(newBeneficiary, _) =>
+          transformService.addCompanyProtectorTransformer(
+            utr,
+            request.identifier,
+            newBeneficiary
+          ) map { _ =>
+            Ok
+          }
+        case JsError(errors) =>
+          logger.warn(s"[ProtectorTransformationController][addCompanyProtector] Supplied json could not be read as a Company Beneficiary - $errors")
+          Future.successful(BadRequest)
+      }
+    }
+  }
+
 }
