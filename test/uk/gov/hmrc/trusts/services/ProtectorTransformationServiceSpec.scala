@@ -106,5 +106,26 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
           "internalId", AddIndividualProtectorTransform(newProtector))
       }
     }
+
+    "must add a new add company protector transform using the transformation service" in {
+      val transformationService = mock[TransformationService]
+      val service = new ProtectorTransformationService(transformationService)
+      val newCompanyProtector = DisplayTrustProtectorCompany(
+        name = "TestCompany",
+        identification = None,
+        lineNo = None,
+        bpMatchStatus = None,
+        entityStart = LocalDate.parse("2010-05-03")
+      )
+
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+      val result = service.addCompanyProtectorTransformer("utr", "internalId", newCompanyProtector)
+      whenReady(result) { _ =>
+
+        verify(transformationService).addNewTransform("utr",
+          "internalId", AddCompanyProtectorTransform(newCompanyProtector))
+      }
+    }
   }
 }

@@ -84,6 +84,8 @@ POST        /add-business-settlor/:utr                          uk.gov.hmrc.trus
 
 POST        /add-individual-protector/:utr                      uk.gov.hmrc.trusts.controllers.ProtectorTransformationController.addIndividualProtector(utr: String)
 
+POST        /add-business-protector/:utr                      uk.gov.hmrc.trusts.controllers.ProtectorTransformationController.addCompanyProtector(utr: String)
+
 POST        /amend-business-protector/:utr/:index               uk.gov.hmrc.trusts.controllers.ProtectorTransformationController.amendBusinessProtector(utr: String, index: Int)
 
 PUT         /:utr/protectors/remove                             uk.gov.hmrc.trusts.controllers.ProtectorTransformationController.removeProtector(utr: String)

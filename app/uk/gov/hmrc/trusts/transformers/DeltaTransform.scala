@@ -82,6 +82,7 @@ object DeltaTransform {
 
   def protectorReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
     readsForTransform[AddIndividualProtectorTransform](AddIndividualProtectorTransform.key) orElse
+      readsForTransform[AddCompanyProtectorTransform](AddCompanyProtectorTransform.key) orElse
     readsForTransform[AmendBusinessProtectorTransform](AmendBusinessProtectorTransform.key) orElse
     readsForTransform[RemoveProtectorsTransform](RemoveProtectorsTransform.key)
   }
@@ -170,7 +171,8 @@ object DeltaTransform {
   def addProtectorsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
     case transform: AddIndividualProtectorTransform =>
       Json.obj(AddIndividualProtectorTransform.key -> Json.toJson(transform)(AddIndividualProtectorTransform.format))
-  }
+    case transform: AddCompanyProtectorTransform =>
+      Json.obj(AddCompanyProtectorTransform.key -> Json.toJson(transform)(AddCompanyProtectorTransform.format))  }
 
   def amendProtectorsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
     case transform: AmendBusinessProtectorTransform =>
