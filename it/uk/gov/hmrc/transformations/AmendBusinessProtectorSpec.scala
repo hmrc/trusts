@@ -72,7 +72,7 @@ class AmendBusinessProtectorSpec extends FreeSpec with MustMatchers with Mockito
             """
               |{
               |  "lineNo": "1",
-              |  "name": "New Company Name",
+              |  "name": "New Protector Name",
               |  "identification": {
               |    "utr": "5465416546"
               |  },
