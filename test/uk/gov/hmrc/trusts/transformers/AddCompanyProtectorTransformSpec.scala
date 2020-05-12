@@ -34,11 +34,11 @@ class AddCompanyProtectorTransformSpec extends FreeSpec with MustMatchers {
   )
 
   val newSecondCompanyProtector = DisplayTrustProtectorCompany(
-    name = "TestCompany",
+    name = "TheNewOne",
     identification = None,
     lineNo = None,
     bpMatchStatus = None,
-    entityStart = LocalDate.parse("2010-05-03")
+    entityStart = LocalDate.parse("2019-01-01")
   )
 
   "the add company protector transformer should" - {
