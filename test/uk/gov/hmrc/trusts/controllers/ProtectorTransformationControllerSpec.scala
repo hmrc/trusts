@@ -29,7 +29,7 @@ import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustProtector
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustProtector, DisplayTrustProtectorCompany}
 import uk.gov.hmrc.trusts.services.ProtectorTransformationService
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -89,6 +89,52 @@ class ProtectorTransformationControllerSpec extends FreeSpec
       status(result) mustBe BAD_REQUEST
     }
   }
+
+  "Add company protector" - {
+
+    "must add a new company protector transform" in {
+
+      val protectorTransformationService = mock[ProtectorTransformationService]
+      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)
+
+      val newCompanyProtector = DisplayTrustProtectorCompany(
+        name = "TestCompany",
+        identification = None,
+        lineNo = None,
+        bpMatchStatus = None,
+        entityStart = LocalDate.parse("2010-05-03")
+      )
+
+      when(protectorTransformationService.addCompanyProtectorTransformer(any(), any(), any()))
+        .thenReturn(Future.successful(true))
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(newCompanyProtector))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.addCompanyProtector("aUTR").apply(request)
+
+      status(result) mustBe OK
+      verify(protectorTransformationService).addCompanyProtectorTransformer(
+        equalTo("aUTR"),
+        equalTo("id"),
+        equalTo(newCompanyProtector))
+    }
+
+    "must return an error for malformed json" in {
+
+      val protectorTransformationService = mock[ProtectorTransformationService]
+      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.parse("{}"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.addCompanyProtector("aUTR").apply(request)
+      status(result) mustBe BAD_REQUEST
+    }
+  }
+
 
   "Amend individual protector" - {
 
