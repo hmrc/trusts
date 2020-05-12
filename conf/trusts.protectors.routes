@@ -1,6 +1,6 @@
 
-POST        /add-individual/:utr                      uk.gov.hmrc.trusts.controllers.ProtectorTransformationController.addIndividualProtector(utr: String)
+POST        /add-individual/:utr                     uk.gov.hmrc.trusts.controllers.ProtectorTransformationController.addIndividualProtector(utr: String)
 
-POST        /amend-individual/:utr/:index               uk.gov.hmrc.trusts.controllers.SettlorTransformationController.amendIndividualSettlor(utr: String, index: Int)
+POST        /amend-individual/:utr/:index            uk.gov.hmrc.trusts.controllers.ProtectorTransformationController.amendIndividualProtector(utr: String, index: Int)
 
 PUT         /:utr/remove                             uk.gov.hmrc.trusts.controllers.ProtectorTransformationController.removeProtector(utr: String)

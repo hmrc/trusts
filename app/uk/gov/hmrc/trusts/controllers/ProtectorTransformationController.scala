@@ -23,6 +23,7 @@ import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveProtector
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustProtector
+import uk.gov.hmrc.trusts.models.variation.Protector
 import uk.gov.hmrc.trusts.services.ProtectorTransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
@@ -61,6 +62,27 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
           }
         case JsError(errors) =>
           logger.warn(s"[ProtectorTransformationController][addIndividualProtector]" +
+            s" Supplied json could not be read as a Protector - $errors")
+          Future.successful(BadRequest)
+      }
+    }
+  }
+
+  def amendIndividualProtector(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
+    implicit request => {
+      request.body.validate[Protector] match {
+        case JsSuccess(protector, _) =>
+
+          transformService.amendIndividualProtectorTransformer(
+            utr,
+            index,
+            request.identifier,
+            protector
+          ) map { _ =>
+            Ok
+          }
+        case JsError(errors) =>
+          logger.warn(s"[ProtectorTransformationController][amendIndividualProtector]" +
             s" Supplied json could not be read as a Protector - $errors")
           Future.successful(BadRequest)
       }

@@ -46,8 +46,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
 
     "must add a new individual protector transform" in {
 
-      val protectorTransformationService = mock[ProtectorTransformationService]
-      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)
+      val protectorTransformationService: ProtectorTransformationService = mock[ProtectorTransformationService]
 
       val newProtector = DisplayTrustProtector(
         lineNo = None,
@@ -58,10 +57,10 @@ class ProtectorTransformationControllerSpec extends FreeSpec
         entityStart = LocalDate.parse("2010-05-03")
       )
 
-      val newDescription = "Some new description"
-
       when(protectorTransformationService.addIndividualProtectorTransformer(any(), any(), any()))
         .thenReturn(Future.successful(Success))
+
+      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(newProtector))
@@ -78,7 +77,8 @@ class ProtectorTransformationControllerSpec extends FreeSpec
 
     "must return an error for malformed json" in {
 
-      val protectorTransformationService = mock[ProtectorTransformationService]
+      val protectorTransformationService: ProtectorTransformationService = mock[ProtectorTransformationService]
+
       val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)
 
       val request = FakeRequest("POST", "path")
@@ -89,16 +89,70 @@ class ProtectorTransformationControllerSpec extends FreeSpec
       status(result) mustBe BAD_REQUEST
     }
   }
-  
+
+  "Amend individual protector" - {
+
+    val index = 0
+
+    "must add a new amend individual protector transform" in {
+
+      val protectorTransformationService: ProtectorTransformationService = mock[ProtectorTransformationService]
+
+      val newProtector = variation.Protector(
+        lineNo = None,
+        bpMatchStatus = None,
+        name = NameType("First", None, "Last"),
+        dateOfBirth = None,
+        identification = None,
+        entityStart = LocalDate.parse("2010-05-03"),
+        entityEnd = None
+      )
+
+      when(protectorTransformationService.amendIndividualProtectorTransformer(any(), any(), any(), any())(any()))
+        .thenReturn(Future.successful(Success))
+
+      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(newProtector))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendIndividualProtector("aUTR", index).apply(request)
+
+      status(result) mustBe OK
+
+      verify(protectorTransformationService).amendIndividualProtectorTransformer(
+        equalTo("aUTR"),
+        equalTo(index),
+        equalTo("id"),
+        equalTo(newProtector))(any())
+    }
+
+    "must return an error for malformed json" in {
+
+      val protectorTransformationService: ProtectorTransformationService = mock[ProtectorTransformationService]
+
+      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.parse("{}"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendIndividualProtector("aUTR", index).apply(request)
+      status(result) mustBe BAD_REQUEST
+    }
+  }
+
   "remove protector" - {
 
     "add a new remove protector transform " in {
 
-      val protectorTransformationService = mock[ProtectorTransformationService]
-      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)
+      val protectorTransformationService: ProtectorTransformationService = mock[ProtectorTransformationService]
 
       when(protectorTransformationService.removeProtector(any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
+
+      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.obj(
