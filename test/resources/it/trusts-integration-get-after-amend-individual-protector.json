@@ -251,13 +251,13 @@
             {
               "lineNo": "1",
               "name": {
-                "firstName": "abcdefghijkl",
-                "middleName": "abcdefghijklmn",
-                "lastName": "abcde"
+                "firstName": "John",
+                "middleName": "William",
+                "lastName": "O'Connor"
               },
-              "dateOfBirth": "2001-01-01",
+              "dateOfBirth": "2002-01-01",
               "identification": {
-                "nino": "ST019091"
+                "nino": "KC456736"
               },
               "entityStart": "1998-02-12"
             }
@@ -265,7 +265,7 @@
           "protectorCompany": [
             {
               "lineNo": "1",
-              "name": "New Protector Name",
+              "name": "abcdefghijklmnopqr",
               "identification": {
                 "utr": "5465416546"
               },

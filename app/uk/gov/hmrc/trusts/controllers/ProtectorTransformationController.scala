@@ -67,7 +67,7 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
       }
     }
   }
-  def addCompanyProtector(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def addBusinessProtector(utr: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[DisplayTrustProtectorCompany] match {
         case JsSuccess(newBeneficiary, _) =>
@@ -90,7 +90,6 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
     implicit request => {
       request.body.validate[Protector] match {
         case JsSuccess(protector, _) =>
-
           transformService.amendIndividualProtectorTransformer(
             utr,
             index,
@@ -100,8 +99,8 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[ProtectorTransformationController][amendIndividualProtector]" +
-            s" Supplied json could not be read as a Protector - $errors")
+            logger.warn(s"[ProtectorTransformationController][amendIndividualProtector]" +
+              s" Supplied json could not be read as a Protector - $errors")
           Future.successful(BadRequest)
       }
     }

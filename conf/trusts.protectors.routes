@@ -3,4 +3,6 @@ POST        /add-individual/:utr                     uk.gov.hmrc.trusts.controll
 
 POST        /amend-individual/:utr/:index            uk.gov.hmrc.trusts.controllers.ProtectorTransformationController.amendIndividualProtector(utr: String, index: Int)
 
+POST        /amend-business/:utr/:index               uk.gov.hmrc.trusts.controllers.ProtectorTransformationController.amendBusinessProtector(utr: String, index: Int)
+
 PUT         /:utr/remove                             uk.gov.hmrc.trusts.controllers.ProtectorTransformationController.removeProtector(utr: String)

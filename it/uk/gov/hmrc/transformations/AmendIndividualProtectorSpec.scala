@@ -74,13 +74,12 @@ class AmendIndividualProtectorSpec extends FreeSpec with MustMatchers with Mocki
             """
               |{
               |              "lineNo":"1",
-              |              "bpMatchStatus": "01",
               |              "name":{
               |                "firstName":"John",
               |                "middleName":"William",
               |                "lastName":"O'Connor"
               |              },
-              |              "dateOfBirth":"1956-02-12",
+              |              "dateOfBirth":"2002-01-01",
               |              "identification":{
               |                "nino":"KC456736"
               |              },
