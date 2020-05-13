@@ -1,0 +1,85 @@
+{
+  "details":{
+    "trust":{
+      "entities":{
+        "leadTrustees":{
+          "lineNo":"1",
+          "bpMatchStatus":"01",
+          "name":"Trust Services LTD",
+          "phoneNumber":"0754545454",
+          "email":"me@you.com",
+          "identification":{
+            "utr":"5465416546"
+          },
+          "entityStart":"1998-02-12"
+        },
+        "trustees": [
+          {
+            "trusteeInd": {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "name": {
+                "firstName": "Tamara",
+                "middleName": "Hingis",
+                "lastName": "Jones"
+              },
+              "dateOfBirth": "1965-02-28",
+              "identification": {
+                "nino": "AA000000A"
+              },
+              "phoneNumber": "+447456788112",
+              "entityStart": "2017-02-28"
+            }
+          },
+          {
+            "trusteeOrg": {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "name": "MyOrg Incorporated",
+              "phoneNumber": "+447456788112",
+              "email": "a",
+              "identification": {
+                "utr": "1234567890"
+              },
+              "entityStart": "2017-02-28"
+            }
+          }
+        ],
+        "protectors": {
+          "protector": [
+            {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "name": {
+                "firstName": "First 1",
+                "lastName": "Last 1"
+              },
+              "entityStart": "2018-02-28"
+            },
+            {
+              "lineNo": "2",
+              "bpMatchStatus": "01",
+              "name": {
+                "firstName": "First 2",
+                "lastName": "Last 2"
+              },
+              "dateOfBirth": "2010-05-03",
+              "identification": {
+                "nino": "JP1212122A"
+              },
+              "entityStart": "2018-02-28"
+            },
+            {
+              "name": {
+                "firstName": "Amended New First 3",
+                "lastName": "Amended New Last 3"
+              },
+              "entityStart": "2018-02-28"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "otherfields" : "exist"
+}

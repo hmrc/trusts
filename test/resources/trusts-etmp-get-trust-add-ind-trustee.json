@@ -208,6 +208,23 @@
               "entityStart":"1998-02-12"
             }
           ]
+        },
+        "protectors":{
+          "protector":[
+            {
+              "lineNo":"1",
+              "bpMatchStatus": "01",
+              "name":{
+                "firstName":"John",
+                "middleName":"William",
+                "lastName":"O'Connor"
+              },
+              "dateOfBirth":"1956-02-12",
+              "identification":{
+                "nino":"KC456736"
+              },
+              "entityStart":"1998-02-12"
+            }]
         }
       },
       "assets":{

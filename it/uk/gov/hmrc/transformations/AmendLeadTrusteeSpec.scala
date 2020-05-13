@@ -39,7 +39,7 @@ import scala.concurrent.Future
 class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar with TransformIntegrationTest {
 
   val getTrustResponseFromDES: GetTrustSuccessResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
-  val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+  val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an amend lead trustee call" - {
     "must return amended data in a subsequent 'get' call" in {
@@ -66,7 +66,7 @@ class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar 
           None
       )
 
-      val expectedGetAfterAmendLeadTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-after-amend-lead-trustee.json")
+      val expectedGetAfterAmendLeadTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-lead-trustee.json")
 
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
@@ -85,7 +85,7 @@ class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar 
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val amendRequest = FakeRequest(POST, "/trusts/amend-lead-trustee/5174384721")
+          val amendRequest = FakeRequest(POST, "/trusts/trustees/amend-lead/5174384721")
             .withBody(Json.toJson(newTrusteeIndInfo))
             .withHeaders(CONTENT_TYPE -> "application/json")
 

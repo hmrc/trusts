@@ -1,49 +1,40 @@
 {
-  "applicationType": "01",
-  "matchData": {
-    "utr": "5465416546"
+  "responseHeader": {
+    "status": "Processed",
+    "formBundleNo": "000012387218"
   },
-  "correspondence": {
-    "abroadIndicator": false,
-    "name": "Abram James",
-    "address": {
-      "line1": "1344 Army Road",
-      "line2": "Suite 111",
-      "line3": "Telford",
-      "line4": "Shropshire",
-      "postCode": "TF1 5DR",
-      "country": "GB"
+  "getTrust": {
+    "matchData": {
+      "utr": "5465416546"
     },
-    "phoneNumber": "+4423400342"
-  },
-  "yearsReturns": {
-    "returns": [
-      {
-        "taxReturnYear": "18",
-        "taxConsequence": true
+    "correspondence": {
+      "abroadIndicator": false,
+      "name": "Abram James",
+      "address": {
+        "line1": "1344 Army Road",
+        "line2": "Suite 111",
+        "line3": "Telford",
+        "line4": "Shropshire",
+        "postCode": "TF1 5DR",
+        "country": "GB"
       },
-      {
-        "taxReturnYear": "19",
-        "taxConsequence": true
-      }
-    ]
-  },
-  "declaration": {
-    "name": {
-      "firstName": "Abram",
-      "middleName": "Joe",
-      "lastName": "James"
+      "phoneNumber": "+4423400342"
     },
-    "address": {
-      "line1": "1344 Army Road",
-      "line2": "Suite 111",
-      "line3": "Telford",
-      "line4": "Shropshire",
-      "postCode": "TF1 5DR",
-      "country": "GB"
-    }
-  },
-  "details": {
+    "declaration": {
+      "name": {
+        "firstName": "Abram",
+        "middleName": "Joe",
+        "lastName": "James"
+      },
+      "address": {
+        "line1": "1344 Army Road",
+        "line2": "Suite 111",
+        "line3": "Telford",
+        "line4": "Shropshire",
+        "postCode": "TF1 5DR",
+        "country": "GB"
+      }
+    },
     "trust": {
       "details": {
         "startDate": "2001-01-01",
@@ -76,6 +67,22 @@
           }
         ],
         "beneficiary": {
+          "company": [
+            {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "organisationName": "Company 1",
+              "entityStart": "2001-01-01"
+            }
+          ],
+          "charity": [
+            {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "organisationName": "Charity 1",
+              "entityStart": "2001-01-01"
+            }
+          ],
           "individualDetails": [
             {
               "lineNo": "1",
@@ -109,6 +116,7 @@
           "other": [
             {
               "lineNo": "1",
+              "description": "Lorem ipsum",
               "address": {
                 "line1": "1344 Army Road",
                 "line2": "Suite 111",
@@ -116,14 +124,48 @@
                 "postCode": "TF1 5DR",
                 "country": "GB"
               },
-              "description": "Lorem ipsum",
               "entityStart": "1998-02-12"
+            }
+          ],
+          "unidentified": [
+            {
+              "lineNo":"1",
+              "bpMatchStatus": "01",
+              "description": "Some Description",
+              "beneficiaryShareOfIncome": "25",
+              "entityStart": "2017-02-28"
+            }
+          ],
+          "trust": [
+            {
+              "bpMatchStatus": "01",
+              "entityStart": "2001-01-01",
+              "lineNo": "1",
+              "organisationName": "Trust 1"
+            }
+          ],
+          "large": [
+            {
+              "lineNo":"1",
+              "bpMatchStatus": "01",
+              "organisationName": "Organisation Name",
+              "identification": {
+                "address": {
+                  "line1": "Line 1",
+                  "line2": "Line 2",
+                  "postCode": "NE1 1NE",
+                  "country": "GB"
+                }
+              },
+              "description": "Description",
+              "numberOfBeneficiary": "501",
+              "entityStart": "1990-10-10"
             }
           ]
         },
         "deceased": {
-          "lineNo": "1",
           "bpMatchStatus": "01",
+          "lineNo": "1",
           "name": {
             "firstName": "John",
             "middleName": "William",
@@ -136,39 +178,42 @@
           },
           "entityStart": "1998-02-12"
         },
-        "leadTrustees": {
-          "lineNo": "1",
-          "bpMatchStatus": "01",
-          "name": "Trust Services LTD",
-          "phoneNumber": "0754545454",
-          "email": "me@you.com",
-          "identification": {
-            "utr": "5465416546"
-          },
-          "entityStart": "1998-02-12"
+        "leadTrustee": {
+          "leadTrusteeOrg": {
+            "lineNo": "1",
+            "bpMatchStatus": "01",
+            "name": "Trust Services LTD",
+            "phoneNumber": "0754545454",
+            "email": "me@you.com",
+            "identification": {
+              "address": {
+                "country": "GB",
+                "line1": "1344 Army Road",
+                "line2": "Suite 111",
+                "line3": "Telford",
+                "line4": "Shropshire",
+                "postCode": "TF1 5DR"
+              },
+              "utr": "5465416546"
+            },
+            "entityStart": "1998-02-12"
+          }
         },
         "trustees": [
           {
             "trusteeInd": {
               "lineNo": "1",
-              "bpMatchStatus": "01",
               "name": {
                 "firstName": "John",
                 "middleName": "William",
                 "lastName": "O'Connor"
               },
               "dateOfBirth": "1956-02-12",
+              "phoneNumber": "0121546546",
               "identification": {
                 "nino": "ST123456"
               },
-              "phoneNumber": "0121546546",
               "entityStart": "1998-02-12"
-            }
-          },
-          {
-            "trusteeOrg": {
-              "name": "Company Name",
-              "entityStart": "2020-01-30"
             }
           }
         ],
@@ -201,22 +246,32 @@
             }
           ]
         },
-        "protectors":{
-          "protector":[
+        "protectors": {
+          "protector": [
             {
-              "lineNo":"1",
-              "bpMatchStatus": "01",
-              "name":{
-                "firstName":"John",
-                "middleName":"William",
-                "lastName":"O'Connor"
+              "lineNo": "1",
+              "name": {
+                "firstName": "John",
+                "middleName": "William",
+                "lastName": "O'Connor"
               },
-              "dateOfBirth":"1956-02-12",
-              "identification":{
-                "nino":"KC456736"
+              "dateOfBirth": "2002-01-01",
+              "identification": {
+                "nino": "KC456736"
               },
-              "entityStart":"1998-02-12"
-            }]
+              "entityStart": "1998-02-12"
+            }
+          ],
+          "protectorCompany": [
+            {
+              "lineNo": "1",
+              "name": "abcdefghijklmnopqr",
+              "identification": {
+                "utr": "5465416546"
+              },
+              "entityStart": "1998-02-12"
+            }
+          ]
         }
       },
       "assets": {

@@ -44,7 +44,7 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
   private lazy val expectedInitialGetJson: JsValue =
-    JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+    JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   private object TestLocalDateService extends LocalDateService {
     override def now: LocalDate = LocalDate.of(2020, 4, 1)
@@ -53,10 +53,10 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
   "doing a bunch of beneficiary transforms" - {
     "must return amended data in a subsequent 'get' call" in {
       lazy val expectedGetAfterAddBeneficiaryJson: JsValue =
-        JsonUtils.getJsonValueFromFile("trusts-integration-get-after-combo-beneficiary.json")
+        JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-combo-beneficiary.json")
 
       lazy val expectedDeclaredBeneficiaryJson: JsValue =
-        JsonUtils.getJsonValueFromFile("trusts-integration-declared-combo-beneficiary.json")
+        JsonUtils.getJsonValueFromFile("it/trusts-integration-declared-combo-beneficiary.json")
 
 
       val stubbedDesConnector = mock[DesConnector]
@@ -142,7 +142,7 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
         |""".stripMargin
     )
 
-    val addRequest = FakeRequest(POST, "/trusts/add-charity-beneficiary/5174384721")
+    val addRequest = FakeRequest(POST, "/trusts/beneficiaries/add-charity/5174384721")
       .withBody(newBeneficiaryJson)
       .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -167,7 +167,7 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
         |""".stripMargin
     )
 
-    val addRequest = FakeRequest(POST, "/trusts/add-individual-beneficiary/5174384721")
+    val addRequest = FakeRequest(POST, "/trusts/beneficiaries/add-individual/5174384721")
       .withBody(newBeneficiaryJson)
       .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -184,7 +184,7 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
         |""".stripMargin
     )
 
-    val addRequest = FakeRequest(POST, "/trusts/add-unidentified-beneficiary/5174384721")
+    val addRequest = FakeRequest(POST, "/trusts/beneficiaries/add-unidentified/5174384721")
       .withBody(newBeneficiaryJson)
       .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -192,7 +192,7 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
   }
 
   private def amendUnidentifiedBeneficiary(application: Application) = {
-    val addRequest = FakeRequest(POST, "/trusts/amend-unidentified-beneficiary/5174384721/0")
+    val addRequest = FakeRequest(POST, "/trusts/beneficiaries/amend-unidentified/5174384721/0")
       .withBody(JsString("Amended Beneficiary Description"))
       .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -235,7 +235,7 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
         |""".stripMargin
     )
 
-    val addRequest = FakeRequest(POST, "/trusts/amend-charity-beneficiary/5174384721/0")
+    val addRequest = FakeRequest(POST, "/trusts/beneficiaries/amend-charity/5174384721/0")
       .withBody(amendedBeneficiaryJson)
       .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -278,7 +278,7 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
         |""".stripMargin
     )
 
-    val addRequest = FakeRequest(POST, "/trusts/amend-company-beneficiary/5174384721/0")
+    val addRequest = FakeRequest(POST, "/trusts/beneficiaries/amend-company/5174384721/0")
       .withBody(amendedBeneficiaryJson)
       .withHeaders(CONTENT_TYPE -> "application/json")
 

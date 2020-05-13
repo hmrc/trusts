@@ -39,7 +39,7 @@ class AddBusinessSettlorSpec extends FreeSpec with MustMatchers with MockitoSuga
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
   lazy val expectedInitialGetJson: JsValue =
-    JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+    JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an add business settlor call" - {
     "must return add data in a subsequent 'get' call" in {
@@ -79,7 +79,7 @@ class AddBusinessSettlorSpec extends FreeSpec with MustMatchers with MockitoSuga
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val addRequest = FakeRequest(POST, "/trusts/add-business-settlor/5465416546")
+          val addRequest = FakeRequest(POST, "/trusts/settlors/add-business/5465416546")
             .withBody(newCompanySettlorJson)
             .withHeaders(CONTENT_TYPE -> "application/json")
 

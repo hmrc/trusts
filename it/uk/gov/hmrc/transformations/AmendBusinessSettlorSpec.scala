@@ -40,14 +40,14 @@ class AmendBusinessSettlorSpec extends FreeSpec with MustMatchers with MockitoSu
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
   val expectedInitialGetJson: JsValue =
-    JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+    JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an amend individual settlor call" - {
 
     "must return amended data in a subsequent 'get' call" in {
 
       val expectedGetAfterAmendJson: JsValue =
-        JsonUtils.getJsonValueFromFile("trusts-integration-get-after-amend-business-settlor.json")
+        JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-business-settlor.json")
 
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
@@ -80,7 +80,7 @@ class AmendBusinessSettlorSpec extends FreeSpec with MustMatchers with MockitoSu
           val index = 0
 
           // amend individual settlor
-          val amendRequest = FakeRequest(POST, s"/trusts/amend-business-settlor/5174384721/$index")
+          val amendRequest = FakeRequest(POST, s"/trusts/settlors/amend-business/5174384721/$index")
             .withBody(payload)
             .withHeaders(CONTENT_TYPE -> "application/json")
 

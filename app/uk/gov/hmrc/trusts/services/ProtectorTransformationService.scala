@@ -21,7 +21,7 @@ import play.api.libs.json.{JsObject, JsValue, Json, __}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustProtector, DisplayTrustProtectorCompany, TrustProcessedResponse}
-import uk.gov.hmrc.trusts.models.variation.ProtectorCompany
+import uk.gov.hmrc.trusts.models.variation._
 import uk.gov.hmrc.trusts.models.{RemoveProtector, Success}
 import uk.gov.hmrc.trusts.transformers._
 
@@ -50,7 +50,7 @@ class ProtectorTransformationService @Inject()(transformationService: Transforma
       }
   }
 
-  def addCompanyProtectorTransformer(utr: String, internalId: String, newProtectorCompany: DisplayTrustProtectorCompany): Future[Boolean] = {
+  def addBusinessProtectorTransformer(utr: String, internalId: String, newProtectorCompany: DisplayTrustProtectorCompany): Future[Boolean] = {
     transformationService.addNewTransform(utr, internalId, AddCompanyProtectorTransform(newProtectorCompany))
   }
 
@@ -75,6 +75,24 @@ class ProtectorTransformationService @Inject()(transformationService: Transforma
     transformationService.addNewTransform(utr, internalId, AddIndividualProtectorTransform(newProtector)).map(_ => Success)
   }
 
+
+  def amendIndividualProtectorTransformer(utr: String,
+                                          index: Int,
+                                          internalId: String,
+                                          amended: Protector)
+                                         (implicit hc: HeaderCarrier): Future[Success.type] = {
+    getTransformedTrustJson(utr, internalId)
+      .map(findProtectorJson(_, "protector", index))
+      .flatMap(Future.fromTry)
+      .flatMap { original =>
+        transformationService.addNewTransform(
+          utr,
+          internalId,
+          AmendIndividualProtectorTransform(index, Json.toJson(amended), original, localDateService.now)
+        ).map(_ => Success)
+      }
+  }
+
   def amendBusinessProtectorTransformer(utr: String,
                                          index: Int,
                                          internalId: String,
@@ -92,4 +110,5 @@ class ProtectorTransformationService @Inject()(transformationService: Transforma
         ).map(_ => Success)
       }
   }
+
 }

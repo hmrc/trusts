@@ -39,7 +39,7 @@ class AddIndividualBeneficiarySpec extends FreeSpec with MustMatchers with Mocki
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
   lazy val expectedInitialGetJson: JsValue =
-    JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+    JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an add individual beneficiary call" - {
     "must return amended data in a subsequent 'get' call" in {
@@ -62,7 +62,7 @@ class AddIndividualBeneficiarySpec extends FreeSpec with MustMatchers with Mocki
       )
 
       lazy val expectedGetAfterAddBeneficiaryJson: JsValue =
-        JsonUtils.getJsonValueFromFile("trusts-integration-get-after-add-individual-beneficiary.json")
+        JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-add-individual-beneficiary.json")
 
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
@@ -82,7 +82,7 @@ class AddIndividualBeneficiarySpec extends FreeSpec with MustMatchers with Mocki
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val addRequest = FakeRequest(POST, "/trusts/add-individual-beneficiary/5174384721")
+          val addRequest = FakeRequest(POST, "/trusts/beneficiaries/add-individual/5174384721")
             .withBody(newBeneficiaryJson)
             .withHeaders(CONTENT_TYPE -> "application/json")
 

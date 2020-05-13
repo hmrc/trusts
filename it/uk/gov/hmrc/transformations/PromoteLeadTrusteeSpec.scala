@@ -39,7 +39,7 @@ import scala.concurrent.Future
 class PromoteLeadTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar with TransformIntegrationTest {
 
   val getTrustResponseFromDES: GetTrustSuccessResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
-  val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+  val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "a promote lead trustee call" - {
 
@@ -67,7 +67,7 @@ class PromoteLeadTrusteeSpec extends FreeSpec with MustMatchers with MockitoSuga
           None
       )
 
-      val expectedGetAfterPromoteTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-after-promote-trustee.json")
+      val expectedGetAfterPromoteTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-promote-trustee.json")
 
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
@@ -86,7 +86,7 @@ class PromoteLeadTrusteeSpec extends FreeSpec with MustMatchers with MockitoSuga
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val promoteRequest = FakeRequest(POST, "/trusts/promote-trustee/5174384721/0")
+          val promoteRequest = FakeRequest(POST, "/trusts/trustees/promote/5174384721/0")
             .withBody(Json.toJson(newTrusteeIndInfo))
             .withHeaders(CONTENT_TYPE -> "application/json")
 

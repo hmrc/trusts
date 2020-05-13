@@ -1,5 +1,10 @@
 # microservice specific routes
 
+->          /trustees/                                          trusts.trustees.Routes
+->          /beneficiaries/                                     trusts.beneficiaries.Routes
+->          /settlors/                                          trusts.settlors.Routes
+->          /protectors/                                        trusts.protectors.Routes
+
 POST        /check                                              uk.gov.hmrc.trusts.controllers.CheckTrustController.checkExistingTrust
 
 POST        /register                                           uk.gov.hmrc.trusts.controllers.RegisterTrustController.registration
@@ -29,6 +34,8 @@ GET         /:utr/transformed/deceased-settlor-death-recorded   uk.gov.hmrc.trus
 POST        /variation                                          uk.gov.hmrc.trusts.controllers.TrustVariationsController.trustVariation
 
 POST        /declare/:utr                                       uk.gov.hmrc.trusts.controllers.TrustVariationsController.declare(utr: String)
+
+# Endpoints below are deprecated, to be removed once frontends are migrated
 
 POST        /amend-lead-trustee/:utr                            uk.gov.hmrc.trusts.controllers.TrusteeTransformationController.amendLeadTrustee(utr: String)
 
@@ -84,7 +91,7 @@ POST        /add-business-settlor/:utr                          uk.gov.hmrc.trus
 
 POST        /add-individual-protector/:utr                      uk.gov.hmrc.trusts.controllers.ProtectorTransformationController.addIndividualProtector(utr: String)
 
-POST        /add-business-protector/:utr                      uk.gov.hmrc.trusts.controllers.ProtectorTransformationController.addCompanyProtector(utr: String)
+POST        /add-business-protector/:utr                      uk.gov.hmrc.trusts.controllers.ProtectorTransformationController.addBusinessProtector(utr: String)
 
 POST        /amend-business-protector/:utr/:index               uk.gov.hmrc.trusts.controllers.ProtectorTransformationController.amendBusinessProtector(utr: String, index: Int)
 

@@ -32,8 +32,8 @@ class AmendCompanyBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
 
       "amend a beneficiary's details by replacing the beneficiary" in {
 
-        val beforeJson = JsonUtils.getJsonValueFromFile("trusts-company-beneficiary-transform-before.json")
-        val afterJson = JsonUtils.getJsonValueFromFile("trusts-company-beneficiary-transform-after.json")
+        val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-company-beneficiary-transform-before.json")
+        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-company-beneficiary-transform-after.json")
 
         val amended = BeneficiaryCompanyType(
           lineNo = None,
@@ -74,10 +74,10 @@ class AmendCompanyBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
       "set an end date for the original beneficiary, adding in the amendment as a new beneficiary for a beneficiary known by etmp" in {
 
         val beforeJson =
-          JsonUtils.getJsonValueFromFile("trusts-company-beneficiary-transform-before.json")
+          JsonUtils.getJsonValueFromFile("transforms/trusts-company-beneficiary-transform-before.json")
 
         val afterJson =
-          JsonUtils.getJsonValueFromFile("trusts-company-beneficiary-transform-after-declaration.json")
+          JsonUtils.getJsonValueFromFile("transforms/trusts-company-beneficiary-transform-after-declaration.json")
 
         val amended = BeneficiaryCompanyType(
           lineNo = None,
@@ -115,10 +115,10 @@ class AmendCompanyBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
 
       "amend the new beneficiary that is not known to etmp" in {
         val beforeJson =
-          JsonUtils.getJsonValueFromFile("trusts-new-company-beneficiary-transform-before.json")
+          JsonUtils.getJsonValueFromFile("transforms/trusts-new-company-beneficiary-transform-before.json")
 
         val afterJson =
-          JsonUtils.getJsonValueFromFile("trusts-new-company-beneficiary-transform-after-declaration.json")
+          JsonUtils.getJsonValueFromFile("transforms/trusts-new-company-beneficiary-transform-after-declaration.json")
 
         val amended = BeneficiaryCompanyType(
           lineNo = None,

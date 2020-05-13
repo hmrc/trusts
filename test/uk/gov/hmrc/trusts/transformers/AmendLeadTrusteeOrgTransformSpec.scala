@@ -25,8 +25,8 @@ class AmendLeadTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {
   "the modify lead transformer should" - {
 
     "successfully set a new org lead trustee's details" in {
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-before.json")
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-after-org.json")
+      val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-before.json")
+      val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-org.json")
       val newTrusteeInfo = DisplayTrustLeadTrusteeOrgType(
         lineNo = Some("newLineNo"),
         bpMatchStatus = Some("newMatchStatus"),

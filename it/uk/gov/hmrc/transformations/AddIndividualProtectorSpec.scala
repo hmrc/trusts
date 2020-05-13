@@ -39,7 +39,7 @@ class AddIndividualProtectorSpec extends FreeSpec with MustMatchers with Mockito
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
   lazy val expectedInitialGetJson: JsValue =
-    JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+    JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an add individual protector call" - {
     "must return add data in a subsequent 'get' call" in {
@@ -82,7 +82,7 @@ class AddIndividualProtectorSpec extends FreeSpec with MustMatchers with Mockito
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val addRequest = FakeRequest(POST, "/trusts/add-individual-protector/5174384721")
+          val addRequest = FakeRequest(POST, "/trusts/protectors/add-individual/5174384721")
             .withBody(newProtectorJson)
             .withHeaders(CONTENT_TYPE -> "application/json")
 

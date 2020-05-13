@@ -39,7 +39,7 @@ class AddLargeBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSug
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
   lazy val expectedInitialGetJson: JsValue =
-    JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+    JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an add large beneficiary call" - {
     "must return amended data in a subsequent 'get' call" in {
@@ -64,7 +64,7 @@ class AddLargeBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSug
       )
 
       lazy val expectedGetAfterAddBeneficiaryJson: JsValue =
-        JsonUtils.getJsonValueFromFile("trusts-integration-get-after-add-large-beneficiary.json")
+        JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-add-large-beneficiary.json")
 
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
@@ -84,7 +84,7 @@ class AddLargeBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSug
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val addRequest = FakeRequest(POST, "/trusts/add-large-beneficiary/5174384721")
+          val addRequest = FakeRequest(POST, "/trusts/beneficiaries/add-large/5174384721")
             .withBody(newBeneficiaryJson)
             .withHeaders(CONTENT_TYPE -> "application/json")
 

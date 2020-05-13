@@ -107,8 +107,8 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
     when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
-    val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-before.json")
-    val afterJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-after-ind-and-remove.json")
+    val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-before.json")
+    val afterJson: JsValue = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-ind-and-remove.json")
 
     val result: Future[JsResult[JsValue]] = service.applyDeclarationTransformations("utr", "internalId", beforeJson)
 
@@ -123,7 +123,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     when(repository.get(any(), any())).thenReturn(Future.successful(None))
     when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
-    val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-transform-before.json")
+    val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-before.json")
 
     val result: Future[JsResult[JsValue]] = service.applyDeclarationTransformations("utr", "internalId", beforeJson)
 

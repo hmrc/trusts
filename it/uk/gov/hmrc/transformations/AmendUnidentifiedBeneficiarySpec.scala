@@ -37,7 +37,7 @@ import scala.concurrent.Future
 class AmendUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar with TransformIntegrationTest {
 
   val getTrustResponseFromDES: GetTrustSuccessResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
-  val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+  val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an amend unidentified beneficiary call" - {
 
@@ -45,7 +45,7 @@ class AmendUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with S
 
       val newDescription = "Updated description"
 
-      val expectedGetAfterAmendBeneficiaryJson: JsValue = JsonUtils.getJsonValueFromFile("trusts-integration-get-after-amend-unidentified-beneficiary.json")
+      val expectedGetAfterAmendBeneficiaryJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-unidentified-beneficiary.json")
 
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
@@ -65,7 +65,7 @@ class AmendUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with S
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val amendRequest = FakeRequest(POST, "/trusts/amend-unidentified-beneficiary/5174384721/0")
+          val amendRequest = FakeRequest(POST, "/trusts/beneficiaries/amend-unidentified/5174384721/0")
             .withBody(JsString(newDescription))
             .withHeaders(CONTENT_TYPE -> "application/json")
 

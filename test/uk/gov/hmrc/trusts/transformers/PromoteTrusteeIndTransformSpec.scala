@@ -48,15 +48,15 @@ class PromoteTrusteeIndTransformSpec extends FreeSpec with MustMatchers {
   "the promote trustee ind transformer should" - {
 
     "successfully promote a trustee to lead and demote the existing lead trustee" in {
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-promote-trustee-transform-before-ind.json")
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-promote-trustee-transform-after-ind.json")
+      val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-before-ind.json")
+      val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind.json")
 
       val result = transformToTest.applyTransform(beforeJson).get
       result mustBe afterJson
     }
     "re-add the removed trustee with an end date at declaration time if it existed before" in {
-      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-promote-trustee-transform-after-ind.json")
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-promote-trustee-transform-after-ind-declare.json")
+      val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind.json")
+      val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind-declare.json")
 
       val result = transformToTest.applyDeclarationTransform(beforeJson).get
       result mustBe afterJson

@@ -27,10 +27,10 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.models.{NameType, RemoveProtector}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.ProtectorCompany
+import uk.gov.hmrc.trusts.models.variation.{Protector, ProtectorCompany}
+import uk.gov.hmrc.trusts.models.{NameType, RemoveProtector}
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
 
@@ -67,112 +67,170 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
 
   "The protector transformation service" - {
 
-    "must add a new remove protector transform using the transformation service" in {
-      val transformationService = mock[TransformationService]
-      val service = new ProtectorTransformationService(transformationService, LocalDateMock)
-      val protector = protectorJson("Blah Blah Blah")
-
-      when(transformationService.addNewTransform(any(), any(), any()))
-        .thenReturn(Future.successful(true))
-      when(transformationService.getTransformedData(any(), any())(any()))
-        .thenReturn(Future.successful(TrustProcessedResponse(
-          buildInputJson("protector", Seq(protector)),
-          ResponseHeader("status", "formBundlNo")
-        )))
-
-      val result = service.removeProtector("utr", "internalId", RemoveProtector(LocalDate.of(2013, 2, 20), 0, "protector"))
-      whenReady(result) { _ =>
-        verify(transformationService).addNewTransform("utr",
-          "internalId", RemoveProtectorsTransform(0, protector, LocalDate.of(2013, 2, 20), "protector"))
-      }
-    }
-
-    "must add a new add individual protector transform using the transformation service" in {
-      val transformationService = mock[TransformationService]
-      val service = new ProtectorTransformationService(transformationService, LocalDateMock)
-      val newProtector = DisplayTrustProtector(
-        None,
-        None,
-        NameType("First", None, "Last"),
-        None,
-        None,
-        LocalDate.parse("1990-10-10")
-      )
-
-      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
-
-      val result = service.addIndividualProtectorTransformer("utr", "internalId", newProtector)
-      whenReady(result) { _ =>
-
-        verify(transformationService).addNewTransform("utr",
-          "internalId", AddIndividualProtectorTransform(newProtector))
-      }
-    }
-
-    "must add a new add company protector transform using the transformation service" in {
-      val transformationService = mock[TransformationService]
-      val service = new ProtectorTransformationService(transformationService, LocalDateMock)
-      val newCompanyProtector = DisplayTrustProtectorCompany(
-        name = "TestCompany",
-        identification = None,
-        lineNo = None,
-        bpMatchStatus = None,
-        entityStart = LocalDate.parse("2010-05-03")
-      )
-
-      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
-
-      val result = service.addCompanyProtectorTransformer("utr", "internalId", newCompanyProtector)
-      whenReady(result) { _ =>
-
-        verify(transformationService).addNewTransform("utr",
-          "internalId", AddCompanyProtectorTransform(newCompanyProtector))
-      }
-    }
-
-    "must add a new amend business protector transform using the transformation service" in {
-      val index = 0
-      val transformationService = mock[TransformationService]
-      val service = new ProtectorTransformationService(transformationService, LocalDateMock)
-      val newCompany = ProtectorCompany(
-        None,
-        None,
-        "Company Name",
-        None,
-        LocalDate.parse("2010-01-01"),
-        None
-      )
-
-      val original: JsValue = Json.parse(
-        """
-          |{
-          |  "lineNo": "1",
-          |  "bpMatchStatus": "01",
-          |  "name": "Original name",
-          |  "identification": {
-          |    "utr": "1234567890"
-          |  },
-          |  "entityStart": "2018-02-28"
-          |}
-          |""".stripMargin)
-
-      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
-
-      when(transformationService.getTransformedData(any(), any())(any()))
-        .thenReturn(Future.successful(TrustProcessedResponse(
-          buildInputJson("protectorCompany", Seq(original)),
-          ResponseHeader("status", "formBundleNo")
-        )))
-
-      val result = service.amendBusinessProtectorTransformer("utr", index, "internalId", newCompany)
-      whenReady(result) { _ =>
-
-        verify(transformationService).addNewTransform(
-          Matchers.eq("utr"),
-          Matchers.eq("internalId"),
-          Matchers.eq(AmendBusinessProtectorTransform(index, Json.toJson(newCompany), original, LocalDateMock.now))
+    "must add a new transform" - {
+      "for add individual protector using the transformation service" in {
+        val transformationService = mock[TransformationService]
+        val service = new ProtectorTransformationService(transformationService, LocalDateMock)
+        val newProtector = DisplayTrustProtector(
+          None,
+          None,
+          NameType("First", None, "Last"),
+          None,
+          None,
+          LocalDate.parse("1990-10-10")
         )
+
+        when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+        val result = service.addIndividualProtectorTransformer("utr", "internalId", newProtector)
+        whenReady(result) { _ =>
+
+          verify(transformationService).addNewTransform("utr",
+            "internalId", AddIndividualProtectorTransform(newProtector))
+        }
+      }
+
+      "for amend individual protector using the transformation service" in {
+
+        val transformationService = mock[TransformationService]
+        val service = new ProtectorTransformationService(transformationService, LocalDateMock)
+
+        val amendedProtector = Protector(
+          name = NameType("First", None, "Last"),
+          dateOfBirth = None,
+          identification = None,
+          lineNo = None,
+          bpMatchStatus = None,
+          entityStart = LocalDate.now(),
+          entityEnd = None
+        )
+
+        val originalProtector = Json.parse(
+          """
+            |{
+            |  "lineNo":"1",
+            |  "bpMatchStatus": "01",
+            |  "name":{
+            |    "firstName":"John",
+            |    "middleName":"William",
+            |    "lastName":"O'Connor"
+            |  },
+            |  "dateOfBirth":"1956-02-12",
+            |  "identification":{
+            |    "nino":"KC456736"
+            |  },
+            |  "entityStart":"1998-02-12"
+            |}
+            |""".stripMargin)
+
+        when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+        val desResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
+
+        when(transformationService.getTransformedData(any(), any())(any()))
+          .thenReturn(
+            Future.successful(
+              TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
+            ))
+
+        val result = service.amendIndividualProtectorTransformer("utr", 0, "internalId", amendedProtector)
+        whenReady(result) { _ =>
+
+          verify(transformationService).addNewTransform(
+            "utr",
+            "internalId",
+            AmendIndividualProtectorTransform(0, Json.toJson(amendedProtector), originalProtector, LocalDateMock.now)
+          )
+        }
+
+      }
+
+      "for new remove protector using the transformation service" in {
+        val transformationService = mock[TransformationService]
+        val service = new ProtectorTransformationService(transformationService, LocalDateMock)
+        val protector = protectorJson("Blah Blah Blah")
+
+        when(transformationService.addNewTransform(any(), any(), any()))
+          .thenReturn(Future.successful(true))
+        when(transformationService.getTransformedData(any(), any())(any()))
+          .thenReturn(Future.successful(TrustProcessedResponse(
+            buildInputJson("protector", Seq(protector)),
+            ResponseHeader("status", "formBundlNo")
+          )))
+
+        val result = service.removeProtector("utr", "internalId", RemoveProtector(LocalDate.of(2013, 2, 20), 0, "protector"))
+        whenReady(result) { _ =>
+          verify(transformationService).addNewTransform("utr",
+            "internalId", RemoveProtectorsTransform(0, protector, LocalDate.of(2013, 2, 20), "protector"))
+        }
+      }
+
+      "for new add company protector using the transformation service" in {
+        val transformationService = mock[TransformationService]
+        val service = new ProtectorTransformationService(transformationService, LocalDateMock)
+        val newCompanyProtector = DisplayTrustProtectorCompany(
+          name = "TestCompany",
+          identification = None,
+          lineNo = None,
+          bpMatchStatus = None,
+          entityStart = LocalDate.parse("2010-05-03")
+        )
+
+        when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+        val result = service.addBusinessProtectorTransformer("utr", "internalId", newCompanyProtector)
+        whenReady(result) { _ =>
+
+          verify(transformationService).addNewTransform("utr",
+            "internalId", AddCompanyProtectorTransform(newCompanyProtector))
+        }
+      }
+
+      "for new amend business protector using the transformation service" in {
+        val index = 0
+        val transformationService = mock[TransformationService]
+        val service = new ProtectorTransformationService(transformationService, LocalDateMock)
+        val newCompany = ProtectorCompany(
+          None,
+          None,
+          "Company Name",
+          None,
+          LocalDate.parse("2010-01-01"),
+          None
+        )
+
+        val original: JsValue = Json.parse(
+          """
+            |{
+            |  "lineNo": "1",
+            |  "bpMatchStatus": "01",
+            |  "name": "Original name",
+            |  "identification": {
+            |    "utr": "1234567890"
+            |  },
+            |  "entityStart": "2018-02-28"
+            |}
+            |""".stripMargin)
+
+        when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+        when(transformationService.getTransformedData(any(), any())(any()))
+          .thenReturn(Future.successful(TrustProcessedResponse(
+            buildInputJson("protectorCompany", Seq(original)),
+            ResponseHeader("status", "formBundleNo")
+          )))
+
+        val result = service.amendBusinessProtectorTransformer("utr", index, "internalId", newCompany)
+        whenReady(result) { _ =>
+
+          verify(transformationService).addNewTransform(
+            Matchers.eq("utr"),
+            Matchers.eq("internalId"),
+            Matchers.eq(AmendBusinessProtectorTransform(index, Json.toJson(newCompany), original, LocalDateMock.now))
+          )
+        }
       }
     }
+
   }
 }
