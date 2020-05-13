@@ -50,8 +50,8 @@ class ProtectorTransformationService @Inject()(transformationService: Transforma
       }
   }
 
-  def addCompanyProtectorTransformer(utr: String, internalId: String, newProtectorCompany: DisplayTrustProtectorCompany): Future[Boolean] = {
-    transformationService.addNewTransform(utr, internalId, AddCompanyProtectorTransform(newProtectorCompany))
+  def addBusinessProtectorTransformer(utr: String, internalId: String, newProtectorBusiness: DisplayTrustProtectorCompany): Future[Boolean] = {
+    transformationService.addNewTransform(utr, internalId, AddCompanyProtectorTransform(newProtectorBusiness))
   }
 
   private def getTransformedTrustJson(utr: String, internalId: String)
@@ -93,4 +93,22 @@ class ProtectorTransformationService @Inject()(transformationService: Transforma
       }
   }
 
+
+  def amendBusinessProtectorTransformer(utr: String,
+                                         index: Int,
+                                         internalId: String,
+                                         amended: ProtectorCompany
+                                       )(implicit hc: HeaderCarrier): Future[Success.type] = {
+    getTransformedTrustJson(utr, internalId)
+      .map(findProtectorJson(_, "protectorCompany", index))
+      .flatMap(Future.fromTry)
+      .flatMap { protectorJson =>
+
+        transformationService.addNewTransform(
+          utr,
+          internalId,
+          AmendBusinessProtectorTransform(index, Json.toJson(amended), protectorJson, localDateService.now)
+        ).map(_ => Success)
+      }
+  }
 }

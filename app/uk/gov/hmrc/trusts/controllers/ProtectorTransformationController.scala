@@ -23,7 +23,7 @@ import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveProtector
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.Protector
+import uk.gov.hmrc.trusts.models.variation.{Protector, ProtectorCompany}
 import uk.gov.hmrc.trusts.services.ProtectorTransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
@@ -71,7 +71,7 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
     implicit request => {
       request.body.validate[DisplayTrustProtectorCompany] match {
         case JsSuccess(newBeneficiary, _) =>
-          transformService.addCompanyProtectorTransformer(
+          transformService.addBusinessProtectorTransformer(
             utr,
             request.identifier,
             newBeneficiary
@@ -105,5 +105,24 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
           Future.successful(BadRequest)
       }
     }
+  }
+
+  def amendBusinessProtector(utr: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
+    implicit request =>
+      request.body.validate[ProtectorCompany] match {
+        case JsSuccess(businessProtector, _) =>
+          transformService.amendBusinessProtectorTransformer(
+            utr,
+            index,
+            request.identifier,
+            businessProtector
+          ) map { _ =>
+            Ok
+          }
+        case JsError(errors) =>
+          logger.warn(s"[ProtectorTransformationController][amendBusinessProtector]" +
+            s" Supplied payload could not be read as a ProtectorCompany - $errors")
+          Future.successful(BadRequest)
+      }
   }
 }
