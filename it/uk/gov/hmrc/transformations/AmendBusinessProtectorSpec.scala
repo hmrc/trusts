@@ -40,14 +40,14 @@ class AmendBusinessProtectorSpec extends FreeSpec with MustMatchers with Mockito
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
   val expectedInitialGetJson: JsValue =
-    JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+    JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an amend business protector call" - {
 
     "must return amended data in a subsequent 'get' call" in {
 
       val expectedGetAfterAmendProtectorJson: JsValue =
-        JsonUtils.getJsonValueFromFile("trusts-integration-get-after-amend-business-protector.json")
+        JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-business-protector.json")
 
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))

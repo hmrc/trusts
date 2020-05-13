@@ -44,7 +44,7 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
   private lazy val expectedInitialGetJson: JsValue =
-    JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+    JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   private object TestLocalDateService extends LocalDateService {
     override def now: LocalDate = LocalDate.of(2020, 4, 1)
@@ -53,10 +53,10 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
   "doing a bunch of beneficiary transforms" - {
     "must return amended data in a subsequent 'get' call" in {
       lazy val expectedGetAfterAddBeneficiaryJson: JsValue =
-        JsonUtils.getJsonValueFromFile("trusts-integration-get-after-combo-beneficiary.json")
+        JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-combo-beneficiary.json")
 
       lazy val expectedDeclaredBeneficiaryJson: JsValue =
-        JsonUtils.getJsonValueFromFile("trusts-integration-declared-combo-beneficiary.json")
+        JsonUtils.getJsonValueFromFile("it/trusts-integration-declared-combo-beneficiary.json")
 
 
       val stubbedDesConnector = mock[DesConnector]

@@ -39,7 +39,7 @@ class AddCharityBeneficiarySpec extends FreeSpec with MustMatchers with MockitoS
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
   lazy val expectedInitialGetJson: JsValue =
-    JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+    JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an add charity beneficiary call" - {
     "must return amended data in a subsequent 'get' call" in {
@@ -64,7 +64,7 @@ class AddCharityBeneficiarySpec extends FreeSpec with MustMatchers with MockitoS
       )
 
       lazy val expectedGetAfterAddBeneficiaryJson: JsValue =
-        JsonUtils.getJsonValueFromFile("trusts-integration-get-after-add-charity-beneficiary.json")
+        JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-add-charity-beneficiary.json")
 
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))

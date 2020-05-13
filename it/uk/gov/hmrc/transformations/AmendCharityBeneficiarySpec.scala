@@ -40,14 +40,14 @@ class AmendCharityBeneficiarySpec extends FreeSpec with MustMatchers with Mockit
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
   val expectedInitialGetJson: JsValue =
-    JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+    JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an amend charity beneficiary call" - {
 
     "must return amended data in a subsequent 'get' call" in {
 
       val expectedGetAfterAmendBeneficiaryJson: JsValue =
-        JsonUtils.getJsonValueFromFile("trusts-integration-get-after-amend-charity-beneficiary.json")
+        JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-charity-beneficiary.json")
 
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))

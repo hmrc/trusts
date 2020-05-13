@@ -39,7 +39,7 @@ class AddCompanyProtectorSpec extends FreeSpec with MustMatchers with MockitoSug
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
   lazy val expectedInitialGetJson: JsValue =
-    JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+    JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an add company protector call" - {
     "must return add data in a subsequent 'get' call" in {

@@ -40,7 +40,7 @@ class AddUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with Sca
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
   lazy val expectedInitialGetJson: JsValue =
-    JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+    JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an add unidentified beneficiary call" - {
 
@@ -56,7 +56,7 @@ class AddUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with Sca
       )
 
       lazy val expectedGetAfterAddBeneficiaryJson: JsValue =
-        JsonUtils.getJsonValueFromFile("trusts-integration-get-after-add-unidentified-beneficiary.json")
+        JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-add-unidentified-beneficiary.json")
 
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))

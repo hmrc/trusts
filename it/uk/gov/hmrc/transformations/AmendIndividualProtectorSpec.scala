@@ -34,7 +34,7 @@ import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
 
-class AmendCompanyBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar with TransformIntegrationTest with ScalaFutures {
+class AmendIndividualProtectorSpec extends FreeSpec with MustMatchers with MockitoSugar with TransformIntegrationTest with ScalaFutures {
 
   val getTrustResponseFromDES: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
@@ -42,15 +42,17 @@ class AmendCompanyBeneficiarySpec extends FreeSpec with MustMatchers with Mockit
   val expectedInitialGetJson: JsValue =
     JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
-  "an amend company beneficiary call" - {
+  "an amend individual protector call" - {
 
     "must return amended data in a subsequent 'get' call" in {
 
-      val expectedGetAfterAmendBeneficiaryJson: JsValue =
-        JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-company-beneficiary.json")
+      val expectedGetAfterAmendProtectorJson: JsValue =
+        JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-individual-protector.json")
 
       val stubbedDesConnector = mock[DesConnector]
-      when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+
+      when(stubbedDesConnector.getTrustInfo(any())(any()))
+        .thenReturn(Future.successful(getTrustResponseFromDES))
 
       val application = applicationBuilder
         .overrides(
@@ -71,16 +73,21 @@ class AmendCompanyBeneficiarySpec extends FreeSpec with MustMatchers with Mockit
           val payload = Json.parse(
             """
               |{
-              |  "lineNo": "1",
-              |  "organisationName": "New Company Name",
-              |  "identification": {
-              |    "utr": "1234567890"
-              |  },
-              |  "entityStart": "1998-02-12"
-              |}
-              |""".stripMargin)
+              |              "lineNo":"1",
+              |              "bpMatchStatus": "01",
+              |              "name":{
+              |                "firstName":"John",
+              |                "middleName":"William",
+              |                "lastName":"O'Connor"
+              |              },
+              |              "dateOfBirth":"1956-02-12",
+              |              "identification":{
+              |                "nino":"KC456736"
+              |              },
+              |              "entityStart":"1998-02-12"
+              |            }""".stripMargin)
 
-          val amendRequest = FakeRequest(POST, "/trusts/amend-company-beneficiary/5174384721/0")
+          val amendRequest = FakeRequest(POST, "/trusts/protectors/amend-individual/5174384721/0")
             .withBody(payload)
             .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -89,7 +96,7 @@ class AmendCompanyBeneficiarySpec extends FreeSpec with MustMatchers with Mockit
 
           val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
           status(newResult) mustBe OK
-          contentAsJson(newResult) mustEqual expectedGetAfterAmendBeneficiaryJson
+          contentAsJson(newResult) mustEqual expectedGetAfterAmendProtectorJson
 
           dropTheDatabase(connection)
         }.get

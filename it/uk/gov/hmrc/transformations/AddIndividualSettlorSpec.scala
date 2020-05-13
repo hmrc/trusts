@@ -39,7 +39,7 @@ class AddIndividualSettlorSpec extends FreeSpec with MustMatchers with MockitoSu
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
   lazy val expectedInitialGetJson: JsValue =
-    JsonUtils.getJsonValueFromFile("trusts-integration-get-initial.json")
+    JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an add individual settlor call" - {
     "must return add data in a subsequent 'get' call" in {
