@@ -1,9 +1,9 @@
 # microservice specific routes
 
-->          /trustees/                                          trusts.trustees.Routes
-->          /beneficiaries/                                     trusts.beneficiaries.Routes
-->          /settlors/                                          trusts.settlors.Routes
-->          /protectors/                                        trusts.protectors.Routes
+->          /trustees                                           trusts.trustees.Routes
+->          /beneficiaries                                      trusts.beneficiaries.Routes
+->          /settlors                                           trusts.settlors.Routes
+->          /protectors                                         trusts.protectors.Routes
 
 POST        /check                                              uk.gov.hmrc.trusts.controllers.CheckTrustController.checkExistingTrust
 
