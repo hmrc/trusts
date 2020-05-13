@@ -82,7 +82,7 @@ class AddIndividualBeneficiarySpec extends FreeSpec with MustMatchers with Mocki
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val addRequest = FakeRequest(POST, "/trusts/add-individual-beneficiary/5174384721")
+          val addRequest = FakeRequest(POST, "/trusts/beneficiaries/add-individual/5174384721")
             .withBody(newBeneficiaryJson)
             .withHeaders(CONTENT_TYPE -> "application/json")
 

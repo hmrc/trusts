@@ -85,7 +85,7 @@ class AddTrustBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSug
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val addRequest = FakeRequest(POST, "/trusts/add-trust-beneficiary/5174384721")
+          val addRequest = FakeRequest(POST, "/trusts/beneficiaries/add-trust/5174384721")
             .withBody(newBeneficiaryJson)
             .withHeaders(CONTENT_TYPE -> "application/json")
 

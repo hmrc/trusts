@@ -81,7 +81,7 @@ class AmendDeceasedSettlorSpec extends FreeSpec with MustMatchers with MockitoSu
               |}
               |""".stripMargin)
 
-          val amendRequest = FakeRequest(POST, "/trusts/amend-deceased-settlor/5174384721")
+          val amendRequest = FakeRequest(POST, "/trusts/settlors/amend-deceased/5174384721")
             .withBody(payload)
             .withHeaders(CONTENT_TYPE -> "application/json")
 

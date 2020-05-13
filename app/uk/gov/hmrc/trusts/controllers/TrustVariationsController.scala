@@ -42,6 +42,7 @@ class TrustVariationsController @Inject()(
                                            responseHandler: VariationsResponseHandler
                                     ) extends TrustsBaseController with ValidationUtil {
 
+  @deprecated("api is no longer used, use declare instead", "13 May 2020")
   def trustVariation() = identify.async(parse.json) {
     implicit request => {
 

@@ -84,7 +84,7 @@ class AddLargeBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSug
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val addRequest = FakeRequest(POST, "/trusts/add-large-beneficiary/5174384721")
+          val addRequest = FakeRequest(POST, "/trusts/beneficiaries/add-large/5174384721")
             .withBody(newBeneficiaryJson)
             .withHeaders(CONTENT_TYPE -> "application/json")
 

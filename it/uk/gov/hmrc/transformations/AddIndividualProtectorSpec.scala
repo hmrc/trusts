@@ -82,7 +82,7 @@ class AddIndividualProtectorSpec extends FreeSpec with MustMatchers with Mockito
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val addRequest = FakeRequest(POST, "/trusts/add-individual-protector/5174384721")
+          val addRequest = FakeRequest(POST, "/trusts/protectors/add-individual/5174384721")
             .withBody(newProtectorJson)
             .withHeaders(CONTENT_TYPE -> "application/json")
 

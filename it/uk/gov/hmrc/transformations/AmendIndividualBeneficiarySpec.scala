@@ -91,7 +91,7 @@ class AmendIndividualBeneficiarySpec extends FreeSpec with MustMatchers with Moc
               |""".stripMargin)
 
           // amend individual beneficiary
-          val amendRequest = FakeRequest(POST, "/trusts/amend-individual-beneficiary/5174384721/0")
+          val amendRequest = FakeRequest(POST, "/trusts/beneficiaries/amend-individual/5174384721/0")
             .withBody(payload)
             .withHeaders(CONTENT_TYPE -> "application/json")
 

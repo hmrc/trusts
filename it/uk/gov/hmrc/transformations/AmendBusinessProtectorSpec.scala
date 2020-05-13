@@ -80,7 +80,7 @@ class AmendBusinessProtectorSpec extends FreeSpec with MustMatchers with Mockito
               |}
               |""".stripMargin)
 
-          val amendRequest = FakeRequest(POST, "/trusts/amend-business-protector/5174384721/0")
+          val amendRequest = FakeRequest(POST, "/trusts/protectors/amend-business/5174384721/0")
             .withBody(payload)
             .withHeaders(CONTENT_TYPE -> "application/json")
 

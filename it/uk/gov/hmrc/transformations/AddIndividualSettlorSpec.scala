@@ -82,7 +82,7 @@ class AddIndividualSettlorSpec extends FreeSpec with MustMatchers with MockitoSu
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val addRequest = FakeRequest(POST, "/trusts/add-individual-settlor/5174384721")
+          val addRequest = FakeRequest(POST, "/trusts/settlors/add-individual/5174384721")
             .withBody(newSettlorJson)
             .withHeaders(CONTENT_TYPE -> "application/json")
 

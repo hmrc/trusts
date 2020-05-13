@@ -84,7 +84,7 @@ class AddCharityBeneficiarySpec extends FreeSpec with MustMatchers with MockitoS
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val addRequest = FakeRequest(POST, "/trusts/add-charity-beneficiary/5174384721")
+          val addRequest = FakeRequest(POST, "/trusts/beneficiaries/add-charity/5174384721")
             .withBody(newBeneficiaryJson)
             .withHeaders(CONTENT_TYPE -> "application/json")
 
