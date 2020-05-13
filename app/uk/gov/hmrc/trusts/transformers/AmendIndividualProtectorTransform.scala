@@ -29,6 +29,10 @@ case class AmendIndividualProtectorTransform(
   override val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'protectors \ 'protector
 }
 
+object AmendIndividualProtectorTransform {
+  val key = "AmendIndividualProtectorTransform"
 
+  implicit val format: Format[AmendIndividualProtectorTransform] = Json.format[AmendIndividualProtectorTransform]
+}
 
 

@@ -78,7 +78,7 @@ class ProtectorTransformationService @Inject()(transformationService: Transforma
   def amendIndividualProtectorTransformer(utr: String,
                                           index: Int,
                                           internalId: String,
-                                          protector: Protector)
+                                          amended: Protector)
                                          (implicit hc: HeaderCarrier): Future[Success.type] = {
     getTransformedTrustJson(utr, internalId)
       .map(findProtectorJson(_, "protector", index))
@@ -87,7 +87,7 @@ class ProtectorTransformationService @Inject()(transformationService: Transforma
         transformationService.addNewTransform(
           utr,
           internalId,
-          AmendIndividualProtectorTransform(index, Json.toJson(protector), original, localDateService.now)
+          AmendIndividualProtectorTransform(index, Json.toJson(amended), original, localDateService.now)
         ).map(_ => Success)
       }
   }
