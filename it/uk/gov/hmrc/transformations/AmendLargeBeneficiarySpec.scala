@@ -87,7 +87,7 @@ class AmendLargeBeneficiarySpec extends FreeSpec with MustMatchers with MockitoS
               |}
               |""".stripMargin)
 
-          val amendRequest = FakeRequest(POST, "/trusts/amend-large-beneficiary/5174384721/0")
+          val amendRequest = FakeRequest(POST, "/trusts/beneficiaries/amend-large/5174384721/0")
             .withBody(payload)
             .withHeaders(CONTENT_TYPE -> "application/json")
 

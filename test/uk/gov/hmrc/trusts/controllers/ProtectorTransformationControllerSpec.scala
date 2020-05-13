@@ -236,7 +236,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
         .withBody(Json.parse("{}"))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val result = controller.amendIndividualProtector("aUTR", index).apply(request)
+      val result = controller.amendBusinessProtector("aUTR", index).apply(request)
       status(result) mustBe BAD_REQUEST
     }
   }

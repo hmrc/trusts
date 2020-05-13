@@ -65,7 +65,7 @@ class AmendUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with S
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val amendRequest = FakeRequest(POST, "/trusts/amend-unidentified-beneficiary/5174384721/0")
+          val amendRequest = FakeRequest(POST, "/trusts/beneficiaries/amend-unidentified/5174384721/0")
             .withBody(JsString(newDescription))
             .withHeaders(CONTENT_TYPE -> "application/json")
 

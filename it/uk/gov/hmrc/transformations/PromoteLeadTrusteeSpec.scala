@@ -86,7 +86,7 @@ class PromoteLeadTrusteeSpec extends FreeSpec with MustMatchers with MockitoSuga
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val promoteRequest = FakeRequest(POST, "/trusts/promote-trustee/5174384721/0")
+          val promoteRequest = FakeRequest(POST, "/trusts/trustees/promote/5174384721/0")
             .withBody(Json.toJson(newTrusteeIndInfo))
             .withHeaders(CONTENT_TYPE -> "application/json")
 

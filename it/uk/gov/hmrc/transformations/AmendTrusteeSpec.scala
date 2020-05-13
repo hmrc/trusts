@@ -80,7 +80,7 @@ class AmendTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar with
           status(result) mustBe OK
           contentAsJson(result) mustBe expectedInitialGetJson
 
-          val amendRequest = FakeRequest(POST, "/trusts/amend-trustee/5174384721/0")
+          val amendRequest = FakeRequest(POST, "/trusts/trustees/amend/5174384721/0")
             .withBody(Json.toJson(newTrusteeIndInfo))
             .withHeaders(CONTENT_TYPE -> "application/json")
 

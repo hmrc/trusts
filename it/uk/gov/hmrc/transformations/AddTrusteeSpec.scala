@@ -76,7 +76,7 @@ class AddTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar with T
               |}
               |""".stripMargin)
 
-          val amendRequest = FakeRequest(POST, "/trusts/add-trustee/5174384721")
+          val amendRequest = FakeRequest(POST, "/trusts/trustees/add/5174384721")
             .withBody(addTrusteeJson)
             .withHeaders(CONTENT_TYPE -> "application/json")
 

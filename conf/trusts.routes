@@ -35,6 +35,8 @@ POST        /variation                                          uk.gov.hmrc.trus
 
 POST        /declare/:utr                                       uk.gov.hmrc.trusts.controllers.TrustVariationsController.declare(utr: String)
 
+# Endpoints below are deprecated, to be removed once frontends are migrated
+
 POST        /amend-lead-trustee/:utr                            uk.gov.hmrc.trusts.controllers.TrusteeTransformationController.amendLeadTrustee(utr: String)
 
 POST        /add-trustee/:utr                                   uk.gov.hmrc.trusts.controllers.TrusteeTransformationController.addTrustee(utr: String)

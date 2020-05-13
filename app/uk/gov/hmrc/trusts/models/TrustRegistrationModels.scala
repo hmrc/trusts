@@ -221,7 +221,6 @@ case class LeadTrusteeOrgType(
                                phoneNumber: String,
                                email: Option[String] = None,
                                identification: IdentificationOrgType
-
                              )
 object LeadTrusteeOrgType {
   implicit val leadTrusteeOrgTypeFormat: Format[LeadTrusteeOrgType] = Json.format[LeadTrusteeOrgType]

@@ -77,7 +77,7 @@ class AddUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with Sca
           status(result) mustBe OK
           contentAsJson(result) mustEqual expectedInitialGetJson
 
-          val addRequest = FakeRequest(POST, "/trusts/add-unidentified-beneficiary/5174384721")
+          val addRequest = FakeRequest(POST, "/trusts/beneficiaries/add-unidentified/5174384721")
             .withBody(newBeneficiaryJson)
             .withHeaders(CONTENT_TYPE -> "application/json")
 

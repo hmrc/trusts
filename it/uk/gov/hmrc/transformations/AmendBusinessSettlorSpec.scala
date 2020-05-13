@@ -80,7 +80,7 @@ class AmendBusinessSettlorSpec extends FreeSpec with MustMatchers with MockitoSu
           val index = 0
 
           // amend individual settlor
-          val amendRequest = FakeRequest(POST, s"/trusts/amend-business-settlor/5174384721/$index")
+          val amendRequest = FakeRequest(POST, s"/trusts/settlors/amend-business/5174384721/$index")
             .withBody(payload)
             .withHeaders(CONTENT_TYPE -> "application/json")
 
