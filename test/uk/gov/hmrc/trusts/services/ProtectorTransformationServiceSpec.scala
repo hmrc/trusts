@@ -18,6 +18,7 @@ package uk.gov.hmrc.trusts.services
 
 import java.time.LocalDate
 
+import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -26,10 +27,10 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.models.{NameType, RemoveProtector}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.Protector
+import uk.gov.hmrc.trusts.models.variation.{Protector, ProtectorCompany}
+import uk.gov.hmrc.trusts.models.{NameType, RemoveProtector}
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
 
@@ -164,7 +165,7 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
       }
     }
 
-    "must add a new add company protector transform using the transformation service" in {
+    "must add a new add business protector transform using the transformation service" in {
       val transformationService = mock[TransformationService]
       val service = new ProtectorTransformationService(transformationService, LocalDateMock)
       val newCompanyProtector = DisplayTrustProtectorCompany(
@@ -177,7 +178,7 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      val result = service.addCompanyProtectorTransformer("utr", "internalId", newCompanyProtector)
+      val result = service.addBusinessProtectorTransformer("utr", "internalId", newCompanyProtector)
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",
@@ -185,5 +186,50 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
       }
     }
 
+
+    "must add a new amend business protector transform using the transformation service" in {
+      val index = 0
+      val transformationService = mock[TransformationService]
+      val service = new ProtectorTransformationService(transformationService, LocalDateMock)
+      val newCompany = ProtectorCompany(
+        None,
+        None,
+        "Company Name",
+        None,
+        LocalDate.parse("2010-01-01"),
+        None
+      )
+
+      val original: JsValue = Json.parse(
+        """
+          |{
+          |  "lineNo": "1",
+          |  "bpMatchStatus": "01",
+          |  "name": "Original name",
+          |  "identification": {
+          |    "utr": "1234567890"
+          |  },
+          |  "entityStart": "2018-02-28"
+          |}
+          |""".stripMargin)
+
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+      when(transformationService.getTransformedData(any(), any())(any()))
+        .thenReturn(Future.successful(TrustProcessedResponse(
+          buildInputJson("protectorCompany", Seq(original)),
+          ResponseHeader("status", "formBundleNo")
+        )))
+
+      val result = service.amendBusinessProtectorTransformer("utr", index, "internalId", newCompany)
+      whenReady(result) { _ =>
+
+        verify(transformationService).addNewTransform(
+          Matchers.eq("utr"),
+          Matchers.eq("internalId"),
+          Matchers.eq(AmendBusinessProtectorTransform(index, Json.toJson(newCompany), original, LocalDateMock.now))
+        )
+      }
+    }
   }
 }

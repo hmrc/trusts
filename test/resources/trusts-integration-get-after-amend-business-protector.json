@@ -83,14 +83,6 @@
               "entityStart": "2001-01-01"
             }
           ],
-          "trust": [
-            {
-              "lineNo": "1",
-              "bpMatchStatus": "01",
-              "organisationName": "Trust 1",
-              "entityStart": "2001-01-01"
-            }
-          ],
           "individualDetails": [
             {
               "lineNo": "1",
@@ -142,6 +134,14 @@
               "description": "Some Description",
               "beneficiaryShareOfIncome": "25",
               "entityStart": "2017-02-28"
+            }
+          ],
+          "trust": [
+            {
+              "bpMatchStatus": "01",
+              "entityStart": "2001-01-01",
+              "lineNo": "1",
+              "organisationName": "Trust 1"
             }
           ],
           "large": [
@@ -260,24 +260,12 @@
                 "nino": "ST019091"
               },
               "entityStart": "1998-02-12"
-            },
-            {
-              "name": {
-                "firstName": "abcdefghijkl",
-                "middleName": "abcdefghijklmn",
-                "lastName": "abcde"
-              },
-              "dateOfBirth": "2000-01-01",
-              "identification": {
-                "nino": "ST019091"
-              },
-              "entityStart": "2002-01-01"
             }
           ],
           "protectorCompany": [
             {
               "lineNo": "1",
-              "name": "abcdefghijklmnopqr",
+              "name": "New Protector Name",
               "identification": {
                 "utr": "5465416546"
               },
