@@ -614,6 +614,72 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar with MustMatcher
     }
   }
 
+  ".getProtectorsAlreadyExist" should {
+
+    "return 403 - Forbidden with parked content" in {
+
+      when(transformationService.getTransformedData(any(), any())(any()))
+        .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
+
+      val result = getTrustController.getProtectorsAlreadyExist(utr)(FakeRequest())
+
+      whenReady(result) { _ =>
+        status(result) mustBe FORBIDDEN
+      }
+    }
+
+    "return 200 - Ok with true when exists" in {
+
+      val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+
+      when(transformationService.getTransformedData(any[String], any[String])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(processedResponse))
+
+      val result = getTrustController.getProtectorsAlreadyExist(utr)(FakeRequest())
+
+      val expected = Json.parse("true")
+
+      whenReady(result) { _ =>
+        verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+        verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any[HeaderCarrier])
+        status(result) mustBe OK
+        contentType(result) mustBe Some(JSON)
+        contentAsJson(result) mustBe expected
+      }
+    }
+
+    "return 500 - Internal server error for invalid content" in {
+
+      when(transformationService.getTransformedData(any(), any())(any()))
+        .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+
+      val result = getTrustController.getProtectorsAlreadyExist(utr)(FakeRequest())
+
+      whenReady(result) { _ =>
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+    }
+    "return 200 - Ok but false when doesn't exist" in {
+
+      val processedResponse = TrustProcessedResponse(getEmptyTransformedTrustResponse, ResponseHeader("Processed", "1"))
+
+      when(transformationService.getTransformedData(any[String], any[String])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(processedResponse))
+
+      val result = getTrustController.getProtectorsAlreadyExist(utr)(FakeRequest())
+
+      val expected = Json.parse("false")
+
+      whenReady(result) { _ =>
+        status(result) mustBe OK
+        verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+        verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any[HeaderCarrier])
+        contentType(result) mustBe Some(JSON)
+        contentAsJson(result) mustBe expected
+      }
+    }
+  }
+
   ".getProtectors" should {
 
     "return 403 - Forbidden with parked content" in {
