@@ -110,6 +110,15 @@ class GetTrustController @Inject()(identify: IdentifierAction,
         JsBoolean(etmpData.transform(deceasedDeathDatePath.json.pick).isSuccess)
     }
 
+  def getProtectorsAlreadyExist(utr: String) : Action[AnyContent] =
+    processEtmpData(utr) {
+      trustData =>
+        val protectorsPath = JsPath \ 'details \ 'trust \ 'entities \ 'protectors
+        JsBoolean(!trustData.transform(protectorsPath.json.pick).asOpt.contains(
+          Json.obj("protector" -> JsArray(), "protectorCompany" -> JsArray()))
+        )
+    }
+
   def getProtectors(utr: String) : Action[AnyContent] =
     getArrayAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'protectors, "protectors")
 
