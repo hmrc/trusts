@@ -29,6 +29,8 @@ GET         /:utr/transformed/settlors                          uk.gov.hmrc.trus
 
 GET         /:utr/transformed/protectors                        uk.gov.hmrc.trusts.controllers.GetTrustController.getProtectors(utr: String)
 
+GET         /:utr/transformed/other-individuals                 uk.gov.hmrc.trusts.controllers.GetTrustController.getOtherIndividuals(utr: String)
+
 GET         /:utr/transformed/protectors-already-exist          uk.gov.hmrc.trusts.controllers.GetTrustController.getProtectorsAlreadyExist(utr: String)
 
 GET         /:utr/transformed/deceased-settlor-death-recorded   uk.gov.hmrc.trusts.controllers.GetTrustController.getDeceasedSettlorDeathRecorded(utr: String)

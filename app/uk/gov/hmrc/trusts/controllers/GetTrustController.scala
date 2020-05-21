@@ -122,6 +122,9 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   def getProtectors(utr: String) : Action[AnyContent] =
     getArrayAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'protectors, "protectors")
 
+  def getOtherIndividuals(utr: String) : Action[AnyContent] =
+    getArrayAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'naturalPerson, "naturalPerson")
+
   private def getArrayAtPath(utr: String, path: JsPath, fieldName: String): Action[AnyContent] = {
     getElementAtPath(utr,
       path,
