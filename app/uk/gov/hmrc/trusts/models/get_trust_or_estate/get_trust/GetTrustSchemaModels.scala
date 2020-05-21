@@ -102,6 +102,18 @@ case class DisplayTrustNaturalPersonType(lineNo: String,
 
 object DisplayTrustNaturalPersonType {
   implicit val naturalPersonTypeFormat: Format[DisplayTrustNaturalPersonType] = Json.format[DisplayTrustNaturalPersonType]
+
+  val writeToMaintain : Writes[DisplayTrustNaturalPersonType] = new Writes[DisplayTrustNaturalPersonType] {
+    override def writes(o: DisplayTrustNaturalPersonType): JsValue = Json.obj(
+      "lineNo" -> o.lineNo,
+      "bpMatchStatus" -> o.bpMatchStatus,
+      "name" -> o.name,
+      "dateOfBirth" -> o.dateOfBirth,
+      "identification" -> o.identification,
+      "entityStart" -> o.entityStart,
+      "provisional" -> o.lineNo.isEmpty
+    ).withoutNulls
+  }
 }
 
 case class DisplayTrustLeadTrusteeIndType(

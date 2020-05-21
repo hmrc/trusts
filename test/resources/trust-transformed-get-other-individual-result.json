@@ -1,0 +1,19 @@
+{
+  "naturalPerson": [
+    {
+      "lineNo": "1",
+      "bpMatchStatus": "01",
+      "name": {
+        "firstName": "Nicola",
+        "middleName": "Andrey",
+        "lastName": "Jackson"
+      },
+      "dateOfBirth": "1970-02-28",
+      "identification": {
+        "safeId": "2222200000000"
+      },
+      "entityStart": "2017-02-28",
+      "provisional": false
+    }
+  ]
+}

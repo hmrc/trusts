@@ -22,7 +22,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.{ResponseHeader, _}
-import uk.gov.hmrc.trusts.transformers.mdtp.Trustees
+import uk.gov.hmrc.trusts.transformers.mdtp.{OtherIndividuals, Trustees}
 import uk.gov.hmrc.trusts.transformers.mdtp.beneficiaries.Beneficiaries
 import uk.gov.hmrc.trusts.transformers.mdtp.protectors.Protectors
 import uk.gov.hmrc.trusts.transformers.mdtp.settlors.Settlors
@@ -65,7 +65,8 @@ case class TrustProcessedResponse(getTrust: JsValue,
       Trustees.transform(getTrust) andThen
       Beneficiaries.transform(getTrust) andThen
       Settlors.transform(getTrust) andThen
-      Protectors.transform(getTrust)
+      Protectors.transform(getTrust) andThen
+      OtherIndividuals.transform(getTrust)
     ).map {
       json =>
         TrustProcessedResponse(json, responseHeader)
