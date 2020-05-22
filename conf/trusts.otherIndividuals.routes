@@ -1,0 +1,2 @@
+
+PUT         /:utr/remove                             uk.gov.hmrc.trusts.controllers.OtherIndividualTransformationController.removeOtherIndividual(utr: String)
