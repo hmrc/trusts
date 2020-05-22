@@ -21,7 +21,7 @@ import play.api.libs.json.{JsObject, JsValue, Json, __}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
-import uk.gov.hmrc.trusts.models.variation.Protector
+import uk.gov.hmrc.trusts.models.variation.NaturalPersonType
 import uk.gov.hmrc.trusts.models.{RemoveOtherIndividual, Success}
 import uk.gov.hmrc.trusts.transformers._
 
@@ -52,7 +52,7 @@ class OtherIndividualTransformationService @Inject()(transformationService: Tran
   def amendOtherIndividualTransformer(utr: String,
                                           index: Int,
                                           internalId: String,
-                                          amended: Protector)
+                                          amended: NaturalPersonType)
                                          (implicit hc: HeaderCarrier): Future[Success.type] = {
     getTransformedTrustJson(utr, internalId)
       .map(findOtherIndividualJson(_, index))
