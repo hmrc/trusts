@@ -24,7 +24,7 @@ case class AmendOtherIndividualTransform(index: Int,
                                         amended: JsValue,
                                         original: JsValue,
                                         endDate: LocalDate
-                                        ) extends AmendProtectorTransform {
+                                        ) extends AmendEntityTransform {
 
   override val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'naturalPerson
 }

@@ -20,8 +20,8 @@ import java.time.LocalDate
 
 import play.api.libs.json.{JsPath, JsResult, JsValue, Json}
 
-trait AmendBeneficiaryTransform  extends DeltaTransform
-  with JsonOperations {
+trait AmendEntityTransform extends DeltaTransform with JsonOperations {
+
   val index: Int
   val amended: JsValue
   val original: JsValue

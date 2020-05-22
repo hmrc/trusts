@@ -21,13 +21,10 @@ import java.time.LocalDate
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.variation.BeneficiaryCharityType
 
-case class AmendCharityBeneficiaryTransform(
-                                                index: Int,
-                                                amended: JsValue,
-                                                original: JsValue,
-                                                endDate: LocalDate
-                                              )
-  extends AmendBeneficiaryTransform {
+case class AmendCharityBeneficiaryTransform(index: Int,
+                                            amended: JsValue,
+                                            original: JsValue,
+                                            endDate: LocalDate) extends AmendEntityTransform {
 
   override val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'charity
 }
