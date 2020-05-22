@@ -17,18 +17,20 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
-import play.api.libs.json.{JsObject, JsValue, __}
+import play.api.libs.json.{JsObject, JsValue, Json, __}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
+import uk.gov.hmrc.trusts.models.variation.Protector
 import uk.gov.hmrc.trusts.models.{RemoveOtherIndividual, Success}
 import uk.gov.hmrc.trusts.transformers._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}
 
-class OtherIndividualTransformationService @Inject()(transformationService: TransformationService
-                                              )(implicit ec:ExecutionContext) extends JsonOperations {
+class OtherIndividualTransformationService @Inject()(transformationService: TransformationService,
+                                                     localDateService: LocalDateService
+                                                    )(implicit ec:ExecutionContext) extends JsonOperations {
 
   def removeOtherIndividual(utr: String, internalId: String, removeOtherIndividual: RemoveOtherIndividual)
                      (implicit hc: HeaderCarrier) : Future[Success.type] = {
@@ -43,6 +45,23 @@ class OtherIndividualTransformationService @Inject()(transformationService: Tran
             otherIndividualJson,
             removeOtherIndividual.endDate
           )
+        ).map(_ => Success)
+      }
+  }
+
+  def amendOtherIndividualTransformer(utr: String,
+                                          index: Int,
+                                          internalId: String,
+                                          amended: Protector)
+                                         (implicit hc: HeaderCarrier): Future[Success.type] = {
+    getTransformedTrustJson(utr, internalId)
+      .map(findOtherIndividualJson(_, index))
+      .flatMap(Future.fromTry)
+      .flatMap { original =>
+        transformationService.addNewTransform(
+          utr,
+          internalId,
+          AmendOtherIndividualTransform(index, Json.toJson(amended), original, localDateService.now)
         ).map(_ => Success)
       }
   }
