@@ -22,7 +22,7 @@ import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveOtherIndividual
-import uk.gov.hmrc.trusts.models.variation.Protector
+import uk.gov.hmrc.trusts.models.variation.NaturalPersonType
 import uk.gov.hmrc.trusts.services.OtherIndividualTransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
@@ -49,13 +49,13 @@ class OtherIndividualTransformationController @Inject()(identify: IdentifierActi
 
   def amendOtherIndividual(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
-      request.body.validate[Protector] match {
-        case JsSuccess(protector, _) =>
+      request.body.validate[NaturalPersonType] match {
+        case JsSuccess(otherIndividual, _) =>
           transformService.amendOtherIndividualTransformer(
             utr,
             index,
             request.identifier,
-            protector
+            otherIndividual
           ) map { _ =>
             Ok
           }
