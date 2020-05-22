@@ -267,6 +267,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
       val removeOtherIndividualsTransform = RemoveOtherIndividualsTransform(3, Json.toJson(otherIndividual), LocalDate.parse("2012-02-06"))
 
+      val amendOtherIndividualTransform = AmendOtherIndividualTransform(0, Json.toJson(otherIndividual), Json.obj(), LocalDate.parse("2020-03-25"))
+
       val json = Json.parse(
         s"""{
           |        "deltaTransforms" : [
@@ -371,6 +373,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           |            },
           |            {
           |               "RemoveOtherIndividualsTransform": ${Json.toJson(removeOtherIndividualsTransform)}
+          |            },
+          |            {
+          |               "AmendOtherIndividualTransform": ${Json.toJson(amendOtherIndividualTransform)}
           |            }
           |        ]
           |    }
@@ -410,7 +415,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           removeProtectorsTransform,
           addCompanyProtectorTransform,
           amendBusinessProtectorTransform,
-          removeOtherIndividualsTransform
+          removeOtherIndividualsTransform,
+          amendOtherIndividualTransform
         )
       )
 
