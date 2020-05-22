@@ -4,7 +4,7 @@
 ->          /beneficiaries                                      trusts.beneficiaries.Routes
 ->          /settlors                                           trusts.settlors.Routes
 ->          /protectors                                         trusts.protectors.Routes
-->          /other-ndividuals                                   trusts.otherIndividuals.Routes
+->          /other-individuals                                  trusts.otherIndividuals.Routes
 
 POST        /check                                              uk.gov.hmrc.trusts.controllers.CheckTrustController.checkExistingTrust
 

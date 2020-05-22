@@ -1,0 +1,85 @@
+/*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package uk.gov.hmrc.trusts.controllers
+
+import java.time.LocalDate
+
+import org.mockito.Matchers.{any, eq => equalTo}
+import org.mockito.Mockito.{verify, when}
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.mockito.MockitoSugar
+import org.scalatest.{FreeSpec, MustMatchers}
+import play.api.libs.json.Json
+import play.api.test.FakeRequest
+import play.api.test.Helpers.{CONTENT_TYPE, _}
+import uk.gov.hmrc.auth.core.AffinityGroup.Agent
+import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
+import uk.gov.hmrc.trusts.models.{RemoveOtherIndividual, Success}
+import uk.gov.hmrc.trusts.services.OtherIndividualTransformationService
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+class OtherIndividualTransformationControllerSpec extends FreeSpec
+  with MockitoSugar
+  with ScalaFutures
+  with MustMatchers {
+
+  val identifierAction = new FakeIdentifierAction(Agent)
+
+  "remove otherIndividual" - {
+
+    "add a new remove otherIndividual transform " in {
+
+      val otherIndividualTransformationService: OtherIndividualTransformationService = mock[OtherIndividualTransformationService]
+
+      when(otherIndividualTransformationService.removeOtherIndividual(any(), any(), any())(any()))
+        .thenReturn(Future.successful(Success))
+
+      val controller = new OtherIndividualTransformationController(identifierAction, otherIndividualTransformationService)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.obj(
+          "endDate" -> LocalDate.of(2018, 2, 24),
+          "index" -> 24
+        ))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.removeOtherIndividual("UTRUTRUTR").apply(request)
+
+      status(result) mustBe OK
+      verify(otherIndividualTransformationService)
+        .removeOtherIndividual(
+          equalTo("UTRUTRUTR"),
+          equalTo("id"),
+          equalTo(RemoveOtherIndividual(LocalDate.of(2018, 2, 24), 24)))(any())
+    }
+
+    "return an error when json is invalid" in {
+      val OUT = new OtherIndividualTransformationController(identifierAction, mock[OtherIndividualTransformationService])
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.obj("field" -> "value"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = OUT.removeOtherIndividual("UTRUTRUTR")(request)
+
+      status(result) mustBe BAD_REQUEST
+    }
+
+  }
+}

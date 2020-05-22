@@ -93,12 +93,12 @@ object DisplayTrustEntitiesType {
   implicit val trustEntitiesTypeWrites: Writes[DisplayTrustEntitiesType] = Json.writes[DisplayTrustEntitiesType]
 }
 
-case class DisplayTrustNaturalPersonType(lineNo: String,
+case class DisplayTrustNaturalPersonType(lineNo: Option[String],
                                          bpMatchStatus: Option[String],
                                          name: NameType,
                                          dateOfBirth: Option[LocalDate],
                                          identification: Option[DisplayTrustIdentificationType],
-                                         entityStart: String)
+                                         entityStart: LocalDate)
 
 object DisplayTrustNaturalPersonType {
   implicit val naturalPersonTypeFormat: Format[DisplayTrustNaturalPersonType] = Json.format[DisplayTrustNaturalPersonType]
