@@ -28,7 +28,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.{RemoveOtherIndividual, Success}
+import uk.gov.hmrc.trusts.models.variation.NaturalPersonType
+import uk.gov.hmrc.trusts.models.{NameType, RemoveOtherIndividual, Success}
 import uk.gov.hmrc.trusts.services.OtherIndividualTransformationService
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -78,6 +79,60 @@ class OtherIndividualTransformationControllerSpec extends FreeSpec
 
       val result = OUT.removeOtherIndividual("UTRUTRUTR")(request)
 
+      status(result) mustBe BAD_REQUEST
+    }
+
+  }
+
+  "Amend other individual" - {
+
+    val index = 0
+
+    "must add a new amend other individual transform" in {
+
+      val otherIndividualTransformationService: OtherIndividualTransformationService = mock[OtherIndividualTransformationService]
+
+      val newOtherIndividual = NaturalPersonType(
+        lineNo = None,
+        bpMatchStatus = None,
+        name = NameType("First", None, "Last"),
+        dateOfBirth = None,
+        identification = None,
+        entityStart = LocalDate.parse("2010-05-03"),
+        entityEnd = None
+      )
+
+      when(otherIndividualTransformationService.amendOtherIndividualTransformer(any(), any(), any(), any())(any()))
+        .thenReturn(Future.successful(Success))
+
+      val controller = new OtherIndividualTransformationController(identifierAction, otherIndividualTransformationService)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(newOtherIndividual))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendOtherIndividual("aUTR", index).apply(request)
+
+      status(result) mustBe OK
+
+      verify(otherIndividualTransformationService).amendOtherIndividualTransformer(
+        equalTo("aUTR"),
+        equalTo(index),
+        equalTo("id"),
+        equalTo(newOtherIndividual))(any())
+    }
+
+    "must return an error for malformed json" in {
+
+      val otherIndividualTransformationService: OtherIndividualTransformationService = mock[OtherIndividualTransformationService]
+
+      val controller = new OtherIndividualTransformationController(identifierAction, otherIndividualTransformationService)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.parse("{}"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amendOtherIndividual("aUTR", index).apply(request)
       status(result) mustBe BAD_REQUEST
     }
 

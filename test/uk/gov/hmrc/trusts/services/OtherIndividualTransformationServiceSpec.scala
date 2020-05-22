@@ -26,9 +26,10 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.models.RemoveOtherIndividual
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.variation.NaturalPersonType
+import uk.gov.hmrc.trusts.models.{NameType, RemoveOtherIndividual}
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
 
@@ -69,7 +70,7 @@ class OtherIndividualTransformationServiceSpec extends FreeSpec with MockitoSuga
 
       "for new remove otherIndividual using the transformation service" in {
         val transformationService = mock[TransformationService]
-        val service = new OtherIndividualTransformationService(transformationService)
+        val service = new OtherIndividualTransformationService(transformationService, LocalDateMock)
         val otherIndividual = otherIndividualJson()
 
         when(transformationService.addNewTransform(any(), any(), any()))
@@ -85,6 +86,60 @@ class OtherIndividualTransformationServiceSpec extends FreeSpec with MockitoSuga
           verify(transformationService).addNewTransform("utr",
             "internalId", RemoveOtherIndividualsTransform(0, otherIndividual, LocalDate.of(2013, 2, 20)))
         }
+      }
+
+      "for amend other individual using the transformation service" in {
+
+        val transformationService = mock[TransformationService]
+        val service = new OtherIndividualTransformationService(transformationService, LocalDateMock)
+
+        val amendedOtherIndividual = NaturalPersonType(
+          name = NameType("First", None, "Last"),
+          dateOfBirth = None,
+          identification = None,
+          lineNo = None,
+          bpMatchStatus = None,
+          entityStart = LocalDateMock.now,
+          entityEnd = None
+        )
+
+        val originalOtherIndividual = Json.parse(
+          """
+            |{
+            |  "lineNo":"1",
+            |  "name":{
+            |    "firstName":"John",
+            |    "middleName":"William",
+            |    "lastName":"O'Connor"
+            |  },
+            |  "dateOfBirth":"1956-02-12",
+            |  "identification":{
+            |    "nino":"KC287812"
+            |  },
+            |  "entityStart":"1998-02-12"
+            |}
+            |""".stripMargin)
+
+        when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+        val desResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
+
+        when(transformationService.getTransformedData(any(), any())(any()))
+          .thenReturn(
+            Future.successful(
+              TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
+            ))
+
+        val result = service.amendOtherIndividualTransformer("utr", 0, "internalId", amendedOtherIndividual)
+        whenReady(result) { _ =>
+
+          verify(transformationService).addNewTransform(
+            "utr",
+            "internalId",
+            AmendOtherIndividualTransform(0, Json.toJson(amendedOtherIndividual), originalOtherIndividual, LocalDateMock.now)
+          )
+        }
+
       }
     }
 

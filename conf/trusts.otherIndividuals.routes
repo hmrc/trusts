@@ -1,2 +1,4 @@
 
+POST        /amend/:utr/:index                       uk.gov.hmrc.trusts.controllers.OtherIndividualTransformationController.amendOtherIndividual(utr: String, index: Int)
+
 PUT         /:utr/remove                             uk.gov.hmrc.trusts.controllers.OtherIndividualTransformationController.removeOtherIndividual(utr: String)
