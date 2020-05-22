@@ -99,7 +99,7 @@ class OtherIndividualTransformationServiceSpec extends FreeSpec with MockitoSuga
           identification = None,
           lineNo = None,
           bpMatchStatus = None,
-          entityStart = LocalDate.now(),
+          entityStart = LocalDateMock.now,
           entityEnd = None
         )
 
