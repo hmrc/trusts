@@ -21,9 +21,9 @@ import java.time.LocalDate
 import play.api.libs.json._
 
 case class AmendLargeBeneficiaryTransform(index: Int,
-                                            amended: JsValue,
-                                            original: JsValue,
-                                            endDate: LocalDate) extends AmendBeneficiaryTransform {
+                                          amended: JsValue,
+                                          original: JsValue,
+                                          endDate: LocalDate) extends AmendEntityTransform {
 
   override val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'large
 }

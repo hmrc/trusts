@@ -20,8 +20,10 @@ import java.time.LocalDate
 
 import play.api.libs.json._
 
-case class AmendUnidentifiedBeneficiaryTransform(index: Int, description: String, original: JsValue, endDate: LocalDate)
-  extends AmendBeneficiaryTransform {
+case class AmendUnidentifiedBeneficiaryTransform(index: Int,
+                                                 description: String,
+                                                 original: JsValue,
+                                                 endDate: LocalDate) extends AmendEntityTransform {
 
   override val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'unidentified
 

@@ -17,17 +17,71 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustNaturalPersonType
+import play.api.libs.json.{JsObject, JsValue, Json, __}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustNaturalPersonType, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.variation.NaturalPersonType
+import uk.gov.hmrc.trusts.models.{RemoveOtherIndividual, Success}
 import uk.gov.hmrc.trusts.transformers._
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Try}
 
-class OtherIndividualTransformationService @Inject()(
-                                                  transformationService: TransformationService,
-                                                  localDateService: LocalDateService
-                                                )
-                                                    (implicit ec:ExecutionContext)
-  extends JsonOperations {
+class OtherIndividualTransformationService @Inject()(transformationService: TransformationService,
+                                                     localDateService: LocalDateService
+                                                    )(implicit ec:ExecutionContext) extends JsonOperations {
+
+  def removeOtherIndividual(utr: String, internalId: String, removeOtherIndividual: RemoveOtherIndividual)
+                     (implicit hc: HeaderCarrier) : Future[Success.type] = {
+
+    getTransformedTrustJson(utr, internalId)
+      .map(findOtherIndividualJson(_, removeOtherIndividual.index))
+      .flatMap(Future.fromTry)
+      .flatMap { otherIndividualJson =>
+        transformationService.addNewTransform (utr, internalId,
+          RemoveOtherIndividualsTransform(
+            removeOtherIndividual.index,
+            otherIndividualJson,
+            removeOtherIndividual.endDate
+          )
+        ).map(_ => Success)
+      }
+  }
+
+  def amendOtherIndividualTransformer(utr: String,
+                                          index: Int,
+                                          internalId: String,
+                                          amended: NaturalPersonType)
+                                         (implicit hc: HeaderCarrier): Future[Success.type] = {
+    getTransformedTrustJson(utr, internalId)
+      .map(findOtherIndividualJson(_, index))
+      .flatMap(Future.fromTry)
+      .flatMap { original =>
+        transformationService.addNewTransform(
+          utr,
+          internalId,
+          AmendOtherIndividualTransform(index, Json.toJson(amended), original, localDateService.now)
+        ).map(_ => Success)
+      }
+  }
+
+  private def getTransformedTrustJson(utr: String, internalId: String)
+                                     (implicit hc:HeaderCarrier): Future[JsObject] = {
+
+    transformationService.getTransformedData(utr, internalId).flatMap {
+      case TrustProcessedResponse(json, _) => Future.successful(json.as[JsObject])
+      case _ => Future.failed(InternalServerErrorException("Trust is not in processed state."))
+    }
+  }
+
+  private def findOtherIndividualJson(json: JsValue, index: Int): Try[JsObject] = {
+    val path = (__ \ 'details \ 'trust \ 'entities \ 'naturalPerson \ index).json
+    json.transform(path.pick).fold(
+      _ => Failure(InternalServerErrorException("Could not locate otherIndividual at index")),
+      value => scala.util.Success(value.as[JsObject])
+    )
+  }
 
   def addOtherIndividualTransformer(utr: String, internalId: String, newOtherIndividual: DisplayTrustNaturalPersonType): Future[Boolean] = {
     transformationService.addNewTransform(utr, internalId, AddOtherIndividualTransform(newOtherIndividual))

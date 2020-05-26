@@ -1,3 +1,6 @@
 
-POST        /add/:utr                  uk.gov.hmrc.trusts.controllers.OtherIndividualTransformationController.addOtherIndividual(utr: String)
+POST        /amend/:utr/:index                       uk.gov.hmrc.trusts.controllers.OtherIndividualTransformationController.amendOtherIndividual(utr: String, index: Int)
+POST        /add/:utr                                uk.gov.hmrc.trusts.controllers.OtherIndividualTransformationController.addOtherIndividual(utr: String)
+
+PUT         /:utr/remove                             uk.gov.hmrc.trusts.controllers.OtherIndividualTransformationController.removeOtherIndividual(utr: String)
 

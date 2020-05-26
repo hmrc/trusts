@@ -14,25 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.transformers
+package uk.gov.hmrc.trusts.models
 
 import java.time.LocalDate
 
-import play.api.libs.json.{JsPath, JsResult, JsValue, Json}
+import play.api.libs.json.{Format, Json}
 
-trait AmendBeneficiaryTransform  extends DeltaTransform
-  with JsonOperations {
-  val index: Int
-  val amended: JsValue
-  val original: JsValue
-  val endDate: LocalDate
-  val path: JsPath
+case class RemoveOtherIndividual(endDate: LocalDate, index: Int)
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    amendAtPosition(input, path, index, Json.toJson(amended))
-  }
-
-  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    endEntity(input, path, original, endDate)
-  }
+object RemoveOtherIndividual {
+  implicit val formats : Format[RemoveOtherIndividual] = Json.format[RemoveOtherIndividual]
 }

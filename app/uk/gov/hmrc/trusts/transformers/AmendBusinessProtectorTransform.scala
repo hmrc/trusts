@@ -23,7 +23,7 @@ import play.api.libs.json._
 case class AmendBusinessProtectorTransform(index: Int,
                                            amended: JsValue,
                                            original: JsValue,
-                                           endDate: LocalDate) extends AmendProtectorTransform {
+                                           endDate: LocalDate) extends AmendEntityTransform {
 
   override val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'protectors \ 'protectorCompany
 }

@@ -98,7 +98,7 @@ case class DisplayTrustNaturalPersonType(lineNo: Option[String],
                                          name: NameType,
                                          dateOfBirth: Option[LocalDate],
                                          identification: Option[DisplayTrustIdentificationType],
-                                         entityStart: String)
+                                         entityStart: LocalDate)
 
 object DisplayTrustNaturalPersonType {
   implicit val naturalPersonTypeFormat: Format[DisplayTrustNaturalPersonType] = Json.format[DisplayTrustNaturalPersonType]

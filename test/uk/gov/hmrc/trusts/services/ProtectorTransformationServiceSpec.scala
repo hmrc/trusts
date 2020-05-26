@@ -101,7 +101,7 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
           identification = None,
           lineNo = None,
           bpMatchStatus = None,
-          entityStart = LocalDate.now(),
+          entityStart = LocalDateMock.now,
           entityEnd = None
         )
 

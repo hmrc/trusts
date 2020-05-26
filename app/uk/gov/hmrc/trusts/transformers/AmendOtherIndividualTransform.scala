@@ -18,21 +18,19 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import play.api.libs.json.{JsPath, JsResult, JsValue, Json}
+import play.api.libs.json._
 
-trait AmendProtectorTransform extends DeltaTransform with JsonOperations {
+case class AmendOtherIndividualTransform(index: Int,
+                                        amended: JsValue,
+                                        original: JsValue,
+                                        endDate: LocalDate
+                                        ) extends AmendEntityTransform {
 
-  val index: Int
-  val amended: JsValue
-  val original: JsValue
-  val endDate: LocalDate
-  val path: JsPath
+  override val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'naturalPerson
+}
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    amendAtPosition(input, path, index, Json.toJson(amended))
-  }
+object AmendOtherIndividualTransform {
+  val key = "AmendOtherIndividualTransform"
 
-  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    endEntity(input, path, original, endDate)
-  }
+  implicit val format: Format[AmendOtherIndividualTransform] = Json.format[AmendOtherIndividualTransform]
 }

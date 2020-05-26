@@ -37,7 +37,8 @@ object DeltaTransform {
         trusteeReads orElse
         beneficiaryReads orElse
         settlorReads orElse
-        protectorReads
+        protectorReads orElse
+        otherIndividualReads
       ) (value.as[JsObject]) orElse (throw new Exception(s"Don't know how to deserialise transform"))
   )
 
@@ -86,6 +87,11 @@ object DeltaTransform {
     readsForTransform[AmendIndividualProtectorTransform](AmendIndividualProtectorTransform.key) orElse
     readsForTransform[AmendBusinessProtectorTransform](AmendBusinessProtectorTransform.key) orElse
     readsForTransform[RemoveProtectorsTransform](RemoveProtectorsTransform.key)
+  }
+
+  def otherIndividualReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
+    readsForTransform[AmendOtherIndividualTransform](AmendOtherIndividualTransform.key) orElse
+    readsForTransform[RemoveOtherIndividualsTransform](RemoveOtherIndividualsTransform.key)
   }
 
   def trusteeWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
@@ -187,6 +193,16 @@ object DeltaTransform {
       Json.obj(RemoveProtectorsTransform.key -> Json.toJson(transform)(RemoveProtectorsTransform.format))
   }
 
+  def otherIndividualsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+    case transform: AmendOtherIndividualTransform =>
+      Json.obj(AmendOtherIndividualTransform.key -> Json.toJson(transform)(AmendOtherIndividualTransform.format))
+  }
+
+  def removeOtherIndividualsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
+    case transform: RemoveOtherIndividualsTransform =>
+      Json.obj(RemoveOtherIndividualsTransform.key -> Json.toJson(transform)(RemoveOtherIndividualsTransform.format))
+  }
+
   def defaultWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
     case transform => throw new Exception(s"Don't know how to serialise transform - $transform")
   }
@@ -202,6 +218,8 @@ object DeltaTransform {
       addProtectorsWrites orElse
       amendProtectorsWrites orElse
       removeProtectorsWrites orElse
+      otherIndividualsWrites orElse
+      removeOtherIndividualsWrites orElse
       defaultWrites
       ).apply(deltaTransform)
   }

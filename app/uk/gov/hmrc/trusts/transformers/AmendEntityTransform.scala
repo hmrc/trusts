@@ -18,20 +18,21 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.variation.BeneficiaryCharityType
+import play.api.libs.json.{JsPath, JsResult, JsValue, Json}
 
-case class AmendCharityBeneficiaryTransform(index: Int,
-                                            amended: JsValue,
-                                            original: JsValue,
-                                            endDate: LocalDate) extends AmendEntityTransform {
+trait AmendEntityTransform extends DeltaTransform with JsonOperations {
 
-  override val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'charity
+  val index: Int
+  val amended: JsValue
+  val original: JsValue
+  val endDate: LocalDate
+  val path: JsPath
+
+  override def applyTransform(input: JsValue): JsResult[JsValue] = {
+    amendAtPosition(input, path, index, Json.toJson(amended))
+  }
+
+  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
+    endEntity(input, path, original, endDate)
+  }
 }
-
-object AmendCharityBeneficiaryTransform {
-  val key = "AmendCharityBeneficiaryTransform"
-
-  implicit val format: Format[AmendCharityBeneficiaryTransform] = Json.format[AmendCharityBeneficiaryTransform]
-}
-
