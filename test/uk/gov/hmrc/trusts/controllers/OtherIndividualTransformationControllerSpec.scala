@@ -28,9 +28,10 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustNaturalPersonType
 import uk.gov.hmrc.trusts.models.variation.NaturalPersonType
 import uk.gov.hmrc.trusts.models.{NameType, RemoveOtherIndividual, Success}
-import uk.gov.hmrc.trusts.services.OtherIndividualTransformationService
+import uk.gov.hmrc.trusts.services.{BeneficiaryTransformationService, OtherIndividualTransformationService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -135,6 +136,47 @@ class OtherIndividualTransformationControllerSpec extends FreeSpec
       val result = controller.amendOtherIndividual("aUTR", index).apply(request)
       status(result) mustBe BAD_REQUEST
     }
-
   }
+
+  "Add other individual" - {
+
+    "must add a new add other  individual transform" in {
+      val otherIndividualTransformationService = mock[OtherIndividualTransformationService]
+      val controller = new OtherIndividualTransformationController(identifierAction, otherIndividualTransformationService)
+
+      val newOtherIndividual = DisplayTrustNaturalPersonType(
+        None,
+        None,
+        name = NameType("First", None, "Last"),
+        None,
+        None,
+        entityStart = LocalDate.parse("2000-01-01")
+      )
+
+      when(otherIndividualTransformationService.addOtherIndividualTransformer(any(), any(), any()))
+        .thenReturn(Future.successful(true))
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(newOtherIndividual))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.addOtherIndividual("aUTR").apply(request)
+
+      status(result) mustBe OK
+      verify(otherIndividualTransformationService).addOtherIndividualTransformer("aUTR", "id", newOtherIndividual)
+    }
+
+    "must return an error for malformed json" in {
+      val otherIndividualTransformationService = mock[OtherIndividualTransformationService]
+      val controller = new OtherIndividualTransformationController(identifierAction, otherIndividualTransformationService)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.parse("{}"))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.addOtherIndividual("aUTR").apply(request)
+      status(result) mustBe BAD_REQUEST
+    }
+  }
+
 }

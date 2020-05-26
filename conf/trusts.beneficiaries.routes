@@ -27,4 +27,4 @@ POST        /add-large/:utr                         uk.gov.hmrc.trusts.controlle
 
 POST        /amend-large/:utr/:index                uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendLargeBeneficiary(utr: String, index: Int)
 
-PUT         /:utr/remove                          uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.removeBeneficiary(utr: String)
+PUT         /:utr/remove                            uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.removeBeneficiary(utr: String)

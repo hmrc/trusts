@@ -91,7 +91,8 @@ object DeltaTransform {
 
   def otherIndividualReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
     readsForTransform[AmendOtherIndividualTransform](AmendOtherIndividualTransform.key) orElse
-    readsForTransform[RemoveOtherIndividualsTransform](RemoveOtherIndividualsTransform.key)
+    readsForTransform[RemoveOtherIndividualsTransform](RemoveOtherIndividualsTransform.key) orElse
+    readsForTransform[AddOtherIndividualTransform](AddOtherIndividualTransform.key)
   }
 
   def trusteeWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
@@ -203,6 +204,11 @@ object DeltaTransform {
       Json.obj(RemoveOtherIndividualsTransform.key -> Json.toJson(transform)(RemoveOtherIndividualsTransform.format))
   }
 
+  def addOtherIndividualsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
+    case transform: AddOtherIndividualTransform =>
+      Json.obj(AddOtherIndividualTransform.key -> Json.toJson(transform)(AddOtherIndividualTransform.format))
+  }
+
   def defaultWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
     case transform => throw new Exception(s"Don't know how to serialise transform - $transform")
   }
@@ -220,6 +226,7 @@ object DeltaTransform {
       removeProtectorsWrites orElse
       otherIndividualsWrites orElse
       removeOtherIndividualsWrites orElse
+      addOtherIndividualsWrites orElse
       defaultWrites
       ).apply(deltaTransform)
   }

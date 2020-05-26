@@ -20,7 +20,7 @@ import javax.inject.Inject
 import play.api.libs.json.{JsObject, JsValue, Json, __}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustNaturalPersonType, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.models.variation.NaturalPersonType
 import uk.gov.hmrc.trusts.models.{RemoveOtherIndividual, Success}
 import uk.gov.hmrc.trusts.transformers._
@@ -81,6 +81,10 @@ class OtherIndividualTransformationService @Inject()(transformationService: Tran
       _ => Failure(InternalServerErrorException("Could not locate otherIndividual at index")),
       value => scala.util.Success(value.as[JsObject])
     )
+  }
+
+  def addOtherIndividualTransformer(utr: String, internalId: String, newOtherIndividual: DisplayTrustNaturalPersonType): Future[Boolean] = {
+    transformationService.addNewTransform(utr, internalId, AddOtherIndividualTransform(newOtherIndividual))
   }
 
 }
