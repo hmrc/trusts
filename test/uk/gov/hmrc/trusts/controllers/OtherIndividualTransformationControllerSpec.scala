@@ -167,14 +167,14 @@ class OtherIndividualTransformationControllerSpec extends FreeSpec
     }
 
     "must return an error for malformed json" in {
-      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val otherIndividualTransformationService = mock[OtherIndividualTransformationService]
+      val controller = new OtherIndividualTransformationController(identifierAction, otherIndividualTransformationService)
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val result = controller.addUnidentifiedBeneficiary("aUTR").apply(request)
+      val result = controller.addOtherIndividual("aUTR").apply(request)
       status(result) mustBe BAD_REQUEST
     }
   }

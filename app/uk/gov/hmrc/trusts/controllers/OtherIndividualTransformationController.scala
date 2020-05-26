@@ -60,8 +60,8 @@ class OtherIndividualTransformationController @Inject()(
               Ok
             }
           case JsError(errors) =>
-            logger.warn(s"[OtherIndividualTransformationController][addOtherIndividualTransformer] " +
-              s"Supplied json could not be read as an Unidentified Beneficiary - $errors")
+            logger.warn(s"[OtherIndividualTransformationController][amendOtherIndividual] " +
+              s"Supplied json could not be read as an Other Individual - $errors")
             Future.successful(BadRequest)
         }
       }
@@ -81,7 +81,7 @@ class OtherIndividualTransformationController @Inject()(
             }
           case JsError(errors) =>
             logger.warn(s"[OtherIndividualTransformationController][addOtherIndividualTransformer] " +
-              s"Supplied json could not be read as an Unidentified Beneficiary - $errors")
+              s"Supplied json could not be read as an Other Individual - $errors")
             Future.successful(BadRequest)
         }
       }

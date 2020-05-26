@@ -60,7 +60,7 @@ class AddOtherIndividualSpec extends FreeSpec with MustMatchers with MockitoSuga
           |              "entityStart":"1998-02-12"
           |            }""".stripMargin)
 
-      lazy val expectedGetAfterAddBeneficiaryJson: JsValue =
+      lazy val expectedGetAfterAddOtherIndividualJson: JsValue =
         JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-add-other-individual.json")
 
       val stubbedDesConnector = mock[DesConnector]
@@ -90,7 +90,7 @@ class AddOtherIndividualSpec extends FreeSpec with MustMatchers with MockitoSuga
 
           val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
           status(newResult) mustBe OK
-          contentAsJson(newResult) mustBe expectedGetAfterAddBeneficiaryJson
+          contentAsJson(newResult) mustBe expectedGetAfterAddOtherIndividualJson
 
           dropTheDatabase(connection)
         }.get
