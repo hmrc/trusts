@@ -44,7 +44,8 @@ class DeclarationTransformer {
         pruneEmptyTrustees(responseJson) andThen
         putNewValue(__ \ 'reqHeader \ 'formBundleNo, JsString(responseHeader.formBundleNo)) andThen
         addDeclaration(declarationForApi, responseJson) andThen
-        addAgentIfDefined(declarationForApi.agentDetails)
+        addAgentIfDefined(declarationForApi.agentDetails) andThen
+        addEndDateIfDefined(declarationForApi.endDate)
     )
   }
 
@@ -150,6 +151,14 @@ class DeclarationTransformer {
   private def addAgentIfDefined(agentDetails: Option[AgentDetails]) = if (agentDetails.isDefined) {
     __.json.update(
       (__ \ 'agentDetails).json.put(Json.toJson(agentDetails.get))
+    )
+  } else {
+    __.json.pick[JsObject]
+  }
+
+  private def addEndDateIfDefined(endDate: Option[LocalDate]) = if (endDate.isDefined) {
+    __.json.update(
+      (__ \ 'trustEndDate).json.put(Json.toJson(endDate.get))
     )
   } else {
     __.json.pick[JsObject]

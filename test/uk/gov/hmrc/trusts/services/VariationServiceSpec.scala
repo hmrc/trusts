@@ -57,7 +57,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
     override def now: LocalDate = LocalDate.of(1999, 3, 14)
   }
 
-  val declarationForApi = DeclarationForApi(declaration, None)
+  val declarationForApi = DeclarationForApi(declaration, None, None)
 
   "Declare no change" should {
 
@@ -101,6 +101,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
       }}
     }
   }
+
   "Fail if the etmp data version doesn't match our submission data" in {
     val desService = mock[DesService]
     val transformationService = mock[TransformationService]
@@ -128,7 +129,6 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
     whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { exception => {
       exception mustBe an[EtmpCacheDataStaleException.type]
       verify(desService, times(0)).trustVariation(any())(any[HeaderCarrier])
-    }
-    }
+    }}
   }
 }
