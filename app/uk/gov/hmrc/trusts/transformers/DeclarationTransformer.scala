@@ -156,12 +156,15 @@ class DeclarationTransformer {
     __.json.pick[JsObject]
   }
 
-  private def addEndDateIfDefined(endDate: Option[LocalDate]) = if (endDate.isDefined) {
-    __.json.update(
-      (__ \ 'trustEndDate).json.put(Json.toJson(endDate.get))
-    )
-  } else {
-    __.json.pick[JsObject]
+  private def addEndDateIfDefined(endDate: Option[LocalDate]) = {
+    endDate match {
+      case Some(date) =>
+        __.json.update(
+          (__ \ 'trustEndDate).json.put(Json.toJson(date))
+        )
+      case _ =>
+        __.json.pick[JsObject]
+    }
   }
 
 }
