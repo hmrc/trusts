@@ -110,20 +110,28 @@ class GetTrustController @Inject()(identify: IdentifierAction,
         JsBoolean(etmpData.transform(deceasedDeathDatePath.json.pick).isSuccess)
     }
 
+  private val protectorsPath = JsPath \ 'details \ 'trust \ 'entities \ 'protectors
+
   def getProtectorsAlreadyExist(utr: String) : Action[AnyContent] =
     processEtmpData(utr) {
       trustData =>
-        val protectorsPath = JsPath \ 'details \ 'trust \ 'entities \ 'protectors
         JsBoolean(!trustData.transform(protectorsPath.json.pick).asOpt.contains(
           Json.obj("protector" -> JsArray(), "protectorCompany" -> JsArray()))
         )
     }
 
   def getProtectors(utr: String) : Action[AnyContent] =
-    getArrayAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'protectors, "protectors")
+    getArrayAtPath(utr, protectorsPath, "protectors")
+
+  private val otherIndividualPath = JsPath \ 'details \ 'trust \ 'entities \ 'naturalPerson
+
+  def getOtherIndividualsAlreadyExist(utr: String): Action[AnyContent] =
+    processEtmpData(utr) {
+      trustData => JsBoolean(trustData.transform((otherIndividualPath \ 0).json.pick).isSuccess)
+    }
 
   def getOtherIndividuals(utr: String) : Action[AnyContent] =
-    getArrayAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'naturalPerson, "naturalPerson")
+    getArrayAtPath(utr, otherIndividualPath, "naturalPerson")
 
   private def getArrayAtPath(utr: String, path: JsPath, fieldName: String): Action[AnyContent] = {
     getElementAtPath(utr,

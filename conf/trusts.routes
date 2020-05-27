@@ -34,6 +34,8 @@ GET         /:utr/transformed/other-individuals                 uk.gov.hmrc.trus
 
 GET         /:utr/transformed/protectors-already-exist          uk.gov.hmrc.trusts.controllers.GetTrustController.getProtectorsAlreadyExist(utr: String)
 
+GET         /:utr/transformed/other-individuals-already-exist   uk.gov.hmrc.trusts.controllers.GetTrustController.getOtherIndividualsAlreadyExist(utr: String)
+
 GET         /:utr/transformed/deceased-settlor-death-recorded   uk.gov.hmrc.trusts.controllers.GetTrustController.getDeceasedSettlorDeathRecorded(utr: String)
 
 POST        /variation                                          uk.gov.hmrc.trusts.controllers.TrustVariationsController.trustVariation
