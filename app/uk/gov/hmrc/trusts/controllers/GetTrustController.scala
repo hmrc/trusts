@@ -123,15 +123,15 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   def getProtectors(utr: String) : Action[AnyContent] =
     getArrayAtPath(utr, protectorsPath, "protectors")
 
-  private val otherIndividualPath = JsPath \ 'details \ 'trust \ 'entities \ 'naturalPerson
+  private val otherIndividualsPath = JsPath \ 'details \ 'trust \ 'entities \ 'naturalPerson
 
   def getOtherIndividualsAlreadyExist(utr: String): Action[AnyContent] =
     processEtmpData(utr) {
-      trustData => JsBoolean(trustData.transform((otherIndividualPath \ 0).json.pick).isSuccess)
+      trustData => JsBoolean(trustData.transform((otherIndividualsPath \ 0).json.pick).isSuccess)
     }
 
   def getOtherIndividuals(utr: String) : Action[AnyContent] =
-    getArrayAtPath(utr, otherIndividualPath, "naturalPerson")
+    getArrayAtPath(utr, otherIndividualsPath, "naturalPerson")
 
   private def getArrayAtPath(utr: String, path: JsPath, fieldName: String): Action[AnyContent] = {
     getElementAtPath(utr,
