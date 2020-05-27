@@ -315,7 +315,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
           NameType("firstname", None, "Surname")
         )
 
-        val declarationForApi = DeclarationForApi(declaration, None)
+        val declarationForApi = DeclarationForApi(declaration, None, None)
 
         when(mockVariationService.submitDeclaration(any(), any(), any())(any()))
           .thenReturn(Future.failed(EtmpCacheDataStaleException))

@@ -86,7 +86,7 @@ class TrustVariationsController @Inject()(
 
           auditService.audit(
             TrustAuditing.TRUST_VARIATION,
-            Json.obj("declaration" ->request.body),
+            Json.obj("declaration" -> request.body),
             request.identifier,
             Json.toJson(Json.obj())
           )
