@@ -1,0 +1,2 @@
+POST        /                                           uk.gov.hmrc.trusts.controllers.RegisterTrustController.registration
+
