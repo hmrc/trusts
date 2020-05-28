@@ -32,9 +32,4 @@ class DateFormatter @Inject()(config: AppConfig) {
     dateTime.format(dateFormatter)
   }
 
-  def savedUntil(date: LocalDateTime) : String = {
-    val ttlInSeconds = config.ttlInSeconds
-    formatDate(date.plusSeconds(ttlInSeconds))
-  }
-
 }

@@ -29,6 +29,7 @@ import reactivemongo.bson.BSONDocument
 import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
 import reactivemongo.play.json.collection.JSONCollection
 import uk.gov.hmrc.trusts.config.AppConfig
+import uk.gov.hmrc.trusts.models.FrontEndUiState
 import uk.gov.hmrc.trusts.utils.DateFormatter
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -51,43 +52,74 @@ class DefaultUiStateRepository @Inject()(
       res <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
     } yield res
 
-  private val lastUpdatedIndex = Index(
-    key = Seq("updatedAt" -> IndexType.Ascending),
-    name = Some("ui-state-updated-at-index"),
+  private val createdAtIndex = Index(
+    key = Seq("createdAt" -> IndexType.Ascending),
+    name = Some("ui-state-created-at-index"),
     options = BSONDocument("expireAfterSeconds" -> cacheTtl)
   )
 
-  private val idIndex = Index(
-    key = Seq("id" -> IndexType.Ascending),
-    name = Some("id-index")
+  private val draftIdIndex = Index(
+    key = Seq("draftId" -> IndexType.Ascending),
+    name = Some("draft-id-index")
+  )
+
+  private val internalIdIndex = Index(
+    key = Seq("internalId" -> IndexType.Ascending),
+    name = Some("internal-id-index")
   )
 
   private lazy val ensureIndexes = {
     logger.info("Ensuring collection indexes")
     for {
       collection              <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
-      createdLastUpdatedIndex <- collection.indexesManager.ensure(lastUpdatedIndex)
-      createdIdIndex          <- collection.indexesManager.ensure(idIndex)
-    } yield createdLastUpdatedIndex && createdIdIndex
+      createdCreatedIndex <- collection.indexesManager.ensure(createdAtIndex)
+      createdIdIndex          <- collection.indexesManager.ensure(draftIdIndex)
+      createdInternalIdIndex  <- collection.indexesManager.ensure(internalIdIndex)
+    } yield createdCreatedIndex && createdIdIndex && createdInternalIdIndex
   }
 
-  private def createKey(draftId: String, internalId: String) = {
-    (draftId + '-' + internalId)
+  override def set(uiState: FrontEndUiState): Future[Boolean] = {
+
+    val selector = Json.obj(
+      "draftId" -> uiState.draftId,
+      "internalId" -> uiState.internalId
+    )
+
+    val modifier = Json.obj(
+      "$set" -> uiState
+    )
+
+    collection.flatMap {
+      _.update(ordered = false).one(selector, modifier, upsert = true).map {
+        lastError =>
+          lastError.ok
+      }
+    }
   }
 
-  override def get(draftId: String, internalId: String): Future[Option[JsObject]] = {
-      val selector = Json.obj(
-        "id" -> createKey(draftId, internalId)
-      )
+  override def get(draftId: String, internalId: String): Future[Option[FrontEndUiState]] = {
+    val selector = Json.obj(
+      "draftId" -> draftId,
+      "internalId" -> internalId
+    )
 
-      collection.flatMap(_.find(
-        selector = selector, None).one[JsObject].map(opt =>
-        for  {
-          document <- opt
-          transforms <- (document \ "state").asOpt[JsObject]
-        } yield transforms)
-      )
+    collection.flatMap(_.find(
+      selector = selector, None).one[FrontEndUiState])
   }
+
+//  override def getAll(internalId: String): Future[Option[JsObject]] = {
+//    val selector = Json.obj(
+//      "id" -> createKey(draftId, internalId)
+//    )
+//
+//    collection.flatMap(_.find(
+//      selector = selector, None).one[JsObject].map(opt =>
+//      for  {
+//        document <- opt
+//        transforms <- (document \ "state").asOpt[JsObject]
+//      } yield transforms)
+//    )
+//  }
 
 //  override def getDraftRegistrations(internalId: String): Future[List[UserAnswers]] = {
 //    val draftIdLimit = 20
@@ -122,37 +154,19 @@ class DefaultUiStateRepository @Inject()(
 //    }
 //  }
 
-  override def set(draftId: String, internalId: String, uiState: JsObject): Future[Boolean] = {
 
-    val id = createKey(draftId, internalId)
-    val selector = Json.obj(
-      "id" -> id
-    )
-
-    val modifier = Json.obj(
-      "$set" -> Json.obj(
-        "id" -> id,
-        "updatedAt" -> Json.obj("$date" -> Timestamp.valueOf(LocalDateTime.now())),
-        "state" -> uiState
-      )
-    )
-
-    collection.flatMap {
-      _.update(ordered = false).one(selector, modifier, upsert = true).map {
-        lastError =>
-          lastError.ok
-      }
-    }
-  }
 }
+
 
 trait UiStateRepository {
 
-  def get(draftId: String, internalId: String): Future[Option[JsObject]]
+  def get(draftId: String, internalId: String): Future[Option[FrontEndUiState]]
 
-  def set(draftId: String, internalId: String, uiState: JsObject): Future[Boolean]
+  def set(uiState: FrontEndUiState): Future[Boolean]
 
-//  def getDraftRegistrations(internalId: String): Future[List[UserAnswers]]
+//  def getAll(internalId: String): Future[Option[JsObject]]
+
+  //  def getDraftRegistrations(internalId: String): Future[List[UserAnswers]]
 //
 //  def listDrafts(internalId : String) : Future[List[DraftRegistration]]
 }

@@ -16,18 +16,37 @@
 
 package uk.gov.hmrc.repositories
 
+import java.time.LocalDateTime
+
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json._
 import play.api.test.Helpers.running
+import uk.gov.hmrc.trusts.models.FrontEndUiState
 import uk.gov.hmrc.trusts.repositories.UiStateRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class UiStateRepositorySpec extends FreeSpec with MustMatchers with TransformIntegrationTest {
 
+  private val data1 = Json.obj(
+    "field1" -> "value1",
+    "field2" -> "value2",
+    "theAnswer" -> 42
+  )
+  private val data2 = Json.obj(
+    "field1" -> "valueX",
+    "field2" -> "valueY",
+    "theAnswer" -> 3.14
+  )
+  private val data3 = Json.obj(
+    "field1" -> "valueA",
+    "field2" -> "valueB",
+    "theAnswer" -> 6.28
+  )
+
   "the ui state repository" - {
 
-    "must be able to store and retrieve a payload" in {
+    "must be able to store and retrieve data" in {
 
       val application = applicationBuilder.build()
 
@@ -38,19 +57,56 @@ class UiStateRepositorySpec extends FreeSpec with MustMatchers with TransformInt
 
           val repository = application.injector.instanceOf[UiStateRepository]
 
-          val data = Json.obj(
-            "field1" -> "value1",
-            "field2" -> "value2",
-            "theAnswer" -> 42
+          val state1 = FrontEndUiState(
+            "draftId1",
+            "InternalId",
+            LocalDateTime.of(2012, 12, 8, 11, 34),
+            data1
           )
 
-          val storedOk = repository.set("draftId", "InternalId", data)
+          val storedOk = repository.set(state1)
           storedOk.futureValue mustBe true
 
-          val retrieved = repository.get("draftId", "InternalId")
-            .map(_.getOrElse(fail("The record was not found in the database")))
+          val state2 = FrontEndUiState(
+            "draftId2",
+            "InternalId",
+            LocalDateTime.of(2016, 10, 24, 17, 2),
+            data2
+          )
 
-          retrieved.futureValue mustBe data
+          val storedOk2 = repository.set(state2)
+          storedOk2.futureValue mustBe true
+
+          val state3 = FrontEndUiState(
+            "draftId1",
+            "InternalId2",
+            LocalDateTime.of(2019, 2, 1, 23, 59),
+            data3
+          )
+
+          val storedOk3 = repository.set(state3)
+          storedOk3.futureValue mustBe true
+
+          {
+            val retrieved = repository.get("draftId1", "InternalId")
+              .map(_.getOrElse(fail("The record was not found in the database")))
+
+            retrieved.futureValue mustBe state1
+          }
+
+          {
+            val retrieved = repository.get("draftId2", "InternalId")
+              .map(_.getOrElse(fail("The record was not found in the database")))
+
+            retrieved.futureValue mustBe state2
+          }
+
+          {
+            val retrieved = repository.get("draftId1", "InternalId2")
+              .map(_.getOrElse(fail("The record was not found in the database")))
+
+            retrieved.futureValue mustBe state3
+          }
 
           dropTheDatabase(connection)
         }.get
