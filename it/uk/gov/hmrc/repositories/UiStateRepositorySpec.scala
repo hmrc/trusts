@@ -87,30 +87,23 @@ class UiStateRepositorySpec extends FreeSpec with MustMatchers with TransformInt
           val storedOk3 = repository.set(state3)
           storedOk3.futureValue mustBe true
 
-          {
-            val retrieved = repository.get("draftId1", "InternalId")
-              .map(_.getOrElse(fail("The record was not found in the database")))
+          testRetrieval(repository, "draftId1", "InternalId", state1)
+          testRetrieval(repository, "draftId2", "InternalId", state2)
+          testRetrieval(repository, "draftId1", "InternalId2", state3)
 
-            retrieved.futureValue mustBe state1
-          }
-
-          {
-            val retrieved = repository.get("draftId2", "InternalId")
-              .map(_.getOrElse(fail("The record was not found in the database")))
-
-            retrieved.futureValue mustBe state2
-          }
-
-          {
-            val retrieved = repository.get("draftId1", "InternalId2")
-              .map(_.getOrElse(fail("The record was not found in the database")))
-
-            retrieved.futureValue mustBe state3
-          }
+          val result = repository.getAll("InternalId")
+          result.futureValue mustBe Seq(state2, state1)
 
           dropTheDatabase(connection)
         }.get
       }
     }
   }
+
+  private def testRetrieval(repository: UiStateRepository, draftId: String, internalId: String, result: FrontEndUiState) = {
+      val retrieved = repository.get(draftId, internalId)
+        .map(_.getOrElse(fail("The record was not found in the database")))
+
+      retrieved.futureValue mustBe result
+    }
 }

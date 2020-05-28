@@ -16,9 +16,6 @@
 
 package uk.gov.hmrc.trusts.repositories
 
-import java.sql.Timestamp
-import java.time.LocalDateTime
-
 import akka.stream.Materializer
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
@@ -33,6 +30,15 @@ import uk.gov.hmrc.trusts.models.FrontEndUiState
 import uk.gov.hmrc.trusts.utils.DateFormatter
 
 import scala.concurrent.{ExecutionContext, Future}
+
+trait UiStateRepository {
+
+  def get(draftId: String, internalId: String): Future[Option[FrontEndUiState]]
+
+  def set(uiState: FrontEndUiState): Future[Boolean]
+
+  def getAll(internalId: String): Future[List[FrontEndUiState]]
+}
 
 class DefaultUiStateRepository @Inject()(
                                           mongo: MongoDriver,
@@ -107,66 +113,16 @@ class DefaultUiStateRepository @Inject()(
       selector = selector, None).one[FrontEndUiState])
   }
 
-//  override def getAll(internalId: String): Future[Option[JsObject]] = {
-//    val selector = Json.obj(
-//      "id" -> createKey(draftId, internalId)
-//    )
-//
-//    collection.flatMap(_.find(
-//      selector = selector, None).one[JsObject].map(opt =>
-//      for  {
-//        document <- opt
-//        transforms <- (document \ "state").asOpt[JsObject]
-//      } yield transforms)
-//    )
-//  }
+  override def getAll(internalId: String): Future[List[FrontEndUiState]] = {
+    val draftIdLimit = 20
 
-//  override def getDraftRegistrations(internalId: String): Future[List[UserAnswers]] = {
-//    val draftIdLimit = 20
-//
-//    val selector = Json.obj(
-//      "internalId" -> internalId,
-//      "progress" -> Json.obj("$ne" -> RegistrationStatus.Complete.toString)
-//    )
-//
-//    collection.flatMap(
-//      _.find(
-//        selector = selector,
-//        projection = None
-//      )
-//        .sort(Json.obj("createdAt" -> -1))
-//        .cursor[UserAnswers]()
-//        .collect[List](draftIdLimit, Cursor.FailOnError[List[UserAnswers]]()))
-//  }
-//
-//  override def listDrafts(internalId : String) : Future[List[DraftRegistration]] = {
-//    getDraftRegistrations(internalId).map {
-//      drafts =>
-//
-//        drafts.flatMap {
-//          x =>
-//            x.get(AgentInternalReferencePage).map {
-//              reference =>
-//                DraftRegistration(x.draftId, reference, dateFormatter.savedUntil(x.createdAt))
-//            }
-//
-//        }
-//    }
-//  }
+    val selector = Json.obj(
+      "internalId" -> internalId
+    )
 
-
-}
-
-
-trait UiStateRepository {
-
-  def get(draftId: String, internalId: String): Future[Option[FrontEndUiState]]
-
-  def set(uiState: FrontEndUiState): Future[Boolean]
-
-//  def getAll(internalId: String): Future[Option[JsObject]]
-
-  //  def getDraftRegistrations(internalId: String): Future[List[UserAnswers]]
-//
-//  def listDrafts(internalId : String) : Future[List[DraftRegistration]]
+    collection.flatMap(_.find(
+      selector = selector, projection = None).sort(Json.obj("createdAt" -> -1))
+            .cursor[FrontEndUiState]()
+            .collect[List](draftIdLimit, Cursor.FailOnError[List[FrontEndUiState]]()))
+  }
 }
