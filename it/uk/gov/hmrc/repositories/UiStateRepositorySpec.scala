@@ -24,8 +24,6 @@ import play.api.test.Helpers.running
 import uk.gov.hmrc.trusts.models.FrontEndUiState
 import uk.gov.hmrc.trusts.repositories.UiStateRepository
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
 class UiStateRepositorySpec extends FreeSpec with MustMatchers with TransformIntegrationTest {
 
   private val data1 = Json.obj(
@@ -64,8 +62,7 @@ class UiStateRepositorySpec extends FreeSpec with MustMatchers with TransformInt
             data1
           )
 
-          val storedOk = repository.set(state1)
-          storedOk.futureValue mustBe true
+          repository.set(state1).futureValue mustBe true
 
           val state2 = FrontEndUiState(
             "draftId2",
@@ -74,8 +71,7 @@ class UiStateRepositorySpec extends FreeSpec with MustMatchers with TransformInt
             data2
           )
 
-          val storedOk2 = repository.set(state2)
-          storedOk2.futureValue mustBe true
+          repository.set(state2).futureValue mustBe true
 
           val state3 = FrontEndUiState(
             "draftId1",
@@ -84,26 +80,48 @@ class UiStateRepositorySpec extends FreeSpec with MustMatchers with TransformInt
             data3
           )
 
-          val storedOk3 = repository.set(state3)
-          storedOk3.futureValue mustBe true
+          repository.set(state3).futureValue mustBe true
 
-          testRetrieval(repository, "draftId1", "InternalId", state1)
-          testRetrieval(repository, "draftId2", "InternalId", state2)
-          testRetrieval(repository, "draftId1", "InternalId2", state3)
+          repository.get("draftId1", "InternalId").futureValue mustBe Some(state1)
+          repository.get("draftId2", "InternalId").futureValue mustBe Some(state2)
+          repository.get("draftId1", "InternalId2").futureValue mustBe Some(state3)
 
-          val result = repository.getAll("InternalId")
-          result.futureValue mustBe Seq(state2, state1)
+          repository.getAll("InternalId").futureValue mustBe Seq(state2, state1)
+
+          dropTheDatabase(connection)
+        }.get
+      }
+    }
+    "must be able to remove drafts no longer being used" in {
+      val application = applicationBuilder.build()
+
+      running(application) {
+        getConnection(application).map { connection =>
+
+          dropTheDatabase(connection)
+
+          val repository = application.injector.instanceOf[UiStateRepository]
+
+          repository.remove("draftId1", "InternalId").futureValue mustBe true
+
+          val state1 = FrontEndUiState(
+            "draftId1",
+            "InternalId",
+            LocalDateTime.of(2012, 12, 8, 11, 34),
+            data1
+          )
+
+          repository.set(state1).futureValue mustBe true
+
+          repository.get("draftId1", "InternalId").futureValue mustBe Some(state1)
+
+          repository.remove("draftId1", "InternalId").futureValue mustBe true
+
+          repository.get("draftId1", "InternalId").futureValue mustBe None
 
           dropTheDatabase(connection)
         }.get
       }
     }
   }
-
-  private def testRetrieval(repository: UiStateRepository, draftId: String, internalId: String, result: FrontEndUiState) = {
-      val retrieved = repository.get(draftId, internalId)
-        .map(_.getOrElse(fail("The record was not found in the database")))
-
-      retrieved.futureValue mustBe result
-    }
 }

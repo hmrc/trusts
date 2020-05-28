@@ -20,7 +20,8 @@ import akka.stream.Materializer
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
 import play.api.libs.json._
-import reactivemongo.api.Cursor
+import reactivemongo.api.commands.WriteResult
+import reactivemongo.api.{Cursor, WriteConcern}
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.BSONDocument
 import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
@@ -38,6 +39,8 @@ trait UiStateRepository {
   def set(uiState: FrontEndUiState): Future[Boolean]
 
   def getAll(internalId: String): Future[List[FrontEndUiState]]
+
+  def remove(draftId: String, internalId: String): Future[Boolean]
 }
 
 class DefaultUiStateRepository @Inject()(
@@ -125,4 +128,14 @@ class DefaultUiStateRepository @Inject()(
             .cursor[FrontEndUiState]()
             .collect[List](draftIdLimit, Cursor.FailOnError[List[FrontEndUiState]]()))
   }
+
+  override def remove(draftId: String, internalId: String): Future[Boolean] = {
+    val selector = Json.obj(
+      "draftId" -> draftId,
+      "internalId" -> internalId
+    )
+
+    collection.flatMap(_.delete().one(selector)).map(_.ok)
+  }
+
 }
