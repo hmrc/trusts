@@ -55,6 +55,8 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
 
           val repository = application.injector.instanceOf[RegistrationSubmissionRepository]
 
+          repository.getAllDrafts("InternalId").futureValue mustBe Seq.empty[RegistrationSubmissionDraft]
+
           val state1 = RegistrationSubmissionDraft(
             "draftId1",
             "InternalId",
