@@ -321,4 +321,26 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
     contentType(result) mustBe Some(JSON)
     contentAsJson(result) mustBe expectedDraftJson
   }
+  "remove draft" in {
+    val identifierAction = new FakeIdentifierAction(Organisation)
+    val submissionRepository = mock[RegistrationSubmissionRepository]
+    val auditService = mock[AuditService]
+
+    val controller = new SubmissionDraftController(
+      submissionRepository,
+      identifierAction,
+      auditService,
+      LocalDateTimeServiceStub
+    )
+
+    when(submissionRepository.removeDraft(any(), any()))
+      .thenReturn(Future.successful(true))
+
+    val request = FakeRequest("GET", "path")
+
+    val result = controller.removeDraft("DRAFTID").apply(request)
+    status(result) mustBe OK
+
+    verify(submissionRepository).removeDraft("DRAFTID", "id")
+  }
 }

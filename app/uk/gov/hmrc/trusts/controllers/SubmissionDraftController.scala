@@ -99,6 +99,10 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
     }
   }
 
+  def removeDraft(draftId: String): Action[AnyContent] = identify.async { request =>
+    submissionRepository.removeDraft(draftId, request.identifier).map { _ => Ok }
+  }
+
   private def buildResponseJson(draft: RegistrationSubmissionDraft, data: JsValue) = {
     Json.obj(
       "createdAt" -> draft.createdAt,
