@@ -80,9 +80,9 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           val path = JsPath() \ sectionKey
           draft.draftData.transform(path.json.pick) match {
             case JsSuccess(data, _) => Ok(buildResponseJson(draft, data))
-            case _: JsError => ???
+            case _: JsError => NoContent
           }
-        case None => ???
+        case None => NoContent
       }
   }
 
