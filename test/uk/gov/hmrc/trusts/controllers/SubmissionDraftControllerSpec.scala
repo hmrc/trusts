@@ -227,7 +227,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
       val request = FakeRequest("GET", "path")
 
       val result = controller.getSection("DRAFTID", "sectionKey2").apply(request)
-      status(result) mustBe NOT_FOUND
+      status(result) mustBe NO_CONTENT
     }
   }
   "return not found when there is no draft" in {
@@ -248,6 +248,50 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
     val request = FakeRequest("GET", "path")
 
     val result = controller.getSection("DRAFTID", "sectionKey2").apply(request)
-    status(result) mustBe NO_CONTENT
+    status(result) mustBe NOT_FOUND
+  }
+  "get all drafts when some exist" in {
+    val identifierAction = new FakeIdentifierAction(Organisation)
+    val submissionRepository = mock[RegistrationSubmissionRepository]
+    val auditService = mock[AuditService]
+
+    val controller = new SubmissionDraftController(
+      submissionRepository,
+      identifierAction,
+      auditService,
+      LocalDateTimeServiceStub
+    )
+
+    val drafts = List(
+      RegistrationSubmissionDraft("draftId1", "id", LocalDateTime.of(2012, 2, 3, 9, 30), Json.obj()),
+      RegistrationSubmissionDraft("draftId2", "id", LocalDateTime.of(2010, 10, 10, 14, 40), Json.obj())
+    )
+
+    when(submissionRepository.getAllDrafts(any()))
+      .thenReturn(Future.successful(drafts))
+
+    val request = FakeRequest("GET", "path")
+
+    val result = controller.getDrafts().apply(request)
+    status(result) mustBe OK
+
+    verify(submissionRepository).getAllDrafts("id")
+
+    val expectedDraftJson = Json.parse(
+      """
+        |[
+        | {
+        |   "createdAt": "2012-02-03T09:30:00",
+        |   "draftId": "draftId1"
+        | },
+        | {
+        |   "createdAt": "2010-10-10T14:40:00",
+        |   "draftId": "draftId2"
+        | }
+        |]
+        |""".stripMargin)
+
+    contentType(result) mustBe Some(JSON)
+    contentAsJson(result) mustBe expectedDraftJson
   }
 }

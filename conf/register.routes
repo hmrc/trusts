@@ -1,4 +1,5 @@
-POST        /                                           uk.gov.hmrc.trusts.controllers.RegisterTrustController.registration
+POST        /                                            uk.gov.hmrc.trusts.controllers.RegisterTrustController.registration
 
-GET         /:draftId/submission-draft/:sectionKey      uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String)
-POST        /:draftId/submission-draft/:sectionKey      uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSection(draftId: String, sectionKey: String)
+GET         /submission-drafts/:draftId/:sectionKey      uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String)
+POST        /submission-drafts/:draftId/:sectionKey      uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSection(draftId: String, sectionKey: String)
+GET         /submission-drafts                           uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getDrafts()

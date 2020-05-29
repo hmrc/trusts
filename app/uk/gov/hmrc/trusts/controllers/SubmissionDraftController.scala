@@ -16,20 +16,19 @@
 
 package uk.gov.hmrc.trusts.controllers
 
-import java.time.LocalDateTime
-
-import akka.serialization.JSerializer
 import javax.inject.Inject
-import play.api.libs.json.{JsError, JsPath, JsSuccess, JsValue, Json}
+import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RegistrationSubmissionDraft
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 import uk.gov.hmrc.trusts.repositories.RegistrationSubmissionRepository
 import uk.gov.hmrc.trusts.services.{AuditService, LocalDateTimeService}
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubmissionRepository,
                                           identify: IdentifierAction,
@@ -84,6 +83,20 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           }
         case None => NotFound
       }
+  }
+
+  def getDrafts: Action[AnyContent] = identify.async { request =>
+    submissionRepository.getAllDrafts(request.identifier).map {
+      drafts =>
+
+        implicit val draftWrites: Writes[RegistrationSubmissionDraft] = new Writes[RegistrationSubmissionDraft] {
+          override def writes(draft: RegistrationSubmissionDraft): JsValue = Json.obj(
+            "createdAt" -> draft.createdAt,
+            "draftId" -> draft.draftId)
+        }
+
+        Ok(Json.toJson(drafts))
+    }
   }
 
   private def buildResponseJson(draft: RegistrationSubmissionDraft, data: JsValue) = {
