@@ -64,7 +64,13 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
             contentAsJson(result) mustBe Json.parse("[]")
           }
 
-          // Create draft
+          // Read non-existent draft
+          {
+            val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/Section")).get
+            status(result) mustBe NOT_FOUND
+          }
+
+          // Create draft section
           {
             val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/Section")
                         .withBody(draftData)
@@ -73,7 +79,7 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
             status(result) mustBe OK
           }
 
-          // Read draft
+          // Read draft section
           {
             val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/Section")).get
             status(result) mustBe OK
@@ -85,7 +91,13 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
             json.transform(dataPath.json.pick) mustBe JsSuccess(draftData, dataPath)
           }
 
-          // Update draft
+          // Read non-existent draft section
+          {
+            val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/AnotherSection")).get
+            status(result) mustBe NO_CONTENT
+          }
+
+          // Update draft section
           {
             val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/Section")
               .withBody(amendedDraftData)
@@ -94,7 +106,7 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
             status(result) mustBe OK
           }
 
-          // Read amended draft
+          // Read amended draft section
           {
             val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/Section")).get
             status(result) mustBe OK
