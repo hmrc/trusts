@@ -74,7 +74,22 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
   }
 
   def getSection(draftId: String, sectionKey: String): Action[AnyContent] = identify.async {
-    implicit request: IdentifierRequest[AnyContent] => Future.successful(InternalServerError)
+    implicit request: IdentifierRequest[AnyContent] =>
+      submissionRepository.getDraft(draftId, request.identifier).map {
+        case Some(draft) =>
+          val path = JsPath() \ sectionKey
+          draft.draftData.transform(path.json.pick) match {
+            case JsSuccess(data, _) => Ok(buildResponseJson(draft, data))
+            case _: JsError => ???
+          }
+        case None => ???
+      }
   }
 
+  private def buildResponseJson(draft: RegistrationSubmissionDraft, data: JsValue) = {
+    Json.obj(
+      "createdAt" -> draft.createdAt,
+      "data" -> data
+    )
+  }
 }

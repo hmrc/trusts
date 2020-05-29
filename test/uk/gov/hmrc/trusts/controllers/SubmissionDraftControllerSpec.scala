@@ -45,6 +45,29 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
     override def now: LocalDateTime = currentDateTime
   }
 
+  private val existingDraftData = Json.parse(
+    """
+      |{
+      | "anotherKey": {
+      |   "foo": "bar",
+      |   "fizzbinn": true
+      | },
+      | "sectionKey": {
+      |   "field1": "value1",
+      |   "field2": "value2",
+      |   "field3": 3
+      | }
+      |}
+      |""".stripMargin
+  )
+
+  private val existingDraft = RegistrationSubmissionDraft(
+    "DRAFTID",
+    "id",
+    LocalDateTime.of(1997, 3, 14, 14, 45),
+    existingDraftData
+  )
+
   ".setSection" should {
     "cause creation of draft with section if none exists" in {
       val identifierAction = new FakeIdentifierAction(Organisation)
@@ -90,8 +113,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
 
       val expectedDraft = RegistrationSubmissionDraft("DRAFTID", "id", currentDateTime, draftData)
 
-      val value1: Action[JsValue] = controller.setSection("DRAFTID", "sectionKey")
-      val result = value1.apply(request)
+      val result = controller.setSection("DRAFTID", "sectionKey").apply(request)
       status(result) mustBe OK
 
       verify(submissionRepository).getDraft("DRAFTID", "id")
@@ -108,29 +130,6 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
         identifierAction,
         auditService,
         LocalDateTimeServiceStub
-      )
-
-      val existingDraftData = Json.parse(
-        """
-          |{
-          | "anotherKey": {
-          |   "foo": "bar",
-          |   "fizzbinn": true
-          | },
-          | "sectionKey": {
-          |   "field1": "value1",
-          |   "field2": "value2",
-          |   "field3": 3
-          | }
-          |}
-          |""".stripMargin
-      )
-
-      val existingDraft = RegistrationSubmissionDraft(
-        "DRAFTID",
-        "id",
-        LocalDateTime.of(1997, 3, 14, 14, 45),
-        existingDraftData
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -169,12 +168,46 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
 
       val expectedDraft = RegistrationSubmissionDraft("DRAFTID", "id", existingDraft.createdAt, draftData)
 
-      val value1: Action[JsValue] = controller.setSection("DRAFTID", "sectionKey")
-      val result = value1.apply(request)
+      val result = controller.setSection("DRAFTID", "sectionKey").apply(request)
       status(result) mustBe OK
 
       verify(submissionRepository).getDraft("DRAFTID", "id")
       verify(submissionRepository).setDraft(expectedDraft)
+    }
+    "get existing draft when one exists" in {
+      val identifierAction = new FakeIdentifierAction(Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        auditService,
+        LocalDateTimeServiceStub
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(existingDraft)))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getSection("DRAFTID", "sectionKey").apply(request)
+      status(result) mustBe OK
+
+      val expectedDraftJson = Json.parse(
+        """
+          |{
+          | "createdAt": "1997-03-14T14:45:00",
+          | "data": {
+          |   "field1": "value1",
+          |   "field2": "value2",
+          |   "field3": 3
+          | }
+          |}
+          |""".stripMargin)
+
+      contentType(result) mustBe Some(JSON)
+      contentAsJson(result) mustBe expectedDraftJson
     }
   }
 }
