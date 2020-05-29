@@ -82,7 +82,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
             case JsSuccess(data, _) => Ok(buildResponseJson(draft, data))
             case _: JsError => NoContent
           }
-        case None => NoContent
+        case None => NotFound
       }
   }
 

@@ -227,7 +227,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
       val request = FakeRequest("GET", "path")
 
       val result = controller.getSection("DRAFTID", "sectionKey2").apply(request)
-      status(result) mustBe NO_CONTENT
+      status(result) mustBe NOT_FOUND
     }
   }
   "return not found when there is no draft" in {
