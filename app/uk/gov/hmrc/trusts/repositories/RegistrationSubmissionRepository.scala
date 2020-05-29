@@ -20,38 +20,37 @@ import akka.stream.Materializer
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
 import play.api.libs.json._
-import reactivemongo.api.commands.WriteResult
-import reactivemongo.api.{Cursor, WriteConcern}
+import reactivemongo.api.Cursor
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.BSONDocument
 import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
 import reactivemongo.play.json.collection.JSONCollection
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.models.FrontEndUiState
+import uk.gov.hmrc.trusts.models.RegistrationSubmissionDraft
 import uk.gov.hmrc.trusts.utils.DateFormatter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait UiStateRepository {
+trait RegistrationSubmissionRepository {
 
-  def get(draftId: String, internalId: String): Future[Option[FrontEndUiState]]
+  def get(draftId: String, internalId: String): Future[Option[RegistrationSubmissionDraft]]
 
-  def set(uiState: FrontEndUiState): Future[Boolean]
+  def set(uiState: RegistrationSubmissionDraft): Future[Boolean]
 
-  def getAll(internalId: String): Future[List[FrontEndUiState]]
+  def getAll(internalId: String): Future[List[RegistrationSubmissionDraft]]
 
   def remove(draftId: String, internalId: String): Future[Boolean]
 }
 
-class DefaultUiStateRepository @Inject()(
+class RegistrationSubmissionRepositoryImpl @Inject()(
                                           mongo: MongoDriver,
                                           config: AppConfig,
                                           dateFormatter: DateFormatter
-                                        )(implicit ec: ExecutionContext, m: Materializer) extends UiStateRepository {
+                                        )(implicit ec: ExecutionContext, m: Materializer) extends RegistrationSubmissionRepository {
 
   private val logger = LoggerFactory.getLogger("application." + getClass.getCanonicalName)
 
-  private val collectionName: String = "frontend-ui-state"
+  private val collectionName: String = "registration-submissions"
 
   private val cacheTtl = config.registrationTtlInSeconds
 
@@ -87,7 +86,7 @@ class DefaultUiStateRepository @Inject()(
     } yield createdCreatedIndex && createdIdIndex && createdInternalIdIndex
   }
 
-  override def set(uiState: FrontEndUiState): Future[Boolean] = {
+  override def set(uiState: RegistrationSubmissionDraft): Future[Boolean] = {
 
     val selector = Json.obj(
       "draftId" -> uiState.draftId,
@@ -106,17 +105,17 @@ class DefaultUiStateRepository @Inject()(
     }
   }
 
-  override def get(draftId: String, internalId: String): Future[Option[FrontEndUiState]] = {
+  override def get(draftId: String, internalId: String): Future[Option[RegistrationSubmissionDraft]] = {
     val selector = Json.obj(
       "draftId" -> draftId,
       "internalId" -> internalId
     )
 
     collection.flatMap(_.find(
-      selector = selector, None).one[FrontEndUiState])
+      selector = selector, None).one[RegistrationSubmissionDraft])
   }
 
-  override def getAll(internalId: String): Future[List[FrontEndUiState]] = {
+  override def getAll(internalId: String): Future[List[RegistrationSubmissionDraft]] = {
     val draftIdLimit = 20
 
     val selector = Json.obj(
@@ -125,8 +124,8 @@ class DefaultUiStateRepository @Inject()(
 
     collection.flatMap(_.find(
       selector = selector, projection = None).sort(Json.obj("createdAt" -> -1))
-            .cursor[FrontEndUiState]()
-            .collect[List](draftIdLimit, Cursor.FailOnError[List[FrontEndUiState]]()))
+            .cursor[RegistrationSubmissionDraft]()
+            .collect[List](draftIdLimit, Cursor.FailOnError[List[RegistrationSubmissionDraft]]()))
   }
 
   override def remove(draftId: String, internalId: String): Future[Boolean] = {

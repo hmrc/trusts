@@ -21,10 +21,10 @@ import java.time.LocalDateTime
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json._
 import play.api.test.Helpers.running
-import uk.gov.hmrc.trusts.models.FrontEndUiState
-import uk.gov.hmrc.trusts.repositories.UiStateRepository
+import uk.gov.hmrc.trusts.models.RegistrationSubmissionDraft
+import uk.gov.hmrc.trusts.repositories.RegistrationSubmissionRepository
 
-class UiStateRepositorySpec extends FreeSpec with MustMatchers with TransformIntegrationTest {
+class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers with TransformIntegrationTest {
 
   private val data1 = Json.obj(
     "field1" -> "value1",
@@ -53,9 +53,9 @@ class UiStateRepositorySpec extends FreeSpec with MustMatchers with TransformInt
 
           dropTheDatabase(connection)
 
-          val repository = application.injector.instanceOf[UiStateRepository]
+          val repository = application.injector.instanceOf[RegistrationSubmissionRepository]
 
-          val state1 = FrontEndUiState(
+          val state1 = RegistrationSubmissionDraft(
             "draftId1",
             "InternalId",
             LocalDateTime.of(2012, 12, 8, 11, 34),
@@ -64,7 +64,7 @@ class UiStateRepositorySpec extends FreeSpec with MustMatchers with TransformInt
 
           repository.set(state1).futureValue mustBe true
 
-          val state2 = FrontEndUiState(
+          val state2 = RegistrationSubmissionDraft(
             "draftId2",
             "InternalId",
             LocalDateTime.of(2016, 10, 24, 17, 2),
@@ -73,7 +73,7 @@ class UiStateRepositorySpec extends FreeSpec with MustMatchers with TransformInt
 
           repository.set(state2).futureValue mustBe true
 
-          val state3 = FrontEndUiState(
+          val state3 = RegistrationSubmissionDraft(
             "draftId1",
             "InternalId2",
             LocalDateTime.of(2019, 2, 1, 23, 59),
@@ -100,11 +100,11 @@ class UiStateRepositorySpec extends FreeSpec with MustMatchers with TransformInt
 
           dropTheDatabase(connection)
 
-          val repository = application.injector.instanceOf[UiStateRepository]
+          val repository = application.injector.instanceOf[RegistrationSubmissionRepository]
 
           repository.remove("draftId1", "InternalId").futureValue mustBe true
 
-          val state1 = FrontEndUiState(
+          val state1 = RegistrationSubmissionDraft(
             "draftId1",
             "InternalId",
             LocalDateTime.of(2012, 12, 8, 11, 34),

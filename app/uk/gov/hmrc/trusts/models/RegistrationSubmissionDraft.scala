@@ -20,16 +20,16 @@ import java.time.LocalDateTime
 
 import play.api.libs.json.{JsValue, OWrites, Reads, __}
 
-case class FrontEndUiState(
-                            draftId: String,
-                            internalId: String,
-                            createdAt: LocalDateTime,
-                            state: JsValue
+case class RegistrationSubmissionDraft(
+                                        draftId: String,
+                                        internalId: String,
+                                        createdAt: LocalDateTime,
+                                        draftData: JsValue
                           )
 
-object FrontEndUiState {
+object RegistrationSubmissionDraft {
 
-  implicit lazy val reads: Reads[FrontEndUiState] = {
+  implicit lazy val reads: Reads[RegistrationSubmissionDraft] = {
 
     import play.api.libs.functional.syntax._
 
@@ -37,11 +37,11 @@ object FrontEndUiState {
       (__ \ "draftId").read[String] and
         (__ \ "internalId").read[String] and
         (__ \ "createdAt").read(MongoDateTimeFormats.localDateTimeRead) and
-        (__ \ "state").read[JsValue]
-      ) (FrontEndUiState.apply _)
+        (__ \ "draftData").read[JsValue]
+      ) (RegistrationSubmissionDraft.apply _)
   }
 
-  implicit lazy val writes: OWrites[FrontEndUiState] = {
+  implicit lazy val writes: OWrites[RegistrationSubmissionDraft] = {
 
     import play.api.libs.functional.syntax._
 
@@ -49,7 +49,7 @@ object FrontEndUiState {
       (__ \ "draftId").write[String] and
         (__ \ "internalId").write[String] and
         (__ \ "createdAt").write(MongoDateTimeFormats.localDateTimeWrite) and
-        (__ \ "state").write[JsValue]
-      ) (unlift(FrontEndUiState.unapply))
+        (__ \ "draftData").write[JsValue]
+      ) (unlift(RegistrationSubmissionDraft.unapply))
   }
 }
