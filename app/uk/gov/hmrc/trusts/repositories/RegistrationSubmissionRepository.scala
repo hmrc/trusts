@@ -33,13 +33,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait RegistrationSubmissionRepository {
 
-  def get(draftId: String, internalId: String): Future[Option[RegistrationSubmissionDraft]]
+  def getDraft(draftId: String, internalId: String): Future[Option[RegistrationSubmissionDraft]]
 
-  def set(uiState: RegistrationSubmissionDraft): Future[Boolean]
+  def setDraft(uiState: RegistrationSubmissionDraft): Future[Boolean]
 
-  def getAll(internalId: String): Future[List[RegistrationSubmissionDraft]]
+  def getAllDrafts(internalId: String): Future[List[RegistrationSubmissionDraft]]
 
-  def remove(draftId: String, internalId: String): Future[Boolean]
+  def removeDraft(draftId: String, internalId: String): Future[Boolean]
 }
 
 class RegistrationSubmissionRepositoryImpl @Inject()(
@@ -86,7 +86,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
     } yield createdCreatedIndex && createdIdIndex && createdInternalIdIndex
   }
 
-  override def set(uiState: RegistrationSubmissionDraft): Future[Boolean] = {
+  override def setDraft(uiState: RegistrationSubmissionDraft): Future[Boolean] = {
 
     val selector = Json.obj(
       "draftId" -> uiState.draftId,
@@ -105,7 +105,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
     }
   }
 
-  override def get(draftId: String, internalId: String): Future[Option[RegistrationSubmissionDraft]] = {
+  override def getDraft(draftId: String, internalId: String): Future[Option[RegistrationSubmissionDraft]] = {
     val selector = Json.obj(
       "draftId" -> draftId,
       "internalId" -> internalId
@@ -115,7 +115,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
       selector = selector, None).one[RegistrationSubmissionDraft])
   }
 
-  override def getAll(internalId: String): Future[List[RegistrationSubmissionDraft]] = {
+  override def getAllDrafts(internalId: String): Future[List[RegistrationSubmissionDraft]] = {
     val draftIdLimit = 20
 
     val selector = Json.obj(
@@ -128,7 +128,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
             .collect[List](draftIdLimit, Cursor.FailOnError[List[RegistrationSubmissionDraft]]()))
   }
 
-  override def remove(draftId: String, internalId: String): Future[Boolean] = {
+  override def removeDraft(draftId: String, internalId: String): Future[Boolean] = {
     val selector = Json.obj(
       "draftId" -> draftId,
       "internalId" -> internalId

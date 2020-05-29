@@ -62,7 +62,7 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
             data1
           )
 
-          repository.set(state1).futureValue mustBe true
+          repository.setDraft(state1).futureValue mustBe true
 
           val state2 = RegistrationSubmissionDraft(
             "draftId2",
@@ -71,7 +71,7 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
             data2
           )
 
-          repository.set(state2).futureValue mustBe true
+          repository.setDraft(state2).futureValue mustBe true
 
           val state3 = RegistrationSubmissionDraft(
             "draftId1",
@@ -80,13 +80,13 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
             data3
           )
 
-          repository.set(state3).futureValue mustBe true
+          repository.setDraft(state3).futureValue mustBe true
 
-          repository.get("draftId1", "InternalId").futureValue mustBe Some(state1)
-          repository.get("draftId2", "InternalId").futureValue mustBe Some(state2)
-          repository.get("draftId1", "InternalId2").futureValue mustBe Some(state3)
+          repository.getDraft("draftId1", "InternalId").futureValue mustBe Some(state1)
+          repository.getDraft("draftId2", "InternalId").futureValue mustBe Some(state2)
+          repository.getDraft("draftId1", "InternalId2").futureValue mustBe Some(state3)
 
-          repository.getAll("InternalId").futureValue mustBe Seq(state2, state1)
+          repository.getAllDrafts("InternalId").futureValue mustBe Seq(state2, state1)
 
           dropTheDatabase(connection)
         }.get
@@ -102,7 +102,7 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
 
           val repository = application.injector.instanceOf[RegistrationSubmissionRepository]
 
-          repository.remove("draftId1", "InternalId").futureValue mustBe true
+          repository.removeDraft("draftId1", "InternalId").futureValue mustBe true
 
           val state1 = RegistrationSubmissionDraft(
             "draftId1",
@@ -111,13 +111,13 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
             data1
           )
 
-          repository.set(state1).futureValue mustBe true
+          repository.setDraft(state1).futureValue mustBe true
 
-          repository.get("draftId1", "InternalId").futureValue mustBe Some(state1)
+          repository.getDraft("draftId1", "InternalId").futureValue mustBe Some(state1)
 
-          repository.remove("draftId1", "InternalId").futureValue mustBe true
+          repository.removeDraft("draftId1", "InternalId").futureValue mustBe true
 
-          repository.get("draftId1", "InternalId").futureValue mustBe None
+          repository.getDraft("draftId1", "InternalId").futureValue mustBe None
 
           dropTheDatabase(connection)
         }.get
