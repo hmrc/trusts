@@ -18,14 +18,20 @@ package uk.gov.hmrc.trusts.models
 
 import java.time.LocalDateTime
 
-import play.api.libs.json.{JsValue, OWrites, Reads, __}
+import play.api.libs.json.{JsValue, Json, OFormat, OWrites, Reads, __}
+
+case class RegistrationSubmissionDraftData(data: JsValue, reference: Option [String])
+
+object RegistrationSubmissionDraftData {
+  implicit lazy val format: OFormat[RegistrationSubmissionDraftData] = Json.format[RegistrationSubmissionDraftData]
+}
 
 case class RegistrationSubmissionDraft(
                                         draftId: String,
                                         internalId: String,
                                         createdAt: LocalDateTime,
-                                        draftData: JsValue
-                          )
+                                        draftData: JsValue,
+                                        reference: Option [String])
 
 object RegistrationSubmissionDraft {
 
@@ -37,7 +43,8 @@ object RegistrationSubmissionDraft {
       (__ \ "draftId").read[String] and
         (__ \ "internalId").read[String] and
         (__ \ "createdAt").read(MongoDateTimeFormats.localDateTimeRead) and
-        (__ \ "draftData").read[JsValue]
+        (__ \ "draftData").read[JsValue] and
+        (__ \ "reference").readNullable[String]
       ) (RegistrationSubmissionDraft.apply _)
   }
 
@@ -49,7 +56,8 @@ object RegistrationSubmissionDraft {
       (__ \ "draftId").write[String] and
         (__ \ "internalId").write[String] and
         (__ \ "createdAt").write(MongoDateTimeFormats.localDateTimeWrite) and
-        (__ \ "draftData").write[JsValue]
+        (__ \ "draftData").write[JsValue] and
+        (__ \ "reference").writeNullable[String]
       ) (unlift(RegistrationSubmissionDraft.unapply))
   }
 }

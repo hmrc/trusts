@@ -20,9 +20,7 @@ import javax.inject.Inject
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
-import uk.gov.hmrc.trusts.models.RegistrationSubmissionDraft
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
+import uk.gov.hmrc.trusts.models.{RegistrationSubmissionDraft, RegistrationSubmissionDraftData}
 import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 import uk.gov.hmrc.trusts.repositories.RegistrationSubmissionRepository
 import uk.gov.hmrc.trusts.services.{AuditService, LocalDateTimeService}
@@ -37,38 +35,43 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
                                        ) extends TrustsBaseController {
 
   def setSection(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
-    implicit request: IdentifierRequest[JsValue] => {
-      submissionRepository.getDraft(draftId, request.identifier).flatMap(
-        result => {
-          val draft: RegistrationSubmissionDraft = result match {
-            case Some(draft) => draft
-            case None => RegistrationSubmissionDraft(draftId, request.identifier, localDateTimeService.now, Json.obj())
-          }
+    implicit request => {
+      request.body.validate[RegistrationSubmissionDraftData] match {
+        case JsSuccess(draftData, _) =>
+          submissionRepository.getDraft(draftId, request.identifier).flatMap(
+            result => {
+              val draft: RegistrationSubmissionDraft = result match {
+                case Some(draft) => draft
+                case None => RegistrationSubmissionDraft(draftId, request.identifier, localDateTimeService.now, Json.obj(), None)
+              }
 
-          val body: JsValue = request.body
+              val body: JsValue = draftData.data
 
-          val path = JsPath() \ sectionKey
+              val path = JsPath() \ sectionKey
 
-          draft.draftData.transform(
-          path.json.prune andThen
-            JsPath.json.update {
-              path.json.put(Json.toJson(body))
+              draft.draftData.transform(
+                path.json.prune andThen
+                  JsPath.json.update {
+                    path.json.put(Json.toJson(body))
+                  }
+              ) match {
+                case JsSuccess(newDraftData, _) =>
+                  val newReference = draftData.reference orElse draft.reference
+                  val newDraft = draft.copy(draftData = newDraftData, reference = newReference)
+                  submissionRepository.setDraft(newDraft).map(
+                    result => if (result) {
+                      Ok
+                    } else {
+                      InternalServerError
+                    }
+                  )
+                case e: JsError => Future.successful(InternalServerError(e.errors.toString()))
+              }
+
             }
-          ) match {
-            case JsSuccess(newDraftData, _) =>
-              val newDraft = draft.copy(draftData = newDraftData)
-              submissionRepository.setDraft(newDraft).map(
-                result => if (result) {
-                  Ok
-                } else {
-                  InternalServerError
-                }
-              )
-            case e: JsError => Future.successful(InternalServerError(e.errors.toString()))
-          }
-
-        }
-      )
+          )
+        case _ => Future.successful(BadRequest)
+      }
     }
   }
 
@@ -90,9 +93,17 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
       drafts =>
 
         implicit val draftWrites: Writes[RegistrationSubmissionDraft] = new Writes[RegistrationSubmissionDraft] {
-          override def writes(draft: RegistrationSubmissionDraft): JsValue = Json.obj(
-            "createdAt" -> draft.createdAt,
-            "draftId" -> draft.draftId)
+          override def writes(draft: RegistrationSubmissionDraft): JsValue =
+            if (draft.reference.isDefined) {
+              Json.obj(
+                "createdAt" -> draft.createdAt,
+                "draftId" -> draft.draftId,
+                "reference" -> draft.reference)
+            } else {
+              Json.obj(
+                "createdAt" -> draft.createdAt,
+                "draftId" -> draft.draftId)
+            }
         }
 
         Ok(Json.toJson(drafts))
@@ -104,9 +115,17 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
   }
 
   private def buildResponseJson(draft: RegistrationSubmissionDraft, data: JsValue) = {
-    Json.obj(
-      "createdAt" -> draft.createdAt,
-      "data" -> data
-    )
+    if (draft.reference.isDefined) {
+      Json.obj(
+        "createdAt" -> draft.createdAt,
+        "data" -> data,
+        "reference" -> draft.reference
+      )
+    } else {
+      Json.obj(
+        "createdAt" -> draft.createdAt,
+        "data" -> data
+      )
+    }
   }
 }

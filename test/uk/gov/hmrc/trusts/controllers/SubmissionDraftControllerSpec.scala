@@ -16,24 +16,21 @@
 
 package uk.gov.hmrc.trusts.controllers
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDateTime
 
-import akka.util.ByteString
 import org.mockito.Matchers.any
-import org.scalatest._
 import org.mockito.Mockito._
+import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import play.api.libs.json.{JsValue, Json}
-import play.api.libs.streams.Accumulator
-import play.api.mvc.{Action, Result}
+import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.{RegistrationSubmissionDraft, Success}
+import uk.gov.hmrc.trusts.models.RegistrationSubmissionDraft
 import uk.gov.hmrc.trusts.repositories.RegistrationSubmissionRepository
-import uk.gov.hmrc.trusts.services.{AuditService, LocalDateService, LocalDateTimeService}
+import uk.gov.hmrc.trusts.services.{AuditService, LocalDateTimeService}
 import uk.gov.hmrc.trusts.utils.JsonRequests
 
 import scala.concurrent.Future
@@ -65,10 +62,42 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
     "DRAFTID",
     "id",
     LocalDateTime.of(1997, 3, 14, 14, 45),
-    existingDraftData
+    existingDraftData,
+    Some("theRef")
   )
 
   ".setSection" should {
+    "return 'bad request' for malformed body" in {
+      val identifierAction = new FakeIdentifierAction(Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        auditService,
+        LocalDateTimeServiceStub
+      )
+      val body = Json.parse(
+        """
+          |{
+          | "datum": {
+          |  "field1": "value1",
+          |  "field2": "value2",
+          |  "field3": 3
+          | },
+          | "referee": "theReferee"
+          |}
+          |""".stripMargin)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(body)
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.setSection("DRAFTID", "sectionKey").apply(request)
+      status(result) mustBe BAD_REQUEST
+    }
+
     "cause creation of draft with section if none exists" in {
       val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
@@ -90,9 +119,12 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
       val body = Json.parse(
         """
           |{
-          | "field1": "value1",
-          | "field2": "value2",
-          | "field3": 3
+          | "data": {
+          |  "field1": "value1",
+          |  "field2": "value2",
+          |  "field3": 3
+          | },
+          | "reference": "theReference"
           |}
           |""".stripMargin)
 
@@ -111,7 +143,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
           |}
           |""".stripMargin)
 
-      val expectedDraft = RegistrationSubmissionDraft("DRAFTID", "id", currentDateTime, draftData)
+      val expectedDraft = RegistrationSubmissionDraft("DRAFTID", "id", currentDateTime, draftData, Some("theReference"))
 
       val result = controller.setSection("DRAFTID", "sectionKey").apply(request)
       status(result) mustBe OK
@@ -141,9 +173,12 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
       val body = Json.parse(
         """
           |{
-          | "field1": "value1",
-          | "field2": "value2",
-          | "field3": 3
+          | "data": {
+          |   "field1": "value1",
+          |   "field2": "value2",
+          |   "field3": 3
+          | },
+          | "reference": "newRef"
           |}
           |""".stripMargin)
 
@@ -166,7 +201,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
           |}
           |""".stripMargin)
 
-      val expectedDraft = RegistrationSubmissionDraft("DRAFTID", "id", existingDraft.createdAt, draftData)
+      val expectedDraft = RegistrationSubmissionDraft("DRAFTID", "id", existingDraft.createdAt, draftData, Some("newRef"))
 
       val result = controller.setSection("DRAFTID", "sectionKey").apply(request)
       status(result) mustBe OK
@@ -202,7 +237,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
           |   "field1": "value1",
           |   "field2": "value2",
           |   "field3": 3
-          | }
+          | },
+          | "reference": "theRef"
           |}
           |""".stripMargin)
 
@@ -263,8 +299,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
     )
 
     val drafts = List(
-      RegistrationSubmissionDraft("draftId1", "id", LocalDateTime.of(2012, 2, 3, 9, 30), Json.obj()),
-      RegistrationSubmissionDraft("draftId2", "id", LocalDateTime.of(2010, 10, 10, 14, 40), Json.obj())
+      RegistrationSubmissionDraft("draftId1", "id", LocalDateTime.of(2012, 2, 3, 9, 30), Json.obj(), Some("ref")),
+      RegistrationSubmissionDraft("draftId2", "id", LocalDateTime.of(2010, 10, 10, 14, 40), Json.obj(), None)
     )
 
     when(submissionRepository.getAllDrafts(any()))
@@ -282,7 +318,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
         |[
         | {
         |   "createdAt": "2012-02-03T09:30:00",
-        |   "draftId": "draftId1"
+        |   "draftId": "draftId1",
+        |   "reference": "ref"
         | },
         | {
         |   "createdAt": "2010-10-10T14:40:00",

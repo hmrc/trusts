@@ -21,12 +21,13 @@ import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.inject.bind
-import play.api.libs.json.{JsArray, JsPath, JsString, JsSuccess, JsValue, Json}
+import play.api.libs.json.{JsArray, JsError, JsPath, JsString, JsSuccess, JsValue, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
+import uk.gov.hmrc.trusts.models.{RegistrationSubmissionDraft, RegistrationSubmissionDraftData}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustSuccessResponse
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
@@ -43,6 +44,7 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
   )
   private val createdAtPath = JsPath() \ 'createdAt
   private val dataPath = JsPath() \ 'data
+  private val referencePath = JsPath() \ 'reference
 
   "working with submission drafts" - {
     "must be CRUDdy" in {
@@ -72,8 +74,9 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
 
           // Create draft section
           {
+            val draftRequestData = RegistrationSubmissionDraftData(draftData, None)
             val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/Section")
-                        .withBody(draftData)
+                        .withBody(Json.toJson(draftRequestData))
                         .withHeaders(CONTENT_TYPE -> "application/json")
             val result = route(application, request).get
             status(result) mustBe OK
@@ -89,6 +92,7 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
             assert(json.transform(createdAtPath.json.pick).isSuccess)
 
             json.transform(dataPath.json.pick) mustBe JsSuccess(draftData, dataPath)
+            assert(json.transform(referencePath.json.pick).isError)
           }
 
           // Read non-existent draft section
@@ -99,8 +103,9 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
 
           // Update draft section
           {
+            val amendedDraftRequestData = RegistrationSubmissionDraftData(amendedDraftData, Some("amendedReference"))
             val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/Section")
-              .withBody(amendedDraftData)
+              .withBody(Json.toJson(amendedDraftRequestData))
               .withHeaders(CONTENT_TYPE -> "application/json")
             val result = route(application, request).get
             status(result) mustBe OK
@@ -111,7 +116,9 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
             val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/Section")).get
             status(result) mustBe OK
 
-            contentAsJson(result).transform(dataPath.json.pick) mustBe JsSuccess(amendedDraftData, dataPath)
+            val resultJson = contentAsJson(result)
+            resultJson.transform(dataPath.json.pick) mustBe JsSuccess(amendedDraftData, dataPath)
+            resultJson.transform(referencePath.json.pick) mustBe JsSuccess(JsString("amendedReference"), referencePath)
           }
 
           // Read all drafts
@@ -128,6 +135,7 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
 
             val draftIdPath = JsPath() \ 'draftId
             draft.transform(draftIdPath.json.pick) mustBe JsSuccess(JsString("Draft0001"), draftIdPath)
+            draft.transform(referencePath.json.pick) mustBe JsSuccess(JsString("amendedReference"), referencePath)
           }
 
           // Delete draft

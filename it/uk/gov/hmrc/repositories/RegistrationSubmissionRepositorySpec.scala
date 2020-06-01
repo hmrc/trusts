@@ -61,7 +61,8 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
             "draftId1",
             "InternalId",
             LocalDateTime.of(2012, 12, 8, 11, 34),
-            data1
+            data1,
+            Some("reference1")
           )
 
           repository.setDraft(state1).futureValue mustBe true
@@ -70,7 +71,8 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
             "draftId2",
             "InternalId",
             LocalDateTime.of(2016, 10, 24, 17, 2),
-            data2
+            data2,
+            Some("reference2")
           )
 
           repository.setDraft(state2).futureValue mustBe true
@@ -79,7 +81,8 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
             "draftId1",
             "InternalId2",
             LocalDateTime.of(2019, 2, 1, 23, 59),
-            data3
+            data3,
+            None
           )
 
           repository.setDraft(state3).futureValue mustBe true
@@ -110,7 +113,8 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
             "draftId1",
             "InternalId",
             LocalDateTime.of(2012, 12, 8, 11, 34),
-            data1
+            data1,
+            Some("ref1")
           )
 
           repository.setDraft(state1).futureValue mustBe true
