@@ -42,7 +42,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
             result => {
               val draft: RegistrationSubmissionDraft = result match {
                 case Some(draft) => draft
-                case None => RegistrationSubmissionDraft(draftId, request.identifier, localDateTimeService.now, Json.obj(), None)
+                case None => RegistrationSubmissionDraft(draftId, request.identifier, localDateTimeService.now, Json.obj(), None, Some(true))
               }
 
               val body: JsValue = draftData.data
@@ -57,7 +57,11 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
               ) match {
                 case JsSuccess(newDraftData, _) =>
                   val newReference = draftData.reference orElse draft.reference
-                  val newDraft = draft.copy(draftData = newDraftData, reference = newReference)
+                  val newInProgress = draftData.inProgress orElse draft.inProgress
+                  val newDraft = draft.copy(
+                    draftData = newDraftData,
+                    reference = newReference,
+                    inProgress = newInProgress)
                   submissionRepository.setDraft(newDraft).map(
                     result => if (result) {
                       Ok

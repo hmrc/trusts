@@ -62,7 +62,8 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
             "InternalId",
             LocalDateTime.of(2012, 12, 8, 11, 34),
             data1,
-            Some("reference1")
+            Some("reference1"),
+            Some(true)
           )
 
           repository.setDraft(state1).futureValue mustBe true
@@ -72,7 +73,8 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
             "InternalId",
             LocalDateTime.of(2016, 10, 24, 17, 2),
             data2,
-            Some("reference2")
+            Some("reference2"),
+            Some(true)
           )
 
           repository.setDraft(state2).futureValue mustBe true
@@ -82,14 +84,27 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
             "InternalId2",
             LocalDateTime.of(2019, 2, 1, 23, 59),
             data3,
+            None,
             None
           )
 
           repository.setDraft(state3).futureValue mustBe true
 
+          val state4 = RegistrationSubmissionDraft(
+            "draftId3",
+            "InternalId",
+            LocalDateTime.of(2020, 6, 10, 13, 21),
+            data2,
+            Some("reference3"),
+            Some(false)
+          )
+
+          repository.setDraft(state4).futureValue mustBe true
+
           repository.getDraft("draftId1", "InternalId").futureValue mustBe Some(state1)
           repository.getDraft("draftId2", "InternalId").futureValue mustBe Some(state2)
           repository.getDraft("draftId1", "InternalId2").futureValue mustBe Some(state3)
+          repository.getDraft("draftId3", "InternalId").futureValue mustBe Some(state4)
 
           repository.getAllDrafts("InternalId").futureValue mustBe Seq(state2, state1)
 
@@ -114,7 +129,8 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
             "InternalId",
             LocalDateTime.of(2012, 12, 8, 11, 34),
             data1,
-            Some("ref1")
+            Some("ref1"),
+            Some(true)
           )
 
           repository.setDraft(state1).futureValue mustBe true

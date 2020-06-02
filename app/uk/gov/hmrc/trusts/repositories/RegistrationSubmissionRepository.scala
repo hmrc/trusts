@@ -119,11 +119,13 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
     val draftIdLimit = 20
 
     val selector = Json.obj(
-      "internalId" -> internalId
+      "internalId" -> internalId,
+      "inProgress" -> Json.obj("$eq" -> true)
     )
 
     collection.flatMap(_.find(
-      selector = selector, projection = None).sort(Json.obj("createdAt" -> -1))
+      selector = selector, projection = None)
+            .sort(Json.obj("createdAt" -> -1))
             .cursor[RegistrationSubmissionDraft]()
             .collect[List](draftIdLimit, Cursor.FailOnError[List[RegistrationSubmissionDraft]]()))
   }

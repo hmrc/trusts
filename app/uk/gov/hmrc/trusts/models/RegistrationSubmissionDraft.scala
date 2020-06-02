@@ -20,7 +20,7 @@ import java.time.LocalDateTime
 
 import play.api.libs.json.{JsValue, Json, OFormat, OWrites, Reads, __}
 
-case class RegistrationSubmissionDraftData(data: JsValue, reference: Option [String])
+case class RegistrationSubmissionDraftData(data: JsValue, reference: Option[String], inProgress: Option[Boolean])
 
 object RegistrationSubmissionDraftData {
   implicit lazy val format: OFormat[RegistrationSubmissionDraftData] = Json.format[RegistrationSubmissionDraftData]
@@ -31,7 +31,8 @@ case class RegistrationSubmissionDraft(
                                         internalId: String,
                                         createdAt: LocalDateTime,
                                         draftData: JsValue,
-                                        reference: Option [String])
+                                        reference: Option[String],
+                                        inProgress: Option[Boolean])
 
 object RegistrationSubmissionDraft {
 
@@ -44,7 +45,8 @@ object RegistrationSubmissionDraft {
         (__ \ "internalId").read[String] and
         (__ \ "createdAt").read(MongoDateTimeFormats.localDateTimeRead) and
         (__ \ "draftData").read[JsValue] and
-        (__ \ "reference").readNullable[String]
+        (__ \ "reference").readNullable[String] and
+        (__ \ "inProgress").readNullable[Boolean]
       ) (RegistrationSubmissionDraft.apply _)
   }
 
@@ -57,7 +59,8 @@ object RegistrationSubmissionDraft {
         (__ \ "internalId").write[String] and
         (__ \ "createdAt").write(MongoDateTimeFormats.localDateTimeWrite) and
         (__ \ "draftData").write[JsValue] and
-        (__ \ "reference").writeNullable[String]
+        (__ \ "reference").writeNullable[String] and
+        (__ \ "inProgress").writeNullable[Boolean]
       ) (unlift(RegistrationSubmissionDraft.unapply))
   }
 }

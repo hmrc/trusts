@@ -16,22 +16,15 @@
 
 package uk.gov.hmrc.repositories
 
-import org.mockito.Matchers._
-import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.inject.bind
-import play.api.libs.json.{JsArray, JsError, JsPath, JsString, JsSuccess, JsValue, Json}
+import play.api.libs.json._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
-import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import uk.gov.hmrc.trusts.models.{RegistrationSubmissionDraft, RegistrationSubmissionDraftData}
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustSuccessResponse
-import uk.gov.hmrc.trusts.utils.JsonUtils
-
-import scala.concurrent.Future
+import uk.gov.hmrc.trusts.models.RegistrationSubmissionDraftData
 
 class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with MockitoSugar with TransformIntegrationTest {
   private val draftData = Json.obj(
@@ -74,7 +67,7 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
 
           // Create draft section
           {
-            val draftRequestData = RegistrationSubmissionDraftData(draftData, None)
+            val draftRequestData = RegistrationSubmissionDraftData(draftData, None, None)
             val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/Section")
                         .withBody(Json.toJson(draftRequestData))
                         .withHeaders(CONTENT_TYPE -> "application/json")
@@ -103,7 +96,7 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
 
           // Update draft section
           {
-            val amendedDraftRequestData = RegistrationSubmissionDraftData(amendedDraftData, Some("amendedReference"))
+            val amendedDraftRequestData = RegistrationSubmissionDraftData(amendedDraftData, Some("amendedReference"), None)
             val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/Section")
               .withBody(Json.toJson(amendedDraftRequestData))
               .withHeaders(CONTENT_TYPE -> "application/json")

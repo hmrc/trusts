@@ -63,7 +63,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
     "id",
     LocalDateTime.of(1997, 3, 14, 14, 45),
     existingDraftData,
-    Some("theRef")
+    Some("theRef"),
+    Some(true)
   )
 
   ".setSection" should {
@@ -143,7 +144,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
           |}
           |""".stripMargin)
 
-      val expectedDraft = RegistrationSubmissionDraft("DRAFTID", "id", currentDateTime, draftData, Some("theReference"))
+      val expectedDraft = RegistrationSubmissionDraft("DRAFTID", "id", currentDateTime, draftData, Some("theReference"), Some(true))
 
       val result = controller.setSection("DRAFTID", "sectionKey").apply(request)
       status(result) mustBe OK
@@ -201,7 +202,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
           |}
           |""".stripMargin)
 
-      val expectedDraft = RegistrationSubmissionDraft("DRAFTID", "id", existingDraft.createdAt, draftData, Some("newRef"))
+      val expectedDraft = RegistrationSubmissionDraft("DRAFTID", "id", existingDraft.createdAt, draftData, Some("newRef"), Some(true))
 
       val result = controller.setSection("DRAFTID", "sectionKey").apply(request)
       status(result) mustBe OK
@@ -299,8 +300,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
     )
 
     val drafts = List(
-      RegistrationSubmissionDraft("draftId1", "id", LocalDateTime.of(2012, 2, 3, 9, 30), Json.obj(), Some("ref")),
-      RegistrationSubmissionDraft("draftId2", "id", LocalDateTime.of(2010, 10, 10, 14, 40), Json.obj(), None)
+      RegistrationSubmissionDraft("draftId1", "id", LocalDateTime.of(2012, 2, 3, 9, 30), Json.obj(), Some("ref"), Some(true)),
+      RegistrationSubmissionDraft("draftId2", "id", LocalDateTime.of(2010, 10, 10, 14, 40), Json.obj(), None, Some(true))
     )
 
     when(submissionRepository.getAllDrafts(any()))
