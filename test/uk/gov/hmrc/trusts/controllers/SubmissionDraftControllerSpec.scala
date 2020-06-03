@@ -246,7 +246,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
       contentType(result) mustBe Some(JSON)
       contentAsJson(result) mustBe expectedDraftJson
     }
-    "return not found when none exists in draft" in {
+    "return empty data when none exists in draft" in {
       val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
       val auditService = mock[AuditService]
@@ -264,7 +264,18 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
       val request = FakeRequest("GET", "path")
 
       val result = controller.getSection("DRAFTID", "sectionKey2").apply(request)
-      status(result) mustBe NO_CONTENT
+      status(result) mustBe OK
+      val expectedDraftJson = Json.parse(
+        """
+          |{
+          | "createdAt": "1997-03-14T14:45:00",
+          | "data": {},
+          | "reference": "theRef"
+          |}
+          |""".stripMargin)
+
+      contentType(result) mustBe Some(JSON)
+      contentAsJson(result) mustBe expectedDraftJson
     }
   }
   "return not found when there is no draft" in {

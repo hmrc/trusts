@@ -91,7 +91,12 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
           // Read non-existent draft section
           {
             val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/AnotherSection")).get
-            status(result) mustBe NO_CONTENT
+            status(result) mustBe OK
+
+            val json = contentAsJson(result)
+
+            json.transform(dataPath.json.pick) mustBe JsSuccess(Json.obj(), dataPath)
+
           }
 
           // Update draft section
