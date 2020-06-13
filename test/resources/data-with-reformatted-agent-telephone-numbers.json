@@ -1,0 +1,21 @@
+{
+  "object1": {
+    "agentTelephoneNumber": "01632 960 001"
+  },
+  "object2": {
+    "array": [
+      {
+        "agentTelephoneNumber": "07700 900 982"
+      },
+      {
+        "object": {
+          "agentTelephoneNumber": "+44 0808 157 0192"
+        }
+      },
+      {
+        "agentTelephoneNumber": "+44151 666 1337"
+      }
+    ],
+    "agentTelephoneNumber": "0044151 666 1337"
+  }
+}
