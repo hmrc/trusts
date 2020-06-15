@@ -131,7 +131,7 @@ class BaseConnectorSpec extends BaseSpec with WireMockHelper {
     s"""
        |{
        | "code": "NO_CONTENT",
-       | "reason": "No Conent."
+       | "reason": "No Content."
        |}""".stripMargin)
 
 

@@ -699,7 +699,7 @@ class DesConnectorSpec extends BaseConnectorSpec {
         whenReady(futureResult) { result =>
           result mustBe NotEnoughDataResponse(jsonResponse204, Json.parse(
             """
-              |{"obj":[{"msg":["'responseHeader' is undefined on object: {\"code\":\"NO_CONTENT\",\"reason\":\"No Conent.\"}"],"args":[]}]}
+              |{"obj":[{"msg":["'responseHeader' is undefined on object: {\"code\":\"NO_CONTENT\",\"reason\":\"No Content.\"}"],"args":[]}]}
               |""".stripMargin))
         }
       }
