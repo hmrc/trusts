@@ -49,7 +49,7 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
 
       val draftIdOption = request.headers.get(Headers.DraftRegistrationId)
 
-      val payload = request.body.applyRules().toString
+      val payload = request.body.applyRules.toString
 
       validationService
         .get(config.trustsApiRegistrationSchema)
