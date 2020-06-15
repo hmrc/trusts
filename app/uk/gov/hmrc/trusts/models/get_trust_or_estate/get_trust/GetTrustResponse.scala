@@ -96,7 +96,7 @@ object GetTrustResponse {
               case JsSuccess(trustFound,_) => trustFound
               case JsError(errors) =>
                   Logger.error(s"[GetTrustResponse] Cannot parse as TrustFoundResponse due to $errors")
-                  NotEnoughDataResponse
+                  NotEnoughDataResponse(response.json, JsError.toJson(errors))
             }
           case BAD_REQUEST =>
             response.json.asOpt[DesErrorResponse] match {
