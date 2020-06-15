@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.trusts.models.get_trust_or_estate
 
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.GetEstateResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustResponse
 
@@ -31,7 +32,7 @@ case object ResourceNotFoundResponse extends TrustErrorResponse
 
 case object InternalServerErrorResponse extends TrustErrorResponse
 
-case object NotEnoughDataResponse extends TrustErrorResponse
+case class NotEnoughDataResponse(json: JsValue, errors: JsValue) extends TrustErrorResponse
 
 case object ServiceUnavailableResponse extends TrustErrorResponse
 
