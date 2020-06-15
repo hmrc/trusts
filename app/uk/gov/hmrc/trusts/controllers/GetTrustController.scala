@@ -216,7 +216,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
             case NotEnoughDataResponse(json, errors) =>
               val reason = Json.obj(
                 "response" -> json,
-                "reason" -> "Missing mandatory field received from DES",
+                "reason" -> "Missing mandatory fields in response received from DES",
                 "errors" -> errors
               )
 
