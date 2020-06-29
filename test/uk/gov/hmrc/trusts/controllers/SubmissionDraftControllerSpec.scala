@@ -133,7 +133,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
         .withBody(body)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val draftData  = Json.parse(
+      val draftData = Json.parse(
         """
           |{
           | "sectionKey": {
@@ -187,7 +187,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
         .withBody(body)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val draftData  = Json.parse(
+      val draftData = Json.parse(
         """
           |{
           | "anotherKey": {
@@ -210,6 +210,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
       verify(submissionRepository).getDraft("DRAFTID", "id")
       verify(submissionRepository).setDraft(expectedDraft)
     }
+  }
+  ".getSection" should {
     "get existing draft when one exists" in {
       val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
@@ -277,119 +279,124 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
       contentType(result) mustBe Some(JSON)
       contentAsJson(result) mustBe expectedDraftJson
     }
+
+    "return not found when there is no draft" in {
+      val identifierAction = new FakeIdentifierAction(Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        auditService,
+        LocalDateTimeServiceStub
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getSection("DRAFTID", "sectionKey2").apply(request)
+      status(result) mustBe NOT_FOUND
+    }
   }
-  "return not found when there is no draft" in {
-    val identifierAction = new FakeIdentifierAction(Organisation)
-    val submissionRepository = mock[RegistrationSubmissionRepository]
-    val auditService = mock[AuditService]
+  ".getDrafts" should {
+    "get all drafts when some exist" in {
+      val identifierAction = new FakeIdentifierAction(Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
-    val controller = new SubmissionDraftController(
-      submissionRepository,
-      identifierAction,
-      auditService,
-      LocalDateTimeServiceStub
-    )
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        auditService,
+        LocalDateTimeServiceStub
+      )
 
-    when(submissionRepository.getDraft(any(), any()))
-      .thenReturn(Future.successful(None))
+      val drafts = List(
+        RegistrationSubmissionDraft("draftId1", "id", LocalDateTime.of(2012, 2, 3, 9, 30), Json.obj(), Some("ref"), Some(true)),
+        RegistrationSubmissionDraft("draftId2", "id", LocalDateTime.of(2010, 10, 10, 14, 40), Json.obj(), None, Some(true))
+      )
 
-    val request = FakeRequest("GET", "path")
+      when(submissionRepository.getAllDrafts(any()))
+        .thenReturn(Future.successful(drafts))
 
-    val result = controller.getSection("DRAFTID", "sectionKey2").apply(request)
-    status(result) mustBe NOT_FOUND
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getDrafts().apply(request)
+      status(result) mustBe OK
+
+      verify(submissionRepository).getAllDrafts("id")
+
+      val expectedDraftJson = Json.parse(
+        """
+          |[
+          | {
+          |   "createdAt": "2012-02-03T09:30:00",
+          |   "draftId": "draftId1",
+          |   "reference": "ref"
+          | },
+          | {
+          |   "createdAt": "2010-10-10T14:40:00",
+          |   "draftId": "draftId2"
+          | }
+          |]
+          |""".stripMargin)
+
+      contentType(result) mustBe Some(JSON)
+      contentAsJson(result) mustBe expectedDraftJson
+    }
+    "get all drafts when none exist" in {
+      val identifierAction = new FakeIdentifierAction(Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        auditService,
+        LocalDateTimeServiceStub
+      )
+
+      when(submissionRepository.getAllDrafts(any()))
+        .thenReturn(Future.successful(List()))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getDrafts().apply(request)
+      status(result) mustBe OK
+
+      verify(submissionRepository).getAllDrafts("id")
+
+      val expectedDraftJson = Json.parse("[]")
+
+      contentType(result) mustBe Some(JSON)
+      contentAsJson(result) mustBe expectedDraftJson
+    }
   }
-  "get all drafts when some exist" in {
-    val identifierAction = new FakeIdentifierAction(Organisation)
-    val submissionRepository = mock[RegistrationSubmissionRepository]
-    val auditService = mock[AuditService]
+  ".removeDraft" should {
+    "remove draft" in {
+      val identifierAction = new FakeIdentifierAction(Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
-    val controller = new SubmissionDraftController(
-      submissionRepository,
-      identifierAction,
-      auditService,
-      LocalDateTimeServiceStub
-    )
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        auditService,
+        LocalDateTimeServiceStub
+      )
 
-    val drafts = List(
-      RegistrationSubmissionDraft("draftId1", "id", LocalDateTime.of(2012, 2, 3, 9, 30), Json.obj(), Some("ref"), Some(true)),
-      RegistrationSubmissionDraft("draftId2", "id", LocalDateTime.of(2010, 10, 10, 14, 40), Json.obj(), None, Some(true))
-    )
+      when(submissionRepository.removeDraft(any(), any()))
+        .thenReturn(Future.successful(true))
 
-    when(submissionRepository.getAllDrafts(any()))
-      .thenReturn(Future.successful(drafts))
+      val request = FakeRequest("GET", "path")
 
-    val request = FakeRequest("GET", "path")
+      val result = controller.removeDraft("DRAFTID").apply(request)
+      status(result) mustBe OK
 
-    val result = controller.getDrafts().apply(request)
-    status(result) mustBe OK
-
-    verify(submissionRepository).getAllDrafts("id")
-
-    val expectedDraftJson = Json.parse(
-      """
-        |[
-        | {
-        |   "createdAt": "2012-02-03T09:30:00",
-        |   "draftId": "draftId1",
-        |   "reference": "ref"
-        | },
-        | {
-        |   "createdAt": "2010-10-10T14:40:00",
-        |   "draftId": "draftId2"
-        | }
-        |]
-        |""".stripMargin)
-
-    contentType(result) mustBe Some(JSON)
-    contentAsJson(result) mustBe expectedDraftJson
-  }
-  "get all drafts when none exist" in {
-    val identifierAction = new FakeIdentifierAction(Organisation)
-    val submissionRepository = mock[RegistrationSubmissionRepository]
-    val auditService = mock[AuditService]
-
-    val controller = new SubmissionDraftController(
-      submissionRepository,
-      identifierAction,
-      auditService,
-      LocalDateTimeServiceStub
-    )
-
-    when(submissionRepository.getAllDrafts(any()))
-      .thenReturn(Future.successful(List()))
-
-    val request = FakeRequest("GET", "path")
-
-    val result = controller.getDrafts().apply(request)
-    status(result) mustBe OK
-
-    verify(submissionRepository).getAllDrafts("id")
-
-    val expectedDraftJson = Json.parse("[]")
-
-    contentType(result) mustBe Some(JSON)
-    contentAsJson(result) mustBe expectedDraftJson
-  }
-  "remove draft" in {
-    val identifierAction = new FakeIdentifierAction(Organisation)
-    val submissionRepository = mock[RegistrationSubmissionRepository]
-    val auditService = mock[AuditService]
-
-    val controller = new SubmissionDraftController(
-      submissionRepository,
-      identifierAction,
-      auditService,
-      LocalDateTimeServiceStub
-    )
-
-    when(submissionRepository.removeDraft(any(), any()))
-      .thenReturn(Future.successful(true))
-
-    val request = FakeRequest("GET", "path")
-
-    val result = controller.removeDraft("DRAFTID").apply(request)
-    status(result) mustBe OK
-
-    verify(submissionRepository).removeDraft("DRAFTID", "id")
+      verify(submissionRepository).removeDraft("DRAFTID", "id")
+    }
   }
 }
