@@ -20,8 +20,8 @@ import javax.inject.Inject
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
-import uk.gov.hmrc.trusts.models.{RegistrationSubmissionDraft, RegistrationSubmissionDraftData}
 import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
+import uk.gov.hmrc.trusts.models.{RegistrationSubmissionDraft, RegistrationSubmissionDraftData, RegistrationSubmissionDraftPiece, RegistrationSubmissionDraftSetData, RegistrationSubmissionDraftStatus}
 import uk.gov.hmrc.trusts.repositories.RegistrationSubmissionRepository
 import uk.gov.hmrc.trusts.services.{AuditService, LocalDateTimeService}
 
@@ -50,7 +50,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
               val path = JsPath() \ sectionKey
 
               draft.draftData.transform(
-                path.json.prune andThen
+                prunePath(path) andThen
                   JsPath.json.update {
                     path.json.put(Json.toJson(body))
                   }
@@ -72,6 +72,83 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
                 case e: JsError => Future.successful(InternalServerError(e.errors.toString()))
               }
 
+            }
+          )
+        case _ => Future.successful(BadRequest)
+      }
+    }
+  }
+
+  // Play 2.5 throws if the path to be pruned does not exist.
+  // So we do this hacky thing to keep it all self-contained.
+  // If upgraded to play 2.6, this can turn into simply "path.json.prune".
+  private def prunePath(path: JsPath) = {
+    JsPath.json.update {
+      path.json.put(Json.toJson(Json.obj()))
+    } andThen path.json.prune
+  }
+
+  private def setRegistrationSection(path: String, registrationSectionData: JsValue) : Reads[JsObject] = {
+    val sectionPath = (JsPath \ "registration" \ path)
+    prunePath(sectionPath) andThen JsPath.json.update(sectionPath.json.put(registrationSectionData))
+  }
+
+  private def setRegistrationSections(pieces: List[RegistrationSubmissionDraftPiece]) : List[Reads[JsObject]] = {
+    pieces.map(piece => setRegistrationSection(piece.elementPath, piece.data))
+  }
+
+  private def setStatus(statusOpt: Option[RegistrationSubmissionDraftStatus]): Reads[JsObject] = {
+    statusOpt match {
+      case Some(draftStatus) =>
+        val sectionPath = (JsPath \ "status" \ draftStatus.section)
+
+        draftStatus.status match {
+          case Some(status) => prunePath(sectionPath) andThen JsPath.json.update(sectionPath.json.put(Json.toJson(status.toString)))
+          case None => prunePath(sectionPath)
+        }
+      case _ => JsPath.json.pick[JsObject]
+    }
+  }
+
+  def setSectionSet(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
+    implicit request => {
+      request.body.validate[RegistrationSubmissionDraftSetData] match {
+        case JsSuccess(incomingDraftData, _) =>
+          submissionRepository.getDraft(draftId, request.identifier).flatMap(
+            result => {
+              val draft: RegistrationSubmissionDraft = result match {
+                case Some(draft) => draft
+                case None => RegistrationSubmissionDraft(draftId, request.identifier, localDateTimeService.now, Json.obj(), None, Some(true))
+              }
+
+              val sectionPath = JsPath() \ sectionKey
+
+              val thingsToDo = List(
+                prunePath(sectionPath),
+                JsPath.json.update {
+                  sectionPath.json.put(Json.toJson(incomingDraftData.data))
+                },
+                setStatus(incomingDraftData.status)
+              ) ++ setRegistrationSections(incomingDraftData.registrationPieces)
+
+              thingsToDo.foldLeft[JsResult[JsValue]](JsSuccess(draft.draftData))((cur, xform) =>
+                cur.flatMap(_.transform(xform))) match {
+                  case JsSuccess(newDraftData, _) =>
+
+                    val newDraft = draft.copy(
+                      draftData = newDraftData)
+
+                    submissionRepository.setDraft(newDraft).map(
+                      result => if (result) {
+                        Ok
+                      } else {
+                        InternalServerError
+                      }
+                    )
+                  case e: JsError =>
+                    println(s"errors = ${e.errors}")
+                    Future.successful(InternalServerError(e.errors.toString()))
+                }
             }
           )
         case _ => Future.successful(BadRequest)

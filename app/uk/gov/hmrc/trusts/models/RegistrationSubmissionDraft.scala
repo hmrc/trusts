@@ -18,14 +18,39 @@ package uk.gov.hmrc.trusts.models
 
 import java.time.LocalDateTime
 
-import play.api.libs.json.{JsValue, Json, OFormat, OWrites, Reads, __}
+import play.api.libs.json._
 
+// Primary front end draft data (e.g, trusts-frontend), including reference and in-progress.
 case class RegistrationSubmissionDraftData(data: JsValue, reference: Option[String], inProgress: Option[Boolean])
 
 object RegistrationSubmissionDraftData {
   implicit lazy val format: OFormat[RegistrationSubmissionDraftData] = Json.format[RegistrationSubmissionDraftData]
 }
 
+// Piece to be inserted into final registration data. JsNull means remove value.
+case class RegistrationSubmissionDraftPiece(elementPath: String, data: JsValue)
+
+object RegistrationSubmissionDraftPiece {
+  implicit lazy val format: OFormat[RegistrationSubmissionDraftPiece] = Json.format[RegistrationSubmissionDraftPiece]
+}
+
+// In-progress or completed status for a particular section (front end).
+case class RegistrationSubmissionDraftStatus(section: String, status: Option[Status])
+
+object RegistrationSubmissionDraftStatus {
+  implicit lazy val format: OFormat[RegistrationSubmissionDraftStatus] = Json.format[RegistrationSubmissionDraftStatus]
+}
+
+// Set of data sent by sub-frontend, with user answers, status and any registration pieces.
+case class RegistrationSubmissionDraftSetData(data: JsValue,
+                                              status: Option[RegistrationSubmissionDraftStatus],
+                                              registrationPieces: List[RegistrationSubmissionDraftPiece])
+
+object RegistrationSubmissionDraftSetData {
+  implicit lazy val format: OFormat[RegistrationSubmissionDraftSetData] = Json.format[RegistrationSubmissionDraftSetData]
+}
+
+// Full draft data as stored in database.
 case class RegistrationSubmissionDraft(
                                         draftId: String,
                                         internalId: String,

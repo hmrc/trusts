@@ -211,6 +211,101 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
       verify(submissionRepository).setDraft(expectedDraft)
     }
   }
+  ".setSectionSet" should {
+    "set data into correct sections" in {
+      val identifierAction = new FakeIdentifierAction(Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        auditService,
+        LocalDateTimeServiceStub
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(existingDraft)))
+
+      when(submissionRepository.setDraft(any()))
+        .thenReturn(Future.successful(true))
+
+      val body = Json.parse(
+        """
+          |{
+          | "data": {
+          |   "field1": "value1",
+          |   "field2": "value2",
+          |   "field3": 3
+          | },
+          | "status": {
+          |   "section": "asset",
+          |   "status": "completed"
+          | },
+          | "registrationPieces": [
+          |   {
+          |     "elementPath": "trust/assets",
+          |     "data": {
+          |       "reg1": "regvalue1",
+          |       "reg2": 42,
+          |       "reg3": "regvalue3"
+          |     }
+          |   }, {
+          |     "elementPath": "correspondence/name",
+          |     "data": "My trust"
+          |   }
+          | ]
+          |}
+          |""".stripMargin)
+
+      val request = FakeRequest("POST", "path")
+        .withBody(body)
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val draftData = Json.parse(
+        """
+          |{
+          | "anotherKey": {
+          |   "foo": "bar",
+          |   "fizzbinn": true
+          | },
+          | "sectionKey": {
+          |   "field1": "value1",
+          |   "field2": "value2",
+          |   "field3": 3
+          | },
+          | "status": {
+          |   "asset": "completed"
+          | }      ,
+          | "registration": {
+          |   "trust/assets" : {
+          |     "reg1": "regvalue1",
+          |     "reg2": 42,
+          |     "reg3": "regvalue3"
+          |   },
+          |   "correspondence/name": "My trust"
+          | }
+          |}
+          |""".stripMargin)
+
+
+
+      val expectedDraft = RegistrationSubmissionDraft(
+        "DRAFTID",
+        "id",
+        existingDraft.createdAt,
+        draftData,
+        existingDraft.reference,
+        existingDraft.inProgress)
+
+      val result = controller.setSectionSet("DRAFTID", "sectionKey").apply(request)
+      status(result) mustBe OK
+
+      verify(submissionRepository).getDraft("DRAFTID", "id")
+      verify(submissionRepository).setDraft(expectedDraft)
+    }
+
+  }
   ".getSection" should {
     "get existing draft when one exists" in {
       val identifierAction = new FakeIdentifierAction(Organisation)
