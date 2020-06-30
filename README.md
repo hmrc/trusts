@@ -1,5 +1,7 @@
 # trusts
 
+Hi
+
 [![Build Status](https://travis-ci.org/hmrc/trusts.svg)](https://travis-ci.org/hmrc/trusts) [ ![Download](https://api.bintray.com/packages/hmrc/releases/trusts/images/download.svg) ](https://bintray.com/hmrc/releases/trusts/_latestVersion)
 
 This is a placeholder README.md for a new repository
