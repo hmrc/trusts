@@ -227,7 +227,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
                 response = reason
               )
 
-              Future.successful(InternalServerError)
+              Future.successful(NoContent)
             case err =>
               auditService.auditErrorResponse(
                 TrustAuditing.GET_TRUST,
