@@ -179,7 +179,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar with MustMatcher
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          status(result) mustBe INTERNAL_SERVER_ERROR
+          status(result) mustBe NO_CONTENT
         }
       }
     }
