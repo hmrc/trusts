@@ -27,7 +27,16 @@ class JsonOpsSpec extends BaseSpec {
     val initialJson: JsValue = JsonUtils.getJsonValueFromFile("data-with-brackets-in-phone-numbers.json")
     val reformattedJson: JsValue = JsonUtils.getJsonValueFromFile("data-with-reformatted-phone-numbers.json")
 
-    initialJson.applyRules() mustBe reformattedJson
+    initialJson.applyRules mustBe reformattedJson
+
+  }
+
+  "return modified json with no brackets in agent telephone numbers" in {
+
+    val initialJson: JsValue = JsonUtils.getJsonValueFromFile("data-with-brackets-in-agent-telephone-numbers.json")
+    val reformattedJson: JsValue = JsonUtils.getJsonValueFromFile("data-with-reformatted-agent-telephone-numbers.json")
+
+    initialJson.applyRules mustBe reformattedJson
 
   }
 

@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.trusts.connectors
 
+import play.api.data.validation.ValidationError
 import play.api.libs.json.{Format, JsError, JsSuccess, JsValue, Json, Reads, Writes}
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions.{AlreadyRegisteredException, _}
@@ -625,7 +626,10 @@ class DesConnectorSpec extends BaseConnectorSpec {
         application.stop()
 
         whenReady(futureResult) { result =>
-          result mustBe NotEnoughDataResponse
+          result mustBe NotEnoughDataResponse(Json.parse(getTrustMalformedJsonResponse), Json.parse(
+            """
+              |{"obj.details.trust.entities.leadTrustees.phoneNumber":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.identification":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.name":[{"msg":["error.path.missing"],"args":[]}]}
+              |""".stripMargin))
         }
       }
 
@@ -693,7 +697,10 @@ class DesConnectorSpec extends BaseConnectorSpec {
         application.stop()
 
         whenReady(futureResult) { result =>
-          result mustBe NotEnoughDataResponse
+          result mustBe NotEnoughDataResponse(jsonResponse204, Json.parse(
+            """
+              |{"obj":[{"msg":["'responseHeader' is undefined on object: {\"code\":\"NO_CONTENT\",\"reason\":\"No Content.\"}"],"args":[]}]}
+              |""".stripMargin))
         }
       }
     }

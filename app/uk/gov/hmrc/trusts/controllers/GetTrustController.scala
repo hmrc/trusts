@@ -38,18 +38,16 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   private val logger = LoggerFactory.getLogger("application." + classOf[GetTrustController].getCanonicalName)
 
 
-  val errorAuditMessages: Map[GetTrustResponse, String] = Map (
+  val errorAuditMessages: Map[GetTrustResponse, String] = Map(
     InvalidUTRResponse -> "The UTR provided is invalid.",
     InvalidRegimeResponse -> "Invalid regime received from DES.",
     BadRequestResponse -> "Bad Request received from DES.",
-    NotEnoughDataResponse -> "Missing mandatory field received from DES.",
     ResourceNotFoundResponse -> "Not Found received from DES.",
     InternalServerErrorResponse -> "Internal Server Error received from DES.",
     ServiceUnavailableResponse -> "Service Unavailable received from DES."
   )
 
   val errorResponses: Map[GetTrustResponse, Result] = Map (
-    NotEnoughDataResponse -> NoContent,
     ResourceNotFoundResponse -> NotFound
   )
 
@@ -215,7 +213,21 @@ class GetTrustController @Inject()(identify: IdentifierAction,
               )
 
               Future.successful(handleResult(response))
+            case NotEnoughDataResponse(json, errors) =>
+              val reason = Json.obj(
+                "response" -> json,
+                "reason" -> "Missing mandatory fields in response received from DES",
+                "errors" -> errors
+              )
 
+              auditService.audit(
+                event = TrustAuditing.GET_TRUST,
+                request = Json.obj("utr" -> utr),
+                internalId = request.identifier,
+                response = reason
+              )
+
+              Future.successful(NoContent)
             case err =>
               auditService.auditErrorResponse(
                 TrustAuditing.GET_TRUST,

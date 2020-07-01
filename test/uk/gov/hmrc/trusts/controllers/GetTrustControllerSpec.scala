@@ -168,17 +168,17 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar with MustMatcher
       }
     }
 
-    "return 204 - NoContent" when {
+    "return 500 - InternalServerError" when {
 
       "the get endpoint returns a NotEnoughDataResponse" in {
 
         when(desService.getTrustInfo(any(), any())(any()))
-          .thenReturn(Future.successful(NotEnoughDataResponse))
+          .thenReturn(Future.successful(NotEnoughDataResponse(Json.obj(), Json.obj())))
 
         val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 
         whenReady(result) { _ =>
-          verify(mockedAuditService).auditErrorResponse(mockEq("GetTrust"), any[JsValue], any[String], any[String])(any())
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
           status(result) mustBe NO_CONTENT
         }
       }

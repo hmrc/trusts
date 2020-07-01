@@ -90,7 +90,7 @@ class VariationService @Inject()(
 
   private def doSubmit(utr: String, value: JsValue, internalId: String)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
 
-    val payload = value.applyRules()
+    val payload = value.applyRules
 
     auditService.audit(
       TrustAuditing.TRUST_VARIATION_ATTEMPT,
