@@ -55,5 +55,6 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, playEnv: Envi
   val auditingEnabled : Boolean = loadConfig("microservice.services.trusts.features.auditing.enabled").toBoolean
 
   val ttlInSeconds: Int = runModeConfiguration.getInt("mongodb.ttlSeconds").getOrElse(4*60*60)
+  val registrationTtlInSeconds: Int = runModeConfiguration.getInt("mongodb.registration.ttlSeconds").getOrElse(28*24*60*60)
 }
 

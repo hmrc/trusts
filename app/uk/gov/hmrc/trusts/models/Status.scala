@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.utils
+package uk.gov.hmrc.trusts.models
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+sealed trait Status
 
-import com.google.inject.Inject
-import uk.gov.hmrc.trusts.config.AppConfig
+object Status extends Enumerable.Implicits {
 
+  case object Completed extends WithName("completed") with Status
 
-class DateFormatter @Inject()(config: AppConfig) {
+  case object InProgress extends WithName("progress") with Status
 
-  private val format = "d MMMM yyyy"
+  val values: Set[Status] = Set(
+    Completed, InProgress
+  )
 
-  def formatDate(dateTime: LocalDateTime): String = {
-    val dateFormatter = DateTimeFormatter.ofPattern(format)
-    dateTime.format(dateFormatter)
-  }
-
+  implicit val enumerable: Enumerable[Status] =
+    Enumerable(values.toSeq.map(v => v.toString -> v): _*)
 }

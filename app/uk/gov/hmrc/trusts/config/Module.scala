@@ -30,5 +30,6 @@ class Module extends AbstractModule {
 
     bind(classOf[TransformationRepository]).to(classOf[TransformationRepositoryImpl]).asEagerSingleton()
     bind(classOf[CacheRepository]).to(classOf[CacheRepositoryImpl]).asEagerSingleton()
+    bind(classOf[RegistrationSubmissionRepository]).to(classOf[RegistrationSubmissionRepositoryImpl]).asEagerSingleton()
   }
 }

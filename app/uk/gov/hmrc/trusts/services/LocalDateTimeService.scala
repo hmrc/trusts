@@ -14,22 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.utils
+package uk.gov.hmrc.trusts.services
 
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
-import com.google.inject.Inject
-import uk.gov.hmrc.trusts.config.AppConfig
-
-
-class DateFormatter @Inject()(config: AppConfig) {
-
-  private val format = "d MMMM yyyy"
-
-  def formatDate(dateTime: LocalDateTime): String = {
-    val dateFormatter = DateTimeFormatter.ofPattern(format)
-    dateTime.format(dateFormatter)
-  }
-
+class LocalDateTimeService {
+  def now: LocalDateTime = LocalDateTime.now
 }

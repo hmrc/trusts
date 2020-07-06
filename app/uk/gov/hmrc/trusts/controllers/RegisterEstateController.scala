@@ -107,7 +107,7 @@ class RegisterEstateController @Inject()(desService: DesService, config: AppConf
                       response = RegistrationFailureResponse(503, "SERVICE_UNAVAILABLE", "Dependent systems are currently not responding.")
                     )
 
-                    Logger.error(s"[RegisterTrustController][registration] Service unavailable response from DES")
+                    Logger.error(s"[RegisterEstateController][registration] Service unavailable response from DES")
                     InternalServerError(Json.toJson(internalServerErrorResponse))
                   case x : BadRequestException =>
 
@@ -119,7 +119,7 @@ class RegisterEstateController @Inject()(desService: DesService, config: AppConf
                       response = RegistrationFailureResponse(400, "INVALID_PAYLOAD", "Submission has not passed validation. Invalid payload..")
                     )
 
-                    Logger.error(s"[RegisterTrustController][registration] bad request response from DES")
+                    Logger.error(s"[RegisterEstateController][registration] bad request response from DES")
                     InternalServerError(Json.toJson(internalServerErrorResponse))
                   case NonFatal(e) =>
                     Logger.error(s"[RegisterEstateController][registration] Exception received : $e.")
