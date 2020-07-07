@@ -117,7 +117,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
   def setSectionSet(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[RegistrationSubmission.DataSet] match {
-        case JsSuccess(incomingDraftData, _) =>
+        case JsSuccess(dataSet, _) =>
           submissionRepository.getDraft(draftId, request.identifier).flatMap(
             result => {
               val draft: RegistrationSubmissionDraft = result match {
@@ -125,39 +125,44 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
                 case None => RegistrationSubmissionDraft(draftId, request.identifier, localDateTimeService.now, Json.obj(), None, Some(true))
               }
 
-              val sectionPath = JsPath() \ sectionKey
-
-              val thingsToDo = List(
-                prunePath(sectionPath),
-                JsPath.json.update {
-                  sectionPath.json.put(Json.toJson(incomingDraftData.data))
-                },
-                setStatus(incomingDraftData.componentKey, incomingDraftData.status),
-                setAnswerSections(incomingDraftData.componentKey, incomingDraftData.answerSections)
-              ) ++ setRegistrationSections(incomingDraftData.registrationPieces)
-
-              thingsToDo.foldLeft[JsResult[JsValue]](JsSuccess(draft.draftData))((cur, xform) =>
-                cur.flatMap(_.transform(xform))) match {
-                  case JsSuccess(newDraftData, _) =>
-
-                    val newDraft = draft.copy(
-                      draftData = newDraftData)
-
-                    submissionRepository.setDraft(newDraft).map(
-                      result => if (result) {
-                        Ok
-                      } else {
-                        InternalServerError
-                      }
-                    )
-                  case e: JsError =>
-                    println(s"errors = ${e.errors}")
-                    Future.successful(InternalServerError(e.errors.toString()))
-                }
+              applyDataSet(draft, dataSetOperations(sectionKey, dataSet))
             }
           )
         case _ => Future.successful(BadRequest)
       }
+    }
+  }
+
+  private def dataSetOperations(sectionKey: String, incomingDraftData: RegistrationSubmission.DataSet) = {
+    val sectionPath = JsPath() \ sectionKey
+
+    List(
+      prunePath(sectionPath),
+      JsPath.json.update {
+        sectionPath.json.put(Json.toJson(incomingDraftData.data))
+      },
+      setStatus(incomingDraftData.componentKey, incomingDraftData.status),
+      setAnswerSections(incomingDraftData.componentKey, incomingDraftData.answerSections)
+    ) ++ setRegistrationSections(incomingDraftData.registrationPieces)
+  }
+
+  private def applyDataSet(draft: RegistrationSubmissionDraft, operations: List[Reads[JsObject]]) = {
+    operations.foldLeft[JsResult[JsValue]](JsSuccess(draft.draftData))((cur, xform) =>
+      cur.flatMap(_.transform(xform))) match {
+      case JsSuccess(newDraftData, _) =>
+
+        val newDraft = draft.copy(draftData = newDraftData)
+
+        submissionRepository.setDraft(newDraft).map(
+          result => if (result) {
+            Ok
+          } else {
+            InternalServerError
+          }
+        )
+      case e: JsError =>
+        println(s"errors = ${e.errors}")
+        Future.successful(InternalServerError(e.errors.toString()))
     }
   }
 
