@@ -21,7 +21,8 @@ import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
-import uk.gov.hmrc.trusts.models.{RegistrationSubmissionDraft, RegistrationSubmissionDraftData, RegistrationSubmissionDraftPiece, RegistrationSubmissionDraftSetData, RegistrationSubmissionDraftStatus}
+import uk.gov.hmrc.trusts.models._
+import uk.gov.hmrc.trusts.models.{Status => ModelStatus}
 import uk.gov.hmrc.trusts.repositories.RegistrationSubmissionRepository
 import uk.gov.hmrc.trusts.services.{AuditService, LocalDateTimeService}
 
@@ -89,30 +90,27 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
   }
 
   private def setRegistrationSection(path: String, registrationSectionData: JsValue) : Reads[JsObject] = {
-    val sectionPath = (JsPath \ "registration" \ path)
+    val sectionPath = JsPath \ "registration" \ path
     prunePath(sectionPath) andThen JsPath.json.update(sectionPath.json.put(registrationSectionData))
   }
 
-  private def setRegistrationSections(pieces: List[RegistrationSubmissionDraftPiece]) : List[Reads[JsObject]] = {
+  private def setRegistrationSections(pieces: List[RegistrationSubmission.MappedPiece]) : List[Reads[JsObject]] = {
     pieces.map(piece => setRegistrationSection(piece.elementPath, piece.data))
   }
 
-  private def setStatus(statusOpt: Option[RegistrationSubmissionDraftStatus]): Reads[JsObject] = {
-    statusOpt match {
-      case Some(draftStatus) =>
-        val sectionPath = (JsPath \ "status" \ draftStatus.section)
+  private def setStatus(key: String, statusOpt: Option[ModelStatus]): Reads[JsObject] = {
+    val sectionPath = JsPath \ "status" \ key
 
-        draftStatus.status match {
-          case Some(status) => prunePath(sectionPath) andThen JsPath.json.update(sectionPath.json.put(Json.toJson(status.toString)))
-          case None => prunePath(sectionPath)
-        }
-      case _ => JsPath.json.pick[JsObject]
+    statusOpt match {
+      case Some(status) =>
+        prunePath(sectionPath) andThen JsPath.json.update(sectionPath.json.put(Json.toJson(status.toString)))
+      case _ => prunePath(sectionPath)
     }
   }
 
   def setSectionSet(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
-      request.body.validate[RegistrationSubmissionDraftSetData] match {
+      request.body.validate[RegistrationSubmission.DataSet] match {
         case JsSuccess(incomingDraftData, _) =>
           submissionRepository.getDraft(draftId, request.identifier).flatMap(
             result => {
@@ -128,7 +126,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
                 JsPath.json.update {
                   sectionPath.json.put(Json.toJson(incomingDraftData.data))
                 },
-                setStatus(incomingDraftData.status)
+                setStatus(incomingDraftData.componentKey, incomingDraftData.status)
               ) ++ setRegistrationSections(incomingDraftData.registrationPieces)
 
               thingsToDo.foldLeft[JsResult[JsValue]](JsSuccess(draft.draftData))((cur, xform) =>

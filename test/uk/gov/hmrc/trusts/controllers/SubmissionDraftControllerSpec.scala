@@ -23,12 +23,12 @@ import org.mockito.Mockito._
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import play.api.libs.json.Json
+import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.RegistrationSubmissionDraft
+import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.repositories.RegistrationSubmissionRepository
 import uk.gov.hmrc.trusts.services.{AuditService, LocalDateTimeService}
 import uk.gov.hmrc.trusts.utils.JsonRequests
@@ -230,36 +230,37 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
       when(submissionRepository.setDraft(any()))
         .thenReturn(Future.successful(true))
 
-      val body = Json.parse(
+      val data = Json.parse(
         """
           |{
-          | "data": {
-          |   "field1": "value1",
-          |   "field2": "value2",
-          |   "field3": 3
-          | },
-          | "status": {
-          |   "section": "asset",
-          |   "status": "completed"
-          | },
-          | "registrationPieces": [
-          |   {
-          |     "elementPath": "trust/assets",
-          |     "data": {
-          |       "reg1": "regvalue1",
-          |       "reg2": 42,
-          |       "reg3": "regvalue3"
-          |     }
-          |   }, {
-          |     "elementPath": "correspondence/name",
-          |     "data": "My trust"
-          |   }
-          | ]
+          | "field1": "value1",
+          | "field2": "value2",
+          | "field3": 3
           |}
           |""".stripMargin)
 
+      val registrationPiece1 = Json.parse(
+        """
+          |{
+          | "reg1": "regvalue1",
+          | "reg2": 42,
+          | "reg3": "regvalue3"
+          |}
+          |""".stripMargin)
+
+
+      val set = RegistrationSubmission.DataSet(
+        data,
+        "asset",
+        Some(Status.Completed),
+        List(
+          RegistrationSubmission.MappedPiece("trust/assets", registrationPiece1),
+          RegistrationSubmission.MappedPiece("correspondence/name", JsString("My trust"))
+        ),
+        List.empty)
+
       val request = FakeRequest("POST", "path")
-        .withBody(body)
+        .withBody(Json.toJson(set))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val draftData = Json.parse(
@@ -287,8 +288,6 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
           | }
           |}
           |""".stripMargin)
-
-
 
       val expectedDraft = RegistrationSubmissionDraft(
         "DRAFTID",
