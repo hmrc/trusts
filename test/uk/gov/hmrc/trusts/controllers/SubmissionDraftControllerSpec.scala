@@ -239,25 +239,41 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
           |}
           |""".stripMargin)
 
-      val registrationPiece1 = Json.parse(
-        """
-          |{
-          | "reg1": "regvalue1",
-          | "reg2": 42,
-          | "reg3": "regvalue3"
-          |}
-          |""".stripMargin)
+      val mappedPieces = List(
+        RegistrationSubmission.MappedPiece("trust/assets", Json.parse(
+          """
+            |{
+            | "reg1": "regvalue1",
+            | "reg2": 42,
+            | "reg3": "regvalue3"
+            |}
+            |""".stripMargin)),
+        RegistrationSubmission.MappedPiece("correspondence/name", JsString("My trust"))
+      )
 
+      val answerSections = List(
+        RegistrationSubmission.AnswerSection(
+          Some("section1.heading"),
+          List(
+            RegistrationSubmission.AnswerRow("label1", "answer1", "labelArg1")
+          ),
+          Some("section1.key")
+        ),
+        RegistrationSubmission.AnswerSection(
+          Some("section2.heading"),
+          List(
+            RegistrationSubmission.AnswerRow("label2", "answer2", "labelArg2")
+          ),
+          Some("section2.key")
+        )
+      )
 
       val set = RegistrationSubmission.DataSet(
         data,
         "asset",
         Some(Status.Completed),
-        List(
-          RegistrationSubmission.MappedPiece("trust/assets", registrationPiece1),
-          RegistrationSubmission.MappedPiece("correspondence/name", JsString("My trust"))
-        ),
-        List.empty)
+        mappedPieces,
+        answerSections)
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(set))
@@ -277,7 +293,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
           | },
           | "status": {
           |   "asset": "completed"
-          | }      ,
+          | },
           | "registration": {
           |   "trust/assets" : {
           |     "reg1": "regvalue1",
@@ -285,6 +301,32 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
           |     "reg3": "regvalue3"
           |   },
           |   "correspondence/name": "My trust"
+          | },
+          | "answerSections": {
+          |   "asset": [
+          |     {
+          |       "headingKey": "section1.heading",
+          |       "rows": [
+          |         {
+          |           "label": "label1",
+          |           "answer": "answer1",
+          |           "labelArg": "labelArg1"
+          |         }
+          |       ],
+          |       "sectionKey": "section1.key"
+          |     },
+          |     {
+          |       "headingKey": "section2.heading",
+          |       "rows": [
+          |         {
+          |           "label": "label2",
+          |           "answer": "answer2",
+          |           "labelArg": "labelArg2"
+          |         }
+          |       ],
+          |       "sectionKey": "section2.key"
+          |     }
+          |   ]
           | }
           |}
           |""".stripMargin)

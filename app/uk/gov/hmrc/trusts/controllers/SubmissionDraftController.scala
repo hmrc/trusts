@@ -108,6 +108,12 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
     }
   }
 
+  private def setAnswerSections(key: String, answerSections: List[RegistrationSubmission.AnswerSection]): Reads[JsObject] = {
+    val sectionPath = JsPath \ "answerSections" \ key
+
+      prunePath(sectionPath) andThen JsPath.json.update(sectionPath.json.put(Json.toJson(answerSections)))
+  }
+
   def setSectionSet(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[RegistrationSubmission.DataSet] match {
@@ -126,7 +132,8 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
                 JsPath.json.update {
                   sectionPath.json.put(Json.toJson(incomingDraftData.data))
                 },
-                setStatus(incomingDraftData.componentKey, incomingDraftData.status)
+                setStatus(incomingDraftData.componentKey, incomingDraftData.status),
+                setAnswerSections(incomingDraftData.componentKey, incomingDraftData.answerSections)
               ) ++ setRegistrationSections(incomingDraftData.registrationPieces)
 
               thingsToDo.foldLeft[JsResult[JsValue]](JsSuccess(draft.draftData))((cur, xform) =>
