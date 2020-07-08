@@ -61,14 +61,14 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
 
           // Read non-existent draft
           {
-            val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/Section")).get
+            val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/beneficiaries")).get
             status(result) mustBe NOT_FOUND
           }
 
           // Create draft section
           {
             val draftRequestData = RegistrationSubmissionDraftData(draftData, None, None)
-            val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/Section")
+            val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/main")
                         .withBody(Json.toJson(draftRequestData))
                         .withHeaders(CONTENT_TYPE -> "application/json")
             val result = route(application, request).get
@@ -77,7 +77,7 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
 
           // Read draft section
           {
-            val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/Section")).get
+            val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/main")).get
             status(result) mustBe OK
 
             val json = contentAsJson(result)
@@ -88,21 +88,10 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
             assert(json.transform(referencePath.json.pick).isError)
           }
 
-          // Read non-existent draft section
-          {
-            val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/AnotherSection")).get
-            status(result) mustBe OK
-
-            val json = contentAsJson(result)
-
-            json.transform(dataPath.json.pick) mustBe JsSuccess(Json.obj(), dataPath)
-
-          }
-
           // Update draft section
           {
             val amendedDraftRequestData = RegistrationSubmissionDraftData(amendedDraftData, Some("amendedReference"), None)
-            val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/Section")
+            val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/main")
               .withBody(Json.toJson(amendedDraftRequestData))
               .withHeaders(CONTENT_TYPE -> "application/json")
             val result = route(application, request).get
@@ -111,7 +100,7 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
 
           // Read amended draft section
           {
-            val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/Section")).get
+            val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/main")).get
             status(result) mustBe OK
 
             val resultJson = contentAsJson(result)
