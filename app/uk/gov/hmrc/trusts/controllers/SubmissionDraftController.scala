@@ -17,6 +17,7 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
+import play.api.Logger
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
@@ -161,7 +162,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           }
         )
       case e: JsError =>
-        println(s"errors = ${e.errors}")
+        Logger.error(s"applyDataSet: Can't apply operations to draft data: $e.errors.")
         Future.successful(InternalServerError(e.errors.toString()))
     }
   }
