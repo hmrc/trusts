@@ -270,7 +270,6 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
 
       val set = RegistrationSubmission.DataSet(
         data,
-        "asset",
         Some(Status.Completed),
         mappedPieces,
         answerSections)
@@ -292,7 +291,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
           |   "field3": 3
           | },
           | "status": {
-          |   "asset": "completed"
+          |   "sectionKey": "completed"
           | },
           | "registration": {
           |   "trust/assets" : {
@@ -303,7 +302,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
           |   "correspondence/name": "My trust"
           | },
           | "answerSections": {
-          |   "asset": [
+          |   "sectionKey": [
           |     {
           |       "headingKey": "section1.heading",
           |       "rows": [

@@ -45,7 +45,6 @@ object RegistrationSubmission {
 
   // Set of data sent by sub-frontend, with user answers, status, any mapped pieces and answer sections.
   case class DataSet(data: JsValue,
-                     componentKey: String,
                      status: Option[Status],
                      registrationPieces: List[MappedPiece],
                      answerSections: List[AnswerSection])

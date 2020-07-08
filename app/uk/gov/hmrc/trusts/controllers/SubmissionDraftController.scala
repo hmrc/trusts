@@ -141,8 +141,8 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
       JsPath.json.update {
         sectionPath.json.put(Json.toJson(incomingDraftData.data))
       },
-      setStatus(incomingDraftData.componentKey, incomingDraftData.status),
-      setAnswerSections(incomingDraftData.componentKey, incomingDraftData.answerSections)
+      setStatus(sectionKey, incomingDraftData.status),
+      setAnswerSections(sectionKey, incomingDraftData.answerSections)
     ) ++ setRegistrationSections(incomingDraftData.registrationPieces)
   }
 
