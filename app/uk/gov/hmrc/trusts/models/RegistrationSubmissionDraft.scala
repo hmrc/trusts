@@ -20,34 +20,45 @@ import java.time.LocalDateTime
 
 import play.api.libs.json._
 
+object RegistrationSubmission {
+  // Piece to be inserted into final registration data. data == JsNull means remove value.
+  case class MappedPiece(elementPath: String, data: JsValue)
+
+  object MappedPiece {
+    implicit lazy val format: OFormat[MappedPiece] = Json.format[MappedPiece]
+  }
+
+  // Answer row and section, for display in print summary.
+  case class AnswerRow(label: String, answer: String, labelArg: String)
+
+  object AnswerRow {
+    implicit lazy val format: OFormat[AnswerRow] = Json.format[AnswerRow]
+  }
+
+  case class AnswerSection(headingKey: Option[String],
+                                                 rows: Seq[AnswerRow],
+                                                 sectionKey: Option[String])
+
+  object AnswerSection {
+    implicit lazy val format: OFormat[AnswerSection] = Json.format[AnswerSection]
+  }
+
+  // Set of data sent by sub-frontend, with user answers, status, any mapped pieces and answer sections.
+  case class DataSet(data: JsValue,
+                     status: Option[Status],
+                     registrationPieces: List[MappedPiece],
+                     answerSections: List[AnswerSection])
+
+  object DataSet {
+    implicit lazy val format: OFormat[DataSet] = Json.format[DataSet]
+  }
+}
+
 // Primary front end draft data (e.g, trusts-frontend), including reference and in-progress.
 case class RegistrationSubmissionDraftData(data: JsValue, reference: Option[String], inProgress: Option[Boolean])
 
 object RegistrationSubmissionDraftData {
   implicit lazy val format: OFormat[RegistrationSubmissionDraftData] = Json.format[RegistrationSubmissionDraftData]
-}
-
-// Piece to be inserted into final registration data. JsNull means remove value.
-case class RegistrationSubmissionDraftPiece(elementPath: String, data: JsValue)
-
-object RegistrationSubmissionDraftPiece {
-  implicit lazy val format: OFormat[RegistrationSubmissionDraftPiece] = Json.format[RegistrationSubmissionDraftPiece]
-}
-
-// In-progress or completed status for a particular section (front end).
-case class RegistrationSubmissionDraftStatus(section: String, status: Option[Status])
-
-object RegistrationSubmissionDraftStatus {
-  implicit lazy val format: OFormat[RegistrationSubmissionDraftStatus] = Json.format[RegistrationSubmissionDraftStatus]
-}
-
-// Set of data sent by sub-frontend, with user answers, status and any registration pieces.
-case class RegistrationSubmissionDraftSetData(data: JsValue,
-                                              status: Option[RegistrationSubmissionDraftStatus],
-                                              registrationPieces: List[RegistrationSubmissionDraftPiece])
-
-object RegistrationSubmissionDraftSetData {
-  implicit lazy val format: OFormat[RegistrationSubmissionDraftSetData] = Json.format[RegistrationSubmissionDraftSetData]
 }
 
 // Full draft data as stored in database.
