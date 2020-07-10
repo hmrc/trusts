@@ -116,7 +116,6 @@ trait ValidationUtil {
     passportNumberList
   }
 
-
   def isNotTrust(currentTypeOfTrust: TypeOfTrust, expectedType: TypeOfTrust): Boolean = currentTypeOfTrust != expectedType
 
   def getSettlorPassportNumberWithIndex(settlor: List[Settlor]):List[(String, Int)] = {

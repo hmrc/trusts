@@ -94,7 +94,6 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
 
   }
 
-
   def indBeneficiariesDobIsNotFutureDate: List[Option[TrustsValidationError]] = {
     registration.trust.entities.beneficiary.individualDetails.map {
       indBeneficiary =>
@@ -124,6 +123,34 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
 
   }
 
+  def indBeneficiariesBeneficiaryType: List[Option[TrustsValidationError]] = {
+
+    registration.trust.details.typeOfTrust  match {
+
+      case TypeOfTrust.Employment =>
+        registration.trust.entities.beneficiary.individualDetails.map {
+          indBeneficiary => {
+
+            val beneficiaryTypeNotSet = indBeneficiary
+              .zipWithIndex
+              .filter(_._1.beneficiaryType.isEmpty)
+
+            Logger.info(s"[IndBeneficiariesBeneficiaryType] Number of Beneficiary Types not set found : ${beneficiaryTypeNotSet.size} ")
+
+            beneficiaryTypeNotSet.map {
+              case (_, index) =>
+                Some(TrustsValidationError(s"Beneficiary Type must be set if Trust Type is Employment.",
+                  s"/trust/entities/beneficiary/individualDetails/$index/beneficiaryType/individualDetails/beneficiaryType"))
+            }
+
+          }
+        }.toList.flatten
+
+      case _ => List.empty
+
+    }
+
+  }
 
   def businessTrusteesDuplicateUtr: List[Option[TrustsValidationError]] = {
     registration.trust.entities.trustees.map {
@@ -179,6 +206,7 @@ object BusinessValidation {
       domainValidator.indBeneficiariesDobIsNotFutureDate.flatten ++
       domainValidator.indBeneficiariesDuplicateNino.flatten ++
       domainValidator.indBeneficiariesDuplicatePassportNumber.flatten ++
+      domainValidator.indBeneficiariesBeneficiaryType.flatten ++
       SettlorDomainValidation.check(registration) ++
       AssetsDomainValidation.check(registration)
 

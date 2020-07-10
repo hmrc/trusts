@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.utils
 import java.time.LocalDate
 
 import uk.gov.hmrc.trusts.BaseSpec
-import uk.gov.hmrc.trusts.models.Registration
+import uk.gov.hmrc.trusts.models.{Registration, TrustDetailsType, TrustEntitiesType}
 
 class DomainValidatorSpec extends BaseSpec with DataExamples {
 
@@ -130,6 +130,7 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
     }
   }
 
+
   "businessTrusteesDuplicateUtr" should {
     "return None when there is no trustees" in {
       val request = registrationWithTrustess(None)
@@ -147,7 +148,6 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
       }
     }
   }
-
 
   "bussinessTrusteeUtrIsSameTrustUtr" should {
     "return None when there is no trustees" in {
@@ -218,6 +218,60 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
           error.location mustBe s"/trust/entities/beneficiary/individualDetails/$index/identification/passport/number"
       }
     }
+  }
+
+  "indBeneficiariesBeneficiaryType" should {
+
+    "return none" when {
+
+      "typeOfTrust is employees and beneficiaryType is set" in {
+
+        val trustEntities: TrustEntitiesType = defaultTrustEntities.copy(
+          beneficiary = beneficiaryTypeEntity().copy(
+            individualDetails = Some(List(
+              indBenficiary().copy(beneficiaryType = Some("Director")),
+              indBenficiary(nino2).copy(beneficiaryType = Some("Employee"))
+            ))
+          )
+        )
+        val trustDetails: TrustDetailsType = defaultTrustDetails.copy(typeOfTrust = TypeOfTrust.Employment)
+
+        val request = registration(Some(trustDetails), Some(trustEntities))
+
+        SUT(request).indBeneficiariesBeneficiaryType.flatten mustBe empty
+      }
+
+      "typeOfTrust is not employees" in {
+
+        val trustEntities: TrustEntitiesType = defaultTrustEntities.copy(beneficiary = beneficiaryTypeEntity())
+        val trustDetails: TrustDetailsType = defaultTrustDetails.copy(typeOfTrust = TypeOfTrust.DeedOfVariationOrFamilyAgreement)
+
+        val request = registration(Some(trustDetails), Some(trustEntities))
+
+        SUT(request).indBeneficiariesBeneficiaryType.flatten mustBe empty
+
+      }
+
+    }
+
+    "return validation error when typeOfTrust is employees and beneficiaryType is not set" in {
+
+      val trustEntities: TrustEntitiesType = defaultTrustEntities.copy(beneficiary = beneficiaryTypeEntity())
+      val trustDetails: TrustDetailsType = defaultTrustDetails.copy(typeOfTrust = TypeOfTrust.Employment)
+
+      val request = registration(Some(trustDetails), Some(trustEntities))
+
+      val response = SUT(request).indBeneficiariesBeneficiaryType
+
+      response.flatten.size mustBe 2
+      response.flatten.zipWithIndex.map{
+        case (error,index) =>
+          error.message mustBe "Beneficiary Type must be set if Trust Type is Employment."
+          error.location mustBe s"/trust/entities/beneficiary/individualDetails/$index/beneficiaryType/individualDetails/beneficiaryType"
+      }
+    }
+
+
   }
 
 }

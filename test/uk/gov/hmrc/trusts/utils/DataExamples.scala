@@ -111,7 +111,7 @@ trait DataExamples extends  JsonRequests {
   def defaultTrustDetails: TrustDetailsType = registrationRequest.trust.details
   def defaultTrustEntities: TrustEntitiesType = registrationRequest.trust.entities
 
-  private def registration(trustDetailsType: Option[TrustDetailsType]= Some(defaultTrustDetails),
+  def registration(trustDetailsType: Option[TrustDetailsType]= Some(defaultTrustDetails),
                            trustEntities: Option[TrustEntitiesType]= Some(defaultTrustEntities)) = {
 
     val trust = registrationRequest.trust
