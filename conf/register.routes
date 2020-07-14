@@ -1,14 +1,17 @@
 POST        /                                               uk.gov.hmrc.trusts.controllers.RegisterTrustController.registration
 
+# Used by trusts-frontend
 GET         /submission-drafts/:draftId/status              uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "status")
+POST        /submission-drafts/:draftId/status              uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSection(draftId: String, sectionKey: String = "status")
 GET         /submission-drafts/:draftId/registration        uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "registration")
 GET         /submission-drafts/:draftId/answerSections      uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "answerSections")
 
 GET         /submission-drafts/:draftId/main                uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "main")
-GET         /submission-drafts/:draftId/beneficiaries       uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "beneficiaries")
-
 POST        /submission-drafts/:draftId/main                uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSection(draftId: String, sectionKey: String = "main")
 
-POST        /submission-drafts/:draftId/set/beneficiaries   uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "beneficiaries")
 GET         /submission-drafts                              uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getDrafts()
 DELETE      /submission-drafts/:draftId                     uk.gov.hmrc.trusts.controllers.SubmissionDraftController.removeDraft(draftId: String)
+
+# Used by register-trust-beneficiary-frontend
+GET         /submission-drafts/:draftId/beneficiaries       uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "beneficiaries")
+POST        /submission-drafts/:draftId/set/beneficiaries   uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "beneficiaries")
