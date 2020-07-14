@@ -101,6 +101,7 @@ class DesConnector @Inject()(http: WSHttp, config: AppConfig) {
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
+    Logger.warn(s"[DesConnector] registration: $registration")
     Logger.info(s"[DesConnector] registering trust for correlationId: $correlationId")
 
     val response = http.POST[JsValue, RegistrationResponse](trustRegistrationEndpoint, Json.toJson(registration))
