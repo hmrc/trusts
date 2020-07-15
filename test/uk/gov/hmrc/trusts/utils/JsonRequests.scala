@@ -38,6 +38,9 @@ trait JsonRequests extends JsonUtils {
   lazy val invalidEstateVariationsRequestJson: String = getJsonFromFile("invalid-estate-variation-api.json")
 
   lazy val trustVariationsRequest: JsValue = getJsonValueFromFile("valid-trusts-variations-api.json").validate[JsValue].get
+
+  lazy val trustVariationsNoPreviousPropertyValueRequest: JsValue = getJsonValueFromFile("valid-trusts-variations-no-previous-value-property-api.json").validate[JsValue].get
+
   lazy val invalidTrustVariationsRequest: JsValue = getJsonValueFromFile("invalid-payload-trusts-variations.json")
 
   lazy val estateVariationsRequest: EstateVariation = getJsonValueFromFile("valid-estate-variation-api.json").validate[EstateVariation].get
@@ -48,6 +51,10 @@ trait JsonRequests extends JsonUtils {
 
   lazy val getTrustResponseJson: String = getJsonFromFile("valid-get-trust-response.json")
   lazy val getTrustResponse: JsValue = getJsonValueFromFile("valid-get-trust-response.json")
+
+  lazy val getTrustPropertyLandNoPreviousValue: String = getJsonFromFile("valid-get-trust-response-property-or-land-no-previous-value.json")
+  lazy val getTrustPropertyLandNoPreviousValueJson: JsValue = getJsonValueFromFile("valid-get-trust-response-property-or-land-no-previous-value.json")
+
   lazy val getTransformedTrustResponse: JsValue = getJsonValueFromFile("transformed-get-trust-response.json")
   lazy val getEmptyTransformedTrustResponse: JsValue = getJsonValueFromFile("empty-transformed-get-trust-response.json")
   lazy val getTransformedApiResponse: JsValue = getJsonValueFromFile("trust-transformed-get-api-result.json")

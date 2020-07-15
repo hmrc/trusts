@@ -601,6 +601,29 @@ class DesConnectorSpec extends BaseConnectorSpec {
         }
       }
 
+      "des has returned a 200 with property or land asset with no previous value" in {
+
+        val utr = "1234567890"
+        stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustPropertyLandNoPreviousValue)
+
+        val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(utr)
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+
+          val expectedHeader: ResponseHeader = (getTrustPropertyLandNoPreviousValueJson \ "responseHeader").as[ResponseHeader]
+          val expectedJson = (getTrustPropertyLandNoPreviousValueJson \ "trustOrEstateDisplay").as[JsValue]
+
+          result match {
+            case r:TrustProcessedResponse =>
+              r.responseHeader mustBe expectedHeader
+              r.getTrust mustBe expectedJson
+            case _ => fail
+          }
+        }
+      }
+
       "des has returned a 200 and indicated that the submission is still being processed" in {
         val utr = "1234567800"
         stubForGet(server, createTrustOrEstateEndpoint(utr), OK, getTrustOrEstateProcessingResponseJson)
@@ -959,6 +982,23 @@ class DesConnectorSpec extends BaseConnectorSpec {
         stubForPost(server, url, requestBody, OK, """{"tvn": "XXTVN1234567890"}""")
 
         val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest))
+
+        application.stop()
+
+        whenReady(futureResult) { result =>
+          result mustBe a[VariationResponse]
+          inside(result){ case VariationResponse(tvn)  => tvn must fullyMatch regex """^[a-zA-Z0-9]{15}$""".r }
+        }
+      }
+    }
+
+    "return a VariationTrnResponse" when {
+      "des has returned a 200 with a trn for a submission of property or land without previousValue" in {
+
+        val requestBody = Json.stringify(Json.toJson(trustVariationsNoPreviousPropertyValueRequest))
+        stubForPost(server, url, requestBody, OK, """{"tvn": "XXTVN1234567890"}""")
+
+        val futureResult = connector.trustVariation(Json.toJson(trustVariationsNoPreviousPropertyValueRequest))
 
         application.stop()
 

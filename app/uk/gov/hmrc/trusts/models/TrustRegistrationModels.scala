@@ -390,8 +390,6 @@ object NonUKType {
   implicit val nonUKTypeFormat: Format[NonUKType] = Json.format[NonUKType]
 }
 
-
-
 case class PropertyLandType(buildingLandName: Option[String],
                             address: Option[AddressType],
                             valueFull: Long,

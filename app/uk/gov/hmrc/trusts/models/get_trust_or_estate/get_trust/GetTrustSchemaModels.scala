@@ -598,6 +598,15 @@ object DisplayTrustAssets {
   implicit val assetsFormat: Format[DisplayTrustAssets] = Json.format[DisplayTrustAssets]
 }
 
+case class PropertyLandType(buildingLandName: Option[String],
+                            address: Option[AddressType],
+                            valueFull: Long,
+                            valuePrevious: Option[Long])
+
+object PropertyLandType {
+  implicit val propertyLandTypeFormat: Format[PropertyLandType] = Json.format[PropertyLandType]
+}
+
 case class DisplaySharesType(numberOfShares: Option[String],
                              orgName: String,
                              utr: Option[String],

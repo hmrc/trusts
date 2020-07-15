@@ -92,26 +92,9 @@ object GetTrustResponse {
         Logger.info(s"[GetTrustResponse] response status received from des: ${response.status}")
         response.status match {
           case OK =>
-            response.json.validate[GetTrustSuccessResponse] match {
-              case JsSuccess(trustFound,_) => trustFound
-              case JsError(errors) =>
-                  Logger.error(s"[GetTrustResponse] Cannot parse as TrustFoundResponse due to $errors")
-                  NotEnoughDataResponse(response.json, JsError.toJson(errors))
-            }
+            parseOkResponse(response)
           case BAD_REQUEST =>
-            response.json.asOpt[DesErrorResponse] match {
-              case Some(desErrorResponse) =>
-                desErrorResponse.code match {
-                  case "INVALID_UTR" =>
-                    InvalidUTRResponse
-                  case "INVALID_REGIME" =>
-                    InvalidRegimeResponse
-                  case _ =>
-                    BadRequestResponse
-                }
-              case None =>
-                InternalServerErrorResponse
-            }
+            parseBadRequestResponse(response)
           case NOT_FOUND =>
             ResourceNotFoundResponse
           case SERVICE_UNAVAILABLE =>
@@ -121,4 +104,29 @@ object GetTrustResponse {
         }
       }
     }
+
+  private def parseOkResponse(response: HttpResponse) : GetTrustResponse = {
+    response.json.validate[GetTrustSuccessResponse] match {
+      case JsSuccess(trustFound, _) => trustFound
+      case JsError(errors) =>
+        Logger.error(s"[GetTrustResponse] Cannot parse as TrustFoundResponse due to $errors")
+        NotEnoughDataResponse(response.json, JsError.toJson(errors))
+    }
+  }
+
+  private def parseBadRequestResponse(response: HttpResponse) : TrustErrorResponse = {
+    response.json.asOpt[DesErrorResponse] match {
+      case Some(desErrorResponse) =>
+        desErrorResponse.code match {
+          case "INVALID_UTR" =>
+            InvalidUTRResponse
+          case "INVALID_REGIME" =>
+            InvalidRegimeResponse
+          case _ =>
+            BadRequestResponse
+        }
+      case None =>
+        InternalServerErrorResponse
+    }
+  }
 }
