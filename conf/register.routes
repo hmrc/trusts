@@ -15,3 +15,8 @@ DELETE      /submission-drafts/:draftId                     uk.gov.hmrc.trusts.c
 # Used by register-trust-beneficiary-frontend
 GET         /submission-drafts/:draftId/beneficiaries       uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "beneficiaries")
 POST        /submission-drafts/:draftId/set/beneficiaries   uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "beneficiaries")
+
+# Used by register-trust-trustee-frontend
+GET         /submission-drafts/:draftId/trustees       uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "trustees")
+POST        /submission-drafts/:draftId/set/trustees   uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "trustees")
+
