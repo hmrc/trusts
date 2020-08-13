@@ -20,3 +20,6 @@ POST        /submission-drafts/:draftId/set/beneficiaries   uk.gov.hmrc.trusts.c
 GET         /submission-drafts/:draftId/trustees       uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "trustees")
 POST        /submission-drafts/:draftId/set/trustees   uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "trustees")
 
+# Used by register-trust-protector-frontend
+GET         /submission-drafts/:draftId/protectors          uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "protectors")
+POST        /submission-drafts/:draftId/set/protectors      uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "protectors")
