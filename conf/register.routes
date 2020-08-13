@@ -23,3 +23,7 @@ POST        /submission-drafts/:draftId/set/trustees   uk.gov.hmrc.trusts.contro
 # Used by register-trust-protector-frontend
 GET         /submission-drafts/:draftId/protectors          uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "protectors")
 POST        /submission-drafts/:draftId/set/protectors      uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "protectors")
+
+# Used by register-trust-tax-liability-frontend
+GET         /submission-drafts/:draftId/tax-liability          uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "tax-liability")
+POST        /submission-drafts/:draftId/set/tax-liability      uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "tax-liability")
