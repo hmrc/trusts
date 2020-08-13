@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.trusts.controllers
 
+import java.time.LocalDate
+
 import javax.inject.Inject
 import play.api.Logger
 import play.api.libs.json._
@@ -219,5 +221,25 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
         "data" -> data
       )
     }
+  }
+
+
+  def getWhenTrustSetup(draftId: String) : Action[AnyContent] = identify.async {
+    implicit request =>
+      submissionRepository.getDraft(draftId, request.identifier).map {
+        case Some(draft) =>
+          val path = JsPath \ "main" \ "data" \ "trustDetails" \ "whenTrustSetup"
+          draft.draftData.transform(path.json.pick).map(_.as[LocalDate]) match {
+            case JsSuccess(date, _) =>
+              Logger.info(s"[SubmissionDraftController] found trust start date")
+              Ok(Json.obj("startDate" -> date))
+            case _ : JsError =>
+              Logger.info(s"[SubmissionDraftController] no trust start date")
+              NotFound
+          }
+        case None =>
+          Logger.info(s"[SubmissionDraftController] no draft, cannot return start date")
+          NotFound
+      }
   }
 }
