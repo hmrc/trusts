@@ -25,6 +25,9 @@ object RegistrationSubmission {
   case class MappedPiece(elementPath: String, data: JsValue)
 
   object MappedPiece {
+
+    val path = JsPath \ "registration"
+
     implicit lazy val format: OFormat[MappedPiece] = Json.format[MappedPiece]
   }
 
@@ -40,6 +43,9 @@ object RegistrationSubmission {
                                                  sectionKey: Option[String])
 
   object AnswerSection {
+
+    val path = JsPath \ "answerSections"
+
     implicit lazy val format: OFormat[AnswerSection] = Json.format[AnswerSection]
   }
 
