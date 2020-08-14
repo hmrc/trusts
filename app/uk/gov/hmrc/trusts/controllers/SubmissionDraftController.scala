@@ -242,4 +242,23 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           NotFound
       }
   }
+
+  def getLeadTrustee(draftId: String) : Action[AnyContent] = identify.async {
+    implicit request =>
+      submissionRepository.getDraft(draftId, request.identifier).map {
+        case Some(draft) =>
+          val path = JsPath \ "registration" \ "trust/entities/leadTrustees"
+          draft.draftData.transform(path.json.pick).map(_.as[LeadTrusteeType]) match {
+            case JsSuccess(leadTrusteeType, _) =>
+              Logger.info(s"[SubmissionDraftController] found lead trustee")
+              Ok(Json.toJson(leadTrusteeType)(LeadTrusteeType.writes))
+            case _ : JsError =>
+              Logger.info(s"[SubmissionDraftController] no lead trustee")
+              NotFound
+          }
+        case None =>
+          Logger.info(s"[SubmissionDraftController] no draft, cannot return lead trustee")
+          NotFound
+      }
+  }
 }
