@@ -864,7 +864,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getWhenTrustSetup("DRAFTID").apply(request)
+      val result = controller.getLeadTrustee("DRAFTID").apply(request)
 
       status(result) mustBe NOT_FOUND
     }
