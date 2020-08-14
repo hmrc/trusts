@@ -235,6 +235,9 @@ case class LeadTrusteeType(
 object LeadTrusteeType {
   implicit val leadTrusteeTypeReads:Reads[LeadTrusteeType] = Json.reads[LeadTrusteeType]
 
+  // For when you need normal writes.
+  val writes:Writes[LeadTrusteeType] = Json.writes[LeadTrusteeType]
+
   implicit val leadTrusteeWritesToDes : Writes[LeadTrusteeType] = Writes {
     leadTrustee=> leadTrustee.leadTrusteeInd match {
       case Some(indLeadTrutee) => Json.toJson(indLeadTrutee)
