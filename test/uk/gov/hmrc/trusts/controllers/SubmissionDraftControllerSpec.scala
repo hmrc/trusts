@@ -85,13 +85,24 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
       |            "progress" : "InProgress",
       |            "createdAt" : "2020-08-13T13:37:53.787Z",
       |            "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54"
+      |        },
+      |        "registration": {
+      |          "trust/entities/leadTrustees": {
+      |            "leadTrusteeOrg": {
+      |              "name": "Lead Org",
+      |              "phoneNumber": "07911234567",
+      |              "identification": {
+      |                "utr": "1234567890"
+      |              }
+      |            }
+      |          }
       |        }
       |    },
       |    "inProgress" : true
       |}
       |""".stripMargin).as[RegistrationSubmissionDraft]
 
-  private lazy val mockSubmissionDraftNoStartDate = Json.parse(
+  private lazy val mockSubmissionDraftNoData = Json.parse(
     """
       |{
       |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
@@ -662,7 +673,92 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(mockSubmissionDraftNoStartDate)))
+        .thenReturn(Future.successful(Some(mockSubmissionDraftNoData)))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getWhenTrustSetup("DRAFTID").apply(request)
+
+      status(result) mustBe NOT_FOUND
+    }
+
+  }
+  ".getLeadTrustee" should {
+
+    "respond with OK with the lead trustee" in {
+      val identifierAction = new FakeIdentifierAction(Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        auditService,
+        LocalDateTimeServiceStub
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(mockSubmissionDraft)))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getLeadTrustee("DRAFTID").apply(request)
+
+      status(result) mustBe OK
+
+      val expectedDraftJson = Json.parse(
+        """
+          |{
+          |  "leadTrusteeOrg": {
+          |    "name": "Lead Org",
+          |    "phoneNumber": "07911234567",
+          |    "identification": {
+          |      "utr": "1234567890"
+          |    }
+          |  }
+          |}
+          |""".stripMargin)
+
+      contentType(result) mustBe Some(JSON)
+      contentAsJson(result) mustBe expectedDraftJson
+    }
+
+    "respond with NotFound when no draft" in {
+      val identifierAction = new FakeIdentifierAction(Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        auditService,
+        LocalDateTimeServiceStub
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getWhenTrustSetup("DRAFTID").apply(request)
+
+      status(result) mustBe NOT_FOUND
+    }
+
+    "respond with NotFound when no start date in draft" in {
+      val identifierAction = new FakeIdentifierAction(Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        auditService,
+        LocalDateTimeServiceStub
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(mockSubmissionDraftNoData)))
 
       val request = FakeRequest("GET", "path")
 
