@@ -23,7 +23,7 @@ import org.mockito.Mockito._
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import play.api.libs.json.{JsString, Json}
+import play.api.libs.json.{JsNull, JsString, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
@@ -367,6 +367,126 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
           |   },
           |   "correspondence/name": "My trust"
           | },
+          | "answerSections": {
+          |   "sectionKey": [
+          |     {
+          |       "headingKey": "section1.heading",
+          |       "rows": [
+          |         {
+          |           "label": "label1",
+          |           "answer": "answer1",
+          |           "labelArg": "labelArg1"
+          |         }
+          |       ],
+          |       "sectionKey": "section1.key"
+          |     },
+          |     {
+          |       "headingKey": "section2.heading",
+          |       "rows": [
+          |         {
+          |           "label": "label2",
+          |           "answer": "answer2",
+          |           "labelArg": "labelArg2"
+          |         }
+          |       ],
+          |       "sectionKey": "section2.key"
+          |     }
+          |   ]
+          | }
+          |}
+          |""".stripMargin)
+
+      val expectedDraft = RegistrationSubmissionDraft(
+        "DRAFTID",
+        "id",
+        existingDraft.createdAt,
+        draftData,
+        existingDraft.reference,
+        existingDraft.inProgress)
+
+      val result = controller.setSectionSet("DRAFTID", "sectionKey").apply(request)
+      status(result) mustBe OK
+
+      verify(submissionRepository).getDraft("DRAFTID", "id")
+      verify(submissionRepository).setDraft(expectedDraft)
+    }
+
+    "prune mapped piece when given a path with JsNull" in {
+      val identifierAction = new FakeIdentifierAction(Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        auditService,
+        LocalDateTimeServiceStub
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(existingDraft)))
+
+      when(submissionRepository.setDraft(any()))
+        .thenReturn(Future.successful(true))
+
+      val data = Json.parse(
+        """
+          |{
+          | "field1": "value1",
+          | "field2": "value2",
+          | "field3": 3
+          |}
+          |""".stripMargin)
+
+      val mappedPieces = List(
+        RegistrationSubmission.MappedPiece("trust/assets", JsNull),
+        RegistrationSubmission.MappedPiece("correspondence/name", JsNull)
+      )
+
+      val answerSections = List(
+        RegistrationSubmission.AnswerSection(
+          Some("section1.heading"),
+          List(
+            RegistrationSubmission.AnswerRow("label1", "answer1", "labelArg1")
+          ),
+          Some("section1.key")
+        ),
+        RegistrationSubmission.AnswerSection(
+          Some("section2.heading"),
+          List(
+            RegistrationSubmission.AnswerRow("label2", "answer2", "labelArg2")
+          ),
+          Some("section2.key")
+        )
+      )
+
+      val set = RegistrationSubmission.DataSet(
+        data,
+        Some(Status.Completed),
+        mappedPieces,
+        answerSections
+      )
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(set))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val draftData = Json.parse(
+        """
+          |{
+          | "anotherKey": {
+          |   "foo": "bar",
+          |   "fizzbinn": true
+          | },
+          | "sectionKey": {
+          |   "field1": "value1",
+          |   "field2": "value2",
+          |   "field3": 3
+          | },
+          | "status": {
+          |   "sectionKey": "completed"
+          | },
+          | "registration": {},
           | "answerSections": {
           |   "sectionKey": [
           |     {

@@ -16,9 +16,13 @@
 
 package uk.gov.hmrc.trusts.models
 
+import play.api.libs.json.JsPath
+
 sealed trait Status
 
 object Status extends Enumerable.Implicits {
+
+  val path = JsPath \ "status"
 
   case object Completed extends WithName("completed") with Status
 

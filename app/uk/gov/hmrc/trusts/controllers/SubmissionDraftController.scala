@@ -23,6 +23,7 @@ import play.api.Logger
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
+import uk.gov.hmrc.trusts.models.RegistrationSubmission.{AnswerSection, MappedPiece}
 import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.{Status => ModelStatus}
@@ -93,16 +94,21 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
   }
 
   private def setRegistrationSection(path: String, registrationSectionData: JsValue) : Reads[JsObject] = {
-    val sectionPath = JsPath \ "registration" \ path
+    val sectionPath = MappedPiece.path \ path
     prunePath(sectionPath) andThen JsPath.json.update(sectionPath.json.put(registrationSectionData))
   }
 
   private def setRegistrationSections(pieces: List[RegistrationSubmission.MappedPiece]) : List[Reads[JsObject]] = {
-    pieces.map(piece => setRegistrationSection(piece.elementPath, piece.data))
+    pieces.map {
+      case RegistrationSubmission.MappedPiece(path, JsNull) =>
+        prunePath(MappedPiece.path \ path)
+      case piece =>
+        setRegistrationSection(piece.elementPath, piece.data)
+    }
   }
 
   private def setStatus(key: String, statusOpt: Option[ModelStatus]): Reads[JsObject] = {
-    val sectionPath = JsPath \ "status" \ key
+    val sectionPath = ModelStatus.path \ key
 
     statusOpt match {
       case Some(status) =>
@@ -112,7 +118,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
   }
 
   private def setAnswerSections(key: String, answerSections: List[RegistrationSubmission.AnswerSection]): Reads[JsObject] = {
-    val sectionPath = JsPath \ "answerSections" \ key
+    val sectionPath = AnswerSection.path \ key
 
       prunePath(sectionPath) andThen JsPath.json.update(sectionPath.json.put(Json.toJson(answerSections)))
   }
