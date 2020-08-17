@@ -28,8 +28,10 @@ POST        /submission-drafts/:draftId/set/protectors      uk.gov.hmrc.trusts.c
 GET         /submission-drafts/:draftId/taxLiability          uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "taxLiability")
 POST        /submission-drafts/:draftId/set/taxLiability      uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "taxLiability")
 
-GET         /submission-drafts/:draftId/when-trust-setup    uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getWhenTrustSetup(draftId: String)
+GET         /submission-drafts/:draftId/when-trust-setup       uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getWhenTrustSetup(draftId: String)
 
-GET         /submission-drafts/:draftId/lead-trustee        uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getLeadTrustee(draftId: String)
+GET         /submission-drafts/:draftId/lead-trustee           uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getLeadTrustee(draftId: String)
 
 POST        /submission-drafts/:draftId/reset-status/taxLiability   uk.gov.hmrc.trusts.controllers.SubmissionDraftController.resetStatus(draftId: String, section: String = "taxLiability")
+
+GET         /submission-drafts/:draftId/correspondence-address uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getCorrespondenceAddress(draftId: String)
