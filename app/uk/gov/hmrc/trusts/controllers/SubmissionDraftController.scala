@@ -267,4 +267,25 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           NotFound
       }
   }
+
+  def resetStatus(draftId: String, section: String) : Action[AnyContent] = identify.async {
+    implicit request =>
+      submissionRepository.getDraft(draftId, request.identifier).flatMap {
+        case Some(draft) =>
+          val path = ModelStatus.path \ section
+
+          draft.draftData.transform(prunePath(path)) match {
+            case JsSuccess(data, _) =>
+              val draftWithStatusRemoved = draft.copy(draftData = data)
+              Logger.info(s"[SubmissionDraftController][resetStatus] reset status for $section")
+              submissionRepository.setDraft(draftWithStatusRemoved).map(x => if (x) Ok else InternalServerError)
+            case _ : JsError =>
+              Logger.info(s"[SubmissionDraftController][resetStatus] failed to reset status for $section")
+              Future.successful(InternalServerError)
+          }
+        case None =>
+          Logger.info(s"[SubmissionDraftController][resetStatus] no draft, cannot reset status for $section")
+          Future.successful(InternalServerError)
+      }
+  }
 }
