@@ -25,8 +25,8 @@ GET         /submission-drafts/:draftId/protectors          uk.gov.hmrc.trusts.c
 POST        /submission-drafts/:draftId/set/protectors      uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "protectors")
 
 # Used by register-trust-tax-liability-frontend
-GET         /submission-drafts/:draftId/tax-liability          uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "tax-liability")
-POST        /submission-drafts/:draftId/set/tax-liability      uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "tax-liability")
+GET         /submission-drafts/:draftId/taxLiability          uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "taxLiability")
+POST        /submission-drafts/:draftId/set/taxLiability      uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "taxLiability")
 
 GET         /submission-drafts/:draftId/when-trust-setup    uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getWhenTrustSetup(draftId: String)
 
