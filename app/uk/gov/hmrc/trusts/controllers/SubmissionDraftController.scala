@@ -267,4 +267,22 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           NotFound
       }
   }
+  def getCorrespondenceAddress(draftId: String) : Action[AnyContent] = identify.async {
+    implicit request =>
+      submissionRepository.getDraft(draftId, request.identifier).map {
+        case Some(draft) =>
+          val path = JsPath \ "registration" \ "correspondence/address"
+          draft.draftData.transform(path.json.pick).map(_.as[AddressType]) match {
+            case JsSuccess(leadTrusteeType, _) =>
+              Logger.info(s"[SubmissionDraftController] found correspondence address")
+              Ok(Json.toJson(leadTrusteeType))
+            case _ : JsError =>
+              Logger.info(s"[SubmissionDraftController] no correspondence address")
+              NotFound
+          }
+        case None =>
+          Logger.info(s"[SubmissionDraftController] no draft, cannot return correspondence address")
+          NotFound
+      }
+  }
 }
