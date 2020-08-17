@@ -95,6 +95,12 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
       |                "utr": "1234567890"
       |              }
       |            }
+      |          },
+      |          "correspondence/address": {
+      |            "line1": "Address line1",
+      |            "line2": "Address line2",
+      |            "postCode": "NE1 1EN",
+      |            "country": "GB"
       |          }
       |        }
       |    },
@@ -102,7 +108,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
       |}
       |""".stripMargin).as[RegistrationSubmissionDraft]
 
-  private lazy val mockSubmissionDraftNoStartDate = Json.parse(
+  private lazy val mockSubmissionDraftNoData = Json.parse(
     """
       |{
       |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
@@ -796,7 +802,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(mockSubmissionDraftNoStartDate)))
+        .thenReturn(Future.successful(Some(mockSubmissionDraftNoData)))
 
       val request = FakeRequest("GET", "path")
 
@@ -868,5 +874,87 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
 
       status(result) mustBe NOT_FOUND
     }
+  }
+  ".getCorrespondenceAddress" should {
+
+    "respond with OK with the correspondence address" in {
+      val identifierAction = new FakeIdentifierAction(Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        auditService,
+        LocalDateTimeServiceStub
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(mockSubmissionDraft)))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getCorrespondenceAddress("DRAFTID").apply(request)
+
+      status(result) mustBe OK
+
+      val expectedDraftJson = Json.parse(
+        """
+          |{
+          | "line1": "Address line1",
+          | "line2": "Address line2",
+          | "postCode": "NE1 1EN",
+          | "country": "GB"
+          |}
+          |""".stripMargin)
+
+      contentType(result) mustBe Some(JSON)
+      contentAsJson(result) mustBe expectedDraftJson
+    }
+
+    "respond with NotFound when no draft" in {
+      val identifierAction = new FakeIdentifierAction(Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        auditService,
+        LocalDateTimeServiceStub
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getCorrespondenceAddress("DRAFTID").apply(request)
+
+      status(result) mustBe NOT_FOUND
+    }
+
+    "respond with NotFound when no start date in draft" in {
+      val identifierAction = new FakeIdentifierAction(Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        auditService,
+        LocalDateTimeServiceStub
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(mockSubmissionDraftNoData)))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getCorrespondenceAddress("DRAFTID").apply(request)
+
+      status(result) mustBe NOT_FOUND
+    }
+
   }
 }
