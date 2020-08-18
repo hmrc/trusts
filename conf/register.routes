@@ -32,4 +32,6 @@ GET         /submission-drafts/:draftId/when-trust-setup       uk.gov.hmrc.trust
 
 GET         /submission-drafts/:draftId/lead-trustee           uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getLeadTrustee(draftId: String)
 
+POST        /submission-drafts/:draftId/reset-status/taxLiability   uk.gov.hmrc.trusts.controllers.SubmissionDraftController.resetStatus(draftId: String, section: String = "taxLiability")
+
 GET         /submission-drafts/:draftId/correspondence-address uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getCorrespondenceAddress(draftId: String)

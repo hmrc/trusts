@@ -65,6 +65,9 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
       |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
       |    "createdAt" : { "$date" : 1597323808000 },
       |    "draftData" : {
+      |        "status" : {
+      |           "taxLiability" : "completed"
+      |        },
       |        "main" : {
       |            "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
       |            "data" : {
@@ -875,6 +878,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
       status(result) mustBe NOT_FOUND
     }
   }
+
   ".getCorrespondenceAddress" should {
 
     "respond with OK with the correspondence address" in {
@@ -956,5 +960,108 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
       status(result) mustBe NOT_FOUND
     }
 
+  }
+
+  ".resetStatus" should {
+
+    "respond with OK when able to prune the status of a task" in {
+      val identifierAction = new FakeIdentifierAction(Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        auditService,
+        LocalDateTimeServiceStub
+      )
+
+      lazy val expectedSubmissionDraftWithResetStatus = Json.parse(
+        """
+          |{
+          |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+          |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
+          |    "createdAt" : { "$date" : 1597323808000 },
+          |    "draftData" : {
+          |        "status" : {},
+          |        "main" : {
+          |            "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+          |            "data" : {
+          |                "trustDetails" : {
+          |                    "administrationInsideUK" : true,
+          |                    "trusteesBasedInTheUK" : "UKBasedTrustees",
+          |                    "trustName" : "Adam",
+          |                    "whenTrustSetup" : "2010-08-21",
+          |                    "establishedUnderScotsLaw" : true,
+          |                    "governedInsideTheUK" : false,
+          |                    "countryGoverningTrust" : "FR",
+          |                    "residentOffshore" : false,
+          |                    "status" : "completed"
+          |                },
+          |                "trustRegisteredOnline" : false,
+          |                "trustHaveAUTR" : false
+          |            },
+          |            "progress" : "InProgress",
+          |            "createdAt" : "2020-08-13T13:37:53.787Z",
+          |            "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54"
+          |        },
+          |        "registration": {
+          |          "trust/entities/leadTrustees": {
+          |            "leadTrusteeOrg": {
+          |              "name": "Lead Org",
+          |              "phoneNumber": "07911234567",
+          |              "identification": {
+          |                "utr": "1234567890"
+          |              }
+          |            }
+          |          },
+          |          "correspondence/address": {
+          |            "line1": "Address line1",
+          |            "line2": "Address line2",
+          |            "postCode": "NE1 1EN",
+          |            "country": "GB"
+          |          }
+          |        }
+          |    },
+          |    "inProgress" : true
+          |}
+          |""".stripMargin).as[RegistrationSubmissionDraft]
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(mockSubmissionDraft)))
+
+      when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.resetStatus("DRAFTID", "taxLiability").apply(request)
+
+      status(result) mustBe OK
+
+      verify(submissionRepository).getDraft("DRAFTID", "id")
+      verify(submissionRepository).setDraft(expectedSubmissionDraftWithResetStatus)
+    }
+
+    "respond with InternalServerError when no draft" in {
+      val identifierAction = new FakeIdentifierAction(Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        auditService,
+        LocalDateTimeServiceStub
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.resetStatus("DRAFTID", "taxLiability").apply(request)
+
+      status(result) mustBe INTERNAL_SERVER_ERROR
+    }
   }
 }
