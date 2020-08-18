@@ -71,7 +71,7 @@ object Correspondence {
 
 }
 
-case class YearsReturns(var returns: Option[List[YearReturnType]])
+case class YearsReturns(returns: List[YearReturnType])
 
 object YearsReturns {
   implicit val yearsReturnsFormat: Format[YearsReturns] = Json.format[YearsReturns]
