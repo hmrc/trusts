@@ -268,23 +268,31 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
       }
   }
 
-  def resetStatus(draftId: String, section: String) : Action[AnyContent] = identify.async {
+  def reset(draftId: String, section: String, mappedDataKey : String) : Action[AnyContent] = identify.async {
     implicit request =>
       submissionRepository.getDraft(draftId, request.identifier).flatMap {
         case Some(draft) =>
-          val path = ModelStatus.path \ section
+          val statusPath = ModelStatus.path \ section
+          val userAnswersPath = __ \ section
+          val rowsPath = AnswerSection.path \ section
+          val mappedDataPath = MappedPiece.path \ mappedDataKey
 
-          draft.draftData.transform(prunePath(path)) match {
+          draft.draftData.transform {
+            prunePath(statusPath) andThen
+              prunePath(userAnswersPath) andThen
+              prunePath(rowsPath) andThen
+              prunePath(mappedDataPath)
+          } match {
             case JsSuccess(data, _) =>
               val draftWithStatusRemoved = draft.copy(draftData = data)
-              Logger.info(s"[SubmissionDraftController][resetStatus] reset status for $section")
+              Logger.info(s"[SubmissionDraftController][reset] removed status, mapped data, answers and status for $section")
               submissionRepository.setDraft(draftWithStatusRemoved).map(x => if (x) Ok else InternalServerError)
             case _ : JsError =>
-              Logger.info(s"[SubmissionDraftController][resetStatus] failed to reset status for $section")
+              Logger.info(s"[SubmissionDraftController][reset] failed to reset for $section")
               Future.successful(InternalServerError)
           }
         case None =>
-          Logger.info(s"[SubmissionDraftController][resetStatus] no draft, cannot reset status for $section")
+          Logger.info(s"[SubmissionDraftController][reset] no draft, cannot reset status for $section")
           Future.successful(InternalServerError)
       }
   }

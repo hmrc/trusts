@@ -68,6 +68,13 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
       |        "status" : {
       |           "taxLiability" : "completed"
       |        },
+      |        "taxLiability" : {
+      |            "data" : {
+      |                "cyMinusFourYesNo" : true,
+      |                "trustStartDate" : "2010-10-10",
+      |                "didDeclareTaxToHMRCForYear4" : false
+      |            }
+      |        },
       |        "main" : {
       |            "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
       |            "data" : {
@@ -89,7 +96,38 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
       |            "createdAt" : "2020-08-13T13:37:53.787Z",
       |            "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54"
       |        },
+      |        "answerSections" : {
+      |            "taxLiability" : [
+      |                {
+      |                    "headingKey" : "Tax liability 6 April 2016 to 5 April 2017",
+      |                    "rows" : [
+      |                        {
+      |                            "label" : "Did the trust need to pay any tax from 6 April 2016 to 5 April 2017?",
+      |                            "answer" : "Yes",
+      |                            "labelArg" : ""
+      |                        },
+      |                        {
+      |                            "label" : "Was the tax from 6 April 2016 to 5 April 2017 declared?",
+      |                            "answer" : "No",
+      |                            "labelArg" : ""
+      |                        }
+      |                    ]
+      |                }
+      |            ]
+      |        },
       |        "registration": {
+      |          "yearsReturns" : {
+      |             "returns": [
+      |                {
+      |                    "taxReturnYear" : "17",
+      |                    "taxConsequence" : true
+      |                },
+      |                {
+      |                    "taxReturnYear" : "18",
+      |                    "taxConsequence" : true
+      |                }
+      |             ]
+      |          },
       |          "trust/entities/leadTrustees": {
       |            "leadTrusteeOrg": {
       |              "name": "Lead Org",
@@ -962,9 +1000,9 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
 
   }
 
-  ".resetStatus" should {
+  ".reset" should {
 
-    "respond with OK when able to prune the status of a task" in {
+    "respond with OK after cleaning up draft answers, status, mapped registration data and print answer sections" in {
       val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
       val auditService = mock[AuditService]
@@ -976,7 +1014,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
         LocalDateTimeServiceStub
       )
 
-      lazy val expectedSubmissionDraftWithResetStatus = Json.parse(
+      lazy val expectedAfterCleanup = Json.parse(
         """
           |{
           |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
@@ -1005,6 +1043,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
           |            "createdAt" : "2020-08-13T13:37:53.787Z",
           |            "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54"
           |        },
+          |        "answerSections": {},
           |        "registration": {
           |          "trust/entities/leadTrustees": {
           |            "leadTrusteeOrg": {
@@ -1034,12 +1073,12 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.resetStatus("DRAFTID", "taxLiability").apply(request)
+      val result = controller.reset("DRAFTID", "taxLiability", "yearsReturns").apply(request)
 
       status(result) mustBe OK
 
       verify(submissionRepository).getDraft("DRAFTID", "id")
-      verify(submissionRepository).setDraft(expectedSubmissionDraftWithResetStatus)
+      verify(submissionRepository).setDraft(expectedAfterCleanup)
     }
 
     "respond with InternalServerError when no draft" in {
@@ -1059,7 +1098,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with Must
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.resetStatus("DRAFTID", "taxLiability").apply(request)
+      val result = controller.reset("DRAFTID", "taxLiability", "yearsReturns").apply(request)
 
       status(result) mustBe INTERNAL_SERVER_ERROR
     }
