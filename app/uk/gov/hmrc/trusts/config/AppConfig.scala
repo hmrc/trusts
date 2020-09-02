@@ -39,6 +39,8 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, playEnv: Envi
 
   val varyTrustOrEstateUrl : String = baseUrl("des-vary-trust-or-estate")
 
+  val trustsStoreUrl : String = baseUrl("trusts-store")
+
   val desEnvironment : String = loadConfig("microservice.services.des-trusts.environment")
   val desToken : String = loadConfig("microservice.services.des-trusts.token")
 
