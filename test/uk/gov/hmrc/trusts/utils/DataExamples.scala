@@ -45,7 +45,10 @@ trait DataExamples extends  JsonRequests {
       dateOfBirth = LocalDate.parse("1900-01-01"),
       identification = nino,
       phoneNumber = "1234567890",
-      email = Some("test@test.com")
+      email = Some("test@test.com"),
+      countryOfResidence = None,
+      nationality = None,
+      legallyIncapable = None
     )))
 
   val leadTrusteeOrganisation = LeadTrusteeType(
@@ -53,22 +56,40 @@ trait DataExamples extends  JsonRequests {
       name = "company name",
       identification = utr,
       phoneNumber = phoneNumber,
-      email = email
+      email = email,
+      countryOfResidence = None
     )))
 
-  def trusteeIndividual(dateOfBirthStr :String= "1500-01-01") = Some(TrusteeIndividualType(name = nameType,
-    dateOfBirth = Some(LocalDate.parse(dateOfBirthStr)),None,identification = Some(nino)))
-
+  def trusteeIndividual(dateOfBirthStr :String= "1500-01-01") = Some(
+    TrusteeIndividualType(
+      name = nameType,
+      dateOfBirth = Some(LocalDate.parse(dateOfBirthStr)),
+      None,
+      identification = Some(nino),
+      None,
+      None,
+      None))
 
   def indBenficiary(identification :IdentificationType = nino,dateOfBirthStr :String= "1500-01-01") =
     IndividualDetailsType(
-      nameType,Some(LocalDate.parse(dateOfBirthStr)),false,None,None,None, Some(identification))
+      nameType,
+      Some(LocalDate.parse(dateOfBirthStr)),
+      Some(false),
+      None,
+      None,
+      None,
+      Some(identification),
+      None,
+      None,
+      None
+    )
 
   def trusteeOrg  = Some(TrusteeOrgType(
     name = "trustee as company",
     identification = Some(utr),
     phoneNumber = None,
-    email = email))
+    email = email,
+    countryOfResidence = None))
 
 
   def registrationWithStartDate(date : LocalDate ): Registration = {

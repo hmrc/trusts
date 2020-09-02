@@ -103,10 +103,11 @@ class ValidationServiceSpec extends BaseSpec
       "valid json having asset value of 12 digits. " in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
         val registration =  validator.validate[Registration](jsonString).right.get
-        registration.trust.assets.monetary.get.map{x=>x.assetMonetaryAmount.toString.length mustBe 12}
-        registration.trust.assets.propertyOrLand.get.map{x=>x.valueFull.toString.length mustBe 12}
-        registration.trust.assets.shares.get.map{x=>x.value.toString.length mustBe 12}
-        registration.trust.assets.other.get.map{x=>x.value.toString.length mustBe 12}
+        //TODO There has to be a better way to test this than length of toString.
+        registration.trust.assets.get.monetary.get.map{x=>x.assetMonetaryAmount.toString.length mustBe 12}
+        registration.trust.assets.get.propertyOrLand.get.map{x=>x.valueFull.toString.length mustBe 12}
+        registration.trust.assets.get.shares.get.map{x=>x.value.toString.length mustBe 18}
+        registration.trust.assets.get.other.get.map{x=>x.value.toString.length mustBe 18}
       }
 
       "individual trustees has no identification" in {
