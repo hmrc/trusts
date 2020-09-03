@@ -24,9 +24,9 @@ import uk.gov.hmrc.trusts.models.FeatureResponse
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class TrustsStoreConnector @Inject()(http: HttpClient, config : AppConfig) {
+class TrustsStoreConnector @Inject()(http: HttpClient, config: AppConfig) {
 
-  def featureUrl(feature: String): String = s"${config.trustsStoreUrl}/trusts-store/features/$feature"
+  private def featureUrl(feature: String): String = s"${config.trustsStoreUrl}/trusts-store/features/$feature"
 
   def getFeature(feature: String)(implicit hc : HeaderCarrier, ec : ExecutionContext): Future[FeatureResponse] = {
     http.GET[FeatureResponse](featureUrl(feature))
