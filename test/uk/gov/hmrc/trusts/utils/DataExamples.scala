@@ -38,6 +38,7 @@ trait DataExamples extends  JsonRequests {
   val utr = IdentificationOrgType(utr = Some("5454541615"),None)
   val phoneNumber = "1234567890"
   val email = Some("test@test.com")
+  val submissionDate = LocalDate.parse("2020-04-24")
 
   val leadTrusteeIndividual = LeadTrusteeType(
     leadTrusteeInd = Some(LeadTrusteeIndType(
@@ -142,6 +143,7 @@ trait DataExamples extends  JsonRequests {
       correspondence = registrationRequest.correspondence,
       yearsReturns = registrationRequest.yearsReturns,
       declaration = registrationRequest.declaration,
+      submissionDate = Some(submissionDate),
       agentDetails = None)
   }
 

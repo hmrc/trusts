@@ -31,6 +31,7 @@ case class Registration(matchData: Option[MatchData],
                         yearsReturns: Option[YearsReturns],
                         declaration: Declaration,
                         trust: Trust,
+                        submissionDate: Option[LocalDate],      // new 5MLD required
                         agentDetails: Option[AgentDetails] = None
                        )
 
