@@ -127,7 +127,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
 
     registration.trust.details.typeOfTrust  match {
 
-      case TypeOfTrust.Employment =>
+      case Some(TypeOfTrust.Employment) =>
         registration.trust.entities.beneficiary.individualDetails.map {
           indBeneficiary => {
 

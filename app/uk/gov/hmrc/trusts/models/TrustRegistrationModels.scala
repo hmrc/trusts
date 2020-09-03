@@ -122,7 +122,7 @@ object DeclarationForApi {
 case class Trust(
                   details: TrustDetailsType,
                   entities: TrustEntitiesType,
-                  assets: Option[Assets])   // Now optional with 5MLD
+                  assets: Option[Assets])   // now optional with 5MLD
 
 object Trust {
   implicit val trustFormat: Format[Trust] = Json.format[Trust]
@@ -393,7 +393,7 @@ case class TrustDetailsType(startDate: LocalDate,
                             lawCountry: Option[String],
                             administrationCountry: Option[String],
                             residentialStatus: Option[ResidentialStatusType],
-                            typeOfTrust: TypeOfTrust,
+                            typeOfTrust: Option[TypeOfTrust],     // now optional with 5MLD
                             deedOfVariation: Option[DeedOfVariation],
                             interVivos: Option[Boolean],
                             efrbsStartDate: Option[LocalDate],
@@ -403,7 +403,7 @@ case class TrustDetailsType(startDate: LocalDate,
                             trustUKProperty: Option[Boolean]      // new 5MLD optional
                            ) {
 
-  def isEmploymentRelatedTrust : Boolean = typeOfTrust == Employment
+  def isEmploymentRelatedTrust : Boolean = typeOfTrust.contains(Employment)
 
 }
 
@@ -436,8 +436,8 @@ object NonUKType {
 
 case class PropertyLandType(buildingLandName: Option[String],
                             address: Option[AddressType],
-                            valueFull: Long,
-                            valuePrevious: Long)
+                            valueFull: Option[Long],        // now optional with 5MLD
+                            valuePrevious: Option[Long])    // now optional with 5MLD
 
 object PropertyLandType {
   implicit val propertyLandTypeFormat: Format[PropertyLandType] = Json.format[PropertyLandType]
@@ -445,15 +445,15 @@ object PropertyLandType {
 
 case class BusinessAssetType(orgName: String,
                              businessDescription: Option[String],
-                             address: Option[AddressType],  // Now optional with 5MLD
-                             businessValue: Option[Long])   // Now optional with 5MLD
+                             address: Option[AddressType],  // now optional with 5MLD
+                             businessValue: Option[Long])   // now optional with 5MLD
 
 object BusinessAssetType {
   implicit val businessAssetTypeFormat: Format[BusinessAssetType] = Json.format[BusinessAssetType]
 }
 
 case class OtherAssetType(description: String,
-                          value: Option[Long])    // Now optional with 5MLD
+                          value: Option[Long])    // now optional with 5MLD
 
 object OtherAssetType {
   implicit val otherAssetTypeFormat: Format[OtherAssetType] = Json.format[OtherAssetType]
@@ -471,7 +471,7 @@ object NonEEABusinessType {
 }
 
 case class PartnershipType(description: String,
-                           partnershipStart: Option[LocalDate])   // Now optional with 5MLD
+                           partnershipStart: Option[LocalDate])   // now optional with 5MLD
 
 object PartnershipType {
   implicit val partnershipTypeFormat: Format[PartnershipType] = Json.format[PartnershipType]

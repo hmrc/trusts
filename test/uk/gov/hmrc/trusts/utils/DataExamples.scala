@@ -101,7 +101,7 @@ trait DataExamples extends  JsonRequests {
 
   def registrationWithEfrbsStartDate(date : LocalDate, typeOfTrust: TypeOfTrust): Registration = {
     val trustDetailsType = registrationRequest.trust.details.copy(efrbsStartDate = Some(date),
-      typeOfTrust = typeOfTrust)
+      typeOfTrust = Some(typeOfTrust))
     registration(Some(trustDetailsType))
   }
 

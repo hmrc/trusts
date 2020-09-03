@@ -234,7 +234,7 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
             ))
           )
         )
-        val trustDetails: TrustDetailsType = defaultTrustDetails.copy(typeOfTrust = TypeOfTrust.Employment)
+        val trustDetails: TrustDetailsType = defaultTrustDetails.copy(typeOfTrust = Some(TypeOfTrust.Employment))
 
         val request = registration(Some(trustDetails), Some(trustEntities))
 
@@ -244,7 +244,7 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
       "typeOfTrust is not employees" in {
 
         val trustEntities: TrustEntitiesType = defaultTrustEntities.copy(beneficiary = beneficiaryTypeEntity())
-        val trustDetails: TrustDetailsType = defaultTrustDetails.copy(typeOfTrust = TypeOfTrust.DeedOfVariationOrFamilyAgreement)
+        val trustDetails: TrustDetailsType = defaultTrustDetails.copy(typeOfTrust = Some(TypeOfTrust.DeedOfVariationOrFamilyAgreement))
 
         val request = registration(Some(trustDetails), Some(trustEntities))
 
@@ -257,7 +257,7 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
     "return validation error when typeOfTrust is employees and beneficiaryType is not set" in {
 
       val trustEntities: TrustEntitiesType = defaultTrustEntities.copy(beneficiary = beneficiaryTypeEntity())
-      val trustDetails: TrustDetailsType = defaultTrustDetails.copy(typeOfTrust = TypeOfTrust.Employment)
+      val trustDetails: TrustDetailsType = defaultTrustDetails.copy(typeOfTrust = Some(TypeOfTrust.Employment))
 
       val request = registration(Some(trustDetails), Some(trustEntities))
 

@@ -105,7 +105,7 @@ class ValidationServiceSpec extends BaseSpec
         val registration =  validator.validate[Registration](jsonString).right.get
         //TODO There has to be a better way to test this than length of toString.
         registration.trust.assets.get.monetary.get.map{x=>x.assetMonetaryAmount.toString.length mustBe 12}
-        registration.trust.assets.get.propertyOrLand.get.map{x=>x.valueFull.toString.length mustBe 12}
+        registration.trust.assets.get.propertyOrLand.get.map{x=>x.valueFull.toString.length mustBe 18}
         registration.trust.assets.get.shares.get.map{x=>x.value.toString.length mustBe 18}
         registration.trust.assets.get.other.get.map{x=>x.value.toString.length mustBe 18}
       }
