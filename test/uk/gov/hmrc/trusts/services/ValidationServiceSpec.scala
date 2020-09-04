@@ -16,11 +16,13 @@
 
 package uk.gov.hmrc.trusts.services
 
-import org.scalatest.EitherValues
+import org.scalatest.{Assertion, EitherValues}
+import org.scalatest.MustMatchers.convertToAnyMustWrapper
 import uk.gov.hmrc.trusts.BaseSpec
-import uk.gov.hmrc.trusts.models.{EstateRegistration, ExistingCheckRequest, Registration}
+import uk.gov.hmrc.trusts.models.{Assets, EstateRegistration, ExistingCheckRequest, Registration}
 import uk.gov.hmrc.trusts.utils.{DataExamples, EstateDataExamples, JsonUtils}
 
+import scala.language.implicitConversions
 
 class ValidationServiceSpec extends BaseSpec
   with DataExamples with EstateDataExamples with EitherValues {
@@ -101,13 +103,22 @@ class ValidationServiceSpec extends BaseSpec
       }
 
       "valid json having asset value of 12 digits. " in {
+
+        implicit class LongDigitCounter(value: Long) {
+          def mustHave12Digits: Assertion = {
+            assert(value >= 100000000000L && value < 1000000000000L)
+          }
+        }
+
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
         val registration =  validator.validate[Registration](jsonString).right.get
-        //TODO There has to be a better way to test this than length of toString.
-        registration.trust.assets.get.monetary.get.map{x=>x.assetMonetaryAmount.toString.length mustBe 12}
-        registration.trust.assets.get.propertyOrLand.get.map{x=>x.valueFull.toString.length mustBe 18}
-        registration.trust.assets.get.shares.get.map{x=>x.value.toString.length mustBe 18}
-        registration.trust.assets.get.other.get.map{x=>x.value.toString.length mustBe 18}
+        
+        val assets: Assets = registration.trust.assets.get
+
+        assets.monetary.get.head.assetMonetaryAmount.mustHave12Digits
+        assets.propertyOrLand.get.head.valueFull.get.mustHave12Digits
+        assets.shares.get.head.value.get.mustHave12Digits
+        assets.other.get.head.value.get.mustHave12Digits
       }
 
       "individual trustees has no identification" in {
