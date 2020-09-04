@@ -106,7 +106,7 @@ class ValidationServiceSpec extends BaseSpec
 
         implicit class LongDigitCounter(value: Long) {
           def mustHave12Digits: Assertion = {
-            assert(value >= 100000000000L && value < 1000000000000L)
+            assert(value >= 1E11.toLong && value < 1E12.toLong)
           }
         }
 
@@ -115,10 +115,10 @@ class ValidationServiceSpec extends BaseSpec
         
         val assets: Assets = registration.trust.assets.get
 
-        assets.monetary.get.head.assetMonetaryAmount.mustHave12Digits
-        assets.propertyOrLand.get.head.valueFull.get.mustHave12Digits
-        assets.shares.get.head.value.get.mustHave12Digits
-        assets.other.get.head.value.get.mustHave12Digits
+        assets.monetary.get.map(_.assetMonetaryAmount.mustHave12Digits)
+        assets.propertyOrLand.get.map(_.valueFull.get.mustHave12Digits)
+        assets.shares.get.map(_.value.get.mustHave12Digits)
+        assets.other.get.map(_.value.get.mustHave12Digits)
       }
 
       "individual trustees has no identification" in {
