@@ -44,8 +44,8 @@ class AppConfig @Inject()(val runModeConfiguration: Configuration, playEnv: Envi
   val desEnvironment : String = loadConfig("microservice.services.des-trusts.environment")
   val desToken : String = loadConfig("microservice.services.des-trusts.token")
 
-  val trustsApiRegistrationSchema4MLD : String  = "/resources/schemas/trusts-api-schema-5.0.json"
-  val trustsApiRegistrationSchema5MLD : String  = "/resources/schemas/trusts-api-schema-5.0.json" // TODO - change to 5MLD schema
+  val trustsApiRegistrationSchema4MLD : String  = "/resources/schemas/4MLD/trusts-api-registration-schema-5.0.0.json"
+  val trustsApiRegistrationSchema5MLD : String  = "/resources/schemas/5MLD/trusts-api-registration-schema-1.3.0.json"
   val estatesApiRegistrationSchema : String  = "/resources/schemas/estates-api-schema-5.0.json"
   val variationsApiSchema: String = "/resources/schemas/variations-api-schema-4.0.json"
 
