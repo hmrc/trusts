@@ -29,9 +29,10 @@ class AssetsDomainValidation (registration: Registration) extends ValidationUtil
         case Some(properties) =>
           properties.zipWithIndex.map {
             case (property, index) =>
-              val isValid = property.valueFull.isDefined &&
+              val isValid = (property.valueFull.isDefined &&
                 property.valuePrevious.isDefined &&
-                property.valueFull.get >= property.valuePrevious.get
+                property.valueFull.get >= property.valuePrevious.get) ||
+                (property.valueFull.isEmpty && property.valuePrevious.isEmpty)
               if (!isValid) {
                 Some(TrustsValidationError(s"Value full must be equal or more than value previous.",
                   s"/trust/assets/propertyOrLand/${index}/valueFull"))

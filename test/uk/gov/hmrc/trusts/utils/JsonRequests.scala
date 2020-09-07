@@ -23,6 +23,8 @@ import uk.gov.hmrc.trusts.models.variation.{EstateVariation, TrustVariation}
 trait JsonRequests extends JsonUtils {
 
   lazy val validRegistrationRequestJson: String =  getJsonFromFile("valid-trusts-registration-api.json")
+  lazy val validRegistration5MldRequestJson: String =  getJsonFromFile("valid-trusts-registration-api-5mld.json")
+  lazy val validRegistration5MldNontaxableRequestJson: String =  getJsonFromFile("valid-trusts-registration-api-5mld-nontaxable.json")
   lazy val invalidRegistrationRequestJson: String =  getJsonFromFile("invalid-payload-trusts-registration.json")
   lazy val invalidTrustBusinessValidation: String =  getJsonFromFile("trust-business-validation-fail.json")
 

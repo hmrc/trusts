@@ -51,9 +51,9 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
   before {
     reset(rosmPatternService)
+    when(mockTrustsStoreConnector.getFeature(any())(any(), any())).thenReturn(Future.successful(FeatureResponse("5mld", isEnabled = false)))
   }
 
-  when(mockTrustsStoreConnector.getFeature(any())(any(), any())).thenReturn(Future.successful(FeatureResponse("5mld", isEnabled = false)))
 
   ".registration" should {
 
@@ -77,6 +77,58 @@ class RegisterTrustControllerSpec extends BaseSpec {
         )
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
+        status(result) mustBe OK
+        (contentAsJson(result) \ "trn").as[String] mustBe trnResponse
+
+        verify(rosmPatternService, times(1)).enrolAndLogResult(any(), any())(any[HeaderCarrier])
+      }
+
+      "individual user called the register endpoint with a valid 5mld json payload " in {
+
+        when(mockTrustsStoreConnector.getFeature(any())(any(), any())).thenReturn(Future.successful(FeatureResponse("5mld", isEnabled = true)))
+
+        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
+
+        when(rosmPatternService.enrolAndLogResult(any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentSuccess))
+
+        val SUT = new RegisterTrustController(
+          mockDesService,
+          appConfig,
+          validationService,
+          fakeOrganisationAuthAction,
+          rosmPatternService,
+          mockedAuditService,
+          mockTrustsStoreConnector
+        )
+
+        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistration5MldRequestJson)))
+        status(result) mustBe OK
+        (contentAsJson(result) \ "trn").as[String] mustBe trnResponse
+
+        verify(rosmPatternService, times(1)).enrolAndLogResult(any(), any())(any[HeaderCarrier])
+      }
+
+      "individual user called the register endpoint with a valid 5mld nontaxable json payload " in {
+
+        when(mockTrustsStoreConnector.getFeature(any())(any(), any())).thenReturn(Future.successful(FeatureResponse("5mld", isEnabled = true)))
+
+        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
+
+        when(rosmPatternService.enrolAndLogResult(any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentSuccess))
+
+        val SUT = new RegisterTrustController(
+          mockDesService,
+          appConfig,
+          validationService,
+          fakeOrganisationAuthAction,
+          rosmPatternService,
+          mockedAuditService,
+          mockTrustsStoreConnector
+        )
+
+        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistration5MldNontaxableRequestJson)))
         status(result) mustBe OK
         (contentAsJson(result) \ "trn").as[String] mustBe trnResponse
 
