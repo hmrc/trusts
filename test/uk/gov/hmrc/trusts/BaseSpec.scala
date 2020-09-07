@@ -24,7 +24,6 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.PlayBodyParsers
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -57,7 +56,7 @@ class BaseSpec extends WordSpec
       )
   }
 
-  val parsers = injector.instanceOf[PlayBodyParsers]
+  val parsers = stubControllerComponents().parsers.defaultBodyParser
 
   def fakeRequest : FakeRequest[JsValue] = FakeRequest("POST", "")
     .withHeaders(CONTENT_TYPE -> "application/json")
