@@ -215,18 +215,20 @@
         }
       },
       "leadTrustees": {
-        "name": {
-          "firstName": "1234567890 QwErTyUiOp ,.(\/)&'- name",
-          "lastName": "1234567890 QwErTyUiOp ,.(\/)&'- name"
-        },
-        "dateOfBirth": "2015-03-20",
-        "identification": {
-          "nino": "SJ123456B"
-        },
-        "phoneNumber": "+123456789012345678",
-        "countryOfResidence": "DE",
-        "nationality": "DE",
-        "legallyIncapable": false
+        "leadTrusteeInd": {
+          "name": {
+            "firstName": "1234567890 QwErTyUiOp ,.(\/)&'- name",
+            "lastName": "1234567890 QwErTyUiOp ,.(\/)&'- name"
+          },
+          "dateOfBirth": "2015-03-20",
+          "identification": {
+            "nino": "SJ123456B"
+          },
+          "phoneNumber": "+123456789012345678",
+          "countryOfResidence": "DE",
+          "nationality": "DE",
+          "legallyIncapable": false
+        }
       },
       "trustees": [
         {

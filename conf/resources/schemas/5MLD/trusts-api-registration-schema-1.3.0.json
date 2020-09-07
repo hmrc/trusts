@@ -232,10 +232,28 @@
           "type": "object",
           "oneOf": [
             {
-              "$ref": "#/definitions/leadTrusteeOrgType"
+              "type": "object",
+              "properties": {
+                "leadTrusteeInd": {
+                  "$ref": "#/definitions/leadTrusteeIndType"
+                }
+              },
+              "required": [
+                "leadTrusteeInd"
+              ],
+              "additionalProperties": false
             },
             {
-              "$ref": "#/definitions/leadTrusteeIndType"
+              "type": "object",
+              "properties": {
+                "leadTrusteeOrg": {
+                  "$ref": "#/definitions/leadTrusteeOrgType"
+                }
+              },
+              "required": [
+                "leadTrusteeOrg"
+              ],
+              "additionalProperties": false
             }
           ]
         },

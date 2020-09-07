@@ -43,8 +43,9 @@ object Registration {
     (JsPath \ "declaration").write[Declaration] and
     (JsPath \ "yearsReturns").writeNullable[YearsReturns] and
     (JsPath \ "details" \ "trust").write[Trust] and
+    (JsPath \ "submissionDate").writeNullable[LocalDate] and
     (JsPath \ "agentDetails" ).writeNullable[AgentDetails]
-  )(r => (r.matchData, r.correspondence,r.declaration, r.yearsReturns, r.trust,r.agentDetails))
+  )(r => (r.matchData, r.correspondence,r.declaration, r.yearsReturns, r.trust, r.submissionDate, r.agentDetails))
 }
 
 case class Details(trust: Trust)
