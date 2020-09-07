@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.controllers
 import javax.inject.Inject
 import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.Result
+import play.api.mvc.{ControllerComponents, Result}
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.DeclarationForApi
@@ -39,8 +39,9 @@ class TrustVariationsController @Inject()(
                                            validator: ValidationService,
                                            config : AppConfig,
                                            variationService: VariationService,
-                                           responseHandler: VariationsResponseHandler
-                                    ) extends TrustsBaseController with ValidationUtil {
+                                           responseHandler: VariationsResponseHandler,
+                                           cc: ControllerComponents
+                                    ) extends TrustsBaseController(cc) with ValidationUtil {
 
   @deprecated("api is no longer used, use declare instead", "13 May 2020")
   def trustVariation() = identify.async(parse.json) {

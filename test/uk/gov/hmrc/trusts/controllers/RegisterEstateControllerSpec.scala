@@ -21,6 +21,8 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito.{when, _}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.Json
+import play.api.mvc.BodyParsers
+import play.api.test.Helpers
 import play.api.test.Helpers.{status, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -38,8 +40,10 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
   private val mockDesService = mock[DesService]
   private val rosmPatternService = mock[RosmPatternService]
 
-  val fakeOrganisationAuthAction = new FakeIdentifierAction(Organisation)
-  val fakeAgentAuthAction = new FakeIdentifierAction(Agent)
+  lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+
+  val fakeOrganisationAuthAction = new FakeIdentifierAction(bodyParsers, Organisation)
+  val fakeAgentAuthAction = new FakeIdentifierAction(bodyParsers, Agent)
 
   lazy val validationService: ValidationService = new ValidationService()
 
@@ -59,7 +63,7 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
         mockRosmResponse(TaxEnrolmentSuccess)
         mockDesServiceResponse
 
-        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService)
+        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService, Helpers.stubControllerComponents())
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(estateRegistration01)))
         status(result) mustBe OK
@@ -73,7 +77,7 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
           mockRosmResponse(TaxEnrolmentFailure)
           mockDesServiceResponse
 
-          val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService)
+          val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService, Helpers.stubControllerComponents())
 
           val result = SUT.registration().apply(postRequestWithPayload(Json.parse(estateRegistration01)))
           status(result) mustBe OK
@@ -86,7 +90,7 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
         mockRosmResponse(TaxEnrolmentSuccess)
         mockDesServiceResponse
 
-        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, fakeAgentAuthAction,rosmPatternService, mockedAuditService)
+        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, fakeAgentAuthAction,rosmPatternService, mockedAuditService, Helpers.stubControllerComponents())
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(estateRegistration03)))
         status(result) mustBe OK
@@ -102,7 +106,7 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
         when(mockDesService.registerEstate(any[EstateRegistration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(AlreadyRegisteredException))
 
-        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction,rosmPatternService, mockedAuditService)
+        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction,rosmPatternService, mockedAuditService, Helpers.stubControllerComponents())
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(estateRegistration01)))
         status(result) mustBe CONFLICT
@@ -119,7 +123,7 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
         when(mockDesService.registerEstate(any[EstateRegistration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(NoMatchException))
 
-        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction,rosmPatternService, mockedAuditService)
+        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction,rosmPatternService, mockedAuditService, Helpers.stubControllerComponents())
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(estateRegistration01)))
         status(result) mustBe FORBIDDEN
@@ -134,7 +138,7 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
     "return a BAD REQUEST" when {
       "input request fails schema validation" in {
 
-        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction,rosmPatternService, mockedAuditService)
+        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction,rosmPatternService, mockedAuditService, Helpers.stubControllerComponents())
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(invalidRegistrationRequestJson)))
         status(result) mustBe BAD_REQUEST
@@ -148,7 +152,7 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
 
         mockDesServiceResponse
 
-        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction,rosmPatternService, mockedAuditService)
+        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction,rosmPatternService, mockedAuditService, Helpers.stubControllerComponents())
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(estateRegistration03), withDraftId = false))
 
@@ -169,7 +173,7 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
         when(mockDesService.registerEstate(any[EstateRegistration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(InternalServerErrorException("some error")))
 
-        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction,rosmPatternService, mockedAuditService)
+        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction,rosmPatternService, mockedAuditService, Helpers.stubControllerComponents())
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(estateRegistration01)))
         status(result) mustBe INTERNAL_SERVER_ERROR
@@ -182,7 +186,8 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
 
     "return an internal server error" when {
       "the des returns BAD REQUEST" in {
-        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction,rosmPatternService, mockedAuditService)
+        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction,rosmPatternService, mockedAuditService, Helpers.stubControllerComponents())
+
         when(mockDesService.registerEstate(any[EstateRegistration])(any[HeaderCarrier])).
           thenReturn(Future.failed(BadRequestException))
 
@@ -198,7 +203,8 @@ class RegisterEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite 
     "return an internal server error" when {
       "the des returns Service Unavailable as dependent service is down. " in {
 
-        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction,rosmPatternService, mockedAuditService)
+        val SUT = new RegisterEstateController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction,rosmPatternService, mockedAuditService, Helpers.stubControllerComponents())
+
         when(mockDesService.registerEstate(any[EstateRegistration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(ServiceNotAvailableException("dependent service is down")))
 

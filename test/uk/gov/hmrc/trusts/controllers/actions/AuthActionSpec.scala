@@ -18,7 +18,9 @@ package uk.gov.hmrc.trusts.controllers.actions
 
 import akka.stream.Materializer
 import com.google.inject.Inject
+import play.api.mvc.BodyParsers.Default
 import play.api.mvc.{BodyParsers, Results}
+import play.api.test.Helpers
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Individual
 import uk.gov.hmrc.auth.core._
@@ -35,7 +37,7 @@ class AuthActionSpec extends BaseSpec {
   implicit lazy val mtrlzr = injector.instanceOf[Materializer]
 
   class Harness(authAction: IdentifierAction) {
-    def onSubmit() = authAction.apply(BodyParsers.parse.json) { _ => Results.Ok }
+    def onSubmit() = authAction.apply(parsers.json) { _ => Results.Ok }
   }
 
   private def authRetrievals(affinityGroup: AffinityGroup) =
@@ -51,7 +53,7 @@ class AuthActionSpec extends BaseSpec {
 
       "allow user to continue" in {
 
-        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(agentAffinityGroup)), appConfig)
+        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(agentAffinityGroup)), new BodyParsers.Default(parsers))
         val controller = new Harness(authAction)
         val result = controller.onSubmit()(fakeRequest)
 
@@ -66,7 +68,7 @@ class AuthActionSpec extends BaseSpec {
 
       "allow user to continue" in {
 
-        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(orgAffinityGroup)), appConfig)
+        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(orgAffinityGroup)), new BodyParsers.Default(parsers))
         val controller = new Harness(authAction)
         val result = controller.onSubmit()(fakeRequest)
 
@@ -81,7 +83,7 @@ class AuthActionSpec extends BaseSpec {
 
       "redirect the user to the unauthorised page" in {
         
-        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(Individual)), appConfig)
+        val authAction = new AuthenticatedIdentifierAction(new FakeAuthConnector(authRetrievals(Individual)), new BodyParsers.Default(parsers))
         val controller = new Harness(authAction)
         val result = controller.onSubmit()(fakeRequest)
         status(result) mustBe UNAUTHORIZED
@@ -95,7 +97,7 @@ class AuthActionSpec extends BaseSpec {
 
       "redirect the user to log in " in {
 
-        val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new MissingBearerToken), appConfig)
+        val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new MissingBearerToken), new BodyParsers.Default(parsers))
         val controller = new Harness(authAction)
         val result = controller.onSubmit()(fakeRequest)
 
@@ -109,7 +111,7 @@ class AuthActionSpec extends BaseSpec {
 
       "redirect the user to log in " in {
 
-        val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new BearerTokenExpired), appConfig)
+        val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new BearerTokenExpired), new BodyParsers.Default(parsers))
         val controller = new Harness(authAction)
         val result = controller.onSubmit()(fakeRequest)
 

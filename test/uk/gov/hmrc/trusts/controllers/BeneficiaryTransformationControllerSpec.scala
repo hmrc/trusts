@@ -21,22 +21,28 @@ import java.time.LocalDate
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.Json
-import play.api.test.FakeRequest
+import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType, RemoveBeneficiary, Success}
+import uk.gov.hmrc.trusts.models.{Success, RemoveBeneficiary, NameType, IdentificationOrgType, AddressType}
 import uk.gov.hmrc.trusts.models.variation._
 import uk.gov.hmrc.trusts.services.BeneficiaryTransformationService
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
-class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers {
-  val identifierAction = new FakeIdentifierAction(Agent)
+class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers
+ with GuiceOneAppPerSuite {
+
+  lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+
+  val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
   "Amend unidentified beneficiary" - {
 
@@ -44,7 +50,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must add a new amend unidentified beneficiary transform" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val newDescription = "Some new description"
 
@@ -67,7 +73,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must return an error for malformed json" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -81,7 +87,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
   "remove Beneficiary" - {
     "add an new remove beneficiary transform " in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       when(beneficiaryTransformationService.removeBeneficiary(any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
@@ -105,7 +111,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
     }
 
     "return an error when json is invalid" in {
-      val OUT = new BeneficiaryTransformationController(identifierAction, mock[BeneficiaryTransformationService])
+      val OUT = new BeneficiaryTransformationController(identifierAction, mock[BeneficiaryTransformationService])(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.obj("field" -> "value"))
@@ -122,7 +128,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must add a new add unidentified beneficiary transform" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val newBeneficiary = UnidentifiedType(
         None,
@@ -149,7 +155,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must return an error for malformed json" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -167,7 +173,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
     "must add a new amend individual beneficiary transform" in {
 
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val newIndividual = IndividualDetailsType(
         None,
@@ -205,7 +211,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must return an error for malformed json" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -221,7 +227,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must add a new add individual beneficiary transform" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val newBeneficiary = IndividualDetailsType(None,
         None,
@@ -251,7 +257,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must return an error for malformed json" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -266,7 +272,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must add a new add charity beneficiary transform" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val newBeneficiary = BeneficiaryCharityType(
         None,
@@ -294,7 +300,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must return an error for malformed json" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -312,7 +318,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
     "must add a new amend charity beneficiary transform" in {
 
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val newCharity = BeneficiaryCharityType(
         None,
@@ -347,7 +353,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must return an error for malformed json" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -363,7 +369,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must add a new add other beneficiary transform" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val newBeneficiary = OtherType(
         None,
@@ -391,7 +397,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must return an error for malformed json" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -406,7 +412,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must add a new add company beneficiary transform" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val newBeneficiary = BeneficiaryCompanyType(
         None,
@@ -436,7 +442,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must return an error for malformed json" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -454,7 +460,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
     "must add a new amend company beneficiary transform" in {
 
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val newCompany = BeneficiaryCompanyType(
         None,
@@ -489,7 +495,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must return an error for malformed json" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -505,7 +511,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must add a new add trust beneficiary transform" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val newBeneficiary = BeneficiaryTrustType(
         None,
@@ -535,7 +541,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must return an error for malformed json" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -554,7 +560,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
     "must add a new amend other beneficiary transform" in {
 
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val newOther = OtherType(
         None,
@@ -589,7 +595,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must return an error for malformed json" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -607,7 +613,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
     "must add a new amend trust beneficiary transform" in {
 
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val newTrust = BeneficiaryTrustType(
         None,
@@ -642,7 +648,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must return an error for malformed json" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -657,7 +663,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must add a new add large beneficiary transform" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val newBeneficiary = LargeType(
         None,
@@ -694,7 +700,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must return an error for malformed json" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -712,7 +718,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
     "must add a new amend large beneficiary transform" in {
 
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val newLargeBeneficiary = LargeType(
         None,
@@ -756,7 +762,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
     "must return an error for malformed json" in {
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)
+      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))

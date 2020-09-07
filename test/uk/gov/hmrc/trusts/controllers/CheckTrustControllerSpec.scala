@@ -20,6 +20,8 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.Json
+import play.api.mvc.BodyParsers
+import play.api.test.Helpers
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -37,6 +39,8 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
   lazy val validatationService: ValidationService = new ValidationService()
   val mockDesService = mock[DesService]
 
+  lazy val bodyParsers = injector.instanceOf[BodyParsers.Default]
+
   val validPayloadRequest = Json.parse("""{"name": "trust name","postcode": "NE1 1NE","utr": "1234567890"}""")
   val validPayloadPostCodeLowerCase = Json.parse("""{"name": "trust name","postcode": "aa9a 9aa","utr": "1234567890"}""")
   val validPayloadRequestWithoutPostCode = Json.parse("""{"name": "trust name","utr": "1234567890"}""")
@@ -47,7 +51,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
     "return OK with match true" when {
       "trusts data match with existing trusts. " in {
 
-        val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, new FakeIdentifierAction(Organisation))
+        val SUT = new CheckTrustController(mockDesService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
         when(mockDesService.checkExistingTrust(any[ExistingCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(Matched))
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequest))
@@ -57,7 +61,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       
       "trusts data match with existing trusts with postcode in lowercase. " in {
 
-        val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, new FakeIdentifierAction(Organisation))
+        val SUT = new CheckTrustController(mockDesService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
         when(mockDesService.checkExistingTrust(any[ExistingCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(Matched))
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadPostCodeLowerCase))
@@ -69,7 +73,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
     "return OK with match true" when {
       "trusts data match with existing trusts without postcode. " in {
 
-        val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, new FakeIdentifierAction(Organisation))
+        val SUT = new CheckTrustController(mockDesService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
         when(mockDesService.checkExistingTrust(any[ExistingCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(Matched))
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequestWithoutPostCode))
@@ -80,7 +84,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
     "return OK with match false" when {
       "trusts data does not match with existing trusts." in {
-        val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, new FakeIdentifierAction(Organisation))
+        val SUT = new CheckTrustController(mockDesService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
         when(mockDesService.checkExistingTrust(any[ExistingCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(NotMatched))
 
@@ -93,7 +97,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
     "return 403 with message and code" when {
 
       "trusts data matched with already registered trusts." in {
-        val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, new FakeIdentifierAction(Organisation))
+        val SUT = new CheckTrustController(mockDesService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
         when(mockDesService.checkExistingTrust(any[ExistingCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(AlreadyRegistered))
 
@@ -107,7 +111,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
     "return 400 " when {
       "trust name is not valid" in {
 
-        val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, new FakeIdentifierAction(Organisation))
+        val SUT = new CheckTrustController(mockDesService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
         val nameInvalidPayload = Json.parse("""{"name": "","postcode": "NE11NE","utr": "1234567890"}""")
 
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(nameInvalidPayload))
@@ -118,7 +122,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
       "trust name is more than 56 characters" in {
 
-        val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, new FakeIdentifierAction(Organisation))
+        val SUT = new CheckTrustController(mockDesService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
         val nameInvalidPayload = Json.parse("""{"name": "Lorem ipsum dolor sit amet, consectetur adipiscing elitee","postcode": "NE11NE","utr": "1234567890"}""")
 
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(nameInvalidPayload))
@@ -133,7 +137,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
     "return 400 " when {
       "utr is not valid" in {
 
-        val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, new FakeIdentifierAction(Organisation))
+        val SUT = new CheckTrustController(mockDesService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
 
         val utrInvalidPayload = Json.parse("""{"name": "trust name","postcode": "NE11NE","utr": "12345678"}""")
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(utrInvalidPayload))
@@ -146,7 +150,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
     "return 400 " when {
       "postcode is not valid" in {
 
-        val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, new FakeIdentifierAction(Organisation))
+        val SUT = new CheckTrustController(mockDesService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
 
         val invalidPayload = Json.parse("""{"name": "trust name","postcode": "AA9A 9AAT","utr": "1234567890"}""")
 
@@ -160,7 +164,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
     "return 400 " when {
       "request is not valid" in {
 
-        val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, new FakeIdentifierAction(Organisation))
+        val SUT = new CheckTrustController(mockDesService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
 
         val requestInvalid = Json.parse("""{"name1": "trust name","postcode": "NE11NE","utr": "1234567890"}""")
 
@@ -174,7 +178,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
     "return Internal server error " when {
       "des dependent service is not responding" in {
 
-        val SUT = new CheckTrustController(mockDesService, appConfig, validatationService, new FakeIdentifierAction(Organisation))
+        val SUT = new CheckTrustController(mockDesService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
         when(mockDesService.checkExistingTrust(any[ExistingCheckRequest])(any[HeaderCarrier]))
           .thenReturn(Future.successful(ServiceUnavailable))
 

@@ -21,10 +21,8 @@ import com.github.fge.jsonschema.core.report.LogLevel.ERROR
 import com.github.fge.jsonschema.core.report.ProcessingReport
 import com.github.fge.jsonschema.main.{JsonSchema, JsonSchemaFactory}
 import javax.inject.Inject
-
 import play.api.Logger
-import play.api.data.validation.ValidationError
-import play.api.libs.json.{JsPath, Json, Reads}
+import play.api.libs.json.{JsPath, Json, JsonValidationError, Reads}
 import uk.gov.hmrc.trusts.models.{EstateRegistration, Registration}
 import uk.gov.hmrc.trusts.utils.{BusinessValidation, EstateBusinessValidation}
 
@@ -94,7 +92,7 @@ class Validator(schema: JsonSchema) {
     }
   }
 
-  protected def getValidationErrors(errors: Seq[(JsPath, Seq[ValidationError])]): List[TrustsValidationError] = {
+  protected def getValidationErrors(errors: Seq[(JsPath, Seq[JsonValidationError])]): List[TrustsValidationError] = {
     val validationErrors = errors.flatMap(errors => errors._2.map(error => TrustsValidationError(error.message, errors._1.toString()))).toList
     Logger.debug(s"[Validator][getValidationErrors]  validationErrors in validate :  $validationErrors")
     validationErrors

@@ -16,14 +16,13 @@
 
 package uk.gov.hmrc.trusts.connectors
 
-import play.api.data.validation.ValidationError
-import play.api.libs.json.{Format, JsError, JsSuccess, JsValue, Json, Reads, Writes}
+import play.api.http.Status._
+import play.api.libs.json.{JsValue, Json, Reads}
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions.{AlreadyRegisteredException, _}
 import uk.gov.hmrc.trusts.models.ExistingCheckRequest._
 import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
 import uk.gov.hmrc.trusts.models._
-import play.api.http.Status._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
@@ -31,7 +30,7 @@ import uk.gov.hmrc.trusts.models.variation.{EstateVariation, TrustVariation, Var
 
 import scala.concurrent.Future
 
-class DesConnectorSpec extends BaseConnectorSpec {
+class DesConnectorSpec extends ConnectorSpecHelper {
 
   lazy val connector: DesConnector = injector.instanceOf[DesConnector]
 

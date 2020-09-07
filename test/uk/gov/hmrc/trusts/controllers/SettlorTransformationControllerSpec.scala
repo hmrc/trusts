@@ -21,27 +21,32 @@ import java.time.LocalDate
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.Json
-import play.api.test.FakeRequest
+import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.variation.AmendDeceasedSettlor
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustSettlor, DisplayTrustSettlorCompany}
+import uk.gov.hmrc.trusts.models.variation.AmendDeceasedSettlor
 import uk.gov.hmrc.trusts.models.{variation, _}
 import uk.gov.hmrc.trusts.services.SettlorTransformationService
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
 class SettlorTransformationControllerSpec extends FreeSpec
   with MockitoSugar
   with ScalaFutures
-  with MustMatchers {
+  with MustMatchers
+  with GuiceOneAppPerSuite {
 
-  val identifierAction = new FakeIdentifierAction(Agent)
+  lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+
+  val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
   "Amend individual settlor" - {
 
@@ -51,7 +56,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
 
       val service = mock[SettlorTransformationService]
 
-      val controller = new SettlorTransformationController(identifierAction, service)
+      val controller = new SettlorTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
       val newSettlor = variation.Settlor(
         lineNo = None,
@@ -83,7 +88,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
 
     "must return an error for malformed json" in {
       val service = mock[SettlorTransformationService]
-      val controller = new SettlorTransformationController(identifierAction, service)
+      val controller = new SettlorTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -99,7 +104,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
     "must add a new individual settlor transform" in {
 
       val settlorTransformationService = mock[SettlorTransformationService]
-      val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)
+      val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val newSettlor = DisplayTrustSettlor(
         lineNo = None,
@@ -131,7 +136,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
     "must return an error for malformed json" in {
 
       val settlorTransformationService = mock[SettlorTransformationService]
-      val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)
+      val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -147,7 +152,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
     "must add a new business settlor transform" in {
 
       val settlorTransformationService = mock[SettlorTransformationService]
-      val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)
+      val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val newCompanySettlor = DisplayTrustSettlorCompany(
         lineNo = None,
@@ -178,7 +183,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
     "must return an error for malformed json" in {
 
       val settlorTransformationService = mock[SettlorTransformationService]
-      val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)
+      val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -197,7 +202,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
 
       val service = mock[SettlorTransformationService]
 
-      val controller = new SettlorTransformationController(identifierAction, service)
+      val controller = new SettlorTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
       val newSettlor = variation.SettlorCompany(
         lineNo = None,
@@ -230,7 +235,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
 
     "must return an error for malformed json" in {
       val service = mock[SettlorTransformationService]
-      val controller = new SettlorTransformationController(identifierAction, service)
+      val controller = new SettlorTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -245,7 +250,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
   "remove Settlor" - {
     "add an new remove settlor transform " in {
       val settlorTransformationService = mock[SettlorTransformationService]
-      val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)
+      val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       when(settlorTransformationService.removeSettlor(any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
@@ -269,7 +274,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
     }
 
     "return an error when json is invalid" in {
-      val OUT = new SettlorTransformationController(identifierAction, mock[SettlorTransformationService])
+      val OUT = new SettlorTransformationController(identifierAction, mock[SettlorTransformationService])(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.obj("field" -> "value"))
@@ -288,7 +293,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
 
       val service = mock[SettlorTransformationService]
 
-      val controller = new SettlorTransformationController(identifierAction, service)
+      val controller = new SettlorTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
       val amendedSettlor = AmendDeceasedSettlor(
         name = NameType("First", None, "Last"),
@@ -316,7 +321,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
 
     "must return an error for malformed json" in {
       val service = mock[SettlorTransformationService]
-      val controller = new SettlorTransformationController(identifierAction, service)
+      val controller = new SettlorTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))

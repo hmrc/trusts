@@ -18,27 +18,26 @@ package uk.gov.hmrc.trusts.connector
 
 import java.util.UUID
 
-import com.google.inject.ImplementedBy
 import javax.inject.Inject
 import play.api.Logger
 import play.api.http.HeaderNames
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.config.{AppConfig, WSHttp}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.GetEstateResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustResponse
-import uk.gov.hmrc.trusts.models.variation.{EstateVariation, TrustVariation, VariationResponse}
+import uk.gov.hmrc.trusts.models.variation.{EstateVariation, VariationResponse}
 import uk.gov.hmrc.trusts.utils.Constants._
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
+class DesConnector @Inject()(http: HttpClient, config: AppConfig) {
 
-class DesConnector @Inject()(http: WSHttp, config: AppConfig) {
-
-  lazy val trustsServiceUrl : String = s"${config.desTrustsUrl}/trusts"
-  lazy val estatesServiceUrl : String = s"${config.desEstatesUrl}/estates"
+  lazy val trustsServiceUrl : String = s"${config.registerTrustsUrl}/trusts"
+  lazy val estatesServiceUrl : String = s"${config.registerEstatesUrl}/estates"
 
   lazy val matchTrustsEndpoint : String = s"$trustsServiceUrl/match"
   lazy val matchEstatesEndpoint : String = s"$estatesServiceUrl/match"

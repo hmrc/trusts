@@ -25,23 +25,23 @@ case class ExistingCheckRequest(name: String, postcode: Option[String] = None, u
 
 object ExistingCheckRequest {
 
-  private val validationError = ValidationError("")
+  private def validationError(msg: String) = JsonValidationError(msg)
   private val utrValidationRegEx = """^[0-9]{10}$""".r
   private val postcodeRegEx ="""^[a-zA-Z]{1,2}[0-9][0-9a-zA-Z]?\s?[0-9][a-zA-Z]{2}$""".r
   private val nameRegEx = """^[A-Za-z0-9 ,.()/&'-]{1,56}$""".r
 
   private val utrValidation: Reads[String] =
-    Reads.StringReads.filter(validationError)(
+    Reads.StringReads.filter(validationError("Invalid UTR"))(
       utrValidationRegEx.findFirstIn(_).isDefined
     )
 
   private val postcodeValidation: Reads[String] =
-    Reads.StringReads.filter(validationError)(
+    Reads.StringReads.filter(validationError("Invalid postcode"))(
       postcodeRegEx.findFirstIn(_).isDefined
     )
 
   private val nameValidation: Reads[String] =
-    Reads.StringReads.filter(validationError)(
+    Reads.StringReads.filter(validationError("Invalid name"))(
       nameRegEx.findFirstIn(_).isDefined
     )
 

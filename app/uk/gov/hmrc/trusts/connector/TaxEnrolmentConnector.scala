@@ -16,21 +16,19 @@
 
 package uk.gov.hmrc.trusts.connector
 
-import javax.inject.Inject
-
 import com.google.inject.ImplementedBy
-import play.api.Logger
+import javax.inject.Inject
 import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.Authorization
-import uk.gov.hmrc.trusts.config.{AppConfig, WSHttp}
-import uk.gov.hmrc.trusts.models.{ExistingCheckResponse, TaxEnrolmentSubscription, TaxEnrolmentSuscriberResponse}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.trusts.config.AppConfig
+import uk.gov.hmrc.trusts.models.{TaxEnrolmentSubscription, TaxEnrolmentSuscriberResponse}
 import uk.gov.hmrc.trusts.utils.Constants._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TaxEnrolmentConnectorImpl @Inject()(http: WSHttp, config: AppConfig) extends TaxEnrolmentConnector {
+class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient, config: AppConfig) extends TaxEnrolmentConnector {
 
   def headers =
     Seq(

@@ -17,19 +17,17 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
-
 import play.api.Logger
-import play.api.mvc.Action
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.bootstrap.controller.BaseController
-import uk.gov.hmrc.trusts.config.AppConfig
+import play.api.mvc.ControllerComponents
+import uk.gov.hmrc.play.bootstrap.controller.BackendController
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
 class TaxEnrolmentCallbackController @Inject()(
-                                               auditConnector :AuditConnector
-                                               ) extends BaseController {
+                                                cc: ControllerComponents
+                                               ) extends BackendController(cc) {
 
   def subscriptionCallback() = Action.async(parse.json) {
     implicit request =>

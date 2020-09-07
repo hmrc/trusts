@@ -20,6 +20,8 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.BodyParsers
+import play.api.test.Helpers
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.http.HeaderCarrier
@@ -31,7 +33,7 @@ import uk.gov.hmrc.trusts.services.{DesService, ValidationService}
 
 import scala.concurrent.Future
 
-class CheckEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
+class CheckEstateControllerSpec extends BaseSpec {
 
   lazy val validatationService: ValidationService = new ValidationService()
 
@@ -165,7 +167,8 @@ class CheckEstateControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
   }
 
   private def getEstateController = {
-    val SUT = new CheckEstateController(mockDesService, appConfig, validatationService, new FakeIdentifierAction(Organisation))
+    lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+    val SUT = new CheckEstateController(mockDesService, new FakeIdentifierAction(bodyParsers, Organisation), Helpers.stubControllerComponents())
     SUT
   }
 

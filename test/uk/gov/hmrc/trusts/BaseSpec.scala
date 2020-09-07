@@ -19,12 +19,12 @@ package uk.gov.hmrc.trusts
 import java.util.UUID
 
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfter, Inside, MustMatchers, WordSpec}
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.PlayBodyParsers
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -56,6 +56,8 @@ class BaseSpec extends WordSpec
           "auditing.enabled" -> false): _*
       )
   }
+
+  val parsers = injector.instanceOf[PlayBodyParsers]
 
   def fakeRequest : FakeRequest[JsValue] = FakeRequest("POST", "")
     .withHeaders(CONTENT_TYPE -> "application/json")
