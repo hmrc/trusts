@@ -25,7 +25,6 @@ import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.repositories.CacheRepositoryImpl
@@ -116,84 +115,13 @@ class DesServiceSpec extends BaseSpec {
     }
   }
 
-
-  ".checkExistingEstate" should {
-    "return Matched " when {
-      "connector returns Matched." in new DesServiceFixture {
-        when(mockConnector.checkExistingEstate(request)).
-          thenReturn(Future.successful(Matched))
-        val futureResult = SUT.checkExistingEstate(request)
-        whenReady(futureResult) {
-          result => result mustBe Matched
-        }
-      }
-    }
-
-
-    "return NotMatched " when {
-      "connector returns NotMatched." in new DesServiceFixture {
-        when(mockConnector.checkExistingEstate(request)).
-          thenReturn(Future.successful(NotMatched))
-        val futureResult = SUT.checkExistingEstate(request)
-        whenReady(futureResult) {
-          result => result mustBe NotMatched
-        }
-      }
-    }
-
-    "return BadRequest " when {
-      "connector returns BadRequest." in new DesServiceFixture {
-        when(mockConnector.checkExistingEstate(request)).
-          thenReturn(Future.successful(BadRequest))
-        val futureResult = SUT.checkExistingEstate(request)
-        whenReady(futureResult) {
-          result => result mustBe BadRequest
-        }
-      }
-    }
-
-    "return AlreadyRegistered " when {
-      "connector returns AlreadyRegistered." in new DesServiceFixture {
-        when(mockConnector.checkExistingEstate(request)).
-          thenReturn(Future.successful(AlreadyRegistered))
-        val futureResult = SUT.checkExistingEstate(request)
-        whenReady(futureResult) {
-          result => result mustBe AlreadyRegistered
-        }
-      }
-    }
-
-    "return ServiceUnavailable " when {
-      "connector returns ServiceUnavailable." in new DesServiceFixture {
-        when(mockConnector.checkExistingEstate(request)).
-          thenReturn(Future.successful(ServiceUnavailable))
-        val futureResult = SUT.checkExistingEstate(request)
-        whenReady(futureResult) {
-          result => result mustBe ServiceUnavailable
-        }
-
-      }
-    }
-
-    "return ServerError " when {
-      "connector returns ServerError." in new DesServiceFixture {
-        when(mockConnector.checkExistingEstate(request)).
-          thenReturn(Future.successful(ServerError))
-        val futureResult = SUT.checkExistingEstate(request)
-        whenReady(futureResult) {
-          result => result mustBe ServerError
-        }
-      }
-    }
-  }
-
   ".getTrustInfoFormBundleNo should return formBundle No from ETMP Data" in {
     val etmpData = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
-    val mockDesconnector = mock[DesConnector]
+    val mockDesConnector = mock[DesConnector]
     val mockRepository = mock[CacheRepositoryImpl]
-    when(mockDesconnector.getTrustInfo(any())(any())).thenReturn(Future.successful(etmpData))
+    when(mockDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(etmpData))
 
-    val OUT = new DesService(mockDesconnector, mockRepository)
+    val OUT = new DesService(mockDesConnector, mockRepository)
 
     whenReady(OUT.getTrustInfoFormBundleNo("75464876")) {formBundleNo =>
       formBundleNo mustBe etmpData.responseHeader.formBundleNo
@@ -230,45 +158,6 @@ class DesServiceSpec extends BaseSpec {
         when(mockConnector.registerTrust(registrationRequest)).
           thenReturn(Future.failed(InternalServerErrorException("")))
         val futureResult = SUT.registerTrust(registrationRequest)
-
-        whenReady(futureResult.failed) {
-          result => result mustBe an[InternalServerErrorException]
-        }
-      }
-    }
-
-  }
-
-  ".registerEstate" should {
-
-    "return RegistrationTrnResponse " when {
-      "connector returns RegistrationTrnResponse." in new DesServiceFixture {
-        when(mockConnector.registerEstate(estateRegRequest)).
-          thenReturn(Future.successful(RegistrationTrnResponse("trn123")))
-        val futureResult = SUT.registerEstate(estateRegRequest)
-        whenReady(futureResult) {
-          result => result mustBe RegistrationTrnResponse("trn123")
-        }
-      }
-    }
-
-    "return AlreadyRegisteredException " when {
-      "connector returns  AlreadyRegisteredException." in new DesServiceFixture {
-        when(mockConnector.registerEstate(estateRegRequest)).
-          thenReturn(Future.failed(AlreadyRegisteredException))
-        val futureResult = SUT.registerEstate(estateRegRequest)
-
-        whenReady(futureResult.failed) {
-          result => result mustBe AlreadyRegisteredException
-        }
-      }
-    }
-
-    "return same Exception " when {
-      "connector returns  exception." in new DesServiceFixture {
-        when(mockConnector.registerEstate(estateRegRequest)).
-          thenReturn(Future.failed(InternalServerErrorException("")))
-        val futureResult = SUT.registerEstate(estateRegRequest)
 
         whenReady(futureResult.failed) {
           result => result mustBe an[InternalServerErrorException]
@@ -443,107 +332,6 @@ class DesServiceSpec extends BaseSpec {
     }
   }
 
-  ".getEstateInfo" should {
-    "return EstateFoundResponse" when {
-      "EstateFoundResponse is returned from DES Connector" in new DesServiceFixture {
-
-        val utr = "1234567890"
-
-        when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(EstateFoundResponse(None, ResponseHeader("In Processing", "1"))))
-
-        val futureResult = SUT.getEstateInfo(utr)
-
-        whenReady(futureResult) { result =>
-          result mustBe EstateFoundResponse(None, ResponseHeader("In Processing", "1"))
-        }
-      }
-    }
-
-    "return InvalidUTRResponse" when {
-      "InvalidUTRResponse is returned from DES Connector" in new DesServiceFixture {
-
-        when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(InvalidUTRResponse))
-
-        val invalidUtr = "123456789"
-        val futureResult = SUT.getEstateInfo(invalidUtr)
-
-        whenReady(futureResult) { result =>
-          result mustBe InvalidUTRResponse
-        }
-      }
-    }
-
-    "return InvalidRegimeResponse" when {
-      "InvalidRegimeResponse is returned from DES Connector" in new DesServiceFixture {
-
-        when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(InvalidRegimeResponse))
-
-        val utr = "123456789"
-        val futureResult = SUT.getEstateInfo(utr)
-
-        whenReady(futureResult) { result =>
-          result mustBe InvalidRegimeResponse
-        }
-      }
-    }
-
-    "return BadRequestResponse" when {
-      "BadRequestResponse is returned from DES Connector" in new DesServiceFixture {
-
-        when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(BadRequestResponse))
-
-        val utr = "123456789"
-        val futureResult = SUT.getEstateInfo(utr)
-
-        whenReady(futureResult) { result =>
-          result mustBe BadRequestResponse
-        }
-      }
-    }
-
-    "return ResourceNotFoundResponse" when {
-      "ResourceNotFoundResponse is returned from DES Connector" in new DesServiceFixture {
-
-        when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(ResourceNotFoundResponse))
-
-        val utr = "123456789"
-        val futureResult = SUT.getEstateInfo(utr)
-
-        whenReady(futureResult) { result =>
-          result mustBe ResourceNotFoundResponse
-        }
-      }
-    }
-
-    "return InternalServerErrorResponse" when {
-      "InternalServerErrorResponse is returned from DES Connector" in new DesServiceFixture {
-
-        when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(InternalServerErrorResponse))
-
-        val utr = "123456789"
-        val futureResult = SUT.getEstateInfo(utr)
-
-        whenReady(futureResult) { result =>
-          result mustBe InternalServerErrorResponse
-        }
-      }
-    }
-
-    "return ServiceUnavailableResponse" when {
-      "ServiceUnavailableResponse is returned from DES Connector" in new DesServiceFixture {
-
-        when(mockConnector.getEstateInfo(any())(any())).thenReturn(Future.successful(ServiceUnavailableResponse))
-
-        val utr = "123456789"
-        val futureResult = SUT.getEstateInfo(utr)
-
-        whenReady(futureResult) { result =>
-          result mustBe ServiceUnavailableResponse
-        }
-      }
-    }
-  } // getTrustInfo
-
   ".trustVariation" should {
     "return a VariationTvnResponse" when {
 
@@ -595,58 +383,5 @@ class DesServiceSpec extends BaseSpec {
 
     }
   }
-
-  ".estateVariation" should {
-    "return a VariationTvnResponse" when {
-
-      "connector returns VariationResponse." in new DesServiceFixture {
-
-        when(mockConnector.estateVariation(estateVariationsRequest)).
-          thenReturn(Future.successful(VariationResponse("tvn123")))
-
-        val futureResult = SUT.estateVariation(estateVariationsRequest)
-
-        whenReady(futureResult) {
-          result => result mustBe VariationResponse("tvn123")
-        }
-
-      }
-
-
-      "return DuplicateSubmissionException" when {
-
-        "connector returns  DuplicateSubmissionException." in new DesServiceFixture {
-
-          when(mockConnector.estateVariation(estateVariationsRequest)).
-            thenReturn(Future.failed(DuplicateSubmissionException))
-
-          val futureResult = SUT.estateVariation(estateVariationsRequest)
-
-          whenReady(futureResult.failed) {
-            result => result mustBe DuplicateSubmissionException
-          }
-
-        }
-
-      }
-
-      "return same Exception " when {
-        "connector returns  exception." in new DesServiceFixture {
-
-          when(mockConnector.estateVariation(estateVariationsRequest)).
-            thenReturn(Future.failed(InternalServerErrorException("")))
-
-          val futureResult = SUT.estateVariation(estateVariationsRequest)
-
-          whenReady(futureResult.failed) {
-            result => result mustBe an[InternalServerErrorException]
-          }
-
-        }
-      }
-
-    }
-  }
-
 }
 

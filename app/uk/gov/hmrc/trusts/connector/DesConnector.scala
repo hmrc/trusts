@@ -26,9 +26,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.GetEstateResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustResponse
-import uk.gov.hmrc.trusts.models.variation.{EstateVariation, VariationResponse}
+import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.utils.Constants._
 
 import scala.concurrent.ExecutionContext.Implicits._
@@ -36,21 +35,14 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class DesConnector @Inject()(http: HttpClient, config: AppConfig) {
 
-  lazy val trustsServiceUrl : String = s"${config.registerTrustsUrl}/trusts"
-  lazy val estatesServiceUrl : String = s"${config.registerEstatesUrl}/estates"
-
-  lazy val matchTrustsEndpoint : String = s"$trustsServiceUrl/match"
-  lazy val matchEstatesEndpoint : String = s"$estatesServiceUrl/match"
-
-  lazy val trustRegistrationEndpoint : String = s"$trustsServiceUrl/registration"
-  lazy val estateRegistrationEndpoint : String = s"$estatesServiceUrl/registration"
-
-  lazy val getTrustOrEstateUrl: String =  s"${config.getTrustOrEstateUrl}/trusts"
+  private lazy val trustsServiceUrl : String = s"${config.registerTrustsUrl}/trusts"
+  private lazy val matchTrustsEndpoint : String = s"$trustsServiceUrl/match"
+  private lazy val trustRegistrationEndpoint : String = s"$trustsServiceUrl/registration"
+  private lazy val getTrustOrEstateUrl: String =  s"${config.getTrustOrEstateUrl}/trusts"
 
   def createGetTrustOrEstateEndpoint(utr: String): String = s"$getTrustOrEstateUrl/registration/$utr"
 
-  lazy val trustVariationsEndpoint : String = s"${config.varyTrustOrEstateUrl}/trusts/variation"
-  lazy val estateVariationsEndpoint : String = s"${config.varyTrustOrEstateUrl}/estates/variation"
+  private lazy val trustVariationsEndpoint : String = s"${config.varyTrustOrEstateUrl}/trusts/variation"
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "CorrelationId"
@@ -80,20 +72,6 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig) {
     response
   }
 
-  def checkExistingEstate(existingEstateCheckRequest: ExistingCheckRequest)
-  : Future[ExistingCheckResponse] = {
-    val correlationId = UUID.randomUUID().toString
-
-    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
-
-    Logger.info(s"[DesConnector] matching estate for correlationId: $correlationId")
-
-    val response = http.POST[JsValue, ExistingCheckResponse](matchEstatesEndpoint, Json.toJson(existingEstateCheckRequest))
-    (implicitly[Writes[JsValue]], ExistingCheckResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
-
-    response
-  }
-
   def registerTrust(registration: Registration)
                             : Future[RegistrationResponse] = {
     val correlationId = UUID.randomUUID().toString
@@ -106,18 +84,6 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig) {
     val response = http.POST[JsValue, RegistrationResponse](trustRegistrationEndpoint, Json.toJson(registration))
     (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
 
-    response
-  }
-
-  def registerEstate(registration: EstateRegistration): Future[RegistrationResponse] = {
-    val correlationId = UUID.randomUUID().toString
-
-    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
-
-    Logger.info(s"[DesConnector] registering estate for correlationId: $correlationId")
-
-    val response = http.POST[JsValue, RegistrationResponse](estateRegistrationEndpoint, Json.toJson(registration))
-    (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
     response
   }
 
@@ -145,16 +111,6 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig) {
 
     http.GET[GetTrustResponse](createGetTrustOrEstateEndpoint(utr))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)
   }
-  
-  def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse] = {
-    val correlationId = UUID.randomUUID().toString
-
-    implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
-
-    Logger.info(s"[DesConnector] getting playback for estate for correlationId: $correlationId")
-
-    http.GET[GetEstateResponse](createGetTrustOrEstateEndpoint(utr))(GetEstateResponse.httpReads, implicitly[HeaderCarrier](hc), global)
-  }
 
   def trustVariation(trustVariations: JsValue)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
     val correlationId = UUID.randomUUID().toString
@@ -167,17 +123,4 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig) {
        implicitly[Writes[JsValue]], VariationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
 
   }
-
-  def estateVariation(estateVariations: EstateVariation)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
-    val correlationId = UUID.randomUUID().toString
-
-    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
-
-    Logger.info(s"[DesConnector] submitting estate variation for correlationId: $correlationId")
-
-    http.POST[JsValue, VariationResponse](estateVariationsEndpoint, Json.toJson(estateVariations))(
-      implicitly[Writes[JsValue]], VariationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
-
-  }
-
 }

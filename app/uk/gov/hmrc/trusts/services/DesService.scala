@@ -23,14 +23,12 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.GetEstateResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustResponse, GetTrustSuccessResponse, TrustProcessedResponse}
-import uk.gov.hmrc.trusts.models.variation.{EstateVariation, VariationResponse}
+import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.repositories.CacheRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
 
 class DesService @Inject()(val desConnector: DesConnector, val repository: CacheRepository) {
 
@@ -48,19 +46,9 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Cache
     desConnector.checkExistingTrust(existingTrustCheckRequest)
   }
 
-  def checkExistingEstate(existingEstateCheckRequest: ExistingCheckRequest)
-                         (implicit hc: HeaderCarrier): Future[ExistingCheckResponse] = {
-    desConnector.checkExistingEstate(existingEstateCheckRequest)
-  }
-
   def registerTrust(registration: Registration)
                    (implicit hc: HeaderCarrier): Future[RegistrationResponse] = {
     desConnector.registerTrust(registration)
-  }
-
-  def registerEstate(estateRegistration: EstateRegistration)
-                    (implicit hc: HeaderCarrier): Future[RegistrationResponse] = {
-    desConnector.registerEstate(estateRegistration)
   }
 
   def getSubscriptionId(trn: String)(implicit hc: HeaderCarrier): Future[SubscriptionIdResponse] = {
@@ -103,15 +91,8 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Cache
     }
   }
 
-  def getEstateInfo(utr: String)(implicit hc: HeaderCarrier): Future[GetEstateResponse] = {
-    desConnector.getEstateInfo(utr)
-  }
-
   def trustVariation(trustVariation: JsValue)(implicit hc: HeaderCarrier): Future[VariationResponse] =
     desConnector.trustVariation(trustVariation: JsValue)
-
-  def estateVariation(estateVariation: EstateVariation)(implicit hc: HeaderCarrier): Future[VariationResponse] =
-    desConnector.estateVariation(estateVariation: EstateVariation)
 }
 
 

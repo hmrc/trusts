@@ -21,8 +21,8 @@ import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.models.auditing.{EstateRegistrationSubmissionAuditEvent, GetTrustOrEstateAuditEvent, TrustRegistrationSubmissionAuditEvent}
-import uk.gov.hmrc.trusts.models.{EstateRegistration, Registration, RegistrationResponse}
+import uk.gov.hmrc.trusts.models.auditing.{GetTrustOrEstateAuditEvent, TrustRegistrationSubmissionAuditEvent}
+import uk.gov.hmrc.trusts.models.{Registration, RegistrationResponse}
 
 class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig){
 
@@ -32,7 +32,7 @@ class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig)
             registration: Registration,
             draftId: String,
             internalId: String,
-            response: RegistrationResponse)(implicit hc: HeaderCarrier) = {
+            response: RegistrationResponse)(implicit hc: HeaderCarrier): Unit = {
 
     if (config.auditingEnabled) {
       val auditPayload = TrustRegistrationSubmissionAuditEvent(
@@ -49,37 +49,12 @@ class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig)
     } else {
       ()
     }
-
-  }
-
-  def audit(event: String,
-            registration: EstateRegistration,
-            draftId: String,
-            internalId: String,
-            response: RegistrationResponse)(implicit hc: HeaderCarrier) = {
-
-    if (config.auditingEnabled) {
-      val auditPayload = EstateRegistrationSubmissionAuditEvent(
-        registration = registration,
-        draftId = draftId,
-        internalAuthId = internalId,
-        response = response
-      )
-
-      auditConnector.sendExplicitAudit(
-        event,
-        auditPayload
-      )
-    } else {
-      ()
-    }
-
   }
 
   def audit(event: String,
             request: JsValue,
             internalId: String,
-            response: JsValue)(implicit hc: HeaderCarrier) = {
+            response: JsValue)(implicit hc: HeaderCarrier): Unit = {
 
     if (config.auditingEnabled) {
       val auditPayload = GetTrustOrEstateAuditEvent(
