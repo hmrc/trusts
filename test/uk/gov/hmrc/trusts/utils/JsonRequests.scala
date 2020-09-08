@@ -18,7 +18,6 @@ package uk.gov.hmrc.trusts.utils
 
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.models.variation.{EstateVariation, TrustVariation}
 
 trait JsonRequests extends JsonUtils {
 
@@ -26,25 +25,14 @@ trait JsonRequests extends JsonUtils {
   lazy val invalidRegistrationRequestJson: String =  getJsonFromFile("invalid-payload-trusts-registration.json")
   lazy val invalidTrustBusinessValidation: String =  getJsonFromFile("trust-business-validation-fail.json")
 
-  lazy val estateRegRequest: EstateRegistration = getJsonValueFromFile("valid-estate-registration-01.json").validate[EstateRegistration].get
-
-  lazy val estateRegistration01: String =  getJsonFromFile("valid-estate-registration-01.json")
-  lazy val estateRegistration03: String =  getJsonFromFile("valid-estate-registration-03.json")
-
   lazy val validTrustVariationsRequestJson: String =  getJsonFromFile("valid-trusts-variations-api.json")
   lazy val invalidTrustVariationsRequestJson: String = getJsonFromFile("invalid-payload-trusts-variations.json")
-
-  lazy val validEstateVariationsRequestJson: String =  getJsonFromFile("valid-estate-variation-api.json")
-  lazy val invalidEstateVariationsRequestJson: String = getJsonFromFile("invalid-estate-variation-api.json")
 
   lazy val trustVariationsRequest: JsValue = getJsonValueFromFile("valid-trusts-variations-api.json").validate[JsValue].get
 
   lazy val trustVariationsNoPreviousPropertyValueRequest: JsValue = getJsonValueFromFile("valid-trusts-variations-no-previous-value-property-api.json").validate[JsValue].get
 
   lazy val invalidTrustVariationsRequest: JsValue = getJsonValueFromFile("invalid-payload-trusts-variations.json")
-
-  lazy val estateVariationsRequest: EstateVariation = getJsonValueFromFile("valid-estate-variation-api.json").validate[EstateVariation].get
-  lazy val invalidEstateVariationsRequest: JsValue = getJsonValueFromFile("invalid-estate-variation-api.json")
 
   lazy val registrationRequest: Registration = getJsonValueFromFile("valid-trusts-registration-api.json").validate[Registration].get
   lazy val invalidRegistrationRequest: Registration = getJsonValueFromFile("invalid-payload-trusts-registration.json").validate[Registration].get
@@ -65,9 +53,6 @@ trait JsonRequests extends JsonUtils {
   lazy val getTransformedTrustDeceasedSettlorWithoutDeathResponse: JsValue = getJsonValueFromFile("transformed-get-trust-response-deceased-settlor-without-date-of-death.json")
   lazy val getTransformedProtectorsResponse: JsValue = getJsonValueFromFile("trust-transformed-get-protector-result.json")
   lazy val getTransformedOtherIndividualsResponse: JsValue = getJsonValueFromFile("trust-transformed-get-other-individual-result.json")
-
-  lazy val getEstateResponseJson: String = getJsonFromFile("valid-get-estate-response.json")
-  lazy val getEstateExpectedResponse: JsValue = getJsonValueFromFile("valid-get-estate-expected-response.json")
 
   lazy val getTrustOrEstateProcessingResponseJson: String = getJsonFromFile("valid-get-trust-or-estate-in-processing-response.json")
 

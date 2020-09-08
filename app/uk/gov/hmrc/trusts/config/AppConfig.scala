@@ -20,12 +20,10 @@ import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-
 @Singleton
 class AppConfig @Inject()(configuration: Configuration, servicesConfig: ServicesConfig) {
 
   val registerTrustsUrl : String = servicesConfig.baseUrl("des-trusts")
-  val registerEstatesUrl : String = servicesConfig.baseUrl("des-estates")
   val taxEnrolmentsUrl : String = servicesConfig.baseUrl("tax-enrolments")
   val getTrustOrEstateUrl : String = servicesConfig.baseUrl("des-display-trust-or-estate")
   val varyTrustOrEstateUrl : String = servicesConfig.baseUrl("des-vary-trust-or-estate")
@@ -34,7 +32,6 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
   val desToken : String = configuration.get[String]("microservice.services.des-trusts.token")
 
   val trustsApiRegistrationSchema : String  = "/resources/schemas/trusts-api-schema-5.0.json"
-  val estatesApiRegistrationSchema : String  = "/resources/schemas/estates-api-schema-5.0.json"
   val variationsApiSchema: String = "/resources/schemas/variations-api-schema-4.0.json"
 
   val taxEnrolmentsPayloadBodyServiceName : String =
