@@ -21,11 +21,13 @@ import java.time.LocalDate
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.Json
-import play.api.test.FakeRequest
+import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
@@ -33,11 +35,13 @@ import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee, Success}
 import uk.gov.hmrc.trusts.services.{LocalDateService, TrusteeTransformationService}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers {
-  val identifierAction = new FakeIdentifierAction(Agent)
+class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with GuiceOneAppPerSuite {
+
+  lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+
+  val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
   object LocalDateServiceStub extends LocalDateService {
     override def now: LocalDate = LocalDate.of(1999, 3, 14)
@@ -47,7 +51,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
 
     "must add a new amend lead trustee transform" in {
       val trusteeTransformationService = mock[TrusteeTransformationService]
-      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)(ExecutionContext.Implicits.global, Helpers.stubControllerComponents())
 
       val newTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
         lineNo = Some("newLineNo"),
@@ -77,7 +81,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
 
     "must return an error for malformed json" in {
       val trusteeTransformationService = mock[TrusteeTransformationService]
-      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)(ExecutionContext.Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -93,7 +97,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
     "must add a new add trustee transform" in {
 
       val trusteeTransformationService = mock[TrusteeTransformationService]
-      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)(ExecutionContext.Implicits.global, Helpers.stubControllerComponents())
 
       val newTrusteeIndInfo = DisplayTrustTrusteeIndividualType(
         lineNo = Some("newLineNo"),
@@ -122,7 +126,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
 
     "must return an error for malformed json" in {
       val trusteeTransformationService = mock[TrusteeTransformationService]
-      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)(ExecutionContext.Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -138,7 +142,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
     "must add a new promote trustee transform" in {
 
       val trusteeTransformationService = mock[TrusteeTransformationService]
-      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)(ExecutionContext.Implicits.global, Helpers.stubControllerComponents())
       val index = 3
 
       val newTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
@@ -175,7 +179,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
     "must return an error for malformed json" in {
       val trusteeTransformationService = mock[TrusteeTransformationService]
 
-      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)(ExecutionContext.Implicits.global, Helpers.stubControllerComponents())
       val index = 3
 
       val request = FakeRequest("POST", "path")
@@ -194,7 +198,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
       implicit val hc: HeaderCarrier = HeaderCarrier()
 
       val trusteeTransformationService = mock[TrusteeTransformationService]
-      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)(ExecutionContext.Implicits.global, Helpers.stubControllerComponents())
 
       val payload = RemoveTrustee(
         endDate = LocalDate.parse("2020-01-10"), index = 0
@@ -224,7 +228,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
 
     "must add a new amend trustee transform for a trustee ind" in {
       val trusteeTransformationService = mock[TrusteeTransformationService]
-      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)(ExecutionContext.Implicits.global, Helpers.stubControllerComponents())
 
       val newTrusteeIndInfo = DisplayTrustTrusteeIndividualType(
         lineNo = Some("newLineNo"),
@@ -258,7 +262,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
 
     "must add a new amend trustee transform for a trustee org" in {
       val trusteeTransformationService = mock[TrusteeTransformationService]
-      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)(ExecutionContext.Implicits.global, Helpers.stubControllerComponents())
 
       val newTrusteeOrgInfo = DisplayTrustTrusteeOrgType(
         lineNo = Some("newLineNo"),
@@ -293,7 +297,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
 
     "must return an error for malformed json" in {
       val trusteeTransformationService = mock[TrusteeTransformationService]
-      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)
+      val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)(ExecutionContext.Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))

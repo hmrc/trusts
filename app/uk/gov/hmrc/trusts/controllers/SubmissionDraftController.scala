@@ -21,7 +21,7 @@ import java.time.LocalDate
 import javax.inject.Inject
 import play.api.Logger
 import play.api.libs.json._
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RegistrationSubmission.{AnswerSection, MappedPiece}
 import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
@@ -35,9 +35,9 @@ import scala.concurrent.Future
 
 class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubmissionRepository,
                                           identify: IdentifierAction,
-                                          auditService: AuditService,
-                                          localDateTimeService: LocalDateTimeService
-                                       ) extends TrustsBaseController {
+                                          localDateTimeService: LocalDateTimeService,
+                                          cc: ControllerComponents
+                                       ) extends TrustsBaseController(cc) {
 
   def setSection(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
@@ -228,7 +228,6 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
       )
     }
   }
-
 
   def getWhenTrustSetup(draftId: String) : Action[AnyContent] = identify.async {
     implicit request =>

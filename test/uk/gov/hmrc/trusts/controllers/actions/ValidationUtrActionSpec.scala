@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.actions
+package uk.gov.hmrc.trusts.controllers.actions
 
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.Json
-import play.api.mvc.{ActionRefiner, AnyContent, Request}
+import play.api.mvc.AnyContent
 import play.api.mvc.Results.{BadRequest, Ok}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.trusts.controllers.actions.ValidateUTRAction
-
-import scala.concurrent.Future
 import uk.gov.hmrc.trusts.models.ApiResponse.invalidUTRErrorResponse
 
-class TrustsActionsSpec extends PlaySpec with MockitoSugar with GuiceOneAppPerSuite{
+import scala.concurrent.Future
 
-  def createSUT(utr: String) = ValidateUTRAction(utr)
+class ValidationUtrActionSpec extends PlaySpec with MockitoSugar with GuiceOneAppPerSuite {
+
+  def createSUT(utr: String) = app.injector.instanceOf[ValidateUtrActionProvider].apply(utr)
 
   "The validateUTR action" should {
     "accept a valid 10 digit UTR" in {

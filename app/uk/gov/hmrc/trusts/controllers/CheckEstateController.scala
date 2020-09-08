@@ -19,6 +19,7 @@ package uk.gov.hmrc.trusts.controllers
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json
+import play.api.mvc.ControllerComponents
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.ApiResponse._
@@ -29,9 +30,10 @@ import uk.gov.hmrc.trusts.services.{DesService, ValidationService}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton()
-class CheckEstateController @Inject()(desService: DesService, config: AppConfig,
-                                      validationService: ValidationService,
-                                      identify: IdentifierAction) extends TrustsBaseController {
+@deprecated("API moved to it's own microservice. http://github.com/hmrc/estates", "7 September 2020")
+class CheckEstateController @Inject()(desService: DesService,
+                                      identify: IdentifierAction,
+                                      cc: ControllerComponents) extends TrustsBaseController(cc) {
 
 
   def checkExistingEstate() = identify.async(parse.json) { implicit request =>

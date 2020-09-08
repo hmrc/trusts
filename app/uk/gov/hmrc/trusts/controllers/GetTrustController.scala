@@ -18,10 +18,10 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsArray, JsBoolean, JsObject, JsPath, JsValue, Json}
-import play.api.mvc.{Action, AnyContent, Result}
-import uk.gov.hmrc.play.bootstrap.controller.BaseController
-import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUTRAction}
+import play.api.libs.json._
+import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
+import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUtrActionProvider}
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.{BadRequestResponse, _}
@@ -34,9 +34,11 @@ import scala.concurrent.Future
 class GetTrustController @Inject()(identify: IdentifierAction,
                                    auditService: AuditService,
                                    desService: DesService,
-                                   transformationService: TransformationService) extends BaseController {
-  private val logger = LoggerFactory.getLogger("application." + classOf[GetTrustController].getCanonicalName)
+                                   transformationService: TransformationService,
+                                   validateUtr : ValidateUtrActionProvider,
+                                   cc: ControllerComponents) extends BackendController(cc) {
 
+  private val logger = LoggerFactory.getLogger("application." + classOf[GetTrustController].getCanonicalName)
 
   val errorAuditMessages: Map[GetTrustResponse, String] = Map(
     InvalidUTRResponse -> "The UTR provided is invalid.",
@@ -190,9 +192,8 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   }
 
   private def doGet(utr: String, applyTransformations: Boolean, refreshEtmpData: Boolean = false)
-                   (handleResult: GetTrustSuccessResponse => Result): Action[AnyContent] = {
-
-    (ValidateUTRAction(utr) andThen identify).async {
+                   (handleResult: GetTrustSuccessResponse => Result): Action[AnyContent] =
+    (validateUtr(utr) andThen identify).async {
       implicit request =>
 
         resetCacheIfRequested(utr, request.identifier, refreshEtmpData).flatMap { _ =>
@@ -243,5 +244,4 @@ class GetTrustController @Inject()(identify: IdentifierAction,
           }
         }
     }
-  }
 }

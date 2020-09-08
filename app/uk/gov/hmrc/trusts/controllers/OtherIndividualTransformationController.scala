@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.controllers
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
-import play.api.mvc.Action
+import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustNaturalPersonType
 import uk.gov.hmrc.trusts.models.RemoveOtherIndividual
@@ -32,7 +32,9 @@ import scala.concurrent.{ExecutionContext, Future}
 class OtherIndividualTransformationController @Inject()(
                                           identify: IdentifierAction,
                                           transformService: OtherIndividualTransformationService
-                                        )(implicit val executionContext: ExecutionContext) extends TrustsBaseController with ValidationUtil {
+                                        )(implicit val executionContext: ExecutionContext,cc: ControllerComponents)
+  extends TrustsBaseController(cc) with ValidationUtil {
+  
   private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
 
     def removeOtherIndividual(utr: String): Action[JsValue] = identify.async(parse.json) {

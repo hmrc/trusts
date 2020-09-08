@@ -17,18 +17,15 @@
 package uk.gov.hmrc.trusts.connectors
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, containing, equalTo, get, post, put, urlEqualTo}
-import org.scalatest.time.{Millis, Seconds, Span}
+import com.github.tomakehurst.wiremock.client.WireMock._
+import org.scalatest.concurrent.IntegrationPatience
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers.CONTENT_TYPE
 import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.utils.WireMockHelper
 
-class BaseConnectorSpec extends BaseSpec with WireMockHelper {
-
-  implicit val defaultPatience =
-    PatienceConfig(timeout = Span(5, Seconds), interval = Span(15, Millis))
+class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationPatience {
 
   override def applicationBuilder(): GuiceApplicationBuilder = {
     super.applicationBuilder()

@@ -22,6 +22,8 @@ import org.mockito.Matchers.{eq => Meq, _}
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import play.api.libs.json.Json
+import play.api.mvc.BodyParsers
+import play.api.test.Helpers
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.http.HeaderCarrier
@@ -36,7 +38,7 @@ import uk.gov.hmrc.trusts.utils.Headers
 
 import scala.concurrent.Future
 
-class EstateVariationsControllerSpec extends BaseSpec with BeforeAndAfterEach{
+class EstateVariationsControllerSpec extends BaseSpec with BeforeAndAfterEach {
 
   lazy val mockDesService: DesService = mock[DesService]
 
@@ -48,6 +50,8 @@ class EstateVariationsControllerSpec extends BaseSpec with BeforeAndAfterEach{
   val auditService = new AuditService(mockAuditConnector, mockConfig)
   val validationService = new ValidationService()
 
+  lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+
   val responseHandler = new VariationsResponseHandler(mockAuditService)
 
   override def beforeEach() = {
@@ -55,7 +59,7 @@ class EstateVariationsControllerSpec extends BaseSpec with BeforeAndAfterEach{
   }
 
   private def estateVariationsController = {
-    val SUT = new EstateVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig, responseHandler)
+    val SUT = new EstateVariationsController(new FakeIdentifierAction(bodyParsers, Organisation), mockDesService, mockAuditService, validationService, mockConfig, responseHandler, Helpers.stubControllerComponents())
     SUT
   }
 
@@ -75,7 +79,8 @@ class EstateVariationsControllerSpec extends BaseSpec with BeforeAndAfterEach{
 
         val requestPayLoad = Json.parse(validEstateVariationsRequestJson)
 
-        val SUT = new EstateVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig, responseHandler)
+        val SUT = new EstateVariationsController(new FakeIdentifierAction(bodyParsers, Organisation),
+          mockDesService, mockAuditService, validationService, mockConfig, responseHandler, Helpers.stubControllerComponents())
 
         val result = SUT.estateVariation()(
           postRequestWithPayload(requestPayLoad, withDraftId = false)
@@ -100,7 +105,8 @@ class EstateVariationsControllerSpec extends BaseSpec with BeforeAndAfterEach{
 
         val requestPayLoad = Json.parse(validEstateVariationsRequestJson)
 
-        val SUT = new EstateVariationsController(new FakeIdentifierAction(Organisation),mockDesService, auditService, validationService, mockConfig, responseHandler)
+        val SUT = new EstateVariationsController(new FakeIdentifierAction(bodyParsers, Organisation),
+          mockDesService, auditService, validationService, mockConfig, responseHandler, Helpers.stubControllerComponents())
 
         val result = SUT.estateVariation()(
           postRequestWithPayload(requestPayLoad, withDraftId = false)

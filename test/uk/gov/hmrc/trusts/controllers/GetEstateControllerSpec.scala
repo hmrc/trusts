@@ -19,14 +19,16 @@ package uk.gov.hmrc.trusts.controllers
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.JsValue
-import play.api.test.FakeRequest
+import play.api.mvc.BodyParsers
+import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
+import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, ValidateUtrActionProvider}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustFoundResponse
@@ -34,22 +36,27 @@ import uk.gov.hmrc.trusts.services.{AuditService, DesService, FakeAuditService}
 
 import scala.concurrent.Future
 
-class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach{
+class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach {
 
   lazy val desService: DesService = mock[DesService]
   lazy val mockedAuditService: AuditService = mock[AuditService]
+
+  lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   val mockAuditConnector = mock[AuditConnector]
   val mockConfig = mock[AppConfig]
 
   val auditService = new AuditService(mockAuditConnector, mockConfig)
 
+  val validateUtrAction = app.injector.instanceOf[ValidateUtrActionProvider]
+
   override def afterEach() =  {
     reset(mockedAuditService, mockAuditConnector, mockConfig)
   }
 
   private def getEstatesController = {
-    val SUT = new GetEstateController(new FakeIdentifierAction(Organisation), mockedAuditService, desService)
+    val SUT = new GetEstateController(new FakeIdentifierAction(bodyParsers, Organisation),
+      mockedAuditService, desService, validateUtrAction, Helpers.stubControllerComponents())
     SUT
   }
 
@@ -66,7 +73,8 @@ class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAn
 
         when(mockConfig.auditingEnabled).thenReturn(false)
 
-        val SUT = new GetEstateController(new FakeIdentifierAction(Organisation), auditService, desService)
+        val SUT = new GetEstateController(new FakeIdentifierAction(bodyParsers, Organisation),
+          auditService, desService, validateUtrAction, Helpers.stubControllerComponents())
 
         val result = SUT.get(utr).apply(FakeRequest(GET, s"/estates/$utr"))
 
@@ -83,7 +91,7 @@ class GetEstateControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAn
 
         when(mockConfig.auditingEnabled).thenReturn(true)
 
-        val SUT = new GetEstateController(new FakeIdentifierAction(Organisation), auditService, desService)
+        val SUT = new GetEstateController(new FakeIdentifierAction(bodyParsers, Organisation), auditService, desService, validateUtrAction, Helpers.stubControllerComponents())
 
         val result = SUT.get(utr).apply(FakeRequest(GET, s"/estates/$utr"))
 
