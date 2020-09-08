@@ -19,19 +19,19 @@ package uk.gov.hmrc.trusts.controllers
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.ControllerComponents
+import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.ApiResponse._
 import uk.gov.hmrc.trusts.models.ExistingCheckRequest
 import uk.gov.hmrc.trusts.models.ExistingCheckResponse.{AlreadyRegistered, Matched, NotMatched}
-import uk.gov.hmrc.trusts.services.DesService
+import uk.gov.hmrc.trusts.services.{DesService, ValidationService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton()
-class CheckTrustController @Inject()(desService: DesService,
-                                     cc: ControllerComponents,
-                                     identify: IdentifierAction) extends TrustsBaseController(cc) {
+class CheckTrustController @Inject()(desService: DesService, config: AppConfig,
+                                     validationService: ValidationService,
+                                     identify: IdentifierAction) extends TrustsBaseController {
 
   def checkExistingTrust() = identify.async(parse.json) { implicit request =>
     withJsonBody[ExistingCheckRequest] {

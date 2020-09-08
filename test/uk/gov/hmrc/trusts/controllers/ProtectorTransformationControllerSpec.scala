@@ -21,13 +21,11 @@ import java.time.LocalDate
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
-import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.Json
-import play.api.mvc.BodyParsers
+import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
-import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustProtector, DisplayTrustProtectorCompany}
@@ -35,18 +33,15 @@ import uk.gov.hmrc.trusts.models.variation.{Protector, ProtectorCompany}
 import uk.gov.hmrc.trusts.models.{NameType, RemoveProtector, Success}
 import uk.gov.hmrc.trusts.services.ProtectorTransformationService
 
-import scala.concurrent.ExecutionContext.Implicits
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ProtectorTransformationControllerSpec extends FreeSpec
   with MockitoSugar
   with ScalaFutures
-  with MustMatchers
-  with GuiceOneAppPerSuite {
+  with MustMatchers {
 
-  lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
-
-  val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
+  val identifierAction = new FakeIdentifierAction(Agent)
 
   "Add individual protector" - {
 
@@ -66,7 +61,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
       when(protectorTransformationService.addIndividualProtectorTransformer(any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
-      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
+      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(newProtector))
@@ -85,7 +80,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
 
       val protectorTransformationService: ProtectorTransformationService = mock[ProtectorTransformationService]
 
-      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
+      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -101,7 +96,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
     "must add a new business protector transform" in {
 
       val protectorTransformationService = mock[ProtectorTransformationService]
-      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
+      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)
 
       val newCompanyProtector = DisplayTrustProtectorCompany(
         name = "TestCompany",
@@ -130,7 +125,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
     "must return an error for malformed json" in {
 
       val protectorTransformationService = mock[ProtectorTransformationService]
-      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
+      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -162,7 +157,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
       when(protectorTransformationService.amendIndividualProtectorTransformer(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
 
-      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
+      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(newProtector))
@@ -183,7 +178,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
 
       val protectorTransformationService: ProtectorTransformationService = mock[ProtectorTransformationService]
 
-      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
+      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -202,7 +197,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
     "must add a new amend business protector transform" in {
 
       val protectorTransformationService = mock[ProtectorTransformationService]
-      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
+      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)
 
       val newCompany = ProtectorCompany(
         None,
@@ -235,7 +230,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
 
     "must return an error for malformed json" in {
       val protectorTransformationService = mock[ProtectorTransformationService]
-      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
+      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -255,7 +250,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
       when(protectorTransformationService.removeProtector(any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
 
-      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
+      val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.obj(
@@ -276,7 +271,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
     }
 
     "return an error when json is invalid" in {
-      val OUT = new ProtectorTransformationController(identifierAction, mock[ProtectorTransformationService])(Implicits.global, Helpers.stubControllerComponents())
+      val OUT = new ProtectorTransformationController(identifierAction, mock[ProtectorTransformationService])
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.obj("field" -> "value"))

@@ -22,7 +22,7 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
-import play.api.test.{FakeRequest, Helpers}
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.repositories.TransformIntegrationTest
@@ -66,7 +66,7 @@ class AddBusinessSettlorSpec extends FreeSpec with MustMatchers with MockitoSuga
 
       val application = applicationBuilder
         .overrides(
-          bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+          bind[IdentifierAction].toInstance(new FakeIdentifierAction(Organisation)),
           bind[DesConnector].toInstance(stubbedDesConnector)
         )
         .build()

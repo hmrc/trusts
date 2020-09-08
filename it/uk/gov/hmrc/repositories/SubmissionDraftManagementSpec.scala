@@ -20,14 +20,13 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.inject.bind
 import play.api.libs.json._
-import play.api.test.{FakeRequest, Helpers}
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import uk.gov.hmrc.trusts.models.RegistrationSubmissionDraftData
 
 class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with MockitoSugar with TransformIntegrationTest {
-
   private val draftData = Json.obj(
     "field1" -> "value1",
     "field2" -> "value2"
@@ -45,7 +44,7 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
 
       val application = applicationBuilder
         .overrides(
-          bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation))
+          bind[IdentifierAction].toInstance(new FakeIdentifierAction(Organisation))
         )
         .build()
 

@@ -16,26 +16,14 @@
 
 package uk.gov.hmrc.trusts.controllers.actions
 
-import javax.inject.Inject
 import play.api.libs.json.Json.toJson
 import play.api.mvc.Results._
 import play.api.mvc._
 import uk.gov.hmrc.trusts.models.ApiResponse.invalidUTRErrorResponse
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-class ValidateUtrActionProvider @Inject()()(implicit
-                                            val parser: BodyParsers.Default,
-                                            executionContext: ExecutionContext) {
-
-  def apply(utr: String) = new ValidateUTRAction(utr)
-
-}
-
-class ValidateUTRAction @Inject()(input: String)(implicit val parser: BodyParsers.Default,
-                                                 val executionContext: ExecutionContext)
-  extends ActionFilter[Request] with ActionBuilder[Request, AnyContent] {
-
+case class ValidateUTRAction(input: String) extends ActionFilter[Request] with ActionBuilder[Request] {
   override protected def filter[A](request: Request[A]): Future[Option[Result]] = Future.successful{
     if (input.matches("^[0-9]{10}$")) {
       None

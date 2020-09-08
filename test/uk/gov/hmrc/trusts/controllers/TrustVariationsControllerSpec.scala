@@ -22,8 +22,7 @@ import org.mockito.Matchers.{eq => Meq, _}
 import org.mockito.Mockito._
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.BodyParsers
-import play.api.test.{FakeRequest, Helpers}
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.http.HeaderCarrier
@@ -40,8 +39,6 @@ import uk.gov.hmrc.trusts.utils.Headers
 import scala.concurrent.Future
 
 class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach {
-
-  lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   lazy val mockDesService: DesService = mock[DesService]
 
@@ -64,16 +61,13 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
   private def trustVariationsController = {
     val SUT = new TrustVariationsController(
-      new FakeIdentifierAction(bodyParsers, Organisation),
+      new FakeIdentifierAction(Organisation),
       mockDesService,
       mockAuditService,
       validationService,
       mockConfig,
       mockVariationService,
-      responseHandler,
-      Helpers.stubControllerComponents()
-    )
-
+      responseHandler)
     SUT
   }
 
@@ -93,7 +87,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
           val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
 
-          val SUT = new TrustVariationsController(new FakeIdentifierAction(bodyParsers, Organisation), mockDesService, mockAuditService, validationService, mockConfig, mockVariationService, responseHandler, Helpers.stubControllerComponents())
+          val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, mockAuditService, validationService, mockConfig, mockVariationService, responseHandler)
 
           val result = SUT.trustVariation()(
             postRequestWithPayload(requestPayLoad, withDraftId = false)
@@ -119,7 +113,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
           val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
 
-          val SUT = new TrustVariationsController(new FakeIdentifierAction(bodyParsers, Organisation), mockDesService, auditService, validationService, mockConfig, mockVariationService, responseHandler, Helpers.stubControllerComponents())
+          val SUT = new TrustVariationsController(new FakeIdentifierAction(Organisation), mockDesService, auditService, validationService, mockConfig, mockVariationService, responseHandler)
 
           val result = SUT.trustVariation()(
             postRequestWithPayload(requestPayLoad, withDraftId = false)

@@ -23,19 +23,18 @@ import play.api.mvc.Results._
 import play.api.mvc.{Request, Result, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.retrieve.~
+import uk.gov.hmrc.auth.core.retrieve.{Retrievals, ~}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.models.ApiResponse._
 import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 
 import scala.concurrent.ExecutionContext.Implicits._
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class AuthenticatedIdentifierAction @Inject()(override val authConnector: AuthConnector,
-                                              val parser: BodyParsers.Default)
-                                             (implicit val executionContext: ExecutionContext)
+                                               config: AppConfig)
   extends IdentifierAction with AuthorisedFunctions {
 
   def invokeBlock[A](request: Request[A],
@@ -63,4 +62,4 @@ class AuthenticatedIdentifierAction @Inject()(override val authConnector: AuthCo
 
 }
 
-trait IdentifierAction extends ActionBuilder[IdentifierRequest, AnyContent]
+trait IdentifierAction extends ActionBuilder[IdentifierRequest]

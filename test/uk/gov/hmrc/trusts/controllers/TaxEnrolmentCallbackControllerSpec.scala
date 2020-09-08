@@ -18,7 +18,6 @@ package uk.gov.hmrc.trusts.controllers
 
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.Json
-import play.api.test.Helpers
 import play.api.test.Helpers.status
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -35,7 +34,7 @@ class TaxEnrolmentCallbackControllerSpec extends BaseSpec with GuiceOneServerPer
 
     "return 200 " when {
       "tax enrolment callback for subscription id enrolment  " in {
-        val SUT = new TaxEnrolmentCallbackController(Helpers.stubControllerComponents())
+        val SUT = new TaxEnrolmentCallbackController( auditConnector)
 
         val result = SUT.subscriptionCallback().apply(postRequestWithPayload(Json.parse({"""{ "url" : "http//","state" : "SUCCESS"}"""})))
         status(result) mustBe OK

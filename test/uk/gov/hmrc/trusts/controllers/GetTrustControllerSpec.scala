@@ -18,20 +18,18 @@ package uk.gov.hmrc.trusts.controllers
 
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.{reset, times, verify, when}
-import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Span}
-import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import org.scalatest._
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.BodyParsers
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, ValidateUtrActionProvider}
+import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{TrustFoundResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService}
@@ -39,10 +37,7 @@ import uk.gov.hmrc.trusts.utils.JsonRequests
 
 import scala.concurrent.Future
 
-class GetTrustControllerSpec extends WordSpec with MockitoSugar
-  with MustMatchers with BeforeAndAfter
-  with BeforeAndAfterEach with JsonRequests
-  with Inside with ScalaFutures with GuiceOneAppPerSuite {
+class GetTrustControllerSpec extends WordSpec with MockitoSugar with MustMatchers with BeforeAndAfter with BeforeAndAfterEach with JsonRequests with Inside with ScalaFutures {
 
   private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 
@@ -56,18 +51,12 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
   private val auditService = new AuditService(mockAuditConnector, mockConfig)
 
-  private val validateUtrAction = app.injector.instanceOf[ValidateUtrActionProvider]
-
-  lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
-
   override def afterEach(): Unit =  {
     reset(mockedAuditService, desService, mockAuditConnector, mockConfig, transformationService)
   }
 
   private def getTrustController = {
-    val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation),
-      mockedAuditService, desService, transformationService, validateUtrAction, Helpers.stubControllerComponents())
-
+    val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), mockedAuditService, desService, transformationService)
     SUT
   }
 
@@ -77,8 +66,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
   ".getFromEtmp" should {
     "reset the cache and clear transforms before calling get" in {
 
-      val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation),
-        auditService, desService, transformationService,validateUtrAction, Helpers.stubControllerComponents())
+      val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), auditService, desService, transformationService)
 
       val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
       when(desService.resetCache(any(), any()))
@@ -104,7 +92,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
     "not perform auditing" when {
       "the feature toggle is set to false" in {
 
-        val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation), auditService, desService, transformationService, validateUtrAction, Helpers.stubControllerComponents())
+        val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), auditService, desService, transformationService)
 
         val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
         when(desService.getTrustInfo(any(), any())(any()))
@@ -123,7 +111,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
     "perform auditing" when {
       "the feature toggle is set to true" in {
 
-        val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation), auditService, desService, transformationService, validateUtrAction, Helpers.stubControllerComponents())
+        val SUT = new GetTrustController(new FakeIdentifierAction(Organisation), auditService, desService, transformationService)
 
         when(desService.getTrustInfo(any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))

@@ -22,11 +22,9 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.{JsNull, JsString, Json}
-import play.api.mvc.BodyParsers
-import play.api.test.{FakeRequest, Helpers}
+import play.api.test.FakeRequest
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
@@ -37,11 +35,7 @@ import uk.gov.hmrc.trusts.utils.JsonRequests
 
 import scala.concurrent.Future
 
-class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
-  with MustMatchers with JsonRequests with Inside with ScalaFutures
-  with GuiceOneAppPerSuite {
-
-  lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar with MustMatchers with JsonRequests with Inside with ScalaFutures {
 
   private val currentDateTime: LocalDateTime = LocalDateTime.of(1999, 3, 14, 13, 33)
   private object LocalDateTimeServiceStub extends LocalDateTimeService {
@@ -186,15 +180,15 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
   ".setSection" should {
 
     "return 'bad request' for malformed body" in {
-
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        auditService,
+        LocalDateTimeServiceStub
       )
       val body = Json.parse(
         """
@@ -217,14 +211,15 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
     }
 
     "cause creation of draft with section if none exists" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        auditService,
+        LocalDateTimeServiceStub
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -270,16 +265,16 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
     }
 
     "modify existing draft if one exists" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        auditService,
+        LocalDateTimeServiceStub
       )
-
 
       when(submissionRepository.getDraft(any(), any()))
         .thenReturn(Future.successful(Some(existingDraft)))
@@ -331,16 +326,16 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
   ".setSectionSet" should {
 
     "set data into correct sections" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        auditService,
+        LocalDateTimeServiceStub
       )
-
 
       when(submissionRepository.getDraft(any(), any()))
         .thenReturn(Future.successful(Some(existingDraft)))
@@ -464,14 +459,15 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
     }
 
     "prune mapped piece when given a path with JsNull" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        auditService,
+        LocalDateTimeServiceStub
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -587,14 +583,15 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
   ".getSection" should {
 
     "get existing draft when one exists" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        auditService,
+        LocalDateTimeServiceStub
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -622,16 +619,16 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       contentAsJson(result) mustBe expectedDraftJson
     }
     "return empty data when none exists in draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        auditService,
+        LocalDateTimeServiceStub
       )
-
 
       when(submissionRepository.getDraft(any(), any()))
         .thenReturn(Future.successful(Some(existingDraft)))
@@ -654,14 +651,15 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
     }
 
     "return not found when there is no draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        auditService,
+        LocalDateTimeServiceStub
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -677,14 +675,15 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
   ".getDrafts" should {
 
     "get all drafts when some exist" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        auditService,
+        LocalDateTimeServiceStub
       )
 
       val drafts = List(
@@ -720,16 +719,16 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       contentType(result) mustBe Some(JSON)
       contentAsJson(result) mustBe expectedDraftJson
     }
-
     "get all drafts when none exist" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        auditService,
+        LocalDateTimeServiceStub
       )
 
       when(submissionRepository.getAllDrafts(any()))
@@ -752,14 +751,15 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
   ".removeDraft" should {
 
     "remove draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        auditService,
+        LocalDateTimeServiceStub
       )
 
       when(submissionRepository.removeDraft(any(), any()))
@@ -777,14 +777,15 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
   ".getWhenTrustSetup" should {
 
      "respond with OK with the start date" in {
-       val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+       val identifierAction = new FakeIdentifierAction(Organisation)
        val submissionRepository = mock[RegistrationSubmissionRepository]
+       val auditService = mock[AuditService]
 
        val controller = new SubmissionDraftController(
          submissionRepository,
          identifierAction,
-         LocalDateTimeServiceStub,
-         Helpers.stubControllerComponents()
+         auditService,
+         LocalDateTimeServiceStub
        )
 
        when(submissionRepository.getDraft(any(), any()))
@@ -808,14 +809,15 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
      }
 
     "respond with NotFound when no draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        auditService,
+        LocalDateTimeServiceStub
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -829,14 +831,15 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
     }
 
     "respond with NotFound when no start date in draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        auditService,
+        LocalDateTimeServiceStub
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -854,14 +857,15 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
   ".getLeadTrustee" should {
 
     "respond with OK with the lead trustee" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        auditService,
+        LocalDateTimeServiceStub
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -891,14 +895,15 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
     }
 
     "respond with NotFound when no draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        auditService,
+        LocalDateTimeServiceStub
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -915,14 +920,15 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
   ".getCorrespondenceAddress" should {
 
     "respond with OK with the correspondence address" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        auditService,
+        LocalDateTimeServiceStub
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -949,14 +955,15 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
     }
 
     "respond with NotFound when no draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        auditService,
+        LocalDateTimeServiceStub
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -970,16 +977,16 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
     }
 
     "respond with NotFound when no start date in draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        auditService,
+        LocalDateTimeServiceStub
       )
-
 
       when(submissionRepository.getDraft(any(), any()))
         .thenReturn(Future.successful(Some(mockSubmissionDraftNoData)))
@@ -996,14 +1003,15 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
   ".reset" should {
 
     "respond with OK after cleaning up draft answers, status, mapped registration data and print answer sections" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        auditService,
+        LocalDateTimeServiceStub
       )
 
       lazy val expectedAfterCleanup = Json.parse(
@@ -1074,14 +1082,15 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
     }
 
     "respond with InternalServerError when no draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction = new FakeIdentifierAction(Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
+      val auditService = mock[AuditService]
 
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        auditService,
+        LocalDateTimeServiceStub
       )
 
       when(submissionRepository.getDraft(any(), any()))

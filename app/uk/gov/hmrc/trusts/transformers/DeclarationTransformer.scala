@@ -73,11 +73,10 @@ class DeclarationTransformer {
 
   private def fixLeadTrusteeAddress(leadTrusteeJson: JsValue, leadTrusteePath: JsPath) = {
     if (leadTrusteeJson.transform((leadTrusteePath \ 'identification \ 'utr).json.pick).isSuccess ||
-        leadTrusteeJson.transform((leadTrusteePath \ 'identification \ 'nino).json.pick).isSuccess) {
+        leadTrusteeJson.transform((leadTrusteePath \ 'identification \ 'nino).json.pick).isSuccess)
       (leadTrusteePath \ 'identification \ 'address).json.prune
-    } else {
+    else
       __.json.pick
-    }
   }
 
   private def determineTrusteeField(rootPath: JsPath, json: JsValue): String = {
@@ -107,7 +106,7 @@ class DeclarationTransformer {
 
     (newLeadTrustee, originalLeadTrustee) match {
       case (JsSuccess(newLeadTrusteeJson, _), JsSuccess(originalLeadTrusteeJson, _))
-        if newLeadTrusteeJson != originalLeadTrusteeJson =>
+        if (newLeadTrusteeJson != originalLeadTrusteeJson) =>
           val reads = fixLeadTrusteeAddress(originalLeadTrusteeJson, __)
           originalLeadTrusteeJson.transform(reads) match {
             case JsSuccess(value, _) => addPreviousLeadTrusteeAsExpiredStep(value, date)
@@ -125,25 +124,19 @@ class DeclarationTransformer {
     __.json.update(path.json.put(value))
 
   private def declarationAddress(agentDetails: Option[AgentDetails], responseJson: JsValue) =
-    if (agentDetails.isDefined) {
+    if (agentDetails.isDefined)
       agentDetails.get.agentAddress
-    } else {
+    else
       responseJson.transform((pathToLeadTrustees \ 'identification \ 'address).json.pick) match {
         case JsSuccess(value, _) => value.as[AddressType]
-        case JsError(_) =>
-          // Todo, apply same fixes that went into estates microservice
-          ???
+        case JsError(_) => ???
       }
-    }
 
   private def pruneEmptyTrustees(responseJson: JsValue) = {
     val pickTrusteesArray = pathToTrustees.json.pick[JsArray]
-
     responseJson.transform(pickTrusteesArray) match {
-      case JsSuccess(JsArray(e), _) if e.isEmpty =>
-        pathToTrustees.json.prune
-      case _ =>
-        __.json.pick[JsObject]
+      case JsSuccess(JsArray(Nil), _) => pathToTrustees.json.prune
+      case _ => __.json.pick[JsObject]
     }
   }
 

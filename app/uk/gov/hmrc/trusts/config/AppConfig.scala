@@ -17,41 +17,44 @@
 package uk.gov.hmrc.trusts.config
 
 import javax.inject.{Inject, Singleton}
-import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+
+import play.api.Mode.Mode
+import play.api.{Configuration, Environment}
+import uk.gov.hmrc.play.config.ServicesConfig
 
 
 @Singleton
-class AppConfig @Inject()(configuration: Configuration, servicesConfig: ServicesConfig) {
+class AppConfig @Inject()(val runModeConfiguration: Configuration, playEnv: Environment) extends ServicesConfig {
 
-  val registerTrustsUrl : String = servicesConfig.baseUrl("des-trusts")
-  val registerEstatesUrl : String = servicesConfig.baseUrl("des-estates")
-  val taxEnrolmentsUrl : String = servicesConfig.baseUrl("tax-enrolments")
-  val getTrustOrEstateUrl : String = servicesConfig.baseUrl("des-display-trust-or-estate")
-  val varyTrustOrEstateUrl : String = servicesConfig.baseUrl("des-vary-trust-or-estate")
+  override protected def mode: Mode = playEnv.mode
 
-  val desEnvironment : String = configuration.get[String]("microservice.services.des-trusts.environment")
-  val desToken : String = configuration.get[String]("microservice.services.des-trusts.token")
+  private def loadConfig(key: String) = runModeConfiguration.getString(key).getOrElse(
+    throw new Exception(s"Missing configuration key : $key")
+  )
+
+  val desTrustsUrl : String = baseUrl("des-trusts")
+  val desEstatesUrl : String = baseUrl("des-estates")
+
+  val getTrustOrEstateUrl : String = baseUrl("des-display-trust-or-estate")
+
+  val varyTrustOrEstateUrl : String = baseUrl("des-vary-trust-or-estate")
+
+  val desEnvironment : String = loadConfig("microservice.services.des-trusts.environment")
+  val desToken : String = loadConfig("microservice.services.des-trusts.token")
 
   val trustsApiRegistrationSchema : String  = "/resources/schemas/trusts-api-schema-5.0.json"
   val estatesApiRegistrationSchema : String  = "/resources/schemas/estates-api-schema-5.0.json"
   val variationsApiSchema: String = "/resources/schemas/variations-api-schema-4.0.json"
 
-  val taxEnrolmentsPayloadBodyServiceName : String =
-    configuration.get[String]("microservice.services.tax-enrolments.serviceName")
+  val taxEnrolmentsUrl : String = baseUrl("tax-enrolments")
+  val taxEnrolmentsPayloadBodyServiceName : String = loadConfig("microservice.services.tax-enrolments.serviceName")
+  val taxEnrolmentsPayloadBodyCallback : String = loadConfig("microservice.services.tax-enrolments.callback")
+  val delayToConnectTaxEnrolment : Int = loadConfig("microservice.services.trusts.delayToConnectTaxEnrolment").toInt
+  val maxRetry : Int = loadConfig("microservice.services.trusts.maxRetry").toInt
 
-  val taxEnrolmentsPayloadBodyCallback : String =
-    configuration.get[String]("microservice.services.tax-enrolments.callback")
+  val auditingEnabled : Boolean = loadConfig("microservice.services.trusts.features.auditing.enabled").toBoolean
 
-  val delayToConnectTaxEnrolment : Int =
-    configuration.get[String]("microservice.services.trusts.delayToConnectTaxEnrolment").toInt
-
-  val maxRetry : Int = configuration.get[Int]("microservice.services.trusts.maxRetry")
-
-  val auditingEnabled : Boolean = configuration.get[Boolean]("microservice.services.trusts.features.auditing.enabled")
-
-  val ttlInSeconds: Int = configuration.get[Int]("mongodb.ttlSeconds")
-
-  val registrationTtlInSeconds: Int = configuration.get[Int]("mongodb.registration.ttlSeconds")
+  val ttlInSeconds: Int = runModeConfiguration.getInt("mongodb.ttlSeconds").getOrElse(4*60*60)
+  val registrationTtlInSeconds: Int = runModeConfiguration.getInt("mongodb.registration.ttlSeconds").getOrElse(28*24*60*60)
 }
 

@@ -18,25 +18,22 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
-import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUtrActionProvider}
+import play.api.mvc.{Action, AnyContent}
+import uk.gov.hmrc.play.bootstrap.controller.BaseController
+import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUTRAction}
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
-import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.EstateFoundResponse
+import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.services.{AuditService, DesService}
 
-import scala.concurrent.ExecutionContext.Implicits._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-@deprecated("API moved to it's own microservice. http://github.com/hmrc/estates", "7 September 2020")
 class GetEstateController @Inject()(identify: IdentifierAction,
                                     auditService: AuditService,
-                                    desService: DesService,
-                                    validateUtr: ValidateUtrActionProvider,
-                                    cc: ControllerComponents) extends BackendController(cc) {
+                                    desService: DesService) extends BaseController {
 
-  def get(utr: String): Action[AnyContent] = (validateUtr(utr) andThen identify).async {
+  def get(utr: String): Action[AnyContent] = (ValidateUTRAction(utr) andThen identify).async {
     implicit request =>
 
     desService.getEstateInfo(utr) map {

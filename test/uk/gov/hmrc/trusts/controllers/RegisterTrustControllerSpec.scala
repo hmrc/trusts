@@ -19,8 +19,6 @@ package uk.gov.hmrc.trusts.controllers
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{when, _}
 import play.api.libs.json.Json
-import play.api.mvc.BodyParsers
-import play.api.test.Helpers
 import play.api.test.Helpers.{status, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.auth.core._
@@ -31,7 +29,6 @@ import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.services.{DesService, FakeAuditService, RosmPatternService, ValidationService}
 
-import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
 class RegisterTrustControllerSpec extends BaseSpec {
@@ -40,10 +37,8 @@ class RegisterTrustControllerSpec extends BaseSpec {
   val rosmPatternService = mock[RosmPatternService]
   val authConnector = mock[AuthConnector]
 
-  lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
-
-  val fakeOrganisationAuthAction = new FakeIdentifierAction(bodyParsers, Organisation)
-  val fakeAgentAuthAction = new FakeIdentifierAction(bodyParsers, Agent)
+  val fakeOrganisationAuthAction = new FakeIdentifierAction(Organisation)
+  val fakeAgentAuthAction = new FakeIdentifierAction(Agent)
 
   lazy val mockedAuditService = injector.instanceOf[FakeAuditService]
 
@@ -72,8 +67,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
-          mockedAuditService,
-          Helpers.stubControllerComponents()
+          mockedAuditService
         )
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
@@ -92,7 +86,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
           when(rosmPatternService.enrolAndLogResult(any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentFailure))
 
-          val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService, Helpers.stubControllerComponents())
+          val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService)
 
           val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
           status(result) mustBe OK
@@ -106,7 +100,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
         when(rosmPatternService.enrolAndLogResult(any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentNotProcessed))
 
-        val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, fakeAgentAuthAction, rosmPatternService, mockedAuditService, Helpers.stubControllerComponents())
+        val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, fakeAgentAuthAction, rosmPatternService, mockedAuditService)
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
 
@@ -121,7 +115,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
     "return a Conflict" when {
       "trusts is already registered with provided details." in {
 
-        val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService, Helpers.stubControllerComponents())
+        val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService)
 
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(AlreadyRegisteredException))
@@ -144,7 +138,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(NoMatchException))
 
-        val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService, Helpers.stubControllerComponents())
+        val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService)
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
         status(result) mustBe FORBIDDEN
@@ -159,7 +153,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
       "input request fails schema validation" in {
 
-        val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService, Helpers.stubControllerComponents())
+        val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService)
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(invalidRegistrationRequestJson)))
 
@@ -174,7 +168,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
       "input request fails business validation" in {
 
-        val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService, Helpers.stubControllerComponents())
+        val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService)
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(invalidTrustBusinessValidation)))
         status(result) mustBe BAD_REQUEST
@@ -189,7 +183,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
           .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
-        val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService, Helpers.stubControllerComponents())
+        val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService)
 
 
         val request = postRequestWithPayload(Json.parse(validRegistrationRequestJson), withDraftId = false)
@@ -213,7 +207,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(InternalServerErrorException("some error")))
 
-        val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService, Helpers.stubControllerComponents())
+        val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService)
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
 
@@ -229,8 +223,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
       "the des returns BAD REQUEST" in {
 
-        val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService, Helpers.stubControllerComponents())
-
+        val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier])).
           thenReturn(Future.failed(BadRequestException))
 
@@ -248,7 +241,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
       "the des returns Service Unavailable as dependent service is down. " in {
 
-        val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService, Helpers.stubControllerComponents())
+        val SUT = new RegisterTrustController(mockDesService, appConfig, validationService, fakeOrganisationAuthAction, rosmPatternService, mockedAuditService)
         when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
           .thenReturn(Future.failed(ServiceNotAvailableException("dependent service is down")))
 

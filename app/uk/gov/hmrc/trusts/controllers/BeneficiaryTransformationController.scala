@@ -18,11 +18,11 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
-import play.api.libs.json.{JsError, JsString, JsSuccess, JsValue}
-import play.api.mvc.{Action, ControllerComponents}
+import play.api.libs.json.{JsError, JsString, JsSuccess, JsValue, Json}
+import play.api.mvc.Action
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveBeneficiary
-import uk.gov.hmrc.trusts.models.variation._
+import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryCompanyType, BeneficiaryTrustType, IndividualDetailsType, OtherType, UnidentifiedType, LargeType}
 import uk.gov.hmrc.trusts.services.BeneficiaryTransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
@@ -31,10 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class BeneficiaryTransformationController @Inject()(
                                           identify: IdentifierAction,
                                           beneficiaryTransformationService: BeneficiaryTransformationService
-                                        )(implicit val executionContext: ExecutionContext,
-                                          cc: ControllerComponents)
-  extends TrustsBaseController(cc) with ValidationUtil {
-
+                                        )(implicit val executionContext: ExecutionContext) extends TrustsBaseController with ValidationUtil {
   private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
 
   def amendUnidentifiedBeneficiary(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {

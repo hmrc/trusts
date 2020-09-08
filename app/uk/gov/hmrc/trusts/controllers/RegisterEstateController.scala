@@ -19,7 +19,6 @@ package uk.gov.hmrc.trusts.controllers
 import javax.inject.Inject
 import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.ControllerComponents
 import uk.gov.hmrc.http.BadRequestException
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
@@ -28,20 +27,19 @@ import uk.gov.hmrc.trusts.models.ApiResponse._
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, RosmPatternService, ValidationService}
-import uk.gov.hmrc.trusts.utils.ErrorResponses._
 import uk.gov.hmrc.trusts.utils.Headers
+import uk.gov.hmrc.trusts.utils.ErrorResponses._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-@deprecated("API moved to it's own microservice. http://github.com/hmrc/estates", "7 September 2020")
+
 class RegisterEstateController @Inject()(desService: DesService, config: AppConfig,
                                          validationService: ValidationService,
                                          identifierAction: IdentifierAction,
                                          rosmPatternService: RosmPatternService,
-                                         auditService: AuditService,
-                                         cc: ControllerComponents) extends TrustsBaseController(cc) {
+                                         auditService: AuditService) extends TrustsBaseController {
 
   def registration() = identifierAction.async(parse.json) {
     implicit request =>

@@ -19,7 +19,6 @@ package uk.gov.hmrc.trusts.controllers
 import javax.inject.Inject
 import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.ControllerComponents
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
@@ -31,16 +30,14 @@ import uk.gov.hmrc.trusts.utils.ValidationUtil
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-@deprecated("API moved to it's own microservice. http://github.com/hmrc/estates", "7 September 2020")
 class EstateVariationsController @Inject()(
                                       identify: IdentifierAction,
                                       desService: DesService,
                                       auditService: AuditService,
                                       validator: ValidationService,
                                       config : AppConfig,
-                                      responseHandler: VariationsResponseHandler,
-                                      cc: ControllerComponents
-                                    ) extends TrustsBaseController(cc) with ValidationUtil {
+                                      responseHandler: VariationsResponseHandler
+                                    ) extends TrustsBaseController with ValidationUtil {
 
   def estateVariation() = identify.async(parse.json) {
     implicit request =>
