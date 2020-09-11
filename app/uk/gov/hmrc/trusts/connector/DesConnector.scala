@@ -74,17 +74,22 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig) {
 
   def registerTrust(registration: Registration)
                             : Future[RegistrationResponse] = {
-    val correlationId = UUID.randomUUID().toString
+    if (config.desEnvironment == "ist0") {
+      Future.successful(RegistrationTrnResponse("XXTRN1234567890"))
+    } else {
 
-    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
+      val correlationId = UUID.randomUUID().toString
 
-    Logger.warn(s"[DesConnector] registration: $registration")
-    Logger.info(s"[DesConnector] registering trust for correlationId: $correlationId")
+      implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
-    val response = http.POST[JsValue, RegistrationResponse](trustRegistrationEndpoint, Json.toJson(registration))
-    (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
+      Logger.warn(s"[DesConnector] registration: $registration")
+      Logger.info(s"[DesConnector] registering trust for correlationId: $correlationId")
 
-    response
+      val response = http.POST[JsValue, RegistrationResponse](trustRegistrationEndpoint, Json.toJson(registration))
+      (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc), implicitly[ExecutionContext])
+
+      response
+    }
   }
 
   def getSubscriptionId(trn: String): Future[SubscriptionIdResponse] = {
