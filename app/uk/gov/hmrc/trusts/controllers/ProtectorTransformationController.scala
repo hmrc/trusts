@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.controllers
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
-import play.api.mvc.Action
+import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveProtector
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
@@ -31,8 +31,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class ProtectorTransformationController @Inject()(identify: IdentifierAction,
                                                   transformService: ProtectorTransformationService)
-                                                 (implicit val executionContext: ExecutionContext)
-  extends TrustsBaseController with ValidationUtil {
+                                                 (implicit val executionContext: ExecutionContext,
+                                                  cc: ControllerComponents)
+  extends TrustsBaseController(cc) with ValidationUtil {
 
   private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
 
@@ -84,7 +85,6 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
       }
     }
   }
-
 
   def amendIndividualProtector(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {

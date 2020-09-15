@@ -16,15 +16,14 @@
 
 package uk.gov.hmrc.trusts.controllers
 
-import play.api.data.validation.ValidationError
 import play.api.libs.json._
-import play.api.mvc.{Request, Result}
-import uk.gov.hmrc.play.bootstrap.controller.BaseController
+import play.api.mvc.{ControllerComponents, Request, Result}
+import uk.gov.hmrc.play.bootstrap.controller.BackendController
 import uk.gov.hmrc.trusts.utils.ErrorResponses._
 
 import scala.concurrent.Future
 
-class TrustsBaseController extends BaseController {
+class TrustsBaseController(cc: ControllerComponents) extends BackendController(cc) {
 
   protected def matchResponse = """{"match": true}"""
 
@@ -43,7 +42,7 @@ class TrustsBaseController extends BaseController {
     }
 
 
-  def handleErrorResponseByField(field: Seq[(JsPath, Seq[ValidationError])]): Result = {
+  def handleErrorResponseByField(field: Seq[(JsPath, Seq[JsonValidationError])]): Result = {
 
     val fields = field.map { case (key, validationError) =>
       (key.toString.stripPrefix("/"), validationError.head.message)

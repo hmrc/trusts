@@ -16,12 +16,11 @@
 
 package uk.gov.hmrc.trusts.connectors
 
-import org.scalatest.time.{Millis, Seconds, Span}
 import uk.gov.hmrc.trusts.connector.TaxEnrolmentConnector
 import uk.gov.hmrc.trusts.exceptions.{BadRequestException, InternalServerErrorException}
 import uk.gov.hmrc.trusts.models.TaxEnrolmentSuccess
 
-class TaxEnrolmentConnectorSpec extends BaseConnectorSpec {
+class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
   lazy val connector: TaxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
 

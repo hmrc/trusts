@@ -17,10 +17,9 @@
 package uk.gov.hmrc.trusts.models.get_trust_or_estate
 
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_estate.GetEstateResponse
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustResponse
 
-sealed trait TrustErrorResponse extends GetTrustResponse with GetEstateResponse
+sealed trait TrustErrorResponse extends GetTrustResponse
 
 case object InvalidUTRResponse extends TrustErrorResponse
 

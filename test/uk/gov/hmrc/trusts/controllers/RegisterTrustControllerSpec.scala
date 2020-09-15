@@ -19,6 +19,8 @@ package uk.gov.hmrc.trusts.controllers
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{when, _}
 import play.api.libs.json.Json
+import play.api.mvc.BodyParsers
+import play.api.test.Helpers
 import play.api.test.Helpers.{status, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.auth.core._
@@ -40,8 +42,10 @@ class RegisterTrustControllerSpec extends BaseSpec {
   val authConnector: AuthConnector = mock[AuthConnector]
   val mockTrustsStoreConnector: TrustsStoreConnector = mock[TrustsStoreConnector]
 
-  val fakeOrganisationAuthAction = new FakeIdentifierAction(Organisation)
-  val fakeAgentAuthAction = new FakeIdentifierAction(Agent)
+  lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+
+  val fakeOrganisationAuthAction = new FakeIdentifierAction(bodyParsers, Organisation)
+  val fakeAgentAuthAction = new FakeIdentifierAction(bodyParsers, Agent)
 
   lazy val mockedAuditService: FakeAuditService = injector.instanceOf[FakeAuditService]
 
@@ -73,6 +77,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           fakeOrganisationAuthAction,
           rosmPatternService,
           mockedAuditService,
+          Helpers.stubControllerComponents(),
           mockTrustsStoreConnector
         )
 
@@ -99,6 +104,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           fakeOrganisationAuthAction,
           rosmPatternService,
           mockedAuditService,
+          Helpers.stubControllerComponents(),
           mockTrustsStoreConnector
         )
 
@@ -125,6 +131,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           fakeOrganisationAuthAction,
           rosmPatternService,
           mockedAuditService,
+          Helpers.stubControllerComponents(),
           mockTrustsStoreConnector
         )
 
@@ -151,6 +158,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
             fakeOrganisationAuthAction,
             rosmPatternService,
             mockedAuditService,
+            Helpers.stubControllerComponents(),
             mockTrustsStoreConnector
           )
 
@@ -173,6 +181,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           fakeAgentAuthAction,
           rosmPatternService,
           mockedAuditService,
+          Helpers.stubControllerComponents(),
           mockTrustsStoreConnector
         )
 
@@ -196,6 +205,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           fakeOrganisationAuthAction,
           rosmPatternService,
           mockedAuditService,
+          Helpers.stubControllerComponents(),
           mockTrustsStoreConnector
         )
 
@@ -227,6 +237,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           fakeOrganisationAuthAction,
           rosmPatternService,
           mockedAuditService,
+          Helpers.stubControllerComponents(),
           mockTrustsStoreConnector
         )
 
@@ -250,6 +261,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           fakeOrganisationAuthAction,
           rosmPatternService,
           mockedAuditService,
+          Helpers.stubControllerComponents(),
           mockTrustsStoreConnector
         )
 
@@ -273,6 +285,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           fakeOrganisationAuthAction,
           rosmPatternService,
           mockedAuditService,
+          Helpers.stubControllerComponents(),
           mockTrustsStoreConnector
         )
 
@@ -296,6 +309,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           fakeOrganisationAuthAction,
           rosmPatternService,
           mockedAuditService,
+          Helpers.stubControllerComponents(),
           mockTrustsStoreConnector
         )
 
@@ -327,6 +341,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           fakeOrganisationAuthAction,
           rosmPatternService,
           mockedAuditService,
+          Helpers.stubControllerComponents(),
           mockTrustsStoreConnector
         )
 
@@ -351,6 +366,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           fakeOrganisationAuthAction,
           rosmPatternService,
           mockedAuditService,
+          Helpers.stubControllerComponents(),
           mockTrustsStoreConnector
         )
 
@@ -378,6 +394,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           fakeOrganisationAuthAction,
           rosmPatternService,
           mockedAuditService,
+          Helpers.stubControllerComponents(),
           mockTrustsStoreConnector
         )
 

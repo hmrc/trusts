@@ -21,27 +21,32 @@ import java.time.LocalDate
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.Json
-import play.api.test.FakeRequest
+import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustNaturalPersonType
 import uk.gov.hmrc.trusts.models.variation.NaturalPersonType
 import uk.gov.hmrc.trusts.models.{NameType, RemoveOtherIndividual, Success}
-import uk.gov.hmrc.trusts.services.{BeneficiaryTransformationService, OtherIndividualTransformationService}
+import uk.gov.hmrc.trusts.services.OtherIndividualTransformationService
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
 class OtherIndividualTransformationControllerSpec extends FreeSpec
   with MockitoSugar
   with ScalaFutures
-  with MustMatchers {
+  with MustMatchers
+  with GuiceOneAppPerSuite {
 
-  val identifierAction = new FakeIdentifierAction(Agent)
+  lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+
+  val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
   "remove otherIndividual" - {
 
@@ -52,7 +57,7 @@ class OtherIndividualTransformationControllerSpec extends FreeSpec
       when(otherIndividualTransformationService.removeOtherIndividual(any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
 
-      val controller = new OtherIndividualTransformationController(identifierAction, otherIndividualTransformationService)
+      val controller = new OtherIndividualTransformationController(identifierAction, otherIndividualTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.obj(
@@ -72,7 +77,7 @@ class OtherIndividualTransformationControllerSpec extends FreeSpec
     }
 
     "return an error when json is invalid" in {
-      val OUT = new OtherIndividualTransformationController(identifierAction, mock[OtherIndividualTransformationService])
+      val OUT = new OtherIndividualTransformationController(identifierAction, mock[OtherIndividualTransformationService])(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.obj("field" -> "value"))
@@ -106,7 +111,7 @@ class OtherIndividualTransformationControllerSpec extends FreeSpec
       when(otherIndividualTransformationService.amendOtherIndividualTransformer(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
 
-      val controller = new OtherIndividualTransformationController(identifierAction, otherIndividualTransformationService)
+      val controller = new OtherIndividualTransformationController(identifierAction, otherIndividualTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(newOtherIndividual))
@@ -127,7 +132,7 @@ class OtherIndividualTransformationControllerSpec extends FreeSpec
 
       val otherIndividualTransformationService: OtherIndividualTransformationService = mock[OtherIndividualTransformationService]
 
-      val controller = new OtherIndividualTransformationController(identifierAction, otherIndividualTransformationService)
+      val controller = new OtherIndividualTransformationController(identifierAction, otherIndividualTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
@@ -142,7 +147,7 @@ class OtherIndividualTransformationControllerSpec extends FreeSpec
 
     "must add a new add other  individual transform" in {
       val otherIndividualTransformationService = mock[OtherIndividualTransformationService]
-      val controller = new OtherIndividualTransformationController(identifierAction, otherIndividualTransformationService)
+      val controller = new OtherIndividualTransformationController(identifierAction, otherIndividualTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val newOtherIndividual = DisplayTrustNaturalPersonType(
         None,
@@ -168,7 +173,7 @@ class OtherIndividualTransformationControllerSpec extends FreeSpec
 
     "must return an error for malformed json" in {
       val otherIndividualTransformationService = mock[OtherIndividualTransformationService]
-      val controller = new OtherIndividualTransformationController(identifierAction, otherIndividualTransformationService)
+      val controller = new OtherIndividualTransformationController(identifierAction, otherIndividualTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))

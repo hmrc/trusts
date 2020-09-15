@@ -19,6 +19,7 @@ package uk.gov.hmrc.trusts.controllers
 import javax.inject.Inject
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.http.BadRequestException
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.connector.TrustsStoreConnector
@@ -43,8 +44,9 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
                                         identify: IdentifierAction,
                                         rosmPatternService: RosmPatternService,
                                         auditService: AuditService,
+                                        cc: ControllerComponents,
                                         trustsStoreConnector: TrustsStoreConnector
-                                       )(implicit ec: ExecutionContext) extends TrustsBaseController {
+                                       )(implicit ec: ExecutionContext) extends TrustsBaseController(cc) {
 
   private def schemaF(implicit request: IdentifierRequest[JsValue]): Future[String] = {
     trustsStoreConnector.getFeature("5mld").map {
@@ -53,7 +55,7 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
     }
   }
 
-  def registration() = identify.async(parse.json) {
+  def registration(): Action[JsValue] = identify.async(parse.json) {
     implicit request =>
 
       val payload = request.body.applyRules.toString
@@ -109,7 +111,7 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
 
                       Logger.info("[RegisterTrustController][registration] Returning no match response.")
                       Forbidden(Json.toJson(noMatchRegistrationResponse))
-                    case x : ServiceNotAvailableException =>
+                    case _ : ServiceNotAvailableException =>
 
                       auditService.audit(
                         event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
@@ -121,7 +123,7 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
 
                       Logger.error(s"[RegisterTrustController][registration] Service unavailable response from DES")
                       InternalServerError(Json.toJson(internalServerErrorResponse))
-                    case x : BadRequestException =>
+                    case _ : BadRequestException =>
 
                       auditService.audit(
                         event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
