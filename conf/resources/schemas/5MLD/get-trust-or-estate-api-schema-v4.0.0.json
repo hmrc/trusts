@@ -1,0 +1,2043 @@
+﻿{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"title": "Display Trust or Estate - Response",
+	"description": "API#1488 Response schema 4.0.0",
+	"type": "object",
+	"properties": {
+		"trustOrEstateDisplay": {
+			"type": "object",
+			"properties": {
+				"applicationType": {
+					"description": "01-Trust,02-Estate",
+					"type": "string",
+					"enum": [
+						"01",
+						"02"
+					]
+				},
+				"matchData": {
+					"type": "object",
+					"description": "Possible options - UTR to be returned for Taxable , URN for Non- Taxable , UTR and URN if Trust has converted from Non-taxable to Taxable",					
+							"properties": {
+								"utr": {
+									"$ref": "#/definitions/utrString"
+								},"urn": {
+									"$ref": "#/definitions/urnString"
+								}
+							},
+							"additionalProperties": false
+						},
+			
+				"correspondence": {
+					"type": "object",
+					"properties": {
+						"abroadIndicator": {
+							"type": "boolean"
+						},
+						"name": {
+							"$ref": "#/definitions/corNameType"
+						},
+						"address": {
+							"$ref": "#/definitions/addressType"
+						},
+						"phoneNumber": {
+							"$ref": "#/definitions/phoneString"
+						},
+						"welsh": {
+							"$ref": "#/definitions/checkElement"
+						},
+						"braille": {
+							"$ref": "#/definitions/checkElement"
+						}
+					},
+					"required": [
+						"abroadIndicator",
+						"name",
+						"address",
+						"phoneNumber"
+					],
+					"additionalProperties": false
+				},
+				"declaration": {
+					"type": "object",
+					"properties": {
+						"name": {
+							"$ref": "#/definitions/nameType"
+						},
+						"address": {
+							"$ref": "#/definitions/addressType"
+						}
+					},
+					"required": [
+						"name",
+						"address"
+					],
+					"additionalProperties": false
+				},
+				"details": {
+					"description": "Trust Or Estate Details",
+					"type": "object",
+					"oneOf": [
+						{
+							"$ref": "#/definitions/trustType"
+						},
+						{
+							"$ref": "#/definitions/estateType"
+						}
+					]
+				},
+				"submissionDate": {
+					"$ref": "#/definitions/dateString"
+				}
+			},
+			"required": [
+				"applicationType",
+				"matchData",
+				"correspondence",
+				"declaration",
+				"details"
+			],
+			"additionalProperties": false
+		},
+		"responseHeader": {
+			"type": "object",
+			"properties": {
+				"dfmcaReturnUserStatus": {
+					"type": "string",
+					"enum": [
+						"Processed",
+						"In Processing",
+						"Pending Closure",
+						"Closed",
+						"Suspended",
+						"Parked",
+						"Obsoleted"
+					]
+				},
+				"formBundleNo": {
+					"type": "string",
+					"pattern": "^[0-9]{12}$"
+				}
+			},
+			"required": [
+				"dfmcaReturnUserStatus",
+				"formBundleNo"
+			],
+			"additionalProperties": false
+		}
+	},
+	"required": [
+		"responseHeader"
+	],
+	"additionalProperties": false,
+	"definitions": {
+		"trustType": {
+			"type": "object",
+			"properties": {
+				"trust": {
+					"type": "object",
+					"properties": {
+						"details": {
+							"$ref": "#/definitions/trustDetailsType"
+						},
+						"entities": {
+							"$ref": "#/definitions/trustEntitiesType"
+						},
+						"assets": {
+							"$ref": "#/definitions/assetsType"
+						}
+					},
+					"required": [
+						"details",
+						"entities"
+					],
+					"additionalProperties": false
+				}
+			},
+			"required": [
+				"trust"
+			],
+			"additionalProperties": false
+		},
+		"trustEntitiesType": {
+			"type": "object",
+			"properties": {
+				"naturalPerson": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 25,
+					"items": {
+						"$ref": "#/definitions/naturalPersonType"
+					}
+				},
+				"beneficiary": {
+					"$ref": "#/definitions/beneficiaryType"
+				},
+				"deceased": {
+					"$ref": "#/definitions/willType"
+				},
+				"leadTrustees": {
+					"type": "object",
+					"oneOf": [
+						{
+							"$ref": "#/definitions/leadTrusteeOrgType"
+						},
+						{
+							"$ref": "#/definitions/leadTrusteeIndType"
+						}
+					]
+				},
+				"trustees": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 25,
+					"items": {
+						"$ref": "#/definitions/trusteeType"
+					}
+				},
+				"protectors": {
+					"type": "object",
+					"properties": {
+						"protector": {
+							"type": "array",
+							"minItems": 1,
+							"maxItems": 25,
+							"items": [
+								{
+									"type": "object",
+									"properties": {
+										"lineNo": {
+											"$ref": "#/definitions/lineNoType"
+										},
+										"bpMatchStatus": {
+											"$ref": "#/definitions/bpMatchStatusType"
+										},
+										"name": {
+											"$ref": "#/definitions/nameType"
+										},
+										"dateOfBirth": {
+											"$ref": "#/definitions/dateString"
+										},
+										"identification": {
+											"$ref": "#/definitions/identificationType"
+										},
+										"entityStart": {
+											"$ref": "#/definitions/dateString"
+										},
+										"countryOfResidence": {
+											"$ref": "#/definitions/countryType"
+										},
+										"nationality": {
+											"$ref": "#/definitions/countryType"
+										},
+										"legallyIncapable": {
+											"$ref": "#/definitions/checkElement"
+										}
+									},
+									"required": [
+										"lineNo",
+										"name",
+										"entityStart"
+									],
+									"additionalProperties": false
+								}
+							]
+						},
+						"protectorCompany": {
+							"type": "array",
+							"minItems": 1,
+							"maxItems": 25,
+							"items": [
+								{
+									"type": "object",
+									"properties": {
+										"lineNo": {
+											"$ref": "#/definitions/lineNoType"
+										},
+										"bpMatchStatus": {
+											"$ref": "#/definitions/bpMatchStatusType"
+										},
+										"name": {
+											"$ref": "#/definitions/orgNameString"
+										},
+										"identification": {
+											"$ref": "#/definitions/identificationOrgType"
+										},
+										"entityStart": {
+											"$ref": "#/definitions/dateString"
+										},
+										"countryOfResidence": {
+											"$ref": "#/definitions/countryType"
+										}
+									},
+									"required": [
+										"lineNo",
+										"name",
+										"entityStart"
+									],
+									"additionalProperties": false
+								}
+							]
+						}
+					},
+					"additionalProperties": false
+				},
+				"settlors": {
+					"type": "object",
+					"properties": {
+						"settlor": {
+							"type": "array",
+							"minItems": 1,
+							"maxItems": 25,
+							"items": {
+								"type": "object",
+								"properties": {
+									"lineNo": {
+										"$ref": "#/definitions/lineNoType"
+									},
+									"bpMatchStatus": {
+										"$ref": "#/definitions/bpMatchStatusType"
+									},
+									"name": {
+										"$ref": "#/definitions/nameType"
+									},
+									"dateOfBirth": {
+										"$ref": "#/definitions/dateString"
+									},
+									"identification": {
+										"$ref": "#/definitions/identificationType"
+									},
+									"entityStart": {
+										"$ref": "#/definitions/dateString"
+									},
+									"countryOfResidence": {
+										"$ref": "#/definitions/countryType"
+									},
+									"nationality": {
+										"$ref": "#/definitions/countryType"
+									},
+									"legallyIncapable": {
+										"$ref": "#/definitions/checkElement"
+									}
+								},
+								"required": [
+									"lineNo",
+									"name",
+									"entityStart"
+								],
+								"additionalProperties": false
+							}
+						},
+						"settlorCompany": {
+							"type": "array",
+							"minItems": 1,
+							"maxItems": 25,
+							"items": {
+								"type": "object",
+								"properties": {
+									"lineNo": {
+										"$ref": "#/definitions/lineNoType"
+									},
+									"bpMatchStatus": {
+										"$ref": "#/definitions/bpMatchStatusType"
+									},
+									"name": {
+										"$ref": "#/definitions/orgNameString"
+									},
+									"companyType": {
+										"type": "string",
+										"enum": [
+											"Trading",
+											"Investment"
+										]
+									},
+									"companyTime": {
+										"type": "boolean"
+									},
+									"identification": {
+										"$ref": "#/definitions/identificationOrgType"
+									},
+									"entityStart": {
+										"$ref": "#/definitions/dateString"
+									},
+									"countryOfResidence": {
+										"$ref": "#/definitions/countryType"
+									}
+								},
+								"required": [
+									"lineNo",
+									"name",
+									"entityStart"
+								],
+								"additionalProperties": false
+							}
+						}
+					},
+					"additionalProperties": false
+				}
+			},
+			"required": [
+				"beneficiary",
+				"leadTrustees"
+			],
+			"additionalProperties": false
+		},
+		"assetsType": {
+			"type": "object",
+			"properties": {
+				"monetary": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 1,
+					"items": {
+						"type": "object",
+						"properties": {
+							"assetMonetaryAmount": {
+								"$ref": "#/definitions/monetaryType"
+							}
+						},
+						"required": [
+							"assetMonetaryAmount"
+						],
+						"additionalProperties": false
+					}
+				},
+				"propertyOrLand": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 10,
+					"items": {
+						"$ref": "#/definitions/propertyLandType"
+					}
+				},
+				"shares": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 10,
+					"items": {
+						"$ref": "#/definitions/sharesType"
+					}
+				},
+				"business": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 10,
+					"items": {
+						"$ref": "#/definitions/businessAssetType"
+					}
+				},
+				"partnerShip": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 10,
+					"items": {
+						"$ref": "#/definitions/partnershipType"
+					}
+				},
+				"other": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 10,
+					"items": {
+						"$ref": "#/definitions/otherAssetType"
+					}
+				},
+				"nonEEABusiness": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 25,
+					"items": {
+						"$ref": "#/definitions/nonEEABusinessType"
+					}
+				}
+			},
+			"additionalProperties": false
+		},
+		"otherAssetType": {
+			"type": "object",
+			"properties": {
+				"description": {
+					"type": "string",
+					"pattern": "^[0-9a-zA-Z{À-˿’}\\- \\u005C&`'^]{1,56}$"
+				},
+				"value": {
+					"$ref": "#/definitions/monetaryType"
+				}
+			},
+			"required": [
+				"description"
+			],
+			"additionalProperties": false
+		},
+		"trustDetailsType": {
+			"type": "object",
+			"properties": {
+				"startDate": {
+					"$ref": "#/definitions/dateString"
+				},
+				"trustTaxable": {
+					"$ref": "#/definitions/checkElement"
+				},
+				"expressTrust": {
+					"$ref": "#/definitions/checkElement"
+				},
+				"trustUKResident": {
+					"$ref": "#/definitions/checkElement"
+				},
+				"trustUKProperty": {
+					"$ref": "#/definitions/checkElement"
+				},
+				"lawCountry": {
+					"$ref": "#/definitions/nonUKCountryType"
+				},
+				"administrationCountry": {
+					"$ref": "#/definitions/countryType"
+				},
+				"residentialStatus": {
+					"type": "object",
+					"oneOf": [
+						{
+							"type": "object",
+							"properties": {
+								"uk": {
+									"type": "object",
+									"properties": {
+										"scottishLaw": {
+											"type": "boolean"
+										},
+										"preOffShore": {
+											"$ref": "#/definitions/countryType"
+										}
+									},
+									"required": [
+										"scottishLaw"
+									],
+									"additionalProperties": false
+								}
+							},
+							"required": [
+								"uk"
+							],
+							"additionalProperties": false
+						},
+						{
+							"type": "object",
+							"properties": {
+								"nonUK": {
+									"type": "object",
+									"properties": {
+										"sch5atcgga92": {
+											"type": "boolean"
+										},
+										"s218ihta84": {
+											"type": "boolean"
+										},
+										"agentS218IHTA84": {
+											"type": "boolean"
+										},
+										"trusteeStatus": {
+											"type": "string",
+											"enum": [
+												"Non Resident Domiciled",
+												"Non Resident Non Domiciled",
+												"Non Resident Cease Resident"
+											]
+										}
+									},
+									"required": [
+										"sch5atcgga92"
+									],
+									"additionalProperties": false
+								}
+							},
+							"required": [
+								"nonUK"
+							],
+							"additionalProperties": false
+						}
+					]
+				},
+				"typeOfTrust": {
+					"type": "string",
+					"enum": [
+						"Will Trust or Intestacy Trust",
+						"Deed of Variation Trust or Family Arrangement",
+						"Inter vivos Settlement",
+						"Employment Related",
+						"Heritage Maintenance Fund",
+						"Flat Management Company or Sinking Fund"
+					]
+				},
+				"deedOfVariation": {
+					"type": "string",
+					"enum": [
+						"Previously there was only an absolute interest under the will",
+						"Replaced the will trust",
+						"Addition to the will trust"
+					]
+				},
+				"interVivos": {
+					"type": "boolean"
+				},
+				"efrbsStartDate": {
+					"$ref": "#/definitions/dateString"
+				}
+			},
+			"required": [
+				"startDate",
+				"trustUKResident"
+			],
+			"additionalProperties": false
+		},
+		"estateType": {
+			"type": "object",
+			"properties": {
+				"estate": {
+					"type": "object",
+					"properties": {
+						"entities": {
+							"$ref": "#/definitions/entitiesType"
+						},
+						"administrationEndDate": {
+							"$ref": "#/definitions/dateString"
+						},
+						"periodTaxDues": {
+							"description": "01-Total Income Tax and Capital Gains due for the administration period more than £10,000, 02-Date of Death before 05 April 2016 and the sale of estates assets by administrators is £225,000 in any  one tax year, 03-Date of Death After 05 April 2016 and the sale of estates assets by administrators is £250.00 in any one tax year, 04-Estate worth more than 2.5 million at the death of death",
+							"type": "string",
+							"enum": [
+								"01",
+								"02",
+								"03",
+								"04"
+							]
+						}
+					},
+					"required": [
+						"entities",
+						"periodTaxDues"
+					],
+					"additionalProperties": false
+				}
+			},
+			"required": [
+				"estate"
+			],
+			"additionalProperties": false
+		},
+		"entitiesType": {
+			"type": "object",
+			"properties": {
+				"deceased": {
+					"$ref": "#/definitions/willTypeEstate"
+				},
+				"personalRepresentative": {
+					"type": "object",
+					"oneOf": [
+						{
+							"type": "object",
+							"$ref": "#/definitions/estatePerRepInd"
+						},
+						{
+							"type": "object",
+							"$ref": "#/definitions/estatePerRepOrg"
+						}
+					]
+				}
+			},
+			"required": [
+				"deceased",
+				"personalRepresentative"
+			],
+			"additionalProperties": false
+		},
+		"estatePerRepInd": {
+			"type": "object",
+			"properties": {
+				"lineNo": {
+					"$ref": "#/definitions/lineNoType"
+				},
+				"bpMatchStatus": {
+					"$ref": "#/definitions/bpMatchStatusType"
+				},
+				"name": {
+					"$ref": "#/definitions/nameType"
+				},
+				"dateOfBirth": {
+					"$ref": "#/definitions/dateString"
+				},
+				"identification": {
+					"$ref": "#/definitions/identificationTypeNPLT"
+				},
+				"phoneNumber": {
+					"$ref": "#/definitions/phoneString"
+				},
+				"email": {
+					"type": "string",
+					"format": "email"
+				},
+				"entityStart": {
+					"$ref": "#/definitions/dateString"
+				}
+			},
+			"required": [
+				"lineNo",
+				"name",
+				"dateOfBirth",
+				"identification",
+				"phoneNumber",
+				"entityStart"
+			],
+			"additionalProperties": false
+		},
+		"estatePerRepOrg": {
+			"type": "object",
+			"properties": {
+				"lineNo": {
+					"$ref": "#/definitions/lineNoType"
+				},
+				"bpMatchStatus": {
+					"$ref": "#/definitions/bpMatchStatusType"
+				},
+				"orgName": {
+					"$ref": "#/definitions/orgName56String"
+				},
+				"phoneNumber": {
+					"$ref": "#/definitions/phoneString"
+				},
+				"email": {
+					"type": "string",
+					"format": "email"
+				},
+				"identification": {
+					"$ref": "#/definitions/identificationOrgType"
+				},
+				"entityStart": {
+					"$ref": "#/definitions/dateString"
+				}
+			},
+			"required": [
+				"lineNo",
+				"orgName",
+				"phoneNumber",
+				"identification",
+				"entityStart"
+			],
+			"additionalProperties": false
+		},
+		"naturalPersonType": {
+			"type": "object",
+			"properties": {
+				"lineNo": {
+					"$ref": "#/definitions/lineNoType"
+				},
+				"bpMatchStatus": {
+					"$ref": "#/definitions/bpMatchStatusType"
+				},
+				"name": {
+					"$ref": "#/definitions/nameType"
+				},
+				"dateOfBirth": {
+					"$ref": "#/definitions/dateString"
+				},
+				"identification": {
+					"$ref": "#/definitions/identificationType"
+				},
+				"entityStart": {
+					"$ref": "#/definitions/dateString"
+				},
+				"countryOfResidence": {
+					"$ref": "#/definitions/countryType"
+				},
+				"nationality": {
+					"$ref": "#/definitions/countryType"
+				},
+				"legallyIncapable": {
+					"$ref": "#/definitions/checkElement"
+				}
+			},
+			"required": [
+				"lineNo",
+				"name",
+				"entityStart"
+			],
+			"additionalProperties": false
+		},
+		"identificationType": {
+			"type": "object",
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"nino": {
+							"$ref": "#/definitions/ninoType"
+						}
+					},
+					"required": [
+						"nino"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"passport": {
+							"$ref": "#/definitions/passportType"
+						},
+						"address": {
+							"$ref": "#/definitions/addressType"
+						},
+						"safeId": {
+							"$ref": "#/definitions/safeIdType"
+						}
+					},
+					"additionalProperties": false
+				}
+			]
+		},
+		"identificationTypeNPLT": {
+			"type": "object",
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"nino": {
+							"$ref": "#/definitions/ninoType"
+						}
+					},
+					"required": [
+						"nino"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"passport": {
+							"$ref": "#/definitions/passportType"
+						},
+						"address": {
+							"$ref": "#/definitions/addressType"
+						},
+						"safeId": {
+							"$ref": "#/definitions/safeIdType"
+						}
+					},
+					"required": [
+						"passport",
+						"address"
+					],
+					"additionalProperties": false
+				}
+			]
+		},
+		"identificationOrgType": {
+			"type": "object",
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"utr": {
+							"$ref": "#/definitions/utrString"
+						}
+					},
+					"required": [
+						"utr"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"address": {
+							"$ref": "#/definitions/addressType"
+						},
+						"safeId": {
+							"$ref": "#/definitions/safeIdType"
+						}
+					},
+					"required": [
+						"address"
+					],
+					"additionalProperties": false
+				}
+			]
+		},
+		"beneficiaryType": {
+			"type": "object",
+			"properties": {
+				"individualDetails": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 25,
+					"items": {
+						"$ref": "#/definitions/individualDetailsType"
+					}
+				},
+				"company": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 25,
+					"items": {
+						"$ref": "#/definitions/companyType"
+					}
+				},
+				"trust": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 25,
+					"items": {
+						"$ref": "#/definitions/beneficiaryTrustType"
+					}
+				},
+				"charity": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 25,
+					"items": {
+						"$ref": "#/definitions/charityType"
+					}
+				},
+				"unidentified": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 25,
+					"items": {
+						"$ref": "#/definitions/unidentifiedType"
+					}
+				},
+				"large": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 25,
+					"items": {
+						"$ref": "#/definitions/largeType"
+					}
+				},
+				"other": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 25,
+					"items": {
+						"$ref": "#/definitions/otherType"
+					}
+				}
+			},
+			"additionalProperties": false
+		},
+		"individualDetailsType": {
+			"type": "object",
+			"properties": {
+				"lineNo": {
+					"$ref": "#/definitions/lineNoType"
+				},
+				"bpMatchStatus": {
+					"$ref": "#/definitions/bpMatchStatusType"
+				},
+				"name": {
+					"$ref": "#/definitions/nameType"
+				},
+				"dateOfBirth": {
+					"$ref": "#/definitions/dateString"
+				},
+				"vulnerableBeneficiary": {
+					"type": "boolean"
+				},
+				"beneficiaryType": {
+					"type": "string",
+					"enum": [
+						"Director",
+						"Employee",
+						"NA"
+					]
+				},
+				"beneficiaryDiscretion": {
+					"type": "boolean"
+				},
+				"beneficiaryShareOfIncome": {
+					"$ref": "#/definitions/shareofIncomeString"
+				},
+				"identification": {
+					"$ref": "#/definitions/identificationType"
+				},
+				"entityStart": {
+					"$ref": "#/definitions/dateString"
+				},
+				"countryOfResidence": {
+					"$ref": "#/definitions/countryType"
+				},
+				"nationality": {
+					"$ref": "#/definitions/countryType"
+				},
+				"legallyIncapable": {
+					"$ref": "#/definitions/checkElement"
+				}
+			},
+			"required": [
+				"lineNo",
+				"name",
+				"entityStart"
+			],
+			"additionalProperties": false
+		},
+		"beneficiaryTrustType": {
+			"type": "object",
+			"properties": {
+				"lineNo": {
+					"$ref": "#/definitions/lineNoType"
+				},
+				"bpMatchStatus": {
+					"$ref": "#/definitions/bpMatchStatusType"
+				},
+				"organisationName": {
+					"$ref": "#/definitions/orgNameString"
+				},
+				"beneficiaryDiscretion": {
+					"type": "boolean"
+				},
+				"beneficiaryShareOfIncome": {
+					"$ref": "#/definitions/shareofIncomeString"
+				},
+				"identification": {
+					"$ref": "#/definitions/identificationOrgType"
+				},
+				"entityStart": {
+					"$ref": "#/definitions/dateString"
+				},
+				"countryOfResidence": {
+					"$ref": "#/definitions/countryType"
+				}
+			},
+			"required": [
+				"lineNo",
+				"organisationName",
+				"entityStart"
+			],
+			"additionalProperties": false
+		},
+		"charityType": {
+			"type": "object",
+			"properties": {
+				"lineNo": {
+					"$ref": "#/definitions/lineNoType"
+				},
+				"bpMatchStatus": {
+					"$ref": "#/definitions/bpMatchStatusType"
+				},
+				"organisationName": {
+					"$ref": "#/definitions/orgNameString"
+				},
+				"beneficiaryDiscretion": {
+					"type": "boolean"
+				},
+				"beneficiaryShareOfIncome": {
+					"$ref": "#/definitions/shareofIncomeString"
+				},
+				"identification": {
+					"$ref": "#/definitions/identificationOrgType"
+				},
+				"entityStart": {
+					"$ref": "#/definitions/dateString"
+				},
+				"countryOfResidence": {
+					"$ref": "#/definitions/countryType"
+				}
+			},
+			"required": [
+				"lineNo",
+				"organisationName",
+				"entityStart"
+			],
+			"additionalProperties": false
+		},
+		"unidentifiedType": {
+			"type": "object",
+			"properties": {
+				"lineNo": {
+					"$ref": "#/definitions/lineNoType"
+				},
+				"bpMatchStatus": {
+					"$ref": "#/definitions/bpMatchStatusType"
+				},
+				"description": {
+					"type": "string",
+					"pattern": "^[0-9a-zA-Z{À-˿’}\\- \\u005C&`'^]{1,56}$"
+				},
+				"beneficiaryDiscretion": {
+					"type": "boolean"
+				},
+				"beneficiaryShareOfIncome": {
+					"$ref": "#/definitions/shareofIncomeString"
+				},
+				"entityStart": {
+					"$ref": "#/definitions/dateString"
+				}
+			},
+			"required": [
+				"lineNo",
+				"description",
+				"entityStart"
+			],
+			"additionalProperties": false
+		},
+		"largeType": {
+			"type": "object",
+			"properties": {
+				"lineNo": {
+					"$ref": "#/definitions/lineNoType"
+				},
+				"bpMatchStatus": {
+					"$ref": "#/definitions/bpMatchStatusType"
+				},
+				"organisationName": {
+					"$ref": "#/definitions/orgNameString"
+				},
+				"description": {
+					"type": "string",
+					"pattern": "^[0-9a-zA-Z{À-˿’}\\- \\u005C&`'^]{1,70}$"
+				},
+				"description1": {
+					"type": "string",
+					"pattern": "^[0-9a-zA-Z{À-˿’}\\- \\u005C&`'^]{1,70}$"
+				},
+				"description2": {
+					"type": "string",
+					"pattern": "^[0-9a-zA-Z{À-˿’}\\- \\u005C&`'^]{1,70}$"
+				},
+				"description3": {
+					"type": "string",
+					"pattern": "^[0-9a-zA-Z{À-˿’}\\- \\u005C&`'^]{1,70}$"
+				},
+				"description4": {
+					"type": "string",
+					"pattern": "^[0-9a-zA-Z{À-˿’}\\- \\u005C&`'^]{1,70}$"
+				},
+				"numberOfBeneficiary": {
+					"type": "string",
+					"pattern": "^[0-9a-zA-Z]{1,4}$"
+				},
+				"identification": {
+					"$ref": "#/definitions/identificationOrgType"
+				},
+				"beneficiaryDiscretion": {
+					"type": "boolean"
+				},
+				"beneficiaryShareOfIncome": {
+					"$ref": "#/definitions/shareofIncomeString"
+				},
+				"entityStart": {
+					"$ref": "#/definitions/dateString"
+				},
+				"countryOfResidence": {
+					"$ref": "#/definitions/countryType"
+				}
+			},
+			"required": [
+				"lineNo",
+				"organisationName",
+				"description",
+				"numberOfBeneficiary",
+				"entityStart"
+			],
+			"additionalProperties": false
+		},
+		"otherType": {
+			"type": "object",
+			"properties": {
+				"lineNo": {
+					"$ref": "#/definitions/lineNoType"
+				},
+				"bpMatchStatus": {
+					"$ref": "#/definitions/bpMatchStatusType"
+				},
+				"description": {
+					"type": "string",
+					"pattern": "^[0-9a-zA-Z{À-˿’}\\- \\u005C&`'^]{1,70}$"
+				},
+				"address": {
+					"$ref": "#/definitions/addressType"
+				},
+				"beneficiaryDiscretion": {
+					"type": "boolean"
+				},
+				"beneficiaryShareOfIncome": {
+					"$ref": "#/definitions/shareofIncomeString"
+				},
+				"entityStart": {
+					"$ref": "#/definitions/dateString"
+				},
+				"countryOfResidence": {
+					"$ref": "#/definitions/countryType"
+				}
+			},
+			"required": [
+				"lineNo",
+				"description",
+				"entityStart"
+			],
+			"additionalProperties": false
+		},
+		"companyType": {
+			"type": "object",
+			"properties": {
+				"lineNo": {
+					"$ref": "#/definitions/lineNoType"
+				},
+				"bpMatchStatus": {
+					"$ref": "#/definitions/bpMatchStatusType"
+				},
+				"organisationName": {
+					"$ref": "#/definitions/orgNameString"
+				},
+				"beneficiaryDiscretion": {
+					"type": "boolean"
+				},
+				"beneficiaryShareOfIncome": {
+					"$ref": "#/definitions/shareofIncomeString"
+				},
+				"identification": {
+					"$ref": "#/definitions/identificationOrgType"
+				},
+				"entityStart": {
+					"$ref": "#/definitions/dateString"
+				},
+				"countryOfResidence": {
+					"$ref": "#/definitions/countryType"
+				}
+			},
+			"required": [
+				"lineNo",
+				"organisationName",
+				"entityStart"
+			],
+			"additionalProperties": false
+		},
+		"willType": {
+			"type": "object",
+			"properties": {
+				"lineNo": {
+					"$ref": "#/definitions/lineNoType"
+				},
+				"bpMatchStatus": {
+					"$ref": "#/definitions/bpMatchStatusType"
+				},
+				"name": {
+					"$ref": "#/definitions/nameType"
+				},
+				"dateOfBirth": {
+					"$ref": "#/definitions/dateString"
+				},
+				"dateOfDeath": {
+					"$ref": "#/definitions/dateString"
+				},
+				"identification": {
+					"$ref": "#/definitions/identificationType"
+				},
+				"entityStart": {
+					"$ref": "#/definitions/dateString"
+				},
+				"countryOfResidence": {
+					"$ref": "#/definitions/countryType"
+				},
+				"nationality": {
+					"$ref": "#/definitions/countryType"
+				}
+			},
+			"required": [
+				"lineNo",
+				"name",
+				"entityStart"
+			],
+			"additionalProperties": false
+		},
+		"willTypeEstate": {
+			"type": "object",
+			"properties": {
+				"lineNo": {
+					"$ref": "#/definitions/lineNoType"
+				},
+				"bpMatchStatus": {
+					"$ref": "#/definitions/bpMatchStatusType"
+				},
+				"name": {
+					"$ref": "#/definitions/nameType"
+				},
+				"dateOfBirth": {
+					"$ref": "#/definitions/dateString"
+				},
+				"dateOfDeath": {
+					"$ref": "#/definitions/dateString"
+				},
+				"identification": {
+					"$ref": "#/definitions/identificationType"
+				},
+				"entityStart": {
+					"$ref": "#/definitions/dateString"
+				}
+			},
+			"required": [
+				"lineNo",
+				"name",
+				"dateOfDeath",
+				"entityStart"
+			],
+			"additionalProperties": false
+		},
+		"leadTrusteeOrgType": {
+			"type": "object",
+			"properties": {
+				"lineNo": {
+					"$ref": "#/definitions/lineNoType"
+				},
+				"bpMatchStatus": {
+					"$ref": "#/definitions/bpMatchStatusType"
+				},
+				"name": {
+					"$ref": "#/definitions/orgName56String"
+				},
+				"phoneNumber": {
+					"$ref": "#/definitions/phoneString"
+				},
+				"email": {
+					"type": "string",
+					"format": "email"
+				},
+				"identification": {
+					"$ref": "#/definitions/identificationOrgType"
+				},
+				"entityStart": {
+					"$ref": "#/definitions/dateString"
+				},
+				"countryOfResidence": {
+					"$ref": "#/definitions/countryType"
+				}
+			},
+			"required": [
+				"lineNo",
+				"name",
+				"phoneNumber",
+				"identification",
+				"entityStart"
+			],
+			"additionalProperties": false
+		},
+		"trusteeType": {
+			"type": "object",
+			"properties": {
+				"trusteeInd": {
+					"$ref": "#/definitions/trusteeIndType"
+				},
+				"trusteeOrg": {
+					"$ref": "#/definitions/trusteeOrgType"
+				}
+			},
+			"additionalProperties": false
+		},
+		"trusteeIndType": {
+			"type": "object",
+			"properties": {
+				"lineNo": {
+					"$ref": "#/definitions/lineNoType"
+				},
+				"bpMatchStatus": {
+					"$ref": "#/definitions/bpMatchStatusType"
+				},
+				"name": {
+					"$ref": "#/definitions/nameType"
+				},
+				"dateOfBirth": {
+					"$ref": "#/definitions/dateString"
+				},
+				"identification": {
+					"$ref": "#/definitions/identificationType"
+				},
+				"phoneNumber": {
+					"$ref": "#/definitions/phoneString"
+				},
+				"entityStart": {
+					"$ref": "#/definitions/dateString"
+				},
+				"countryOfResidence": {
+					"$ref": "#/definitions/countryType"
+				},
+				"nationality": {
+					"$ref": "#/definitions/countryType"
+				},
+				"legallyIncapable": {
+					"$ref": "#/definitions/checkElement"
+				}
+			},
+			"required": [
+				"lineNo",
+				"name",
+				"entityStart"
+			],
+			"additionalProperties": false
+		},
+		"trusteeOrgType": {
+			"type": "object",
+			"properties": {
+				"lineNo": {
+					"$ref": "#/definitions/lineNoType"
+				},
+				"bpMatchStatus": {
+					"$ref": "#/definitions/bpMatchStatusType"
+				},
+				"name": {
+					"$ref": "#/definitions/orgName56String"
+				},
+				"phoneNumber": {
+					"$ref": "#/definitions/phoneString"
+				},
+				"email": {
+					"type": "string",
+					"format": "email"
+				},
+				"identification": {
+					"$ref": "#/definitions/identificationOrgType"
+				},
+				"entityStart": {
+					"$ref": "#/definitions/dateString"
+				},
+				"countryOfResidence": {
+					"$ref": "#/definitions/countryType"
+				}
+			},
+			"required": [
+				"lineNo",
+				"name",
+				"entityStart"
+			],
+			"additionalProperties": false
+		},
+		"addressType": {
+			"type": "object",
+			"oneOf": [
+				{
+					"type": "object",
+					"properties": {
+						"line1": {
+							"$ref": "#/definitions/addressLineType"
+						},
+						"line2": {
+							"$ref": "#/definitions/addressLineType"
+						},
+						"line3": {
+							"$ref": "#/definitions/addressLineType"
+						},
+						"line4": {
+							"$ref": "#/definitions/addressLineType"
+						},
+						"postCode": {
+							"type": "string",
+							"pattern": "^[A-Za-z0-9 ]{1,10}$"
+						},
+						"country": {
+							"type": "string",
+							"enum": [
+								"GB"
+							]
+						}
+					},
+					"required": [
+						"line1",
+						"line2",
+						"postCode",
+						"country"
+					],
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"properties": {
+						"line1": {
+							"$ref": "#/definitions/addressLineType"
+						},
+						"line2": {
+							"$ref": "#/definitions/addressLineType"
+						},
+						"line3": {
+							"$ref": "#/definitions/addressLineType"
+						},
+						"line4": {
+							"$ref": "#/definitions/addressLineType"
+						},
+						"country": {
+							"$ref": "#/definitions/nonUKCountryType"
+						}
+					},
+					"required": [
+						"line1",
+						"line2",
+						"country"
+					],
+					"additionalProperties": false
+				}
+			]
+		},
+		"leadTrusteeIndType": {
+			"type": "object",
+			"properties": {
+				"lineNo": {
+					"$ref": "#/definitions/lineNoType"
+				},
+				"bpMatchStatus": {
+					"$ref": "#/definitions/bpMatchStatusType"
+				},
+				"name": {
+					"$ref": "#/definitions/nameType"
+				},
+				"dateOfBirth": {
+					"$ref": "#/definitions/dateString"
+				},
+				"identification": {
+					"$ref": "#/definitions/identificationTypeNPLT"
+				},
+				"phoneNumber": {
+					"$ref": "#/definitions/phoneString"
+				},
+				"email": {
+					"type": "string",
+					"format": "email"
+				},
+				"entityStart": {
+					"$ref": "#/definitions/dateString"
+				},
+				"countryOfResidence": {
+					"$ref": "#/definitions/countryType"
+				},
+				"nationality": {
+					"$ref": "#/definitions/countryType"
+				},
+				"legallyIncapable": {
+					"$ref": "#/definitions/checkElement"
+				}
+			},
+			"required": [
+				"lineNo",
+				"name",
+				"dateOfBirth",
+				"identification",
+				"phoneNumber",
+				"entityStart"
+			],
+			"additionalProperties": false
+		},
+		"sharesType": {
+			"type": "object",
+			"properties": {
+				"numberOfShares": {
+					"type": "string",
+					"pattern": "^[0-9]{1,12}$"
+				},
+				"orgName": {
+					"$ref": "#/definitions/orgNameString"
+				},
+				"utr": {
+					"$ref": "#/definitions/utrString"
+				},
+				"shareClass": {
+					"type": "string",
+					"enum": [
+						"Ordinary shares",
+						"Non-voting shares",
+						"Redeemable shares",
+						"Preference shares",
+						"Deferred ordinary shares",
+						"Management shares",
+						"Other classes of shares",
+						"Voting shares",
+						"Dividend shares",
+						"Capital share",
+						"Other"
+					]
+				},
+				"typeOfShare": {
+					"type": "string",
+					"enum": [
+						"Quoted",
+						"Unquoted"
+					]
+				},
+				"value": {
+					"$ref": "#/definitions/monetaryType"
+				}
+			},
+			"required": [
+				"orgName"
+			],
+			"additionalProperties": false
+		},
+		"businessAssetType": {
+			"type": "object",
+			"properties": {
+				"orgName": {
+					"$ref": "#/definitions/orgNameString"
+				},
+				"utr": {
+					"$ref": "#/definitions/utrString"
+				},
+				"businessDescription": {
+					"type": "string",
+					"pattern": "^[0-9a-zA-Z{À-˿’}\\- \\u005C&`'^]{1,56}$"
+				},
+				"address": {
+					"$ref": "#/definitions/addressType"
+				},
+				"businessValue": {
+					"$ref": "#/definitions/monetaryType"
+				}
+			},
+			"required": [
+				"orgName",
+				"businessDescription"
+			],
+			"additionalProperties": false
+		},
+		"partnershipType": {
+			"type": "object",
+			"properties": {
+				"utr": {
+					"$ref": "#/definitions/utrString"
+				},
+				"description": {
+					"type": "string",
+					"pattern": "^[0-9a-zA-Z{À-˿’}\\- \\u005C&`'^]{1,56}$"
+				},
+				"partnershipStart": {
+					"$ref": "#/definitions/dateString"
+				}
+			},
+			"required": [
+				"description"
+			],
+			"additionalProperties": false
+		},
+		"nonEEABusinessType": {
+			"type": "object",
+			"properties": {
+				"lineNo": {
+					"$ref": "#/definitions/lineNoType"
+				},
+				"orgName": {
+					"$ref": "#/definitions/orgNameString"
+				},
+				"address": {
+					"$ref": "#/definitions/addressType"
+				},
+				"govLawCountry": {
+					"$ref": "#/definitions/countryType"
+				},
+				"startDate": {
+					"$ref": "#/definitions/dateString"
+				},
+				"endDate": {
+					"$ref": "#/definitions/dateString"
+				}
+			},
+			"required": [
+				"lineNo",
+				"orgName",
+				"address",
+				"govLawCountry",
+				"startDate"
+			],
+			"additionalProperties": false
+		},
+		"passportType": {
+			"type": "object",
+			"properties": {
+				"number": {
+					"type": "string",
+					"pattern": "^[A-Za-z0-9]{1,30}$"
+				},
+				"expirationDate": {
+					"$ref": "#/definitions/dateString"
+				},
+				"countryOfIssue": {
+					"$ref": "#/definitions/countryType"
+				}
+			},
+			"required": [
+				"number",
+				"expirationDate",
+				"countryOfIssue"
+			],
+			"additionalProperties": false
+		},
+		"shareofIncomeString": {
+			"type": "string",
+			"pattern": "^([0-9]|[1-9][0-9]|100)$"
+		},
+		"phoneString": {
+			"type": "string",
+			"pattern": "^\\+[0-9 ]{1,18}$|^[0-9 ]{1,19}$"
+		},
+		"nameType": {
+			"type": "object",
+			"properties": {
+				"firstName": {
+					"$ref": "#/definitions/nameString"
+				},
+				"middleName": {
+					"$ref": "#/definitions/nameString"
+				},
+				"lastName": {
+					"$ref": "#/definitions/nameString"
+				}
+			},
+			"required": [
+				"firstName",
+				"lastName"
+			],
+			"additionalProperties": false
+		},
+		"addressLineType": {
+			"type": "string",
+			"pattern": "^[A-Za-z0-9 ,.()/&'-]{1,35}$"
+		},
+		"nameString": {
+			"type": "string",
+			"pattern": "^[A-Za-z0-9 ,.()/&'-]{1,35}$"
+		},
+		"orgNameString": {
+			"type": "string",
+			"pattern": "^[A-Za-z0-9 ,.()/&'-]{1,105}$"
+		},
+		"orgName56String": {
+			"type": "string",
+			"pattern": "^[A-Za-z0-9 ,.()/&'-]{1,56}$"
+		},
+		"utrString": {
+			"type": "string",
+			"pattern": "^[0-9]{10}$"
+		},
+		"safeIdType": {
+			"type": "string",
+			"pattern": "^[A-Z0-9]{1,15}$"
+		},
+		"monetaryType": {
+			"description": "Integer up to 12 digits max; 1250 represents 1250 pounds",
+			"type": "integer",
+			"minimum": 0,
+			"maximum": 999999999999
+		},
+		"corNameType": {
+			"type": "string",
+			"pattern": "^[A-Za-z0-9 ,.()/&*'-]{1,56}$"
+		},
+		"ninoType": {
+			"type": "string",
+			"pattern": "^((?!(BG|GB|KN|NK|NT|TN|ZZ)|(D|F|I|Q|U|V)[A-Z]|[A-Z](D|F|I|O|Q|U|V))[A-Z]{2})[0-9]{6}[A-D]?$"
+		},
+		"bpMatchStatusType": {
+			"type": "string",
+			"pattern": "^[0-9]{2}$"
+		},
+		"lineNoType": {
+			"type": "string",
+			"pattern": "^[0-9]{1,4}$"
+		},
+		"propertyLandType": {
+			"type": "object",
+			"properties": {
+				"buildingLandName": {
+					"type": "string",
+					"pattern": "^[0-9a-zA-Z{À-˿’}\\- \\u005C&`'^]{1,56}$"
+				},
+				"address": {
+					"$ref": "#/definitions/addressType"
+				},
+				"valueFull": {
+					"$ref": "#/definitions/monetaryType"
+				},
+				"valuePrevious": {
+					"$ref": "#/definitions/monetaryType"
+				}
+			},
+			"additionalProperties": false
+		},
+		"dateString": {
+			"description": "YYYY-MM-DD",
+			"type": "string",
+			"pattern": "^(((15|16|17|18|19|20)([2468][048]|[13579][26]|0[48])|2000|1600)[-]02[-]29|((15|16|17|18|19|20)[0-9]{2}[-](0[469]|11)[-](0[1-9]|1[0-9]|2[0-9]|30)|(15|16|17|18|19|20)[0-9]{2}[-](0[13578]|1[02])[-](0[1-9]|[12][0-9]|3[01])|(15|16|17|18|19|20)[0-9]{2}[-]02[-](0[1-9]|1[0-9]|2[0-8])))$"
+		},
+		"countryType": {
+			"type": "string",
+			"oneOf": [
+				{
+					"type": "string",
+					"enum": [
+						"GB"
+					]
+				},
+				{
+					"$ref": "#/definitions/nonUKCountryType"
+				}
+			]
+		},
+		"nonUKCountryType": {
+			"type": "string",
+			"enum": [
+				"AD",
+				"AE",
+				"AF",
+				"AG",
+				"AI",
+				"AL",
+				"AM",
+				"AN",
+				"AO",
+				"AQ",
+				"AR",
+				"AS",
+				"AT",
+				"AU",
+				"AW",
+				"AX",
+				"AZ",
+				"BA",
+				"BB",
+				"BD",
+				"BE",
+				"BF",
+				"BG",
+				"BH",
+				"BI",
+				"BJ",
+				"BM",
+				"BN",
+				"BO",
+				"BQ",
+				"BR",
+				"BS",
+				"BT",
+				"BV",
+				"BW",
+				"BY",
+				"BZ",
+				"CA",
+				"CC",
+				"CD",
+				"CF",
+				"CG",
+				"CH",
+				"CI",
+				"CK",
+				"CL",
+				"CM",
+				"CN",
+				"CO",
+				"CR",
+				"CS",
+				"CU",
+				"CV",
+				"CW",
+				"CX",
+				"CY",
+				"CZ",
+				"DE",
+				"DJ",
+				"DK",
+				"DM",
+				"DO",
+				"DZ",
+				"EC",
+				"EE",
+				"EG",
+				"EH",
+				"ER",
+				"ES",
+				"ET",
+				"FC",
+				"FI",
+				"FJ",
+				"FK",
+				"FM",
+				"FO",
+				"FR",
+				"GA",
+				"GD",
+				"GE",
+				"GF",
+				"GG",
+				"GH",
+				"GI",
+				"GL",
+				"GM",
+				"GN",
+				"GP",
+				"GQ",
+				"GR",
+				"GS",
+				"GT",
+				"GU",
+				"GW",
+				"GY",
+				"HK",
+				"HM",
+				"HN",
+				"HR",
+				"HT",
+				"HU",
+				"ID",
+				"IE",
+				"IL",
+				"IM",
+				"IN",
+				"IO",
+				"IQ",
+				"IR",
+				"IS",
+				"IT",
+				"JE",
+				"JM",
+				"JO",
+				"JP",
+				"KE",
+				"KG",
+				"KH",
+				"KI",
+				"KM",
+				"KN",
+				"KP",
+				"KR",
+				"KW",
+				"KY",
+				"KZ",
+				"LA",
+				"LB",
+				"LC",
+				"LI",
+				"LK",
+				"LR",
+				"LS",
+				"LT",
+				"LU",
+				"LV",
+				"LY",
+				"MA",
+				"MC",
+				"MD",
+				"ME",
+				"MF",
+				"MG",
+				"MH",
+				"MK",
+				"ML",
+				"MM",
+				"MN",
+				"MO",
+				"MP",
+				"MQ",
+				"MR",
+				"MS",
+				"MT",
+				"MU",
+				"MV",
+				"MW",
+				"MX",
+				"MY",
+				"MZ",
+				"NA",
+				"NC",
+				"NE",
+				"NF",
+				"NG",
+				"NI",
+				"NL",
+				"NO",
+				"NP",
+				"NR",
+				"NU",
+				"NZ",
+				"OM",
+				"PA",
+				"PE",
+				"PF",
+				"PG",
+				"PH",
+				"PK",
+				"PL",
+				"PM",
+				"PN",
+				"PR",
+				"PS",
+				"PT",
+				"PW",
+				"PY",
+				"QA",
+				"RE",
+				"RO",
+				"RS",
+				"RU",
+				"RW",
+				"SA",
+				"SB",
+				"SC",
+				"SD",
+				"SE",
+				"SG",
+				"SH",
+				"SI",
+				"SJ",
+				"SK",
+				"SL",
+				"SM",
+				"SN",
+				"SO",
+				"SR",
+				"SS",
+				"ST",
+				"SV",
+				"SX",
+				"SY",
+				"SZ",
+				"TC",
+				"TD",
+				"TF",
+				"TG",
+				"TH",
+				"TJ",
+				"TK",
+				"TL",
+				"TM",
+				"TN",
+				"TO",
+				"TP",
+				"TR",
+				"TT",
+				"TV",
+				"TW",
+				"TZ",
+				"UA",
+				"UG",
+				"UM",
+				"US",
+				"UY",
+				"UZ",
+				"VA",
+				"VC",
+				"VE",
+				"VG",
+				"VI",
+				"VN",
+				"VU",
+				"WF",
+				"WS",
+				"YE",
+				"YT",
+				"ZA",
+				"ZM",
+				"ZW"
+			]
+		},
+		"urnString": {
+			"type": "string",
+			"pattern": "^[0-9A-Z]{15}$"
+		},
+		"checkElement": {
+			"description": "True or False",
+			"type": "boolean"
+		}
+	}
+}

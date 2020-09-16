@@ -36,6 +36,9 @@ class AmendLeadTrusteeIndTransformSpec extends FreeSpec with MustMatchers {
         phoneNumber = "newPhone",
         email = Some("newEmail"),
         identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         entityStart = None
       )
       val transformer = AmendLeadTrusteeIndTransform(newTrusteeInfo)

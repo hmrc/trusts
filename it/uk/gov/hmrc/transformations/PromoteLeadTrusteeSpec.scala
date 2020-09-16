@@ -64,7 +64,10 @@ class PromoteLeadTrusteeSpec extends FreeSpec with MustMatchers with MockitoSuga
             Some("NE1 2LA"),
             "GB"
           ))),
-          None
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
+        None
       )
 
       val expectedGetAfterPromoteTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-promote-trustee.json")

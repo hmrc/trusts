@@ -58,6 +58,9 @@ class AmendTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar with
             None
           )
         ),
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         entityStart = LocalDate.of(1998, 2, 12)
       )
 

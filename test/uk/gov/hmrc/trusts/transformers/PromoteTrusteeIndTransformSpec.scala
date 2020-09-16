@@ -72,6 +72,9 @@ class PromoteTrusteeIndTransformSpec extends FreeSpec with MustMatchers {
       phoneNumber = "Phone",
       email = Some("Email"),
       identification = DisplayTrustIdentificationType(None, Some("ST123456"), None, None),
+      countryOfResidence = None,
+      legallyIncapable = None,
+      nationality = None,
       entityStart = None
     )
     PromoteTrusteeIndTransform(

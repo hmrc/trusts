@@ -30,6 +30,7 @@ class AddCompanyProtectorTransformSpec extends FreeSpec with MustMatchers {
     identification = None,
     lineNo = None,
     bpMatchStatus = None,
+    countryOfResidence = None,
     entityStart = LocalDate.parse("2010-05-03")
   )
 
@@ -38,6 +39,7 @@ class AddCompanyProtectorTransformSpec extends FreeSpec with MustMatchers {
     identification = None,
     lineNo = None,
     bpMatchStatus = None,
+    countryOfResidence = None,
     entityStart = LocalDate.parse("2019-01-01")
   )
 

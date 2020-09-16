@@ -98,6 +98,9 @@ case class DisplayTrustNaturalPersonType(lineNo: Option[String],
                                          name: NameType,
                                          dateOfBirth: Option[LocalDate],
                                          identification: Option[DisplayTrustIdentificationType],
+                                         countryOfResidence: Option[String],    // new 5MLD optional
+                                         legallyIncapable: Option[Boolean],     // new 5MLD optional
+                                         nationality: Option[String],           // new 5MLD optional
                                          entityStart: LocalDate)
 
 object DisplayTrustNaturalPersonType {
@@ -110,6 +113,9 @@ object DisplayTrustNaturalPersonType {
       "name" -> o.name,
       "dateOfBirth" -> o.dateOfBirth,
       "identification" -> o.identification,
+      "countryOfResidence" -> o.countryOfResidence,
+      "legallyIncapable" -> o.legallyIncapable,
+      "nationality" -> o.nationality,
       "entityStart" -> o.entityStart,
       "provisional" -> o.lineNo.isEmpty
     ).withoutNulls
@@ -124,6 +130,9 @@ case class DisplayTrustLeadTrusteeIndType(
                                            phoneNumber: String,
                                            email: Option[String] = None,
                                            identification: DisplayTrustIdentificationType,
+                                           countryOfResidence: Option[String],    // new 5MLD optional
+                                           legallyIncapable: Option[Boolean],     // new 5MLD optional
+                                           nationality: Option[String],           // new 5MLD optional
                                            entityStart: Option[LocalDate]
                                          )
 
@@ -140,6 +149,7 @@ case class DisplayTrustLeadTrusteeOrgType(
                                            phoneNumber: String,
                                            email: Option[String] = None,
                                            identification: DisplayTrustIdentificationOrgType,
+                                           countryOfResidence: Option[String],    // new 5MLD optional
                                            entityStart: Option[LocalDate]
                                          )
 
@@ -197,6 +207,9 @@ case class DisplayTrustIndividualDetailsType(lineNo: Option[String],
                                              beneficiaryDiscretion: Option[Boolean],
                                              beneficiaryShareOfIncome: Option[String],
                                              identification: Option[DisplayTrustIdentificationType],
+                                             countryOfResidence: Option[String],    // new 5MLD optional
+                                             legallyIncapable: Option[Boolean],     // new 5MLD optional
+                                             nationality: Option[String],           // new 5MLD optional
                                              entityStart: String)
 
 object DisplayTrustIndividualDetailsType {
@@ -213,6 +226,9 @@ object DisplayTrustIndividualDetailsType {
       "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
       "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
       "identification" -> o.identification,
+      "countryOfResidence" -> o.countryOfResidence,
+      "legallyIncapable" -> o.legallyIncapable,
+      "nationality" -> o.nationality,
       "entityStart" -> o.entityStart,
       "provisional" -> o.lineNo.isEmpty
     ).withoutNulls
@@ -225,6 +241,7 @@ case class DisplayTrustBeneficiaryCompanyType(lineNo: Option[String],
                                               beneficiaryDiscretion: Option[Boolean],
                                               beneficiaryShareOfIncome: Option[String],
                                               identification: Option[DisplayTrustIdentificationOrgType],
+                                              countryOfResidence: Option[String],   // new 5MLD optional
                                               entityStart: String)
 
 object DisplayTrustBeneficiaryCompanyType {
@@ -238,6 +255,7 @@ object DisplayTrustBeneficiaryCompanyType {
       "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
       "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
       "identification" -> o.identification,
+      "countryOfResidence" -> o.countryOfResidence,
       "entityStart" -> o.entityStart,
       "provisional" -> o.lineNo.isEmpty
     ).withoutNulls
@@ -250,6 +268,8 @@ case class DisplayTrustWillType(lineNo: String,
                                 dateOfBirth: Option[LocalDate],
                                 dateOfDeath: Option[LocalDate],
                                 identification: Option[DisplayTrustIdentificationType],
+                                countryOfResidence: Option[String],    // new 5MLD optional
+                                nationality: Option[String],           // new 5MLD optional
                                 entityStart: String)
 
 object DisplayTrustWillType {
@@ -262,6 +282,7 @@ case class DisplayTrustBeneficiaryTrustType(lineNo: Option[String],
                                             beneficiaryDiscretion: Option[Boolean],
                                             beneficiaryShareOfIncome: Option[String],
                                             identification: Option[DisplayTrustIdentificationOrgType],
+                                            countryOfResidence: Option[String],   // new 5MLD optional
                                             entityStart: String)
 
 object DisplayTrustBeneficiaryTrustType {
@@ -275,6 +296,7 @@ object DisplayTrustBeneficiaryTrustType {
       "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
       "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
       "identification" -> o.identification,
+      "countryOfResidence" -> o.countryOfResidence,
       "entityStart" -> o.entityStart,
       "provisional" -> o.lineNo.isEmpty
     ).withoutNulls
@@ -287,6 +309,7 @@ case class DisplayTrustCharityType(lineNo: Option[String],
                                    beneficiaryDiscretion: Option[Boolean],
                                    beneficiaryShareOfIncome: Option[String],
                                    identification: Option[DisplayTrustIdentificationOrgType],
+                                   countryOfResidence: Option[String],   // new 5MLD optional
                                    entityStart: String)
 
 object DisplayTrustCharityType {
@@ -300,6 +323,7 @@ object DisplayTrustCharityType {
       "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
       "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
       "identification" -> o.identification,
+      "countryOfResidence" -> o.countryOfResidence,
       "entityStart" -> o.entityStart,
       "provisional" -> o.lineNo.isEmpty
     ).withoutNulls
@@ -343,6 +367,7 @@ case class DisplayTrustLargeType(lineNo: Option[String],
                                  identification: Option[DisplayTrustIdentificationOrgType],
                                  beneficiaryDiscretion: Option[Boolean],
                                  beneficiaryShareOfIncome: Option[String],
+                                 countryOfResidence: Option[String],    // new 5MLD optional
                                  entityStart: String)
 
 object DisplayTrustLargeType {
@@ -362,6 +387,7 @@ object DisplayTrustLargeType {
       "identification" -> o.identification,
       "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
       "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
+      "countryOfResidence" -> o.countryOfResidence,
       "entityStart" -> o.entityStart,
       "provisional" -> o.lineNo.isEmpty
     ).withoutNulls
@@ -406,6 +432,7 @@ case class DisplayTrustTrusteeOrgType(lineNo: Option[String],
                                       phoneNumber: Option[String] = None,
                                       email: Option[String] = None,
                                       identification: Option[DisplayTrustIdentificationOrgType],
+                                      countryOfResidence: Option[String],    // new 5MLD optional
                                       entityStart: LocalDate)
 
 object DisplayTrustTrusteeOrgType {
@@ -420,6 +447,7 @@ object DisplayTrustTrusteeOrgType {
       "phoneNumber" -> o.phoneNumber,
       "email" -> o.email,
       "identification" -> o.identification,
+      "countryOfResidence" -> o.countryOfResidence,
       "entityStart" -> o.entityStart,
       "provisional" -> o.lineNo.isEmpty
     ).withoutNulls
@@ -432,6 +460,9 @@ case class DisplayTrustTrusteeIndividualType(lineNo: Option[String],
                                              dateOfBirth: Option[LocalDate],
                                              phoneNumber: Option[String],
                                              identification: Option[DisplayTrustIdentificationType],
+                                             countryOfResidence: Option[String],    // new 5MLD optional
+                                             legallyIncapable: Option[Boolean],     // new 5MLD optional
+                                             nationality: Option[String],           // new 5MLD optional
                                              entityStart: LocalDate
                                             )
 
@@ -447,6 +478,9 @@ object DisplayTrustTrusteeIndividualType {
       "dateOfBirth" -> o.dateOfBirth,
       "phoneNumber" -> o.phoneNumber,
       "identification" -> o.identification,
+      "countryOfResidence" -> o.countryOfResidence,
+      "legallyIncapable" -> o.legallyIncapable,
+      "nationality" -> o.nationality,
       "entityStart" -> o.entityStart,
       "provisional" -> o.lineNo.isEmpty
     ).withoutNulls
@@ -466,6 +500,9 @@ case class DisplayTrustProtector(lineNo: Option[String],
                                  name: NameType,
                                  dateOfBirth: Option[LocalDate],
                                  identification: Option[DisplayTrustIdentificationType],
+                                 countryOfResidence: Option[String],    // new 5MLD optional
+                                 legallyIncapable: Option[Boolean],     // new 5MLD optional
+                                 nationality: Option[String],           // new 5MLD optional
                                  entityStart: LocalDate)
 
 object DisplayTrustProtector {
@@ -478,6 +515,9 @@ object DisplayTrustProtector {
       "name" -> o.name,
       "dateOfBirth" -> o.dateOfBirth,
       "identification" -> o.identification,
+      "countryOfResidence" -> o.countryOfResidence,
+      "legallyIncapable" -> o.legallyIncapable,
+      "nationality" -> o.nationality,
       "entityStart" -> o.entityStart,
       "provisional" -> o.lineNo.isEmpty
     ).withoutNulls
@@ -488,6 +528,7 @@ case class DisplayTrustProtectorCompany(lineNo: Option[String],
                                         bpMatchStatus: Option[String],
                                         name: String,
                                         identification: Option[DisplayTrustIdentificationOrgType],
+                                        countryOfResidence: Option[String],    // new 5MLD optional
                                         entityStart: LocalDate)
 
 object DisplayTrustProtectorCompany {
@@ -499,6 +540,7 @@ object DisplayTrustProtectorCompany {
       "bpMatchStatus" -> o.bpMatchStatus,
       "name" -> o.name,
       "identification" -> o.identification,
+      "countryOfResidence" -> o.countryOfResidence,
       "entityStart" -> o.entityStart,
       "provisional" -> o.lineNo.isEmpty
     ).withoutNulls
@@ -518,6 +560,9 @@ case class DisplayTrustSettlor(lineNo: Option[String],
                                name: NameType,
                                dateOfBirth: Option[LocalDate],
                                identification: Option[DisplayTrustIdentificationType],
+                               countryOfResidence: Option[String],    // new 5MLD optional
+                               legallyIncapable: Option[Boolean],     // new 5MLD optional
+                               nationality: Option[String],           // new 5MLD optional
                                entityStart: LocalDate)
 
 object DisplayTrustSettlor {
@@ -530,6 +575,9 @@ object DisplayTrustSettlor {
       "name" -> o.name,
       "dateOfBirth" -> o.dateOfBirth,
       "identification" -> o.identification,
+      "countryOfResidence" -> o.countryOfResidence,
+      "legallyIncapable" -> o.legallyIncapable,
+      "nationality" -> o.nationality,
       "entityStart" -> o.entityStart,
       "provisional" -> o.lineNo.isEmpty
     ).withoutNulls
@@ -542,6 +590,7 @@ case class DisplayTrustSettlorCompany(lineNo: Option[String],
                                       companyType: Option[String],
                                       companyTime: Option[Boolean],
                                       identification: Option[DisplayTrustIdentificationOrgType],
+                                      countryOfResidence: Option[String],    // new 5MLD optional
                                       entityStart: LocalDate)
 
 object DisplayTrustSettlorCompany {
@@ -555,6 +604,7 @@ object DisplayTrustSettlorCompany {
       "companyType" -> o.companyType,
       "companyTime" -> o.companyTime,
       "identification" -> o.identification,
+      "countryOfResidence" -> o.countryOfResidence,
       "entityStart" -> o.entityStart,
       "provisional" -> o.lineNo.isEmpty
     ).withoutNulls
@@ -592,7 +642,8 @@ case class DisplayTrustAssets(monetary: Option[List[AssetMonetaryAmount]],
                               shares: Option[List[DisplaySharesType]],
                               business: Option[List[DisplayBusinessAssetType]],
                               partnerShip: Option[List[DisplayTrustPartnershipType]],
-                              other: Option[List[DisplayOtherAssetType]])
+                              other: Option[List[DisplayOtherAssetType]],
+                              nonEEABusiness: Option[List[DisplayNonEEABusinessType]])
 
 object DisplayTrustAssets {
   implicit val assetsFormat: Format[DisplayTrustAssets] = Json.format[DisplayTrustAssets]
@@ -634,3 +685,16 @@ case class DisplayOtherAssetType(description: String,
 object DisplayOtherAssetType {
   implicit val otherAssetTypeFormat: Format[DisplayOtherAssetType] = Json.format[DisplayOtherAssetType]
 }
+
+// new 5MLD type
+case class DisplayNonEEABusinessType(lineNo: String,
+                                     orgName: String,
+                                     address: AddressType,
+                                     govLawCountry: String,
+                                     startDate: LocalDate,
+                                     endDate: Option[LocalDate])
+
+object DisplayNonEEABusinessType {
+  implicit val format: Format[DisplayNonEEABusinessType] = Json.format[DisplayNonEEABusinessType]
+}
+

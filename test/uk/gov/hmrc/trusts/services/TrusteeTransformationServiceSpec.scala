@@ -49,6 +49,9 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
+    countryOfResidence = None,
+    legallyIncapable = None,
+    nationality = None,
     entityStart = Some(LocalDate.parse("2012-03-14"))
   )
 
@@ -59,6 +62,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = DisplayTrustIdentificationOrgType(None, Some("UTR"), None),
+    countryOfResidence = None,
     entityStart = Some(LocalDate.parse("2012-03-14"))
   )
 
@@ -69,6 +73,9 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     dateOfBirth = Some(LocalDate.of(1965, 2, 10)),
     phoneNumber = Some("newPhone"),
     identification = Some(DisplayTrustIdentificationType(None, Some("newNino"), None, None)),
+    countryOfResidence = None,
+    legallyIncapable = None,
+    nationality = None,
     entityStart = LocalDate.parse("2012-03-14")
   )
 
@@ -83,6 +90,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       Some("newUtr"),
       None)
     ),
+    countryOfResidence = None,
     entityStart = LocalDate.parse("2012-03-14")
   )
 

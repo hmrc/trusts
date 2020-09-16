@@ -155,6 +155,9 @@ class OtherIndividualTransformationControllerSpec extends FreeSpec
         name = NameType("First", None, "Last"),
         None,
         None,
+        None,
+        None,
+        None,
         entityStart = LocalDate.parse("2000-01-01")
       )
 

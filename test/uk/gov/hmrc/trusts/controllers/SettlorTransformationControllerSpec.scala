@@ -112,6 +112,9 @@ class SettlorTransformationControllerSpec extends FreeSpec
         name = NameType("First", None, "Last"),
         dateOfBirth = None,
         identification = None,
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         entityStart = LocalDate.parse("2010-05-03")
       )
 
@@ -160,6 +163,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
         name = "Test",
         companyType = None,
         identification = None,
+        countryOfResidence = None,
         entityStart = LocalDate.parse("2010-05-03"),
         companyTime = None
       )

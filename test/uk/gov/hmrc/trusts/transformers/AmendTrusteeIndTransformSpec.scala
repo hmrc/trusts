@@ -38,6 +38,9 @@ class AmendTrusteeIndTransformSpec extends FreeSpec with MustMatchers  {
         dateOfBirth = Some(LocalDate.of(1965, 2, 10)),
         phoneNumber = Some("newPhone"),
         identification = Some(DisplayTrustIdentificationType(None, Some("newNino"), None, None)),
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         entityStart = LocalDate.of(2019, 2, 10)
       )
 

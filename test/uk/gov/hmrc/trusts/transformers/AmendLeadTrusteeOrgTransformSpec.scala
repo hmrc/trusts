@@ -34,6 +34,7 @@ class AmendLeadTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {
         phoneNumber = "newPhone",
         email = Some("newEmail"),
         identification = DisplayTrustIdentificationOrgType(None, Some("newUtr"), None),
+        countryOfResidence = None,
         None
       )
       val transformer = AmendLeadTrusteeOrgTransform(newTrusteeInfo)

@@ -60,6 +60,9 @@ class ProtectorTransformationControllerSpec extends FreeSpec
         name = NameType("First", None, "Last"),
         dateOfBirth = None,
         identification = None,
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         entityStart = LocalDate.parse("2010-05-03")
       )
 
@@ -108,6 +111,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
         identification = None,
         lineNo = None,
         bpMatchStatus = None,
+        countryOfResidence = None,
         entityStart = LocalDate.parse("2010-05-03")
       )
 

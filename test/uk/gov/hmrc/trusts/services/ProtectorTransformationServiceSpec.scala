@@ -77,6 +77,9 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
           NameType("First", None, "Last"),
           None,
           None,
+          None,
+          None,
+          None,
           LocalDate.parse("1990-10-10")
         )
 
@@ -173,6 +176,7 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
           identification = None,
           lineNo = None,
           bpMatchStatus = None,
+          countryOfResidence = None,
           entityStart = LocalDate.parse("2010-05-03")
         )
 

@@ -230,7 +230,7 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
   }
 
   def companySettlorUtrIsNotTrustUtr: List[Option[TrustsValidationError]] = {
-    val trustUtr = registration.matchData.map(x => x.utr)
+    val trustUtr = registration.matchData.map(x => x.utr.get)
     getSettlorCompanies(registration).map {
       settlorCompanies => {
         val utrList: List[(String, Int)] = getSettlorUtrNumberWithIndex(settlorCompanies)

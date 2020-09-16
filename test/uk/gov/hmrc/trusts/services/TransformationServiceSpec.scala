@@ -46,6 +46,9 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
+    countryOfResidence = None,
+    legallyIncapable = None,
+    nationality = None,
     entityStart = Some(LocalDate.parse("2012-03-14"))
   )
 
@@ -82,6 +85,9 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
+    countryOfResidence = None,
+    legallyIncapable = None,
+    nationality = None,
     entityStart = Some(LocalDate.parse("2002-03-14"))
   )
 
@@ -93,6 +99,9 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
+    countryOfResidence = None,
+    legallyIncapable = None,
+    nationality = None,
     entityStart = Some(LocalDate.parse("2012-03-14"))
   )
 
@@ -177,6 +186,9 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
         Some("newNino"),
         None,
         Some(AddressType("newLine1", "newLine2", None, None, Some("NE1 2LA"), "GB"))),
+      countryOfResidence = None,
+      legallyIncapable = None,
+      nationality = None,
       entityStart = None
     )
 

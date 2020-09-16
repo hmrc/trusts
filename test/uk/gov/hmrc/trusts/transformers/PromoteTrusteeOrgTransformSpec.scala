@@ -65,6 +65,7 @@ class PromoteTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {
       phoneNumber = "0121546546",
       email = None,
       identification = DisplayTrustIdentificationOrgType(None, Some("5465416546"), None),
+      countryOfResidence = None,
       entityStart = None
     )
     val transformer = PromoteTrusteeOrgTransform(

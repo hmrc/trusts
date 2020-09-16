@@ -54,7 +54,8 @@ object Details {
   implicit val detailsFormat: Format[Details] = Json.format[Details]
 }
 
-case class MatchData(utr: String,
+case class MatchData(utr: Option[String],     // now optional with 5MLD
+                     urn: Option[String],     // new 5MLD optional
                      name: String,
                      postCode: Option[String]
                     )

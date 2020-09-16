@@ -95,6 +95,9 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
         NameType("First", None, "Last"),
         None,
         None,
+        None,
+        None,
+        None,
         LocalDate.parse("1990-10-10")
       )
 
@@ -121,6 +124,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
           None,
           None,
           Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")))),
+        None,
         LocalDate.parse("1990-10-10")
       )
 

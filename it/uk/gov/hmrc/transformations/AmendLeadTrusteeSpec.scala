@@ -63,7 +63,10 @@ class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar 
             Some("TF1 5DR"),
             "GB"
           ))),
-          None
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
+        None
       )
 
       val expectedGetAfterAmendLeadTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-lead-trustee.json")
