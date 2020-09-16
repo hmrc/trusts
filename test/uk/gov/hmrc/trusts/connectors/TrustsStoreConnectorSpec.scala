@@ -23,7 +23,7 @@ import uk.gov.hmrc.trusts.connector.TrustsStoreConnector
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class TrustsStoreConnectorSpec extends BaseConnectorSpec with RecoverMethods {
+class TrustsStoreConnectorSpec extends ConnectorSpecHelper with RecoverMethods {
 
   private lazy val url: String = "/trusts-store/features/5mld"
 
