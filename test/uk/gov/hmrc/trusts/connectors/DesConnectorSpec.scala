@@ -323,287 +323,858 @@ class DesConnectorSpec extends ConnectorSpecHelper {
 
   ".getTrustInfoJson" when {
 
-    "return TrustFoundResponse" when {
+    "4MLD" when {
 
-      "des has returned a 200 with trust details" in {
+      "return TrustFoundResponse" when {
 
-        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
-          """
-            |{
-            | "name": "5mld",
-            | "isEnabled": false
-            |}""".stripMargin
-        )))
+        "des has returned a 200 with trust details" in {
 
-        val utr = "1234567890"
-        stubForGet(server, get4MLDTrustEndpoint(utr), OK, getTrustResponseJson)
+          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            """
+              |{
+              | "name": "5mld",
+              | "isEnabled": false
+              |}""".stripMargin
+          )))
 
-        val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(utr)
+          val utr = "1234567890"
+          stubForGet(server, get4MLDTrustEndpoint(utr), OK, getTrustResponseJson)
 
-        whenReady(futureResult) { result =>
+          val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(utr)
 
-          val expectedHeader: ResponseHeader = (getTrustResponse \ "responseHeader").as[ResponseHeader]
-          val expectedJson = (getTrustResponse \ "trustOrEstateDisplay").as[JsValue]
+          whenReady(futureResult) { result =>
 
-          result match {
-            case r: TrustProcessedResponse =>
-              r.responseHeader mustBe expectedHeader
-              r.getTrust mustBe expectedJson
-            case _ => fail
+            val expectedHeader: ResponseHeader = (getTrustResponse \ "responseHeader").as[ResponseHeader]
+            val expectedJson = (getTrustResponse \ "trustOrEstateDisplay").as[JsValue]
+
+            result match {
+              case r: TrustProcessedResponse =>
+                r.responseHeader mustBe expectedHeader
+                r.getTrust mustBe expectedJson
+              case _ => fail
+            }
+          }
+        }
+
+        "des has returned a 200 with property or land asset with no previous value" in {
+
+          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            """
+              |{
+              | "name": "5mld",
+              | "isEnabled": false
+              |}""".stripMargin
+          )))
+
+          val utr = "1234567890"
+          stubForGet(server, get4MLDTrustEndpoint(utr), OK, getTrustPropertyLandNoPreviousValue)
+
+          val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(utr)
+
+
+          whenReady(futureResult) { result =>
+
+            val expectedHeader: ResponseHeader = (getTrustPropertyLandNoPreviousValueJson \ "responseHeader").as[ResponseHeader]
+            val expectedJson = (getTrustPropertyLandNoPreviousValueJson \ "trustOrEstateDisplay").as[JsValue]
+
+            result match {
+              case r: TrustProcessedResponse =>
+                r.responseHeader mustBe expectedHeader
+                r.getTrust mustBe expectedJson
+              case _ => fail
+            }
+          }
+        }
+
+        "des has returned a 200 and indicated that the submission is still being processed" in {
+
+          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            """
+              |{
+              | "name": "5mld",
+              | "isEnabled": false
+              |}""".stripMargin
+          )))
+
+          val utr = "1234567800"
+          stubForGet(server, get4MLDTrustEndpoint(utr), OK, getTrustOrEstateProcessingResponseJson)
+
+          val futureResult = connector.getTrustInfo(utr)
+
+
+          whenReady(futureResult) { result =>
+            result mustBe TrustFoundResponse(ResponseHeader("In Processing", "1"))
           }
         }
       }
 
-      "des has returned a 200 with property or land asset with no previous value" in {
+      "return NotEnoughData" when {
 
-        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
-          """
-            |{
-            | "name": "5mld",
-            | "isEnabled": false
-            |}""".stripMargin
-        )))
+        "json does not validate as GetData model" in {
 
-        val utr = "1234567890"
-        stubForGet(server, get4MLDTrustEndpoint(utr), OK, getTrustPropertyLandNoPreviousValue)
+          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            """
+              |{
+              | "name": "5mld",
+              | "isEnabled": false
+              |}""".stripMargin
+          )))
 
-        val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(utr)
+          val utr = "123456789"
+          stubForGet(server, get4MLDTrustEndpoint(utr), OK, getTrustMalformedJsonResponse)
+
+          val futureResult = connector.getTrustInfo(utr)
 
 
-        whenReady(futureResult) { result =>
+          whenReady(futureResult) { result =>
+            result mustBe NotEnoughDataResponse(Json.parse(getTrustMalformedJsonResponse), Json.parse(
+              """
+                |{"obj.details.trust.entities.leadTrustees.phoneNumber":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.identification":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.name":[{"msg":["error.path.missing"],"args":[]}]}
+                |""".stripMargin))
+          }
+        }
 
-          val expectedHeader: ResponseHeader = (getTrustPropertyLandNoPreviousValueJson \ "responseHeader").as[ResponseHeader]
-          val expectedJson = (getTrustPropertyLandNoPreviousValueJson \ "trustOrEstateDisplay").as[JsValue]
+      }
 
-          result match {
-            case r: TrustProcessedResponse =>
-              r.responseHeader mustBe expectedHeader
-              r.getTrust mustBe expectedJson
-            case _ => fail
+      "return InvalidUTRResponse" when {
+
+        "des has returned a 400 with the code INVALID_UTR" in {
+
+          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            """
+              |{
+              | "name": "5mld",
+              | "isEnabled": false
+              |}""".stripMargin
+          )))
+
+          val invalidUTR = "123456789"
+          stubForGet(server, get4MLDTrustEndpoint(invalidUTR), BAD_REQUEST,
+            Json.stringify(jsonResponse400InvalidUTR))
+
+          val futureResult = connector.getTrustInfo(invalidUTR)
+
+
+          whenReady(futureResult) { result =>
+            result mustBe InvalidUTRResponse
           }
         }
       }
 
-      "des has returned a 200 and indicated that the submission is still being processed" in {
+      "return InvalidRegimeResponse" when {
 
-        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
-          """
-            |{
-            | "name": "5mld",
-            | "isEnabled": false
-            |}""".stripMargin
-        )))
+        "des has returned a 400 with the code INVALID_REGIME" in {
 
-        val utr = "1234567800"
-        stubForGet(server, get4MLDTrustEndpoint(utr), OK, getTrustOrEstateProcessingResponseJson)
-
-        val futureResult = connector.getTrustInfo(utr)
-
-
-        whenReady(futureResult) { result =>
-          result mustBe TrustFoundResponse(ResponseHeader("In Processing", "1"))
-        }
-      }
-    }
-
-    "return NotEnoughData" when {
-
-      "json does not validate as GetData model" in {
-
-        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
-          """
-            |{
-            | "name": "5mld",
-            | "isEnabled": false
-            |}""".stripMargin
-        )))
-
-        val utr = "123456789"
-        stubForGet(server, get4MLDTrustEndpoint(utr), OK, getTrustMalformedJsonResponse)
-
-        val futureResult = connector.getTrustInfo(utr)
-
-
-        whenReady(futureResult) { result =>
-          result mustBe NotEnoughDataResponse(Json.parse(getTrustMalformedJsonResponse), Json.parse(
+          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
             """
-              |{"obj.details.trust.entities.leadTrustees.phoneNumber":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.identification":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.name":[{"msg":["error.path.missing"],"args":[]}]}
-              |""".stripMargin))
+              |{
+              | "name": "5mld",
+              | "isEnabled": false
+              |}""".stripMargin
+          )))
+
+          val utr = "1234567891"
+          stubForGet(server, get4MLDTrustEndpoint(utr), BAD_REQUEST,
+            Json.stringify(jsonResponse400InvalidRegime))
+
+          val futureResult = connector.getTrustInfo(utr)
+
+
+          whenReady(futureResult) { result =>
+            result mustBe InvalidRegimeResponse
+          }
         }
       }
 
-    }
+      "return BadRequestResponse" when {
 
-    "return InvalidUTRResponse" when {
+        "des has returned a 400 with a code which is not INVALID_UTR OR INVALID_REGIME" in {
 
-      "des has returned a 400 with the code INVALID_UTR" in {
-
-        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
-          """
-            |{
-            | "name": "5mld",
-            | "isEnabled": false
-            |}""".stripMargin
-        )))
-
-        val invalidUTR = "123456789"
-        stubForGet(server, get4MLDTrustEndpoint(invalidUTR), BAD_REQUEST,
-          Json.stringify(jsonResponse400InvalidUTR))
-
-        val futureResult = connector.getTrustInfo(invalidUTR)
-
-
-        whenReady(futureResult) { result =>
-          result mustBe InvalidUTRResponse
-        }
-      }
-    }
-
-    "return InvalidRegimeResponse" when {
-
-      "des has returned a 400 with the code INVALID_REGIME" in {
-
-        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
-          """
-            |{
-            | "name": "5mld",
-            | "isEnabled": false
-            |}""".stripMargin
-        )))
-
-        val utr = "1234567891"
-        stubForGet(server, get4MLDTrustEndpoint(utr), BAD_REQUEST,
-          Json.stringify(jsonResponse400InvalidRegime))
-
-        val futureResult = connector.getTrustInfo(utr)
-
-
-        whenReady(futureResult) { result =>
-          result mustBe InvalidRegimeResponse
-        }
-      }
-    }
-
-    "return BadRequestResponse" when {
-
-      "des has returned a 400 with a code which is not INVALID_UTR OR INVALID_REGIME" in {
-
-        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
-          """
-            |{
-            | "name": "5mld",
-            | "isEnabled": false
-            |}""".stripMargin
-        )))
-
-        val utr = "1234567891"
-        stubForGet(server, get4MLDTrustEndpoint(utr), BAD_REQUEST,
-          Json.stringify(jsonResponse400))
-
-        val futureResult = connector.getTrustInfo(utr)
-
-
-        whenReady(futureResult) { result =>
-          result mustBe BadRequestResponse
-        }
-      }
-    }
-
-    "return NotEnoughDataResponse" when {
-
-      "des has returned a 204" in {
-
-        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
-          """
-            |{
-            | "name": "5mld",
-            | "isEnabled": false
-            |}""".stripMargin
-        )))
-
-        val utr = "6666666666"
-        stubForGet(server, get4MLDTrustEndpoint(utr), OK, Json.stringify(jsonResponse204))
-
-        val futureResult = connector.getTrustInfo(utr)
-
-
-        whenReady(futureResult) { result =>
-          result mustBe NotEnoughDataResponse(jsonResponse204, Json.parse(
+          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
             """
-              |{"obj":[{"msg":["'responseHeader' is undefined on object: {\"code\":\"NO_CONTENT\",\"reason\":\"No Content.\"}"],"args":[]}]}
-              |""".stripMargin))
+              |{
+              | "name": "5mld",
+              | "isEnabled": false
+              |}""".stripMargin
+          )))
+
+          val utr = "1234567891"
+          stubForGet(server, get4MLDTrustEndpoint(utr), BAD_REQUEST,
+            Json.stringify(jsonResponse400))
+
+          val futureResult = connector.getTrustInfo(utr)
+
+
+          whenReady(futureResult) { result =>
+            result mustBe BadRequestResponse
+          }
         }
       }
-    }
 
-    "return ResourceNotFoundResponse" when {
+      "return NotEnoughDataResponse" when {
 
-      "des has returned a 404" in {
+        "des has returned a 204" in {
 
-        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
-          """
-            |{
-            | "name": "5mld",
-            | "isEnabled": false
-            |}""".stripMargin
-        )))
+          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            """
+              |{
+              | "name": "5mld",
+              | "isEnabled": false
+              |}""".stripMargin
+          )))
 
-        val utr = "1234567892"
-        stubForGet(server, get4MLDTrustEndpoint(utr), NOT_FOUND, "")
+          val utr = "6666666666"
+          stubForGet(server, get4MLDTrustEndpoint(utr), OK, Json.stringify(jsonResponse204))
 
-        val futureResult = connector.getTrustInfo(utr)
+          val futureResult = connector.getTrustInfo(utr)
 
-        whenReady(futureResult) { result =>
-          result mustBe ResourceNotFoundResponse
+
+          whenReady(futureResult) { result =>
+            result mustBe NotEnoughDataResponse(jsonResponse204, Json.parse(
+              """
+                |{"obj":[{"msg":["'responseHeader' is undefined on object: {\"code\":\"NO_CONTENT\",\"reason\":\"No Content.\"}"],"args":[]}]}
+                |""".stripMargin))
+          }
         }
       }
-    }
 
-    "return InternalServerErrorResponse" when {
+      "return ResourceNotFoundResponse" when {
 
-      "des has returned a 500 with the code SERVER_ERROR" in {
+        "des has returned a 404" in {
 
-        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
-          """
-            |{
-            | "name": "5mld",
-            | "isEnabled": false
-            |}""".stripMargin
-        )))
+          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            """
+              |{
+              | "name": "5mld",
+              | "isEnabled": false
+              |}""".stripMargin
+          )))
 
-        val utr = "1234567893"
-        stubForGet(server, get4MLDTrustEndpoint(utr), INTERNAL_SERVER_ERROR, "")
+          val utr = "1234567892"
+          stubForGet(server, get4MLDTrustEndpoint(utr), NOT_FOUND, "")
 
-        val futureResult = connector.getTrustInfo(utr)
+          val futureResult = connector.getTrustInfo(utr)
 
-        whenReady(futureResult) { result =>
-          result mustBe InternalServerErrorResponse
+          whenReady(futureResult) { result =>
+            result mustBe ResourceNotFoundResponse
+          }
         }
       }
-    }
 
-    "return ServiceUnavailableResponse" when {
+      "return InternalServerErrorResponse" when {
 
-      "des has returned a 503 with the code SERVICE_UNAVAILABLE" in {
+        "des has returned a 500 with the code SERVER_ERROR" in {
 
-        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
-          """
-            |{
-            | "name": "5mld",
-            | "isEnabled": false
-            |}""".stripMargin
-        )))
+          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            """
+              |{
+              | "name": "5mld",
+              | "isEnabled": false
+              |}""".stripMargin
+          )))
 
-        val utr = "1234567894"
-        stubForGet(server, get4MLDTrustEndpoint(utr), SERVICE_UNAVAILABLE, "")
+          val utr = "1234567893"
+          stubForGet(server, get4MLDTrustEndpoint(utr), INTERNAL_SERVER_ERROR, "")
 
-        val futureResult = connector.getTrustInfo(utr)
+          val futureResult = connector.getTrustInfo(utr)
 
-        whenReady(futureResult) { result =>
-          result mustBe ServiceUnavailableResponse
+          whenReady(futureResult) { result =>
+            result mustBe InternalServerErrorResponse
+          }
         }
       }
+
+      "return ServiceUnavailableResponse" when {
+
+        "des has returned a 503 with the code SERVICE_UNAVAILABLE" in {
+
+          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            """
+              |{
+              | "name": "5mld",
+              | "isEnabled": false
+              |}""".stripMargin
+          )))
+
+          val utr = "1234567894"
+          stubForGet(server, get4MLDTrustEndpoint(utr), SERVICE_UNAVAILABLE, "")
+
+          val futureResult = connector.getTrustInfo(utr)
+
+          whenReady(futureResult) { result =>
+            result mustBe ServiceUnavailableResponse
+          }
+        }
+      }
+
     }
+
+    "5MLD" when {
+
+      "identifier is UTR" must {
+
+        "return TrustFoundResponse" when {
+
+          "des has returned a 200 with trust details" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val utr = "1234567890"
+            stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, getTrustResponseJson)
+
+            val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(utr)
+
+            whenReady(futureResult) { result =>
+
+              val expectedHeader: ResponseHeader = (getTrustResponse \ "responseHeader").as[ResponseHeader]
+              val expectedJson = (getTrustResponse \ "trustOrEstateDisplay").as[JsValue]
+
+              result match {
+                case r: TrustProcessedResponse =>
+                  r.responseHeader mustBe expectedHeader
+                  r.getTrust mustBe expectedJson
+                case _ => fail
+              }
+            }
+          }
+
+          "des has returned a 200 with property or land asset with no previous value" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val utr = "1234567890"
+            stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, getTrustPropertyLandNoPreviousValue)
+
+            val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(utr)
+
+
+            whenReady(futureResult) { result =>
+
+              val expectedHeader: ResponseHeader = (getTrustPropertyLandNoPreviousValueJson \ "responseHeader").as[ResponseHeader]
+              val expectedJson = (getTrustPropertyLandNoPreviousValueJson \ "trustOrEstateDisplay").as[JsValue]
+
+              result match {
+                case r: TrustProcessedResponse =>
+                  r.responseHeader mustBe expectedHeader
+                  r.getTrust mustBe expectedJson
+                case _ => fail
+              }
+            }
+          }
+
+          "des has returned a 200 and indicated that the submission is still being processed" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val utr = "1234567800"
+            stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, getTrustOrEstateProcessingResponseJson)
+
+            val futureResult = connector.getTrustInfo(utr)
+
+
+            whenReady(futureResult) { result =>
+              result mustBe TrustFoundResponse(ResponseHeader("In Processing", "1"))
+            }
+          }
+        }
+
+        "return NotEnoughData" when {
+
+          "json does not validate as GetData model" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val utr = "1234567890"
+            stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, getTrustMalformedJsonResponse)
+
+            val futureResult = connector.getTrustInfo(utr)
+
+            whenReady(futureResult) { result =>
+              result mustBe NotEnoughDataResponse(Json.parse(getTrustMalformedJsonResponse), Json.parse(
+                """
+                  |{"obj.details.trust.entities.leadTrustees.phoneNumber":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.identification":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.name":[{"msg":["error.path.missing"],"args":[]}]}
+                  |""".stripMargin))
+            }
+          }
+
+        }
+
+        "return InvalidUTRResponse" when {
+
+          "des has returned a 400 with the code INVALID_UTR" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val invalidUTR = "1234567890"
+            stubForGet(server, get5MLDTrustUTREndpoint(invalidUTR), BAD_REQUEST,
+              Json.stringify(jsonResponse400InvalidUTR))
+
+            val futureResult = connector.getTrustInfo(invalidUTR)
+
+
+            whenReady(futureResult) { result =>
+              result mustBe InvalidUTRResponse
+            }
+          }
+        }
+
+        "return InvalidRegimeResponse" when {
+
+          "des has returned a 400 with the code INVALID_REGIME" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val utr = "1234567891"
+            stubForGet(server, get5MLDTrustUTREndpoint(utr), BAD_REQUEST,
+              Json.stringify(jsonResponse400InvalidRegime))
+
+            val futureResult = connector.getTrustInfo(utr)
+
+
+            whenReady(futureResult) { result =>
+              result mustBe InvalidRegimeResponse
+            }
+          }
+        }
+
+        "return BadRequestResponse" when {
+
+          "des has returned a 400 with a code which is not INVALID_UTR OR INVALID_REGIME" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val utr = "1234567891"
+            stubForGet(server, get5MLDTrustUTREndpoint(utr), BAD_REQUEST,
+              Json.stringify(jsonResponse400))
+
+            val futureResult = connector.getTrustInfo(utr)
+
+
+            whenReady(futureResult) { result =>
+              result mustBe BadRequestResponse
+            }
+          }
+        }
+
+        "return NotEnoughDataResponse" when {
+
+          "des has returned a 204" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val utr = "6666666666"
+            stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, Json.stringify(jsonResponse204))
+
+            val futureResult = connector.getTrustInfo(utr)
+
+
+            whenReady(futureResult) { result =>
+              result mustBe NotEnoughDataResponse(jsonResponse204, Json.parse(
+                """
+                  |{"obj":[{"msg":["'responseHeader' is undefined on object: {\"code\":\"NO_CONTENT\",\"reason\":\"No Content.\"}"],"args":[]}]}
+                  |""".stripMargin))
+            }
+          }
+        }
+
+        "return ResourceNotFoundResponse" when {
+
+          "des has returned a 404" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val utr = "1234567892"
+            stubForGet(server, get5MLDTrustUTREndpoint(utr), NOT_FOUND, "")
+
+            val futureResult = connector.getTrustInfo(utr)
+
+            whenReady(futureResult) { result =>
+              result mustBe ResourceNotFoundResponse
+            }
+          }
+        }
+
+        "return InternalServerErrorResponse" when {
+
+          "des has returned a 500 with the code SERVER_ERROR" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val utr = "1234567893"
+            stubForGet(server, get5MLDTrustUTREndpoint(utr), INTERNAL_SERVER_ERROR, "")
+
+            val futureResult = connector.getTrustInfo(utr)
+
+            whenReady(futureResult) { result =>
+              result mustBe InternalServerErrorResponse
+            }
+          }
+        }
+
+        "return ServiceUnavailableResponse" when {
+
+          "des has returned a 503 with the code SERVICE_UNAVAILABLE" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val utr = "1234567894"
+            stubForGet(server, get5MLDTrustUTREndpoint(utr), SERVICE_UNAVAILABLE, "")
+
+            val futureResult = connector.getTrustInfo(utr)
+
+            whenReady(futureResult) { result =>
+              result mustBe ServiceUnavailableResponse
+            }
+          }
+        }
+      }
+
+      "identifier is URN" must {
+
+        "return TrustFoundResponse" when {
+
+          "des has returned a 200 with trust details" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val urn = "1234567890ADCEF"
+            stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, getTrustResponseJson)
+
+            val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(urn)
+
+            whenReady(futureResult) { result =>
+
+              val expectedHeader: ResponseHeader = (getTrustResponse \ "responseHeader").as[ResponseHeader]
+              val expectedJson = (getTrustResponse \ "trustOrEstateDisplay").as[JsValue]
+
+              result match {
+                case r: TrustProcessedResponse =>
+                  r.responseHeader mustBe expectedHeader
+                  r.getTrust mustBe expectedJson
+                case _ => fail
+              }
+            }
+          }
+
+          "des has returned a 200 with property or land asset with no previous value" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val urn = "1234567890ADCEF"
+            stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, getTrustPropertyLandNoPreviousValue)
+
+            val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(urn)
+
+            whenReady(futureResult) { result =>
+
+              val expectedHeader: ResponseHeader = (getTrustPropertyLandNoPreviousValueJson \ "responseHeader").as[ResponseHeader]
+              val expectedJson = (getTrustPropertyLandNoPreviousValueJson \ "trustOrEstateDisplay").as[JsValue]
+
+              result match {
+                case r: TrustProcessedResponse =>
+                  r.responseHeader mustBe expectedHeader
+                  r.getTrust mustBe expectedJson
+                case _ => fail
+              }
+            }
+          }
+
+          "des has returned a 200 and indicated that the submission is still being processed" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val urn = "1234567890ADCEF"
+            stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, getTrustOrEstateProcessingResponseJson)
+
+            val futureResult = connector.getTrustInfo(urn)
+
+            whenReady(futureResult) { result =>
+              result mustBe TrustFoundResponse(ResponseHeader("In Processing", "1"))
+            }
+          }
+        }
+
+        "return NotEnoughData" when {
+
+          "json does not validate as GetData model" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val urn = "1234567890ADCEF"
+            stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, getTrustMalformedJsonResponse)
+
+            val futureResult = connector.getTrustInfo(urn)
+
+            whenReady(futureResult) { result =>
+              result mustBe NotEnoughDataResponse(Json.parse(getTrustMalformedJsonResponse), Json.parse(
+                """
+                  |{"obj.details.trust.entities.leadTrustees.phoneNumber":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.identification":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.name":[{"msg":["error.path.missing"],"args":[]}]}
+                  |""".stripMargin))
+            }
+          }
+
+        }
+
+        "return InvalidUTRResponse" when {
+
+          "des has returned a 400 with the code INVALID_UTR" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val urn = "1234567890ADCEF"
+            stubForGet(server, get5MLDTrustURNEndpoint(urn), BAD_REQUEST,
+              Json.stringify(jsonResponse400InvalidUTR))
+
+            val futureResult = connector.getTrustInfo(urn)
+
+            whenReady(futureResult) { result =>
+              result mustBe InvalidUTRResponse
+            }
+          }
+        }
+
+        "return InvalidRegimeResponse" when {
+
+          "des has returned a 400 with the code INVALID_REGIME" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val urn = "1234567890ADCEF"
+            stubForGet(server, get5MLDTrustURNEndpoint(urn), BAD_REQUEST,
+              Json.stringify(jsonResponse400InvalidRegime))
+
+            val futureResult = connector.getTrustInfo(urn)
+
+            whenReady(futureResult) { result =>
+              result mustBe InvalidRegimeResponse
+            }
+          }
+        }
+
+        "return BadRequestResponse" when {
+
+          "des has returned a 400 with a code which is not INVALID_UTR OR INVALID_REGIME" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val urn = "1234567890ADCEF"
+            stubForGet(server, get5MLDTrustURNEndpoint(urn), BAD_REQUEST,
+              Json.stringify(jsonResponse400))
+
+            val futureResult = connector.getTrustInfo(urn)
+
+            whenReady(futureResult) { result =>
+              result mustBe BadRequestResponse
+            }
+          }
+        }
+
+        "return NotEnoughDataResponse" when {
+
+          "des has returned a 204" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val urn = "1234567890ADCEF"
+            stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, Json.stringify(jsonResponse204))
+
+            val futureResult = connector.getTrustInfo(urn)
+
+            whenReady(futureResult) { result =>
+              result mustBe NotEnoughDataResponse(jsonResponse204, Json.parse(
+                """
+                  |{"obj":[{"msg":["'responseHeader' is undefined on object: {\"code\":\"NO_CONTENT\",\"reason\":\"No Content.\"}"],"args":[]}]}
+                  |""".stripMargin))
+            }
+          }
+        }
+
+        "return ResourceNotFoundResponse" when {
+
+          "des has returned a 404" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val urn = "1234567890ADCEF"
+            stubForGet(server, get5MLDTrustURNEndpoint(urn), NOT_FOUND, "")
+
+            val futureResult = connector.getTrustInfo(urn)
+
+            whenReady(futureResult) { result =>
+              result mustBe ResourceNotFoundResponse
+            }
+          }
+        }
+
+        "return InternalServerErrorResponse" when {
+
+          "des has returned a 500 with the code SERVER_ERROR" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val urn = "1234567890ADCEF"
+            stubForGet(server, get5MLDTrustURNEndpoint(urn), INTERNAL_SERVER_ERROR, "")
+
+            val futureResult = connector.getTrustInfo(urn)
+
+            whenReady(futureResult) { result =>
+              result mustBe InternalServerErrorResponse
+            }
+          }
+        }
+
+        "return ServiceUnavailableResponse" when {
+
+          "des has returned a 503 with the code SERVICE_UNAVAILABLE" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val urn = "1234567890ADCEF"
+            stubForGet(server, get5MLDTrustURNEndpoint(urn), SERVICE_UNAVAILABLE, "")
+
+            val futureResult = connector.getTrustInfo(urn)
+
+            whenReady(futureResult) { result =>
+              result mustBe ServiceUnavailableResponse
+            }
+          }
+        }
+      }
+
+    }
+
   }
 
   ".TrustVariation" should {
