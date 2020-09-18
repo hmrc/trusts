@@ -22,10 +22,11 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.{ResponseHeader, _}
-import uk.gov.hmrc.trusts.transformers.mdtp.{OtherIndividuals, Trustees}
 import uk.gov.hmrc.trusts.transformers.mdtp.beneficiaries.Beneficiaries
 import uk.gov.hmrc.trusts.transformers.mdtp.protectors.Protectors
 import uk.gov.hmrc.trusts.transformers.mdtp.settlors.Settlors
+import uk.gov.hmrc.trusts.transformers.mdtp.{OtherIndividuals, Trustees}
+import uk.gov.hmrc.trusts.models.Taxability._
 
 trait GetTrustResponse
 
@@ -57,8 +58,7 @@ object GetTrustSuccessResponse {
   }
 }
 
-case class TrustProcessedResponse(getTrust: JsValue,
-                              responseHeader: ResponseHeader) extends GetTrustSuccessResponse {
+case class TrustProcessedResponse(getTrust: JsValue, responseHeader: ResponseHeader) extends GetTrustSuccessResponse {
 
   def transform : JsResult[TrustProcessedResponse] = {
     getTrust.transform(
@@ -70,6 +70,18 @@ case class TrustProcessedResponse(getTrust: JsValue,
     ).map {
       json =>
         TrustProcessedResponse(json, responseHeader)
+    }
+  }
+
+  def taxability: Taxability = {
+    val matchDataPath: JsPath = JsPath \ 'matchData
+    val utrPath: JsPath = matchDataPath \ 'utr
+    val urnPath: JsPath = matchDataPath \ 'urn
+
+    (getTrust.transform(utrPath.json.pick).isSuccess, getTrust.transform(urnPath.json.pick).isSuccess) match {
+      case (true, false) => Taxable
+      case (false, true) => NonTaxable
+      case (true, true) => ConvertedFromNonTaxableToTaxable
     }
   }
 
