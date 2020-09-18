@@ -35,7 +35,10 @@ class DesConnectorSpec extends ConnectorSpecHelper {
 
   lazy val request = ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
 
-  def registerTrustEndpoint(utr: String) = s"/trusts/registration/$utr"
+  def get4MLDTrustEndpoint(utr: String) = s"/trusts/registration/$utr"
+
+  def get5MLDTrustUTREndpoint(utr: String) = s"/trusts/registration/UTR/$utr"
+  def get5MLDTrustURNEndpoint(utr: String) = s"/trusts/registration/URN/$utr"
 
   ".checkExistingTrust" should {
 
@@ -324,11 +327,18 @@ class DesConnectorSpec extends ConnectorSpecHelper {
 
       "des has returned a 200 with trust details" in {
 
+        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+          """
+            |{
+            | "name": "5mld",
+            | "isEnabled": false
+            |}""".stripMargin
+        )))
+
         val utr = "1234567890"
-        stubForGet(server, registerTrustEndpoint(utr), OK, getTrustResponseJson)
+        stubForGet(server, get4MLDTrustEndpoint(utr), OK, getTrustResponseJson)
 
         val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(utr)
-
 
         whenReady(futureResult) { result =>
 
@@ -346,8 +356,16 @@ class DesConnectorSpec extends ConnectorSpecHelper {
 
       "des has returned a 200 with property or land asset with no previous value" in {
 
+        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+          """
+            |{
+            | "name": "5mld",
+            | "isEnabled": false
+            |}""".stripMargin
+        )))
+
         val utr = "1234567890"
-        stubForGet(server, registerTrustEndpoint(utr), OK, getTrustPropertyLandNoPreviousValue)
+        stubForGet(server, get4MLDTrustEndpoint(utr), OK, getTrustPropertyLandNoPreviousValue)
 
         val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(utr)
 
@@ -367,8 +385,17 @@ class DesConnectorSpec extends ConnectorSpecHelper {
       }
 
       "des has returned a 200 and indicated that the submission is still being processed" in {
+
+        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+          """
+            |{
+            | "name": "5mld",
+            | "isEnabled": false
+            |}""".stripMargin
+        )))
+
         val utr = "1234567800"
-        stubForGet(server, registerTrustEndpoint(utr), OK, getTrustOrEstateProcessingResponseJson)
+        stubForGet(server, get4MLDTrustEndpoint(utr), OK, getTrustOrEstateProcessingResponseJson)
 
         val futureResult = connector.getTrustInfo(utr)
 
@@ -382,8 +409,17 @@ class DesConnectorSpec extends ConnectorSpecHelper {
     "return NotEnoughData" when {
 
       "json does not validate as GetData model" in {
+
+        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+          """
+            |{
+            | "name": "5mld",
+            | "isEnabled": false
+            |}""".stripMargin
+        )))
+
         val utr = "123456789"
-        stubForGet(server, registerTrustEndpoint(utr), OK, getTrustMalformedJsonResponse)
+        stubForGet(server, get4MLDTrustEndpoint(utr), OK, getTrustMalformedJsonResponse)
 
         val futureResult = connector.getTrustInfo(utr)
 
@@ -401,8 +437,17 @@ class DesConnectorSpec extends ConnectorSpecHelper {
     "return InvalidUTRResponse" when {
 
       "des has returned a 400 with the code INVALID_UTR" in {
+
+        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+          """
+            |{
+            | "name": "5mld",
+            | "isEnabled": false
+            |}""".stripMargin
+        )))
+
         val invalidUTR = "123456789"
-        stubForGet(server, registerTrustEndpoint(invalidUTR), BAD_REQUEST,
+        stubForGet(server, get4MLDTrustEndpoint(invalidUTR), BAD_REQUEST,
           Json.stringify(jsonResponse400InvalidUTR))
 
         val futureResult = connector.getTrustInfo(invalidUTR)
@@ -417,8 +462,17 @@ class DesConnectorSpec extends ConnectorSpecHelper {
     "return InvalidRegimeResponse" when {
 
       "des has returned a 400 with the code INVALID_REGIME" in {
+
+        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+          """
+            |{
+            | "name": "5mld",
+            | "isEnabled": false
+            |}""".stripMargin
+        )))
+
         val utr = "1234567891"
-        stubForGet(server, registerTrustEndpoint(utr), BAD_REQUEST,
+        stubForGet(server, get4MLDTrustEndpoint(utr), BAD_REQUEST,
           Json.stringify(jsonResponse400InvalidRegime))
 
         val futureResult = connector.getTrustInfo(utr)
@@ -433,8 +487,17 @@ class DesConnectorSpec extends ConnectorSpecHelper {
     "return BadRequestResponse" when {
 
       "des has returned a 400 with a code which is not INVALID_UTR OR INVALID_REGIME" in {
+
+        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+          """
+            |{
+            | "name": "5mld",
+            | "isEnabled": false
+            |}""".stripMargin
+        )))
+
         val utr = "1234567891"
-        stubForGet(server, registerTrustEndpoint(utr), BAD_REQUEST,
+        stubForGet(server, get4MLDTrustEndpoint(utr), BAD_REQUEST,
           Json.stringify(jsonResponse400))
 
         val futureResult = connector.getTrustInfo(utr)
@@ -449,8 +512,17 @@ class DesConnectorSpec extends ConnectorSpecHelper {
     "return NotEnoughDataResponse" when {
 
       "des has returned a 204" in {
+
+        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+          """
+            |{
+            | "name": "5mld",
+            | "isEnabled": false
+            |}""".stripMargin
+        )))
+
         val utr = "6666666666"
-        stubForGet(server, registerTrustEndpoint(utr), OK, Json.stringify(jsonResponse204))
+        stubForGet(server, get4MLDTrustEndpoint(utr), OK, Json.stringify(jsonResponse204))
 
         val futureResult = connector.getTrustInfo(utr)
 
@@ -467,8 +539,17 @@ class DesConnectorSpec extends ConnectorSpecHelper {
     "return ResourceNotFoundResponse" when {
 
       "des has returned a 404" in {
+
+        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+          """
+            |{
+            | "name": "5mld",
+            | "isEnabled": false
+            |}""".stripMargin
+        )))
+
         val utr = "1234567892"
-        stubForGet(server, registerTrustEndpoint(utr), NOT_FOUND, "")
+        stubForGet(server, get4MLDTrustEndpoint(utr), NOT_FOUND, "")
 
         val futureResult = connector.getTrustInfo(utr)
 
@@ -481,8 +562,17 @@ class DesConnectorSpec extends ConnectorSpecHelper {
     "return InternalServerErrorResponse" when {
 
       "des has returned a 500 with the code SERVER_ERROR" in {
+
+        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+          """
+            |{
+            | "name": "5mld",
+            | "isEnabled": false
+            |}""".stripMargin
+        )))
+
         val utr = "1234567893"
-        stubForGet(server, registerTrustEndpoint(utr), INTERNAL_SERVER_ERROR, "")
+        stubForGet(server, get4MLDTrustEndpoint(utr), INTERNAL_SERVER_ERROR, "")
 
         val futureResult = connector.getTrustInfo(utr)
 
@@ -495,8 +585,17 @@ class DesConnectorSpec extends ConnectorSpecHelper {
     "return ServiceUnavailableResponse" when {
 
       "des has returned a 503 with the code SERVICE_UNAVAILABLE" in {
+
+        stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+          """
+            |{
+            | "name": "5mld",
+            | "isEnabled": false
+            |}""".stripMargin
+        )))
+
         val utr = "1234567894"
-        stubForGet(server, registerTrustEndpoint(utr), SERVICE_UNAVAILABLE, "")
+        stubForGet(server, get4MLDTrustEndpoint(utr), SERVICE_UNAVAILABLE, "")
 
         val futureResult = connector.getTrustInfo(utr)
 
