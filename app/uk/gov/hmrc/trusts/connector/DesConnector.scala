@@ -28,19 +28,28 @@ import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustResponse
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
+import uk.gov.hmrc.trusts.services.TrustsStoreService
 import uk.gov.hmrc.trusts.utils.Constants._
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
-class DesConnector @Inject()(http: HttpClient, config: AppConfig) {
+class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustStoreService: TrustsStoreService) {
 
   private lazy val trustsServiceUrl : String = s"${config.registerTrustsUrl}/trusts"
   private lazy val matchTrustsEndpoint : String = s"$trustsServiceUrl/match"
   private lazy val trustRegistrationEndpoint : String = s"$trustsServiceUrl/registration"
   private lazy val getTrustOrEstateUrl: String =  s"${config.getTrustOrEstateUrl}/trusts"
 
-  def createGetTrustOrEstateEndpoint(utr: String): String = s"$getTrustOrEstateUrl/registration/$utr"
+  def get4MLDTrustOrEstateEndpoint(utr: String): String = s"$getTrustOrEstateUrl/registration/$utr"
+
+  def get5MLDTrustOrEstateEndpoint(utr: String): String = {
+    if (utr.length == 10) {
+      s"$getTrustOrEstateUrl/registration/UTR/$utr"
+    } else {
+      s"$getTrustOrEstateUrl/registration/URN/$utr"
+    }
+  }
 
   private lazy val trustVariationsEndpoint : String = s"${config.varyTrustOrEstateUrl}/trusts/variation"
 
@@ -114,7 +123,14 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig) {
 
     Logger.info(s"[DesConnector] getting playback for trust for correlationId: $correlationId")
 
-    http.GET[GetTrustResponse](createGetTrustOrEstateEndpoint(utr))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)
+
+    trustStoreService.isFeatureEnabled("5mld").flatMap { is5MLD =>
+      if (is5MLD) {
+        http.GET[GetTrustResponse](get5MLDTrustOrEstateEndpoint(utr))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)
+      } else {
+        http.GET[GetTrustResponse](get4MLDTrustOrEstateEndpoint(utr))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)
+      }
+    }
   }
 
   def trustVariation(trustVariations: JsValue)(implicit hc: HeaderCarrier): Future[VariationResponse] = {

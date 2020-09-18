@@ -31,7 +31,7 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, ValidateUtrActionProvider}
+import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, ValidateIdentifierActionProvider}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{TrustFoundResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService, TrustsStoreService}
@@ -58,7 +58,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
   private val auditService = new AuditService(mockAuditConnector, mockConfig)
 
-  private val validateUtrAction = app.injector.instanceOf[ValidateUtrActionProvider]
+  private val validateUtrAction = app.injector.instanceOf[ValidateIdentifierActionProvider]
 
   lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 

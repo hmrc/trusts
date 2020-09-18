@@ -73,10 +73,10 @@ class TransformationRepositoryImpl @Inject()(
     } yield createdLastUpdatedIndex && createdIdIndex
   }
 
-  override def get(utr: String, internalId: String): Future[Option[ComposedDeltaTransform]] = {
+  override def get(identifier: String, internalId: String): Future[Option[ComposedDeltaTransform]] = {
 
     val selector = Json.obj(
-      "id" -> createKey(utr, internalId)
+      "id" -> createKey(identifier, internalId)
     )
 
     collection.flatMap {collection =>
@@ -89,19 +89,19 @@ class TransformationRepositoryImpl @Inject()(
     }
   }
 
-  private def createKey(utr: String, internalId: String) = {
-    (utr + '-' + internalId)
+  private def createKey(identifier: String, internalId: String) = {
+    (identifier + '-' + internalId)
   }
 
-  override def set(utr: String, internalId: String, transforms: ComposedDeltaTransform): Future[Boolean] = {
+  override def set(identifier: String, internalId: String, transforms: ComposedDeltaTransform): Future[Boolean] = {
 
     val selector = Json.obj(
-      "id" -> createKey(utr, internalId)
+      "id" -> createKey(identifier, internalId)
     )
 
     val modifier = Json.obj(
       "$set" -> Json.obj(
-        "id" -> createKey(utr, internalId),
+        "id" -> createKey(identifier, internalId),
         "updatedAt" -> Json.obj("$date" -> Timestamp.valueOf(LocalDateTime.now())),
         "transforms" -> Json.toJson(transforms)
       )
@@ -114,9 +114,9 @@ class TransformationRepositoryImpl @Inject()(
     }
   }
 
-  override def resetCache(utr: String, internalId: String): Future[Option[JsObject]] = {
+  override def resetCache(identifier: String, internalId: String): Future[Option[JsObject]] = {
     val selector = Json.obj(
-      "id" -> createKey(utr, internalId)
+      "id" -> createKey(identifier, internalId)
     )
 
     collection.flatMap(_.findAndRemove(selector, None, None, WriteConcern.Default, None, None, Seq.empty).map(
@@ -127,9 +127,9 @@ class TransformationRepositoryImpl @Inject()(
 
 trait TransformationRepository {
 
-  def get(utr: String, internalId: String): Future[Option[ComposedDeltaTransform]]
+  def get(identifier: String, internalId: String): Future[Option[ComposedDeltaTransform]]
 
-  def set(utr: String, internalId: String, transforms: ComposedDeltaTransform): Future[Boolean]
+  def set(identifier: String, internalId: String, transforms: ComposedDeltaTransform): Future[Boolean]
 
-  def resetCache(utr: String, internalId: String): Future[Option[JsObject]]
+  def resetCache(identifier: String, internalId: String): Future[Option[JsObject]]
 }

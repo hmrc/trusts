@@ -75,9 +75,9 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Cache
     }
   }
 
-  def getTrustInfo(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
+  def getTrustInfo(identifier: String, internalId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
     Logger.debug("Getting trust Info")
-    repository.get(utr, internalId).flatMap {
+    repository.get(identifier, internalId).flatMap {
       case Some(x) => x.validate[GetTrustSuccessResponse].fold(
         errs => {
           Logger.error(s"[DesService] unable to parse json from cache as GetTrustSuccessResponse $errs")
@@ -87,7 +87,7 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Cache
           Future.successful(response)
         }
       )
-      case None => refreshCacheAndGetTrustInfo(utr, internalId)
+      case None => refreshCacheAndGetTrustInfo(identifier, internalId)
     }
   }
 
