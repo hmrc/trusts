@@ -152,7 +152,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     result.get mustEqual afterJson
   }
   "must fix lead trustee address of ETMP json read from DES service" in {
-    val response = getTrustResponse.as[GetTrustSuccessResponse]
+    val response = get4MLDTrustResponse.as[GetTrustSuccessResponse]
     val processedResponse = response.asInstanceOf[TrustProcessedResponse]
     val desService = mock[DesService]
     when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
@@ -169,7 +169,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     }
   }
   "must apply transformations to ETMP json read from DES service" in {
-    val response = getTrustResponse.as[GetTrustSuccessResponse]
+    val response = get4MLDTrustResponse.as[GetTrustSuccessResponse]
     val processedResponse = response.asInstanceOf[TrustProcessedResponse]
     val desService = mock[DesService]
     when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))

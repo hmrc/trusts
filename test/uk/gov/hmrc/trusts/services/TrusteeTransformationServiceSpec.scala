@@ -184,7 +184,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     }
 
     "must write a promote trustee ind transform using the transformation service" in {
-      val response = getTrustResponse.as[GetTrustSuccessResponse]
+      val response = get4MLDTrustResponse.as[GetTrustSuccessResponse]
       val processedResponse = response.asInstanceOf[TrustProcessedResponse]
 
       val transformationService = mock[TransformationService]
@@ -206,7 +206,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     }
 
     "must write a promote trustee org transform using the transformation service" in {
-      val response = getTrustResponse.as[GetTrustSuccessResponse]
+      val response = get4MLDTrustResponse.as[GetTrustSuccessResponse]
       val processedResponse = response.asInstanceOf[TrustProcessedResponse]
 
       val transformationService = mock[TransformationService]
@@ -234,7 +234,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     }
 
     "must write a RemoveTrustee transform using the transformation service" in {
-      val response = getTrustResponse.as[GetTrustSuccessResponse]
+      val response = get4MLDTrustResponse.as[GetTrustSuccessResponse]
       val processedResponse = response.asInstanceOf[TrustProcessedResponse]
 
       val transformationService = mock[TransformationService]
@@ -278,7 +278,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     }
 
     "must add a new amend trustee transform using the transformation service" in {
-      val response = getTrustResponse.as[GetTrustSuccessResponse]
+      val response = get4MLDTrustResponse.as[GetTrustSuccessResponse]
       val processedResponse = response.asInstanceOf[TrustProcessedResponse]
 
       val index = 0

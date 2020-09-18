@@ -44,7 +44,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
   private val formBundleNo = "001234567890"
   private val utr = "1234567890"
   private val internalId = "InternalId"
-  private val fullEtmpResponseJson = getTrustResponse
+  private val fullEtmpResponseJson = get4MLDTrustResponse
   private val transformedEtmpResponseJson = Json.parse("""{ "field": "Arbitrary transformed JSON" }""")
   private val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
   private val transformedJson = Json.obj("field" -> "value")

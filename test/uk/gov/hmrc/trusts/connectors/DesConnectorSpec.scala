@@ -338,14 +338,14 @@ class DesConnectorSpec extends ConnectorSpecHelper {
           )))
 
           val utr = "1234567890"
-          stubForGet(server, get4MLDTrustEndpoint(utr), OK, getTrustResponseJson)
+          stubForGet(server, get4MLDTrustEndpoint(utr), OK, get4MLDTrustResponseJson)
 
           val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(utr)
 
           whenReady(futureResult) { result =>
 
-            val expectedHeader: ResponseHeader = (getTrustResponse \ "responseHeader").as[ResponseHeader]
-            val expectedJson = (getTrustResponse \ "trustOrEstateDisplay").as[JsValue]
+            val expectedHeader: ResponseHeader = (get4MLDTrustResponse \ "responseHeader").as[ResponseHeader]
+            val expectedJson = (get4MLDTrustResponse \ "trustOrEstateDisplay").as[JsValue]
 
             result match {
               case r: TrustProcessedResponse =>
@@ -626,14 +626,14 @@ class DesConnectorSpec extends ConnectorSpecHelper {
             )))
 
             val utr = "1234567890"
-            stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, getTrustResponseJson)
+            stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, get4MLDTrustResponseJson)
 
             val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(utr)
 
             whenReady(futureResult) { result =>
 
-              val expectedHeader: ResponseHeader = (getTrustResponse \ "responseHeader").as[ResponseHeader]
-              val expectedJson = (getTrustResponse \ "trustOrEstateDisplay").as[JsValue]
+              val expectedHeader: ResponseHeader = (get4MLDTrustResponse \ "responseHeader").as[ResponseHeader]
+              val expectedJson = (get4MLDTrustResponse \ "trustOrEstateDisplay").as[JsValue]
 
               result match {
                 case r: TrustProcessedResponse =>
@@ -910,14 +910,14 @@ class DesConnectorSpec extends ConnectorSpecHelper {
             )))
 
             val urn = "1234567890ADCEF"
-            stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, getTrustResponseJson)
+            stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, get5MLDTrustNonTaxableResponseJson)
 
             val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(urn)
 
             whenReady(futureResult) { result =>
 
-              val expectedHeader: ResponseHeader = (getTrustResponse \ "responseHeader").as[ResponseHeader]
-              val expectedJson = (getTrustResponse \ "trustOrEstateDisplay").as[JsValue]
+              val expectedHeader: ResponseHeader = (get4MLDTrustResponse \ "responseHeader").as[ResponseHeader]
+              val expectedJson = (get4MLDTrustResponse \ "trustOrEstateDisplay").as[JsValue]
 
               result match {
                 case r: TrustProcessedResponse =>

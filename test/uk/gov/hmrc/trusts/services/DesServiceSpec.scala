@@ -198,7 +198,7 @@ class DesServiceSpec extends BaseSpec {
     "return TrustFoundResponse" when {
       "TrustFoundResponse is returned from DES Connector with a Processed flag and a trust body when not cached" in new DesServiceFixture {
         val utr = "1234567890"
-        val fullEtmpResponseJson = getTrustResponse
+        val fullEtmpResponseJson = get4MLDTrustResponse
         val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
 
         when(mockRepository.get(any[String], any[String])).thenReturn(Future.successful(None))
@@ -216,7 +216,7 @@ class DesServiceSpec extends BaseSpec {
       "TrustFoundResponse is returned from repository with a Processed flag and a trust body when cached" in new DesServiceFixture {
         val utr = "1234567890"
 
-        val fullEtmpResponseJson = getTrustResponse
+        val fullEtmpResponseJson = get4MLDTrustResponse
         val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
 
         when(mockRepository.get(any[String], any[String])).thenReturn(Future.successful(Some(fullEtmpResponseJson)))
