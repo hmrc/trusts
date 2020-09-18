@@ -22,7 +22,6 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.http.BadRequestException
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.connector.TrustsStoreConnector
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ApiResponse._
@@ -30,7 +29,7 @@ import uk.gov.hmrc.trusts.models.RegistrationTrnResponse._
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
-import uk.gov.hmrc.trusts.services.{AuditService, DesService, RosmPatternService, ValidationService}
+import uk.gov.hmrc.trusts.services._
 import uk.gov.hmrc.trusts.utils.ErrorResponses._
 import uk.gov.hmrc.trusts.utils.Headers
 import uk.gov.hmrc.trusts.utils.JsonOps._
@@ -45,12 +44,12 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
                                         rosmPatternService: RosmPatternService,
                                         auditService: AuditService,
                                         cc: ControllerComponents,
-                                        trustsStoreConnector: TrustsStoreConnector
+                                        trustsStoreService: TrustsStoreService
                                        )(implicit ec: ExecutionContext) extends TrustsBaseController(cc) {
 
   private def schemaF(implicit request: IdentifierRequest[JsValue]): Future[String] = {
-    trustsStoreConnector.getFeature("5mld").map {
-      case FeatureResponse(_, true) => config.trustsApiRegistrationSchema5MLD
+    trustsStoreService.isFeatureEnabled("5mld").map {
+      case true => config.trustsApiRegistrationSchema5MLD
       case _ => config.trustsApiRegistrationSchema4MLD
     }
   }

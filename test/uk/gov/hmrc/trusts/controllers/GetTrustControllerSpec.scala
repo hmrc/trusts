@@ -34,7 +34,7 @@ import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, ValidateUtrActionProvider}
 import uk.gov.hmrc.trusts.models.get_trust_or_estate._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{TrustFoundResponse, TrustProcessedResponse}
-import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService}
+import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService, TrustsStoreService}
 import uk.gov.hmrc.trusts.utils.JsonRequests
 
 import scala.concurrent.Future
@@ -54,6 +54,8 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
   private val transformationService = mock[TransformationService]
 
+  private val trustsStoreService = mock[TrustsStoreService]
+
   private val auditService = new AuditService(mockAuditConnector, mockConfig)
 
   private val validateUtrAction = app.injector.instanceOf[ValidateUtrActionProvider]
@@ -66,7 +68,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
   private def getTrustController = {
     val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation),
-      mockedAuditService, desService, transformationService, validateUtrAction, Helpers.stubControllerComponents())
+      mockedAuditService, desService, transformationService, validateUtrAction, trustsStoreService, Helpers.stubControllerComponents())
 
     SUT
   }
@@ -78,7 +80,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
     "reset the cache and clear transforms before calling get" in {
 
       val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation),
-        auditService, desService, transformationService,validateUtrAction, Helpers.stubControllerComponents())
+        auditService, desService, transformationService,validateUtrAction, trustsStoreService, Helpers.stubControllerComponents())
 
       val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
       when(desService.resetCache(any(), any()))
@@ -104,7 +106,15 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
     "not perform auditing" when {
       "the feature toggle is set to false" in {
 
-        val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation), auditService, desService, transformationService, validateUtrAction, Helpers.stubControllerComponents())
+        val SUT = new GetTrustController(
+          new FakeIdentifierAction(bodyParsers, Organisation),
+          auditService,
+          desService,
+          transformationService,
+          validateUtrAction,
+          trustsStoreService,
+          Helpers.stubControllerComponents()
+        )
 
         val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
         when(desService.getTrustInfo(any(), any())(any()))
@@ -123,7 +133,15 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
     "perform auditing" when {
       "the feature toggle is set to true" in {
 
-        val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation), auditService, desService, transformationService, validateUtrAction, Helpers.stubControllerComponents())
+        val SUT = new GetTrustController(
+          new FakeIdentifierAction(bodyParsers, Organisation),
+          auditService,
+          desService,
+          transformationService,
+          validateUtrAction,
+          trustsStoreService,
+          Helpers.stubControllerComponents()
+        )
 
         when(desService.getTrustInfo(any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
