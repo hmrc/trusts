@@ -21,8 +21,8 @@ import play.api.Logger
 import play.api.libs.json.{JsObject, JsResult, JsSuccess, JsValue, Json, __, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
-import uk.gov.hmrc.trusts.models.get_trust.TransformationErrorResponse
 import uk.gov.hmrc.trusts.models.get_trust.get_trust.{GetTrustResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.get_trust.{TransformationErrorResponse, get_trust}
 import uk.gov.hmrc.trusts.repositories.TransformationRepository
 import uk.gov.hmrc.trusts.transformers._
 
@@ -31,8 +31,8 @@ import scala.concurrent.Future
 
 class TransformationService @Inject()(repository: TransformationRepository,
                                       desService: DesService,
-                                      auditService: AuditService){
-  def getTransformedData(identifier: String, internalId: String)(implicit hc : HeaderCarrier): Future[GetTrustResponse] = {
+                                      auditService: AuditService) {
+  def getTransformedData(identifier: String, internalId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
     desService.getTrustInfo(identifier, internalId).flatMap {
       case response: TrustProcessedResponse =>
         populateLeadTrusteeAddress(response.getTrust) match {
@@ -41,7 +41,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
             applyTransformations(identifier, internalId, fixed).map {
               case JsSuccess(transformed, _) =>
 
-                TrustProcessedResponse(transformed, response.responseHeader)
+                get_trust.TrustProcessedResponse(transformed, response.responseHeader)
               case JsError(errors) => TransformationErrorResponse(errors.toString)
             }
           case JsError(errors) => Future.successful(TransformationErrorResponse(errors.toString))
@@ -50,7 +50,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
-  private def applyTransformations(identifier: String, internalId: String, json: JsValue)(implicit hc : HeaderCarrier): Future[JsResult[JsValue]] = {
+  private def applyTransformations(identifier: String, internalId: String, json: JsValue)(implicit hc: HeaderCarrier): Future[JsResult[JsValue]] = {
     repository.get(identifier, internalId).map {
       case None =>
         JsSuccess(json)
@@ -59,7 +59,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
-  def applyDeclarationTransformations(identifier: String, internalId: String, json: JsValue)(implicit hc : HeaderCarrier): Future[JsResult[JsValue]] = {
+  def applyDeclarationTransformations(identifier: String, internalId: String, json: JsValue)(implicit hc: HeaderCarrier): Future[JsResult[JsValue]] = {
     repository.get(identifier, internalId).map {
       case None =>
         Logger.info(s"[TransformationService] no transformations to apply")
@@ -101,7 +101,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
-  def addNewTransform(identifier: String, internalId: String, newTransform: DeltaTransform) : Future[Boolean] = {
+  def addNewTransform(identifier: String, internalId: String, newTransform: DeltaTransform): Future[Boolean] = {
     repository.get(identifier, internalId).map {
       case None =>
         ComposedDeltaTransform(Seq(newTransform))

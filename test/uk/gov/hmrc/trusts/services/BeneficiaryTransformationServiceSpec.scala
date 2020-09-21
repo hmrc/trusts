@@ -27,9 +27,9 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.models.get_trust.ResponseHeader
-import uk.gov.hmrc.trusts.models.get_trust.get_trust._
-import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryCompanyType, BeneficiaryTrustType, IdentificationType, IndividualDetailsType, LargeType, OtherType, UnidentifiedType}
+import uk.gov.hmrc.trusts.models.get_trust.get_trust
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustProcessedResponse, _}
+import uk.gov.hmrc.trusts.models.variation._
 import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType}
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.transformers.remove.RemoveBeneficiary
@@ -105,7 +105,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
       when(transformationService.getTransformedData(any(), any())(any()))
-        .thenReturn(Future.successful(TrustProcessedResponse(
+        .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
           buildInputJson("unidentified", Seq(originalBeneficiaryJson)),
           ResponseHeader("status", "formBundlNo")
         )))
@@ -179,7 +179,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
         when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
         when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(TrustProcessedResponse(
+          .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
             buildInputJson("individualDetails", Seq(original)),
             ResponseHeader("status", "formBundlNo")
           )))
@@ -276,7 +276,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
       when(transformationService.getTransformedData(any(), any())(any()))
-        .thenReturn(Future.successful(TrustProcessedResponse(
+        .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
           buildInputJson("charity", Seq(original)),
           ResponseHeader("status", "formBundleNo")
         )))
@@ -372,7 +372,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
       when(transformationService.getTransformedData(any(), any())(any()))
-        .thenReturn(Future.successful(TrustProcessedResponse(
+        .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
           buildInputJson("company", Seq(original)),
           ResponseHeader("status", "formBundleNo")
         )))
@@ -448,7 +448,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
       when(transformationService.getTransformedData(any(), any())(any()))
-        .thenReturn(Future.successful(TrustProcessedResponse(
+        .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
           buildInputJson("other", Seq(original)),
           ResponseHeader("status", "formBundleNo")
         )))
@@ -496,7 +496,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
     when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
     when(transformationService.getTransformedData(any(), any())(any()))
-      .thenReturn(Future.successful(TrustProcessedResponse(
+      .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
         buildInputJson("trust", Seq(original)),
         ResponseHeader("status", "formBundleNo")
       )))
@@ -592,7 +592,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
     when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
     when(transformationService.getTransformedData(any(), any())(any()))
-      .thenReturn(Future.successful(TrustProcessedResponse(
+      .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
         buildInputJson("large", Seq(original)),
         ResponseHeader("status", "formBundleNo")
       )))

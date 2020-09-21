@@ -27,10 +27,10 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.models.get_trust.ResponseHeader
-import uk.gov.hmrc.trusts.models.get_trust.get_trust._
-import uk.gov.hmrc.trusts.models.variation.{Protector, ProtectorCompany}
 import uk.gov.hmrc.trusts.models.NameType
+import uk.gov.hmrc.trusts.models.get_trust.get_trust
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustProcessedResponse, _}
+import uk.gov.hmrc.trusts.models.variation.{Protector, ProtectorCompany}
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.transformers.remove.RemoveProtector
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
@@ -157,7 +157,7 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
         when(transformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
         when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(TrustProcessedResponse(
+          .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
             buildInputJson("protector", Seq(protector)),
             ResponseHeader("status", "formBundlNo")
           )))
@@ -220,7 +220,7 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
         when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
         when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(TrustProcessedResponse(
+          .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
             buildInputJson("protectorCompany", Seq(original)),
             ResponseHeader("status", "formBundleNo")
           )))

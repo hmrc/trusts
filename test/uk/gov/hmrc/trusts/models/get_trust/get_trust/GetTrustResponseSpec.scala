@@ -18,8 +18,8 @@ package uk.gov.hmrc.trusts.models.get_trust.get_trust
 
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.BaseSpec
-import uk.gov.hmrc.trusts.models.get_trust.ResponseHeader
 import uk.gov.hmrc.trusts.models.Taxability._
+import uk.gov.hmrc.trusts.models.get_trust.get_trust
 
 class GetTrustResponseSpec extends BaseSpec {
 
@@ -60,7 +60,7 @@ class GetTrustResponseSpec extends BaseSpec {
               |""".stripMargin
           )
 
-          val response = TrustProcessedResponse(trust, responseHeader)
+          val response = get_trust.TrustProcessedResponse(trust, responseHeader)
 
           response.taxability mustBe NonTaxable
         }
@@ -78,7 +78,7 @@ class GetTrustResponseSpec extends BaseSpec {
               |""".stripMargin
           )
 
-          val response = TrustProcessedResponse(trust, responseHeader)
+          val response = get_trust.TrustProcessedResponse(trust, responseHeader)
 
           response.taxability mustBe ConvertedFromNonTaxableToTaxable
         }

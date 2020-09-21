@@ -24,7 +24,7 @@ import uk.gov.hmrc.trusts.models.existing_trust.ExistingCheckRequest._
 import uk.gov.hmrc.trusts.models.existing_trust.ExistingCheckResponse._
 import uk.gov.hmrc.trusts.models.existing_trust.ExistingCheckRequest
 import uk.gov.hmrc.trusts.models.get_trust._
-import uk.gov.hmrc.trusts.models.get_trust.get_trust._
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustProcessedResponse, _}
 import uk.gov.hmrc.trusts.models.registration.RegistrationTrnResponse
 import uk.gov.hmrc.trusts.models.tax_enrolments.SubscriptionIdResponse
 import uk.gov.hmrc.trusts.models.variation.{TrustVariation, VariationResponse}

@@ -28,8 +28,8 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsSuccess, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.EtmpCacheDataStaleException
-import uk.gov.hmrc.trusts.models.get_trust.ResponseHeader
-import uk.gov.hmrc.trusts.models.get_trust.get_trust.TrustProcessedResponse
+import uk.gov.hmrc.trusts.models.get_trust.get_trust
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.ResponseHeader
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.models.{DeclarationForApi, DeclarationName, NameType}
 import uk.gov.hmrc.trusts.repositories.{CacheRepository, TransformationRepository}
@@ -75,7 +75,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
       when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
       when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
 
-      val response = TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
+      val response = get_trust.TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
 
       when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))(any[HeaderCarrier]())).thenReturn(Future.successful(
         response
@@ -89,7 +89,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
 
       val OUT = new VariationService(desService, transformationService, transformer, mockCacheRepository, mockTransformationRepository, auditService, LocalDateServiceStub)
 
-      val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
+      val transformedResponse = get_trust.TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
 
       whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { variationResponse => {
         variationResponse mustBe VariationResponse("TVN34567890")
@@ -115,7 +115,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
     when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
 
     when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))(any[HeaderCarrier]())).thenReturn(Future.successful(
-      TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
+      get_trust.TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
     ))
 
     when(desService.trustVariation(any())(any[HeaderCarrier])).thenReturn(Future.successful(

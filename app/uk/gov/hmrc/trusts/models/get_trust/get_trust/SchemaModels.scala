@@ -20,24 +20,10 @@ import java.time.LocalDate
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.models.get_trust.{MatchData, ResponseHeader}
 import uk.gov.hmrc.trusts.models.JsonWithoutNulls._
-
-case class GetTrust(matchData: MatchData,
-                    correspondence: Correspondence,
-                    declaration: Declaration,
-                    trust: DisplayTrust)
-
-object GetTrust {
-  implicit val writes: Writes[GetTrust] = Json.writes[GetTrust]
-  implicit val reads: Reads[GetTrust] = (
-    (JsPath \ "matchData").read[MatchData] and
-      (JsPath \ "correspondence").read[Correspondence] and
-      (JsPath \ "declaration").read[Declaration] and
-      (JsPath \ "details" \ "trust").read[DisplayTrust]
-    ) (GetTrust.apply _)
-}
+import uk.gov.hmrc.trusts.models._
+import uk.gov.hmrc.trusts.utils.DeedOfVariation.DeedOfVariation
+import uk.gov.hmrc.trusts.utils.TypeOfTrust.TypeOfTrust
 
 case class GetTrustDesResponse(getTrust: Option[GetTrust],
                                responseHeader: ResponseHeader)
@@ -50,6 +36,69 @@ object GetTrustDesResponse {
     ) (GetTrustDesResponse.apply _)
 }
 
+case class ResponseHeader(status: String,
+                          formBundleNo: String)
+
+object ResponseHeader {
+  implicit val apiWrites: Writes[ResponseHeader] = Json.writes[ResponseHeader]
+
+  val mongoWrites: Writes[ResponseHeader] = new Writes[ResponseHeader] {
+    override def writes(header: ResponseHeader): JsValue = Json.obj(
+      "dfmcaReturnUserStatus" -> header.status,
+      "formBundleNo" -> header.formBundleNo
+    )
+  }
+
+  implicit val reads: Reads[ResponseHeader] = (
+    (JsPath \ "dfmcaReturnUserStatus").read[String] and
+      (JsPath \ "formBundleNo").read[String]
+    )(ResponseHeader.apply _)
+}
+
+// Both optional in display response
+case class MatchData(utr: Option[String], urn: Option[String])
+
+object MatchData {
+  implicit val matchDataFormat: Format[MatchData] = Json.format[MatchData]
+}
+
+case class GetTrust(matchData: MatchData,
+                    correspondence: Correspondence,
+                    declaration: Declaration,
+                    trust: DisplayTrust,
+                    submissionDate: Option[LocalDate] // New to 5MLD response, mandatory in 5MLD
+                   )
+
+object GetTrust {
+  implicit val writes: Writes[GetTrust] = Json.writes[GetTrust]
+  implicit val reads: Reads[GetTrust] = (
+    (JsPath \ "matchData").read[MatchData] and
+      (JsPath \ "correspondence").read[Correspondence] and
+      (JsPath \ "declaration").read[Declaration] and
+      (JsPath \ "details" \ "trust").read[DisplayTrust] and
+      (JsPath \ "submissionDate").readNullable[LocalDate]
+    ) (GetTrust.apply _)
+}
+
+case class Correspondence(abroadIndicator: Boolean,
+                          name: String,
+                          address: AddressType,
+                          phoneNumber: String,
+                          welsh: Option[Boolean],   // new 5MLD optional
+                          braille: Option[Boolean]) // new 5MLD optional
+
+object Correspondence {
+  implicit val correspondenceFormat : Format[Correspondence] = Json.format[Correspondence]
+
+}
+
+case class Declaration(name: NameType,
+                       address: AddressType)
+
+object Declaration {
+  implicit val declarationFormat: Format[Declaration] = Json.format[Declaration]
+}
+
 case class DisplayTrust(
                          details: TrustDetailsType,
                          entities: DisplayTrustEntitiesType,
@@ -57,6 +106,31 @@ case class DisplayTrust(
 
 object DisplayTrust {
   implicit val trustFormat: Format[DisplayTrust] = Json.format[DisplayTrust]
+}
+
+case class TrustDetailsType(startDate: LocalDate,
+                            lawCountry: Option[String],
+                            administrationCountry: Option[String],
+                            residentialStatus: Option[ResidentialStatusType],
+                            typeOfTrust: Option[TypeOfTrust],     // now optional with 5MLD
+                            deedOfVariation: Option[DeedOfVariation],
+                            interVivos: Option[Boolean],
+                            efrbsStartDate: Option[LocalDate],
+                            trustTaxable: Option[Boolean],        // new 5MLD required
+                            expressTrust: Option[Boolean],        // new 5MLD required
+                            trustUKResident: Option[Boolean],     // new 5MLD required
+                            trustUKProperty: Option[Boolean]      // new 5MLD optional
+                           )
+
+object TrustDetailsType {
+  implicit val trustDetailsTypeFormat: Format[TrustDetailsType] = Json.format[TrustDetailsType]
+}
+
+case class ResidentialStatusType(uk: Option[UkType],
+                                 nonUK: Option[NonUKType])
+
+object ResidentialStatusType {
+  implicit val residentialStatusTypeFormat: Format[ResidentialStatusType] = Json.format[ResidentialStatusType]
 }
 
 case class DisplayTrustEntitiesType(naturalPerson: Option[List[DisplayTrustNaturalPersonType]],

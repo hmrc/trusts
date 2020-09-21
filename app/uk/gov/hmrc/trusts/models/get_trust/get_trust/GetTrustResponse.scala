@@ -20,14 +20,9 @@ import play.api.Logger
 import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK, SERVICE_UNAVAILABLE}
 import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
-import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.models.get_trust.{ResponseHeader, _}
-import uk.gov.hmrc.trusts.transformers.mdtp.beneficiaries.Beneficiaries
-import uk.gov.hmrc.trusts.transformers.mdtp.protectors.Protectors
-import uk.gov.hmrc.trusts.transformers.mdtp.settlors.Settlors
-import uk.gov.hmrc.trusts.transformers.mdtp.{OtherIndividuals, Trustees}
-import uk.gov.hmrc.trusts.models.Taxability._
+import uk.gov.hmrc.trusts.models
 import uk.gov.hmrc.trusts.models.existing_trust.DesErrorResponse
+import uk.gov.hmrc.trusts.models.get_trust._
 
 trait GetTrustResponse
 
@@ -50,7 +45,7 @@ object GetTrustSuccessResponse {
         case Some(x) =>
           x.validate[GetTrust] match {
             case JsSuccess(_, _) =>
-              header.map(h => TrustProcessedResponse(x, h))
+              header.map(h => models.get_trust.get_trust.TrustProcessedResponse(x, h))
             case x : JsError => x
           }
 
@@ -58,45 +53,6 @@ object GetTrustSuccessResponse {
     }
   }
 }
-
-case class TrustProcessedResponse(getTrust: JsValue, responseHeader: ResponseHeader) extends GetTrustSuccessResponse {
-
-  def transform : JsResult[TrustProcessedResponse] = {
-    getTrust.transform(
-      Trustees.transform(getTrust) andThen
-      Beneficiaries.transform(getTrust) andThen
-      Settlors.transform(getTrust) andThen
-      Protectors.transform(getTrust) andThen
-      OtherIndividuals.transform(getTrust)
-    ).map {
-      json =>
-        TrustProcessedResponse(json, responseHeader)
-    }
-  }
-
-  def taxability: Taxability = {
-    val matchDataPath: JsPath = JsPath \ 'matchData
-    val utrPath: JsPath = matchDataPath \ 'utr
-    val urnPath: JsPath = matchDataPath \ 'urn
-
-    (getTrust.transform(utrPath.json.pick).isSuccess, getTrust.transform(urnPath.json.pick).isSuccess) match {
-      case (true, false) => Taxable
-      case (false, true) => NonTaxable
-      case (true, true) => ConvertedFromNonTaxableToTaxable
-    }
-  }
-
-}
-
-object TrustProcessedResponse {
-  val mongoWrites: Writes[TrustProcessedResponse] = new Writes[TrustProcessedResponse] {
-    override def writes(o: TrustProcessedResponse): JsValue = Json.obj(
-      "responseHeader" -> Json.toJson(o.responseHeader)(ResponseHeader.mongoWrites),
-      "trustOrEstateDisplay" -> o.getTrust)
-  }
-}
-
-case class TrustFoundResponse(responseHeader: ResponseHeader) extends GetTrustSuccessResponse
 
 object GetTrustResponse {
 

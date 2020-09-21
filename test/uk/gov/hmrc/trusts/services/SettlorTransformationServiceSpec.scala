@@ -26,9 +26,9 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.models.get_trust.{IdentificationOrgType, ResponseHeader}
-import uk.gov.hmrc.trusts.models.get_trust.get_trust._
-import uk.gov.hmrc.trusts.models.variation.{AmendDeceasedSettlor, WillType}
+import uk.gov.hmrc.trusts.models.get_trust.get_trust
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustProcessedResponse, _}
+import uk.gov.hmrc.trusts.models.variation.AmendDeceasedSettlor
 import uk.gov.hmrc.trusts.models.{AddressType, NameType, variation}
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.transformers.remove.RemoveSettlor
@@ -169,7 +169,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
         when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
         when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(TrustProcessedResponse(
+          .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
             buildInputJson("settlor", Seq(originalSettlorJson)),
             ResponseHeader("status", "formBundlNo")
           )))
@@ -219,7 +219,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
       when(transformationService.getTransformedData(any(), any())(any()))
         .thenReturn(
-          Future.successful(TrustProcessedResponse(buildInputJson("settlorCompany", Seq(originalSettlorJson)),
+          Future.successful(get_trust.TrustProcessedResponse(buildInputJson("settlorCompany", Seq(originalSettlorJson)),
           ResponseHeader("status", "formBundlNo")
         )))
 
@@ -271,7 +271,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       when(transformationService.getTransformedData(any(), any())(any()))
         .thenReturn(
           Future.successful(
-            TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
+            get_trust.TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
           ))
 
       val result = service.amendDeceasedSettlor("utr", "internalId", amendedSettlor)

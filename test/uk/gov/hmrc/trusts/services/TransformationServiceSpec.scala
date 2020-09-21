@@ -26,7 +26,8 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.{JsResult, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.models.get_trust.get_trust._
+import uk.gov.hmrc.trusts.models.get_trust.get_trust
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustProcessedResponse, _}
 import uk.gov.hmrc.trusts.models.{AddressType, NameType}
 import uk.gov.hmrc.trusts.repositories.TransformationRepositoryImpl
 import uk.gov.hmrc.trusts.transformers._
@@ -158,7 +159,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     when(desService.getTrustInfo(any(), any())(any())).thenReturn(Future.successful(response))
 
     val transformedJson = JsonUtils.getJsonValueFromFile("valid-get-trust-response-transformed.json")
-    val expectedResponse = TrustProcessedResponse(transformedJson, processedResponse.responseHeader)
+    val expectedResponse = get_trust.TrustProcessedResponse(transformedJson, processedResponse.responseHeader)
 
     val repository = mock[TransformationRepositoryImpl]
     when(repository.get(any(), any())).thenReturn(Future.successful(None))
@@ -201,7 +202,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
 
     val transformedJson = JsonUtils.getJsonValueFromFile("valid-get-trust-response-transformed-with-amend.json")
-    val expectedResponse = TrustProcessedResponse(transformedJson, processedResponse.responseHeader)
+    val expectedResponse = get_trust.TrustProcessedResponse(transformedJson, processedResponse.responseHeader)
 
     val service = new TransformationService(repository, desService, auditService)
 

@@ -26,10 +26,10 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.models.get_trust.ResponseHeader
-import uk.gov.hmrc.trusts.models.get_trust.get_trust._
-import uk.gov.hmrc.trusts.models.variation.NaturalPersonType
 import uk.gov.hmrc.trusts.models.NameType
+import uk.gov.hmrc.trusts.models.get_trust.get_trust
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustProcessedResponse, _}
+import uk.gov.hmrc.trusts.models.variation.NaturalPersonType
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.transformers.remove.RemoveOtherIndividual
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
@@ -128,7 +128,7 @@ class OtherIndividualTransformationServiceSpec extends FreeSpec with MockitoSuga
         when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(
             Future.successful(
-              TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
+              get_trust.TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
             ))
 
         val result = service.amendOtherIndividualTransformer("utr", 0, "internalId", amendedOtherIndividual)
