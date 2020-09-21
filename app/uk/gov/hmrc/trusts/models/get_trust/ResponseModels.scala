@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models.get_trust_or_estate
+package uk.gov.hmrc.trusts.models.get_trust
 
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustResponse
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.GetTrustResponse
 
 sealed trait TrustErrorResponse extends GetTrustResponse
 

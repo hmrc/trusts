@@ -23,8 +23,8 @@ import uk.gov.hmrc.trusts.exceptions.{AlreadyRegisteredException, _}
 import uk.gov.hmrc.trusts.models.ExistingCheckRequest._
 import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
 import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.get_trust._
+import uk.gov.hmrc.trusts.models.get_trust.get_trust._
 import uk.gov.hmrc.trusts.models.variation.{TrustVariation, VariationResponse}
 
 import scala.concurrent.Future

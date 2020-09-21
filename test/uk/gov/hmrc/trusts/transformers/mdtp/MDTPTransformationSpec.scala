@@ -18,8 +18,8 @@ package uk.gov.hmrc.trusts.transformers.mdtp
 
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.JsPath
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
+import uk.gov.hmrc.trusts.models.get_trust.ResponseHeader
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class MDTPTransformationSpec extends FreeSpec with MustMatchers {

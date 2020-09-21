@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustNaturalPersonType
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.DisplayTrustNaturalPersonType
 import uk.gov.hmrc.trusts.models.RemoveOtherIndividual
 import uk.gov.hmrc.trusts.models.variation.NaturalPersonType
 import uk.gov.hmrc.trusts.services.OtherIndividualTransformationService

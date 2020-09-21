@@ -24,8 +24,8 @@ import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
 import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.get_trust._
+import uk.gov.hmrc.trusts.models.get_trust.get_trust._
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.repositories.CacheRepositoryImpl
 import uk.gov.hmrc.trusts.utils.JsonUtils

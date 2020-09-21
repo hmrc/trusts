@@ -21,8 +21,8 @@ import play.api.Logger
 import play.api.libs.json.{JsObject, JsResult, JsSuccess, JsValue, Json, __, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.TransformationErrorResponse
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.get_trust.TransformationErrorResponse
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{GetTrustResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.repositories.TransformationRepository
 import uk.gov.hmrc.trusts.transformers._
 

@@ -22,7 +22,7 @@ import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveSettlor
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustSettlor, DisplayTrustSettlorCompany}
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{DisplayTrustSettlor, DisplayTrustSettlorCompany}
 import uk.gov.hmrc.trusts.models.variation.{AmendDeceasedSettlor, Settlor, SettlorCompany}
 import uk.gov.hmrc.trusts.services.SettlorTransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil

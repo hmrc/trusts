@@ -23,8 +23,8 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateIdentifierActionProvider}
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.{BadRequestResponse, _}
+import uk.gov.hmrc.trusts.models.get_trust.get_trust._
+import uk.gov.hmrc.trusts.models.get_trust.{BadRequestResponse, _}
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService, TrustsStoreService}
 
 import scala.concurrent.ExecutionContext.Implicits.global

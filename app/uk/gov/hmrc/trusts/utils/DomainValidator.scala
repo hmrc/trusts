@@ -169,7 +169,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil {
   }
 
   def businessTrusteeUtrIsNotTrustUtr: List[Option[TrustsValidationError]] = {
-    val trustUtr = registration.matchData.map(x => x.utr.get)
+    val trustUtr = registration.matchData.map(x => x.utr)
     registration.trust.entities.trustees.map {
       trustees => {
         val utrList: List[(String, Int)] = getTrusteesUtrWithIndex(trustees)

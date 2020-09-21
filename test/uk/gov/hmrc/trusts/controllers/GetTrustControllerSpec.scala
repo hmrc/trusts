@@ -32,8 +32,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, ValidateIdentifierActionProvider}
-import uk.gov.hmrc.trusts.models.get_trust_or_estate._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{TrustFoundResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.get_trust._
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustFoundResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService, TrustsStoreService}
 import uk.gov.hmrc.trusts.utils.JsonRequests
 

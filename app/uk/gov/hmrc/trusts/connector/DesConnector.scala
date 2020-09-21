@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustResponse
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.GetTrustResponse
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.services.TrustsStoreService
 import uk.gov.hmrc.trusts.utils.Constants._

@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.transformers
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustProtector
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.DisplayTrustProtector
 
 case class AddIndividualProtectorTransform(newProtector: DisplayTrustProtector)
   extends DeltaTransform

@@ -26,8 +26,8 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.{IdentificationOrgType, ResponseHeader}
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.get_trust.{IdentificationOrgType, ResponseHeader}
+import uk.gov.hmrc.trusts.models.get_trust.get_trust._
 import uk.gov.hmrc.trusts.models.variation.{AmendDeceasedSettlor, WillType}
 import uk.gov.hmrc.trusts.models.{AddressType, NameType, RemoveSettlor, variation}
 import uk.gov.hmrc.trusts.transformers._

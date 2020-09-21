@@ -24,7 +24,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.{EtmpCacheDataStaleException, InternalServerErrorException}
 import uk.gov.hmrc.trusts.models.DeclarationForApi
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.repositories.{CacheRepository, TransformationRepository}
 import uk.gov.hmrc.trusts.transformers.DeclarationTransformer

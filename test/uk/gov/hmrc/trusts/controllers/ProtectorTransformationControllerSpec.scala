@@ -30,7 +30,7 @@ import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustProtector, DisplayTrustProtectorCompany}
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{DisplayTrustProtector, DisplayTrustProtectorCompany}
 import uk.gov.hmrc.trusts.models.variation.{Protector, ProtectorCompany}
 import uk.gov.hmrc.trusts.models.{NameType, RemoveProtector, Success}
 import uk.gov.hmrc.trusts.services.ProtectorTransformationService

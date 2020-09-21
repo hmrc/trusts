@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import org.scalatest.{FreeSpec, MustMatchers}
 import uk.gov.hmrc.trusts.models.NameType
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustProtector, DisplayTrustProtectorCompany}
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{DisplayTrustIdentificationType, DisplayTrustProtector, DisplayTrustProtectorCompany}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AddCompanyProtectorTransformSpec extends FreeSpec with MustMatchers {

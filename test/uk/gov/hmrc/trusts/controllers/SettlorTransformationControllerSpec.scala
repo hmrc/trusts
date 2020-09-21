@@ -30,7 +30,7 @@ import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustSettlor, DisplayTrustSettlorCompany}
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{DisplayTrustSettlor, DisplayTrustSettlorCompany}
 import uk.gov.hmrc.trusts.models.variation.AmendDeceasedSettlor
 import uk.gov.hmrc.trusts.models.{variation, _}
 import uk.gov.hmrc.trusts.services.SettlorTransformationService

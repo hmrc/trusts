@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.utils.JsonUtils
 

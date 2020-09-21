@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.transformers.mdtp
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType, DisplayTrustTrusteeType}
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType, DisplayTrustTrusteeType}
 
 object Trustees {
 

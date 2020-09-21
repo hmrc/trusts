@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust
+package uk.gov.hmrc.trusts.models.get_trust.get_trust
 
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.BaseSpec
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
+import uk.gov.hmrc.trusts.models.get_trust.ResponseHeader
 import uk.gov.hmrc.trusts.models.Taxability._
 
 class GetTrustResponseSpec extends BaseSpec {

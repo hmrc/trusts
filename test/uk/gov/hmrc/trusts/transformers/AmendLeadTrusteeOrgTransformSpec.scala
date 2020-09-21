@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.transformers
 
 import org.scalatest.{FreeSpec, MustMatchers}
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationOrgType, DisplayTrustLeadTrusteeOrgType}
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{DisplayTrustIdentificationOrgType, DisplayTrustLeadTrusteeOrgType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AmendLeadTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {

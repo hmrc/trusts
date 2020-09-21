@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust
+package uk.gov.hmrc.trusts.models.get_trust.get_trust
 
 import play.api.Logger
 import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK, SERVICE_UNAVAILABLE}
 import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.{ResponseHeader, _}
+import uk.gov.hmrc.trusts.models.get_trust.{ResponseHeader, _}
 import uk.gov.hmrc.trusts.transformers.mdtp.beneficiaries.Beneficiaries
 import uk.gov.hmrc.trusts.transformers.mdtp.protectors.Protectors
 import uk.gov.hmrc.trusts.transformers.mdtp.settlors.Settlors
