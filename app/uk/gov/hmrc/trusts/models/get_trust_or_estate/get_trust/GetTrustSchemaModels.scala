@@ -53,7 +53,7 @@ object GetTrustDesResponse {
 case class DisplayTrust(
                          details: TrustDetailsType,
                          entities: DisplayTrustEntitiesType,
-                         assets: DisplayTrustAssets)
+                         assets: Option[DisplayTrustAssets])    // now optional with 5mld
 
 object DisplayTrust {
   implicit val trustFormat: Format[DisplayTrust] = Json.format[DisplayTrust]
