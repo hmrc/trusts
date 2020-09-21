@@ -54,8 +54,8 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     ResourceNotFoundResponse -> NotFound
   )
 
-  def getFromEtmp(utr: String): Action[AnyContent] =
-    doGet(utr, applyTransformations = false, refreshEtmpData = true) {
+  def getFromEtmp(identifier: String): Action[AnyContent] =
+    doGet(identifier, applyTransformations = false, refreshEtmpData = true) {
       result: GetTrustSuccessResponse => Ok(Json.toJson(result))
     }
 

@@ -916,13 +916,16 @@ class DesConnectorSpec extends ConnectorSpecHelper {
 
             val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(urn)
 
+            val expectedResponse = Json.parse(get5MLDTrustNonTaxableResponseJson)
+
             whenReady(futureResult) { result =>
 
-              val expectedHeader: ResponseHeader = (get4MLDTrustResponse \ "responseHeader").as[ResponseHeader]
-              val expectedJson = (get4MLDTrustResponse \ "trustOrEstateDisplay").as[JsValue]
+              val expectedHeader: ResponseHeader = (expectedResponse \ "responseHeader").as[ResponseHeader]
+              val expectedJson = (expectedResponse \ "trustOrEstateDisplay").as[JsValue]
 
               result match {
                 case r: TrustProcessedResponse =>
+
                   r.responseHeader mustBe expectedHeader
                   r.getTrust mustBe expectedJson
                 case _ => fail

@@ -58,7 +58,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
   private val auditService = new AuditService(mockAuditConnector, mockConfig)
 
-  private val validateUtrAction = app.injector.instanceOf[ValidateIdentifierActionProvider]
+  private val validateIdentififerAction = app.injector.instanceOf[ValidateIdentifierActionProvider]
 
   lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
@@ -68,37 +68,70 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
   private def getTrustController = {
     val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation),
-      mockedAuditService, desService, transformationService, validateUtrAction, trustsStoreService, Helpers.stubControllerComponents())
+      mockedAuditService, desService, transformationService, validateIdentififerAction, trustsStoreService, Helpers.stubControllerComponents())
 
     SUT
   }
 
   val invalidUTR = "1234567"
   val utr = "1234567890"
+  val urn = "1234567890ABCDE"
 
-  ".getFromEtmp" should {
-    "reset the cache and clear transforms before calling get" in {
+  ".getFromEtmp" when {
 
-      val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation),
-        auditService, desService, transformationService,validateUtrAction, trustsStoreService, Helpers.stubControllerComponents())
+    "utr provided" should {
 
-      val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
-      when(desService.resetCache(any(), any()))
-        .thenReturn(Future.successful(()))
+      "reset the cache and clear transforms before calling get" in {
 
-      when(transformationService.removeAllTransformations(any(), any()))
-        .thenReturn(Future.successful(None))
+        val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation),
+          auditService, desService, transformationService,validateIdentififerAction, trustsStoreService, Helpers.stubControllerComponents())
 
-      when(desService.getTrustInfo(any(), any())(any()))
-        .thenReturn(Future.successful(response))
+        val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
+        when(desService.resetCache(any(), any()))
+          .thenReturn(Future.successful(()))
 
-      val result = SUT.getFromEtmp(utr).apply(FakeRequest(GET, s"/trusts/$utr/refresh"))
+        when(transformationService.removeAllTransformations(any(), any()))
+          .thenReturn(Future.successful(None))
 
-      whenReady(result) { _ =>
-        verify(desService).resetCache(utr, "id")
-        verify(transformationService).removeAllTransformations(utr, "id")
+        when(desService.getTrustInfo(any(), any())(any()))
+          .thenReturn(Future.successful(response))
+
+        val result = SUT.getFromEtmp(utr).apply(FakeRequest(GET, s"/trusts/$utr/refresh"))
+
+        whenReady(result) { _ =>
+          verify(desService).resetCache(utr, "id")
+          verify(transformationService).removeAllTransformations(utr, "id")
+        }
       }
     }
+
+    "urn provided" should {
+
+      "reset the cache and clear transforms before calling get" in {
+
+        val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation),
+          auditService, desService, transformationService,validateIdentififerAction, trustsStoreService, Helpers.stubControllerComponents())
+
+        val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
+        when(desService.resetCache(any(), any()))
+          .thenReturn(Future.successful(()))
+
+        when(transformationService.removeAllTransformations(any(), any()))
+          .thenReturn(Future.successful(None))
+
+        when(desService.getTrustInfo(any(), any())(any()))
+          .thenReturn(Future.successful(response))
+
+        val result = SUT.getFromEtmp(urn).apply(FakeRequest(GET, s"/trusts/$urn/refresh"))
+
+        whenReady(result) { _ =>
+          verify(desService).resetCache(urn, "id")
+          verify(transformationService).removeAllTransformations(urn, "id")
+        }
+      }
+
+    }
+
   }
 
   ".get" should {
@@ -111,7 +144,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           auditService,
           desService,
           transformationService,
-          validateUtrAction,
+          validateIdentififerAction,
           trustsStoreService,
           Helpers.stubControllerComponents()
         )
@@ -138,7 +171,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           auditService,
           desService,
           transformationService,
-          validateUtrAction,
+          validateIdentififerAction,
           trustsStoreService,
           Helpers.stubControllerComponents()
         )
@@ -324,6 +357,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         contentAsJson(result) mustBe getTransformedLeadTrusteeResponse
       }
     }
+
     "return 500 - Internal server error for invalid content" in {
 
       when(transformationService.getTransformedData(any(), any())(any()))
@@ -338,6 +372,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
   }
 
   ".getTrustDetails" should {
+
     "return 403 - Forbidden with parked content" in {
 
       when(transformationService.getTransformedData(any(), any())(any()))
@@ -349,6 +384,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         status(result) mustBe FORBIDDEN
       }
     }
+
     "return 200 - Ok with processed content" in {
 
       val processedResponse = get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
@@ -801,6 +837,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
     }
 
   }
+
   ".getOtherIndividualsAlreadyExist" should {
 
     "return 403 - Forbidden with parked content" in {
