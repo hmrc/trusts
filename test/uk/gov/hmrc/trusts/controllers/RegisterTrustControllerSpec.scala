@@ -29,6 +29,8 @@ import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models._
+import uk.gov.hmrc.trusts.models.registration.RegistrationTrnResponse
+import uk.gov.hmrc.trusts.models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSuccess}
 import uk.gov.hmrc.trusts.services._
 
 import scala.concurrent.ExecutionContext.Implicits._

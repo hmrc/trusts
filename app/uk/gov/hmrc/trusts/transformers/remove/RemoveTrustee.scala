@@ -14,27 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models
+package uk.gov.hmrc.trusts.transformers.remove
 
 import java.time.LocalDate
 
-import play.api.libs.json._
+import play.api.libs.json.{Format, Json}
 
-case class RemoveBeneficiary (endDate: LocalDate, index: Int, `type`: String)
+case class RemoveTrustee(endDate: LocalDate, index: Int)
 
-object RemoveBeneficiary {
-  val validBeneficiaryTypes: Seq[String] = Seq(
-    "individualDetails",
-    "unidentified",
-    "company",
-    "large",
-    "trust",
-    "charity",
-    "other"
-  )
-
-  val reads: Reads[RemoveBeneficiary] = Json.reads[RemoveBeneficiary].filter(rb => validBeneficiaryTypes.contains(rb.`type`))
-  val writes: OWrites[RemoveBeneficiary] = Json.writes[RemoveBeneficiary]
-
-  implicit val formats: Format[RemoveBeneficiary] = Format(reads, writes)
+object RemoveTrustee {
+  implicit val formats : Format[RemoveTrustee] = Json.format[RemoveTrustee]
 }

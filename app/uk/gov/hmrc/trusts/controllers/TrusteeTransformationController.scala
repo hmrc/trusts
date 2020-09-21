@@ -21,9 +21,9 @@ import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
-import uk.gov.hmrc.trusts.models.RemoveTrustee
 import uk.gov.hmrc.trusts.models.get_trust.get_trust._
 import uk.gov.hmrc.trusts.services.{LocalDateService, TrusteeTransformationService}
+import uk.gov.hmrc.trusts.transformers.remove.RemoveTrustee
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
 import scala.concurrent.{ExecutionContext, Future}

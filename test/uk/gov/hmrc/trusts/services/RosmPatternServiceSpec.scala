@@ -18,8 +18,8 @@ package uk.gov.hmrc.trusts.services
 
 import org.mockito.Mockito.when
 import uk.gov.hmrc.trusts.BaseSpec
-import uk.gov.hmrc.trusts.models.{SubscriptionIdResponse, TaxEnrolmentFailure, TaxEnrolmentSuccess}
 import uk.gov.hmrc.trusts.exceptions._
+import uk.gov.hmrc.trusts.models.tax_enrolments.{SubscriptionIdResponse, TaxEnrolmentFailure, TaxEnrolmentSuccess}
 
 import scala.concurrent.Future
 

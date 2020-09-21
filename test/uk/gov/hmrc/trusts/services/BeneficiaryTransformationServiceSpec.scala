@@ -30,8 +30,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust.get_trust._
 import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, BeneficiaryCompanyType, BeneficiaryTrustType, IdentificationType, IndividualDetailsType, LargeType, OtherType, UnidentifiedType}
-import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType, RemoveBeneficiary}
+import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType}
 import uk.gov.hmrc.trusts.transformers._
+import uk.gov.hmrc.trusts.transformers.remove.RemoveBeneficiary
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
 
 import scala.concurrent.ExecutionContext.Implicits.global

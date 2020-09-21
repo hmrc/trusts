@@ -24,7 +24,7 @@ import play.api.mvc.AnyContent
 import play.api.mvc.Results.{BadRequest, Ok}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.trusts.models.ApiResponse.invalidUTRErrorResponse
+import uk.gov.hmrc.trusts.models.registration.ApiResponse.invalidUTRErrorResponse
 
 import scala.concurrent.Future
 

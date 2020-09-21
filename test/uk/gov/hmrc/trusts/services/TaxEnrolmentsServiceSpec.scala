@@ -18,13 +18,11 @@ package uk.gov.hmrc.trusts.services
 
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{times, verify, when, _}
-import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.BaseSpec
-import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.connector.TaxEnrolmentConnector
 import uk.gov.hmrc.trusts.exceptions.{BadRequestException, InternalServerErrorException}
-import uk.gov.hmrc.trusts.models.{TaxEnrolmentFailure, TaxEnrolmentSuccess}
+import uk.gov.hmrc.trusts.models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentSuccess}
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -56,7 +54,6 @@ class TaxEnrolmentsServiceSpec extends BaseSpec {
       }
     }
 
-
     "return TaxEnrolmentFailure " when {
       "tax enrolment returns internal server error." in {
         when(mockConnector.enrolSubscriber("123456789")).
@@ -78,6 +75,6 @@ class TaxEnrolmentsServiceSpec extends BaseSpec {
       }
 
     }
-  }//setSubscriptionId
+  }
 
 }

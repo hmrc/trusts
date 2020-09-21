@@ -32,8 +32,9 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust.get_trust.{DisplayTrustProtector, DisplayTrustProtectorCompany}
 import uk.gov.hmrc.trusts.models.variation.{Protector, ProtectorCompany}
-import uk.gov.hmrc.trusts.models.{NameType, RemoveProtector, Success}
+import uk.gov.hmrc.trusts.models.{NameType, Success}
 import uk.gov.hmrc.trusts.services.ProtectorTransformationService
+import uk.gov.hmrc.trusts.transformers.remove.RemoveProtector
 
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future

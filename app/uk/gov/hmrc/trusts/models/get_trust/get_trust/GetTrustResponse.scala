@@ -27,6 +27,7 @@ import uk.gov.hmrc.trusts.transformers.mdtp.protectors.Protectors
 import uk.gov.hmrc.trusts.transformers.mdtp.settlors.Settlors
 import uk.gov.hmrc.trusts.transformers.mdtp.{OtherIndividuals, Trustees}
 import uk.gov.hmrc.trusts.models.Taxability._
+import uk.gov.hmrc.trusts.models.existing_trust.DesErrorResponse
 
 trait GetTrustResponse
 

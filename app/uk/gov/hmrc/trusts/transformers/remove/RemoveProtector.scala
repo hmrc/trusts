@@ -14,13 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models
+package uk.gov.hmrc.trusts.transformers.remove
 
-case class TrusteeIndOrOrg(trustee: String) {
+import java.time.LocalDate
 
-  override val toString: String = trustee
+import play.api.libs.json.{Format, Json, OWrites, Reads}
 
+case class RemoveProtector(endDate: LocalDate, index: Int, `type`: String)
+
+object RemoveProtector {
+  val validProtectorTypes: Seq[String] = Seq(
+    "protector",
+    "protectorCompany"
+  )
+
+  val reads: Reads[RemoveProtector] = Json.reads[RemoveProtector].filter(rb => validProtectorTypes.contains(rb.`type`))
+  val writes: OWrites[RemoveProtector] = Json.writes[RemoveProtector]
+
+  implicit val formats: Format[RemoveProtector] = Format(reads, writes)
 }
-
-object TrusteeInd extends TrusteeIndOrOrg("trusteeInd")
-object TrusteeOrg extends TrusteeIndOrOrg("trusteeOrg")

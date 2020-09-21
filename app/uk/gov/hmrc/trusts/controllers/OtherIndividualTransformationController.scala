@@ -22,9 +22,9 @@ import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust.get_trust.DisplayTrustNaturalPersonType
-import uk.gov.hmrc.trusts.models.RemoveOtherIndividual
 import uk.gov.hmrc.trusts.models.variation.NaturalPersonType
 import uk.gov.hmrc.trusts.services.OtherIndividualTransformationService
+import uk.gov.hmrc.trusts.transformers.remove.RemoveOtherIndividual
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
 import scala.concurrent.{ExecutionContext, Future}

@@ -30,9 +30,10 @@ import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.{Success, RemoveBeneficiary, NameType, IdentificationOrgType, AddressType}
+import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType, Success}
 import uk.gov.hmrc.trusts.models.variation._
 import uk.gov.hmrc.trusts.services.BeneficiaryTransformationService
+import uk.gov.hmrc.trusts.transformers.remove.RemoveBeneficiary
 
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future

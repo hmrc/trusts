@@ -20,6 +20,7 @@ import java.time.LocalDate
 
 import org.scalatest.{MustMatchers, WordSpec}
 import play.api.libs.json.{JsError, JsSuccess, Json}
+import uk.gov.hmrc.trusts.transformers.remove.RemoveBeneficiary
 
 class RemoveBeneficiarySpecs extends WordSpec with MustMatchers {
   "Can round trip throuh Json" in {

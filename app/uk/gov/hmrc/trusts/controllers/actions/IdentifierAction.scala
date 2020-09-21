@@ -27,7 +27,7 @@ import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
-import uk.gov.hmrc.trusts.models.ApiResponse._
+import uk.gov.hmrc.trusts.models.registration.ApiResponse._
 import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 
 import scala.concurrent.ExecutionContext.Implicits._

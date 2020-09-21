@@ -30,8 +30,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust.get_trust._
 import uk.gov.hmrc.trusts.models.variation.{Protector, ProtectorCompany}
-import uk.gov.hmrc.trusts.models.{NameType, RemoveProtector}
+import uk.gov.hmrc.trusts.models.NameType
 import uk.gov.hmrc.trusts.transformers._
+import uk.gov.hmrc.trusts.transformers.remove.RemoveProtector
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
 
 import scala.concurrent.ExecutionContext.Implicits.global

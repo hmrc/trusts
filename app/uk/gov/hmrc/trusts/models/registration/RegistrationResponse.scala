@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models
+package uk.gov.hmrc.trusts.models.registration
 
 import play.api.Logger
 import play.api.http.Status._
 import play.api.libs.json.{Format, JsResult, JsValue, Json}
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.trusts.exceptions._
+import uk.gov.hmrc.trusts.models.existing_trust.DesErrorResponse
 import uk.gov.hmrc.trusts.utils.Constants._
 
 sealed trait RegistrationResponse

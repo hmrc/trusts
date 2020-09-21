@@ -17,13 +17,13 @@
 package uk.gov.hmrc.trusts.utils
 
 import play.api.libs.json.Json
-import uk.gov.hmrc.trusts.models.ErrorResponse
 import play.api.mvc.Results._
+import uk.gov.hmrc.trusts.models.registration.RegistrationErrorResponse
 
 object ErrorResponses {
 
   protected def doErrorResponse(code: String, message: String) =
-    Json.toJson(ErrorResponse(code: String, message: String))
+    Json.toJson(RegistrationErrorResponse(code: String, message: String))
 
   def invalidNameErrorResponse =
     BadRequest(doErrorResponse("INVALID_NAME", "Provided name is invalid."))

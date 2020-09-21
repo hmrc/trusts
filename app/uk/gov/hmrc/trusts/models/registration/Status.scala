@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models
+package uk.gov.hmrc.trusts.models.registration
 
 import play.api.libs.json.JsPath
+import uk.gov.hmrc.trusts.models.{Enumerable, WithName}
 
 sealed trait Status
 

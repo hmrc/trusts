@@ -22,10 +22,12 @@ import play.api.libs.json.JsValue
 import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions._
-import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
-import uk.gov.hmrc.trusts.models._
+import uk.gov.hmrc.trusts.models.existing_trust._
+import uk.gov.hmrc.trusts.models.existing_trust.ExistingCheckResponse._
 import uk.gov.hmrc.trusts.models.get_trust._
 import uk.gov.hmrc.trusts.models.get_trust.get_trust._
+import uk.gov.hmrc.trusts.models.registration.RegistrationTrnResponse
+import uk.gov.hmrc.trusts.models.tax_enrolments.SubscriptionIdResponse
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.repositories.CacheRepositoryImpl
 import uk.gov.hmrc.trusts.utils.JsonUtils

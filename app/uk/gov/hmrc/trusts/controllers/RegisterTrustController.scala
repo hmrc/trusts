@@ -24,10 +24,11 @@ import uk.gov.hmrc.http.BadRequestException
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
-import uk.gov.hmrc.trusts.models.ApiResponse._
-import uk.gov.hmrc.trusts.models.RegistrationTrnResponse._
+import uk.gov.hmrc.trusts.models.registration.ApiResponse._
+import uk.gov.hmrc.trusts.models.registration.RegistrationTrnResponse._
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
+import uk.gov.hmrc.trusts.models.registration.{RegistrationFailureResponse, RegistrationTrnResponse}
 import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 import uk.gov.hmrc.trusts.services._
 import uk.gov.hmrc.trusts.utils.ErrorResponses._

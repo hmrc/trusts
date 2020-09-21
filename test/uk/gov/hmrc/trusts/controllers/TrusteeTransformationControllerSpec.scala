@@ -32,8 +32,9 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust.get_trust._
-import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee, Success}
+import uk.gov.hmrc.trusts.models.{NameType, Success}
 import uk.gov.hmrc.trusts.services.{LocalDateService, TrusteeTransformationService}
+import uk.gov.hmrc.trusts.transformers.remove.RemoveTrustee
 
 import scala.concurrent.{ExecutionContext, Future}
 

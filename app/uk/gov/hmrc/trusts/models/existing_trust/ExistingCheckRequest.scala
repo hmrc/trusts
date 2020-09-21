@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models
+package uk.gov.hmrc.trusts.models.existing_trust
 
-import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
-import play.api.data.validation.ValidationError
+import play.api.libs.json._
 
 case class ExistingCheckRequest(name: String, postcode: Option[String] = None, utr: String)
 

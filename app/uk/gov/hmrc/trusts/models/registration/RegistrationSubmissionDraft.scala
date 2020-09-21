@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models
+package uk.gov.hmrc.trusts.models.registration
 
 import java.time.LocalDateTime
 
 import play.api.libs.json._
+import uk.gov.hmrc.trusts.models.MongoDateTimeFormats
 
 object RegistrationSubmission {
   // Piece to be inserted into final registration data. data == JsNull means remove value.

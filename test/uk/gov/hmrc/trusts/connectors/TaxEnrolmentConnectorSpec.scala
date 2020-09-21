@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.connectors
 
 import uk.gov.hmrc.trusts.connector.TaxEnrolmentConnector
 import uk.gov.hmrc.trusts.exceptions.{BadRequestException, InternalServerErrorException}
-import uk.gov.hmrc.trusts.models.TaxEnrolmentSuccess
+import uk.gov.hmrc.trusts.models.tax_enrolments.TaxEnrolmentSuccess
 
 class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 

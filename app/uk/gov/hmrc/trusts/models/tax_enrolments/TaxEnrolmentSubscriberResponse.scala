@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models
+package uk.gov.hmrc.trusts.models.tax_enrolments
 
 import play.api.Logger
 import play.api.http.Status._
-import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.trusts.exceptions._
 

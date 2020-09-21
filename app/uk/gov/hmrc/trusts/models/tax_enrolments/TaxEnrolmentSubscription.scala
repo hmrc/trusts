@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models
+package uk.gov.hmrc.trusts.models.tax_enrolments
 
-import java.time.LocalDate
+import play.api.libs.json.Json
 
-import play.api.libs.json.{Format, Json}
 
-case class RemoveOtherIndividual(endDate: LocalDate, index: Int)
+case class TaxEnrolmentSubscription(serviceName: String, callback: String, etmpId: String)
 
-object RemoveOtherIndividual {
-  implicit val formats : Format[RemoveOtherIndividual] = Json.format[RemoveOtherIndividual]
+object TaxEnrolmentSubscription {
+  implicit val format = Json.format[TaxEnrolmentSubscription]
 }
+

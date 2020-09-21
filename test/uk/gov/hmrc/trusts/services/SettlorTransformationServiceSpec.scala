@@ -29,8 +29,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust.{IdentificationOrgType, ResponseHeader}
 import uk.gov.hmrc.trusts.models.get_trust.get_trust._
 import uk.gov.hmrc.trusts.models.variation.{AmendDeceasedSettlor, WillType}
-import uk.gov.hmrc.trusts.models.{AddressType, NameType, RemoveSettlor, variation}
+import uk.gov.hmrc.trusts.models.{AddressType, NameType, variation}
 import uk.gov.hmrc.trusts.transformers._
+import uk.gov.hmrc.trusts.transformers.remove.RemoveSettlor
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
 
 import scala.concurrent.ExecutionContext.Implicits.global

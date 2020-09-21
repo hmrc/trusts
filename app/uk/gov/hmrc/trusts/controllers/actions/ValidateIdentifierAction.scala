@@ -20,7 +20,7 @@ import javax.inject.Inject
 import play.api.libs.json.Json.toJson
 import play.api.mvc.Results._
 import play.api.mvc._
-import uk.gov.hmrc.trusts.models.ApiResponse.invalidUTRErrorResponse
+import uk.gov.hmrc.trusts.models.registration.ApiResponse.invalidUTRErrorResponse
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.matching.Regex

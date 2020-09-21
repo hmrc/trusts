@@ -26,13 +26,14 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsNull, JsString, Json}
 import play.api.mvc.BodyParsers
-import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers.{CONTENT_TYPE, _}
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models._
+import uk.gov.hmrc.trusts.models.registration.{RegistrationSubmission, RegistrationSubmissionDraft}
 import uk.gov.hmrc.trusts.repositories.RegistrationSubmissionRepository
-import uk.gov.hmrc.trusts.services.{AuditService, LocalDateTimeService}
+import uk.gov.hmrc.trusts.services.LocalDateTimeService
 import uk.gov.hmrc.trusts.utils.JsonRequests
 
 import scala.concurrent.Future
@@ -388,7 +389,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val set = RegistrationSubmission.DataSet(
         data,
-        Some(Status.Completed),
+        Some(registration.Status.Completed),
         mappedPieces,
         answerSections)
 
@@ -513,7 +514,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val set = RegistrationSubmission.DataSet(
         data,
-        Some(Status.Completed),
+        Some(registration.Status.Completed),
         mappedPieces,
         answerSections
       )

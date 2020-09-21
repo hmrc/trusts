@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models
+package uk.gov.hmrc.trusts.transformers.remove
 
 import java.time.LocalDate
 
-import play.api.libs.json.{Format, Json, OWrites, Reads}
+import play.api.libs.json.{Format, Json}
 
-case class RemoveSettlor(endDate: LocalDate, index: Int, `type`: String)
+case class RemoveOtherIndividual(endDate: LocalDate, index: Int)
 
-object RemoveSettlor {
-  val validSettlorTypes: Seq[String] = Seq(
-    "settlor",
-    "settlorCompany"
-  )
-
-  val reads: Reads[RemoveSettlor] = Json.reads[RemoveSettlor].filter(rb => validSettlorTypes.contains(rb.`type`))
-  val writes: OWrites[RemoveSettlor] = Json.writes[RemoveSettlor]
-
-  implicit val formats: Format[RemoveSettlor] = Format(reads, writes)
+object RemoveOtherIndividual {
+  implicit val formats : Format[RemoveOtherIndividual] = Json.format[RemoveOtherIndividual]
 }

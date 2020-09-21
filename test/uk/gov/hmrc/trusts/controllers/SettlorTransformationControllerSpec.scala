@@ -34,6 +34,7 @@ import uk.gov.hmrc.trusts.models.get_trust.get_trust.{DisplayTrustSettlor, Displ
 import uk.gov.hmrc.trusts.models.variation.AmendDeceasedSettlor
 import uk.gov.hmrc.trusts.models.{variation, _}
 import uk.gov.hmrc.trusts.services.SettlorTransformationService
+import uk.gov.hmrc.trusts.transformers.remove.RemoveSettlor
 
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future

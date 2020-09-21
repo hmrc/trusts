@@ -16,24 +16,20 @@
 
 package uk.gov.hmrc.trusts.services
 
-import javax.inject.Inject
-
 import akka.actor.ActorSystem
-import com.google.inject.ImplementedBy
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.connector.{DesConnector, TaxEnrolmentConnector}
-import uk.gov.hmrc.trusts.exceptions.MaxRetriesAttemptedException
-import uk.gov.hmrc.trusts.models.{TaxEnrolmentFailure, TaxEnrolmentSuccess, TaxEnrolmentSuscriberResponse}
 import akka.pattern.Patterns.after
+import com.google.inject.ImplementedBy
+import javax.inject.Inject
 import play.api.Logger
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.config.AppConfig
+import uk.gov.hmrc.trusts.connector.TaxEnrolmentConnector
+import uk.gov.hmrc.trusts.models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentSuscriberResponse}
 
-import scala.annotation.tailrec
-import scala.concurrent.duration._
-import scala.concurrent.Future
-import scala.concurrent.duration.FiniteDuration
-import scala.util.control.NonFatal
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.duration.{FiniteDuration, _}
+import scala.util.control.NonFatal
 
 
 class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector :TaxEnrolmentConnector, config: AppConfig) extends TaxEnrolmentsService {

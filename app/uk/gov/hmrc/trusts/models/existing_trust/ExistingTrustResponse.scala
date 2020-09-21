@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models
+package uk.gov.hmrc.trusts.models.existing_trust
 
 import play.api.libs.json.Json
 
+case class ExistingTrustResponse(`match`:Boolean)
 
-case class TaxEnrolmentSubscription(serviceName: String, callback: String, etmpId: String)
-
-object TaxEnrolmentSubscription {
-  implicit val format = Json.format[TaxEnrolmentSubscription]
+object ExistingTrustResponse {
+  implicit val formats = Json.format[ExistingTrustResponse]
 }
 
+case class DesErrorResponse(code: String,reason: String )
+
+object DesErrorResponse {
+  implicit val formats = Json.format[DesErrorResponse]
+}

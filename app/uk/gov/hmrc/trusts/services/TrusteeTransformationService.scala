@@ -23,8 +23,9 @@ import play.api.libs.json.{__, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models.get_trust.get_trust.{DisplayTrustLeadTrusteeType, DisplayTrustTrusteeType, TrustProcessedResponse}
-import uk.gov.hmrc.trusts.models.{RemoveTrustee, Success}
+import uk.gov.hmrc.trusts.models.Success
 import uk.gov.hmrc.trusts.transformers._
+import uk.gov.hmrc.trusts.transformers.remove.RemoveTrustee
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

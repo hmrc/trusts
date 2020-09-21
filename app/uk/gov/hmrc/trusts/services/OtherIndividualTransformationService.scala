@@ -22,8 +22,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models.get_trust.get_trust.{DisplayTrustNaturalPersonType, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.models.variation.NaturalPersonType
-import uk.gov.hmrc.trusts.models.{RemoveOtherIndividual, Success}
+import uk.gov.hmrc.trusts.models.Success
 import uk.gov.hmrc.trusts.transformers._
+import uk.gov.hmrc.trusts.transformers.remove.RemoveOtherIndividual
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}

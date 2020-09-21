@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models
+package uk.gov.hmrc.trusts.models.existing_trust
 
 import play.api.http.Status._
 import play.api.libs.json.Format
@@ -33,7 +33,7 @@ object ExistingCheckResponse {
   final case object ServerError extends ExistingCheckResponse
   final case object ServiceUnavailable extends ExistingCheckResponse
 
-  implicit val desResponseReads : Format[DesResponse] = DesResponse.formats
+  implicit val desResponseReads : Format[ExistingTrustResponse] = ExistingTrustResponse.formats
   implicit val desErrorResponseReads : Format[DesErrorResponse] = DesErrorResponse.formats
 
   implicit lazy val httpReads: HttpReads[ExistingCheckResponse] =
@@ -41,7 +41,7 @@ object ExistingCheckResponse {
       override def read(method: String, url: String, response: HttpResponse): ExistingCheckResponse = {
         response.status match {
           case OK =>
-            if (response.json.as[DesResponse].`match`) Matched else NotMatched
+            if (response.json.as[ExistingTrustResponse].`match`) Matched else NotMatched
           case CONFLICT =>
             response.json.asOpt[DesErrorResponse] match {
               case Some(desResponse) if desResponse.code == Constants.ALREADY_REGISTERED_CODE =>

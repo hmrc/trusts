@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models
+package uk.gov.hmrc.trusts.transformers
 
-import play.api.libs.json.Json
+case class TrusteeIndOrOrg(trustee: String) {
 
-case class DesResponse(`match`:Boolean)
-object DesResponse {
-  implicit val formats = Json.format[DesResponse]
+  override val toString: String = trustee
+
 }
 
-case class DesErrorResponse(code: String,reason: String )
-
-object DesErrorResponse {
-  implicit val formats = Json.format[DesErrorResponse]
-}
+object TrusteeInd extends TrusteeIndOrOrg("trusteeInd")
+object TrusteeOrg extends TrusteeIndOrOrg("trusteeOrg")
