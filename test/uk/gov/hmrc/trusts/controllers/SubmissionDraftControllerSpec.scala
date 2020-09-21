@@ -34,12 +34,12 @@ import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.registration.{RegistrationSubmission, RegistrationSubmissionDraft}
 import uk.gov.hmrc.trusts.repositories.RegistrationSubmissionRepository
 import uk.gov.hmrc.trusts.services.LocalDateTimeService
-import uk.gov.hmrc.trusts.utils.JsonRequests
+import uk.gov.hmrc.trusts.utils.JsonFixtures
 
 import scala.concurrent.Future
 
 class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
-  with MustMatchers with JsonRequests with Inside with ScalaFutures
+  with MustMatchers with JsonFixtures with Inside with ScalaFutures
   with GuiceOneAppPerSuite {
 
   lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]

@@ -32,12 +32,12 @@ import uk.gov.hmrc.trusts.models.variation.AmendDeceasedSettlor
 import uk.gov.hmrc.trusts.models.{AddressType, NameType, variation}
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.transformers.remove.RemoveSettlor
-import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
+import uk.gov.hmrc.trusts.utils.{JsonFixtures, JsonUtils}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonRequests {
+class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonFixtures {
 
   private implicit val pc: PatienceConfig =
     PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))

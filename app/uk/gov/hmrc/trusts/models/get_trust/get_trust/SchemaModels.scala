@@ -71,6 +71,7 @@ case class GetTrust(matchData: MatchData,
 
 object GetTrust {
   implicit val writes: Writes[GetTrust] = Json.writes[GetTrust]
+
   implicit val reads: Reads[GetTrust] = (
     (JsPath \ "matchData").read[MatchData] and
       (JsPath \ "correspondence").read[Correspondence] and
@@ -474,6 +475,7 @@ case class DisplayTrustOtherType(lineNo: Option[String],
                                  address: Option[AddressType],
                                  beneficiaryDiscretion: Option[Boolean],
                                  beneficiaryShareOfIncome: Option[String],
+                                 countryOfResidence: Option[String],    // new 5MLD optional
                                  entityStart: String)
 
 object DisplayTrustOtherType {

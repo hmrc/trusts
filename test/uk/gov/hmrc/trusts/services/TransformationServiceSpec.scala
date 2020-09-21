@@ -31,11 +31,11 @@ import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustProcessedResponse, _}
 import uk.gov.hmrc.trusts.models.{AddressType, NameType}
 import uk.gov.hmrc.trusts.repositories.TransformationRepositoryImpl
 import uk.gov.hmrc.trusts.transformers._
-import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
+import uk.gov.hmrc.trusts.utils.{JsonFixtures, JsonUtils}
 
 import scala.concurrent.Future
 
-class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonRequests {
+class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonFixtures {
   private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 
 

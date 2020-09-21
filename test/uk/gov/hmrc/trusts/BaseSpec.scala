@@ -34,7 +34,7 @@ class BaseSpec extends WordSpec
   with MustMatchers
   with ScalaFutures
   with MockitoSugar
-  with JsonRequests
+  with JsonFixtures
   with BeforeAndAfter
   with GuiceOneServerPerSuite
   with Inside {

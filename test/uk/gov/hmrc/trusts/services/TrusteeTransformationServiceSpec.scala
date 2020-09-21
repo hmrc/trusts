@@ -30,11 +30,11 @@ import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustProcessedResponse, _}
 import uk.gov.hmrc.trusts.models.NameType
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.transformers.remove.RemoveTrustee
-import uk.gov.hmrc.trusts.utils.JsonRequests
+import uk.gov.hmrc.trusts.utils.JsonFixtures
 
 import scala.concurrent.Future
 
-class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonRequests {
+class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonFixtures {
   private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 
   private val currentDate: LocalDate = LocalDate.of(1999, 3, 14)

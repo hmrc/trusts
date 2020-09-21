@@ -34,11 +34,11 @@ import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.models.{DeclarationForApi, DeclarationName, NameType}
 import uk.gov.hmrc.trusts.repositories.{CacheRepository, TransformationRepository}
 import uk.gov.hmrc.trusts.transformers.DeclarationTransformer
-import uk.gov.hmrc.trusts.utils.JsonRequests
+import uk.gov.hmrc.trusts.utils.JsonFixtures
 
 import scala.concurrent.Future
 
-class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar with ScalaFutures with MustMatchers with GuiceOneAppPerSuite {
+class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar with ScalaFutures with MustMatchers with GuiceOneAppPerSuite {
 
   private implicit  val hc: HeaderCarrier = new HeaderCarrier
   private val formBundleNo = "001234567890"

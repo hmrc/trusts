@@ -33,12 +33,12 @@ import uk.gov.hmrc.trusts.models.variation._
 import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType}
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.transformers.remove.RemoveBeneficiary
-import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
+import uk.gov.hmrc.trusts.utils.{JsonFixtures, JsonUtils}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonRequests {
+class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonFixtures {
    private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 
   private implicit val hc : HeaderCarrier = HeaderCarrier()

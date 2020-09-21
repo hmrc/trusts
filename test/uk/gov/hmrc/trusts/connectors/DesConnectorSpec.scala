@@ -28,6 +28,7 @@ import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustProcessedResponse, _}
 import uk.gov.hmrc.trusts.models.registration.RegistrationTrnResponse
 import uk.gov.hmrc.trusts.models.tax_enrolments.SubscriptionIdResponse
 import uk.gov.hmrc.trusts.models.variation.{TrustVariation, VariationResponse}
+import uk.gov.hmrc.trusts.utils.NonTaxable5MLDFixtures
 
 import scala.concurrent.Future
 
@@ -912,11 +913,11 @@ class DesConnectorSpec extends ConnectorSpecHelper {
             )))
 
             val urn = "1234567890ADCEF"
-            stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, get5MLDTrustNonTaxableResponseJson)
+            stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, NonTaxable5MLDFixtures.DES.get5MLDTrustNonTaxableResponse)
 
             val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(urn)
 
-            val expectedResponse = Json.parse(get5MLDTrustNonTaxableResponseJson)
+            val expectedResponse = Json.parse(NonTaxable5MLDFixtures.DES.get5MLDTrustNonTaxableResponse)
 
             whenReady(futureResult) { result =>
 

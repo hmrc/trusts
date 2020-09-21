@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.utils
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.trusts.models._
 
-trait JsonRequests extends JsonUtils {
+trait JsonFixtures extends JsonUtils {
 
   lazy val validRegistrationRequestJson: String =  getJsonFromFile("valid-trusts-registration-api.json")
   lazy val validRegistration5MldRequestJson: String =  getJsonFromFile("valid-trusts-registration-api-5mld.json")
@@ -42,13 +42,13 @@ trait JsonRequests extends JsonUtils {
   lazy val get4MLDTrustResponseJson: String = getJsonFromFile("valid-get-trust-response.json")
   lazy val get4MLDTrustResponse: JsValue = getJsonValueFromFile("valid-get-trust-response.json")
 
-  lazy val get5MLDTrustNonTaxableResponseJson: String = getJsonFromFile("5MLD/NonTaxable/valid-get-trust-5mld-non-taxable-response.json")
-
   lazy val getTrustPropertyLandNoPreviousValue: String = getJsonFromFile("valid-get-trust-response-property-or-land-no-previous-value.json")
   lazy val getTrustPropertyLandNoPreviousValueJson: JsValue = getJsonValueFromFile("valid-get-trust-response-property-or-land-no-previous-value.json")
 
   lazy val getTransformedTrustResponse: JsValue = getJsonValueFromFile("transformed-get-trust-response.json")
+
   lazy val getEmptyTransformedTrustResponse: JsValue = getJsonValueFromFile("empty-transformed-get-trust-response.json")
+
   lazy val getTransformedApiResponse: JsValue = getJsonValueFromFile("trust-transformed-get-api-result.json")
   lazy val getTransformedLeadTrusteeResponse: JsValue = getJsonValueFromFile("trust-transformed-get-lead-trustee-result.json")
   lazy val getTransformedTrusteesResponse: JsValue = getJsonValueFromFile("trust-transformed-get-trustees-result.json")

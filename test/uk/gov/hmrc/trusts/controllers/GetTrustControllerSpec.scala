@@ -35,13 +35,13 @@ import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, ValidateIde
 import uk.gov.hmrc.trusts.models.get_trust.get_trust.{ResponseHeader, TrustFoundResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.models.get_trust.{get_trust, _}
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService, TrustsStoreService}
-import uk.gov.hmrc.trusts.utils.JsonRequests
+import uk.gov.hmrc.trusts.utils.{JsonFixtures, NonTaxable5MLDFixtures}
 
 import scala.concurrent.Future
 
 class GetTrustControllerSpec extends WordSpec with MockitoSugar
   with MustMatchers with BeforeAndAfter
-  with BeforeAndAfterEach with JsonRequests
+  with BeforeAndAfterEach with JsonFixtures
   with Inside with ScalaFutures with GuiceOneAppPerSuite {
 
   private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
@@ -164,6 +164,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
     }
 
     "perform auditing" when {
+
       "the feature toggle is set to true" in {
 
         val SUT = new GetTrustController(
@@ -202,21 +203,44 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       }
     }
 
-    "return 200 - Ok with processed content" in {
+    "provided a UTR" must {
+      "return 200 - Ok with processed content" in {
 
-      val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-      when(transformationService.getTransformedData(any[String], any[String])(any[HeaderCarrier]))
-        .thenReturn(Future.successful(processedResponse))
+        when(transformationService.getTransformedData(any[String], any[String])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(processedResponse))
 
-      val result = getTrustController.get(utr, applyTransformations = true).apply(FakeRequest(GET, s"/trusts/$utr"))
+        val result = getTrustController.get(utr, applyTransformations = true).apply(FakeRequest(GET, s"/trusts/$utr"))
 
-      whenReady(result) { _ =>
-        verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-        verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any[HeaderCarrier])
-        status(result) mustBe OK
-        contentType(result) mustBe Some(JSON)
-        contentAsJson(result) mustBe getTransformedApiResponse
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any[HeaderCarrier])
+          status(result) mustBe OK
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe getTransformedApiResponse
+        }
+      }
+    }
+
+    "provided a URN" must {
+
+      "return 200 - Ok with processed content" in {
+
+        val processedResponse = TrustProcessedResponse(NonTaxable5MLDFixtures.TransformCache.getTransformedNonTaxableTrustResponse, ResponseHeader("Processed", "1"))
+
+        when(transformationService.getTransformedData(any[String], any[String])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(processedResponse))
+
+        val result = getTrustController.get(urn, applyTransformations = true).apply(FakeRequest(GET, s"/trusts/$urn"))
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(transformationService).getTransformedData(mockEq(urn), mockEq("id"))(any[HeaderCarrier])
+          status(result) mustBe OK
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe NonTaxable5MLDFixtures.Trusts.getTransformedNonTaxableTrustResponse
+        }
       }
     }
 

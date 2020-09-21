@@ -33,12 +33,12 @@ import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustProcessedResponse, _}
 import uk.gov.hmrc.trusts.models.variation.{Protector, ProtectorCompany}
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.transformers.remove.RemoveProtector
-import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
+import uk.gov.hmrc.trusts.utils.{JsonFixtures, JsonUtils}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonRequests {
+class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonFixtures {
 
   private implicit val pc: PatienceConfig =
     PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
