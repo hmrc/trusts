@@ -43,6 +43,7 @@ trait JsonRequests extends JsonUtils {
   lazy val get4MLDTrustResponse: JsValue = getJsonValueFromFile("valid-get-trust-response.json")
 
   lazy val get5MLDTrustNonTaxableResponseJson: String = getJsonFromFile("5MLD/NonTaxable/valid-get-trust-5mld-non-taxable-response.json")
+  lazy val get5MLDTrustNonTaxableResponse: JsValue = getJsonValueFromFile("5MLD/NonTaxable/valid-get-trust-5mld-non-taxable-response.json")
 
   lazy val getTrustPropertyLandNoPreviousValue: String = getJsonFromFile("valid-get-trust-response-property-or-land-no-previous-value.json")
   lazy val getTrustPropertyLandNoPreviousValueJson: JsValue = getJsonValueFromFile("valid-get-trust-response-property-or-land-no-previous-value.json")
