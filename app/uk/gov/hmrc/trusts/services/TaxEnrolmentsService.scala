@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.services
 
 import akka.actor.ActorSystem
-import akka.pattern.Patterns.after
+import akka.pattern.after
 import com.google.inject.ImplementedBy
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
@@ -28,7 +28,7 @@ import uk.gov.hmrc.trusts.models.{TaxEnrolmentFailure, TaxEnrolmentSuscriberResp
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.duration.{FiniteDuration, _}
+import scala.concurrent.duration._
 import scala.util.control.NonFatal
 
 
@@ -52,7 +52,7 @@ class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector :TaxEnrolmentConn
           logger.error(s"[enrolSubscriberWithRetry] Maximum retry completed. Tax enrolment failed for subscription id $subscriptionId")
           Future.successful(TaxEnrolmentFailure)
         } else {
-          afterSeconds(DELAY_SECONDS_BETWEEN_REQUEST.seconds).flatMap { _ =>
+          after(DELAY_SECONDS_BETWEEN_REQUEST.seconds, as.scheduler){
             logger.error(s"[enrolSubscriberWithRetry]  Retrying to enrol subscription id $subscriptionId,  $acc")
             enrolSubscriberWithRetry(subscriptionId, acc + 1)
           }
@@ -62,10 +62,6 @@ class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector :TaxEnrolmentConn
 
   private def isMaxRetryReached(currentCounter: Int): Boolean =
     currentCounter == MAX_TRIES
-
-  private def afterSeconds(duration: FiniteDuration)(implicit as: ActorSystem) = {
-    after(duration, as.scheduler, global, Future.successful(1))
-  }
 
   private def makeRequest(subscriptionId: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] = {
     taxEnrolmentConnector.enrolSubscriber(subscriptionId)

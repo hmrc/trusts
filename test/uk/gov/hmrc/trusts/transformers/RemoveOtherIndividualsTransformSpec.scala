@@ -18,18 +18,11 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import org.mockito.Matchers.any
-import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.repositories.TransformationRepository
-import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService}
 import uk.gov.hmrc.trusts.utils.JsonUtils
-
-import scala.concurrent.Future
 
 class RemoveOtherIndividualsTransformSpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar {
 

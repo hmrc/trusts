@@ -21,11 +21,10 @@ import java.time.LocalDate
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee}
 import uk.gov.hmrc.trusts.transformers._
@@ -85,8 +84,6 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     ),
     entityStart = LocalDate.parse("2012-03-14")
   )
-
-  private implicit val hc : HeaderCarrier = HeaderCarrier()
 
   private val originalTrusteeIndJson = Json.parse(
     """

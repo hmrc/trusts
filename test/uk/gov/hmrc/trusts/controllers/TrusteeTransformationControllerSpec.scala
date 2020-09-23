@@ -29,7 +29,6 @@ import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee, Success}
@@ -194,8 +193,6 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
   "remove trustee" - {
 
     "must add a 'remove trustee' transform" in {
-
-      implicit val hc: HeaderCarrier = HeaderCarrier()
 
       val trusteeTransformationService = mock[TrusteeTransformationService]
       val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)(ExecutionContext.Implicits.global, Helpers.stubControllerComponents())

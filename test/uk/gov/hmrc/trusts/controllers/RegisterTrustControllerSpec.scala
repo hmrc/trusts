@@ -31,7 +31,6 @@ import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.services.{DesService, FakeAuditService, RosmPatternService, ValidationService}
 
-import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
 class RegisterTrustControllerSpec extends BaseSpec {

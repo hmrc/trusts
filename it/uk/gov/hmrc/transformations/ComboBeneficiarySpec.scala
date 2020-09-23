@@ -21,7 +21,7 @@ import java.time.LocalDate
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.mockito.ArgumentCaptor
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.Application
 import play.api.inject.bind

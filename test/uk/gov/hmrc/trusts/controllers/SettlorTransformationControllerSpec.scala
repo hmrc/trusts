@@ -115,8 +115,6 @@ class SettlorTransformationControllerSpec extends FreeSpec
         entityStart = LocalDate.parse("2010-05-03")
       )
 
-      val newDescription = "Some new description"
-
       when(settlorTransformationService.addIndividualSettlorTransformer(any(), any(), any()))
         .thenReturn(Future.successful(Success))
 

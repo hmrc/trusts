@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.trusts.models.variation.{IdentificationType, IndividualDetailsType, Protector}
+import uk.gov.hmrc.trusts.models.variation.{IdentificationType, Protector}
 import uk.gov.hmrc.trusts.models.{NameType, PassportType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
