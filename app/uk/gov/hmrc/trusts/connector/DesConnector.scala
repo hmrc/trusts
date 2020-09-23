@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.connector
 import java.util.UUID
 
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import play.api.http.HeaderNames
 import play.api.libs.json._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
@@ -32,14 +32,12 @@ import uk.gov.hmrc.trusts.utils.Constants._
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
-class DesConnector @Inject()(http: HttpClient, config: AppConfig) {
+class DesConnector @Inject()(http: HttpClient, config: AppConfig) extends Logging {
 
   private lazy val trustsServiceUrl : String = s"${config.registerTrustsUrl}/trusts"
   private lazy val matchTrustsEndpoint : String = s"$trustsServiceUrl/match"
   private lazy val trustRegistrationEndpoint : String = s"$trustsServiceUrl/registration"
   private lazy val getTrustOrEstateUrl: String =  s"${config.getTrustOrEstateUrl}/trusts"
-
-  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
 
   def createGetTrustOrEstateEndpoint(utr: String): String = s"$getTrustOrEstateUrl/registration/$utr"
 

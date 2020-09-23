@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc.Result
 import uk.gov.hmrc.http.HeaderCarrier
@@ -26,9 +26,7 @@ import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 import uk.gov.hmrc.trusts.services.AuditService
 import uk.gov.hmrc.trusts.utils.ErrorResponses._
 
-class VariationsResponseHandler @Inject()(auditService: AuditService) {
-
-  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+class VariationsResponseHandler @Inject()(auditService: AuditService) extends Logging {
 
   def recoverFromException(auditType: String)(implicit request: IdentifierRequest[JsValue],hc: HeaderCarrier): PartialFunction[Throwable, Result] = {
 

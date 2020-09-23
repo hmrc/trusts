@@ -16,15 +16,13 @@
 
 package uk.gov.hmrc.trusts.utils
 
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import uk.gov.hmrc.trusts.models.Registration
 import uk.gov.hmrc.trusts.services.TrustsValidationError
 import uk.gov.hmrc.trusts.utils.TypeOfTrust.TypeOfTrust
 
 
-class SettlorDomainValidation(registration: Registration) extends ValidationUtil {
-
-  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+class SettlorDomainValidation(registration: Registration) extends ValidationUtil with Logging {
 
   def deceasedSettlorDobIsNotFutureDate: Option[TrustsValidationError] = {
     getDeceasedSettlor(registration).flatMap {

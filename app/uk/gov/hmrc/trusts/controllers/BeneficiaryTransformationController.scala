@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import play.api.libs.json.{JsError, JsString, JsSuccess, JsValue}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
@@ -33,9 +33,7 @@ class BeneficiaryTransformationController @Inject()(
                                           beneficiaryTransformationService: BeneficiaryTransformationService
                                         )(implicit val executionContext: ExecutionContext,
                                           cc: ControllerComponents)
-  extends TrustsBaseController(cc) with ValidationUtil {
-
-  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+  extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
   def amendUnidentifiedBeneficiary(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {

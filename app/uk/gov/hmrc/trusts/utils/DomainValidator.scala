@@ -16,13 +16,11 @@
 
 package uk.gov.hmrc.trusts.utils
 
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import uk.gov.hmrc.trusts.models.Registration
 import uk.gov.hmrc.trusts.services.TrustsValidationError
 
-class DomainValidator(registration : Registration) extends ValidationUtil {
-
-  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+class DomainValidator(registration : Registration) extends ValidationUtil with Logging {
 
   val EFRBS_VALIDAION_MESSAGE = "Trusts efrbs start date can be provided for Employment Related trust only."
 

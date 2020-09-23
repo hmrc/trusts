@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.controllers.actions
 
 import com.google.inject.Inject
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc.{Request, Result, _}
@@ -35,9 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class AuthenticatedIdentifierAction @Inject()(override val authConnector: AuthConnector,
                                               val parser: BodyParsers.Default)
                                              (implicit val executionContext: ExecutionContext)
-  extends IdentifierAction with AuthorisedFunctions {
-
-  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+  extends IdentifierAction with AuthorisedFunctions with Logging {
 
   def invokeBlock[A](request: Request[A],
                      block: IdentifierRequest[A] => Future[Result]) : Future[Result] = {

@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.services
 
 
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.{EtmpCacheDataStaleException, InternalServerErrorException}
@@ -37,9 +37,7 @@ class VariationService @Inject()(desService: DesService,
                                  transformationService: TransformationService,
                                  declarationTransformer: DeclarationTransformer,
                                  auditService: AuditService,
-                                 localDateService: LocalDateService) {
-
-  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+                                 localDateService: LocalDateService) extends Logging {
 
   def submitDeclaration(utr: String, internalId: String, declaration: DeclarationForApi)
                        (implicit hc: HeaderCarrier): Future[VariationResponse] = {

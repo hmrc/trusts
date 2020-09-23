@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust
 
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK, SERVICE_UNAVAILABLE}
 import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
@@ -85,9 +85,7 @@ object TrustProcessedResponse {
 
 case class TrustFoundResponse(responseHeader: ResponseHeader) extends GetTrustSuccessResponse
 
-object GetTrustResponse {
-
-  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+object GetTrustResponse extends Logging {
 
   implicit lazy val httpReads: HttpReads[GetTrustResponse] = new HttpReads[GetTrustResponse] {
       override def read(method: String, url: String, response: HttpResponse): GetTrustResponse = {

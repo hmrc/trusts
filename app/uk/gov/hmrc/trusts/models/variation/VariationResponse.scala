@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.trusts.models.variation
 
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
@@ -24,9 +24,7 @@ import uk.gov.hmrc.trusts.exceptions._
 
 final case class VariationResponse(tvn: String)
 
-object VariationResponse {
-
-  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+object VariationResponse extends Logging {
 
   implicit val formats: Format[VariationResponse] = Json.format[VariationResponse]
 

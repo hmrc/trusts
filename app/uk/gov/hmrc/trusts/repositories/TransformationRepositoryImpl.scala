@@ -20,7 +20,7 @@ import java.sql.Timestamp
 import java.time.LocalDateTime
 
 import javax.inject.{Inject, Singleton}
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import play.api.libs.json._
 import reactivemongo.api.WriteConcern
 import reactivemongo.api.indexes.{Index, IndexType}
@@ -36,9 +36,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class TransformationRepositoryImpl @Inject()(
                             mongo: MongoDriver,
                             config: AppConfig
-                          )(implicit ec: ExecutionContext) extends TransformationRepository {
+                          )(implicit ec: ExecutionContext) extends TransformationRepository with Logging {
 
-  private val logger = LoggerFactory.getLogger("application." + getClass.getCanonicalName)
   private val collectionName: String = "transforms"
   private val cacheTtl = config.ttlInSeconds
 

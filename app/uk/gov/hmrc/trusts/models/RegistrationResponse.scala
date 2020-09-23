@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.trusts.models
 
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.{Format, JsResult, JsValue, Json}
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
@@ -37,9 +37,9 @@ object RegistrationFailureResponse {
   implicit val formats = Json.format[RegistrationFailureResponse]
 }
 
-object RegistrationResponse {
+object RegistrationResponse extends Logging {
 
-  implicit object RegistrationResponseFormats extends Format[RegistrationResponse] {
+  implicit object RegistrationResponseFormats extends Format[RegistrationResponse] with Logging {
 
     override def reads(json: JsValue): JsResult[RegistrationResponse] = json.validate[RegistrationTrnResponse]
 
@@ -50,8 +50,6 @@ object RegistrationResponse {
     }
 
   }
-
-  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
 
   implicit lazy val httpReads: HttpReads[RegistrationResponse] =
     new HttpReads[RegistrationResponse] {

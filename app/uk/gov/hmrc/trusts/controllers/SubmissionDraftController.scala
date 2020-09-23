@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.controllers
 import java.time.LocalDate
 
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
@@ -36,9 +36,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
                                           identify: IdentifierAction,
                                           localDateTimeService: LocalDateTimeService,
                                           cc: ControllerComponents
-                                       ) extends TrustsBaseController(cc) {
-
-  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+                                       ) extends TrustsBaseController(cc) with Logging {
 
   def setSection(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {

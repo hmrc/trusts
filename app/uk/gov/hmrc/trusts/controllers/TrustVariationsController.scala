@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import play.api.libs.json.Json
 import play.api.mvc.{ControllerComponents, Result}
 import uk.gov.hmrc.trusts.config.AppConfig
@@ -41,9 +41,7 @@ class TrustVariationsController @Inject()(
                                            variationService: VariationService,
                                            responseHandler: VariationsResponseHandler,
                                            cc: ControllerComponents
-                                    ) extends TrustsBaseController(cc) with ValidationUtil {
-
-  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+                                    ) extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
   @deprecated("api is no longer used, use declare instead", "13 May 2020")
   def trustVariation() = identify.async(parse.json) {

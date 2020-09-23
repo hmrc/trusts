@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.services
 
 import com.google.inject.ImplementedBy
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.{TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSuccess, TaxEnrolmentSuscriberResponse}
@@ -28,9 +28,7 @@ import scala.concurrent.Future
 import scala.util.control.NonFatal
 
 
-class RosmPatternServiceImpl @Inject()( desService :DesService, taxEnrolmentService : TaxEnrolmentsService) extends RosmPatternService{
-
-  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+class RosmPatternServiceImpl @Inject()( desService :DesService, taxEnrolmentService : TaxEnrolmentsService) extends RosmPatternService with Logging {
 
   override def setSubscriptionId(trn : String)(implicit hc : HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] ={
 

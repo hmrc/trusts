@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.repositories
 
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import play.api.libs.json._
 import reactivemongo.api.Cursor
 import reactivemongo.api.indexes.{Index, IndexType}
@@ -43,9 +43,7 @@ trait RegistrationSubmissionRepository {
 class RegistrationSubmissionRepositoryImpl @Inject()(
                                           mongo: MongoDriver,
                                           config: AppConfig
-                                        )(implicit ec: ExecutionContext) extends RegistrationSubmissionRepository {
-
-  private val logger = LoggerFactory.getLogger("application." + getClass.getCanonicalName)
+                                        )(implicit ec: ExecutionContext) extends RegistrationSubmissionRepository with Logging {
 
   private val collectionName: String = "registration-submissions"
 

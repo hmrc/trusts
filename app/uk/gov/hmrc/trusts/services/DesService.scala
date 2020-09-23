@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
@@ -29,9 +29,7 @@ import uk.gov.hmrc.trusts.repositories.CacheRepository
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class DesService @Inject()(val desConnector: DesConnector, val repository: CacheRepository) {
-
-  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+class DesService @Inject()(val desConnector: DesConnector, val repository: CacheRepository) extends Logging {
 
   def getTrustInfoFormBundleNo(utr: String): Future[String] =
     desConnector.getTrustInfo(utr).map {

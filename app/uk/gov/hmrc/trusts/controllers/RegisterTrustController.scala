@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import play.api.libs.json.Json
 import play.api.mvc.ControllerComponents
 import uk.gov.hmrc.http.BadRequestException
@@ -43,9 +43,7 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
                                         rosmPatternService: RosmPatternService,
                                         auditService: AuditService,
                                         cc: ControllerComponents
-                                        ) extends TrustsBaseController(cc) {
-
-  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+                                        ) extends TrustsBaseController(cc) with Logging {
 
   def registration() = identify.async(parse.json) {
     implicit request =>

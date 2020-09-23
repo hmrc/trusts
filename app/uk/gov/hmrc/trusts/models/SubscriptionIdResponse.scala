@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.trusts.models
 
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
@@ -24,11 +24,9 @@ import uk.gov.hmrc.trusts.exceptions._
 
 final case class SubscriptionIdResponse(subscriptionId: String)
 
-object SubscriptionIdResponse {
+object SubscriptionIdResponse extends Logging {
 
   implicit val formats = Json.format[SubscriptionIdResponse]
-
-  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
 
   implicit lazy val httpReads: HttpReads[SubscriptionIdResponse] =
     new HttpReads[SubscriptionIdResponse] {

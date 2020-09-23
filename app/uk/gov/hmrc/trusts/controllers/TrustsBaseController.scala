@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.controllers
 
 import play.api.libs.json._
 import play.api.mvc.{ControllerComponents, Request, Result}
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.trusts.utils.ErrorResponses._
 
 import scala.concurrent.Future

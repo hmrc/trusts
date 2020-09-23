@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import play.api.libs.json.{JsObject, JsResult, JsSuccess, JsValue, Json, __, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
@@ -31,9 +31,7 @@ import scala.concurrent.Future
 
 class TransformationService @Inject()(repository: TransformationRepository,
                                       desService: DesService,
-                                      auditService: AuditService){
-
-  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+                                      auditService: AuditService) extends Logging {
 
   def getTransformedData(utr: String, internalId: String): Future[GetTrustResponse] = {
     desService.getTrustInfo(utr, internalId).flatMap {

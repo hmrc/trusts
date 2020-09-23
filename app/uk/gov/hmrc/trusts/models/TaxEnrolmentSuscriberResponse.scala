@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.trusts.models
 
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import play.api.http.Status._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.trusts.exceptions._
@@ -28,9 +28,7 @@ case object TaxEnrolmentSuccess extends TaxEnrolmentSuscriberResponse
 case object TaxEnrolmentFailure extends TaxEnrolmentSuscriberResponse
 case object TaxEnrolmentNotProcessed extends TaxEnrolmentSuscriberResponse
 
-object TaxEnrolmentSuscriberResponse {
-
-  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+object TaxEnrolmentSuscriberResponse extends Logging {
 
   implicit lazy val httpReads: HttpReads[TaxEnrolmentSuscriberResponse] =
     new HttpReads[TaxEnrolmentSuscriberResponse] {

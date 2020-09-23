@@ -20,7 +20,7 @@ import akka.actor.ActorSystem
 import akka.pattern.after
 import com.google.inject.ImplementedBy
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.connector.TaxEnrolmentConnector
@@ -32,12 +32,10 @@ import scala.concurrent.duration._
 import scala.util.control.NonFatal
 
 
-class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector :TaxEnrolmentConnector, config: AppConfig) extends TaxEnrolmentsService {
+class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector :TaxEnrolmentConnector, config: AppConfig) extends TaxEnrolmentsService with Logging {
 
   private val DELAY_SECONDS_BETWEEN_REQUEST = config.delayToConnectTaxEnrolment
   private val MAX_TRIES = config.maxRetry
-
-  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
 
   override def setSubscriptionId(subscriptionId: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] = {
     implicit val as = ActorSystem()

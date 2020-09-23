@@ -21,7 +21,7 @@ import com.github.fge.jsonschema.core.report.LogLevel.ERROR
 import com.github.fge.jsonschema.core.report.ProcessingReport
 import com.github.fge.jsonschema.main.{JsonSchema, JsonSchemaFactory}
 import javax.inject.Inject
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import play.api.libs.json.{JsPath, Json, JsonValidationError, Reads}
 import uk.gov.hmrc.trusts.models.Registration
 import uk.gov.hmrc.trusts.utils.BusinessValidation
@@ -43,9 +43,7 @@ class ValidationService @Inject()() {
 
 }
 
-class Validator(schema: JsonSchema) {
-
-  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+class Validator(schema: JsonSchema) extends Logging {
 
   private val JsonErrorMessageTag = "message"
   private val JsonErrorInstanceTag = "instance"
