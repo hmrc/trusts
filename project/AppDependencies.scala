@@ -8,9 +8,11 @@ object AppDependencies {
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "org.reactivemongo" %% "play2-reactivemongo" % "0.18.8-play27",
-    "uk.gov.hmrc" %% "bootstrap-backend-play-27" % "2.25.0",
-    "com.github.java-json-tools" % "json-schema-validator" % "2.2.8"
+    compilerPlugin("com.github.ghik" % "silencer-plugin" % "1.7.0" cross CrossVersion.full),
+    "com.github.ghik"            % "silencer-lib"               % "1.7.0"           % Provided cross CrossVersion.full,
+    "org.reactivemongo"         %% "play2-reactivemongo"        % "0.18.8-play27",
+    "uk.gov.hmrc"               %% "bootstrap-backend-play-27"  % "2.25.0",
+    "com.github.java-json-tools" % "json-schema-validator"      % "2.2.8"
   )
 
   val test: Seq[ModuleID] = Seq(
