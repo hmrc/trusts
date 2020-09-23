@@ -52,7 +52,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "trusts data match with existing trusts. " in {
 
         val SUT = new CheckTrustController(mockDesService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
-        when(mockDesService.checkExistingTrust(any[ExistingCheckRequest])(any[HeaderCarrier]))
+        when(mockDesService.checkExistingTrust(any[ExistingCheckRequest]))
           .thenReturn(Future.successful(Matched))
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequest))
         status(result) mustBe OK
@@ -62,7 +62,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "trusts data match with existing trusts with postcode in lowercase. " in {
 
         val SUT = new CheckTrustController(mockDesService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
-        when(mockDesService.checkExistingTrust(any[ExistingCheckRequest])(any[HeaderCarrier]))
+        when(mockDesService.checkExistingTrust(any[ExistingCheckRequest]))
           .thenReturn(Future.successful(Matched))
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadPostCodeLowerCase))
         status(result) mustBe OK
@@ -74,7 +74,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "trusts data match with existing trusts without postcode. " in {
 
         val SUT = new CheckTrustController(mockDesService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
-        when(mockDesService.checkExistingTrust(any[ExistingCheckRequest])(any[HeaderCarrier]))
+        when(mockDesService.checkExistingTrust(any[ExistingCheckRequest]))
           .thenReturn(Future.successful(Matched))
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequestWithoutPostCode))
         status(result) mustBe OK
@@ -85,7 +85,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
     "return OK with match false" when {
       "trusts data does not match with existing trusts." in {
         val SUT = new CheckTrustController(mockDesService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
-        when(mockDesService.checkExistingTrust(any[ExistingCheckRequest])(any[HeaderCarrier]))
+        when(mockDesService.checkExistingTrust(any[ExistingCheckRequest]))
           .thenReturn(Future.successful(NotMatched))
 
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequest))
@@ -98,7 +98,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
       "trusts data matched with already registered trusts." in {
         val SUT = new CheckTrustController(mockDesService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
-        when(mockDesService.checkExistingTrust(any[ExistingCheckRequest])(any[HeaderCarrier]))
+        when(mockDesService.checkExistingTrust(any[ExistingCheckRequest]))
           .thenReturn(Future.successful(AlreadyRegistered))
 
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequest))
@@ -179,7 +179,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "des dependent service is not responding" in {
 
         val SUT = new CheckTrustController(mockDesService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
-        when(mockDesService.checkExistingTrust(any[ExistingCheckRequest])(any[HeaderCarrier]))
+        when(mockDesService.checkExistingTrust(any[ExistingCheckRequest]))
           .thenReturn(Future.successful(ServiceUnavailable))
 
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequest))

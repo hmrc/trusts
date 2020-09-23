@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
-import play.api.Logger
+import org.slf4j.LoggerFactory
 import play.api.libs.json.Json
 import play.api.mvc.{ControllerComponents, Result}
 import uk.gov.hmrc.trusts.config.AppConfig
@@ -43,6 +43,8 @@ class TrustVariationsController @Inject()(
                                            cc: ControllerComponents
                                     ) extends TrustsBaseController(cc) with ValidationUtil {
 
+  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+
   @deprecated("api is no longer used, use declare instead", "13 May 2020")
   def trustVariation() = identify.async(parse.json) {
     implicit request => {
@@ -51,7 +53,7 @@ class TrustVariationsController @Inject()(
 
       validator.get(config.variationsApiSchema).validate[TrustVariation](payload).fold[Future[Result]](
         errors => {
-          Logger.error(s"[variations] trusts validation errors from request body $errors.")
+          logger.error(s"[variations] trusts validation errors from request body $errors.")
 
           auditService.auditErrorResponse(
             TrustAuditing.TRUST_VARIATION,
@@ -92,7 +94,7 @@ class TrustVariationsController @Inject()(
             Json.toJson(Json.obj())
           )
 
-          Logger.error(s"[TrustsVariationController][declare] unable to parse json as DeclarationForApi, $errors")
+          logger.error(s"[TrustsVariationController][declare] unable to parse json as DeclarationForApi, $errors")
           Future.successful(BadRequest)
         },
         declarationForApi => {

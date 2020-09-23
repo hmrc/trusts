@@ -19,7 +19,6 @@ package uk.gov.hmrc.trusts.repositories
 import java.sql.Timestamp
 import java.time.LocalDateTime
 
-import akka.stream.Materializer
 import javax.inject.{Inject, Singleton}
 import org.slf4j.LoggerFactory
 import play.api.libs.json._
@@ -29,16 +28,14 @@ import reactivemongo.bson.BSONDocument
 import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
 import reactivemongo.play.json.collection.JSONCollection
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.utils.DateFormatter
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class CacheRepositoryImpl @Inject()(
                                           mongo: MongoDriver,
-                                          config: AppConfig,
-                                          dateFormatter: DateFormatter
-                                   )(implicit ec: ExecutionContext, m: Materializer) extends CacheRepository {
+                                          config: AppConfig
+                                   )(implicit ec: ExecutionContext) extends CacheRepository {
 
   private val logger = LoggerFactory.getLogger("application" + classOf[CacheRepositoryImpl].getCanonicalName)
   private val collectionName: String = "trusts"

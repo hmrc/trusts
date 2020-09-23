@@ -85,7 +85,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       "not perform auditing" when {
         "the feature toggle is set to false" in {
 
-          when(mockDesService.trustVariation(any[JsValue])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[JsValue]))
             .thenReturn(Future.successful(VariationResponse(tvnResponse)))
 
           when(mockConfig.auditingEnabled).thenReturn(false)
@@ -111,7 +111,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
         "the feature toggle is set to true" in {
 
-          when(mockDesService.trustVariation(any[JsValue])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[JsValue]))
             .thenReturn(Future.successful(VariationResponse(tvnResponse)))
 
           when(mockConfig.auditingEnabled).thenReturn(true)
@@ -137,7 +137,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
         "individual user called the register endpoint with a valid json payload " in {
 
-          when(mockDesService.trustVariation(any[JsValue])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[JsValue]))
             .thenReturn(Future.successful(VariationResponse(tvnResponse)))
 
           when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)
@@ -197,7 +197,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
         "input request fails business validation" in {
 
-          when(mockDesService.trustVariation(any[JsValue])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[JsValue]))
             .thenReturn(Future.failed(BadRequestException))
 
           when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)
@@ -220,7 +220,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
         "invalid correlation id is provided in the headers" in {
 
-          when(mockDesService.trustVariation(any[JsValue])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[JsValue]))
             .thenReturn(Future.failed(InvalidCorrelationIdException))
 
           when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)
@@ -252,7 +252,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       "return a Conflict" when {
         "submission with same correlation id is submitted." in {
 
-          when(mockDesService.trustVariation(any[JsValue])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[JsValue]))
             .thenReturn(Future.failed(DuplicateSubmissionException))
 
           when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)
@@ -285,7 +285,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
         "the register endpoint called and something goes wrong." in {
 
-          when(mockDesService.trustVariation(any[JsValue])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[JsValue]))
             .thenReturn(Future.failed(InternalServerErrorException("some error")))
 
           when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)
@@ -347,7 +347,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       "return service unavailable" when {
         "the des returns Service Unavailable as dependent service is down. " in {
 
-          when(mockDesService.trustVariation(any[JsValue])(any[HeaderCarrier]))
+          when(mockDesService.trustVariation(any[JsValue]))
             .thenReturn(Future.failed(ServiceNotAvailableException("dependent service is down")))
 
           when(mockConfig.variationsApiSchema).thenReturn(appConfig.variationsApiSchema)

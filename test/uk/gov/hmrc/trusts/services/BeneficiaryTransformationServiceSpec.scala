@@ -73,7 +73,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any()))
         .thenReturn(Future.successful(true))
-      when(transformationService.getTransformedData(any(), any())(any()))
+      when(transformationService.getTransformedData(any(), any()))
         .thenReturn(Future.successful(TrustProcessedResponse(
           buildInputJson("individualDetails", Seq(beneficiary)),
           ResponseHeader("status", "formBundlNo")
@@ -103,7 +103,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any())(any()))
+      when(transformationService.getTransformedData(any(), any()))
         .thenReturn(Future.successful(TrustProcessedResponse(
           buildInputJson("unidentified", Seq(originalBeneficiaryJson)),
           ResponseHeader("status", "formBundlNo")
@@ -177,7 +177,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
         when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any()))
           .thenReturn(Future.successful(TrustProcessedResponse(
             buildInputJson("individualDetails", Seq(original)),
             ResponseHeader("status", "formBundlNo")
@@ -274,7 +274,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any())(any()))
+      when(transformationService.getTransformedData(any(), any()))
         .thenReturn(Future.successful(TrustProcessedResponse(
           buildInputJson("charity", Seq(original)),
           ResponseHeader("status", "formBundleNo")
@@ -370,7 +370,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any())(any()))
+      when(transformationService.getTransformedData(any(), any()))
         .thenReturn(Future.successful(TrustProcessedResponse(
           buildInputJson("company", Seq(original)),
           ResponseHeader("status", "formBundleNo")
@@ -446,7 +446,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any())(any()))
+      when(transformationService.getTransformedData(any(), any()))
         .thenReturn(Future.successful(TrustProcessedResponse(
           buildInputJson("other", Seq(original)),
           ResponseHeader("status", "formBundleNo")
@@ -494,7 +494,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
     when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-    when(transformationService.getTransformedData(any(), any())(any()))
+    when(transformationService.getTransformedData(any(), any()))
       .thenReturn(Future.successful(TrustProcessedResponse(
         buildInputJson("trust", Seq(original)),
         ResponseHeader("status", "formBundleNo")
@@ -590,7 +590,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
     when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-    when(transformationService.getTransformedData(any(), any())(any()))
+    when(transformationService.getTransformedData(any(), any()))
       .thenReturn(Future.successful(TrustProcessedResponse(
         buildInputJson("large", Seq(original)),
         ResponseHeader("status", "formBundleNo")

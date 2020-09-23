@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.trusts.models
 
-import play.api.Logger
+import org.slf4j.LoggerFactory
 import play.api.http.Status._
 import play.api.libs.json.{Format, JsResult, JsValue, Json}
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
@@ -51,29 +51,31 @@ object RegistrationResponse {
 
   }
 
+  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+
   implicit lazy val httpReads: HttpReads[RegistrationResponse] =
     new HttpReads[RegistrationResponse] {
       override def read(method: String, url: String, response: HttpResponse): RegistrationResponse = {
-        Logger.info(s"[RegistrationTrustResponse]  response status received from des: ${response.status}")
+        logger.info(s"[RegistrationTrustResponse]  response status received from des: ${response.status}")
         response.status match {
           case OK =>
             response.json.as[RegistrationTrnResponse]
           case FORBIDDEN =>
             response.json.asOpt[DesErrorResponse] match {
               case Some(desReponse) if desReponse.code == ALREADY_REGISTERED_CODE =>
-                Logger.info(s"[RegistrationTrustResponse] already registered response from des.")
+                logger.info(s"[RegistrationTrustResponse] already registered response from des.")
                 throw AlreadyRegisteredException
               case Some(desReponse) if desReponse.code == NO_MATCH_CODE =>
-                Logger.info(s"[RegistrationTrustResponse] No match response from des.")
+                logger.info(s"[RegistrationTrustResponse] No match response from des.")
                 throw NoMatchException
               case _ =>
-                Logger.error("[RegistrationTrustResponse] Forbidden response from des.")
+                logger.error("[RegistrationTrustResponse] Forbidden response from des.")
                 throw InternalServerErrorException("Forbidden response from des.")
             }
           case BAD_REQUEST =>
             throw BadRequestException
           case SERVICE_UNAVAILABLE =>
-            Logger.error("[RegistrationTrustResponse] Service unavailable response from des.")
+            logger.error("[RegistrationTrustResponse] Service unavailable response from des.")
             throw ServiceNotAvailableException("Des dependent service is down.")
           case status =>
             throw InternalServerErrorException(s"Error response from des $status body: ${response.body}")

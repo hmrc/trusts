@@ -17,9 +17,8 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
-import play.api.Logger
+import org.slf4j.LoggerFactory
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models._
@@ -32,26 +31,26 @@ import scala.concurrent.Future
 
 class DesService @Inject()(val desConnector: DesConnector, val repository: CacheRepository) {
 
-  def getTrustInfoFormBundleNo(utr: String)(implicit hc: HeaderCarrier): Future[String] =
+  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+
+  def getTrustInfoFormBundleNo(utr: String): Future[String] =
     desConnector.getTrustInfo(utr).map {
       case response: GetTrustSuccessResponse => response.responseHeader.formBundleNo
       case response =>
         val msg = s"Failed to retrieve latest form bundle no from ETMP : $response"
-        Logger.warn(msg)
+        logger.warn(msg)
         throw InternalServerErrorException(s"Submission could not proceed, $msg")
     }
 
-  def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest)
-                        (implicit hc: HeaderCarrier): Future[ExistingCheckResponse] = {
+  def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest): Future[ExistingCheckResponse] = {
     desConnector.checkExistingTrust(existingTrustCheckRequest)
   }
 
-  def registerTrust(registration: Registration)
-                   (implicit hc: HeaderCarrier): Future[RegistrationResponse] = {
+  def registerTrust(registration: Registration): Future[RegistrationResponse] = {
     desConnector.registerTrust(registration)
   }
 
-  def getSubscriptionId(trn: String)(implicit hc: HeaderCarrier): Future[SubscriptionIdResponse] = {
+  def getSubscriptionId(trn: String): Future[SubscriptionIdResponse] = {
     desConnector.getSubscriptionId(trn)
   }
 
@@ -61,9 +60,9 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Cache
     }
   }
 
-  def refreshCacheAndGetTrustInfo(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
-    Logger.debug("Retrieving Trust Info from DES")
-    Logger.info(s"[DesService][refreshCacheAndGetTrustInfo] refreshing cache")
+  def refreshCacheAndGetTrustInfo(utr: String, internalId: String): Future[GetTrustResponse] = {
+    logger.debug("Retrieving Trust Info from DES")
+    logger.info(s"[DesService][refreshCacheAndGetTrustInfo] refreshing cache")
 
     repository.resetCache(utr, internalId).flatMap { _ =>
       desConnector.getTrustInfo(utr).map {
@@ -75,12 +74,12 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Cache
     }
   }
 
-  def getTrustInfo(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
-    Logger.debug("Getting trust Info")
+  def getTrustInfo(utr: String, internalId: String): Future[GetTrustResponse] = {
+    logger.debug("Getting trust Info")
     repository.get(utr, internalId).flatMap {
       case Some(x) => x.validate[GetTrustSuccessResponse].fold(
         errs => {
-          Logger.error(s"[DesService] unable to parse json from cache as GetTrustSuccessResponse $errs")
+          logger.error(s"[DesService] unable to parse json from cache as GetTrustSuccessResponse $errs")
           Future.failed[GetTrustResponse](new Exception(errs.toString))
         },
         response => {
@@ -91,7 +90,7 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Cache
     }
   }
 
-  def trustVariation(trustVariation: JsValue)(implicit hc: HeaderCarrier): Future[VariationResponse] =
+  def trustVariation(trustVariation: JsValue): Future[VariationResponse] =
     desConnector.trustVariation(trustVariation: JsValue)
 }
 

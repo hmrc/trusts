@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.trusts.repositories
 
-import akka.stream.Materializer
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
 import play.api.libs.json._
@@ -27,7 +26,6 @@ import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
 import reactivemongo.play.json.collection.JSONCollection
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.models.RegistrationSubmissionDraft
-import uk.gov.hmrc.trusts.utils.DateFormatter
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -44,9 +42,8 @@ trait RegistrationSubmissionRepository {
 
 class RegistrationSubmissionRepositoryImpl @Inject()(
                                           mongo: MongoDriver,
-                                          config: AppConfig,
-                                          dateFormatter: DateFormatter
-                                        )(implicit ec: ExecutionContext, m: Materializer) extends RegistrationSubmissionRepository {
+                                          config: AppConfig
+                                        )(implicit ec: ExecutionContext) extends RegistrationSubmissionRepository {
 
   private val logger = LoggerFactory.getLogger("application." + getClass.getCanonicalName)
 

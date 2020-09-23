@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.trusts.models.variation
 
-import play.api.Logger
+import org.slf4j.LoggerFactory
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
@@ -26,35 +26,37 @@ final case class VariationResponse(tvn: String)
 
 object VariationResponse {
 
+  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+
   implicit val formats: Format[VariationResponse] = Json.format[VariationResponse]
 
   implicit lazy val httpReads: HttpReads[VariationResponse] =
     new HttpReads[VariationResponse] {
       override def read(method: String, url: String, response: HttpResponse): VariationResponse = {
 
-        Logger.debug(s"[VariationResponse] response body ${response.body}")
+        logger.debug(s"[VariationResponse] response body ${response.body}")
 
-        Logger.info(s"[VariationTvnResponse]  response status received from des: ${response.status}")
+        logger.info(s"[VariationTvnResponse]  response status received from des: ${response.status}")
         response.status match {
           case OK =>
             response.json.as[VariationResponse]
           case BAD_REQUEST if response.body contains "INVALID_CORRELATIONID" =>
-            Logger.error(s"[VariationTvnResponse] Bad Request for invalid correlation id response from des ")
+            logger.error(s"[VariationTvnResponse] Bad Request for invalid correlation id response from des ")
             throw InternalServerErrorException("Invalid correlation id response from des")
           case BAD_REQUEST =>
-            Logger.error(s"[VariationTvnResponse] Bad Request response from des ")
+            logger.error(s"[VariationTvnResponse] Bad Request response from des ")
             throw BadRequestException
           case CONFLICT =>
-            Logger.error(s"[VariationTvnResponse] Conflict response from des")
+            logger.error(s"[VariationTvnResponse] Conflict response from des")
             throw InternalServerErrorException("Conflict response from des")
           case INTERNAL_SERVER_ERROR =>
-            Logger.error(s"[VariationTvnResponse] Internal server error response from des")
+            logger.error(s"[VariationTvnResponse] Internal server error response from des")
             throw InternalServerErrorException("des is currently experiencing problems that require live service intervention")
           case SERVICE_UNAVAILABLE =>
-            Logger.error("[VariationTvnResponse] Service unavailable response from des.")
+            logger.error("[VariationTvnResponse] Service unavailable response from des.")
             throw ServiceNotAvailableException("des dependent service is down.")
           case status =>
-            Logger.error(s"[VariationTvnResponse]  Error response from des : $status")
+            logger.error(s"[VariationTvnResponse]  Error response from des : $status")
             throw InternalServerErrorException(s"Error response from des $status")
         }
       }

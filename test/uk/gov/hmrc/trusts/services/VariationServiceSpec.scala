@@ -77,17 +77,17 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
 
       val response = TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
 
-      when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))(any[HeaderCarrier]())).thenReturn(Future.successful(
+      when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))).thenReturn(Future.successful(
         response
       ))
 
-      when(desService.trustVariation(any())(any[HeaderCarrier])).thenReturn(Future.successful(
+      when(desService.trustVariation(any())).thenReturn(Future.successful(
         VariationResponse("TVN34567890")
       ))
 
       when(transformer.transform(any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
 
-      val OUT = new VariationService(desService, transformationService, transformer, mockCacheRepository, mockTransformationRepository, auditService, LocalDateServiceStub)
+      val OUT = new VariationService(desService, transformationService, transformer, auditService, LocalDateServiceStub)
 
       val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
 
@@ -96,7 +96,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
         verify(transformationService, times( 1)).applyDeclarationTransformations(equalTo(utr), equalTo(internalId), equalTo(trustInfoJson))(any[HeaderCarrier])
         verify(transformer, times(1)).transform(equalTo(transformedResponse), equalTo(response.getTrust), equalTo(declarationForApi), any())
         val arg: ArgumentCaptor[JsValue] = ArgumentCaptor.forClass(classOf[JsValue])
-        verify(desService, times(1)).trustVariation(arg.capture())(any[HeaderCarrier])
+        verify(desService, times(1)).trustVariation(arg.capture())
         arg.getValue mustBe transformedJson
       }}
     }
@@ -114,21 +114,21 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
 
     when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
 
-    when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))(any[HeaderCarrier]())).thenReturn(Future.successful(
+    when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))).thenReturn(Future.successful(
       TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
     ))
 
-    when(desService.trustVariation(any())(any[HeaderCarrier])).thenReturn(Future.successful(
+    when(desService.trustVariation(any())).thenReturn(Future.successful(
       VariationResponse("TVN34567890")
     ))
 
     when(transformer.transform(any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
 
-    val OUT = new VariationService(desService, transformationService, transformer, mockCacheRepository, mockTransformationRepository, auditService, LocalDateServiceStub)
+    val OUT = new VariationService(desService, transformationService, transformer, auditService, LocalDateServiceStub)
 
     whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { exception => {
       exception mustBe an[EtmpCacheDataStaleException.type]
-      verify(desService, times(0)).trustVariation(any())(any[HeaderCarrier])
+      verify(desService, times(0)).trustVariation(any())
     }}
   }
 }

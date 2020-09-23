@@ -73,7 +73,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
       when(transformationService.addNewTransform(any(), any(), any()))
         .thenReturn(Future.successful(true))
-      when(transformationService.getTransformedData(any(), any())(any()))
+      when(transformationService.getTransformedData(any(), any()))
         .thenReturn(Future.successful(TrustProcessedResponse(
           buildInputJson("settlor", Seq(settlor)),
           ResponseHeader("status", "formBundlNo")
@@ -163,7 +163,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
         when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any()))
           .thenReturn(Future.successful(TrustProcessedResponse(
             buildInputJson("settlor", Seq(originalSettlorJson)),
             ResponseHeader("status", "formBundlNo")
@@ -212,7 +212,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any())(any()))
+      when(transformationService.getTransformedData(any(), any()))
         .thenReturn(
           Future.successful(TrustProcessedResponse(buildInputJson("settlorCompany", Seq(originalSettlorJson)),
           ResponseHeader("status", "formBundlNo")
@@ -263,7 +263,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
       val desResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-      when(transformationService.getTransformedData(any(), any())(any()))
+      when(transformationService.getTransformedData(any(), any()))
         .thenReturn(
           Future.successful(
             TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))

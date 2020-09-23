@@ -182,7 +182,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       val transformationService = mock[TransformationService]
       val service = new TrusteeTransformationService(transformationService, LocalDateServiceStub)
 
-      when(transformationService.getTransformedData(any(), any())(any())).thenReturn(Future.successful(processedResponse))
+      when(transformationService.getTransformedData(any(), any())).thenReturn(Future.successful(processedResponse))
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
       val index = 1
@@ -204,7 +204,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       val transformationService = mock[TransformationService]
       val service = new TrusteeTransformationService(transformationService, LocalDateServiceStub)
 
-      when(transformationService.getTransformedData(any(), any())(any())).thenReturn(Future.successful(processedResponse))
+      when(transformationService.getTransformedData(any(), any())).thenReturn(Future.successful(processedResponse))
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
       val index = 1
@@ -232,7 +232,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       val transformationService = mock[TransformationService]
       val service = new TrusteeTransformationService(transformationService, LocalDateServiceStub)
 
-      when(transformationService.getTransformedData(any(), any())(any())).thenReturn(Future.successful(processedResponse))
+      when(transformationService.getTransformedData(any(), any())).thenReturn(Future.successful(processedResponse))
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
       val endDate = LocalDate.parse("2010-10-10")
@@ -278,7 +278,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       val transformationService = mock[TransformationService]
       val service = new TrusteeTransformationService(transformationService, LocalDateServiceStub)
 
-      when(transformationService.getTransformedData(any(), any())(any())).thenReturn(Future.successful(processedResponse))
+      when(transformationService.getTransformedData(any(), any())).thenReturn(Future.successful(processedResponse))
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
       val result = service.addAmendTrusteeTransformer("utr", index, "internalId", DisplayTrustTrusteeType(Some(newTrusteeIndInfo), None))

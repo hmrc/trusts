@@ -127,7 +127,7 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
 
         val desResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any()))
           .thenReturn(
             Future.successful(
               TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
@@ -152,7 +152,7 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
 
         when(transformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any()))
           .thenReturn(Future.successful(TrustProcessedResponse(
             buildInputJson("protector", Seq(protector)),
             ResponseHeader("status", "formBundlNo")
@@ -214,7 +214,7 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
 
         when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any()))
           .thenReturn(Future.successful(TrustProcessedResponse(
             buildInputJson("protectorCompany", Seq(original)),
             ResponseHeader("status", "formBundleNo")

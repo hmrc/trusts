@@ -75,7 +75,7 @@ class OtherIndividualTransformationServiceSpec extends FreeSpec with MockitoSuga
 
         when(transformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any()))
           .thenReturn(Future.successful(TrustProcessedResponse(
             buildInputJson(Seq(otherIndividual)),
             ResponseHeader("status", "formBundlNo")
@@ -124,7 +124,7 @@ class OtherIndividualTransformationServiceSpec extends FreeSpec with MockitoSuga
 
         val desResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any()))
           .thenReturn(
             Future.successful(
               TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))

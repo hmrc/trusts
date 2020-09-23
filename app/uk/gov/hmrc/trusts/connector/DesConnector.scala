@@ -19,11 +19,10 @@ package uk.gov.hmrc.trusts.connector
 import java.util.UUID
 
 import javax.inject.Inject
-import play.api.Logger
+import org.slf4j.LoggerFactory
 import play.api.http.HeaderNames
 import play.api.libs.json._
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustResponse
@@ -39,6 +38,8 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig) {
   private lazy val matchTrustsEndpoint : String = s"$trustsServiceUrl/match"
   private lazy val trustRegistrationEndpoint : String = s"$trustsServiceUrl/registration"
   private lazy val getTrustOrEstateUrl: String =  s"${config.getTrustOrEstateUrl}/trusts"
+
+  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
 
   def createGetTrustOrEstateEndpoint(utr: String): String = s"$getTrustOrEstateUrl/registration/$utr"
 
@@ -64,7 +65,7 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig) {
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
-    Logger.info(s"[DesConnector] matching trust for correlationId: $correlationId")
+    logger.info(s"[DesConnector] matching trust for correlationId: $correlationId")
 
     val response = http.POST[JsValue, ExistingCheckResponse](matchTrustsEndpoint, Json.toJson(existingTrustCheckRequest))
     (implicitly[Writes[JsValue]], ExistingCheckResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
@@ -82,8 +83,8 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig) {
 
       implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
-      Logger.warn(s"[DesConnector] registration: $registration")
-      Logger.info(s"[DesConnector] registering trust for correlationId: $correlationId")
+      logger.warn(s"[DesConnector] registration: $registration")
+      logger.info(s"[DesConnector] registering trust for correlationId: $correlationId")
 
       val response = http.POST[JsValue, RegistrationResponse](trustRegistrationEndpoint, Json.toJson(registration))
       (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc), implicitly[ExecutionContext])
@@ -99,7 +100,7 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig) {
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
     val subscriptionIdEndpointUrl = s"$trustsServiceUrl/trn/$trn/subscription"
-    Logger.debug(s"[getSubscriptionId] Sending get subscription id request to DES, url=$subscriptionIdEndpointUrl")
+    logger.debug(s"[getSubscriptionId] Sending get subscription id request to DES, url=$subscriptionIdEndpointUrl")
 
     val response = http.GET[SubscriptionIdResponse](subscriptionIdEndpointUrl)
     (SubscriptionIdResponse.httpReads, implicitly[HeaderCarrier](hc), implicitly[ExecutionContext])
@@ -112,7 +113,7 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig) {
 
     implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
-    Logger.info(s"[DesConnector] getting playback for trust for correlationId: $correlationId")
+    logger.info(s"[DesConnector] getting playback for trust for correlationId: $correlationId")
 
     http.GET[GetTrustResponse](createGetTrustOrEstateEndpoint(utr))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)
   }
@@ -122,7 +123,7 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig) {
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
-    Logger.info(s"[DesConnector] submitting trust variation for correlationId: $correlationId")
+    logger.info(s"[DesConnector] submitting trust variation for correlationId: $correlationId")
 
      http.POST[JsValue, VariationResponse](trustVariationsEndpoint, Json.toJson(trustVariations))(
        implicitly[Writes[JsValue]], VariationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])

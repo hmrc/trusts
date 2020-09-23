@@ -16,16 +16,16 @@
 
 package uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust
 
-import play.api.Logger
+import org.slf4j.LoggerFactory
 import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK, SERVICE_UNAVAILABLE}
 import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.{ResponseHeader, _}
-import uk.gov.hmrc.trusts.transformers.mdtp.{OtherIndividuals, Trustees}
 import uk.gov.hmrc.trusts.transformers.mdtp.beneficiaries.Beneficiaries
 import uk.gov.hmrc.trusts.transformers.mdtp.protectors.Protectors
 import uk.gov.hmrc.trusts.transformers.mdtp.settlors.Settlors
+import uk.gov.hmrc.trusts.transformers.mdtp.{OtherIndividuals, Trustees}
 
 trait GetTrustResponse
 
@@ -87,9 +87,11 @@ case class TrustFoundResponse(responseHeader: ResponseHeader) extends GetTrustSu
 
 object GetTrustResponse {
 
+  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+
   implicit lazy val httpReads: HttpReads[GetTrustResponse] = new HttpReads[GetTrustResponse] {
       override def read(method: String, url: String, response: HttpResponse): GetTrustResponse = {
-        Logger.info(s"[GetTrustResponse] response status received from des: ${response.status}")
+        logger.info(s"[GetTrustResponse] response status received from des: ${response.status}")
         response.status match {
           case OK =>
             parseOkResponse(response)
@@ -109,7 +111,7 @@ object GetTrustResponse {
     response.json.validate[GetTrustSuccessResponse] match {
       case JsSuccess(trustFound, _) => trustFound
       case JsError(errors) =>
-        Logger.error(s"[GetTrustResponse] Cannot parse as TrustFoundResponse due to $errors")
+        logger.error(s"[GetTrustResponse] Cannot parse as TrustFoundResponse due to $errors")
         NotEnoughDataResponse(response.json, JsError.toJson(errors))
     }
   }

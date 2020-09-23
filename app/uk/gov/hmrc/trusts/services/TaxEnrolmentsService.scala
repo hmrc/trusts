@@ -16,30 +16,28 @@
 
 package uk.gov.hmrc.trusts.services
 
-import javax.inject.Inject
-
 import akka.actor.ActorSystem
-import com.google.inject.ImplementedBy
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.connector.{DesConnector, TaxEnrolmentConnector}
-import uk.gov.hmrc.trusts.exceptions.MaxRetriesAttemptedException
-import uk.gov.hmrc.trusts.models.{TaxEnrolmentFailure, TaxEnrolmentSuccess, TaxEnrolmentSuscriberResponse}
 import akka.pattern.Patterns.after
-import play.api.Logger
+import com.google.inject.ImplementedBy
+import javax.inject.Inject
+import org.slf4j.LoggerFactory
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.config.AppConfig
+import uk.gov.hmrc.trusts.connector.TaxEnrolmentConnector
+import uk.gov.hmrc.trusts.models.{TaxEnrolmentFailure, TaxEnrolmentSuscriberResponse}
 
-import scala.annotation.tailrec
-import scala.concurrent.duration._
-import scala.concurrent.Future
-import scala.concurrent.duration.FiniteDuration
-import scala.util.control.NonFatal
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.duration.{FiniteDuration, _}
+import scala.util.control.NonFatal
 
 
 class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector :TaxEnrolmentConnector, config: AppConfig) extends TaxEnrolmentsService {
 
   private val DELAY_SECONDS_BETWEEN_REQUEST = config.delayToConnectTaxEnrolment
   private val MAX_TRIES = config.maxRetry
+
+  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
 
   override def setSubscriptionId(subscriptionId: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] = {
     implicit val as = ActorSystem()
@@ -51,11 +49,11 @@ class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector :TaxEnrolmentConn
     makeRequest(subscriptionId) recoverWith {
       case NonFatal(_) =>
         if (isMaxRetryReached(acc)) {
-          Logger.error(s"[enrolSubscriberWithRetry] Maximum retry completed. Tax enrolment failed for subscription id $subscriptionId")
+          logger.error(s"[enrolSubscriberWithRetry] Maximum retry completed. Tax enrolment failed for subscription id $subscriptionId")
           Future.successful(TaxEnrolmentFailure)
         } else {
           afterSeconds(DELAY_SECONDS_BETWEEN_REQUEST.seconds).flatMap { _ =>
-            Logger.error(s"[enrolSubscriberWithRetry]  Retrying to enrol subscription id $subscriptionId,  $acc")
+            logger.error(s"[enrolSubscriberWithRetry]  Retrying to enrol subscription id $subscriptionId,  $acc")
             enrolSubscriberWithRetry(subscriptionId, acc + 1)
           }
       }

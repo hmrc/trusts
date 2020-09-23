@@ -20,8 +20,8 @@ import java.time.LocalDate
 
 import play.api.libs.json.Reads._
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models._
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 
 class DeclarationTransformer {
 

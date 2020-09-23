@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.services
 
 import com.google.inject.ImplementedBy
 import javax.inject.Inject
-import play.api.Logger
+import org.slf4j.LoggerFactory
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.{TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSuccess, TaxEnrolmentSuscriberResponse}
@@ -29,6 +29,8 @@ import scala.util.control.NonFatal
 
 
 class RosmPatternServiceImpl @Inject()( desService :DesService, taxEnrolmentService : TaxEnrolmentsService) extends RosmPatternService{
+
+  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
 
   override def setSubscriptionId(trn : String)(implicit hc : HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] ={
 
@@ -46,19 +48,19 @@ class RosmPatternServiceImpl @Inject()( desService :DesService, taxEnrolmentServ
       case AffinityGroup.Organisation =>
         setSubscriptionId(trn) map {
           case TaxEnrolmentSuccess =>
-            Logger.info(s"Rosm completed successfully for provided trn : $trn.")
+            logger.info(s"Rosm completed successfully for provided trn : $trn.")
             TaxEnrolmentSuccess
           case TaxEnrolmentFailure =>
-            Logger.error(s"Rosm pattern is not completed for trn:  $trn.")
+            logger.error(s"Rosm pattern is not completed for trn:  $trn.")
             TaxEnrolmentFailure
         } recover {
           case NonFatal(exception) =>
-            Logger.error(s"Rosm pattern is not completed for trn:  $trn.")
-            Logger.error(s"Rosm Exception received : $exception.")
+            logger.error(s"Rosm pattern is not completed for trn:  $trn.")
+            logger.error(s"Rosm Exception received : $exception.")
             TaxEnrolmentFailure
           }
       case _ =>
-        Logger.info("Tax enrolments is not required for Agent.")
+        logger.info("Tax enrolments is not required for Agent.")
         Future.successful(TaxEnrolmentNotProcessed)
     }
   }

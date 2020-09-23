@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
-import play.api.Logger
+import org.slf4j.LoggerFactory
 import play.api.mvc.ControllerComponents
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
@@ -29,9 +29,11 @@ class TaxEnrolmentCallbackController @Inject()(
                                                 cc: ControllerComponents
                                                ) extends BackendController(cc) {
 
+  private val logger = LoggerFactory.getLogger("application." + this.getClass.getCanonicalName)
+
   def subscriptionCallback() = Action.async(parse.json) {
     implicit request =>
-      Logger.info(s"[subscriptionCallback] Tax-Enrolment: subscription callback message was  : ${request.body}")
+      logger.info(s"[subscriptionCallback] Tax-Enrolment: subscription callback message was  : ${request.body}")
       Future(Ok(""))
   }
 
