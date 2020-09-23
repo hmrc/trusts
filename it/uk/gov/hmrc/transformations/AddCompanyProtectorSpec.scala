@@ -57,7 +57,7 @@ class AddCompanyProtectorSpec extends FreeSpec with MustMatchers with MockitoSug
         JsonUtils.getJsonValueFromFile("add-company-protector-after-etmp-call.json")
 
       val stubbedDesConnector = mock[DesConnector]
-      when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+      when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
 
       val application = applicationBuilder
         .overrides(

@@ -51,7 +51,7 @@ class AmendOtherIndividualSpec extends FreeSpec with MustMatchers with MockitoSu
 
       val stubbedDesConnector = mock[DesConnector]
 
-      when(stubbedDesConnector.getTrustInfo(any())(any()))
+      when(stubbedDesConnector.getTrustInfo(any()))
         .thenReturn(Future.successful(getTrustResponseFromDES))
 
       val application = applicationBuilder

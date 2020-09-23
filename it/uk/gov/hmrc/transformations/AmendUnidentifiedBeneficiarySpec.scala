@@ -48,7 +48,7 @@ class AmendUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with S
       val expectedGetAfterAmendBeneficiaryJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-unidentified-beneficiary.json")
 
       val stubbedDesConnector = mock[DesConnector]
-      when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+      when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
 
       val application = applicationBuilder
         .overrides(

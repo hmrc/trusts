@@ -30,7 +30,6 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.trusts.models.ApiResponse._
 import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 
-import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthenticatedIdentifierAction @Inject()(override val authConnector: AuthConnector,

@@ -62,7 +62,7 @@ class AddBusinessSettlorSpec extends FreeSpec with MustMatchers with MockitoSuga
         JsonUtils.getJsonValueFromFile("add-business-settlor-after-etmp-call.json")
 
       val stubbedDesConnector = mock[DesConnector]
-      when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+      when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
 
       val application = applicationBuilder
         .overrides(

@@ -47,7 +47,7 @@ class RemoveOtherIndividualSpec extends FreeSpec with MustMatchers with MockitoS
 
       val stubbedDesConnector = mock[DesConnector]
 
-      when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES.as[GetTrustSuccessResponse]))
+      when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES.as[GetTrustSuccessResponse]))
 
       val application = applicationBuilder
         .overrides(

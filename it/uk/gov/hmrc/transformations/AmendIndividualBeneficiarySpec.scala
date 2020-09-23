@@ -50,7 +50,7 @@ class AmendIndividualBeneficiarySpec extends FreeSpec with MustMatchers with Moc
         JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-individual-beneficiary.json")
 
       val stubbedDesConnector = mock[DesConnector]
-      when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+      when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
 
       val application = applicationBuilder
         .overrides(

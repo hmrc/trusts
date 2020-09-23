@@ -64,7 +64,7 @@ class AddOtherIndividualSpec extends FreeSpec with MustMatchers with MockitoSuga
         JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-add-other-individual.json")
 
       val stubbedDesConnector = mock[DesConnector]
-      when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+      when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
 
       val application = applicationBuilder
         .overrides(

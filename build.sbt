@@ -21,17 +21,15 @@ lazy val scoverageSettings = {
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
-  .settings(majorVersion := 0)
-  .settings(PlayKeys.playDefaultPort := 9782)
   .settings(
+    scalaVersion := "2.12.10",
+    majorVersion := 0,
+    PlayKeys.playDefaultPort := 9782,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
-    dependencyOverrides ++= AppDependencies.overrides,
-    evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
+    evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
+    publishingSettings ++ scoverageSettings,
+    unmanagedSourceDirectories in Compile += baseDirectory.value / "resources"
   )
-  .settings(
-    publishingSettings ++ scoverageSettings: _*
-  )
-  .settings(unmanagedSourceDirectories in Compile += baseDirectory.value / "resources")
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(itSettings): _*)
   .settings(
