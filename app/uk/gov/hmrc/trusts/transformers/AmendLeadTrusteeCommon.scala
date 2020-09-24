@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import play.api.libs.json.{JsError, JsResult, JsSuccess, JsValue, __}
+import play.api.libs.json._
 
 trait AmendLeadTrusteeCommon {
   def setLeadTrustee(input: JsValue, newLeadTrusteeDetails: JsValue): JsResult[JsValue] = {

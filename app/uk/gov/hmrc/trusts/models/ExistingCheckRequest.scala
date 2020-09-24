@@ -19,7 +19,6 @@ package uk.gov.hmrc.trusts.models
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
-import play.api.data.validation.ValidationError
 
 case class ExistingCheckRequest(name: String, postcode: Option[String] = None, utr: String)
 

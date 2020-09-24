@@ -32,7 +32,7 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.repositories.RegistrationSubmissionRepository
-import uk.gov.hmrc.trusts.services.{AuditService, LocalDateTimeService}
+import uk.gov.hmrc.trusts.services.LocalDateTimeService
 import uk.gov.hmrc.trusts.utils.JsonRequests
 
 import scala.concurrent.Future

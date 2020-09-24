@@ -21,7 +21,7 @@ import java.time.LocalDate
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.mockito.ArgumentCaptor
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.Application
 import play.api.inject.bind
@@ -60,7 +60,7 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
 
 
       val stubbedDesConnector = mock[DesConnector]
-      when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+      when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
 
       val application = applicationBuilder
         .overrides(
@@ -94,7 +94,7 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
           lazy val variationResponse = VariationResponse("TVN12345678")
           val payloadCaptor = ArgumentCaptor.forClass(classOf[JsValue])
 
-          when(stubbedDesConnector.trustVariation(payloadCaptor.capture())(any())).thenReturn(Future.successful(variationResponse))
+          when(stubbedDesConnector.trustVariation(payloadCaptor.capture())).thenReturn(Future.successful(variationResponse))
 
           val declaration = Json.parse(
             """

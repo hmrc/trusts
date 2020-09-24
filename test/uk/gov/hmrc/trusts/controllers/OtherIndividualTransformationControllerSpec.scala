@@ -54,7 +54,7 @@ class OtherIndividualTransformationControllerSpec extends FreeSpec
 
       val otherIndividualTransformationService: OtherIndividualTransformationService = mock[OtherIndividualTransformationService]
 
-      when(otherIndividualTransformationService.removeOtherIndividual(any(), any(), any())(any()))
+      when(otherIndividualTransformationService.removeOtherIndividual(any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
       val controller = new OtherIndividualTransformationController(identifierAction, otherIndividualTransformationService)(Implicits.global, Helpers.stubControllerComponents())
@@ -73,7 +73,7 @@ class OtherIndividualTransformationControllerSpec extends FreeSpec
         .removeOtherIndividual(
           equalTo("UTRUTRUTR"),
           equalTo("id"),
-          equalTo(RemoveOtherIndividual(LocalDate.of(2018, 2, 24), 24)))(any())
+          equalTo(RemoveOtherIndividual(LocalDate.of(2018, 2, 24), 24)))
     }
 
     "return an error when json is invalid" in {
@@ -108,7 +108,7 @@ class OtherIndividualTransformationControllerSpec extends FreeSpec
         entityEnd = None
       )
 
-      when(otherIndividualTransformationService.amendOtherIndividualTransformer(any(), any(), any(), any())(any()))
+      when(otherIndividualTransformationService.amendOtherIndividualTransformer(any(), any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
       val controller = new OtherIndividualTransformationController(identifierAction, otherIndividualTransformationService)(Implicits.global, Helpers.stubControllerComponents())
@@ -125,7 +125,7 @@ class OtherIndividualTransformationControllerSpec extends FreeSpec
         equalTo("aUTR"),
         equalTo(index),
         equalTo("id"),
-        equalTo(newOtherIndividual))(any())
+        equalTo(newOtherIndividual))
     }
 
     "must return an error for malformed json" in {

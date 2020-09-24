@@ -19,7 +19,7 @@ package uk.gov.hmrc.transformations
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
@@ -51,7 +51,7 @@ class AmendIndividualProtectorSpec extends FreeSpec with MustMatchers with Mocki
 
       val stubbedDesConnector = mock[DesConnector]
 
-      when(stubbedDesConnector.getTrustInfo(any())(any()))
+      when(stubbedDesConnector.getTrustInfo(any()))
         .thenReturn(Future.successful(getTrustResponseFromDES))
 
       val application = applicationBuilder

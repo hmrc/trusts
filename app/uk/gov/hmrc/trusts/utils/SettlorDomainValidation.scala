@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.trusts.utils
 
-import play.api.Logger
+import play.api.Logging
 import uk.gov.hmrc.trusts.models.Registration
 import uk.gov.hmrc.trusts.services.TrustsValidationError
 import uk.gov.hmrc.trusts.utils.TypeOfTrust.TypeOfTrust
 
 
-class SettlorDomainValidation(registration: Registration) extends ValidationUtil {
+class SettlorDomainValidation(registration: Registration) extends ValidationUtil with Logging {
 
   def deceasedSettlorDobIsNotFutureDate: Option[TrustsValidationError] = {
     getDeceasedSettlor(registration).flatMap {
@@ -181,7 +181,7 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
           settlorIndividuals =>
             val ninoList: List[(String, Int)] = getSettlorNinoWithIndex(settlorIndividuals)
             val duplicatesNino = findDuplicates(ninoList).reverse
-            Logger.info(s"[livingSettlorDuplicateNino] Number of Duplicate Nino found : ${duplicatesNino.size} ")
+            logger.info(s"[livingSettlorDuplicateNino] Number of Duplicate Nino found : ${duplicatesNino.size} ")
             duplicatesNino.map {
               case (nino, index) =>
                 Some(TrustsValidationError(s"NINO is already used for another individual settlor.",
@@ -206,7 +206,7 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
           settlorIndividuals =>
             val utrList: List[(String, Int)] = getSettlorPassportNumberWithIndex(settlorIndividuals)
             val duplicateUtrList = findDuplicates(utrList).reverse
-            Logger.info(s"[livingSettlorDuplicatePassportNumber] Number of Duplicate passport number found : ${duplicateUtrList.size} ")
+            logger.info(s"[livingSettlorDuplicatePassportNumber] Number of Duplicate passport number found : ${duplicateUtrList.size} ")
             duplicateUtrList.map {
               case (utr, index) =>
                 Some(TrustsValidationError(s"Passport number is already used for another individual settlor.",
@@ -220,7 +220,7 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
       settlorCompanies =>
             val passportNumberList: List[(String, Int)] = getSettlorUtrNumberWithIndex(settlorCompanies)
             val duplicatePassportNumberList = findDuplicates(passportNumberList).reverse
-            Logger.info(s"[livingSettlorDuplicateUtr] Number of Duplicate utr found : ${duplicatePassportNumberList.size} ")
+            logger.info(s"[livingSettlorDuplicateUtr] Number of Duplicate utr found : ${duplicatePassportNumberList.size} ")
             duplicatePassportNumberList.map {
               case (passport, index) =>
                 Some(TrustsValidationError(s"Utr is already used for another settlor company.",

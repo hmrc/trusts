@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.controllers.actions
 
 import com.google.inject.Inject
-import play.api.Logger
+import play.api.Logging
 import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc.{Request, Result, _}
@@ -30,13 +30,12 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.trusts.models.ApiResponse._
 import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 
-import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthenticatedIdentifierAction @Inject()(override val authConnector: AuthConnector,
                                               val parser: BodyParsers.Default)
                                              (implicit val executionContext: ExecutionContext)
-  extends IdentifierAction with AuthorisedFunctions {
+  extends IdentifierAction with AuthorisedFunctions with Logging {
 
   def invokeBlock[A](request: Request[A],
                      block: IdentifierRequest[A] => Future[Result]) : Future[Result] = {
@@ -52,11 +51,11 @@ class AuthenticatedIdentifierAction @Inject()(override val authConnector: AuthCo
       case Some(internalId) ~ Some(Organisation) =>
         block(IdentifierRequest(request, internalId, Organisation))
       case _ =>
-        Logger.info(s"[IdentifierAction] Insufficient enrolment")
+        logger.info(s"[IdentifierAction] Insufficient enrolment")
         Future.successful(Unauthorized(Json.toJson(insufficientEnrolmentErrorResponse)))
     } recoverWith {
       case e : AuthorisationException =>
-        Logger.info(s"[IdentifierAction] AuthorisationException: $e")
+        logger.info(s"[IdentifierAction] AuthorisationException: $e")
         Future.successful(Unauthorized)
     }
   }

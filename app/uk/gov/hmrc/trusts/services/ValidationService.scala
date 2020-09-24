@@ -21,7 +21,7 @@ import com.github.fge.jsonschema.core.report.LogLevel.ERROR
 import com.github.fge.jsonschema.core.report.ProcessingReport
 import com.github.fge.jsonschema.main.{JsonSchema, JsonSchemaFactory}
 import javax.inject.Inject
-import play.api.Logger
+import play.api.Logging
 import play.api.libs.json.{JsPath, Json, JsonValidationError, Reads}
 import uk.gov.hmrc.trusts.models.Registration
 import uk.gov.hmrc.trusts.utils.BusinessValidation
@@ -43,7 +43,7 @@ class ValidationService @Inject()() {
 
 }
 
-class Validator(schema: JsonSchema) {
+class Validator(schema: JsonSchema) extends Logging {
 
   private val JsonErrorMessageTag = "message"
   private val JsonErrorInstanceTag = "instance"
@@ -61,11 +61,11 @@ class Validator(schema: JsonSchema) {
               validateBusinessRules(request)
           )
         } else {
-          Logger.error(s"[Validator][validate] unable to validate to schema")
+          logger.error(s"[Validator][validate] unable to validate to schema")
           Left(getValidationErrors(result))
         }
       case Failure(e) =>
-        Logger.error(s"[Validator][validate] IOException $e")
+        logger.error(s"[Validator][validate] IOException $e")
         Left(List(TrustsValidationError(s"[Validator][validate] IOException $e", "")))
     }
 
@@ -78,7 +78,7 @@ class Validator(schema: JsonSchema) {
         BusinessValidation.check(registration) match {
           case Nil => Right(request)
           case errors @ _ :: _ =>
-            Logger.error(s"[validateBusinessRules] Validation fails : $errors")
+            logger.error(s"[validateBusinessRules] Validation fails : $errors")
             Left(errors)
         }
       case _ => Right(request)
@@ -87,7 +87,7 @@ class Validator(schema: JsonSchema) {
 
   protected def getValidationErrors(errors: Seq[(JsPath, Seq[JsonValidationError])]): List[TrustsValidationError] = {
     val validationErrors = errors.flatMap(errors => errors._2.map(error => TrustsValidationError(error.message, errors._1.toString()))).toList
-    Logger.debug(s"[Validator][getValidationErrors]  validationErrors in validate :  $validationErrors")
+    logger.debug(s"[Validator][getValidationErrors]  validationErrors in validate :  $validationErrors")
     validationErrors
   }
 
@@ -97,7 +97,7 @@ class Validator(schema: JsonSchema) {
       val message = error.findValue(JsonErrorMessageTag).asText("")
       val location = error.findValue(JsonErrorInstanceTag).at(s"/$JsonErrorPointerTag").asText()
       val locations = error.findValues(JsonErrorPointerTag)
-      Logger.error(s"validation failed at locations :  $locations")
+      logger.error(s"validation failed at locations :  $locations")
       TrustsValidationError(message, location)
     })
     validationErrors

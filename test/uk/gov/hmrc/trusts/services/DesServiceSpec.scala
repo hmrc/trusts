@@ -119,7 +119,7 @@ class DesServiceSpec extends BaseSpec {
     val etmpData = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
     val mockDesConnector = mock[DesConnector]
     val mockRepository = mock[CacheRepositoryImpl]
-    when(mockDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(etmpData))
+    when(mockDesConnector.getTrustInfo(any())).thenReturn(Future.successful(etmpData))
 
     val OUT = new DesService(mockDesConnector, mockRepository)
 
@@ -203,7 +203,7 @@ class DesServiceSpec extends BaseSpec {
 
         when(mockRepository.get(any[String], any[String])).thenReturn(Future.successful(None))
         when(mockRepository.resetCache(any[String], any[String])).thenReturn(Future.successful(None))
-        when(mockConnector.getTrustInfo(any())(any()))
+        when(mockConnector.getTrustInfo(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))))
 
         val futureResult = SUT.getTrustInfo(utr, myId)
@@ -220,7 +220,7 @@ class DesServiceSpec extends BaseSpec {
         val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
 
         when(mockRepository.get(any[String], any[String])).thenReturn(Future.successful(Some(fullEtmpResponseJson)))
-        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.failed(new Exception("Connector should not have been called")))
+        when(mockConnector.getTrustInfo(any())).thenReturn(Future.failed(new Exception("Connector should not have been called")))
 
         val futureResult = SUT.getTrustInfo(utr, myId)
         whenReady(futureResult) { result =>
@@ -236,7 +236,7 @@ class DesServiceSpec extends BaseSpec {
 
         val utr = "1234567890"
 
-        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("In Processing", "1"))))
+        when(mockConnector.getTrustInfo(any())).thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("In Processing", "1"))))
 
         val futureResult = SUT.getTrustInfo(utr, myId)
 
@@ -250,7 +250,7 @@ class DesServiceSpec extends BaseSpec {
 
       "InvalidUTRResponse is returned from DES Connector" in new DesServiceFixture {
 
-        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(InvalidUTRResponse))
+        when(mockConnector.getTrustInfo(any())).thenReturn(Future.successful(InvalidUTRResponse))
 
         val invalidUtr = "123456789"
         val futureResult = SUT.getTrustInfo(invalidUtr, myId)
@@ -264,7 +264,7 @@ class DesServiceSpec extends BaseSpec {
     "return InvalidRegimeResponse" when {
       "InvalidRegimeResponse is returned from DES Connector" in new DesServiceFixture {
 
-        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(InvalidRegimeResponse))
+        when(mockConnector.getTrustInfo(any())).thenReturn(Future.successful(InvalidRegimeResponse))
 
         val utr = "123456789"
         val futureResult = SUT.getTrustInfo(utr, myId)
@@ -278,7 +278,7 @@ class DesServiceSpec extends BaseSpec {
     "return BadRequestResponse" when {
       "BadRequestResponse is returned from DES Connector" in new DesServiceFixture {
 
-        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(BadRequestResponse))
+        when(mockConnector.getTrustInfo(any())).thenReturn(Future.successful(BadRequestResponse))
 
         val utr = "123456789"
         val futureResult = SUT.getTrustInfo(utr, myId)
@@ -292,7 +292,7 @@ class DesServiceSpec extends BaseSpec {
     "return ResourceNotFoundResponse" when {
       "ResourceNotFoundResponse is returned from DES Connector" in new DesServiceFixture {
 
-        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(ResourceNotFoundResponse))
+        when(mockConnector.getTrustInfo(any())).thenReturn(Future.successful(ResourceNotFoundResponse))
 
         val utr = "123456789"
         val futureResult = SUT.getTrustInfo(utr, myId)
@@ -306,7 +306,7 @@ class DesServiceSpec extends BaseSpec {
     "return InternalServerErrorResponse" when {
       "InternalServerErrorResponse is returned from DES Connector" in new DesServiceFixture {
 
-        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(InternalServerErrorResponse))
+        when(mockConnector.getTrustInfo(any())).thenReturn(Future.successful(InternalServerErrorResponse))
 
         val utr = "123456789"
         val futureResult = SUT.getTrustInfo(utr, myId)
@@ -320,7 +320,7 @@ class DesServiceSpec extends BaseSpec {
     "return ServiceUnavailableResponse" when {
       "ServiceUnavailableResponse is returned from DES Connector" in new DesServiceFixture {
 
-        when(mockConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(ServiceUnavailableResponse))
+        when(mockConnector.getTrustInfo(any())).thenReturn(Future.successful(ServiceUnavailableResponse))
 
         val utr = "123456789"
         val futureResult = SUT.getTrustInfo(utr, myId)

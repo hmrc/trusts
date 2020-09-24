@@ -19,30 +19,25 @@ package uk.gov.hmrc.trusts.repositories
 import java.sql.Timestamp
 import java.time.LocalDateTime
 
-import akka.stream.Materializer
 import javax.inject.{Inject, Singleton}
-import org.slf4j.LoggerFactory
+import play.api.Logging
 import play.api.libs.json._
-import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.WriteConcern
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.BSONDocument
 import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
 import reactivemongo.play.json.collection.JSONCollection
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.transformers.{ComposedDeltaTransform, DeltaTransform}
-import uk.gov.hmrc.trusts.utils.DateFormatter
+import uk.gov.hmrc.trusts.transformers.ComposedDeltaTransform
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class TransformationRepositoryImpl @Inject()(
                             mongo: MongoDriver,
-                            config: AppConfig,
-                            dateFormatter: DateFormatter
-                          )(implicit ec: ExecutionContext, m: Materializer) extends TransformationRepository {
+                            config: AppConfig
+                          )(implicit ec: ExecutionContext) extends TransformationRepository with Logging {
 
-  private val logger = LoggerFactory.getLogger("application." + getClass.getCanonicalName)
   private val collectionName: String = "transforms"
   private val cacheTtl = config.ttlInSeconds
 

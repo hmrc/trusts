@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
-import play.api.Logger
+import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc.Result
 import uk.gov.hmrc.http.HeaderCarrier
@@ -26,12 +26,12 @@ import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 import uk.gov.hmrc.trusts.services.AuditService
 import uk.gov.hmrc.trusts.utils.ErrorResponses._
 
-class VariationsResponseHandler @Inject()(auditService: AuditService) {
+class VariationsResponseHandler @Inject()(auditService: AuditService) extends Logging {
 
   def recoverFromException(auditType: String)(implicit request: IdentifierRequest[JsValue],hc: HeaderCarrier): PartialFunction[Throwable, Result] = {
 
     case InvalidCorrelationIdException =>
-      Logger.error(s"[ErrorHandler] InvalidCorrelationIdException returned")
+      logger.error(s"[ErrorHandler] InvalidCorrelationIdException returned")
       auditService.auditErrorResponse(
         auditType,
         request.body,
@@ -41,7 +41,7 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) {
       invalidCorrelationIdErrorResponse
 
     case DuplicateSubmissionException =>
-      Logger.error(s"[ErrorHandler] DuplicateSubmissionException returned")
+      logger.error(s"[ErrorHandler] DuplicateSubmissionException returned")
       auditService.auditErrorResponse(
         auditType,
         request.body,
@@ -51,7 +51,7 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) {
       duplicateSubmissionErrorResponse
 
     case ServiceNotAvailableException(_) =>
-      Logger.error(s"[ErrorHandler] ServiceNotAvailableException returned")
+      logger.error(s"[ErrorHandler] ServiceNotAvailableException returned")
       auditService.auditErrorResponse(
         auditType,
         request.body,
@@ -61,7 +61,7 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) {
       serviceUnavailableErrorResponse
 
     case EtmpCacheDataStaleException =>
-      Logger.error(s"[ErrorHandler] EtmpCacheDataStaleException returned")
+      logger.error(s"[ErrorHandler] EtmpCacheDataStaleException returned")
       auditService.auditErrorResponse(
         auditType,
         request.body,
@@ -71,7 +71,7 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) {
       etmpDataStaleErrorResponse
 
     case e =>
-      Logger.error(s"[ErrorHandler] Exception returned ${e.getMessage}")
+      logger.error(s"[ErrorHandler] Exception returned ${e.getMessage}")
 
       auditService.auditErrorResponse(
         auditType,

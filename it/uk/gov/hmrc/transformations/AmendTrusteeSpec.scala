@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
@@ -64,7 +64,7 @@ class AmendTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar with
       val expectedGetAfterAmendTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-trustee.json")
 
       val stubbedDesConnector = mock[DesConnector]
-      when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+      when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
 
       val application = applicationBuilder
         .overrides(

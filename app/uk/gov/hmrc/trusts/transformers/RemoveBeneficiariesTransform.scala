@@ -17,9 +17,7 @@
 package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
-import play.api.data.validation.ValidationError
-import play.api.libs.json.{Format, JsArray, JsObject, JsResult, JsSuccess, JsValue, Json, Reads, Writes, __}
-import play.api.libs.functional.syntax._
+import play.api.libs.json._
 
 case class RemoveBeneficiariesTransform(
                                          index : Int,

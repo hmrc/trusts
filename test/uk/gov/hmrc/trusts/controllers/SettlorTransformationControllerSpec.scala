@@ -68,7 +68,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
         entityEnd = None
       )
 
-      when(service.amendIndividualSettlorTransformer(any(), any(), any(), any())(any()))
+      when(service.amendIndividualSettlorTransformer(any(), any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
@@ -83,7 +83,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
         equalTo("aUTR"),
         equalTo(index),
         equalTo("id"),
-        equalTo(newSettlor))(any())
+        equalTo(newSettlor))
     }
 
     "must return an error for malformed json" in {
@@ -114,8 +114,6 @@ class SettlorTransformationControllerSpec extends FreeSpec
         identification = None,
         entityStart = LocalDate.parse("2010-05-03")
       )
-
-      val newDescription = "Some new description"
 
       when(settlorTransformationService.addIndividualSettlorTransformer(any(), any(), any()))
         .thenReturn(Future.successful(Success))
@@ -215,7 +213,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
         entityEnd = None
       )
 
-      when(service.amendBusinessSettlorTransformer(any(), any(), any(), any())(any()))
+      when(service.amendBusinessSettlorTransformer(any(), any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
@@ -230,7 +228,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
         equalTo("aUTR"),
         equalTo(index),
         equalTo("id"),
-        equalTo(newSettlor))(any())
+        equalTo(newSettlor))
     }
 
     "must return an error for malformed json" in {
@@ -252,7 +250,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
       val settlorTransformationService = mock[SettlorTransformationService]
       val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
-      when(settlorTransformationService.removeSettlor(any(), any(), any())(any()))
+      when(settlorTransformationService.removeSettlor(any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
@@ -270,7 +268,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
         .removeSettlor(
           equalTo("UTRUTRUTR"),
           equalTo("id"),
-          equalTo(RemoveSettlor(LocalDate.of(2018, 2, 24), 24, "settlor")))(any())
+          equalTo(RemoveSettlor(LocalDate.of(2018, 2, 24), 24, "settlor")))
     }
 
     "return an error when json is invalid" in {
@@ -302,7 +300,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
         identification = None
       )
 
-      when(service.amendDeceasedSettlor(any(), any(), any())(any()))
+      when(service.amendDeceasedSettlor(any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
@@ -316,7 +314,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
       verify(service).amendDeceasedSettlor(
         equalTo("aUTR"),
         equalTo("id"),
-        equalTo(amendedSettlor))(any())
+        equalTo(amendedSettlor))
     }
 
     "must return an error for malformed json" in {
