@@ -21,4 +21,16 @@ object AppDependencies {
     "org.scalatestplus.play" %% "scalatestplus-play"  % "4.0.3",
     "com.typesafe.play"      %% "play-test"           % PlayVersion.current
   ).map(_ % Test)
+
+  val akkaVersion = "2.6.7"
+  val akkaHttpVersion = "10.1.12"
+
+  val overrides = Seq(
+    "com.typesafe.akka" %% "akka-stream"    % akkaVersion,
+    "com.typesafe.akka" %% "akka-protobuf"  % akkaVersion,
+    "com.typesafe.akka" %% "akka-slf4j"     % akkaVersion,
+    "com.typesafe.akka" %% "akka-actor"     % akkaVersion,
+    "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion
+  )
+
 }

@@ -27,6 +27,7 @@ lazy val microservice = Project(appName, file("."))
     majorVersion := 0,
     PlayKeys.playDefaultPort := 9782,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
+    dependencyOverrides ++= AppDependencies.overrides,
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     publishingSettings ++ scoverageSettings,
     unmanagedSourceDirectories in Compile += baseDirectory.value / "resources"
