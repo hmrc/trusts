@@ -88,9 +88,9 @@ class ValidationServiceSpec extends BaseSpec
         val assets: Assets = registration.trust.assets.get
 
         assets.monetary.get.map(_.assetMonetaryAmount.mustHave12Digits)
-        assets.propertyOrLand.get.map(_.valueFull.get.mustHave12Digits)
-        assets.shares.get.map(_.value.get.mustHave12Digits)
-        assets.other.get.map(_.value.get.mustHave12Digits)
+        assets.propertyOrLand.get.map(_.valueFull.mustHave12Digits)
+        assets.shares.get.map(_.value.mustHave12Digits)
+        assets.other.get.map(_.value.mustHave12Digits)
       }
 
       "individual trustees has no identification" in {

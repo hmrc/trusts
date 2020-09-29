@@ -42,7 +42,7 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
     "theAnswer" -> 6.28
   )
 
-  "the ui state repository" - {
+  "the registration submission repository" - {
 
     "must be able to store and retrieve data" in {
 

@@ -437,8 +437,8 @@ object NonUKType {
 
 case class PropertyLandType(buildingLandName: Option[String],
                             address: Option[AddressType],
-                            valueFull: Option[Long],        // now optional with 5MLD
-                            valuePrevious: Option[Long])    // now optional with 5MLD
+                            valueFull: Long,
+                            valuePrevious: Long)
 
 object PropertyLandType {
   implicit val propertyLandTypeFormat: Format[PropertyLandType] = Json.format[PropertyLandType]
@@ -446,15 +446,15 @@ object PropertyLandType {
 
 case class BusinessAssetType(orgName: String,
                              businessDescription: Option[String],
-                             address: Option[AddressType],  // now optional with 5MLD
-                             businessValue: Option[Long])   // now optional with 5MLD
+                             address: AddressType,
+                             businessValue: Long)
 
 object BusinessAssetType {
   implicit val businessAssetTypeFormat: Format[BusinessAssetType] = Json.format[BusinessAssetType]
 }
 
 case class OtherAssetType(description: String,
-                          value: Option[Long])    // now optional with 5MLD
+                          value: Long)
 
 object OtherAssetType {
   implicit val otherAssetTypeFormat: Format[OtherAssetType] = Json.format[OtherAssetType]
@@ -472,17 +472,17 @@ object NonEEABusinessType {
 }
 
 case class PartnershipType(description: String,
-                           partnershipStart: Option[LocalDate])   // now optional with 5MLD
+                           partnershipStart: LocalDate)
 
 object PartnershipType {
   implicit val partnershipTypeFormat: Format[PartnershipType] = Json.format[PartnershipType]
 }
 
-case class SharesType(numberOfShares: Option[String],   // now optional with 5MLD
+case class SharesType(numberOfShares: String,
                       orgName: String,
-                      shareClass: Option[String],       // now optional with 5MLD
-                      typeOfShare: Option[String],      // now optional with 5MLD
-                      value: Option[Long],              // now optional with 5MLD
+                      shareClass: String,
+                      typeOfShare: String,
+                      value: Long,
                       utr: Option[String])              // new 5MLD optional
 
 object SharesType {
