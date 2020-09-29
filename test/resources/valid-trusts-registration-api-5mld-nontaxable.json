@@ -29,17 +29,7 @@
       "startDate": "2019-04-06",
       "trustTaxable": false,
       "expressTrust": true,
-      "trustUKResident": true,
-      "trustUKProperty": true,
-      "lawCountry": "DE",
-      "administrationCountry": "DE",
-      "residentialStatus": {
-        "nonUK": {
-          "sch5atcgga92": true,
-          "trusteeStatus": "Non Resident Domiciled"
-        }
-      },
-      "typeOfTrust": "Will Trust or Intestacy Trust"
+      "trustUKResident": true
     },
     "entities": {
       "naturalPerson": [
@@ -272,18 +262,9 @@
       }
     },
     "assets": {
-      "monetary": [
+      "nonEEABusiness": [
         {
-          "assetMonetaryAmount": 999999999999
-        }
-      ],
-      "propertyOrLand": [
-        {
-          "buildingLandName": "1234567890&`'^ -QWERTYqwertyzxcvbnmasdfghjklpoiuypoiuytr"
-        }
-      ],
-      "business": [
-        {
+          "orgName": "nonEEA Org",
           "address": {
             "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
             "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
@@ -292,26 +273,8 @@
             "postCode": "Z99 2YY",
             "country": "GB"
           },
-          "orgName": "1234567890 QwErTyUiOp ,.(/)&'- name",
-          "businessDescription": "1234567890&`'^ -QWERTYqwertyzxcvbnmasdfghjklpoiuypoiuytr"
-        }
-      ],
-      "other": [
-        {
-          "description": "1234567890&`'^ -QWERTYqwertyzxcvbnmasdfghjklpoiuypoiuytr"
-        }
-      ],
-      "partnerShip": [
-        {
-          "description": "1234567890&`'^ -QWERTYqwertyzxcvbnmasdfghjklpoiuypoiuytr",
-          "partnershipStart": "2015-03-20"
-        }
-      ],
-      "shares": [
-        {
-          "orgName": "1234567890 QwErTyUiOp ,.(/)&'- name",
-          "shareClass": "Ordinary shares",
-          "typeOfShare": "Quoted"
+          "govLawCountry": "GB",
+          "startDate": "2001-08-14"
         }
       ]
     }
