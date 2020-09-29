@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
-import play.api.Logger
+import play.api.Logging
 import play.api.libs.json.{JsObject, JsResult, JsSuccess, JsValue, Json, __, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
@@ -31,8 +31,9 @@ import scala.concurrent.Future
 
 class TransformationService @Inject()(repository: TransformationRepository,
                                       desService: DesService,
-                                      auditService: AuditService){
-  def getTransformedData(utr: String, internalId: String)(implicit hc : HeaderCarrier): Future[GetTrustResponse] = {
+                                      auditService: AuditService) extends Logging {
+
+  def getTransformedData(utr: String, internalId: String): Future[GetTrustResponse] = {
     desService.getTrustInfo(utr, internalId).flatMap {
       case response: TrustProcessedResponse =>
         populateLeadTrusteeAddress(response.getTrust) match {
@@ -50,7 +51,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
-  private def applyTransformations(utr: String, internalId: String, json: JsValue)(implicit hc : HeaderCarrier): Future[JsResult[JsValue]] = {
+  private def applyTransformations(utr: String, internalId: String, json: JsValue): Future[JsResult[JsValue]] = {
     repository.get(utr, internalId).map {
       case None =>
         JsSuccess(json)
@@ -62,7 +63,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
   def applyDeclarationTransformations(utr: String, internalId: String, json: JsValue)(implicit hc : HeaderCarrier): Future[JsResult[JsValue]] = {
     repository.get(utr, internalId).map {
       case None =>
-        Logger.info(s"[TransformationService] no transformations to apply")
+        logger.info(s"[TransformationService] no transformations to apply")
         JsSuccess(json)
       case Some(transformations) =>
 
@@ -78,11 +79,11 @@ class TransformationService @Inject()(repository: TransformationRepository,
 
         for {
           initial <- {
-            Logger.info(s"[TransformationService] applying transformations")
+            logger.info(s"[TransformationService] applying transformations")
             transformations.applyTransform(json)
           }
           transformed <- {
-            Logger.info(s"[TransformationService] applying declaration transformations")
+            logger.info(s"[TransformationService] applying declaration transformations")
             transformations.applyDeclarationTransform(initial)
           }
         } yield transformed
@@ -112,7 +113,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }.flatMap(newTransforms =>
       repository.set(utr, internalId, newTransforms)).recoverWith {
       case e =>
-        Logger.error(s"[TransformationService] exception adding new transform: ${e.getMessage}")
+        logger.error(s"[TransformationService] exception adding new transform: ${e.getMessage}")
         Future.failed(e)
     }
   }

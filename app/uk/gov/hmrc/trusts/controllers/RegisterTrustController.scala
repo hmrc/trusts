@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
-import play.api.Logger
+import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.http.BadRequestException
@@ -36,7 +36,7 @@ import uk.gov.hmrc.trusts.utils.Headers
 import uk.gov.hmrc.trusts.utils.JsonOps._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.control.NonFatal
 
 class RegisterTrustController @Inject()(desService: DesService, config: AppConfig,
@@ -46,7 +46,7 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
                                         auditService: AuditService,
                                         cc: ControllerComponents,
                                         trustsStoreConnector: TrustsStoreConnector
-                                       )(implicit ec: ExecutionContext) extends TrustsBaseController(cc) {
+                                        ) extends TrustsBaseController(cc) with Logging {
 
   private def schemaF(implicit request: IdentifierRequest[JsValue]): Future[String] = {
     trustsStoreConnector.getFeature("5mld").map {
@@ -97,7 +97,7 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
                         response = RegistrationFailureResponse(403, "ALREADY_REGISTERED", "Trust is already registered.")
                       )
 
-                      Logger.info("[RegisterTrustController][registration] Returning already registered response.")
+                      logger.info("[RegisterTrustController][registration] Returning already registered response.")
                       Conflict(Json.toJson(alreadyRegisteredTrustsResponse))
                     case NoMatchException =>
 
@@ -109,9 +109,9 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
                         response = RegistrationFailureResponse(403, "NO_MATCH", "There is no match in HMRC records.")
                       )
 
-                      Logger.info("[RegisterTrustController][registration] Returning no match response.")
+                      logger.info("[RegisterTrustController][registration] Returning no match response.")
                       Forbidden(Json.toJson(noMatchRegistrationResponse))
-                    case _ : ServiceNotAvailableException =>
+                    case _: ServiceNotAvailableException =>
 
                       auditService.audit(
                         event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
@@ -121,9 +121,9 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
                         response = RegistrationFailureResponse(503, "SERVICE_UNAVAILABLE", "Dependent systems are currently not responding.")
                       )
 
-                      Logger.error(s"[RegisterTrustController][registration] Service unavailable response from DES")
+                      logger.error(s"[RegisterTrustController][registration] Service unavailable response from DES")
                       InternalServerError(Json.toJson(internalServerErrorResponse))
-                    case _ : BadRequestException =>
+                    case _: BadRequestException =>
 
                       auditService.audit(
                         event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
@@ -133,17 +133,17 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
                         response = RegistrationFailureResponse(400, "INVALID_PAYLOAD", "Submission has not passed validation. Invalid payload..")
                       )
 
-                      Logger.error(s"[RegisterTrustController][registration] bad request response from DES")
+                      logger.error(s"[RegisterTrustController][registration] bad request response from DES")
                       InternalServerError(Json.toJson(internalServerErrorResponse))
                     case NonFatal(e) =>
-                      Logger.error(s"[RegisterTrustController][registration] Exception received : $e.")
+                      logger.error(s"[RegisterTrustController][registration] Exception received : $e.")
                       InternalServerError(Json.toJson(internalServerErrorResponse))
                   }
                 case None =>
                   Future.successful(BadRequest(Json.toJson(noDraftIdProvided)))
               }
             case Left(_) =>
-              Logger.error(s"[registration] trusts validation errors, returning bad request.")
+              logger.error(s"[registration] trusts validation errors, returning bad request.")
               Future.successful(invalidRequestErrorResponse)
           }
       }

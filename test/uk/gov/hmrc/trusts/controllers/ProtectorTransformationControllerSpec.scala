@@ -159,7 +159,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
         entityEnd = None
       )
 
-      when(protectorTransformationService.amendIndividualProtectorTransformer(any(), any(), any(), any())(any()))
+      when(protectorTransformationService.amendIndividualProtectorTransformer(any(), any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
       val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
@@ -176,7 +176,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
         equalTo("aUTR"),
         equalTo(index),
         equalTo("id"),
-        equalTo(newProtector))(any())
+        equalTo(newProtector))
     }
 
     "must return an error for malformed json" in {
@@ -213,7 +213,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
         None
       )
 
-      when(protectorTransformationService.amendBusinessProtectorTransformer(any(), any(), any(), any())(any()))
+      when(protectorTransformationService.amendBusinessProtectorTransformer(any(), any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
@@ -229,7 +229,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
           equalTo(index),
           equalTo("id"),
           equalTo(newCompany)
-        )(any())
+        )
 
     }
 
@@ -252,7 +252,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
 
       val protectorTransformationService: ProtectorTransformationService = mock[ProtectorTransformationService]
 
-      when(protectorTransformationService.removeProtector(any(), any(), any())(any()))
+      when(protectorTransformationService.removeProtector(any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
       val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
@@ -272,7 +272,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
         .removeProtector(
           equalTo("UTRUTRUTR"),
           equalTo("id"),
-          equalTo(RemoveProtector(LocalDate.of(2018, 2, 24), 24, "protector")))(any())
+          equalTo(RemoveProtector(LocalDate.of(2018, 2, 24), 24, "protector")))
     }
 
     "return an error when json is invalid" in {

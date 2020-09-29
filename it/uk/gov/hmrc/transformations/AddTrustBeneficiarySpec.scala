@@ -18,7 +18,7 @@ package uk.gov.hmrc.transformations
 
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
@@ -68,7 +68,7 @@ class AddTrustBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSug
         JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-add-trust-beneficiary.json")
 
       val stubbedDesConnector = mock[DesConnector]
-      when(stubbedDesConnector.getTrustInfo(any())(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+      when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
 
       val application = applicationBuilder
         .overrides(

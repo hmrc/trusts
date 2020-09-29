@@ -20,7 +20,7 @@ import com.google.inject.ImplementedBy
 import javax.inject.Inject
 import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.models.{TaxEnrolmentSubscription, TaxEnrolmentSuscriberResponse}
 import uk.gov.hmrc.trusts.utils.Constants._

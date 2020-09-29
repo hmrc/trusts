@@ -16,9 +16,8 @@
 
 package uk.gov.hmrc.trusts.models
 
-import play.api.Logger
+import play.api.Logging
 import play.api.http.Status._
-import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.trusts.exceptions._
 
@@ -29,21 +28,21 @@ case object TaxEnrolmentSuccess extends TaxEnrolmentSuscriberResponse
 case object TaxEnrolmentFailure extends TaxEnrolmentSuscriberResponse
 case object TaxEnrolmentNotProcessed extends TaxEnrolmentSuscriberResponse
 
-object TaxEnrolmentSuscriberResponse {
+object TaxEnrolmentSuscriberResponse extends Logging {
 
   implicit lazy val httpReads: HttpReads[TaxEnrolmentSuscriberResponse] =
     new HttpReads[TaxEnrolmentSuscriberResponse] {
       override def read(method: String, url: String, response: HttpResponse): TaxEnrolmentSuscriberResponse = {
 
-        Logger.info(s"[TaxEnrolmentSuscriberResponse]  response status received from tax enrolment: ${response.status}")
+        logger.info(s"[TaxEnrolmentSuscriberResponse]  response status received from tax enrolment: ${response.status}")
         response.status match {
           case NO_CONTENT =>
             TaxEnrolmentSuccess
           case BAD_REQUEST =>
-            Logger.error("[TaxEnrolmentSuscriberResponse] Bad request response received from tax enrolment")
+            logger.error("[TaxEnrolmentSuscriberResponse] Bad request response received from tax enrolment")
             throw  BadRequestException
           case status =>
-            Logger.error(s"[TaxEnrolmentSuscriberResponse] Error response from tax enrolment:  $status")
+            logger.error(s"[TaxEnrolmentSuscriberResponse] Error response from tax enrolment:  $status")
             throw  InternalServerErrorException(s"Error response from tax enrolment:  $status")
         }
       }

@@ -18,7 +18,7 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import play.api.libs.json.{Format, JsResult, JsValue, Json, __}
+import play.api.libs.json._
 
 case class RemoveSettlorsTransform(index : Int,
                                    settlorData : JsValue,

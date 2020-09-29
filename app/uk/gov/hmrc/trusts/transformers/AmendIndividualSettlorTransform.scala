@@ -17,6 +17,7 @@
 package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
+
 import play.api.libs.json._
 
 case class AmendIndividualSettlorTransform(

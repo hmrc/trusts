@@ -32,7 +32,6 @@ import uk.gov.hmrc.trusts.exceptions._
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.services.{DesService, FakeAuditService, RosmPatternService, ValidationService}
 
-import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
 
 class RegisterTrustControllerSpec extends BaseSpec {
@@ -65,7 +64,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
       "individual user called the register endpoint with a valid json payload " in {
 
-        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
+        when(mockDesService.registerTrust(any[Registration]))
           .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
         when(rosmPatternService.enrolAndLogResult(any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentSuccess))
@@ -92,7 +91,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
         when(mockTrustsStoreConnector.getFeature(any())(any(), any())).thenReturn(Future.successful(FeatureResponse("5mld", isEnabled = true)))
 
-        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
+        when(mockDesService.registerTrust(any[Registration]))
           .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
         when(rosmPatternService.enrolAndLogResult(any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentSuccess))
@@ -119,7 +118,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
         when(mockTrustsStoreConnector.getFeature(any())(any(), any())).thenReturn(Future.successful(FeatureResponse("5mld", isEnabled = true)))
 
-        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
+        when(mockDesService.registerTrust(any[Registration]))
           .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
         when(rosmPatternService.enrolAndLogResult(any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentSuccess))
@@ -146,7 +145,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
         "tax enrolment failed to enrol user" in {
 
-          when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
+          when(mockDesService.registerTrust(any[Registration]))
             .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
           when(rosmPatternService.enrolAndLogResult(any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentFailure))
@@ -209,7 +208,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           mockTrustsStoreConnector
         )
 
-        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
+        when(mockDesService.registerTrust(any[Registration]))
           .thenReturn(Future.failed(AlreadyRegisteredException))
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
@@ -227,7 +226,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
     "return a Forbidden" when {
 
       "no match found for provided existing trusts details." in {
-        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
+        when(mockDesService.registerTrust(any[Registration]))
           .thenReturn(Future.failed(NoMatchException))
 
         val SUT = new RegisterTrustController(
@@ -299,7 +298,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
       "no draft id is provided in the headers" in {
 
-        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
+        when(mockDesService.registerTrust(any[Registration]))
           .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
         val SUT = new RegisterTrustController(
@@ -331,7 +330,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
       "the register endpoint called and something goes wrong." in {
 
-        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
+        when(mockDesService.registerTrust(any[Registration]))
           .thenReturn(Future.failed(InternalServerErrorException("some error")))
 
         val SUT = new RegisterTrustController(
@@ -370,7 +369,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           mockTrustsStoreConnector
         )
 
-        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier])).
+        when(mockDesService.registerTrust(any[Registration])).
           thenReturn(Future.failed(BadRequestException))
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
@@ -398,7 +397,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           mockTrustsStoreConnector
         )
 
-        when(mockDesService.registerTrust(any[Registration])(any[HeaderCarrier]))
+        when(mockDesService.registerTrust(any[Registration]))
           .thenReturn(Future.failed(ServiceNotAvailableException("dependent service is down")))
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))

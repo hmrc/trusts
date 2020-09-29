@@ -17,8 +17,8 @@
 package uk.gov.hmrc.trusts.utils
 
 import play.api.libs.json.Json
-import uk.gov.hmrc.trusts.models.ErrorResponse
 import play.api.mvc.Results._
+import uk.gov.hmrc.trusts.models.ErrorResponse
 
 object ErrorResponses {
 

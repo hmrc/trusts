@@ -18,7 +18,6 @@ package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
 import play.api.libs.json.{JsObject, JsValue, Json, __}
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustProtector, DisplayTrustProtectorCompany, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.models.variation._
@@ -32,8 +31,7 @@ class ProtectorTransformationService @Inject()(transformationService: Transforma
                                                localDateService: LocalDateService
                                               )(implicit ec:ExecutionContext) extends JsonOperations {
 
-  def removeProtector(utr: String, internalId: String, removeProtector: RemoveProtector)
-                     (implicit hc: HeaderCarrier) : Future[Success.type] = {
+  def removeProtector(utr: String, internalId: String, removeProtector: RemoveProtector): Future[Success.type] = {
 
     getTransformedTrustJson(utr, internalId)
       .map(findProtectorJson(_, removeProtector.`type`, removeProtector.index))
@@ -54,8 +52,7 @@ class ProtectorTransformationService @Inject()(transformationService: Transforma
     transformationService.addNewTransform(utr, internalId, AddCompanyProtectorTransform(newProtectorCompany))
   }
 
-  private def getTransformedTrustJson(utr: String, internalId: String)
-                                     (implicit hc:HeaderCarrier): Future[JsObject] = {
+  private def getTransformedTrustJson(utr: String, internalId: String): Future[JsObject] = {
 
     transformationService.getTransformedData(utr, internalId).flatMap {
       case TrustProcessedResponse(json, _) => Future.successful(json.as[JsObject])
@@ -79,8 +76,7 @@ class ProtectorTransformationService @Inject()(transformationService: Transforma
   def amendIndividualProtectorTransformer(utr: String,
                                           index: Int,
                                           internalId: String,
-                                          amended: Protector)
-                                         (implicit hc: HeaderCarrier): Future[Success.type] = {
+                                          amended: Protector): Future[Success.type] = {
     getTransformedTrustJson(utr, internalId)
       .map(findProtectorJson(_, "protector", index))
       .flatMap(Future.fromTry)
@@ -96,8 +92,7 @@ class ProtectorTransformationService @Inject()(transformationService: Transforma
   def amendBusinessProtectorTransformer(utr: String,
                                          index: Int,
                                          internalId: String,
-                                         amended: ProtectorCompany
-                                       )(implicit hc: HeaderCarrier): Future[Success.type] = {
+                                         amended: ProtectorCompany): Future[Success.type] = {
     getTransformedTrustJson(utr, internalId)
       .map(findProtectorJson(_, "protectorCompany", index))
       .flatMap(Future.fromTry)

@@ -17,7 +17,6 @@
 package uk.gov.hmrc.trusts.transformers.mdtp.beneficiaries
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 
 object Beneficiaries {
 

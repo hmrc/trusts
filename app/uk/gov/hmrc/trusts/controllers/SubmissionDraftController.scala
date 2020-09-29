@@ -19,16 +19,15 @@ package uk.gov.hmrc.trusts.controllers
 import java.time.LocalDate
 
 import javax.inject.Inject
-import play.api.Logger
+import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RegistrationSubmission.{AnswerSection, MappedPiece}
 import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
-import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.models.{Status => ModelStatus}
+import uk.gov.hmrc.trusts.models.{Status => ModelStatus, _}
 import uk.gov.hmrc.trusts.repositories.RegistrationSubmissionRepository
-import uk.gov.hmrc.trusts.services.{AuditService, LocalDateTimeService}
+import uk.gov.hmrc.trusts.services.LocalDateTimeService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -37,7 +36,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
                                           identify: IdentifierAction,
                                           localDateTimeService: LocalDateTimeService,
                                           cc: ControllerComponents
-                                       ) extends TrustsBaseController(cc) {
+                                       ) extends TrustsBaseController(cc) with Logging {
 
   def setSection(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
@@ -170,7 +169,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           }
         )
       case e: JsError =>
-        Logger.error(s"applyDataSet: Can't apply operations to draft data: $e.errors.")
+        logger.error(s"applyDataSet: Can't apply operations to draft data: $e.errors.")
         Future.successful(InternalServerError(e.errors.toString()))
     }
   }
@@ -236,14 +235,14 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           val path = JsPath \ "main" \ "data" \ "trustDetails" \ "whenTrustSetup"
           draft.draftData.transform(path.json.pick).map(_.as[LocalDate]) match {
             case JsSuccess(date, _) =>
-              Logger.info(s"[SubmissionDraftController] found trust start date")
+              logger.info(s"[SubmissionDraftController] found trust start date")
               Ok(Json.obj("startDate" -> date))
             case _ : JsError =>
-              Logger.info(s"[SubmissionDraftController] no trust start date")
+              logger.info(s"[SubmissionDraftController] no trust start date")
               NotFound
           }
         case None =>
-          Logger.info(s"[SubmissionDraftController] no draft, cannot return start date")
+          logger.info(s"[SubmissionDraftController] no draft, cannot return start date")
           NotFound
       }
   }
@@ -255,14 +254,14 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           val path = JsPath \ "registration" \ "trust/entities/leadTrustees"
           draft.draftData.transform(path.json.pick).map(_.as[LeadTrusteeType]) match {
             case JsSuccess(leadTrusteeType, _) =>
-              Logger.info(s"[SubmissionDraftController] found lead trustee")
+              logger.info(s"[SubmissionDraftController] found lead trustee")
               Ok(Json.toJson(leadTrusteeType)(LeadTrusteeType.writes))
             case _ : JsError =>
-              Logger.info(s"[SubmissionDraftController] no lead trustee")
+              logger.info(s"[SubmissionDraftController] no lead trustee")
               NotFound
           }
         case None =>
-          Logger.info(s"[SubmissionDraftController] no draft, cannot return lead trustee")
+          logger.info(s"[SubmissionDraftController] no draft, cannot return lead trustee")
           NotFound
       }
   }
@@ -284,14 +283,14 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           } match {
             case JsSuccess(data, _) =>
               val draftWithStatusRemoved = draft.copy(draftData = data)
-              Logger.info(s"[SubmissionDraftController][reset] removed status, mapped data, answers and status for $section")
+              logger.info(s"[SubmissionDraftController][reset] removed status, mapped data, answers and status for $section")
               submissionRepository.setDraft(draftWithStatusRemoved).map(x => if (x) Ok else InternalServerError)
             case _ : JsError =>
-              Logger.info(s"[SubmissionDraftController][reset] failed to reset for $section")
+              logger.info(s"[SubmissionDraftController][reset] failed to reset for $section")
               Future.successful(InternalServerError)
           }
         case None =>
-          Logger.info(s"[SubmissionDraftController][reset] no draft, cannot reset status for $section")
+          logger.info(s"[SubmissionDraftController][reset] no draft, cannot reset status for $section")
           Future.successful(InternalServerError)
       }
   }
@@ -303,14 +302,14 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           val path = JsPath \ "registration" \ "correspondence/address"
           draft.draftData.transform(path.json.pick).map(_.as[AddressType]) match {
             case JsSuccess(leadTrusteeType, _) =>
-              Logger.info(s"[SubmissionDraftController] found correspondence address")
+              logger.info(s"[SubmissionDraftController] found correspondence address")
               Ok(Json.toJson(leadTrusteeType))
             case _ : JsError =>
-              Logger.info(s"[SubmissionDraftController] no correspondence address")
+              logger.info(s"[SubmissionDraftController] no correspondence address")
               NotFound
           }
         case None =>
-          Logger.info(s"[SubmissionDraftController] no draft, cannot return correspondence address")
+          logger.info(s"[SubmissionDraftController] no draft, cannot return correspondence address")
           NotFound
       }
   }

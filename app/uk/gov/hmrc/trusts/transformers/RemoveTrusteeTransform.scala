@@ -18,7 +18,6 @@ package uk.gov.hmrc.trusts.transformers
 
 import java.time.LocalDate
 
-import play.api.libs.json.Reads.of
 import play.api.libs.json._
 
 case class RemoveTrusteeTransform(endDate: LocalDate, index: Int, trusteeToRemove: JsValue)

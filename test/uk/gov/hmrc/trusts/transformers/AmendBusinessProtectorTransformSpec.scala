@@ -21,7 +21,7 @@ import java.time.LocalDate
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.trusts.models.IdentificationOrgType
-import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCompanyType, ProtectorCompany}
+import uk.gov.hmrc.trusts.models.variation.ProtectorCompany
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AmendBusinessProtectorTransformSpec extends FreeSpec with MustMatchers {

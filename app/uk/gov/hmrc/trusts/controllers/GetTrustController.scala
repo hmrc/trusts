@@ -17,16 +17,15 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.{Inject, Singleton}
-import org.slf4j.LoggerFactory
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUtrActionProvider}
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.{BadRequestResponse, _}
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService}
-
+import play.api.Logging
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -36,9 +35,8 @@ class GetTrustController @Inject()(identify: IdentifierAction,
                                    desService: DesService,
                                    transformationService: TransformationService,
                                    validateUtr : ValidateUtrActionProvider,
-                                   cc: ControllerComponents) extends BackendController(cc) {
+                                   cc: ControllerComponents) extends BackendController(cc) with Logging {
 
-  private val logger = LoggerFactory.getLogger("application." + classOf[GetTrustController].getCanonicalName)
 
   val errorAuditMessages: Map[GetTrustResponse, String] = Map(
     InvalidUTRResponse -> "The UTR provided is invalid.",

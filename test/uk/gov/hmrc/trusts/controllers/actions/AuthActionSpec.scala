@@ -26,7 +26,6 @@ import uk.gov.hmrc.auth.core.retrieve.{Retrieval, ~}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.BaseSpec
 
-import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthActionSpec extends BaseSpec {
@@ -41,7 +40,7 @@ class AuthActionSpec extends BaseSpec {
     Future.successful(new ~(Some("id"), Some(affinityGroup)))
 
   private def actionToTest(authConnector: AuthConnector) = {
-    new AuthenticatedIdentifierAction(authConnector, injector.instanceOf[BodyParsers.Default])
+    new AuthenticatedIdentifierAction(authConnector, injector.instanceOf[BodyParsers.Default])(ExecutionContext.Implicits.global)
   }
 
   private val agentAffinityGroup = AffinityGroup.Agent

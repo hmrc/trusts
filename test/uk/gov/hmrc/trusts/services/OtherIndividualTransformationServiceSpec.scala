@@ -21,11 +21,10 @@ import java.time.LocalDate
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.variation.NaturalPersonType
@@ -40,8 +39,6 @@ class OtherIndividualTransformationServiceSpec extends FreeSpec with MockitoSuga
 
   private implicit val pc: PatienceConfig =
     PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
-
-  private implicit val hc: HeaderCarrier = HeaderCarrier()
 
   private def otherIndividualJson(endDate: Option[LocalDate] = None) = {
     if (endDate.isDefined) {
@@ -75,7 +72,7 @@ class OtherIndividualTransformationServiceSpec extends FreeSpec with MockitoSuga
 
         when(transformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any()))
           .thenReturn(Future.successful(TrustProcessedResponse(
             buildInputJson(Seq(otherIndividual)),
             ResponseHeader("status", "formBundlNo")
@@ -124,7 +121,7 @@ class OtherIndividualTransformationServiceSpec extends FreeSpec with MockitoSuga
 
         val desResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any()))
           .thenReturn(
             Future.successful(
               TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
