@@ -1,0 +1,358 @@
+{
+  "correspondence": {
+    "abroadIndicator": false,
+    "name": "1234567890 QwErTyUiOp ,.(/)&'- name",
+    "address": {
+      "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+      "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+      "postCode": "SR2 7UY",
+      "country": "GB"
+    },
+    "phoneNumber": "+123456789012345678",
+    "welsh": false,
+    "braille": false
+  },
+  "yearsReturns": {
+    "returns": [
+      {
+        "taxReturnYear": "17",
+        "taxConsequence": true
+      },
+      {
+        "taxReturnYear": "18",
+        "taxConsequence": true
+      },
+      {
+        "taxReturnYear": "19",
+        "taxConsequence": true
+      },
+      {
+        "taxReturnYear": "20",
+        "taxConsequence": true
+      }
+    ]
+  },
+  "declaration": {
+    "name": {
+      "firstName": "1234567890 QwErTyUiOp ,.(\/)&'- name",
+      "lastName": "1234567890 QwErTyUiOp ,.(\/)&'- name"
+    },
+    "address": {
+      "line1": "DECLARED WITH NINO",
+      "line2": "DECLARED WITH NINO",
+      "postCode": "XX1 1XX",
+      "country": "GB"
+    }
+  },
+  "trust": {
+    "details": {
+      "startDate": "2019-04-06",
+      "trustTaxable": true,
+      "expressTrust": true,
+      "trustUKResident": true,
+      "trustUKProperty": true,
+      "lawCountry": "DE",
+      "administrationCountry": "DE",
+      "residentialStatus": {
+        "nonUK": {
+          "sch5atcgga92": true,
+          "trusteeStatus": "Non Resident Domiciled"
+        }
+      },
+      "typeOfTrust": "Will Trust or Intestacy Trust"
+    },
+    "entities": {
+      "naturalPerson": [
+        {
+          "name": {
+            "firstName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "middleName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "lastName": "1234567890 QwErTyUiOp ,.(/)&'- name"
+          },
+          "identification": {
+            "passport": {
+              "number": "KSJDFKSDHF64565451478523NATPER",
+              "expirationDate": "2020-02-02",
+              "countryOfIssue": "DE"
+            },
+            "address": {
+              "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+              "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+              "line3": "1234567890 QwErTyUiOp ,.(/)&'- name",
+              "country": "DE"
+            }
+          },
+          "countryOfResidence": "DE",
+          "nationality": "DE",
+          "legallyIncapable": false
+        }
+      ],
+      "beneficiary": {
+        "individualDetails": [
+          {
+            "name": {
+              "firstName": "1234567890 QwErTyUiOp ,.(\/)&'- name",
+              "lastName": "1234567890 QwErTyUiOp ,.(\/)&'- name"
+            },
+            "dateOfBirth": "1500-03-20",
+            "vulnerableBeneficiary": true,
+            "countryOfResidence": "DE",
+            "nationality": "DE",
+            "legallyIncapable": false,
+            "identification": {
+              "nino": "SJ123456B"
+            }
+          }
+        ],
+        "company": [
+          {
+            "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "beneficiaryDiscretion": true,
+            "countryOfResidence": "DE",
+            "identification": {
+              "address": {
+                "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "postCode": "Z99 2YY",
+                "country": "GB"
+              }
+            }
+          }
+        ],
+        "trust": [
+          {
+            "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "beneficiaryDiscretion": true,
+            "countryOfResidence": "DE",
+            "identification": {
+              "address": {
+                "line1": "1 Some High Street",
+                "line2": "Sometown",
+                "postCode": "Z99 2YY",
+                "country": "GB"
+              }
+            }
+          }
+        ],
+        "charity": [
+          {
+            "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "beneficiaryDiscretion": true,
+            "countryOfResidence": "DE",
+            "identification": {
+              "address": {
+                "line1": "1 Some High Street",
+                "line2": "Sometown",
+                "postCode": "Z99 2YY",
+                "country": "GB"
+              }
+            }
+          }
+        ],
+        "unidentified": [
+          {
+            "description": "1234567890&`'^ -QWERTYqwertyzxcvbnmasdfghjklpoiuypoiuytr"
+          }
+        ],
+        "large": [
+          {
+            "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "description": "1234567890&`'^ -QWERTYqwertyzxcvbnmasdfghjklpoiuypoiuytr",
+            "numberOfBeneficiary": "1",
+            "countryOfResidence": "DE",
+            "identification": {
+              "address": {
+                "line1": "1 Some High Street",
+                "line2": "Sometown",
+                "postCode": "Z99 2YY",
+                "country": "GB"
+              }
+            }
+          },
+          {
+            "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- na01",
+            "description": "1234567890&`'^ -QWERTYqwertyzxcvbnmasdfghjklpoiuypoiuytr",
+            "description1": "Description 2",
+            "description2": "Description 3",
+            "description3": "Description 4",
+            "description4": "Description 5",
+            "numberOfBeneficiary": "501",
+            "countryOfResidence": "DE",
+            "identification": {
+              "address": {
+                "line1": "1 Some High Street",
+                "line2": "Sometown",
+                "postCode": "Z99 2YY",
+                "country": "GB"
+              }
+            }
+          }
+        ],
+        "other": [
+          {
+            "description": "1234567890&`'^ -QWERTYqwertyzxcvbnmasdfghjklpoiuypoiuytr",
+            "address": {
+              "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+              "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+              "postCode": "SR2 7UY",
+              "country": "GB"
+            },
+            "beneficiaryDiscretion": true,
+            "countryOfResidence": "DE"
+          }
+        ]
+      },
+      "deceased": {
+        "name": {
+          "firstName": "John",
+          "middleName": "William",
+          "lastName": "O'Connor"
+        },
+        "dateOfBirth": "1956-02-12",
+        "dateOfDeath": "2016-01-01",
+        "identification": {
+          "nino": "KC456736A"
+        }
+      },
+      "leadTrustees": {
+        "leadTrusteeInd": {
+          "name": {
+            "firstName": "1234567890 QwErTyUiOp ,.(\/)&'- name",
+            "lastName": "1234567890 QwErTyUiOp ,.(\/)&'- name"
+          },
+          "dateOfBirth": "2015-03-20",
+          "identification": {
+            "nino": "SJ123456B"
+          },
+          "phoneNumber": "+123456789012345678",
+          "countryOfResidence": "DE",
+          "nationality": "DE",
+          "legallyIncapable": false
+        }
+      },
+      "trustees": [
+        {
+          "trusteeInd": {
+            "name": {
+              "firstName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+              "lastName": "1234567890 QwErTyUiOp ,.(/)&'- name"
+            },
+            "identification": {
+              "passport": {
+                "number": "KSJDFKSDHF645654514TRUSTEEIND1",
+                "expirationDate": "2020-02-02",
+                "countryOfIssue": "DE"
+              },
+              "address": {
+                "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "line3": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "line4": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "postCode": "Z99 2YY",
+                "country": "GB"
+              }
+            },
+            "dateOfBirth": "1983-09-24",
+            "countryOfResidence": "DE",
+            "nationality": "DE",
+            "legallyIncapable": false
+          }
+        }
+      ],
+      "protectors": {
+        "protectorCompany": [
+          {
+            "name": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "identification": {
+              "address": {
+                "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "line3": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "line4": "1234567890 QwErTyUiOp ,.(/)&'- name",
+                "postCode": "Z99 2YY",
+                "country": "GB"
+              }
+            },
+            "countryOfResidence": "DE"
+          }
+        ]
+      },
+      "settlors": {
+        "settlor": [
+          {
+            "name": {
+              "firstName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+              "lastName": "1234567890 QwErTyUiOp ,.(/)&'- name"
+            },
+            "dateOfBirth": "1983-09-24",
+            "countryOfResidence": "DE",
+            "legallyIncapable": false
+          }
+        ]
+      }
+    },
+    "assets": {
+      "monetary": [
+        {
+          "assetMonetaryAmount": 999999999999
+        }
+      ],
+      "propertyOrLand": [
+        {
+          "buildingLandName": "1234567890&`'^ -QWERTYqwertyzxcvbnmasdfghjklpoiuypoiuytr",
+          "valueFull": 999999999999,
+          "valuePrevious": 999999999999
+        }
+      ],
+      "business": [
+        {
+          "address": {
+            "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "line3": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "line4": "1234567890 QwErTyUiOp ,.(/)&'- name",
+            "postCode": "Z99 2YY",
+            "country": "GB"
+          },
+          "orgName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+          "businessDescription": "1234567890&`'^ -QWERTYqwertyzxcvbnmasdfghjklpoiuypoiuytr",
+          "businessValue": 999999999999
+        }
+      ],
+      "other": [
+        {
+          "description": "1234567890&`'^ -QWERTYqwertyzxcvbnmasdfghjklpoiuypoiuytr",
+          "value": 999999999999
+        }
+      ],
+      "partnerShip": [
+        {
+          "description": "1234567890&`'^ -QWERTYqwertyzxcvbnmasdfghjklpoiuypoiuytr",
+          "partnershipStart": "2015-03-20"
+        }
+      ],
+      "shares": [
+        {
+          "numberOfShares": "999999999999",
+          "orgName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+          "shareClass": "Ordinary shares",
+          "typeOfShare": "Quoted",
+          "value": 999999999999
+        }
+      ]
+    }
+  },
+  "agentDetails": {
+    "arn": "SARN1234567",
+    "agentName": "Agent name",
+    "agentAddress": {
+      "line1": "56 Maple Street",
+      "line2": "Northumberland",
+      "postCode": "ne64 8hr",
+      "country": "GB"
+    },
+    "agentTelephoneNumber": "+123456789012345678",
+    "clientReference": "Agent01"
+  },
+  "submissionDate": "2020-09-01"
+}

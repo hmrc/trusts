@@ -34,7 +34,8 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
           "microservice.services.des-trusts.port" -> server.port(),
           "microservice.services.des-display-trust-or-estate.port" -> server.port(),
           "microservice.services.des-vary-trust-or-estate.port" -> server.port(),
-          "microservice.services.tax-enrolments.port" -> server.port()
+          "microservice.services.tax-enrolments.port" -> server.port(),
+          "microservice.services.trusts-store.port" -> server.port()
         ): _*)
   }
 

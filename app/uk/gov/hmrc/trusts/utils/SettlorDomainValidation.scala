@@ -170,8 +170,8 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
     val trustType = registration.trust.details.typeOfTrust
 
     trustType match {
-      case TypeOfTrust.DeedOfVariationOrFamilyAgreement => validateDeedOfVariation(trustType)
-      case TypeOfTrust.Will => validateDeceasedSettlor
+      case Some(TypeOfTrust.DeedOfVariationOrFamilyAgreement) => validateDeedOfVariation(TypeOfTrust.DeedOfVariationOrFamilyAgreement)
+      case Some(TypeOfTrust.Will) => validateDeceasedSettlor
       case _ => validateTrustHasLivingSettlor
     }
   }

@@ -24,18 +24,21 @@ class AssetsDomainValidation (registration: Registration) extends ValidationUtil
 
 
   def valueFullIsNotMoreThanValuePrevious:List[Option[TrustsValidationError]]= {
-    registration.trust.assets.propertyOrLand.map {
-      properties =>
-        properties.zipWithIndex.map {
-          case (property, index) =>
-            val isValid = property.valueFull >= property.valuePrevious
-            if (!isValid) {
-              Some(TrustsValidationError(s"Value full must be equal or more than value previous.",
-                s"/trust/assets/propertyOrLand/${index}/valueFull"))
-            } else {
-              None
-            }
-        }
+    registration.trust.assets.map {
+      asset => asset.propertyOrLand match {
+        case Some(properties) =>
+          properties.zipWithIndex.map {
+            case (property, index) =>
+              val isValid = property.valueFull >= property.valuePrevious
+              if (!isValid) {
+                Some(TrustsValidationError(s"Value full must be equal or more than value previous.",
+                  s"/trust/assets/propertyOrLand/${index}/valueFull"))
+              } else {
+                None
+              }
+          }
+        case None => List(None)
+      }
     }.toList.flatten
   }
 
