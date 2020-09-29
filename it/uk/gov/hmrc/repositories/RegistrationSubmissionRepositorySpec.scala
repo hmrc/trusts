@@ -26,6 +26,9 @@ import uk.gov.hmrc.trusts.repositories.RegistrationSubmissionRepository
 
 class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers with TransformIntegrationTest {
 
+  // Make sure we use value of LocalDateTime that survives JSON round trip - and isn't expired.
+  private val testDateTime: LocalDateTime = Json.toJson(LocalDateTime.now()).as[LocalDateTime]
+
   private val data1 = Json.obj(
     "field1" -> "value1",
     "field2" -> "value2",
@@ -60,7 +63,7 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
           val state1 = RegistrationSubmissionDraft(
             "draftId1",
             "InternalId",
-            LocalDateTime.of(2012, 12, 8, 11, 34),
+            testDateTime,
             data1,
             Some("reference1"),
             Some(true)
@@ -71,7 +74,7 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
           val state2 = RegistrationSubmissionDraft(
             "draftId2",
             "InternalId",
-            LocalDateTime.of(2016, 10, 24, 17, 2),
+            testDateTime,
             data2,
             Some("reference2"),
             Some(true)
@@ -82,7 +85,7 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
           val state3 = RegistrationSubmissionDraft(
             "draftId1",
             "InternalId2",
-            LocalDateTime.of(2019, 2, 1, 23, 59),
+            testDateTime,
             data3,
             None,
             None
@@ -93,7 +96,7 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
           val state4 = RegistrationSubmissionDraft(
             "draftId3",
             "InternalId",
-            LocalDateTime.of(2020, 6, 10, 13, 21),
+            testDateTime,
             data2,
             Some("reference3"),
             Some(false)
@@ -127,7 +130,7 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
           val state1 = RegistrationSubmissionDraft(
             "draftId1",
             "InternalId",
-            LocalDateTime.of(2012, 12, 8, 11, 34),
+            testDateTime,
             data1,
             Some("ref1"),
             Some(true)
