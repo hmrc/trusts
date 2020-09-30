@@ -39,19 +39,6 @@
             "middleName": "1234567890 QwErTyUiOp ,.(/)&'- name",
             "lastName": "1234567890 QwErTyUiOp ,.(/)&'- name"
           },
-          "identification": {
-            "passport": {
-              "number": "KSJDFKSDHF64565451478523NATPER",
-              "expirationDate": "2020-02-02",
-              "countryOfIssue": "DE"
-            },
-            "address": {
-              "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
-              "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
-              "line3": "1234567890 QwErTyUiOp ,.(/)&'- name",
-              "country": "DE"
-            }
-          },
           "countryOfResidence": "DE",
           "nationality": "DE",
           "legallyIncapable": false
@@ -68,55 +55,28 @@
             "vulnerableBeneficiary": true,
             "countryOfResidence": "DE",
             "nationality": "DE",
-            "legallyIncapable": false,
-            "identification": {
-              "nino": "SJ123456B"
-            }
+            "legallyIncapable": false
           }
         ],
         "company": [
           {
             "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- name",
             "beneficiaryDiscretion": true,
-            "countryOfResidence": "DE",
-            "identification": {
-              "address": {
-                "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
-                "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
-                "postCode": "Z99 2YY",
-                "country": "GB"
-              }
-            }
+            "countryOfResidence": "DE"
           }
         ],
         "trust": [
           {
             "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- name",
             "beneficiaryDiscretion": true,
-            "countryOfResidence": "DE",
-            "identification": {
-              "address": {
-                "line1": "1 Some High Street",
-                "line2": "Sometown",
-                "postCode": "Z99 2YY",
-                "country": "GB"
-              }
-            }
+            "countryOfResidence": "DE"
           }
         ],
         "charity": [
           {
             "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- name",
             "beneficiaryDiscretion": true,
-            "countryOfResidence": "DE",
-            "identification": {
-              "address": {
-                "line1": "1 Some High Street",
-                "line2": "Sometown",
-                "postCode": "Z99 2YY",
-                "country": "GB"
-              }
-            }
+            "countryOfResidence": "DE"
           }
         ],
         "unidentified": [
@@ -129,15 +89,7 @@
             "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- name",
             "description": "1234567890&`'^ -QWERTYqwertyzxcvbnmasdfghjklpoiuypoiuytr",
             "numberOfBeneficiary": "1",
-            "countryOfResidence": "DE",
-            "identification": {
-              "address": {
-                "line1": "1 Some High Street",
-                "line2": "Sometown",
-                "postCode": "Z99 2YY",
-                "country": "GB"
-              }
-            }
+            "countryOfResidence": "DE"
           },
           {
             "organisationName": "1234567890 QwErTyUiOp ,.(/)&'- na01",
@@ -147,15 +99,7 @@
             "description3": "Description 4",
             "description4": "Description 5",
             "numberOfBeneficiary": "501",
-            "countryOfResidence": "DE",
-            "identification": {
-              "address": {
-                "line1": "1 Some High Street",
-                "line2": "Sometown",
-                "postCode": "Z99 2YY",
-                "country": "GB"
-              }
-            }
+            "countryOfResidence": "DE"
           }
         ],
         "other": [
@@ -179,10 +123,7 @@
           "lastName": "O'Connor"
         },
         "dateOfBirth": "1956-02-12",
-        "dateOfDeath": "2016-01-01",
-        "identification": {
-          "nino": "KC456736A"
-        }
+        "dateOfDeath": "2016-01-01"
       },
       "leadTrustees": {
         "leadTrusteeInd": {
@@ -207,21 +148,6 @@
               "firstName": "1234567890 QwErTyUiOp ,.(/)&'- name",
               "lastName": "1234567890 QwErTyUiOp ,.(/)&'- name"
             },
-            "identification": {
-              "passport": {
-                "number": "KSJDFKSDHF645654514TRUSTEEIND1",
-                "expirationDate": "2020-02-02",
-                "countryOfIssue": "DE"
-              },
-              "address": {
-                "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
-                "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
-                "line3": "1234567890 QwErTyUiOp ,.(/)&'- name",
-                "line4": "1234567890 QwErTyUiOp ,.(/)&'- name",
-                "postCode": "Z99 2YY",
-                "country": "GB"
-              }
-            },
             "dateOfBirth": "1983-09-24",
             "countryOfResidence": "DE",
             "nationality": "DE",
@@ -233,16 +159,6 @@
         "protectorCompany": [
           {
             "name": "1234567890 QwErTyUiOp ,.(/)&'- name",
-            "identification": {
-              "address": {
-                "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
-                "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
-                "line3": "1234567890 QwErTyUiOp ,.(/)&'- name",
-                "line4": "1234567890 QwErTyUiOp ,.(/)&'- name",
-                "postCode": "Z99 2YY",
-                "country": "GB"
-              }
-            },
             "countryOfResidence": "DE"
           }
         ]
