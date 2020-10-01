@@ -64,6 +64,33 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       |""".stripMargin
   )
 
+  private lazy val whenTrustSetupAtNewPath = Json.parse(
+    """
+      |{
+      |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+      |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
+      |    "createdAt" : { "$date" : 1597323808000 },
+      |    "draftData" : {
+      |        "status" : {
+      |           "taxLiability" : "completed"
+      |        },
+      |        "trustDetails" : {
+      |           "data": {
+      |              "whenTrustSetup" : "2015-04-06"
+      |           }
+      |        },
+      |        "main" : {
+      |            "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+      |            "data" : {},
+      |            "progress" : "InProgress",
+      |            "createdAt" : "2020-08-13T13:37:53.787Z",
+      |            "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54"
+      |        }
+      |    },
+      |    "inProgress" : true
+      |}
+      |""".stripMargin).as[RegistrationSubmissionDraft]
+
   private lazy val mockSubmissionDraft = Json.parse(
     """
       |{
@@ -776,7 +803,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
   ".getWhenTrustSetup" should {
 
-     "respond with OK with the start date" in {
+     "respond with OK with the start date at the old path" in {
        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
        val submissionRepository = mock[RegistrationSubmissionRepository]
 
@@ -806,6 +833,37 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
        contentType(result) mustBe Some(JSON)
        contentAsJson(result) mustBe expectedDraftJson
      }
+
+    "respond with OK with the start date at the new path" in {
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents()
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(whenTrustSetupAtNewPath)))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getWhenTrustSetup("DRAFTID").apply(request)
+
+      status(result) mustBe OK
+
+      val expectedDraftJson = Json.parse(
+        """
+          |{
+          | "startDate": "2015-04-06"
+          |}
+          |""".stripMargin)
+
+      contentType(result) mustBe Some(JSON)
+      contentAsJson(result) mustBe expectedDraftJson
+    }
 
     "respond with NotFound when no draft" in {
       val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)

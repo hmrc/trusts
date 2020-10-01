@@ -232,12 +232,27 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
     implicit request =>
       submissionRepository.getDraft(draftId, request.identifier).map {
         case Some(draft) =>
-          val path = JsPath \ "main" \ "data" \ "trustDetails" \ "whenTrustSetup"
-          draft.draftData.transform(path.json.pick).map(_.as[LocalDate]) match {
-            case JsSuccess(date, _) =>
-              logger.info(s"[SubmissionDraftController] found trust start date")
+          // Todo remove old path once trusts-details has migrated to register-trust-details-frontend and is in production
+          // Added the ability for both paths due to 28 days S4L for draft registrations
+          // Implemented on 01 October 2020
+          val oldPath = JsPath \ "main" \ "data" \ "trustDetails" \ "whenTrustSetup"
+          val newPath = JsPath \ "trustDetails" \ "data" \ "whenTrustSetup"
+
+          def getDate(path: JsPath) =
+            draft.draftData.transform(path.json.pick).map(_.as[LocalDate])
+
+          val dateAtOldPath = getDate(oldPath)
+
+          val dateAtNewPath = getDate(newPath)
+
+          (dateAtOldPath, dateAtNewPath) match {
+            case (JsSuccess(date, _), JsError(_)) =>
+              logger.info(s"[SubmissionDraftController] found trust start date at old path")
               Ok(Json.obj("startDate" -> date))
-            case _ : JsError =>
+            case (JsError(_), JsSuccess(date, _)) =>
+              logger.info(s"[SubmissionDraftController] found trust start date at new path")
+              Ok(Json.obj("startDate" -> date))
+            case _ =>
               logger.info(s"[SubmissionDraftController] no trust start date")
               NotFound
           }
