@@ -76,7 +76,9 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       |        },
       |        "trustDetails" : {
       |           "data": {
-      |              "whenTrustSetup" : "2015-04-06"
+      |               "trustDetails": {
+      |                  "whenTrustSetup" : "2015-04-06"
+      |               }
       |           }
       |        },
       |        "main" : {
@@ -114,7 +116,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       |                "trustDetails" : {
       |                    "administrationInsideUK" : true,
       |                    "trusteesBasedInTheUK" : "UKBasedTrustees",
-      |                    "trustName" : "Adam",
+      |                    "trustName" : "Trust Name Details",
       |                    "whenTrustSetup" : "2010-08-21",
       |                    "establishedUnderScotsLaw" : true,
       |                    "governedInsideTheUK" : false,
@@ -801,6 +803,115 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
     }
   }
 
+  ".getTrustName" should {
+
+    "respond with OK and trust name when answered as part of trust matching" in {
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents()
+      )
+
+      val cache = Json.parse(
+        """
+          |{
+          |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+          |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
+          |    "createdAt" : { "$date" : 1597323808000 },
+          |    "draftData" : {
+          |       "main" : {
+          |            "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+          |            "data" : {
+          |                "matching" : {
+          |                    "trustName" : "Trust Name Matching"
+          |                }
+          |            },
+          |            "progress" : "InProgress",
+          |            "createdAt" : "2020-08-13T13:37:53.787Z",
+          |            "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54"
+          |        }
+          |    },
+          |    "inProgress" : true
+          |}
+          |""".stripMargin).as[RegistrationSubmissionDraft]
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(cache)))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getTrustName("DRAFTID").apply(request)
+
+      status(result) mustBe OK
+
+      val expectedDraftJson = Json.parse(
+        """
+          |{
+          | "trustName": "Trust Name Matching"
+          |}
+          |""".stripMargin)
+
+      contentType(result) mustBe Some(JSON)
+      contentAsJson(result) mustBe expectedDraftJson
+    }
+
+    "response with OK and trust name when answered as part of trust details" in {
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents()
+      )
+
+      val cache = Json.parse(
+        """
+          |{
+          |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+          |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
+          |    "createdAt" : { "$date" : 1597323808000 },
+          |    "draftData" : {
+          |       "trustDetails": {
+          |         "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+          |         "data": {
+          |           "trustDetails": {
+          |             "trustName": "Trust Name Details"
+          |           }
+          |         }
+          |       }
+          |    },
+          |    "inProgress" : true
+          |}
+          |""".stripMargin).as[RegistrationSubmissionDraft]
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(cache)))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getTrustName("DRAFTID").apply(request)
+
+      status(result) mustBe OK
+
+      val expectedDraftJson = Json.parse(
+        """
+          |{
+          | "trustName": "Trust Name Details"
+          |}
+          |""".stripMargin)
+
+      contentType(result) mustBe Some(JSON)
+      contentAsJson(result) mustBe expectedDraftJson
+    }
+
+  }
+
   ".getWhenTrustSetup" should {
 
      "respond with OK with the start date at the old path" in {
@@ -1078,7 +1189,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           |                "trustDetails" : {
           |                    "administrationInsideUK" : true,
           |                    "trusteesBasedInTheUK" : "UKBasedTrustees",
-          |                    "trustName" : "Adam",
+          |                    "trustName" : "Trust Name Details",
           |                    "whenTrustSetup" : "2010-08-21",
           |                    "establishedUnderScotsLaw" : true,
           |                    "governedInsideTheUK" : false,

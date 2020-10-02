@@ -236,7 +236,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           // Added the ability for both paths due to 28 days S4L for draft registrations
           // Implemented on 01 October 2020
           val oldPath = JsPath \ "main" \ "data" \ "trustDetails" \ "whenTrustSetup"
-          val newPath = JsPath \ "trustDetails" \ "data" \ "whenTrustSetup"
+          val newPath = JsPath \ "trustDetails" \ "data" \ "trustDetails" \ "whenTrustSetup"
 
           def getDate(path: JsPath) =
             draft.draftData.transform(path.json.pick).map(_.as[LocalDate])
@@ -258,6 +258,36 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           }
         case None =>
           logger.info(s"[SubmissionDraftController] no draft, cannot return start date")
+          NotFound
+      }
+  }
+
+  def getTrustName(draftId: String) : Action[AnyContent] = identify.async {
+    implicit request =>
+      submissionRepository.getDraft(draftId, request.identifier).map {
+        case Some(draft) =>
+          val matchingPath = JsPath \ "main" \ "data" \ "matching" \ "trustName"
+          val detailsPath = JsPath \ "trustDetails" \ "data" \ "trustDetails" \ "trustName"
+
+          def getData(path: JsPath) =
+            draft.draftData.transform(path.json.pick).map(_.as[String])
+
+          val matchingName = getData(matchingPath)
+          val detailsName = getData(detailsPath)
+
+          (matchingName, detailsName) match {
+            case (JsSuccess(date, _), JsError(_)) =>
+              logger.info(s"[SubmissionDraftController] found trust name in matching")
+              Ok(Json.obj("trustName" -> date))
+            case (JsError(_), JsSuccess(date, _)) =>
+              logger.info(s"[SubmissionDraftController] found trust name in trust details")
+              Ok(Json.obj("trustName" -> date))
+            case _ =>
+              logger.info(s"[SubmissionDraftController] no trust name found")
+              NotFound
+          }
+        case None =>
+          logger.info(s"[SubmissionDraftController] no draft, cannot return trust name")
           NotFound
       }
   }

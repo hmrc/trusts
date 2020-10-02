@@ -38,6 +38,8 @@ POST        /submission-drafts/:draftId/set/trustDetails      uk.gov.hmrc.trusts
 
 GET         /submission-drafts/:draftId/when-trust-setup       uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getWhenTrustSetup(draftId: String)
 
+GET         /submission-drafts/:draftId/trust-name       uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getTrustName(draftId: String)
+
 GET         /submission-drafts/:draftId/lead-trustee           uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getLeadTrustee(draftId: String)
 
 POST        /submission-drafts/:draftId/reset/taxLiability   uk.gov.hmrc.trusts.controllers.SubmissionDraftController.reset(draftId: String, section: String = "taxLiability", mappedDataKey: String = "yearsReturns")
