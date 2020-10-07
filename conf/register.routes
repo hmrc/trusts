@@ -37,8 +37,8 @@ GET         /submission-drafts/:draftId/trustDetails          uk.gov.hmrc.trusts
 POST        /submission-drafts/:draftId/set/trustDetails      uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "trustDetails")
 
 # Used by register-settlors-frontend
-GET         /submission-drafts/:draftId/trustDetails          uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "settlors")
-POST        /submission-drafts/:draftId/set/trustDetails      uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "settlors")
+GET         /submission-drafts/:draftId/settlors              uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "settlors")
+POST        /submission-drafts/:draftId/set/settlors          uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "settlors")
 
 GET         /submission-drafts/:draftId/when-trust-setup       uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getWhenTrustSetup(draftId: String)
 
