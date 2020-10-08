@@ -20,25 +20,27 @@ import java.time.LocalDate
 
 import org.scalatest.{FreeSpec, MustMatchers}
 import uk.gov.hmrc.trusts.models.NameType
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustProtector}
+import uk.gov.hmrc.trusts.models.variation.{IdentificationType, Protector}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AddIndividualProtectorTransformSpec extends FreeSpec with MustMatchers {
 
-  val newProtector = DisplayTrustProtector(Some("1"),
+  val newProtector = Protector(Some("1"),
     None,
     NameType("abcdefghijkl",Some("abcdefghijklmn"), "abcde"),
     Some(LocalDate.parse("2000-01-01")),
-    Some(DisplayTrustIdentificationType(None,Some("ST019091"),None,None)),
-    LocalDate.parse("2002-01-01")
+    Some(IdentificationType(Some("ST019091"),None,None, None)),
+    LocalDate.parse("2002-01-01"),
+    None
   )
 
-  val newSecondProtector = DisplayTrustProtector(None,
+  val newSecondProtector = Protector(None,
     None,
     NameType("second",None, "protector"),
     Some(LocalDate.parse("2000-01-01")),
-    Some(DisplayTrustIdentificationType(None,Some("AB123456"),None,None)),
-    LocalDate.parse("2010-01-01")
+    Some(IdentificationType(Some("AB123456"),None,None, None)),
+    LocalDate.parse("2010-01-01"),
+    None
   )
 
   "the add individual protector transformer should" - {

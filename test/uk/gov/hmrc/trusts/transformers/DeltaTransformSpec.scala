@@ -138,18 +138,19 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
         LocalDate.parse("2010-01-01")
       )
 
-      val protector = DisplayTrustProtector(
+      val protector = Protector(
         None,
         None,
         NameType("Individual", None, "Settlor"),
         Some(LocalDate.parse("2000-01-01")),
-        Some(DisplayTrustIdentificationType(
-          None,
+        Some(IdentificationType(
           Some("nino"),
+          None,
           None,
           None
         )),
-        LocalDate.parse("2010-01-01")
+        LocalDate.parse("2010-01-01"),
+        None
       )
 
       val newCompanyProtector = ProtectorCompany(

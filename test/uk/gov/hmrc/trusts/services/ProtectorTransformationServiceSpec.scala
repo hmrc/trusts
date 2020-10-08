@@ -68,13 +68,14 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
       "for add individual protector using the transformation service" in {
         val transformationService = mock[TransformationService]
         val service = new ProtectorTransformationService(transformationService, LocalDateMock)
-        val newProtector = DisplayTrustProtector(
+        val newProtector = Protector(
           None,
           None,
           NameType("First", None, "Last"),
           None,
           None,
-          LocalDate.parse("1990-10-10")
+          LocalDate.parse("1990-10-10"),
+          None
         )
 
         when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
