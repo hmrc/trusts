@@ -103,12 +103,13 @@ class ProtectorTransformationControllerSpec extends FreeSpec
       val protectorTransformationService = mock[ProtectorTransformationService]
       val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
-      val newCompanyProtector = DisplayTrustProtectorCompany(
+      val newCompanyProtector = ProtectorCompany(
         name = "TestCompany",
         identification = None,
         lineNo = None,
         bpMatchStatus = None,
-        entityStart = LocalDate.parse("2010-05-03")
+        entityStart = LocalDate.parse("2010-05-03"),
+        entityEnd = None
       )
 
       when(protectorTransformationService.addBusinessProtectorTransformer(any(), any(), any()))
