@@ -19,8 +19,8 @@ package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
 import org.scalatest.{FreeSpec, MustMatchers}
-import uk.gov.hmrc.trusts.models.variation.BeneficiaryCharityType
-import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType}
+import uk.gov.hmrc.trusts.models.AddressType
+import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, IdentificationOrgType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AddCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
@@ -31,7 +31,7 @@ class AddCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
     "Charity",
     Some(false),
     Some("50"),
-    Some(IdentificationOrgType(None, Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")))),
+    Some(IdentificationOrgType(None, Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")), None)),
     LocalDate.parse("1990-10-10"),
     None
   )

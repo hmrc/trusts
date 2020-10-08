@@ -19,8 +19,8 @@ package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
 import org.scalatest.{FreeSpec, MustMatchers}
-import uk.gov.hmrc.trusts.models.variation.LargeType
-import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType}
+import uk.gov.hmrc.trusts.models.AddressType
+import uk.gov.hmrc.trusts.models.variation.{IdentificationOrgType, LargeType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AddLargeBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
@@ -37,7 +37,8 @@ class AddLargeBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
     "501",
     Some(IdentificationOrgType(
       None,
-      Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB"))
+      Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
+      None
     )),
     None,
     None,

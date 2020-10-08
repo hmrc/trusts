@@ -22,7 +22,7 @@ import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.variation._
-import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType}
+import uk.gov.hmrc.trusts.models.{AddressType, NameType}
 
 class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
@@ -99,7 +99,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
         Some("50"),
         Some(IdentificationOrgType(
           Some("company utr"),
-          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")))),
+          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
+          None)),
         LocalDate.parse("1990-10-10"),
         None
       )
@@ -116,7 +117,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
         "501",
         Some(IdentificationOrgType(
           None,
-          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB"))
+          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
+          None
         )),
         None,
         None,

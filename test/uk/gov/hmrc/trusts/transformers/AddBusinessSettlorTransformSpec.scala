@@ -19,8 +19,7 @@ package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
-import uk.gov.hmrc.trusts.models.IdentificationOrgType
-import uk.gov.hmrc.trusts.models.variation.SettlorCompany
+import uk.gov.hmrc.trusts.models.variation.{IdentificationOrgType, SettlorCompany}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AddBusinessSettlorTransformSpec extends FreeSpec with MustMatchers with OptionValues {
@@ -30,7 +29,7 @@ class AddBusinessSettlorTransformSpec extends FreeSpec with MustMatchers with Op
     "Test",
     None,
     Some(false),
-    Some(IdentificationOrgType(Some("ST019091"), None)),
+    Some(IdentificationOrgType(Some("ST019091"), None, None)),
     LocalDate.parse("2002-01-01"),
     None
   )

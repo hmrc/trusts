@@ -30,7 +30,7 @@ import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.{Success, RemoveBeneficiary, NameType, IdentificationOrgType, AddressType}
+import uk.gov.hmrc.trusts.models.{Success, RemoveBeneficiary, NameType, AddressType}
 import uk.gov.hmrc.trusts.models.variation._
 import uk.gov.hmrc.trusts.services.BeneficiaryTransformationService
 
@@ -280,7 +280,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         "Charity",
         Some(false),
         Some("50"),
-        Some(IdentificationOrgType(None, Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")))),
+        Some(IdentificationOrgType(None, Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")), None)),
         LocalDate.parse("1990-10-10"),
         None
       )
@@ -422,7 +422,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         Some("50"),
         Some(IdentificationOrgType(
           Some("company utr"),
-          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")))),
+          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")), None)),
         LocalDate.parse("1990-10-10"),
         None
       )
@@ -521,7 +521,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         Some("50"),
         Some(IdentificationOrgType(
           Some("company utr"),
-          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")))),
+          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")), None)),
         LocalDate.parse("1990-10-10"),
         None
       )
@@ -677,7 +677,8 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         "501",
         Some(IdentificationOrgType(
           None,
-          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB"))
+          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
+          None
         )),
         None,
         None,
@@ -732,7 +733,8 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         "501",
         Some(IdentificationOrgType(
           None,
-          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB"))
+          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
+          None
         )),
         None,
         None,

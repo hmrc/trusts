@@ -27,7 +27,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.{AmendDeceasedSettlor, SettlorCompany}
+import uk.gov.hmrc.trusts.models.variation.{AmendDeceasedSettlor, SettlorCompany, IdentificationOrgType}
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
@@ -116,7 +116,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
         Some(false),
         Some(IdentificationOrgType(
           None,
-          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")))),
+          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")), None)),
         LocalDate.parse("1990-10-10"),
         None
       )

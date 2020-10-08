@@ -21,6 +21,7 @@ import java.time.LocalDate
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models._
+import uk.gov.hmrc.trusts.models.JsonWithoutNulls._
 
 case class TrustVariation(
                       matchData: MatchData,
@@ -342,9 +343,18 @@ case class Protector(
                     )
 
 object Protector {
-
   implicit val protectorFormat: Format[Protector] = Json.format[Protector]
 
+  val writeToMaintain : Writes[Protector] = (o: Protector) => Json.obj(
+    "lineNo" -> o.lineNo,
+    "bpMatchStatus" -> o.bpMatchStatus,
+    "name" -> o.name,
+    "dateOfBirth" -> o.dateOfBirth,
+    "identification" -> o.identification,
+    "entityStart" -> o.entityStart,
+    "entityEnd" -> o.entityEnd,
+    "provisional" -> o.lineNo.isEmpty
+  ).withoutNulls
 }
 
 case class ProtectorCompany(
@@ -359,6 +369,16 @@ case class ProtectorCompany(
 object ProtectorCompany {
 
   implicit val protectorCompanyFormat: Format[ProtectorCompany] = Json.format[ProtectorCompany]
+
+  val writeToMaintain : Writes[ProtectorCompany] = (o: ProtectorCompany) => Json.obj(
+    "lineNo" -> o.lineNo,
+    "bpMatchStatus" -> o.bpMatchStatus,
+    "name" -> o.name,
+    "identification" -> o.identification,
+    "entityStart" -> o.entityStart,
+    "entityEnd" -> o.entityEnd,
+    "provisional" -> o.lineNo.isEmpty
+  ).withoutNulls
 }
 
 case class Settlors(
@@ -397,6 +417,18 @@ case class SettlorCompany(
 
 object SettlorCompany {
   implicit val settlorCompanyFormat: Format[SettlorCompany] = Json.format[SettlorCompany]
+
+  val writeToMaintain : Writes[SettlorCompany] = (o: SettlorCompany) => Json.obj(
+    "lineNo" -> o.lineNo,
+    "bpMatchStatus" -> o.bpMatchStatus,
+    "name" -> o.name,
+    "companyType" -> o.companyType,
+    "companyTime" -> o.companyTime,
+    "identification" -> o.identification,
+    "entityStart" -> o.entityStart,
+    "entityEnd" -> o.entityEnd,
+    "provisional" -> o.lineNo.isEmpty
+  ).withoutNulls
 }
 
 case class Assets(
@@ -472,4 +504,13 @@ case class IdentificationType(nino: Option[String],
 
 object IdentificationType {
   implicit val identificationTypeFormat: Format[IdentificationType] = Json.format[IdentificationType]
+}
+
+
+case class IdentificationOrgType(utr: Option[String],
+                                 address: Option[AddressType],
+                                 safeId: Option[String])
+
+object IdentificationOrgType {
+  implicit val trustBeneficiaryIdentificationFormat: Format[IdentificationOrgType] = Json.format[IdentificationOrgType]
 }
