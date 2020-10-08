@@ -109,7 +109,19 @@ case class NaturalPersonType(
 
 object NaturalPersonType {
   implicit val naturalPersonTypeFormat: Format[NaturalPersonType] = Json.format[NaturalPersonType]
-}
+
+  val writeToMaintain : Writes[NaturalPersonType] = new Writes[NaturalPersonType] {
+    override def writes(o: NaturalPersonType): JsValue = Json.obj(
+      "lineNo" -> o.lineNo,
+      "bpMatchStatus" -> o.bpMatchStatus,
+      "name" -> o.name,
+      "dateOfBirth" -> o.dateOfBirth,
+      "identification" -> o.identification,
+      "entityStart" -> o.entityStart,
+      "entityEnd" -> o.entityEnd,
+      "provisional" -> o.lineNo.isEmpty
+    ).withoutNulls
+  }}
 
 case class BeneficiaryType(
                             individualDetails: Option[List[IndividualDetailsType]],

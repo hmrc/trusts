@@ -30,7 +30,6 @@ import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustNaturalPersonType
 import uk.gov.hmrc.trusts.models.variation.NaturalPersonType
 import uk.gov.hmrc.trusts.models.{NameType, RemoveOtherIndividual, Success}
 import uk.gov.hmrc.trusts.services.OtherIndividualTransformationService
@@ -44,9 +43,9 @@ class OtherIndividualTransformationControllerSpec extends FreeSpec
   with MustMatchers
   with GuiceOneAppPerSuite {
 
-  lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+  private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
-  val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
+  private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
   "remove otherIndividual" - {
 
@@ -149,13 +148,14 @@ class OtherIndividualTransformationControllerSpec extends FreeSpec
       val otherIndividualTransformationService = mock[OtherIndividualTransformationService]
       val controller = new OtherIndividualTransformationController(identifierAction, otherIndividualTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
-      val newOtherIndividual = DisplayTrustNaturalPersonType(
+      val newOtherIndividual = NaturalPersonType(
         None,
         None,
         name = NameType("First", None, "Last"),
         None,
         None,
-        entityStart = LocalDate.parse("2000-01-01")
+        entityStart = LocalDate.parse("2000-01-01"),
+        None
       )
 
       when(otherIndividualTransformationService.addOtherIndividualTransformer(any(), any(), any()))
