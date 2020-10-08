@@ -20,8 +20,8 @@ import java.time.LocalDate
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.JsonWithoutNulls._
+import uk.gov.hmrc.trusts.models._
 
 case class TrustVariation(
                       matchData: MatchData,
@@ -402,7 +402,19 @@ case class Settlor(
 
 object Settlor {
   implicit val settlorFormat: Format[Settlor] = Json.format[Settlor]
-}
+
+  val writeToMaintain : Writes[Settlor] = new Writes[Settlor] {
+    override def writes(o: Settlor): JsValue = Json.obj(
+      "lineNo" -> o.lineNo,
+      "bpMatchStatus" -> o.bpMatchStatus,
+      "name" -> o.name,
+      "dateOfBirth" -> o.dateOfBirth,
+      "identification" -> o.identification,
+      "entityStart" -> o.entityStart,
+      "entityEnd" -> o.entityEnd,
+      "provisional" -> o.lineNo.isEmpty
+    ).withoutNulls
+  }}
 
 case class SettlorCompany(
                            lineNo: Option[String],

@@ -499,18 +499,6 @@ case class DisplayTrustSettlor(lineNo: Option[String],
 
 object DisplayTrustSettlor {
   implicit val settlorFormat: Format[DisplayTrustSettlor] = Json.format[DisplayTrustSettlor]
-
-  val writeToMaintain : Writes[DisplayTrustSettlor] = new Writes[DisplayTrustSettlor] {
-    override def writes(o: DisplayTrustSettlor): JsValue = Json.obj(
-      "lineNo" -> o.lineNo,
-      "bpMatchStatus" -> o.bpMatchStatus,
-      "name" -> o.name,
-      "dateOfBirth" -> o.dateOfBirth,
-      "identification" -> o.identification,
-      "entityStart" -> o.entityStart,
-      "provisional" -> o.lineNo.isEmpty
-    ).withoutNulls
-  }
 }
 
 case class DisplayTrustSettlorCompany(lineNo: Option[String],

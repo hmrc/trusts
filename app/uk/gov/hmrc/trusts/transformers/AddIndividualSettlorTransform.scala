@@ -17,9 +17,9 @@
 package uk.gov.hmrc.trusts.transformers
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustSettlor
+import uk.gov.hmrc.trusts.models.variation.Settlor
 
-case class AddIndividualSettlorTransform(newSettlor: DisplayTrustSettlor)
+case class AddIndividualSettlorTransform(newSettlor: Settlor)
   extends DeltaTransform
   with JsonOperations {
 

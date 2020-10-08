@@ -30,8 +30,7 @@ import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustSettlor
-import uk.gov.hmrc.trusts.models.variation.{AmendDeceasedSettlor, SettlorCompany}
+import uk.gov.hmrc.trusts.models.variation.{AmendDeceasedSettlor, SettlorCompany, Settlor}
 import uk.gov.hmrc.trusts.models.{variation, _}
 import uk.gov.hmrc.trusts.services.SettlorTransformationService
 
@@ -58,7 +57,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
 
       val controller = new SettlorTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-      val newSettlor = variation.Settlor(
+      val newSettlor = Settlor(
         lineNo = None,
         bpMatchStatus = None,
         name = NameType("First", None, "Last"),
@@ -106,13 +105,14 @@ class SettlorTransformationControllerSpec extends FreeSpec
       val settlorTransformationService = mock[SettlorTransformationService]
       val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
-      val newSettlor = DisplayTrustSettlor(
+      val newSettlor = Settlor(
         lineNo = None,
         bpMatchStatus = None,
         name = NameType("First", None, "Last"),
         dateOfBirth = None,
         identification = None,
-        entityStart = LocalDate.parse("2010-05-03")
+        entityStart = LocalDate.parse("2010-05-03"),
+        entityEnd = None
       )
 
       when(settlorTransformationService.addIndividualSettlorTransformer(any(), any(), any()))
@@ -203,7 +203,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
 
       val controller = new SettlorTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-      val newSettlor = variation.SettlorCompany(
+      val newSettlor = SettlorCompany(
         lineNo = None,
         bpMatchStatus = None,
         name = "Company",

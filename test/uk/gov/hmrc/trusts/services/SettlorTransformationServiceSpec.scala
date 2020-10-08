@@ -27,7 +27,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
 import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.{AmendDeceasedSettlor, SettlorCompany, IdentificationOrgType}
+import uk.gov.hmrc.trusts.models.variation.{AmendDeceasedSettlor, SettlorCompany, Settlor, IdentificationOrgType}
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
@@ -86,13 +86,14 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     "must add a new add individual settlor transform using the transformation service" in {
       val transformationService = mock[TransformationService]
       val service = new SettlorTransformationService(transformationService, LocalDateMock)
-      val newSettlor = DisplayTrustSettlor(
+      val newSettlor = Settlor(
         None,
         None,
         NameType("First", None, "Last"),
         None,
         None,
-        LocalDate.parse("1990-10-10")
+        LocalDate.parse("1990-10-10"),
+        None
       )
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
