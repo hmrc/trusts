@@ -19,18 +19,20 @@ package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationOrgType, DisplayTrustSettlorCompany}
+import uk.gov.hmrc.trusts.models.IdentificationOrgType
+import uk.gov.hmrc.trusts.models.variation.SettlorCompany
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AddBusinessSettlorTransformSpec extends FreeSpec with MustMatchers with OptionValues {
 
-  val newCompanySettlor = DisplayTrustSettlorCompany(Some("1"),
+  val newCompanySettlor = SettlorCompany(Some("1"),
     None,
     "Test",
     None,
     Some(false),
-    Some(DisplayTrustIdentificationOrgType(None,Some("ST019091"),None)),
-    LocalDate.parse("2002-01-01")
+    Some(IdentificationOrgType(Some("ST019091"), None)),
+    LocalDate.parse("2002-01-01"),
+    None
   )
 
   "the add business settlor transformer should" - {
@@ -40,7 +42,7 @@ class AddBusinessSettlorTransformSpec extends FreeSpec with MustMatchers with Op
 
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-add-new-business-settlor.json")
 
-      val transformer = new AddBuisnessSettlorTransform(newCompanySettlor)
+      val transformer = new AddBusinessSettlorTransform(newCompanySettlor)
 
       val result = transformer.applyTransform(trustJson).get
 
@@ -53,7 +55,7 @@ class AddBusinessSettlorTransformSpec extends FreeSpec with MustMatchers with Op
 
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-add-second-business-settlor.json")
 
-      val transformer = new AddBuisnessSettlorTransform(newCompanySettlor)
+      val transformer = new AddBusinessSettlorTransform(newCompanySettlor)
 
       val result = transformer.applyTransform(trustJson).get
 

@@ -30,8 +30,8 @@ import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustSettlor, DisplayTrustSettlorCompany}
-import uk.gov.hmrc.trusts.models.variation.AmendDeceasedSettlor
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustSettlor
+import uk.gov.hmrc.trusts.models.variation.{AmendDeceasedSettlor, SettlorCompany}
 import uk.gov.hmrc.trusts.models.{variation, _}
 import uk.gov.hmrc.trusts.services.SettlorTransformationService
 
@@ -44,7 +44,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
   with MustMatchers
   with GuiceOneAppPerSuite {
 
-  lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+  private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
@@ -152,14 +152,15 @@ class SettlorTransformationControllerSpec extends FreeSpec
       val settlorTransformationService = mock[SettlorTransformationService]
       val controller = new SettlorTransformationController(identifierAction, settlorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
-      val newCompanySettlor = DisplayTrustSettlorCompany(
+      val newCompanySettlor = SettlorCompany(
         lineNo = None,
         bpMatchStatus = None,
         name = "Test",
         companyType = None,
         identification = None,
         entityStart = LocalDate.parse("2010-05-03"),
-        companyTime = None
+        companyTime = None,
+        entityEnd=None
       )
 
       when(settlorTransformationService.addBusinessSettlorTransformer(any(), any(), any()))
