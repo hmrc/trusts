@@ -30,7 +30,7 @@ import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.variation._
 import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee, Success}
 import uk.gov.hmrc.trusts.services.{LocalDateService, TrusteeTransformationService}
 
@@ -38,9 +38,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with GuiceOneAppPerSuite {
 
-  lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+  private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
-  val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
+  private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
   object LocalDateServiceStub extends LocalDateService {
     override def now: LocalDate = LocalDate.of(1999, 3, 14)
@@ -52,21 +52,24 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
       val trusteeTransformationService = mock[TrusteeTransformationService]
       val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)(ExecutionContext.Implicits.global, Helpers.stubControllerComponents())
 
-      val newTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
+      val newTrusteeIndInfo = LeadTrusteeIndType(
         lineNo = Some("newLineNo"),
         bpMatchStatus = Some("newMatchStatus"),
         name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
         dateOfBirth = LocalDate.of(1965, 2, 10),
         phoneNumber = "newPhone",
         email = Some("newEmail"),
-        identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-        entityStart = Some(LocalDate.parse("2012-03-14"))
+        identification = IdentificationType(Some("newNino"), None, None, None),
+        entityStart = LocalDate.parse("2012-03-14"),
+        entityEnd = None
       )
 
       when(trusteeTransformationService.addAmendLeadTrusteeTransformer(any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
-      val newTrusteeInfo = DisplayTrustLeadTrusteeType(Some(newTrusteeIndInfo), None)
+      val newTrusteeInfo = LeadTrusteeType(Some(newTrusteeIndInfo), None)
+
+      println(s"---- trustee info: ${Json.toJson(newTrusteeIndInfo)}")
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(newTrusteeIndInfo))
@@ -98,20 +101,21 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
       val trusteeTransformationService = mock[TrusteeTransformationService]
       val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)(ExecutionContext.Implicits.global, Helpers.stubControllerComponents())
 
-      val newTrusteeIndInfo = DisplayTrustTrusteeIndividualType(
+      val newTrusteeIndInfo = TrusteeIndividualType(
         lineNo = Some("newLineNo"),
         bpMatchStatus = Some("newMatchStatus"),
         name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
         dateOfBirth = Some(LocalDate.of(1965, 2, 10)),
         phoneNumber = Some("newPhone"),
-        identification = Some(DisplayTrustIdentificationType(None, Some("newNino"), None, None)),
-        entityStart = LocalDate.parse("2012-03-14")
+        identification = Some(IdentificationType(Some("newNino"), None, None, None)),
+        entityStart = LocalDate.parse("2012-03-14"),
+        entityEnd = None
       )
 
       when(trusteeTransformationService.addAddTrusteeTransformer(any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
-      val newTrusteeInfo = DisplayTrustTrusteeType(Some(newTrusteeIndInfo), None)
+      val newTrusteeInfo = TrusteeType(Some(newTrusteeIndInfo), None)
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(newTrusteeIndInfo))
@@ -144,21 +148,22 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
       val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)(ExecutionContext.Implicits.global, Helpers.stubControllerComponents())
       val index = 3
 
-      val newTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
+      val newTrusteeIndInfo = LeadTrusteeIndType(
         lineNo = Some("newLineNo"),
         bpMatchStatus = Some("newMatchStatus"),
         name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
         dateOfBirth = LocalDate.of(1965, 2, 10),
         phoneNumber = "newPhone",
         email = Some("newEmail"),
-        identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-        entityStart = Some(LocalDate.parse("2012-03-14"))
+        identification = IdentificationType(Some("newNino"), None, None, None),
+        entityStart = LocalDate.parse("2012-03-14"),
+        entityEnd = None
       )
 
       when(trusteeTransformationService.addPromoteTrusteeTransformer(any(), any(), any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
-      val newTrusteeInfo = DisplayTrustLeadTrusteeType(Some(newTrusteeIndInfo), None)
+      val newTrusteeInfo = LeadTrusteeType(Some(newTrusteeIndInfo), None)
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(newTrusteeIndInfo))
@@ -227,20 +232,21 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
       val trusteeTransformationService = mock[TrusteeTransformationService]
       val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)(ExecutionContext.Implicits.global, Helpers.stubControllerComponents())
 
-      val newTrusteeIndInfo = DisplayTrustTrusteeIndividualType(
+      val newTrusteeIndInfo = TrusteeIndividualType(
         lineNo = Some("newLineNo"),
         bpMatchStatus = Some("newMatchStatus"),
         name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
         dateOfBirth = Some(LocalDate.of(1965, 2, 10)),
         phoneNumber = Some("newPhone"),
-        identification = Some(DisplayTrustIdentificationType(None, Some("newNino"), None, None)),
-        entityStart = LocalDate.parse("2012-03-14")
+        identification = Some(IdentificationType(Some("newNino"), None, None, None)),
+        entityStart = LocalDate.parse("2012-03-14"),
+        entityEnd = None
       )
 
       when(trusteeTransformationService.addAmendTrusteeTransformer(any(), any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
-      val newTrusteeInfo = DisplayTrustTrusteeType(Some(newTrusteeIndInfo), None)
+      val newTrusteeInfo = TrusteeType(Some(newTrusteeIndInfo), None)
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(newTrusteeIndInfo))
@@ -261,20 +267,21 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
       val trusteeTransformationService = mock[TrusteeTransformationService]
       val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)(ExecutionContext.Implicits.global, Helpers.stubControllerComponents())
 
-      val newTrusteeOrgInfo = DisplayTrustTrusteeOrgType(
+      val newTrusteeOrgInfo = TrusteeOrgType(
         lineNo = Some("newLineNo"),
         bpMatchStatus = Some("newMatchStatus"),
         name = "newFirstName newLastName",
         phoneNumber = Some("newPhone"),
         email = Some("newEmail"),
-        identification = Some(DisplayTrustIdentificationOrgType(None, Some("newUtr"), None)),
-        entityStart = LocalDate.parse("2012-03-14")
+        identification = Some(IdentificationOrgType(Some("newUtr"), None, None)),
+        entityStart = LocalDate.parse("2012-03-14"),
+        entityEnd = None
       )
 
       when(trusteeTransformationService.addAmendTrusteeTransformer(any(), any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
-      val newTrusteeInfo = DisplayTrustTrusteeType(None, Some(newTrusteeOrgInfo))
+      val newTrusteeInfo = TrusteeType(None, Some(newTrusteeOrgInfo))
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(newTrusteeOrgInfo))

@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.variation._
 
 trait PromoteTrusteeCommon {
   private val leadTrusteesPath = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees)
@@ -55,33 +55,35 @@ trait PromoteTrusteeCommon {
   }
 
   private def demoteLeadTrusteeTransform(input: JsValue): DeltaTransform = {
-    val oldLeadIndTrustee = input.transform(leadTrusteesPath.json.pick).flatMap(_.validate[DisplayTrustLeadTrusteeIndType]).asOpt
-    val oldLeadOrgTrustee = input.transform(leadTrusteesPath.json.pick).flatMap(_.validate[DisplayTrustLeadTrusteeOrgType]).asOpt
+    val oldLeadIndTrustee = input.transform(leadTrusteesPath.json.pick).flatMap(_.validate[LeadTrusteeIndType]).asOpt
+    val oldLeadOrgTrustee = input.transform(leadTrusteesPath.json.pick).flatMap(_.validate[LeadTrusteeOrgType]).asOpt
 
     (oldLeadIndTrustee, oldLeadOrgTrustee) match {
       case (Some(indLead), None) =>
-        val demotedTrustee = DisplayTrustTrusteeIndividualType(
+        val demotedTrustee = TrusteeIndividualType(
           None,
           None,
           indLead.name,
           Some(indLead.dateOfBirth),
           Some(indLead.phoneNumber),
           Some(getIdentification(indLead.identification)),
-          indLead.entityStart.get
+          indLead.entityStart,
+          indLead.entityEnd
         )
 
         AddTrusteeIndTransform(demotedTrustee)
 
       case (None, Some(orgLead)) =>
 
-        val demotedTrustee = DisplayTrustTrusteeOrgType(
+        val demotedTrustee = TrusteeOrgType(
           None,
           None,
           orgLead.name,
           Some(orgLead.phoneNumber),
           orgLead.email,
           Some(getIdentification(orgLead.identification)),
-          orgLead.entityStart.get
+          orgLead.entityStart,
+          orgLead.entityEnd
         )
 
         AddTrusteeOrgTransform(demotedTrustee)
@@ -90,18 +92,18 @@ trait PromoteTrusteeCommon {
     }
   }
 
-  private def getIdentification(identification: DisplayTrustIdentificationType): DisplayTrustIdentificationType = {
+  private def getIdentification(identification: IdentificationType): IdentificationType = {
     if (identification.nino.isDefined) {
-      DisplayTrustIdentificationType(identification.safeId, identification.nino, identification.passport, None)
+      IdentificationType(identification.nino, identification.passport, None, identification.safeId)
     }
     else {
       identification
     }
   }
 
-  private def getIdentification(identification: DisplayTrustIdentificationOrgType): DisplayTrustIdentificationOrgType = {
+  private def getIdentification(identification: IdentificationOrgType): IdentificationOrgType = {
     if (identification.utr.isDefined) {
-      DisplayTrustIdentificationOrgType(identification.safeId, identification.utr, None)
+      IdentificationOrgType(identification.utr, None, identification.safeId)
     }
     else {
       identification

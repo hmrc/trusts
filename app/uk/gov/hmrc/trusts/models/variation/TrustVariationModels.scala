@@ -294,6 +294,21 @@ case class LeadTrusteeType(
 object LeadTrusteeType {
 
   implicit val leadTrusteeFormats: Format[LeadTrusteeType] = Json.format[LeadTrusteeType]
+
+  object EitherLeadTrusteeReads extends Reads[LeadTrusteeType] {
+    override def reads(json: JsValue): JsResult[LeadTrusteeType] = {
+
+      json.validate[LeadTrusteeIndType].map {
+        leadTrusteeInd =>
+          LeadTrusteeType(leadTrusteeInd = Some(leadTrusteeInd))
+      }.orElse {
+        json.validate[LeadTrusteeOrgType].map {
+          org =>
+            LeadTrusteeType(leadTrusteeOrg = Some(org))
+        }
+      }
+    }
+  }
 }
 
 case class TrusteeType(

@@ -26,7 +26,8 @@ import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.{JsResult, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.variation.{IdentificationType, LeadTrusteeIndType}
 import uk.gov.hmrc.trusts.models.{AddressType, NameType}
 import uk.gov.hmrc.trusts.repositories.TransformationRepositoryImpl
 import uk.gov.hmrc.trusts.transformers._
@@ -38,15 +39,16 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
   private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 
 
-  val unitTestTrusteeInfo = DisplayTrustLeadTrusteeIndType(
+  val unitTestTrusteeInfo = LeadTrusteeIndType(
     lineNo = Some("newLineNo"),
     bpMatchStatus = Some("newMatchStatus"),
     name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
     dateOfBirth = LocalDate.of(1965, 2, 10),
     phoneNumber = "newPhone",
     email = Some("newEmail"),
-    identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-    entityStart = Some(LocalDate.parse("2012-03-14"))
+    identification = IdentificationType(Some("newNino"), None, None, None),
+    entityStart = LocalDate.parse("2012-03-14"),
+    entityEnd = None
   )
 
   private val auditService = mock[AuditService]
@@ -74,26 +76,28 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       |          }
       |""".stripMargin)
 
-  val existingLeadTrusteeInfo = DisplayTrustLeadTrusteeIndType(
+  val existingLeadTrusteeInfo = LeadTrusteeIndType(
     lineNo = Some("newLineNo"),
     bpMatchStatus = Some("newMatchStatus"),
     name = NameType("existingFirstName", Some("existingMiddleName"), "existingLastName"),
     dateOfBirth = LocalDate.of(1965, 2, 10),
     phoneNumber = "newPhone",
     email = Some("newEmail"),
-    identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-    entityStart = Some(LocalDate.parse("2002-03-14"))
+    identification = IdentificationType(Some("newNino"), None, None, None),
+    entityStart = LocalDate.parse("2002-03-14"),
+    entityEnd = None
   )
 
-  val newLeadTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
+  val newLeadTrusteeIndInfo = LeadTrusteeIndType(
     lineNo = Some("newLineNo"),
     bpMatchStatus = Some("newMatchStatus"),
     name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
     dateOfBirth = LocalDate.of(1965, 2, 10),
     phoneNumber = "newPhone",
     email = Some("newEmail"),
-    identification = DisplayTrustIdentificationType(None, Some("newNino"), None, None),
-    entityStart = Some(LocalDate.parse("2012-03-14"))
+    identification = IdentificationType(Some("newNino"), None, None, None),
+    entityStart = LocalDate.parse("2012-03-14"),
+    entityEnd = None
   )
 
   "must transform json data with the current transforms" in {
@@ -165,19 +169,20 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     val desService = mock[DesService]
     when(desService.getTrustInfo(any(), any())).thenReturn(Future.successful(response))
 
-    val newLeadTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
+    val newLeadTrusteeIndInfo = LeadTrusteeIndType(
       lineNo = None,
       bpMatchStatus = None,
       name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
       dateOfBirth = LocalDate.of(1965, 2, 10),
       phoneNumber = "newPhone",
       email = Some("newEmail"),
-      identification = DisplayTrustIdentificationType(
-        None,
+      identification = IdentificationType(
         Some("newNino"),
         None,
-        Some(AddressType("newLine1", "newLine2", None, None, Some("NE1 2LA"), "GB"))),
-      entityStart = None
+        Some(AddressType("newLine1", "newLine2", None, None, Some("NE1 2LA"), "GB")),
+        None),
+      entityStart = LocalDate.of(2012, 2, 20),
+      entityEnd = None
     )
 
     val existingTransforms = Seq(

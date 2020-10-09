@@ -20,17 +20,18 @@ import java.time.LocalDate
 
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
-import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.repositories.TransformIntegrationTest
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType, GetTrustSuccessResponse}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.GetTrustSuccessResponse
+import uk.gov.hmrc.trusts.models.variation.{IdentificationType, LeadTrusteeIndType}
 import uk.gov.hmrc.trusts.models.{AddressType, NameType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
@@ -45,15 +46,14 @@ class PromoteLeadTrusteeSpec extends FreeSpec with MustMatchers with MockitoSuga
 
     "must return amended data in a subsequent 'get' call" in {
 
-      val newTrusteeIndInfo = DisplayTrustLeadTrusteeIndType(
+      val newTrusteeIndInfo = LeadTrusteeIndType(
         lineNo = None,
         bpMatchStatus = None,
         name = NameType("John", Some("William"), "O'Connor"),
         dateOfBirth = LocalDate.of(1965, 2, 10),
         phoneNumber = "newPhone",
         email = Some("newEmail"),
-        identification = DisplayTrustIdentificationType(
-          None,
+        identification = IdentificationType(
           Some("ST123456"),
           None,
           Some(AddressType(
@@ -63,8 +63,10 @@ class PromoteLeadTrusteeSpec extends FreeSpec with MustMatchers with MockitoSuga
             None,
             Some("NE1 2LA"),
             "GB"
-          ))),
-          None
+          )),
+          None),
+        entityStart = LocalDate.of(2012, 2, 20),
+        entityEnd = None
       )
 
       val expectedGetAfterPromoteTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-promote-trustee.json")

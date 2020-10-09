@@ -19,7 +19,8 @@ package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType, DisplayTrustTrusteeType}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustTrusteeType
+import uk.gov.hmrc.trusts.models.variation.{TrusteeIndividualType, TrusteeOrgType}
 
 trait AmendTrusteeCommon {
 
@@ -38,8 +39,8 @@ trait AmendTrusteeCommon {
   }
 
   private def addTrustee(newTrustee: JsValue, updatedJson: JsValue, entityStart: LocalDate): JsResult[JsValue] = {
-    val indTrustee = newTrustee.validate[DisplayTrustTrusteeIndividualType].asOpt
-    val orgTrustee = newTrustee.validate[DisplayTrustTrusteeOrgType].asOpt
+    val indTrustee = newTrustee.validate[TrusteeIndividualType].asOpt
+    val orgTrustee = newTrustee.validate[TrusteeOrgType].asOpt
 
     (indTrustee, orgTrustee) match {
       case (Some(ind), None) =>

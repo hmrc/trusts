@@ -21,7 +21,7 @@ import java.time.LocalDate
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.test.Helpers.running
 import uk.gov.hmrc.trusts.models.NameType
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType, DisplayTrustTrusteeIndividualType}
+import uk.gov.hmrc.trusts.models.variation.{IdentificationType, LeadTrusteeIndType, TrusteeIndividualType}
 import uk.gov.hmrc.trusts.repositories.TransformationRepository
 import uk.gov.hmrc.trusts.transformers.{AddTrusteeIndTransform, AmendLeadTrusteeIndTransform, ComposedDeltaTransform}
 
@@ -59,26 +59,28 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with TransformI
   val data = ComposedDeltaTransform(
     Seq(
       AmendLeadTrusteeIndTransform(
-        DisplayTrustLeadTrusteeIndType(
+        LeadTrusteeIndType(
           Some(""),
           None,
           NameType("New", Some("lead"), "Trustee"),
           LocalDate.parse("2000-01-01"),
           "",
           None,
-          DisplayTrustIdentificationType(None, None, None, None),
-          Some(LocalDate.parse("2010-10-10"))
+          IdentificationType(None, None, None, None),
+          LocalDate.parse("2010-10-10"),
+          None
         )
       ),
       AddTrusteeIndTransform(
-        DisplayTrustTrusteeIndividualType(
+        TrusteeIndividualType(
           Some("lineNo"),
           Some("bpMatchStatus"),
           NameType("New", None, "Trustee"),
           Some(LocalDate.parse("2000-01-01")),
           Some("phoneNumber"),
-          Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-          LocalDate.parse("2010-10-10")
+          Some(IdentificationType(Some("nino"), None, None, None)),
+          LocalDate.parse("2010-10-10"),
+          None
         )
       )
     )

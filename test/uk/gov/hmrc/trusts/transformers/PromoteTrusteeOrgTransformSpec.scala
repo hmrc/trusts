@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationOrgType, DisplayTrustLeadTrusteeOrgType}
+import uk.gov.hmrc.trusts.models.variation.{IdentificationOrgType, LeadTrusteeOrgType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class PromoteTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {
@@ -58,14 +58,15 @@ class PromoteTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {
   }
 
   private def transformToTest = {
-    val newTrusteeInfo = DisplayTrustLeadTrusteeOrgType(
+    val newTrusteeInfo = LeadTrusteeOrgType(
       lineNo = None,
       bpMatchStatus = None,
       name = "Trustee Org 1",
       phoneNumber = "0121546546",
       email = None,
-      identification = DisplayTrustIdentificationOrgType(None, Some("5465416546"), None),
-      entityStart = None
+      identification = IdentificationOrgType(Some("5465416546"), None, None),
+      entityStart = LocalDate.of(2010, 4, 3),
+      entityEnd = None
     )
     val transformer = PromoteTrusteeOrgTransform(
       index = 1,

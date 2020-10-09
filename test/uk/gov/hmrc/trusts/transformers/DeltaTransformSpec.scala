@@ -20,7 +20,6 @@ import java.time.LocalDate
 
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.variation._
 import uk.gov.hmrc.trusts.models.{AddressType, NameType}
 
@@ -34,47 +33,51 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
       val amendedDate = LocalDate.of(2012, 3, 14)
       val currentDate = LocalDate.of(2020, 4, 1)
 
-      val newLeadTrustee = DisplayTrustLeadTrusteeIndType(
+      val newLeadTrustee = LeadTrusteeIndType(
         None,
         None,
         NameType("New", Some("lead"), "Trustee"),
         LocalDate.parse("2000-01-01"),
         "",
         None,
-        DisplayTrustIdentificationType(None, None, None, None),
-        None
+        IdentificationType(None, None, None, None),
+        LocalDate.of(2010, 4, 3),
+        entityEnd = None
       )
 
-      val newLeadTrusteeOrg = DisplayTrustLeadTrusteeOrgType(
+      val newLeadTrusteeOrg = LeadTrusteeOrgType(
         None,
         None,
         "Organisation",
         "phoneNumber",
         None,
-        DisplayTrustIdentificationOrgType(
-          None, Some("utr"), None
+        IdentificationOrgType(
+          Some("utr"), None, None
         ),
+        LocalDate.of(2010, 4, 3),
         None
       )
 
-      val newTrusteeInd = DisplayTrustTrusteeIndividualType(
+      val newTrusteeInd = TrusteeIndividualType(
         Some("lineNo"),
         Some("bpMatchStatus"),
         NameType("New", None, "Trustee"),
         Some(LocalDate.parse("2000-01-01")),
         Some("phoneNumber"),
-        Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-        LocalDate.parse("2000-01-01")
+        Some(IdentificationType(Some("nino"), None, None, None)),
+        LocalDate.parse("2000-01-01"),
+        None
       )
 
-      val newTrusteeOrg = DisplayTrustTrusteeOrgType(
+      val newTrusteeOrg = TrusteeOrgType(
         Some("lineNo"),
         Some("bpMatchStatus"),
         "New Trustee",
         Some("phoneNumber"),
         Some("email"),
-        Some(DisplayTrustIdentificationOrgType(None, Some("utr"), None)),
-        LocalDate.parse("2000-01-01")
+        Some(IdentificationOrgType(Some("utr"), None, None)),
+        LocalDate.parse("2000-01-01"),
+        None
       )
 
       val individualBeneficiary = IndividualDetailsType(
