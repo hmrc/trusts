@@ -22,7 +22,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.utils.TypeOfTrust.TypeOfTrust
 
-trait DataExamples extends  JsonRequests {
+trait DataExamples extends  JsonFixtures {
 
   val nameType = NameType(
     firstName = "Oliver",

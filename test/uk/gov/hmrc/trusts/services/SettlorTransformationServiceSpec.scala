@@ -25,17 +25,18 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.variation.{AmendDeceasedSettlor, SettlorCompany, Settlor, IdentificationOrgType}
-import uk.gov.hmrc.trusts.models._
+import uk.gov.hmrc.trusts.models.get_trust.get_trust
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustProcessedResponse, _}
+import uk.gov.hmrc.trusts.models.variation.{AmendDeceasedSettlor, IdentificationOrgType, Settlor, SettlorCompany}
+import uk.gov.hmrc.trusts.models.{AddressType, NameType, variation}
 import uk.gov.hmrc.trusts.transformers._
-import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
+import uk.gov.hmrc.trusts.transformers.remove.RemoveSettlor
+import uk.gov.hmrc.trusts.utils.{JsonFixtures, JsonUtils}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonRequests {
+class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonFixtures {
 
   private implicit val pc: PatienceConfig =
     PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
@@ -92,6 +93,9 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
         NameType("First", None, "Last"),
         None,
         None,
+        None,
+        None,
+        None,
         LocalDate.parse("1990-10-10"),
         None
       )
@@ -118,6 +122,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
         Some(IdentificationOrgType(
           None,
           Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")), None)),
+        None,
         LocalDate.parse("1990-10-10"),
         None
       )
@@ -143,6 +148,9 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
           name = NameType("First", None, "Last"),
           dateOfBirth = None,
           identification = None,
+          countryOfResidence = None,
+          legallyIncapable = None,
+          nationality = None,
           entityStart = LocalDate.parse("2010-05-03"),
           entityEnd = None
         )
@@ -154,6 +162,9 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
             name = NameType("Old", None, "Last"),
             dateOfBirth = Some(LocalDate.parse("1990-02-01")),
             identification = None,
+            countryOfResidence = None,
+            legallyIncapable = None,
+            nationality = None,
             entityStart = LocalDate.parse("2010-05-03"),
             entityEnd = None
           )
@@ -162,7 +173,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
         when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
         when(transformationService.getTransformedData(any(), any()))
-          .thenReturn(Future.successful(TrustProcessedResponse(
+          .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
             buildInputJson("settlor", Seq(originalSettlorJson)),
             ResponseHeader("status", "formBundlNo")
           )))
@@ -191,6 +202,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
         companyType = None,
         companyTime = None,
         identification = None,
+        countryOfResidence = None,
         entityStart = LocalDate.parse("2010-05-03"),
         entityEnd = None
       )
@@ -203,6 +215,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
           companyTime = None,
           companyType = None,
           identification = None,
+          countryOfResidence = None,
           entityStart = LocalDate.parse("2010-05-03"),
           entityEnd = None
         )
@@ -212,7 +225,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
       when(transformationService.getTransformedData(any(), any()))
         .thenReturn(
-          Future.successful(TrustProcessedResponse(buildInputJson("settlorCompany", Seq(originalSettlorJson)),
+          Future.successful(get_trust.TrustProcessedResponse(buildInputJson("settlorCompany", Seq(originalSettlorJson)),
           ResponseHeader("status", "formBundlNo")
         )))
 
@@ -264,7 +277,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       when(transformationService.getTransformedData(any(), any()))
         .thenReturn(
           Future.successful(
-            TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
+            get_trust.TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
           ))
 
       val result = service.amendDeceasedSettlor("utr", "internalId", amendedSettlor)

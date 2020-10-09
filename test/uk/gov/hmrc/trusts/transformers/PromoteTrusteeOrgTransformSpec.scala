@@ -65,6 +65,7 @@ class PromoteTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {
       phoneNumber = "0121546546",
       email = None,
       identification = IdentificationOrgType(Some("5465416546"), None, None),
+      countryOfResidence = None,
       entityStart = LocalDate.of(2010, 4, 3),
       entityEnd = None
     )

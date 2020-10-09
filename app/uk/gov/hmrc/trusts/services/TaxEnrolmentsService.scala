@@ -24,7 +24,7 @@ import play.api.Logging
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.connector.TaxEnrolmentConnector
-import uk.gov.hmrc.trusts.models.{TaxEnrolmentFailure, TaxEnrolmentSuscriberResponse}
+import uk.gov.hmrc.trusts.models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentSuscriberResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -38,7 +38,7 @@ class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector :TaxEnrolmentConn
   private val MAX_TRIES = config.maxRetry
 
   override def setSubscriptionId(subscriptionId: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] = {
-    implicit val as = ActorSystem()
+    implicit val as: ActorSystem = ActorSystem()
     enrolSubscriberWithRetry(subscriptionId, 1)
   }
 

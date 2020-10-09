@@ -41,6 +41,7 @@ class AmendBusinessSettlorTransformSpec extends FreeSpec with MustMatchers {
           None,
           None,
           identification = None,
+          None,
           LocalDate.parse("2018-02-28"),
           None
         )
@@ -79,6 +80,7 @@ class AmendBusinessSettlorTransformSpec extends FreeSpec with MustMatchers {
           None,
           None,
           identification = None,
+          None,
           LocalDate.parse("2018-02-28"),
           None
         )
@@ -114,6 +116,7 @@ class AmendBusinessSettlorTransformSpec extends FreeSpec with MustMatchers {
           None,
           None,
           identification = None,
+          None,
           LocalDate.parse("2020-02-28"),
           None
         )

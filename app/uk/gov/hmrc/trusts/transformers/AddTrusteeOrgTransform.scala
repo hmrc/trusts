@@ -17,7 +17,6 @@
 package uk.gov.hmrc.trusts.transformers
 
 import play.api.libs.json.{Json, _}
-import uk.gov.hmrc.trusts.models.TrusteeOrg
 import uk.gov.hmrc.trusts.models.variation.TrusteeOrgType
 
 case class AddTrusteeOrgTransform(trustee: TrusteeOrgType) extends DeltaTransform

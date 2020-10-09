@@ -21,9 +21,9 @@ import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
-import uk.gov.hmrc.trusts.models.RemoveSettlor
 import uk.gov.hmrc.trusts.models.variation.{AmendDeceasedSettlor, Settlor, SettlorCompany}
 import uk.gov.hmrc.trusts.services.SettlorTransformationService
+import uk.gov.hmrc.trusts.transformers.remove.RemoveSettlor
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
 import scala.concurrent.{ExecutionContext, Future}

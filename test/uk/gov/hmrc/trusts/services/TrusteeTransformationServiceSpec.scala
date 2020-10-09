@@ -25,15 +25,16 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
-import uk.gov.hmrc.trusts.models.variation.{IdentificationOrgType, IdentificationType, LeadTrusteeIndType, LeadTrusteeOrgType, LeadTrusteeType, TrusteeIndividualType, TrusteeOrgType, TrusteeType}
-import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee}
+import uk.gov.hmrc.trusts.models.NameType
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustProcessedResponse, _}
+import uk.gov.hmrc.trusts.models.variation._
 import uk.gov.hmrc.trusts.transformers._
-import uk.gov.hmrc.trusts.utils.JsonRequests
+import uk.gov.hmrc.trusts.transformers.remove.RemoveTrustee
+import uk.gov.hmrc.trusts.utils.JsonFixtures
 
 import scala.concurrent.Future
 
-class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonRequests {
+class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonFixtures {
   private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 
   private val currentDate: LocalDate = LocalDate.of(1999, 3, 14)
@@ -49,6 +50,9 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = IdentificationType(Some("newNino"), None, None, None),
+    countryOfResidence = None,
+    legallyIncapable = None,
+    nationality = None,
     entityStart = LocalDate.parse("2012-03-14"),
     None
   )
@@ -60,6 +64,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = IdentificationOrgType(Some("UTR"), None, None),
+    countryOfResidence = None,
     entityStart = LocalDate.parse("2012-03-14"),
     entityEnd = None
   )
@@ -71,6 +76,9 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     dateOfBirth = Some(LocalDate.of(1965, 2, 10)),
     phoneNumber = Some("newPhone"),
     identification = Some(IdentificationType(Some("newNino"), None, None, None)),
+    countryOfResidence = None,
+    legallyIncapable = None,
+    nationality = None,
     entityStart = LocalDate.parse("2012-03-14"),
     entityEnd = None
   )
@@ -86,6 +94,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       None,
       None)
     ),
+    countryOfResidence = None,
     entityStart = LocalDate.parse("2012-03-14"),
     entityEnd = None
   )
@@ -189,7 +198,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     }
 
     "must write a promote trustee ind transform using the transformation service" in {
-      val response = getTrustResponse.as[GetTrustSuccessResponse]
+      val response = get4MLDTrustResponse.as[GetTrustSuccessResponse]
       val processedResponse = response.asInstanceOf[TrustProcessedResponse]
 
       val transformationService = mock[TransformationService]
@@ -216,7 +225,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     }
 
     "must write a promote trustee org transform using the transformation service" in {
-      val response = getTrustResponse.as[GetTrustSuccessResponse]
+      val response = get4MLDTrustResponse.as[GetTrustSuccessResponse]
       val processedResponse = response.asInstanceOf[TrustProcessedResponse]
 
       val transformationService = mock[TransformationService]
@@ -244,7 +253,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     }
 
     "must write a RemoveTrustee transform using the transformation service" in {
-      val response = getTrustResponse.as[GetTrustSuccessResponse]
+      val response = get4MLDTrustResponse.as[GetTrustSuccessResponse]
       val processedResponse = response.asInstanceOf[TrustProcessedResponse]
 
       val transformationService = mock[TransformationService]
@@ -292,7 +301,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     }
 
     "must add a new amend trustee transform using the transformation service" in {
-      val response = getTrustResponse.as[GetTrustSuccessResponse]
+      val response = get4MLDTrustResponse.as[GetTrustSuccessResponse]
       val processedResponse = response.asInstanceOf[TrustProcessedResponse]
 
       val index = 0

@@ -25,17 +25,18 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.NameType
+import uk.gov.hmrc.trusts.models.get_trust.get_trust
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustProcessedResponse, _}
 import uk.gov.hmrc.trusts.models.variation.NaturalPersonType
-import uk.gov.hmrc.trusts.models.{NameType, RemoveOtherIndividual}
 import uk.gov.hmrc.trusts.transformers._
-import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
+import uk.gov.hmrc.trusts.transformers.remove.RemoveOtherIndividual
+import uk.gov.hmrc.trusts.utils.{JsonFixtures, JsonUtils}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class OtherIndividualTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonRequests {
+class OtherIndividualTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonFixtures {
 
   private implicit val pc: PatienceConfig =
     PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
@@ -96,6 +97,9 @@ class OtherIndividualTransformationServiceSpec extends FreeSpec with MockitoSuga
           identification = None,
           lineNo = None,
           bpMatchStatus = None,
+          countryOfResidence = None,
+          legallyIncapable = None,
+          nationality = None,
           entityStart = LocalDateMock.now,
           entityEnd = None
         )
@@ -124,7 +128,7 @@ class OtherIndividualTransformationServiceSpec extends FreeSpec with MockitoSuga
         when(transformationService.getTransformedData(any(), any()))
           .thenReturn(
             Future.successful(
-              TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
+              get_trust.TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
             ))
 
         val result = service.amendOtherIndividualTransformer("utr", 0, "internalId", amendedOtherIndividual)

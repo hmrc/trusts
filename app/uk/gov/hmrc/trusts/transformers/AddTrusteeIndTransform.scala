@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.trusts.transformers
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.TrusteeInd
 import uk.gov.hmrc.trusts.models.variation.TrusteeIndividualType
 
 case class AddTrusteeIndTransform(trustee: TrusteeIndividualType) extends DeltaTransform

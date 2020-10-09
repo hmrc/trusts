@@ -23,9 +23,10 @@ import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
-import uk.gov.hmrc.trusts.models.RegistrationSubmission.{AnswerSection, MappedPiece}
+import uk.gov.hmrc.trusts.models._
+import uk.gov.hmrc.trusts.models.registration.RegistrationSubmission.{AnswerSection, MappedPiece}
+import uk.gov.hmrc.trusts.models.registration.{RegistrationSubmission, RegistrationSubmissionDraft, RegistrationSubmissionDraftData}
 import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
-import uk.gov.hmrc.trusts.models.{Status => ModelStatus, _}
 import uk.gov.hmrc.trusts.repositories.RegistrationSubmissionRepository
 import uk.gov.hmrc.trusts.services.LocalDateTimeService
 
@@ -106,8 +107,8 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
     }
   }
 
-  private def setStatus(key: String, statusOpt: Option[ModelStatus]): Reads[JsObject] = {
-    val sectionPath = ModelStatus.path \ key
+  private def setStatus(key: String, statusOpt: Option[registration.Status]): Reads[JsObject] = {
+    val sectionPath = registration.Status.path \ key
 
     statusOpt match {
       case Some(status) =>
@@ -315,7 +316,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
     implicit request =>
       submissionRepository.getDraft(draftId, request.identifier).flatMap {
         case Some(draft) =>
-          val statusPath = ModelStatus.path \ section
+          val statusPath = registration.Status.path \ section
           val userAnswersPath = __ \ section
           val rowsPath = AnswerSection.path \ section
           val mappedDataPath = MappedPiece.path \ mappedDataKey

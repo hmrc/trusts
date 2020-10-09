@@ -67,6 +67,9 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with TransformI
           "",
           None,
           IdentificationType(None, None, None, None),
+          countryOfResidence = None,
+          legallyIncapable = None,
+          nationality = None,
           LocalDate.parse("2010-10-10"),
           None
         )
@@ -79,6 +82,9 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with TransformI
           Some(LocalDate.parse("2000-01-01")),
           Some("phoneNumber"),
           Some(IdentificationType(Some("nino"), None, None, None)),
+          countryOfResidence = None,
+          legallyIncapable = None,
+          nationality = None,
           LocalDate.parse("2010-10-10"),
           None
         )

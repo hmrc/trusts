@@ -31,8 +31,9 @@ import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.variation.NaturalPersonType
-import uk.gov.hmrc.trusts.models.{NameType, RemoveOtherIndividual, Success}
+import uk.gov.hmrc.trusts.models.{NameType, Success}
 import uk.gov.hmrc.trusts.services.OtherIndividualTransformationService
+import uk.gov.hmrc.trusts.transformers.remove.RemoveOtherIndividual
 
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
@@ -103,6 +104,9 @@ class OtherIndividualTransformationControllerSpec extends FreeSpec
         name = NameType("First", None, "Last"),
         dateOfBirth = None,
         identification = None,
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         entityStart = LocalDate.parse("2010-05-03"),
         entityEnd = None
       )
@@ -152,6 +156,9 @@ class OtherIndividualTransformationControllerSpec extends FreeSpec
         None,
         None,
         name = NameType("First", None, "Last"),
+        None,
+        None,
+        None,
         None,
         None,
         entityStart = LocalDate.parse("2000-01-01"),

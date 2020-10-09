@@ -26,17 +26,18 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.NameType
+import uk.gov.hmrc.trusts.models.get_trust.get_trust
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustProcessedResponse, _}
 import uk.gov.hmrc.trusts.models.variation.{Protector, ProtectorCompany}
-import uk.gov.hmrc.trusts.models.{NameType, RemoveProtector}
 import uk.gov.hmrc.trusts.transformers._
-import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
+import uk.gov.hmrc.trusts.transformers.remove.RemoveProtector
+import uk.gov.hmrc.trusts.utils.{JsonFixtures, JsonUtils}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonRequests {
+class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonFixtures {
 
   private implicit val pc: PatienceConfig =
     PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
@@ -74,6 +75,9 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
           NameType("First", None, "Last"),
           None,
           None,
+          None,
+          None,
+          None,
           LocalDate.parse("1990-10-10"),
           None
         )
@@ -99,6 +103,9 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
           identification = None,
           lineNo = None,
           bpMatchStatus = None,
+          countryOfResidence = None,
+          legallyIncapable = None,
+          nationality = None,
           entityStart = LocalDateMock.now,
           entityEnd = None
         )
@@ -151,7 +158,7 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
         when(transformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
         when(transformationService.getTransformedData(any(), any()))
-          .thenReturn(Future.successful(TrustProcessedResponse(
+          .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
             buildInputJson("protector", Seq(protector)),
             ResponseHeader("status", "formBundlNo")
           )))
@@ -171,6 +178,7 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
           identification = None,
           lineNo = None,
           bpMatchStatus = None,
+          countryOfResidence = None,
           entityStart = LocalDate.parse("2010-05-03"),
           entityEnd = None
         )
@@ -194,6 +202,7 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
           None,
           "Company Name",
           None,
+          None,
           LocalDate.parse("2010-01-01"),
           None
         )
@@ -214,7 +223,7 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
         when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
         when(transformationService.getTransformedData(any(), any()))
-          .thenReturn(Future.successful(TrustProcessedResponse(
+          .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
             buildInputJson("protectorCompany", Seq(original)),
             ResponseHeader("status", "formBundleNo")
           )))

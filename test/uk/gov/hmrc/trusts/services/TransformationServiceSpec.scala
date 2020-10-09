@@ -26,16 +26,17 @@ import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.{JsResult, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.get_trust.get_trust
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustProcessedResponse, _}
 import uk.gov.hmrc.trusts.models.variation.{IdentificationType, LeadTrusteeIndType}
 import uk.gov.hmrc.trusts.models.{AddressType, NameType}
 import uk.gov.hmrc.trusts.repositories.TransformationRepositoryImpl
 import uk.gov.hmrc.trusts.transformers._
-import uk.gov.hmrc.trusts.utils.{JsonRequests, JsonUtils}
+import uk.gov.hmrc.trusts.utils.{JsonFixtures, JsonUtils}
 
 import scala.concurrent.Future
 
-class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonRequests {
+class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonFixtures {
   private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 
 
@@ -47,6 +48,9 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = IdentificationType(Some("newNino"), None, None, None),
+    countryOfResidence = None,
+    legallyIncapable = None,
+    nationality = None,
     entityStart = LocalDate.parse("2012-03-14"),
     entityEnd = None
   )
@@ -84,6 +88,9 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = IdentificationType(Some("newNino"), None, None, None),
+    countryOfResidence = None,
+    legallyIncapable = None,
+    nationality = None,
     entityStart = LocalDate.parse("2002-03-14"),
     entityEnd = None
   )
@@ -96,6 +103,9 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = IdentificationType(Some("newNino"), None, None, None),
+    countryOfResidence = None,
+    legallyIncapable = None,
+    nationality = None,
     entityStart = LocalDate.parse("2012-03-14"),
     entityEnd = None
   )
@@ -147,13 +157,13 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     result.get mustEqual afterJson
   }
   "must fix lead trustee address of ETMP json read from DES service" in {
-    val response = getTrustResponse.as[GetTrustSuccessResponse]
+    val response = get4MLDTrustResponse.as[GetTrustSuccessResponse]
     val processedResponse = response.asInstanceOf[TrustProcessedResponse]
     val desService = mock[DesService]
     when(desService.getTrustInfo(any(), any())).thenReturn(Future.successful(response))
 
     val transformedJson = JsonUtils.getJsonValueFromFile("valid-get-trust-response-transformed.json")
-    val expectedResponse = TrustProcessedResponse(transformedJson, processedResponse.responseHeader)
+    val expectedResponse = get_trust.TrustProcessedResponse(transformedJson, processedResponse.responseHeader)
 
     val repository = mock[TransformationRepositoryImpl]
     when(repository.get(any(), any())).thenReturn(Future.successful(None))
@@ -164,7 +174,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     }
   }
   "must apply transformations to ETMP json read from DES service" in {
-    val response = getTrustResponse.as[GetTrustSuccessResponse]
+    val response = get4MLDTrustResponse.as[GetTrustSuccessResponse]
     val processedResponse = response.asInstanceOf[TrustProcessedResponse]
     val desService = mock[DesService]
     when(desService.getTrustInfo(any(), any())).thenReturn(Future.successful(response))
@@ -181,6 +191,9 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
         None,
         Some(AddressType("newLine1", "newLine2", None, None, Some("NE1 2LA"), "GB")),
         None),
+      countryOfResidence = None,
+      legallyIncapable = None,
+      nationality = None,
       entityStart = LocalDate.of(2012, 2, 20),
       entityEnd = None
     )
@@ -194,7 +207,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
 
     val transformedJson = JsonUtils.getJsonValueFromFile("valid-get-trust-response-transformed-with-amend.json")
-    val expectedResponse = TrustProcessedResponse(transformedJson, processedResponse.responseHeader)
+    val expectedResponse = get_trust.TrustProcessedResponse(transformedJson, processedResponse.responseHeader)
 
     val service = new TransformationService(repository, desService, auditService)
 

@@ -56,8 +56,7 @@ object Details {
 
 case class MatchData(utr: String,
                      name: String,
-                     postCode: Option[String]
-                    )
+                     postCode: Option[String])
 
 object MatchData {
   implicit val matchDataFormat: Format[MatchData] = Json.format[MatchData]
@@ -310,8 +309,7 @@ object BeneficiaryTrustType {
   implicit val beneficiaryTrustTypeFormat: Format[BeneficiaryTrustType] = Json.format[BeneficiaryTrustType]
 }
 
-case class IdentificationOrgType(utr: Option[String],
-                                          address: Option[AddressType])
+case class IdentificationOrgType(utr: Option[String], address: Option[AddressType])
 
 object IdentificationOrgType {
   implicit val trustBeneficiaryIdentificationFormat: Format[IdentificationOrgType] = Json.format[IdentificationOrgType]

@@ -22,10 +22,12 @@ import play.api.libs.json.JsValue
 import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions._
-import uk.gov.hmrc.trusts.models.ExistingCheckResponse._
-import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.existing_trust.ExistingCheckResponse._
+import uk.gov.hmrc.trusts.models.existing_trust._
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustProcessedResponse, _}
+import uk.gov.hmrc.trusts.models.get_trust.{get_trust, _}
+import uk.gov.hmrc.trusts.models.registration.RegistrationTrnResponse
+import uk.gov.hmrc.trusts.models.tax_enrolments.SubscriptionIdResponse
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.repositories.CacheRepositoryImpl
 import uk.gov.hmrc.trusts.utils.JsonUtils
@@ -198,7 +200,7 @@ class DesServiceSpec extends BaseSpec {
     "return TrustFoundResponse" when {
       "TrustFoundResponse is returned from DES Connector with a Processed flag and a trust body when not cached" in new DesServiceFixture {
         val utr = "1234567890"
-        val fullEtmpResponseJson = getTrustResponse
+        val fullEtmpResponseJson = get4MLDTrustResponse
         val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
 
         when(mockRepository.get(any[String], any[String])).thenReturn(Future.successful(None))
@@ -208,7 +210,7 @@ class DesServiceSpec extends BaseSpec {
 
         val futureResult = SUT.getTrustInfo(utr, myId)
         whenReady(futureResult) { result =>
-          result mustBe TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))
+          result mustBe get_trust.TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))
           verify(mockRepository, times(1)).set(utr, myId, fullEtmpResponseJson)
         }
       }
@@ -216,7 +218,7 @@ class DesServiceSpec extends BaseSpec {
       "TrustFoundResponse is returned from repository with a Processed flag and a trust body when cached" in new DesServiceFixture {
         val utr = "1234567890"
 
-        val fullEtmpResponseJson = getTrustResponse
+        val fullEtmpResponseJson = get4MLDTrustResponse
         val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
 
         when(mockRepository.get(any[String], any[String])).thenReturn(Future.successful(Some(fullEtmpResponseJson)))
@@ -224,7 +226,7 @@ class DesServiceSpec extends BaseSpec {
 
         val futureResult = SUT.getTrustInfo(utr, myId)
         whenReady(futureResult) { result =>
-          result mustBe TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))
+          result mustBe get_trust.TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))
           verifyZeroInteractions(mockConnector)
         }
       }

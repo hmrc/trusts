@@ -21,8 +21,8 @@ import java.time.LocalDate
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.Json
 import play.api.mvc.BodyParsers
@@ -30,9 +30,10 @@ import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.{Success, RemoveBeneficiary, NameType, AddressType}
 import uk.gov.hmrc.trusts.models.variation._
+import uk.gov.hmrc.trusts.models.{AddressType, NameType, Success}
 import uk.gov.hmrc.trusts.services.BeneficiaryTransformationService
+import uk.gov.hmrc.trusts.transformers.remove.RemoveBeneficiary
 
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
@@ -40,9 +41,9 @@ import scala.concurrent.Future
 class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers
  with GuiceOneAppPerSuite {
 
-  lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+  private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
-  val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
+  private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
   "Amend unidentified beneficiary" - {
 

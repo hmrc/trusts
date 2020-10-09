@@ -36,6 +36,7 @@ class AmendLeadTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {
         phoneNumber = "newPhone",
         email = Some("newEmail"),
         identification = IdentificationOrgType( Some("newUtr"), None, None),
+        countryOfResidence = None,
         LocalDate.of(2010, 4, 3),
         None
       )

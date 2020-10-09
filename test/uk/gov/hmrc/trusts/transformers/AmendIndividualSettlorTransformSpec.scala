@@ -41,6 +41,9 @@ class AmendIndividualSettlorTransformSpec extends FreeSpec with MustMatchers {
           NameType("First updated", None, "Last updated"),
           None,
           identification = None,
+          countryOfResidence = None,
+          legallyIncapable = None,
+          nationality = None,
           LocalDate.parse("2018-02-28"),
           None
         )
@@ -82,6 +85,9 @@ class AmendIndividualSettlorTransformSpec extends FreeSpec with MustMatchers {
           NameType("First updated", None, "Last updated"),
           None,
           identification = None,
+          countryOfResidence = None,
+          legallyIncapable = None,
+          nationality = None,
           LocalDate.parse("2018-02-28"),
           None
         )
@@ -120,6 +126,9 @@ class AmendIndividualSettlorTransformSpec extends FreeSpec with MustMatchers {
           NameType("Second updated", None, "Second updated"),
           None,
           identification = None,
+          countryOfResidence = None,
+          legallyIncapable = None,
+          nationality = None,
           LocalDate.parse("2020-02-28"),
           None
         )

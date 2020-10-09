@@ -50,6 +50,9 @@ class AmendOtherIndividualTransformSpec extends FreeSpec with MustMatchers {
             address = None,
             safeId = None
           )),
+          countryOfResidence = None,
+          legallyIncapable = None,
+          nationality = None,
           LocalDate.parse("2018-02-28"),
           None
         )
@@ -103,6 +106,9 @@ class AmendOtherIndividualTransformSpec extends FreeSpec with MustMatchers {
             address = None,
             safeId = None
           )),
+          countryOfResidence = None,
+          legallyIncapable = None,
+          nationality = None,
           LocalDate.parse("2018-02-28"),
           None
         )
@@ -144,6 +150,9 @@ class AmendOtherIndividualTransformSpec extends FreeSpec with MustMatchers {
           NameType("Amended New First 3", None, "Amended New Last 3"),
           dateOfBirth = None,
           identification = None,
+          countryOfResidence = None,
+          legallyIncapable = None,
+          nationality = None,
           LocalDate.parse("2018-02-28"),
           None
         )

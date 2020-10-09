@@ -30,9 +30,10 @@ import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.variation.{AmendDeceasedSettlor, SettlorCompany, Settlor}
-import uk.gov.hmrc.trusts.models.{variation, _}
+import uk.gov.hmrc.trusts.models._
+import uk.gov.hmrc.trusts.models.variation.{AmendDeceasedSettlor, Settlor, SettlorCompany}
 import uk.gov.hmrc.trusts.services.SettlorTransformationService
+import uk.gov.hmrc.trusts.transformers.remove.RemoveSettlor
 
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
@@ -63,6 +64,9 @@ class SettlorTransformationControllerSpec extends FreeSpec
         name = NameType("First", None, "Last"),
         dateOfBirth = None,
         identification = None,
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         entityStart = LocalDate.parse("2010-05-03"),
         entityEnd = None
       )
@@ -111,6 +115,9 @@ class SettlorTransformationControllerSpec extends FreeSpec
         name = NameType("First", None, "Last"),
         dateOfBirth = None,
         identification = None,
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         entityStart = LocalDate.parse("2010-05-03"),
         entityEnd = None
       )
@@ -158,6 +165,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
         name = "Test",
         companyType = None,
         identification = None,
+        countryOfResidence = None,
         entityStart = LocalDate.parse("2010-05-03"),
         companyTime = None,
         entityEnd=None
@@ -210,6 +218,7 @@ class SettlorTransformationControllerSpec extends FreeSpec
         companyType = None,
         companyTime = None,
         identification = None,
+        countryOfResidence = None,
         entityStart = LocalDate.parse("2010-05-03"),
         entityEnd = None
       )

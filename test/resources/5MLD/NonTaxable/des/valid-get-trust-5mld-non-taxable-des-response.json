@@ -1,0 +1,395 @@
+{
+  "responseHeader": {
+    "dfmcaReturnUserStatus": "Processed",
+    "formBundleNo": "123456789012"
+  },
+  "trustOrEstateDisplay": {
+    "applicationType": "01",
+    "matchData": {
+      "utr": "2134514321",
+      "urn": "1234567890AAAAA"
+    },
+    "correspondence": {
+      "abroadIndicator": true,
+      "name": "Nelson James",
+      "address": {
+        "line1": "1010 EASY ST",
+        "line2": "OTTAWA",
+        "line3": "ONTARIO",
+        "line4": "ONTARIO",
+        "postCode": "K1A 0B1",
+        "country": "GB"
+      },
+      "phoneNumber": "+10392019203",
+      "welsh": false,
+      "braille": false
+    },
+    "declaration": {
+      "name": {
+        "firstName": "Nelson",
+        "middleName": "Nicola",
+        "lastName": "James"
+      },
+      "address": {
+        "line1": "1010 EASY ST",
+        "line2": "OTTAWA",
+        "line3": "ONTARIO",
+        "line4": "ONTARIO",
+        "postCode": "K1A 0B1",
+        "country": "GB"
+      }
+    },
+    "details": {
+      "trust": {
+        "details": {
+          "trustTaxable": false,
+          "expressTrust": true,
+          "trustUKResident": true,
+          "startDate": "1920-03-28"
+        },
+        "entities": {
+          "naturalPerson": [
+            {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "name": {
+                "firstName": "Nicola",
+                "middleName": "Andrey",
+                "lastName": "Jackson"
+              },
+              "dateOfBirth": "1970-02-28",
+              "identification": {
+                "safeId": "2222200000000"
+              },
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "DE",
+              "nationality": "FR",
+              "legallyIncapable": false
+            }
+          ],
+          "beneficiary": {
+            "individualDetails": [
+              {
+                "lineNo": "1",
+                "bpMatchStatus": "01",
+                "name": {
+                  "firstName": "Nicola",
+                  "middleName": "Andrey",
+                  "lastName": "Jackson"
+                },
+                "dateOfBirth": "1970-02-28",
+                "vulnerableBeneficiary": true,
+                "beneficiaryType": "Director",
+                "beneficiaryDiscretion": true,
+                "beneficiaryShareOfIncome": "0",
+                "identification": {
+                  "safeId": "2222200000000"
+                },
+                "entityStart": "2017-02-28",
+                "countryOfResidence": "DE",
+                "nationality": "FR",
+                "legallyIncapable": false
+              }
+            ],
+            "company": [
+              {
+                "lineNo": "1",
+                "bpMatchStatus": "01",
+                "organisationName": " ",
+                "beneficiaryDiscretion": true,
+                "beneficiaryShareOfIncome": "0",
+                "identification": {
+                  "safeId": "2222200000000",
+                  "address": {
+                    "line1": "1010 EASY ST",
+                    "line2": "OTTAWA",
+                    "line3": "ONTARIO",
+                    "line4": "ONTARIO",
+                    "country": "CA"
+                  }
+                },
+                "entityStart": "2017-02-28",
+                "countryOfResidence": "DE"
+              }
+            ],
+            "trust": [
+              {
+                "lineNo": "1",
+                "bpMatchStatus": "01",
+                "organisationName": "Nelson Ltd ",
+                "beneficiaryDiscretion": true,
+                "beneficiaryShareOfIncome": "0",
+                "identification": {
+                  "safeId": "2222200000000",
+                  "address": {
+                    "line1": "1010 EASY ST",
+                    "line2": "OTTAWA",
+                    "line3": "ONTARIO",
+                    "line4": "ONTARIO",
+                    "country": "CA"
+                  }
+                },
+                "entityStart": "2017-02-28",
+                "countryOfResidence": "DE"
+              }
+            ],
+            "charity": [
+              {
+                "lineNo": "1",
+                "bpMatchStatus": "01",
+                "organisationName": "Nelson Ltd",
+                "beneficiaryDiscretion": true,
+                "beneficiaryShareOfIncome": "0",
+                "identification": {
+                  "safeId": "2222200000000",
+                  "address": {
+                    "line1": "1010 EASY ST",
+                    "line2": "OTTAWA",
+                    "line3": "ONTARIO",
+                    "line4": "ONTARIO",
+                    "country": "CA"
+                  }
+                },
+                "entityStart": "2017-02-28",
+                "countryOfResidence": "DE"
+              }
+            ],
+            "unidentified": [
+              {
+                "lineNo": "1",
+                "bpMatchStatus": "01",
+                "description": "Reserve money",
+                "beneficiaryDiscretion": true,
+                "beneficiaryShareOfIncome": "0",
+                "entityStart": "2017-02-28"
+              }
+            ],
+            "large": [
+              {
+                "lineNo": "1",
+                "bpMatchStatus": "01",
+                "organisationName": "Nelson Ltd",
+                "description": "This is a must",
+                "description1": "This is a must",
+                "description2": "This is a must",
+                "description3": "This is a must",
+                "description4": "This is a must",
+                "numberOfBeneficiary": "0",
+                "identification": {
+                  "safeId": "2222200000000",
+                  "address": {
+                    "line1": "1010 EASY ST",
+                    "line2": "OTTAWA",
+                    "line3": "ONTARIO",
+                    "line4": "ONTARIO",
+                    "country": "CA"
+                  }
+                },
+                "beneficiaryDiscretion": true,
+                "beneficiaryShareOfIncome": "0",
+                "entityStart": "2017-02-28",
+                "countryOfResidence": "DE"
+              }
+            ],
+            "other": [
+              {
+                "lineNo": "1",
+                "bpMatchStatus": "01",
+                "description": "Joint Fund",
+                "address": {
+                  "line1": "1010 EASY ST",
+                  "line2": "OTTAWA",
+                  "line3": "ONTARIO",
+                  "line4": "ONTARIO",
+                  "postCode": "K1A 0B1",
+                  "country": "GB"
+                },
+                "beneficiaryDiscretion": true,
+                "beneficiaryShareOfIncome": "0",
+                "entityStart": "2017-02-28",
+                "countryOfResidence": "DE"
+              }
+            ]
+          },
+          "deceased": {
+            "lineNo": "1",
+            "bpMatchStatus": "01",
+            "name": {
+              "firstName": "James",
+              "middleName": "Kingsley",
+              "lastName": "Bond"
+            },
+            "dateOfBirth": "1965-02-28",
+            "dateOfDeath": "2018-02-28",
+            "identification": {
+              "safeId": "2222200000000"
+            },
+            "entityStart": "2017-02-28",
+            "countryOfResidence": "DE",
+            "nationality": "FR"
+          },
+          "leadTrustees": {
+              "lineNo": "1",
+              "bpMatchStatus": "01",
+              "name": {
+                "firstName": "Jimmy",
+                "middleName": "Hingis",
+                "lastName": "Jones"
+              },
+              "dateOfBirth": "1965-02-28",
+              "phoneNumber": "+1234567",
+              "email": "a@adam.com",
+              "identification": {
+                "nino": "NH111111A"
+              },
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "DE",
+              "nationality": "FR",
+              "legallyIncapable": false
+          },
+          "trustees": [
+            {
+              "trusteeInd": {
+                "lineNo": "1",
+                "bpMatchStatus": "01",
+                "name": {
+                  "firstName": "Tamara",
+                  "middleName": "Hingis",
+                  "lastName": "Jones"
+                },
+                "dateOfBirth": "1965-02-28",
+                "identification": {
+                  "safeId": "2222200000000",
+                  "address": {
+                    "line1": "1010 EASY ST",
+                    "line2": "OTTAWA",
+                    "line3": "ONTARIO",
+                    "line4": "ONTARIO",
+                    "country": "CA"
+                  }
+                },
+                "phoneNumber": "+447456788112",
+                "entityStart": "2017-02-28",
+                "countryOfResidence": "DE",
+                "nationality": "FR",
+                "legallyIncapable": false
+              }
+            },
+            {
+              "trusteeOrg": {
+                "lineNo": "1",
+                "name": "MyOrg Incorporated",
+                "phoneNumber": "+447456788112",
+                "email": "a@adam.com",
+                "identification": {
+                  "safeId": "2222200000000",
+                  "address": {
+                    "line1": "1010 EASY ST",
+                    "line2": "OTTAWA",
+                    "line3": "ONTARIO",
+                    "line4": "ONTARIO",
+                    "country": "CA"
+                  }
+                },
+                "entityStart": "2017-02-28",
+                "countryOfResidence": "DE"
+              }
+            }
+          ],
+          "protectors": {
+            "protector": [
+              {
+                "lineNo": "1",
+                "bpMatchStatus": "01",
+                "name": {
+                  "firstName": "Bruce",
+                  "middleName": "Bob",
+                  "lastName": "Branson"
+                },
+                "dateOfBirth": "1965-02-28",
+                "identification": {
+                  "safeId": "2222200000000"
+                },
+                "entityStart": "2017-02-28",
+                "countryOfResidence": "DE",
+                "nationality": "FR",
+                "legallyIncapable": false
+              }
+            ],
+            "protectorCompany": [
+              {
+                "lineNo": "1",
+                "bpMatchStatus": "01",
+                "name": "Raga Dandy",
+                "identification": {
+                  "safeId": "2222200000000",
+                  "address": {
+                    "line1": "1010 EASY ST",
+                    "line2": "OTTAWA",
+                    "line3": "ONTARIO",
+                    "line4": "ONTARIO",
+                    "country": "CA"
+                  }
+                },
+                "entityStart": "2017-02-28",
+                "countryOfResidence": "DE"
+              }
+            ]
+          },
+          "settlors": {
+            "settlor": [
+              {
+                "lineNo": "1",
+                "bpMatchStatus": "01",
+                "name": {
+                  "firstName": "Bruce",
+                  "middleName": "Bob",
+                  "lastName": "Branson"
+                },
+                "dateOfBirth": "1965-02-28",
+                "identification": {
+                  "safeId": "2222200000000",
+                  "address": {
+                    "line1": "1010 EASY ST",
+                    "line2": "OTTAWA",
+                    "line3": "ONTARIO",
+                    "line4": "ONTARIO",
+                    "country": "CA"
+                  }
+                },
+                "entityStart": "2017-02-28",
+                "countryOfResidence": "DE",
+                "nationality": "FR",
+                "legallyIncapable": false
+              }
+            ],
+            "settlorCompany": [
+              {
+                "lineNo": "1",
+                "bpMatchStatus": "01",
+                "name": "Completors Limited ",
+                "companyType": "Trading",
+                "companyTime": true,
+                "identification": {
+                  "safeId": "2222200000000",
+                  "address": {
+                    "line1": "1010 EASY ST",
+                    "line2": "OTTAWA",
+                    "line3": "ONTARIO",
+                    "line4": "ONTARIO",
+                    "country": "CA"
+                  }
+                },
+                "entityStart": "2017-02-28",
+                "countryOfResidence": "DE"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "submissionDate": "2020-01-05"
+  }
+}
+
+

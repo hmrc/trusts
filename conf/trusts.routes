@@ -11,9 +11,9 @@ POST        /check                                              uk.gov.hmrc.trus
 
 POST        /tax-enrolment/callback/subscriptions               uk.gov.hmrc.trusts.controllers.TaxEnrolmentCallbackController.subscriptionCallback
 
-GET         /:utr/refresh                                       uk.gov.hmrc.trusts.controllers.GetTrustController.getFromEtmp(utr: String)
+GET         /:identifier/refresh                                uk.gov.hmrc.trusts.controllers.GetTrustController.getFromEtmp(identifier: String)
 
-GET         /:utr                                               uk.gov.hmrc.trusts.controllers.GetTrustController.get(utr: String, applyTransforms: Boolean = false)
+GET         /:identifier                                         uk.gov.hmrc.trusts.controllers.GetTrustController.get(identifier: String, applyTransforms: Boolean = false)
 
 GET         /:utr/transformed                                   uk.gov.hmrc.trusts.controllers.GetTrustController.get(utr: String, applyTransforms: Boolean = true)
 

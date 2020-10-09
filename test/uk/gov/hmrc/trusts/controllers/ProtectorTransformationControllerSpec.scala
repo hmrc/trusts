@@ -31,8 +31,9 @@ import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.variation.{Protector, ProtectorCompany}
-import uk.gov.hmrc.trusts.models.{NameType, RemoveProtector, Success}
+import uk.gov.hmrc.trusts.models.{NameType, Success}
 import uk.gov.hmrc.trusts.services.ProtectorTransformationService
+import uk.gov.hmrc.trusts.transformers.remove.RemoveProtector
 
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
@@ -59,6 +60,9 @@ class ProtectorTransformationControllerSpec extends FreeSpec
         name = NameType("First", None, "Last"),
         dateOfBirth = None,
         identification = None,
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         entityStart = LocalDate.parse("2010-05-03"),
         entityEnd = None
       )
@@ -108,6 +112,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
         identification = None,
         lineNo = None,
         bpMatchStatus = None,
+        countryOfResidence = None,
         entityStart = LocalDate.parse("2010-05-03"),
         entityEnd = None
       )
@@ -156,6 +161,9 @@ class ProtectorTransformationControllerSpec extends FreeSpec
         name = NameType("First", None, "Last"),
         dateOfBirth = None,
         identification = None,
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         entityStart = LocalDate.parse("2010-05-03"),
         entityEnd = None
       )
@@ -209,6 +217,7 @@ class ProtectorTransformationControllerSpec extends FreeSpec
         None,
         None,
         "Company Name",
+        None,
         None,
         LocalDate.parse("2010-01-01"),
         None

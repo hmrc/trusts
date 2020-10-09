@@ -103,6 +103,9 @@ case class NaturalPersonType(
                               name: NameType,
                               dateOfBirth: Option[LocalDate],
                               identification: Option[IdentificationType],
+                              countryOfResidence: Option[String],    // new 5MLD optional
+                              legallyIncapable: Option[Boolean],     // new 5MLD optional
+                              nationality: Option[String],           // new 5MLD optional
                               entityStart: LocalDate,
                               entityEnd: Option[LocalDate]
                             )
@@ -116,6 +119,9 @@ object NaturalPersonType {
     "name" -> o.name,
     "dateOfBirth" -> o.dateOfBirth,
     "identification" -> o.identification,
+    "countryOfResidence" -> o.countryOfResidence,
+    "legallyIncapable" -> o.legallyIncapable,
+    "nationality" -> o.nationality,
     "entityStart" -> o.entityStart,
     "entityEnd" -> o.entityEnd,
     "provisional" -> o.lineNo.isEmpty
@@ -351,6 +357,9 @@ case class LeadTrusteeIndType(
                                phoneNumber: String,
                                email: Option[String] = None,
                                identification: IdentificationType,
+                               countryOfResidence: Option[String],    // new 5MLD optional
+                               legallyIncapable: Option[Boolean],     // new 5MLD optional
+                               nationality: Option[String],           // new 5MLD optional
                                entityStart: LocalDate,
                                entityEnd: Option[LocalDate]
                              )
@@ -368,6 +377,7 @@ case class LeadTrusteeOrgType(
                                phoneNumber: String,
                                email: Option[String] = None,
                                identification: IdentificationOrgType,
+                               countryOfResidence: Option[String],    // new 5MLD optional
                                entityStart: LocalDate,
                                entityEnd: Option[LocalDate]
                              )
@@ -417,6 +427,7 @@ case class TrusteeOrgType(
                            phoneNumber: Option[String] = None,
                            email: Option[String] = None,
                            identification: Option[IdentificationOrgType],
+                           countryOfResidence: Option[String],    // new 5MLD optional
                            entityStart: LocalDate,
                            entityEnd: Option[LocalDate]
                          )
@@ -432,6 +443,7 @@ object TrusteeOrgType {
     "phoneNumber" -> o.phoneNumber,
     "email" -> o.email,
     "identification" -> o.identification,
+    "countryOfResidence" -> o.countryOfResidence,
     "entityStart" -> o.entityStart,
     "entityEnd" -> o.entityEnd,
     "provisional" -> o.lineNo.isEmpty
@@ -445,6 +457,9 @@ case class TrusteeIndividualType(
                                   dateOfBirth: Option[LocalDate],
                                   phoneNumber: Option[String],
                                   identification: Option[IdentificationType],
+                                  countryOfResidence: Option[String],    // new 5MLD optional
+                                  legallyIncapable: Option[Boolean],     // new 5MLD optional
+                                  nationality: Option[String],           // new 5MLD optional
                                   entityStart: LocalDate,
                                   entityEnd: Option[LocalDate]
                                 )
@@ -460,6 +475,9 @@ object TrusteeIndividualType {
     "dateOfBirth" -> o.dateOfBirth,
     "phoneNumber" -> o.phoneNumber,
     "identification" -> o.identification,
+    "countryOfResidence" -> o.countryOfResidence,
+    "legallyIncapable" -> o.legallyIncapable,
+    "nationality" -> o.nationality,
     "entityStart" -> o.entityStart,
     "entityEnd" -> o.entityEnd,
     "provisional" -> o.lineNo.isEmpty
@@ -479,6 +497,9 @@ case class Protector(
                       name: NameType,
                       dateOfBirth: Option[LocalDate],
                       identification: Option[IdentificationType],
+                      countryOfResidence: Option[String],    // new 5MLD optional
+                      legallyIncapable: Option[Boolean],     // new 5MLD optional
+                      nationality: Option[String],           // new 5MLD optional
                       entityStart: LocalDate,
                       entityEnd: Option[LocalDate]
                     )
@@ -492,6 +513,9 @@ object Protector {
     "name" -> o.name,
     "dateOfBirth" -> o.dateOfBirth,
     "identification" -> o.identification,
+    "countryOfResidence" -> o.countryOfResidence,
+    "legallyIncapable" -> o.legallyIncapable,
+    "nationality" -> o.nationality,
     "entityStart" -> o.entityStart,
     "entityEnd" -> o.entityEnd,
     "provisional" -> o.lineNo.isEmpty
@@ -503,6 +527,7 @@ case class ProtectorCompany(
                              bpMatchStatus: Option[String],
                              name: String,
                              identification: Option[IdentificationOrgType],
+                             countryOfResidence: Option[String],    // new 5MLD optional
                              entityStart: LocalDate,
                              entityEnd: Option[LocalDate]
                            )
@@ -516,6 +541,7 @@ object ProtectorCompany {
     "bpMatchStatus" -> o.bpMatchStatus,
     "name" -> o.name,
     "identification" -> o.identification,
+    "countryOfResidence" -> o.countryOfResidence,
     "entityStart" -> o.entityStart,
     "entityEnd" -> o.entityEnd,
     "provisional" -> o.lineNo.isEmpty
@@ -537,6 +563,9 @@ case class Settlor(
                     name: NameType,
                     dateOfBirth: Option[LocalDate],
                     identification: Option[IdentificationType],
+                    countryOfResidence: Option[String],    // new 5MLD optional
+                    legallyIncapable: Option[Boolean],     // new 5MLD optional
+                    nationality: Option[String],           // new 5MLD optional
                     entityStart: LocalDate,
                     entityEnd: Option[LocalDate]
                   )
@@ -550,6 +579,9 @@ object Settlor {
     "name" -> o.name,
     "dateOfBirth" -> o.dateOfBirth,
     "identification" -> o.identification,
+    "countryOfResidence" -> o.countryOfResidence,
+    "legallyIncapable" -> o.legallyIncapable,
+    "nationality" -> o.nationality,
     "entityStart" -> o.entityStart,
     "entityEnd" -> o.entityEnd,
     "provisional" -> o.lineNo.isEmpty
@@ -563,6 +595,7 @@ case class SettlorCompany(
                            companyType: Option[String],
                            companyTime: Option[Boolean],
                            identification: Option[IdentificationOrgType],
+                           countryOfResidence: Option[String],    // new 5MLD optional
                            entityStart: LocalDate,
                            entityEnd: Option[LocalDate]
                          )
@@ -577,6 +610,7 @@ object SettlorCompany {
     "companyType" -> o.companyType,
     "companyTime" -> o.companyTime,
     "identification" -> o.identification,
+    "countryOfResidence" -> o.countryOfResidence,
     "entityStart" -> o.entityStart,
     "entityEnd" -> o.entityEnd,
     "provisional" -> o.lineNo.isEmpty

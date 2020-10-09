@@ -41,6 +41,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
         "",
         None,
         IdentificationType(None, None, None, None),
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         LocalDate.of(2010, 4, 3),
         entityEnd = None
       )
@@ -54,6 +57,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
         IdentificationOrgType(
           Some("utr"), None, None
         ),
+        countryOfResidence = None,
         LocalDate.of(2010, 4, 3),
         None
       )
@@ -65,6 +69,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
         Some(LocalDate.parse("2000-01-01")),
         Some("phoneNumber"),
         Some(IdentificationType(Some("nino"), None, None, None)),
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         LocalDate.parse("2000-01-01"),
         None
       )
@@ -76,6 +83,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
         Some("phoneNumber"),
         Some("email"),
         Some(IdentificationOrgType(Some("utr"), None, None)),
+        countryOfResidence = None,
         LocalDate.parse("2000-01-01"),
         None
       )
@@ -140,6 +148,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           None,
           None
         )),
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         LocalDate.parse("2010-01-01"),
         None
       )
@@ -155,6 +166,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           None,
           None
         )),
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         LocalDate.parse("2010-01-01"),
         None
       )
@@ -164,6 +178,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
         identification = None,
         lineNo = None,
         bpMatchStatus = None,
+        countryOfResidence = None,
         entityStart = LocalDate.parse("2010-05-03"),
         entityEnd = None
       )
@@ -179,6 +194,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           None,
           None
         )),
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         LocalDate.parse("2010-01-01"),
         None
       )
