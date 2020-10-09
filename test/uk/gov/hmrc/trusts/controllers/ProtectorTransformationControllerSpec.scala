@@ -30,7 +30,6 @@ import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustProtector, DisplayTrustProtectorCompany}
 import uk.gov.hmrc.trusts.models.variation.{Protector, ProtectorCompany}
 import uk.gov.hmrc.trusts.models.{NameType, RemoveProtector, Success}
 import uk.gov.hmrc.trusts.services.ProtectorTransformationService
@@ -44,9 +43,9 @@ class ProtectorTransformationControllerSpec extends FreeSpec
   with MustMatchers
   with GuiceOneAppPerSuite {
 
-  lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+  private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
-  val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
+  private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
   "Add individual protector" - {
 
@@ -54,13 +53,14 @@ class ProtectorTransformationControllerSpec extends FreeSpec
 
       val protectorTransformationService: ProtectorTransformationService = mock[ProtectorTransformationService]
 
-      val newProtector = DisplayTrustProtector(
+      val newProtector = Protector(
         lineNo = None,
         bpMatchStatus = None,
         name = NameType("First", None, "Last"),
         dateOfBirth = None,
         identification = None,
-        entityStart = LocalDate.parse("2010-05-03")
+        entityStart = LocalDate.parse("2010-05-03"),
+        entityEnd = None
       )
 
       when(protectorTransformationService.addIndividualProtectorTransformer(any(), any(), any()))
@@ -103,12 +103,13 @@ class ProtectorTransformationControllerSpec extends FreeSpec
       val protectorTransformationService = mock[ProtectorTransformationService]
       val controller = new ProtectorTransformationController(identifierAction, protectorTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
-      val newCompanyProtector = DisplayTrustProtectorCompany(
+      val newCompanyProtector = ProtectorCompany(
         name = "TestCompany",
         identification = None,
         lineNo = None,
         bpMatchStatus = None,
-        entityStart = LocalDate.parse("2010-05-03")
+        entityStart = LocalDate.parse("2010-05-03"),
+        entityEnd = None
       )
 
       when(protectorTransformationService.addBusinessProtectorTransformer(any(), any(), any()))

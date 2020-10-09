@@ -19,25 +19,27 @@ package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
 import org.scalatest.{FreeSpec, MustMatchers}
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustProtectorCompany
+import uk.gov.hmrc.trusts.models.variation.ProtectorCompany
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AddCompanyProtectorTransformSpec extends FreeSpec with MustMatchers {
 
-  val newCompanyProtector = DisplayTrustProtectorCompany(
+  val newCompanyProtector = ProtectorCompany(
     name = "TestCompany",
     identification = None,
     lineNo = None,
     bpMatchStatus = None,
-    entityStart = LocalDate.parse("2010-05-03")
+    entityStart = LocalDate.parse("2010-05-03"),
+    entityEnd = None
   )
 
-  val newSecondCompanyProtector = DisplayTrustProtectorCompany(
+  val newSecondCompanyProtector = ProtectorCompany(
     name = "TheNewOne",
     identification = None,
     lineNo = None,
     bpMatchStatus = None,
-    entityStart = LocalDate.parse("2019-01-01")
+    entityStart = LocalDate.parse("2019-01-01"),
+    entityEnd = None
   )
 
   "the add company protector transformer should" - {

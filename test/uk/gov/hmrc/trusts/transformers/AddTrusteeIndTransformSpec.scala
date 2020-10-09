@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import org.scalatest.{FreeSpec, MustMatchers}
 import uk.gov.hmrc.trusts.models.NameType
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustTrusteeIndividualType}
+import uk.gov.hmrc.trusts.models.variation.{IdentificationType, TrusteeIndividualType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers {
@@ -28,13 +28,14 @@ class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers {
   "the add trustee transformer should" - {
 
     "add a new individual trustee when there are no trustees existing" in {
-      val t = DisplayTrustTrusteeIndividualType(None,
+      val t = TrusteeIndividualType(None,
         None,
         NameType("New", None, "Trustee"),
         Some(LocalDate.parse("2000-01-01")),
         Some("phoneNumber"),
-        Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-        LocalDate.parse("1990-10-10")
+        Some(IdentificationType(Some("nino"), None, None, None)),
+        LocalDate.parse("1990-10-10"),
+        None
       )
 
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-no-trustees.json")
@@ -50,13 +51,14 @@ class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers {
 
     "add a new individual trustee" in {
 
-      val t = DisplayTrustTrusteeIndividualType(None,
+      val t = TrusteeIndividualType(None,
         None,
         NameType("New", None, "Trustee"),
         Some(LocalDate.parse("2000-01-01")),
         Some("phoneNumber"),
-        Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-        LocalDate.parse("1990-10-10")
+        Some(IdentificationType(Some("nino"), None, None, None)),
+        LocalDate.parse("1990-10-10"),
+        None
       )
 
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")

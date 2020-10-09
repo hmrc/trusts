@@ -19,10 +19,10 @@ package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustTrusteeOrgType
+import uk.gov.hmrc.trusts.models.variation.TrusteeOrgType
 
 case class AmendTrusteeOrgTransform(index: Int,
-                                    trustee: DisplayTrustTrusteeOrgType,
+                                    trustee: TrusteeOrgType,
                                     originalTrusteeJson: JsValue,
                                     override val currentDate: LocalDate
                                    ) extends DeltaTransform with AmendTrusteeCommon {

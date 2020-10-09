@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType, DisplayTrustTrusteeType}
+import uk.gov.hmrc.trusts.models.variation.{TrusteeIndividualType, TrusteeOrgType, TrusteeType}
 
 trait AmendTrusteeCommon {
 
@@ -38,8 +38,8 @@ trait AmendTrusteeCommon {
   }
 
   private def addTrustee(newTrustee: JsValue, updatedJson: JsValue, entityStart: LocalDate): JsResult[JsValue] = {
-    val indTrustee = newTrustee.validate[DisplayTrustTrusteeIndividualType].asOpt
-    val orgTrustee = newTrustee.validate[DisplayTrustTrusteeOrgType].asOpt
+    val indTrustee = newTrustee.validate[TrusteeIndividualType].asOpt
+    val orgTrustee = newTrustee.validate[TrusteeOrgType].asOpt
 
     (indTrustee, orgTrustee) match {
       case (Some(ind), None) =>
@@ -56,9 +56,9 @@ trait AmendTrusteeCommon {
 
   private def getEntityStartDate(trusteeToRemove: JsValue): LocalDate = {
 
-    trusteeToRemove.validate[DisplayTrustTrusteeType].asOpt match {
-      case Some(DisplayTrustTrusteeType(Some(ind), None)) => ind.entityStart
-      case Some(DisplayTrustTrusteeType(None, Some(org))) => org.entityStart
+    trusteeToRemove.validate[TrusteeType].asOpt match {
+      case Some(TrusteeType(Some(ind), None)) => ind.entityStart
+      case Some(TrusteeType(None, Some(org))) => org.entityStart
       case _ => throw new Exception("Existing trustee could not be identified")
     }
   }

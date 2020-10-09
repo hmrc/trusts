@@ -21,7 +21,6 @@ import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustNaturalPersonType
 import uk.gov.hmrc.trusts.models.RemoveOtherIndividual
 import uk.gov.hmrc.trusts.models.variation.NaturalPersonType
 import uk.gov.hmrc.trusts.services.OtherIndividualTransformationService
@@ -69,7 +68,7 @@ class OtherIndividualTransformationController @Inject()(
 
     def addOtherIndividual(utr: String): Action[JsValue] = identify.async(parse.json) {
       implicit request => {
-        request.body.validate[DisplayTrustNaturalPersonType] match {
+        request.body.validate[NaturalPersonType] match {
           case JsSuccess(otherIndividual, _) =>
 
             transformService.addOtherIndividualTransformer(

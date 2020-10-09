@@ -20,6 +20,7 @@ import java.time.LocalDate
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import uk.gov.hmrc.trusts.models.JsonWithoutNulls._
 import uk.gov.hmrc.trusts.models._
 
 case class TrustVariation(
@@ -108,6 +109,17 @@ case class NaturalPersonType(
 
 object NaturalPersonType {
   implicit val naturalPersonTypeFormat: Format[NaturalPersonType] = Json.format[NaturalPersonType]
+
+  val writeToMaintain : Writes[NaturalPersonType] = (o: NaturalPersonType) => Json.obj(
+    "lineNo" -> o.lineNo,
+    "bpMatchStatus" -> o.bpMatchStatus,
+    "name" -> o.name,
+    "dateOfBirth" -> o.dateOfBirth,
+    "identification" -> o.identification,
+    "entityStart" -> o.entityStart,
+    "entityEnd" -> o.entityEnd,
+    "provisional" -> o.lineNo.isEmpty
+  ).withoutNulls
 }
 
 case class BeneficiaryType(
@@ -134,6 +146,17 @@ case class UnidentifiedType(lineNo: Option[String],
 
 object UnidentifiedType {
   implicit val unidentifiedTypeFormat: Format[UnidentifiedType] = Json.format[UnidentifiedType]
+
+  val writeToMaintain : Writes[UnidentifiedType] = (o: UnidentifiedType) => Json.obj(
+    "lineNo" -> o.lineNo,
+    "bpMatchStatus" -> o.bpMatchStatus,
+    "description" -> o.description,
+    "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
+    "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
+    "entityStart" -> o.entityStart,
+    "entityEnd" -> o.entityEnd,
+    "provisional" -> o.lineNo.isEmpty
+  ).withoutNulls
 }
 
 case class LargeType(lineNo: Option[String],
@@ -153,6 +176,24 @@ case class LargeType(lineNo: Option[String],
 
 object LargeType {
   implicit val largeTypeFormat: Format[LargeType] = Json.format[LargeType]
+
+  val writeToMaintain : Writes[LargeType] = (o: LargeType) => Json.obj(
+    "lineNo" -> o.lineNo,
+    "bpMatchStatus" -> o.bpMatchStatus,
+    "organisationName" -> o.organisationName,
+    "description" -> o.description,
+    "description1" -> o.description1,
+    "description2" -> o.description2,
+    "description3" -> o.description3,
+    "description4" -> o.description4,
+    "numberOfBeneficiary" -> o.numberOfBeneficiary,
+    "identification" -> o.identification,
+    "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
+    "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
+    "entityStart" -> o.entityStart,
+    "entityEnd" -> o.entityEnd,
+    "provisional" -> o.lineNo.isEmpty
+  ).withoutNulls
 }
 
 case class OtherType(lineNo: Option[String],
@@ -166,6 +207,18 @@ case class OtherType(lineNo: Option[String],
 
 object OtherType {
   implicit val otherTypeFormat: Format[OtherType] = Json.format[OtherType]
+
+  val writeToMaintain : Writes[OtherType] = (o: OtherType) => Json.obj(
+    "lineNo" -> o.lineNo,
+    "bpMatchStatus" -> o.bpMatchStatus,
+    "description" -> o.description,
+    "address" -> o.address,
+    "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
+    "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
+    "entityStart" -> o.entityStart,
+    "entityEnd" -> o.entityEnd,
+    "provisional" -> o.lineNo.isEmpty
+  ).withoutNulls
 }
 
 case class IndividualDetailsType(
@@ -184,6 +237,20 @@ case class IndividualDetailsType(
 
 object IndividualDetailsType {
   implicit val individualDetailsTypeFormat: Format[IndividualDetailsType] = Json.format[IndividualDetailsType]
+  val writeToMaintain : Writes[IndividualDetailsType] = (o: IndividualDetailsType) => Json.obj(
+    "lineNo" -> o.lineNo,
+    "bpMatchStatus" -> o.bpMatchStatus,
+    "name" -> o.name,
+    "dateOfBirth" -> o.dateOfBirth,
+    "vulnerableBeneficiary" -> o.vulnerableBeneficiary,
+    "beneficiaryType" -> o.beneficiaryType,
+    "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
+    "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
+    "identification" -> o.identification,
+    "entityStart" -> o.entityStart,
+    "entityEnd" -> o.entityEnd,
+    "provisional" -> o.lineNo.isEmpty
+  ).withoutNulls
 }
 
 case class BeneficiaryCompanyType(lineNo: Option[String],
@@ -197,6 +264,18 @@ case class BeneficiaryCompanyType(lineNo: Option[String],
 
 object BeneficiaryCompanyType {
   implicit val companyTypeFormat: Format[BeneficiaryCompanyType] = Json.format[BeneficiaryCompanyType]
+
+  val writeToMaintain : Writes[BeneficiaryCompanyType] = (o: BeneficiaryCompanyType) => Json.obj(
+    "lineNo" -> o.lineNo,
+    "bpMatchStatus" -> o.bpMatchStatus,
+    "organisationName" -> o.organisationName,
+    "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
+    "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
+    "identification" -> o.identification,
+    "entityStart" -> o.entityStart,
+    "entityEnd" -> o.entityEnd,
+    "provisional" -> o.lineNo.isEmpty
+  ).withoutNulls
 }
 
 case class BeneficiaryTrustType(lineNo: Option[String],
@@ -210,6 +289,18 @@ case class BeneficiaryTrustType(lineNo: Option[String],
 
 object BeneficiaryTrustType {
   implicit val beneficiaryTrustTypeFormat: Format[BeneficiaryTrustType] = Json.format[BeneficiaryTrustType]
+
+  val writeToMaintain : Writes[BeneficiaryTrustType] = (o: BeneficiaryTrustType) => Json.obj(
+    "lineNo" -> o.lineNo,
+    "bpMatchStatus" -> o.bpMatchStatus,
+    "organisationName" -> o.organisationName,
+    "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
+    "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
+    "identification" -> o.identification,
+    "entityStart" -> o.entityStart,
+    "entityEnd" -> o.entityEnd,
+    "provisional" -> o.lineNo.isEmpty
+  ).withoutNulls
 }
 
 case class BeneficiaryCharityType(lineNo: Option[String],
@@ -223,6 +314,18 @@ case class BeneficiaryCharityType(lineNo: Option[String],
 
 object BeneficiaryCharityType {
   implicit val charityTypeFormat: Format[BeneficiaryCharityType] = Json.format[BeneficiaryCharityType]
+
+  val writeToMaintain : Writes[BeneficiaryCharityType] = (o: BeneficiaryCharityType) => Json.obj(
+    "lineNo" -> o.lineNo,
+    "bpMatchStatus" -> o.bpMatchStatus,
+    "organisationName" -> o.organisationName,
+    "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
+    "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
+    "identification" -> o.identification,
+    "entityStart" -> o.entityStart,
+    "entityEnd" -> o.entityEnd,
+    "provisional" -> o.lineNo.isEmpty
+  ).withoutNulls
 }
 
 case class WillType(
@@ -281,6 +384,21 @@ case class LeadTrusteeType(
 object LeadTrusteeType {
 
   implicit val leadTrusteeFormats: Format[LeadTrusteeType] = Json.format[LeadTrusteeType]
+
+  object EitherLeadTrusteeReads extends Reads[LeadTrusteeType] {
+    override def reads(json: JsValue): JsResult[LeadTrusteeType] = {
+
+      json.validate[LeadTrusteeIndType].map {
+        leadTrusteeInd =>
+          LeadTrusteeType(leadTrusteeInd = Some(leadTrusteeInd))
+      }.orElse {
+        json.validate[LeadTrusteeOrgType].map {
+          org =>
+            LeadTrusteeType(leadTrusteeOrg = Some(org))
+        }
+      }
+    }
+  }
 }
 
 case class TrusteeType(
@@ -306,6 +424,18 @@ case class TrusteeOrgType(
 object TrusteeOrgType {
 
   implicit val trusteeOrgTypeFormat: Format[TrusteeOrgType] = Json.format[TrusteeOrgType]
+
+  val writeToMaintain : Writes[TrusteeOrgType] = (o: TrusteeOrgType) => Json.obj(
+    "lineNo" -> o.lineNo,
+    "bpMatchStatus" -> o.bpMatchStatus,
+    "name" -> o.name,
+    "phoneNumber" -> o.phoneNumber,
+    "email" -> o.email,
+    "identification" -> o.identification,
+    "entityStart" -> o.entityStart,
+    "entityEnd" -> o.entityEnd,
+    "provisional" -> o.lineNo.isEmpty
+  ).withoutNulls
 }
 
 case class TrusteeIndividualType(
@@ -322,6 +452,18 @@ case class TrusteeIndividualType(
 object TrusteeIndividualType {
 
   implicit val trusteeIndividualTypeFormat: Format[TrusteeIndividualType] = Json.format[TrusteeIndividualType]
+
+  val writeToMaintain : Writes[TrusteeIndividualType] = (o: TrusteeIndividualType) => Json.obj(
+    "lineNo" -> o.lineNo,
+    "bpMatchStatus" -> o.bpMatchStatus,
+    "name" -> o.name,
+    "dateOfBirth" -> o.dateOfBirth,
+    "phoneNumber" -> o.phoneNumber,
+    "identification" -> o.identification,
+    "entityStart" -> o.entityStart,
+    "entityEnd" -> o.entityEnd,
+    "provisional" -> o.lineNo.isEmpty
+  ).withoutNulls
 }
 
 case class ProtectorsType(protector: Option[List[Protector]],
@@ -342,9 +484,18 @@ case class Protector(
                     )
 
 object Protector {
-
   implicit val protectorFormat: Format[Protector] = Json.format[Protector]
 
+  val writeToMaintain : Writes[Protector] = (o: Protector) => Json.obj(
+    "lineNo" -> o.lineNo,
+    "bpMatchStatus" -> o.bpMatchStatus,
+    "name" -> o.name,
+    "dateOfBirth" -> o.dateOfBirth,
+    "identification" -> o.identification,
+    "entityStart" -> o.entityStart,
+    "entityEnd" -> o.entityEnd,
+    "provisional" -> o.lineNo.isEmpty
+  ).withoutNulls
 }
 
 case class ProtectorCompany(
@@ -359,6 +510,16 @@ case class ProtectorCompany(
 object ProtectorCompany {
 
   implicit val protectorCompanyFormat: Format[ProtectorCompany] = Json.format[ProtectorCompany]
+
+  val writeToMaintain : Writes[ProtectorCompany] = (o: ProtectorCompany) => Json.obj(
+    "lineNo" -> o.lineNo,
+    "bpMatchStatus" -> o.bpMatchStatus,
+    "name" -> o.name,
+    "identification" -> o.identification,
+    "entityStart" -> o.entityStart,
+    "entityEnd" -> o.entityEnd,
+    "provisional" -> o.lineNo.isEmpty
+  ).withoutNulls
 }
 
 case class Settlors(
@@ -382,6 +543,17 @@ case class Settlor(
 
 object Settlor {
   implicit val settlorFormat: Format[Settlor] = Json.format[Settlor]
+
+  val writeToMaintain : Writes[Settlor] = (o: Settlor) => Json.obj(
+    "lineNo" -> o.lineNo,
+    "bpMatchStatus" -> o.bpMatchStatus,
+    "name" -> o.name,
+    "dateOfBirth" -> o.dateOfBirth,
+    "identification" -> o.identification,
+    "entityStart" -> o.entityStart,
+    "entityEnd" -> o.entityEnd,
+    "provisional" -> o.lineNo.isEmpty
+  ).withoutNulls
 }
 
 case class SettlorCompany(
@@ -397,6 +569,18 @@ case class SettlorCompany(
 
 object SettlorCompany {
   implicit val settlorCompanyFormat: Format[SettlorCompany] = Json.format[SettlorCompany]
+
+  val writeToMaintain : Writes[SettlorCompany] = (o: SettlorCompany) => Json.obj(
+    "lineNo" -> o.lineNo,
+    "bpMatchStatus" -> o.bpMatchStatus,
+    "name" -> o.name,
+    "companyType" -> o.companyType,
+    "companyTime" -> o.companyTime,
+    "identification" -> o.identification,
+    "entityStart" -> o.entityStart,
+    "entityEnd" -> o.entityEnd,
+    "provisional" -> o.lineNo.isEmpty
+  ).withoutNulls
 }
 
 case class Assets(
@@ -472,4 +656,13 @@ case class IdentificationType(nino: Option[String],
 
 object IdentificationType {
   implicit val identificationTypeFormat: Format[IdentificationType] = Json.format[IdentificationType]
+}
+
+
+case class IdentificationOrgType(utr: Option[String],
+                                 address: Option[AddressType],
+                                 safeId: Option[String])
+
+object IdentificationOrgType {
+  implicit val trustBeneficiaryIdentificationFormat: Format[IdentificationOrgType] = Json.format[IdentificationOrgType]
 }

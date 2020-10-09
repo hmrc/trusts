@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.services
 import javax.inject.Inject
 import play.api.libs.json.{JsObject, JsValue, Json, __}
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustSettlor, DisplayTrustSettlorCompany, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models.variation._
 import uk.gov.hmrc.trusts.models.{RemoveSettlor, Success}
 import uk.gov.hmrc.trusts.transformers._
@@ -92,12 +92,12 @@ class SettlorTransformationService @Inject()(
       }
   }
 
-  def addIndividualSettlorTransformer(utr: String, internalId: String, newSettlor: DisplayTrustSettlor): Future[Success.type] = {
+  def addIndividualSettlorTransformer(utr: String, internalId: String, newSettlor: Settlor): Future[Success.type] = {
     transformationService.addNewTransform(utr, internalId, AddIndividualSettlorTransform(newSettlor)).map(_ => Success)
   }
 
-  def addBusinessSettlorTransformer(utr: String, internalId: String, newCompanySettlor: DisplayTrustSettlorCompany): Future[Success.type] = {
-    transformationService.addNewTransform(utr, internalId, AddBuisnessSettlorTransform(newCompanySettlor)).map(_ => Success)
+  def addBusinessSettlorTransformer(utr: String, internalId: String, newCompanySettlor: SettlorCompany): Future[Success.type] = {
+    transformationService.addNewTransform(utr, internalId, AddBusinessSettlorTransform(newCompanySettlor)).map(_ => Success)
   }
 
   def amendBusinessSettlorTransformer(utr: String,

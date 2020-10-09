@@ -21,7 +21,7 @@ import java.time.LocalDate
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.models.NameType
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustTrusteeIndividualType}
+import uk.gov.hmrc.trusts.models.variation.{IdentificationType, TrusteeIndividualType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AmendTrusteeIndTransformSpec extends FreeSpec with MustMatchers  {
@@ -31,14 +31,15 @@ class AmendTrusteeIndTransformSpec extends FreeSpec with MustMatchers  {
     "successfully set a new trustee's details" in {
       val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-trustee-transform-before.json")
       val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-trustee-transform-after-ind.json")
-      val newTrusteeInfo = DisplayTrustTrusteeIndividualType(
+      val newTrusteeInfo = TrusteeIndividualType(
         lineNo = Some("newLineNo"),
         bpMatchStatus = Some("newMatchStatus"),
         name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
         dateOfBirth = Some(LocalDate.of(1965, 2, 10)),
         phoneNumber = Some("newPhone"),
-        identification = Some(DisplayTrustIdentificationType(None, Some("newNino"), None, None)),
-        entityStart = LocalDate.of(2019, 2, 10)
+        identification = Some(IdentificationType(Some("newNino"), None, None, None)),
+        entityStart = LocalDate.of(2019, 2, 10),
+        entityEnd = None
       )
 
       val originalTrusteeInfo = Json.parse(

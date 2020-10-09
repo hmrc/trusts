@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.transformers.mdtp.protectors
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.variation.ProtectorCompany
 
 object Business {
 
@@ -32,9 +32,9 @@ object Business {
       },
       protectors => {
 
-        val protectorsUpdated = JsArray(protectors.as[List[DisplayTrustProtectorCompany]].map {
+        val protectorsUpdated = JsArray(protectors.as[List[ProtectorCompany]].map {
           protector =>
-            Json.toJson(protector)(DisplayTrustProtectorCompany.writeToMaintain)
+            Json.toJson(protector)(ProtectorCompany.writeToMaintain)
         })
 
         JsPath.json.update(

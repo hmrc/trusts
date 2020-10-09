@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
 import org.scalatest.{FreeSpec, MustMatchers}
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustTrusteeOrgType
+import uk.gov.hmrc.trusts.models.variation.TrusteeOrgType
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {
@@ -27,13 +27,14 @@ class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {
   "the add trustee transformer should" - {
 
     "add a new organisation trustee when there are no trustees existing" in {
-      val t = DisplayTrustTrusteeOrgType(None,
+      val t = TrusteeOrgType(None,
         None,
         "Company Name",
         None,
         None,
         None,
-        LocalDate.parse("2020-01-30")
+        LocalDate.parse("2020-01-30"),
+        None
       )
 
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-no-trustees.json")
@@ -49,14 +50,15 @@ class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {
 
     "add a new org trustee" in {
 
-      val t = DisplayTrustTrusteeOrgType(
+      val t = TrusteeOrgType(
         None,
         None,
         "Company Name",
         None,
         None,
         None,
-        LocalDate.parse("2020-01-30")
+        LocalDate.parse("2020-01-30"),
+        None
       )
 
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")

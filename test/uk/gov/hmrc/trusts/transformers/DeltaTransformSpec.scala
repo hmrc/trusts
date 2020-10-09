@@ -20,9 +20,8 @@ import java.time.LocalDate
 
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.variation._
-import uk.gov.hmrc.trusts.models.{AddressType, IdentificationOrgType, NameType}
+import uk.gov.hmrc.trusts.models.{AddressType, NameType}
 
 class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
@@ -34,47 +33,51 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
       val amendedDate = LocalDate.of(2012, 3, 14)
       val currentDate = LocalDate.of(2020, 4, 1)
 
-      val newLeadTrustee = DisplayTrustLeadTrusteeIndType(
+      val newLeadTrustee = LeadTrusteeIndType(
         None,
         None,
         NameType("New", Some("lead"), "Trustee"),
         LocalDate.parse("2000-01-01"),
         "",
         None,
-        DisplayTrustIdentificationType(None, None, None, None),
-        None
+        IdentificationType(None, None, None, None),
+        LocalDate.of(2010, 4, 3),
+        entityEnd = None
       )
 
-      val newLeadTrusteeOrg = DisplayTrustLeadTrusteeOrgType(
+      val newLeadTrusteeOrg = LeadTrusteeOrgType(
         None,
         None,
         "Organisation",
         "phoneNumber",
         None,
-        DisplayTrustIdentificationOrgType(
-          None, Some("utr"), None
+        IdentificationOrgType(
+          Some("utr"), None, None
         ),
+        LocalDate.of(2010, 4, 3),
         None
       )
 
-      val newTrusteeInd = DisplayTrustTrusteeIndividualType(
+      val newTrusteeInd = TrusteeIndividualType(
         Some("lineNo"),
         Some("bpMatchStatus"),
         NameType("New", None, "Trustee"),
         Some(LocalDate.parse("2000-01-01")),
         Some("phoneNumber"),
-        Some(DisplayTrustIdentificationType(None, Some("nino"), None, None)),
-        LocalDate.parse("2000-01-01")
+        Some(IdentificationType(Some("nino"), None, None, None)),
+        LocalDate.parse("2000-01-01"),
+        None
       )
 
-      val newTrusteeOrg = DisplayTrustTrusteeOrgType(
+      val newTrusteeOrg = TrusteeOrgType(
         Some("lineNo"),
         Some("bpMatchStatus"),
         "New Trustee",
         Some("phoneNumber"),
         Some("email"),
-        Some(DisplayTrustIdentificationOrgType(None, Some("utr"), None)),
-        LocalDate.parse("2000-01-01")
+        Some(IdentificationOrgType(Some("utr"), None, None)),
+        LocalDate.parse("2000-01-01"),
+        None
       )
 
       val individualBeneficiary = IndividualDetailsType(
@@ -99,7 +102,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
         Some("50"),
         Some(IdentificationOrgType(
           Some("company utr"),
-          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")))),
+          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
+          None)),
         LocalDate.parse("1990-10-10"),
         None
       )
@@ -116,7 +120,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
         "501",
         Some(IdentificationOrgType(
           None,
-          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB"))
+          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
+          None
         )),
         None,
         None,
@@ -124,54 +129,58 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
         None
       )
 
-      val settlor = DisplayTrustSettlor(
+      val settlor = Settlor(
         None,
         None,
         NameType("Individual", None, "Settlor"),
         Some(LocalDate.parse("2000-01-01")),
-        Some(DisplayTrustIdentificationType(
-          None,
+        Some(IdentificationType(
           Some("nino"),
+          None,
           None,
           None
         )),
-        LocalDate.parse("2010-01-01")
+        LocalDate.parse("2010-01-01"),
+        None
       )
 
-      val protector = DisplayTrustProtector(
+      val protector = Protector(
         None,
         None,
         NameType("Individual", None, "Settlor"),
         Some(LocalDate.parse("2000-01-01")),
-        Some(DisplayTrustIdentificationType(
-          None,
+        Some(IdentificationType(
           Some("nino"),
+          None,
           None,
           None
         )),
-        LocalDate.parse("2010-01-01")
+        LocalDate.parse("2010-01-01"),
+        None
       )
 
-      val newCompanyProtector = DisplayTrustProtectorCompany(
+      val newCompanyProtector = ProtectorCompany(
         name = "TestCompany",
         identification = None,
         lineNo = None,
         bpMatchStatus = None,
-        entityStart = LocalDate.parse("2010-05-03")
+        entityStart = LocalDate.parse("2010-05-03"),
+        entityEnd = None
       )
 
-      val otherIndividual = DisplayTrustNaturalPersonType(
+      val otherIndividual = NaturalPersonType(
         None,
         None,
         NameType("Individual", None, "Settlor"),
         Some(LocalDate.parse("2000-01-01")),
-        Some(DisplayTrustIdentificationType(
-          None,
+        Some(IdentificationType(
           Some("nino"),
+          None,
           None,
           None
         )),
-        LocalDate.parse("2010-01-01")
+        LocalDate.parse("2010-01-01"),
+        None
       )
 
       val addTrustBeneficiaryTransform = AddTrustBeneficiaryTransform(newTrustBeneficiary)

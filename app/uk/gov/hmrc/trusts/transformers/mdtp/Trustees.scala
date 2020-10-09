@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.transformers.mdtp
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustTrusteeIndividualType, DisplayTrustTrusteeOrgType, DisplayTrustTrusteeType}
+import uk.gov.hmrc.trusts.models.variation.{TrusteeIndividualType, TrusteeOrgType, TrusteeType}
 
 object Trustees {
 
@@ -32,14 +32,14 @@ object Trustees {
       },
       trustees => {
 
-        val trusteesUpdated = JsArray(trustees.as[List[DisplayTrustTrusteeType]].map {
-          case DisplayTrustTrusteeType(Some(trusteeInd), None) =>
+        val trusteesUpdated = JsArray(trustees.as[List[TrusteeType]].map {
+          case TrusteeType(Some(trusteeInd), None) =>
             Json.obj(
-              "trusteeInd" -> Json.toJson(trusteeInd)(DisplayTrustTrusteeIndividualType.writeToMaintain)
+              "trusteeInd" -> Json.toJson(trusteeInd)(TrusteeIndividualType.writeToMaintain)
             )
-          case DisplayTrustTrusteeType(None, Some(trusteeOrg)) =>
+          case TrusteeType(None, Some(trusteeOrg)) =>
             Json.obj(
-              "trusteeOrg" -> Json.toJson(trusteeOrg)(DisplayTrustTrusteeOrgType.writeToMaintain)
+              "trusteeOrg" -> Json.toJson(trusteeOrg)(TrusteeOrgType.writeToMaintain)
             )
         })
 

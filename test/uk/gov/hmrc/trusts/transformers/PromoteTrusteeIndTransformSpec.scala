@@ -21,7 +21,7 @@ import java.time.LocalDate
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
 import uk.gov.hmrc.trusts.models.NameType
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustIdentificationType, DisplayTrustLeadTrusteeIndType}
+import uk.gov.hmrc.trusts.models.variation.{IdentificationType, LeadTrusteeIndType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class PromoteTrusteeIndTransformSpec extends FreeSpec with MustMatchers {
@@ -64,15 +64,16 @@ class PromoteTrusteeIndTransformSpec extends FreeSpec with MustMatchers {
   }
 
   private def transformToTest = {
-    val newTrusteeInfo = DisplayTrustLeadTrusteeIndType(
+    val newTrusteeInfo = LeadTrusteeIndType(
       lineNo = None,
       bpMatchStatus = None,
       name = NameType("John", Some("William"), "O'Connor"),
       dateOfBirth = LocalDate.of(1956, 2, 12),
       phoneNumber = "Phone",
       email = Some("Email"),
-      identification = DisplayTrustIdentificationType(None, Some("ST123456"), None, None),
-      entityStart = None
+      identification = IdentificationType(Some("ST123456"), None, None, None),
+      entityStart = LocalDate.of(2010, 4, 3),
+      entityEnd = None
     )
     PromoteTrusteeIndTransform(
       index = 0,

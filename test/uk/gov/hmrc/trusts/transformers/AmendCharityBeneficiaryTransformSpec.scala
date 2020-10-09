@@ -20,8 +20,7 @@ import java.time.LocalDate
 
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.trusts.models.IdentificationOrgType
-import uk.gov.hmrc.trusts.models.variation.BeneficiaryCharityType
+import uk.gov.hmrc.trusts.models.variation.{BeneficiaryCharityType, IdentificationOrgType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AmendCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
@@ -43,7 +42,8 @@ class AmendCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
           None,
           identification = Some(IdentificationOrgType(
             utr = Some("1234567890"),
-            address = None
+            address = None,
+            safeId = None
           )),
           LocalDate.parse("2018-02-28"),
           None
@@ -87,7 +87,8 @@ class AmendCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
           None,
           identification = Some(IdentificationOrgType(
             utr = Some("1234567890"),
-            address = None
+            address = None,
+            safeId = None
           )),
           LocalDate.parse("2018-02-28"),
           None

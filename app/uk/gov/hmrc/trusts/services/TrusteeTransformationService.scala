@@ -21,7 +21,8 @@ import java.time.LocalDate
 import javax.inject.Inject
 import play.api.libs.json.{__, _}
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustLeadTrusteeType, DisplayTrustTrusteeType, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
+import uk.gov.hmrc.trusts.models.variation.{LeadTrusteeType, TrusteeType}
 import uk.gov.hmrc.trusts.models.{RemoveTrustee, Success}
 import uk.gov.hmrc.trusts.transformers._
 
@@ -33,24 +34,24 @@ class TrusteeTransformationService @Inject()(
                                               transformationService: TransformationService,
                                               localDateService: LocalDateService) {
 
-  def addAmendLeadTrusteeTransformer(utr: String, internalId: String, newLeadTrustee: DisplayTrustLeadTrusteeType): Future[Success.type] = {
+  def addAmendLeadTrusteeTransformer(utr: String, internalId: String, newLeadTrustee: LeadTrusteeType): Future[Success.type] = {
     transformationService.addNewTransform(utr, internalId, newLeadTrustee match {
-      case DisplayTrustLeadTrusteeType(Some(trusteeInd), None) => AmendLeadTrusteeIndTransform(trusteeInd)
-      case DisplayTrustLeadTrusteeType(None, Some(trusteeOrg)) => AmendLeadTrusteeOrgTransform(trusteeOrg)
+      case LeadTrusteeType(Some(trusteeInd), None) => AmendLeadTrusteeIndTransform(trusteeInd)
+      case LeadTrusteeType(None, Some(trusteeOrg)) => AmendLeadTrusteeOrgTransform(trusteeOrg)
     }).map(_ => Success)
   }
 
   def addAmendTrusteeTransformer(utr: String,
                                  index: Int,
                                  internalId: String,
-                                 newTrustee: DisplayTrustTrusteeType): Future[Success.type] = {
+                                 newTrustee: TrusteeType): Future[Success.type] = {
 
     getTrusteeAtIndex(utr, internalId, index).flatMap {
       case scala.util.Success(trusteeJson) =>
         transformationService.addNewTransform(utr, internalId, newTrustee match {
-          case DisplayTrustTrusteeType(Some(trusteeInd), None) =>
+          case TrusteeType(Some(trusteeInd), None) =>
             AmendTrusteeIndTransform(index, trusteeInd, trusteeJson, localDateService.now)
-          case DisplayTrustTrusteeType(None, Some(trusteeOrg)) =>
+          case TrusteeType(None, Some(trusteeOrg)) =>
             AmendTrusteeOrgTransform(index, trusteeOrg, trusteeJson, localDateService.now)
         }).map(_ => Success)
       case scala.util.Failure(_) => Future.failed(InternalServerErrorException(s"Could not pick trustee at index $index."))
@@ -61,25 +62,25 @@ class TrusteeTransformationService @Inject()(
                                     utr: String,
                                     internalId: String,
                                     index: Int,
-                                    newLeadTrustee: DisplayTrustLeadTrusteeType,
+                                    newLeadTrustee: LeadTrusteeType,
                                     endDate: LocalDate): Future[Success.type] = {
 
     getTrusteeAtIndex(utr, internalId, index).flatMap {
       case scala.util.Success(trusteeJson) =>
         transformationService.addNewTransform(utr, internalId, newLeadTrustee match {
-          case DisplayTrustLeadTrusteeType(Some(trusteeInd), None) =>
+          case LeadTrusteeType(Some(trusteeInd), None) =>
             PromoteTrusteeIndTransform(index, trusteeInd, endDate, trusteeJson, localDateService.now)
-          case DisplayTrustLeadTrusteeType(None, Some(trusteeOrg)) =>
+          case LeadTrusteeType(None, Some(trusteeOrg)) =>
             PromoteTrusteeOrgTransform(index, trusteeOrg, endDate, trusteeJson, localDateService.now)
         }).map(_ => Success)
       case scala.util.Failure(_) => Future.failed(InternalServerErrorException(s"Could not pick trustee at index $index."))
     }
   }
 
-  def addAddTrusteeTransformer(utr: String, internalId: String, newTrustee: DisplayTrustTrusteeType): Future[Success.type] = {
+  def addAddTrusteeTransformer(utr: String, internalId: String, newTrustee: TrusteeType): Future[Success.type] = {
     transformationService.addNewTransform(utr, internalId, newTrustee match {
-      case DisplayTrustTrusteeType(Some(trusteeInd), None) => AddTrusteeIndTransform(trusteeInd)
-      case DisplayTrustTrusteeType(None, Some(trusteeOrg)) => AddTrusteeOrgTransform(trusteeOrg)
+      case TrusteeType(Some(trusteeInd), None) => AddTrusteeIndTransform(trusteeInd)
+      case TrusteeType(None, Some(trusteeOrg)) => AddTrusteeOrgTransform(trusteeOrg)
     }).map(_ => Success)
   }
 

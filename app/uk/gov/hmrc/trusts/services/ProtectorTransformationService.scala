@@ -19,7 +19,7 @@ package uk.gov.hmrc.trusts.services
 import javax.inject.Inject
 import play.api.libs.json.{JsObject, JsValue, Json, __}
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{DisplayTrustProtector, DisplayTrustProtectorCompany, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models.variation._
 import uk.gov.hmrc.trusts.models.{RemoveProtector, Success}
 import uk.gov.hmrc.trusts.transformers._
@@ -48,7 +48,7 @@ class ProtectorTransformationService @Inject()(transformationService: Transforma
       }
   }
 
-  def addBusinessProtectorTransformer(utr: String, internalId: String, newProtectorCompany: DisplayTrustProtectorCompany): Future[Boolean] = {
+  def addBusinessProtectorTransformer(utr: String, internalId: String, newProtectorCompany: ProtectorCompany): Future[Boolean] = {
     transformationService.addNewTransform(utr, internalId, AddCompanyProtectorTransform(newProtectorCompany))
   }
 
@@ -68,7 +68,7 @@ class ProtectorTransformationService @Inject()(transformationService: Transforma
     )
   }
 
-  def addIndividualProtectorTransformer(utr: String, internalId: String, newProtector: DisplayTrustProtector): Future[Success.type] = {
+  def addIndividualProtectorTransformer(utr: String, internalId: String, newProtector: Protector): Future[Success.type] = {
     transformationService.addNewTransform(utr, internalId, AddIndividualProtectorTransform(newProtector)).map(_ => Success)
   }
 

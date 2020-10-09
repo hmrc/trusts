@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.transformers.mdtp.settlors
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.variation.SettlorCompany
 
 object Business {
 
@@ -32,9 +32,9 @@ object Business {
       },
       settlors => {
 
-        val settlorsUpdated = JsArray(settlors.as[List[DisplayTrustSettlorCompany]].map {
+        val settlorsUpdated = JsArray(settlors.as[List[SettlorCompany]].map {
           settlor =>
-            Json.toJson(settlor)(DisplayTrustSettlorCompany.writeToMaintain)
+            Json.toJson(settlor)(SettlorCompany.writeToMaintain)
         })
 
         JsPath.json.update(

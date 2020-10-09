@@ -17,9 +17,9 @@
 package uk.gov.hmrc.trusts.transformers
 import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.TrusteeInd
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.DisplayTrustTrusteeIndividualType
+import uk.gov.hmrc.trusts.models.variation.TrusteeIndividualType
 
-case class AddTrusteeIndTransform(trustee: DisplayTrustTrusteeIndividualType) extends DeltaTransform
+case class AddTrusteeIndTransform(trustee: TrusteeIndividualType) extends DeltaTransform
   with JsonOperations {
 
   private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'trustees

@@ -22,7 +22,6 @@ import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveProtector
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
 import uk.gov.hmrc.trusts.models.variation.{Protector, ProtectorCompany}
 import uk.gov.hmrc.trusts.services.ProtectorTransformationService
 import uk.gov.hmrc.trusts.utils.ValidationUtil
@@ -49,7 +48,7 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
 
   def addIndividualProtector(utr: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
-      request.body.validate[DisplayTrustProtector] match {
+      request.body.validate[Protector] match {
         case JsSuccess(protector, _) =>
 
           transformService.addIndividualProtectorTransformer(
@@ -68,12 +67,12 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
   }
   def addBusinessProtector(utr: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
-      request.body.validate[DisplayTrustProtectorCompany] match {
-        case JsSuccess(newBeneficiary, _) =>
+      request.body.validate[ProtectorCompany] match {
+        case JsSuccess(protectorCompany, _) =>
           transformService.addBusinessProtectorTransformer(
             utr,
             request.identifier,
-            newBeneficiary
+            protectorCompany
           ) map { _ =>
             Ok
           }

@@ -22,7 +22,7 @@ import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.RemoveTrustee
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.variation._
 import uk.gov.hmrc.trusts.services.{LocalDateService, TrusteeTransformationService}
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
@@ -38,13 +38,13 @@ class TrusteeTransformationController @Inject()(
 
   def amendLeadTrustee(utr: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
-      request.body.validate[DisplayTrustLeadTrusteeType] match {
+      request.body.validate[LeadTrusteeType](LeadTrusteeType.EitherLeadTrusteeReads) match {
         case JsSuccess(model, _) =>
           trusteeTransformationService.addAmendLeadTrusteeTransformer(utr, request.identifier, model) map { _ =>
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"Supplied Lead trustee could not be read as DisplayTrustLeadTrusteeType - $errors")
+          logger.warn(s"Supplied Lead trustee could not be read as LeadTrusteeType - $errors")
           Future.successful(BadRequest)
       }
     }
@@ -66,16 +66,16 @@ class TrusteeTransformationController @Inject()(
   def addTrustee(utr: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
 
-      val trusteeInd = request.body.validateOpt[DisplayTrustTrusteeIndividualType].getOrElse(None)
-      val trusteeOrg = request.body.validateOpt[DisplayTrustTrusteeOrgType].getOrElse(None)
+      val trusteeInd = request.body.validateOpt[TrusteeIndividualType].getOrElse(None)
+      val trusteeOrg = request.body.validateOpt[TrusteeOrgType].getOrElse(None)
 
       (trusteeInd, trusteeOrg) match {
         case (Some(ind), _) =>
-          trusteeTransformationService.addAddTrusteeTransformer(utr, request.identifier, DisplayTrustTrusteeType(Some(ind), None)) map { _ =>
+          trusteeTransformationService.addAddTrusteeTransformer(utr, request.identifier, TrusteeType(Some(ind), None)) map { _ =>
             Ok
           }
         case (_, Some(org)) =>
-          trusteeTransformationService.addAddTrusteeTransformer(utr, request.identifier, DisplayTrustTrusteeType(None, Some(org))) map { _ =>
+          trusteeTransformationService.addAddTrusteeTransformer(utr, request.identifier, TrusteeType(None, Some(org))) map { _ =>
             Ok
           }
         case _ =>
@@ -88,16 +88,16 @@ class TrusteeTransformationController @Inject()(
   def amendTrustee(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
 
-      val trusteeInd = request.body.validateOpt[DisplayTrustTrusteeIndividualType].getOrElse(None)
-      val trusteeOrg = request.body.validateOpt[DisplayTrustTrusteeOrgType].getOrElse(None)
+      val trusteeInd = request.body.validateOpt[TrusteeIndividualType].getOrElse(None)
+      val trusteeOrg = request.body.validateOpt[TrusteeOrgType].getOrElse(None)
 
       (trusteeInd, trusteeOrg) match {
         case (Some(ind), _) =>
-          trusteeTransformationService.addAmendTrusteeTransformer(utr, index, request.identifier, DisplayTrustTrusteeType(Some(ind), None)) map { _ =>
+          trusteeTransformationService.addAmendTrusteeTransformer(utr, index, request.identifier, TrusteeType(Some(ind), None)) map { _ =>
             Ok
           }
         case (_, Some(org)) =>
-          trusteeTransformationService.addAmendTrusteeTransformer(utr, index, request.identifier, DisplayTrustTrusteeType(None, Some(org))) map { _ =>
+          trusteeTransformationService.addAmendTrusteeTransformer(utr, index, request.identifier, TrusteeType(None, Some(org))) map { _ =>
             Ok
           }
         case _ =>
@@ -110,8 +110,8 @@ class TrusteeTransformationController @Inject()(
   def promoteTrustee(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
 
-      val leadTrusteeInd = request.body.validateOpt[DisplayTrustLeadTrusteeIndType].getOrElse(None)
-      val leadTrusteeOrg = request.body.validateOpt[DisplayTrustLeadTrusteeOrgType].getOrElse(None)
+      val leadTrusteeInd = request.body.validateOpt[LeadTrusteeIndType].getOrElse(None)
+      val leadTrusteeOrg = request.body.validateOpt[LeadTrusteeOrgType].getOrElse(None)
 
       (leadTrusteeInd, leadTrusteeOrg) match {
         case (Some(ind), _) =>
@@ -119,7 +119,7 @@ class TrusteeTransformationController @Inject()(
             utr,
             request.identifier,
             index,
-            DisplayTrustLeadTrusteeType(Some(ind), None),
+            LeadTrusteeType(Some(ind), None),
             localDateService.now
           ).map(_ => Ok)
         case (_, Some(org)) =>
@@ -127,7 +127,7 @@ class TrusteeTransformationController @Inject()(
             utr,
             request.identifier,
             index,
-            DisplayTrustLeadTrusteeType(None, Some(org)),
+            LeadTrusteeType(None, Some(org)),
             localDateService.now
           ).map(_ => Ok)
         case _ =>

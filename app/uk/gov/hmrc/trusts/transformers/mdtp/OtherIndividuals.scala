@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.transformers.mdtp
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.variation.NaturalPersonType
 
 object OtherIndividuals {
 
@@ -32,9 +32,9 @@ object OtherIndividuals {
       },
       otherIndividuals => {
 
-        val otherIndividualsUpdated = JsArray(otherIndividuals.as[List[DisplayTrustNaturalPersonType]].map {
+        val otherIndividualsUpdated = JsArray(otherIndividuals.as[List[NaturalPersonType]].map {
           otherIndividual =>
-            Json.toJson(otherIndividual)(DisplayTrustNaturalPersonType.writeToMaintain)
+            Json.toJson(otherIndividual)(NaturalPersonType.writeToMaintain)
         })
 
         JsPath.json.update(

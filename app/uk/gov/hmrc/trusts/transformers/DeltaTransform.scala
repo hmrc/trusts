@@ -75,7 +75,7 @@ object DeltaTransform {
   def settlorReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
     readsForTransform[AddIndividualSettlorTransform](AddIndividualSettlorTransform.key) orElse
     readsForTransform[AmendIndividualSettlorTransform](AmendIndividualSettlorTransform.key) orElse
-    readsForTransform[AddBuisnessSettlorTransform](AddBuisnessSettlorTransform.key) orElse
+    readsForTransform[AddBusinessSettlorTransform](AddBusinessSettlorTransform.key) orElse
     readsForTransform[AmendBusinessSettlorTransform](AmendBusinessSettlorTransform.key) orElse
     readsForTransform[AmendDeceasedSettlorTransform](AmendDeceasedSettlorTransform.key) orElse
     readsForTransform[RemoveSettlorsTransform](RemoveSettlorsTransform.key)
@@ -158,8 +158,8 @@ object DeltaTransform {
   def addSettlorsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
     case transform: AddIndividualSettlorTransform =>
       Json.obj(AddIndividualSettlorTransform.key -> Json.toJson(transform)(AddIndividualSettlorTransform.format))
-    case transform: AddBuisnessSettlorTransform =>
-      Json.obj(AddBuisnessSettlorTransform.key -> Json.toJson(transform)(AddBuisnessSettlorTransform.format))
+    case transform: AddBusinessSettlorTransform =>
+      Json.obj(AddBusinessSettlorTransform.key -> Json.toJson(transform)(AddBusinessSettlorTransform.format))
   }
 
   def amendSettlorsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
