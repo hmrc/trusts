@@ -40,19 +40,17 @@ object GetTrustSuccessResponse {
     case TrustFoundResponse(header) => Json.obj("responseHeader" -> header)
   }
 
-  implicit val reads: Reads[GetTrustSuccessResponse] = new Reads[GetTrustSuccessResponse] {
-    override def reads(json: JsValue): JsResult[GetTrustSuccessResponse] = {
-      val header = (json \ "responseHeader").validate[ResponseHeader]
-      (json \ "trustOrEstateDisplay").toOption match {
-        case None => header.map(TrustFoundResponse)
-        case Some(x) =>
-          x.validate[GetTrust] match {
-            case JsSuccess(_, _) =>
-              header.map(h => TrustProcessedResponse(x, h))
-            case x : JsError => x
-          }
+  implicit val reads: Reads[GetTrustSuccessResponse] = (json: JsValue) => {
+    val header = (json \ "responseHeader").validate[ResponseHeader]
+    (json \ "trustOrEstateDisplay").toOption match {
+      case None => header.map(TrustFoundResponse)
+      case Some(x) =>
+        x.validate[GetTrust] match {
+          case JsSuccess(_, _) =>
+            header.map(h => TrustProcessedResponse(x, h))
+          case x: JsError => x
+        }
 
-      }
     }
   }
 }
@@ -76,11 +74,9 @@ case class TrustProcessedResponse(getTrust: JsValue,
 }
 
 object TrustProcessedResponse {
-  val mongoWrites: Writes[TrustProcessedResponse] = new Writes[TrustProcessedResponse] {
-    override def writes(o: TrustProcessedResponse): JsValue = Json.obj(
-      "responseHeader" -> Json.toJson(o.responseHeader)(ResponseHeader.mongoWrites),
-      "trustOrEstateDisplay" -> o.getTrust)
-  }
+  val mongoWrites: Writes[TrustProcessedResponse] = (o: TrustProcessedResponse) => Json.obj(
+    "responseHeader" -> Json.toJson(o.responseHeader)(ResponseHeader.mongoWrites),
+    "trustOrEstateDisplay" -> o.getTrust)
 }
 
 case class TrustFoundResponse(responseHeader: ResponseHeader) extends GetTrustSuccessResponse

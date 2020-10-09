@@ -69,8 +69,6 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
 
       val newTrusteeInfo = LeadTrusteeType(Some(newTrusteeIndInfo), None)
 
-      println(s"---- trustee info: ${Json.toJson(newTrusteeIndInfo)}")
-
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(newTrusteeIndInfo))
         .withHeaders(CONTENT_TYPE -> "application/json")
