@@ -17,7 +17,7 @@
 package uk.gov.hmrc.trusts.transformers.mdtp.beneficiaries
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
+import uk.gov.hmrc.trusts.models.variation.BeneficiaryCompanyType
 
 object Company {
 
@@ -32,9 +32,9 @@ object Company {
       },
       beneficiaries => {
 
-        val beneficiariesUpdated = JsArray(beneficiaries.as[List[DisplayTrustBeneficiaryCompanyType]].map {
+        val beneficiariesUpdated = JsArray(beneficiaries.as[List[BeneficiaryCompanyType]].map {
           beneficiary =>
-            Json.toJson(beneficiary)(DisplayTrustBeneficiaryCompanyType.writeToMaintain)
+            Json.toJson(beneficiary)(BeneficiaryCompanyType.writeToMaintain)
         })
 
         JsPath.json.update(
