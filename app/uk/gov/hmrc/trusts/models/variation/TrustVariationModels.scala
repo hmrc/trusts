@@ -240,7 +240,7 @@ case class IndividualDetailsType(
                                   bpMatchStatus: Option[String],
                                   name: NameType,
                                   dateOfBirth: Option[LocalDate],
-                                  vulnerableBeneficiary: Boolean,
+                                  vulnerableBeneficiary: Boolean,       // actually optional in 5MLD schema
                                   beneficiaryType: Option[String],
                                   beneficiaryDiscretion: Option[Boolean],
                                   beneficiaryShareOfIncome: Option[String],
@@ -645,7 +645,8 @@ case class Assets(
                    shares: Option[List[SharesType]],
                    business: Option[List[BusinessAssetType]],
                    partnerShip: Option[List[PartnershipType]],
-                   other: Option[List[OtherAssetType]]
+                   other: Option[List[OtherAssetType]],
+                   nonEEABusiness: Option[List[NonEEABusinessType]]
                  )
 
 object Assets {
@@ -722,3 +723,16 @@ case class IdentificationOrgType(utr: Option[String],
 object IdentificationOrgType {
   implicit val trustBeneficiaryIdentificationFormat: Format[IdentificationOrgType] = Json.format[IdentificationOrgType]
 }
+
+// new 5MLD type
+case class NonEEABusinessType(lineNo: String,
+                               orgName: String,
+                               address: AddressType,
+                               govLawCountry: String,
+                               startDate: LocalDate,
+                               endDate: Option[LocalDate])
+
+object NonEEABusinessType {
+  implicit val format: Format[NonEEABusinessType] = Json.format[NonEEABusinessType]
+}
+
