@@ -98,6 +98,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
         None,
         None,
         None,
+        None,
+        None,
+        None,
         LocalDate.parse("2018-02-28"),
         None
       )
@@ -112,6 +115,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           Some("company utr"),
           Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
           None)),
+        None,
         LocalDate.parse("1990-10-10"),
         None
       )
@@ -131,6 +135,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
           None
         )),
+        None,
         None,
         None,
         LocalDate.parse("2010-01-01"),
@@ -255,18 +260,18 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
       val addCharityBeneficiaryTransform = AddCharityBeneficiaryTransform(
         BeneficiaryCharityType(
           None, None, "New Organisation Name", Some(true),
-          None, None, LocalDate.parse("2010-02-23"), None
+          None, None, None, LocalDate.parse("2010-02-23"), None
         )
       )
 
       val addOtherBeneficiaryTransform = AddOtherBeneficiaryTransform(
         OtherType(
-          None, None, "description", None, None, None, LocalDate.parse("2010-02-23"), None
+          None, None, "description", None, None, None, None, LocalDate.parse("2010-02-23"), None
         )
       )
 
       val addCompanyBeneficiaryTransform = AddCompanyBeneficiaryTransform(
-        BeneficiaryCompanyType(None, None, "Organisation", None, None, None, LocalDate.parse("2010-02-23"), None)
+        BeneficiaryCompanyType(None, None, "Organisation", None, None, None, None, LocalDate.parse("2010-02-23"), None)
       )
 
       val addLargeBeneficiaryTransform = AddLargeBeneficiaryTransform(newLargeBeneficiary)

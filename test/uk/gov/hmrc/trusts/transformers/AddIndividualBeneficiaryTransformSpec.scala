@@ -34,6 +34,9 @@ class AddIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
     None,
     None,
     Some(IdentificationType(Some("nino"), None, None, None)),
+    None,
+    None,
+    None,
     LocalDate.parse("1990-10-10"),
     None
   )

@@ -20,7 +20,6 @@ import java.time.LocalDate
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.JsonWithoutNulls._
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.utils.DeedOfVariation.DeedOfVariation
 import uk.gov.hmrc.trusts.utils.TypeOfTrust.TypeOfTrust
@@ -270,20 +269,6 @@ case class DisplayTrustIndividualDetailsType(lineNo: Option[String],
 
 object DisplayTrustIndividualDetailsType {
   implicit val individualDetailsTypeFormat: Format[DisplayTrustIndividualDetailsType] = Json.format[DisplayTrustIndividualDetailsType]
-
-  val writeToMaintain : Writes[DisplayTrustIndividualDetailsType] = (o: DisplayTrustIndividualDetailsType) => Json.obj(
-    "lineNo" -> o.lineNo,
-    "bpMatchStatus" -> o.bpMatchStatus,
-    "name" -> o.name,
-    "dateOfBirth" -> o.dateOfBirth,
-    "vulnerableBeneficiary" -> o.vulnerableBeneficiary,
-    "beneficiaryType" -> o.beneficiaryType,
-    "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
-    "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
-    "identification" -> o.identification,
-    "entityStart" -> o.entityStart,
-    "provisional" -> o.lineNo.isEmpty
-  ).withoutNulls
 }
 
 case class DisplayTrustBeneficiaryCompanyType(lineNo: Option[String],

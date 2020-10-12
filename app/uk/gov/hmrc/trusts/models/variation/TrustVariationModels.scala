@@ -30,7 +30,8 @@ case class TrustVariation(
                       details: Trust,
                       agentDetails: Option[AgentDetails] = None,
                       trustEndDate: Option[LocalDate],
-                      reqHeader: ReqHeader
+                      reqHeader: ReqHeader,
+                      submissionDate: Option[LocalDate]   // New to 5MLD variation, mandatory in 5MLD
                     )
 
 object TrustVariation {
@@ -43,7 +44,8 @@ object TrustVariation {
         (__ \ "details" \ "trust").read[Trust] and
         (__ \ "agentDetails").readNullable[AgentDetails] and
         (__ \ "trustEndDate").readNullable[LocalDate] and
-        (__ \ "reqHeader").read[ReqHeader]
+        (__ \ "reqHeader").read[ReqHeader] and
+        (__ \ "submissionDate").readNullable[LocalDate]
       ) (TrustVariation.apply _)
   }
 
@@ -54,14 +56,16 @@ object TrustVariation {
       (JsPath \ "details" \ "trust").write[Trust] and
       (JsPath \ "agentDetails").writeNullable[AgentDetails] and
       (JsPath \ "trustEndDate").writeNullable[LocalDate] and
-      (JsPath \ "reqHeader").write[ReqHeader]
+      (JsPath \ "reqHeader").write[ReqHeader] and
+      (JsPath \ "submissionDate").writeNullable[LocalDate]
     ) (unlift(TrustVariation.unapply))
 
   implicit val variationFormat: Format[TrustVariation] = Format(variationReads, writeToDes)
 
 }
 
-case class MatchData(utr: String)
+// Both optional in display response
+case class MatchData(utr: Option[String], urn: Option[String])
 
 object MatchData {
   implicit val matchDataFormat: Format[MatchData] = Json.format[MatchData]
@@ -76,7 +80,7 @@ object ReqHeader {
 case class Trust(
                   details: TrustDetailsType,
                   entities: TrustEntitiesType,
-                  assets: Assets
+                  assets: Option[Assets]    // now optional with 5mld
                 )
 
 object Trust {
@@ -177,6 +181,7 @@ case class LargeType(lineNo: Option[String],
                      identification: Option[IdentificationOrgType],
                      beneficiaryDiscretion: Option[Boolean],
                      beneficiaryShareOfIncome: Option[String],
+                     countryOfResidence: Option[String],    // new 5MLD optional
                      entityStart: LocalDate,
                      entityEnd: Option[LocalDate])
 
@@ -196,6 +201,7 @@ object LargeType {
     "identification" -> o.identification,
     "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
     "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
+    "countryOfResidence" -> o.countryOfResidence,
     "entityStart" -> o.entityStart,
     "entityEnd" -> o.entityEnd,
     "provisional" -> o.lineNo.isEmpty
@@ -208,6 +214,7 @@ case class OtherType(lineNo: Option[String],
                      address: Option[AddressType],
                      beneficiaryDiscretion: Option[Boolean],
                      beneficiaryShareOfIncome: Option[String],
+                     countryOfResidence: Option[String],    // new 5MLD optional
                      entityStart: LocalDate,
                      entityEnd: Option[LocalDate])
 
@@ -221,6 +228,7 @@ object OtherType {
     "address" -> o.address,
     "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
     "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
+    "countryOfResidence" -> o.countryOfResidence,
     "entityStart" -> o.entityStart,
     "entityEnd" -> o.entityEnd,
     "provisional" -> o.lineNo.isEmpty
@@ -237,6 +245,9 @@ case class IndividualDetailsType(
                                   beneficiaryDiscretion: Option[Boolean],
                                   beneficiaryShareOfIncome: Option[String],
                                   identification: Option[IdentificationType],
+                                  countryOfResidence: Option[String],    // new 5MLD optional
+                                  legallyIncapable: Option[Boolean],     // new 5MLD optional
+                                  nationality: Option[String],           // new 5MLD optional
                                   entityStart: LocalDate,
                                   entityEnd: Option[LocalDate]
                                 )
@@ -253,6 +264,9 @@ object IndividualDetailsType {
     "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
     "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
     "identification" -> o.identification,
+    "countryOfResidence" -> o.countryOfResidence,
+    "legallyIncapable" -> o.legallyIncapable,
+    "nationality" -> o.nationality,
     "entityStart" -> o.entityStart,
     "entityEnd" -> o.entityEnd,
     "provisional" -> o.lineNo.isEmpty
@@ -265,6 +279,7 @@ case class BeneficiaryCompanyType(lineNo: Option[String],
                                   beneficiaryDiscretion: Option[Boolean],
                                   beneficiaryShareOfIncome: Option[String],
                                   identification: Option[IdentificationOrgType],
+                                  countryOfResidence: Option[String],   // new 5MLD optional
                                   entityStart: LocalDate,
                                   entityEnd: Option[LocalDate])
 
@@ -278,6 +293,7 @@ object BeneficiaryCompanyType {
     "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
     "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
     "identification" -> o.identification,
+    "countryOfResidence" -> o.countryOfResidence,
     "entityStart" -> o.entityStart,
     "entityEnd" -> o.entityEnd,
     "provisional" -> o.lineNo.isEmpty
@@ -290,6 +306,7 @@ case class BeneficiaryTrustType(lineNo: Option[String],
                                 beneficiaryDiscretion: Option[Boolean],
                                 beneficiaryShareOfIncome: Option[String],
                                 identification: Option[IdentificationOrgType],
+                                countryOfResidence: Option[String],   // new 5MLD optional
                                 entityStart: LocalDate,
                                 entityEnd: Option[LocalDate])
 
@@ -303,6 +320,7 @@ object BeneficiaryTrustType {
     "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
     "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
     "identification" -> o.identification,
+    "countryOfResidence" -> o.countryOfResidence,
     "entityStart" -> o.entityStart,
     "entityEnd" -> o.entityEnd,
     "provisional" -> o.lineNo.isEmpty
@@ -315,6 +333,7 @@ case class BeneficiaryCharityType(lineNo: Option[String],
                                   beneficiaryDiscretion: Option[Boolean],
                                   beneficiaryShareOfIncome: Option[String],
                                   identification: Option[IdentificationOrgType],
+                                  countryOfResidence: Option[String],   // new 5MLD optional
                                   entityStart: LocalDate,
                                   entityEnd: Option[LocalDate])
 
@@ -328,6 +347,7 @@ object BeneficiaryCharityType {
     "beneficiaryDiscretion" -> o.beneficiaryDiscretion,
     "beneficiaryShareOfIncome" -> o.beneficiaryShareOfIncome,
     "identification" -> o.identification,
+    "countryOfResidence" -> o.countryOfResidence,
     "entityStart" -> o.entityStart,
     "entityEnd" -> o.entityEnd,
     "provisional" -> o.lineNo.isEmpty
@@ -341,6 +361,8 @@ case class WillType(
                      dateOfBirth: Option[LocalDate],
                      dateOfDeath: Option[LocalDate],
                      identification: Option[IdentificationType],
+                     countryOfResidence: Option[String],    // new 5MLD optional
+                     nationality: Option[String],           // new 5MLD optional
                      entityStart: LocalDate,
                      entityEnd: Option[LocalDate]
                    )

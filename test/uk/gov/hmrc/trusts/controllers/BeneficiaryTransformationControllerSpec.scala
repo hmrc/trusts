@@ -186,6 +186,9 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None,
         None,
         None,
+        None,
+        None,
+        None,
         LocalDate.parse("2010-01-01"),
         None
       )
@@ -239,6 +242,9 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None,
         None,
         Some(IdentificationType(Some("nino"), None, None, None)),
+        None,
+        None,
+        None,
         LocalDate.parse("1990-10-10"),
         None
       )
@@ -282,6 +288,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         Some(false),
         Some("50"),
         Some(IdentificationOrgType(None, Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")), None)),
+        None,
         LocalDate.parse("1990-10-10"),
         None
       )
@@ -325,6 +332,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None,
         None,
         "Charity Name",
+        None,
         None,
         None,
         None,
@@ -379,6 +387,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
         Some(false),
         None,
+        None,
         LocalDate.parse("1990-10-10"),
         None
       )
@@ -424,6 +433,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         Some(IdentificationOrgType(
           Some("company utr"),
           Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")), None)),
+        None,
         LocalDate.parse("1990-10-10"),
         None
       )
@@ -467,6 +477,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None,
         None,
         "Company Name",
+        None,
         None,
         None,
         None,
@@ -523,6 +534,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         Some(IdentificationOrgType(
           Some("company utr"),
           Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")), None)),
+        None,
         LocalDate.parse("1990-10-10"),
         None
       )
@@ -567,6 +579,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None,
         None,
         "Other Name",
+        None,
         None,
         None,
         None,
@@ -620,6 +633,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None,
         None,
         "Trust Name",
+        None,
         None,
         None,
         None,
@@ -683,6 +697,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         )),
         None,
         None,
+        None,
         LocalDate.parse("2010-01-01"),
         None
       )
@@ -737,6 +752,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
           Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
           None
         )),
+        None,
         None,
         None,
         LocalDate.parse("2010-01-01"),

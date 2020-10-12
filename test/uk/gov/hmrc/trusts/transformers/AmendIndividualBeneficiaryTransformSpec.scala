@@ -54,6 +54,9 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
             address = None,
             safeId = None
           )),
+          None,
+          None,
+          None,
           LocalDate.parse("2018-02-28"),
           None
         )
@@ -112,6 +115,9 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
             address = None,
             safeId = None
           )),
+          None,
+          None,
+          None,
           LocalDate.parse("2018-02-28"),
           None
         )
@@ -154,6 +160,9 @@ class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers
           NameType("Amended New First 3", None, "Amended New Last 3"),
           dateOfBirth = None,
           vulnerableBeneficiary = true,
+          None,
+          None,
+          None,
           None,
           None,
           None,
