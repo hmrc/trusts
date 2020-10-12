@@ -399,7 +399,9 @@ case class TrustDetailsType(startDate: LocalDate,
                             trustTaxable: Option[Boolean],        // new 5MLD required
                             expressTrust: Option[Boolean],        // new 5MLD required
                             trustUKResident: Option[Boolean],     // new 5MLD required
-                            trustUKProperty: Option[Boolean]      // new 5MLD optional
+                            trustUKProperty: Option[Boolean],     // new 5MLD optional
+                            trustRecorded: Option[Boolean],       // new 5MLD required
+                            trustUKRelation: Option[Boolean]      // new 5MLD required
                            ) {
 
   def isEmploymentRelatedTrust : Boolean = typeOfTrust.contains(Employment)
