@@ -38,9 +38,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonFixtures {
-   private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
+  private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 
-  private def beneficiaryJson(value1 : String, endDate: Option[LocalDate] = None) = {
+  private def beneficiaryJson(value1: String, endDate: Option[LocalDate] = None) = {
     if (endDate.isDefined) {
       Json.obj("field1" -> value1, "field2" -> "value20", "endDate" -> endDate.get, "lineNo" -> 65)
     } else {
@@ -139,59 +139,59 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
     }
 
     "must add a new amend individual beneficiary transform using the transformation service" in {
-        val index = 0
-        val transformationService = mock[TransformationService]
-        val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
-        val newIndividual = IndividualDetailsType(
-          None,
-          None,
-          NameType("First", None, "Last"),
-          None,
-          vulnerableBeneficiary = false,
-          None,
-          None,
-          None,
-          None,
-          None,
-          None,
-          None,
-          LocalDate.parse("2010-01-01"),
-          None
+      val index = 0
+      val transformationService = mock[TransformationService]
+      val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
+      val newIndividual = IndividualDetailsType(
+        None,
+        None,
+        NameType("First", None, "Last"),
+        None,
+        vulnerableBeneficiary = false,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        LocalDate.parse("2010-01-01"),
+        None
+      )
+
+      val original: JsValue = Json.parse(
+        """
+          |{
+          |  "lineNo": "1",
+          |  "bpMatchStatus": "01",
+          |  "name": {
+          |    "firstName": "First 2",
+          |    "lastName": "Last 2"
+          |  },
+          |  "vulnerableBeneficiary": true,
+          |  "identification": {
+          |    "nino": "JP1212122A"
+          |  },
+          |  "entityStart": "2018-02-28"
+          |}
+          |""".stripMargin)
+
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+      when(transformationService.getTransformedData(any(), any()))
+        .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
+          buildInputJson("individualDetails", Seq(original)),
+          ResponseHeader("status", "formBundlNo")
+        )))
+
+      val result = service.amendIndividualBeneficiaryTransformer("utr", index, "internalId", newIndividual)
+      whenReady(result) { _ =>
+
+        verify(transformationService).addNewTransform(
+          Matchers.eq("utr"),
+          Matchers.eq("internalId"),
+          Matchers.eq(AmendIndividualBeneficiaryTransform(index, Json.toJson(newIndividual), original, LocalDateMock.now))
         )
-
-        val original: JsValue = Json.parse(
-          """
-            |{
-            |  "lineNo": "1",
-            |  "bpMatchStatus": "01",
-            |  "name": {
-            |    "firstName": "First 2",
-            |    "lastName": "Last 2"
-            |  },
-            |  "vulnerableBeneficiary": true,
-            |  "identification": {
-            |    "nino": "JP1212122A"
-            |  },
-            |  "entityStart": "2018-02-28"
-            |}
-            |""".stripMargin)
-
-        when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
-
-        when(transformationService.getTransformedData(any(), any()))
-          .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
-            buildInputJson("individualDetails", Seq(original)),
-            ResponseHeader("status", "formBundlNo")
-          )))
-
-        val result = service.amendIndividualBeneficiaryTransformer("utr", index, "internalId", newIndividual)
-        whenReady(result) { _ =>
-
-          verify(transformationService).addNewTransform(
-            Matchers.eq("utr"),
-            Matchers.eq("internalId"),
-            Matchers.eq(AmendIndividualBeneficiaryTransform(index, Json.toJson(newIndividual), original, LocalDateMock.now))
-          )
       }
     }
 
@@ -396,48 +396,48 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
       }
     }
 
-  "must add a new add trust beneficiary transform using the transformation service" in {
-    val transformationService = mock[TransformationService]
-    val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
-    val newBeneficiary = BeneficiaryTrustType(
-      None,
-      None,
-      "Organisation Name",
-      Some(false),
-      Some("50"),
-      Some(IdentificationOrgType(
-        Some("company utr"),
-        Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")), None)),
-      None,
-      LocalDate.parse("1990-10-10"),
-      None
-    )
+    "must add a new add trust beneficiary transform using the transformation service" in {
+      val transformationService = mock[TransformationService]
+      val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
+      val newBeneficiary = BeneficiaryTrustType(
+        None,
+        None,
+        "Organisation Name",
+        Some(false),
+        Some("50"),
+        Some(IdentificationOrgType(
+          Some("company utr"),
+          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")), None)),
+        None,
+        LocalDate.parse("1990-10-10"),
+        None
+      )
 
-    when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-    val result = service.addTrustBeneficiaryTransformer("utr", "internalId", newBeneficiary)
-    whenReady(result) { _ =>
+      val result = service.addTrustBeneficiaryTransformer("utr", "internalId", newBeneficiary)
+      whenReady(result) { _ =>
 
-      verify(transformationService).addNewTransform("utr",
-        "internalId", AddTrustBeneficiaryTransform(newBeneficiary))
+        verify(transformationService).addNewTransform("utr",
+          "internalId", AddTrustBeneficiaryTransform(newBeneficiary))
+      }
     }
-  }
 
-  "must add a new amend other beneficiary transform using the transformation service" in {
-    val index = 0
-    val transformationService = mock[TransformationService]
-    val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
-    val newBeneficiary = OtherType(
-      None,
-      None,
-      "Other",
-      Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
-      Some(false),
-      None,
-      None,
-      LocalDate.parse("1990-10-10"),
-      None
-    )
+    "must add a new amend other beneficiary transform using the transformation service" in {
+      val index = 0
+      val transformationService = mock[TransformationService]
+      val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
+      val newBeneficiary = OtherType(
+        None,
+        None,
+        "Other",
+        Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
+        Some(false),
+        None,
+        None,
+        LocalDate.parse("1990-10-10"),
+        None
+      )
 
       val original: JsValue = Json.parse(
         """
@@ -473,153 +473,153 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
         )
       }
     }
-  }
 
-  "must add a new amend trust beneficiary transform using the transformation service" in {
-    val index = 0
-    val transformationService = mock[TransformationService]
-    val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
-    val newTrust = BeneficiaryTrustType(
-      None,
-      None,
-      "Trust Name",
-      None,
-      None,
-      None,
-      None,
-      LocalDate.parse("2010-01-01"),
-      None
-    )
-
-    val original: JsValue = Json.parse(
-      """
-        |{
-        |  "lineNo": "1",
-        |  "bpMatchStatus": "01",
-        |  "name": "Original name",
-        |  "identification": {
-        |    "utr": "1234567890"
-        |  },
-        |  "entityStart": "2018-02-28"
-        |}
-        |""".stripMargin)
-
-    when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
-
-    when(transformationService.getTransformedData(any(), any()))
-      .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
-        buildInputJson("trust", Seq(original)),
-        ResponseHeader("status", "formBundleNo")
-      )))
-
-    val result = service.amendTrustBeneficiaryTransformer("utr", index, "internalId", newTrust)
-    whenReady(result) { _ =>
-
-      verify(transformationService).addNewTransform(
-        Matchers.eq("utr"),
-        Matchers.eq("internalId"),
-        Matchers.eq(AmendTrustBeneficiaryTransform(index, Json.toJson(newTrust), original, LocalDateMock.now))
-      )
-    }
-  }
-
-  "must add a new add large beneficiary transform using the transformation service" in {
-    val transformationService = mock[TransformationService]
-    val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
-    val newBeneficiary = LargeType(
-      None,
-      None,
-      "Name",
-      "Description",
-      None,
-      None,
-      None,
-      None,
-      "501",
-      Some(IdentificationOrgType(
+    "must add a new amend trust beneficiary transform using the transformation service" in {
+      val index = 0
+      val transformationService = mock[TransformationService]
+      val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
+      val newTrust = BeneficiaryTrustType(
         None,
-        Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
-        None
-      )),
-      None,
-      None,
-      None,
-      LocalDate.parse("2010-01-01"),
-      None
-    )
-
-    when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
-
-    val result = service.addLargeBeneficiaryTransformer("utr", "internalId", newBeneficiary)
-    whenReady(result) { _ =>
-
-      verify(transformationService).addNewTransform("utr",
-        "internalId", AddLargeBeneficiaryTransform(newBeneficiary))
-    }
-  }
-
-  "must add a new amend large beneficiary transform using the transformation service" in {
-    val index = 0
-    val transformationService = mock[TransformationService]
-    val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
-    val newBeneficiary = LargeType(
-      None,
-      None,
-      "Amended Name",
-      "Amended Description",
-      None,
-      None,
-      None,
-      None,
-      "501",
-      Some(IdentificationOrgType(
         None,
-        Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
+        "Trust Name",
+        None,
+        None,
+        None,
+        None,
+        LocalDate.parse("2010-01-01"),
         None
-      )),
-      None,
-      None,
-      None,
-      LocalDate.parse("2010-01-01"),
-      None
-    )
-
-    val original: JsValue = Json.parse(
-      """
-        |{
-        |  "lineNo": "1",
-        |  "bpMatchStatus": "01",
-        |  "organisationName": "Name",
-        |  "identification": {
-        |    "address": {
-        |      "line1": "Line 1",
-        |      "line2": "Line 2",
-        |      "postCode": "NE1 1NE",
-        |      "country": "GB"
-        |    }
-        |  },
-        |  "description": "Description",
-        |  "numberOfBeneficiary": "501",
-        |  "entityStart": "2010-01-01"
-        |}
-        |""".stripMargin)
-
-    when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
-
-    when(transformationService.getTransformedData(any(), any()))
-      .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
-        buildInputJson("large", Seq(original)),
-        ResponseHeader("status", "formBundleNo")
-      )))
-
-    val result = service.amendLargeBeneficiaryTransformer("utr", index, "internalId", newBeneficiary)
-    whenReady(result) { _ =>
-
-      verify(transformationService).addNewTransform(
-        Matchers.eq("utr"),
-        Matchers.eq("internalId"),
-        Matchers.eq(AmendLargeBeneficiaryTransform(index, Json.toJson(newBeneficiary), original, LocalDateMock.now))
       )
+
+      val original: JsValue = Json.parse(
+        """
+          |{
+          |  "lineNo": "1",
+          |  "bpMatchStatus": "01",
+          |  "name": "Original name",
+          |  "identification": {
+          |    "utr": "1234567890"
+          |  },
+          |  "entityStart": "2018-02-28"
+          |}
+          |""".stripMargin)
+
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+      when(transformationService.getTransformedData(any(), any()))
+        .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
+          buildInputJson("trust", Seq(original)),
+          ResponseHeader("status", "formBundleNo")
+        )))
+
+      val result = service.amendTrustBeneficiaryTransformer("utr", index, "internalId", newTrust)
+      whenReady(result) { _ =>
+
+        verify(transformationService).addNewTransform(
+          Matchers.eq("utr"),
+          Matchers.eq("internalId"),
+          Matchers.eq(AmendTrustBeneficiaryTransform(index, Json.toJson(newTrust), original, LocalDateMock.now))
+        )
+      }
+    }
+
+    "must add a new add large beneficiary transform using the transformation service" in {
+      val transformationService = mock[TransformationService]
+      val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
+      val newBeneficiary = LargeType(
+        None,
+        None,
+        "Name",
+        "Description",
+        None,
+        None,
+        None,
+        None,
+        "501",
+        Some(IdentificationOrgType(
+          None,
+          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
+          None
+        )),
+        None,
+        None,
+        None,
+        LocalDate.parse("2010-01-01"),
+        None
+      )
+
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+      val result = service.addLargeBeneficiaryTransformer("utr", "internalId", newBeneficiary)
+      whenReady(result) { _ =>
+
+        verify(transformationService).addNewTransform("utr",
+          "internalId", AddLargeBeneficiaryTransform(newBeneficiary))
+      }
+    }
+
+    "must add a new amend large beneficiary transform using the transformation service" in {
+      val index = 0
+      val transformationService = mock[TransformationService]
+      val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
+      val newBeneficiary = LargeType(
+        None,
+        None,
+        "Amended Name",
+        "Amended Description",
+        None,
+        None,
+        None,
+        None,
+        "501",
+        Some(IdentificationOrgType(
+          None,
+          Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
+          None
+        )),
+        None,
+        None,
+        None,
+        LocalDate.parse("2010-01-01"),
+        None
+      )
+
+      val original: JsValue = Json.parse(
+        """
+          |{
+          |  "lineNo": "1",
+          |  "bpMatchStatus": "01",
+          |  "organisationName": "Name",
+          |  "identification": {
+          |    "address": {
+          |      "line1": "Line 1",
+          |      "line2": "Line 2",
+          |      "postCode": "NE1 1NE",
+          |      "country": "GB"
+          |    }
+          |  },
+          |  "description": "Description",
+          |  "numberOfBeneficiary": "501",
+          |  "entityStart": "2010-01-01"
+          |}
+          |""".stripMargin)
+
+      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+
+      when(transformationService.getTransformedData(any(), any()))
+        .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
+          buildInputJson("large", Seq(original)),
+          ResponseHeader("status", "formBundleNo")
+        )))
+
+      val result = service.amendLargeBeneficiaryTransformer("utr", index, "internalId", newBeneficiary)
+      whenReady(result) { _ =>
+
+        verify(transformationService).addNewTransform(
+          Matchers.eq("utr"),
+          Matchers.eq("internalId"),
+          Matchers.eq(AmendLargeBeneficiaryTransform(index, Json.toJson(newBeneficiary), original, LocalDateMock.now))
+        )
+      }
     }
   }
 }
