@@ -19,14 +19,11 @@ package uk.gov.hmrc.trusts.controllers
 import javax.inject.Inject
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, ControllerComponents, Result}
-import uk.gov.hmrc.trusts.config.AppConfig
+import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.DeclarationForApi
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
-import uk.gov.hmrc.trusts.models.variation.TrustVariation
-import uk.gov.hmrc.trusts.services.{AuditService, DesService, TrustsStoreService, ValidationService, VariationService}
-import uk.gov.hmrc.trusts.utils.ErrorResponses._
+import uk.gov.hmrc.trusts.services.{AuditService, VariationService}
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,57 +31,11 @@ import scala.concurrent.Future
 
 class TrustVariationsController @Inject()(
                                            identify: IdentifierAction,
-                                           desService: DesService,
                                            auditService: AuditService,
-                                           validator: ValidationService,
-                                           config : AppConfig,
                                            variationService: VariationService,
                                            responseHandler: VariationsResponseHandler,
-                                           trustsStoreService: TrustsStoreService,
                                            cc: ControllerComponents
                                     ) extends TrustsBaseController(cc) with ValidationUtil with Logging {
-
-  //  TODO: Move this method to a test-only route.
-  def trustVariation(): Action[JsValue] = identify.async(parse.json) {
-    implicit request => {
-
-      val payload = request.body.toString()
-
-      trustsStoreService.is5mldEnabled().flatMap {
-        enabled =>
-          val schema = if (enabled) config.variationsApiSchema5MLD else config.variationsApiSchema4MLD
-
-          validator.get(schema).validate[TrustVariation](payload).fold[Future[Result]](
-            errors => {
-              logger.error(s"[variations] trusts validation errors from request body $errors.")
-
-              auditService.auditErrorResponse(
-                TrustAuditing.TRUST_VARIATION,
-                request.body,
-                request.identifier,
-                errorReason = "Provided request is invalid."
-              )
-
-              Future.successful(invalidRequestErrorResponse)
-            },
-            variationRequest => {
-              desService.trustVariation(Json.toJson(variationRequest)) map { response =>
-
-                auditService.audit(
-                  TrustAuditing.TRUST_VARIATION,
-                  Json.toJson(variationRequest),
-                  request.identifier,
-                  Json.toJson(response)
-                )
-
-                Ok(Json.toJson(response))
-
-              } recover responseHandler.recoverFromException(TrustAuditing.TRUST_VARIATION)
-            }
-          )
-      }
-    }
-  }
 
   def declare(utr: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
