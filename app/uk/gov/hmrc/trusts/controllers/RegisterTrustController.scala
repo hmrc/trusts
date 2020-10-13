@@ -22,24 +22,21 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.http.BadRequestException
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.connector.TrustsStoreConnector
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.exceptions._
-import uk.gov.hmrc.trusts.models.registration.ApiResponse._
-import uk.gov.hmrc.trusts.models.registration.RegistrationTrnResponse._
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
-import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
-import uk.gov.hmrc.trusts.services.{AuditService, DesService, RosmPatternService, ValidationService}
+import uk.gov.hmrc.trusts.models.registration.ApiResponse._
+import uk.gov.hmrc.trusts.models.registration.RegistrationTrnResponse._
 import uk.gov.hmrc.trusts.models.registration.{RegistrationFailureResponse, RegistrationTrnResponse}
 import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
-import uk.gov.hmrc.trusts.services._
+import uk.gov.hmrc.trusts.services.{AuditService, DesService, RosmPatternService, ValidationService, _}
 import uk.gov.hmrc.trusts.utils.ErrorResponses._
 import uk.gov.hmrc.trusts.utils.Headers
 import uk.gov.hmrc.trusts.utils.JsonOps._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.control.NonFatal
 
 class RegisterTrustController @Inject()(desService: DesService, config: AppConfig,
