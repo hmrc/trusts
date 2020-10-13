@@ -20,12 +20,14 @@ import java.util.UUID
 
 import org.mockito.Matchers.{eq => Meq, _}
 import org.mockito.Mockito._
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.trusts.BaseSpec
 import uk.gov.hmrc.trusts.config.AppConfig
@@ -36,9 +38,10 @@ import uk.gov.hmrc.trusts.models.{DeclarationForApi, DeclarationName, NameType}
 import uk.gov.hmrc.trusts.services._
 import uk.gov.hmrc.trusts.utils.Headers
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach {
+class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach  with IntegrationPatience {
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
@@ -59,9 +62,10 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
   private val responseHandler = new VariationsResponseHandler(mockAuditService)
 
   override def beforeEach(): Unit = {
-    reset(mockDesService, mockAuditService, mockAuditConnector, mockConfig)
+    reset(mockDesService, mockAuditService, mockAuditConnector, mockConfig, mockTrustsStoreService)
     when(mockConfig.variationsApiSchema4MLD).thenReturn(appConfig.variationsApiSchema4MLD)
     when(mockConfig.variationsApiSchema5MLD).thenReturn(appConfig.variationsApiSchema5MLD)
+    when(mockTrustsStoreService.is5mldEnabled()(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(false))
   }
 
   private def trustVariationsController = {
@@ -91,7 +95,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
         when(mockConfig.auditingEnabled).thenReturn(false)
 
-        val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
+        val requestPayLoad = Json.parse(validTrustVariations4mldRequestJson)
 
         val SUT = trustVariationsController
 
@@ -116,7 +120,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
         when(mockConfig.auditingEnabled).thenReturn(true)
 
-        val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
+        val requestPayLoad = Json.parse(validTrustVariations4mldRequestJson)
 
         val SUT = new TrustVariationsController(
           new FakeIdentifierAction(bodyParsers, Organisation),
@@ -148,7 +152,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
         when(mockDesService.trustVariation(any[JsValue]))
           .thenReturn(Future.successful(VariationResponse(tvnResponse)))
 
-        val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
+        val requestPayLoad = Json.parse(validTrustVariations4mldRequestJson)
 
         val SUT = trustVariationsController
 
@@ -169,7 +173,33 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
         (contentAsJson(result) \ "tvn").as[String] mustBe tvnResponse
 
       }
+      "individual user called the register endpoint with a valid 5mld json payload in 5mld mode" in {
 
+        when(mockTrustsStoreService.is5mldEnabled()(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(true))
+
+        when(mockDesService.trustVariation(any[JsValue]))
+          .thenReturn(Future.successful(VariationResponse(tvnResponse)))
+
+        val requestPayLoad = Json.parse(validTrustVariations5mldRequestJson)
+
+        val SUT = trustVariationsController
+
+        val result = SUT.trustVariation()(
+          postRequestWithPayload(requestPayLoad, withDraftId = false)
+            .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
+        )
+
+        status(result) mustBe OK
+
+        verify(mockAuditService).audit(
+          Meq(trustVariationsAuditEvent),
+          any(),
+          Meq("id"),
+          Meq(Json.obj("tvn" -> tvnResponse))
+        )(any())
+
+        (contentAsJson(result) \ "tvn").as[String] mustBe tvnResponse
+      }
     }
 
     "return a BadRequest" when {
@@ -227,7 +257,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
         val SUT = trustVariationsController
 
-        val request = postRequestWithPayload(Json.parse(validTrustVariationsRequestJson), withDraftId = false)
+        val request = postRequestWithPayload(Json.parse(validTrustVariations4mldRequestJson), withDraftId = false)
 
         val result = SUT.trustVariation()(request)
 
@@ -258,7 +288,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
         val SUT = trustVariationsController
 
         val result = SUT.trustVariation()(
-          postRequestWithPayload(Json.parse(validTrustVariationsRequestJson), withDraftId = false)
+          postRequestWithPayload(Json.parse(validTrustVariations4mldRequestJson), withDraftId = false)
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
 
@@ -289,7 +319,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
         val SUT = trustVariationsController
 
         val result = SUT.trustVariation()(
-          postRequestWithPayload(Json.parse(validTrustVariationsRequestJson))
+          postRequestWithPayload(Json.parse(validTrustVariations4mldRequestJson))
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
 
@@ -319,7 +349,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
         val SUT = trustVariationsController
 
         val result = SUT.trustVariation()(
-          postRequestWithPayload(Json.parse(validTrustVariationsRequestJson))
+          postRequestWithPayload(Json.parse(validTrustVariations4mldRequestJson))
             .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
 

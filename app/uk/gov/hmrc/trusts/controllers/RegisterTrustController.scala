@@ -52,7 +52,7 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
                                         ) extends TrustsBaseController(cc) with Logging {
 
   private def schemaF(implicit request: IdentifierRequest[JsValue]): Future[String] = {
-    trustsStoreService.isFeatureEnabled("5mld").map {
+    trustsStoreService.is5mldEnabled.map {
       case true => config.trustsApiRegistrationSchema5MLD
       case _ => config.trustsApiRegistrationSchema4MLD
     }

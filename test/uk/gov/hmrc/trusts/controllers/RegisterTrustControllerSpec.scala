@@ -53,7 +53,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
   before {
     reset(rosmPatternService)
-    when(mockTrustsStoreService.isFeatureEnabled(any())(any(), any())).thenReturn(Future.successful(false))
+    when(mockTrustsStoreService.is5mldEnabled()(any(), any())).thenReturn(Future.successful(false))
   }
 
   ".registration" should {
@@ -87,7 +87,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
       "individual user called the register endpoint with a valid 5mld json payload " in {
 
-        when(mockTrustsStoreService.isFeatureEnabled(any())(any(), any())).thenReturn(Future.successful(true))
+        when(mockTrustsStoreService.is5mldEnabled()(any(), any())).thenReturn(Future.successful(true))
 
         when(mockDesService.registerTrust(any[Registration]))
           .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
@@ -114,7 +114,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
       "individual user called the register endpoint with a valid 5mld nontaxable json payload " in {
 
-        when(mockTrustsStoreService.isFeatureEnabled(any())(any(), any())).thenReturn(Future.successful(true))
+        when(mockTrustsStoreService.is5mldEnabled()(any(), any())).thenReturn(Future.successful(true))
 
         when(mockDesService.registerTrust(any[Registration]))
           .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))

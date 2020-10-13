@@ -22,8 +22,6 @@ import uk.gov.hmrc.trusts.models.existing_trust.ExistingCheckRequest
 import uk.gov.hmrc.trusts.models.{Assets, Registration}
 import uk.gov.hmrc.trusts.utils.{DataExamples, JsonUtils}
 
-import scala.language.implicitConversions
-
 class ValidationServiceSpec extends BaseSpec
   with DataExamples with EitherValues {
 

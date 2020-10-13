@@ -50,34 +50,39 @@ class TrustVariationsController @Inject()(
 
       val payload = request.body.toString()
 
-      validator.get(config.variationsApiSchema4MLD).validate[TrustVariation](payload).fold[Future[Result]](
-        errors => {
-          logger.error(s"[variations] trusts validation errors from request body $errors.")
+      trustsStoreService.is5mldEnabled().flatMap {
+        enabled =>
+          val schema = if (enabled) config.variationsApiSchema5MLD else config.variationsApiSchema4MLD
 
-          auditService.auditErrorResponse(
-            TrustAuditing.TRUST_VARIATION,
-            request.body,
-            request.identifier,
-            errorReason = "Provided request is invalid."
+          validator.get(schema).validate[TrustVariation](payload).fold[Future[Result]](
+            errors => {
+              logger.error(s"[variations] trusts validation errors from request body $errors.")
+
+              auditService.auditErrorResponse(
+                TrustAuditing.TRUST_VARIATION,
+                request.body,
+                request.identifier,
+                errorReason = "Provided request is invalid."
+              )
+
+              Future.successful(invalidRequestErrorResponse)
+            },
+            variationRequest => {
+              desService.trustVariation(Json.toJson(variationRequest)) map { response =>
+
+                auditService.audit(
+                  TrustAuditing.TRUST_VARIATION,
+                  Json.toJson(variationRequest),
+                  request.identifier,
+                  Json.toJson(response)
+                )
+
+                Ok(Json.toJson(response))
+
+              } recover responseHandler.recoverFromException(TrustAuditing.TRUST_VARIATION)
+            }
           )
-
-          Future.successful(invalidRequestErrorResponse)
-        },
-        variationRequest => {
-          desService.trustVariation(Json.toJson(variationRequest)) map { response =>
-
-            auditService.audit(
-              TrustAuditing.TRUST_VARIATION,
-              Json.toJson(variationRequest),
-              request.identifier,
-              Json.toJson(response)
-            )
-
-            Ok(Json.toJson(response))
-
-          } recover responseHandler.recoverFromException(TrustAuditing.TRUST_VARIATION)
-        }
-      )
+      }
     }
   }
 
