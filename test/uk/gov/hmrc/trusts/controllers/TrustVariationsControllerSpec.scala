@@ -78,297 +78,298 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
     )
   }
 
-    val tvnResponse = "XXTVN1234567890"
-    val trustVariationsAuditEvent = "TrustVariation"
+  val tvnResponse = "XXTVN1234567890"
+  val trustVariationsAuditEvent = "TrustVariation"
 
-    ".trustVariation" should {
+  ".trustVariation" should {
 
-      "not perform auditing" when {
-        "the feature toggle is set to false" in {
+    "not perform auditing" when {
+      "the feature toggle is set to false" in {
 
-          when(mockDesService.trustVariation(any[JsValue]))
-            .thenReturn(Future.successful(VariationResponse(tvnResponse)))
+        when(mockDesService.trustVariation(any[JsValue]))
+          .thenReturn(Future.successful(VariationResponse(tvnResponse)))
 
-          when(mockConfig.auditingEnabled).thenReturn(false)
+        when(mockConfig.auditingEnabled).thenReturn(false)
 
-          val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
+        val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
 
-          val SUT = trustVariationsController
-
-          val result = SUT.trustVariation()(
-            postRequestWithPayload(requestPayLoad, withDraftId = false)
-              .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
-          )
-
-          whenReady(result) { _ =>
-
-            verify(mockAuditConnector, times(0)).sendExplicitAudit[Any](any(), any())(any(), any(), any())
-          }
-        }
-      }
-
-      "perform auditing" when {
-
-        "the feature toggle is set to true" in {
-
-          when(mockDesService.trustVariation(any[JsValue]))
-            .thenReturn(Future.successful(VariationResponse(tvnResponse)))
-
-          when(mockConfig.auditingEnabled).thenReturn(true)
-
-          val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
-
-          val SUT = new TrustVariationsController(
-            new FakeIdentifierAction(bodyParsers, Organisation),
-            mockDesService,
-            auditService,
-            validationService,
-            mockConfig,
-            mockVariationService,
-            responseHandler,
-            mockTrustsStoreService,
-            Helpers.stubControllerComponents())
-
-          val result = SUT.trustVariation()(
-            postRequestWithPayload(requestPayLoad, withDraftId = false)
-              .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
-          )
-
-          whenReady(result) { _ =>
-
-            verify(mockAuditConnector, times(1)).sendExplicitAudit[Any](any(), any())(any(), any(), any())
-          }
-        }
-      }
-
-      "return 200 with TVN" when {
-
-        "individual user called the register endpoint with a valid json payload " in {
-
-          when(mockDesService.trustVariation(any[JsValue]))
-            .thenReturn(Future.successful(VariationResponse(tvnResponse)))
-
-          val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
-
-          val SUT = trustVariationsController
-
-          val result = SUT.trustVariation()(
-            postRequestWithPayload(requestPayLoad, withDraftId = false)
-              .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
-          )
-
-          status(result) mustBe OK
-
-          verify(mockAuditService).audit(
-            Meq(trustVariationsAuditEvent),
-            any(),
-            Meq("id"),
-            Meq(Json.obj("tvn" -> tvnResponse))
-          )(any())
-
-          (contentAsJson(result) \ "tvn").as[String] mustBe tvnResponse
-
-        }
-
-      }
-
-      "return a BadRequest" when {
-
-        "input request fails schema validation" in {
-
-          val SUT = trustVariationsController
-
-          val result = SUT.trustVariation()(
-            postRequestWithPayload(Json.parse(invalidTrustVariationsRequestJson), withDraftId = false)
-              .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
-          )
-
-          status(result) mustBe BAD_REQUEST
-
-          verify(mockAuditService).auditErrorResponse(
-            Meq(trustVariationsAuditEvent),
-            any(),
-            Meq("id"),
-            Meq("Provided request is invalid.")
-          )(any())
-
-          val output = contentAsJson(result)
-
-          (output \ "code").as[String] mustBe "BAD_REQUEST"
-          (output \ "message").as[String] mustBe "Provided request is invalid."
-
-        }
-
-        "input request fails business validation" in {
-
-          when(mockDesService.trustVariation(any[JsValue]))
-            .thenReturn(Future.failed(BadRequestException))
-
-          val SUT = trustVariationsController
-
-          val result = SUT.trustVariation()(
-            postRequestWithPayload(Json.parse(invalidTrustBusinessValidation), withDraftId = false)
-              .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
-          )
-
-          status(result) mustBe BAD_REQUEST
-
-          val output = contentAsJson(result)
-
-          (output \ "code").as[String] mustBe "BAD_REQUEST"
-          (output \ "message").as[String] mustBe "Provided request is invalid."
-
-        }
-
-        "invalid correlation id is provided in the headers" in {
-
-          when(mockDesService.trustVariation(any[JsValue]))
-            .thenReturn(Future.failed(InvalidCorrelationIdException))
-
-          val SUT = trustVariationsController
-
-          val request = postRequestWithPayload(Json.parse(validTrustVariationsRequestJson), withDraftId = false)
-
-          val result = SUT.trustVariation()(request)
-
-          status(result) mustBe INTERNAL_SERVER_ERROR
-
-          verify(mockAuditService).auditErrorResponse(
-            Meq(trustVariationsAuditEvent),
-            any(),
-            Meq("id"),
-            Meq("Submission has not passed validation. Invalid CorrelationId.")
-          )(any())
-
-          val output = contentAsJson(result)
-
-          (output \ "code").as[String] mustBe "INVALID_CORRELATIONID"
-          (output \ "message").as[String] mustBe "Submission has not passed validation. Invalid CorrelationId."
-
-        }
-
-      }
-
-      "return a Conflict" when {
-        "submission with same correlation id is submitted." in {
-
-          when(mockDesService.trustVariation(any[JsValue]))
-            .thenReturn(Future.failed(DuplicateSubmissionException))
-
-          val SUT = trustVariationsController
-
-          val result = SUT.trustVariation()(
-            postRequestWithPayload(Json.parse(validTrustVariationsRequestJson), withDraftId = false)
-              .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
-          )
-
-          status(result) mustBe CONFLICT
-
-          verify(mockAuditService).auditErrorResponse(
-            Meq(trustVariationsAuditEvent),
-            any(),
-            Meq("id"),
-            Meq("Duplicate Correlation Id was submitted.")
-          )(any())
-
-          val output = contentAsJson(result)
-
-          (output \ "code").as[String] mustBe "DUPLICATE_SUBMISSION"
-          (output \ "message").as[String] mustBe "Duplicate Correlation Id was submitted."
-
-        }
-      }
-
-      "return an internal server error" when {
-
-        "the register endpoint called and something goes wrong." in {
-
-          when(mockDesService.trustVariation(any[JsValue]))
-            .thenReturn(Future.failed(InternalServerErrorException("some error")))
-
-          val SUT = trustVariationsController
-
-          val result = SUT.trustVariation()(
-            postRequestWithPayload(Json.parse(validTrustVariationsRequestJson))
-              .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
-          )
-
-          status(result) mustBe INTERNAL_SERVER_ERROR
-
-          verify(mockAuditService).auditErrorResponse(
-            Meq(trustVariationsAuditEvent),
-            any(),
-            Meq("id"),
-            any()
-          )(any())
-
-          val output = contentAsJson(result)
-
-          (output \ "code").as[String] mustBe "INTERNAL_SERVER_ERROR"
-          (output \ "message").as[String] mustBe "Internal server error."
-
-        }
-
-      }
-
-      "Return bad request when declaring No change and there is a form bundle number mismatch" in {
         val SUT = trustVariationsController
-        val declaration = DeclarationName(
-          NameType("firstname", None, "Surname")
+
+        val result = SUT.trustVariation()(
+          postRequestWithPayload(requestPayLoad, withDraftId = false)
+            .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
 
-        val declarationForApi = DeclarationForApi(declaration, None, None)
+        whenReady(result) { _ =>
 
-        when(mockVariationService.submitDeclaration(any(), any(), any())(any()))
-          .thenReturn(Future.failed(EtmpCacheDataStaleException))
+          verify(mockAuditConnector, times(0)).sendExplicitAudit[Any](any(), any())(any(), any(), any())
+        }
+      }
+    }
 
-        val result = SUT.declare("1234567890")(
-          FakeRequest("POST", "/no-change/1234567890").withBody(Json.toJson(declarationForApi))
+    "perform auditing" when {
+
+      "the feature toggle is set to true" in {
+
+        when(mockDesService.trustVariation(any[JsValue]))
+          .thenReturn(Future.successful(VariationResponse(tvnResponse)))
+
+        when(mockConfig.auditingEnabled).thenReturn(true)
+
+        val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
+
+        val SUT = new TrustVariationsController(
+          new FakeIdentifierAction(bodyParsers, Organisation),
+          mockDesService,
+          auditService,
+          validationService,
+          mockConfig,
+          mockVariationService,
+          responseHandler,
+          mockTrustsStoreService,
+          Helpers.stubControllerComponents())
+
+        val result = SUT.trustVariation()(
+          postRequestWithPayload(requestPayLoad, withDraftId = false)
+            .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
+        )
+
+        whenReady(result) { _ =>
+
+          verify(mockAuditConnector, times(1)).sendExplicitAudit[Any](any(), any())(any(), any(), any())
+        }
+      }
+    }
+
+    "return 200 with TVN" when {
+
+      "individual user called the register endpoint with a valid json payload " in {
+
+        when(mockDesService.trustVariation(any[JsValue]))
+          .thenReturn(Future.successful(VariationResponse(tvnResponse)))
+
+        val requestPayLoad = Json.parse(validTrustVariationsRequestJson)
+
+        val SUT = trustVariationsController
+
+        val result = SUT.trustVariation()(
+          postRequestWithPayload(requestPayLoad, withDraftId = false)
+            .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
+        )
+
+        status(result) mustBe OK
+
+        verify(mockAuditService).audit(
+          Meq(trustVariationsAuditEvent),
+          any(),
+          Meq("id"),
+          Meq(Json.obj("tvn" -> tvnResponse))
+        )(any())
+
+        (contentAsJson(result) \ "tvn").as[String] mustBe tvnResponse
+
+      }
+
+    }
+
+    "return a BadRequest" when {
+
+      "input request fails schema validation" in {
+
+        val SUT = trustVariationsController
+
+        val result = SUT.trustVariation()(
+          postRequestWithPayload(Json.parse(invalidTrustVariationsRequestJson), withDraftId = false)
+            .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
         )
 
         status(result) mustBe BAD_REQUEST
-        contentAsJson(result) mustBe Json.obj(
-          "code" -> "ETMP_DATA_STALE",
-          "message" -> "ETMP returned a changed form bundle number for the trust."
-        )
 
         verify(mockAuditService).auditErrorResponse(
           Meq(trustVariationsAuditEvent),
           any(),
           Meq("id"),
-          Meq("Cached ETMP data stale.")
+          Meq("Provided request is invalid.")
         )(any())
+
+        val output = contentAsJson(result)
+
+        (output \ "code").as[String] mustBe "BAD_REQUEST"
+        (output \ "message").as[String] mustBe "Provided request is invalid."
+
       }
 
-      "return service unavailable" when {
-        "the des returns Service Unavailable as dependent service is down. " in {
+      "input request fails business validation" in {
 
-          when(mockDesService.trustVariation(any[JsValue]))
-            .thenReturn(Future.failed(ServiceNotAvailableException("dependent service is down")))
+        when(mockDesService.trustVariation(any[JsValue]))
+          .thenReturn(Future.failed(BadRequestException))
 
-          val SUT = trustVariationsController
+        val SUT = trustVariationsController
 
-          val result = SUT.trustVariation()(
-            postRequestWithPayload(Json.parse(validTrustVariationsRequestJson))
-              .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
-          )
+        val result = SUT.trustVariation()(
+          postRequestWithPayload(Json.parse(invalidTrustBusinessValidation), withDraftId = false)
+            .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
+        )
 
-          status(result) mustBe SERVICE_UNAVAILABLE
+        status(result) mustBe BAD_REQUEST
 
-          verify(mockAuditService).auditErrorResponse(
-            Meq(trustVariationsAuditEvent),
-            any(),
-            Meq("id"),
-            Meq("Service unavailable.")
-          )(any())
+        val output = contentAsJson(result)
 
-          val output = contentAsJson(result)
+        (output \ "code").as[String] mustBe "BAD_REQUEST"
+        (output \ "message").as[String] mustBe "Provided request is invalid."
 
-          (output \ "code").as[String] mustBe "SERVICE_UNAVAILABLE"
-          (output \ "message").as[String] mustBe "Service unavailable."
+      }
 
-        }
+      "invalid correlation id is provided in the headers" in {
+
+        when(mockDesService.trustVariation(any[JsValue]))
+          .thenReturn(Future.failed(InvalidCorrelationIdException))
+
+        val SUT = trustVariationsController
+
+        val request = postRequestWithPayload(Json.parse(validTrustVariationsRequestJson), withDraftId = false)
+
+        val result = SUT.trustVariation()(request)
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+
+        verify(mockAuditService).auditErrorResponse(
+          Meq(trustVariationsAuditEvent),
+          any(),
+          Meq("id"),
+          Meq("Submission has not passed validation. Invalid CorrelationId.")
+        )(any())
+
+        val output = contentAsJson(result)
+
+        (output \ "code").as[String] mustBe "INVALID_CORRELATIONID"
+        (output \ "message").as[String] mustBe "Submission has not passed validation. Invalid CorrelationId."
+
+      }
+
+    }
+
+    "return a Conflict" when {
+      "submission with same correlation id is submitted." in {
+
+        when(mockDesService.trustVariation(any[JsValue]))
+          .thenReturn(Future.failed(DuplicateSubmissionException))
+
+        val SUT = trustVariationsController
+
+        val result = SUT.trustVariation()(
+          postRequestWithPayload(Json.parse(validTrustVariationsRequestJson), withDraftId = false)
+            .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
+        )
+
+        status(result) mustBe CONFLICT
+
+        verify(mockAuditService).auditErrorResponse(
+          Meq(trustVariationsAuditEvent),
+          any(),
+          Meq("id"),
+          Meq("Duplicate Correlation Id was submitted.")
+        )(any())
+
+        val output = contentAsJson(result)
+
+        (output \ "code").as[String] mustBe "DUPLICATE_SUBMISSION"
+        (output \ "message").as[String] mustBe "Duplicate Correlation Id was submitted."
+
+      }
+    }
+
+    "return an internal server error" when {
+
+      "the register endpoint called and something goes wrong." in {
+
+        when(mockDesService.trustVariation(any[JsValue]))
+          .thenReturn(Future.failed(InternalServerErrorException("some error")))
+
+        val SUT = trustVariationsController
+
+        val result = SUT.trustVariation()(
+          postRequestWithPayload(Json.parse(validTrustVariationsRequestJson))
+            .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
+        )
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+
+        verify(mockAuditService).auditErrorResponse(
+          Meq(trustVariationsAuditEvent),
+          any(),
+          Meq("id"),
+          any()
+        )(any())
+
+        val output = contentAsJson(result)
+
+        (output \ "code").as[String] mustBe "INTERNAL_SERVER_ERROR"
+        (output \ "message").as[String] mustBe "Internal server error."
+
+      }
+
+    }
+    "return service unavailable" when {
+      "the des returns Service Unavailable as dependent service is down. " in {
+
+        when(mockDesService.trustVariation(any[JsValue]))
+          .thenReturn(Future.failed(ServiceNotAvailableException("dependent service is down")))
+
+        val SUT = trustVariationsController
+
+        val result = SUT.trustVariation()(
+          postRequestWithPayload(Json.parse(validTrustVariationsRequestJson))
+            .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
+        )
+
+        status(result) mustBe SERVICE_UNAVAILABLE
+
+        verify(mockAuditService).auditErrorResponse(
+          Meq(trustVariationsAuditEvent),
+          any(),
+          Meq("id"),
+          Meq("Service unavailable.")
+        )(any())
+
+        val output = contentAsJson(result)
+
+        (output \ "code").as[String] mustBe "SERVICE_UNAVAILABLE"
+        (output \ "message").as[String] mustBe "Service unavailable."
+
       }
     }
   }
+
+  ".declare" should {
+    "Return bad request when declaring No change and there is a form bundle number mismatch" in {
+      val SUT = trustVariationsController
+      val declaration = DeclarationName(
+        NameType("firstname", None, "Surname")
+      )
+
+      val declarationForApi = DeclarationForApi(declaration, None, None)
+
+      when(mockVariationService.submitDeclaration(any(), any(), any())(any()))
+        .thenReturn(Future.failed(EtmpCacheDataStaleException))
+
+      val result = SUT.declare("1234567890")(
+        FakeRequest("POST", "/no-change/1234567890").withBody(Json.toJson(declarationForApi))
+      )
+
+      status(result) mustBe BAD_REQUEST
+      contentAsJson(result) mustBe Json.obj(
+        "code" -> "ETMP_DATA_STALE",
+        "message" -> "ETMP returned a changed form bundle number for the trust."
+      )
+
+      verify(mockAuditService).auditErrorResponse(
+        Meq(trustVariationsAuditEvent),
+        any(),
+        Meq("id"),
+        Meq("Cached ETMP data stale.")
+      )(any())
+    }
+  }
+}
 
