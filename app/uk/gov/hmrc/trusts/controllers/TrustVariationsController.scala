@@ -18,14 +18,14 @@ package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.Inject
 import play.api.Logging
-import play.api.libs.json.Json
-import play.api.mvc.{ControllerComponents, Result}
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.{Action, ControllerComponents, Result}
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models.DeclarationForApi
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.variation.TrustVariation
-import uk.gov.hmrc.trusts.services.{AuditService, DesService, ValidationService, VariationService}
+import uk.gov.hmrc.trusts.services.{AuditService, DesService, TrustsStoreService, ValidationService, VariationService}
 import uk.gov.hmrc.trusts.utils.ErrorResponses._
 import uk.gov.hmrc.trusts.utils.ValidationUtil
 
@@ -40,16 +40,17 @@ class TrustVariationsController @Inject()(
                                            config : AppConfig,
                                            variationService: VariationService,
                                            responseHandler: VariationsResponseHandler,
+                                           trustsStoreService: TrustsStoreService,
                                            cc: ControllerComponents
                                     ) extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
-  @deprecated("api is no longer used, use declare instead", "13 May 2020")
-  def trustVariation() = identify.async(parse.json) {
+  //  TODO: Move this method to a test-only route.
+  def trustVariation(): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
 
       val payload = request.body.toString()
 
-      validator.get(config.variationsApiSchema).validate[TrustVariation](payload).fold[Future[Result]](
+      validator.get(config.variationsApiSchema4MLD).validate[TrustVariation](payload).fold[Future[Result]](
         errors => {
           logger.error(s"[variations] trusts validation errors from request body $errors.")
 
@@ -80,7 +81,7 @@ class TrustVariationsController @Inject()(
     }
   }
 
-  def declare(utr: String) = identify.async(parse.json) {
+  def declare(utr: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[DeclarationForApi].fold(
         errors => {
