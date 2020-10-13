@@ -22,7 +22,7 @@ import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.models.{TaxEnrolmentSubscription, TaxEnrolmentSuscriberResponse}
+import uk.gov.hmrc.trusts.models.tax_enrolments.{TaxEnrolmentSubscription, TaxEnrolmentSuscriberResponse}
 import uk.gov.hmrc.trusts.utils.Constants._
 
 import scala.concurrent.ExecutionContext.Implicits.global

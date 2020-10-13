@@ -17,7 +17,8 @@
 package uk.gov.hmrc.trusts.models.auditing
 
 import play.api.libs.json.{Format, JsValue, Json}
-import uk.gov.hmrc.trusts.models.{Registration, RegistrationResponse}
+import uk.gov.hmrc.trusts.models.Registration
+import uk.gov.hmrc.trusts.models.registration.RegistrationResponse
 
 case class TrustRegistrationSubmissionAuditEvent(
                                                   registration: Registration,

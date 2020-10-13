@@ -35,7 +35,9 @@ class ValidationService @Inject()() {
   private val factory = JsonSchemaFactory.byDefault()
 
   def get(schemaFile: String): Validator = {
-    val schemaJsonFileString = Source.fromFile(getClass.getResource(schemaFile).getPath).mkString
+    val source = Source.fromFile(getClass.getResource(schemaFile).getPath)
+    val schemaJsonFileString = source.mkString
+    source.close()
     val schemaJson = JsonLoader.fromString(schemaJsonFileString)
     val schema = factory.getJsonSchema(schemaJson)
     new Validator(schema)

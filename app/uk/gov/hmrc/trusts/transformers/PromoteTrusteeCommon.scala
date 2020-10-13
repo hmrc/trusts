@@ -22,7 +22,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.trusts.models.variation._
 
 trait PromoteTrusteeCommon {
-  private val leadTrusteesPath = (__ \ 'details \ 'trust \ 'entities \ 'leadTrustees)
+  private val leadTrusteesPath = __ \ 'details \ 'trust \ 'entities \ 'leadTrustees
 
   val currentDate: LocalDate
 
@@ -48,8 +48,8 @@ trait PromoteTrusteeCommon {
 
   private def promoteTrustee(newLeadTrustee: JsValue, entityStart: JsValue) = {
     leadTrusteesPath.json.prune andThen
-      (__).json.update(leadTrusteesPath.json.put(newLeadTrustee)) andThen
-      (__).json.update((leadTrusteesPath \ 'entityStart).json.put(entityStart)) andThen
+      __.json.update(leadTrusteesPath.json.put(newLeadTrustee)) andThen
+      __.json.update((leadTrusteesPath \ 'entityStart).json.put(entityStart)) andThen
       (leadTrusteesPath \ 'lineNo).json.prune andThen
       (leadTrusteesPath \ 'bpMatchStatus).json.prune
   }
@@ -67,6 +67,9 @@ trait PromoteTrusteeCommon {
           Some(indLead.dateOfBirth),
           Some(indLead.phoneNumber),
           Some(getIdentification(indLead.identification)),
+          None,
+          None,
+          None,
           indLead.entityStart,
           indLead.entityEnd
         )
@@ -82,6 +85,7 @@ trait PromoteTrusteeCommon {
           Some(orgLead.phoneNumber),
           orgLead.email,
           Some(getIdentification(orgLead.identification)),
+          None,
           orgLead.entityStart,
           orgLead.entityEnd
         )

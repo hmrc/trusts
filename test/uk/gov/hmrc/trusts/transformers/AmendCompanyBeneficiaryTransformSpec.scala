@@ -45,6 +45,7 @@ class AmendCompanyBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
             address = None,
             safeId = None
           )),
+          None,
           LocalDate.parse("2018-02-28"),
           None
         )
@@ -90,6 +91,7 @@ class AmendCompanyBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
             address = None,
             safeId = None
           )),
+          None,
           LocalDate.parse("2018-02-28"),
           None
         )
@@ -125,6 +127,7 @@ class AmendCompanyBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
           lineNo = None,
           bpMatchStatus = None,
           "Amended Company Name",
+          None,
           None,
           None,
           None,

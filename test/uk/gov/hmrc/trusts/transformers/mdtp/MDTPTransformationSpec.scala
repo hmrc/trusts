@@ -18,8 +18,8 @@ package uk.gov.hmrc.trusts.transformers.mdtp
 
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.JsPath
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
+import uk.gov.hmrc.trusts.models.get_trust.get_trust
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.ResponseHeader
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class MDTPTransformationSpec extends FreeSpec with MustMatchers {
@@ -31,7 +31,7 @@ class MDTPTransformationSpec extends FreeSpec with MustMatchers {
       val etmpResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
       val afterJson = JsonUtils.getJsonValueFromFile("trust-transformed-get-api-result-after-trustee-transform.json")
 
-      val processedResponse = TrustProcessedResponse(etmpResponse, ResponseHeader("Processed", "1"))
+      val processedResponse = get_trust.TrustProcessedResponse(etmpResponse, ResponseHeader("Processed", "1"))
 
       val result = processedResponse.transform.get
 
@@ -43,7 +43,7 @@ class MDTPTransformationSpec extends FreeSpec with MustMatchers {
       val etmpResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-one-of-each-beneficiary.json")
       val afterJson = JsonUtils.getJsonValueFromFile("trust-transformed-get-api-result-after-beneficiaries-transform.json")
 
-      val processedResponse = TrustProcessedResponse(etmpResponse, ResponseHeader("Processed", "1"))
+      val processedResponse = get_trust.TrustProcessedResponse(etmpResponse, ResponseHeader("Processed", "1"))
 
       val result = processedResponse.transform.get
 
@@ -55,7 +55,7 @@ class MDTPTransformationSpec extends FreeSpec with MustMatchers {
       val etmpResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-one-of-each-protector.json")
       val afterJson = JsonUtils.getJsonValueFromFile("trust-transformed-get-api-result-after-settlors-transform.json")
 
-      val processedResponse = TrustProcessedResponse(etmpResponse, ResponseHeader("Processed", "1"))
+      val processedResponse = get_trust.TrustProcessedResponse(etmpResponse, ResponseHeader("Processed", "1"))
 
       val result = processedResponse.transform.get
 
@@ -67,7 +67,7 @@ class MDTPTransformationSpec extends FreeSpec with MustMatchers {
       val etmpResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-one-of-each-protector.json")
       val afterJson = JsonUtils.getJsonValueFromFile("trust-transformed-get-api-result-after-protectors-transform.json")
 
-      val processedResponse = TrustProcessedResponse(etmpResponse, ResponseHeader("Processed", "1"))
+      val processedResponse = get_trust.TrustProcessedResponse(etmpResponse, ResponseHeader("Processed", "1"))
 
       val result = processedResponse.transform.get
 

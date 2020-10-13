@@ -43,6 +43,7 @@ class AmendBusinessProtectorTransformSpec extends FreeSpec with MustMatchers {
             address = None,
             safeId = None
           )),
+          countryOfResidence = None,
           LocalDate.parse("2018-02-28"),
           None
         )
@@ -86,6 +87,7 @@ class AmendBusinessProtectorTransformSpec extends FreeSpec with MustMatchers {
             address = None,
             safeId = None
           )),
+          countryOfResidence = None,
           LocalDate.parse("2018-02-28"),
           None
         )
@@ -122,6 +124,7 @@ class AmendBusinessProtectorTransformSpec extends FreeSpec with MustMatchers {
           bpMatchStatus = None,
           "Amended Company Name",
           None,
+          countryOfResidence = None,
           LocalDate.parse("2018-02-28"),
           None
         )

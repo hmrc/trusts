@@ -17,15 +17,16 @@
 package uk.gov.hmrc.trusts.controllers
 
 import javax.inject.{Inject, Singleton}
+import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateUtrActionProvider}
+import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateIdentifierActionProvider}
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.{BadRequestResponse, _}
-import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService}
-import play.api.Logging
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustProcessedResponse, _}
+import uk.gov.hmrc.trusts.models.get_trust.{BadRequestResponse, _}
+import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService, TrustsStoreService}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -34,7 +35,8 @@ class GetTrustController @Inject()(identify: IdentifierAction,
                                    auditService: AuditService,
                                    desService: DesService,
                                    transformationService: TransformationService,
-                                   validateUtr : ValidateUtrActionProvider,
+                                   validateIdentifier : ValidateIdentifierActionProvider,
+                                   trustsStoreService: TrustsStoreService,
                                    cc: ControllerComponents) extends BackendController(cc) with Logging {
 
 
@@ -51,13 +53,13 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     ResourceNotFoundResponse -> NotFound
   )
 
-  def getFromEtmp(utr: String): Action[AnyContent] =
-    doGet(utr, applyTransformations = false, refreshEtmpData = true) {
+  def getFromEtmp(identifier: String): Action[AnyContent] =
+    doGet(identifier, applyTransformations = false, refreshEtmpData = true) {
       result: GetTrustSuccessResponse => Ok(Json.toJson(result))
     }
 
-  def get(utr: String, applyTransformations: Boolean = false): Action[AnyContent] =
-    doGet(utr, applyTransformations) {
+  def get(identifier: String, applyTransformations: Boolean = false): Action[AnyContent] =
+    doGet(identifier, applyTransformations) {
       result: GetTrustSuccessResponse => Ok(Json.toJson(result))
     }
 
@@ -175,11 +177,10 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
   }
 
-
-  private def resetCacheIfRequested(utr: String, internalId: String, refreshEtmpData: Boolean) = {
+  private def resetCacheIfRequested(identifier: String, internalId: String, refreshEtmpData: Boolean) = {
     if (refreshEtmpData) {
-      val resetTransforms = transformationService.removeAllTransformations(utr, internalId)
-      val resetCache = desService.resetCache(utr, internalId)
+      val resetTransforms = transformationService.removeAllTransformations(identifier, internalId)
+      val resetCache = desService.resetCache(identifier, internalId)
       for {
         _ <- resetTransforms
         cache <- resetCache
@@ -189,24 +190,26 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
   }
 
-  private def doGet(utr: String, applyTransformations: Boolean, refreshEtmpData: Boolean = false)
+  private def doGet(identifier: String,
+                    applyTransformations: Boolean,
+                    refreshEtmpData: Boolean = false)
                    (handleResult: GetTrustSuccessResponse => Result): Action[AnyContent] =
-    (validateUtr(utr) andThen identify).async {
+    (validateIdentifier(identifier) andThen identify).async {
       implicit request =>
 
-        resetCacheIfRequested(utr, request.identifier, refreshEtmpData).flatMap { _ =>
+        resetCacheIfRequested(identifier, request.identifier, refreshEtmpData).flatMap { _ =>
 
           val data = if (applyTransformations) {
-            transformationService.getTransformedData(utr, request.identifier)
+            transformationService.getTransformedData(identifier, request.identifier)
           } else {
-            desService.getTrustInfo(utr, request.identifier)
+            desService.getTrustInfo(identifier, request.identifier)
           }
 
           data.flatMap {
             case response: GetTrustSuccessResponse =>
               auditService.audit(
                 event = TrustAuditing.GET_TRUST,
-                request = Json.obj("utr" -> utr),
+                request = Json.obj("utr" -> identifier),
                 internalId = request.identifier,
                 response = Json.toJson(response)
               )
@@ -221,7 +224,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
 
               auditService.audit(
                 event = TrustAuditing.GET_TRUST,
-                request = Json.obj("utr" -> utr),
+                request = Json.obj("utr" -> identifier),
                 internalId = request.identifier,
                 response = reason
               )
@@ -230,7 +233,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
             case err =>
               auditService.auditErrorResponse(
                 TrustAuditing.GET_TRUST,
-                Json.obj("utr" -> utr),
+                Json.obj("utr" -> identifier),
                 request.identifier,
                 errorAuditMessages.getOrElse(err, "UNKNOWN")
               )

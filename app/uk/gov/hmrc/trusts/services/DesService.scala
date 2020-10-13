@@ -22,7 +22,10 @@ import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models._
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustResponse, GetTrustSuccessResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{GetTrustResponse, GetTrustSuccessResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.registration.RegistrationResponse
+import uk.gov.hmrc.trusts.models.tax_enrolments.SubscriptionIdResponse
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.repositories.CacheRepository
 
@@ -72,9 +75,9 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Cache
     }
   }
 
-  def getTrustInfo(utr: String, internalId: String): Future[GetTrustResponse] = {
+  def getTrustInfo(identifier: String, internalId: String): Future[GetTrustResponse] = {
     logger.debug("Getting trust Info")
-    repository.get(utr, internalId).flatMap {
+    repository.get(identifier, internalId).flatMap {
       case Some(x) => x.validate[GetTrustSuccessResponse].fold(
         errs => {
           logger.error(s"[DesService] unable to parse json from cache as GetTrustSuccessResponse $errs")
@@ -84,7 +87,7 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Cache
           Future.successful(response)
         }
       )
-      case None => refreshCacheAndGetTrustInfo(utr, internalId)
+      case None => refreshCacheAndGetTrustInfo(identifier, internalId)
     }
   }
 

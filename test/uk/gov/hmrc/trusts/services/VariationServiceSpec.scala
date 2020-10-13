@@ -28,22 +28,22 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsSuccess, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.EtmpCacheDataStaleException
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.ResponseHeader
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
+import uk.gov.hmrc.trusts.models.get_trust.get_trust
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.ResponseHeader
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.models.{DeclarationForApi, DeclarationName, NameType}
 import uk.gov.hmrc.trusts.transformers.DeclarationTransformer
-import uk.gov.hmrc.trusts.utils.JsonRequests
+import uk.gov.hmrc.trusts.utils.JsonFixtures
 
 import scala.concurrent.Future
 
-class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar with ScalaFutures with MustMatchers with GuiceOneAppPerSuite {
+class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar with ScalaFutures with MustMatchers with GuiceOneAppPerSuite {
 
   private implicit  val hc: HeaderCarrier = new HeaderCarrier
   private val formBundleNo = "001234567890"
   private val utr = "1234567890"
   private val internalId = "InternalId"
-  private val fullEtmpResponseJson = getTrustResponse
+  private val fullEtmpResponseJson = get4MLDTrustResponse
   private val transformedEtmpResponseJson = Json.parse("""{ "field": "Arbitrary transformed JSON" }""")
   private val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
   private val transformedJson = Json.obj("field" -> "value")
@@ -72,7 +72,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
       when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
       when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
 
-      val response = TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
+      val response = get_trust.TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
 
       when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))).thenReturn(Future.successful(
         response
@@ -86,7 +86,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
 
       val OUT = new VariationService(desService, transformationService, transformer, auditService, LocalDateServiceStub)
 
-      val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
+      val transformedResponse = get_trust.TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
 
       whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { variationResponse => {
         variationResponse mustBe VariationResponse("TVN34567890")
@@ -110,7 +110,7 @@ class VariationServiceSpec extends WordSpec with JsonRequests with MockitoSugar 
     when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
 
     when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))).thenReturn(Future.successful(
-      TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
+      get_trust.TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
     ))
 
     when(desService.trustVariation(any())).thenReturn(Future.successful(

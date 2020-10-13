@@ -25,7 +25,7 @@ import reactivemongo.bson.BSONDocument
 import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
 import reactivemongo.play.json.collection.JSONCollection
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.models.RegistrationSubmissionDraft
+import uk.gov.hmrc.trusts.models.registration.RegistrationSubmissionDraft
 
 import scala.concurrent.{ExecutionContext, Future}
 

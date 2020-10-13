@@ -21,7 +21,8 @@ import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.models.{Registration, RegistrationResponse}
+import uk.gov.hmrc.trusts.models.Registration
+import uk.gov.hmrc.trusts.models.registration.RegistrationResponse
 
 class FakeAuditService @Inject()(auditConnector: AuditConnector, config: AppConfig)
   extends AuditService(auditConnector, config) {

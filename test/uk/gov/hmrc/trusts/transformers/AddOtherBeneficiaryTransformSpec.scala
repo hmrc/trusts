@@ -32,6 +32,7 @@ class AddOtherBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
     Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")),
     Some(false),
     None,
+    None,
     LocalDate.parse("1990-10-10"),
     None
   )

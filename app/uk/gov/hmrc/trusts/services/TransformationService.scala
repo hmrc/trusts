@@ -21,8 +21,8 @@ import play.api.Logging
 import play.api.libs.json.{JsObject, JsResult, JsSuccess, JsValue, Json, __, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.TransformationErrorResponse
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.{GetTrustResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.{GetTrustResponse, TrustProcessedResponse}
+import uk.gov.hmrc.trusts.models.get_trust.{TransformationErrorResponse, get_trust}
 import uk.gov.hmrc.trusts.repositories.TransformationRepository
 import uk.gov.hmrc.trusts.transformers._
 
@@ -33,16 +33,16 @@ class TransformationService @Inject()(repository: TransformationRepository,
                                       desService: DesService,
                                       auditService: AuditService) extends Logging {
 
-  def getTransformedData(utr: String, internalId: String): Future[GetTrustResponse] = {
-    desService.getTrustInfo(utr, internalId).flatMap {
+  def getTransformedData(identifier: String, internalId: String): Future[GetTrustResponse] = {
+    desService.getTrustInfo(identifier, internalId).flatMap {
       case response: TrustProcessedResponse =>
         populateLeadTrusteeAddress(response.getTrust) match {
           case JsSuccess(fixed, _) =>
 
-            applyTransformations(utr, internalId, fixed).map {
+            applyTransformations(identifier, internalId, fixed).map {
               case JsSuccess(transformed, _) =>
 
-                TrustProcessedResponse(transformed, response.responseHeader)
+                get_trust.TrustProcessedResponse(transformed, response.responseHeader)
               case JsError(errors) => TransformationErrorResponse(errors.toString)
             }
           case JsError(errors) => Future.successful(TransformationErrorResponse(errors.toString))
@@ -51,8 +51,8 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
-  private def applyTransformations(utr: String, internalId: String, json: JsValue): Future[JsResult[JsValue]] = {
-    repository.get(utr, internalId).map {
+  private def applyTransformations(identifier: String, internalId: String, json: JsValue): Future[JsResult[JsValue]] = {
+    repository.get(identifier, internalId).map {
       case None =>
         JsSuccess(json)
       case Some(transformations) =>
@@ -60,8 +60,8 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
-  def applyDeclarationTransformations(utr: String, internalId: String, json: JsValue)(implicit hc : HeaderCarrier): Future[JsResult[JsValue]] = {
-    repository.get(utr, internalId).map {
+  def applyDeclarationTransformations(identifier: String, internalId: String, json: JsValue)(implicit hc: HeaderCarrier): Future[JsResult[JsValue]] = {
+    repository.get(identifier, internalId).map {
       case None =>
         logger.info(s"[TransformationService] no transformations to apply")
         JsSuccess(json)
@@ -102,8 +102,8 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
-  def addNewTransform(utr: String, internalId: String, newTransform: DeltaTransform) : Future[Boolean] = {
-    repository.get(utr, internalId).map {
+  def addNewTransform(identifier: String, internalId: String, newTransform: DeltaTransform): Future[Boolean] = {
+    repository.get(identifier, internalId).map {
       case None =>
         ComposedDeltaTransform(Seq(newTransform))
 
@@ -111,14 +111,14 @@ class TransformationService @Inject()(repository: TransformationRepository,
         composedTransform :+ newTransform
 
     }.flatMap(newTransforms =>
-      repository.set(utr, internalId, newTransforms)).recoverWith {
+      repository.set(identifier, internalId, newTransforms)).recoverWith {
       case e =>
         logger.error(s"[TransformationService] exception adding new transform: ${e.getMessage}")
         Future.failed(e)
     }
   }
 
-  def removeAllTransformations(utr: String, internalId: String): Future[Option[JsObject]] = {
-    repository.resetCache(utr, internalId)
+  def removeAllTransformations(identifier: String, internalId: String): Future[Option[JsObject]] = {
+    repository.resetCache(identifier, internalId)
   }
 }

@@ -32,6 +32,7 @@ class AddCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
     Some(false),
     Some("50"),
     Some(IdentificationOrgType(None, Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")), None)),
+    None,
     LocalDate.parse("1990-10-10"),
     None
   )

@@ -33,6 +33,7 @@ class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {
         None,
         None,
         None,
+        countryOfResidence = None,
         LocalDate.parse("2020-01-30"),
         None
       )
@@ -57,6 +58,7 @@ class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {
         None,
         None,
         None,
+        countryOfResidence = None,
         LocalDate.parse("2020-01-30"),
         None
       )

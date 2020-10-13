@@ -42,6 +42,7 @@ class AddLargeBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
     )),
     None,
     None,
+    None,
     LocalDate.parse("2010-01-01"),
     None
   )

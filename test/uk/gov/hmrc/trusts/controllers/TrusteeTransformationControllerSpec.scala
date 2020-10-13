@@ -31,8 +31,9 @@ import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models.variation._
-import uk.gov.hmrc.trusts.models.{NameType, RemoveTrustee, Success}
+import uk.gov.hmrc.trusts.models.{NameType, Success}
 import uk.gov.hmrc.trusts.services.{LocalDateService, TrusteeTransformationService}
+import uk.gov.hmrc.trusts.transformers.remove.RemoveTrustee
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -60,6 +61,9 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         phoneNumber = "newPhone",
         email = Some("newEmail"),
         identification = IdentificationType(Some("newNino"), None, None, None),
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         entityStart = LocalDate.parse("2012-03-14"),
         entityEnd = None
       )
@@ -106,6 +110,9 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         dateOfBirth = Some(LocalDate.of(1965, 2, 10)),
         phoneNumber = Some("newPhone"),
         identification = Some(IdentificationType(Some("newNino"), None, None, None)),
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         entityStart = LocalDate.parse("2012-03-14"),
         entityEnd = None
       )
@@ -154,6 +161,9 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         phoneNumber = "newPhone",
         email = Some("newEmail"),
         identification = IdentificationType(Some("newNino"), None, None, None),
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         entityStart = LocalDate.parse("2012-03-14"),
         entityEnd = None
       )
@@ -237,6 +247,9 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         dateOfBirth = Some(LocalDate.of(1965, 2, 10)),
         phoneNumber = Some("newPhone"),
         identification = Some(IdentificationType(Some("newNino"), None, None, None)),
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         entityStart = LocalDate.parse("2012-03-14"),
         entityEnd = None
       )
@@ -272,6 +285,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         phoneNumber = Some("newPhone"),
         email = Some("newEmail"),
         identification = Some(IdentificationOrgType(Some("newUtr"), None, None)),
+        countryOfResidence = None,
         entityStart = LocalDate.parse("2012-03-14"),
         entityEnd = None
       )

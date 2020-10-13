@@ -21,9 +21,9 @@ import play.api.Logging
 import play.api.libs.json.Json
 import play.api.mvc.ControllerComponents
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
-import uk.gov.hmrc.trusts.models.ApiResponse._
-import uk.gov.hmrc.trusts.models.ExistingCheckRequest
-import uk.gov.hmrc.trusts.models.ExistingCheckResponse.{AlreadyRegistered, Matched, NotMatched}
+import uk.gov.hmrc.trusts.models.registration.ApiResponse._
+import uk.gov.hmrc.trusts.models.existing_trust.ExistingCheckRequest
+import uk.gov.hmrc.trusts.models.existing_trust.ExistingCheckResponse._
 import uk.gov.hmrc.trusts.services.DesService
 
 import scala.concurrent.ExecutionContext.Implicits.global

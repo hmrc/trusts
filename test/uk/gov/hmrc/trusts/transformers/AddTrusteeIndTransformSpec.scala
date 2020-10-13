@@ -34,6 +34,9 @@ class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers {
         Some(LocalDate.parse("2000-01-01")),
         Some("phoneNumber"),
         Some(IdentificationType(Some("nino"), None, None, None)),
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         LocalDate.parse("1990-10-10"),
         None
       )
@@ -57,6 +60,9 @@ class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers {
         Some(LocalDate.parse("2000-01-01")),
         Some("phoneNumber"),
         Some(IdentificationType(Some("nino"), None, None, None)),
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         LocalDate.parse("1990-10-10"),
         None
       )

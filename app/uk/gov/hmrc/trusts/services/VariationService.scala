@@ -24,7 +24,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.exceptions.{EtmpCacheDataStaleException, InternalServerErrorException}
 import uk.gov.hmrc.trusts.models.DeclarationForApi
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
-import uk.gov.hmrc.trusts.models.get_trust_or_estate.get_trust.TrustProcessedResponse
+import uk.gov.hmrc.trusts.models.get_trust.get_trust
+import uk.gov.hmrc.trusts.models.get_trust.get_trust.TrustProcessedResponse
 import uk.gov.hmrc.trusts.models.variation.VariationResponse
 import uk.gov.hmrc.trusts.transformers.DeclarationTransformer
 import uk.gov.hmrc.trusts.utils.JsonOps._
@@ -47,7 +48,7 @@ class VariationService @Inject()(desService: DesService,
         case JsSuccess(originalJson, _) =>
           transformationService.applyDeclarationTransformations(utr, internalId, originalJson).flatMap {
             case JsSuccess(transformedJson, _) =>
-              val response = TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
+              val response = get_trust.TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
               declarationTransformer.transform(response, originalJson, declaration, localDateService.now) match {
                 case JsSuccess(value, _) =>
                   logger.info(s"[VariationService] successfully transformed json for declaration")

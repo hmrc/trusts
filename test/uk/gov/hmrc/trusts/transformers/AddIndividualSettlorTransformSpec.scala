@@ -30,6 +30,9 @@ class AddIndividualSettlorTransformSpec extends FreeSpec with MustMatchers {
     NameType("abcdefghijkl",Some("abcdefghijklmn"), "abcde"),
     Some(LocalDate.parse("2000-01-01")),
     Some(IdentificationType(Some("ST019091"),None, None, None)),
+    countryOfResidence = None,
+    legallyIncapable = None,
+    nationality = None,
     LocalDate.parse("2002-01-01"),
     None
   )

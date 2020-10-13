@@ -36,6 +36,9 @@ class AmendLeadTrusteeIndTransformSpec extends FreeSpec with MustMatchers {
         phoneNumber = "newPhone",
         email = Some("newEmail"),
         identification = IdentificationType(Some("newNino"), None, None, None),
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
         entityStart = LocalDate.of(2010, 4, 3),
         entityEnd = None
       )

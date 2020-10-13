@@ -30,6 +30,7 @@ class AddBusinessSettlorTransformSpec extends FreeSpec with MustMatchers with Op
     None,
     Some(false),
     Some(IdentificationOrgType(Some("ST019091"), None, None)),
+    None,
     LocalDate.parse("2002-01-01"),
     None
   )

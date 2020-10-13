@@ -42,6 +42,7 @@ class AmendOtherBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
           Some(AddressType("Amended House", "Amended Street", None, None, Some("NE1 1EN"), "GB")),
           Some(false),
           None,
+          None,
           LocalDate.parse("2019-02-12"),
           None
         )
@@ -85,6 +86,7 @@ class AmendOtherBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
           Some(AddressType("Amended House", "Amended Street", None, None, Some("NE1 1EN"), "GB")),
           Some(false),
           None,
+          None,
           LocalDate.parse("2019-02-12"),
           None
         )
@@ -124,6 +126,7 @@ class AmendOtherBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
           "Amended Description",
           Some(AddressType("Amended House", "Amended Street", None, None, Some("NE1 1EN"), "GB")),
           Some(false),
+          None,
           None,
           LocalDate.parse("2020-02-12"),
           None

@@ -56,8 +56,7 @@ object Details {
 
 case class MatchData(utr: String,
                      name: String,
-                     postCode: Option[String]
-                    )
+                     postCode: Option[String])
 
 object MatchData {
   implicit val matchDataFormat: Format[MatchData] = Json.format[MatchData]
@@ -310,8 +309,7 @@ object BeneficiaryTrustType {
   implicit val beneficiaryTrustTypeFormat: Format[BeneficiaryTrustType] = Json.format[BeneficiaryTrustType]
 }
 
-case class IdentificationOrgType(utr: Option[String],
-                                          address: Option[AddressType])
+case class IdentificationOrgType(utr: Option[String], address: Option[AddressType])
 
 object IdentificationOrgType {
   implicit val trustBeneficiaryIdentificationFormat: Format[IdentificationOrgType] = Json.format[IdentificationOrgType]
@@ -401,7 +399,9 @@ case class TrustDetailsType(startDate: LocalDate,
                             trustTaxable: Option[Boolean],        // new 5MLD required
                             expressTrust: Option[Boolean],        // new 5MLD required
                             trustUKResident: Option[Boolean],     // new 5MLD required
-                            trustUKProperty: Option[Boolean]      // new 5MLD optional
+                            trustUKProperty: Option[Boolean],     // new 5MLD optional
+                            trustRecorded: Option[Boolean],       // new 5MLD required
+                            trustUKRelation: Option[Boolean]      // new 5MLD required
                            ) {
 
   def isEmploymentRelatedTrust : Boolean = typeOfTrust.contains(Employment)
