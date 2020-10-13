@@ -141,9 +141,12 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
     logger.info(s"[DesConnector] submitting trust variation for correlationId: $correlationId")
-
-     http.POST[JsValue, VariationResponse](trustVariationsEndpoint, Json.toJson(trustVariations))(
-       implicitly[Writes[JsValue]], VariationResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
+    if (config.desEnvironment == "ist0") {
+      Future.successful(VariationResponse("XXTVN1234567890"))
+    } else {
+      http.POST[JsValue, VariationResponse](trustVariationsEndpoint, Json.toJson(trustVariations))(
+        implicitly[Writes[JsValue]], VariationResponse.httpReads, implicitly[HeaderCarrier](hc), implicitly[ExecutionContext])
+    }
 
   }
 }
