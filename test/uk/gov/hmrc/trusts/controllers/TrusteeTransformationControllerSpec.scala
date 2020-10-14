@@ -53,34 +53,25 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
       val trusteeTransformationService = mock[TrusteeTransformationService]
       val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)(ExecutionContext.Implicits.global, Helpers.stubControllerComponents())
 
-      val newTrusteeIndInfo = LeadTrusteeIndType(
-        lineNo = Some("newLineNo"),
-        bpMatchStatus = Some("newMatchStatus"),
-        name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-        dateOfBirth = LocalDate.of(1965, 2, 10),
-        phoneNumber = "newPhone",
-        email = Some("newEmail"),
-        identification = IdentificationType(Some("newNino"), None, None, None),
-        countryOfResidence = None,
-        legallyIncapable = None,
-        nationality = None,
-        entityStart = LocalDate.parse("2012-03-14"),
-        entityEnd = None
+      val newTrusteeIndInfo = Json.obj(
+        "name" -> NameType("newFirstName", Some("newMiddleName"), "newLastName"),
+        "dateOfBirth" -> LocalDate.of(1965, 2, 10),
+        "phoneNumber" -> "newPhone",
+        "email" -> Some("newEmail"),
+        "identification" -> IdentificationType(Some("newNino"), None, None, None)
       )
 
       when(trusteeTransformationService.addAmendLeadTrusteeTransformer(any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
-      val newTrusteeInfo = LeadTrusteeType(Some(newTrusteeIndInfo), None)
-
       val request = FakeRequest("POST", "path")
-        .withBody(Json.toJson(newTrusteeIndInfo))
+        .withBody(newTrusteeIndInfo)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val result = controller.amendLeadTrustee("aUTR").apply(request)
 
       status(result) mustBe OK
-      verify(trusteeTransformationService).addAmendLeadTrusteeTransformer("aUTR", "id", newTrusteeInfo)
+      verify(trusteeTransformationService).addAmendLeadTrusteeTransformer(equalTo("aUTR"), equalTo("id"), any())
     }
 
     "must return an error for malformed json" in {
@@ -153,28 +144,19 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
       val controller = new TrusteeTransformationController(identifierAction, trusteeTransformationService, LocalDateServiceStub)(ExecutionContext.Implicits.global, Helpers.stubControllerComponents())
       val index = 3
 
-      val newTrusteeIndInfo = LeadTrusteeIndType(
-        lineNo = Some("newLineNo"),
-        bpMatchStatus = Some("newMatchStatus"),
-        name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-        dateOfBirth = LocalDate.of(1965, 2, 10),
-        phoneNumber = "newPhone",
-        email = Some("newEmail"),
-        identification = IdentificationType(Some("newNino"), None, None, None),
-        countryOfResidence = None,
-        legallyIncapable = None,
-        nationality = None,
-        entityStart = LocalDate.parse("2012-03-14"),
-        entityEnd = None
+      val newTrusteeIndInfo = Json.obj(
+        "name" -> NameType("newFirstName", Some("newMiddleName"), "newLastName"),
+        "dateOfBirth" -> LocalDate.of(1965, 2, 10),
+        "phoneNumber" -> "newPhone",
+        "email" -> Some("newEmail"),
+        "identification" -> IdentificationType(Some("newNino"), None, None, None)
       )
 
       when(trusteeTransformationService.addPromoteTrusteeTransformer(any(), any(), any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
-      val newTrusteeInfo = LeadTrusteeType(Some(newTrusteeIndInfo), None)
-
       val request = FakeRequest("POST", "path")
-        .withBody(Json.toJson(newTrusteeIndInfo))
+        .withBody(newTrusteeIndInfo)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val result = controller.promoteTrustee("aUTR", index).apply(request)
@@ -184,7 +166,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         equalTo("aUTR"),
         equalTo("id"),
         equalTo(index),
-        equalTo(newTrusteeInfo),
+        any(),
         any())
     }
 

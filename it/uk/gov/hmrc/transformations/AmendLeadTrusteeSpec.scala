@@ -45,14 +45,12 @@ class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar 
   "an amend lead trustee call" - {
     "must return amended data in a subsequent 'get' call" in {
 
-      val newTrusteeIndInfo = LeadTrusteeIndType(
-        lineNo = None,
-        bpMatchStatus = None,
-        name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-        dateOfBirth = LocalDate.of(1965, 2, 10),
-        phoneNumber = "newPhone",
-        email = Some("newEmail"),
-        identification = IdentificationType(
+      val newTrusteeIndInfo = Json.obj(
+        "name" -> NameType("newFirstName", Some("newMiddleName"), "newLastName"),
+        "dateOfBirth" -> LocalDate.of(1965, 2, 10),
+        "phoneNumber" -> "newPhone",
+        "email" -> "newEmail",
+        "identification" -> IdentificationType(
           Some("newNino"),
           None,
           Some(AddressType(
@@ -63,12 +61,7 @@ class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar 
             Some("TF1 5DR"),
             "GB"
           )),
-          None),
-        countryOfResidence = None,
-        legallyIncapable = None,
-        nationality = None,
-        entityStart = LocalDate.of(2012, 2, 20),
-        entityEnd = None
+          None)
       )
 
       val expectedGetAfterAmendLeadTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-lead-trustee.json")
@@ -91,7 +84,7 @@ class AmendLeadTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar 
           contentAsJson(result) mustBe expectedInitialGetJson
 
           val amendRequest = FakeRequest(POST, "/trusts/trustees/amend-lead/5174384721")
-            .withBody(Json.toJson(newTrusteeIndInfo))
+            .withBody(newTrusteeIndInfo)
             .withHeaders(CONTENT_TYPE -> "application/json")
 
           val amendResult = route(application, amendRequest).get

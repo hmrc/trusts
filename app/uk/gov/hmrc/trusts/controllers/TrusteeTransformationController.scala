@@ -38,7 +38,7 @@ class TrusteeTransformationController @Inject()(
 
   def amendLeadTrustee(utr: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
-      request.body.validate[LeadTrusteeType](LeadTrusteeType.EitherLeadTrusteeReads) match {
+      request.body.validate[LeadTrusteeType](LeadTrusteeType.AmendLeadTrusteeReads) match {
         case JsSuccess(model, _) =>
           trusteeTransformationService.addAmendLeadTrusteeTransformer(utr, request.identifier, model) map { _ =>
             Ok
@@ -110,8 +110,8 @@ class TrusteeTransformationController @Inject()(
   def promoteTrustee(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
 
-      val leadTrusteeInd = request.body.validateOpt[LeadTrusteeIndType].getOrElse(None)
-      val leadTrusteeOrg = request.body.validateOpt[LeadTrusteeOrgType].getOrElse(None)
+      val leadTrusteeInd = request.body.validateOpt[LeadTrusteeIndType](LeadTrusteeIndType.amendOrPromoteReads).getOrElse(None)
+      val leadTrusteeOrg = request.body.validateOpt[LeadTrusteeOrgType](LeadTrusteeOrgType.amendOrPromoteReads).getOrElse(None)
 
       (leadTrusteeInd, leadTrusteeOrg) match {
         case (Some(ind), _) =>
