@@ -21,7 +21,7 @@ import java.time.LocalDate
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.test.Helpers.running
 import uk.gov.hmrc.trusts.models.NameType
-import uk.gov.hmrc.trusts.models.variation.{IdentificationType, LeadTrusteeIndType, TrusteeIndividualType}
+import uk.gov.hmrc.trusts.models.variation.{AmendedLeadTrusteeIndType, IdentificationType, TrusteeIndividualType}
 import uk.gov.hmrc.trusts.repositories.TransformationRepository
 import uk.gov.hmrc.trusts.transformers.{AddTrusteeIndTransform, AmendLeadTrusteeIndTransform, ComposedDeltaTransform}
 
@@ -59,9 +59,7 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with TransformI
   val data = ComposedDeltaTransform(
     Seq(
       AmendLeadTrusteeIndTransform(
-        LeadTrusteeIndType(
-          Some(""),
-          None,
+        AmendedLeadTrusteeIndType(
           NameType("New", Some("lead"), "Trustee"),
           LocalDate.parse("2000-01-01"),
           "",
@@ -69,9 +67,7 @@ class TransformRepositorySpec extends FreeSpec with MustMatchers with TransformI
           IdentificationType(None, None, None, None),
           countryOfResidence = None,
           legallyIncapable = None,
-          nationality = None,
-          LocalDate.parse("2010-10-10"),
-          None
+          nationality = None
         )
       ),
       AddTrusteeIndTransform(

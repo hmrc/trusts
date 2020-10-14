@@ -16,10 +16,8 @@
 
 package uk.gov.hmrc.trusts.transformers
 
-import java.time.LocalDate
-
 import org.scalatest.{FreeSpec, MustMatchers}
-import uk.gov.hmrc.trusts.models.variation.{IdentificationOrgType, LeadTrusteeOrgType}
+import uk.gov.hmrc.trusts.models.variation.{AmendedLeadTrusteeOrgType, IdentificationOrgType}
 import uk.gov.hmrc.trusts.utils.JsonUtils
 
 class AmendLeadTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {
@@ -29,16 +27,12 @@ class AmendLeadTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {
     "successfully set a new org lead trustee's details" in {
       val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-before.json")
       val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-org.json")
-      val newTrusteeInfo = LeadTrusteeOrgType(
-        lineNo = Some("newLineNo"),
-        bpMatchStatus = Some("newMatchStatus"),
+      val newTrusteeInfo = AmendedLeadTrusteeOrgType(
         name = "newName",
         phoneNumber = "newPhone",
         email = Some("newEmail"),
         identification = IdentificationOrgType( Some("newUtr"), None, None),
-        countryOfResidence = None,
-        LocalDate.of(2010, 4, 3),
-        None
+        countryOfResidence = None
       )
       val transformer = AmendLeadTrusteeOrgTransform(newTrusteeInfo)
 

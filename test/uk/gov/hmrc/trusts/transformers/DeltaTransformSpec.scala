@@ -33,9 +33,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
       val amendedDate = LocalDate.of(2012, 3, 14)
       val currentDate = LocalDate.of(2020, 4, 1)
 
-      val newLeadTrustee = LeadTrusteeIndType(
-        None,
-        None,
+      val newLeadTrustee = AmendedLeadTrusteeIndType(
         NameType("New", Some("lead"), "Trustee"),
         LocalDate.parse("2000-01-01"),
         "",
@@ -43,23 +41,17 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
         IdentificationType(None, None, None, None),
         countryOfResidence = None,
         legallyIncapable = None,
-        nationality = None,
-        LocalDate.of(2010, 4, 3),
-        entityEnd = None
+        nationality = None
       )
 
-      val newLeadTrusteeOrg = LeadTrusteeOrgType(
-        None,
-        None,
+      val newLeadTrusteeOrg = AmendedLeadTrusteeOrgType(
         "Organisation",
         "phoneNumber",
         None,
         IdentificationOrgType(
           Some("utr"), None, None
         ),
-        countryOfResidence = None,
-        LocalDate.of(2010, 4, 3),
-        None
+        countryOfResidence = None
       )
 
       val newTrusteeInd = TrusteeIndividualType(

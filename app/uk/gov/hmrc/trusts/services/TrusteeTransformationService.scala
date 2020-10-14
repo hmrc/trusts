@@ -23,7 +23,7 @@ import play.api.libs.json.{__, _}
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models.Success
 import uk.gov.hmrc.trusts.models.get_trust.get_trust.TrustProcessedResponse
-import uk.gov.hmrc.trusts.models.variation.{LeadTrusteeType, TrusteeType}
+import uk.gov.hmrc.trusts.models.variation.{AmendedLeadTrusteeIndType, AmendedLeadTrusteeOrgType, TrusteeType}
 import uk.gov.hmrc.trusts.transformers._
 import uk.gov.hmrc.trusts.transformers.remove.RemoveTrustee
 
@@ -35,11 +35,20 @@ class TrusteeTransformationService @Inject()(
                                               transformationService: TransformationService,
                                               localDateService: LocalDateService) {
 
-  def addAmendLeadTrusteeTransformer(utr: String, internalId: String, newLeadTrustee: LeadTrusteeType): Future[Success.type] = {
-    transformationService.addNewTransform(utr, internalId, newLeadTrustee match {
-      case LeadTrusteeType(Some(trusteeInd), None) => AmendLeadTrusteeIndTransform(trusteeInd)
-      case LeadTrusteeType(None, Some(trusteeOrg)) => AmendLeadTrusteeOrgTransform(trusteeOrg)
-    }).map(_ => Success)
+  def addAmendLeadTrusteeIndTransformer(utr: String, internalId: String, newLeadTrustee: AmendedLeadTrusteeIndType): Future[Success.type] = {
+    transformationService.addNewTransform(
+      utr,
+      internalId,
+      AmendLeadTrusteeIndTransform(newLeadTrustee)
+    ).map(_ => Success)
+  }
+
+  def addAmendLeadTrusteeOrgTransformer(utr: String, internalId: String, newLeadTrustee: AmendedLeadTrusteeOrgType): Future[Success.type] = {
+    transformationService.addNewTransform(
+      utr,
+      internalId,
+      AmendLeadTrusteeOrgTransform(newLeadTrustee)
+    ).map(_ => Success)
   }
 
   def addAmendTrusteeTransformer(utr: String,
@@ -59,21 +68,38 @@ class TrusteeTransformationService @Inject()(
     }
   }
 
-  def addPromoteTrusteeTransformer(
+  def addPromoteTrusteeIndTransformer(
                                     utr: String,
                                     internalId: String,
                                     index: Int,
-                                    newLeadTrustee: LeadTrusteeType,
+                                    newLeadTrustee: AmendedLeadTrusteeIndType,
                                     endDate: LocalDate): Future[Success.type] = {
 
     getTrusteeAtIndex(utr, internalId, index).flatMap {
       case scala.util.Success(trusteeJson) =>
-        transformationService.addNewTransform(utr, internalId, newLeadTrustee match {
-          case LeadTrusteeType(Some(trusteeInd), None) =>
-            PromoteTrusteeIndTransform(index, trusteeInd, endDate, trusteeJson, localDateService.now)
-          case LeadTrusteeType(None, Some(trusteeOrg)) =>
-            PromoteTrusteeOrgTransform(index, trusteeOrg, endDate, trusteeJson, localDateService.now)
-        }).map(_ => Success)
+        transformationService.addNewTransform(
+          utr,
+          internalId,
+          PromoteTrusteeIndTransform(index, newLeadTrustee, endDate, trusteeJson, localDateService.now)
+        ).map(_ => Success)
+      case scala.util.Failure(_) => Future.failed(InternalServerErrorException(s"Could not pick trustee at index $index."))
+    }
+  }
+
+  def addPromoteTrusteeOrgTransformer(
+                                       utr: String,
+                                       internalId: String,
+                                       index: Int,
+                                       newLeadTrustee: AmendedLeadTrusteeOrgType,
+                                       endDate: LocalDate): Future[Success.type] = {
+
+    getTrusteeAtIndex(utr, internalId, index).flatMap {
+      case scala.util.Success(trusteeJson) =>
+        transformationService.addNewTransform(
+          utr,
+          internalId,
+          PromoteTrusteeOrgTransform(index, newLeadTrustee, endDate, trusteeJson, localDateService.now)
+        ).map(_ => Success)
       case scala.util.Failure(_) => Future.failed(InternalServerErrorException(s"Could not pick trustee at index $index."))
     }
   }

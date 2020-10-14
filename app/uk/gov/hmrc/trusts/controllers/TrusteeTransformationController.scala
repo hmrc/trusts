@@ -38,13 +38,21 @@ class TrusteeTransformationController @Inject()(
 
   def amendLeadTrustee(utr: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
-      request.body.validate[LeadTrusteeType](LeadTrusteeType.AmendLeadTrusteeReads) match {
-        case JsSuccess(model, _) =>
-          trusteeTransformationService.addAmendLeadTrusteeTransformer(utr, request.identifier, model) map { _ =>
-            Ok
-          }
+
+      val result = request.body.validate[AmendedLeadTrusteeIndType].map {
+        leadTrustee =>
+          trusteeTransformationService.addAmendLeadTrusteeIndTransformer(utr, request.identifier, leadTrustee)
+      }.orElse {
+        request.body.validate[AmendedLeadTrusteeOrgType].map {
+          leadTrustee =>
+            trusteeTransformationService.addAmendLeadTrusteeOrgTransformer(utr, request.identifier, leadTrustee)
+        }
+      }
+
+      result match {
+        case JsSuccess(_,_) => Future.successful(Ok)
         case JsError(errors) =>
-          logger.warn(s"Supplied Lead trustee could not be read as LeadTrusteeType - $errors")
+          logger.warn(s"Supplied Lead trustee could not be read as amended lead trustee - $errors")
           Future.successful(BadRequest)
       }
     }
@@ -110,24 +118,24 @@ class TrusteeTransformationController @Inject()(
   def promoteTrustee(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
 
-      val leadTrusteeInd = request.body.validateOpt[LeadTrusteeIndType](LeadTrusteeIndType.amendOrPromoteReads).getOrElse(None)
-      val leadTrusteeOrg = request.body.validateOpt[LeadTrusteeOrgType](LeadTrusteeOrgType.amendOrPromoteReads).getOrElse(None)
+      val leadTrusteeInd = request.body.validateOpt[AmendedLeadTrusteeIndType].getOrElse(None)
+      val leadTrusteeOrg = request.body.validateOpt[AmendedLeadTrusteeOrgType].getOrElse(None)
 
       (leadTrusteeInd, leadTrusteeOrg) match {
         case (Some(ind), _) =>
-          trusteeTransformationService.addPromoteTrusteeTransformer(
+          trusteeTransformationService.addPromoteTrusteeIndTransformer(
             utr,
             request.identifier,
             index,
-            LeadTrusteeType(Some(ind), None),
+            ind,
             localDateService.now
           ).map(_ => Ok)
         case (_, Some(org)) =>
-          trusteeTransformationService.addPromoteTrusteeTransformer(
+          trusteeTransformationService.addPromoteTrusteeOrgTransformer(
             utr,
             request.identifier,
             index,
-            LeadTrusteeType(None, Some(org)),
+            org,
             localDateService.now
           ).map(_ => Ok)
         case _ =>

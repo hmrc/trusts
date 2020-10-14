@@ -61,7 +61,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         "identification" -> IdentificationType(Some("newNino"), None, None, None)
       )
 
-      when(trusteeTransformationService.addAmendLeadTrusteeTransformer(any(), any(), any()))
+      when(trusteeTransformationService.addAmendLeadTrusteeIndTransformer(any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
@@ -71,7 +71,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
       val result = controller.amendLeadTrustee("aUTR").apply(request)
 
       status(result) mustBe OK
-      verify(trusteeTransformationService).addAmendLeadTrusteeTransformer(equalTo("aUTR"), equalTo("id"), any())
+      verify(trusteeTransformationService).addAmendLeadTrusteeIndTransformer(equalTo("aUTR"), equalTo("id"), any())
     }
 
     "must return an error for malformed json" in {
@@ -152,7 +152,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         "identification" -> IdentificationType(Some("newNino"), None, None, None)
       )
 
-      when(trusteeTransformationService.addPromoteTrusteeTransformer(any(), any(), any(), any(), any()))
+      when(trusteeTransformationService.addPromoteTrusteeIndTransformer(any(), any(), any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
@@ -162,7 +162,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
       val result = controller.promoteTrustee("aUTR", index).apply(request)
 
       status(result) mustBe OK
-      verify(trusteeTransformationService).addPromoteTrusteeTransformer(
+      verify(trusteeTransformationService).addPromoteTrusteeIndTransformer(
         equalTo("aUTR"),
         equalTo("id"),
         equalTo(index),

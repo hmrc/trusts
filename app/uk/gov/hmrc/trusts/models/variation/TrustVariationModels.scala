@@ -387,42 +387,7 @@ case class LeadTrusteeIndType(
                              )
 
 object LeadTrusteeIndType {
-
   implicit val leadTrusteeIndTypeFormat: Format[LeadTrusteeIndType] = Json.format[LeadTrusteeIndType]
-
-  val amendOrPromoteReads: Reads[LeadTrusteeIndType] = (
-        (__ \ "name").read[NameType] and
-        (__ \ "dateOfBirth").read[LocalDate] and
-        (__ \ "phoneNumber").read[String] and
-        (__ \ "email").readNullable[String] and
-        (__ \ "identification").read[IdentificationType] and
-        (__ \ "countryOfResidence").readNullable[String] and
-        (__ \ "legallyIncapable").readNullable[Boolean] and
-        (__ \ "nationality").readNullable[String]
-      )(
-        (name,
-         dateOfBirth,
-         phoneNumber,
-         email,
-         identification,
-         countryOfResidence,
-         legallyIncapable,
-         nationality) =>
-          LeadTrusteeIndType(
-            None,
-            None,
-            name,
-            dateOfBirth,
-            phoneNumber,
-            email,
-            identification,
-            countryOfResidence,
-            legallyIncapable,
-            nationality,
-            LocalDate.now(),
-            None)
-    )
-
 }
 
 case class LeadTrusteeOrgType(
@@ -439,30 +404,7 @@ case class LeadTrusteeOrgType(
 
 object LeadTrusteeOrgType {
   implicit val leadTrusteeOrgTypeFormat: Format[LeadTrusteeOrgType] = Json.format[LeadTrusteeOrgType]
-
-  val amendOrPromoteReads: Reads[LeadTrusteeOrgType] = (
-       (__ \ "name").read[String] and
-      (__ \ "phoneNumber").read[String] and
-      (__ \ "email").readNullable[String] and
-      (__ \ "identification").read[IdentificationOrgType] and
-      (__ \ "countryOfResidence").readNullable[String]
-    )(
-    (name,
-     phoneNumber,
-     email,
-     identification,
-     countryOfResidence) =>
-      LeadTrusteeOrgType(
-        None,
-        None,
-        name,
-        phoneNumber,
-        email,
-        identification,
-        countryOfResidence,
-        LocalDate.now(),
-        None)
-  )}
+}
 
 case class LeadTrusteeType(
                             leadTrusteeInd: Option[LeadTrusteeIndType] = None,
@@ -470,23 +412,7 @@ case class LeadTrusteeType(
                           )
 
 object LeadTrusteeType {
-
   implicit val leadTrusteeFormats: Format[LeadTrusteeType] = Json.format[LeadTrusteeType]
-
-  object AmendLeadTrusteeReads extends Reads[LeadTrusteeType] {
-    override def reads(json: JsValue): JsResult[LeadTrusteeType] = {
-
-      json.validate[LeadTrusteeIndType](LeadTrusteeIndType.amendOrPromoteReads).map {
-        leadTrusteeInd =>
-          LeadTrusteeType(leadTrusteeInd = Some(leadTrusteeInd))
-      }.orElse {
-        json.validate[LeadTrusteeOrgType](LeadTrusteeOrgType.amendOrPromoteReads).map {
-          org =>
-            LeadTrusteeType(leadTrusteeOrg = Some(org))
-        }
-      }
-    }
-  }
 }
 
 case class TrusteeType(

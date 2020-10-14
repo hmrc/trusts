@@ -28,7 +28,7 @@ import play.api.libs.json.{JsResult, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.get_trust.get_trust
 import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustProcessedResponse, _}
-import uk.gov.hmrc.trusts.models.variation.{IdentificationType, LeadTrusteeIndType}
+import uk.gov.hmrc.trusts.models.variation.{AmendedLeadTrusteeIndType, IdentificationType}
 import uk.gov.hmrc.trusts.models.{AddressType, NameType}
 import uk.gov.hmrc.trusts.repositories.TransformationRepositoryImpl
 import uk.gov.hmrc.trusts.transformers._
@@ -40,9 +40,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
   private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 
 
-  val unitTestTrusteeInfo = LeadTrusteeIndType(
-    lineNo = Some("newLineNo"),
-    bpMatchStatus = Some("newMatchStatus"),
+  private val unitTestLeadTrusteeInfo = AmendedLeadTrusteeIndType(
     name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
     dateOfBirth = LocalDate.of(1965, 2, 10),
     phoneNumber = "newPhone",
@@ -50,9 +48,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     identification = IdentificationType(Some("newNino"), None, None, None),
     countryOfResidence = None,
     legallyIncapable = None,
-    nationality = None,
-    entityStart = LocalDate.parse("2012-03-14"),
-    entityEnd = None
+    nationality = None
   )
 
   private val auditService = mock[AuditService]
@@ -80,9 +76,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       |          }
       |""".stripMargin)
 
-  val existingLeadTrusteeInfo = LeadTrusteeIndType(
-    lineNo = Some("newLineNo"),
-    bpMatchStatus = Some("newMatchStatus"),
+  private val existingLeadTrusteeInfo = AmendedLeadTrusteeIndType(
     name = NameType("existingFirstName", Some("existingMiddleName"), "existingLastName"),
     dateOfBirth = LocalDate.of(1965, 2, 10),
     phoneNumber = "newPhone",
@@ -90,14 +84,10 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     identification = IdentificationType(Some("newNino"), None, None, None),
     countryOfResidence = None,
     legallyIncapable = None,
-    nationality = None,
-    entityStart = LocalDate.parse("2002-03-14"),
-    entityEnd = None
+    nationality = None
   )
 
-  val newLeadTrusteeIndInfo = LeadTrusteeIndType(
-    lineNo = Some("newLineNo"),
-    bpMatchStatus = Some("newMatchStatus"),
+  private val newLeadTrusteeIndInfo = AmendedLeadTrusteeIndType(
     name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
     dateOfBirth = LocalDate.of(1965, 2, 10),
     phoneNumber = "newPhone",
@@ -105,9 +95,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     identification = IdentificationType(Some("newNino"), None, None, None),
     countryOfResidence = None,
     legallyIncapable = None,
-    nationality = None,
-    entityStart = LocalDate.parse("2012-03-14"),
-    entityEnd = None
+    nationality = None
   )
 
   "must transform json data with the current transforms" in {
@@ -116,7 +104,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
     val existingTransforms = Seq(
       RemoveTrusteeTransform(LocalDate.parse("2019-12-21"), 0, originalTrusteeIndJson),
-      AmendLeadTrusteeIndTransform(unitTestTrusteeInfo)
+      AmendLeadTrusteeIndTransform(unitTestLeadTrusteeInfo)
     )
     when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
     when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
@@ -179,9 +167,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     val desService = mock[DesService]
     when(desService.getTrustInfo(any(), any())).thenReturn(Future.successful(response))
 
-    val newLeadTrusteeIndInfo = LeadTrusteeIndType(
-      lineNo = None,
-      bpMatchStatus = None,
+    val newLeadTrusteeIndInfo = AmendedLeadTrusteeIndType(
       name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
       dateOfBirth = LocalDate.of(1965, 2, 10),
       phoneNumber = "newPhone",
@@ -193,9 +179,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
         None),
       countryOfResidence = None,
       legallyIncapable = None,
-      nationality = None,
-      entityStart = LocalDate.of(2012, 2, 20),
-      entityEnd = None
+      nationality = None
     )
 
     val existingTransforms = Seq(

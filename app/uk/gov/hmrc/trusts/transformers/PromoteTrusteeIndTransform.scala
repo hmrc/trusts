@@ -19,10 +19,10 @@ package uk.gov.hmrc.trusts.transformers
 import java.time.LocalDate
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.variation.LeadTrusteeIndType
+import uk.gov.hmrc.trusts.models.variation.AmendedLeadTrusteeIndType
 
 case class PromoteTrusteeIndTransform(index: Int,
-                                      newLeadTrustee: LeadTrusteeIndType,
+                                      newLeadTrustee: AmendedLeadTrusteeIndType,
                                       endDate: LocalDate,
                                       originalTrusteeJson: JsValue,
                                       override val currentDate: LocalDate
