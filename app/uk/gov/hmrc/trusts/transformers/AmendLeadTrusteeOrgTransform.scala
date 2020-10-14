@@ -17,9 +17,9 @@
 package uk.gov.hmrc.trusts.transformers
 
 import play.api.libs.json._
-import uk.gov.hmrc.trusts.models.variation.LeadTrusteeOrgType
+import uk.gov.hmrc.trusts.models.variation.AmendedLeadTrusteeOrgType
 
-case class AmendLeadTrusteeOrgTransform(leadTrustee: LeadTrusteeOrgType) extends DeltaTransform with AmendLeadTrusteeCommon {
+case class AmendLeadTrusteeOrgTransform(leadTrustee: AmendedLeadTrusteeOrgType) extends DeltaTransform with AmendLeadTrusteeCommon {
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     setLeadTrustee(input, Json.toJson(leadTrustee))
   }

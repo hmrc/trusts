@@ -42,9 +42,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     override def now: LocalDate = currentDate
   }
 
-  val newLeadTrusteeIndInfo = LeadTrusteeIndType(
-    lineNo = Some("newLineNo"),
-    bpMatchStatus = Some("newMatchStatus"),
+  val newLeadTrusteeIndInfo = AmendedLeadTrusteeIndType(
     name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
     dateOfBirth = LocalDate.of(1965, 2, 10),
     phoneNumber = "newPhone",
@@ -52,21 +50,15 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
     identification = IdentificationType(Some("newNino"), None, None, None),
     countryOfResidence = None,
     legallyIncapable = None,
-    nationality = None,
-    entityStart = LocalDate.parse("2012-03-14"),
-    None
+    nationality = None
   )
 
-  val newLeadTrusteeOrgInfo = LeadTrusteeOrgType(
-    lineNo = Some("newLineNo"),
-    bpMatchStatus = Some("newMatchStatus"),
+  val newLeadTrusteeOrgInfo = AmendedLeadTrusteeOrgType(
     name = "Company Name",
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = IdentificationOrgType(Some("UTR"), None, None),
-    countryOfResidence = None,
-    entityStart = LocalDate.parse("2012-03-14"),
-    entityEnd = None
+    countryOfResidence = None
   )
 
   val newTrusteeIndInfo = TrusteeIndividualType(
@@ -145,10 +137,10 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      val result = service.addAmendLeadTrusteeTransformer(
+      val result = service.addAmendLeadTrusteeIndTransformer(
         "utr",
         "internalId",
-        LeadTrusteeType(Some(newLeadTrusteeIndInfo), None))
+        newLeadTrusteeIndInfo)
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",
@@ -210,11 +202,11 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       val index = 1
 
       val endDate = LocalDate.of(2014, 3, 14)
-      val result = service.addPromoteTrusteeTransformer(
+      val result = service.addPromoteTrusteeIndTransformer(
         "utr",
         "internalId",
         index,
-        LeadTrusteeType(Some(newLeadTrusteeIndInfo), None), endDate)
+        newLeadTrusteeIndInfo, endDate)
 
       whenReady(result) { _ =>
 
@@ -238,11 +230,11 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
       val endDate = LocalDate.of(2013, 6, 28)
 
-      val result = service.addPromoteTrusteeTransformer(
+      val result = service.addPromoteTrusteeOrgTransformer(
         "utr",
         "internalId",
         index,
-        LeadTrusteeType(None, Some(newLeadTrusteeOrgInfo)),
+        newLeadTrusteeOrgInfo,
         endDate)
       whenReady(result) { _ =>
 
@@ -287,10 +279,10 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      val result = service.addAmendLeadTrusteeTransformer(
+      val result = service.addAmendLeadTrusteeIndTransformer(
         "utr",
         "internalId",
-        LeadTrusteeType(Some(newLeadTrusteeIndInfo), None))
+        newLeadTrusteeIndInfo)
 
       whenReady(result) { _ =>
 
