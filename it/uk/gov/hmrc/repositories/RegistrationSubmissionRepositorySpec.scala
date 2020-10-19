@@ -66,7 +66,8 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
             testDateTime,
             data1,
             Some("reference1"),
-            Some(true)
+            Some(true),
+            Some(false)
           )
 
           repository.setDraft(state1).futureValue mustBe true
@@ -77,7 +78,8 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
             testDateTime,
             data2,
             Some("reference2"),
-            Some(true)
+            Some(true),
+            None
           )
 
           repository.setDraft(state2).futureValue mustBe true
@@ -88,7 +90,8 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
             testDateTime,
             data3,
             None,
-            None
+            None,
+            Some(true)
           )
 
           repository.setDraft(state3).futureValue mustBe true
@@ -99,7 +102,8 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
             testDateTime,
             data2,
             Some("reference3"),
-            Some(false)
+            Some(false),
+            None
           )
 
           repository.setDraft(state4).futureValue mustBe true
@@ -133,7 +137,8 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
             testDateTime,
             data1,
             Some("ref1"),
-            Some(true)
+            Some(true),
+            Some(false)
           )
 
           repository.setDraft(state1).futureValue mustBe true

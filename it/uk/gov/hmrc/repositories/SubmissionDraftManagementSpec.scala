@@ -68,7 +68,7 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
 
           // Create draft section
           {
-            val draftRequestData = RegistrationSubmissionDraftData(draftData, None, None)
+            val draftRequestData = RegistrationSubmissionDraftData(draftData, None, None, None)
             val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/main")
                         .withBody(Json.toJson(draftRequestData))
                         .withHeaders(CONTENT_TYPE -> "application/json")
@@ -91,7 +91,7 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
 
           // Update draft section
           {
-            val amendedDraftRequestData = RegistrationSubmissionDraftData(amendedDraftData, Some("amendedReference"), None)
+            val amendedDraftRequestData = RegistrationSubmissionDraftData(amendedDraftData, Some("amendedReference"), None, Some(true))
             val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/main")
               .withBody(Json.toJson(amendedDraftRequestData))
               .withHeaders(CONTENT_TYPE -> "application/json")

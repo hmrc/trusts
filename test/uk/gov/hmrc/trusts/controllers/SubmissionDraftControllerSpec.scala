@@ -210,7 +210,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
     LocalDateTime.of(1997, 3, 14, 14, 45),
     existingDraftData,
     Some("theRef"),
-    Some(true)
+    Some(true),
+    Some(false)
   )
 
   ".setSection" should {
@@ -290,7 +291,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           |}
           |""".stripMargin)
 
-      val expectedDraft = RegistrationSubmissionDraft("DRAFTID", "id", currentDateTime, draftData, Some("theReference"), Some(true))
+      val expectedDraft = RegistrationSubmissionDraft("DRAFTID", "id", currentDateTime, draftData, Some("theReference"), Some(true), None)
 
       val result = controller.setSection("DRAFTID", "sectionKey").apply(request)
       status(result) mustBe OK
@@ -348,7 +349,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           |}
           |""".stripMargin)
 
-      val expectedDraft = RegistrationSubmissionDraft("DRAFTID", "id", existingDraft.createdAt, draftData, Some("newRef"), Some(true))
+      val expectedDraft = RegistrationSubmissionDraft("DRAFTID", "id", existingDraft.createdAt, draftData, Some("newRef"), Some(true), Some(false))
 
       val result = controller.setSection("DRAFTID", "sectionKey").apply(request)
       status(result) mustBe OK
@@ -484,7 +485,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         existingDraft.createdAt,
         draftData,
         existingDraft.reference,
-        existingDraft.inProgress)
+        existingDraft.inProgress,
+        existingDraft.nonTaxable)
 
       val result = controller.setSectionSet("DRAFTID", "sectionKey").apply(request)
       status(result) mustBe OK
@@ -603,7 +605,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         existingDraft.createdAt,
         draftData,
         existingDraft.reference,
-        existingDraft.inProgress)
+        existingDraft.inProgress,
+        existingDraft.nonTaxable)
 
       val result = controller.setSectionSet("DRAFTID", "sectionKey").apply(request)
       status(result) mustBe OK
@@ -644,7 +647,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           |   "field2": "value2",
           |   "field3": 3
           | },
-          | "reference": "theRef"
+          | "reference": "theRef",
+          | "nonTaxable": false
           |}
           |""".stripMargin)
 
@@ -675,7 +679,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           |{
           | "createdAt": "1997-03-14T14:45:00",
           | "data": {},
-          | "reference": "theRef"
+          | "reference": "theRef",
+          | "nonTaxable": false
           |}
           |""".stripMargin)
 
@@ -718,8 +723,22 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       )
 
       val drafts = List(
-        RegistrationSubmissionDraft("draftId1", "id", LocalDateTime.of(2012, 2, 3, 9, 30), Json.obj(), Some("ref"), Some(true)),
-        RegistrationSubmissionDraft("draftId2", "id", LocalDateTime.of(2010, 10, 10, 14, 40), Json.obj(), None, Some(true))
+        RegistrationSubmissionDraft(
+          "draftId1",
+          "id",
+          LocalDateTime.of(2012, 2, 3, 9, 30),
+          Json.obj(),
+          Some("ref"),
+          Some(true),
+          None),
+        RegistrationSubmissionDraft(
+          "draftId2",
+          "id",
+          LocalDateTime.of(2010, 10, 10, 14, 40),
+          Json.obj(),
+          None,
+          Some(true),
+          Some(true))
       )
 
       when(submissionRepository.getAllDrafts(any()))
@@ -742,7 +761,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           | },
           | {
           |   "createdAt": "2010-10-10T14:40:00",
-          |   "draftId": "draftId2"
+          |   "draftId": "draftId2",
+          |   "nonTaxable": true
           | }
           |]
           |""".stripMargin)

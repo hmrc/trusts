@@ -29,6 +29,7 @@ import uk.gov.hmrc.trusts.models.registration.{RegistrationSubmission, Registrat
 import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 import uk.gov.hmrc.trusts.repositories.RegistrationSubmissionRepository
 import uk.gov.hmrc.trusts.services.LocalDateTimeService
+import uk.gov.hmrc.trusts.models.JsonWithoutNulls._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -43,13 +44,8 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
     implicit request => {
       request.body.validate[RegistrationSubmissionDraftData] match {
         case JsSuccess(draftData, _) =>
-          submissionRepository.getDraft(draftId, request.identifier).flatMap(
-            result => {
-              val draft: RegistrationSubmissionDraft = result match {
-                case Some(draft) => draft
-                case None => RegistrationSubmissionDraft(draftId, request.identifier, localDateTimeService.now, Json.obj(), None, Some(true))
-              }
-
+          getOrCreateDraft(draftId, request.identifier).flatMap {
+            draft =>
               val body: JsValue = draftData.data
 
               val path = JsPath() \ sectionKey
@@ -63,10 +59,12 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
                 case JsSuccess(newDraftData, _) =>
                   val newReference = draftData.reference orElse draft.reference
                   val newInProgress = draftData.inProgress orElse draft.inProgress
+                  val newNonTaxable = draftData.nonTaxable orElse draft.nonTaxable
                   val newDraft = draft.copy(
                     draftData = newDraftData,
                     reference = newReference,
-                    inProgress = newInProgress)
+                    inProgress = newInProgress,
+                    nonTaxable = newNonTaxable)
                   submissionRepository.setDraft(newDraft).map(
                     result => if (result) {
                       Ok
@@ -76,9 +74,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
                   )
                 case e: JsError => Future.successful(InternalServerError(e.errors.toString()))
               }
-
-            }
-          )
+          }
         case _ => Future.successful(BadRequest)
       }
     }
@@ -123,20 +119,27 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
       prunePath(sectionPath) andThen JsPath.json.update(sectionPath.json.put(Json.toJson(answerSections)))
   }
 
+  private def getOrCreateDraft(draftId: String, identifier: String): Future[RegistrationSubmissionDraft] = {
+    submissionRepository.getDraft(draftId, identifier).map {
+      case Some(draft) => draft
+      case None => RegistrationSubmissionDraft(
+        draftId,
+        identifier,
+        localDateTimeService.now,
+        Json.obj(),
+        None,
+        Some(true),
+        None)
+    }
+  }
+
   def setSectionSet(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[RegistrationSubmission.DataSet] match {
         case JsSuccess(dataSet, _) =>
-          submissionRepository.getDraft(draftId, request.identifier).flatMap(
-            result => {
-              val draft: RegistrationSubmissionDraft = result match {
-                case Some(draft) => draft
-                case None => RegistrationSubmissionDraft(draftId, request.identifier, localDateTimeService.now, Json.obj(), None, Some(true))
-              }
-
-              applyDataSet(draft, dataSetOperations(sectionKey, dataSet))
-            }
-          )
+          getOrCreateDraft(draftId, request.identifier).flatMap {
+            applyDataSet(_, dataSetOperations(sectionKey, dataSet))
+          }
         case _ => Future.successful(BadRequest)
       }
     }
@@ -194,18 +197,14 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
 
         implicit val draftWrites: Writes[RegistrationSubmissionDraft] = new Writes[RegistrationSubmissionDraft] {
           override def writes(draft: RegistrationSubmissionDraft): JsValue =
-            if (draft.reference.isDefined) {
-              Json.obj(
-                "createdAt" -> draft.createdAt,
-                "draftId" -> draft.draftId,
-                "reference" -> draft.reference)
-            } else {
-              Json.obj(
-                "createdAt" -> draft.createdAt,
-                "draftId" -> draft.draftId)
-            }
-        }
 
+            Json.obj(
+              "createdAt" -> draft.createdAt,
+              "draftId" -> draft.draftId,
+              "reference" -> draft.reference,
+              "nonTaxable" -> draft.nonTaxable
+            ).withoutNulls
+        }
         Ok(Json.toJson(drafts))
     }
   }
@@ -214,19 +213,13 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
     submissionRepository.removeDraft(draftId, request.identifier).map { _ => Ok }
   }
 
-  private def buildResponseJson(draft: RegistrationSubmissionDraft, data: JsValue) = {
-    if (draft.reference.isDefined) {
-      Json.obj(
-        "createdAt" -> draft.createdAt,
-        "data" -> data,
-        "reference" -> draft.reference
-      )
-    } else {
-      Json.obj(
-        "createdAt" -> draft.createdAt,
-        "data" -> data
-      )
-    }
+  private def buildResponseJson(draft: RegistrationSubmissionDraft, data: JsValue): JsValue = {
+    Json.obj(
+      "createdAt" -> draft.createdAt,
+      "data" -> data,
+      "reference" -> draft.reference,
+      "nonTaxable" -> draft.nonTaxable
+    ).withoutNulls
   }
 
   def getWhenTrustSetup(draftId: String) : Action[AnyContent] = identify.async {
