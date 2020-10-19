@@ -104,7 +104,8 @@ class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig)
       case (false, false) => TrustAuditing.VARIATION_SUBMITTED_BY_ORGANISATION
       case (false, true) => TrustAuditing.CLOSURE_SUBMITTED_BY_ORGANISATION
       case (true, false) => TrustAuditing.VARIATION_SUBMITTED_BY_AGENT
-      case (true, true) => TrustAuditing.CLOSURE_SUBMITTED_BY_AGENT
+      case _ => TrustAuditing.CLOSURE_SUBMITTED_BY_AGENT
+
     }
 
     audit(
