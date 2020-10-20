@@ -257,7 +257,7 @@ case class DisplayTrustIndividualDetailsType(lineNo: Option[String],
                                              bpMatchStatus: Option[String],
                                              name: NameType,
                                              dateOfBirth: Option[LocalDate],
-                                             vulnerableBeneficiary: Boolean,
+                                             vulnerableBeneficiary: Option[Boolean], // Optional in 5MLD for non-tax trusts
                                              beneficiaryType: Option[String],
                                              beneficiaryDiscretion: Option[Boolean],
                                              beneficiaryShareOfIncome: Option[String],

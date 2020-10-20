@@ -240,7 +240,7 @@ case class IndividualDetailsType(
                                   bpMatchStatus: Option[String],
                                   name: NameType,
                                   dateOfBirth: Option[LocalDate],
-                                  vulnerableBeneficiary: Boolean,       // actually optional in 5MLD schema
+                                  vulnerableBeneficiary: Option[Boolean], // Optional in 5MLD for non-tax trust
                                   beneficiaryType: Option[String],
                                   beneficiaryDiscretion: Option[Boolean],
                                   beneficiaryShareOfIncome: Option[String],

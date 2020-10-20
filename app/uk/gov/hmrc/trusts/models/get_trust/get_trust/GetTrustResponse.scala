@@ -33,14 +33,20 @@ trait GetTrustSuccessResponse extends GetTrustResponse {
 object GetTrustSuccessResponse {
 
   implicit val writes: Writes[GetTrustSuccessResponse] = Writes{
-    case TrustProcessedResponse(trust, header) => Json.obj("responseHeader" -> header, "getTrust" -> Json.toJson(trust.as[GetTrust]))
-    case TrustFoundResponse(header) => Json.obj("responseHeader" -> header)
+    case TrustProcessedResponse(trust, header) =>
+      Json.obj(
+        "responseHeader" -> header,
+        "getTrust" -> Json.toJson(trust.as[GetTrust])
+      )
+    case TrustFoundResponse(header) =>
+      Json.obj("responseHeader" -> header)
   }
 
   implicit val reads: Reads[GetTrustSuccessResponse] = (json: JsValue) => {
     val header = (json \ "responseHeader").validate[ResponseHeader]
     (json \ "trustOrEstateDisplay").toOption match {
-      case None => header.map(TrustFoundResponse)
+      case None =>
+        header.map(TrustFoundResponse)
       case Some(x) =>
         x.validate[GetTrust] match {
           case JsSuccess(_, _) =>
