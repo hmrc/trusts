@@ -125,7 +125,6 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
 
     logger.info(s"[DesConnector] getting playback for trust for correlationId: $correlationId")
 
-
     trustsStoreService.is5mldEnabled.flatMap { is5MLD =>
       if (is5MLD) {
         http.GET[GetTrustResponse](get5MLDTrustOrEstateEndpoint(utr))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)

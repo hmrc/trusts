@@ -85,7 +85,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
         bpMatchStatus = None,
         NameType("Amended New First 3", None, "Amended New Last 3"),
         dateOfBirth = None,
-        vulnerableBeneficiary = true,
+        vulnerableBeneficiary = Some(true),
         None,
         None,
         None,

@@ -25,6 +25,7 @@ import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateIdentif
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustProcessedResponse, _}
 import uk.gov.hmrc.trusts.models.get_trust.{BadRequestResponse, _}
+import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService, TrustsStoreService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -192,57 +193,56 @@ class GetTrustController @Inject()(identify: IdentifierAction,
 
   private def doGet(identifier: String,
                     applyTransformations: Boolean,
-                    refreshEtmpData: Boolean = false)
+                    refreshEtmpData: Boolean = false
+                   )
                    (handleResult: GetTrustSuccessResponse => Result): Action[AnyContent] =
     (validateIdentifier(identifier) andThen identify).async {
       implicit request =>
 
-        resetCacheIfRequested(identifier, request.identifier, refreshEtmpData).flatMap { _ =>
-
-          val data = if (applyTransformations) {
+        (for {
+          _ <- resetCacheIfRequested(identifier, request.identifier, refreshEtmpData)
+          data <- if (applyTransformations) {
             transformationService.getTransformedData(identifier, request.identifier)
           } else {
             desService.getTrustInfo(identifier, request.identifier)
           }
+        } yield data match {
+          case response: GetTrustSuccessResponse =>
+            auditService.audit(
+              event = TrustAuditing.GET_TRUST,
+              request = Json.obj("utr" -> identifier),
+              internalId = request.identifier,
+              response = Json.toJson(response)
+            )
 
-          data.flatMap {
-            case response: GetTrustSuccessResponse =>
-              auditService.audit(
-                event = TrustAuditing.GET_TRUST,
-                request = Json.obj("utr" -> identifier),
-                internalId = request.identifier,
-                response = Json.toJson(response)
-              )
+            handleResult(response)
+          case NotEnoughDataResponse(json, errors) =>
+            val reason = Json.obj(
+              "response" -> json,
+              "reason" -> "Missing mandatory fields in response received from DES",
+              "errors" -> errors
+            )
 
-              Future.successful(handleResult(response))
-            case NotEnoughDataResponse(json, errors) =>
-              val reason = Json.obj(
-                "response" -> json,
-                "reason" -> "Missing mandatory fields in response received from DES",
-                "errors" -> errors
-              )
+            auditService.audit(
+              event = TrustAuditing.GET_TRUST,
+              request = Json.obj("utr" -> identifier),
+              internalId = request.identifier,
+              response = reason
+            )
 
-              auditService.audit(
-                event = TrustAuditing.GET_TRUST,
-                request = Json.obj("utr" -> identifier),
-                internalId = request.identifier,
-                response = reason
-              )
-
-              Future.successful(NoContent)
-            case err =>
-              auditService.auditErrorResponse(
-                TrustAuditing.GET_TRUST,
-                Json.obj("utr" -> identifier),
-                request.identifier,
-                errorAuditMessages.getOrElse(err, "UNKNOWN")
-              )
-              Future.successful(errorResponses.getOrElse(err, InternalServerError))
-          }.recover {
-            case ex =>
-              logger.error("Failed to get trust info", ex)
-              InternalServerError
-          }
+            NoContent
+          case err =>
+            auditService.auditErrorResponse(
+              TrustAuditing.GET_TRUST,
+              Json.obj("utr" -> identifier),
+              request.identifier,
+              errorAuditMessages.getOrElse(err, "UNKNOWN")
+            )
+            errorResponses.getOrElse(err, InternalServerError)
+        }) recover {
+          case e =>
+            logger.error(s"Failed to get trust info ${e.getMessage}")
+            InternalServerError
         }
     }
 }

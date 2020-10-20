@@ -207,8 +207,10 @@ class DesServiceSpec extends BaseSpec {
         when(mockRepository.resetCache(any[String], any[String])).thenReturn(Future.successful(None))
         when(mockConnector.getTrustInfo(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))))
+        when(mockRepository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
         val futureResult = SUT.getTrustInfo(utr, myId)
+
         whenReady(futureResult) { result =>
           result mustBe get_trust.TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))
           verify(mockRepository, times(1)).set(utr, myId, fullEtmpResponseJson)

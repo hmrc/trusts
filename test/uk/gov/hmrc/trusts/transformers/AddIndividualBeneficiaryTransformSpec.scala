@@ -29,7 +29,7 @@ class AddIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
     None,
     NameType("First", None, "Last"),
     Some(LocalDate.parse("2000-01-01")),
-    vulnerableBeneficiary = false,
+    vulnerableBeneficiary = Some(false),
     None,
     None,
     None,

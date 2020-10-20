@@ -23,6 +23,7 @@ import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
+import uk.gov.hmrc.trusts.models.get_trust.TrustErrorResponse
 import uk.gov.hmrc.trusts.models.get_trust.get_trust.{GetTrustResponse, GetTrustSuccessResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.models.registration.RegistrationResponse
 import uk.gov.hmrc.trusts.models.tax_enrolments.SubscriptionIdResponse
@@ -62,32 +63,30 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Cache
   }
 
   def refreshCacheAndGetTrustInfo(utr: String, internalId: String): Future[GetTrustResponse] = {
-    logger.debug("Retrieving Trust Info from DES")
-    logger.info(s"[DesService][refreshCacheAndGetTrustInfo] refreshing cache")
-
     repository.resetCache(utr, internalId).flatMap { _ =>
-      desConnector.getTrustInfo(utr).map {
+      desConnector.getTrustInfo(utr).flatMap {
         case response: TrustProcessedResponse =>
           repository.set(utr, internalId, Json.toJson(response)(TrustProcessedResponse.mongoWrites))
-          response
-        case x => x
+            .map(_ => response)
+        case x => Future.successful(x)
       }
     }
   }
 
   def getTrustInfo(identifier: String, internalId: String): Future[GetTrustResponse] = {
-    logger.debug("Getting trust Info")
     repository.get(identifier, internalId).flatMap {
-      case Some(x) => x.validate[GetTrustSuccessResponse].fold(
-        errs => {
-          logger.error(s"[DesService] unable to parse json from cache as GetTrustSuccessResponse $errs")
-          Future.failed[GetTrustResponse](new Exception(errs.toString))
-        },
-        response => {
-          Future.successful(response)
-        }
+      case Some(x) =>
+        x.validate[GetTrustSuccessResponse].fold(
+          errs => {
+            logger.error(s"[DesService] unable to parse json from cache as GetTrustSuccessResponse $errs")
+            Future.failed[GetTrustResponse](new Exception(errs.toString))
+          },
+          response => {
+            Future.successful(response)
+          }
       )
-      case None => refreshCacheAndGetTrustInfo(identifier, internalId)
+      case None =>
+        refreshCacheAndGetTrustInfo(identifier, internalId)
     }
   }
 
