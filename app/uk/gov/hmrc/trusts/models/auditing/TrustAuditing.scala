@@ -26,4 +26,9 @@ object TrustAuditing {
   val TRUST_VARIATION_ATTEMPT = "TrustVariationAttempt"
   val TRUST_TRANSFORMATIONS = "TrustTransformations"
 
+  val VARIATION_SUBMITTED_BY_ORGANISATION = "VariationSubmittedByOrganisation"
+  val VARIATION_SUBMITTED_BY_AGENT = "VariationSubmittedByAgent"
+  val CLOSURE_SUBMITTED_BY_ORGANISATION = "ClosureSubmittedByOrganisation"
+  val CLOSURE_SUBMITTED_BY_AGENT = "ClosureSubmittedByAgent"
+
 }

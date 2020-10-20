@@ -17,13 +17,14 @@
 package uk.gov.hmrc.trusts.services
 
 import javax.inject.Inject
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsPath, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.trusts.config.AppConfig
-import uk.gov.hmrc.trusts.models.auditing.{GetTrustOrEstateAuditEvent, TrustRegistrationSubmissionAuditEvent}
 import uk.gov.hmrc.trusts.models.Registration
+import uk.gov.hmrc.trusts.models.auditing.{GetTrustOrEstateAuditEvent, TrustAuditing, TrustRegistrationSubmissionAuditEvent}
 import uk.gov.hmrc.trusts.models.registration.RegistrationResponse
+import uk.gov.hmrc.trusts.models.variation.VariationResponse
 
 class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig){
 
@@ -88,4 +89,31 @@ class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig)
       ()
     }
   }
+
+  def auditVariationSubmitted(internalId: String,
+                              payload: JsValue,
+                              response: VariationResponse
+                             )(implicit hc: HeaderCarrier): Unit = {
+    val hasField = (field: String) =>
+      payload.transform((JsPath \ field).json.pick).isSuccess
+
+    val isAgent = hasField("agentDetails")
+    val isClose = hasField("trustEndDate")
+
+    val event = (isAgent, isClose) match {
+      case (false, false) => TrustAuditing.VARIATION_SUBMITTED_BY_ORGANISATION
+      case (false, true) => TrustAuditing.CLOSURE_SUBMITTED_BY_ORGANISATION
+      case (true, false) => TrustAuditing.VARIATION_SUBMITTED_BY_AGENT
+      case _ => TrustAuditing.CLOSURE_SUBMITTED_BY_AGENT
+
+    }
+
+    audit(
+      event = event,
+      request = payload,
+      internalId = internalId,
+      response = Json.toJson(response)
+    )
+  }
+
 }

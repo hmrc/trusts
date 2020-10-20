@@ -100,11 +100,10 @@ class VariationService @Inject()(desService: DesService,
 
       logger.info(s"[VariationService][doSubmit] variation submitted")
 
-      auditService.audit(
-        TrustAuditing.TRUST_VARIATION,
-        payload,
+      auditService.auditVariationSubmitted(
         internalId,
-        Json.toJson(response)
+        payload,
+        response
       )
 
       response
