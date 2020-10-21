@@ -819,16 +819,11 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       verify(submissionRepository).getDraft(draftId, internalId)
 
       val expectedDraftJson = Json.parse(
-        """
+        s"""
           |{
-          | "draftId": "draftId",
-          | "internalId": "id",
-          | "createdAt": {
-          |  "$date": 1328261400000
-          | },
-          | "draftData": {},
-          | "reference": "ref",
-          | "inProgress": true
+          | "createdAt": "2012-02-03T09:30:00",
+          | "draftId": "$draftId",
+          | "reference": "$reference"
           |}
           |""".stripMargin)
 

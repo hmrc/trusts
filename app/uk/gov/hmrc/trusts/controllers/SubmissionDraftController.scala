@@ -188,24 +188,20 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
       }
   }
 
+  implicit val draftWrites: Writes[RegistrationSubmissionDraft] = (draft: RegistrationSubmissionDraft) => if (draft.reference.isDefined) {
+    Json.obj(
+      "createdAt" -> draft.createdAt,
+      "draftId" -> draft.draftId,
+      "reference" -> draft.reference)
+  } else {
+    Json.obj(
+      "createdAt" -> draft.createdAt,
+      "draftId" -> draft.draftId)
+  }
+
   def getDrafts: Action[AnyContent] = identify.async { request =>
     submissionRepository.getAllDrafts(request.identifier).map {
       drafts =>
-
-        implicit val draftWrites: Writes[RegistrationSubmissionDraft] = new Writes[RegistrationSubmissionDraft] {
-          override def writes(draft: RegistrationSubmissionDraft): JsValue =
-            if (draft.reference.isDefined) {
-              Json.obj(
-                "createdAt" -> draft.createdAt,
-                "draftId" -> draft.draftId,
-                "reference" -> draft.reference)
-            } else {
-              Json.obj(
-                "createdAt" -> draft.createdAt,
-                "draftId" -> draft.draftId)
-            }
-        }
-
         Ok(Json.toJson(drafts))
     }
   }
