@@ -210,6 +210,13 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
     }
   }
 
+  def getDraft(draftId: String): Action[AnyContent] = identify.async { request =>
+    submissionRepository.getDraft(draftId, request.identifier).map {
+      case Some(draft) => Ok(Json.toJson(draft))
+      case _ => NotFound
+    }
+  }
+
   def removeDraft(draftId: String): Action[AnyContent] = identify.async { request =>
     submissionRepository.removeDraft(draftId, request.identifier).map { _ => Ok }
   }

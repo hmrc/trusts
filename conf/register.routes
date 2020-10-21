@@ -10,6 +10,7 @@ GET         /submission-drafts/:draftId/main                uk.gov.hmrc.trusts.c
 POST        /submission-drafts/:draftId/main                uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSection(draftId: String, sectionKey: String = "main")
 
 GET         /submission-drafts                              uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getDrafts()
+GET         /submission-drafts/:draftId                     uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getDraft(draftId: String)
 DELETE      /submission-drafts/:draftId                     uk.gov.hmrc.trusts.controllers.SubmissionDraftController.removeDraft(draftId: String)
 
 # Used by register-trust-beneficiary-frontend

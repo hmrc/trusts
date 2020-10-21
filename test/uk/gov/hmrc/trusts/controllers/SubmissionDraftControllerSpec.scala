@@ -779,6 +779,75 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
     }
   }
 
+  ".getDraft" should {
+
+    val draftId: String = "draftId"
+    val internalId: String = "id"
+
+    val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+    val submissionRepository = mock[RegistrationSubmissionRepository]
+
+    val controller = new SubmissionDraftController(
+      submissionRepository,
+      identifierAction,
+      LocalDateTimeServiceStub,
+      Helpers.stubControllerComponents()
+    )
+
+    "get a draft if it exists" in {
+
+      val reference: String = "ref"
+      val createdAt: LocalDateTime = LocalDateTime.of(2012, 2, 3, 9, 30)
+
+      val draft = RegistrationSubmissionDraft(
+        draftId = draftId,
+        internalId = internalId,
+        createdAt = createdAt,
+        draftData = Json.obj(),
+        reference = Some(reference),
+        inProgress = Some(true)
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(draft)))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getDraft(draftId).apply(request)
+      status(result) mustBe OK
+
+      verify(submissionRepository).getDraft(draftId, internalId)
+
+      val expectedDraftJson = Json.parse(
+        """
+          |{
+          | "draftId": "draftId",
+          | "internalId": "id",
+          | "createdAt": {
+          |  "$date": 1328261400000
+          | },
+          | "draftData": {},
+          | "reference": "ref",
+          | "inProgress": true
+          |}
+          |""".stripMargin)
+
+      contentType(result) mustBe Some(JSON)
+      contentAsJson(result) mustBe expectedDraftJson
+    }
+
+    "return NotFound if draft not found" in {
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getDraft(draftId).apply(request)
+      status(result) mustBe NOT_FOUND
+    }
+  }
+
   ".removeDraft" should {
 
     "remove draft" in {
