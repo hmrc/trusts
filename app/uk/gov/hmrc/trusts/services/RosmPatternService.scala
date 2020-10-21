@@ -22,6 +22,7 @@ import play.api.Logging
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.trusts.models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSuccess, TaxEnrolmentSuscriberResponse}
+import uk.gov.hmrc.trusts.utils.Session
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -46,19 +47,24 @@ class RosmPatternServiceImpl @Inject()( desService :DesService, taxEnrolmentServ
       case AffinityGroup.Organisation =>
         setSubscriptionId(trn) map {
           case TaxEnrolmentSuccess =>
-            logger.info(s"Rosm completed successfully for provided trn : $trn.")
+            logger.info(s"[RosmPatternService][enrolAndLogResult][Session ID: ${Session.id(hc)}]" +
+              s" Rosm completed successfully for provided trn : $trn.")
             TaxEnrolmentSuccess
           case TaxEnrolmentFailure =>
-            logger.error(s"Rosm pattern is not completed for trn:  $trn.")
+            logger.error(s"[RosmPatternService][enrolAndLogResult][Session ID: ${Session.id(hc)}]" +
+              s"Rosm pattern is not completed for trn:  $trn.")
             TaxEnrolmentFailure
         } recover {
           case NonFatal(exception) =>
-            logger.error(s"Rosm pattern is not completed for trn:  $trn.")
-            logger.error(s"Rosm Exception received : $exception.")
+            logger.error(s"[RosmPatternService][enrolAndLogResult][Session ID: ${Session.id(hc)}]" +
+              s"Rosm pattern is not completed for trn:  $trn.")
+            logger.error(s"[RosmPatternService][enrolAndLogResult][Session ID: ${Session.id(hc)}]" +
+              s"Rosm Exception received : $exception.")
             TaxEnrolmentFailure
           }
       case _ =>
-        logger.info("Tax enrolments is not required for Agent.")
+        logger.info(s"[RosmPatternService][enrolAndLogResult][Session ID: ${Session.id(hc)}]" +
+          "Tax enrolments is not required for Agent.")
         Future.successful(TaxEnrolmentNotProcessed)
     }
   }

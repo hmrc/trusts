@@ -52,7 +52,8 @@ class TrusteeTransformationController @Inject()(
       result match {
         case JsSuccess(_,_) => Future.successful(Ok)
         case JsError(errors) =>
-          logger.warn(s"Supplied Lead trustee could not be read as amended lead trustee - $errors")
+          logger.warn(s"[TrusteeTransformationController][amendLeadTrustee][Session ID: ${request.sessionId}]" +
+            s" Supplied Lead trustee could not be read as amended lead trustee - $errors")
           Future.successful(BadRequest)
       }
     }
@@ -65,7 +66,9 @@ class TrusteeTransformationController @Inject()(
           trusteeTransformationService.addRemoveTrusteeTransformer(utr, request.identifier, model) map { _ =>
             Ok
           }
-        case JsError(_) =>
+        case JsError(errors) =>
+          logger.warn(s"[TrusteeTransformationController][removeTrustee][Session ID: ${request.sessionId}]" +
+            s" Supplied RemoveTrustee could not be read as RemoveTrustee - $errors")
           Future.successful(BadRequest)
       }
     }
@@ -87,7 +90,8 @@ class TrusteeTransformationController @Inject()(
             Ok
           }
         case _ =>
-          logger.error("[TrusteeTransformationController][addTrustee] Supplied json could not be read as an individual or organisation trustee")
+          logger.error("[TrusteeTransformationController][addTrustee][Session ID: ${request.sessionId}]" +
+            " Supplied json could not be read as an individual or organisation trustee")
           Future.successful(BadRequest)
       }
     }
@@ -109,7 +113,8 @@ class TrusteeTransformationController @Inject()(
             Ok
           }
         case _ =>
-          logger.error("[TrusteeTransformationController][amendTrustee] Supplied json could not be read as an individual or organisation trustee")
+          logger.error("[TrusteeTransformationController][amendTrustee][Session ID: ${request.sessionId}]" +
+            " Supplied json could not be read as an individual or organisation trustee")
           Future.successful(BadRequest)
       }
     }
@@ -139,7 +144,8 @@ class TrusteeTransformationController @Inject()(
             localDateService.now
           ).map(_ => Ok)
         case _ =>
-          logger.error("[TrusteeTransformationController][promoteTrustee] Supplied json could not be read as an individual or organisation lead trustee")
+          logger.error("[TrusteeTransformationController][promoteTrustee][Session ID: ${request.sessionId}]" +
+            " Supplied json could not be read as an individual or organisation lead trustee")
           Future.successful(BadRequest)
       }
     }

@@ -41,7 +41,7 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) extends Lo
       invalidCorrelationIdErrorResponse
 
     case DuplicateSubmissionException =>
-      logger.error(s"[ErrorHandler] DuplicateSubmissionException returned")
+      logger.error(s"[ErrorHandler][Session ID: ${request.sessionId}] DuplicateSubmissionException returned")
       auditService.auditErrorResponse(
         auditType,
         request.body,
@@ -51,7 +51,7 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) extends Lo
       duplicateSubmissionErrorResponse
 
     case ServiceNotAvailableException(_) =>
-      logger.error(s"[ErrorHandler] ServiceNotAvailableException returned")
+      logger.error(s"[ErrorHandler][Session ID: ${request.sessionId}] ServiceNotAvailableException returned")
       auditService.auditErrorResponse(
         auditType,
         request.body,
@@ -61,7 +61,7 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) extends Lo
       serviceUnavailableErrorResponse
 
     case EtmpCacheDataStaleException =>
-      logger.error(s"[ErrorHandler] EtmpCacheDataStaleException returned")
+      logger.error(s"[ErrorHandler][Session ID: ${request.sessionId}] EtmpCacheDataStaleException returned")
       auditService.auditErrorResponse(
         auditType,
         request.body,
@@ -71,7 +71,7 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) extends Lo
       etmpDataStaleErrorResponse
 
     case e =>
-      logger.error(s"[ErrorHandler] Exception returned ${e.getMessage}")
+      logger.error(s"[ErrorHandler][Session ID: ${request.sessionId}] Exception returned ${e.getMessage}")
 
       auditService.auditErrorResponse(
         auditType,

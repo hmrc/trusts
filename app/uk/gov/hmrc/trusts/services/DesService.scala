@@ -40,7 +40,7 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Cache
       case response: GetTrustSuccessResponse => response.responseHeader.formBundleNo
       case response =>
         val msg = s"Failed to retrieve latest form bundle no from ETMP : $response"
-        logger.warn(msg)
+        logger.warn(s"[DesService][getTrustInfoFormBundleNo][UTR: $utr] $msg")
         throw InternalServerErrorException(s"Submission could not proceed, $msg")
     }
 

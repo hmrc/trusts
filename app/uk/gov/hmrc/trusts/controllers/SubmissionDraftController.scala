@@ -21,7 +21,7 @@ import java.time.LocalDate
 import javax.inject.Inject
 import play.api.Logging
 import play.api.libs.json._
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import play.api.mvc.{Action, AnyContent, ControllerComponents, Request}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.registration.RegistrationSubmission.{AnswerSection, MappedPiece}
@@ -155,7 +155,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
     ) ++ setRegistrationSections(incomingDraftData.registrationPieces)
   }
 
-  private def applyDataSet(draft: RegistrationSubmissionDraft, operations: List[Reads[JsObject]]) = {
+  private def applyDataSet(draft: RegistrationSubmissionDraft, operations: List[Reads[JsObject]])(implicit request: IdentifierRequest[JsValue]) = {
     operations.foldLeft[JsResult[JsValue]](JsSuccess(draft.draftData))((cur, xform) =>
       cur.flatMap(_.transform(xform))) match {
       case JsSuccess(newDraftData, _) =>
@@ -170,7 +170,8 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           }
         )
       case e: JsError =>
-        logger.error(s"applyDataSet: Can't apply operations to draft data: $e.errors.")
+        logger.error(s"[SubmissionDraftController][applyDataSet][Session ID: ${request.sessionId}]" +
+          s" Can't apply operations to draft data: $e.errors.")
         Future.successful(InternalServerError(e.errors.toString()))
     }
   }
@@ -248,17 +249,21 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
 
           (dateAtOldPath, dateAtNewPath) match {
             case (JsSuccess(date, _), JsError(_)) =>
-              logger.info(s"[SubmissionDraftController] found trust start date at old path")
+              logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+                s" found trust start date at old path")
               Ok(Json.obj("startDate" -> date))
             case (JsError(_), JsSuccess(date, _)) =>
-              logger.info(s"[SubmissionDraftController] found trust start date at new path")
+              logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+                s" found trust start date at new path")
               Ok(Json.obj("startDate" -> date))
             case _ =>
-              logger.info(s"[SubmissionDraftController] no trust start date")
+              logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+                s" no trust start date")
               NotFound
           }
         case None =>
-          logger.info(s"[SubmissionDraftController] no draft, cannot return start date")
+          logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+            s" no draft, cannot return start date")
           NotFound
       }
   }
@@ -278,17 +283,21 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
 
           (matchingName, detailsName) match {
             case (JsSuccess(date, _), JsError(_)) =>
-              logger.info(s"[SubmissionDraftController] found trust name in matching")
+              logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+                s" found trust name in matching")
               Ok(Json.obj("trustName" -> date))
             case (JsError(_), JsSuccess(date, _)) =>
-              logger.info(s"[SubmissionDraftController] found trust name in trust details")
+              logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+                s" found trust name in trust details")
               Ok(Json.obj("trustName" -> date))
             case _ =>
-              logger.info(s"[SubmissionDraftController] no trust name found")
+              logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+                s" no trust name found")
               NotFound
           }
         case None =>
-          logger.info(s"[SubmissionDraftController] no draft, cannot return trust name")
+          logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+            s" no draft, cannot return trust name")
           NotFound
       }
   }
@@ -300,14 +309,17 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           val path = JsPath \ "registration" \ "trust/entities/leadTrustees"
           draft.draftData.transform(path.json.pick).map(_.as[LeadTrusteeType]) match {
             case JsSuccess(leadTrusteeType, _) =>
-              logger.info(s"[SubmissionDraftController] found lead trustee")
+              logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+                s" found lead trustee")
               Ok(Json.toJson(leadTrusteeType)(LeadTrusteeType.writes))
             case _ : JsError =>
-              logger.info(s"[SubmissionDraftController] no lead trustee")
+              logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+                s" no lead trustee")
               NotFound
           }
         case None =>
-          logger.info(s"[SubmissionDraftController] no draft, cannot return lead trustee")
+          logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+            s" no draft, cannot return lead trustee")
           NotFound
       }
   }
@@ -329,14 +341,17 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           } match {
             case JsSuccess(data, _) =>
               val draftWithStatusRemoved = draft.copy(draftData = data)
-              logger.info(s"[SubmissionDraftController][reset] removed status, mapped data, answers and status for $section")
+              logger.info(s"[SubmissionDraftController][reset][Session ID: ${request.sessionId}]" +
+                s" removed status, mapped data, answers and status for $section")
               submissionRepository.setDraft(draftWithStatusRemoved).map(x => if (x) Ok else InternalServerError)
             case _ : JsError =>
-              logger.info(s"[SubmissionDraftController][reset] failed to reset for $section")
+              logger.info(s"[SubmissionDraftController][reset][Session ID: ${request.sessionId}]" +
+                s" failed to reset for $section")
               Future.successful(InternalServerError)
           }
         case None =>
-          logger.info(s"[SubmissionDraftController][reset] no draft, cannot reset status for $section")
+          logger.info(s"[SubmissionDraftController][reset][Session ID: ${request.sessionId}]" +
+            s" no draft, cannot reset status for $section")
           Future.successful(InternalServerError)
       }
   }
@@ -348,14 +363,17 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           val path = JsPath \ "registration" \ "correspondence/address"
           draft.draftData.transform(path.json.pick).map(_.as[AddressType]) match {
             case JsSuccess(leadTrusteeType, _) =>
-              logger.info(s"[SubmissionDraftController] found correspondence address")
+              logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+                s" found correspondence address")
               Ok(Json.toJson(leadTrusteeType))
             case _ : JsError =>
-              logger.info(s"[SubmissionDraftController] no correspondence address")
+              logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+                s" no correspondence address")
               NotFound
           }
         case None =>
-          logger.info(s"[SubmissionDraftController] no draft, cannot return correspondence address")
+          logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+            s" no draft, cannot return correspondence address")
           NotFound
       }
   }

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.trusts.models.requests
+package uk.gov.hmrc.trusts.utils
 
-import play.api.mvc.{Request, WrappedRequest}
-import uk.gov.hmrc.auth.core.AffinityGroup
+import uk.gov.hmrc.http.HeaderCarrier
 
-case class IdentifierRequest[A](request: Request[A], identifier: String, sessionId: String, affinityGroup: AffinityGroup)
-  extends WrappedRequest[A](request)
+object Session {
+  def id(hc: HeaderCarrier): String = hc.sessionId.map(_.value).getOrElse("No Session ID available")
+}

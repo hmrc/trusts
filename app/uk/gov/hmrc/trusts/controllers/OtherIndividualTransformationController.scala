@@ -59,7 +59,7 @@ class OtherIndividualTransformationController @Inject()(
               Ok
             }
           case JsError(errors) =>
-            logger.warn(s"[OtherIndividualTransformationController][amendOtherIndividual] " +
+            logger.warn(s"[OtherIndividualTransformationController][amendOtherIndividual][Session ID: ${request.sessionId}] " +
               s"Supplied json could not be read as an Other Individual - $errors")
             Future.successful(BadRequest)
         }
@@ -79,7 +79,7 @@ class OtherIndividualTransformationController @Inject()(
               Ok
             }
           case JsError(errors) =>
-            logger.warn(s"[OtherIndividualTransformationController][addOtherIndividualTransformer] " +
+            logger.warn(s"[OtherIndividualTransformationController][addOtherIndividualTransformer][Session ID: ${request.sessionId}] " +
               s"Supplied json could not be read as an Other Individual - $errors")
             Future.successful(BadRequest)
         }
