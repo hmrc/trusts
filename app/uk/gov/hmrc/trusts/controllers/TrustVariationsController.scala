@@ -49,7 +49,7 @@ class TrustVariationsController @Inject()(
             Json.toJson(Json.obj())
           )
 
-          logger.error(s"[TrustsVariationController][declare][Session ID: ${request.sessionId}]" +
+          logger.error(s"[declare][Session ID: ${request.sessionId}]" +
             s" unable to parse json as DeclarationForApi, $errors")
           Future.successful(BadRequest)
         },

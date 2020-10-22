@@ -76,7 +76,7 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
-    logger.info(s"[DesConnector][Session ID: ${Session.id(hc)}] matching trust for correlationId: $correlationId")
+    logger.info(s"[Session ID: ${Session.id(hc)}] matching trust for correlationId: $correlationId")
 
     val response = http.POST[JsValue, ExistingCheckResponse](matchTrustsEndpoint, Json.toJson(existingTrustCheckRequest))
     (implicitly[Writes[JsValue]], ExistingCheckResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
@@ -94,7 +94,7 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
 
       implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
-      logger.info(s"[DesConnector][Session ID: ${Session.id(hc)}] registering trust for correlationId: $correlationId")
+      logger.info(s"[Session ID: ${Session.id(hc)}] registering trust for correlationId: $correlationId")
 
       val response = http.POST[JsValue, RegistrationResponse](trustRegistrationEndpoint, Json.toJson(registration))
       (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc), implicitly[ExecutionContext])
@@ -124,7 +124,7 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
 
     implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
-    logger.info(s"[DesConnector][Session ID: ${Session.id(hc)}]" +
+    logger.info(s"[Session ID: ${Session.id(hc)}]" +
       s" getting playback for trust for correlationId: $correlationId")
 
     trustsStoreService.is5mldEnabled.flatMap { is5MLD =>
@@ -141,7 +141,7 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
-    logger.info(s"[DesConnector][Session ID: ${Session.id(hc)}]" +
+    logger.info(s"[Session ID: ${Session.id(hc)}]" +
       s" submitting trust variation for correlationId: $correlationId")
     if (config.desEnvironment == "ist0") {
       Future.successful(VariationResponse("XXTVN1234567890"))

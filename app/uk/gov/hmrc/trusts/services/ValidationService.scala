@@ -63,11 +63,11 @@ class Validator(schema: JsonSchema) extends Logging {
               validateBusinessRules(request)
           )
         } else {
-          logger.error(s"[Validator][validate] unable to validate to schema")
+          logger.error(s"[validate] unable to validate to schema")
           Left(getValidationErrors(result))
         }
       case Failure(e) =>
-        logger.error(s"[Validator][validate] IOException $e")
+        logger.error(s"[validate] IOException $e")
         Left(List(TrustsValidationError(s"[Validator][validate] IOException $e", "")))
     }
 
@@ -89,7 +89,7 @@ class Validator(schema: JsonSchema) extends Logging {
 
   protected def getValidationErrors(errors: Seq[(JsPath, Seq[JsonValidationError])]): List[TrustsValidationError] = {
     val validationErrors = errors.flatMap(errors => errors._2.map(error => TrustsValidationError(error.message, errors._1.toString()))).toList
-    logger.debug(s"[Validator][getValidationErrors]  validationErrors in validate :  $validationErrors")
+    logger.debug(s"[getValidationErrors]  validationErrors in validate :  $validationErrors")
     validationErrors
   }
 

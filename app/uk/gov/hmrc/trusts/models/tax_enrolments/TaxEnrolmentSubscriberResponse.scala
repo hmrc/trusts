@@ -34,15 +34,15 @@ object TaxEnrolmentSuscriberResponse extends Logging {
     new HttpReads[TaxEnrolmentSuscriberResponse] {
       override def read(method: String, url: String, response: HttpResponse): TaxEnrolmentSuscriberResponse = {
 
-        logger.info(s"[TaxEnrolmentSubscriberResponse]  response status received from tax enrolment: ${response.status}")
+        logger.info(s"Response status received from tax enrolment: ${response.status}")
         response.status match {
           case NO_CONTENT =>
             TaxEnrolmentSuccess
           case BAD_REQUEST =>
-            logger.error("[TaxEnrolmentSubscriberResponse] Bad request response received from tax enrolment")
+            logger.error("Bad request response received from tax enrolment")
             throw  BadRequestException
           case status =>
-            logger.error(s"[TaxEnrolmentSubscriberResponse] Error response from tax enrolment:  $status")
+            logger.error(s"Error response from tax enrolment:  $status")
             throw  InternalServerErrorException(s"Error response from tax enrolment:  $status")
         }
       }

@@ -241,7 +241,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
             errorResponses.getOrElse(err, InternalServerError)
         }) recover {
           case e =>
-            logger.error(s"[GetTrustController][Session ID: ${request.sessionId}] Failed to get trust info ${e.getMessage}")
+            logger.error(s"[Session ID: ${request.sessionId}] Failed to get trust info ${e.getMessage}")
             InternalServerError
         }
     }

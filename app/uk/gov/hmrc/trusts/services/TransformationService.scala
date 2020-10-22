@@ -64,7 +64,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
   def applyDeclarationTransformations(identifier: String, internalId: String, json: JsValue)(implicit hc: HeaderCarrier): Future[JsResult[JsValue]] = {
     repository.get(identifier, internalId).map {
       case None =>
-        logger.info(s"[TransformationService][Session ID: ${Session.id(hc)}]" +
+        logger.info(s"[Session ID: ${Session.id(hc)}]" +
           s" no transformations to apply")
         JsSuccess(json)
       case Some(transformations) =>
@@ -81,12 +81,12 @@ class TransformationService @Inject()(repository: TransformationRepository,
 
         for {
           initial <- {
-            logger.info(s"[TransformationService][Session ID: ${Session.id(hc)}]" +
+            logger.info(s"[Session ID: ${Session.id(hc)}]" +
               s" applying transformations")
             transformations.applyTransform(json)
           }
           transformed <- {
-            logger.info(s"[TransformationService][Session ID: ${Session.id(hc)}]" +
+            logger.info(s"[Session ID: ${Session.id(hc)}]" +
               s" applying declaration transformations")
             transformations.applyDeclarationTransform(initial)
           }
@@ -117,7 +117,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }.flatMap(newTransforms =>
       repository.set(identifier, internalId, newTransforms)).recoverWith {
       case e =>
-        logger.error(s"[TransformationService] exception adding new transform: ${e.getMessage}")
+        logger.error(s"Exception adding new transform: ${e.getMessage}")
         Future.failed(e)
     }
   }

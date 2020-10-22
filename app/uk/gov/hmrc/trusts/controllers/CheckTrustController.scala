@@ -38,7 +38,7 @@ class CheckTrustController @Inject()(desService: DesService,
       trustsCheckRequest =>
         desService.checkExistingTrust(trustsCheckRequest).map {
           result =>
-            logger.info(s"[CheckTrustController][checkExistingTrust][Session ID: ${request.sessionId}] response: $result")
+            logger.info(s"[checkExistingTrust][Session ID: ${request.sessionId}] response: $result")
             result match {
               case Matched => Ok(matchResponse)
               case NotMatched => Ok(noMatchResponse)

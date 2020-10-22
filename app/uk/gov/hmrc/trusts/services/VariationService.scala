@@ -52,21 +52,21 @@ class VariationService @Inject()(desService: DesService,
               val response = get_trust.TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
               declarationTransformer.transform(response, originalJson, declaration, localDateService.now) match {
                 case JsSuccess(value, _) =>
-                  logger.info(s"[VariationService][Session ID: ${Session.id(hc)}][UTR: $utr]" +
+                  logger.info(s"[Session ID: ${Session.id(hc)}][UTR: $utr]" +
                     s" successfully transformed json for declaration")
                   doSubmit(utr, value, internalId)
                 case JsError(errors) =>
-                  logger.error("[VariationService][Session ID: ${Session.id(hc)}][UTR: $utr]" +
+                  logger.error("[Session ID: ${Session.id(hc)}][UTR: $utr]" +
                     " Problem transforming data for ETMP submission " + errors.toString())
                   Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
               }
             case JsError(errors) =>
-              logger.error(s"[VariationService][Session ID: ${Session.id(hc)}][UTR: $utr]" +
+              logger.error(s"[Session ID: ${Session.id(hc)}][UTR: $utr]" +
                 s" Failed to transform trust info $errors")
               Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
           }
         case JsError(errors) =>
-          logger.error(s"[VariationService][Session ID: ${Session.id(hc)}][UTR: $utr]" +
+          logger.error(s"[Session ID: ${Session.id(hc)}][UTR: $utr]" +
             s" Failed to populate lead trustee address $errors")
           Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
       }
@@ -79,15 +79,15 @@ class VariationService @Inject()(desService: DesService,
       fbn <- desService.getTrustInfoFormBundleNo(utr)
     } yield response match {
       case tpr: TrustProcessedResponse if tpr.responseHeader.formBundleNo == fbn =>
-        logger.info(s"[VariationService][submitDeclaration][Session ID: ${Session.id(hc)}][UTR: $utr]" +
+        logger.info(s"[submitDeclaration][Session ID: ${Session.id(hc)}][UTR: $utr]" +
           s" returning TrustProcessedResponse")
         response.asInstanceOf[TrustProcessedResponse]
       case _: TrustProcessedResponse =>
-        logger.info(s"[VariationService][submitDeclaration][Session ID: ${Session.id(hc)}][UTR: $utr]" +
+        logger.info(s"[submitDeclaration][Session ID: ${Session.id(hc)}][UTR: $utr]" +
           s" ETMP cached data in mongo has become stale, rejecting submission")
         throw EtmpCacheDataStaleException
       case _ =>
-        logger.warn(s"[VariationService][submitDeclaration][Session ID: ${Session.id(hc)}][UTR: $utr]" +
+        logger.warn(s"[submitDeclaration][Session ID: ${Session.id(hc)}][UTR: $utr]" +
           s" Trust was not in a processed state")
         throw InternalServerErrorException("Submission could not proceed, Trust data was not in a processed state")
     }
@@ -106,7 +106,7 @@ class VariationService @Inject()(desService: DesService,
 
     desService.trustVariation(payload) map { response =>
 
-      logger.info(s"[VariationService][doSubmit][Session ID: ${Session.id(hc)}][UTR: $utr] variation submitted")
+      logger.info(s"[doSubmit][Session ID: ${Session.id(hc)}][UTR: $utr] variation submitted")
 
       auditService.auditVariationSubmitted(
         internalId,

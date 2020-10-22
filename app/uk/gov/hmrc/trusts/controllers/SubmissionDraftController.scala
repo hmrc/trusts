@@ -170,7 +170,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           }
         )
       case e: JsError =>
-        logger.error(s"[SubmissionDraftController][applyDataSet][Session ID: ${request.sessionId}]" +
+        logger.error(s"[applyDataSet][Session ID: ${request.sessionId}]" +
           s" Can't apply operations to draft data: $e.errors.")
         Future.successful(InternalServerError(e.errors.toString()))
     }
@@ -249,20 +249,20 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
 
           (dateAtOldPath, dateAtNewPath) match {
             case (JsSuccess(date, _), JsError(_)) =>
-              logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+              logger.info(s"[Session ID: ${request.sessionId}]" +
                 s" found trust start date at old path")
               Ok(Json.obj("startDate" -> date))
             case (JsError(_), JsSuccess(date, _)) =>
-              logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+              logger.info(s"[Session ID: ${request.sessionId}]" +
                 s" found trust start date at new path")
               Ok(Json.obj("startDate" -> date))
             case _ =>
-              logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+              logger.info(s"[Session ID: ${request.sessionId}]" +
                 s" no trust start date")
               NotFound
           }
         case None =>
-          logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+          logger.info(s"[Session ID: ${request.sessionId}]" +
             s" no draft, cannot return start date")
           NotFound
       }
@@ -283,20 +283,20 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
 
           (matchingName, detailsName) match {
             case (JsSuccess(date, _), JsError(_)) =>
-              logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+              logger.info(s"[Session ID: ${request.sessionId}]" +
                 s" found trust name in matching")
               Ok(Json.obj("trustName" -> date))
             case (JsError(_), JsSuccess(date, _)) =>
-              logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+              logger.info(s"[Session ID: ${request.sessionId}]" +
                 s" found trust name in trust details")
               Ok(Json.obj("trustName" -> date))
             case _ =>
-              logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+              logger.info(s"[Session ID: ${request.sessionId}]" +
                 s" no trust name found")
               NotFound
           }
         case None =>
-          logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+          logger.info(s"[Session ID: ${request.sessionId}]" +
             s" no draft, cannot return trust name")
           NotFound
       }
@@ -309,16 +309,16 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           val path = JsPath \ "registration" \ "trust/entities/leadTrustees"
           draft.draftData.transform(path.json.pick).map(_.as[LeadTrusteeType]) match {
             case JsSuccess(leadTrusteeType, _) =>
-              logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+              logger.info(s"[Session ID: ${request.sessionId}]" +
                 s" found lead trustee")
               Ok(Json.toJson(leadTrusteeType)(LeadTrusteeType.writes))
             case _ : JsError =>
-              logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+              logger.info(s"[Session ID: ${request.sessionId}]" +
                 s" no lead trustee")
               NotFound
           }
         case None =>
-          logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+          logger.info(s"[Session ID: ${request.sessionId}]" +
             s" no draft, cannot return lead trustee")
           NotFound
       }
@@ -341,16 +341,16 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           } match {
             case JsSuccess(data, _) =>
               val draftWithStatusRemoved = draft.copy(draftData = data)
-              logger.info(s"[SubmissionDraftController][reset][Session ID: ${request.sessionId}]" +
+              logger.info(s"[reset][Session ID: ${request.sessionId}]" +
                 s" removed status, mapped data, answers and status for $section")
               submissionRepository.setDraft(draftWithStatusRemoved).map(x => if (x) Ok else InternalServerError)
             case _ : JsError =>
-              logger.info(s"[SubmissionDraftController][reset][Session ID: ${request.sessionId}]" +
+              logger.info(s"[reset][Session ID: ${request.sessionId}]" +
                 s" failed to reset for $section")
               Future.successful(InternalServerError)
           }
         case None =>
-          logger.info(s"[SubmissionDraftController][reset][Session ID: ${request.sessionId}]" +
+          logger.info(s"[reset][Session ID: ${request.sessionId}]" +
             s" no draft, cannot reset status for $section")
           Future.successful(InternalServerError)
       }
@@ -363,16 +363,16 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           val path = JsPath \ "registration" \ "correspondence/address"
           draft.draftData.transform(path.json.pick).map(_.as[AddressType]) match {
             case JsSuccess(leadTrusteeType, _) =>
-              logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+              logger.info(s"[Session ID: ${request.sessionId}]" +
                 s" found correspondence address")
               Ok(Json.toJson(leadTrusteeType))
             case _ : JsError =>
-              logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+              logger.info(s"[Session ID: ${request.sessionId}]" +
                 s" no correspondence address")
               NotFound
           }
         case None =>
-          logger.info(s"[SubmissionDraftController][Session ID: ${request.sessionId}]" +
+          logger.info(s"[Session ID: ${request.sessionId}]" +
             s" no draft, cannot return correspondence address")
           NotFound
       }

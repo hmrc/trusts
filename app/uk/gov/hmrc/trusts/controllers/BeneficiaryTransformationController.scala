@@ -48,7 +48,7 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[BeneficiaryTransformationController][amendUnidentifiedBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[amendUnidentifiedBeneficiary][Session ID: ${request.sessionId}]" +
             s" Supplied description could not be read as a JsString - $errors")
           Future.successful(BadRequest)
       }
@@ -68,7 +68,7 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[BeneficiaryTransformationController][addUnidentifiedBeneficiary][Session ID: ${request.sessionId}] " +
+          logger.warn(s"[addUnidentifiedBeneficiary][Session ID: ${request.sessionId}] " +
             s"Supplied json could not be read as an Unidentified Beneficiary - $errors")
           Future.successful(BadRequest)
       }
@@ -87,7 +87,7 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[BeneficiaryTransformationController][addIndividualBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[addIndividualBeneficiary][Session ID: ${request.sessionId}]" +
             s" Supplied json could not be read as an Individual Beneficiary - $errors")
           Future.successful(BadRequest)
       }
@@ -119,7 +119,7 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[BeneficiaryTransformationController][amendIndividualBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[amendIndividualBeneficiary][Session ID: ${request.sessionId}]" +
             s" Supplied payload could not be read as a IndividualDetailsType - $errors")
           Future.successful(BadRequest)
       }
@@ -137,7 +137,7 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[BeneficiaryTransformationController][addCharityBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[addCharityBeneficiary][Session ID: ${request.sessionId}]" +
             s" Supplied json could not be read as a Charity Beneficiary - $errors")
           Future.successful(BadRequest)
       }
@@ -157,7 +157,7 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[BeneficiaryTransformationController][amendCharityBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[amendCharityBeneficiary][Session ID: ${request.sessionId}]" +
             s" Supplied payload could not be read as a CharityType - $errors")
           Future.successful(BadRequest)
       }
@@ -175,7 +175,7 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[BeneficiaryTransformationController][addOtherBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[addOtherBeneficiary][Session ID: ${request.sessionId}]" +
             s" Supplied json could not be read as an Other Beneficiary - $errors")
           Future.successful(BadRequest)
       }
@@ -195,7 +195,7 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[BeneficiaryTransformationController][amendOtherBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[amendOtherBeneficiary][Session ID: ${request.sessionId}]" +
             s" Supplied payload could not be read as a OtherType - $errors")
           Future.successful(BadRequest)
       }
@@ -213,7 +213,7 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[BeneficiaryTransformationController][addCompanyBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[addCompanyBeneficiary][Session ID: ${request.sessionId}]" +
             s" Supplied json could not be read as a Company Beneficiary - $errors")
           Future.successful(BadRequest)
       }
@@ -232,7 +232,7 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[BeneficiaryTransformationController][addTrustBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[addTrustBeneficiary][Session ID: ${request.sessionId}]" +
             s" Supplied json could not be read as a Trust Beneficiary - $errors")
           Future.successful(BadRequest)
       }
@@ -251,7 +251,7 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[BeneficiaryTransformationController][amendCompanyBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[amendCompanyBeneficiary][Session ID: ${request.sessionId}]" +
             s" Supplied payload could not be read as a BeneficiaryCompanyType - $errors")
           Future.successful(BadRequest)
       }
@@ -270,7 +270,7 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[BeneficiaryTransformationController][amendTrustBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[amendTrustBeneficiary][Session ID: ${request.sessionId}]" +
             s" Supplied payload could not be read as a BeneficiaryTrustType - $errors")
           Future.successful(BadRequest)
       }
@@ -288,7 +288,7 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[BeneficiaryTransformationController][addLargeBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[addLargeBeneficiary][Session ID: ${request.sessionId}]" +
             s" Supplied json could not be read as a Large Beneficiary - $errors")
           Future.successful(BadRequest)
       }
@@ -308,7 +308,7 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[BeneficiaryTransformationController][amendLargeBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[amendLargeBeneficiary][Session ID: ${request.sessionId}]" +
             s" Supplied payload could not be read as a LargeBeneficiary - $errors")
           Future.successful(BadRequest)
       }

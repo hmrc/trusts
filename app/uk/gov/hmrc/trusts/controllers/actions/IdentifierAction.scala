@@ -52,11 +52,11 @@ class AuthenticatedIdentifierAction @Inject()(override val authConnector: AuthCo
       case Some(internalId) ~ Some(Organisation) =>
         block(IdentifierRequest(request, internalId, Session.id(hc), Organisation))
       case _ =>
-        logger.info(s"[IdentifierAction][Session ID: ${Session.id(hc)}] Insufficient enrolment")
+        logger.info(s"[Session ID: ${Session.id(hc)}] Insufficient enrolment")
         Future.successful(Unauthorized(Json.toJson(insufficientEnrolmentErrorResponse)))
     } recoverWith {
       case e : AuthorisationException =>
-        logger.info(s"[IdentifierAction][Session ID: ${Session.id(hc)}] AuthorisationException: $e")
+        logger.info(s"[Session ID: ${Session.id(hc)}] AuthorisationException: $e")
         Future.successful(Unauthorized)
     }
   }
