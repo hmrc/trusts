@@ -48,7 +48,7 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[SettlorTransformationController][amendIndividualSettlor]" +
+          logger.warn(s"[amendIndividualSettlor][Session ID: ${request.sessionId}]" +
             s" Supplied json could not be read as a Settlor - $errors")
           Future.successful(BadRequest)
       }
@@ -68,7 +68,7 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[SettlorTransformationController][addIndividualSettlor]" +
+          logger.warn(s"[addIndividualSettlor][Session ID: ${request.sessionId}]" +
             s" Supplied json could not be read as a Settlor - $errors")
           Future.successful(BadRequest)
       }
@@ -88,7 +88,7 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[SettlorTransformationController][addBusinessSettlor]" +
+          logger.warn(s"[addBusinessSettlor][Session ID: ${request.sessionId}]" +
             s" Supplied json could not be read as a Settlor - $errors")
           Future.successful(BadRequest)
       }
@@ -110,7 +110,7 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[SettlorTransformationController][amendBusinessSettlor]" +
+          logger.warn(s"[amendBusinessSettlor][Session ID: ${request.sessionId}]" +
             s" Supplied json could not be read as a SettlorCompany - $errors")
           Future.successful(BadRequest)
       }
@@ -125,7 +125,7 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[SettlorTransformationController][removeSettlor]" +
+          logger.warn(s"[removeSettlor][Session ID: ${request.sessionId}]" +
             s" Supplied json could not be read as a RemoveSettlor - $errors")
           Future.successful(BadRequest)
       }
@@ -139,7 +139,10 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
           transformService.amendDeceasedSettlor(utr, request.identifier, settlor) map { _ =>
             Ok
           }
-        case JsError(_) => Future.successful(BadRequest)
+        case JsError(errors) =>
+          logger.warn(s"[amendDeceasedSettlor][Session ID: ${request.sessionId}]" +
+            s" Supplied json could not be read as a AmendDeceasedSettlor - $errors")
+          Future.successful(BadRequest)
       }
   }
 

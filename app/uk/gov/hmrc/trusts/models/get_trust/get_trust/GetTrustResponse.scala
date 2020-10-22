@@ -62,7 +62,7 @@ object GetTrustResponse extends Logging {
 
   implicit lazy val httpReads: HttpReads[GetTrustResponse] = new HttpReads[GetTrustResponse] {
       override def read(method: String, url: String, response: HttpResponse): GetTrustResponse = {
-        logger.info(s"[GetTrustResponse] response status received from des: ${response.status}")
+        logger.info(s"response status received from des: ${response.status}")
         response.status match {
           case OK =>
             parseOkResponse(response)
@@ -82,7 +82,7 @@ object GetTrustResponse extends Logging {
     response.json.validate[GetTrustSuccessResponse] match {
       case JsSuccess(trustFound, _) => trustFound
       case JsError(errors) =>
-        logger.error(s"[GetTrustResponse] Cannot parse as TrustFoundResponse due to $errors")
+        logger.error(s"Cannot parse as TrustFoundResponse due to $errors")
         NotEnoughDataResponse(response.json, JsError.toJson(errors))
     }
   }
