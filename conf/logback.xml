@@ -7,7 +7,15 @@
         </encoder>
     </appender>
 
-    <logger name="application" level="DEBUG"/>
+    <logger name="uk.gov" level="INFO"/>
+
+    <logger name="controllers" level="DEBUG"/>
+    <logger name="services" level="DEBUG"/>
+    <logger name="models" level="DEBUG"/>
+    <logger name="repositories" level="DEBUG"/>
+    <logger name="connector" level="DEBUG"/>
+    <logger name="transformers" level="DEBUG"/>
+    <logger name="utils" level="DEBUG"/>
 
     <root level="WARN">
         <appender-ref ref="STDOUT"/>
