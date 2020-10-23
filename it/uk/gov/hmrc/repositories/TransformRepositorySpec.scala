@@ -18,41 +18,26 @@ package uk.gov.hmrc.repositories
 
 import java.time.LocalDate
 
-import org.scalatest.{FreeSpec, MustMatchers}
-import play.api.test.Helpers.running
+import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import uk.gov.hmrc.trusts.models.NameType
 import uk.gov.hmrc.trusts.models.variation.{AmendedLeadTrusteeIndType, IdentificationType, TrusteeIndividualType}
 import uk.gov.hmrc.trusts.repositories.TransformationRepository
 import uk.gov.hmrc.trusts.transformers.{AddTrusteeIndTransform, AmendLeadTrusteeIndTransform, ComposedDeltaTransform}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
-class TransformRepositorySpec extends FreeSpec with MustMatchers with TransformIntegrationTest {
+class TransformRepositorySpec extends AsyncFreeSpec with MustMatchers with NewTransformIntegrationTest {
 
   "a transform repository" - {
 
-    "must be able to store and retrieve a payload" in {
+    "must be able to store and retrieve a payload" in assertMongoTest(createApplication) { application =>
 
-      val application = applicationBuilder.build()
+      val repository = application.injector.instanceOf[TransformationRepository]
 
-      running(application) {
-        getConnection(application).map { connection =>
+      val storedOk = repository.set("UTRUTRUTR", "InternalId", data)
+      storedOk.futureValue mustBe true
 
-          dropTheDatabase(connection)
+      val retrieved = repository.get("UTRUTRUTR", "InternalId")
 
-          val repository = application.injector.instanceOf[TransformationRepository]
-
-          val storedOk = repository.set("UTRUTRUTR", "InternalId", data)
-          storedOk.futureValue mustBe true
-
-          val retrieved = repository.get("UTRUTRUTR", "InternalId")
-            .map(_.getOrElse(fail("The record was not found in the database")))
-
-          retrieved.futureValue mustBe data
-
-          dropTheDatabase(connection)
-        }.get
-      }
+      retrieved.futureValue mustBe Some(data)
     }
   }
 

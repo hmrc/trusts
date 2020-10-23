@@ -16,17 +16,14 @@
 
 package uk.gov.hmrc.repositories
 
+import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{FreeSpec, MustMatchers}
-import play.api.inject.bind
 import play.api.libs.json._
-import play.api.test.{FakeRequest, Helpers}
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
-import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import uk.gov.hmrc.trusts.models.registration.RegistrationSubmissionDraftData
 
-class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with MockitoSugar with TransformIntegrationTest {
+class SubmissionDraftManagementSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with NewTransformIntegrationTest {
 
   private val draftData = Json.obj(
     "field1" -> "value1",
@@ -41,106 +38,91 @@ class SubmissionDraftManagementSpec extends FreeSpec with MustMatchers with Mock
   private val referencePath = JsPath() \ 'reference
 
   "working with submission drafts" - {
-    "must be CRUDdy" in {
+    "must be CRUDdy" in assertMongoTest(createApplication) { application =>
+      // Initial empty
+      {
+        val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts")).get
+        status(result) mustBe OK
+        contentAsJson(result) mustBe Json.parse("[]")
+      }
 
-      val application = applicationBuilder
-        .overrides(
-          bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation))
-        )
-        .build()
+      // Read non-existent draft
+      {
+        val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/beneficiaries")).get
+        status(result) mustBe NOT_FOUND
+      }
 
-      running(application) {
-        getConnection(application).map { connection =>
-          dropTheDatabase(connection)
+      // Create draft section
+      {
+        val draftRequestData = RegistrationSubmissionDraftData(draftData, None, None)
+        val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/main")
+                    .withBody(Json.toJson(draftRequestData))
+                    .withHeaders(CONTENT_TYPE -> "application/json")
+        val result = route(application, request).get
+        status(result) mustBe OK
+      }
 
-          // Initial empty
-          {
-            val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts")).get
-            status(result) mustBe OK
-            contentAsJson(result) mustBe Json.parse("[]")
-          }
+      // Read draft section
+      {
+        val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/main")).get
+        status(result) mustBe OK
 
-          // Read non-existent draft
-          {
-            val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/beneficiaries")).get
-            status(result) mustBe NOT_FOUND
-          }
+        val json = contentAsJson(result)
 
-          // Create draft section
-          {
-            val draftRequestData = RegistrationSubmissionDraftData(draftData, None, None)
-            val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/main")
-                        .withBody(Json.toJson(draftRequestData))
-                        .withHeaders(CONTENT_TYPE -> "application/json")
-            val result = route(application, request).get
-            status(result) mustBe OK
-          }
+        assert(json.transform(createdAtPath.json.pick).isSuccess)
 
-          // Read draft section
-          {
-            val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/main")).get
-            status(result) mustBe OK
+        json.transform(dataPath.json.pick) mustBe JsSuccess(draftData, dataPath)
+        assert(json.transform(referencePath.json.pick).isError)
+      }
 
-            val json = contentAsJson(result)
+      // Update draft section
+      {
+        val amendedDraftRequestData = RegistrationSubmissionDraftData(amendedDraftData, Some("amendedReference"), None)
+        val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/main")
+          .withBody(Json.toJson(amendedDraftRequestData))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+        val result = route(application, request).get
+        status(result) mustBe OK
+      }
 
-            assert(json.transform(createdAtPath.json.pick).isSuccess)
+      // Read amended draft section
+      {
+        val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/main")).get
+        status(result) mustBe OK
 
-            json.transform(dataPath.json.pick) mustBe JsSuccess(draftData, dataPath)
-            assert(json.transform(referencePath.json.pick).isError)
-          }
+        val resultJson = contentAsJson(result)
+        resultJson.transform(dataPath.json.pick) mustBe JsSuccess(amendedDraftData, dataPath)
+        resultJson.transform(referencePath.json.pick) mustBe JsSuccess(JsString("amendedReference"), referencePath)
+      }
 
-          // Update draft section
-          {
-            val amendedDraftRequestData = RegistrationSubmissionDraftData(amendedDraftData, Some("amendedReference"), None)
-            val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/main")
-              .withBody(Json.toJson(amendedDraftRequestData))
-              .withHeaders(CONTENT_TYPE -> "application/json")
-            val result = route(application, request).get
-            status(result) mustBe OK
-          }
+      // Read all drafts
+      {
+        val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts")).get
+        status(result) mustBe OK
+        val json = contentAsJson(result)
 
-          // Read amended draft section
-          {
-            val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/main")).get
-            status(result) mustBe OK
+        val drafts = json.as[JsArray]
+        drafts.value.size mustBe 1
 
-            val resultJson = contentAsJson(result)
-            resultJson.transform(dataPath.json.pick) mustBe JsSuccess(amendedDraftData, dataPath)
-            resultJson.transform(referencePath.json.pick) mustBe JsSuccess(JsString("amendedReference"), referencePath)
-          }
+        val draft = drafts(0)
+        assert(draft.transform(createdAtPath.json.pick).isSuccess)
 
-          // Read all drafts
-          {
-            val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts")).get
-            status(result) mustBe OK
-            val json = contentAsJson(result)
+        val draftIdPath = JsPath() \ 'draftId
+        draft.transform(draftIdPath.json.pick) mustBe JsSuccess(JsString("Draft0001"), draftIdPath)
+        draft.transform(referencePath.json.pick) mustBe JsSuccess(JsString("amendedReference"), referencePath)
+      }
 
-            val drafts = json.as[JsArray]
-            drafts.value.size mustBe 1
+      // Delete draft
+      {
+        val result = route(application, FakeRequest(DELETE, "/trusts/register/submission-drafts/Draft0001")).get
+        status(result) mustBe OK
+      }
 
-            val draft = drafts(0)
-            assert(draft.transform(createdAtPath.json.pick).isSuccess)
-
-            val draftIdPath = JsPath() \ 'draftId
-            draft.transform(draftIdPath.json.pick) mustBe JsSuccess(JsString("Draft0001"), draftIdPath)
-            draft.transform(referencePath.json.pick) mustBe JsSuccess(JsString("amendedReference"), referencePath)
-          }
-
-          // Delete draft
-          {
-            val result = route(application, FakeRequest(DELETE, "/trusts/register/submission-drafts/Draft0001")).get
-            status(result) mustBe OK
-          }
-
-          // Read all (empty) drafts
-          {
-            val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts")).get
-            status(result) mustBe OK
-            contentAsJson(result) mustBe Json.parse("[]")
-          }
-
-          dropTheDatabase(connection)
-        }.get
+      // Read all (empty) drafts
+      {
+        val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts")).get
+        status(result) mustBe OK
+        contentAsJson(result) mustBe Json.parse("[]")
       }
     }
   }

@@ -19,9 +19,13 @@ package uk.gov.hmrc.repositories
 import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
+import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.test.Helpers.stubControllerComponents
 import play.api.{Application, Play}
 import reactivemongo.api.{DefaultDB, MongoConnection}
+import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
+import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import uk.gov.hmrc.trusts.repositories.TrustsMongoDriver
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -51,6 +55,8 @@ trait NewTransformIntegrationTest extends ScalaFutures {
     Await.result(getDatabase(connection).drop(), Duration.Inf)
   }
 
+  private val cc = stubControllerComponents()
+
   def createApplication : Application = {
     new GuiceApplicationBuilder()
       .configure(Seq(
@@ -59,6 +65,9 @@ trait NewTransformIntegrationTest extends ScalaFutures {
         "auditing.enabled" -> false,
         "mongo-async-driver.akka.log-dead-letters" -> 0
       ): _*)
+      .overrides(
+        bind[IdentifierAction].toInstance(new FakeIdentifierAction(cc.parsers.default, Agent))
+      )
       .build()
   }
 
