@@ -59,7 +59,7 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[ProtectorTransformationController][addIndividualProtector]" +
+          logger.warn(s"[addIndividualProtector][Session ID: ${request.sessionId}]" +
             s" Supplied json could not be read as a Protector - $errors")
           Future.successful(BadRequest)
       }
@@ -77,7 +77,8 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[ProtectorTransformationController][addCompanyProtector] Supplied json could not be read as a Company Beneficiary - $errors")
+          logger.warn(s"[addCompanyProtector][Session ID: ${request.sessionId}]" +
+            s" Supplied json could not be read as a Company Beneficiary - $errors")
           Future.successful(BadRequest)
       }
     }
@@ -96,7 +97,7 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
             Ok
           }
         case JsError(errors) =>
-            logger.warn(s"[ProtectorTransformationController][amendIndividualProtector]" +
+            logger.warn(s"[amendIndividualProtector][Session ID: ${request.sessionId}]" +
               s" Supplied json could not be read as a Protector - $errors")
           Future.successful(BadRequest)
       }
@@ -116,7 +117,7 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[ProtectorTransformationController][amendBusinessProtector]" +
+          logger.warn(s"[amendBusinessProtector][Session ID: ${request.sessionId}]" +
             s" Supplied payload could not be read as a ProtectorCompany - $errors")
           Future.successful(BadRequest)
       }

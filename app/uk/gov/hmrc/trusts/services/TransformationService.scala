@@ -25,6 +25,7 @@ import uk.gov.hmrc.trusts.models.get_trust.get_trust.{GetTrustResponse, TrustPro
 import uk.gov.hmrc.trusts.models.get_trust.{TransformationErrorResponse, get_trust}
 import uk.gov.hmrc.trusts.repositories.TransformationRepository
 import uk.gov.hmrc.trusts.transformers._
+import uk.gov.hmrc.trusts.utils.Session
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -63,7 +64,8 @@ class TransformationService @Inject()(repository: TransformationRepository,
   def applyDeclarationTransformations(identifier: String, internalId: String, json: JsValue)(implicit hc: HeaderCarrier): Future[JsResult[JsValue]] = {
     repository.get(identifier, internalId).map {
       case None =>
-        logger.info(s"[TransformationService] no transformations to apply")
+        logger.info(s"[Session ID: ${Session.id(hc)}]" +
+          s" no transformations to apply")
         JsSuccess(json)
       case Some(transformations) =>
 
@@ -79,11 +81,13 @@ class TransformationService @Inject()(repository: TransformationRepository,
 
         for {
           initial <- {
-            logger.info(s"[TransformationService] applying transformations")
+            logger.info(s"[Session ID: ${Session.id(hc)}]" +
+              s" applying transformations")
             transformations.applyTransform(json)
           }
           transformed <- {
-            logger.info(s"[TransformationService] applying declaration transformations")
+            logger.info(s"[Session ID: ${Session.id(hc)}]" +
+              s" applying declaration transformations")
             transformations.applyDeclarationTransform(initial)
           }
         } yield transformed
@@ -113,7 +117,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }.flatMap(newTransforms =>
       repository.set(identifier, internalId, newTransforms)).recoverWith {
       case e =>
-        logger.error(s"[TransformationService] exception adding new transform: ${e.getMessage}")
+        logger.error(s"Exception adding new transform: ${e.getMessage}")
         Future.failed(e)
     }
   }

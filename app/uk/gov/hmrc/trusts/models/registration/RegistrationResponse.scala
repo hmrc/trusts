@@ -55,26 +55,26 @@ object RegistrationResponse extends Logging {
   implicit lazy val httpReads: HttpReads[RegistrationResponse] =
     new HttpReads[RegistrationResponse] {
       override def read(method: String, url: String, response: HttpResponse): RegistrationResponse = {
-        logger.info(s"[RegistrationTrustResponse]  response status received from des: ${response.status}")
+        logger.info(s"response status received from des: ${response.status}")
         response.status match {
           case OK =>
             response.json.as[RegistrationTrnResponse]
           case FORBIDDEN =>
             response.json.asOpt[DesErrorResponse] match {
               case Some(desReponse) if desReponse.code == ALREADY_REGISTERED_CODE =>
-                logger.info(s"[RegistrationTrustResponse] already registered response from des.")
+                logger.info(s"already registered response from des.")
                 throw AlreadyRegisteredException
               case Some(desReponse) if desReponse.code == NO_MATCH_CODE =>
-                logger.info(s"[RegistrationTrustResponse] No match response from des.")
+                logger.info(s"No match response from des.")
                 throw NoMatchException
               case _ =>
-                logger.error("[RegistrationTrustResponse] Forbidden response from des.")
+                logger.error("Forbidden response from des.")
                 throw InternalServerErrorException("Forbidden response from des.")
             }
           case BAD_REQUEST =>
             throw BadRequestException
           case SERVICE_UNAVAILABLE =>
-            logger.error("[RegistrationTrustResponse] Service unavailable response from des.")
+            logger.error("Service unavailable response from des.")
             throw ServiceNotAvailableException("Des dependent service is down.")
           case status =>
             throw InternalServerErrorException(s"Error response from des $status body: ${response.body}")
