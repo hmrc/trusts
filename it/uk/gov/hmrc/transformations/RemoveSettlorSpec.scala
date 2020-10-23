@@ -18,14 +18,14 @@ package uk.gov.hmrc.transformations
 
 import org.mockito.Matchers._
 import org.mockito.Mockito._
+import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.inject.bind
 import play.api.libs.json.{JsArray, JsValue, Json}
-import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
-import uk.gov.hmrc.repositories.TransformIntegrationTest
+import uk.gov.hmrc.itbase.IntegrationTestBase
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import uk.gov.hmrc.trusts.models.get_trust.get_trust._
@@ -33,19 +33,14 @@ import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
 
-class RemoveSettlorSpec extends FreeSpec with MustMatchers with MockitoSugar with TransformIntegrationTest {
-
-  trait JsonFixtures {
-
-    val getTrustResponseFromDES : JsValue = JsonUtils
-      .getJsonValueFromFile("trusts-etmp-received-multiple-settlors.json")
-  }
+class RemoveSettlorSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
 
   "a remove settlor call" - {
 
-    "must return amended data in a subsequent 'get' call" in new JsonFixtures {
-
       val stubbedDesConnector = mock[DesConnector]
+
+      val getTrustResponseFromDES : JsValue = JsonUtils
+        .getJsonValueFromFile("trusts-etmp-received-multiple-settlors.json")
 
       when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES.as[GetTrustSuccessResponse]))
 
@@ -56,67 +51,60 @@ class RemoveSettlorSpec extends FreeSpec with MustMatchers with MockitoSugar wit
         )
         .build()
 
-      running(application) {
+    "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
 
-        getConnection(application).map { connection =>
-          dropTheDatabase(connection)
+      val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+      status(result) mustBe OK
 
-          val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
-          status(result) mustBe OK
+      val removeSettlorAtIndex = Json.parse(
+        """
+          |{
+          |	"index": 0,
+          |	"endDate": "2010-10-10",
+          | "type": "settlor"
+          |}
+          |""".stripMargin)
 
-          val removeSettlorAtIndex = Json.parse(
-            """
-              |{
-              |	"index": 0,
-              |	"endDate": "2010-10-10",
-              | "type": "settlor"
-              |}
-              |""".stripMargin)
+      val removeSettlorRequest = FakeRequest(PUT, "/trusts/5174384721/settlors/remove")
+        .withBody(Json.toJson(removeSettlorAtIndex))
+        .withHeaders(CONTENT_TYPE -> "application/json")
 
-          val removeSettlorRequest = FakeRequest(PUT, "/trusts/5174384721/settlors/remove")
-            .withBody(Json.toJson(removeSettlorAtIndex))
-            .withHeaders(CONTENT_TYPE -> "application/json")
+      val removeSettlorResult = route(application, removeSettlorRequest).get
+      status(removeSettlorResult) mustBe OK
 
-          val removeSettlorResult = route(application, removeSettlorRequest).get
-          status(removeSettlorResult) mustBe OK
+      val removeSettlorCompanyAtIndex = Json.parse(
+        """
+          |{
+          |	"index": 0,
+          |	"endDate": "2010-10-10",
+          | "type": "settlorCompany"
+          |}
+          |""".stripMargin)
 
-          val removeSettlorCompanyAtIndex = Json.parse(
-            """
-              |{
-              |	"index": 0,
-              |	"endDate": "2010-10-10",
-              | "type": "settlorCompany"
-              |}
-              |""".stripMargin)
+      val removeSettlorCompanyRequest = FakeRequest(PUT, "/trusts/5174384721/settlors/remove")
+        .withBody(Json.toJson(removeSettlorCompanyAtIndex))
+        .withHeaders(CONTENT_TYPE -> "application/json")
 
-          val removeSettlorCompanyRequest = FakeRequest(PUT, "/trusts/5174384721/settlors/remove")
-            .withBody(Json.toJson(removeSettlorCompanyAtIndex))
-            .withHeaders(CONTENT_TYPE -> "application/json")
+      val removeSettlorCompanyResult = route(application, removeSettlorCompanyRequest).get
+      status(removeSettlorCompanyResult) mustBe OK
 
-          val removeSettlorCompanyResult = route(application, removeSettlorCompanyRequest).get
-          status(removeSettlorCompanyResult) mustBe OK
+      val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed/settlors")).get
+      status(newResult) mustBe OK
 
-          val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed/settlors")).get
-          status(newResult) mustBe OK
+      val settlors = (contentAsJson(newResult) \ "settlors" \ "settlor").as[JsArray]
+      settlors mustBe Json.parse(
+        """
+          |[
+          |]
+          |""".stripMargin)
 
-          val settlors = (contentAsJson(newResult) \ "settlors" \ "settlor").as[JsArray]
-          settlors mustBe Json.parse(
-            """
-              |[
-              |]
-              |""".stripMargin)
+      val settlorCompanies = (contentAsJson(newResult) \ "settlors" \ "settlorCompany").as[JsArray]
+      settlorCompanies mustBe Json.parse(
+        """
+          |[
+          |]
+          |""".stripMargin)
 
-          val settlorCompanies = (contentAsJson(newResult) \ "settlors" \ "settlorCompany").as[JsArray]
-          settlorCompanies mustBe Json.parse(
-            """
-              |[
-              |]
-              |""".stripMargin)
-
-          dropTheDatabase(connection)
-        }.get
-      }
     }
   }
-
 }

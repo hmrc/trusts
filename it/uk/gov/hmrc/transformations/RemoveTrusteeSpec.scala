@@ -18,14 +18,14 @@ package uk.gov.hmrc.transformations
 
 import org.mockito.Matchers._
 import org.mockito.Mockito._
+import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.inject.bind
 import play.api.libs.json.{JsArray, JsValue, Json}
-import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
-import uk.gov.hmrc.repositories.TransformIntegrationTest
+import uk.gov.hmrc.itbase.IntegrationTestBase
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import uk.gov.hmrc.trusts.models.get_trust.get_trust._
@@ -33,19 +33,14 @@ import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
 
-class RemoveTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar with TransformIntegrationTest {
-
-  trait JsonFixtures {
-
-    val getTrustResponseFromDES : JsValue = JsonUtils
-      .getJsonValueFromFile("trusts-etmp-received-multiple-trustees.json")
-  }
+class RemoveTrusteeSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
 
   "a remove trustee call" - {
 
-    "must return amended data in a subsequent 'get' call" in new JsonFixtures {
-
       val stubbedDesConnector = mock[DesConnector]
+
+      val getTrustResponseFromDES : JsValue = JsonUtils
+        .getJsonValueFromFile("trusts-etmp-received-multiple-trustees.json")
 
       when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES.as[GetTrustSuccessResponse]))
 
@@ -56,57 +51,50 @@ class RemoveTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar wit
         )
         .build()
 
-      running(application) {
+    "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
 
-        getConnection(application).map { connection =>
-          dropTheDatabase(connection)
+      val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+      status(result) mustBe OK
 
-          val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
-          status(result) mustBe OK
+      val removeAtIndex = Json.parse(
+        """
+          |{
+          |	"index": 0,
+          |	"endDate": "2010-10-10"
+          |}
+          |""".stripMargin)
 
-          val removeAtIndex = Json.parse(
-            """
-              |{
-              |	"index": 0,
-              |	"endDate": "2010-10-10"
-              |}
-              |""".stripMargin)
+      val amendRequest = FakeRequest(PUT, "/trusts/5174384721/trustees/remove")
+        .withBody(Json.toJson(removeAtIndex))
+        .withHeaders(CONTENT_TYPE -> "application/json")
 
-          val amendRequest = FakeRequest(PUT, "/trusts/5174384721/trustees/remove")
-            .withBody(Json.toJson(removeAtIndex))
-            .withHeaders(CONTENT_TYPE -> "application/json")
+      val firstRemoveResult = route(application, amendRequest).get
+      status(firstRemoveResult) mustBe OK
 
-          val firstRemoveResult = route(application, amendRequest).get
-          status(firstRemoveResult) mustBe OK
+      val secondRemoveResult = route(application, amendRequest).get
+      status(secondRemoveResult) mustBe OK
 
-          val secondRemoveResult = route(application, amendRequest).get
-          status(secondRemoveResult) mustBe OK
+      val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed/trustees")).get
+      status(newResult) mustBe OK
 
-          val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed/trustees")).get
-          status(newResult) mustBe OK
+      val trustees = (contentAsJson(newResult) \ "trustees").as[JsArray]
+      trustees mustBe Json.parse(
+        """
+          |[
+          |            {
+          |              "trusteeOrg": {
+          |                "name": "Trustee Org 2",
+          |                "phoneNumber": "0121546546",
+          |                "identification": {
+          |                  "utr": "5465416546"
+          |                },
+          |                "entityStart": "1998-02-12",
+          |                "provisional": true
+          |              }
+          |            }
+          |]
+          |""".stripMargin)
 
-          val trustees = (contentAsJson(newResult) \ "trustees").as[JsArray]
-          trustees mustBe Json.parse(
-            """
-              |[
-              |            {
-              |              "trusteeOrg": {
-              |                "name": "Trustee Org 2",
-              |                "phoneNumber": "0121546546",
-              |                "identification": {
-              |                  "utr": "5465416546"
-              |                },
-              |                "entityStart": "1998-02-12",
-              |                "provisional": true
-              |              }
-              |            }
-              |]
-              |""".stripMargin)
-
-          dropTheDatabase(connection)
-        }.get
-      }
     }
   }
-
 }

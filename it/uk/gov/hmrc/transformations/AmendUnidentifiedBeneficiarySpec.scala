@@ -19,14 +19,14 @@ package uk.gov.hmrc.transformations
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.inject.bind
 import play.api.libs.json.{JsString, JsValue}
-import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
-import uk.gov.hmrc.repositories.TransformIntegrationTest
+import uk.gov.hmrc.itbase.IntegrationTestBase
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import uk.gov.hmrc.trusts.models.get_trust.get_trust.GetTrustSuccessResponse
@@ -34,14 +34,12 @@ import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
 
-class AmendUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar with TransformIntegrationTest {
+class AmendUnidentifiedBeneficiarySpec extends AsyncFreeSpec with MustMatchers with ScalaFutures with MockitoSugar with IntegrationTestBase {
 
   val getTrustResponseFromDES: GetTrustSuccessResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
   val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an amend unidentified beneficiary call" - {
-
-    "must return amended data in a subsequent 'get' call" in {
 
       val newDescription = "Updated description"
 
@@ -57,28 +55,22 @@ class AmendUnidentifiedBeneficiarySpec extends FreeSpec with MustMatchers with S
         )
         .build()
 
-      running(application) {
-        getConnection(application).map { connection =>
+    "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
 
-          dropTheDatabase(connection)
-          val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
-          status(result) mustBe OK
-          contentAsJson(result) mustBe expectedInitialGetJson
+      val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+      status(result) mustBe OK
+      contentAsJson(result) mustBe expectedInitialGetJson
 
-          val amendRequest = FakeRequest(POST, "/trusts/beneficiaries/amend-unidentified/5174384721/0")
-            .withBody(JsString(newDescription))
-            .withHeaders(CONTENT_TYPE -> "application/json")
+      val amendRequest = FakeRequest(POST, "/trusts/beneficiaries/amend-unidentified/5174384721/0")
+        .withBody(JsString(newDescription))
+        .withHeaders(CONTENT_TYPE -> "application/json")
 
-          val amendResult = route(application, amendRequest).get
-          status(amendResult) mustBe OK
+      val amendResult = route(application, amendRequest).get
+      status(amendResult) mustBe OK
 
-          val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
-          status(newResult) mustBe OK
-          contentAsJson(newResult) mustBe expectedGetAfterAmendBeneficiaryJson
-
-          dropTheDatabase(connection)
-        }.get
-      }
+      val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+      status(newResult) mustBe OK
+      contentAsJson(newResult) mustBe expectedGetAfterAmendBeneficiaryJson
     }
   }
 }

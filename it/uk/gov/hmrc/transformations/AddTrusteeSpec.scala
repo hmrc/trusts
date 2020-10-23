@@ -18,14 +18,14 @@ package uk.gov.hmrc.transformations
 
 import org.mockito.Matchers._
 import org.mockito.Mockito._
+import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.inject.bind
 import play.api.libs.json.{JsArray, JsValue, Json}
-import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
-import uk.gov.hmrc.repositories.TransformIntegrationTest
+import uk.gov.hmrc.itbase.IntegrationTestBase
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import uk.gov.hmrc.trusts.models.get_trust.get_trust._
@@ -33,17 +33,12 @@ import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
 
-class AddTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar with TransformIntegrationTest {
-
-  trait JsonFixtures {
-
-    val getTrustResponseFromDES : JsValue = JsonUtils
-      .getJsonValueFromFile("trusts-etmp-received-no-trustees.json")
-  }
+class AddTrusteeSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
 
   "an add trustee call" - {
 
-    "must return amended data in a subsequent 'get' call with provisional flags" in new JsonFixtures {
+      val getTrustResponseFromDES : JsValue = JsonUtils
+        .getJsonValueFromFile("trusts-etmp-received-no-trustees.json")
 
       val stubbedDesConnector = mock[DesConnector]
 
@@ -56,58 +51,51 @@ class AddTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar with T
         )
         .build()
 
-      running(application) {
+    "must return amended data in a subsequent 'get' call with provisional flags" in assertMongoTest(application) { application =>
 
-        getConnection(application).map { connection =>
-          dropTheDatabase(connection)
+      // Ensure passes schema
+      val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+      status(result) mustBe OK
 
-          // Ensure passes schema
-          val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
-          status(result) mustBe OK
+      val addTrusteeJson = Json.parse(
+        """
+          |{
+          |	"name": {
+          |   "firstName": "Adam",
+          |   "lastName": "Last"
+          | },
+          | "entityStart": "2020-03-03"
+          |}
+          |""".stripMargin)
 
-          val addTrusteeJson = Json.parse(
-            """
-              |{
-              |	"name": {
-              |   "firstName": "Adam",
-              |   "lastName": "Last"
-              | },
-              | "entityStart": "2020-03-03"
-              |}
-              |""".stripMargin)
+      val amendRequest = FakeRequest(POST, "/trusts/trustees/add/5174384721")
+        .withBody(addTrusteeJson)
+        .withHeaders(CONTENT_TYPE -> "application/json")
 
-          val amendRequest = FakeRequest(POST, "/trusts/trustees/add/5174384721")
-            .withBody(addTrusteeJson)
-            .withHeaders(CONTENT_TYPE -> "application/json")
+      val addedResponse = route(application, amendRequest).get
+      status(addedResponse) mustBe OK
 
-          val addedResponse = route(application, amendRequest).get
-          status(addedResponse) mustBe OK
+      // ensure they're in the trust response with the provisional flag
+      val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed/trustees")).get
+      status(newResult) mustBe OK
 
-          // ensure they're in the trust response with the provisional flag
-          val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed/trustees")).get
-          status(newResult) mustBe OK
+      val trustees = (contentAsJson(newResult) \ "trustees").as[JsArray]
+      trustees mustBe Json.parse(
+        """
+          |[
+          |            {
+          |              "trusteeInd": {
+          |                "name": {
+          |                 "firstName": "Adam",
+          |                 "lastName": "Last"
+          |                },
+          |                "entityStart": "2020-03-03",
+          |                "provisional": true
+          |              }
+          |            }
+          |]
+          |""".stripMargin)
 
-          val trustees = (contentAsJson(newResult) \ "trustees").as[JsArray]
-          trustees mustBe Json.parse(
-            """
-              |[
-              |            {
-              |              "trusteeInd": {
-              |                "name": {
-              |                 "firstName": "Adam",
-              |                 "lastName": "Last"
-              |                },
-              |                "entityStart": "2020-03-03",
-              |                "provisional": true
-              |              }
-              |            }
-              |]
-              |""".stripMargin)
-
-          dropTheDatabase(connection)
-        }.get
-      }
     }
-
   }
 }
