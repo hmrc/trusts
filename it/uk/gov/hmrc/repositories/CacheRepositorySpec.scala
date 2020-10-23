@@ -18,9 +18,10 @@ package uk.gov.hmrc.repositories
 
 import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import play.api.libs.json.Json
+import uk.gov.hmrc.itbase.IntegrationTestBase
 import uk.gov.hmrc.trusts.repositories.CacheRepository
 
-class CacheRepositorySpec extends AsyncFreeSpec with MustMatchers with NewTransformIntegrationTest {
+class CacheRepositorySpec extends AsyncFreeSpec with MustMatchers with IntegrationTestBase {
 
   "a playback repository" - {
     "must be able to store and retrieve a payload"  in assertMongoTest(createApplication) { app =>

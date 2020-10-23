@@ -21,9 +21,10 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.itbase.IntegrationTestBase
 import uk.gov.hmrc.trusts.models.registration.RegistrationSubmissionDraftData
 
-class SubmissionDraftManagementSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with NewTransformIntegrationTest {
+class SubmissionDraftManagementSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
 
   private val draftData = Json.obj(
     "field1" -> "value1",
