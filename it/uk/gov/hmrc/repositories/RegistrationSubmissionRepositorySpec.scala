@@ -18,13 +18,13 @@ package uk.gov.hmrc.repositories
 
 import java.time.LocalDateTime
 
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import play.api.libs.json._
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.trusts.models.registration.RegistrationSubmissionDraft
 import uk.gov.hmrc.trusts.repositories.RegistrationSubmissionRepository
 
-class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers with NewTransformIntegrationTest {
+class RegistrationSubmissionRepositorySpec extends AsyncFreeSpec with MustMatchers with NewTransformIntegrationTest {
 
   // Make sure we use value of LocalDateTime that survives JSON round trip - and isn't expired.
   private val testDateTime: LocalDateTime = Json.toJson(LocalDateTime.now()).as[LocalDateTime]
