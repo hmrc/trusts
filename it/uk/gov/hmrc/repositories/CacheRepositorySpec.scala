@@ -16,38 +16,23 @@
 
 package uk.gov.hmrc.repositories
 
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import play.api.libs.json.Json
-import play.api.test.Helpers.running
+import uk.gov.hmrc.itbase.IntegrationTestBase
 import uk.gov.hmrc.trusts.repositories.CacheRepository
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
-class CacheRepositorySpec extends FreeSpec with MustMatchers with TransformIntegrationTest {
+class CacheRepositorySpec extends AsyncFreeSpec with MustMatchers with IntegrationTestBase {
 
   "a playback repository" - {
-    "must be able to store and retrieve a payload" in {
+    "must be able to store and retrieve a payload"  in assertMongoTest(createApplication) { app =>
 
-      val application = applicationBuilder.build()
+      val repository = app.injector.instanceOf[CacheRepository]
 
-      running(application) {
-        getConnection(application).map { connection =>
+      val storedOk = repository.set("UTRUTRUTR", "InternalId", data)
+      storedOk.futureValue mustBe true
 
-          dropTheDatabase(connection)
-
-          val repository = application.injector.instanceOf[CacheRepository]
-
-          val storedOk = repository.set("UTRUTRUTR", "InternalId", data)
-          storedOk.futureValue mustBe true
-
-          val retrieved = repository.get("UTRUTRUTR", "InternalId")
-            .map(_.getOrElse(fail("The record was not found in the database")))
-
-          retrieved.futureValue mustBe data
-
-          dropTheDatabase(connection)
-        }.get
-      }
+      val retrieved = repository.get("UTRUTRUTR", "InternalId")
+      retrieved.futureValue mustBe Some(data)
     }
   }
 

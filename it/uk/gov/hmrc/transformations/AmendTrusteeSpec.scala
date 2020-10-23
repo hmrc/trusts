@@ -20,14 +20,14 @@ import java.time.LocalDate
 
 import org.mockito.Matchers._
 import org.mockito.Mockito._
+import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
-import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
-import uk.gov.hmrc.repositories.TransformIntegrationTest
+import uk.gov.hmrc.itbase.IntegrationTestBase
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import uk.gov.hmrc.trusts.models.NameType
@@ -36,14 +36,12 @@ import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
 
-class AmendTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar with TransformIntegrationTest {
+class AmendTrusteeSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
 
   val getTrustResponseFromDES: GetTrustSuccessResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
   val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an amend trustee call" - {
-    "must return amended data in a subsequent 'get' call" in {
-
       val newTrusteeIndInfo = DisplayTrustTrusteeIndividualType(
         lineNo = Some("newLineNo"),
         bpMatchStatus = None,
@@ -76,28 +74,23 @@ class AmendTrusteeSpec extends FreeSpec with MustMatchers with MockitoSugar with
         )
         .build()
 
-      running(application) {
-        getConnection(application).map { connection =>
-          dropTheDatabase(connection)
-          val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
-          status(result) mustBe OK
-          contentAsJson(result) mustBe expectedInitialGetJson
+    "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
 
-          val amendRequest = FakeRequest(POST, "/trusts/trustees/amend/5174384721/0")
-            .withBody(Json.toJson(newTrusteeIndInfo))
-            .withHeaders(CONTENT_TYPE -> "application/json")
+      val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+      status(result) mustBe OK
+      contentAsJson(result) mustBe expectedInitialGetJson
 
-          val amendResult = route(application, amendRequest).get
-          status(amendResult) mustBe OK
+      val amendRequest = FakeRequest(POST, "/trusts/trustees/amend/5174384721/0")
+        .withBody(Json.toJson(newTrusteeIndInfo))
+        .withHeaders(CONTENT_TYPE -> "application/json")
 
-          val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
-          status(newResult) mustBe OK
-          contentAsJson(newResult) mustBe expectedGetAfterAmendTrusteeJson
+      val amendResult = route(application, amendRequest).get
+      status(amendResult) mustBe OK
 
-          dropTheDatabase(connection)
-        }.get
-      }
+      val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+      status(newResult) mustBe OK
+      contentAsJson(newResult) mustBe expectedGetAfterAmendTrusteeJson
+
     }
   }
-
 }

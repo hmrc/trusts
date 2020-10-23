@@ -18,14 +18,14 @@ package uk.gov.hmrc.transformations
 
 import org.mockito.Matchers._
 import org.mockito.Mockito._
+import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.inject.bind
 import play.api.libs.json.{JsArray, JsValue, Json}
-import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
-import uk.gov.hmrc.repositories.TransformIntegrationTest
+import uk.gov.hmrc.itbase.IntegrationTestBase
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import uk.gov.hmrc.trusts.models.get_trust.get_trust._
@@ -33,19 +33,14 @@ import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
 
-class RemoveOtherIndividualSpec extends FreeSpec with MustMatchers with MockitoSugar with TransformIntegrationTest {
-
-  trait JsonFixtures {
-
-    val getTrustResponseFromDES : JsValue = JsonUtils
-      .getJsonValueFromFile("trusts-etmp-received-multiple-otherIndividuals.json")
-  }
+class RemoveOtherIndividualSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
 
   "a remove otherIndividual call" - {
 
-    "must return amended data in a subsequent 'get' call" in new JsonFixtures {
-
       val stubbedDesConnector = mock[DesConnector]
+
+      val getTrustResponseFromDES : JsValue = JsonUtils
+        .getJsonValueFromFile("trusts-etmp-received-multiple-otherIndividuals.json")
 
       when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES.as[GetTrustSuccessResponse]))
 
@@ -56,57 +51,49 @@ class RemoveOtherIndividualSpec extends FreeSpec with MustMatchers with MockitoS
         )
         .build()
 
-      running(application) {
+    "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
 
-        getConnection(application).map { connection =>
-          dropTheDatabase(connection)
+      val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+      status(result) mustBe OK
 
-          val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
-          status(result) mustBe OK
+      val removeOtherIndividualAtIndex = Json.parse(
+        """
+          |{
+          |	"index": 0,
+          |	"endDate": "2010-10-10"
+          |}
+          |""".stripMargin)
 
-          val removeOtherIndividualAtIndex = Json.parse(
-            """
-              |{
-              |	"index": 0,
-              |	"endDate": "2010-10-10"
-              |}
-              |""".stripMargin)
+      val removeOtherIndividualRequest = FakeRequest(PUT, "/trusts/other-individuals/5174384721/remove")
+        .withBody(Json.toJson(removeOtherIndividualAtIndex))
+        .withHeaders(CONTENT_TYPE -> "application/json")
 
-          val removeOtherIndividualRequest = FakeRequest(PUT, "/trusts/other-individuals/5174384721/remove")
-            .withBody(Json.toJson(removeOtherIndividualAtIndex))
-            .withHeaders(CONTENT_TYPE -> "application/json")
+      val removeOtherIndividualResult = route(application, removeOtherIndividualRequest).get
+      status(removeOtherIndividualResult) mustBe OK
 
-          val removeOtherIndividualResult = route(application, removeOtherIndividualRequest).get
-          status(removeOtherIndividualResult) mustBe OK
+      val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed/other-individuals")).get
+      status(newResult) mustBe OK
 
-          val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed/other-individuals")).get
-          status(newResult) mustBe OK
-
-          val otherIndividuals = (contentAsJson(newResult) \ "naturalPerson").as[JsArray]
-          otherIndividuals mustBe Json.parse(
-            """
-              |[
-              | {
-              |   "lineNo": "2",
-              |   "name": {
-              |     "firstName": "James",
-              |     "middleName": "David",
-              |     "lastName": "O'Connor"
-              |   },
-              |   "dateOfBirth": "1950-01-10",
-              |   "identification": {
-              |     "nino": "AB187812"
-              |   },
-              |   "entityStart": "1998-02-12",
-              |   "provisional": false
-              | }
-              |]
-              |""".stripMargin)
-
-          dropTheDatabase(connection)
-        }.get
-      }
+      val otherIndividuals = (contentAsJson(newResult) \ "naturalPerson").as[JsArray]
+      otherIndividuals mustBe Json.parse(
+        """
+          |[
+          | {
+          |   "lineNo": "2",
+          |   "name": {
+          |     "firstName": "James",
+          |     "middleName": "David",
+          |     "lastName": "O'Connor"
+          |   },
+          |   "dateOfBirth": "1950-01-10",
+          |   "identification": {
+          |     "nino": "AB187812"
+          |   },
+          |   "entityStart": "1998-02-12",
+          |   "provisional": false
+          | }
+          |]
+          |""".stripMargin)
     }
   }
-
 }

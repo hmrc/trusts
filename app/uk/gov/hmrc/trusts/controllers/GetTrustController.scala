@@ -25,7 +25,6 @@ import uk.gov.hmrc.trusts.controllers.actions.{IdentifierAction, ValidateIdentif
 import uk.gov.hmrc.trusts.models.auditing.TrustAuditing
 import uk.gov.hmrc.trusts.models.get_trust.get_trust.{TrustProcessedResponse, _}
 import uk.gov.hmrc.trusts.models.get_trust.{BadRequestResponse, _}
-import uk.gov.hmrc.trusts.models.requests.IdentifierRequest
 import uk.gov.hmrc.trusts.services.{AuditService, DesService, TransformationService, TrustsStoreService}
 
 import scala.concurrent.ExecutionContext.Implicits.global

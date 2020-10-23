@@ -18,14 +18,14 @@ package uk.gov.hmrc.transformations
 
 import org.mockito.Matchers._
 import org.mockito.Mockito._
+import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
-import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
-import uk.gov.hmrc.repositories.TransformIntegrationTest
+import uk.gov.hmrc.itbase.IntegrationTestBase
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import uk.gov.hmrc.trusts.models.get_trust.get_trust.GetTrustSuccessResponse
@@ -33,7 +33,7 @@ import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
 
-class AddOtherIndividualSpec extends FreeSpec with MustMatchers with MockitoSugar with TransformIntegrationTest {
+class AddOtherIndividualSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
 
   lazy val getTrustResponseFromDES: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
@@ -42,7 +42,6 @@ class AddOtherIndividualSpec extends FreeSpec with MustMatchers with MockitoSuga
     JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an add other individual call" - {
-    "must return amended data in a subsequent 'get' call" in {
 
       val newOtherIndividual = Json.parse(
         """
@@ -73,28 +72,21 @@ class AddOtherIndividualSpec extends FreeSpec with MustMatchers with MockitoSuga
         )
         .build()
 
-      running(application) {
-        getConnection(application).map { connection =>
-          dropTheDatabase(connection)
+    "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
+      val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+      status(result) mustBe OK
+      contentAsJson(result) mustBe expectedInitialGetJson
 
-          val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
-          status(result) mustBe OK
-          contentAsJson(result) mustBe expectedInitialGetJson
+      val addRequest = FakeRequest(POST, "/trusts/other-individuals/add/5174384721")
+        .withBody(newOtherIndividual)
+        .withHeaders(CONTENT_TYPE -> "application/json")
 
-          val addRequest = FakeRequest(POST, "/trusts/other-individuals/add/5174384721")
-            .withBody(newOtherIndividual)
-            .withHeaders(CONTENT_TYPE -> "application/json")
+      val addResult = route(application, addRequest).get
+      status(addResult) mustBe OK
 
-          val addResult = route(application, addRequest).get
-          status(addResult) mustBe OK
-
-          val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
-          status(newResult) mustBe OK
-          contentAsJson(newResult) mustBe expectedGetAfterAddOtherIndividualJson
-
-          dropTheDatabase(connection)
-        }.get
-      }
+      val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+      status(newResult) mustBe OK
+      contentAsJson(newResult) mustBe expectedGetAfterAddOtherIndividualJson
     }
   }
 }

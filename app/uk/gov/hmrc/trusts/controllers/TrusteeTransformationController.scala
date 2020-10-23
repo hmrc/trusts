@@ -90,7 +90,7 @@ class TrusteeTransformationController @Inject()(
             Ok
           }
         case _ =>
-          logger.error("[addTrustee][Session ID: ${request.sessionId}]" +
+          logger.error(s"[addTrustee][Session ID: ${request.sessionId}]" +
             " Supplied json could not be read as an individual or organisation trustee")
           Future.successful(BadRequest)
       }
@@ -113,7 +113,7 @@ class TrusteeTransformationController @Inject()(
             Ok
           }
         case _ =>
-          logger.error("[amendTrustee][Session ID: ${request.sessionId}]" +
+          logger.error(s"[amendTrustee][Session ID: ${request.sessionId}]" +
             " Supplied json could not be read as an individual or organisation trustee")
           Future.successful(BadRequest)
       }
@@ -144,7 +144,7 @@ class TrusteeTransformationController @Inject()(
             localDateService.now
           ).map(_ => Ok)
         case _ =>
-          logger.error("[promoteTrustee][Session ID: ${request.sessionId}]" +
+          logger.error(s"[promoteTrustee][Session ID: ${request.sessionId}]" +
             " Supplied json could not be read as an individual or organisation lead trustee")
           Future.successful(BadRequest)
       }

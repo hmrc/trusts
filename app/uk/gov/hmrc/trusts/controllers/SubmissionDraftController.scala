@@ -21,7 +21,7 @@ import java.time.LocalDate
 import javax.inject.Inject
 import play.api.Logging
 import play.api.libs.json._
-import play.api.mvc.{Action, AnyContent, ControllerComponents, Request}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.trusts.controllers.actions.IdentifierAction
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.registration.RegistrationSubmission.{AnswerSection, MappedPiece}

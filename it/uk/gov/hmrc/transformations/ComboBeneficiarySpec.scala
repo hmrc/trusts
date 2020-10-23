@@ -18,18 +18,18 @@ package uk.gov.hmrc.transformations
 
 import java.time.LocalDate
 
+import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
-import org.mockito.ArgumentCaptor
+import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsString, JsValue, Json}
+import play.api.test.Helpers.{CONTENT_TYPE, GET, POST, contentAsJson, route, status, _}
 import play.api.test.{FakeRequest, Helpers}
-import play.api.test.Helpers.{CONTENT_TYPE, GET, POST, contentAsJson, route, running, status, _}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
-import uk.gov.hmrc.repositories.TransformIntegrationTest
+import uk.gov.hmrc.itbase.IntegrationTestBase
 import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import uk.gov.hmrc.trusts.models.get_trust.get_trust.GetTrustSuccessResponse
@@ -39,7 +39,7 @@ import uk.gov.hmrc.trusts.utils.JsonUtils
 
 import scala.concurrent.Future
 
-class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar with TransformIntegrationTest {
+class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
   private lazy val getTrustResponseFromDES: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
@@ -51,7 +51,6 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
   }
 
   "doing a bunch of beneficiary transforms" - {
-    "must return amended data in a subsequent 'get' call" in {
       lazy val expectedGetAfterAddBeneficiaryJson: JsValue =
         JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-combo-beneficiary.json")
 
@@ -70,54 +69,47 @@ class ComboBeneficiarySpec extends FreeSpec with MustMatchers with MockitoSugar 
         )
         .build()
 
-      running(application) {
-        getConnection(application).map { connection =>
-          dropTheDatabase(connection)
+    "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
 
-          val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
-          status(result) mustBe OK
-          contentAsJson(result) mustBe expectedInitialGetJson
+      val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+      status(result) mustBe OK
+      contentAsJson(result) mustBe expectedInitialGetJson
 
-          status(addCharityBeneficiary(application)) mustBe OK
-          status(addIndividualBeneficiary(application)) mustBe OK
-          status(addUnidentifiedBeneficiary(application)) mustBe OK
-          status(amendUnidentifiedBeneficiary(application)) mustBe OK
-          status(removeCharityBeneficiary(application)) mustBe OK
-          status(amendCharityBeneficiary(application)) mustBe OK
-          status(removeOtherBeneficiary(application)) mustBe OK
-          status(amendCompanyBeneficiary(application)) mustBe OK
+      status(addCharityBeneficiary(application)) mustBe OK
+      status(addIndividualBeneficiary(application)) mustBe OK
+      status(addUnidentifiedBeneficiary(application)) mustBe OK
+      status(amendUnidentifiedBeneficiary(application)) mustBe OK
+      status(removeCharityBeneficiary(application)) mustBe OK
+      status(amendCharityBeneficiary(application)) mustBe OK
+      status(removeOtherBeneficiary(application)) mustBe OK
+      status(amendCompanyBeneficiary(application)) mustBe OK
 
-          val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
-          status(newResult) mustBe OK
-          contentAsJson(newResult) mustBe expectedGetAfterAddBeneficiaryJson
+      val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+      status(newResult) mustBe OK
+      contentAsJson(newResult) mustBe expectedGetAfterAddBeneficiaryJson
 
-          lazy val variationResponse = VariationResponse("TVN12345678")
-          val payloadCaptor = ArgumentCaptor.forClass(classOf[JsValue])
+      lazy val variationResponse = VariationResponse("TVN12345678")
+      val payloadCaptor = ArgumentCaptor.forClass(classOf[JsValue])
 
-          when(stubbedDesConnector.trustVariation(payloadCaptor.capture())).thenReturn(Future.successful(variationResponse))
+      when(stubbedDesConnector.trustVariation(payloadCaptor.capture())).thenReturn(Future.successful(variationResponse))
 
-          val declaration = Json.parse(
-            """
-              |{
-              | "declaration": {
-              |     "name": { "firstName": "John", "lastName": "Doe" }
-              | }
-              |}
-              |""".stripMargin)
+      val declaration = Json.parse(
+        """
+          |{
+          | "declaration": {
+          |     "name": { "firstName": "John", "lastName": "Doe" }
+          | }
+          |}
+          |""".stripMargin)
 
-          val declareRequest = FakeRequest(POST, "/trusts/declare/5174384721")
-            .withBody(declaration)
-            .withHeaders(CONTENT_TYPE -> "application/json")
+      val declareRequest = FakeRequest(POST, "/trusts/declare/5174384721")
+        .withBody(declaration)
+        .withHeaders(CONTENT_TYPE -> "application/json")
 
-          val declareResult = route(application, declareRequest).get
-          status(declareResult) mustBe OK
+      val declareResult = route(application, declareRequest).get
+      status(declareResult) mustBe OK
 
-          payloadCaptor.getValue mustBe expectedDeclaredBeneficiaryJson
-
-          dropTheDatabase(connection)
-        }.get
-      }
-
+      payloadCaptor.getValue mustBe expectedDeclaredBeneficiaryJson
     }
   }
 
