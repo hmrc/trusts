@@ -189,9 +189,8 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
   }
 
   def getDrafts: Action[AnyContent] = identify.async { request =>
-    submissionRepository.getAllDrafts(request.identifier).map {
+    submissionRepository.getRecentDrafts(request.identifier, request.affinityGroup).map {
       drafts =>
-
         implicit val draftWrites: Writes[RegistrationSubmissionDraft] = new Writes[RegistrationSubmissionDraft] {
           override def writes(draft: RegistrationSubmissionDraft): JsValue =
             if (draft.reference.isDefined) {
