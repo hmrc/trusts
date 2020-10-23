@@ -28,7 +28,7 @@ import play.api.libs.json.{JsNull, JsString, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
-import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
+import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.trusts.controllers.actions.FakeIdentifierAction
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.registration.{RegistrationSubmission, RegistrationSubmissionDraft}
@@ -706,7 +706,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
   ".getDrafts" should {
 
-    "get all drafts when some exist" in {
+    "get all drafts when some exist for Organisation" in {
       val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
@@ -722,7 +722,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         RegistrationSubmissionDraft("draftId2", "id", LocalDateTime.of(2010, 10, 10, 14, 40), Json.obj(), None, Some(true))
       )
 
-      when(submissionRepository.getAllDrafts(any()))
+      when(submissionRepository.getRecentDrafts(any(), any()))
         .thenReturn(Future.successful(drafts))
 
       val request = FakeRequest("GET", "path")
@@ -730,7 +730,52 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       val result = controller.getDrafts().apply(request)
       status(result) mustBe OK
 
-      verify(submissionRepository).getAllDrafts("id")
+      verify(submissionRepository).getRecentDrafts("id", Organisation)
+
+      val expectedDraftJson = Json.parse(
+        """
+          |[
+          | {
+          |   "createdAt": "2012-02-03T09:30:00",
+          |   "draftId": "draftId1",
+          |   "reference": "ref"
+          | },
+          | {
+          |   "createdAt": "2010-10-10T14:40:00",
+          |   "draftId": "draftId2"
+          | }
+          |]
+          |""".stripMargin)
+
+      contentType(result) mustBe Some(JSON)
+      contentAsJson(result) mustBe expectedDraftJson
+    }
+
+    "get all drafts when some exist for Agent" in {
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents()
+      )
+
+      val drafts = List(
+        RegistrationSubmissionDraft("draftId1", "id", LocalDateTime.of(2012, 2, 3, 9, 30), Json.obj(), Some("ref"), Some(true)),
+        RegistrationSubmissionDraft("draftId2", "id", LocalDateTime.of(2010, 10, 10, 14, 40), Json.obj(), None, Some(true))
+      )
+
+      when(submissionRepository.getRecentDrafts(any(), any()))
+        .thenReturn(Future.successful(drafts))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getDrafts().apply(request)
+      status(result) mustBe OK
+
+      verify(submissionRepository).getRecentDrafts("id", Agent)
 
       val expectedDraftJson = Json.parse(
         """
@@ -762,7 +807,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         Helpers.stubControllerComponents()
       )
 
-      when(submissionRepository.getAllDrafts(any()))
+      when(submissionRepository.getRecentDrafts(any(), any()))
         .thenReturn(Future.successful(List()))
 
       val request = FakeRequest("GET", "path")
@@ -770,7 +815,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       val result = controller.getDrafts().apply(request)
       status(result) mustBe OK
 
-      verify(submissionRepository).getAllDrafts("id")
+      verify(submissionRepository).getRecentDrafts("id", Organisation)
 
       val expectedDraftJson = Json.parse("[]")
 

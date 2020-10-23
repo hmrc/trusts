@@ -24,6 +24,8 @@ import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.BSONDocument
 import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
 import reactivemongo.play.json.collection.JSONCollection
+import uk.gov.hmrc.auth.core.AffinityGroup
+import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.trusts.config.AppConfig
 import uk.gov.hmrc.trusts.models.registration.RegistrationSubmissionDraft
 
@@ -35,7 +37,7 @@ trait RegistrationSubmissionRepository {
 
   def setDraft(uiState: RegistrationSubmissionDraft): Future[Boolean]
 
-  def getAllDrafts(internalId: String): Future[List[RegistrationSubmissionDraft]]
+  def getRecentDrafts(internalId: String, affinityGroup: AffinityGroup): Future[List[RegistrationSubmissionDraft]]
 
   def removeDraft(draftId: String, internalId: String): Future[Boolean]
 }
@@ -110,8 +112,8 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
       selector = selector, None).one[RegistrationSubmissionDraft])
   }
 
-  override def getAllDrafts(internalId: String): Future[List[RegistrationSubmissionDraft]] = {
-    val draftIdLimit = 20
+  override def getRecentDrafts(internalId: String, affinityGroup: AffinityGroup): Future[List[RegistrationSubmissionDraft]] = {
+    val maxDocs = if (affinityGroup == Organisation) 1 else -1
 
     val selector = Json.obj(
       "internalId" -> internalId,
@@ -122,7 +124,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
       selector = selector, projection = None)
             .sort(Json.obj("createdAt" -> -1))
             .cursor[RegistrationSubmissionDraft]()
-            .collect[List](draftIdLimit, Cursor.FailOnError[List[RegistrationSubmissionDraft]]()))
+            .collect[List](maxDocs, Cursor.FailOnError[List[RegistrationSubmissionDraft]]()))
   }
 
   override def removeDraft(draftId: String, internalId: String): Future[Boolean] = {

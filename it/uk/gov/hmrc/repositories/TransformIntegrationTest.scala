@@ -30,7 +30,7 @@ import scala.util.Try
 
 trait TransformIntegrationTest extends ScalaFutures {
 
-  implicit val defaultPatience: PatienceConfig = PatienceConfig(timeout = Span(30, Seconds), interval = Span(500, Millis))
+  implicit val defaultPatience: PatienceConfig = PatienceConfig(timeout = Span(30, Seconds), interval = Span(15, Millis))
 
   val connectionString = "mongodb://localhost:27017/trusts-integration"
 

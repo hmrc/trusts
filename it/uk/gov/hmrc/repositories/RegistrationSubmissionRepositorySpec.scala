@@ -21,6 +21,7 @@ import java.time.LocalDateTime
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json._
 import play.api.test.Helpers.running
+import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.trusts.models.registration.RegistrationSubmissionDraft
 import uk.gov.hmrc.trusts.repositories.RegistrationSubmissionRepository
 
@@ -58,7 +59,7 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
 
           val repository = application.injector.instanceOf[RegistrationSubmissionRepository]
 
-          repository.getAllDrafts("InternalId").futureValue mustBe Seq.empty[RegistrationSubmissionDraft]
+          repository.getRecentDrafts("InternalId", Agent).futureValue mustBe Seq.empty[RegistrationSubmissionDraft]
 
           val state1 = RegistrationSubmissionDraft(
             "draftId1",
@@ -109,7 +110,7 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
           repository.getDraft("draftId1", "InternalId2").futureValue mustBe Some(state3)
           repository.getDraft("draftId3", "InternalId").futureValue mustBe Some(state4)
 
-          repository.getAllDrafts("InternalId").futureValue mustBe Seq(state2, state1)
+          repository.getRecentDrafts("InternalId", Agent).futureValue mustBe Seq(state2, state1)
 
           dropTheDatabase(connection)
         }.get
@@ -148,5 +149,38 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
         }.get
       }
     }
+    "must be able to store and retrieve more than 20 drafts" in {
+
+      val application = applicationBuilder.build()
+
+      running(application) {
+        getConnection(application).map { connection =>
+
+          dropTheDatabase(connection)
+
+          val repository = application.injector.instanceOf[RegistrationSubmissionRepository]
+
+          repository.getRecentDrafts("InternalId", Agent).futureValue mustBe Seq.empty[RegistrationSubmissionDraft]
+
+          for (i <- 0 until 50) {
+            val state = RegistrationSubmissionDraft(
+              s"draftId$i",
+              "InternalId",
+              testDateTime,
+              data1,
+              Some("reference1"),
+              Some(true)
+            )
+            repository.setDraft(state).futureValue mustBe true
+          }
+
+          repository.getRecentDrafts("InternalId", Agent).futureValue.size mustBe 50
+          repository.getRecentDrafts("InternalId", Organisation).futureValue.size mustBe 1
+
+          dropTheDatabase(connection)
+        }.get
+      }
+    }
+
   }
 }
