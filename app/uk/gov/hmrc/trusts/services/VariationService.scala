@@ -56,7 +56,7 @@ class VariationService @Inject()(desService: DesService,
                     s" successfully transformed json for declaration")
                   doSubmit(utr, value, internalId)
                 case JsError(errors) =>
-                  logger.error("[Session ID: ${Session.id(hc)}][UTR: $utr]" +
+                  logger.error(s"[Session ID: ${Session.id(hc)}][UTR: $utr]" +
                     " Problem transforming data for ETMP submission " + errors.toString())
                   Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
               }

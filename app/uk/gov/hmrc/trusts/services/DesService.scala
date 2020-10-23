@@ -23,7 +23,6 @@ import uk.gov.hmrc.trusts.connector.DesConnector
 import uk.gov.hmrc.trusts.exceptions.InternalServerErrorException
 import uk.gov.hmrc.trusts.models._
 import uk.gov.hmrc.trusts.models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
-import uk.gov.hmrc.trusts.models.get_trust.TrustErrorResponse
 import uk.gov.hmrc.trusts.models.get_trust.get_trust.{GetTrustResponse, GetTrustSuccessResponse, TrustProcessedResponse}
 import uk.gov.hmrc.trusts.models.registration.RegistrationResponse
 import uk.gov.hmrc.trusts.models.tax_enrolments.SubscriptionIdResponse
