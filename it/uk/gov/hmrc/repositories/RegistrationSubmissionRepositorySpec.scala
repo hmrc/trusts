@@ -20,12 +20,11 @@ import java.time.LocalDateTime
 
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json._
-import play.api.test.Helpers.running
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.trusts.models.registration.RegistrationSubmissionDraft
 import uk.gov.hmrc.trusts.repositories.RegistrationSubmissionRepository
 
-class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers with TransformIntegrationTest {
+class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers with NewTransformIntegrationTest {
 
   // Make sure we use value of LocalDateTime that survives JSON round trip - and isn't expired.
   private val testDateTime: LocalDateTime = Json.toJson(LocalDateTime.now()).as[LocalDateTime]
@@ -48,139 +47,107 @@ class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers wi
 
   "the registration submission repository" - {
 
-    "must be able to store and retrieve data" in {
+    "must be able to store and retrieve data" in assertMongoTest(createApplication) { app =>
+      val repository = app.injector.instanceOf[RegistrationSubmissionRepository]
 
-      val application = applicationBuilder.build()
+      repository.getRecentDrafts("InternalId", Agent).futureValue mustBe Seq.empty[RegistrationSubmissionDraft]
 
-      running(application) {
-        getConnection(application).map { connection =>
+      val state1 = RegistrationSubmissionDraft(
+        "draftId1",
+        "InternalId",
+        testDateTime,
+        data1,
+        Some("reference1"),
+        Some(true)
+      )
 
-          dropTheDatabase(connection)
+      repository.setDraft(state1).futureValue mustBe true
 
-          val repository = application.injector.instanceOf[RegistrationSubmissionRepository]
+      val state2 = RegistrationSubmissionDraft(
+        "draftId2",
+        "InternalId",
+        testDateTime,
+        data2,
+        Some("reference2"),
+        Some(true)
+      )
 
-          repository.getRecentDrafts("InternalId", Agent).futureValue mustBe Seq.empty[RegistrationSubmissionDraft]
+      repository.setDraft(state2).futureValue mustBe true
 
-          val state1 = RegistrationSubmissionDraft(
-            "draftId1",
-            "InternalId",
-            testDateTime,
-            data1,
-            Some("reference1"),
-            Some(true)
-          )
+      val state3 = RegistrationSubmissionDraft(
+        "draftId1",
+        "InternalId2",
+        testDateTime,
+        data3,
+        None,
+        None
+      )
 
-          repository.setDraft(state1).futureValue mustBe true
+      repository.setDraft(state3).futureValue mustBe true
 
-          val state2 = RegistrationSubmissionDraft(
-            "draftId2",
-            "InternalId",
-            testDateTime,
-            data2,
-            Some("reference2"),
-            Some(true)
-          )
+      val state4 = RegistrationSubmissionDraft(
+        "draftId3",
+        "InternalId",
+        testDateTime,
+        data2,
+        Some("reference3"),
+        Some(false)
+      )
 
-          repository.setDraft(state2).futureValue mustBe true
+      repository.setDraft(state4).futureValue mustBe true
 
-          val state3 = RegistrationSubmissionDraft(
-            "draftId1",
-            "InternalId2",
-            testDateTime,
-            data3,
-            None,
-            None
-          )
+      repository.getDraft("draftId1", "InternalId").futureValue mustBe Some(state1)
+      repository.getDraft("draftId2", "InternalId").futureValue mustBe Some(state2)
+      repository.getDraft("draftId1", "InternalId2").futureValue mustBe Some(state3)
+      repository.getDraft("draftId3", "InternalId").futureValue mustBe Some(state4)
 
-          repository.setDraft(state3).futureValue mustBe true
-
-          val state4 = RegistrationSubmissionDraft(
-            "draftId3",
-            "InternalId",
-            testDateTime,
-            data2,
-            Some("reference3"),
-            Some(false)
-          )
-
-          repository.setDraft(state4).futureValue mustBe true
-
-          repository.getDraft("draftId1", "InternalId").futureValue mustBe Some(state1)
-          repository.getDraft("draftId2", "InternalId").futureValue mustBe Some(state2)
-          repository.getDraft("draftId1", "InternalId2").futureValue mustBe Some(state3)
-          repository.getDraft("draftId3", "InternalId").futureValue mustBe Some(state4)
-
-          repository.getRecentDrafts("InternalId", Agent).futureValue mustBe Seq(state2, state1)
-
-          dropTheDatabase(connection)
-        }.get
-      }
-    }
-    "must be able to remove drafts no longer being used" in {
-      val application = applicationBuilder.build()
-
-      running(application) {
-        getConnection(application).map { connection =>
-
-          dropTheDatabase(connection)
-
-          val repository = application.injector.instanceOf[RegistrationSubmissionRepository]
-
-          repository.removeDraft("draftId1", "InternalId").futureValue mustBe true
-
-          val state1 = RegistrationSubmissionDraft(
-            "draftId1",
-            "InternalId",
-            testDateTime,
-            data1,
-            Some("ref1"),
-            Some(true)
-          )
-
-          repository.setDraft(state1).futureValue mustBe true
-
-          repository.getDraft("draftId1", "InternalId").futureValue mustBe Some(state1)
-
-          repository.removeDraft("draftId1", "InternalId").futureValue mustBe true
-
-          repository.getDraft("draftId1", "InternalId").futureValue mustBe None
-
-          dropTheDatabase(connection)
-        }.get
-      }
-    }
-    "must be able to store and retrieve more than 20 drafts" in {
-
-      val application = applicationBuilder.build()
-
-      running(application) {
-        getConnection(application).map { connection =>
-
-          dropTheDatabase(connection)
-
-          val repository = application.injector.instanceOf[RegistrationSubmissionRepository]
-
-          repository.getRecentDrafts("InternalId", Agent).futureValue mustBe Seq.empty[RegistrationSubmissionDraft]
-
-          for (i <- 0 until 50) {
-            val state = RegistrationSubmissionDraft(
-              s"draftId$i",
-              "InternalId",
-              testDateTime,
-              data1,
-              Some("reference1"),
-              Some(true)
-            )
-            repository.setDraft(state).futureValue mustBe true
-          }
-
-          repository.getRecentDrafts("InternalId", Agent).futureValue.size mustBe 50
-          repository.getRecentDrafts("InternalId", Organisation).futureValue.size mustBe 1
-
-          dropTheDatabase(connection)
-        }.get
-      }
+      repository.getRecentDrafts("InternalId", Agent).futureValue mustBe Seq(state2, state1)
     }
 
+    "must be able to remove drafts no longer being used" in assertMongoTest(createApplication) { app =>
+
+      val repository = app.injector.instanceOf[RegistrationSubmissionRepository]
+
+      repository.removeDraft("draftId1", "InternalId").futureValue mustBe true
+
+      val state1 = RegistrationSubmissionDraft(
+        "draftId1",
+        "InternalId",
+        testDateTime,
+        data1,
+        Some("ref1"),
+        Some(true)
+      )
+
+      repository.setDraft(state1).futureValue mustBe true
+
+      repository.getDraft("draftId1", "InternalId").futureValue mustBe Some(state1)
+
+      repository.removeDraft("draftId1", "InternalId").futureValue mustBe true
+
+      repository.getDraft("draftId1", "InternalId").futureValue mustBe None
+    }
+
+    "must be able to store and retrieve more than 20 drafts"  in assertMongoTest(createApplication) { app =>
+
+      val repository = app.injector.instanceOf[RegistrationSubmissionRepository]
+
+      repository.getRecentDrafts("InternalId", Agent).futureValue mustBe Seq.empty[RegistrationSubmissionDraft]
+
+      for (i <- 0 until 50) {
+        val state = RegistrationSubmissionDraft(
+          s"draftId$i",
+          "InternalId",
+          testDateTime,
+          data1,
+          Some("reference1"),
+          Some(true)
+        )
+        repository.setDraft(state).futureValue mustBe true
+      }
+
+      repository.getRecentDrafts("InternalId", Agent).futureValue.size mustBe 50
+      repository.getRecentDrafts("InternalId", Organisation).futureValue.size mustBe 1
+    }
   }
 }
