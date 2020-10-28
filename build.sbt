@@ -11,7 +11,7 @@ lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
   Seq(
     ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;trusts.Routes.*;estates.Routes.*;prod.*;testOnlyDoNotUseInAppConf.*;views.html.*;" +
-      "uk.gov.hmrc.BuildInfo;app.*;prod.*;uk.gov.hmrc.trusts.config.*",
+      "uk.gov.hmrc.BuildInfo;app.*;prod.*;config.*",
     ScoverageKeys.coverageMinimum := 97,
     ScoverageKeys.coverageFailOnMinimum := false,
     ScoverageKeys.coverageHighlighting := true

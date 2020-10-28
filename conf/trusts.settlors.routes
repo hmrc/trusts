@@ -1,12 +1,12 @@
 
-POST        /amend-individual/:utr/:index               uk.gov.hmrc.trusts.controllers.SettlorTransformationController.amendIndividualSettlor(utr: String, index: Int)
+POST        /amend-individual/:utr/:index               controllers.SettlorTransformationController.amendIndividualSettlor(utr: String, index: Int)
 
-POST        /amend-business/:utr/:index                 uk.gov.hmrc.trusts.controllers.SettlorTransformationController.amendBusinessSettlor(utr: String, index: Int)
+POST        /amend-business/:utr/:index                 controllers.SettlorTransformationController.amendBusinessSettlor(utr: String, index: Int)
 
-PUT         /:utr/remove                                uk.gov.hmrc.trusts.controllers.SettlorTransformationController.removeSettlor(utr: String)
+PUT         /:utr/remove                                controllers.SettlorTransformationController.removeSettlor(utr: String)
 
-POST        /amend-deceased/:utr                        uk.gov.hmrc.trusts.controllers.SettlorTransformationController.amendDeceasedSettlor(utr: String)
+POST        /amend-deceased/:utr                        controllers.SettlorTransformationController.amendDeceasedSettlor(utr: String)
 
-POST        /add-individual/:utr                        uk.gov.hmrc.trusts.controllers.SettlorTransformationController.addIndividualSettlor(utr: String)
+POST        /add-individual/:utr                        controllers.SettlorTransformationController.addIndividualSettlor(utr: String)
 
-POST        /add-business/:utr                          uk.gov.hmrc.trusts.controllers.SettlorTransformationController.addBusinessSettlor(utr: String)
+POST        /add-business/:utr                          controllers.SettlorTransformationController.addBusinessSettlor(utr: String)

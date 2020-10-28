@@ -8,8 +8,8 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import reactivemongo.api.{DefaultDB, MongoConnection}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
-import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import uk.gov.hmrc.trusts.repositories.TrustsMongoDriver
+import controllers.actions.{FakeIdentifierAction, IdentifierAction}
+import repositories.TrustsMongoDriver
 import play.api.test.Helpers.stubControllerComponents
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration

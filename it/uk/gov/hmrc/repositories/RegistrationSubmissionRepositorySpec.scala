@@ -22,8 +22,8 @@ import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import play.api.libs.json._
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.itbase.IntegrationTestBase
-import uk.gov.hmrc.trusts.models.registration.RegistrationSubmissionDraft
-import uk.gov.hmrc.trusts.repositories.RegistrationSubmissionRepository
+import models.registration.RegistrationSubmissionDraft
+import repositories.RegistrationSubmissionRepository
 
 class RegistrationSubmissionRepositorySpec extends AsyncFreeSpec with MustMatchers with IntegrationTestBase {
 

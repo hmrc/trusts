@@ -1,51 +1,51 @@
-POST        /                                               uk.gov.hmrc.trusts.controllers.RegisterTrustController.registration
+POST        /                                               controllers.RegisterTrustController.registration
 
 # Used by trusts-frontend
-GET         /submission-drafts/:draftId/status              uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "status")
-POST        /submission-drafts/:draftId/status              uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSection(draftId: String, sectionKey: String = "status")
-GET         /submission-drafts/:draftId/registration        uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "registration")
-GET         /submission-drafts/:draftId/answerSections      uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "answerSections")
+GET         /submission-drafts/:draftId/status              controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "status")
+POST        /submission-drafts/:draftId/status              controllers.SubmissionDraftController.setSection(draftId: String, sectionKey: String = "status")
+GET         /submission-drafts/:draftId/registration        controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "registration")
+GET         /submission-drafts/:draftId/answerSections      controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "answerSections")
 
-GET         /submission-drafts/:draftId/main                uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "main")
-POST        /submission-drafts/:draftId/main                uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSection(draftId: String, sectionKey: String = "main")
+GET         /submission-drafts/:draftId/main                controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "main")
+POST        /submission-drafts/:draftId/main                controllers.SubmissionDraftController.setSection(draftId: String, sectionKey: String = "main")
 
-GET         /submission-drafts                              uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getDrafts()
-DELETE      /submission-drafts/:draftId                     uk.gov.hmrc.trusts.controllers.SubmissionDraftController.removeDraft(draftId: String)
+GET         /submission-drafts                              controllers.SubmissionDraftController.getDrafts()
+DELETE      /submission-drafts/:draftId                     controllers.SubmissionDraftController.removeDraft(draftId: String)
 
 # Used by register-trust-beneficiary-frontend
-GET         /submission-drafts/:draftId/beneficiaries       uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "beneficiaries")
-POST        /submission-drafts/:draftId/set/beneficiaries   uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "beneficiaries")
+GET         /submission-drafts/:draftId/beneficiaries       controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "beneficiaries")
+POST        /submission-drafts/:draftId/set/beneficiaries   controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "beneficiaries")
 
 # Used by register-trust-trustee-frontend
-GET         /submission-drafts/:draftId/trustees            uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "trustees")
-POST        /submission-drafts/:draftId/set/trustees        uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "trustees")
+GET         /submission-drafts/:draftId/trustees            controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "trustees")
+POST        /submission-drafts/:draftId/set/trustees        controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "trustees")
 
 # Used by register-trust-protector-frontend
-GET         /submission-drafts/:draftId/protectors          uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "protectors")
-POST        /submission-drafts/:draftId/set/protectors      uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "protectors")
+GET         /submission-drafts/:draftId/protectors          controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "protectors")
+POST        /submission-drafts/:draftId/set/protectors      controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "protectors")
 
 # Used by register-trust-other-individuals-frontend
-GET         /submission-drafts/:draftId/otherIndividuals          uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "otherIndividuals")
-POST        /submission-drafts/:draftId/set/otherIndividuals      uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "otherIndividuals")
+GET         /submission-drafts/:draftId/otherIndividuals          controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "otherIndividuals")
+POST        /submission-drafts/:draftId/set/otherIndividuals      controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "otherIndividuals")
 
 # Used by register-trust-tax-liability-frontend
-GET         /submission-drafts/:draftId/taxLiability          uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "taxLiability")
-POST        /submission-drafts/:draftId/set/taxLiability      uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "taxLiability")
+GET         /submission-drafts/:draftId/taxLiability          controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "taxLiability")
+POST        /submission-drafts/:draftId/set/taxLiability      controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "taxLiability")
 
 # Used by register-trust-details-frontend
-GET         /submission-drafts/:draftId/trustDetails          uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "trustDetails")
-POST        /submission-drafts/:draftId/set/trustDetails      uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "trustDetails")
+GET         /submission-drafts/:draftId/trustDetails          controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "trustDetails")
+POST        /submission-drafts/:draftId/set/trustDetails      controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "trustDetails")
 
 # Used by register-settlors-frontend
-GET         /submission-drafts/:draftId/settlors              uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "settlors")
-POST        /submission-drafts/:draftId/set/settlors          uk.gov.hmrc.trusts.controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "settlors")
+GET         /submission-drafts/:draftId/settlors              controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "settlors")
+POST        /submission-drafts/:draftId/set/settlors          controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "settlors")
 
-GET         /submission-drafts/:draftId/when-trust-setup       uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getWhenTrustSetup(draftId: String)
+GET         /submission-drafts/:draftId/when-trust-setup       controllers.SubmissionDraftController.getWhenTrustSetup(draftId: String)
 
-GET         /submission-drafts/:draftId/trust-name       uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getTrustName(draftId: String)
+GET         /submission-drafts/:draftId/trust-name       controllers.SubmissionDraftController.getTrustName(draftId: String)
 
-GET         /submission-drafts/:draftId/lead-trustee           uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getLeadTrustee(draftId: String)
+GET         /submission-drafts/:draftId/lead-trustee           controllers.SubmissionDraftController.getLeadTrustee(draftId: String)
 
-POST        /submission-drafts/:draftId/reset/taxLiability   uk.gov.hmrc.trusts.controllers.SubmissionDraftController.reset(draftId: String, section: String = "taxLiability", mappedDataKey: String = "yearsReturns")
+POST        /submission-drafts/:draftId/reset/taxLiability   controllers.SubmissionDraftController.reset(draftId: String, section: String = "taxLiability", mappedDataKey: String = "yearsReturns")
 
-GET         /submission-drafts/:draftId/correspondence-address uk.gov.hmrc.trusts.controllers.SubmissionDraftController.getCorrespondenceAddress(draftId: String)
+GET         /submission-drafts/:draftId/correspondence-address controllers.SubmissionDraftController.getCorrespondenceAddress(draftId: String)
