@@ -30,12 +30,12 @@ import play.api.test.Helpers.{CONTENT_TYPE, GET, POST, contentAsJson, route, sta
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
-import uk.gov.hmrc.trusts.connector.DesConnector
-import uk.gov.hmrc.trusts.controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import uk.gov.hmrc.trusts.models.get_trust.get_trust.GetTrustSuccessResponse
-import uk.gov.hmrc.trusts.models.variation.VariationResponse
-import uk.gov.hmrc.trusts.services.LocalDateService
-import uk.gov.hmrc.trusts.utils.JsonUtils
+import connector.DesConnector
+import controllers.actions.{FakeIdentifierAction, IdentifierAction}
+import models.get_trust.get_trust.GetTrustSuccessResponse
+import models.variation.VariationResponse
+import services.LocalDateService
+import utils.JsonUtils
 
 import scala.concurrent.Future
 

@@ -22,7 +22,7 @@ import play.api.libs.json._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.itbase.IntegrationTestBase
-import uk.gov.hmrc.trusts.models.registration.RegistrationSubmissionDraftData
+import models.registration.RegistrationSubmissionDraftData
 
 class SubmissionDraftManagementSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
 

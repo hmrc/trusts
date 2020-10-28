@@ -19,7 +19,7 @@ package uk.gov.hmrc.repositories
 import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import play.api.libs.json.Json
 import uk.gov.hmrc.itbase.IntegrationTestBase
-import uk.gov.hmrc.trusts.repositories.CacheRepository
+import repositories.CacheRepository
 
 class CacheRepositorySpec extends AsyncFreeSpec with MustMatchers with IntegrationTestBase {
 

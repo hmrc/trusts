@@ -21,7 +21,7 @@ import org.scalatest.time.{Millis, Seconds, Span}
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import reactivemongo.api.{DefaultDB, MongoConnection}
-import uk.gov.hmrc.trusts.repositories.TrustsMongoDriver
+import repositories.TrustsMongoDriver
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global

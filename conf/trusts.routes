@@ -7,96 +7,96 @@
 ->          /other-individuals                                  trusts.otherIndividuals.Routes
 ->          /register                                           register.Routes
 
-POST        /check                                              uk.gov.hmrc.trusts.controllers.CheckTrustController.checkExistingTrust
+POST        /check                                              controllers.CheckTrustController.checkExistingTrust
 
-POST        /tax-enrolment/callback/subscriptions               uk.gov.hmrc.trusts.controllers.TaxEnrolmentCallbackController.subscriptionCallback
+POST        /tax-enrolment/callback/subscriptions               controllers.TaxEnrolmentCallbackController.subscriptionCallback
 
-GET         /:identifier/refresh                                uk.gov.hmrc.trusts.controllers.GetTrustController.getFromEtmp(identifier: String)
+GET         /:identifier/refresh                                controllers.GetTrustController.getFromEtmp(identifier: String)
 
-GET         /:identifier                                         uk.gov.hmrc.trusts.controllers.GetTrustController.get(identifier: String, applyTransforms: Boolean = false)
+GET         /:identifier                                         controllers.GetTrustController.get(identifier: String, applyTransforms: Boolean = false)
 
-GET         /:utr/transformed                                   uk.gov.hmrc.trusts.controllers.GetTrustController.get(utr: String, applyTransforms: Boolean = true)
+GET         /:utr/transformed                                   controllers.GetTrustController.get(utr: String, applyTransforms: Boolean = true)
 
-GET         /:utr/transformed/lead-trustee                      uk.gov.hmrc.trusts.controllers.GetTrustController.getLeadTrustee(utr: String)
+GET         /:utr/transformed/lead-trustee                      controllers.GetTrustController.getLeadTrustee(utr: String)
 
-GET         /:utr/trust-details                                 uk.gov.hmrc.trusts.controllers.GetTrustController.getTrustDetails(utr: String)
+GET         /:utr/trust-details                                 controllers.GetTrustController.getTrustDetails(utr: String)
 
-GET         /:utr/transformed/beneficiaries                     uk.gov.hmrc.trusts.controllers.GetTrustController.getBeneficiaries(utr: String)
+GET         /:utr/transformed/beneficiaries                     controllers.GetTrustController.getBeneficiaries(utr: String)
 
-GET         /:utr/transformed/trustees                          uk.gov.hmrc.trusts.controllers.GetTrustController.getTrustees(utr: String)
+GET         /:utr/transformed/trustees                          controllers.GetTrustController.getTrustees(utr: String)
 
-GET         /:utr/transformed/settlors                          uk.gov.hmrc.trusts.controllers.GetTrustController.getSettlors(utr: String)
+GET         /:utr/transformed/settlors                          controllers.GetTrustController.getSettlors(utr: String)
 
-GET         /:utr/transformed/protectors                        uk.gov.hmrc.trusts.controllers.GetTrustController.getProtectors(utr: String)
+GET         /:utr/transformed/protectors                        controllers.GetTrustController.getProtectors(utr: String)
 
-GET         /:utr/transformed/other-individuals                 uk.gov.hmrc.trusts.controllers.GetTrustController.getOtherIndividuals(utr: String)
+GET         /:utr/transformed/other-individuals                 controllers.GetTrustController.getOtherIndividuals(utr: String)
 
-GET         /:utr/transformed/protectors-already-exist          uk.gov.hmrc.trusts.controllers.GetTrustController.getProtectorsAlreadyExist(utr: String)
+GET         /:utr/transformed/protectors-already-exist          controllers.GetTrustController.getProtectorsAlreadyExist(utr: String)
 
-GET         /:utr/transformed/other-individuals-already-exist   uk.gov.hmrc.trusts.controllers.GetTrustController.getOtherIndividualsAlreadyExist(utr: String)
+GET         /:utr/transformed/other-individuals-already-exist   controllers.GetTrustController.getOtherIndividualsAlreadyExist(utr: String)
 
-GET         /:utr/transformed/deceased-settlor-death-recorded   uk.gov.hmrc.trusts.controllers.GetTrustController.getDeceasedSettlorDeathRecorded(utr: String)
+GET         /:utr/transformed/deceased-settlor-death-recorded   controllers.GetTrustController.getDeceasedSettlorDeathRecorded(utr: String)
 
-POST        /variation                                          uk.gov.hmrc.trusts.controllers.testOnly.TrustVariationsTestController.trustVariation
+POST        /variation                                          controllers.testOnly.TrustVariationsTestController.trustVariation
 
-POST        /declare/:utr                                       uk.gov.hmrc.trusts.controllers.TrustVariationsController.declare(utr: String)
+POST        /declare/:utr                                       controllers.TrustVariationsController.declare(utr: String)
 
-POST        /amend-lead-trustee/:utr                            uk.gov.hmrc.trusts.controllers.TrusteeTransformationController.amendLeadTrustee(utr: String)
+POST        /amend-lead-trustee/:utr                            controllers.TrusteeTransformationController.amendLeadTrustee(utr: String)
 
-POST        /add-trustee/:utr                                   uk.gov.hmrc.trusts.controllers.TrusteeTransformationController.addTrustee(utr: String)
+POST        /add-trustee/:utr                                   controllers.TrusteeTransformationController.addTrustee(utr: String)
 
-POST        /amend-trustee/:utr/:index                          uk.gov.hmrc.trusts.controllers.TrusteeTransformationController.amendTrustee(utr: String, index: Int)
+POST        /amend-trustee/:utr/:index                          controllers.TrusteeTransformationController.amendTrustee(utr: String, index: Int)
 
-POST        /promote-trustee/:utr/:index                        uk.gov.hmrc.trusts.controllers.TrusteeTransformationController.promoteTrustee(utr: String, index: Int)
+POST        /promote-trustee/:utr/:index                        controllers.TrusteeTransformationController.promoteTrustee(utr: String, index: Int)
 
-PUT         /:utr/trustees/remove                               uk.gov.hmrc.trusts.controllers.TrusteeTransformationController.removeTrustee(utr: String)
+PUT         /:utr/trustees/remove                               controllers.TrusteeTransformationController.removeTrustee(utr: String)
 
-POST        /add-unidentified-beneficiary/:utr                  uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.addUnidentifiedBeneficiary(utr: String)
+POST        /add-unidentified-beneficiary/:utr                  controllers.BeneficiaryTransformationController.addUnidentifiedBeneficiary(utr: String)
 
-POST        /amend-unidentified-beneficiary/:utr/:index         uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendUnidentifiedBeneficiary(utr: String, index: Int)
+POST        /amend-unidentified-beneficiary/:utr/:index         controllers.BeneficiaryTransformationController.amendUnidentifiedBeneficiary(utr: String, index: Int)
 
-POST        /amend-individual-beneficiary/:utr/:index           uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendIndividualBeneficiary(utr: String, index: Int)
+POST        /amend-individual-beneficiary/:utr/:index           controllers.BeneficiaryTransformationController.amendIndividualBeneficiary(utr: String, index: Int)
 
-POST        /add-individual-beneficiary/:utr                    uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.addIndividualBeneficiary(utr: String)
+POST        /add-individual-beneficiary/:utr                    controllers.BeneficiaryTransformationController.addIndividualBeneficiary(utr: String)
 
-POST        /add-charity-beneficiary/:utr                       uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.addCharityBeneficiary(utr: String)
+POST        /add-charity-beneficiary/:utr                       controllers.BeneficiaryTransformationController.addCharityBeneficiary(utr: String)
 
-POST        /amend-charity-beneficiary/:utr/:index              uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendCharityBeneficiary(utr: String, index: Int)
+POST        /amend-charity-beneficiary/:utr/:index              controllers.BeneficiaryTransformationController.amendCharityBeneficiary(utr: String, index: Int)
 
-POST        /add-other-beneficiary/:utr                         uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.addOtherBeneficiary(utr: String)
+POST        /add-other-beneficiary/:utr                         controllers.BeneficiaryTransformationController.addOtherBeneficiary(utr: String)
 
-POST        /amend-other-beneficiary/:utr/:index                uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendOtherBeneficiary(utr: String, index: Int)
+POST        /amend-other-beneficiary/:utr/:index                controllers.BeneficiaryTransformationController.amendOtherBeneficiary(utr: String, index: Int)
 
-POST        /add-company-beneficiary/:utr                       uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.addCompanyBeneficiary(utr: String)
+POST        /add-company-beneficiary/:utr                       controllers.BeneficiaryTransformationController.addCompanyBeneficiary(utr: String)
 
-POST        /add-trust-beneficiary/:utr                         uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.addTrustBeneficiary(utr: String)
+POST        /add-trust-beneficiary/:utr                         controllers.BeneficiaryTransformationController.addTrustBeneficiary(utr: String)
 
-POST        /amend-company-beneficiary/:utr/:index              uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendCompanyBeneficiary(utr: String, index: Int)
+POST        /amend-company-beneficiary/:utr/:index              controllers.BeneficiaryTransformationController.amendCompanyBeneficiary(utr: String, index: Int)
 
-POST        /amend-trust-beneficiary/:utr/:index                uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendTrustBeneficiary(utr: String, index: Int)
+POST        /amend-trust-beneficiary/:utr/:index                controllers.BeneficiaryTransformationController.amendTrustBeneficiary(utr: String, index: Int)
 
-POST        /add-large-beneficiary/:utr                         uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.addLargeBeneficiary(utr: String)
+POST        /add-large-beneficiary/:utr                         controllers.BeneficiaryTransformationController.addLargeBeneficiary(utr: String)
 
-POST        /amend-large-beneficiary/:utr/:index                uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendLargeBeneficiary(utr: String, index: Int)
+POST        /amend-large-beneficiary/:utr/:index                controllers.BeneficiaryTransformationController.amendLargeBeneficiary(utr: String, index: Int)
 
-PUT         /:utr/beneficiaries/remove                          uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.removeBeneficiary(utr: String)
+PUT         /:utr/beneficiaries/remove                          controllers.BeneficiaryTransformationController.removeBeneficiary(utr: String)
 
-POST        /amend-individual-settlor/:utr/:index               uk.gov.hmrc.trusts.controllers.SettlorTransformationController.amendIndividualSettlor(utr: String, index: Int)
+POST        /amend-individual-settlor/:utr/:index               controllers.SettlorTransformationController.amendIndividualSettlor(utr: String, index: Int)
 
-POST        /amend-business-settlor/:utr/:index                 uk.gov.hmrc.trusts.controllers.SettlorTransformationController.amendBusinessSettlor(utr: String, index: Int)
+POST        /amend-business-settlor/:utr/:index                 controllers.SettlorTransformationController.amendBusinessSettlor(utr: String, index: Int)
 
-PUT         /:utr/settlors/remove                               uk.gov.hmrc.trusts.controllers.SettlorTransformationController.removeSettlor(utr: String)
+PUT         /:utr/settlors/remove                               controllers.SettlorTransformationController.removeSettlor(utr: String)
 
-POST        /amend-deceased-settlor/:utr                        uk.gov.hmrc.trusts.controllers.SettlorTransformationController.amendDeceasedSettlor(utr: String)
+POST        /amend-deceased-settlor/:utr                        controllers.SettlorTransformationController.amendDeceasedSettlor(utr: String)
 
-POST        /add-individual-settlor/:utr                        uk.gov.hmrc.trusts.controllers.SettlorTransformationController.addIndividualSettlor(utr: String)
+POST        /add-individual-settlor/:utr                        controllers.SettlorTransformationController.addIndividualSettlor(utr: String)
 
-POST        /add-business-settlor/:utr                          uk.gov.hmrc.trusts.controllers.SettlorTransformationController.addBusinessSettlor(utr: String)
+POST        /add-business-settlor/:utr                          controllers.SettlorTransformationController.addBusinessSettlor(utr: String)
 
-POST        /add-individual-protector/:utr                      uk.gov.hmrc.trusts.controllers.ProtectorTransformationController.addIndividualProtector(utr: String)
+POST        /add-individual-protector/:utr                      controllers.ProtectorTransformationController.addIndividualProtector(utr: String)
 
-POST        /add-business-protector/:utr                      uk.gov.hmrc.trusts.controllers.ProtectorTransformationController.addBusinessProtector(utr: String)
+POST        /add-business-protector/:utr                      controllers.ProtectorTransformationController.addBusinessProtector(utr: String)
 
-POST        /amend-business-protector/:utr/:index               uk.gov.hmrc.trusts.controllers.ProtectorTransformationController.amendBusinessProtector(utr: String, index: Int)
+POST        /amend-business-protector/:utr/:index               controllers.ProtectorTransformationController.amendBusinessProtector(utr: String, index: Int)
 
-PUT         /:utr/protectors/remove                             uk.gov.hmrc.trusts.controllers.ProtectorTransformationController.removeProtector(utr: String)
+PUT         /:utr/protectors/remove                             controllers.ProtectorTransformationController.removeProtector(utr: String)

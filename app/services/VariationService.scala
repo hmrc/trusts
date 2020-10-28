@@ -1,0 +1,120 @@
+/*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package services
+
+
+import javax.inject.Inject
+import play.api.Logging
+import play.api.libs.json._
+import uk.gov.hmrc.http.HeaderCarrier
+import exceptions.{EtmpCacheDataStaleException, InternalServerErrorException}
+import models.DeclarationForApi
+import models.auditing.TrustAuditing
+import models.get_trust.get_trust
+import models.get_trust.get_trust.TrustProcessedResponse
+import models.variation.VariationResponse
+import transformers.DeclarationTransformer
+import utils.JsonOps._
+import utils.Session
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+
+class VariationService @Inject()(desService: DesService,
+                                 transformationService: TransformationService,
+                                 declarationTransformer: DeclarationTransformer,
+                                 auditService: AuditService,
+                                 localDateService: LocalDateService) extends Logging {
+
+  def submitDeclaration(utr: String, internalId: String, declaration: DeclarationForApi)
+                       (implicit hc: HeaderCarrier): Future[VariationResponse] = {
+
+    getCachedTrustData(utr, internalId).flatMap { originalResponse: TrustProcessedResponse =>
+      transformationService.populateLeadTrusteeAddress(originalResponse.getTrust) match {
+        case JsSuccess(originalJson, _) =>
+          transformationService.applyDeclarationTransformations(utr, internalId, originalJson).flatMap {
+            case JsSuccess(transformedJson, _) =>
+              val response = get_trust.TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
+              declarationTransformer.transform(response, originalJson, declaration, localDateService.now) match {
+                case JsSuccess(value, _) =>
+                  logger.info(s"[Session ID: ${Session.id(hc)}][UTR: $utr]" +
+                    s" successfully transformed json for declaration")
+                  doSubmit(utr, value, internalId)
+                case JsError(errors) =>
+                  logger.error(s"[Session ID: ${Session.id(hc)}][UTR: $utr]" +
+                    s" Problem transforming data for ETMP submission " + errors.toString())
+                  Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
+              }
+            case JsError(errors) =>
+              logger.error(s"[Session ID: ${Session.id(hc)}][UTR: $utr]" +
+                s" Failed to transform trust info $errors")
+              Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
+          }
+        case JsError(errors) =>
+          logger.error(s"[Session ID: ${Session.id(hc)}][UTR: $utr]" +
+            s" Failed to populate lead trustee address $errors")
+          Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
+      }
+   }
+  }
+
+  private def getCachedTrustData(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[TrustProcessedResponse] = {
+    for {
+      response <- desService.getTrustInfo(utr, internalId)
+      fbn <- desService.getTrustInfoFormBundleNo(utr)
+    } yield response match {
+      case tpr: TrustProcessedResponse if tpr.responseHeader.formBundleNo == fbn =>
+        logger.info(s"[submitDeclaration][Session ID: ${Session.id(hc)}][UTR: $utr]" +
+          s" returning TrustProcessedResponse")
+        response.asInstanceOf[TrustProcessedResponse]
+      case _: TrustProcessedResponse =>
+        logger.info(s"[submitDeclaration][Session ID: ${Session.id(hc)}][UTR: $utr]" +
+          s" ETMP cached data in mongo has become stale, rejecting submission")
+        throw EtmpCacheDataStaleException
+      case _ =>
+        logger.warn(s"[submitDeclaration][Session ID: ${Session.id(hc)}][UTR: $utr]" +
+          s" Trust was not in a processed state")
+        throw InternalServerErrorException("Submission could not proceed, Trust data was not in a processed state")
+    }
+  }
+
+  private def doSubmit(utr: String, value: JsValue, internalId: String)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
+
+    val payload = value.applyRules
+
+    auditService.audit(
+      TrustAuditing.TRUST_VARIATION_ATTEMPT,
+      payload,
+      internalId,
+      Json.toJson(Json.obj())
+    )
+
+    desService.trustVariation(payload) map { response =>
+
+      logger.info(s"[doSubmit][Session ID: ${Session.id(hc)}][UTR: $utr] variation submitted")
+
+      auditService.auditVariationSubmitted(
+        internalId,
+        payload,
+        response
+      )
+
+      response
+    }
+  }
+}
