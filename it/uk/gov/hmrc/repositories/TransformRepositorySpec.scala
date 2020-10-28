@@ -20,10 +20,10 @@ import java.time.LocalDate
 
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.test.Helpers.running
-import uk.gov.hmrc.trusts.models.NameType
-import uk.gov.hmrc.trusts.models.variation.{AmendedLeadTrusteeIndType, IdentificationType, TrusteeIndividualType}
-import uk.gov.hmrc.trusts.repositories.TransformationRepository
-import uk.gov.hmrc.trusts.transformers.{AddTrusteeIndTransform, AmendLeadTrusteeIndTransform, ComposedDeltaTransform}
+import models.NameType
+import models.variation.{AmendedLeadTrusteeIndType, IdentificationType, TrusteeIndividualType}
+import repositories.TransformationRepository
+import transformers.{AddTrusteeIndTransform, AmendLeadTrusteeIndTransform, ComposedDeltaTransform}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

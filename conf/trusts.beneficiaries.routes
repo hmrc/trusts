@@ -1,30 +1,30 @@
 
-POST        /add-unidentified/:utr                  uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.addUnidentifiedBeneficiary(utr: String)
+POST        /add-unidentified/:utr                  controllers.BeneficiaryTransformationController.addUnidentifiedBeneficiary(utr: String)
 
-POST        /amend-unidentified/:utr/:index         uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendUnidentifiedBeneficiary(utr: String, index: Int)
+POST        /amend-unidentified/:utr/:index         controllers.BeneficiaryTransformationController.amendUnidentifiedBeneficiary(utr: String, index: Int)
 
-POST        /amend-individual/:utr/:index           uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendIndividualBeneficiary(utr: String, index: Int)
+POST        /amend-individual/:utr/:index           controllers.BeneficiaryTransformationController.amendIndividualBeneficiary(utr: String, index: Int)
 
-POST        /add-individual/:utr                    uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.addIndividualBeneficiary(utr: String)
+POST        /add-individual/:utr                    controllers.BeneficiaryTransformationController.addIndividualBeneficiary(utr: String)
 
-POST        /add-charity/:utr                       uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.addCharityBeneficiary(utr: String)
+POST        /add-charity/:utr                       controllers.BeneficiaryTransformationController.addCharityBeneficiary(utr: String)
 
-POST        /amend-charity/:utr/:index              uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendCharityBeneficiary(utr: String, index: Int)
+POST        /amend-charity/:utr/:index              controllers.BeneficiaryTransformationController.amendCharityBeneficiary(utr: String, index: Int)
 
-POST        /add-other/:utr                         uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.addOtherBeneficiary(utr: String)
+POST        /add-other/:utr                         controllers.BeneficiaryTransformationController.addOtherBeneficiary(utr: String)
 
-POST        /amend-other/:utr/:index                uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendOtherBeneficiary(utr: String, index: Int)
+POST        /amend-other/:utr/:index                controllers.BeneficiaryTransformationController.amendOtherBeneficiary(utr: String, index: Int)
 
-POST        /add-company/:utr                       uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.addCompanyBeneficiary(utr: String)
+POST        /add-company/:utr                       controllers.BeneficiaryTransformationController.addCompanyBeneficiary(utr: String)
 
-POST        /add-trust/:utr                         uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.addTrustBeneficiary(utr: String)
+POST        /add-trust/:utr                         controllers.BeneficiaryTransformationController.addTrustBeneficiary(utr: String)
 
-POST        /amend-company/:utr/:index              uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendCompanyBeneficiary(utr: String, index: Int)
+POST        /amend-company/:utr/:index              controllers.BeneficiaryTransformationController.amendCompanyBeneficiary(utr: String, index: Int)
 
-POST        /amend-trust/:utr/:index                uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendTrustBeneficiary(utr: String, index: Int)
+POST        /amend-trust/:utr/:index                controllers.BeneficiaryTransformationController.amendTrustBeneficiary(utr: String, index: Int)
 
-POST        /add-large/:utr                         uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.addLargeBeneficiary(utr: String)
+POST        /add-large/:utr                         controllers.BeneficiaryTransformationController.addLargeBeneficiary(utr: String)
 
-POST        /amend-large/:utr/:index                uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.amendLargeBeneficiary(utr: String, index: Int)
+POST        /amend-large/:utr/:index                controllers.BeneficiaryTransformationController.amendLargeBeneficiary(utr: String, index: Int)
 
-PUT         /:utr/remove                            uk.gov.hmrc.trusts.controllers.BeneficiaryTransformationController.removeBeneficiary(utr: String)
+PUT         /:utr/remove                            controllers.BeneficiaryTransformationController.removeBeneficiary(utr: String)

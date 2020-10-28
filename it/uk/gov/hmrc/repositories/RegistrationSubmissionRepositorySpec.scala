@@ -22,8 +22,8 @@ import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json._
 import play.api.test.Helpers.running
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
-import uk.gov.hmrc.trusts.models.registration.RegistrationSubmissionDraft
-import uk.gov.hmrc.trusts.repositories.RegistrationSubmissionRepository
+import models.registration.RegistrationSubmissionDraft
+import repositories.RegistrationSubmissionRepository
 
 class RegistrationSubmissionRepositorySpec extends FreeSpec with MustMatchers with TransformIntegrationTest {
 

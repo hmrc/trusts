@@ -1,10 +1,10 @@
 
-POST        /amend-lead/:utr                            uk.gov.hmrc.trusts.controllers.TrusteeTransformationController.amendLeadTrustee(utr: String)
+POST        /amend-lead/:utr                            controllers.TrusteeTransformationController.amendLeadTrustee(utr: String)
 
-POST        /add/:utr                                   uk.gov.hmrc.trusts.controllers.TrusteeTransformationController.addTrustee(utr: String)
+POST        /add/:utr                                   controllers.TrusteeTransformationController.addTrustee(utr: String)
 
-POST        /amend/:utr/:index                          uk.gov.hmrc.trusts.controllers.TrusteeTransformationController.amendTrustee(utr: String, index: Int)
+POST        /amend/:utr/:index                          controllers.TrusteeTransformationController.amendTrustee(utr: String, index: Int)
 
-POST        /promote/:utr/:index                        uk.gov.hmrc.trusts.controllers.TrusteeTransformationController.promoteTrustee(utr: String, index: Int)
+POST        /promote/:utr/:index                        controllers.TrusteeTransformationController.promoteTrustee(utr: String, index: Int)
 
-PUT         /:utr/remove                       uk.gov.hmrc.trusts.controllers.TrusteeTransformationController.removeTrustee(utr: String)
+PUT         /:utr/remove                       controllers.TrusteeTransformationController.removeTrustee(utr: String)

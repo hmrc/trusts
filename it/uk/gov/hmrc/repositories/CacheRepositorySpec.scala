@@ -19,7 +19,7 @@ package uk.gov.hmrc.repositories
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
 import play.api.test.Helpers.running
-import uk.gov.hmrc.trusts.repositories.CacheRepository
+import repositories.CacheRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
