@@ -50,7 +50,7 @@ class VariationService @Inject()(desService: DesService,
           transformationService.applyDeclarationTransformations(utr, internalId, originalJson).flatMap {
             case JsSuccess(transformedJson, _) =>
               val response = get_trust.TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
-              declarationTransformer.transform(response, originalJson, declaration, localDateService.now) match {
+              declarationTransformer.transform(response, originalJson, declaration, localDateService.now, is5mld = false) match {
                 case JsSuccess(value, _) =>
                   logger.info(s"[Session ID: ${Session.id(hc)}][UTR: $utr]" +
                     s" successfully transformed json for declaration")

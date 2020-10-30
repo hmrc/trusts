@@ -82,7 +82,7 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
         VariationResponse("TVN34567890")
       ))
 
-      when(transformer.transform(any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
+      when(transformer.transform(any(),any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
 
       val OUT = new VariationService(desService, transformationService, transformer, auditService, LocalDateServiceStub)
 
@@ -91,7 +91,7 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
       whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { variationResponse => {
         variationResponse mustBe VariationResponse("TVN34567890")
         verify(transformationService, times( 1)).applyDeclarationTransformations(equalTo(utr), equalTo(internalId), equalTo(trustInfoJson))(any[HeaderCarrier])
-        verify(transformer, times(1)).transform(equalTo(transformedResponse), equalTo(response.getTrust), equalTo(declarationForApi), any())
+        verify(transformer, times(1)).transform(equalTo(transformedResponse), equalTo(response.getTrust), equalTo(declarationForApi), any(), any())
         val arg: ArgumentCaptor[JsValue] = ArgumentCaptor.forClass(classOf[JsValue])
         verify(desService, times(1)).trustVariation(arg.capture())
         arg.getValue mustBe transformedJson
@@ -117,7 +117,7 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
       VariationResponse("TVN34567890")
     ))
 
-    when(transformer.transform(any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
+    when(transformer.transform(any(),any(),any(),any(), any())).thenReturn(JsSuccess(transformedJson))
 
     val OUT = new VariationService(desService, transformationService, transformer, auditService, LocalDateServiceStub)
 
