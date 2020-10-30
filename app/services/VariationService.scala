@@ -17,23 +17,22 @@
 package services
 
 
-import javax.inject.Inject
-import play.api.Logging
-import play.api.libs.json._
-import uk.gov.hmrc.http.HeaderCarrier
 import exceptions.{EtmpCacheDataStaleException, InternalServerErrorException}
+import javax.inject.Inject
 import models.DeclarationForApi
 import models.auditing.TrustAuditing
 import models.get_trust.get_trust
 import models.get_trust.get_trust.TrustProcessedResponse
 import models.variation.VariationResponse
+import play.api.Logging
+import play.api.libs.json._
 import transformers.DeclarationTransformer
+import uk.gov.hmrc.http.HeaderCarrier
 import utils.JsonOps._
 import utils.Session
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
 
 class VariationService @Inject()(desService: DesService,
                                  transformationService: TransformationService,
@@ -41,8 +40,18 @@ class VariationService @Inject()(desService: DesService,
                                  auditService: AuditService,
                                  localDateService: LocalDateService) extends Logging {
 
+  private case class LoggingContext(utr: String)(implicit hc: HeaderCarrier) {
+    def info(content: String): Unit = logger.info(format(content))
+    def error(content: String): Unit = logger.error(format(content))
+    def warn(content: String): Unit = logger.warn(format(content))
+
+    def format(content: String): String = s"[submitDeclaration][Session ID: ${Session.id(hc)}][UTR: $utr] $content"
+  }
+
   def submitDeclaration(utr: String, internalId: String, declaration: DeclarationForApi)
                        (implicit hc: HeaderCarrier): Future[VariationResponse] = {
+
+    implicit val logging: LoggingContext = LoggingContext(utr)
 
     getCachedTrustData(utr, internalId).flatMap { originalResponse: TrustProcessedResponse =>
       transformationService.populateLeadTrusteeAddress(originalResponse.getTrust) match {
@@ -50,50 +59,53 @@ class VariationService @Inject()(desService: DesService,
           transformationService.applyDeclarationTransformations(utr, internalId, originalJson).flatMap {
             case JsSuccess(transformedJson, _) =>
               val response = get_trust.TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
-              declarationTransformer.transform(response, originalJson, declaration, localDateService.now, is5mld = false) match {
-                case JsSuccess(value, _) =>
-                  logger.info(s"[Session ID: ${Session.id(hc)}][UTR: $utr]" +
-                    s" successfully transformed json for declaration")
-                  doSubmit(utr, value, internalId)
-                case JsError(errors) =>
-                  logger.error(s"[Session ID: ${Session.id(hc)}][UTR: $utr]" +
-                    s" Problem transforming data for ETMP submission " + errors.toString())
-                  Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
-              }
+              transformAndSubmit(utr, internalId, declaration, originalJson, response)
             case JsError(errors) =>
-              logger.error(s"[Session ID: ${Session.id(hc)}][UTR: $utr]" +
-                s" Failed to transform trust info $errors")
+              logging.error(s"Failed to transform trust info $errors")
               Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
           }
         case JsError(errors) =>
-          logger.error(s"[Session ID: ${Session.id(hc)}][UTR: $utr]" +
-            s" Failed to populate lead trustee address $errors")
+          logging.error(s"Failed to populate lead trustee address $errors")
           Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
       }
    }
   }
 
-  private def getCachedTrustData(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[TrustProcessedResponse] = {
+  private def transformAndSubmit(utr: String,
+                                 internalId: String,
+                                 declaration: DeclarationForApi,
+                                 originalJson: JsValue,
+                                 response: TrustProcessedResponse)
+                                (implicit hc: HeaderCarrier, logging: LoggingContext)= {
+    declarationTransformer.transform(response, originalJson, declaration, localDateService.now, is5mld = false) match {
+      case JsSuccess(value, _) =>
+        logging.info("successfully transformed json for declaration")
+        doSubmit(utr, value, internalId)
+      case JsError(errors) =>
+        logging.error(s"Problem transforming data for ETMP submission ${errors.toString()}")
+        Future.failed(InternalServerErrorException(s"There was a problem transforming data for submission to ETMP: ${errors.toString()}"))
+    }
+  }
+
+  private def getCachedTrustData(utr: String, internalId: String)(implicit logging: LoggingContext): Future[TrustProcessedResponse] = {
     for {
       response <- desService.getTrustInfo(utr, internalId)
       fbn <- desService.getTrustInfoFormBundleNo(utr)
     } yield response match {
       case tpr: TrustProcessedResponse if tpr.responseHeader.formBundleNo == fbn =>
-        logger.info(s"[submitDeclaration][Session ID: ${Session.id(hc)}][UTR: $utr]" +
-          s" returning TrustProcessedResponse")
+        logging.info("returning TrustProcessedResponse")
         response.asInstanceOf[TrustProcessedResponse]
       case _: TrustProcessedResponse =>
-        logger.info(s"[submitDeclaration][Session ID: ${Session.id(hc)}][UTR: $utr]" +
-          s" ETMP cached data in mongo has become stale, rejecting submission")
+        logging.info("ETMP cached data in mongo has become stale, rejecting submission")
         throw EtmpCacheDataStaleException
       case _ =>
-        logger.warn(s"[submitDeclaration][Session ID: ${Session.id(hc)}][UTR: $utr]" +
-          s" Trust was not in a processed state")
+        logging.warn("Trust was not in a processed state")
         throw InternalServerErrorException("Submission could not proceed, Trust data was not in a processed state")
     }
   }
 
-  private def doSubmit(utr: String, value: JsValue, internalId: String)(implicit hc: HeaderCarrier): Future[VariationResponse] = {
+  private def doSubmit(utr: String, value: JsValue, internalId: String)
+                      (implicit hc: HeaderCarrier, logging: LoggingContext): Future[VariationResponse] = {
 
     val payload = value.applyRules
 
@@ -106,7 +118,7 @@ class VariationService @Inject()(desService: DesService,
 
     desService.trustVariation(payload) map { response =>
 
-      logger.info(s"[doSubmit][Session ID: ${Session.id(hc)}][UTR: $utr] variation submitted")
+      logging.info("variation submitted")
 
       auditService.auditVariationSubmitted(
         internalId,
@@ -117,4 +129,5 @@ class VariationService @Inject()(desService: DesService,
       response
     }
   }
+
 }
