@@ -34,7 +34,7 @@ import connector.DesConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.get_trust.GetTrustSuccessResponse
 import models.variation.VariationResponse
-import services.LocalDateService
+import services.{LocalDateService, TrustsStoreService}
 import utils.JsonUtils
 
 import scala.concurrent.Future
@@ -57,6 +57,8 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoS
       lazy val expectedDeclaredBeneficiaryJson: JsValue =
         JsonUtils.getJsonValueFromFile("it/trusts-integration-declared-combo-beneficiary.json")
 
+      val trustsStoreServiceMock = mock[TrustsStoreService]
+      when(trustsStoreServiceMock.is5mldEnabled()(any(), any())).thenReturn(Future.successful(false))
 
       val stubbedDesConnector = mock[DesConnector]
       when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
@@ -65,7 +67,8 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoS
         .overrides(
           bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
           bind[DesConnector].toInstance(stubbedDesConnector),
-          bind[LocalDateService].toInstance(TestLocalDateService)
+          bind[LocalDateService].toInstance(TestLocalDateService),
+          bind[TrustsStoreService].toInstance(trustsStoreServiceMock)
         )
         .build()
 

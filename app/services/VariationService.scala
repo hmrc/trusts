@@ -38,7 +38,8 @@ class VariationService @Inject()(desService: DesService,
                                  transformationService: TransformationService,
                                  declarationTransformer: DeclarationTransformer,
                                  auditService: AuditService,
-                                 localDateService: LocalDateService) extends Logging {
+                                 localDateService: LocalDateService,
+                                 trustsStoreService: TrustsStoreService) extends Logging {
 
   private case class LoggingContext(utr: String)(implicit hc: HeaderCarrier) {
     def info(content: String): Unit = logger.info(format(content))
@@ -77,13 +78,16 @@ class VariationService @Inject()(desService: DesService,
                                  originalJson: JsValue,
                                  response: TrustProcessedResponse)
                                 (implicit hc: HeaderCarrier, logging: LoggingContext)= {
-    declarationTransformer.transform(response, originalJson, declaration, localDateService.now, is5mld = false) match {
-      case JsSuccess(value, _) =>
-        logging.info("successfully transformed json for declaration")
-        doSubmit(utr, value, internalId)
-      case JsError(errors) =>
-        logging.error(s"Problem transforming data for ETMP submission ${errors.toString()}")
-        Future.failed(InternalServerErrorException(s"There was a problem transforming data for submission to ETMP: ${errors.toString()}"))
+    trustsStoreService.is5mldEnabled() flatMap {
+      is5mld =>
+        declarationTransformer.transform(response, originalJson, declaration, localDateService.now, is5mld) match {
+          case JsSuccess(value, _) =>
+            logging.info("successfully transformed json for declaration")
+            doSubmit(utr, value, internalId)
+          case JsError(errors) =>
+            logging.error(s"Problem transforming data for ETMP submission ${errors.toString()}")
+            Future.failed(InternalServerErrorException(s"There was a problem transforming data for submission to ETMP: ${errors.toString()}"))
+        }
     }
   }
 
