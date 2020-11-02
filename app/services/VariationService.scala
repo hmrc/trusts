@@ -21,8 +21,7 @@ import exceptions.{EtmpCacheDataStaleException, InternalServerErrorException}
 import javax.inject.Inject
 import models.DeclarationForApi
 import models.auditing.TrustAuditing
-import models.get_trust.get_trust
-import models.get_trust.get_trust.TrustProcessedResponse
+import models.get_trust.TrustProcessedResponse
 import models.variation.VariationResponse
 import play.api.Logging
 import play.api.libs.json._
@@ -59,7 +58,7 @@ class VariationService @Inject()(desService: DesService,
         case JsSuccess(originalJson, _) =>
           transformationService.applyDeclarationTransformations(utr, internalId, originalJson).flatMap {
             case JsSuccess(transformedJson, _) =>
-              val response = get_trust.TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
+              val response = TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
               transformAndSubmit(utr, internalId, declaration, originalJson, response)
             case JsError(errors) =>
               logging.error(s"Failed to transform trust info $errors")

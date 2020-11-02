@@ -21,7 +21,7 @@ import java.time.LocalDate
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import models._
-import models.get_trust.get_trust.TrustProcessedResponse
+import models.get_trust.TrustProcessedResponse
 
 class DeclarationTransformer {
 

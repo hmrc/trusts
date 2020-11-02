@@ -18,6 +18,9 @@ package services
 
 import java.time.LocalDate
 
+import models.NameType
+import models.get_trust.{ResponseHeader, TrustProcessedResponse}
+import models.variation.NaturalPersonType
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -25,10 +28,6 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
-import models.NameType
-import models.get_trust.get_trust
-import models.get_trust.get_trust.{TrustProcessedResponse, _}
-import models.variation.NaturalPersonType
 import transformers._
 import transformers.remove.RemoveOtherIndividual
 import utils.{JsonFixtures, JsonUtils}
@@ -128,7 +127,7 @@ class OtherIndividualTransformationServiceSpec extends FreeSpec with MockitoSuga
         when(transformationService.getTransformedData(any(), any()))
           .thenReturn(
             Future.successful(
-              get_trust.TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
+              TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
             ))
 
         val result = service.amendOtherIndividualTransformer("utr", 0, "internalId", amendedOtherIndividual)

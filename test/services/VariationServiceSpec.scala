@@ -18,6 +18,10 @@ package services
 
 import java.time.LocalDate
 
+import exceptions.EtmpCacheDataStaleException
+import models.get_trust.{ResponseHeader, TrustProcessedResponse}
+import models.variation.VariationResponse
+import models.{DeclarationForApi, DeclarationName, NameType}
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito.{times, verify, when}
@@ -26,13 +30,8 @@ import org.scalatest.{MustMatchers, WordSpec}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsSuccess, JsValue, Json}
-import uk.gov.hmrc.http.HeaderCarrier
-import exceptions.EtmpCacheDataStaleException
-import models.get_trust.get_trust
-import models.get_trust.get_trust.ResponseHeader
-import models.variation.VariationResponse
-import models.{DeclarationForApi, DeclarationName, NameType}
 import transformers.DeclarationTransformer
+import uk.gov.hmrc.http.HeaderCarrier
 import utils.JsonFixtures
 
 import scala.concurrent.Future
@@ -80,7 +79,7 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
       when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
       when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
 
-      val response = get_trust.TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
+      val response = TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
 
       when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))).thenReturn(Future.successful(
         response
@@ -99,7 +98,7 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
         LocalDateServiceStub,
         trustsStoreServiceFor4mld)
 
-      val transformedResponse = get_trust.TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
+      val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
 
       whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { variationResponse => {
         variationResponse mustBe VariationResponse("TVN34567890")
@@ -124,7 +123,7 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
     when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
     when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
 
-    val response = get_trust.TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
+    val response = TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
 
     when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))).thenReturn(Future.successful(
       response
@@ -143,7 +142,7 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
       LocalDateServiceStub,
       trustsStoreServiceFor5mld)
 
-    val transformedResponse = get_trust.TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
+    val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
 
     whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { variationResponse => {
       variationResponse mustBe VariationResponse("TVN34567890")
@@ -166,7 +165,7 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
     when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
 
     when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))).thenReturn(Future.successful(
-      get_trust.TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
+      TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
     ))
 
     when(desService.trustVariation(any())).thenReturn(Future.successful(
