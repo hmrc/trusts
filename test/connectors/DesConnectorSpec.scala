@@ -16,18 +16,17 @@
 
 package connectors
 
-import play.api.http.Status._
-import play.api.libs.json.{JsValue, Json, Reads}
 import connector.DesConnector
 import exceptions.{AlreadyRegisteredException, _}
+import models.existing_trust.ExistingCheckRequest
 import models.existing_trust.ExistingCheckRequest._
 import models.existing_trust.ExistingCheckResponse._
-import models.existing_trust.ExistingCheckRequest
 import models.get_trust._
-import models.get_trust.get_trust.{TrustProcessedResponse, _}
 import models.registration.RegistrationTrnResponse
 import models.tax_enrolments.SubscriptionIdResponse
 import models.variation.{TrustVariation, VariationResponse}
+import play.api.http.Status._
+import play.api.libs.json.{JsValue, Json, Reads}
 import utils.NonTaxable5MLDFixtures
 
 import scala.concurrent.Future

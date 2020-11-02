@@ -19,6 +19,7 @@ package connectors
 import base.BaseSpec
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.scalatest.concurrent.IntegrationPatience
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
@@ -153,9 +154,20 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
   def stubForGet(server: WireMockServer,
                  url: String, returnStatus: Int,
                  responseBody: String,
-                 delayResponse: Int = 0) = {
+                 delayResponse: Int = 0): StubMapping = {
     server.stubFor(get(urlEqualTo(url))
       .withHeader("content-Type", containing("application/json"))
+      .willReturn(
+        aResponse()
+          .withStatus(returnStatus)
+          .withBody(responseBody).withFixedDelay(delayResponse)))
+  }
+
+  def stubForHeaderlessGet(server: WireMockServer,
+                 url: String, returnStatus: Int,
+                 responseBody: String,
+                 delayResponse: Int = 0): StubMapping = {
+    server.stubFor(get(urlEqualTo(url))
       .willReturn(
         aResponse()
           .withStatus(returnStatus)
@@ -165,7 +177,7 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
   def stubForPut(server: WireMockServer,
                  url: String,
                  returnStatus: Int,
-                 delayResponse: Int = 0) = {
+                 delayResponse: Int = 0): StubMapping = {
     server.stubFor(put(urlEqualTo(url))
       .withHeader("content-Type", containing("application/json"))
       .willReturn(

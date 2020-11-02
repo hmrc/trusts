@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package models.get_trust.get_trust
+package models.get_trust
 
+import models.existing_trust.DesErrorResponse
+import models.get_trust
 import play.api.Logging
 import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK, SERVICE_UNAVAILABLE}
 import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
-import models.existing_trust.DesErrorResponse
-import models.get_trust._
 
 trait GetTrustResponse
 
@@ -49,7 +49,7 @@ object GetTrustSuccessResponse {
       case Some(x) =>
         x.validate[GetTrust] match {
           case JsSuccess(_, _) =>
-            header.map(h => models.get_trust.get_trust.TrustProcessedResponse(x, h))
+            header.map(h => get_trust.TrustProcessedResponse(x, h))
           case x: JsError => x
         }
 

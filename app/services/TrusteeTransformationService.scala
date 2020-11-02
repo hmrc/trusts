@@ -22,7 +22,7 @@ import javax.inject.Inject
 import play.api.libs.json.{__, _}
 import exceptions.InternalServerErrorException
 import models.Success
-import models.get_trust.get_trust.TrustProcessedResponse
+import models.get_trust.TrustProcessedResponse
 import models.variation.{AmendedLeadTrusteeIndType, AmendedLeadTrusteeOrgType, TrusteeType}
 import transformers._
 import transformers.remove.RemoveTrustee

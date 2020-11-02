@@ -18,6 +18,10 @@ package uk.gov.hmrc.transformations
 
 import java.time.LocalDate
 
+import connector.DesConnector
+import controllers.actions.{FakeIdentifierAction, IdentifierAction}
+import models.NameType
+import models.get_trust.{DisplayTrustIdentificationType, DisplayTrustTrusteeIndividualType, GetTrustSuccessResponse}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.{AsyncFreeSpec, MustMatchers}
@@ -28,10 +32,6 @@ import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
-import connector.DesConnector
-import controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import models.NameType
-import models.get_trust.get_trust.{DisplayTrustIdentificationType, DisplayTrustTrusteeIndividualType, GetTrustSuccessResponse}
 import utils.JsonUtils
 
 import scala.concurrent.Future

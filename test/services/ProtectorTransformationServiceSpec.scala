@@ -18,6 +18,9 @@ package services
 
 import java.time.LocalDate
 
+import models.NameType
+import models.get_trust.{ResponseHeader, TrustProcessedResponse}
+import models.variation.{Protector, ProtectorCompany}
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -26,10 +29,6 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
-import models.NameType
-import models.get_trust.get_trust
-import models.get_trust.get_trust.{TrustProcessedResponse, _}
-import models.variation.{Protector, ProtectorCompany}
 import transformers._
 import transformers.remove.RemoveProtector
 import utils.{JsonFixtures, JsonUtils}
@@ -158,7 +157,7 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
         when(transformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
         when(transformationService.getTransformedData(any(), any()))
-          .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
+          .thenReturn(Future.successful(TrustProcessedResponse(
             buildInputJson("protector", Seq(protector)),
             ResponseHeader("status", "formBundlNo")
           )))
@@ -223,7 +222,7 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
         when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
         when(transformationService.getTransformedData(any(), any()))
-          .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
+          .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(
             buildInputJson("protectorCompany", Seq(original)),
             ResponseHeader("status", "formBundleNo")
           )))
