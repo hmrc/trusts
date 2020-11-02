@@ -137,4 +137,30 @@ trait JsonOperations {
       value => objectPlusField(amended, field, value)
     )
   }
+
+  def addTo(input: JsValue,
+            path: JsPath,
+            jsonToAdd: JsValue) : JsResult[JsValue] = {
+
+    import play.api.libs.json._
+
+    input.transform(path.json.pick[JsArray]) match {
+      case JsSuccess(_, _) =>
+
+        val updatedItems: Reads[JsObject] = path.json.update(
+          Reads.of[JsArray].map { array =>
+            array :+ jsonToAdd
+          }
+        )
+
+        input.transform(updatedItems)
+      case JsError(_) =>
+        input.transform(__.json.update {
+          path.json.put(JsArray(
+            Seq(jsonToAdd))
+          )
+        })
+    }
+  }
+
 }
