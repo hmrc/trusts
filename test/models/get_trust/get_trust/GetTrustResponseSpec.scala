@@ -17,9 +17,9 @@
 package models.get_trust.get_trust
 
 import base.BaseSpec
-import play.api.libs.json.Json
 import models.Taxability._
-import models.get_trust.get_trust
+import models.get_trust.{ResponseHeader, TrustProcessedResponse}
+import play.api.libs.json.Json
 
 class GetTrustResponseSpec extends BaseSpec {
 
@@ -60,7 +60,7 @@ class GetTrustResponseSpec extends BaseSpec {
               |""".stripMargin
           )
 
-          val response = get_trust.TrustProcessedResponse(trust, responseHeader)
+          val response = TrustProcessedResponse(trust, responseHeader)
 
           response.taxability mustBe NonTaxable
         }
@@ -78,7 +78,7 @@ class GetTrustResponseSpec extends BaseSpec {
               |""".stripMargin
           )
 
-          val response = get_trust.TrustProcessedResponse(trust, responseHeader)
+          val response = models.get_trust.TrustProcessedResponse(trust, responseHeader)
 
           response.taxability mustBe ConvertedFromNonTaxableToTaxable
         }

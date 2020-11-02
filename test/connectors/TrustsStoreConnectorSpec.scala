@@ -16,10 +16,10 @@
 
 package connectors
 
+import connector.TrustsStoreConnector
 import org.scalatest.RecoverMethods
 import play.api.http.Status
-import uk.gov.hmrc.http.{BadRequestException, Upstream5xxResponse}
-import connector.TrustsStoreConnector
+import uk.gov.hmrc.http.{BadRequestException, UpstreamErrorResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -30,7 +30,7 @@ class TrustsStoreConnectorSpec extends ConnectorSpecHelper with RecoverMethods {
   private lazy val connector: TrustsStoreConnector = injector.instanceOf[TrustsStoreConnector]
 
   private def wiremock(expectedStatus: Int, expectedResponse: String) =
-    stubForGet(server, url, expectedStatus, expectedResponse)
+    stubForHeaderlessGet(server, url, expectedStatus, expectedResponse)
 
   "TrustsStoreConnector" must {
 
@@ -38,7 +38,7 @@ class TrustsStoreConnectorSpec extends ConnectorSpecHelper with RecoverMethods {
 
       "returns 200 with value" in {
 
-        val response =
+        val expectedResponse =
           """
             |{
             |   "name": "5mld",
@@ -47,14 +47,15 @@ class TrustsStoreConnectorSpec extends ConnectorSpecHelper with RecoverMethods {
             |""".stripMargin
 
         wiremock(
-          expectedStatus = Status.CREATED,
-          expectedResponse = response
+          expectedStatus = Status.OK,
+          expectedResponse = expectedResponse
         )
 
-        connector.getFeature("5mld") map { response =>
-          app.stop()
-          response.name mustBe "5mld"
-          response.isEnabled mustBe true
+        val futureResult = connector.getFeature("5mld")
+        whenReady(futureResult) {
+          response =>
+            response.name mustBe "5mld"
+            response.isEnabled mustBe true
         }
       }
 
@@ -65,7 +66,10 @@ class TrustsStoreConnectorSpec extends ConnectorSpecHelper with RecoverMethods {
           expectedResponse = ""
         )
 
-        recoverToSucceededIf[BadRequestException](connector.getFeature("5mld"))
+        val futureResult = connector.getFeature("5mld")
+        whenReady(futureResult.failed) {
+          result => result mustBe a[BadRequestException]
+        }
       }
 
       "returns 500 INTERNAL_SERVER_ERROR" in {
@@ -75,8 +79,10 @@ class TrustsStoreConnectorSpec extends ConnectorSpecHelper with RecoverMethods {
           expectedResponse = ""
         )
 
-        recoverToSucceededIf[Upstream5xxResponse](connector.getFeature("5mld"))
-
+        val futureResult = connector.getFeature("5mld")
+        whenReady(futureResult.failed) {
+          result => result mustBe an[UpstreamErrorResponse]
+        }
       }
     }
   }

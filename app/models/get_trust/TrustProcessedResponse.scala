@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package models.get_trust.get_trust
+package models.get_trust
 
-import play.api.libs.json._
 import models.Taxability
 import models.Taxability.{ConvertedFromNonTaxableToTaxable, NonTaxable, Taxable}
+import play.api.libs.json._
 import transformers.mdtp.beneficiaries.Beneficiaries
 import transformers.mdtp.protectors.Protectors
 import transformers.mdtp.settlors.Settlors

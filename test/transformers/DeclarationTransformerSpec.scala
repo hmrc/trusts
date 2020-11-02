@@ -18,9 +18,9 @@ package transformers
 
 import java.time.LocalDate
 
-import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import models._
-import models.get_trust.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
+import models.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
+import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import utils.JsonUtils
 
 class DeclarationTransformerSpec extends FreeSpec with MustMatchers with OptionValues {

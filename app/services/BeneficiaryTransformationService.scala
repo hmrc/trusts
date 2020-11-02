@@ -20,7 +20,7 @@ import javax.inject.Inject
 import play.api.libs.json.{JsObject, JsValue, Json, __}
 import exceptions.InternalServerErrorException
 import models.Success
-import models.get_trust.get_trust.TrustProcessedResponse
+import models.get_trust.TrustProcessedResponse
 import models.variation._
 import transformers._
 import transformers.remove.RemoveBeneficiary

@@ -30,7 +30,7 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
 import connector.DesConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import models.get_trust.get_trust.GetTrustSuccessResponse
+import models.get_trust.GetTrustSuccessResponse
 import models.variation.IdentificationType
 import models.{AddressType, NameType}
 import utils.JsonUtils

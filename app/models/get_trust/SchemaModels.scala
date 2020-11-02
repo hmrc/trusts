@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package models.get_trust.get_trust
+package models.get_trust
 
 import java.time.LocalDate
 
+import models._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import models._
 import utils.DeedOfVariation.DeedOfVariation
 import utils.TypeOfTrust.TypeOfTrust
 
