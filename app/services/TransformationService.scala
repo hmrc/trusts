@@ -17,14 +17,13 @@
 package services
 
 import javax.inject.Inject
+import models.auditing.TrustAuditing
+import models.get_trust.{GetTrustResponse, TransformationErrorResponse, TrustProcessedResponse}
 import play.api.Logging
 import play.api.libs.json.{JsObject, JsResult, JsSuccess, JsValue, Json, __, _}
-import uk.gov.hmrc.http.HeaderCarrier
-import models.auditing.TrustAuditing
-import models.get_trust.get_trust.{GetTrustResponse, TrustProcessedResponse}
-import models.get_trust.{TransformationErrorResponse, get_trust}
 import repositories.TransformationRepository
 import transformers._
+import uk.gov.hmrc.http.HeaderCarrier
 import utils.Session
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -43,7 +42,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
             applyTransformations(identifier, internalId, fixed).map {
               case JsSuccess(transformed, _) =>
 
-                get_trust.TrustProcessedResponse(transformed, response.responseHeader)
+                TrustProcessedResponse(transformed, response.responseHeader)
               case JsError(errors) => TransformationErrorResponse(errors.toString)
             }
           case JsError(errors) => Future.successful(TransformationErrorResponse(errors.toString))

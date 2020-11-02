@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import config.AppConfig
 import models._
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
-import models.get_trust.get_trust.GetTrustResponse
+import models.get_trust.GetTrustResponse
 import models.registration.{RegistrationResponse, RegistrationTrnResponse}
 import models.tax_enrolments.SubscriptionIdResponse
 import models.variation.VariationResponse

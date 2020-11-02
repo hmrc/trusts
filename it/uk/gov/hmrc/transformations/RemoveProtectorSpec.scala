@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.transformations
 
+import connector.DesConnector
+import controllers.actions.{FakeIdentifierAction, IdentifierAction}
+import models.get_trust.GetTrustSuccessResponse
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.{AsyncFreeSpec, MustMatchers}
@@ -26,9 +29,6 @@ import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
-import connector.DesConnector
-import controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import models.get_trust.get_trust._
 import utils.JsonUtils
 
 import scala.concurrent.Future

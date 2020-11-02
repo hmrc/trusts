@@ -18,6 +18,9 @@ package services
 
 import java.time.LocalDate
 
+import models.NameType
+import models.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
+import models.variation._
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -25,9 +28,6 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
-import models.NameType
-import models.get_trust.get_trust.{TrustProcessedResponse, _}
-import models.variation._
 import transformers._
 import transformers.remove.RemoveTrustee
 import utils.JsonFixtures

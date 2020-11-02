@@ -16,17 +16,17 @@
 
 package services
 
-import javax.inject.Inject
-import play.api.Logging
-import play.api.libs.json.{JsValue, Json}
 import connector.DesConnector
 import exceptions.InternalServerErrorException
+import javax.inject.Inject
 import models._
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
-import models.get_trust.get_trust.{GetTrustResponse, GetTrustSuccessResponse, TrustProcessedResponse}
+import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse, TrustProcessedResponse}
 import models.registration.RegistrationResponse
 import models.tax_enrolments.SubscriptionIdResponse
 import models.variation.VariationResponse
+import play.api.Logging
+import play.api.libs.json.{JsValue, Json}
 import repositories.CacheRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global

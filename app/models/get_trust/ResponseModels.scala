@@ -17,7 +17,6 @@
 package models.get_trust
 
 import play.api.libs.json.JsValue
-import models.get_trust.get_trust.GetTrustResponse
 
 sealed trait TrustErrorResponse extends GetTrustResponse
 
