@@ -18,18 +18,50 @@ package services
 
 import javax.inject.Inject
 import models.Success
-import transformers.mld5._
+import transformers.trustDetails._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TrustDetailsTransformationService @Inject()(transformationService: TransformationService) {
 
-  def addExpressTransformer(utr: String, internalId: String, express: Boolean): Future[Success.type] = {
+  def setExpressTransformer(utr: String, internalId: String, express: Boolean): Future[Success.type] = {
     transformationService.addNewTransform(
       utr,
       internalId,
-      AddExpressTransform(express)
+      SetExpressTransform(express)
+    ).map(_ => Success)
+  }
+
+  def setResidentTransformer(utr: String, internalId: String, express: Boolean): Future[Success.type] = {
+    transformationService.addNewTransform(
+      utr,
+      internalId,
+      SetResidentTransform(express)
+    ).map(_ => Success)
+  }
+
+  def setTaxableTransformer(utr: String, internalId: String, express: Boolean): Future[Success.type] = {
+    transformationService.addNewTransform(
+      utr,
+      internalId,
+      SetTaxableTransform(express)
+    ).map(_ => Success)
+  }
+
+  def setPropertyTransformer(utr: String, internalId: String, express: Boolean): Future[Success.type] = {
+    transformationService.addNewTransform(
+      utr,
+      internalId,
+      SetPropertyTransform(express)
+    ).map(_ => Success)
+  }
+
+  def setRecordedTransformer(utr: String, internalId: String, express: Boolean): Future[Success.type] = {
+    transformationService.addNewTransform(
+      utr,
+      internalId,
+      SetRecordedTransform(express)
     ).map(_ => Success)
   }
 

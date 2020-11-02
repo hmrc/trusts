@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package transformers.mld5
+package transformers.trustDetails
 
 import play.api.libs.json._
-import models.variation.BeneficiaryCharityType
 import transformers.{DeltaTransform, JsonOperations}
 
-case class AddExpressTransform(express: Boolean) extends DeltaTransform with JsonOperations {
+case class SetResidentTransform(express: Boolean) extends DeltaTransform with JsonOperations {
 
-  private lazy val path = __ \ 'details \ 'expressTrust
+  private lazy val path = __ \ 'details \ 'trustUKResident
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     addToList(input, path, Json.toJson(express))
@@ -30,9 +29,9 @@ case class AddExpressTransform(express: Boolean) extends DeltaTransform with Jso
 
 }
 
-object AddExpressTransform {
+object SetResidentTransform {
 
-  val key = "AddExpressTransform"
+  val key = "SetResidentTransform"
 
-  implicit val format: Format[AddExpressTransform] = Json.format[AddExpressTransform]
+  implicit val format: Format[SetResidentTransform] = Json.format[SetResidentTransform]
 }
