@@ -88,6 +88,10 @@ class VariationService @Inject()(desService: DesService,
             logging.error(s"Problem transforming data for ETMP submission ${errors.toString()}")
             Future.failed(InternalServerErrorException(s"There was a problem transforming data for submission to ETMP: ${errors.toString()}"))
         }
+    } recoverWith {
+      case e =>
+        logging.error(s"Exception transforming and submitting ${e.getMessage}")
+        Future.failed(InternalServerErrorException(s"Exception transforming and submitting ${e.getMessage}"))
     }
   }
 
