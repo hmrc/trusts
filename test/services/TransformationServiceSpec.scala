@@ -18,6 +18,9 @@ package services
 
 import java.time.LocalDate
 
+import models.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
+import models.variation.{AmendedLeadTrusteeIndType, IdentificationType}
+import models.{AddressType, NameType}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -25,13 +28,9 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.{JsResult, JsValue, Json}
-import uk.gov.hmrc.http.HeaderCarrier
-import models.get_trust.get_trust
-import models.get_trust.get_trust.{TrustProcessedResponse, _}
-import models.variation.{AmendedLeadTrusteeIndType, IdentificationType}
-import models.{AddressType, NameType}
 import repositories.TransformationRepositoryImpl
 import transformers._
+import uk.gov.hmrc.http.HeaderCarrier
 import utils.{JsonFixtures, JsonUtils}
 
 import scala.concurrent.Future
@@ -151,7 +150,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     when(desService.getTrustInfo(any(), any())).thenReturn(Future.successful(response))
 
     val transformedJson = JsonUtils.getJsonValueFromFile("valid-get-trust-response-transformed.json")
-    val expectedResponse = get_trust.TrustProcessedResponse(transformedJson, processedResponse.responseHeader)
+    val expectedResponse = TrustProcessedResponse(transformedJson, processedResponse.responseHeader)
 
     val repository = mock[TransformationRepositoryImpl]
     when(repository.get(any(), any())).thenReturn(Future.successful(None))
@@ -191,7 +190,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
 
     val transformedJson = JsonUtils.getJsonValueFromFile("valid-get-trust-response-transformed-with-amend.json")
-    val expectedResponse = get_trust.TrustProcessedResponse(transformedJson, processedResponse.responseHeader)
+    val expectedResponse = models.get_trust.TrustProcessedResponse(transformedJson, processedResponse.responseHeader)
 
     val service = new TransformationService(repository, desService, auditService)
 

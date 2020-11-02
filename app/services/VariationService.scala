@@ -24,8 +24,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import exceptions.{EtmpCacheDataStaleException, InternalServerErrorException}
 import models.DeclarationForApi
 import models.auditing.TrustAuditing
-import models.get_trust.get_trust
-import models.get_trust.get_trust.TrustProcessedResponse
+import models.get_trust.TrustProcessedResponse
 import models.variation.VariationResponse
 import transformers.DeclarationTransformer
 import utils.JsonOps._
@@ -49,7 +48,7 @@ class VariationService @Inject()(desService: DesService,
         case JsSuccess(originalJson, _) =>
           transformationService.applyDeclarationTransformations(utr, internalId, originalJson).flatMap {
             case JsSuccess(transformedJson, _) =>
-              val response = get_trust.TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
+              val response = TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
               declarationTransformer.transform(response, originalJson, declaration, localDateService.now) match {
                 case JsSuccess(value, _) =>
                   logger.info(s"[Session ID: ${Session.id(hc)}][UTR: $utr]" +

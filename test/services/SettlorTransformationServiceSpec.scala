@@ -18,6 +18,9 @@ package services
 
 import java.time.LocalDate
 
+import models.get_trust.{ResponseHeader, TrustProcessedResponse}
+import models.variation.{AmendDeceasedSettlor, IdentificationOrgType, Settlor, SettlorCompany}
+import models.{AddressType, NameType, variation}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -25,10 +28,6 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
-import models.get_trust.get_trust
-import models.get_trust.get_trust.{TrustProcessedResponse, _}
-import models.variation.{AmendDeceasedSettlor, IdentificationOrgType, Settlor, SettlorCompany}
-import models.{AddressType, NameType, variation}
 import transformers._
 import transformers.remove.RemoveSettlor
 import utils.{JsonFixtures, JsonUtils}
@@ -173,7 +172,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
         when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
         when(transformationService.getTransformedData(any(), any()))
-          .thenReturn(Future.successful(get_trust.TrustProcessedResponse(
+          .thenReturn(Future.successful(TrustProcessedResponse(
             buildInputJson("settlor", Seq(originalSettlorJson)),
             ResponseHeader("status", "formBundlNo")
           )))
@@ -225,7 +224,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
       when(transformationService.getTransformedData(any(), any()))
         .thenReturn(
-          Future.successful(get_trust.TrustProcessedResponse(buildInputJson("settlorCompany", Seq(originalSettlorJson)),
+          Future.successful(models.get_trust.TrustProcessedResponse(buildInputJson("settlorCompany", Seq(originalSettlorJson)),
           ResponseHeader("status", "formBundlNo")
         )))
 
@@ -277,7 +276,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       when(transformationService.getTransformedData(any(), any()))
         .thenReturn(
           Future.successful(
-            get_trust.TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
+            models.get_trust.TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
           ))
 
       val result = service.amendDeceasedSettlor("utr", "internalId", amendedSettlor)

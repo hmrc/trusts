@@ -16,16 +16,15 @@
 
 package controllers
 
+import controllers.actions.{IdentifierAction, ValidateIdentifierActionProvider}
 import javax.inject.{Inject, Singleton}
+import models.auditing.TrustAuditing
+import models.get_trust.{BadRequestResponse, _}
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
-import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import controllers.actions.{IdentifierAction, ValidateIdentifierActionProvider}
-import models.auditing.TrustAuditing
-import models.get_trust.get_trust.{TrustProcessedResponse, _}
-import models.get_trust.{BadRequestResponse, _}
 import services.{AuditService, DesService, TransformationService, TrustsStoreService}
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

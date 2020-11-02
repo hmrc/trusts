@@ -17,18 +17,17 @@
 package services
 
 import base.BaseSpec
-import org.mockito.Matchers._
-import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
-import play.api.libs.json.JsValue
 import connector.DesConnector
 import exceptions._
 import models.existing_trust.ExistingCheckResponse._
 import models.existing_trust._
-import models.get_trust.get_trust.{TrustProcessedResponse, _}
-import models.get_trust.{get_trust, _}
+import models.get_trust._
 import models.registration.RegistrationTrnResponse
 import models.tax_enrolments.SubscriptionIdResponse
 import models.variation.VariationResponse
+import org.mockito.Matchers._
+import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
+import play.api.libs.json.JsValue
 import repositories.CacheRepositoryImpl
 import utils.JsonUtils
 
@@ -212,7 +211,7 @@ class DesServiceSpec extends BaseSpec {
         val futureResult = SUT.getTrustInfo(utr, myId)
 
         whenReady(futureResult) { result =>
-          result mustBe get_trust.TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))
+          result mustBe models.get_trust.TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))
           verify(mockRepository, times(1)).set(utr, myId, fullEtmpResponseJson)
         }
       }
@@ -228,7 +227,7 @@ class DesServiceSpec extends BaseSpec {
 
         val futureResult = SUT.getTrustInfo(utr, myId)
         whenReady(futureResult) { result =>
-          result mustBe get_trust.TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))
+          result mustBe models.get_trust.TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))
           verifyZeroInteractions(mockConnector)
         }
       }
