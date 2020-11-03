@@ -25,7 +25,7 @@ import utils.JsonUtils
 
 class DeclarationTransformerSpec extends FreeSpec with MustMatchers with OptionValues {
 
-  private val entityEnd = LocalDate.of(2020, 1, 30)
+  private val submissionDate = LocalDate.of(2020, 1, 30)
 
   "the declaration transformer should" - {
 
@@ -38,7 +38,7 @@ class DeclarationTransformerSpec extends FreeSpec with MustMatchers with OptionV
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent.json")
       val transformer = new DeclarationTransformer
 
-      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, entityEnd)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
       result.asOpt.value mustBe afterJson
     }
 
@@ -48,7 +48,7 @@ class DeclarationTransformerSpec extends FreeSpec with MustMatchers with OptionV
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual.json")
       val transformer = new DeclarationTransformer
 
-      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, entityEnd)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
       result.asOpt.value mustBe afterJson
     }
 
@@ -62,7 +62,7 @@ class DeclarationTransformerSpec extends FreeSpec with MustMatchers with OptionV
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual-with-prev-org.json")
       val transformer = new DeclarationTransformer
 
-      val result = transformer.transform(trustResponse, originalResponse.getTrust, declarationForApi, entityEnd)
+      val result = transformer.transform(trustResponse, originalResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
       result.asOpt.value mustBe afterJson
     }
 
@@ -81,7 +81,7 @@ class DeclarationTransformerSpec extends FreeSpec with MustMatchers with OptionV
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual-with-agent-details.json")
       val transformer = new DeclarationTransformer
 
-      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, entityEnd)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
       result.asOpt.value mustBe afterJson
     }
 
@@ -91,7 +91,7 @@ class DeclarationTransformerSpec extends FreeSpec with MustMatchers with OptionV
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-pruned-trustees.json")
       val transformer = new DeclarationTransformer
 
-      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, entityEnd)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
       result.asOpt.value mustBe afterJson
     }
 
@@ -101,7 +101,7 @@ class DeclarationTransformerSpec extends FreeSpec with MustMatchers with OptionV
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-pruned-trustees.json")
       val transformer = new DeclarationTransformer
 
-      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, entityEnd)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
       result.asOpt.value mustBe afterJson
     }
 
@@ -113,7 +113,17 @@ class DeclarationTransformerSpec extends FreeSpec with MustMatchers with OptionV
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-end-date.json")
       val transformer = new DeclarationTransformer
 
-      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, entityEnd)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
+      result.asOpt.value mustBe afterJson
+    }
+
+    "add a submission date if 5mld" in {
+      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json")
+      val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-5mld.json")
+      val transformer = new DeclarationTransformer
+
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = true)
       result.asOpt.value mustBe afterJson
     }
   }

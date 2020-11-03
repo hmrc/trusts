@@ -59,6 +59,14 @@ trait JsonOperations {
     }
   }
 
+  def addTo(input: JsValue, path: JsPath, jsonToAdd: JsValue): JsResult[JsValue] = {
+    input.transform(__.json.update {
+      path.json.put(
+        jsonToAdd
+      )
+    })
+  }
+
   def addToList(input: JsValue,
                 path: JsPath,
                 jsonToAdd: JsValue) : JsResult[JsValue] = {
@@ -76,11 +84,10 @@ trait JsonOperations {
 
         input.transform(updatedItems)
       case JsError(_) =>
-        input.transform(__.json.update {
-          path.json.put(JsArray(
+        addTo(
+          input, path, JsArray(
             Seq(jsonToAdd))
-          )
-        })
+        )
     }
   }
 
@@ -137,4 +144,5 @@ trait JsonOperations {
       value => objectPlusField(amended, field, value)
     )
   }
+
 }

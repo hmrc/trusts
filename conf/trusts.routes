@@ -100,3 +100,9 @@ POST        /add-business-protector/:utr                      controllers.Protec
 POST        /amend-business-protector/:utr/:index               controllers.ProtectorTransformationController.amendBusinessProtector(utr: String, index: Int)
 
 PUT         /:utr/protectors/remove                             controllers.ProtectorTransformationController.removeProtector(utr: String)
+
+PUT         /:utr/trust-details/express                        controllers.TrustDetailsTransformationController.setExpress(utr: String)
+PUT         /:utr/trust-details/trustUkResident                controllers.TrustDetailsTransformationController.setResident(utr: String)
+PUT         /:utr/trust-details/trustTaxable                   controllers.TrustDetailsTransformationController.setTaxable(utr: String)
+PUT         /:utr/trust-details/trustUkProperty                controllers.TrustDetailsTransformationController.setProperty(utr: String)
+PUT         /:utr/trust-details/trustRecorded                 controllers.TrustDetailsTransformationController.setRecorded(utr: String)

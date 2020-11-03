@@ -28,7 +28,8 @@ class DeclarationTransformer {
   def transform(response: TrustProcessedResponse,
                 originalJson: JsValue,
                 declarationForApi: DeclarationForApi,
-                date: LocalDate): JsResult[JsValue] = {
+                submissionDate: LocalDate,
+                is5mld: Boolean): JsResult[JsValue] = {
 
     val responseJson = response.getTrust
     val responseHeader = response.responseHeader
@@ -40,12 +41,13 @@ class DeclarationTransformer {
         updateCorrespondence(responseJson) andThen
         fixLeadTrusteeAddress(responseJson, pathToLeadTrustees) andThen
         convertLeadTrustee(responseJson) andThen
-        addPreviousLeadTrustee(responseJson, originalJson, date) andThen
+        addPreviousLeadTrustee(responseJson, originalJson, submissionDate) andThen
         pruneEmptyTrustees(responseJson) andThen
         putNewValue(__ \ 'reqHeader \ 'formBundleNo, JsString(responseHeader.formBundleNo)) andThen
         addDeclaration(declarationForApi, responseJson) andThen
         addAgentIfDefined(declarationForApi.agentDetails) andThen
-        addEndDateIfDefined(declarationForApi.endDate)
+        addEndDateIfDefined(declarationForApi.endDate) andThen
+        addSubmissionDateIf5mld(submissionDate, is5mld)
     )
   }
 
@@ -174,4 +176,13 @@ class DeclarationTransformer {
     }
   }
 
+  private def addSubmissionDateIf5mld(submissionDate: LocalDate, is5mld: Boolean) = {
+    if (is5mld) {
+      __.json.update(
+        (__ \ 'submissionDate).json.put(Json.toJson(submissionDate))
+      )
+    } else {
+      __.json.pick[JsObject]
+    }
+  }
 }
