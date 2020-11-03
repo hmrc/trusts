@@ -17,6 +17,7 @@
 package transformers
 
 import play.api.libs.json.{JsValue, _}
+import transformers.trustDetails.SetExpressTransform
 
 trait DeltaTransform {
   def applyTransform(input: JsValue): JsResult[JsValue]
@@ -38,7 +39,8 @@ object DeltaTransform {
         beneficiaryReads orElse
         settlorReads orElse
         protectorReads orElse
-        otherIndividualReads
+        otherIndividualReads orElse
+        trustDetailsTransformsReads
       ) (value.as[JsObject]) orElse (throw new Exception(s"Don't know how to deserialise transform"))
   )
 
@@ -93,6 +95,10 @@ object DeltaTransform {
     readsForTransform[AmendOtherIndividualTransform](AmendOtherIndividualTransform.key) orElse
     readsForTransform[RemoveOtherIndividualsTransform](RemoveOtherIndividualsTransform.key) orElse
     readsForTransform[AddOtherIndividualTransform](AddOtherIndividualTransform.key)
+  }
+
+  def trustDetailsTransformsReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
+    readsForTransform[SetExpressTransform](SetExpressTransform.key)
   }
 
   def trusteeWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
@@ -209,6 +215,11 @@ object DeltaTransform {
       Json.obj(AddOtherIndividualTransform.key -> Json.toJson(transform)(AddOtherIndividualTransform.format))
   }
 
+  def trustDetailsTransformsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
+    case transform: SetExpressTransform =>
+      Json.obj(SetExpressTransform.key -> Json.toJson(transform)(SetExpressTransform.format))
+  }
+
   def defaultWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
     case transform => throw new Exception(s"Don't know how to serialise transform - $transform")
   }
@@ -227,6 +238,7 @@ object DeltaTransform {
       otherIndividualsWrites orElse
       removeOtherIndividualsWrites orElse
       addOtherIndividualsWrites orElse
+      trustDetailsTransformsWrites orElse
       defaultWrites
       ).apply(deltaTransform)
   }
