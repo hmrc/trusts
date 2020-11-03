@@ -19,19 +19,19 @@ package transformers.trustDetails
 import org.scalatest.{FreeSpec, MustMatchers}
 import utils.JsonUtils
 
-class SetExpressTransformSpec extends FreeSpec with MustMatchers {
+class SetPropertyTransformSpec  extends FreeSpec with MustMatchers {
 
-  "SetExpressTransform should" - {
+  "SetPropertyTransform should" - {
 
     "before declaration" - {
 
       "amend an trust details by setting the field" - {
         "when the field already exists" in {
 
-          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-express.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-express.json")
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-property.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-property.json")
 
-          val transformer = SetExpressTransform(false)
+          val transformer = SetPropertyTransform(false)
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -40,9 +40,9 @@ class SetExpressTransformSpec extends FreeSpec with MustMatchers {
         "when it is a new value" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-express.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-property.json")
 
-          val transformer = SetExpressTransform(false)
+          val transformer = SetPropertyTransform(false)
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson

@@ -19,12 +19,12 @@ package transformers.trustDetails
 import play.api.libs.json._
 import transformers.{DeltaTransform, JsonOperations}
 
-case class SetRecordedTransform(express: Boolean) extends DeltaTransform with JsonOperations {
+case class SetRecordedTransform(trustRecorded: Boolean) extends DeltaTransform with JsonOperations {
 
   private lazy val path = __ \ 'details \ 'trustRecorded
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addToList(input, path, Json.toJson(express))
+    addTo(input, path, Json.toJson(trustRecorded))
   }
 
 }

@@ -21,18 +21,10 @@ import transformers.{DeltaTransform, JsonOperations}
 
 case class SetExpressTransform(expressTrust: Boolean) extends DeltaTransform with JsonOperations {
 
-  private lazy val path = (__ \ 'details \ 'trust \ 'details \ 'expressTrust)
+  private lazy val path = __ \ 'details \ 'trust \ 'details \ 'expressTrust
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-
-    import play.api.libs.json._
-
-    input.transform(__.json.update {
-      path.json.put(
-        JsBoolean(expressTrust)
-      )
-    })
-
+    addTo(input, path, JsBoolean(expressTrust))
   }
 
 }

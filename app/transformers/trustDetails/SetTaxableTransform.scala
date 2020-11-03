@@ -19,12 +19,12 @@ package transformers.trustDetails
 import play.api.libs.json._
 import transformers.{DeltaTransform, JsonOperations}
 
-case class SetTaxableTransform(express: Boolean) extends DeltaTransform with JsonOperations {
+case class SetTaxableTransform(trustTaxable: Boolean) extends DeltaTransform with JsonOperations {
 
   private lazy val path = __ \ 'details \ 'trustTaxable
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addToList(input, path, Json.toJson(express))
+    addTo(input, path, Json.toJson(trustTaxable))
   }
 
 }
