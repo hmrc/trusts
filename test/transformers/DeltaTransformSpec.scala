@@ -22,6 +22,7 @@ import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
 import models.variation._
 import models.{AddressType, NameType}
+import transformers.trustDetails.SetExpressTransform
 
 class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
@@ -295,6 +296,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
       val addOtherIndividualTransform = AddOtherIndividualTransform(otherIndividual)
 
+      val setExpressTransform = SetExpressTransform(expressTrust = true)
+
       val json = Json.parse(
         s"""{
           |        "deltaTransforms" : [
@@ -405,6 +408,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           |            },
           |            {
           |               "AddOtherIndividualTransform": ${Json.toJson(addOtherIndividualTransform)}
+          |            },
+          |            {
+          |               "SetExpressTransform": ${Json.toJson(setExpressTransform)}
           |            }
           |        ]
           |    }
@@ -446,7 +452,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           amendBusinessProtectorTransform,
           removeOtherIndividualsTransform,
           amendOtherIndividualTransform,
-          addOtherIndividualTransform
+          addOtherIndividualTransform,
+          setExpressTransform
         )
       )
 
