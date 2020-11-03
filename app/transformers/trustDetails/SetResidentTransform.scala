@@ -21,7 +21,7 @@ import transformers.{DeltaTransform, JsonOperations}
 
 case class SetResidentTransform(trustUKResident: Boolean) extends DeltaTransform with JsonOperations {
 
-  private lazy val path = __ \ 'details \ 'trustUKResident
+  private lazy val path = __ \ 'details \ 'trust \ 'details \ 'trustUKResident
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     addTo(input, path, Json.toJson(trustUKResident))
