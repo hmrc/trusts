@@ -18,15 +18,15 @@ package controllers
 
 import java.time.LocalDate
 
-import javax.inject.Inject
-import play.api.Logging
-import play.api.libs.json._
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import controllers.actions.IdentifierAction
+import javax.inject.Inject
 import models._
 import models.registration.RegistrationSubmission.{AnswerSection, MappedPiece}
 import models.registration.{RegistrationSubmission, RegistrationSubmissionDraft, RegistrationSubmissionDraftData}
 import models.requests.IdentifierRequest
+import play.api.Logging
+import play.api.libs.json._
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.RegistrationSubmissionRepository
 import services.LocalDateTimeService
 
@@ -374,6 +374,42 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           logger.info(s"[Session ID: ${request.sessionId}]" +
             s" no draft, cannot return correspondence address")
           NotFound
+      }
+  }
+
+  def removeRoleInCompany(draftId: String): Action[AnyContent] = identify.async {
+    implicit request =>
+      submissionRepository.getDraft(draftId, request.identifier).flatMap {
+        case Some(draft) =>
+
+          val initialDraftData: JsValue = draft.draftData
+          val individualBeneficiariesPath = JsPath \ "registration" \ "trust/entities/beneficiary" \ "individualDetails"
+
+          initialDraftData.transform(individualBeneficiariesPath.json.pick) match {
+            case JsSuccess(value, _) =>
+              val updatedDraftData: JsValue = value match {
+                case JsArray(individualBeneficiaries) =>
+                  def roleInCompanyPath(index: Int) = individualBeneficiariesPath \ index \ "roleInCompany"
+                  individualBeneficiaries.toList.zipWithIndex.foldLeft(initialDraftData)((acc, x) => {
+                    acc.transform(roleInCompanyPath(x._2).json.prune) match {
+                      case JsSuccess(value, _) => value
+                      case _ => acc
+                    }
+                  })
+                case _ => initialDraftData
+              }
+
+              val newDraft = draft.copy(draftData = updatedDraftData)
+
+              submissionRepository.setDraft(newDraft).map(
+                result => if (result) Ok else InternalServerError
+              )
+            case _ =>
+              logger.info(s"[Session ID: ${request.sessionId}] no individual beneficiaries found.")
+              Future.successful(Ok)
+          }
+
+        case _ => Future.successful(InternalServerError)
       }
   }
 }

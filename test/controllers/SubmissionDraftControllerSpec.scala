@@ -185,6 +185,204 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       |}
       |""".stripMargin).as[RegistrationSubmissionDraft]
 
+  private lazy val mockSubmissionDraftWithIndividualBeneficiaries = Json.parse(
+    """
+      |{
+      | "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+      | "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
+      | "createdAt" : { "$date" : 1597323808000 },
+      | "draftData" : {
+      |   "status" : {
+      |     "taxLiability" : "completed"
+      |   },
+      |   "taxLiability" : {
+      |     "data" : {
+      |       "cyMinusFourYesNo" : true,
+      |       "trustStartDate" : "2010-10-10",
+      |       "didDeclareTaxToHMRCForYear4" : false
+      |     }
+      |   },
+      |   "main" : {
+      |     "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+      |     "data" : {
+      |       "trustDetails" : {
+      |         "administrationInsideUK" : true,
+      |         "trusteesBasedInTheUK" : "UKBasedTrustees",
+      |         "trustName" : "Trust Name Details",
+      |         "whenTrustSetup" : "2010-08-21",
+      |         "establishedUnderScotsLaw" : true,
+      |         "governedInsideTheUK" : false,
+      |         "countryGoverningTrust" : "FR",
+      |         "residentOffshore" : false,
+      |         "status" : "completed"
+      |       },
+      |       "trustRegisteredOnline" : false,
+      |       "trustHaveAUTR" : false
+      |     },
+      |     "progress" : "InProgress",
+      |     "createdAt" : "2020-08-13T13:37:53.787Z",
+      |     "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54"
+      |   },
+      |   "answerSections" : {
+      |     "taxLiability" : [
+      |       {
+      |         "headingKey" : "Tax liability 6 April 2016 to 5 April 2017",
+      |         "rows" : [
+      |           {
+      |             "label" : "Did the trust need to pay any tax from 6 April 2016 to 5 April 2017?",
+      |             "answer" : "Yes",
+      |             "labelArg" : ""
+      |           },
+      |           {
+      |             "label" : "Was the tax from 6 April 2016 to 5 April 2017 declared?",
+      |             "answer" : "No",
+      |             "labelArg" : ""
+      |           }
+      |         ]
+      |       }
+      |     ]
+      |   },
+      |   "registration": {
+      |     "yearsReturns" : {
+      |       "returns": [
+      |         {
+      |           "taxReturnYear" : "17",
+      |           "taxConsequence" : true
+      |         },
+      |         {
+      |           "taxReturnYear" : "18",
+      |           "taxConsequence" : true
+      |         }
+      |       ]
+      |     },
+      |     "trust/entities/beneficiary": {
+      |       "individualDetails": [
+      |         {
+      |           "name": {
+      |             "firstName": "Joe",
+      |             "lastName": "Bloggs"
+      |           },
+      |           "roleInCompany": "Director"
+      |         },
+      |         {
+      |           "name": {
+      |             "firstName": "John",
+      |             "lastName": "Doe"
+      |           },
+      |           "roleInCompany": "Employee"
+      |         }
+      |       ]
+      |     },
+      |     "correspondence/address": {
+      |       "line1": "Address line1",
+      |       "line2": "Address line2",
+      |       "postCode": "NE1 1EN",
+      |       "country": "GB"
+      |     }
+      |   }
+      | },
+      | "inProgress" : true
+      |}
+      |""".stripMargin).as[RegistrationSubmissionDraft]
+
+  private lazy val mockSubmissionDraftWithIndividualBeneficiariesRoleInCompanyRemoved = Json.parse(
+    """
+      |{
+      | "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+      | "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
+      | "createdAt" : { "$date" : 1597323808000 },
+      | "draftData" : {
+      |   "status" : {
+      |     "taxLiability" : "completed"
+      |   },
+      |   "taxLiability" : {
+      |     "data" : {
+      |       "cyMinusFourYesNo" : true,
+      |       "trustStartDate" : "2010-10-10",
+      |       "didDeclareTaxToHMRCForYear4" : false
+      |     }
+      |   },
+      |   "main" : {
+      |     "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+      |     "data" : {
+      |       "trustDetails" : {
+      |         "administrationInsideUK" : true,
+      |         "trusteesBasedInTheUK" : "UKBasedTrustees",
+      |         "trustName" : "Trust Name Details",
+      |         "whenTrustSetup" : "2010-08-21",
+      |         "establishedUnderScotsLaw" : true,
+      |         "governedInsideTheUK" : false,
+      |         "countryGoverningTrust" : "FR",
+      |         "residentOffshore" : false,
+      |         "status" : "completed"
+      |       },
+      |       "trustRegisteredOnline" : false,
+      |       "trustHaveAUTR" : false
+      |     },
+      |     "progress" : "InProgress",
+      |     "createdAt" : "2020-08-13T13:37:53.787Z",
+      |     "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54"
+      |   },
+      |   "answerSections" : {
+      |     "taxLiability" : [
+      |       {
+      |         "headingKey" : "Tax liability 6 April 2016 to 5 April 2017",
+      |         "rows" : [
+      |           {
+      |             "label" : "Did the trust need to pay any tax from 6 April 2016 to 5 April 2017?",
+      |             "answer" : "Yes",
+      |             "labelArg" : ""
+      |           },
+      |           {
+      |             "label" : "Was the tax from 6 April 2016 to 5 April 2017 declared?",
+      |             "answer" : "No",
+      |             "labelArg" : ""
+      |           }
+      |         ]
+      |       }
+      |     ]
+      |   },
+      |   "registration": {
+      |     "yearsReturns" : {
+      |       "returns": [
+      |         {
+      |           "taxReturnYear" : "17",
+      |           "taxConsequence" : true
+      |         },
+      |         {
+      |           "taxReturnYear" : "18",
+      |           "taxConsequence" : true
+      |         }
+      |       ]
+      |     },
+      |     "trust/entities/beneficiary": {
+      |       "individualDetails": [
+      |         {
+      |           "name": {
+      |             "firstName": "Joe",
+      |             "lastName": "Bloggs"
+      |           }
+      |         },
+      |         {
+      |           "name": {
+      |             "firstName": "John",
+      |             "lastName": "Doe"
+      |           }
+      |         }
+      |       ]
+      |     },
+      |     "correspondence/address": {
+      |       "line1": "Address line1",
+      |       "line2": "Address line2",
+      |       "postCode": "NE1 1EN",
+      |       "country": "GB"
+      |     }
+      |   }
+      | },
+      | "inProgress" : true
+      |}
+      |""".stripMargin).as[RegistrationSubmissionDraft]
+
   private lazy val mockSubmissionDraftNoData = Json.parse(
     """
       |{
@@ -1349,6 +1547,87 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       val result = controller.reset("DRAFTID", "taxLiability", "yearsReturns").apply(request)
 
       status(result) mustBe INTERNAL_SERVER_ERROR
+    }
+  }
+
+  ".removeRoleInCompany" should {
+
+    "remove role in company values from draft data" in {
+
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents()
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(mockSubmissionDraftWithIndividualBeneficiaries)))
+
+      when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.removeRoleInCompany("draftId").apply(request)
+
+      status(result) mustBe OK
+
+      verify(submissionRepository).setDraft(mockSubmissionDraftWithIndividualBeneficiariesRoleInCompanyRemoved)
+    }
+
+    "resubmit identical data if individual beneficiaries do not have role in company values" in {
+
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents()
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(mockSubmissionDraftWithIndividualBeneficiariesRoleInCompanyRemoved)))
+
+      when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.removeRoleInCompany("draftId").apply(request)
+
+      status(result) mustBe OK
+
+      verify(submissionRepository).setDraft(mockSubmissionDraftWithIndividualBeneficiariesRoleInCompanyRemoved)
+    }
+
+    "do nothing if no individual beneficiaries exist" in {
+
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents()
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(mockSubmissionDraftNoData)))
+
+      when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.removeRoleInCompany("draftId").apply(request)
+
+      status(result) mustBe OK
+
+      verify(submissionRepository, times(0)).setDraft(mockSubmissionDraftWithIndividualBeneficiariesRoleInCompanyRemoved)
     }
   }
 }
