@@ -17,7 +17,7 @@
 package transformers
 
 import play.api.libs.json.{JsValue, _}
-import transformers.trustDetails.SetExpressTransform
+import transformers.trustDetails.{SetExpressTransform, SetPropertyTransform, SetRecordedTransform, SetResidentTransform, SetTaxableTransform}
 
 trait DeltaTransform {
   def applyTransform(input: JsValue): JsResult[JsValue]
@@ -98,7 +98,11 @@ object DeltaTransform {
   }
 
   def trustDetailsTransformsReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
-    readsForTransform[SetExpressTransform](SetExpressTransform.key)
+    readsForTransform[SetExpressTransform](SetExpressTransform.key) orElse
+    readsForTransform[SetPropertyTransform](SetPropertyTransform.key) orElse
+    readsForTransform[SetRecordedTransform](SetRecordedTransform.key) orElse
+    readsForTransform[SetResidentTransform](SetResidentTransform.key) orElse
+    readsForTransform[SetTaxableTransform](SetTaxableTransform.key)
   }
 
   def trusteeWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
@@ -218,6 +222,14 @@ object DeltaTransform {
   def trustDetailsTransformsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
     case transform: SetExpressTransform =>
       Json.obj(SetExpressTransform.key -> Json.toJson(transform)(SetExpressTransform.format))
+    case transform: SetPropertyTransform =>
+      Json.obj(SetPropertyTransform.key -> Json.toJson(transform)(SetPropertyTransform.format))
+    case transform: SetRecordedTransform =>
+      Json.obj(SetRecordedTransform.key -> Json.toJson(transform)(SetRecordedTransform.format))
+    case transform: SetResidentTransform =>
+      Json.obj(SetResidentTransform.key -> Json.toJson(transform)(SetResidentTransform.format))
+    case transform: SetTaxableTransform =>
+      Json.obj(SetTaxableTransform.key -> Json.toJson(transform)(SetTaxableTransform.format))
   }
 
   def defaultWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {

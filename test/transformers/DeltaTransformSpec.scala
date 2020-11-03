@@ -22,7 +22,7 @@ import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
 import models.variation._
 import models.{AddressType, NameType}
-import transformers.trustDetails.SetExpressTransform
+import transformers.trustDetails.{SetExpressTransform, SetPropertyTransform, SetRecordedTransform, SetResidentTransform, SetTaxableTransform}
 
 class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
@@ -298,6 +298,14 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
       val setExpressTransform = SetExpressTransform(expressTrust = true)
 
+      val setPropertyTransform = SetPropertyTransform(trustUKProperty = true)
+
+      val setRecordedTransform = SetRecordedTransform(trustRecorded = true)
+
+      val setResidentTransform = SetResidentTransform(trustUKResident = true)
+
+      val setTaxableTransform = SetTaxableTransform(trustTaxable = true)
+
       val json = Json.parse(
         s"""{
           |        "deltaTransforms" : [
@@ -411,6 +419,18 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           |            },
           |            {
           |               "SetExpressTransform": ${Json.toJson(setExpressTransform)}
+          |            },
+          |            {
+          |               "SetPropertyTransform": ${Json.toJson(setPropertyTransform)}
+          |            },
+          |            {
+          |               "SetRecordedTransform": ${Json.toJson(setRecordedTransform)}
+          |            },
+          |            {
+          |               "SetResidentTransform": ${Json.toJson(setResidentTransform)}
+          |            },
+          |            {
+          |               "SetTaxableTransform": ${Json.toJson(setTaxableTransform)}
           |            }
           |        ]
           |    }
@@ -453,7 +473,11 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           removeOtherIndividualsTransform,
           amendOtherIndividualTransform,
           addOtherIndividualTransform,
-          setExpressTransform
+          setExpressTransform,
+          setPropertyTransform,
+          setRecordedTransform,
+          setResidentTransform,
+          setTaxableTransform
         )
       )
 
