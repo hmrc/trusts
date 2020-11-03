@@ -21,7 +21,7 @@ import transformers.{DeltaTransform, JsonOperations}
 
 case class SetTaxableTransform(trustTaxable: Boolean) extends DeltaTransform with JsonOperations {
 
-  private lazy val path = __ \ 'details \ 'trustTaxable
+  private lazy val path = __ \ 'details \ 'trust \ 'details \ 'trustTaxable
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     addTo(input, path, Json.toJson(trustTaxable))
