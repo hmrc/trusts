@@ -8,7 +8,7 @@
     </appender>
 
     <logger name="controllers" level="INFO"/>
-    <logger name="services" level="INFO"/>
+    <logger name="services" level="DEBUG"/>
     <logger name="models" level="INFO"/>
     <logger name="repositories" level="INFO"/>
     <logger name="connector" level="INFO"/>
