@@ -185,298 +185,6 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       |}
       |""".stripMargin).as[RegistrationSubmissionDraft]
 
-  private lazy val mockSubmissionDraftWithIndividualBeneficiaries = Json.parse(
-    """
-      |{
-      | "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
-      | "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
-      | "createdAt" : { "$date" : 1597323808000 },
-      | "draftData" : {
-      |   "status" : {
-      |     "taxLiability" : "completed"
-      |   },
-      |   "taxLiability" : {
-      |     "data" : {
-      |       "cyMinusFourYesNo" : true,
-      |       "trustStartDate" : "2010-10-10",
-      |       "didDeclareTaxToHMRCForYear4" : false
-      |     }
-      |   },
-      |   "main" : {
-      |     "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
-      |     "data" : {
-      |       "trustDetails" : {
-      |         "administrationInsideUK" : true,
-      |         "trusteesBasedInTheUK" : "UKBasedTrustees",
-      |         "trustName" : "Trust Name Details",
-      |         "whenTrustSetup" : "2010-08-21",
-      |         "establishedUnderScotsLaw" : true,
-      |         "governedInsideTheUK" : false,
-      |         "countryGoverningTrust" : "FR",
-      |         "residentOffshore" : false,
-      |         "status" : "completed"
-      |       },
-      |       "trustRegisteredOnline" : false,
-      |       "trustHaveAUTR" : false
-      |     },
-      |     "progress" : "InProgress",
-      |     "createdAt" : "2020-08-13T13:37:53.787Z",
-      |     "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54"
-      |   },
-      |   "answerSections" : {
-      |     "beneficiaries" : [
-      |       {
-      |         "headingKey" : "Individual beneficiary 1",
-      |         "rows" : [
-      |           {
-      |             "label" : "individualBeneficiaryName.checkYourAnswersLabel",
-      |             "answer" : "Joe Bloggs",
-      |             "labelArg" : ""
-      |           },
-      |           {
-      |             "label" : "individualBeneficiary.roleInCompany.checkYourAnswersLabel",
-      |             "answer" : "Director",
-      |             "labelArg" : "Joe Bloggs"
-      |           }
-      |         ]
-      |       },
-      |       {
-      |         "headingKey" : "Individual beneficiary 2",
-      |         "rows" : [
-      |           {
-      |             "label" : "individualBeneficiaryName.checkYourAnswersLabel",
-      |             "answer" : "John Doe",
-      |             "labelArg" : ""
-      |           },
-      |           {
-      |             "label" : "individualBeneficiary.roleInCompany.checkYourAnswersLabel",
-      |             "answer" : "Employee",
-      |             "labelArg" : "John Doe"
-      |           }
-      |         ]
-      |       }
-      |     ]
-      |   },
-      |   "registration": {
-      |     "yearsReturns" : {
-      |       "returns": [
-      |         {
-      |           "taxReturnYear" : "17",
-      |           "taxConsequence" : true
-      |         },
-      |         {
-      |           "taxReturnYear" : "18",
-      |           "taxConsequence" : true
-      |         }
-      |       ]
-      |     },
-      |     "trust/entities/beneficiary": {
-      |       "individualDetails": [
-      |         {
-      |           "name": {
-      |             "firstName": "Joe",
-      |             "lastName": "Bloggs"
-      |           },
-      |           "roleInCompany": "Director"
-      |         },
-      |         {
-      |           "name": {
-      |             "firstName": "John",
-      |             "lastName": "Doe"
-      |           },
-      |           "roleInCompany": "Employee"
-      |         }
-      |       ]
-      |     },
-      |     "correspondence/address": {
-      |       "line1": "Address line1",
-      |       "line2": "Address line2",
-      |       "postCode": "NE1 1EN",
-      |       "country": "GB"
-      |     }
-      |   },
-      |   "beneficiaries" : {
-      |     "_id" : "Int-955338e9-e0d8-422b-ad80-01d9411536c7",
-      |     "data" : {
-      |       "beneficiaries" : {
-      |         "whatTypeOfBeneficiary" : "individual",
-      |         "individualBeneficiaries" : [
-      |           {
-      |             "addressYesNo" : false,
-      |             "incomeYesNo" : true,
-      |             "name" : {
-      |               "firstName" : "Joe",
-      |               "lastName" : "Bloggs"
-      |             },
-      |             "roleInCompany" : "Director",
-      |             "dateOfBirthYesNo" : false,
-      |             "vulnerableYesNo" : false,
-      |             "nationalInsuranceNumberYesNo" : false,
-      |             "status" : "completed"
-      |           },
-      |           {
-      |             "addressYesNo" : false,
-      |             "incomeYesNo" : true,
-      |             "name" : {
-      |               "firstName" : "John",
-      |               "lastName" : "Doe"
-      |             },
-      |             "roleInCompany" : "Employee",
-      |             "dateOfBirthYesNo" : false,
-      |             "vulnerableYesNo" : false,
-      |             "nationalInsuranceNumberYesNo" : false,
-      |             "status" : "completed"
-      |           }
-      |         ]
-      |       },
-      |       "addABeneficiary" : "no-complete"
-      |     },
-      |     "internalId" : "Int-534fed7e-93ec-427a-958f-815264af216f"
-      |   }
-      | },
-      | "inProgress" : true
-      |}
-      |""".stripMargin).as[RegistrationSubmissionDraft]
-
-  private lazy val mockSubmissionDraftWithIndividualBeneficiariesRoleInCompanyRemoved = Json.parse(
-    """
-      |{
-      | "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
-      | "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
-      | "createdAt" : { "$date" : 1597323808000 },
-      | "draftData" : {
-      |   "status" : {
-      |     "taxLiability" : "completed"
-      |   },
-      |   "taxLiability" : {
-      |     "data" : {
-      |       "cyMinusFourYesNo" : true,
-      |       "trustStartDate" : "2010-10-10",
-      |       "didDeclareTaxToHMRCForYear4" : false
-      |     }
-      |   },
-      |   "main" : {
-      |     "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
-      |     "data" : {
-      |       "trustDetails" : {
-      |         "administrationInsideUK" : true,
-      |         "trusteesBasedInTheUK" : "UKBasedTrustees",
-      |         "trustName" : "Trust Name Details",
-      |         "whenTrustSetup" : "2010-08-21",
-      |         "establishedUnderScotsLaw" : true,
-      |         "governedInsideTheUK" : false,
-      |         "countryGoverningTrust" : "FR",
-      |         "residentOffshore" : false,
-      |         "status" : "completed"
-      |       },
-      |       "trustRegisteredOnline" : false,
-      |       "trustHaveAUTR" : false
-      |     },
-      |     "progress" : "InProgress",
-      |     "createdAt" : "2020-08-13T13:37:53.787Z",
-      |     "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54"
-      |   },
-      |   "answerSections" : {
-      |     "beneficiaries" : [
-      |       {
-      |         "headingKey" : "Individual beneficiary 1",
-      |         "rows" : [
-      |           {
-      |             "label" : "individualBeneficiaryName.checkYourAnswersLabel",
-      |             "answer" : "Joe Bloggs",
-      |             "labelArg" : ""
-      |           }
-      |         ]
-      |       },
-      |       {
-      |         "headingKey" : "Individual beneficiary 2",
-      |         "rows" : [
-      |           {
-      |             "label" : "individualBeneficiaryName.checkYourAnswersLabel",
-      |             "answer" : "John Doe",
-      |             "labelArg" : ""
-      |           }
-      |         ]
-      |       }
-      |     ]
-      |   },
-      |   "registration": {
-      |     "yearsReturns" : {
-      |       "returns": [
-      |         {
-      |           "taxReturnYear" : "17",
-      |           "taxConsequence" : true
-      |         },
-      |         {
-      |           "taxReturnYear" : "18",
-      |           "taxConsequence" : true
-      |         }
-      |       ]
-      |     },
-      |     "trust/entities/beneficiary": {
-      |       "individualDetails": [
-      |         {
-      |           "name": {
-      |             "firstName": "Joe",
-      |             "lastName": "Bloggs"
-      |           }
-      |         },
-      |         {
-      |           "name": {
-      |             "firstName": "John",
-      |             "lastName": "Doe"
-      |           }
-      |         }
-      |       ]
-      |     },
-      |     "correspondence/address": {
-      |       "line1": "Address line1",
-      |       "line2": "Address line2",
-      |       "postCode": "NE1 1EN",
-      |       "country": "GB"
-      |     }
-      |   },
-      |   "beneficiaries" : {
-      |     "_id" : "Int-955338e9-e0d8-422b-ad80-01d9411536c7",
-      |     "data" : {
-      |       "beneficiaries" : {
-      |         "whatTypeOfBeneficiary" : "individual",
-      |         "individualBeneficiaries" : [
-      |           {
-      |             "addressYesNo" : false,
-      |             "incomeYesNo" : true,
-      |             "name" : {
-      |               "firstName" : "Joe",
-      |               "lastName" : "Bloggs"
-      |             },
-      |             "dateOfBirthYesNo" : false,
-      |             "vulnerableYesNo" : false,
-      |             "nationalInsuranceNumberYesNo" : false,
-      |             "status" : "completed"
-      |           },
-      |           {
-      |             "addressYesNo" : false,
-      |             "incomeYesNo" : true,
-      |             "name" : {
-      |               "firstName" : "John",
-      |               "lastName" : "Doe"
-      |             },
-      |             "dateOfBirthYesNo" : false,
-      |             "vulnerableYesNo" : false,
-      |             "nationalInsuranceNumberYesNo" : false,
-      |             "status" : "completed"
-      |           }
-      |         ]
-      |       },
-      |       "addABeneficiary" : "no-complete"
-      |     },
-      |     "internalId" : "Int-534fed7e-93ec-427a-958f-815264af216f"
-      |   }
-      | },
-      | "inProgress" : true
-      |}
-      |""".stripMargin).as[RegistrationSubmissionDraft]
-
   private lazy val mockSubmissionDraftNoData = Json.parse(
     """
       |{
@@ -1646,82 +1354,75 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
   ".removeRoleInCompany" should {
 
-    "remove role in company values from draft data" in {
+    "return OK" when {
+      "draft data successfully updated" in {
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
 
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
-      val submissionRepository = mock[RegistrationSubmissionRepository]
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
 
-      val controller = new SubmissionDraftController(
-        submissionRepository,
-        identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
-      )
+        when(submissionRepository.getDraft(any(), any()))
+          .thenReturn(Future.successful(Some(mockSubmissionDraft)))
 
-      when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(mockSubmissionDraftWithIndividualBeneficiaries)))
+        when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
 
-      when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
+        val request = FakeRequest("GET", "path")
 
-      val request = FakeRequest("GET", "path")
+        val result = controller.removeRoleInCompany("draftId").apply(request)
 
-      val result = controller.removeRoleInCompany("draftId").apply(request)
-
-      status(result) mustBe OK
-
-      verify(submissionRepository).setDraft(mockSubmissionDraftWithIndividualBeneficiariesRoleInCompanyRemoved)
+        status(result) mustBe OK
+      }
     }
 
-    "resubmit identical data if individual beneficiaries do not have role in company values" in {
+    "return internal server error" when {
+      "failure getting draft" in {
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
 
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
-      val submissionRepository = mock[RegistrationSubmissionRepository]
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
 
-      val controller = new SubmissionDraftController(
-        submissionRepository,
-        identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
-      )
+        when(submissionRepository.getDraft(any(), any()))
+          .thenReturn(Future.successful(None))
 
-      when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(mockSubmissionDraftWithIndividualBeneficiariesRoleInCompanyRemoved)))
+        val request = FakeRequest("GET", "path")
 
-      when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
+        val result = controller.removeRoleInCompany("draftId").apply(request)
 
-      val request = FakeRequest("GET", "path")
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
 
-      val result = controller.removeRoleInCompany("draftId").apply(request)
+      "failure setting draft" in {
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
 
-      status(result) mustBe OK
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
 
-      verify(submissionRepository).setDraft(mockSubmissionDraftWithIndividualBeneficiariesRoleInCompanyRemoved)
-    }
+        when(submissionRepository.getDraft(any(), any()))
+          .thenReturn(Future.successful(Some(mockSubmissionDraft)))
 
-    "do nothing if no individual beneficiaries exist" in {
+        when(submissionRepository.setDraft(any())).thenReturn(Future.successful(false))
 
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
-      val submissionRepository = mock[RegistrationSubmissionRepository]
+        val request = FakeRequest("GET", "path")
 
-      val controller = new SubmissionDraftController(
-        submissionRepository,
-        identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
-      )
+        val result = controller.removeRoleInCompany("draftId").apply(request)
 
-      when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(mockSubmissionDraftNoData)))
-
-      when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
-
-      val request = FakeRequest("GET", "path")
-
-      val result = controller.removeRoleInCompany("draftId").apply(request)
-
-      status(result) mustBe OK
-
-      verify(submissionRepository, times(0)).setDraft(mockSubmissionDraftWithIndividualBeneficiariesRoleInCompanyRemoved)
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
     }
   }
 }

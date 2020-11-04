@@ -77,13 +77,25 @@ object JsonOps {
 
     def removeMappedPieces(): JsValue = {
       val individualBeneficiariesPath = JsPath \ "registration" \ "trust/entities/beneficiary" \ "individualDetails"
-      removeRoleInCompanyFromArrayAtPath(individualBeneficiariesPath)
+      removeRoleInCompanyFromArrayAtPath(individualBeneficiariesPath, "beneficiaryType")
     }
 
     def removeAnswerRows(): JsValue = {
+
       val beneficiariesPath = JsPath \ "answerSections" \ "beneficiaries"
       def answerRowsPath(index: Int) = beneficiariesPath \ index \ "rows"
       def answerRowPath(beneficiaryIndex: Int, rowIndex: Int) = answerRowsPath(beneficiaryIndex) \ rowIndex
+
+      def removeAnswerRow(jsValue: JsValue, beneficiaryIndex: Int, rowIndex: Int, label: String): JsValue = {
+        if (label == "individualBeneficiaryRoleInCompany.checkYourAnswersLabel") {
+          jsValue.remove(answerRowPath(beneficiaryIndex, rowIndex)) match {
+            case JsSuccess(answerRowRemoved, _) => answerRowRemoved
+            case _ => jsValue
+          }
+        } else {
+          jsValue
+        }
+      }
 
       getArray(initialData, beneficiariesPath) match {
         case Success(beneficiaries) =>
@@ -92,15 +104,7 @@ object JsonOps {
               case Success(answerRows) =>
                 answerRows.zipWithIndex.foldLeft(outerFold)((innerFold, row) => {
                   getString(innerFold, answerRowPath(beneficiary._2, row._2) \ "label") match {
-                    case Success(label) =>
-                      if (label == "individualBeneficiary.roleInCompany.checkYourAnswersLabel") {
-                        innerFold.remove(answerRowPath(beneficiary._2, row._2)) match {
-                          case JsSuccess(answerRowRemoved, _) => answerRowRemoved
-                          case _ => innerFold
-                        }
-                      } else {
-                        innerFold
-                      }
+                    case Success(label) => removeAnswerRow(innerFold, beneficiary._2, row._2, label)
                     case _ => innerFold
                   }
                 })
@@ -113,13 +117,13 @@ object JsonOps {
 
     def removeDraftData(): JsValue = {
       val individualBeneficiariesPath = JsPath \ "beneficiaries" \ "data" \ "beneficiaries" \ "individualBeneficiaries"
-      removeRoleInCompanyFromArrayAtPath(individualBeneficiariesPath)
+      removeRoleInCompanyFromArrayAtPath(individualBeneficiariesPath, "roleInCompany")
     }
 
-    private def removeRoleInCompanyFromArrayAtPath(path: JsPath): JsValue = {
+    private def removeRoleInCompanyFromArrayAtPath(path: JsPath, key: String): JsValue = {
       getArray(initialData, path) match {
         case Success(individualBeneficiaries) =>
-          def roleInCompanyPath(index: Int) = path \ index \ "roleInCompany"
+          def roleInCompanyPath(index: Int) = path \ index \ key
           individualBeneficiaries.zipWithIndex.foldLeft(initialData)((acc, x) => {
             acc.remove(roleInCompanyPath(x._2)) match {
               case JsSuccess(roleInCompanyRemoved, _) => roleInCompanyRemoved
@@ -131,21 +135,28 @@ object JsonOps {
     }
 
     private def getArray(jsValue: JsValue, path: JsPath): Try[List[JsValue]] = {
-      jsValue.transform(path.json.pick) match {
-        case JsSuccess(value, _) => value match {
+      pick(jsValue, path) match {
+        case Success(value) => value match {
           case JsArray(array) => Success(array.toList)
           case _ => Failure(new Throwable(s"JSON at path $path not of type JsArray."))
         }
-        case _ => Failure(new Throwable(s"JSON at path $path not found."))
+        case Failure(exception) => Failure(exception)
       }
     }
 
     private def getString(jsValue: JsValue, path: JsPath): Try[String] = {
-      jsValue.transform(path.json.pick) match {
-        case JsSuccess(value, _) => value match {
+      pick(jsValue, path) match {
+        case Success(value) => value match {
           case JsString(string) => Success(string)
           case _ => Failure(new Throwable(s"JSON at path $path not of type JsString."))
         }
+        case Failure(exception) => Failure(exception)
+      }
+    }
+
+    private def pick(jsValue: JsValue, path: JsPath): Try[JsValue] = {
+      jsValue.transform(path.json.pick) match {
+        case JsSuccess(value, _) => Success(value)
         case _ => Failure(new Throwable(s"JSON at path $path not found."))
       }
     }

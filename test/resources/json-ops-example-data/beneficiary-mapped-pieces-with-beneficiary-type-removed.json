@@ -1,0 +1,24 @@
+{
+  "registration": {
+    "trust/entities/beneficiary": {
+      "individualDetails" : [
+        {
+          "name" : {
+            "firstName" : "Joe",
+            "lastName" : "Bloggs"
+          },
+          "vulnerableBeneficiary" : false,
+          "beneficiaryDiscretion" : true
+        },
+        {
+          "name" : {
+            "firstName" : "John",
+            "lastName" : "Doe"
+          },
+          "vulnerableBeneficiary" : false,
+          "beneficiaryDiscretion" : true
+        }
+      ]
+    }
+  }
+}
