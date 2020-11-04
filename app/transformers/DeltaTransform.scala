@@ -17,7 +17,7 @@
 package transformers
 
 import play.api.libs.json.{JsValue, _}
-import transformers.trustDetails.{SetExpressTransform, SetPropertyTransform, SetRecordedTransform, SetResidentTransform, SetTaxableTransform}
+import transformers.trustDetails.{SetExpressTransform, SetPropertyTransform, SetRecordedTransform, SetResidentTransform, SetTaxableTransform, SetUKRelationTransform}
 
 trait DeltaTransform {
   def applyTransform(input: JsValue): JsResult[JsValue]
@@ -102,7 +102,8 @@ object DeltaTransform {
     readsForTransform[SetPropertyTransform](SetPropertyTransform.key) orElse
     readsForTransform[SetRecordedTransform](SetRecordedTransform.key) orElse
     readsForTransform[SetResidentTransform](SetResidentTransform.key) orElse
-    readsForTransform[SetTaxableTransform](SetTaxableTransform.key)
+    readsForTransform[SetTaxableTransform](SetTaxableTransform.key) orElse
+    readsForTransform[SetUKRelationTransform](SetUKRelationTransform.key)
   }
 
   def trusteeWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
@@ -230,6 +231,8 @@ object DeltaTransform {
       Json.obj(SetResidentTransform.key -> Json.toJson(transform)(SetResidentTransform.format))
     case transform: SetTaxableTransform =>
       Json.obj(SetTaxableTransform.key -> Json.toJson(transform)(SetTaxableTransform.format))
+    case transform: SetUKRelationTransform =>
+      Json.obj(SetUKRelationTransform.key -> Json.toJson(transform)(SetUKRelationTransform.format))
   }
 
   def defaultWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
