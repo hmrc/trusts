@@ -22,7 +22,7 @@ import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
 import models.variation._
 import models.{AddressType, NameType}
-import transformers.trustDetails.{SetExpressTransform, SetPropertyTransform, SetRecordedTransform, SetResidentTransform, SetTaxableTransform}
+import transformers.trustDetails.{SetExpressTransform, SetPropertyTransform, SetRecordedTransform, SetResidentTransform, SetTaxableTransform, SetUKRelationTransform}
 
 class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
@@ -306,6 +306,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
       val setTaxableTransform = SetTaxableTransform(trustTaxable = true)
 
+      val setUKRelationTransform = SetUKRelationTransform(trustUKRelation = true)
+
       val json = Json.parse(
         s"""{
           |        "deltaTransforms" : [
@@ -431,6 +433,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           |            },
           |            {
           |               "SetTaxableTransform": ${Json.toJson(setTaxableTransform)}
+          |            },
+          |            {
+          |               "SetUKRelationTransform": ${Json.toJson(setUKRelationTransform)}
           |            }
           |        ]
           |    }
@@ -477,7 +482,8 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           setPropertyTransform,
           setRecordedTransform,
           setResidentTransform,
-          setTaxableTransform
+          setTaxableTransform,
+          setUKRelationTransform
         )
       )
 
