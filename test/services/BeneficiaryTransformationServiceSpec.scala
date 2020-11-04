@@ -31,6 +31,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
 import transformers._
 import transformers.remove.RemoveBeneficiary
+import uk.gov.hmrc.http.HeaderCarrier
 import utils.{JsonFixtures, JsonUtils}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -38,6 +39,8 @@ import scala.concurrent.Future
 
 class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonFixtures {
   private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
+
+  implicit val hc = HeaderCarrier()
 
   private def beneficiaryJson(value1: String, endDate: Option[LocalDate] = None) = {
     if (endDate.isDefined) {
@@ -70,7 +73,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any()))
         .thenReturn(Future.successful(true))
-      when(transformationService.getTransformedData(any(), any()))
+      when(transformationService.getTransformedData(any(), any())(any()))
         .thenReturn(Future.successful(TrustProcessedResponse(
           buildInputJson("individualDetails", Seq(beneficiary)),
           ResponseHeader("status", "formBundlNo")
@@ -100,7 +103,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any()))
+      when(transformationService.getTransformedData(any(), any())(any()))
         .thenReturn(Future.successful(TrustProcessedResponse(
           buildInputJson("unidentified", Seq(originalBeneficiaryJson)),
           ResponseHeader("status", "formBundlNo")
@@ -177,7 +180,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any()))
+      when(transformationService.getTransformedData(any(), any())(any()))
         .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(
           buildInputJson("individualDetails", Seq(original)),
           ResponseHeader("status", "formBundlNo")
@@ -279,7 +282,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any()))
+      when(transformationService.getTransformedData(any(), any())(any()))
         .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(
           buildInputJson("charity", Seq(original)),
           ResponseHeader("status", "formBundleNo")
@@ -378,7 +381,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any()))
+      when(transformationService.getTransformedData(any(), any())(any()))
         .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(
           buildInputJson("company", Seq(original)),
           ResponseHeader("status", "formBundleNo")
@@ -456,7 +459,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any()))
+      when(transformationService.getTransformedData(any(), any())(any()))
         .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(
           buildInputJson("other", Seq(original)),
           ResponseHeader("status", "formBundleNo")
@@ -504,7 +507,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any()))
+      when(transformationService.getTransformedData(any(), any())(any()))
         .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(
           buildInputJson("trust", Seq(original)),
           ResponseHeader("status", "formBundleNo")
@@ -604,7 +607,7 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any()))
+      when(transformationService.getTransformedData(any(), any())(any()))
         .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(
           buildInputJson("large", Seq(original)),
           ResponseHeader("status", "formBundleNo")

@@ -75,7 +75,7 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
       val auditService = app.injector.instanceOf[FakeAuditService]
       val transformer = mock[DeclarationTransformer]
 
-      when(transformationService.populateLeadTrusteeAddress(any[JsValue])).thenReturn(JsSuccess(trustInfoJson))
+      when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any())).thenReturn(JsSuccess(trustInfoJson))
       when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
       when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
 
@@ -119,7 +119,7 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
     val auditService = app.injector.instanceOf[FakeAuditService]
     val transformer = mock[DeclarationTransformer]
 
-    when(transformationService.populateLeadTrusteeAddress(any[JsValue])).thenReturn(JsSuccess(trustInfoJson))
+    when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any())).thenReturn(JsSuccess(trustInfoJson))
     when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
     when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
 

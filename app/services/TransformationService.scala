@@ -33,7 +33,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
                                       desService: DesService,
                                       auditService: AuditService) extends Logging {
 
-  def getTransformedData(identifier: String, internalId: String): Future[GetTrustResponse] = {
+  def getTransformedData(identifier: String, internalId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
     desService.getTrustInfo(identifier, internalId).flatMap {
       case response: TrustProcessedResponse =>
         populateLeadTrusteeAddress(response.getTrust) match {

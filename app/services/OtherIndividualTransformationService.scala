@@ -24,6 +24,7 @@ import models.get_trust.TrustProcessedResponse
 import models.variation.NaturalPersonType
 import transformers._
 import transformers.remove.RemoveOtherIndividual
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}
@@ -32,7 +33,7 @@ class OtherIndividualTransformationService @Inject()(transformationService: Tran
                                                      localDateService: LocalDateService
                                                     )(implicit ec:ExecutionContext) extends JsonOperations {
 
-  def removeOtherIndividual(utr: String, internalId: String, removeOtherIndividual: RemoveOtherIndividual): Future[Success.type] = {
+  def removeOtherIndividual(utr: String, internalId: String, removeOtherIndividual: RemoveOtherIndividual)(implicit hc: HeaderCarrier): Future[Success.type] = {
 
     getTransformedTrustJson(utr, internalId)
       .map(findOtherIndividualJson(_, removeOtherIndividual.index))
@@ -51,7 +52,7 @@ class OtherIndividualTransformationService @Inject()(transformationService: Tran
   def amendOtherIndividualTransformer(utr: String,
                                           index: Int,
                                           internalId: String,
-                                          amended: NaturalPersonType): Future[Success.type] = {
+                                          amended: NaturalPersonType)(implicit hc: HeaderCarrier): Future[Success.type] = {
     getTransformedTrustJson(utr, internalId)
       .map(findOtherIndividualJson(_, index))
       .flatMap(Future.fromTry)
@@ -64,7 +65,7 @@ class OtherIndividualTransformationService @Inject()(transformationService: Tran
       }
   }
 
-  private def getTransformedTrustJson(utr: String, internalId: String): Future[JsObject] = {
+  private def getTransformedTrustJson(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[JsObject] = {
 
     transformationService.getTransformedData(utr, internalId).flatMap {
       case TrustProcessedResponse(json, _) => Future.successful(json.as[JsObject])

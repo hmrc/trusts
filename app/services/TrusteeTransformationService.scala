@@ -26,6 +26,7 @@ import models.get_trust.TrustProcessedResponse
 import models.variation.{AmendedLeadTrusteeIndType, AmendedLeadTrusteeOrgType, TrusteeType}
 import transformers._
 import transformers.remove.RemoveTrustee
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -54,7 +55,7 @@ class TrusteeTransformationService @Inject()(
   def addAmendTrusteeTransformer(utr: String,
                                  index: Int,
                                  internalId: String,
-                                 newTrustee: TrusteeType): Future[Success.type] = {
+                                 newTrustee: TrusteeType)(implicit hc: HeaderCarrier): Future[Success.type] = {
 
     getTrusteeAtIndex(utr, internalId, index).flatMap {
       case scala.util.Success(trusteeJson) =>
@@ -73,7 +74,7 @@ class TrusteeTransformationService @Inject()(
                                     internalId: String,
                                     index: Int,
                                     newLeadTrustee: AmendedLeadTrusteeIndType,
-                                    endDate: LocalDate): Future[Success.type] = {
+                                    endDate: LocalDate)(implicit hc: HeaderCarrier): Future[Success.type] = {
 
     getTrusteeAtIndex(utr, internalId, index).flatMap {
       case scala.util.Success(trusteeJson) =>
@@ -91,7 +92,7 @@ class TrusteeTransformationService @Inject()(
                                        internalId: String,
                                        index: Int,
                                        newLeadTrustee: AmendedLeadTrusteeOrgType,
-                                       endDate: LocalDate): Future[Success.type] = {
+                                       endDate: LocalDate)(implicit hc: HeaderCarrier): Future[Success.type] = {
 
     getTrusteeAtIndex(utr, internalId, index).flatMap {
       case scala.util.Success(trusteeJson) =>
@@ -111,7 +112,7 @@ class TrusteeTransformationService @Inject()(
     }).map(_ => Success)
   }
 
-  def addRemoveTrusteeTransformer(utr: String, internalId: String, remove: RemoveTrustee): Future[Success.type] = {
+  def addRemoveTrusteeTransformer(utr: String, internalId: String, remove: RemoveTrustee)(implicit hc: HeaderCarrier): Future[Success.type] = {
 
     getTrusteeAtIndex(utr, internalId, remove.index).flatMap {
       case scala.util.Success(trusteeJson) =>
@@ -120,7 +121,7 @@ class TrusteeTransformationService @Inject()(
     }
   }
 
-  private def getTrusteeAtIndex(utr: String, internalId: String, index: Int): Future[Try[JsObject]] = {
+  private def getTrusteeAtIndex(utr: String, internalId: String, index: Int)(implicit hc: HeaderCarrier): Future[Try[JsObject]] = {
 
     transformationService.getTransformedData(utr, internalId).map {
       case TrustProcessedResponse(transformedJson, _) =>

@@ -154,7 +154,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         "identification" -> IdentificationType(Some("newNino"), None, None, None)
       )
 
-      when(trusteeTransformationService.addPromoteTrusteeIndTransformer(any(), any(), any(), any(), any()))
+      when(trusteeTransformationService.addPromoteTrusteeIndTransformer(any(), any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
@@ -171,7 +171,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         equalTo("id"),
         equalTo(index),
         equalTo(newTrusteeInd),
-        any())
+        any())(any())
     }
 
     "must return an error for malformed json" in {
@@ -200,7 +200,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         endDate = LocalDate.parse("2020-01-10"), index = 0
       )
 
-      when(trusteeTransformationService.addRemoveTrusteeTransformer(any(), any(), any()))
+      when(trusteeTransformationService.addRemoveTrusteeTransformer(any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("DELETE", "path")
@@ -213,7 +213,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
       verify(trusteeTransformationService).addRemoveTrusteeTransformer(
         equalTo("aUTR"),
         equalTo("id"),
-        equalTo(payload))
+        equalTo(payload))(any())
 
     }
   }
@@ -240,7 +240,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         entityEnd = None
       )
 
-      when(trusteeTransformationService.addAmendTrusteeTransformer(any(), any(), any(), any()))
+      when(trusteeTransformationService.addAmendTrusteeTransformer(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
 
       val newTrusteeInfo = TrusteeType(Some(newTrusteeIndInfo), None)
@@ -257,7 +257,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         equalTo(index),
         equalTo("id"),
         equalTo(newTrusteeInfo)
-      )
+      )(any())
     }
 
     "must add a new amend trustee transform for a trustee org" in {
@@ -276,7 +276,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         entityEnd = None
       )
 
-      when(trusteeTransformationService.addAmendTrusteeTransformer(any(), any(), any(), any()))
+      when(trusteeTransformationService.addAmendTrusteeTransformer(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
 
       val newTrusteeInfo = TrusteeType(None, Some(newTrusteeOrgInfo))
@@ -293,7 +293,7 @@ class TrusteeTransformationControllerSpec extends FreeSpec with MockitoSugar wit
         equalTo(index),
         equalTo("id"),
         equalTo(newTrusteeInfo)
-      )
+      )(any())
 
     }
 
