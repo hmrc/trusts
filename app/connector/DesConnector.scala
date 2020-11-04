@@ -26,18 +26,20 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import config.AppConfig
 import models._
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
-import models.get_trust.GetTrustResponse
+import models.get_trust.{GetTrustResponse, TrustProcessedResponse}
 import models.registration.{RegistrationResponse, RegistrationTrnResponse}
 import models.tax_enrolments.SubscriptionIdResponse
 import models.variation.VariationResponse
 import services.TrustsStoreService
+import transformers.JsonOperations
 import utils.Constants._
 import utils.Session
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
-class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreService: TrustsStoreService) extends Logging {
+class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreService: TrustsStoreService)
+  extends Logging with JsonOperations {
 
   private lazy val trustsServiceUrl : String = s"${config.registerTrustsUrl}/trusts"
   private lazy val matchTrustsEndpoint : String = s"$trustsServiceUrl/match"
@@ -119,6 +121,21 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
     response
   }
 
+  private def fix5mld(getTrust: JsValue)(implicit hc : HeaderCarrier): JsValue = {
+    val taxablePath = JsPath() \ 'details \ 'trust \ 'details \ 'trustTaxable
+    val hasTaxable = getTrust.transform(taxablePath.json.pick).isSuccess
+    if (hasTaxable) {
+      getTrust
+    } else {
+      addTo(getTrust, taxablePath, JsTrue) match {
+        case JsSuccess(response, _) => response
+        case JsError(errors) =>
+          logger.error(s"[Session ID: ${Session.id(hc)}] Could not add taxable flag to data: $errors")
+          getTrust
+      }
+    }
+  }
+
   def getTrustInfo(utr: String): Future[GetTrustResponse] = {
     val correlationId = UUID.randomUUID().toString
 
@@ -129,7 +146,11 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
 
     trustsStoreService.is5mldEnabled.flatMap { is5MLD =>
       if (is5MLD) {
-        http.GET[GetTrustResponse](get5MLDTrustOrEstateEndpoint(utr))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)
+        http.GET[GetTrustResponse](get5MLDTrustOrEstateEndpoint(utr))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global) map {
+          case response: TrustProcessedResponse => response
+            response.copy(getTrust = fix5mld(response.getTrust))
+          case response => response
+        }
       } else {
         http.GET[GetTrustResponse](get4MLDTrustOrEstateEndpoint(utr))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)
       }
