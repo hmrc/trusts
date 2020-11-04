@@ -634,8 +634,37 @@ class DesConnectorSpec extends ConnectorSpecHelper {
 
             whenReady(futureResult) { result =>
 
-              val expectedHeader: ResponseHeader = (get4MLDTrustResponse \ "responseHeader").as[ResponseHeader]
-              val expectedJson = (get4MLDTrustResponse \ "trustOrEstateDisplay").as[JsValue]
+              val expectedHeader: ResponseHeader = (get5MLDTrustResponse \ "responseHeader").as[ResponseHeader]
+              val expectedJson = (get5MLDTrustResponse \ "trustOrEstateDisplay").as[JsValue]
+
+              result match {
+                case r: TrustProcessedResponse =>
+                  r.responseHeader mustBe expectedHeader
+                  r.getTrust mustBe expectedJson
+                case _ => fail
+              }
+            }
+          }
+
+          "des has returned a 200 with trust details with trustTaxable set to false" in {
+
+            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+              """
+                |{
+                | "name": "5mld",
+                | "isEnabled": true
+                |}""".stripMargin
+            )))
+
+            val utr = "1234567890"
+            stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, get5MLDTrustResponseJsonWithNonTaxable.toString)
+
+            val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(utr)
+
+            whenReady(futureResult) { result =>
+
+              val expectedHeader: ResponseHeader = (get5MLDTrustResponseJsonWithNonTaxable \ "responseHeader").as[ResponseHeader]
+              val expectedJson = (get5MLDTrustResponseJsonWithNonTaxable \ "trustOrEstateDisplay").as[JsValue]
 
               result match {
                 case r: TrustProcessedResponse =>
@@ -664,8 +693,8 @@ class DesConnectorSpec extends ConnectorSpecHelper {
 
             whenReady(futureResult) { result =>
 
-              val expectedHeader: ResponseHeader = (getTrustPropertyLandNoPreviousValueJson \ "responseHeader").as[ResponseHeader]
-              val expectedJson = (getTrustPropertyLandNoPreviousValueJson \ "trustOrEstateDisplay").as[JsValue]
+              val expectedHeader: ResponseHeader = (getTrustPropertyLandNoPreviousValueJson5mld \ "responseHeader").as[ResponseHeader]
+              val expectedJson = (getTrustPropertyLandNoPreviousValueJson5mld \ "trustOrEstateDisplay").as[JsValue]
 
               result match {
                 case r: TrustProcessedResponse =>
@@ -950,8 +979,8 @@ class DesConnectorSpec extends ConnectorSpecHelper {
 
             whenReady(futureResult) { result =>
 
-              val expectedHeader: ResponseHeader = (getTrustPropertyLandNoPreviousValueJson \ "responseHeader").as[ResponseHeader]
-              val expectedJson = (getTrustPropertyLandNoPreviousValueJson \ "trustOrEstateDisplay").as[JsValue]
+              val expectedHeader: ResponseHeader = (getTrustPropertyLandNoPreviousValueJson5mld \ "responseHeader").as[ResponseHeader]
+              val expectedJson = (getTrustPropertyLandNoPreviousValueJson5mld \ "trustOrEstateDisplay").as[JsValue]
 
               result match {
                 case r: TrustProcessedResponse =>
