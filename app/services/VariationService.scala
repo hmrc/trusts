@@ -61,11 +61,11 @@ class VariationService @Inject()(desService: DesService,
               val response = TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
               transformAndSubmit(utr, internalId, declaration, originalJson, response)
             case JsError(errors) =>
-              logging.error(s"Failed to transform trust info $errors")
+              logging.error(s"Failed to transform trust info ${JsError.toJson(errors)}")
               Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
           }
         case JsError(errors) =>
-          logging.error(s"Failed to populate lead trustee address $errors")
+          logging.error(s"Failed to populate lead trustee address ${JsError.toJson(errors)}")
           Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
       }
    }
@@ -77,15 +77,19 @@ class VariationService @Inject()(desService: DesService,
                                  originalJson: JsValue,
                                  response: TrustProcessedResponse)
                                 (implicit hc: HeaderCarrier, logging: LoggingContext)= {
+
     trustsStoreService.is5mldEnabled() flatMap {
       is5mld =>
+
+        logger.debug(s"[Session ID: ${Session.id(hc)}] transformation to final submission, applying declaration transform to shape data into variations payload")
+
         declarationTransformer.transform(response, originalJson, declaration, localDateService.now, is5mld) match {
           case JsSuccess(value, _) =>
             logging.info("successfully transformed json for declaration")
             doSubmit(utr, value, internalId)
           case JsError(errors) =>
-            logging.error(s"Problem transforming data for ETMP submission ${errors.toString()}")
-            Future.failed(InternalServerErrorException(s"There was a problem transforming data for submission to ETMP: ${errors.toString()}"))
+            logging.error(s"Problem transforming data for ETMP submissio: ${JsError.toJson(errors)}")
+            Future.failed(InternalServerErrorException(s"There was a problem transforming data for submission to ETMP: ${JsError.toJson(errors)}"))
         }
     } recoverWith {
       case e =>

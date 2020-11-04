@@ -97,12 +97,16 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
-  def populateLeadTrusteeAddress(beforeJson: JsValue): JsResult[JsValue] = {
+  def populateLeadTrusteeAddress(beforeJson: JsValue)(implicit hc: HeaderCarrier): JsResult[JsValue] = {
     val pathToLeadTrusteeAddress = __ \ 'details \ 'trust \ 'entities \ 'leadTrustees \ 'identification \ 'address
 
+    logger.debug(s"[Session ID: ${Session.id(hc)}] setting address on lead trustee")
+
     if (beforeJson.transform(pathToLeadTrusteeAddress.json.pick).isSuccess) {
+      logger.debug(s"[Session ID: ${Session.id(hc)}] lead trustee already had an address, no modification")
       JsSuccess(beforeJson)
     } else {
+      logger.debug(s"[Session ID: ${Session.id(hc)}] copying address from correspondence and setting on lead trustee")
       val pathToCorrespondenceAddress = __ \ 'correspondence \ 'address
       val copyAddress = __.json.update(pathToLeadTrusteeAddress.json.copyFrom(pathToCorrespondenceAddress.json.pick))
       beforeJson.transform(copyAddress)
@@ -119,7 +123,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
 
     }.flatMap(newTransforms =>
       repository.set(identifier, internalId, newTransforms)).recoverWith {
-      case e =>
+        case e =>
         logger.error(s"Exception adding new transform: ${e.getMessage}")
         Future.failed(e)
     }
