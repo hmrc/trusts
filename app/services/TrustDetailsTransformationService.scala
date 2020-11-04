@@ -65,11 +65,11 @@ class TrustDetailsTransformationService @Inject()(transformationService: Transfo
     ).map(_ => Success)
   }
 
-  def setUKRelationTransformer(utr: String, internalId: String, recorded: Boolean): Future[Success.type] = {
+  def setUKRelationTransformer(utr: String, internalId: String, ukRelation: Boolean): Future[Success.type] = {
     transformationService.addNewTransform(
       utr,
       internalId,
-      SetUKRelationTransform(recorded)
+      SetUKRelationTransform(ukRelation)
     ).map(_ => Success)
   }
 
