@@ -93,7 +93,7 @@ class VariationService @Inject()(desService: DesService,
         }
     } recoverWith {
       case e =>
-        logging.error(s"Exception transforming and submitting ${e.getMessage}")
+        logging.error(s"Exception transforming and submitting ${e.getMessage} ${e.getCause}")
         Future.failed(InternalServerErrorException(s"Exception transforming and submitting ${e.getMessage}"))
     }
   }
