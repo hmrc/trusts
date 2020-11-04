@@ -224,19 +224,34 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       |     "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54"
       |   },
       |   "answerSections" : {
-      |     "taxLiability" : [
+      |     "beneficiaries" : [
       |       {
-      |         "headingKey" : "Tax liability 6 April 2016 to 5 April 2017",
+      |         "headingKey" : "Individual beneficiary 1",
       |         "rows" : [
       |           {
-      |             "label" : "Did the trust need to pay any tax from 6 April 2016 to 5 April 2017?",
-      |             "answer" : "Yes",
+      |             "label" : "individualBeneficiaryName.checkYourAnswersLabel",
+      |             "answer" : "Joe Bloggs",
       |             "labelArg" : ""
       |           },
       |           {
-      |             "label" : "Was the tax from 6 April 2016 to 5 April 2017 declared?",
-      |             "answer" : "No",
+      |             "label" : "individualBeneficiary.roleInCompany.checkYourAnswersLabel",
+      |             "answer" : "Director",
+      |             "labelArg" : "Joe Bloggs"
+      |           }
+      |         ]
+      |       },
+      |       {
+      |         "headingKey" : "Individual beneficiary 2",
+      |         "rows" : [
+      |           {
+      |             "label" : "individualBeneficiaryName.checkYourAnswersLabel",
+      |             "answer" : "John Doe",
       |             "labelArg" : ""
+      |           },
+      |           {
+      |             "label" : "individualBeneficiary.roleInCompany.checkYourAnswersLabel",
+      |             "answer" : "Employee",
+      |             "labelArg" : "John Doe"
       |           }
       |         ]
       |       }
@@ -279,6 +294,44 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       |       "postCode": "NE1 1EN",
       |       "country": "GB"
       |     }
+      |   },
+      |   "beneficiaries" : {
+      |     "_id" : "Int-955338e9-e0d8-422b-ad80-01d9411536c7",
+      |     "data" : {
+      |       "beneficiaries" : {
+      |         "whatTypeOfBeneficiary" : "individual",
+      |         "individualBeneficiaries" : [
+      |           {
+      |             "addressYesNo" : false,
+      |             "incomeYesNo" : true,
+      |             "name" : {
+      |               "firstName" : "Joe",
+      |               "lastName" : "Bloggs"
+      |             },
+      |             "roleInCompany" : "Director",
+      |             "dateOfBirthYesNo" : false,
+      |             "vulnerableYesNo" : false,
+      |             "nationalInsuranceNumberYesNo" : false,
+      |             "status" : "completed"
+      |           },
+      |           {
+      |             "addressYesNo" : false,
+      |             "incomeYesNo" : true,
+      |             "name" : {
+      |               "firstName" : "John",
+      |               "lastName" : "Doe"
+      |             },
+      |             "roleInCompany" : "Employee",
+      |             "dateOfBirthYesNo" : false,
+      |             "vulnerableYesNo" : false,
+      |             "nationalInsuranceNumberYesNo" : false,
+      |             "status" : "completed"
+      |           }
+      |         ]
+      |       },
+      |       "addABeneficiary" : "no-complete"
+      |     },
+      |     "internalId" : "Int-534fed7e-93ec-427a-958f-815264af216f"
       |   }
       | },
       | "inProgress" : true
@@ -324,18 +377,23 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       |     "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54"
       |   },
       |   "answerSections" : {
-      |     "taxLiability" : [
+      |     "beneficiaries" : [
       |       {
-      |         "headingKey" : "Tax liability 6 April 2016 to 5 April 2017",
+      |         "headingKey" : "Individual beneficiary 1",
       |         "rows" : [
       |           {
-      |             "label" : "Did the trust need to pay any tax from 6 April 2016 to 5 April 2017?",
-      |             "answer" : "Yes",
+      |             "label" : "individualBeneficiaryName.checkYourAnswersLabel",
+      |             "answer" : "Joe Bloggs",
       |             "labelArg" : ""
-      |           },
+      |           }
+      |         ]
+      |       },
+      |       {
+      |         "headingKey" : "Individual beneficiary 2",
+      |         "rows" : [
       |           {
-      |             "label" : "Was the tax from 6 April 2016 to 5 April 2017 declared?",
-      |             "answer" : "No",
+      |             "label" : "individualBeneficiaryName.checkYourAnswersLabel",
+      |             "answer" : "John Doe",
       |             "labelArg" : ""
       |           }
       |         ]
@@ -377,6 +435,42 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       |       "postCode": "NE1 1EN",
       |       "country": "GB"
       |     }
+      |   },
+      |   "beneficiaries" : {
+      |     "_id" : "Int-955338e9-e0d8-422b-ad80-01d9411536c7",
+      |     "data" : {
+      |       "beneficiaries" : {
+      |         "whatTypeOfBeneficiary" : "individual",
+      |         "individualBeneficiaries" : [
+      |           {
+      |             "addressYesNo" : false,
+      |             "incomeYesNo" : true,
+      |             "name" : {
+      |               "firstName" : "Joe",
+      |               "lastName" : "Bloggs"
+      |             },
+      |             "dateOfBirthYesNo" : false,
+      |             "vulnerableYesNo" : false,
+      |             "nationalInsuranceNumberYesNo" : false,
+      |             "status" : "completed"
+      |           },
+      |           {
+      |             "addressYesNo" : false,
+      |             "incomeYesNo" : true,
+      |             "name" : {
+      |               "firstName" : "John",
+      |               "lastName" : "Doe"
+      |             },
+      |             "dateOfBirthYesNo" : false,
+      |             "vulnerableYesNo" : false,
+      |             "nationalInsuranceNumberYesNo" : false,
+      |             "status" : "completed"
+      |           }
+      |         ]
+      |       },
+      |       "addABeneficiary" : "no-complete"
+      |     },
+      |     "internalId" : "Int-534fed7e-93ec-427a-958f-815264af216f"
       |   }
       | },
       | "inProgress" : true

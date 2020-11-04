@@ -379,35 +379,90 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
 
   def removeRoleInCompany(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
+
+      implicit class RemoveRoleInCompanyFields(initialData: JsValue) {
+        def removeMappedPieces(): JsValue = {
+          val individualBeneficiariesPath = JsPath \ "registration" \ "trust/entities/beneficiary" \ "individualDetails"
+          removeAtPath(individualBeneficiariesPath)
+        }
+
+        def removeAnswerRows(): JsValue = {
+          val beneficiariesPath = JsPath \ "answerSections" \ "beneficiaries"
+          def answerRowsPath(index: Int) = beneficiariesPath \ index \ "rows"
+          def answerRowPath(beneficiaryIndex: Int, rowIndex: Int) = answerRowsPath(beneficiaryIndex) \ rowIndex
+
+          initialData.transform(beneficiariesPath.json.pick) match {
+            case JsSuccess(value, _) => value match {
+              case JsArray(beneficiaries) =>
+                beneficiaries.toList.zipWithIndex.foldLeft(initialData)((outerFold, beneficiary) => {
+                  outerFold.transform(answerRowsPath(beneficiary._2).json.pick) match {
+                    case JsSuccess(value, _) => value match {
+                      case JsArray(answerRows) =>
+                        answerRows.toList.zipWithIndex.foldLeft(outerFold)((innerFold, row) => {
+                          innerFold.transform((answerRowPath(beneficiary._2, row._2) \ "label").json.pick) match {
+                            case JsSuccess(value, _) =>
+                              value match {
+                                case JsString(label) =>
+                                  if (label == "individualBeneficiary.roleInCompany.checkYourAnswersLabel") {
+                                    innerFold.remove(answerRowPath(beneficiary._2, row._2)) match {
+                                      case JsSuccess(answerRowRemoved, _) => answerRowRemoved
+                                      case _ => innerFold
+                                    }
+                                  } else {
+                                    innerFold
+                                  }
+                                case _ => innerFold
+                              }
+                            case _ => innerFold
+                          }
+                        })
+                      case _ => outerFold
+                    }
+                    case _ => outerFold
+                  }
+                })
+              case _ => initialData
+            }
+            case _ => initialData
+          }
+        }
+
+        def removeDraftData(): JsValue = {
+          val individualBeneficiariesPath = JsPath \ "beneficiaries" \ "data" \ "beneficiaries" \ "individualBeneficiaries"
+          removeAtPath(individualBeneficiariesPath)
+        }
+
+        private def removeAtPath(path: JsPath): JsValue = {
+          initialData.transform(path.json.pick) match {
+            case JsSuccess(value, _) =>
+              value match {
+                case JsArray(individualBeneficiaries) =>
+                  def roleInCompanyPath(index: Int) = path \ index \ "roleInCompany"
+                  individualBeneficiaries.toList.zipWithIndex.foldLeft(initialData)((acc, x) => {
+                    acc.remove(roleInCompanyPath(x._2)) match {
+                      case JsSuccess(roleInCompanyRemoved, _) => roleInCompanyRemoved
+                      case _ => acc
+                    }
+                  })
+                case _ => initialData
+              }
+            case _ => initialData
+          }
+        }
+      }
+
       submissionRepository.getDraft(draftId, request.identifier).flatMap {
         case Some(draft) =>
 
           val initialDraftData: JsValue = draft.draftData
-          val individualBeneficiariesPath = JsPath \ "registration" \ "trust/entities/beneficiary" \ "individualDetails"
 
-          initialDraftData.transform(individualBeneficiariesPath.json.pick) match {
-            case JsSuccess(value, _) =>
-              val updatedDraftData: JsValue = value match {
-                case JsArray(individualBeneficiaries) =>
-                  def roleInCompanyPath(index: Int) = individualBeneficiariesPath \ index \ "roleInCompany"
-                  individualBeneficiaries.toList.zipWithIndex.foldLeft(initialDraftData)((acc, x) => {
-                    acc.transform(roleInCompanyPath(x._2).json.prune) match {
-                      case JsSuccess(value, _) => value
-                      case _ => acc
-                    }
-                  })
-                case _ => initialDraftData
-              }
+          val updatedDraftData = initialDraftData.removeMappedPieces().removeAnswerRows().removeDraftData()
 
-              val newDraft = draft.copy(draftData = updatedDraftData)
+          val newDraft = draft.copy(draftData = updatedDraftData)
 
-              submissionRepository.setDraft(newDraft).map(
-                result => if (result) Ok else InternalServerError
-              )
-            case _ =>
-              logger.info(s"[Session ID: ${request.sessionId}] no individual beneficiaries found.")
-              Future.successful(Ok)
-          }
+          submissionRepository.setDraft(newDraft).map(
+            result => if (result) Ok else InternalServerError
+          )
 
         case _ => Future.successful(InternalServerError)
       }
