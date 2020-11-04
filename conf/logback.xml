@@ -12,7 +12,7 @@
     <logger name="models" level="INFO"/>
     <logger name="repositories" level="INFO"/>
     <logger name="connector" level="INFO"/>
-    <logger name="transformers" level="INFO"/>
+    <logger name="transformers" level="DEBUG"/>
     <logger name="utils" level="INFO"/>
 
     <root level="WARN">

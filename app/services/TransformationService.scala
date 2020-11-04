@@ -80,6 +80,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
 
         for {
           initial <- {
+            logger.debug(s"[Session ID: ${Session.id(hc)}] applying transformations $transformations")
             logger.info(s"[Session ID: ${Session.id(hc)}]" +
               s" applying transformations")
             transformations.applyTransform(json)
@@ -89,7 +90,10 @@ class TransformationService @Inject()(repository: TransformationRepository,
               s" applying declaration transformations")
             transformations.applyDeclarationTransform(initial)
           }
-        } yield transformed
+        } yield {
+          logger.debug(s"[Session ID: ${Session.id(hc)}] transformations have been applied, final output $transformed")
+          transformed
+        }
     }
   }
 
