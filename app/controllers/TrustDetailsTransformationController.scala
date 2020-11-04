@@ -93,7 +93,7 @@ class TrustDetailsTransformationController @Inject()(
       implicit request => {
         request.body.validate[Boolean] match {
           case JsSuccess(property, _) =>
-            transformService.setTaxableTransformer(
+            transformService.setPropertyTransformer(
               utr,
               request.identifier,
               property
@@ -126,5 +126,24 @@ class TrustDetailsTransformationController @Inject()(
         }
       }
     }
+
+  def setUKRelation(utr: String): Action[JsValue] = identify.async(parse.json) {
+    implicit request => {
+      request.body.validate[Boolean] match {
+        case JsSuccess(ukRelation, _) =>
+          transformService.setUKRelationTransformer(
+            utr,
+            request.identifier,
+            ukRelation
+          ) map { _ =>
+            Ok
+          }
+        case JsError(errors) =>
+          logger.warn(s"[setUkRelation][Session ID: ${request.sessionId}] " +
+            s"Supplied json could not be read as an Boolean - $errors")
+          Future.successful(BadRequest)
+      }
+    }
+  }
 
 }

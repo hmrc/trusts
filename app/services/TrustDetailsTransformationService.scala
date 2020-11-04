@@ -33,35 +33,43 @@ class TrustDetailsTransformationService @Inject()(transformationService: Transfo
     ).map(_ => Success)
   }
 
-  def setResidentTransformer(utr: String, internalId: String, express: Boolean): Future[Success.type] = {
+  def setResidentTransformer(utr: String, internalId: String, resident: Boolean): Future[Success.type] = {
     transformationService.addNewTransform(
       utr,
       internalId,
-      SetResidentTransform(express)
+      SetResidentTransform(resident)
     ).map(_ => Success)
   }
 
-  def setTaxableTransformer(utr: String, internalId: String, express: Boolean): Future[Success.type] = {
+  def setTaxableTransformer(utr: String, internalId: String, taxable: Boolean): Future[Success.type] = {
     transformationService.addNewTransform(
       utr,
       internalId,
-      SetTaxableTransform(express)
+      SetTaxableTransform(taxable)
     ).map(_ => Success)
   }
 
-  def setPropertyTransformer(utr: String, internalId: String, express: Boolean): Future[Success.type] = {
+  def setPropertyTransformer(utr: String, internalId: String, property: Boolean): Future[Success.type] = {
     transformationService.addNewTransform(
       utr,
       internalId,
-      SetPropertyTransform(express)
+      SetPropertyTransform(property)
     ).map(_ => Success)
   }
 
-  def setRecordedTransformer(utr: String, internalId: String, express: Boolean): Future[Success.type] = {
+  def setRecordedTransformer(utr: String, internalId: String, recorded: Boolean): Future[Success.type] = {
     transformationService.addNewTransform(
       utr,
       internalId,
-      SetRecordedTransform(express)
+      SetRecordedTransform(recorded)
+    ).map(_ => Success)
+  }
+
+  def setUKRelationTransformer(utr: String, internalId: String, recorded: Boolean): Future[Success.type] = {
+    transformationService.addNewTransform(
+      utr,
+      internalId,
+      SetUKRelationTransform(recorded)
     ).map(_ => Success)
   }
 
