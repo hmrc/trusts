@@ -97,14 +97,14 @@ object JsonOps {
         }
       }
 
-      getArray(initialData, beneficiariesPath) match {
+      get[JsArray](initialData, beneficiariesPath) match {
         case Success(beneficiaries) =>
-          beneficiaries.zipWithIndex.foldLeft(initialData)((outerFold, beneficiary) => {
-            getArray(outerFold, answerRowsPath(beneficiary._2)) match {
+          beneficiaries.value.toList.zipWithIndex.foldLeft(initialData)((outerFold, beneficiary) => {
+            get[JsArray](outerFold, answerRowsPath(beneficiary._2)) match {
               case Success(answerRows) =>
-                answerRows.zipWithIndex.foldLeft(outerFold)((innerFold, row) => {
-                  getString(innerFold, answerRowPath(beneficiary._2, row._2) \ "label") match {
-                    case Success(label) => removeAnswerRow(innerFold, beneficiary._2, row._2, label)
+                answerRows.value.toList.zipWithIndex.foldLeft(outerFold)((innerFold, row) => {
+                  get[JsString](innerFold, answerRowPath(beneficiary._2, row._2) \ "label") match {
+                    case Success(label) => removeAnswerRow(innerFold, beneficiary._2, row._2, label.value)
                     case _ => innerFold
                   }
                 })
@@ -121,10 +121,10 @@ object JsonOps {
     }
 
     private def removeRoleInCompanyFromArrayAtPath(path: JsPath, key: String): JsValue = {
-      getArray(initialData, path) match {
+      get[JsArray](initialData, path) match {
         case Success(individualBeneficiaries) =>
           def roleInCompanyPath(index: Int) = path \ index \ key
-          individualBeneficiaries.zipWithIndex.foldLeft(initialData)((acc, x) => {
+          individualBeneficiaries.value.toList.zipWithIndex.foldLeft(initialData)((acc, x) => {
             acc.remove(roleInCompanyPath(x._2)) match {
               case JsSuccess(roleInCompanyRemoved, _) => roleInCompanyRemoved
               case _ => acc
@@ -134,30 +134,10 @@ object JsonOps {
       }
     }
 
-    private def getArray(jsValue: JsValue, path: JsPath): Try[List[JsValue]] = {
-      pick(jsValue, path) match {
-        case Success(value) => value match {
-          case JsArray(array) => Success(array.toList)
-          case _ => Failure(new Throwable(s"JSON at path $path not of type JsArray."))
-        }
-        case Failure(exception) => Failure(exception)
-      }
-    }
-
-    private def getString(jsValue: JsValue, path: JsPath): Try[String] = {
-      pick(jsValue, path) match {
-        case Success(value) => value match {
-          case JsString(string) => Success(string)
-          case _ => Failure(new Throwable(s"JSON at path $path not of type JsString."))
-        }
-        case Failure(exception) => Failure(exception)
-      }
-    }
-
-    private def pick(jsValue: JsValue, path: JsPath): Try[JsValue] = {
-      jsValue.transform(path.json.pick) match {
+    private def get[A <: JsValue](jsValue: JsValue, path: JsPath)(implicit rds: Reads[A]): Try[A] = {
+      jsValue.transform(path.json.pick[A]) match {
         case JsSuccess(value, _) => Success(value)
-        case _ => Failure(new Throwable(s"JSON at path $path not found."))
+        case _ => Failure(new Throwable(s"Error picking JSON at path $path."))
       }
     }
   }
