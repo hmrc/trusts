@@ -1,10 +1,10 @@
 
-POST        /amend-lead/:utr                            controllers.TrusteeTransformationController.amendLeadTrustee(utr: String)
+POST        /amend-lead/:identifier                   controllers.TrusteeTransformationController.amendLeadTrustee(identifier: String)
 
-POST        /add/:utr                                   controllers.TrusteeTransformationController.addTrustee(utr: String)
+POST        /add/:identifier                          controllers.TrusteeTransformationController.addTrustee(identifier: String)
 
-POST        /amend/:utr/:index                          controllers.TrusteeTransformationController.amendTrustee(utr: String, index: Int)
+POST        /amend/:identifier/:index                 controllers.TrusteeTransformationController.amendTrustee(identifier: String, index: Int)
 
-POST        /promote/:utr/:index                        controllers.TrusteeTransformationController.promoteTrustee(utr: String, index: Int)
+POST        /promote/:identifier/:index               controllers.TrusteeTransformationController.promoteTrustee(identifier: String, index: Int)
 
-PUT         /:utr/remove                       controllers.TrusteeTransformationController.removeTrustee(utr: String)
+PUT         /:identifier/remove                       controllers.TrusteeTransformationController.removeTrustee(identifier: String)
