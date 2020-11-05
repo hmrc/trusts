@@ -29,7 +29,9 @@
       "startDate": "2019-04-06",
       "trustTaxable": false,
       "expressTrust": true,
-      "trustUKResident": true
+      "trustUKResident": true,
+      "trustRecorded": false,
+      "trustUKRelation": false
     },
     "entities": {
       "naturalPerson": [
