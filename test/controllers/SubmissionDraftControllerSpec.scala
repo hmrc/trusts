@@ -1351,4 +1351,78 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       status(result) mustBe INTERNAL_SERVER_ERROR
     }
   }
+
+  ".removeRoleInCompany" should {
+
+    "return OK" when {
+      "draft data successfully updated" in {
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
+
+        when(submissionRepository.getDraft(any(), any()))
+          .thenReturn(Future.successful(Some(mockSubmissionDraft)))
+
+        when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
+
+        val request = FakeRequest("GET", "path")
+
+        val result = controller.removeRoleInCompany("draftId").apply(request)
+
+        status(result) mustBe OK
+      }
+    }
+
+    "return internal server error" when {
+      "failure getting draft" in {
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
+
+        when(submissionRepository.getDraft(any(), any()))
+          .thenReturn(Future.successful(None))
+
+        val request = FakeRequest("GET", "path")
+
+        val result = controller.removeRoleInCompany("draftId").apply(request)
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+
+      "failure setting draft" in {
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
+
+        when(submissionRepository.getDraft(any(), any()))
+          .thenReturn(Future.successful(Some(mockSubmissionDraft)))
+
+        when(submissionRepository.setDraft(any())).thenReturn(Future.successful(false))
+
+        val request = FakeRequest("GET", "path")
+
+        val result = controller.removeRoleInCompany("draftId").apply(request)
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+    }
+  }
 }

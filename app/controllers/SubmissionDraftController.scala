@@ -18,15 +18,15 @@ package controllers
 
 import java.time.LocalDate
 
-import javax.inject.Inject
-import play.api.Logging
-import play.api.libs.json._
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import controllers.actions.IdentifierAction
+import javax.inject.Inject
 import models._
 import models.registration.RegistrationSubmission.{AnswerSection, MappedPiece}
 import models.registration.{RegistrationSubmission, RegistrationSubmissionDraft, RegistrationSubmissionDraftData}
 import models.requests.IdentifierRequest
+import play.api.Logging
+import play.api.libs.json._
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.RegistrationSubmissionRepository
 import services.LocalDateTimeService
 
@@ -374,6 +374,28 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           logger.info(s"[Session ID: ${request.sessionId}]" +
             s" no draft, cannot return correspondence address")
           NotFound
+      }
+  }
+
+  def removeRoleInCompany(draftId: String): Action[AnyContent] = identify.async {
+    implicit request =>
+
+      import utils.JsonOps.RemoveRoleInCompanyFields
+
+      submissionRepository.getDraft(draftId, request.identifier).flatMap {
+        case Some(draft) =>
+
+          val initialDraftData: JsValue = draft.draftData
+
+          val updatedDraftData = initialDraftData.removeRoleInCompanyFields()
+
+          val newDraft = draft.copy(draftData = updatedDraftData)
+
+          submissionRepository.setDraft(newDraft).map(
+            result => if (result) Ok else InternalServerError
+          )
+
+        case _ => Future.successful(InternalServerError)
       }
   }
 }
