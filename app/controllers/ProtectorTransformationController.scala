@@ -34,11 +34,11 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
                                                   cc: ControllerComponents)
   extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
-  def removeProtector(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def removeProtector(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[RemoveProtector] match {
         case JsSuccess(protector, _) =>
-          transformService.removeProtector(utr, request.identifier, protector) map { _ =>
+          transformService.removeProtector(identifier, request.identifier, protector) map { _ =>
             Ok
           }
         case JsError(_) => Future.successful(BadRequest)
@@ -46,50 +46,50 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
     }
   }
 
-  def addIndividualProtector(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def addIndividualProtector(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[Protector] match {
         case JsSuccess(protector, _) =>
 
           transformService.addIndividualProtectorTransformer(
-            utr,
+            identifier,
             request.identifier,
             protector
           ) map { _ =>
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[addIndividualProtector][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[addIndividualProtector][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as a Protector - $errors")
           Future.successful(BadRequest)
       }
     }
   }
-  def addBusinessProtector(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def addBusinessProtector(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[ProtectorCompany] match {
         case JsSuccess(protectorCompany, _) =>
           transformService.addBusinessProtectorTransformer(
-            utr,
+            identifier,
             request.identifier,
             protectorCompany
           ) map { _ =>
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[addCompanyProtector][Session ID: ${request.sessionId}]" +
-            s" Supplied json could not be read as a Company Beneficiary - $errors")
+          logger.warn(s"[addCompanyProtector][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
+            s" Supplied json could not be read as a ProtectorCompany - $errors")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def amendIndividualProtector(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
+  def amendIndividualProtector(identifier: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[Protector] match {
         case JsSuccess(protector, _) =>
           transformService.amendIndividualProtectorTransformer(
-            utr,
+            identifier,
             index,
             request.identifier,
             protector
@@ -97,19 +97,19 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
             Ok
           }
         case JsError(errors) =>
-            logger.warn(s"[amendIndividualProtector][Session ID: ${request.sessionId}]" +
+            logger.warn(s"[amendIndividualProtector][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
               s" Supplied json could not be read as a Protector - $errors")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def amendBusinessProtector(utr: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
+  def amendBusinessProtector(identifier: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
     implicit request =>
       request.body.validate[ProtectorCompany] match {
         case JsSuccess(businessProtector, _) =>
           transformService.amendBusinessProtectorTransformer(
-            utr,
+            identifier,
             index,
             request.identifier,
             businessProtector
@@ -117,7 +117,7 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[amendBusinessProtector][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[amendBusinessProtector][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied payload could not be read as a ProtectorCompany - $errors")
           Future.successful(BadRequest)
       }

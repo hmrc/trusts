@@ -37,7 +37,7 @@ class TrustVariationsController @Inject()(
                                            cc: ControllerComponents
                                     ) extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
-  def declare(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def declare(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[DeclarationForApi].fold(
         errors => {
@@ -49,13 +49,13 @@ class TrustVariationsController @Inject()(
             Json.toJson(Json.obj())
           )
 
-          logger.error(s"[declare][Session ID: ${request.sessionId}]" +
+          logger.error(s"[declare][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" unable to parse json as DeclarationForApi, $errors")
           Future.successful(BadRequest)
         },
         declarationForApi => {
           variationService
-            .submitDeclaration(utr, request.identifier, declarationForApi)
+            .submitDeclaration(identifier, request.identifier, declarationForApi)
             .map(response => Ok(Json.toJson(response)))
         } recover responseHandler.recoverFromException(TrustAuditing.TRUST_VARIATION)
       )

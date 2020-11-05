@@ -36,45 +36,45 @@ class TrusteeTransformationController @Inject()(
                                           cc: ControllerComponents)
   extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
-  def amendLeadTrustee(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def amendLeadTrustee(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
 
       val result = request.body.validate[AmendedLeadTrusteeIndType].map {
         leadTrustee =>
-          trusteeTransformationService.addAmendLeadTrusteeIndTransformer(utr, request.identifier, leadTrustee)
+          trusteeTransformationService.addAmendLeadTrusteeIndTransformer(identifier, request.identifier, leadTrustee)
       }.orElse {
         request.body.validate[AmendedLeadTrusteeOrgType].map {
           leadTrustee =>
-            trusteeTransformationService.addAmendLeadTrusteeOrgTransformer(utr, request.identifier, leadTrustee)
+            trusteeTransformationService.addAmendLeadTrusteeOrgTransformer(identifier, request.identifier, leadTrustee)
         }
       }
 
       result match {
         case JsSuccess(_,_) => Future.successful(Ok)
         case JsError(errors) =>
-          logger.warn(s"[amendLeadTrustee][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[amendLeadTrustee][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied Lead trustee could not be read as amended lead trustee - $errors")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def removeTrustee(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def removeTrustee(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[RemoveTrustee] match {
         case JsSuccess(model, _) =>
-          trusteeTransformationService.addRemoveTrusteeTransformer(utr, request.identifier, model) map { _ =>
+          trusteeTransformationService.addRemoveTrusteeTransformer(identifier, request.identifier, model) map { _ =>
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[removeTrustee][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[removeTrustee][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied RemoveTrustee could not be read as RemoveTrustee - $errors")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def addTrustee(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def addTrustee(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
 
       val trusteeInd = request.body.validateOpt[TrusteeIndividualType].getOrElse(None)
@@ -82,22 +82,22 @@ class TrusteeTransformationController @Inject()(
 
       (trusteeInd, trusteeOrg) match {
         case (Some(ind), _) =>
-          trusteeTransformationService.addAddTrusteeTransformer(utr, request.identifier, TrusteeType(Some(ind), None)) map { _ =>
+          trusteeTransformationService.addAddTrusteeTransformer(identifier, request.identifier, TrusteeType(Some(ind), None)) map { _ =>
             Ok
           }
         case (_, Some(org)) =>
-          trusteeTransformationService.addAddTrusteeTransformer(utr, request.identifier, TrusteeType(None, Some(org))) map { _ =>
+          trusteeTransformationService.addAddTrusteeTransformer(identifier, request.identifier, TrusteeType(None, Some(org))) map { _ =>
             Ok
           }
         case _ =>
-          logger.error(s"[addTrustee][Session ID: ${request.sessionId}]" +
+          logger.error(s"[addTrustee][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as an individual or organisation trustee")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def amendTrustee(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
+  def amendTrustee(identifier: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
 
       val trusteeInd = request.body.validateOpt[TrusteeIndividualType].getOrElse(None)
@@ -105,22 +105,22 @@ class TrusteeTransformationController @Inject()(
 
       (trusteeInd, trusteeOrg) match {
         case (Some(ind), _) =>
-          trusteeTransformationService.addAmendTrusteeTransformer(utr, index, request.identifier, TrusteeType(Some(ind), None)) map { _ =>
+          trusteeTransformationService.addAmendTrusteeTransformer(identifier, index, request.identifier, TrusteeType(Some(ind), None)) map { _ =>
             Ok
           }
         case (_, Some(org)) =>
-          trusteeTransformationService.addAmendTrusteeTransformer(utr, index, request.identifier, TrusteeType(None, Some(org))) map { _ =>
+          trusteeTransformationService.addAmendTrusteeTransformer(identifier, index, request.identifier, TrusteeType(None, Some(org))) map { _ =>
             Ok
           }
         case _ =>
-          logger.error(s"[amendTrustee][Session ID: ${request.sessionId}]" +
+          logger.error(s"[amendTrustee][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as an individual or organisation trustee")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def promoteTrustee(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
+  def promoteTrustee(identifier: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
 
       val leadTrusteeInd = request.body.validateOpt[AmendedLeadTrusteeIndType].getOrElse(None)
@@ -129,7 +129,7 @@ class TrusteeTransformationController @Inject()(
       (leadTrusteeInd, leadTrusteeOrg) match {
         case (Some(ind), _) =>
           trusteeTransformationService.addPromoteTrusteeIndTransformer(
-            utr,
+            identifier,
             request.identifier,
             index,
             ind,
@@ -137,14 +137,14 @@ class TrusteeTransformationController @Inject()(
           ).map(_ => Ok)
         case (_, Some(org)) =>
           trusteeTransformationService.addPromoteTrusteeOrgTransformer(
-            utr,
+            identifier,
             request.identifier,
             index,
             org,
             localDateService.now
           ).map(_ => Ok)
         case _ =>
-          logger.error(s"[promoteTrustee][Session ID: ${request.sessionId}]" +
+          logger.error(s"[promoteTrustee][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as an individual or organisation lead trustee")
           Future.successful(BadRequest)
       }

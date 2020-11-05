@@ -40,7 +40,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
 
 
   val errorAuditMessages: Map[GetTrustResponse, String] = Map(
-    InvalidUTRResponse -> "The UTR provided is invalid.",
+    InvalidUTRResponse -> "The UTR/URN provided is invalid.",
     InvalidRegimeResponse -> "Invalid regime received from DES.",
     BadRequestResponse -> "Bad Request received from DES.",
     ResourceNotFoundResponse -> "Not Found received from DES.",
@@ -62,8 +62,8 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       result: GetTrustSuccessResponse => Ok(Json.toJson(result))
     }
 
-  def getLeadTrustee(utr: String): Action[AnyContent] =
-    doGet(utr, applyTransformations = true) {
+  def getLeadTrustee(identifier: String): Action[AnyContent] =
+    doGet(identifier, applyTransformations = true) {
       case processed: TrustProcessedResponse =>
         val pick = (JsPath \ 'details \ 'trust \ 'entities \ 'leadTrustees).json.pick
         processed.getTrust.transform(pick).fold(
@@ -78,17 +78,17 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       case _ => Forbidden
     }
 
-  def getTrustDetails(utr: String): Action[AnyContent] =
-    getItemAtPath(utr, JsPath \ 'details \ 'trust \ 'details)
+  def getTrustDetails(identifier: String): Action[AnyContent] =
+    getItemAtPath(identifier, JsPath \ 'details \ 'trust \ 'details)
 
-  def getTrustees(utr: String) : Action[AnyContent] =
-    getArrayAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'trustees, "trustees")
+  def getTrustees(identifier: String) : Action[AnyContent] =
+    getArrayAtPath(identifier, JsPath \ 'details \ 'trust \ 'entities \ 'trustees, "trustees")
 
-  def getBeneficiaries(utr: String) : Action[AnyContent] =
-    getArrayAtPath(utr, JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary, "beneficiary")
+  def getBeneficiaries(identifier: String) : Action[AnyContent] =
+    getArrayAtPath(identifier, JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary, "beneficiary")
 
-  def getSettlors(utr: String) : Action[AnyContent] =
-    processEtmpData(utr) {
+  def getSettlors(identifier: String) : Action[AnyContent] =
+    processEtmpData(identifier) {
       transformed =>
         val settlorsPath = JsPath \ 'details \ 'trust \ 'entities \ 'settlors
         val deceasedPath = JsPath \ 'details \ 'trust \ 'entities \ 'deceased
@@ -102,8 +102,8 @@ class GetTrustController @Inject()(identify: IdentifierAction,
         Json.obj("settlors" -> amendedSettlors)
     }
 
-  def getDeceasedSettlorDeathRecorded(utr: String) : Action[AnyContent] =
-    processEtmpData(utr, applyTransformations = false) {
+  def getDeceasedSettlorDeathRecorded(identifier: String) : Action[AnyContent] =
+    processEtmpData(identifier, applyTransformations = false) {
       etmpData =>
         val deceasedDeathDatePath = JsPath \ 'details \ 'trust \ 'entities \ 'deceased \ 'dateOfDeath
         JsBoolean(etmpData.transform(deceasedDeathDatePath.json.pick).isSuccess)
@@ -111,49 +111,48 @@ class GetTrustController @Inject()(identify: IdentifierAction,
 
   private val protectorsPath = JsPath \ 'details \ 'trust \ 'entities \ 'protectors
 
-  def getProtectorsAlreadyExist(utr: String) : Action[AnyContent] =
-    processEtmpData(utr) {
+  def getProtectorsAlreadyExist(identifier: String) : Action[AnyContent] =
+    processEtmpData(identifier) {
       trustData =>
         JsBoolean(!trustData.transform(protectorsPath.json.pick).asOpt.contains(
           Json.obj("protector" -> JsArray(), "protectorCompany" -> JsArray()))
         )
     }
 
-  def getProtectors(utr: String) : Action[AnyContent] =
-    getArrayAtPath(utr, protectorsPath, "protectors")
+  def getProtectors(identifier: String) : Action[AnyContent] =
+    getArrayAtPath(identifier, protectorsPath, "protectors")
 
   private val otherIndividualsPath = JsPath \ 'details \ 'trust \ 'entities \ 'naturalPerson
 
-  def getOtherIndividualsAlreadyExist(utr: String): Action[AnyContent] =
-    processEtmpData(utr) {
+  def getOtherIndividualsAlreadyExist(identifier: String): Action[AnyContent] =
+    processEtmpData(identifier) {
       trustData => JsBoolean(trustData.transform((otherIndividualsPath \ 0).json.pick).isSuccess)
     }
 
-  def getOtherIndividuals(utr: String) : Action[AnyContent] =
-    getArrayAtPath(utr, otherIndividualsPath, "naturalPerson")
+  def getOtherIndividuals(identifier: String) : Action[AnyContent] =
+    getArrayAtPath(identifier, otherIndividualsPath, "naturalPerson")
 
-  private def getArrayAtPath(utr: String, path: JsPath, fieldName: String): Action[AnyContent] = {
-    getElementAtPath(utr,
+  private def getArrayAtPath(identifier: String, path: JsPath, fieldName: String): Action[AnyContent] = {
+    getElementAtPath(identifier,
       path,
       Json.obj(fieldName -> JsArray())) {
         json => Json.obj(fieldName -> json)
       }
   }
 
-  private def getItemAtPath(utr: String, path: JsPath): Action[AnyContent] = {
-    getElementAtPath(utr,
+  private def getItemAtPath(identifier: String, path: JsPath): Action[AnyContent] = {
+    getElementAtPath(identifier,
       path,
       Json.obj()) {
         json => json
       }
   }
 
-  private def getElementAtPath(
-                             utr: String,
+  private def getElementAtPath(identifier: String,
                              path: JsPath,
                              defaultValue: JsValue)
                               (insertIntoObject: JsValue => JsValue): Action[AnyContent] = {
-    processEtmpData(utr) {
+    processEtmpData(identifier) {
       transformed => transformed
         .transform(path.json.pick)
         .map(insertIntoObject)
@@ -161,9 +160,9 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
   }
 
-  private def processEtmpData(utr: String, applyTransformations: Boolean = true)
+  private def processEtmpData(identifier: String, applyTransformations: Boolean = true)
                               (processObject: JsValue => JsValue): Action[AnyContent] = {
-    doGet(utr, applyTransformations) {
+    doGet(identifier, applyTransformations) {
       case processed: TrustProcessedResponse =>
         processed.transform.map {
           case transformed: TrustProcessedResponse =>
@@ -239,7 +238,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
             errorResponses.getOrElse(err, InternalServerError)
         }) recover {
           case e =>
-            logger.error(s"[Session ID: ${request.sessionId}] Failed to get trust info ${e.getMessage}")
+            logger.error(s"[Session ID: ${request.sessionId}][UTR/URN: $identifier] Failed to get trust info ${e.getMessage}")
             InternalServerError
         }
     }
