@@ -73,12 +73,12 @@ class DeclarationTransformer {
       __.json.update(pathToCorrespondencePhoneNumber.json.copyFrom(pathToLeadTrusteePhoneNumber.json.pick))
   }
 
-  private def fixLeadTrusteeAddress(leadTrusteeJson: JsValue, leadTrusteePath: JsPath) = {
+  private def fixLeadTrusteeAddress(leadTrusteeJson: JsValue, leadTrusteePath: JsPath): Reads[JsObject] = {
     if (leadTrusteeJson.transform((leadTrusteePath \ 'identification \ 'utr).json.pick).isSuccess ||
         leadTrusteeJson.transform((leadTrusteePath \ 'identification \ 'nino).json.pick).isSuccess) {
       (leadTrusteePath \ 'identification \ 'address).json.prune
     } else {
-      __.json.pick
+      __.json.pick[JsObject]
     }
   }
 
@@ -115,7 +115,6 @@ class DeclarationTransformer {
             case JsSuccess(value, _) => addPreviousLeadTrusteeAsExpiredStep(value, date)
             case e: JsError => Reads(_ => e)
           }
-
       case _ => __.json.pick[JsObject]
     }
   }
@@ -126,19 +125,15 @@ class DeclarationTransformer {
   private def putNewValue(path: JsPath, value: JsValue ): Reads[JsObject] =
     __.json.update(path.json.put(value))
 
-  private def declarationAddress(agentDetails: Option[AgentDetails], responseJson: JsValue) =
+  private def declarationAddress(agentDetails: Option[AgentDetails], responseJson: JsValue): JsResult[AddressType] = {
     if (agentDetails.isDefined) {
-      agentDetails.get.agentAddress
+      JsSuccess.apply(agentDetails.get.agentAddress)
     } else {
-      responseJson.transform((pathToLeadTrustees \ 'identification \ 'address).json.pick) match {
-        case JsSuccess(value, _) => value.as[AddressType]
-        case JsError(_) =>
-          // Todo, apply same fixes that went into estates microservice
-          ???
-      }
+      responseJson.transform((pathToLeadTrustees \ 'identification \ 'address).json.pick).map(_.as[AddressType])
     }
+  }
 
-  private def pruneEmptyTrustees(responseJson: JsValue) = {
+  private def pruneEmptyTrustees(responseJson: JsValue): Reads[JsObject] = {
     val pickTrusteesArray = pathToTrustees.json.pick[JsArray]
 
     responseJson.transform(pickTrusteesArray) match {
@@ -149,15 +144,17 @@ class DeclarationTransformer {
     }
   }
 
-  private def addDeclaration(declarationForApi: DeclarationForApi, responseJson: JsValue) = {
-    val declarationToSend = Declaration(
-      declarationForApi.declaration.name,
-      declarationAddress(declarationForApi.agentDetails, responseJson)
-    )
-    putNewValue(__ \ 'declaration, Json.toJson(declarationToSend))
+  private def addDeclaration(declarationForApi: DeclarationForApi, responseJson: JsValue): Reads[JsObject] = {
+    declarationAddress(declarationForApi.agentDetails, responseJson) match {
+      case JsSuccess(address, _) =>
+        val declarationToSend = Declaration(declarationForApi.declaration.name, address)
+        putNewValue(__ \ 'declaration, Json.toJson(declarationToSend))
+      case JsError(errors) =>
+        Reads.failed(s"Unable to transform declaration due to ${JsError.toJson(errors)}")
+    }
   }
 
-  private def addAgentIfDefined(agentDetails: Option[AgentDetails]) = if (agentDetails.isDefined) {
+  private def addAgentIfDefined(agentDetails: Option[AgentDetails]): Reads[JsObject] = if (agentDetails.isDefined) {
     __.json.update(
       (__ \ 'agentDetails).json.put(Json.toJson(agentDetails.get))
     )
@@ -165,7 +162,7 @@ class DeclarationTransformer {
     __.json.pick[JsObject]
   }
 
-  private def addEndDateIfDefined(endDate: Option[LocalDate]) = {
+  private def addEndDateIfDefined(endDate: Option[LocalDate]): Reads[JsObject] = {
     endDate match {
       case Some(date) =>
         __.json.update(
@@ -176,7 +173,7 @@ class DeclarationTransformer {
     }
   }
 
-  private def addSubmissionDateIf5mld(submissionDate: LocalDate, is5mld: Boolean) = {
+  private def addSubmissionDateIf5mld(submissionDate: LocalDate, is5mld: Boolean): Reads[JsObject] = {
     if (is5mld) {
       __.json.update(
         (__ \ 'submissionDate).json.put(Json.toJson(submissionDate))

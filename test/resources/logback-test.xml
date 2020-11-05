@@ -5,7 +5,14 @@
         </encoder>
     </appender>
 
-    <logger name="application" level="WARN"/>
+    <logger name="transformers" level="DEBUG"/>
+    <logger name="controllers" level="WARN"/>
+    <logger name="services" level="WARN"/>
+    <logger name="models" level="WARN"/>
+    <logger name="repositories" level="WARN"/>
+    <logger name="connector" level="WARN"/>
+    <logger name="transformers" level="DEBUG"/>
+    <logger name="utils" level="WARN"/>
 
     <root level="WARN">
         <appender-ref ref="CONSOLE"/>
