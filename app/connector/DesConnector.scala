@@ -48,11 +48,11 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
 
   def get4MLDTrustOrEstateEndpoint(utr: String): String = s"$getTrustOrEstateUrl/registration/$utr"
 
-  def get5MLDTrustOrEstateEndpoint(utr: String): String = {
-    if (utr.length == 10) {
-      s"$getTrustOrEstateUrl/registration/UTR/$utr"
+  def get5MLDTrustOrEstateEndpoint(identifier: String): String = {
+    if (identifier.length == 10) {
+      s"$getTrustOrEstateUrl/registration/UTR/$identifier"
     } else {
-      s"$getTrustOrEstateUrl/registration/URN/$utr"
+      s"$getTrustOrEstateUrl/registration/URN/$identifier"
     }
   }
 
@@ -112,7 +112,7 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
     val subscriptionIdEndpointUrl = s"$trustsServiceUrl/trn/$trn/subscription"
-    logger.debug(s"[getSubscriptionId][Session ID: ${Session.id(hc)}]" +
+    logger.debug(s"[getSubscriptionId][Session ID: ${Session.id(hc)}][TRN: $trn]" +
       s" Sending get subscription id request to DES, url=$subscriptionIdEndpointUrl")
 
     val response = http.GET[SubscriptionIdResponse](subscriptionIdEndpointUrl)
@@ -136,23 +136,22 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
     }
   }
 
-  def getTrustInfo(utr: String): Future[GetTrustResponse] = {
+  def getTrustInfo(identifier: String): Future[GetTrustResponse] = {
     val correlationId = UUID.randomUUID().toString
 
     implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
-    logger.info(s"[Session ID: ${Session.id(hc)}]" +
+    logger.info(s"[Session ID: ${Session.id(hc)}][UTR/URN: $identifier]" +
       s" getting playback for trust for correlationId: $correlationId")
 
     trustsStoreService.is5mldEnabled.flatMap { is5MLD =>
       if (is5MLD) {
-        http.GET[GetTrustResponse](get5MLDTrustOrEstateEndpoint(utr))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global) map {
-          case response: TrustProcessedResponse => response
-            response.copy(getTrust = fix5mld(response.getTrust))
+        http.GET[GetTrustResponse](get5MLDTrustOrEstateEndpoint(identifier))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global) map {
+          case response: TrustProcessedResponse => response.copy(getTrust = fix5mld(response.getTrust))
           case response => response
         }
       } else {
-        http.GET[GetTrustResponse](get4MLDTrustOrEstateEndpoint(utr))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)
+        http.GET[GetTrustResponse](get4MLDTrustOrEstateEndpoint(identifier))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)
       }
     }
   }

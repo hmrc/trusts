@@ -34,13 +34,13 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
                                                   cc: ControllerComponents)
   extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
-  def amendIndividualSettlor(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
+  def amendIndividualSettlor(identifier: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[Settlor] match {
         case JsSuccess(settlor, _) =>
 
           transformService.amendIndividualSettlorTransformer(
-            utr,
+            identifier,
             index,
             request.identifier,
             settlor
@@ -48,47 +48,47 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[amendIndividualSettlor][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[amendIndividualSettlor][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as a Settlor - $errors")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def addIndividualSettlor(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def addIndividualSettlor(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[Settlor] match {
         case JsSuccess(settlor, _) =>
 
           transformService.addIndividualSettlorTransformer(
-            utr,
+            identifier,
             request.identifier,
             settlor
           ) map { _ =>
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[addIndividualSettlor][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[addIndividualSettlor][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as a Settlor - $errors")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def addBusinessSettlor(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def addBusinessSettlor(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[SettlorCompany] match {
         case JsSuccess(companySettlor, _) =>
 
           transformService.addBusinessSettlorTransformer(
-            utr,
+            identifier,
             request.identifier,
             companySettlor
           ) map { _ =>
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[addBusinessSettlor][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[addBusinessSettlor][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as a Settlor - $errors")
           Future.successful(BadRequest)
       }
@@ -96,13 +96,13 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
   }
 
 
-  def amendBusinessSettlor(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
+  def amendBusinessSettlor(identifier: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[SettlorCompany] match {
         case JsSuccess(settlor, _) =>
 
           transformService.amendBusinessSettlorTransformer(
-            utr,
+            identifier,
             index,
             request.identifier,
             settlor
@@ -110,37 +110,37 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[amendBusinessSettlor][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[amendBusinessSettlor][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as a SettlorCompany - $errors")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def removeSettlor(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def removeSettlor(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[RemoveSettlor] match {
         case JsSuccess(settlor, _) =>
-          transformService.removeSettlor(utr, request.identifier, settlor) map { _ =>
+          transformService.removeSettlor(identifier, request.identifier, settlor) map { _ =>
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[removeSettlor][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[removeSettlor][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as a RemoveSettlor - $errors")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def amendDeceasedSettlor(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def amendDeceasedSettlor(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request =>
       request.body.validate[AmendDeceasedSettlor] match {
         case JsSuccess(settlor, _) =>
-          transformService.amendDeceasedSettlor(utr, request.identifier, settlor) map { _ =>
+          transformService.amendDeceasedSettlor(identifier, request.identifier, settlor) map { _ =>
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[amendDeceasedSettlor][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[amendDeceasedSettlor][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as a AmendDeceasedSettlor - $errors")
           Future.successful(BadRequest)
       }

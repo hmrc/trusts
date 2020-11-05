@@ -34,12 +34,12 @@ import scala.concurrent.Future
 
 class DesService @Inject()(val desConnector: DesConnector, val repository: CacheRepository) extends Logging {
 
-  def getTrustInfoFormBundleNo(utr: String): Future[String] =
-    desConnector.getTrustInfo(utr).map {
+  def getTrustInfoFormBundleNo(identifier: String): Future[String] =
+    desConnector.getTrustInfo(identifier).map {
       case response: GetTrustSuccessResponse => response.responseHeader.formBundleNo
       case response =>
         val msg = s"Failed to retrieve latest form bundle no from ETMP : $response"
-        logger.warn(s"[getTrustInfoFormBundleNo][UTR: $utr] $msg")
+        logger.warn(s"[getTrustInfoFormBundleNo][UTR/URN: $identifier] $msg")
         throw InternalServerErrorException(s"Submission could not proceed, $msg")
     }
 
@@ -55,17 +55,17 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Cache
     desConnector.getSubscriptionId(trn)
   }
 
-  def resetCache(utr: String, internalId: String) : Future[Unit] = {
-    repository.resetCache(utr, internalId).map { _ =>
+  def resetCache(identifier: String, internalId: String) : Future[Unit] = {
+    repository.resetCache(identifier, internalId).map { _ =>
       Future.successful(())
     }
   }
 
-  def refreshCacheAndGetTrustInfo(utr: String, internalId: String): Future[GetTrustResponse] = {
-    repository.resetCache(utr, internalId).flatMap { _ =>
-      desConnector.getTrustInfo(utr).flatMap {
+  def refreshCacheAndGetTrustInfo(identifier: String, internalId: String): Future[GetTrustResponse] = {
+    repository.resetCache(identifier, internalId).flatMap { _ =>
+      desConnector.getTrustInfo(identifier).flatMap {
         case response: TrustProcessedResponse =>
-          repository.set(utr, internalId, Json.toJson(response)(TrustProcessedResponse.mongoWrites))
+          repository.set(identifier, internalId, Json.toJson(response)(TrustProcessedResponse.mongoWrites))
             .map(_ => response)
         case x => Future.successful(x)
       }

@@ -40,7 +40,7 @@ class DesConnectorSpec extends ConnectorSpecHelper {
   def get4MLDTrustEndpoint(utr: String) = s"/trusts/registration/$utr"
 
   def get5MLDTrustUTREndpoint(utr: String) = s"/trusts/registration/UTR/$utr"
-  def get5MLDTrustURNEndpoint(utr: String) = s"/trusts/registration/URN/$utr"
+  def get5MLDTrustURNEndpoint(urn: String) = s"/trusts/registration/URN/$urn"
 
   ".checkExistingTrust" should {
 

@@ -34,11 +34,11 @@ class OtherIndividualTransformationController @Inject()(
                                         )(implicit val executionContext: ExecutionContext,cc: ControllerComponents)
   extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
-    def removeOtherIndividual(utr: String): Action[JsValue] = identify.async(parse.json) {
+    def removeOtherIndividual(identifier: String): Action[JsValue] = identify.async(parse.json) {
       implicit request => {
         request.body.validate[RemoveOtherIndividual] match {
           case JsSuccess(otherIndividual, _) =>
-            transformService.removeOtherIndividual(utr, request.identifier, otherIndividual) map { _ =>
+            transformService.removeOtherIndividual(identifier, request.identifier, otherIndividual) map { _ =>
               Ok
             }
           case JsError(_) => Future.successful(BadRequest)
@@ -46,12 +46,12 @@ class OtherIndividualTransformationController @Inject()(
       }
     }
 
-    def amendOtherIndividual(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
+    def amendOtherIndividual(identifier: String, index: Int): Action[JsValue] = identify.async(parse.json) {
       implicit request => {
         request.body.validate[NaturalPersonType] match {
           case JsSuccess(otherIndividual, _) =>
             transformService.amendOtherIndividualTransformer(
-              utr,
+              identifier,
               index,
               request.identifier,
               otherIndividual
@@ -59,27 +59,27 @@ class OtherIndividualTransformationController @Inject()(
               Ok
             }
           case JsError(errors) =>
-            logger.warn(s"[amendOtherIndividual][Session ID: ${request.sessionId}] " +
+            logger.warn(s"[amendOtherIndividual][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
               s"Supplied json could not be read as an Other Individual - $errors")
             Future.successful(BadRequest)
         }
       }
     }
 
-    def addOtherIndividual(utr: String): Action[JsValue] = identify.async(parse.json) {
+    def addOtherIndividual(identifier: String): Action[JsValue] = identify.async(parse.json) {
       implicit request => {
         request.body.validate[NaturalPersonType] match {
           case JsSuccess(otherIndividual, _) =>
 
             transformService.addOtherIndividualTransformer(
-              utr,
+              identifier,
               request.identifier,
               otherIndividual
             ) map { _ =>
               Ok
             }
           case JsError(errors) =>
-            logger.warn(s"[addOtherIndividualTransformer][Session ID: ${request.sessionId}] " +
+            logger.warn(s"[addOtherIndividualTransformer][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
               s"Supplied json could not be read as an Other Individual - $errors")
             Future.successful(BadRequest)
         }

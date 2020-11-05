@@ -1,12 +1,12 @@
 
-POST        /amend-individual/:utr/:index               controllers.SettlorTransformationController.amendIndividualSettlor(utr: String, index: Int)
+POST        /amend-individual/:identifier/:index               controllers.SettlorTransformationController.amendIndividualSettlor(identifier: String, index: Int)
 
-POST        /amend-business/:utr/:index                 controllers.SettlorTransformationController.amendBusinessSettlor(utr: String, index: Int)
+POST        /amend-business/:identifier/:index                 controllers.SettlorTransformationController.amendBusinessSettlor(identifier: String, index: Int)
 
-PUT         /:utr/remove                                controllers.SettlorTransformationController.removeSettlor(utr: String)
+PUT         /:identifier/remove                                controllers.SettlorTransformationController.removeSettlor(identifier: String)
 
-POST        /amend-deceased/:utr                        controllers.SettlorTransformationController.amendDeceasedSettlor(utr: String)
+POST        /amend-deceased/:identifier                        controllers.SettlorTransformationController.amendDeceasedSettlor(identifier: String)
 
-POST        /add-individual/:utr                        controllers.SettlorTransformationController.addIndividualSettlor(utr: String)
+POST        /add-individual/:identifier                        controllers.SettlorTransformationController.addIndividualSettlor(identifier: String)
 
-POST        /add-business/:utr                          controllers.SettlorTransformationController.addBusinessSettlor(utr: String)
+POST        /add-business/:identifier                          controllers.SettlorTransformationController.addBusinessSettlor(identifier: String)

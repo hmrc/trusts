@@ -40,26 +40,26 @@ class VariationService @Inject()(desService: DesService,
                                  localDateService: LocalDateService,
                                  trustsStoreService: TrustsStoreService) extends Logging {
 
-  private case class LoggingContext(utr: String)(implicit hc: HeaderCarrier) {
+  private case class LoggingContext(identifier: String)(implicit hc: HeaderCarrier) {
     def info(content: String): Unit = logger.info(format(content))
     def error(content: String): Unit = logger.error(format(content))
     def warn(content: String): Unit = logger.warn(format(content))
 
-    def format(content: String): String = s"[submitDeclaration][Session ID: ${Session.id(hc)}][UTR: $utr] $content"
+    def format(content: String): String = s"[submitDeclaration][Session ID: ${Session.id(hc)}][UTR/URN: $identifier] $content"
   }
 
-  def submitDeclaration(utr: String, internalId: String, declaration: DeclarationForApi)
+  def submitDeclaration(identifier: String, internalId: String, declaration: DeclarationForApi)
                        (implicit hc: HeaderCarrier): Future[VariationResponse] = {
 
-    implicit val logging: LoggingContext = LoggingContext(utr)
+    implicit val logging: LoggingContext = LoggingContext(identifier)
 
-    getCachedTrustData(utr, internalId).flatMap { originalResponse: TrustProcessedResponse =>
+    getCachedTrustData(identifier, internalId).flatMap { originalResponse: TrustProcessedResponse =>
       transformationService.populateLeadTrusteeAddress(originalResponse.getTrust) match {
         case JsSuccess(originalJson, _) =>
-          transformationService.applyDeclarationTransformations(utr, internalId, originalJson).flatMap {
+          transformationService.applyDeclarationTransformations(identifier, internalId, originalJson).flatMap {
             case JsSuccess(transformedJson, _) =>
               val response = TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
-              transformAndSubmit(utr, internalId, declaration, originalJson, response)
+              transformAndSubmit(identifier, internalId, declaration, originalJson, response)
             case JsError(errors) =>
               logging.error(s"Failed to transform trust info ${JsError.toJson(errors)}")
               Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
@@ -71,7 +71,7 @@ class VariationService @Inject()(desService: DesService,
    }
   }
 
-  private def transformAndSubmit(utr: String,
+  private def transformAndSubmit(identifier: String,
                                  internalId: String,
                                  declaration: DeclarationForApi,
                                  originalJson: JsValue,
@@ -86,7 +86,7 @@ class VariationService @Inject()(desService: DesService,
         declarationTransformer.transform(response, originalJson, declaration, localDateService.now, is5mld) match {
           case JsSuccess(value, _) =>
             logging.info("successfully transformed json for declaration")
-            doSubmit(utr, value, internalId)
+            doSubmit(identifier, value, internalId)
           case JsError(errors) =>
             logging.error(s"Problem transforming data for ETMP submissio: ${JsError.toJson(errors)}")
             Future.failed(InternalServerErrorException(s"There was a problem transforming data for submission to ETMP: ${JsError.toJson(errors)}"))
@@ -98,10 +98,10 @@ class VariationService @Inject()(desService: DesService,
     }
   }
 
-  private def getCachedTrustData(utr: String, internalId: String)(implicit logging: LoggingContext): Future[TrustProcessedResponse] = {
+  private def getCachedTrustData(identifier: String, internalId: String)(implicit logging: LoggingContext): Future[TrustProcessedResponse] = {
     for {
-      response <- desService.getTrustInfo(utr, internalId)
-      fbn <- desService.getTrustInfoFormBundleNo(utr)
+      response <- desService.getTrustInfo(identifier, internalId)
+      fbn <- desService.getTrustInfoFormBundleNo(identifier)
     } yield response match {
       case tpr: TrustProcessedResponse if tpr.responseHeader.formBundleNo == fbn =>
         logging.info("returning TrustProcessedResponse")
@@ -115,7 +115,7 @@ class VariationService @Inject()(desService: DesService,
     }
   }
 
-  private def doSubmit(utr: String, value: JsValue, internalId: String)
+  private def doSubmit(identifier: String, value: JsValue, internalId: String)
                       (implicit hc: HeaderCarrier, logging: LoggingContext): Future[VariationResponse] = {
 
     val payload = value.applyRules

@@ -67,10 +67,10 @@ class CacheRepositoryImpl @Inject()(
     } yield createdLastUpdatedIndex && createdIdIndex
   }
 
-  override def get(utr: String, internalId: String): Future[Option[JsValue]] = {
+  override def get(identifier: String, internalId: String): Future[Option[JsValue]] = {
 
     val selector = Json.obj(
-      "id" -> createKey(utr, internalId)
+      "id" -> createKey(identifier, internalId)
     )
 
     collection.flatMap {collection =>
@@ -83,19 +83,19 @@ class CacheRepositoryImpl @Inject()(
     }
   }
 
-  private def createKey(utr: String, internalId: String) = {
-    (utr + '-' + internalId)
+  private def createKey(identifier: String, internalId: String) = {
+    (identifier + '-' + internalId)
   }
 
-  override def set(utr: String, internalId: String, data: JsValue): Future[Boolean] = {
+  override def set(identifier: String, internalId: String, data: JsValue): Future[Boolean] = {
 
     val selector = Json.obj(
-      "id" -> createKey(utr, internalId)
+      "id" -> createKey(identifier, internalId)
     )
 
     val modifier = Json.obj(
       "$set" -> Json.obj(
-        "id" -> createKey(utr, internalId),
+        "id" -> createKey(identifier, internalId),
         "updatedAt" ->  Json.obj("$date" -> Timestamp.valueOf(LocalDateTime.now())),
         "etmpData" -> data
       )
@@ -108,9 +108,9 @@ class CacheRepositoryImpl @Inject()(
     }
   }
 
-  override def resetCache(utr: String, internalId: String): Future[Option[JsObject]] = {
+  override def resetCache(identifier: String, internalId: String): Future[Option[JsObject]] = {
     val selector = Json.obj(
-      "id" -> createKey(utr, internalId)
+      "id" -> createKey(identifier, internalId)
     )
 
     collection.flatMap(_.findAndRemove(selector, None, None, WriteConcern.Default, None, None, Seq.empty).map(
@@ -121,9 +121,9 @@ class CacheRepositoryImpl @Inject()(
 
 trait CacheRepository {
 
-  def get(utr: String, internalId: String): Future[Option[JsValue]]
+  def get(identifier: String, internalId: String): Future[Option[JsValue]]
 
-  def set(utr: String, internalId: String, data: JsValue): Future[Boolean]
+  def set(identifier: String, internalId: String, data: JsValue): Future[Boolean]
 
-  def resetCache(utr: String, internalId: String): Future[Option[JsObject]]
+  def resetCache(identifier: String, internalId: String): Future[Option[JsObject]]
 }

@@ -1,109 +1,109 @@
 # microservice specific routes
 
-->          /trustees                                           trusts.trustees.Routes
-->          /beneficiaries                                      trusts.beneficiaries.Routes
-->          /settlors                                           trusts.settlors.Routes
-->          /protectors                                         trusts.protectors.Routes
-->          /other-individuals                                  trusts.otherIndividuals.Routes
-->          /register                                           register.Routes
+->          /trustees                                                  trusts.trustees.Routes
+->          /beneficiaries                                             trusts.beneficiaries.Routes
+->          /settlors                                                  trusts.settlors.Routes
+->          /protectors                                                trusts.protectors.Routes
+->          /other-individuals                                         trusts.otherIndividuals.Routes
+->          /register                                                  register.Routes
 
-POST        /check                                              controllers.CheckTrustController.checkExistingTrust
+POST        /check                                                     controllers.CheckTrustController.checkExistingTrust
 
-POST        /tax-enrolment/callback/subscriptions               controllers.TaxEnrolmentCallbackController.subscriptionCallback
+POST        /tax-enrolment/callback/subscriptions                      controllers.TaxEnrolmentCallbackController.subscriptionCallback
 
-GET         /:identifier/refresh                                controllers.GetTrustController.getFromEtmp(identifier: String)
+GET         /:identifier/refresh                                       controllers.GetTrustController.getFromEtmp(identifier: String)
 
-GET         /:identifier                                         controllers.GetTrustController.get(identifier: String, applyTransforms: Boolean = false)
+GET         /:identifier                                               controllers.GetTrustController.get(identifier: String, applyTransforms: Boolean = false)
 
-GET         /:utr/transformed                                   controllers.GetTrustController.get(utr: String, applyTransforms: Boolean = true)
+GET         /:identifier/transformed                                   controllers.GetTrustController.get(identifier: String, applyTransforms: Boolean = true)
 
-GET         /:utr/transformed/lead-trustee                      controllers.GetTrustController.getLeadTrustee(utr: String)
+GET         /:identifier/transformed/lead-trustee                      controllers.GetTrustController.getLeadTrustee(identifier: String)
 
-GET         /:utr/trust-details                                 controllers.GetTrustController.getTrustDetails(utr: String)
+GET         /:identifier/trust-details                                 controllers.GetTrustController.getTrustDetails(identifier: String)
 
-GET         /:utr/transformed/beneficiaries                     controllers.GetTrustController.getBeneficiaries(utr: String)
+GET         /:identifier/transformed/beneficiaries                     controllers.GetTrustController.getBeneficiaries(identifier: String)
 
-GET         /:utr/transformed/trustees                          controllers.GetTrustController.getTrustees(utr: String)
+GET         /:identifier/transformed/trustees                          controllers.GetTrustController.getTrustees(identifier: String)
 
-GET         /:utr/transformed/settlors                          controllers.GetTrustController.getSettlors(utr: String)
+GET         /:identifier/transformed/settlors                          controllers.GetTrustController.getSettlors(identifier: String)
 
-GET         /:utr/transformed/protectors                        controllers.GetTrustController.getProtectors(utr: String)
+GET         /:identifier/transformed/protectors                        controllers.GetTrustController.getProtectors(identifier: String)
 
-GET         /:utr/transformed/other-individuals                 controllers.GetTrustController.getOtherIndividuals(utr: String)
+GET         /:identifier/transformed/other-individuals                 controllers.GetTrustController.getOtherIndividuals(identifier: String)
 
-GET         /:utr/transformed/protectors-already-exist          controllers.GetTrustController.getProtectorsAlreadyExist(utr: String)
+GET         /:identifier/transformed/protectors-already-exist          controllers.GetTrustController.getProtectorsAlreadyExist(identifier: String)
 
-GET         /:utr/transformed/other-individuals-already-exist   controllers.GetTrustController.getOtherIndividualsAlreadyExist(utr: String)
+GET         /:identifier/transformed/other-individuals-already-exist   controllers.GetTrustController.getOtherIndividualsAlreadyExist(identifier: String)
 
-GET         /:utr/transformed/deceased-settlor-death-recorded   controllers.GetTrustController.getDeceasedSettlorDeathRecorded(utr: String)
+GET         /:identifier/transformed/deceased-settlor-death-recorded   controllers.GetTrustController.getDeceasedSettlorDeathRecorded(identifier: String)
 
-POST        /variation                                          controllers.testOnly.TrustVariationsTestController.trustVariation
+POST        /variation                                                 controllers.testOnly.TrustVariationsTestController.trustVariation
 
-POST        /declare/:utr                                       controllers.TrustVariationsController.declare(utr: String)
+POST        /declare/:identifier                                       controllers.TrustVariationsController.declare(identifier: String)
 
-POST        /amend-lead-trustee/:utr                            controllers.TrusteeTransformationController.amendLeadTrustee(utr: String)
+POST        /amend-lead-trustee/:identifier                            controllers.TrusteeTransformationController.amendLeadTrustee(identifier: String)
 
-POST        /add-trustee/:utr                                   controllers.TrusteeTransformationController.addTrustee(utr: String)
+POST        /add-trustee/:identifier                                   controllers.TrusteeTransformationController.addTrustee(identifier: String)
 
-POST        /amend-trustee/:utr/:index                          controllers.TrusteeTransformationController.amendTrustee(utr: String, index: Int)
+POST        /amend-trustee/:identifier/:index                          controllers.TrusteeTransformationController.amendTrustee(identifier: String, index: Int)
 
-POST        /promote-trustee/:utr/:index                        controllers.TrusteeTransformationController.promoteTrustee(utr: String, index: Int)
+POST        /promote-trustee/:identifier/:index                        controllers.TrusteeTransformationController.promoteTrustee(identifier: String, index: Int)
 
-PUT         /:utr/trustees/remove                               controllers.TrusteeTransformationController.removeTrustee(utr: String)
+PUT         /:identifier/trustees/remove                               controllers.TrusteeTransformationController.removeTrustee(identifier: String)
 
-POST        /add-unidentified-beneficiary/:utr                  controllers.BeneficiaryTransformationController.addUnidentifiedBeneficiary(utr: String)
+POST        /add-unidentified-beneficiary/:identifier                  controllers.BeneficiaryTransformationController.addUnidentifiedBeneficiary(identifier: String)
 
-POST        /amend-unidentified-beneficiary/:utr/:index         controllers.BeneficiaryTransformationController.amendUnidentifiedBeneficiary(utr: String, index: Int)
+POST        /amend-unidentified-beneficiary/:identifier/:index         controllers.BeneficiaryTransformationController.amendUnidentifiedBeneficiary(identifier: String, index: Int)
 
-POST        /amend-individual-beneficiary/:utr/:index           controllers.BeneficiaryTransformationController.amendIndividualBeneficiary(utr: String, index: Int)
+POST        /amend-individual-beneficiary/:identifier/:index           controllers.BeneficiaryTransformationController.amendIndividualBeneficiary(identifier: String, index: Int)
 
-POST        /add-individual-beneficiary/:utr                    controllers.BeneficiaryTransformationController.addIndividualBeneficiary(utr: String)
+POST        /add-individual-beneficiary/:identifier                    controllers.BeneficiaryTransformationController.addIndividualBeneficiary(identifier: String)
 
-POST        /add-charity-beneficiary/:utr                       controllers.BeneficiaryTransformationController.addCharityBeneficiary(utr: String)
+POST        /add-charity-beneficiary/:identifier                       controllers.BeneficiaryTransformationController.addCharityBeneficiary(identifier: String)
 
-POST        /amend-charity-beneficiary/:utr/:index              controllers.BeneficiaryTransformationController.amendCharityBeneficiary(utr: String, index: Int)
+POST        /amend-charity-beneficiary/:identifier/:index              controllers.BeneficiaryTransformationController.amendCharityBeneficiary(identifier: String, index: Int)
 
-POST        /add-other-beneficiary/:utr                         controllers.BeneficiaryTransformationController.addOtherBeneficiary(utr: String)
+POST        /add-other-beneficiary/:identifier                         controllers.BeneficiaryTransformationController.addOtherBeneficiary(identifier: String)
 
-POST        /amend-other-beneficiary/:utr/:index                controllers.BeneficiaryTransformationController.amendOtherBeneficiary(utr: String, index: Int)
+POST        /amend-other-beneficiary/:identifier/:index                controllers.BeneficiaryTransformationController.amendOtherBeneficiary(identifier: String, index: Int)
 
-POST        /add-company-beneficiary/:utr                       controllers.BeneficiaryTransformationController.addCompanyBeneficiary(utr: String)
+POST        /add-company-beneficiary/:identifier                       controllers.BeneficiaryTransformationController.addCompanyBeneficiary(identifier: String)
 
-POST        /add-trust-beneficiary/:utr                         controllers.BeneficiaryTransformationController.addTrustBeneficiary(utr: String)
+POST        /add-trust-beneficiary/:identifier                         controllers.BeneficiaryTransformationController.addTrustBeneficiary(identifier: String)
 
-POST        /amend-company-beneficiary/:utr/:index              controllers.BeneficiaryTransformationController.amendCompanyBeneficiary(utr: String, index: Int)
+POST        /amend-company-beneficiary/:identifier/:index              controllers.BeneficiaryTransformationController.amendCompanyBeneficiary(identifier: String, index: Int)
 
-POST        /amend-trust-beneficiary/:utr/:index                controllers.BeneficiaryTransformationController.amendTrustBeneficiary(utr: String, index: Int)
+POST        /amend-trust-beneficiary/:identifier/:index                controllers.BeneficiaryTransformationController.amendTrustBeneficiary(identifier: String, index: Int)
 
-POST        /add-large-beneficiary/:utr                         controllers.BeneficiaryTransformationController.addLargeBeneficiary(utr: String)
+POST        /add-large-beneficiary/:identifier                         controllers.BeneficiaryTransformationController.addLargeBeneficiary(identifier: String)
 
-POST        /amend-large-beneficiary/:utr/:index                controllers.BeneficiaryTransformationController.amendLargeBeneficiary(utr: String, index: Int)
+POST        /amend-large-beneficiary/:identifier/:index                controllers.BeneficiaryTransformationController.amendLargeBeneficiary(identifier: String, index: Int)
 
-PUT         /:utr/beneficiaries/remove                          controllers.BeneficiaryTransformationController.removeBeneficiary(utr: String)
+PUT         /:identifier/beneficiaries/remove                          controllers.BeneficiaryTransformationController.removeBeneficiary(identifier: String)
 
-POST        /amend-individual-settlor/:utr/:index               controllers.SettlorTransformationController.amendIndividualSettlor(utr: String, index: Int)
+POST        /amend-individual-settlor/:identifier/:index               controllers.SettlorTransformationController.amendIndividualSettlor(identifier: String, index: Int)
 
-POST        /amend-business-settlor/:utr/:index                 controllers.SettlorTransformationController.amendBusinessSettlor(utr: String, index: Int)
+POST        /amend-business-settlor/:identifier/:index                 controllers.SettlorTransformationController.amendBusinessSettlor(identifier: String, index: Int)
 
-PUT         /:utr/settlors/remove                               controllers.SettlorTransformationController.removeSettlor(utr: String)
+PUT         /:identifier/settlors/remove                               controllers.SettlorTransformationController.removeSettlor(identifier: String)
 
-POST        /amend-deceased-settlor/:utr                        controllers.SettlorTransformationController.amendDeceasedSettlor(utr: String)
+POST        /amend-deceased-settlor/:identifier                        controllers.SettlorTransformationController.amendDeceasedSettlor(identifier: String)
 
-POST        /add-individual-settlor/:utr                        controllers.SettlorTransformationController.addIndividualSettlor(utr: String)
+POST        /add-individual-settlor/:identifier                        controllers.SettlorTransformationController.addIndividualSettlor(identifier: String)
 
-POST        /add-business-settlor/:utr                          controllers.SettlorTransformationController.addBusinessSettlor(utr: String)
+POST        /add-business-settlor/:identifier                          controllers.SettlorTransformationController.addBusinessSettlor(identifier: String)
 
-POST        /add-individual-protector/:utr                      controllers.ProtectorTransformationController.addIndividualProtector(utr: String)
+POST        /add-individual-protector/:identifier                      controllers.ProtectorTransformationController.addIndividualProtector(identifier: String)
 
-POST        /add-business-protector/:utr                      controllers.ProtectorTransformationController.addBusinessProtector(utr: String)
+POST        /add-business-protector/:identifier                        controllers.ProtectorTransformationController.addBusinessProtector(identifier: String)
 
-POST        /amend-business-protector/:utr/:index               controllers.ProtectorTransformationController.amendBusinessProtector(utr: String, index: Int)
+POST        /amend-business-protector/:identifier/:index               controllers.ProtectorTransformationController.amendBusinessProtector(identifier: String, index: Int)
 
-PUT         /:utr/protectors/remove                             controllers.ProtectorTransformationController.removeProtector(utr: String)
+PUT         /:identifier/protectors/remove                             controllers.ProtectorTransformationController.removeProtector(identifier: String)
 
-PUT         /:utr/trust-details/express                         controllers.TrustDetailsTransformationController.setExpress(utr: String)
-PUT         /:utr/trust-details/uk-resident                     controllers.TrustDetailsTransformationController.setResident(utr: String)
-PUT         /:utr/trust-details/taxable                         controllers.TrustDetailsTransformationController.setTaxable(utr: String)
-PUT         /:utr/trust-details/uk-property                     controllers.TrustDetailsTransformationController.setProperty(utr: String)
-PUT         /:utr/trust-details/recorded                        controllers.TrustDetailsTransformationController.setRecorded(utr: String)
-PUT         /:utr/trust-details/uk-relation                     controllers.TrustDetailsTransformationController.setUKRelation(utr: String)
+PUT         /:identifier/trust-details/express                         controllers.TrustDetailsTransformationController.setExpress(identifier: String)
+PUT         /:identifier/trust-details/uk-resident                     controllers.TrustDetailsTransformationController.setResident(identifier: String)
+PUT         /:identifier/trust-details/taxable                         controllers.TrustDetailsTransformationController.setTaxable(identifier: String)
+PUT         /:identifier/trust-details/uk-property                     controllers.TrustDetailsTransformationController.setProperty(identifier: String)
+PUT         /:identifier/trust-details/recorded                        controllers.TrustDetailsTransformationController.setRecorded(identifier: String)
+PUT         /:identifier/trust-details/uk-relation                     controllers.TrustDetailsTransformationController.setUKRelation(identifier: String)

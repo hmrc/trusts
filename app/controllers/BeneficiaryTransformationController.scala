@@ -35,12 +35,12 @@ class BeneficiaryTransformationController @Inject()(
                                           cc: ControllerComponents)
   extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
-  def amendUnidentifiedBeneficiary(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
+  def amendUnidentifiedBeneficiary(identifier: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[JsString] match {
         case JsSuccess(description, _) =>
           beneficiaryTransformationService.amendUnidentifiedBeneficiaryTransformer(
-            utr,
+            identifier,
             index,
             request.identifier,
             description.value
@@ -48,57 +48,57 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[amendUnidentifiedBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[amendUnidentifiedBeneficiary][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied description could not be read as a JsString - $errors")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def addUnidentifiedBeneficiary(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def addUnidentifiedBeneficiary(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[UnidentifiedType] match {
         case JsSuccess(newBeneficiary, _) =>
 
           beneficiaryTransformationService.addUnidentifiedBeneficiaryTransformer(
-            utr,
+            identifier,
             request.identifier,
             newBeneficiary
           ) map { _ =>
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[addUnidentifiedBeneficiary][Session ID: ${request.sessionId}] " +
-            s"Supplied json could not be read as an Unidentified Beneficiary - $errors")
+          logger.warn(s"[addUnidentifiedBeneficiary][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
+            s" Supplied json could not be read as an Unidentified Beneficiary - $errors")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def addIndividualBeneficiary(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def addIndividualBeneficiary(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[IndividualDetailsType] match {
         case JsSuccess(newBeneficiary, _) =>
           beneficiaryTransformationService.addIndividualBeneficiaryTransformer(
-            utr,
+            identifier,
             request.identifier,
             newBeneficiary
           ) map { _ =>
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[addIndividualBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[addIndividualBeneficiary][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as an Individual Beneficiary - $errors")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def removeBeneficiary(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def removeBeneficiary(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[RemoveBeneficiary] match {
         case JsSuccess(beneficiary, _) =>
-          beneficiaryTransformationService.removeBeneficiary(utr, request.identifier, beneficiary) map { _ =>
+          beneficiaryTransformationService.removeBeneficiary(identifier, request.identifier, beneficiary) map { _ =>
           Ok
         }
         case JsError(_) => Future.successful(BadRequest)
@@ -106,12 +106,12 @@ class BeneficiaryTransformationController @Inject()(
     }
   }
 
-  def amendIndividualBeneficiary(utr: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
+  def amendIndividualBeneficiary(identifier: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
     implicit request =>
       request.body.validate[IndividualDetailsType] match {
         case JsSuccess(individual, _) =>
           beneficiaryTransformationService.amendIndividualBeneficiaryTransformer(
-            utr,
+            identifier,
             index,
             request.identifier,
             individual
@@ -119,37 +119,37 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[amendIndividualBeneficiary][Session ID: ${request.sessionId}]" +
-            s" Supplied payload could not be read as a IndividualDetailsType - $errors")
+          logger.warn(s"[amendIndividualBeneficiary][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
+            s" Supplied payload could not be read as an IndividualDetailsType - $errors")
           Future.successful(BadRequest)
       }
   }
 
-  def addCharityBeneficiary(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def addCharityBeneficiary(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[BeneficiaryCharityType] match {
         case JsSuccess(newBeneficiary, _) =>
           beneficiaryTransformationService.addCharityBeneficiaryTransformer(
-            utr,
+            identifier,
             request.identifier,
             newBeneficiary
           ) map { _ =>
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[addCharityBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[addCharityBeneficiary][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as a Charity Beneficiary - $errors")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def amendCharityBeneficiary(utr: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
+  def amendCharityBeneficiary(identifier: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
     implicit request =>
       request.body.validate[BeneficiaryCharityType] match {
         case JsSuccess(charity, _) =>
           beneficiaryTransformationService.amendCharityBeneficiaryTransformer(
-            utr,
+            identifier,
             index,
             request.identifier,
             charity
@@ -157,37 +157,37 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[amendCharityBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[amendCharityBeneficiary][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied payload could not be read as a CharityType - $errors")
           Future.successful(BadRequest)
       }
   }
 
-  def addOtherBeneficiary(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def addOtherBeneficiary(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[OtherType] match {
         case JsSuccess(newBeneficiary, _) =>
           beneficiaryTransformationService.addOtherBeneficiaryTransformer(
-            utr,
+            identifier,
             request.identifier,
             newBeneficiary
           ) map { _ =>
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[addOtherBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[addOtherBeneficiary][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as an Other Beneficiary - $errors")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def amendOtherBeneficiary(utr: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
+  def amendOtherBeneficiary(identifier: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
     implicit request =>
       request.body.validate[OtherType] match {
         case JsSuccess(otherBeneficiary, _) =>
           beneficiaryTransformationService.amendOtherBeneficiaryTransformer(
-            utr,
+            identifier,
             index,
             request.identifier,
             otherBeneficiary
@@ -195,55 +195,55 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[amendOtherBeneficiary][Session ID: ${request.sessionId}]" +
-            s" Supplied payload could not be read as a OtherType - $errors")
+          logger.warn(s"[amendOtherBeneficiary][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
+            s" Supplied payload could not be read as an OtherType - $errors")
           Future.successful(BadRequest)
       }
   }
 
-  def addCompanyBeneficiary(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def addCompanyBeneficiary(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[BeneficiaryCompanyType] match {
         case JsSuccess(newBeneficiary, _) =>
           beneficiaryTransformationService.addCompanyBeneficiaryTransformer(
-            utr,
+            identifier,
             request.identifier,
             newBeneficiary
           ) map { _ =>
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[addCompanyBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[addCompanyBeneficiary][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as a Company Beneficiary - $errors")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def addTrustBeneficiary(utr: String) : Action[JsValue] = identify.async(parse.json) {
+  def addTrustBeneficiary(identifier: String) : Action[JsValue] = identify.async(parse.json) {
     implicit request =>
       request.body.validate[BeneficiaryTrustType] match {
         case JsSuccess(newBeneficiary, _) =>
           beneficiaryTransformationService.addTrustBeneficiaryTransformer(
-            utr,
+            identifier,
             request.identifier,
             newBeneficiary
           ) map { _ =>
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[addTrustBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[addTrustBeneficiary][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as a Trust Beneficiary - $errors")
           Future.successful(BadRequest)
       }
   }
 
-  def amendCompanyBeneficiary(utr: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
+  def amendCompanyBeneficiary(identifier: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
     implicit request =>
       request.body.validate[BeneficiaryCompanyType] match {
         case JsSuccess(companyBeneficiary, _) =>
           beneficiaryTransformationService.amendCompanyBeneficiaryTransformer(
-            utr,
+            identifier,
             index,
             request.identifier,
             companyBeneficiary
@@ -251,18 +251,18 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[amendCompanyBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[amendCompanyBeneficiary][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied payload could not be read as a BeneficiaryCompanyType - $errors")
           Future.successful(BadRequest)
       }
   }
 
-  def amendTrustBeneficiary(utr: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
+  def amendTrustBeneficiary(identifier: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
     implicit request =>
       request.body.validate[BeneficiaryTrustType] match {
         case JsSuccess(charity, _) =>
           beneficiaryTransformationService.amendTrustBeneficiaryTransformer(
-            utr,
+            identifier,
             index,
             request.identifier,
             charity
@@ -270,37 +270,37 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[amendTrustBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[amendTrustBeneficiary][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied payload could not be read as a BeneficiaryTrustType - $errors")
           Future.successful(BadRequest)
       }
   }
 
-  def addLargeBeneficiary(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def addLargeBeneficiary(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[LargeType] match {
         case JsSuccess(newBeneficiary, _) =>
           beneficiaryTransformationService.addLargeBeneficiaryTransformer(
-            utr,
+            identifier,
             request.identifier,
             newBeneficiary
           ) map { _ =>
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[addLargeBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[addLargeBeneficiary][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as a Large Beneficiary - $errors")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def amendLargeBeneficiary(utr: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
+  def amendLargeBeneficiary(identifier: String, index: Int) : Action[JsValue] = identify.async(parse.json) {
     implicit request =>
       request.body.validate[LargeType] match {
         case JsSuccess(largeBeneficiary, _) =>
           beneficiaryTransformationService.amendLargeBeneficiaryTransformer(
-            utr,
+            identifier,
             index,
             request.identifier,
             largeBeneficiary
@@ -308,7 +308,7 @@ class BeneficiaryTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[amendLargeBeneficiary][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[amendLargeBeneficiary][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied payload could not be read as a LargeBeneficiary - $errors")
           Future.successful(BadRequest)
       }
