@@ -30,12 +30,15 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
 import transformers._
 import transformers.remove.RemoveSettlor
+import uk.gov.hmrc.http.HeaderCarrier
 import utils.{JsonFixtures, JsonUtils}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonFixtures {
+
+  implicit val hc = HeaderCarrier()
 
   private implicit val pc: PatienceConfig =
     PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
@@ -70,7 +73,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
       when(transformationService.addNewTransform(any(), any(), any()))
         .thenReturn(Future.successful(true))
-      when(transformationService.getTransformedData(any(), any()))
+      when(transformationService.getTransformedData(any(), any())(any()))
         .thenReturn(Future.successful(TrustProcessedResponse(
           buildInputJson("settlor", Seq(settlor)),
           ResponseHeader("status", "formBundlNo")
@@ -171,7 +174,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
         when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-        when(transformationService.getTransformedData(any(), any()))
+        when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(
             buildInputJson("settlor", Seq(originalSettlorJson)),
             ResponseHeader("status", "formBundlNo")
@@ -222,7 +225,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any()))
+      when(transformationService.getTransformedData(any(), any())(any()))
         .thenReturn(
           Future.successful(models.get_trust.TrustProcessedResponse(buildInputJson("settlorCompany", Seq(originalSettlorJson)),
           ResponseHeader("status", "formBundlNo")
@@ -273,7 +276,7 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
       val desResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-      when(transformationService.getTransformedData(any(), any()))
+      when(transformationService.getTransformedData(any(), any())(any()))
         .thenReturn(
           Future.successful(
             models.get_trust.TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))

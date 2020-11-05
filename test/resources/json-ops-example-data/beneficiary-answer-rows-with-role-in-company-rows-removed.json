@@ -1,0 +1,27 @@
+{
+  "answerSections" : {
+    "beneficiaries" : [
+      {
+        "headingKey" : "Individual beneficiary 1",
+        "rows" : [
+          {
+            "label" : "individualBeneficiaryName.checkYourAnswersLabel",
+            "answer" : "Joe Bloggs",
+            "labelArg" : ""
+          }
+        ],
+        "sectionKey" : "Beneficiaries"
+      },
+      {
+        "headingKey" : "Individual beneficiary 2",
+        "rows" : [
+          {
+            "label" : "individualBeneficiaryName.checkYourAnswersLabel",
+            "answer" : "John Doe",
+            "labelArg" : ""
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -46,7 +46,7 @@ class TrustDetailsTransformationServiceSpec extends FreeSpec
 
         when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-        when(transformationService.getTransformedData(any(), any())).thenReturn {
+        when(transformationService.getTransformedData(any(), any())(any())).thenReturn {
           Future.successful {
             TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
           }
@@ -70,7 +70,7 @@ class TrustDetailsTransformationServiceSpec extends FreeSpec
 
         when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-        when(transformationService.getTransformedData(any(), any())).thenReturn {
+        when(transformationService.getTransformedData(any(), any())(any())).thenReturn {
           Future.successful {
             TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
           }
@@ -94,7 +94,7 @@ class TrustDetailsTransformationServiceSpec extends FreeSpec
 
         when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-        when(transformationService.getTransformedData(any(), any())).thenReturn {
+        when(transformationService.getTransformedData(any(), any())(any())).thenReturn {
           Future.successful {
             TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
           }
@@ -118,7 +118,7 @@ class TrustDetailsTransformationServiceSpec extends FreeSpec
 
         when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-        when(transformationService.getTransformedData(any(), any())).thenReturn {
+        when(transformationService.getTransformedData(any(), any())(any())).thenReturn {
           Future.successful {
             TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
           }
@@ -142,7 +142,7 @@ class TrustDetailsTransformationServiceSpec extends FreeSpec
 
         when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-        when(transformationService.getTransformedData(any(), any())).thenReturn {
+        when(transformationService.getTransformedData(any(), any())(any())).thenReturn {
           Future.successful {
             TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
           }
@@ -166,7 +166,7 @@ class TrustDetailsTransformationServiceSpec extends FreeSpec
 
         when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-        when(transformationService.getTransformedData(any(), any())).thenReturn {
+        when(transformationService.getTransformedData(any(), any())(any())).thenReturn {
           Future.successful {
             TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
           }

@@ -55,7 +55,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
 
       val newDescription = "Some new description"
 
-      when(beneficiaryTransformationService.amendUnidentifiedBeneficiaryTransformer(any(), any(), any(), any()))
+      when(beneficiaryTransformationService.amendUnidentifiedBeneficiaryTransformer(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
@@ -69,7 +69,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         equalTo("aUTR"),
         equalTo(index),
         equalTo("id"),
-        equalTo(newDescription))
+        equalTo(newDescription))(any())
     }
 
     "must return an error for malformed json" in {
@@ -90,7 +90,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
       val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
       val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
-      when(beneficiaryTransformationService.removeBeneficiary(any(), any(), any()))
+      when(beneficiaryTransformationService.removeBeneficiary(any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
@@ -108,7 +108,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         .removeBeneficiary(
           equalTo("UTRUTRUTR"),
           equalTo("id"),
-          equalTo(RemoveBeneficiary(LocalDate.of(2018, 2, 24), 24, "unidentified")))
+          equalTo(RemoveBeneficiary(LocalDate.of(2018, 2, 24), 24, "unidentified")))(any())
     }
 
     "return an error when json is invalid" in {
@@ -193,7 +193,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None
       )
 
-      when(beneficiaryTransformationService.amendIndividualBeneficiaryTransformer(any(), any(), any(), any()))
+      when(beneficiaryTransformationService.amendIndividualBeneficiaryTransformer(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
@@ -209,7 +209,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
           equalTo(index),
           equalTo("id"),
           equalTo(newIndividual)
-        )
+        )(any())
 
     }
 
@@ -340,7 +340,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None
       )
 
-      when(beneficiaryTransformationService.amendCharityBeneficiaryTransformer(any(), any(), any(), any()))
+      when(beneficiaryTransformationService.amendCharityBeneficiaryTransformer(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
@@ -356,7 +356,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
           equalTo(index),
           equalTo("id"),
           equalTo(newCharity)
-        )
+        )(any())
 
     }
 
@@ -485,7 +485,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None
       )
 
-      when(beneficiaryTransformationService.amendCompanyBeneficiaryTransformer(any(), any(), any(), any()))
+      when(beneficiaryTransformationService.amendCompanyBeneficiaryTransformer(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
@@ -501,7 +501,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
           equalTo(index),
           equalTo("id"),
           equalTo(newCompany)
-        )
+        )(any())
 
     }
 
@@ -587,7 +587,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None
       )
 
-      when(beneficiaryTransformationService.amendOtherBeneficiaryTransformer(any(), any(), any(), any()))
+      when(beneficiaryTransformationService.amendOtherBeneficiaryTransformer(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
@@ -603,7 +603,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
           equalTo(index),
           equalTo("id"),
           equalTo(newOther)
-        )
+        )(any())
 
     }
 
@@ -641,7 +641,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None
       )
 
-      when(beneficiaryTransformationService.amendTrustBeneficiaryTransformer(any(), any(), any(), any()))
+      when(beneficiaryTransformationService.amendTrustBeneficiaryTransformer(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
@@ -657,7 +657,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
           equalTo(index),
           equalTo("id"),
           equalTo(newTrust)
-        )
+        )(any())
 
     }
 
@@ -759,7 +759,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
         None
       )
 
-      when(beneficiaryTransformationService.amendLargeBeneficiaryTransformer(any(), any(), any(), any()))
+      when(beneficiaryTransformationService.amendLargeBeneficiaryTransformer(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
@@ -775,7 +775,7 @@ class BeneficiaryTransformationControllerSpec extends FreeSpec with MockitoSugar
           equalTo(index),
           equalTo("id"),
           equalTo(newLargeBeneficiary)
-        )
+        )(any())
 
     }
 

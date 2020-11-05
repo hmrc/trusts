@@ -1,0 +1,36 @@
+{
+  "beneficiaries" : {
+    "data" : {
+      "beneficiaries" : {
+        "individualBeneficiaries" : [
+          {
+            "dateOfBirthYesNo" : false,
+            "name" : {
+              "firstName" : "Joe",
+              "lastName" : "Bloggs"
+            },
+            "vulnerableYesNo" : false,
+            "addressYesNo" : false,
+            "incomeYesNo" : true,
+            "status" : "completed",
+            "nationalInsuranceNumberYesNo" : false,
+            "roleInCompany" : "Director"
+          },
+          {
+            "dateOfBirthYesNo" : false,
+            "name" : {
+              "firstName" : "John",
+              "lastName" : "Doe"
+            },
+            "vulnerableYesNo" : false,
+            "addressYesNo" : false,
+            "incomeYesNo" : true,
+            "status" : "completed",
+            "nationalInsuranceNumberYesNo" : false,
+            "roleInCompany" : "Employee"
+          }
+        ]
+      }
+    }
+  }
+}

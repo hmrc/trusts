@@ -30,12 +30,15 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
 import transformers._
 import transformers.remove.RemoveTrustee
+import uk.gov.hmrc.http.HeaderCarrier
 import utils.JsonFixtures
 
 import scala.concurrent.Future
 
 class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonFixtures {
   private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
+
+  implicit val hc = HeaderCarrier()
 
   private val currentDate: LocalDate = LocalDate.of(1999, 3, 14)
   private object LocalDateServiceStub extends LocalDateService {
@@ -196,7 +199,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       val transformationService = mock[TransformationService]
       val service = new TrusteeTransformationService(transformationService, LocalDateServiceStub)
 
-      when(transformationService.getTransformedData(any(), any())).thenReturn(Future.successful(processedResponse))
+      when(transformationService.getTransformedData(any(), any())(any())).thenReturn(Future.successful(processedResponse))
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
       val index = 1
@@ -223,7 +226,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       val transformationService = mock[TransformationService]
       val service = new TrusteeTransformationService(transformationService, LocalDateServiceStub)
 
-      when(transformationService.getTransformedData(any(), any())).thenReturn(Future.successful(processedResponse))
+      when(transformationService.getTransformedData(any(), any())(any())).thenReturn(Future.successful(processedResponse))
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
       val index = 1
@@ -251,7 +254,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       val transformationService = mock[TransformationService]
       val service = new TrusteeTransformationService(transformationService, LocalDateServiceStub)
 
-      when(transformationService.getTransformedData(any(), any())).thenReturn(Future.successful(processedResponse))
+      when(transformationService.getTransformedData(any(), any())(any())).thenReturn(Future.successful(processedResponse))
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
       val endDate = LocalDate.parse("2010-10-10")
@@ -301,7 +304,7 @@ class TrusteeTransformationServiceSpec extends FreeSpec with MockitoSugar with S
       val transformationService = mock[TransformationService]
       val service = new TrusteeTransformationService(transformationService, LocalDateServiceStub)
 
-      when(transformationService.getTransformedData(any(), any())).thenReturn(Future.successful(processedResponse))
+      when(transformationService.getTransformedData(any(), any())(any())).thenReturn(Future.successful(processedResponse))
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
       val result = service.addAmendTrusteeTransformer(

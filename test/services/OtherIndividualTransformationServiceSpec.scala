@@ -30,12 +30,15 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
 import transformers._
 import transformers.remove.RemoveOtherIndividual
+import uk.gov.hmrc.http.HeaderCarrier
 import utils.{JsonFixtures, JsonUtils}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class OtherIndividualTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonFixtures {
+
+  implicit val hc = HeaderCarrier()
 
   private implicit val pc: PatienceConfig =
     PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
@@ -72,7 +75,7 @@ class OtherIndividualTransformationServiceSpec extends FreeSpec with MockitoSuga
 
         when(transformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
-        when(transformationService.getTransformedData(any(), any()))
+        when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(
             buildInputJson(Seq(otherIndividual)),
             ResponseHeader("status", "formBundlNo")
@@ -124,7 +127,7 @@ class OtherIndividualTransformationServiceSpec extends FreeSpec with MockitoSuga
 
         val desResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-        when(transformationService.getTransformedData(any(), any()))
+        when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(
             Future.successful(
               TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))

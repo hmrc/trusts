@@ -39,6 +39,7 @@ POST        /submission-drafts/:draftId/set/trustDetails      controllers.Submis
 # Used by register-settlors-frontend
 GET         /submission-drafts/:draftId/settlors              controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "settlors")
 POST        /submission-drafts/:draftId/set/settlors          controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "settlors")
+POST        /submission-drafts/:draftId/set/beneficiaries/remove-role-in-company        controllers.SubmissionDraftController.removeRoleInCompany(draftId: String)
 
 GET         /submission-drafts/:draftId/when-trust-setup       controllers.SubmissionDraftController.getWhenTrustSetup(draftId: String)
 
