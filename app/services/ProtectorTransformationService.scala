@@ -33,13 +33,13 @@ class ProtectorTransformationService @Inject()(transformationService: Transforma
                                                localDateService: LocalDateService
                                               )(implicit ec:ExecutionContext) extends JsonOperations {
 
-  def removeProtector(utr: String, internalId: String, removeProtector: RemoveProtector)(implicit hc: HeaderCarrier): Future[Success.type] = {
+  def removeProtector(identifier: String, internalId: String, removeProtector: RemoveProtector)(implicit hc: HeaderCarrier): Future[Success.type] = {
 
-    getTransformedTrustJson(utr, internalId)
+    getTransformedTrustJson(identifier, internalId)
       .map(findProtectorJson(_, removeProtector.`type`, removeProtector.index))
       .flatMap(Future.fromTry)
       .flatMap { protectorJson =>
-        transformationService.addNewTransform (utr, internalId,
+        transformationService.addNewTransform (identifier, internalId,
           RemoveProtectorsTransform(
             removeProtector.index,
             protectorJson,
@@ -50,13 +50,13 @@ class ProtectorTransformationService @Inject()(transformationService: Transforma
       }
   }
 
-  def addBusinessProtectorTransformer(utr: String, internalId: String, newProtectorCompany: ProtectorCompany): Future[Boolean] = {
-    transformationService.addNewTransform(utr, internalId, AddCompanyProtectorTransform(newProtectorCompany))
+  def addBusinessProtectorTransformer(identifier: String, internalId: String, newProtectorCompany: ProtectorCompany): Future[Boolean] = {
+    transformationService.addNewTransform(identifier, internalId, AddCompanyProtectorTransform(newProtectorCompany))
   }
 
-  private def getTransformedTrustJson(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[JsObject] = {
+  private def getTransformedTrustJson(identifier: String, internalId: String)(implicit hc: HeaderCarrier): Future[JsObject] = {
 
-    transformationService.getTransformedData(utr, internalId).flatMap {
+    transformationService.getTransformedData(identifier, internalId).flatMap {
       case TrustProcessedResponse(json, _) => Future.successful(json.as[JsObject])
       case _ => Future.failed(InternalServerErrorException("Trust is not in processed state."))
     }
@@ -70,38 +70,38 @@ class ProtectorTransformationService @Inject()(transformationService: Transforma
     )
   }
 
-  def addIndividualProtectorTransformer(utr: String, internalId: String, newProtector: Protector): Future[Success.type] = {
-    transformationService.addNewTransform(utr, internalId, AddIndividualProtectorTransform(newProtector)).map(_ => Success)
+  def addIndividualProtectorTransformer(identifier: String, internalId: String, newProtector: Protector): Future[Success.type] = {
+    transformationService.addNewTransform(identifier, internalId, AddIndividualProtectorTransform(newProtector)).map(_ => Success)
   }
 
 
-  def amendIndividualProtectorTransformer(utr: String,
+  def amendIndividualProtectorTransformer(identifier: String,
                                           index: Int,
                                           internalId: String,
                                           amended: Protector)(implicit hc: HeaderCarrier): Future[Success.type] = {
-    getTransformedTrustJson(utr, internalId)
+    getTransformedTrustJson(identifier, internalId)
       .map(findProtectorJson(_, "protector", index))
       .flatMap(Future.fromTry)
       .flatMap { original =>
         transformationService.addNewTransform(
-          utr,
+          identifier,
           internalId,
           AmendIndividualProtectorTransform(index, Json.toJson(amended), original, localDateService.now)
         ).map(_ => Success)
       }
   }
 
-  def amendBusinessProtectorTransformer(utr: String,
-                                         index: Int,
-                                         internalId: String,
-                                         amended: ProtectorCompany)(implicit hc: HeaderCarrier): Future[Success.type] = {
-    getTransformedTrustJson(utr, internalId)
+  def amendBusinessProtectorTransformer(identifier: String,
+                                        index: Int,
+                                        internalId: String,
+                                        amended: ProtectorCompany)(implicit hc: HeaderCarrier): Future[Success.type] = {
+    getTransformedTrustJson(identifier, internalId)
       .map(findProtectorJson(_, "protectorCompany", index))
       .flatMap(Future.fromTry)
       .flatMap { protectorJson =>
 
         transformationService.addNewTransform(
-          utr,
+          identifier,
           internalId,
           AmendBusinessProtectorTransform(index, Json.toJson(amended), protectorJson, localDateService.now)
         ).map(_ => Success)

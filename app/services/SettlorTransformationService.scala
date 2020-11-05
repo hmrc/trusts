@@ -36,13 +36,13 @@ class SettlorTransformationService @Inject()(
                                             (implicit ec:ExecutionContext)
   extends JsonOperations {
 
-  def removeSettlor(utr: String, internalId: String, removeSettlor: RemoveSettlor)(implicit hc: HeaderCarrier): Future[Success.type] = {
+  def removeSettlor(identifier: String, internalId: String, removeSettlor: RemoveSettlor)(implicit hc: HeaderCarrier): Future[Success.type] = {
 
-    getTransformedTrustJson(utr, internalId)
+    getTransformedTrustJson(identifier, internalId)
       .map(findSettlorJson(_, removeSettlor.`type`, removeSettlor.index))
       .flatMap(Future.fromTry)
       .flatMap { settlorJson =>
-        transformationService.addNewTransform (utr, internalId,
+        transformationService.addNewTransform (identifier, internalId,
           RemoveSettlorsTransform(
             removeSettlor.index,
             settlorJson,
@@ -53,9 +53,9 @@ class SettlorTransformationService @Inject()(
       }
   }
 
-  private def getTransformedTrustJson(utr: String, internalId: String)(implicit hc: HeaderCarrier) = {
+  private def getTransformedTrustJson(identifier: String, internalId: String)(implicit hc: HeaderCarrier) = {
 
-    transformationService.getTransformedData(utr, internalId).flatMap {
+    transformationService.getTransformedData(identifier, internalId).flatMap {
       case TrustProcessedResponse(json, _) => Future.successful(json.as[JsObject])
       case _ => Future.failed(InternalServerErrorException("Trust is not in processed state."))
     }
@@ -77,58 +77,58 @@ class SettlorTransformationService @Inject()(
     )
   }
 
-  def amendIndividualSettlorTransformer(utr: String,
+  def amendIndividualSettlorTransformer(identifier: String,
                                         index: Int,
                                         internalId: String,
                                         settlor: Settlor)(implicit hc: HeaderCarrier): Future[Success.type] =
   {
-    getTransformedTrustJson(utr, internalId)
+    getTransformedTrustJson(identifier, internalId)
     .map(findSettlorJson(_, "settlor", index))
       .flatMap(Future.fromTry)
       .flatMap { original =>
         transformationService.addNewTransform(
-          utr,
+          identifier,
           internalId,
           AmendIndividualSettlorTransform(index, Json.toJson(settlor), original, localDateService.now)
         ).map(_ => Success)
       }
   }
 
-  def addIndividualSettlorTransformer(utr: String, internalId: String, newSettlor: Settlor): Future[Success.type] = {
-    transformationService.addNewTransform(utr, internalId, AddIndividualSettlorTransform(newSettlor)).map(_ => Success)
+  def addIndividualSettlorTransformer(identifier: String, internalId: String, newSettlor: Settlor): Future[Success.type] = {
+    transformationService.addNewTransform(identifier, internalId, AddIndividualSettlorTransform(newSettlor)).map(_ => Success)
   }
 
-  def addBusinessSettlorTransformer(utr: String, internalId: String, newCompanySettlor: SettlorCompany): Future[Success.type] = {
-    transformationService.addNewTransform(utr, internalId, AddBusinessSettlorTransform(newCompanySettlor)).map(_ => Success)
+  def addBusinessSettlorTransformer(identifier: String, internalId: String, newCompanySettlor: SettlorCompany): Future[Success.type] = {
+    transformationService.addNewTransform(identifier, internalId, AddBusinessSettlorTransform(newCompanySettlor)).map(_ => Success)
   }
 
-  def amendBusinessSettlorTransformer(utr: String,
-                                        index: Int,
-                                        internalId: String,
-                                        settlor: SettlorCompany)(implicit hc: HeaderCarrier): Future[Success.type] =
+  def amendBusinessSettlorTransformer(identifier: String,
+                                      index: Int,
+                                      internalId: String,
+                                      settlor: SettlorCompany)(implicit hc: HeaderCarrier): Future[Success.type] =
   {
-    getTransformedTrustJson(utr, internalId)
+    getTransformedTrustJson(identifier, internalId)
       .map(findSettlorJson(_, "settlorCompany", index))
       .flatMap(Future.fromTry)
       .flatMap { original =>
         transformationService.addNewTransform(
-          utr,
+          identifier,
           internalId,
           AmendBusinessSettlorTransform(index, Json.toJson(settlor), original, localDateService.now)
         ).map(_ => Success)
       }
   }
 
-  def amendDeceasedSettlor(utr: String,
+  def amendDeceasedSettlor(identifier: String,
                            internalId : String,
                            deceased: AmendDeceasedSettlor)(implicit hc: HeaderCarrier): Future[Success.type] =
     {
-      getTransformedTrustJson(utr, internalId)
+      getTransformedTrustJson(identifier, internalId)
         .map(getDeceasedJson)
         .flatMap(Future.fromTry)
         .flatMap { original =>
           transformationService.addNewTransform(
-            utr,
+            identifier,
             internalId,
             AmendDeceasedSettlorTransform(Json.toJson(deceased), original)
           ).map(_ => Success)

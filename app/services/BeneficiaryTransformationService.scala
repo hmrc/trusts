@@ -36,13 +36,13 @@ class BeneficiaryTransformationService @Inject()(
                                                 (implicit ec:ExecutionContext)
   extends JsonOperations {
 
-  def removeBeneficiary(utr: String, internalId: String, removeBeneficiary: RemoveBeneficiary)(implicit hc: HeaderCarrier): Future[Success.type] = {
+  def removeBeneficiary(identifier: String, internalId: String, removeBeneficiary: RemoveBeneficiary)(implicit hc: HeaderCarrier): Future[Success.type] = {
 
-    getTransformedTrustJson(utr, internalId)
+    getTransformedTrustJson(identifier, internalId)
       .map(findBeneficiaryJson(_, removeBeneficiary.`type`, removeBeneficiary.index))
       .flatMap(Future.fromTry)
       .flatMap {beneficiaryJson =>
-        transformationService.addNewTransform (utr, internalId,
+        transformationService.addNewTransform (identifier, internalId,
             RemoveBeneficiariesTransform(
               removeBeneficiary.index,
               beneficiaryJson,
@@ -53,9 +53,9 @@ class BeneficiaryTransformationService @Inject()(
       }
   }
 
-  private def getTransformedTrustJson(utr: String, internalId: String)(implicit hc: HeaderCarrier) = {
+  private def getTransformedTrustJson(identifier: String, internalId: String)(implicit hc: HeaderCarrier) = {
 
-    transformationService.getTransformedData(utr, internalId).flatMap {
+    transformationService.getTransformedData(identifier, internalId).flatMap {
       case TrustProcessedResponse(json, _) => Future.successful(json.as[JsObject])
       case _ => Future.failed(InternalServerErrorException("Trust is not in processed state."))
     }
@@ -69,141 +69,141 @@ class BeneficiaryTransformationService @Inject()(
     )
   }
 
-  def amendUnidentifiedBeneficiaryTransformer(utr: String, index: Int, internalId: String, description: String)(implicit hc: HeaderCarrier): Future[Success.type] = {
-    getTransformedTrustJson(utr, internalId)
+  def amendUnidentifiedBeneficiaryTransformer(identifier: String, index: Int, internalId: String, description: String)(implicit hc: HeaderCarrier): Future[Success.type] = {
+    getTransformedTrustJson(identifier, internalId)
     .map(findBeneficiaryJson(_, "unidentified", index))
       .flatMap(Future.fromTry)
       .flatMap { beneficiaryJson =>
 
-      transformationService.addNewTransform(utr, internalId, AmendUnidentifiedBeneficiaryTransform(index, description, beneficiaryJson, localDateService.now))
+      transformationService.addNewTransform(identifier, internalId, AmendUnidentifiedBeneficiaryTransform(index, description, beneficiaryJson, localDateService.now))
         .map(_ => Success)
       }
   }
 
-  def addUnidentifiedBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: UnidentifiedType): Future[Boolean] = {
-    transformationService.addNewTransform(utr, internalId, AddUnidentifiedBeneficiaryTransform(newBeneficiary))
+  def addUnidentifiedBeneficiaryTransformer(identifier: String, internalId: String, newBeneficiary: UnidentifiedType): Future[Boolean] = {
+    transformationService.addNewTransform(identifier, internalId, AddUnidentifiedBeneficiaryTransform(newBeneficiary))
   }
 
-  def amendIndividualBeneficiaryTransformer(utr: String,
+  def amendIndividualBeneficiaryTransformer(identifier: String,
                                             index: Int,
                                             internalId: String,
                                             amend: IndividualDetailsType)(implicit hc: HeaderCarrier): Future[Success.type] = {
-    getTransformedTrustJson(utr, internalId)
+    getTransformedTrustJson(identifier, internalId)
       .map(findBeneficiaryJson(_, "individualDetails", index))
       .flatMap(Future.fromTry)
       .flatMap { beneficiaryJson =>
 
         transformationService.addNewTransform(
-          utr,
+          identifier,
           internalId,
           AmendIndividualBeneficiaryTransform(index, Json.toJson(amend), beneficiaryJson, localDateService.now)
         ).map(_ => Success)
       }
   }
 
-  def addIndividualBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: IndividualDetailsType): Future[Boolean] = {
-    transformationService.addNewTransform(utr, internalId, AddIndividualBeneficiaryTransform(newBeneficiary))
+  def addIndividualBeneficiaryTransformer(identifier: String, internalId: String, newBeneficiary: IndividualDetailsType): Future[Boolean] = {
+    transformationService.addNewTransform(identifier, internalId, AddIndividualBeneficiaryTransform(newBeneficiary))
   }
 
-  def addCharityBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: BeneficiaryCharityType): Future[Boolean] = {
-    transformationService.addNewTransform(utr, internalId, AddCharityBeneficiaryTransform(newBeneficiary))
+  def addCharityBeneficiaryTransformer(identifier: String, internalId: String, newBeneficiary: BeneficiaryCharityType): Future[Boolean] = {
+    transformationService.addNewTransform(identifier, internalId, AddCharityBeneficiaryTransform(newBeneficiary))
   }
 
-  def amendCharityBeneficiaryTransformer(utr: String,
+  def amendCharityBeneficiaryTransformer(identifier: String,
                                          index: Int,
                                          internalId: String,
                                          amended: BeneficiaryCharityType)(implicit hc: HeaderCarrier): Future[Success.type] = {
-    getTransformedTrustJson(utr, internalId)
+    getTransformedTrustJson(identifier, internalId)
       .map(findBeneficiaryJson(_, "charity", index))
       .flatMap(Future.fromTry)
       .flatMap { beneficiaryJson =>
 
         transformationService.addNewTransform(
-          utr,
+          identifier,
           internalId,
           AmendCharityBeneficiaryTransform(index, Json.toJson(amended), beneficiaryJson, localDateService.now)
         ).map(_ => Success)
       }
   }
 
-  def addOtherBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: OtherType): Future[Boolean] = {
-    transformationService.addNewTransform(utr, internalId, AddOtherBeneficiaryTransform(newBeneficiary))
+  def addOtherBeneficiaryTransformer(identifier: String, internalId: String, newBeneficiary: OtherType): Future[Boolean] = {
+    transformationService.addNewTransform(identifier, internalId, AddOtherBeneficiaryTransform(newBeneficiary))
   }
 
-  def amendOtherBeneficiaryTransformer(utr: String,
-                                         index: Int,
-                                         internalId: String,
-                                         amended: OtherType)(implicit hc: HeaderCarrier): Future[Success.type] = {
-    getTransformedTrustJson(utr, internalId)
+  def amendOtherBeneficiaryTransformer(identifier: String,
+                                       index: Int,
+                                       internalId: String,
+                                       amended: OtherType)(implicit hc: HeaderCarrier): Future[Success.type] = {
+    getTransformedTrustJson(identifier, internalId)
       .map(findBeneficiaryJson(_, "other", index))
       .flatMap(Future.fromTry)
       .flatMap { beneficiaryJson =>
 
         transformationService.addNewTransform(
-          utr,
+          identifier,
           internalId,
           AmendOtherBeneficiaryTransform(index, Json.toJson(amended), beneficiaryJson, localDateService.now)
         ).map(_ => Success)
       }
   }
 
-  def addCompanyBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: BeneficiaryCompanyType): Future[Boolean] = {
-    transformationService.addNewTransform(utr, internalId, AddCompanyBeneficiaryTransform(newBeneficiary))
+  def addCompanyBeneficiaryTransformer(identifier: String, internalId: String, newBeneficiary: BeneficiaryCompanyType): Future[Boolean] = {
+    transformationService.addNewTransform(identifier, internalId, AddCompanyBeneficiaryTransform(newBeneficiary))
   }
 
-  def addTrustBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: BeneficiaryTrustType): Future[Boolean] = {
-    transformationService.addNewTransform(utr, internalId, AddTrustBeneficiaryTransform(newBeneficiary))
+  def addTrustBeneficiaryTransformer(identifier: String, internalId: String, newBeneficiary: BeneficiaryTrustType): Future[Boolean] = {
+    transformationService.addNewTransform(identifier, internalId, AddTrustBeneficiaryTransform(newBeneficiary))
   }
 
-  def amendCompanyBeneficiaryTransformer(utr: String,
-                                       index: Int,
-                                       internalId: String,
-                                       amended: BeneficiaryCompanyType)(implicit hc: HeaderCarrier): Future[Success.type] = {
-    getTransformedTrustJson(utr, internalId)
+  def amendCompanyBeneficiaryTransformer(identifier: String,
+                                         index: Int,
+                                         internalId: String,
+                                         amended: BeneficiaryCompanyType)(implicit hc: HeaderCarrier): Future[Success.type] = {
+    getTransformedTrustJson(identifier, internalId)
       .map(findBeneficiaryJson(_, "company", index))
       .flatMap(Future.fromTry)
       .flatMap { beneficiaryJson =>
 
         transformationService.addNewTransform(
-          utr,
+          identifier,
           internalId,
           AmendCompanyBeneficiaryTransform(index, Json.toJson(amended), beneficiaryJson, localDateService.now)
         ).map(_ => Success)
       }
   }
 
-  def amendTrustBeneficiaryTransformer(utr: String,
-                                         index: Int,
-                                         internalId: String,
-                                         amended: BeneficiaryTrustType)(implicit hc: HeaderCarrier): Future[Success.type] = {
-    getTransformedTrustJson(utr, internalId)
+  def amendTrustBeneficiaryTransformer(identifier: String,
+                                       index: Int,
+                                       internalId: String,
+                                       amended: BeneficiaryTrustType)(implicit hc: HeaderCarrier): Future[Success.type] = {
+    getTransformedTrustJson(identifier, internalId)
       .map(findBeneficiaryJson(_, "trust", index))
       .flatMap(Future.fromTry)
       .flatMap { beneficiaryJson =>
 
         transformationService.addNewTransform(
-          utr,
+          identifier,
           internalId,
           AmendTrustBeneficiaryTransform(index, Json.toJson(amended), beneficiaryJson, localDateService.now)
         ).map(_ => Success)
       }
   }
 
-  def addLargeBeneficiaryTransformer(utr: String, internalId: String, newBeneficiary: LargeType): Future[Boolean] = {
-    transformationService.addNewTransform(utr, internalId, AddLargeBeneficiaryTransform(newBeneficiary))
+  def addLargeBeneficiaryTransformer(identifier: String, internalId: String, newBeneficiary: LargeType): Future[Boolean] = {
+    transformationService.addNewTransform(identifier, internalId, AddLargeBeneficiaryTransform(newBeneficiary))
   }
 
-  def amendLargeBeneficiaryTransformer(utr: String,
+  def amendLargeBeneficiaryTransformer(identifier: String,
                                        index: Int,
                                        internalId: String,
                                        amended: LargeType)(implicit hc: HeaderCarrier): Future[Success.type] = {
-    getTransformedTrustJson(utr, internalId)
+    getTransformedTrustJson(identifier, internalId)
       .map(findBeneficiaryJson(_, "large", index))
       .flatMap(Future.fromTry)
       .flatMap { beneficiaryJson =>
 
         transformationService.addNewTransform(
-          utr,
+          identifier,
           internalId,
           AmendLargeBeneficiaryTransform(index, Json.toJson(amended), beneficiaryJson, localDateService.now)
         ).map(_ => Success)

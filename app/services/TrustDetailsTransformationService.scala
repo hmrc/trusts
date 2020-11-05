@@ -25,49 +25,49 @@ import scala.concurrent.Future
 
 class TrustDetailsTransformationService @Inject()(transformationService: TransformationService) {
 
-  def setExpressTransformer(utr: String, internalId: String, express: Boolean): Future[Success.type] = {
+  def setExpressTransformer(identifier: String, internalId: String, express: Boolean): Future[Success.type] = {
     transformationService.addNewTransform(
-      utr,
+      identifier,
       internalId,
       SetExpressTransform(express)
     ).map(_ => Success)
   }
 
-  def setResidentTransformer(utr: String, internalId: String, resident: Boolean): Future[Success.type] = {
+  def setResidentTransformer(identifier: String, internalId: String, resident: Boolean): Future[Success.type] = {
     transformationService.addNewTransform(
-      utr,
+      identifier,
       internalId,
       SetResidentTransform(resident)
     ).map(_ => Success)
   }
 
-  def setTaxableTransformer(utr: String, internalId: String, taxable: Boolean): Future[Success.type] = {
+  def setTaxableTransformer(identifier: String, internalId: String, taxable: Boolean): Future[Success.type] = {
     transformationService.addNewTransform(
-      utr,
+      identifier,
       internalId,
       SetTaxableTransform(taxable)
     ).map(_ => Success)
   }
 
-  def setPropertyTransformer(utr: String, internalId: String, property: Boolean): Future[Success.type] = {
+  def setPropertyTransformer(identifier: String, internalId: String, property: Boolean): Future[Success.type] = {
     transformationService.addNewTransform(
-      utr,
+      identifier,
       internalId,
       SetPropertyTransform(property)
     ).map(_ => Success)
   }
 
-  def setRecordedTransformer(utr: String, internalId: String, recorded: Boolean): Future[Success.type] = {
+  def setRecordedTransformer(identifier: String, internalId: String, recorded: Boolean): Future[Success.type] = {
     transformationService.addNewTransform(
-      utr,
+      identifier,
       internalId,
       SetRecordedTransform(recorded)
     ).map(_ => Success)
   }
 
-  def setUKRelationTransformer(utr: String, internalId: String, ukRelation: Boolean): Future[Success.type] = {
+  def setUKRelationTransformer(identifier: String, internalId: String, ukRelation: Boolean): Future[Success.type] = {
     transformationService.addNewTransform(
-      utr,
+      identifier,
       internalId,
       SetUKRelationTransform(ukRelation)
     ).map(_ => Success)
