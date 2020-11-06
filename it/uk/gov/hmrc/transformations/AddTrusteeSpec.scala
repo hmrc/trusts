@@ -21,8 +21,9 @@ import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.{AsyncFreeSpec, MustMatchers}
+import org.scalatest.{Assertion, AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsArray, JsValue, Json}
 import play.api.test.Helpers._
@@ -52,9 +53,13 @@ class AddTrusteeSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar w
         .build()
 
     "must return amended data in a subsequent 'get' call with provisional flags" in assertMongoTest(application) { application =>
+      runTest("5174384721", application)
+      runTest("0123456789ABCDE", application)
+    }
 
+    def runTest(identifier: String, application: Application): Assertion = {
       // Ensure passes schema
-      val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+      val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(result) mustBe OK
 
       val addTrusteeJson = Json.parse(
@@ -68,7 +73,7 @@ class AddTrusteeSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar w
           |}
           |""".stripMargin)
 
-      val amendRequest = FakeRequest(POST, "/trusts/trustees/add/5174384721")
+      val amendRequest = FakeRequest(POST, s"/trusts/trustees/add/$identifier")
         .withBody(addTrusteeJson)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -76,7 +81,7 @@ class AddTrusteeSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar w
       status(addedResponse) mustBe OK
 
       // ensure they're in the trust response with the provisional flag
-      val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed/trustees")).get
+      val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed/trustees")).get
       status(newResult) mustBe OK
 
       val trustees = (contentAsJson(newResult) \ "trustees").as[JsArray]

@@ -18,7 +18,7 @@ package uk.gov.hmrc.transformations
 
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.{AsyncFreeSpec, MustMatchers}
+import org.scalatest.{Assertion, AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.libs.json.JsValue
@@ -29,6 +29,7 @@ import uk.gov.hmrc.itbase.IntegrationTestBase
 import connector.DesConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
+import play.api.Application
 import utils.JsonUtils
 
 import scala.concurrent.Future
@@ -69,19 +70,24 @@ class AddBusinessSettlorSpec extends AsyncFreeSpec with MustMatchers with Mockit
       )
       .build()
 
-    "must return add data in a subsequent 'get' call" in assertMongoTest(application) { application =>
-      val result = route(application, FakeRequest(GET, "/trusts/5465416546/transformed")).get
+    "must return add data in a subsequent 'get' call with a UTR" in assertMongoTest(application) { application =>
+      runTest("5465416546", application)
+      runTest("0123456789ABCDE", application)
+    }
+
+    def runTest(identifier: String, application: Application): Assertion = {
+      val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(result) mustBe OK
       contentAsJson(result) mustBe expectedInitialGetJson
 
-      val addRequest = FakeRequest(POST, "/trusts/settlors/add-business/5465416546")
+      val addRequest = FakeRequest(POST, s"/trusts/settlors/add-business/$identifier")
         .withBody(newCompanySettlorJson)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val addResult = route(application, addRequest).get
       status(addResult) mustBe OK
 
-      val newResult = route(application, FakeRequest(GET, "/trusts/5465416546/transformed")).get
+      val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(newResult) mustBe OK
       contentAsJson(newResult) mustBe expectedGetAfterAddSettlorJson
     }

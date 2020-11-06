@@ -21,8 +21,9 @@ import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.{AsyncFreeSpec, MustMatchers}
+import org.scalatest.{Assertion, AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsArray, JsValue, Json}
 import play.api.test.Helpers._
@@ -52,8 +53,12 @@ class RemoveOtherIndividualSpec extends AsyncFreeSpec with MustMatchers with Moc
         .build()
 
     "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
+      runTest("5174384721", application)
+      runTest("0123456789ABCDE", application)
+    }
 
-      val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+    def runTest(identifier: String, application: Application): Assertion = {
+      val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(result) mustBe OK
 
       val removeOtherIndividualAtIndex = Json.parse(
@@ -64,14 +69,14 @@ class RemoveOtherIndividualSpec extends AsyncFreeSpec with MustMatchers with Moc
           |}
           |""".stripMargin)
 
-      val removeOtherIndividualRequest = FakeRequest(PUT, "/trusts/other-individuals/5174384721/remove")
+      val removeOtherIndividualRequest = FakeRequest(PUT, s"/trusts/other-individuals/$identifier/remove")
         .withBody(Json.toJson(removeOtherIndividualAtIndex))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val removeOtherIndividualResult = route(application, removeOtherIndividualRequest).get
       status(removeOtherIndividualResult) mustBe OK
 
-      val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed/other-individuals")).get
+      val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed/other-individuals")).get
       status(newResult) mustBe OK
 
       val otherIndividuals = (contentAsJson(newResult) \ "naturalPerson").as[JsArray]

@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.{AsyncFreeSpec, MustMatchers}
+import org.scalatest.{Assertion, AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
@@ -33,6 +33,7 @@ import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import models.variation.{IdentificationType, LeadTrusteeIndType}
 import models.{AddressType, NameType}
+import play.api.Application
 import utils.JsonUtils
 
 import scala.concurrent.Future
@@ -83,19 +84,23 @@ class PromoteLeadTrusteeSpec extends AsyncFreeSpec with MustMatchers with Mockit
         .build()
 
     "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
+      runTest("5174384721", application)
+      runTest("0123456789ABCDE", application)
+    }
 
-      val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+    def runTest(identifier: String, application: Application): Assertion = {
+      val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(result) mustBe OK
       contentAsJson(result) mustBe expectedInitialGetJson
 
-      val promoteRequest = FakeRequest(POST, "/trusts/trustees/promote/5174384721/0")
+      val promoteRequest = FakeRequest(POST, s"/trusts/trustees/promote/$identifier/0")
         .withBody(Json.toJson(newTrusteeIndInfo))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val promoteResult = route(application, promoteRequest).get
       status(promoteResult) mustBe OK
 
-      val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+      val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(newResult) mustBe OK
       contentAsJson(newResult) mustBe expectedGetAfterPromoteTrusteeJson
 
