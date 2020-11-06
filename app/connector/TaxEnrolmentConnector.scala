@@ -23,29 +23,45 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.HttpClient
 import config.AppConfig
 import models.tax_enrolments.{TaxEnrolmentSubscription, TaxEnrolmentSuscriberResponse}
+import services.TrustsStoreService
 import utils.Constants._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient, config: AppConfig) extends TaxEnrolmentConnector {
+class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
+                                          config: AppConfig,
+                                          trustsStoreService: TrustsStoreService
+                                         ) extends TaxEnrolmentConnector {
 
   def headers =
     Seq(
       CONTENT_TYPE -> CONTENT_TYPE_JSON
     )
 
-  override  def enrolSubscriber(subscriptionId: String)(implicit hc: HeaderCarrier) :  Future[TaxEnrolmentSuscriberResponse] = {
+  def getServiceName()(implicit hc: HeaderCarrier): Future[String] = trustsStoreService.is5mldEnabled.map {
+    case true => config.taxEnrolmentsPayloadBodyServiceName5MLD
+    case _ => config.taxEnrolmentsPayloadBodyServiceName
+  }
+
+  def getResponse(subscriptionId: String, serviceName: String)(implicit hc: HeaderCarrier) :  Future[TaxEnrolmentSuscriberResponse] = {
     val taxEnrolmentsEndpoint = s"${config.taxEnrolmentsUrl}/tax-enrolments/subscriptions/$subscriptionId/subscriber"
-    val taxEnolmentHeaders = hc.withExtraHeaders(headers: _*)
+    val taxEnrolmentHeaders = hc.withExtraHeaders(headers: _*)
 
     val taxEnrolmentSubscriptionRequest = TaxEnrolmentSubscription(
-      serviceName = config.taxEnrolmentsPayloadBodyServiceName,
+      serviceName = serviceName,
       callback = config.taxEnrolmentsPayloadBodyCallback,
       etmpId = subscriptionId)
-
     val response = http.PUT[JsValue, TaxEnrolmentSuscriberResponse](taxEnrolmentsEndpoint, Json.toJson(taxEnrolmentSubscriptionRequest))
-    (Writes.JsValueWrites ,TaxEnrolmentSuscriberResponse.httpReads,taxEnolmentHeaders.headers, global)
+    (Writes.JsValueWrites ,TaxEnrolmentSuscriberResponse.httpReads,taxEnrolmentHeaders.headers, global)
+    response
+  }
+
+  override  def enrolSubscriber(subscriptionId: String)(implicit hc: HeaderCarrier) :  Future[TaxEnrolmentSuscriberResponse] = {
+    for {
+      serviceName <- getServiceName
+      response <- getResponse(subscriptionId, serviceName)
+    } yield
     response
   }
 
