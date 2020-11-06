@@ -53,6 +53,8 @@
       "trustUKProperty": true,
       "lawCountry": "DE",
       "administrationCountry": "DE",
+      "trustRecorded": false,
+      "trustUKRelation": false,
       "residentialStatus": {
         "nonUK": {
           "sch5atcgga92": true,

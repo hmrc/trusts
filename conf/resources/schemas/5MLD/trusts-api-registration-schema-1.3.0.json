@@ -961,6 +961,12 @@
         "administrationCountry": {
           "$ref": "#/definitions/countryType"
         },
+        "trustRecorded": {
+          "$ref": "#/definitions/checkElement"
+        },
+        "trustUKRelation": {
+          "$ref": "#/definitions/checkElement"
+        },
         "residentialStatus": {
           "type": "object",
           "oneOf": [
@@ -1055,7 +1061,9 @@
         "startDate",
         "trustTaxable",
         "expressTrust",
-        "trustUKResident"
+        "trustUKResident",
+        "trustRecorded",
+        "trustUKRelation"
       ],
       "additionalProperties": false
     },
