@@ -19,15 +19,33 @@ package connectors
 import connector.TaxEnrolmentConnector
 import exceptions.{BadRequestException, InternalServerErrorException}
 import models.tax_enrolments.TaxEnrolmentSuccess
+import org.mockito.Matchers.any
+import org.mockito.Mockito.when
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
+import services.TrustsStoreService
+import uk.gov.hmrc.http.HeaderCarrier
+
+import scala.concurrent.{ExecutionContext, Future}
 
 class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
   lazy val connector: TaxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
+  private val mockTrustsStoreService = mock[TrustsStoreService]
+
+  override def applicationBuilder(): GuiceApplicationBuilder = {
+    super.applicationBuilder()
+      .overrides(
+        bind[TrustsStoreService].toInstance(mockTrustsStoreService)
+      )
+  }
 
   ".enrolSubscriber" should {
 
     "return Success " when {
       "tax enrolments succesfully subscribed to provided subscription id" in {
+
+        when(mockTrustsStoreService.is5mldEnabled()(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(false))
 
         stubForPut(server, "/tax-enrolments/subscriptions/123456789/subscriber", 204)
 
@@ -42,6 +60,8 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
     "return BadRequestException " when {
       "tax enrolments returns bad request " in {
 
+        when(mockTrustsStoreService.is5mldEnabled()(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(false))
+
         stubForPut(server, "/tax-enrolments/subscriptions/987654321/subscriber", 400)
 
         val futureResult = connector.enrolSubscriber("987654321")
@@ -54,6 +74,8 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
     "return InternalServerErrorException " when {
       "tax enrolments returns internal server error " in {
+
+        when(mockTrustsStoreService.is5mldEnabled()(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(false))
 
         stubForPut(server, "/tax-enrolments/subscriptions/987654321/subscriber", 500)
 

@@ -40,6 +40,9 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
   val taxEnrolmentsPayloadBodyServiceName : String =
     configuration.get[String]("microservice.services.tax-enrolments.serviceName")
 
+  val taxEnrolmentsPayloadBodyServiceName5MLD: String =
+    configuration.get[String]("microservice.services.tax-enrolments.serviceName5MLD")
+
   val taxEnrolmentsPayloadBodyCallback : String =
     configuration.get[String]("microservice.services.tax-enrolments.callback")
 
