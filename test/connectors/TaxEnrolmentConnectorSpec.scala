@@ -60,6 +60,8 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
     "return BadRequestException " when {
       "tax enrolments returns bad request " in {
 
+        when(mockTrustsStoreService.is5mldEnabled()(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(false))
+
         stubForPut(server, "/tax-enrolments/subscriptions/987654321/subscriber", 400)
 
         val futureResult = connector.enrolSubscriber("987654321")
@@ -72,6 +74,8 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
     "return InternalServerErrorException " when {
       "tax enrolments returns internal server error " in {
+
+        when(mockTrustsStoreService.is5mldEnabled()(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(false))
 
         stubForPut(server, "/tax-enrolments/subscriptions/987654321/subscriber", 500)
 
