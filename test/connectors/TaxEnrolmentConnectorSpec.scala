@@ -21,6 +21,8 @@ import exceptions.{BadRequestException, InternalServerErrorException}
 import models.tax_enrolments.TaxEnrolmentSuccess
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import services.TrustsStoreService
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -30,6 +32,13 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
   lazy val connector: TaxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
   private val mockTrustsStoreService = mock[TrustsStoreService]
+
+  override def applicationBuilder(): GuiceApplicationBuilder = {
+    super.applicationBuilder()
+      .overrides(
+        bind[TrustsStoreService].toInstance(mockTrustsStoreService)
+      )
+  }
 
   ".enrolSubscriber" should {
 
