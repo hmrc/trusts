@@ -21,8 +21,9 @@ import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.{AsyncFreeSpec, MustMatchers}
+import org.scalatest.{Assertion, AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsBoolean, JsValue}
 import play.api.test.Helpers._
@@ -53,21 +54,25 @@ class SetRelationSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar 
         .build()
 
     "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
+      runTest("5174384721", application)
+      runTest("0123456789ABCDE", application)
+    }
 
+    def runTest(identifier: String, application: Application): Assertion = {
       // Ensure passes schema
-      val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+      val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(result) mustBe OK
 
       val setRelationProperty = JsBoolean(true)
 
-      val amendRequest = FakeRequest(PUT, "/trusts/5174384721/trust-details/uk-relation")
+      val amendRequest = FakeRequest(PUT, s"/trusts/$identifier/trust-details/uk-relation")
         .withBody(setRelationProperty)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val addedResponse = route(application, amendRequest).get
       status(addedResponse) mustBe OK
 
-      val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/trust-details")).get
+      val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/trust-details")).get
       status(newResult) mustBe OK
 
       val trustees = (contentAsJson(newResult) \ "trustUKRelation").as[JsBoolean]
