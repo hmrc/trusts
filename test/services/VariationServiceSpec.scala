@@ -29,7 +29,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{MustMatchers, WordSpec}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.{JsSuccess, JsValue, Json}
+import play.api.libs.json.{JsString, JsSuccess, JsValue, Json}
 import transformers.DeclarationTransformer
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.JsonFixtures
@@ -145,12 +145,34 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
     val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
 
     whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { variationResponse => {
+
       variationResponse mustBe VariationResponse("TVN34567890")
-      verify(transformationService, times( 1)).applyDeclarationTransformations(equalTo(utr), equalTo(internalId), equalTo(trustInfoJson))(any[HeaderCarrier])
-      verify(transformer, times(1)).transform(equalTo(transformedResponse), equalTo(response.getTrust), equalTo(declarationForApi), any(), equalTo(true))
+
+      verify(transformationService, times( 1)).applyDeclarationTransformations(
+        equalTo(utr),
+        equalTo(internalId),
+        equalTo(trustInfoJson)
+      )(any[HeaderCarrier])
+
+      verify(transformer, times(1)).transform(
+        equalTo(transformedResponse),
+        equalTo(response.getTrust),
+        equalTo(declarationForApi),
+        any(),
+        equalTo(true)
+      )
+
       val arg: ArgumentCaptor[JsValue] = ArgumentCaptor.forClass(classOf[JsValue])
+
       verify(desService, times(1)).trustVariation(arg.capture())
       arg.getValue mustBe transformedJson
+
+      verify(auditService).auditVariationSubmitted(
+        equalTo(internalId),
+        equalTo(transformedJson),
+        equalTo(VariationResponse("TVN34567890"))
+      )(any())
+
     }}
   }
 
@@ -160,17 +182,17 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
     val auditService = mock[AuditService]
     val transformer = mock[DeclarationTransformer]
 
-    when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful("31415900000"))
+    when(desService.getTrustInfoFormBundleNo(utr))
+      .thenReturn(Future.successful("31415900000"))
 
-    when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
+    when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
+      .thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
 
-    when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))).thenReturn(Future.successful(
-      TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
-    ))
+    when(desService.getTrustInfo(equalTo(utr), equalTo(internalId)))
+      .thenReturn(Future.successful(TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))))
 
-    when(desService.trustVariation(any())).thenReturn(Future.successful(
-      VariationResponse("TVN34567890")
-    ))
+    when(desService.trustVariation(any()))
+      .thenReturn(Future.successful(VariationResponse("TVN34567890")))
 
     when(transformer.transform(any(),any(),any(),any(), any())).thenReturn(JsSuccess(transformedJson))
 
@@ -183,7 +205,21 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
 
     whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { exception => {
       exception mustBe an[EtmpCacheDataStaleException.type]
+
       verify(desService, times(0)).trustVariation(any())
+
     }}
+  }
+
+  "auditing" should {
+
+    "capture failure to transform" in {
+
+    }
+
+    "capture failure to submit" in {
+
+    }
+    
   }
 }
