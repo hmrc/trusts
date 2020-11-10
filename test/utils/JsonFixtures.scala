@@ -42,12 +42,9 @@ trait JsonFixtures extends JsonUtils {
 
   lazy val get4MLDTrustResponseJson: String = getJsonFromFile("valid-get-trust-response.json")
   lazy val get4MLDTrustResponse: JsValue = getJsonValueFromFile("valid-get-trust-response.json")
-  lazy val get5MLDTrustResponseJsonWithNonTaxable: JsValue = getJsonValueFromFile("valid-get-trust-response-5mld-nontaxable.json")
-  lazy val get5MLDTrustResponse: JsValue = getJsonValueFromFile("valid-get-trust-response-5mld.json")
 
   lazy val getTrustPropertyLandNoPreviousValue: String = getJsonFromFile("valid-get-trust-response-property-or-land-no-previous-value.json")
   lazy val getTrustPropertyLandNoPreviousValueJson: JsValue = getJsonValueFromFile("valid-get-trust-response-property-or-land-no-previous-value.json")
-  lazy val getTrustPropertyLandNoPreviousValueJson5mld: JsValue = getJsonValueFromFile("valid-get-trust-response-property-or-land-no-previous-value-5mld.json")
 
   lazy val getTransformedTrustResponse: JsValue = getJsonValueFromFile("transformed-get-trust-response.json")
 
