@@ -35,7 +35,6 @@ class GetTrustController @Inject()(identify: IdentifierAction,
                                    desService: DesService,
                                    transformationService: TransformationService,
                                    validateIdentifier : ValidateIdentifierActionProvider,
-                                   trustsStoreService: TrustsStoreService,
                                    cc: ControllerComponents) extends BackendController(cc) with Logging {
 
 

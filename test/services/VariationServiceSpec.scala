@@ -191,6 +191,26 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
 
   "auditing" should {
 
+    val desService = mock[DesService]
+    val transformationService = mock[TransformationService]
+    val transformer = mock[DeclarationTransformer]
+    val auditService = mock[AuditService]
+
+    when(desService.getTrustInfoFormBundleNo(utr))
+      .thenReturn(Future.successful(formBundleNo))
+
+    when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any()))
+      .thenReturn(JsSuccess(trustInfoJson))
+
+    val OUT = new VariationService(
+      desService,
+      transformationService,
+      transformer,
+      auditService,
+      LocalDateServiceStub,
+      trustsStoreServiceFor5mld
+    )
+
     "capture variation success" in {
 
       val desService = mock[DesService]
@@ -240,34 +260,13 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
 
     "capture failure to transform" in {
 
-      val desService = mock[DesService]
-      val transformationService = mock[TransformationService]
-      val transformer = mock[DeclarationTransformer]
-      val auditService = mock[AuditService]
-
       val response = TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
-
-      when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any()))
-        .thenReturn(JsSuccess(trustInfoJson))
 
       when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
         .thenReturn(Future.successful(JsError("Errors")))
 
-      when(desService.getTrustInfoFormBundleNo(utr))
-        .thenReturn(Future.successful(formBundleNo))
-
       when(desService.getTrustInfo(equalTo(utr), equalTo(internalId)))
         .thenReturn(Future.successful(response))
-
-      when(transformer.transform(any(),any(),any(),any(),any()))
-        .thenReturn(JsSuccess(transformedJson))
-
-      val OUT = new VariationService(desService,
-        transformationService,
-        transformer,
-        auditService,
-        LocalDateServiceStub,
-        trustsStoreServiceFor5mld)
 
       whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { _ => {
 
@@ -282,11 +281,6 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
 
       }}
     }
-
-    "capture failure to submit" in {
-
-    }
-
 
   }
 }
