@@ -19,7 +19,7 @@ package uk.gov.hmrc.transformations
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{AsyncFreeSpec, MustMatchers}
+import org.scalatest.{Assertion, AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
@@ -30,6 +30,7 @@ import uk.gov.hmrc.itbase.IntegrationTestBase
 import connector.DesConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
+import play.api.Application
 import utils.JsonUtils
 
 import scala.concurrent.Future
@@ -67,18 +68,23 @@ class AddUnidentifiedBeneficiarySpec extends AsyncFreeSpec with MustMatchers wit
         .build()
 
     "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
-      val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+      runTest("5174384721", application)
+      runTest("0123456789ABCDE", application)
+    }
+
+    def runTest(identifier: String, application: Application): Assertion = {
+      val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(result) mustBe OK
       contentAsJson(result) mustEqual expectedInitialGetJson
 
-      val addRequest = FakeRequest(POST, "/trusts/beneficiaries/add-unidentified/5174384721")
+      val addRequest = FakeRequest(POST, s"/trusts/beneficiaries/add-unidentified/$identifier")
         .withBody(newBeneficiaryJson)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val addResult = route(application, addRequest).get
       status(addResult) mustBe OK
 
-      val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+      val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(newResult) mustBe OK
       contentAsJson(newResult) mustEqual expectedGetAfterAddBeneficiaryJson
     }

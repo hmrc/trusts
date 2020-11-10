@@ -21,7 +21,7 @@ import java.time.LocalDate
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
-import org.scalatest.{AsyncFreeSpec, MustMatchers}
+import org.scalatest.{Assertion, AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
@@ -73,21 +73,25 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoS
         .build()
 
     "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
+      runTest("5174384721", application)
+      runTest("0123456789ABCDE", application)
+    }
 
-      val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+    def runTest(identifier: String, application: Application): Assertion = {
+      val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(result) mustBe OK
       contentAsJson(result) mustBe expectedInitialGetJson
 
-      status(addCharityBeneficiary(application)) mustBe OK
-      status(addIndividualBeneficiary(application)) mustBe OK
-      status(addUnidentifiedBeneficiary(application)) mustBe OK
-      status(amendUnidentifiedBeneficiary(application)) mustBe OK
-      status(removeCharityBeneficiary(application)) mustBe OK
-      status(amendCharityBeneficiary(application)) mustBe OK
-      status(removeOtherBeneficiary(application)) mustBe OK
-      status(amendCompanyBeneficiary(application)) mustBe OK
+      status(addCharityBeneficiary(identifier, application)) mustBe OK
+      status(addIndividualBeneficiary(identifier, application)) mustBe OK
+      status(addUnidentifiedBeneficiary(identifier, application)) mustBe OK
+      status(amendUnidentifiedBeneficiary(identifier, application)) mustBe OK
+      status(removeCharityBeneficiary(identifier, application)) mustBe OK
+      status(amendCharityBeneficiary(identifier, application)) mustBe OK
+      status(removeOtherBeneficiary(identifier, application)) mustBe OK
+      status(amendCompanyBeneficiary(identifier, application)) mustBe OK
 
-      val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+      val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(newResult) mustBe OK
       contentAsJson(newResult) mustBe expectedGetAfterAddBeneficiaryJson
 
@@ -105,7 +109,7 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoS
           |}
           |""".stripMargin)
 
-      val declareRequest = FakeRequest(POST, "/trusts/declare/5174384721")
+      val declareRequest = FakeRequest(POST, s"/trusts/declare/$identifier")
         .withBody(declaration)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -116,7 +120,7 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoS
     }
   }
 
-  private def addCharityBeneficiary(application: Application) = {
+  private def addCharityBeneficiary(identifier: String, application: Application) = {
     val newBeneficiaryJson = Json.parse(
       """
         |{
@@ -137,14 +141,14 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoS
         |""".stripMargin
     )
 
-    val addRequest = FakeRequest(POST, "/trusts/beneficiaries/add-charity/5174384721")
+    val addRequest = FakeRequest(POST, s"/trusts/beneficiaries/add-charity/$identifier")
       .withBody(newBeneficiaryJson)
       .withHeaders(CONTENT_TYPE -> "application/json")
 
     route(application, addRequest).get
   }
 
-  private def addIndividualBeneficiary(application: Application) = {
+  private def addIndividualBeneficiary(identifier: String, application: Application) = {
     val newBeneficiaryJson = Json.parse(
       """
         |{
@@ -162,14 +166,14 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoS
         |""".stripMargin
     )
 
-    val addRequest = FakeRequest(POST, "/trusts/beneficiaries/add-individual/5174384721")
+    val addRequest = FakeRequest(POST, s"/trusts/beneficiaries/add-individual/$identifier")
       .withBody(newBeneficiaryJson)
       .withHeaders(CONTENT_TYPE -> "application/json")
 
     route(application, addRequest).get
   }
 
-  private def addUnidentifiedBeneficiary(application: Application) = {
+  private def addUnidentifiedBeneficiary(identifier: String, application: Application) = {
     val newBeneficiaryJson = Json.parse(
       """
         |{
@@ -179,22 +183,22 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoS
         |""".stripMargin
     )
 
-    val addRequest = FakeRequest(POST, "/trusts/beneficiaries/add-unidentified/5174384721")
+    val addRequest = FakeRequest(POST, s"/trusts/beneficiaries/add-unidentified/$identifier")
       .withBody(newBeneficiaryJson)
       .withHeaders(CONTENT_TYPE -> "application/json")
 
     route(application, addRequest).get
   }
 
-  private def amendUnidentifiedBeneficiary(application: Application) = {
-    val addRequest = FakeRequest(POST, "/trusts/beneficiaries/amend-unidentified/5174384721/0")
+  private def amendUnidentifiedBeneficiary(identifier: String, application: Application) = {
+    val addRequest = FakeRequest(POST, s"/trusts/beneficiaries/amend-unidentified/$identifier/0")
       .withBody(JsString("Amended Beneficiary Description"))
       .withHeaders(CONTENT_TYPE -> "application/json")
 
     route(application, addRequest).get
   }
 
-  private def removeCharityBeneficiary(application: Application) = {
+  private def removeCharityBeneficiary(identifier: String, application: Application) = {
     val removeJson = Json.parse(
       """
         |{
@@ -203,14 +207,14 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoS
         | "type": "charity"
         |}
         |""".stripMargin)
-    val addRequest = FakeRequest(PUT, "/trusts/5174384721/beneficiaries/remove")
+    val addRequest = FakeRequest(PUT, s"/trusts/$identifier/beneficiaries/remove")
       .withBody(removeJson)
       .withHeaders(CONTENT_TYPE -> "application/json")
 
     route(application, addRequest).get
   }
 
-  private def amendCharityBeneficiary(application: Application) = {
+  private def amendCharityBeneficiary(identifier: String, application: Application) = {
     val amendedBeneficiaryJson = Json.parse(
       """
         |{
@@ -230,14 +234,14 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoS
         |""".stripMargin
     )
 
-    val addRequest = FakeRequest(POST, "/trusts/beneficiaries/amend-charity/5174384721/0")
+    val addRequest = FakeRequest(POST, s"/trusts/beneficiaries/amend-charity/$identifier/0")
       .withBody(amendedBeneficiaryJson)
       .withHeaders(CONTENT_TYPE -> "application/json")
 
     route(application, addRequest).get
   }
 
-  private def removeOtherBeneficiary(application: Application) = {
+  private def removeOtherBeneficiary(identifier: String, application: Application) = {
     val removeJson = Json.parse(
       """
         |{
@@ -246,14 +250,14 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoS
         | "type": "other"
         |}
         |""".stripMargin)
-    val addRequest = FakeRequest(PUT, "/trusts/5174384721/beneficiaries/remove")
+    val addRequest = FakeRequest(PUT, s"/trusts/$identifier/beneficiaries/remove")
       .withBody(removeJson)
       .withHeaders(CONTENT_TYPE -> "application/json")
 
     route(application, addRequest).get
   }
 
-  private def amendCompanyBeneficiary(application: Application) = {
+  private def amendCompanyBeneficiary(identifier: String, application: Application) = {
     val amendedBeneficiaryJson = Json.parse(
       """
         |{
@@ -273,7 +277,7 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoS
         |""".stripMargin
     )
 
-    val addRequest = FakeRequest(POST, "/trusts/beneficiaries/amend-company/5174384721/0")
+    val addRequest = FakeRequest(POST, s"/trusts/beneficiaries/amend-company/$identifier/0")
       .withBody(amendedBeneficiaryJson)
       .withHeaders(CONTENT_TYPE -> "application/json")
 

@@ -21,8 +21,9 @@ import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.{AsyncFreeSpec, MustMatchers}
+import org.scalatest.{Assertion, AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsArray, JsValue, Json}
 import play.api.test.Helpers._
@@ -52,8 +53,12 @@ class RemoveProtectorSpec extends AsyncFreeSpec with MustMatchers with MockitoSu
         .build()
 
     "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
+      runTest("5174384721", application)
+      runTest("0123456789ABCDE", application)
+    }
 
-      val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+    def runTest(identifier: String, application: Application): Assertion = {
+      val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(result) mustBe OK
 
       val removeProtectorAtIndex = Json.parse(
@@ -65,7 +70,7 @@ class RemoveProtectorSpec extends AsyncFreeSpec with MustMatchers with MockitoSu
           |}
           |""".stripMargin)
 
-      val removeProtectorRequest = FakeRequest(PUT, "/trusts/5174384721/protectors/remove")
+      val removeProtectorRequest = FakeRequest(PUT, s"/trusts/$identifier/protectors/remove")
         .withBody(Json.toJson(removeProtectorAtIndex))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -81,14 +86,14 @@ class RemoveProtectorSpec extends AsyncFreeSpec with MustMatchers with MockitoSu
           |}
           |""".stripMargin)
 
-      val removeProtectorCompanyRequest = FakeRequest(PUT, "/trusts/5174384721/protectors/remove")
+      val removeProtectorCompanyRequest = FakeRequest(PUT, s"/trusts/$identifier/protectors/remove")
         .withBody(Json.toJson(removeProtectorCompanyAtIndex))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val removeProtectorCompanyResult = route(application, removeProtectorCompanyRequest).get
       status(removeProtectorCompanyResult) mustBe OK
 
-      val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed/protectors")).get
+      val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed/protectors")).get
       status(newResult) mustBe OK
 
       val protectors = (contentAsJson(newResult) \ "protectors" \ "protector").as[JsArray]

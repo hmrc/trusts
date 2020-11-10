@@ -21,8 +21,9 @@ import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.{AsyncFreeSpec, MustMatchers}
+import org.scalatest.{Assertion, AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsArray, JsValue, Json}
 import play.api.test.Helpers._
@@ -52,8 +53,12 @@ class RemoveSettlorSpec extends AsyncFreeSpec with MustMatchers with MockitoSuga
         .build()
 
     "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
+      runTest("5174384721", application)
+      runTest("0123456789ABCDE", application)
+    }
 
-      val result = route(application, FakeRequest(GET, "/trusts/5174384721/transformed")).get
+    def runTest(identifier: String, application: Application): Assertion = {
+      val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(result) mustBe OK
 
       val removeSettlorAtIndex = Json.parse(
@@ -65,7 +70,7 @@ class RemoveSettlorSpec extends AsyncFreeSpec with MustMatchers with MockitoSuga
           |}
           |""".stripMargin)
 
-      val removeSettlorRequest = FakeRequest(PUT, "/trusts/5174384721/settlors/remove")
+      val removeSettlorRequest = FakeRequest(PUT, s"/trusts/$identifier/settlors/remove")
         .withBody(Json.toJson(removeSettlorAtIndex))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -81,14 +86,14 @@ class RemoveSettlorSpec extends AsyncFreeSpec with MustMatchers with MockitoSuga
           |}
           |""".stripMargin)
 
-      val removeSettlorCompanyRequest = FakeRequest(PUT, "/trusts/5174384721/settlors/remove")
+      val removeSettlorCompanyRequest = FakeRequest(PUT, s"/trusts/$identifier/settlors/remove")
         .withBody(Json.toJson(removeSettlorCompanyAtIndex))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val removeSettlorCompanyResult = route(application, removeSettlorCompanyRequest).get
       status(removeSettlorCompanyResult) mustBe OK
 
-      val newResult = route(application, FakeRequest(GET, "/trusts/5174384721/transformed/settlors")).get
+      val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed/settlors")).get
       status(newResult) mustBe OK
 
       val settlors = (contentAsJson(newResult) \ "settlors" \ "settlor").as[JsArray]
