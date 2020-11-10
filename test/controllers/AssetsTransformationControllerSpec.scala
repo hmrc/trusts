@@ -31,9 +31,10 @@ import play.api.libs.json.Json
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
-import services.BeneficiaryTransformationService
-import transformers.remove.RemoveBeneficiary
+import services.{AssetsTransformationService, BeneficiaryTransformationService}
+import transformers.remove.{RemoveAsset, RemoveBeneficiary}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
@@ -45,27 +46,29 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
+  implicit val hc: HeaderCarrier = HeaderCarrier()
+
   "Amend nonEeaBusinessAsset" - {
 
     val index = 0
 
     "must add a new amend nonEeaBusinessAssetJson transform" in {
-      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
+      val nonEeaBusinessAssetTransformationService = mock[AssetsTransformationService]
+      val controller = new AssetsTransformationController(identifierAction, nonEeaBusinessAssetTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val newDescription = "Some new description"
 
-      when(beneficiaryTransformationService.amendUnidentifiedBeneficiaryTransformer(any(), any(), any(), any()))
+      when(nonEeaBusinessAssetTransformationService.amendNonEeaBusinessAssetTransformer(any(), any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(newDescription))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val result = controller.amendUnidentifiedBeneficiary("aUTR", index).apply(request)
+      val result = controller.amendNonEeaBusinessAsset("aUTR", index).apply(request)
 
       status(result) mustBe OK
-      verify(beneficiaryTransformationService).amendUnidentifiedBeneficiaryTransformer(
+      verify(nonEeaBusinessAssetTransformationService).amendNonEeaBusinessAssetTransformer(
         equalTo("aUTR"),
         equalTo(index),
         equalTo("id"),
@@ -73,14 +76,14 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
     }
 
     "must return an error for malformed json" in {
-      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
+      val nonEeaBusinessAssetTransformationService = mock[AssetsTransformationService]
+      val controller = new AssetsTransformationController(identifierAction, nonEeaBusinessAssetTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val result = controller.amendUnidentifiedBeneficiary("aUTR", index).apply(request)
+      val result = controller.amendNonEeaBusinessAsset("aUTR", index).apply(request)
       status(result) mustBe BAD_REQUEST
     }
   }
@@ -88,10 +91,10 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
   "remove nonEeaBusinessAsset" - {
 
     "add an new remove nonEeaBusinessAsset transform " in {
-      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
+      val nonEeaBusinessAssetTransformationService = mock[AssetsTransformationService]
+      val controller = new AssetsTransformationController(identifierAction, nonEeaBusinessAssetTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
-      when(beneficiaryTransformationService.removeBeneficiary(any(), any(), any()))
+      when(nonEeaBusinessAssetTransformationService.removeAsset(any(), any(), any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
@@ -102,24 +105,24 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
         ))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val result = controller.removeBeneficiary("UTRUTRUTR").apply(request)
+      val result = controller.removeNonEeaBusinessAsset("UTRUTRUTR").apply(request)
 
       status(result) mustBe OK
-      verify(beneficiaryTransformationService)
-        .removeBeneficiary(
+      verify(nonEeaBusinessAssetTransformationService)
+        .removeAsset(
           equalTo("UTRUTRUTR"),
           equalTo("id"),
-          equalTo(RemoveBeneficiary(LocalDate.of(2018, 2, 24), 24, "unidentified")))
+          equalTo(RemoveAsset(LocalDate.of(2018, 2, 24), 24, "unidentified")))
     }
 
     "return an error when json is invalid" in {
-      val OUT = new BeneficiaryTransformationController(identifierAction, mock[BeneficiaryTransformationService])(Implicits.global, Helpers.stubControllerComponents())
+      val OUT = new AssetsTransformationController(identifierAction, mock[AssetsTransformationService])(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.obj("field" -> "value"))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val result = OUT.removeBeneficiary("UTRUTRUTR")(request)
+      val result = OUT.removeNonEeaBusinessAsset("UTRUTRUTR")(request)
 
       status(result) mustBe BAD_REQUEST
     }
@@ -129,47 +132,39 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
   "Add nonEeaBusinessAsset" - {
 
     "must add a new add nonEeaBusinessAsset transform" in {
-      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
+      val nonEeaBusinessAssetTransformationService = mock[AssetsTransformationService]
+      val controller = new AssetsTransformationController(identifierAction, nonEeaBusinessAssetTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
-      val newBeneficiary = IndividualDetailsType(None,
-        None,
-        NameType("First", None, "Last"),
-        Some(LocalDate.parse("2000-01-01")),
-        vulnerableBeneficiary = Some(false),
-        None,
-        None,
-        None,
-        Some(IdentificationType(Some("nino"), None, None, None)),
-        None,
-        None,
-        None,
-        LocalDate.parse("1990-10-10"),
+      val newNonEeaBusinessAsset = NonEEABusinessType("1",
+        "TestOrg",
+        AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK"),
+        "UK",
+        LocalDate.parse("2000-01-01"),
         None
       )
 
-      when(beneficiaryTransformationService.addIndividualBeneficiaryTransformer(any(), any(), any()))
+      when(nonEeaBusinessAssetTransformationService.addNonEeaBusinessAssetTransformer(any(), any(), any()))
         .thenReturn(Future.successful(true))
 
       val request = FakeRequest("POST", "path")
-        .withBody(Json.toJson(newBeneficiary))
+        .withBody(Json.toJson(newNonEeaBusinessAsset))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val result = controller.addIndividualBeneficiary("aUTR").apply(request)
+      val result = controller.addNonEeaBusinessAsset("aUTR").apply(request)
 
       status(result) mustBe OK
-      verify(beneficiaryTransformationService).addIndividualBeneficiaryTransformer("aUTR", "id", newBeneficiary)
+      verify(nonEeaBusinessAssetTransformationService).addNonEeaBusinessAssetTransformer("aUTR", "id", newNonEeaBusinessAsset)
     }
 
     "must return an error for malformed json" in {
-      val beneficiaryTransformationService = mock[BeneficiaryTransformationService]
-      val controller = new BeneficiaryTransformationController(identifierAction, beneficiaryTransformationService)(Implicits.global, Helpers.stubControllerComponents())
+      val nonEeaBusinessAssetTransformationService = mock[AssetsTransformationService]
+      val controller = new AssetsTransformationController(identifierAction, nonEeaBusinessAssetTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.parse("{}"))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val result = controller.addIndividualBeneficiary("aUTR").apply(request)
+      val result = controller.addNonEeaBusinessAsset("aUTR").apply(request)
       status(result) mustBe BAD_REQUEST
     }
   }

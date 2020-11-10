@@ -24,6 +24,7 @@ import models.variation._
 import play.api.libs.json.{JsObject, JsValue, Json, __}
 import transformers._
 import transformers.remove.{RemoveAsset, RemoveBeneficiary}
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}
@@ -35,7 +36,7 @@ class AssetsTransformationService @Inject()(
                                            (implicit ec:ExecutionContext)
   extends JsonOperations {
 
-  def removeAsset(utr: String, internalId: String, removeAsset: RemoveAsset): Future[Success.type] = {
+  def removeAsset(utr: String, internalId: String, removeAsset: RemoveAsset)(implicit hc: HeaderCarrier): Future[Success.type] = {
 
     getTransformedTrustJson(utr, internalId)
       .map(findAssetJson(_, removeAsset.`type`, removeAsset.index))
@@ -52,7 +53,7 @@ class AssetsTransformationService @Inject()(
       }
   }
 
-  private def getTransformedTrustJson(utr: String, internalId: String) = {
+  private def getTransformedTrustJson(utr: String, internalId: String)(implicit hc: HeaderCarrier): Future[JsObject] = {
 
     transformationService.getTransformedData(utr, internalId).flatMap {
       case TrustProcessedResponse(json, _) => Future.successful(json.as[JsObject])
@@ -63,12 +64,12 @@ class AssetsTransformationService @Inject()(
   private def findAssetJson(json: JsValue, nonEEABusinessType: String, index: Int): Try[JsObject] = {
     val nonEEABusinessAssetPath = (__ \ 'details \ 'trust \ 'Assets \ nonEEABusinessType \ index).json
     json.transform(nonEEABusinessAssetPath.pick).fold(
-      _ => Failure(InternalServerErrorException("Could not locate beneficiary at index")),
+      _ => Failure(InternalServerErrorException("Could not locate nonEeaBusinessAsset at index")),
       value => scala.util.Success(value.as[JsObject])
     )
   }
 
-  def amendEeaBusinessAssetTransformer(utr: String, index: Int, internalId: String, description: String): Future[Success.type] = {
+  def amendNonEeaBusinessAssetTransformer(utr: String, index: Int, internalId: String, description: String)(implicit hc: HeaderCarrier): Future[Success.type] = {
     getTransformedTrustJson(utr, internalId)
     .map(findAssetJson(_, "nonEEABusinessType", index))
       .flatMap(Future.fromTry)
@@ -79,7 +80,7 @@ class AssetsTransformationService @Inject()(
       }
   }
 
-  def addEeaBusinessAssetTransformer(utr: String, internalId: String, newNonEEABusinessAsset: NonEEABusinessType): Future[Boolean] = {
+  def addNonEeaBusinessAssetTransformer(utr: String, internalId: String, newNonEEABusinessAsset: NonEEABusinessType): Future[Boolean] = {
     transformationService.addNewTransform(utr, internalId, AddNonEeaBusinessAssetTransform(newNonEEABusinessAsset))
   }
  }

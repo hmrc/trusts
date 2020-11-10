@@ -18,18 +18,25 @@ package transformers
 
 import java.time.LocalDate
 
-import models.variation.{NonEEABusinessType, UnidentifiedType}
+import models.AddressType
+import models.variation.NonEEABusinessType
 import org.scalatest.{FreeSpec, MustMatchers}
 import utils.JsonUtils
 
 class AddNonEeaBusinessAssetTransformSpec extends FreeSpec with MustMatchers {
 
-  val nonEeaBusinessAsset = NonEEABusinessType(None,
+  val nonEeaBusinessAsset = NonEEABusinessType(
+    "1",
+    "TestOrg",
+  AddressType(
+    "Line 1",
+    "Line 2",
     None,
-    "Some Description",
     None,
-    None,
-    LocalDate.parse("1990-10-10"),
+    Some("NE11NE"),
+    "UK"),
+    "UK",
+    LocalDate.parse("2000-01-01"),
     None
   )
 
@@ -38,30 +45,22 @@ class AddNonEeaBusinessAssetTransformSpec extends FreeSpec with MustMatchers {
     "add a new NonEeaBusinessAsset when there are no NonEeaBusinessAssets existing" in {
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-unidentified-beneficiary.json")
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-NonEeaBusinessAsset.json")
 
-      val transformer = new AddNonEeaBusinessAssetTransform(nonEeaBusinessAsset)
+      val transformer = AddNonEeaBusinessAssetTransform(nonEeaBusinessAsset)
 
       val result = transformer.applyTransform(trustJson).get
 
       result mustBe afterJson
     }
 
-    "add a new NonEeaBusinessAsset" in {
+    "add a new NonEeaBusinessAsset when there are NonEeaBusinessAssets existing" in {
 
-      val nonEeaBusinessAsset = NonEEABusinessType(None,
-        None,
-        "Some other description",
-        None,
-        None,
-        LocalDate.parse("2000-10-10"),
-        None
-      )
-      val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-unidentified-beneficiary.json")
+      val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-NonEeaBusinessAsset.json")
 
-      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-second-unidentified-beneficiary.json")
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-second-NonEeaBusinessAsset.json")
 
-      val transformer = new AddNonEeaBusinessAssetTransform(nonEeaBusinessAsset)
+      val transformer = AddNonEeaBusinessAssetTransform(nonEeaBusinessAsset)
 
       val result = transformer.applyTransform(trustJson).get
 

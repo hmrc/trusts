@@ -30,7 +30,8 @@ import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
 import transformers._
-import transformers.remove.RemoveBeneficiary
+import transformers.remove.{RemoveAsset, RemoveBeneficiary}
+import uk.gov.hmrc.http.HeaderCarrier
 import utils.{JsonFixtures, JsonUtils}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -38,6 +39,8 @@ import scala.concurrent.Future
 
 class AssetsTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonFixtures {
   private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
+
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   private def NonEeaBusinessAssetJson(value1: String, endDate: Option[LocalDate] = None) = {
     if (endDate.isDefined) {
@@ -65,75 +68,83 @@ class AssetsTransformationServiceSpec extends FreeSpec with MockitoSugar with Sc
 
     "must add a new remove NonEeaBusinessAsset transform using the transformation service" in {
       val transformationService = mock[TransformationService]
-      val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
-      val beneficiary = NonEeaBusinessAssetJson("Blah Blah Blah")
+      val service = new AssetsTransformationService(transformationService, LocalDateMock)
+      val nonEeaBusinessAsset = NonEeaBusinessAssetJson("Blah Blah Blah")
 
       when(transformationService.addNewTransform(any(), any(), any()))
         .thenReturn(Future.successful(true))
       when(transformationService.getTransformedData(any(), any()))
         .thenReturn(Future.successful(TrustProcessedResponse(
-          buildInputJson("individualDetails", Seq(beneficiary)),
+          buildInputJson("individualDetails", Seq(nonEeaBusinessAsset)),
           ResponseHeader("status", "formBundlNo")
         )))
 
-      val result = service.removeBeneficiary("utr", "internalId", RemoveBeneficiary(LocalDate.of(2013, 2, 20), 0, "individualDetails"))
+      val result = service.removeAsset("utr", "internalId", RemoveAsset(LocalDate.of(2013, 2, 20), 0, "individualDetails"))
       whenReady(result) { _ =>
         verify(transformationService).addNewTransform("utr",
-          "internalId", RemoveBeneficiariesTransform(0, beneficiary, LocalDate.of(2013, 2, 20), "individualDetails"))
+          "internalId", RemoveNonEeaBusinessAssetTransform(0, nonEeaBusinessAsset, LocalDate.of(2013, 2, 20), "individualDetails"))
       }
     }
 
     "must add a new amend NonEeaBusinessAsset transform using the transformation service" in {
       val index = 0
       val transformationService = mock[TransformationService]
-      val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
+      val service = new AssetsTransformationService(transformationService, LocalDateMock)
       val newDescription = "Some Description"
-      val originalBeneficiaryJson = Json.toJson(UnidentifiedType(
-        None,
-        None,
-        "Some description",
-        None,
-        None,
-        LocalDate.parse("2010-01-01"),
-        None
-      ))
+      val originalNonEeaBusinessAssetJson = Json.toJson(NonEEABusinessType(
+        "1",
+        "TestOrg",
+        AddressType(
+          "Line 1",
+          "Line 2",
+          None,
+          None,
+          Some("NE11NE"), "UK"),
+          "UK",
+          LocalDate.parse("2000-01-01"),
+          None
+          ))
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
       when(transformationService.getTransformedData(any(), any()))
         .thenReturn(Future.successful(TrustProcessedResponse(
-          buildInputJson("unidentified", Seq(originalBeneficiaryJson)),
+          buildInputJson("unidentified", Seq(originalNonEeaBusinessAssetJson)),
           ResponseHeader("status", "formBundlNo")
         )))
 
-      val result = service.amendUnidentifiedBeneficiaryTransformer("utr", index, "internalId", newDescription)
+      val result = service.amendNonEeaBusinessAssetTransformer("utr", index, "internalId", newDescription)
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",
-          "internalId", AmendUnidentifiedBeneficiaryTransform(index, newDescription, originalBeneficiaryJson, LocalDateMock.now))
+          "internalId", AmendNonEeaBusinessAssetTransform(index, newDescription, originalNonEeaBusinessAssetJson, LocalDateMock.now))
       }
     }
 
     "must add a new add NonEeaBusinessAsset transform using the transformation service" in {
       val transformationService = mock[TransformationService]
-      val service = new BeneficiaryTransformationService(transformationService, LocalDateMock)
-      val newBeneficiary = UnidentifiedType(
-        None,
-        None,
-        "Some description",
-        None,
-        None,
-        LocalDate.parse("2010-01-01"),
+      val service = new AssetsTransformationService(transformationService, LocalDateMock)
+      val newNonEeaBusinessAsset = NonEEABusinessType(
+        "1",
+        "TestOrg",
+        AddressType(
+          "Line 1",
+          "Line 2",
+          None,
+          None,
+          Some("NE11NE"), "UK"),
+        "UK",
+        LocalDate.parse("2000-01-01"),
         None
       )
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      val result = service.addUnidentifiedBeneficiaryTransformer("utr", "internalId", newBeneficiary)
+      val result = service.addNonEeaBusinessAssetTransformer("utr", "internalId", newNonEeaBusinessAsset)
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",
-          "internalId", AddUnidentifiedBeneficiaryTransform(newBeneficiary))
+          "internalId", AddNonEeaBusinessAssetTransform(newNonEeaBusinessAsset))
       }
     }
   }

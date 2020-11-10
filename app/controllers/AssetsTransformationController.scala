@@ -35,11 +35,11 @@ class AssetsTransformationController @Inject()(
                                           cc: ControllerComponents)
   extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
-  def amendEeaBusinessAsset(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
+  def amendNonEeaBusinessAsset(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[JsString] match {
         case JsSuccess(description, _) =>
-          assetsTransformationService.amendEeaBusinessAssetTransformer(
+          assetsTransformationService.amendNonEeaBusinessAssetTransformer(
             utr,
             index,
             request.identifier,
@@ -48,19 +48,19 @@ class AssetsTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[amendEeaBusinessAsset][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[amendNonEeaBusinessAsset][Session ID: ${request.sessionId}]" +
             s" Supplied description could not be read as a JsString - $errors")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def addEeaBusinessAsset(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def addNonEeaBusinessAsset(utr: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[NonEEABusinessType] match {
         case JsSuccess(newEeaBusinessAsset, _) =>
 
-          assetsTransformationService.addEeaBusinessAssetTransformer(
+          assetsTransformationService.addNonEeaBusinessAssetTransformer(
             utr,
             request.identifier,
             newEeaBusinessAsset
@@ -68,14 +68,14 @@ class AssetsTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[addEeaBusinessAsset][Session ID: ${request.sessionId}] " +
+          logger.warn(s"[addNonEeaBusinessAsset][Session ID: ${request.sessionId}] " +
             s"Supplied json could not be read as an addEeaBusiness Asset - $errors")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def removeBeneficiary(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def removeNonEeaBusinessAsset(utr: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[RemoveAsset] match {
         case JsSuccess(asset, _) =>
