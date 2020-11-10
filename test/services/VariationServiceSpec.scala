@@ -29,7 +29,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{MustMatchers, WordSpec}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.{JsString, JsSuccess, JsValue, Json}
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import transformers.DeclarationTransformer
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.JsonFixtures
@@ -145,34 +145,12 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
     val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
 
     whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { variationResponse => {
-
       variationResponse mustBe VariationResponse("TVN34567890")
-
-      verify(transformationService, times( 1)).applyDeclarationTransformations(
-        equalTo(utr),
-        equalTo(internalId),
-        equalTo(trustInfoJson)
-      )(any[HeaderCarrier])
-
-      verify(transformer, times(1)).transform(
-        equalTo(transformedResponse),
-        equalTo(response.getTrust),
-        equalTo(declarationForApi),
-        any(),
-        equalTo(true)
-      )
-
+      verify(transformationService, times( 1)).applyDeclarationTransformations(equalTo(utr), equalTo(internalId), equalTo(trustInfoJson))(any[HeaderCarrier])
+      verify(transformer, times(1)).transform(equalTo(transformedResponse), equalTo(response.getTrust), equalTo(declarationForApi), any(), equalTo(true))
       val arg: ArgumentCaptor[JsValue] = ArgumentCaptor.forClass(classOf[JsValue])
-
       verify(desService, times(1)).trustVariation(arg.capture())
       arg.getValue mustBe transformedJson
-
-      verify(auditService).auditVariationSubmitted(
-        equalTo(internalId),
-        equalTo(transformedJson),
-        equalTo(VariationResponse("TVN34567890"))
-      )(any())
-
     }}
   }
 
@@ -213,13 +191,102 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
 
   "auditing" should {
 
+    "capture variation success" in {
+
+      val desService = mock[DesService]
+      val transformationService = mock[TransformationService]
+      val transformer = mock[DeclarationTransformer]
+      val auditService = mock[AuditService]
+
+      val response = TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
+
+      when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any()))
+        .thenReturn(JsSuccess(trustInfoJson))
+
+      when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
+
+      when(desService.getTrustInfoFormBundleNo(utr))
+        .thenReturn(Future.successful(formBundleNo))
+
+      when(desService.getTrustInfo(equalTo(utr), equalTo(internalId)))
+        .thenReturn(Future.successful(response))
+
+      when(desService.trustVariation(any()))
+        .thenReturn(Future.successful(
+        VariationResponse("TVN34567890")
+      ))
+
+      when(transformer.transform(any(),any(),any(),any(),any()))
+        .thenReturn(JsSuccess(transformedJson))
+
+      val OUT = new VariationService(desService,
+        transformationService,
+        transformer,
+        auditService,
+        LocalDateServiceStub,
+        trustsStoreServiceFor5mld)
+
+      whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { _ => {
+
+        verify(auditService).auditVariationSubmitted(
+          equalTo(internalId),
+          equalTo(transformedJson),
+          equalTo(VariationResponse("TVN34567890"))
+        )(any())
+
+      }}
+    }
+
     "capture failure to transform" in {
 
+      val desService = mock[DesService]
+      val transformationService = mock[TransformationService]
+      val transformer = mock[DeclarationTransformer]
+      val auditService = mock[AuditService]
+
+      val response = TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
+
+      when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any()))
+        .thenReturn(JsSuccess(trustInfoJson))
+
+      when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(JsError("Errors")))
+
+      when(desService.getTrustInfoFormBundleNo(utr))
+        .thenReturn(Future.successful(formBundleNo))
+
+      when(desService.getTrustInfo(equalTo(utr), equalTo(internalId)))
+        .thenReturn(Future.successful(response))
+
+      when(transformer.transform(any(),any(),any(),any(),any()))
+        .thenReturn(JsSuccess(transformedJson))
+
+      val OUT = new VariationService(desService,
+        transformationService,
+        transformer,
+        auditService,
+        LocalDateServiceStub,
+        trustsStoreServiceFor5mld)
+
+      whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { _ => {
+
+        verify(auditService).auditVariationTransformationError(
+          equalTo(internalId),
+          equalTo(utr),
+          equalTo(trustInfoJson),
+          any(),
+          equalTo("Failed to apply declaration transformations."),
+          any()
+        )(any())
+
+      }}
     }
 
     "capture failure to submit" in {
 
     }
-    
+
+
   }
 }

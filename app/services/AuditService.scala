@@ -36,7 +36,6 @@ class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig)
             internalId: String,
             response: RegistrationResponse)(implicit hc: HeaderCarrier): Unit = {
 
-    if (config.auditingEnabled) {
       val auditPayload = TrustRegistrationSubmissionAuditEvent(
         registration = registration,
         draftId = draftId,
@@ -48,9 +47,6 @@ class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig)
         event,
         auditPayload
       )
-    } else {
-      ()
-    }
   }
 
   def audit(event: String,
@@ -58,7 +54,6 @@ class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig)
             internalId: String,
             response: JsValue)(implicit hc: HeaderCarrier): Unit = {
 
-    if (config.auditingEnabled) {
       val auditPayload = GetTrustOrEstateAuditEvent(
         request = request,
         internalAuthId = internalId,
@@ -69,25 +64,16 @@ class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig)
         event,
         auditPayload
       )
-    } else {
-      ()
-    }
   }
 
   def auditErrorResponse(eventName: String, request: JsValue, internalId: String, errorReason: String)(implicit hc: HeaderCarrier): Unit = {
-
-    if (config.auditingEnabled) {
-      val response = Json.obj("errorReason" -> errorReason)
 
       audit(
         event = eventName,
         request = request,
         internalId = internalId,
-        response = response
+        response = Json.obj("errorReason" -> errorReason)
       )
-    } else {
-      ()
-    }
   }
 
   def auditVariationSubmitted(internalId: String,

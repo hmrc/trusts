@@ -60,7 +60,17 @@ class VariationService @Inject()(desService: DesService,
             case JsSuccess(transformedJson, _) =>
               val response = TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
               transformAndSubmit(identifier, internalId, declaration, originalJson, response)
-            case JsError(errors) =>
+            case e@JsError(errors) =>
+
+              auditService.auditVariationTransformationError(
+                internalId,
+                identifier,
+                originalJson,
+                JsString("Declaration Transforms"),
+                "Failed to apply declaration transformations.",
+                JsError.toJson(e)
+              )
+
               logging.error(s"Failed to transform trust info ${JsError.toJson(errors)}")
               Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
           }
