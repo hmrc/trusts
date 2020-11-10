@@ -24,9 +24,9 @@ import models.variation.VariationResponse
 import models.{DeclarationForApi, DeclarationName, NameType}
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.{any, eq => equalTo}
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{MustMatchers, WordSpec}
+import org.scalatest.{BeforeAndAfterEach, MustMatchers, WordSpec}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
@@ -36,7 +36,12 @@ import utils.JsonFixtures
 
 import scala.concurrent.Future
 
-class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar with ScalaFutures with MustMatchers with GuiceOneAppPerSuite {
+class VariationServiceSpec extends WordSpec
+  with JsonFixtures with MockitoSugar
+  with ScalaFutures with MustMatchers
+  with GuiceOneAppPerSuite with BeforeAndAfterEach {
+
+  private val auditService = mock[AuditService]
 
   private implicit  val hc: HeaderCarrier = new HeaderCarrier
   private val formBundleNo = "001234567890"
@@ -64,6 +69,11 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
   }
 
   val declarationForApi = DeclarationForApi(declaration, None, None)
+
+  override def beforeEach(): Unit = {
+    reset(auditService)
+  }
+
 
   "Declare no change" should {
 
@@ -157,7 +167,6 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
   "Fail if the etmp data version doesn't match our submission data" in {
     val desService = mock[DesService]
     val transformationService = mock[TransformationService]
-    val auditService = mock[AuditService]
     val transformer = mock[DeclarationTransformer]
 
     when(desService.getTrustInfoFormBundleNo(utr))
@@ -194,13 +203,9 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
     val desService = mock[DesService]
     val transformationService = mock[TransformationService]
     val transformer = mock[DeclarationTransformer]
-    val auditService = mock[AuditService]
 
     when(desService.getTrustInfoFormBundleNo(utr))
       .thenReturn(Future.successful(formBundleNo))
-
-    when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any()))
-      .thenReturn(JsSuccess(trustInfoJson))
 
     val OUT = new VariationService(
       desService,
@@ -216,15 +221,14 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
       val desService = mock[DesService]
       val transformationService = mock[TransformationService]
       val transformer = mock[DeclarationTransformer]
-      val auditService = mock[AuditService]
 
       val response = TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
 
-      when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any()))
-        .thenReturn(JsSuccess(trustInfoJson))
-
       when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
         .thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
+
+      when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any()))
+        .thenReturn(JsSuccess(trustInfoJson))
 
       when(desService.getTrustInfoFormBundleNo(utr))
         .thenReturn(Future.successful(formBundleNo))
@@ -265,6 +269,9 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
       when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
         .thenReturn(Future.successful(JsError("Errors")))
 
+      when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any()))
+        .thenReturn(JsSuccess(trustInfoJson))
+
       when(desService.getTrustInfo(equalTo(utr), equalTo(internalId)))
         .thenReturn(Future.successful(response))
 
@@ -276,6 +283,30 @@ class VariationServiceSpec extends WordSpec with JsonFixtures with MockitoSugar 
           equalTo(trustInfoJson),
           any(),
           equalTo("Failed to apply declaration transformations."),
+          any()
+        )(any())
+
+      }}
+    }
+
+    "capture failure to populate lead trustee" in {
+
+      val response = TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
+
+      when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any()))
+        .thenReturn(JsError("Error"))
+
+      when(desService.getTrustInfo(equalTo(utr), equalTo(internalId)))
+        .thenReturn(Future.successful(response))
+
+      whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { _ => {
+
+        verify(auditService).auditVariationTransformationError(
+          equalTo(internalId),
+          equalTo(utr),
+          any(),
+          any(),
+          equalTo("Failed to populate lead trustee address"),
           any()
         )(any())
 

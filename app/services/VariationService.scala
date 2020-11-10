@@ -74,7 +74,17 @@ class VariationService @Inject()(desService: DesService,
               logging.error(s"Failed to transform trust info ${JsError.toJson(errors)}")
               Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
           }
-        case JsError(errors) =>
+        case e@JsError(errors) =>
+
+          auditService.auditVariationTransformationError(
+            internalId,
+            identifier,
+            originalResponse.getTrust,
+            JsString("Populate lead trustees transforms"),
+            "Failed to populate lead trustee address",
+            JsError.toJson(e)
+          )
+
           logging.error(s"Failed to populate lead trustee address ${JsError.toJson(errors)}")
           Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
       }
