@@ -40,7 +40,9 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
       )
   }
 
-  ".enrolSubscriber" should {
+  ".enrolSubscriber 4MLD" should {
+
+    val taxable: Boolean = false
 
     "return Success " when {
       "tax enrolments succesfully subscribed to provided subscription id" in {
@@ -49,7 +51,7 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
         stubForPut(server, "/tax-enrolments/subscriptions/123456789/subscriber", 204)
 
-        val futureResult = connector.enrolSubscriber("123456789")
+        val futureResult = connector.enrolSubscriber("123456789", taxable)
 
         whenReady(futureResult) {
           result => result mustBe TaxEnrolmentSuccess
@@ -64,7 +66,7 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
         stubForPut(server, "/tax-enrolments/subscriptions/987654321/subscriber", 400)
 
-        val futureResult = connector.enrolSubscriber("987654321")
+        val futureResult = connector.enrolSubscriber("987654321", taxable)
 
         whenReady(futureResult.failed) {
           result => result mustBe BadRequestException
@@ -79,7 +81,7 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
         stubForPut(server, "/tax-enrolments/subscriptions/987654321/subscriber", 500)
 
-        val futureResult = connector.enrolSubscriber("987654321")
+        val futureResult = connector.enrolSubscriber("987654321", taxable)
 
         whenReady(futureResult.failed) {
           result => result mustBe an[InternalServerErrorException]

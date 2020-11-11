@@ -44,7 +44,7 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
     case _ => config.taxEnrolmentsPayloadBodyServiceName
   }
 
-  def getResponse(subscriptionId: String, serviceName: String)(implicit hc: HeaderCarrier) :  Future[TaxEnrolmentSuscriberResponse] = {
+  def getResponse(subscriptionId: String, serviceName: String, taxable: Boolean)(implicit hc: HeaderCarrier) :  Future[TaxEnrolmentSuscriberResponse] = {
     val taxEnrolmentsEndpoint = s"${config.taxEnrolmentsUrl}/tax-enrolments/subscriptions/$subscriptionId/subscriber"
     val taxEnrolmentHeaders = hc.withExtraHeaders(headers: _*)
 
@@ -57,10 +57,10 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
     response
   }
 
-  override  def enrolSubscriber(subscriptionId: String)(implicit hc: HeaderCarrier) :  Future[TaxEnrolmentSuscriberResponse] = {
+  override  def enrolSubscriber(subscriptionId: String, taxable: Boolean)(implicit hc: HeaderCarrier) :  Future[TaxEnrolmentSuscriberResponse] = {
     for {
       serviceName <- getServiceName
-      response <- getResponse(subscriptionId, serviceName)
+      response <- getResponse(subscriptionId, serviceName, taxable)
     } yield
     response
   }
@@ -69,5 +69,5 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
 
 @ImplementedBy(classOf[TaxEnrolmentConnectorImpl])
 trait TaxEnrolmentConnector {
-  def enrolSubscriber(subscriptionId: String)(implicit hc: HeaderCarrier):  Future[TaxEnrolmentSuscriberResponse]
+  def enrolSubscriber(subscriptionId: String, taxable: Boolean)(implicit hc: HeaderCarrier):  Future[TaxEnrolmentSuscriberResponse]
 }
