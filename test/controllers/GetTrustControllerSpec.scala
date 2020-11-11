@@ -56,7 +56,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
   private val auditService = new AuditService(mockAuditConnector, mockConfig)
 
-  private val validateIdentififerAction = app.injector.instanceOf[ValidateIdentifierActionProvider]
+  private val validateIdentifierAction = app.injector.instanceOf[ValidateIdentifierActionProvider]
 
   lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
@@ -66,7 +66,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
   private def getTrustController = {
     val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation),
-      mockedAuditService, desService, transformationService, validateIdentififerAction, trustsStoreService, Helpers.stubControllerComponents())
+      mockedAuditService, desService, transformationService, validateIdentifierAction, Helpers.stubControllerComponents())
 
     SUT
   }
@@ -82,7 +82,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       "reset the cache and clear transforms before calling get" in {
 
         val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation),
-          auditService, desService, transformationService,validateIdentififerAction, trustsStoreService, Helpers.stubControllerComponents())
+          auditService, desService, transformationService,validateIdentifierAction, Helpers.stubControllerComponents())
 
         val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
         when(desService.resetCache(any(), any()))
@@ -108,7 +108,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       "reset the cache and clear transforms before calling get" in {
 
         val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation),
-          auditService, desService, transformationService,validateIdentififerAction, trustsStoreService, Helpers.stubControllerComponents())
+          auditService, desService, transformationService,validateIdentifierAction, Helpers.stubControllerComponents())
 
         val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
         when(desService.resetCache(any(), any()))
@@ -134,58 +134,25 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
   ".get" should {
 
-    "not perform auditing" when {
-      "the feature toggle is set to false" in {
+    "perform auditing" in {
 
         val SUT = new GetTrustController(
           new FakeIdentifierAction(bodyParsers, Organisation),
           auditService,
           desService,
           transformationService,
-          validateIdentififerAction,
-          trustsStoreService,
-          Helpers.stubControllerComponents()
-        )
-
-        val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
-        when(desService.getTrustInfo(any(), any()))
-          .thenReturn(Future.successful(response))
-
-        when(mockConfig.auditingEnabled).thenReturn(false)
-
-        val result = SUT.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
-
-        whenReady(result) { _ =>
-          verify(mockAuditConnector, times(0)).sendExplicitAudit[Any](any(), any())(any(), any(), any())
-        }
-      }
-    }
-
-    "perform auditing" when {
-
-      "the feature toggle is set to true" in {
-
-        val SUT = new GetTrustController(
-          new FakeIdentifierAction(bodyParsers, Organisation),
-          auditService,
-          desService,
-          transformationService,
-          validateIdentififerAction,
-          trustsStoreService,
+          validateIdentifierAction,
           Helpers.stubControllerComponents()
         )
 
         when(desService.getTrustInfo(any(), any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
-        when(mockConfig.auditingEnabled).thenReturn(true)
-
         val result = SUT.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 
         whenReady(result) { _ =>
           verify(mockAuditConnector, times(1)).sendExplicitAudit[Any](any(), any())(any(), any(), any())
         }
-      }
     }
 
     "return 200 - Ok with parked content" in {
