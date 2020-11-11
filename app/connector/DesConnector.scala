@@ -129,9 +129,9 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
 
     trustsStoreService.is5mldEnabled.flatMap { is5MLD =>
       if (is5MLD) {
-        http.GET[GetTrustResponse](get5MLDTrustOrEstateEndpoint(identifier))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)
+        http.GET[GetTrustResponse](get5MLDTrustOrEstateEndpoint(identifier))(GetTrustResponse.httpReads(identifier), implicitly[HeaderCarrier](hc), global)
       } else {
-        http.GET[GetTrustResponse](get4MLDTrustOrEstateEndpoint(identifier))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)
+        http.GET[GetTrustResponse](get4MLDTrustOrEstateEndpoint(identifier))(GetTrustResponse.httpReads(identifier), implicitly[HeaderCarrier](hc), global)
       }
     }
   }

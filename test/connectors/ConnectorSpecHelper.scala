@@ -47,6 +47,19 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
        | "reason": "Submission has not passed validation. Invalid Payload."
        |}""".stripMargin)
 
+  val jsonResponse4005mld: JsValue = Json.parse(
+    s"""
+       |{
+       |  "failures": [
+       |    {
+       |      "code" : "INVALID_IDTYPE",
+       |      "reason" : "Submission has not passed validation. Invalid parameter idType."
+       |    }
+       |  ]
+       |}
+     """.stripMargin
+  )
+
   val jsonResponseAlreadyRegistered: JsValue = Json.parse(
     s"""
        |{
@@ -100,6 +113,7 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
        |}
      """.stripMargin
   )
+
 
   val jsonResponse400InvalidRegime: JsValue = Json.parse(
     s"""
