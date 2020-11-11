@@ -50,19 +50,31 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
 
   "Amend nonEeaBusinessAsset" - {
 
+    val nonEEABusiness = NonEEABusinessType(
+      "1",
+      "TestOrg",
+      AddressType(
+        "Line 1",
+        "Line 2",
+        None,
+        None,
+        Some("NE11NE"), "UK"),
+      "UK",
+      LocalDate.parse("2000-01-01"),
+      None
+    )
+
     val index = 0
 
     "must add a new amend nonEeaBusinessAssetJson transform" in {
       val nonEeaBusinessAssetTransformationService = mock[AssetsTransformationService]
       val controller = new AssetsTransformationController(identifierAction, nonEeaBusinessAssetTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
-      val newDescription = "Some new description"
-
-      when(nonEeaBusinessAssetTransformationService.amendNonEeaBusinessAssetTransformer(any(), any(), any(), any()))
+      when(nonEeaBusinessAssetTransformationService.amendNonEeaBusinessAssetTransformer(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
-        .withBody(Json.toJson(newDescription))
+        .withBody(Json.toJson(nonEEABusiness))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val result = controller.amendNonEeaBusinessAsset("aUTR", index).apply(request)
@@ -72,7 +84,7 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
         equalTo("aUTR"),
         equalTo(index),
         equalTo("id"),
-        equalTo(newDescription))
+        equalTo(nonEEABusiness))(any())
     }
 
     "must return an error for malformed json" in {

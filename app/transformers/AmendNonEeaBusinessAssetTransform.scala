@@ -21,14 +21,19 @@ import java.time.LocalDate
 import play.api.libs.json._
 
 case class AmendNonEeaBusinessAssetTransform(index: Int,
-                                             description: String,
+                                             amended: JsValue,
                                              original: JsValue,
                                              endDate: LocalDate) extends AmendEntityTransform {
 
   override val path: JsPath = __ \ 'details \ 'trust \ 'assets \ 'nonEEABusiness
 
-  override val amended: JsValue = original.as[JsObject]
-    .deepMerge(Json.obj("description" -> description)) - "lineNo" - "bpMatchStatus"
+}
+
+object AmendNonEeaBusinessAssetTransform {
+
+  val key = "AmendNonEeaBusinessAssetTransform"
+
+  implicit val format: Format[AmendNonEeaBusinessAssetTransform] = Json.format[AmendNonEeaBusinessAssetTransform]
 }
 
 

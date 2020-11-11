@@ -25,7 +25,7 @@ case class RemoveAsset(endDate: LocalDate, index: Int, `type`: String)
 
 object RemoveAsset {
   val validAssetTypes: Seq[String] = Seq(
-    "noneEeaBusinessAsset"
+    "nonEEABusiness"
   )
 
   val reads: Reads[RemoveAsset] = Json.reads[RemoveAsset].filter(rb => validAssetTypes.contains(rb.`type`))

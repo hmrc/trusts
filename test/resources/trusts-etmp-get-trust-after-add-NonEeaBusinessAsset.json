@@ -36,7 +36,7 @@
             "assetMonetaryAmount": 100000
           }
         ],
-        "nonEeaBusiness": [
+        "nonEEABusiness": [
           {
             "address": {
               "country": "UK",

@@ -61,21 +61,21 @@ class AssetsTransformationService @Inject()(
     }
   }
 
-  private def findAssetJson(json: JsValue, nonEEABusinessType: String, index: Int): Try[JsObject] = {
-    val nonEEABusinessAssetPath = (__ \ 'details \ 'trust \ 'Assets \ nonEEABusinessType \ index).json
-    json.transform(nonEEABusinessAssetPath.pick).fold(
-      _ => Failure(InternalServerErrorException("Could not locate nonEeaBusinessAsset at index")),
+  private def findAssetJson(json: JsValue, assetType: String, index: Int): Try[JsObject] = {
+    val assetPath = (__ \ 'details \ 'trust \ 'assets \ assetType \ index).json
+    json.transform(assetPath.pick).fold(
+      _ => Failure(InternalServerErrorException("Could not locate assetType at index")),
       value => scala.util.Success(value.as[JsObject])
     )
   }
 
-  def amendNonEeaBusinessAssetTransformer(utr: String, index: Int, internalId: String, description: String)(implicit hc: HeaderCarrier): Future[Success.type] = {
+  def amendNonEeaBusinessAssetTransformer(utr: String, index: Int, internalId: String, amended: NonEEABusinessType)(implicit hc: HeaderCarrier): Future[Success.type] = {
     getTransformedTrustJson(utr, internalId)
-    .map(findAssetJson(_, "nonEEABusinessType", index))
+    .map(findAssetJson(_, "nonEEABusiness", index))
       .flatMap(Future.fromTry)
       .flatMap { assetJson =>
 
-      transformationService.addNewTransform(utr, internalId, AmendNonEeaBusinessAssetTransform(index, description, assetJson, localDateService.now))
+      transformationService.addNewTransform(utr, internalId, AmendNonEeaBusinessAssetTransform(index, Json.toJson(amended), assetJson, localDateService.now))
         .map(_ => Success)
       }
   }

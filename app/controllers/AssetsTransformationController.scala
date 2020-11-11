@@ -37,13 +37,13 @@ class AssetsTransformationController @Inject()(
 
   def amendNonEeaBusinessAsset(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
-      request.body.validate[JsString] match {
-        case JsSuccess(description, _) =>
+      request.body.validate[NonEEABusinessType] match {
+        case JsSuccess(nonEEABusiness, _) =>
           assetsTransformationService.amendNonEeaBusinessAssetTransformer(
             utr,
             index,
             request.identifier,
-            description.value
+            nonEEABusiness
           ) map { _ =>
             Ok
           }
