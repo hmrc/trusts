@@ -19,7 +19,7 @@ package transformers
 import java.time.LocalDate
 
 import models.AddressType
-import models.variation.{NonEEABusinessType, UnidentifiedType}
+import models.variation.NonEEABusinessType
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
@@ -38,26 +38,30 @@ class RemoveNonEeaBusinessAssetTransformSpec extends FreeSpec with MustMatchers 
   private def nonEeaBusinessAssetJson(value1 : String, endDate: Option[LocalDate] = None, withLineNo: Boolean = true) = {
     val a = Json.obj("field1" -> value1, "field2" -> "value20")
 
-    val b = if (endDate.isDefined) {a.deepMerge(Json.obj("entityEnd" -> endDate.get))
-    } else a
+    val b = if (endDate.isDefined) {a.deepMerge(Json.obj("endDate" -> endDate.get))} else a
 
-    if (withLineNo) {b.deepMerge(Json.obj("lineNo" -> 12))}
-    else b
+    if (withLineNo) {b.deepMerge(Json.obj("lineNo" -> 12))} else b
   }
 
-  private def buildInputJson(nonEeaBusinessAssetType: String, nonEeaBusinessAssetData: Seq[JsValue]) = {
+  private def buildInputJson(nonEeaBusinessAssetData: Seq[JsValue]) = {
     val baseJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-    val adder = (__ \ "details" \ "trust" \ "assets" \ nonEeaBusinessAssetType).json
+    val adder = (__ \ "details" \ "trust" \ "assets" \ "nonEEABusiness").json
       .put(JsArray(nonEeaBusinessAssetData))
 
     baseJson.as[JsObject](__.json.update(adder))
   }
 
+  private val inputJson = buildInputJson(Seq(
+    nonEeaBusinessAssetJson("One"),
+    nonEeaBusinessAssetJson("Two"),
+    nonEeaBusinessAssetJson("Three")
+  ))
+
   "Remove nonEeaBusinessAsset Transforms should round trip through JSON as part of Composed Transform" in {
     val OUT = ComposedDeltaTransform(Seq(
-      RemoveNonEeaBusinessAssetTransform(56, nonEeaBusinessAssetJson("Blah Blah Blah"), LocalDate.of(1563, 10, 23), "unidentified"),
-      RemoveNonEeaBusinessAssetTransform(12, nonEeaBusinessAssetJson("Foo"), LocalDate.of(2317, 12, 21),  "individualDetails")
+      RemoveNonEeaBusinessAssetTransform(56, nonEeaBusinessAssetJson("Blah Blah Blah"), LocalDate.of(1563, 10, 23)),
+      RemoveNonEeaBusinessAssetTransform(12, nonEeaBusinessAssetJson("Foo"), LocalDate.of(2317, 12, 21))
     ))
 
     Json.toJson(OUT).validate[ComposedDeltaTransform] match {
@@ -68,19 +72,14 @@ class RemoveNonEeaBusinessAssetTransformSpec extends FreeSpec with MustMatchers 
 
   "the remove nonEeaBusiness asset normal transform must" - {
 
-    "remove an nonEeaBusiness asset from the list that is returned to the frontend" in {
-      val inputJson = buildInputJson("unidentified", Seq(
-        nonEeaBusinessAssetJson("One"),
-        nonEeaBusinessAssetJson("Two"),
-        nonEeaBusinessAssetJson("Three")
-      ))
+    "remove a nonEeaBusiness asset from the list that is returned to the frontend" in {
 
-      val expectedOutput = buildInputJson("unidentified", Seq(
+      val expectedOutput = buildInputJson(Seq(
         nonEeaBusinessAssetJson("One"),
         nonEeaBusinessAssetJson("Three")
       ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveNonEeaBusinessAssetTransform(1, Json.obj(), LocalDate.of(2018, 4, 21), "unidentified")))
+      val OUT = ComposedDeltaTransform(Seq(RemoveNonEeaBusinessAssetTransform(1, Json.obj(), LocalDate.of(2018, 4, 21))))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe expectedOutput
@@ -89,13 +88,8 @@ class RemoveNonEeaBusinessAssetTransformSpec extends FreeSpec with MustMatchers 
     }
 
     "not affect the document if the index is too high" in {
-      val inputJson = buildInputJson("unidentified", Seq(
-        nonEeaBusinessAssetJson("One"),
-        nonEeaBusinessAssetJson("Two"),
-        nonEeaBusinessAssetJson("Three")
-      ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveNonEeaBusinessAssetTransform(10, Json.obj(), LocalDate.of(2018, 4, 21), "unidentified")))
+      val OUT = ComposedDeltaTransform(Seq(RemoveNonEeaBusinessAssetTransform(10, Json.obj(), LocalDate.of(2018, 4, 21))))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
@@ -104,13 +98,8 @@ class RemoveNonEeaBusinessAssetTransformSpec extends FreeSpec with MustMatchers 
     }
 
     "not affect the document if the index is too low" in {
-      val inputJson = buildInputJson("unidentified", Seq(
-        nonEeaBusinessAssetJson("One"),
-        nonEeaBusinessAssetJson("Two"),
-        nonEeaBusinessAssetJson("Three")
-      ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveNonEeaBusinessAssetTransform(-1, Json.obj(), LocalDate.of(2018, 4, 21), "unidentified")))
+      val OUT = ComposedDeltaTransform(Seq(RemoveNonEeaBusinessAssetTransform(-1, Json.obj(), LocalDate.of(2018, 4, 21))))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
@@ -118,19 +107,17 @@ class RemoveNonEeaBusinessAssetTransformSpec extends FreeSpec with MustMatchers 
       }
     }
     "remove the section if the last nonEeaBusinessAsset in that section is removed" in {
-      val inputJson = buildInputJson("charity", Seq(
-        nonEeaBusinessAssetJson("One")
-      ))
+      val inputJson = buildInputJson(Seq(nonEeaBusinessAssetJson("One")))
 
       val transforms = Seq(
-        RemoveNonEeaBusinessAssetTransform(0, nonEeaBusinessAssetJson("One", None, withLineNo = false), LocalDate.of(2018, 4, 21), "charity")
+        RemoveNonEeaBusinessAssetTransform(0, nonEeaBusinessAssetJson("One", None, withLineNo = false), LocalDate.of(2018, 4, 21))
       )
 
       val OUT = ComposedDeltaTransform(transforms)
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value.transform(
-          (JsPath()  \ "details" \ "trust" \ "assets" \ "nonEeaBusinessAsset" ).json.pick).isError mustBe true
+          (JsPath()  \ "details" \ "trust" \ "assets" \ "nonEEABusiness" ).json.pick).isError mustBe true
         case _ => fail("Transform failed")
       }
     }
@@ -140,13 +127,8 @@ class RemoveNonEeaBusinessAssetTransformSpec extends FreeSpec with MustMatchers 
   "the remove nonEeaBusinessAsset declaration transform must" - {
 
     "set an end date on  an nonEeaBusinessAsset from the list that is sent to ETMP" in {
-      val inputJson = buildInputJson("unidentified", Seq(
-        nonEeaBusinessAssetJson("One"),
-        nonEeaBusinessAssetJson("Two"),
-        nonEeaBusinessAssetJson("Three")
-      ))
 
-      val expectedOutput = buildInputJson("unidentified", Seq(
+      val expectedOutput = buildInputJson(Seq(
         nonEeaBusinessAssetJson("One"),
         nonEeaBusinessAssetJson("Three"),
         nonEeaBusinessAssetJson("Two", Some(LocalDate.of(2018, 4, 21)))
@@ -156,7 +138,7 @@ class RemoveNonEeaBusinessAssetTransformSpec extends FreeSpec with MustMatchers 
       val repo = mock[TransformationRepository]
       val desService = mock[DesService]
       val auditService = mock[AuditService]
-      val transforms = Seq(RemoveNonEeaBusinessAssetTransform( 1, nonEeaBusinessAssetJson("Two"), LocalDate.of(2018, 4, 21), "unidentified"))
+      val transforms = Seq(RemoveNonEeaBusinessAssetTransform( 1, nonEeaBusinessAssetJson("Two"), LocalDate.of(2018, 4, 21)))
       when(repo.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))
 
       val SUT = new TransformationService(repo, desService, auditService)
@@ -168,18 +150,13 @@ class RemoveNonEeaBusinessAssetTransformSpec extends FreeSpec with MustMatchers 
     }
 
     "ignore a nonEeaBusinessAsset that was added then removed" in {
-      val inputJson = buildInputJson("unidentified", Seq(
-        nonEeaBusinessAssetJson("One"),
-        nonEeaBusinessAssetJson("Two"),
-        nonEeaBusinessAssetJson("Three")
-      ))
 
       val repo = mock[TransformationRepository]
       val desService = mock[DesService]
       val auditService = mock[AuditService]
       val transforms = Seq(
         AddNonEeaBusinessAssetTransform(NonEEABusinessType("01", "TestOrg", AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK"), "UK", LocalDate.parse("1967-12-30"),None)),
-        RemoveNonEeaBusinessAssetTransform(3, nonEeaBusinessAssetJson("Two", None, withLineNo = false), LocalDate.of(2018, 4, 21), "unidentified")
+        RemoveNonEeaBusinessAssetTransform(3, nonEeaBusinessAssetJson("Two", None, withLineNo = false), LocalDate.of(2018, 4, 21))
       )
 
       when(repo.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))
@@ -193,13 +170,8 @@ class RemoveNonEeaBusinessAssetTransformSpec extends FreeSpec with MustMatchers 
     }
 
     "not affect the document if the index is too high" in {
-      val inputJson = buildInputJson("unidentified", Seq(
-        nonEeaBusinessAssetJson("One"),
-        nonEeaBusinessAssetJson("Two"),
-        nonEeaBusinessAssetJson("Three")
-      ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveNonEeaBusinessAssetTransform(10, Json.obj(), LocalDate.of(2018, 4, 21), "unidentified")))
+      val OUT = ComposedDeltaTransform(Seq(RemoveNonEeaBusinessAssetTransform(10, Json.obj(), LocalDate.of(2018, 4, 21))))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
@@ -208,13 +180,8 @@ class RemoveNonEeaBusinessAssetTransformSpec extends FreeSpec with MustMatchers 
     }
 
     "not affect the document if the index is too low" in {
-      val inputJson = buildInputJson("unidentified", Seq(
-        nonEeaBusinessAssetJson("One"),
-        nonEeaBusinessAssetJson("Two"),
-        nonEeaBusinessAssetJson("Three")
-      ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveNonEeaBusinessAssetTransform(-1, Json.obj(), LocalDate.of(2018, 4, 21), "unidentified")))
+      val OUT = ComposedDeltaTransform(Seq(RemoveNonEeaBusinessAssetTransform(-1, Json.obj(), LocalDate.of(2018, 4, 21))))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson

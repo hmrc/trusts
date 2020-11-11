@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import controllers.actions.FakeIdentifierAction
 import models.variation._
-import models.{AddressType, NameType, Success}
+import models.{AddressType, Success}
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -31,8 +31,8 @@ import play.api.libs.json.Json
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
-import services.{AssetsTransformationService, BeneficiaryTransformationService}
-import transformers.remove.{RemoveAsset, RemoveBeneficiary}
+import services.AssetsTransformationService
+import transformers.remove.RemoveAsset
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -84,7 +84,8 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
         equalTo("aUTR"),
         equalTo(index),
         equalTo("id"),
-        equalTo(nonEEABusiness))(any())
+        equalTo(nonEEABusiness)
+      )(any())
     }
 
     "must return an error for malformed json" in {
@@ -102,16 +103,16 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
 
   "remove nonEeaBusinessAsset" - {
 
-    "add an new remove nonEeaBusinessAsset transform " in {
+    "add a new remove nonEeaBusinessAsset transform " in {
       val nonEeaBusinessAssetTransformationService = mock[AssetsTransformationService]
       val controller = new AssetsTransformationController(identifierAction, nonEeaBusinessAssetTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
-      when(nonEeaBusinessAssetTransformationService.removeAsset(any(), any(), any()))
+      when(nonEeaBusinessAssetTransformationService.removeAsset(any(), any(), any())(any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.obj(
-          "type" -> "unidentified",
+          "type" -> "nonEEABusiness",
           "endDate" -> LocalDate.of(2018, 2, 24),
           "index" -> 24
         ))
@@ -124,7 +125,8 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
         .removeAsset(
           equalTo("UTRUTRUTR"),
           equalTo("id"),
-          equalTo(RemoveAsset(LocalDate.of(2018, 2, 24), 24, "unidentified")))
+          equalTo(RemoveAsset(LocalDate.of(2018, 2, 24), 24, "nonEEABusiness"))
+        )(any())
     }
 
     "return an error when json is invalid" in {

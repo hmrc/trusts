@@ -51,9 +51,9 @@ trait JsonOperations {
     }
   }
 
-   def endEntity(input: JsValue, path: JsPath, entityJson: JsValue, endDate: LocalDate): JsResult[JsValue] = {
+  def endEntity(input: JsValue, path: JsPath, entityJson: JsValue, endDate: LocalDate, endDateField: String = "entityEnd"): JsResult[JsValue] = {
     if (isKnownToEtmp(entityJson)) {
-      addToList(input, path, objectPlusField(entityJson,"entityEnd", Json.toJson(endDate)))
+      addToList(input, path, objectPlusField(entityJson, endDateField, Json.toJson(endDate)))
     } else {
       JsSuccess(input)
     }

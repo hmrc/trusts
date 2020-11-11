@@ -26,31 +26,31 @@ import utils.JsonUtils
 
 class AmendNonEeaBusinessAssetTransformSpec extends FreeSpec with MustMatchers {
 
-  private val originalJson = Json.parse(
-    """
-      |{
-      |  "lineNo":"1",
-      |  "bpMatchStatus": "01",
-      |  "orgName": "TestOrg",
-      |  "Address": "Line 1, Line 2, NE11NE, UK",
-      |  "govLawCountry": "UK",
-      |  "startDate": "2000-01-01"
-      |}
-      |""".stripMargin)
+  private val address =  AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "GB")
 
-  private val endDate = LocalDate.of(2012, 12, 20)
+  private val originalNonEeaBusinessAsset: NonEEABusinessType = NonEEABusinessType(
+    lineNo = "2",
+    orgName = "Original Name",
+    address = address,
+    govLawCountry = "GB",
+    startDate = LocalDate.parse("2010-01-01"),
+    endDate = None
+  )
+
+  private val amendedNonEeaBusinessAsset: NonEEABusinessType = originalNonEeaBusinessAsset.copy(orgName = "Amended Name")
+
+  private val endDate = LocalDate.parse("2012-12-20")
 
   "AmendNonEeaBusinessAssetTransform should" - {
 
     "before declaration" - {
 
-      "successfully update a AmendNonEeaBusinessAsset's details" in {
+      "successfully update a NonEeaBusinessAsset's details" in {
 
-        val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-unidentified-beneficiary-transform-before.json")
-        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-unidentified-beneficiary-transform-after.json")
-        val address =  AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK")
-        val amendedNonEeaBusinessAsset = Json.toJson(NonEEABusinessType("1", "TestOrg", address, "UK", LocalDate.parse("2000-01-01"), None))
-        val transformer = AmendNonEeaBusinessAssetTransform(1, amendedNonEeaBusinessAsset, originalJson, endDate)
+        val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-non-eea-business-asset-transform-before.json")
+        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-non-eea-business-asset-transform-after.json")
+
+        val transformer = AmendNonEeaBusinessAssetTransform(1, Json.toJson(amendedNonEeaBusinessAsset), Json.toJson(originalNonEeaBusinessAsset), endDate)
 
         val result = transformer.applyTransform(beforeJson).get
         result mustBe afterJson
@@ -60,11 +60,11 @@ class AmendNonEeaBusinessAssetTransformSpec extends FreeSpec with MustMatchers {
     "at declaration time" - {
 
       "set an end date for the original NonEeaBusinessAsset, adding in the amendment as a new NonEeaBusinessAsset for a NonEeaBusinessAsset known by etmp" in {
-        val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-unidentified-beneficiary-transform-before.json")
-        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-unidentified-beneficiary-transform-after-declaration.json")
-        val address =  AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK")
-        val amendedNonEeaBusinessAsset = Json.toJson(NonEEABusinessType("1", "TestOrg", address, "UK", LocalDate.parse("2000-01-01"), None))
-        val transformer = AmendNonEeaBusinessAssetTransform(1, amendedNonEeaBusinessAsset, originalJson, endDate)
+
+        val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-non-eea-business-asset-transform-before.json")
+        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-non-eea-business-asset-transform-after-declaration.json")
+
+        val transformer = AmendNonEeaBusinessAssetTransform(1, Json.toJson(amendedNonEeaBusinessAsset), Json.toJson(originalNonEeaBusinessAsset), endDate)
 
         val transformed = transformer.applyTransform(beforeJson).get
         val result = transformer.applyDeclarationTransform(transformed).get

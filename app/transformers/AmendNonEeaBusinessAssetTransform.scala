@@ -27,6 +27,7 @@ case class AmendNonEeaBusinessAssetTransform(index: Int,
 
   override val path: JsPath = __ \ 'details \ 'trust \ 'assets \ 'nonEEABusiness
 
+  override val endDateField: String = "endDate"
 }
 
 object AmendNonEeaBusinessAssetTransform {
@@ -35,5 +36,3 @@ object AmendNonEeaBusinessAssetTransform {
 
   implicit val format: Format[AmendNonEeaBusinessAssetTransform] = Json.format[AmendNonEeaBusinessAssetTransform]
 }
-
-

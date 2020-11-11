@@ -22,7 +22,6 @@ import play.api.libs.json.{Format, Json, OWrites, Reads}
 
 case class RemoveAsset(endDate: LocalDate, index: Int, `type`: String)
 
-
 object RemoveAsset {
   val validAssetTypes: Seq[String] = Seq(
     "nonEEABusiness"

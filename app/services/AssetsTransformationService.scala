@@ -23,18 +23,16 @@ import models.get_trust.TrustProcessedResponse
 import models.variation._
 import play.api.libs.json.{JsObject, JsValue, Json, __}
 import transformers._
-import transformers.remove.{RemoveAsset, RemoveBeneficiary}
+import transformers.remove.RemoveAsset
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}
 
 class AssetsTransformationService @Inject()(
-                                                  transformationService: TransformationService,
-                                                  localDateService: LocalDateService
-                                                )
-                                           (implicit ec:ExecutionContext)
-  extends JsonOperations {
+                                             transformationService: TransformationService,
+                                             localDateService: LocalDateService
+                                           )(implicit ec:ExecutionContext) extends JsonOperations {
 
   def removeAsset(utr: String, internalId: String, removeAsset: RemoveAsset)(implicit hc: HeaderCarrier): Future[Success.type] = {
 
@@ -46,8 +44,7 @@ class AssetsTransformationService @Inject()(
             RemoveNonEeaBusinessAssetTransform(
               removeAsset.index,
               assetJson,
-              removeAsset.endDate,
-              removeAsset.`type`
+              removeAsset.endDate
             )
         ).map(_ => Success)
       }
@@ -69,7 +66,8 @@ class AssetsTransformationService @Inject()(
     )
   }
 
-  def amendNonEeaBusinessAssetTransformer(utr: String, index: Int, internalId: String, amended: NonEEABusinessType)(implicit hc: HeaderCarrier): Future[Success.type] = {
+  def amendNonEeaBusinessAssetTransformer(utr: String, index: Int, internalId: String, amended: NonEEABusinessType)
+                                         (implicit hc: HeaderCarrier): Future[Success.type] = {
     getTransformedTrustJson(utr, internalId)
     .map(findAssetJson(_, "nonEEABusiness", index))
       .flatMap(Future.fromTry)

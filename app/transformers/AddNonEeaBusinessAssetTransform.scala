@@ -19,9 +19,7 @@ package transformers
 import models.variation.NonEEABusinessType
 import play.api.libs.json._
 
-case class AddNonEeaBusinessAssetTransform(nonEEABusiness: NonEEABusinessType)
-  extends DeltaTransform
-  with JsonOperations {
+case class AddNonEeaBusinessAssetTransform(nonEEABusiness: NonEEABusinessType) extends DeltaTransform with JsonOperations {
 
   private lazy val path = __ \ 'details \ 'trust \ 'assets \ 'nonEEABusiness
 
