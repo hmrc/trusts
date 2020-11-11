@@ -128,11 +128,12 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
       s" getting playback for trust for correlationId: $correlationId")
 
     trustsStoreService.is5mldEnabled.flatMap { is5MLD =>
-      if (is5MLD) {
-        http.GET[GetTrustResponse](get5MLDTrustOrEstateEndpoint(identifier))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)
+      val url = if (is5MLD) {
+        get5MLDTrustOrEstateEndpoint(identifier)
       } else {
-        http.GET[GetTrustResponse](get4MLDTrustOrEstateEndpoint(identifier))(GetTrustResponse.httpReads, implicitly[HeaderCarrier](hc), global)
+        get4MLDTrustOrEstateEndpoint(identifier)
       }
+      http.GET[GetTrustResponse](url)(GetTrustResponse.httpReads(identifier), implicitly[HeaderCarrier](hc), global)
     }
   }
 

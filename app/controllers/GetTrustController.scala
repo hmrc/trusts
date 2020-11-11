@@ -39,8 +39,6 @@ class GetTrustController @Inject()(identify: IdentifierAction,
 
 
   val errorAuditMessages: Map[GetTrustResponse, String] = Map(
-    InvalidUTRResponse -> "The UTR/URN provided is invalid.",
-    InvalidRegimeResponse -> "Invalid regime received from DES.",
     BadRequestResponse -> "Bad Request received from DES.",
     ResourceNotFoundResponse -> "Not Found received from DES.",
     InternalServerErrorResponse -> "Internal Server Error received from DES.",
@@ -187,11 +185,9 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
   }
 
-  private def doGet(identifier: String,
-                    applyTransformations: Boolean,
-                    refreshEtmpData: Boolean = false
-                   )
+  private def doGet(identifier: String, applyTransformations: Boolean, refreshEtmpData: Boolean = false)
                    (handleResult: GetTrustSuccessResponse => Result): Action[AnyContent] =
+
     (validateIdentifier(identifier) andThen identify).async {
       implicit request =>
 
