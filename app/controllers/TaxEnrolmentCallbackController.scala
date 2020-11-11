@@ -32,7 +32,7 @@ class TaxEnrolmentCallbackController @Inject()(
                                                 cc: ControllerComponents
                                                ) extends BackendController(cc) with Logging {
 
-  def subscriptionCallback() = Action.async(parse.json) {
+  def subscriptionCallback(trn: String) = Action.async(parse.json) {
     implicit request =>
       val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 

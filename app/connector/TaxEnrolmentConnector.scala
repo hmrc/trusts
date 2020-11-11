@@ -39,28 +39,39 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
       CONTENT_TYPE -> CONTENT_TYPE_JSON
     )
 
-  def getServiceName()(implicit hc: HeaderCarrier): Future[String] = trustsStoreService.is5mldEnabled.map {
-    case true => config.taxEnrolmentsPayloadBodyServiceName5MLD
-    case _ => config.taxEnrolmentsPayloadBodyServiceName
-  }
+  def is5MLD()(implicit hc: HeaderCarrier): Future[Boolean] = trustsStoreService.is5mldEnabled()
 
-  def getResponse(subscriptionId: String, serviceName: String, taxable: Boolean)(implicit hc: HeaderCarrier) :  Future[TaxEnrolmentSuscriberResponse] = {
+  def getResponse(subscriptionId: String,
+                  is5MLD: Boolean,
+                  taxable: Boolean,
+                  trn: String)(implicit hc: HeaderCarrier) :  Future[TaxEnrolmentSuscriberResponse] = {
     val taxEnrolmentsEndpoint = s"${config.taxEnrolmentsUrl}/tax-enrolments/subscriptions/$subscriptionId/subscriber"
     val taxEnrolmentHeaders = hc.withExtraHeaders(headers: _*)
 
-    val taxEnrolmentSubscriptionRequest = TaxEnrolmentSubscription(
-      serviceName = serviceName,
-      callback = config.taxEnrolmentsPayloadBodyCallback,
-      etmpId = subscriptionId)
+    val taxEnrolmentSubscriptionRequest = (is5MLD, taxable) match {
+      case (true, false) => {
+        TaxEnrolmentSubscription(
+          serviceName = config.taxEnrolmentsPayloadBodyServiceNameNonTaxable,
+          callback = config.taxEnrolmentsPayloadBodyCallbackNonTaxable(trn),
+          etmpId = subscriptionId)
+      }
+      case (_, _) => {
+        TaxEnrolmentSubscription(
+          serviceName = config.taxEnrolmentsPayloadBodyServiceName,
+          callback = config.taxEnrolmentsPayloadBodyCallback(trn),
+          etmpId = subscriptionId)
+      }
+    }
+
     val response = http.PUT[JsValue, TaxEnrolmentSuscriberResponse](taxEnrolmentsEndpoint, Json.toJson(taxEnrolmentSubscriptionRequest))
     (Writes.JsValueWrites ,TaxEnrolmentSuscriberResponse.httpReads,taxEnrolmentHeaders.headers, global)
     response
   }
 
-  override  def enrolSubscriber(subscriptionId: String, taxable: Boolean)(implicit hc: HeaderCarrier) :  Future[TaxEnrolmentSuscriberResponse] = {
+  override  def enrolSubscriber(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier) :  Future[TaxEnrolmentSuscriberResponse] = {
     for {
-      serviceName <- getServiceName
-      response <- getResponse(subscriptionId, serviceName, taxable)
+      is5MLD <- is5MLD
+      response <- getResponse(subscriptionId, is5MLD, taxable, trn)
     } yield
     response
   }
@@ -69,5 +80,5 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
 
 @ImplementedBy(classOf[TaxEnrolmentConnectorImpl])
 trait TaxEnrolmentConnector {
-  def enrolSubscriber(subscriptionId: String, taxable: Boolean)(implicit hc: HeaderCarrier):  Future[TaxEnrolmentSuscriberResponse]
+  def enrolSubscriber(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier):  Future[TaxEnrolmentSuscriberResponse]
 }

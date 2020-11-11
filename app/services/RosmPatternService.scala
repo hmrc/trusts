@@ -35,7 +35,7 @@ class RosmPatternServiceImpl @Inject()( desService :DesService, taxEnrolmentServ
 
     for {
       subscriptionIdResponse <- desService.getSubscriptionId(trn = trn)
-      taxEnrolmentSuscriberResponse <- taxEnrolmentService.setSubscriptionId(subscriptionIdResponse.subscriptionId, taxable)
+      taxEnrolmentSuscriberResponse <- taxEnrolmentService.setSubscriptionId(subscriptionIdResponse.subscriptionId, taxable, trn)
     } yield {
       taxEnrolmentSuscriberResponse
     }

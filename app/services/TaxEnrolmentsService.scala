@@ -38,14 +38,17 @@ class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector :TaxEnrolmentConn
   private val DELAY_SECONDS_BETWEEN_REQUEST = config.delayToConnectTaxEnrolment
   private val MAX_TRIES = config.maxRetry
 
-  override def setSubscriptionId(subscriptionId: String, taxable: Boolean)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] = {
+  override def setSubscriptionId(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] = {
     implicit val as: ActorSystem = ActorSystem()
-    enrolSubscriberWithRetry(subscriptionId, 1, taxable)
+    enrolSubscriberWithRetry(subscriptionId, 1, taxable, trn)
   }
 
-  private def enrolSubscriberWithRetry(subscriptionId: String, acc: Int, taxable: Boolean)
+  private def enrolSubscriberWithRetry(subscriptionId: String,
+                                       acc: Int,
+                                       taxable: Boolean,
+                                       trn: String)
                                       (implicit as: ActorSystem, hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] = {
-    makeRequest(subscriptionId, taxable) recoverWith {
+    makeRequest(subscriptionId, taxable, trn: String) recoverWith {
       case NonFatal(_) =>
         if (isMaxRetryReached(acc)) {
           logger.error(s"[enrolSubscriberWithRetry][Session ID: ${Session.id(hc)}]" +
@@ -55,7 +58,7 @@ class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector :TaxEnrolmentConn
           after(DELAY_SECONDS_BETWEEN_REQUEST.seconds, as.scheduler){
             logger.error(s"[enrolSubscriberWithRetry][Session ID: ${Session.id(hc)}]" +
               s" Retrying to enrol subscription id $subscriptionId,  $acc")
-            enrolSubscriberWithRetry(subscriptionId, acc + 1, taxable)
+            enrolSubscriberWithRetry(subscriptionId, acc + 1, taxable, trn)
           }
       }
     }
@@ -64,13 +67,13 @@ class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector :TaxEnrolmentConn
   private def isMaxRetryReached(currentCounter: Int): Boolean =
     currentCounter == MAX_TRIES
 
-  private def makeRequest(subscriptionId: String, taxable: Boolean)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] = {
-    taxEnrolmentConnector.enrolSubscriber(subscriptionId, taxable)
+  private def makeRequest(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] = {
+    taxEnrolmentConnector.enrolSubscriber(subscriptionId, taxable, trn: String)
   }
 
 }
 
 @ImplementedBy(classOf[TaxEnrolmentsServiceImpl])
 trait TaxEnrolmentsService{
-   def setSubscriptionId(subscriptionId: String, taxable: Boolean)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse]
+   def setSubscriptionId(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSuscriberResponse]
 }
