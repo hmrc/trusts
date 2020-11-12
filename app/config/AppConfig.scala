@@ -58,8 +58,6 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
 
   val maxRetry : Int = configuration.get[Int]("microservice.services.trusts.maxRetry")
 
-  val auditingEnabled : Boolean = configuration.get[Boolean]("microservice.services.trusts.features.auditing.enabled")
-
   val ttlInSeconds: Int = configuration.get[Int]("mongodb.ttlSeconds")
 
   val registrationTtlInSeconds: Int = configuration.get[Int]("mongodb.registration.ttlSeconds")

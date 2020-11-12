@@ -37,12 +37,6 @@ class ValidateIdentifierAction @Inject()(identifier: String)(implicit val parser
                                                              val executionContext: ExecutionContext)
   extends ActionFilter[Request] with ActionBuilder[Request, AnyContent] {
 
-  /**
-   * TRUS-3086 Spike thoughts:
-   * This could be a transformer instead to change the request to return an IdentifierRequest(id: T) where
-   * T is of type Identifier with two subclasses case class UTR(value) OR case class URN(value)
-   */
-
   override protected def filter[A](request: Request[A]): Future[Option[Result]] = Future.successful{
 
     identifier match {

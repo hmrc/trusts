@@ -22,12 +22,12 @@ import org.mockito.Mockito._
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
 import play.api.libs.json.Json
-import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import controllers.actions.FakeIdentifierAction
 import exceptions._
+import models.auditing.TrustAuditing
 import models.{DeclarationForApi, DeclarationName, NameType}
 import services._
 
@@ -35,7 +35,7 @@ import scala.concurrent.Future
 
 class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach  with IntegrationPatience {
 
-  private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+  private lazy val bodyParsers = Helpers.stubControllerComponents().parsers.default
 
   private lazy val mockAuditService: AuditService = mock[AuditService]
 
@@ -56,8 +56,6 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       Helpers.stubControllerComponents()
     )
   }
-
-  private val trustVariationsAuditEvent = "TrustVariation"
 
   ".declare" should {
     "Return bad request when declaring No change and there is a form bundle number mismatch" in {
@@ -82,7 +80,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       )
 
       verify(mockAuditService).auditErrorResponse(
-        Meq(trustVariationsAuditEvent),
+        Meq(TrustAuditing.TRUST_VARIATION_SUBMISSION_FAILED),
         any(),
         Meq("id"),
         Meq("Cached ETMP data stale.")

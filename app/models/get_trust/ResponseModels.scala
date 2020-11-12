@@ -20,10 +20,6 @@ import play.api.libs.json.JsValue
 
 sealed trait TrustErrorResponse extends GetTrustResponse
 
-case object InvalidUTRResponse extends TrustErrorResponse
-
-case object InvalidRegimeResponse extends TrustErrorResponse
-
 case object BadRequestResponse extends TrustErrorResponse
 
 case object ResourceNotFoundResponse extends TrustErrorResponse

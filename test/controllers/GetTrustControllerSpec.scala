@@ -52,11 +52,9 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
   private val transformationService = mock[TransformationService]
 
-  private val trustsStoreService = mock[TrustsStoreService]
-
   private val auditService = new AuditService(mockAuditConnector, mockConfig)
 
-  private val validateIdentififerAction = app.injector.instanceOf[ValidateIdentifierActionProvider]
+  private val validateIdentifierAction = app.injector.instanceOf[ValidateIdentifierActionProvider]
 
   lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
@@ -66,7 +64,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
   private def getTrustController = {
     val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation),
-      mockedAuditService, desService, transformationService, validateIdentififerAction, trustsStoreService, Helpers.stubControllerComponents())
+      mockedAuditService, desService, transformationService, validateIdentifierAction, Helpers.stubControllerComponents())
 
     SUT
   }
@@ -74,6 +72,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
   val invalidUTR = "1234567"
   val utr = "1234567890"
   val urn = "1234567890ABCDE"
+  val invalidURN = "1234567890%£$£$"
 
   ".getFromEtmp" when {
 
@@ -82,7 +81,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       "reset the cache and clear transforms before calling get" in {
 
         val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation),
-          auditService, desService, transformationService,validateIdentififerAction, trustsStoreService, Helpers.stubControllerComponents())
+          auditService, desService, transformationService,validateIdentifierAction, Helpers.stubControllerComponents())
 
         val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
         when(desService.resetCache(any(), any()))
@@ -108,7 +107,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       "reset the cache and clear transforms before calling get" in {
 
         val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation),
-          auditService, desService, transformationService,validateIdentififerAction, trustsStoreService, Helpers.stubControllerComponents())
+          auditService, desService, transformationService,validateIdentifierAction, Helpers.stubControllerComponents())
 
         val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
         when(desService.resetCache(any(), any()))
@@ -134,58 +133,25 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
   ".get" should {
 
-    "not perform auditing" when {
-      "the feature toggle is set to false" in {
+    "perform auditing" in {
 
         val SUT = new GetTrustController(
           new FakeIdentifierAction(bodyParsers, Organisation),
           auditService,
           desService,
           transformationService,
-          validateIdentififerAction,
-          trustsStoreService,
-          Helpers.stubControllerComponents()
-        )
-
-        val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
-        when(desService.getTrustInfo(any(), any()))
-          .thenReturn(Future.successful(response))
-
-        when(mockConfig.auditingEnabled).thenReturn(false)
-
-        val result = SUT.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
-
-        whenReady(result) { _ =>
-          verify(mockAuditConnector, times(0)).sendExplicitAudit[Any](any(), any())(any(), any(), any())
-        }
-      }
-    }
-
-    "perform auditing" when {
-
-      "the feature toggle is set to true" in {
-
-        val SUT = new GetTrustController(
-          new FakeIdentifierAction(bodyParsers, Organisation),
-          auditService,
-          desService,
-          transformationService,
-          validateIdentififerAction,
-          trustsStoreService,
+          validateIdentifierAction,
           Helpers.stubControllerComponents()
         )
 
         when(desService.getTrustInfo(any(), any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
-        when(mockConfig.auditingEnabled).thenReturn(true)
-
         val result = SUT.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 
         whenReady(result) { _ =>
           verify(mockAuditConnector, times(1)).sendExplicitAudit[Any](any(), any())(any(), any(), any())
         }
-      }
     }
 
     "return 200 - Ok with parked content" in {
@@ -202,6 +168,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
     }
 
     "provided a UTR" must {
+
       "return 200 - Ok with processed content" in {
 
         val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
@@ -217,27 +184,6 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe getTransformedApiResponse
-        }
-      }
-
-      "provided a URN" must {
-
-        "return 200 - Ok with processed content" in {
-
-          val processedResponse = TrustProcessedResponse(NonTaxable5MLDFixtures.TransformCache.getTransformedNonTaxableTrustResponse, ResponseHeader("Processed", "1"))
-
-          when(transformationService.getTransformedData(any[String], any[String])(any()))
-            .thenReturn(Future.successful(processedResponse))
-
-          val result = getTrustController.get(urn, applyTransformations = true).apply(FakeRequest(GET, s"/trusts/$urn"))
-
-          whenReady(result) { _ =>
-            verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-            verify(transformationService).getTransformedData(mockEq(urn), mockEq("id"))(any())
-            status(result) mustBe OK
-            contentType(result) mustBe Some(JSON)
-            contentAsJson(result) mustBe NonTaxable5MLDFixtures.Trusts.getTransformedNonTaxableTrustResponse
-          }
         }
       }
 
@@ -269,31 +215,6 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       }
 
       "return 500 - InternalServerError" when {
-        "the get endpoint returns a InvalidUTRResponse" in {
-
-          when(desService.getTrustInfo(any(), any()))
-            .thenReturn(Future.successful(InvalidUTRResponse))
-
-          val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$invalidUTR"))
-
-          whenReady(result) { _ =>
-            verify(mockedAuditService).auditErrorResponse(mockEq("GetTrust"), any[JsValue], any[String], any[String])(any())
-            status(result) mustBe INTERNAL_SERVER_ERROR
-          }
-        }
-
-        "the get endpoint returns an InvalidRegimeResponse" in {
-
-          when(desService.getTrustInfo(any(), any()))
-            .thenReturn(Future.successful(InvalidRegimeResponse))
-
-          val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
-
-          whenReady(result) { _ =>
-            verify(mockedAuditService).auditErrorResponse(mockEq("GetTrust"), any[JsValue], any[String], any[String])(any())
-            status(result) mustBe INTERNAL_SERVER_ERROR
-          }
-        }
 
         "the get endpoint returns a BadRequestResponse" in {
 
@@ -347,6 +268,111 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           }
         }
       }
+    }
+
+    "provided a URN" must {
+
+      "return 200 - Ok with processed content" in {
+
+        val processedResponse = TrustProcessedResponse(NonTaxable5MLDFixtures.TransformCache.getTransformedNonTaxableTrustResponse, ResponseHeader("Processed", "1"))
+
+        when(transformationService.getTransformedData(any[String], any[String])(any()))
+          .thenReturn(Future.successful(processedResponse))
+
+        val result = getTrustController.get(urn, applyTransformations = true).apply(FakeRequest(GET, s"/trusts/$urn"))
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(transformationService).getTransformedData(mockEq(urn), mockEq("id"))(any())
+          status(result) mustBe OK
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe NonTaxable5MLDFixtures.Trusts.getTransformedNonTaxableTrustResponse
+        }
+      }
+
+      "return 400 - BadRequest" when {
+
+        "the URN given is invalid" in {
+
+          val result = getTrustController.get(invalidURN).apply(FakeRequest(GET, s"/trusts/$invalidURN"))
+
+          whenReady(result) { _ =>
+            status(result) mustBe BAD_REQUEST
+          }
+        }
+      }
+
+      "return 500 - InternalServerError" when {
+
+        "the get endpoint returns a NotEnoughDataResponse" in {
+
+          when(desService.getTrustInfo(any(), any()))
+            .thenReturn(Future.successful(NotEnoughDataResponse(Json.obj(), Json.obj())))
+
+          val result = getTrustController.get(urn).apply(FakeRequest(GET, s"/trusts/$urn"))
+
+          whenReady(result) { _ =>
+            verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+            status(result) mustBe NO_CONTENT
+          }
+        }
+      }
+
+      "return 500 - InternalServerError" when {
+
+        "the get endpoint returns a BadRequestResponse" in {
+
+          when(desService.getTrustInfo(any(), any()))
+            .thenReturn(Future.successful(BadRequestResponse))
+
+          val result = getTrustController.get(urn).apply(FakeRequest(GET, s"/trusts/$urn"))
+
+          whenReady(result) { _ =>
+            verify(mockedAuditService).auditErrorResponse(mockEq("GetTrust"), any[JsValue], any[String], any[String])(any())
+            status(result) mustBe INTERNAL_SERVER_ERROR
+          }
+        }
+
+        "the get endpoint returns a ResourceNotFoundResponse" in {
+
+          when(desService.getTrustInfo(any(), any()))
+            .thenReturn(Future.successful(ResourceNotFoundResponse))
+
+          val result = getTrustController.get(urn).apply(FakeRequest(GET, s"/trusts/$urn"))
+
+          whenReady(result) { _ =>
+            verify(mockedAuditService).auditErrorResponse(mockEq("GetTrust"), any[JsValue], any[String], any[String])(any())
+            status(result) mustBe NOT_FOUND
+          }
+        }
+
+        "the get endpoint returns a InternalServerErrorResponse" in {
+
+          when(desService.getTrustInfo(any(), any()))
+            .thenReturn(Future.successful(InternalServerErrorResponse))
+
+          val result = getTrustController.get(urn).apply(FakeRequest(GET, s"/trusts/$urn"))
+
+          whenReady(result) { _ =>
+            verify(mockedAuditService).auditErrorResponse(mockEq("GetTrust"), any[JsValue], any[String], any[String])(any())
+            status(result) mustBe INTERNAL_SERVER_ERROR
+          }
+        }
+
+        "the get endpoint returns a ServiceUnavailableResponse" in {
+
+          when(desService.getTrustInfo(any(), any()))
+            .thenReturn(Future.successful(ServiceUnavailableResponse))
+
+          val result = getTrustController.get(urn).apply(FakeRequest(GET, s"/trusts/$urn"))
+
+          whenReady(result) { _ =>
+            verify(mockedAuditService).auditErrorResponse(mockEq("GetTrust"), any[JsValue], any[String], any[String])(any())
+            status(result) mustBe INTERNAL_SERVER_ERROR
+          }
+        }
+      }
+
     }
 
     ".getLeadTrustee" should {

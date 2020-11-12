@@ -17,7 +17,7 @@
 package services
 
 import javax.inject.Inject
-import play.api.libs.json.{JsPath, JsValue, Json}
+import play.api.libs.json.{JsPath, JsString, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import config.AppConfig
@@ -36,7 +36,6 @@ class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig)
             internalId: String,
             response: RegistrationResponse)(implicit hc: HeaderCarrier): Unit = {
 
-    if (config.auditingEnabled) {
       val auditPayload = TrustRegistrationSubmissionAuditEvent(
         registration = registration,
         draftId = draftId,
@@ -48,9 +47,6 @@ class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig)
         event,
         auditPayload
       )
-    } else {
-      ()
-    }
   }
 
   def audit(event: String,
@@ -58,7 +54,6 @@ class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig)
             internalId: String,
             response: JsValue)(implicit hc: HeaderCarrier): Unit = {
 
-    if (config.auditingEnabled) {
       val auditPayload = GetTrustOrEstateAuditEvent(
         request = request,
         internalAuthId = internalId,
@@ -69,25 +64,16 @@ class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig)
         event,
         auditPayload
       )
-    } else {
-      ()
-    }
   }
 
   def auditErrorResponse(eventName: String, request: JsValue, internalId: String, errorReason: String)(implicit hc: HeaderCarrier): Unit = {
-
-    if (config.auditingEnabled) {
-      val response = Json.obj("errorReason" -> errorReason)
 
       audit(
         event = eventName,
         request = request,
         internalId = internalId,
-        response = response
+        response = Json.obj("errorReason" -> errorReason)
       )
-    } else {
-      ()
-    }
   }
 
   def auditVariationSubmitted(internalId: String,
@@ -113,6 +99,54 @@ class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig)
       request = payload,
       internalId = internalId,
       response = Json.toJson(response)
+    )
+  }
+
+  def auditVariationFailed(internalId: String,
+                           payload: JsValue,
+                           response: String)
+                          (implicit hc: HeaderCarrier): Unit =
+    auditErrorResponse(
+      eventName = TrustAuditing.TRUST_VARIATION_SUBMISSION_FAILED,
+      request = Json.toJson(payload),
+      internalId = internalId,
+      errorReason = response
+    )
+
+  def auditVariationError(internalId: String,
+                          payload: JsValue,
+                          errorReason: String)
+                         (implicit hc: HeaderCarrier): Unit =
+    auditErrorResponse(
+      eventName = TrustAuditing.TRUST_VARIATION_SUBMISSION_FAILED,
+      request = Json.toJson(payload),
+      internalId = internalId,
+      errorReason = errorReason
+    )
+
+  def auditVariationTransformationError(internalId: String,
+                                        utr: String,
+                                        data: JsValue = Json.obj(),
+                                        transforms: JsValue,
+                                        errorReason: String = "",
+                                        jsErrors: JsValue = Json.obj()
+                                       )(implicit hc: HeaderCarrier): Unit = {
+    val request = Json.obj(
+      "utr" -> utr,
+      "data" -> data,
+      "transformations" -> transforms
+    )
+
+    val response = Json.obj(
+      "errorReason" -> errorReason,
+      "jsErrors" -> jsErrors
+    )
+
+    audit(
+      event = TrustAuditing.TRUST_VARIATION_PREPARATION_FAILED,
+      request = request,
+      internalId = internalId,
+      response = response
     )
   }
 
