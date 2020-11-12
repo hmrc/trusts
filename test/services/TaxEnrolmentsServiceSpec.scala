@@ -40,38 +40,41 @@ class TaxEnrolmentsServiceSpec extends BaseSpec {
 
   ".setSubscriptionId" should {
 
+    val taxable: Boolean = false
+    val trn = "XTRN1234567"
+
     "return TaxEnrolmentSuccess  " when {
       "connector returns success taxEnrolmentSuscriberResponse." in {
-        when(mockConnector.enrolSubscriber("123456789")).
+        when(mockConnector.enrolSubscriber("123456789", taxable, trn)).
           thenReturn(Future.successful(TaxEnrolmentSuccess))
 
-        val futureResult = SUT.setSubscriptionId("123456789")
+        val futureResult = SUT.setSubscriptionId("123456789", taxable, trn)
 
         whenReady(futureResult) {
           result => result mustBe TaxEnrolmentSuccess
         }
-        verify(mockConnector, times(1)).enrolSubscriber(any())(any[HeaderCarrier])
+        verify(mockConnector, times(1)).enrolSubscriber(any(), any(), any())(any[HeaderCarrier])
       }
     }
 
     "return TaxEnrolmentFailure " when {
       "tax enrolment returns internal server error." in {
-        when(mockConnector.enrolSubscriber("123456789")).
+        when(mockConnector.enrolSubscriber("123456789", taxable, trn)).
           thenReturn(Future.failed(new InternalServerErrorException("")))
-        val result = Await.result(SUT.setSubscriptionId("123456789"), Duration.Inf)
+        val result = Await.result(SUT.setSubscriptionId("123456789", taxable, trn), Duration.Inf)
         result mustBe TaxEnrolmentFailure
-        verify(mockConnector, times(10)).enrolSubscriber(any())(any[HeaderCarrier])
+        verify(mockConnector, times(10)).enrolSubscriber(any(), any(), any())(any[HeaderCarrier])
       }
     }
 
     "return TaxEnrolmentFailure " when {
       "tax enrolment returns error" in {
-        when(mockConnector.enrolSubscriber("123456789")).
+        when(mockConnector.enrolSubscriber("123456789", taxable, trn)).
           thenReturn(Future.failed(BadRequestException))
 
-        val result = Await.result(SUT.setSubscriptionId("123456789"), Duration.Inf)
+        val result = Await.result(SUT.setSubscriptionId("123456789", taxable, trn), Duration.Inf)
         result mustBe TaxEnrolmentFailure
-        verify(mockConnector, times(10)).enrolSubscriber(any())(any[HeaderCarrier])
+        verify(mockConnector, times(10)).enrolSubscriber(any(), any(), any())(any[HeaderCarrier])
       }
 
     }

@@ -34,14 +34,17 @@ class RosmPatternServiceSpec extends BaseSpec {
 
   ".completeRosmTransaction" should {
 
+    val taxable: Boolean = false
+    val trn = "XTRN1234567"
+
     "return success taxEnrolmentSuscriberResponse " when {
       "successfully sets subscriptionId id in tax enrolments for provided trn." in {
-        when(mockDesService.getSubscriptionId("trn123456789")).
+        when(mockDesService.getSubscriptionId(trn)).
           thenReturn(Future.successful(SubscriptionIdResponse("123456789")))
-        when(mockTaxEnrolmentsService.setSubscriptionId("123456789")).
+        when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn)).
           thenReturn(Future.successful(TaxEnrolmentSuccess))
 
-        val futureResult = SUT.setSubscriptionId("trn123456789")
+        val futureResult = SUT.setSubscriptionId(trn, taxable)
 
         whenReady(futureResult) {
           result => result mustBe TaxEnrolmentSuccess
@@ -51,12 +54,12 @@ class RosmPatternServiceSpec extends BaseSpec {
 
     "return InternalServerErrorException " when {
       "des is down and not able to return subscription id." in {
-        when(mockDesService.getSubscriptionId("trn123456789")).
+        when(mockDesService.getSubscriptionId(trn)).
           thenReturn(Future.failed(InternalServerErrorException("")))
-        when(mockTaxEnrolmentsService.setSubscriptionId("123456789")).
+        when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn)).
           thenReturn(Future.successful(TaxEnrolmentSuccess))
 
-        val futureResult = SUT.setSubscriptionId("trn123456789")
+        val futureResult = SUT.setSubscriptionId(trn, taxable)
 
         whenReady(futureResult.failed) {
           result => result mustBe an[InternalServerErrorException]
@@ -66,12 +69,12 @@ class RosmPatternServiceSpec extends BaseSpec {
 
     "return InternalServerErrorException " when {
       "tax enrolment service is down " in {
-        when(mockDesService.getSubscriptionId("trn123456789")).
+        when(mockDesService.getSubscriptionId(trn)).
           thenReturn(Future.successful(SubscriptionIdResponse("123456789")))
-        when(mockTaxEnrolmentsService.setSubscriptionId("123456789")).
+        when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn)).
           thenReturn(Future.successful(TaxEnrolmentFailure))
 
-        val futureResult = SUT.setSubscriptionId("trn123456789")
+        val futureResult = SUT.setSubscriptionId(trn, taxable)
 
         whenReady(futureResult) {
           result => result mustBe TaxEnrolmentFailure
@@ -80,12 +83,12 @@ class RosmPatternServiceSpec extends BaseSpec {
     }
     "return BadRequestException " when {
       "tax enrolment service does not found provided subscription id." in {
-        when(mockDesService.getSubscriptionId("trn123456789")).
+        when(mockDesService.getSubscriptionId(trn)).
           thenReturn(Future.successful(SubscriptionIdResponse("123456789")))
-        when(mockTaxEnrolmentsService.setSubscriptionId("123456789")).
+        when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn)).
           thenReturn(Future.failed(BadRequestException))
 
-        val futureResult = SUT.setSubscriptionId("trn123456789")
+        val futureResult = SUT.setSubscriptionId(trn, taxable)
 
         whenReady(futureResult.failed) {
           result => result mustBe BadRequestException

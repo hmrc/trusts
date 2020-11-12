@@ -18,38 +18,53 @@ package connectors
 
 import connector.TaxEnrolmentConnector
 import exceptions.{BadRequestException, InternalServerErrorException}
-import models.tax_enrolments.TaxEnrolmentSuccess
-import org.mockito.Matchers.any
-import org.mockito.Mockito.when
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
-import services.TrustsStoreService
-import uk.gov.hmrc.http.HeaderCarrier
-
-import scala.concurrent.{ExecutionContext, Future}
+import models.tax_enrolments.{TaxEnrolmentSubscription, TaxEnrolmentSuccess}
 
 class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
-  lazy val connector: TaxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
-  private val mockTrustsStoreService = mock[TrustsStoreService]
+  private lazy val connector: TaxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
 
-  override def applicationBuilder(): GuiceApplicationBuilder = {
-    super.applicationBuilder()
-      .overrides(
-        bind[TrustsStoreService].toInstance(mockTrustsStoreService)
-      )
+  ".getTaxEnrolmentSubscription" when {
+
+    "taxable" should {
+
+      "return correct config" in {
+        val result = connector.getTaxEnrolmentSubscription("123456789", taxable = true, "trn")
+        result mustBe TaxEnrolmentSubscription(
+          "serviceNameTaxable",
+          "http://localhost:9782/trusts/tax-enrolment/registration/taxable/hmrc-ters-org/trn/subscriptions",
+          "123456789"
+        )
+      }
+
+    }
+
+    "non-taxable" should {
+
+      "return correct config" in {
+        val result = connector.getTaxEnrolmentSubscription("123456789", taxable = false, "trn")
+        result mustBe TaxEnrolmentSubscription(
+          "serviceNameNonTaxable",
+          "http://localhost:9782/trusts/tax-enrolment/registration/non-taxable/hmrc-tersnt-org/trn/subscriptions",
+          "123456789"
+        )
+      }
+
+    }
+
   }
 
   ".enrolSubscriber" should {
 
-    "return Success " when {
-      "tax enrolments succesfully subscribed to provided subscription id" in {
+    val taxable: Boolean = true
+    val trn = "XTRN1234567"
 
-        when(mockTrustsStoreService.is5mldEnabled()(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(false))
+    "return Success" when {
+      "tax enrolments successfully subscribed to provided subscription id" in {
 
         stubForPut(server, "/tax-enrolments/subscriptions/123456789/subscriber", 204)
 
-        val futureResult = connector.enrolSubscriber("123456789")
+        val futureResult = connector.enrolSubscriber("123456789", taxable, trn)
 
         whenReady(futureResult) {
           result => result mustBe TaxEnrolmentSuccess
@@ -60,11 +75,9 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
     "return BadRequestException " when {
       "tax enrolments returns bad request " in {
 
-        when(mockTrustsStoreService.is5mldEnabled()(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(false))
-
         stubForPut(server, "/tax-enrolments/subscriptions/987654321/subscriber", 400)
 
-        val futureResult = connector.enrolSubscriber("987654321")
+        val futureResult = connector.enrolSubscriber("987654321", taxable, trn)
 
         whenReady(futureResult.failed) {
           result => result mustBe BadRequestException
@@ -75,11 +88,9 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
     "return InternalServerErrorException " when {
       "tax enrolments returns internal server error " in {
 
-        when(mockTrustsStoreService.is5mldEnabled()(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(false))
-
         stubForPut(server, "/tax-enrolments/subscriptions/987654321/subscriber", 500)
 
-        val futureResult = connector.enrolSubscriber("987654321")
+        val futureResult = connector.enrolSubscriber("987654321", taxable, trn)
 
         whenReady(futureResult.failed) {
           result => result mustBe an[InternalServerErrorException]

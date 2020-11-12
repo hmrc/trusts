@@ -37,14 +37,23 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
   val variationsApiSchema4MLD: String = "/resources/schemas/4MLD/variations-api-schema-4.0.json"
   val variationsApiSchema5MLD: String = "/resources/schemas/5MLD/variations-api-schema-4.2.0.json"
 
-  val taxEnrolmentsPayloadBodyServiceName : String =
-    configuration.get[String]("microservice.services.tax-enrolments.serviceName")
+  private def insertTRN(url: String, trn: String) = url.replace(":trn", trn)
 
-  val taxEnrolmentsPayloadBodyServiceName5MLD: String =
-    configuration.get[String]("microservice.services.tax-enrolments.serviceName5MLD")
+  val taxEnrolmentsPayloadBodyServiceNameTaxable : String =
+    configuration.get[String]("microservice.services.tax-enrolments.taxable.serviceName")
 
-  val taxEnrolmentsPayloadBodyCallback : String =
-    configuration.get[String]("microservice.services.tax-enrolments.callback")
+  private val taxEnrolmentsPayloadBodyCallbackTaxableTemplate : String =
+    configuration.get[String]("microservice.services.tax-enrolments.taxable.callback")
+
+  def taxEnrolmentsPayloadBodyCallbackTaxable(trn: String): String = insertTRN(taxEnrolmentsPayloadBodyCallbackTaxableTemplate, trn)
+
+  val taxEnrolmentsPayloadBodyServiceNameNonTaxable: String =
+    configuration.get[String]("microservice.services.tax-enrolments.non-taxable.serviceName")
+
+  private val taxEnrolmentsPayloadBodyCallbackNonTaxableTemplate : String =
+    configuration.get[String]("microservice.services.tax-enrolments.non-taxable.callback")
+
+  def taxEnrolmentsPayloadBodyCallbackNonTaxable(trn: String): String = insertTRN(taxEnrolmentsPayloadBodyCallbackNonTaxableTemplate, trn)
 
   val delayToConnectTaxEnrolment : Int =
     configuration.get[String]("microservice.services.trusts.delayToConnectTaxEnrolment").toInt
