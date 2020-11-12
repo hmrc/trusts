@@ -5,6 +5,8 @@
 ->          /settlors                                                  trusts.settlors.Routes
 ->          /protectors                                                trusts.protectors.Routes
 ->          /other-individuals                                         trusts.otherIndividuals.Routes
+->          /assets                                                    trusts.assets.Routes
+
 ->          /register                                                  register.Routes
 
 POST        /check                                                     controllers.CheckTrustController.checkExistingTrust

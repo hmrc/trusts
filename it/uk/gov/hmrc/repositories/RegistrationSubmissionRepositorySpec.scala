@@ -18,6 +18,7 @@ package uk.gov.hmrc.repositories
 
 import java.time.LocalDateTime
 
+import models.MongoDateTimeFormats
 import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import play.api.libs.json._
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
@@ -25,7 +26,7 @@ import uk.gov.hmrc.itbase.IntegrationTestBase
 import models.registration.RegistrationSubmissionDraft
 import repositories.RegistrationSubmissionRepository
 
-class RegistrationSubmissionRepositorySpec extends AsyncFreeSpec with MustMatchers with IntegrationTestBase {
+class RegistrationSubmissionRepositorySpec extends AsyncFreeSpec with MustMatchers with IntegrationTestBase with MongoDateTimeFormats {
 
   // Make sure we use value of LocalDateTime that survives JSON round trip - and isn't expired.
   private val testDateTime: LocalDateTime = Json.toJson(LocalDateTime.now()).as[LocalDateTime]

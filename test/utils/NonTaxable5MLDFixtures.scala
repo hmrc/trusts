@@ -27,7 +27,7 @@ object NonTaxable5MLDFixtures extends JsonFixtures {
      */
 
     lazy val get5MLDTrustNonTaxableResponse: String = getJsonFromFile("5MLD/NonTaxable/des/valid-get-trust-5mld-non-taxable-des-response.json")
-
+    lazy val newGet5MLDTrustNonTaxableResponse: String = getJsonFromFile("5MLD/NonTaxable/des/new-valid-get-trust-5mld-non-taxable-des-response.json")
   }
 
   object TransformCache {
@@ -39,7 +39,7 @@ object NonTaxable5MLDFixtures extends JsonFixtures {
      *
      * For instance, __ \ trust \ details \ trusts moves to -> __ \ trust
      *
-     * The data is returned as part of a TrustProcessedResponse
+     * The data is returned as an instance of a TrustsProcessed response
      */
 
     lazy val getTransformedNonTaxableTrustResponse: JsValue = getJsonValueFromFile("5MLD/NonTaxable/cached/transformed-get-non-taxable-trust-response.json")
@@ -53,6 +53,7 @@ object NonTaxable5MLDFixtures extends JsonFixtures {
      */
 
     lazy val getTransformedNonTaxableTrustResponse: JsValue = getJsonValueFromFile("5MLD/NonTaxable/trusts/get-trust-transformed-non-taxable-response.json")
+    lazy val newGetTransformedNonTaxableTrustResponse: JsValue = getJsonValueFromFile("5MLD/NonTaxable/trusts/new-get-trust-transformed-non-taxable-response.json")
 
   }
 
