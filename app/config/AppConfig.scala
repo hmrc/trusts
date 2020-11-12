@@ -39,12 +39,12 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
 
   private def insertTRN(url: String, trn: String) = url.replace(":trn", trn)
 
-  val taxEnrolmentsPayloadBodyServiceName : String =
-    configuration.get[String]("microservice.services.tax-enrolments.serviceName")
+  val taxEnrolmentsPayloadBodyServiceNameTaxable : String =
+    configuration.get[String]("microservice.services.tax-enrolments.taxable.serviceName")
 
-  val taxEnrolmentsPayloadBodyCallbackTemplate : String =
-    configuration.get[String]("microservice.services.tax-enrolments.callback")
-  def taxEnrolmentsPayloadBodyCallback(trn: String): String = insertTRN(taxEnrolmentsPayloadBodyCallbackTemplate, trn)
+  val taxEnrolmentsPayloadBodyCallbackTaxableTemplate : String =
+    configuration.get[String]("microservice.services.tax-enrolments.taxable.callback")
+  def taxEnrolmentsPayloadBodyCallbackTaxable(trn: String): String = insertTRN(taxEnrolmentsPayloadBodyCallbackTaxableTemplate, trn)
 
   val taxEnrolmentsPayloadBodyServiceNameNonTaxable: String =
     configuration.get[String]("microservice.services.tax-enrolments.non-taxable.serviceName")

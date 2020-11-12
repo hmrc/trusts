@@ -38,7 +38,7 @@ class TaxEnrolmentsServiceSpec extends BaseSpec {
     reset(mockConnector)
   }
 
-  ".setSubscriptionId 4MLD" should {
+  ".setSubscriptionId" should {
 
     val taxable: Boolean = false
     val trn = "XTRN1234567"

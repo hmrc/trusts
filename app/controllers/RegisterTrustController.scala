@@ -84,7 +84,7 @@ class RegisterTrustController @Inject()(desService: DesService, config: AppConfi
 
                       rosmPatternService.enrolAndLogResult(response.trn,
                         request.affinityGroup,
-                        trustsRegistrationRequest.trust.details.trustTaxable.getOrElse(false)
+                        trustsRegistrationRequest.trust.details.trustTaxable.getOrElse(true)
                       ) map {
                         _ =>
                           Ok(Json.toJson(response))

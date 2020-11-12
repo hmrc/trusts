@@ -32,7 +32,7 @@ class RosmPatternServiceSpec extends BaseSpec {
 
   private val SUT = new RosmPatternServiceImpl(mockDesService, mockTaxEnrolmentsService)
 
-  ".completeRosmTransaction 4MLD" should {
+  ".completeRosmTransaction" should {
 
     val taxable: Boolean = false
     val trn = "XTRN1234567"
