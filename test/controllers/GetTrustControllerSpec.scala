@@ -33,7 +33,7 @@ import play.api.test.{FakeRequest, Helpers}
 import services.{AuditService, DesService, TransformationService, TrustsStoreService}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import utils.{JsonFixtures, NonTaxable5MLDFixtures}
+import utils.{JsonFixtures, NonTaxable5MLDFixtures, Taxable5MLDFixtures}
 
 import scala.concurrent.Future
 
@@ -274,7 +274,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
       "return 200 - Ok with processed content" in {
 
-        val processedResponse = TrustProcessedResponse(NonTaxable5MLDFixtures.TransformCache.getTransformedNonTaxableTrustResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(NonTaxable5MLDFixtures.Cache.getTransformedNonTaxableTrustResponse, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -388,7 +388,8 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           status(result) mustBe FORBIDDEN
         }
       }
-      "return 200 - Ok with processed content" in {
+
+      "return 200 - Ok with lead trustee with 4MLD data" in {
 
         val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
@@ -402,6 +403,27 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe getTransformedLeadTrusteeResponse
+        }
+      }
+
+      "return 200 - Ok with lead trustee with 5MLD data" in {
+
+        val cached = Taxable5MLDFixtures.Cache.taxable5mld2134514321
+
+        val processedResponse = models.get_trust.TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
+
+        when(transformationService.getTransformedData(any[String], any[String])(any())).thenReturn(Future.successful(processedResponse))
+
+        val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/lead-trustee"))
+
+        val expectedResponseFromTrusts = Taxable5MLDFixtures.Trusts.LeadTrustee.taxable5mld2134514321LeadTrustee
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          status(result) mustBe OK
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe expectedResponseFromTrusts
         }
       }
 
