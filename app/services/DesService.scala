@@ -26,11 +26,12 @@ import models.registration.RegistrationResponse
 import models.tax_enrolments.SubscriptionIdResponse
 import models.variation.VariationResponse
 import play.api.Logging
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsError, JsResult, JsSuccess, JsValue, Json}
 import repositories.CacheRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Try
 
 class DesService @Inject()(val desConnector: DesConnector, val repository: CacheRepository) extends Logging {
 
