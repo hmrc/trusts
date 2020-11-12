@@ -42,15 +42,17 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
   val taxEnrolmentsPayloadBodyServiceNameTaxable : String =
     configuration.get[String]("microservice.services.tax-enrolments.taxable.serviceName")
 
-  val taxEnrolmentsPayloadBodyCallbackTaxableTemplate : String =
+  private val taxEnrolmentsPayloadBodyCallbackTaxableTemplate : String =
     configuration.get[String]("microservice.services.tax-enrolments.taxable.callback")
+
   def taxEnrolmentsPayloadBodyCallbackTaxable(trn: String): String = insertTRN(taxEnrolmentsPayloadBodyCallbackTaxableTemplate, trn)
 
   val taxEnrolmentsPayloadBodyServiceNameNonTaxable: String =
     configuration.get[String]("microservice.services.tax-enrolments.non-taxable.serviceName")
 
-  val taxEnrolmentsPayloadBodyCallbackNonTaxableTemplate : String =
+  private val taxEnrolmentsPayloadBodyCallbackNonTaxableTemplate : String =
     configuration.get[String]("microservice.services.tax-enrolments.non-taxable.callback")
+
   def taxEnrolmentsPayloadBodyCallbackNonTaxable(trn: String): String = insertTRN(taxEnrolmentsPayloadBodyCallbackNonTaxableTemplate, trn)
 
   val delayToConnectTaxEnrolment : Int =
