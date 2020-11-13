@@ -68,7 +68,10 @@
             "identification": {
               "safeId": "2222200000000"
             },
-            "entityStart": "2017-02-28"
+            "entityStart": "2017-02-28",
+            "countryOfResidence": "GB",
+            "nationality": "DE",
+            "legallyIncapable": false
           }
         ],
         "beneficiary": {
@@ -273,7 +276,10 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB",
+              "nationality": "DE",
+              "legallyIncapable": false
             }
           ],
           "protectorCompany": [
@@ -284,7 +290,8 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB"
             }
           ]
         },

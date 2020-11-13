@@ -950,6 +950,26 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         }
       }
 
+      "return 200 - Ok with processed content with 5MLD data" in {
+
+        val cached = Taxable5MLDFixtures.Cache.taxable5mld2134514321
+
+        val processedResponse = models.get_trust.TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
+
+        when(transformationService.getTransformedData(any[String], any[String])(any()))
+          .thenReturn(Future.successful(processedResponse))
+
+        val result = getTrustController.getProtectors(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/protectors"))
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          status(result) mustBe OK
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe Taxable5MLDFixtures.Trusts.Protectors.taxable5mld2134514321Protectors
+        }
+      }
+
       "return 500 - Internal server error for invalid content" in {
 
         when(transformationService.getTransformedData(any(), any())(any()))
@@ -993,6 +1013,26 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe getTransformedOtherIndividualsResponse
+        }
+      }
+
+      "return 200 - Ok with processed content with 5mld data" in {
+
+        val cached = Taxable5MLDFixtures.Cache.taxable5mld2134514321
+
+        val processedResponse = models.get_trust.TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
+
+        when(transformationService.getTransformedData(any[String], any[String])(any()))
+          .thenReturn(Future.successful(processedResponse))
+
+        val result = getTrustController.getOtherIndividuals(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/other-individuals"))
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          status(result) mustBe OK
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe Taxable5MLDFixtures.Trusts.OtherIndividuals.taxable5mld2134514321OtherIndividuals
         }
       }
 
