@@ -22,18 +22,19 @@ import play.api.libs.json._
 
 case class RemoveNonEeaBusinessAssetTransform(
                                                index : Int,
-                                               NonEeaBusinessAsset : JsValue,
-                                               endDate : LocalDate
+                                               nonEEABusinessAsset : JsValue,
+                                               endDate : LocalDate,
+                                               assetType : String
                                              ) extends DeltaTransform with JsonOperations {
 
-  private lazy val path = __ \ "details" \ "trust" \ "assets" \ "nonEEABusiness"
+  private lazy val path = __ \ "details" \ "trust" \ "assets" \ assetType
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     removeAtPosition(input, path, index)
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    endEntity(input, path, Json.toJson(NonEeaBusinessAsset), endDate, "endDate")
+    endEntity(input, path, Json.toJson(nonEEABusinessAsset), endDate, "endDate")
   }
 }
 

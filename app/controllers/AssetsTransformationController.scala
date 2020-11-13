@@ -35,12 +35,12 @@ class AssetsTransformationController @Inject()(
                                           cc: ControllerComponents)
   extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
-  def amendNonEeaBusinessAsset(utr: String, index: Int): Action[JsValue] = identify.async(parse.json) {
+  def amendNonEeaBusinessAsset(identifier: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[NonEEABusinessType] match {
         case JsSuccess(nonEEABusiness, _) =>
           assetsTransformationService.amendNonEeaBusinessAssetTransformer(
-            utr,
+            identifier,
             index,
             request.identifier,
             nonEEABusiness
@@ -55,13 +55,13 @@ class AssetsTransformationController @Inject()(
     }
   }
 
-  def addNonEeaBusinessAsset(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def addNonEeaBusinessAsset(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[NonEEABusinessType] match {
         case JsSuccess(newEeaBusinessAsset, _) =>
 
           assetsTransformationService.addNonEeaBusinessAssetTransformer(
-            utr,
+            identifier,
             request.identifier,
             newEeaBusinessAsset
           ) map { _ =>
@@ -75,11 +75,11 @@ class AssetsTransformationController @Inject()(
     }
   }
 
-  def removeNonEeaBusinessAsset(utr: String): Action[JsValue] = identify.async(parse.json) {
+  def removeNonEeaBusinessAsset(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[RemoveAsset] match {
         case JsSuccess(asset, _) =>
-          assetsTransformationService.removeAsset(utr, request.identifier, asset) map { _ =>
+          assetsTransformationService.removeAsset(identifier, request.identifier, asset) map { _ =>
             Ok
           }
         case JsError(_) => Future.successful(BadRequest)

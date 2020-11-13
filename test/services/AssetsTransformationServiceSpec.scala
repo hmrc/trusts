@@ -81,7 +81,7 @@ class AssetsTransformationServiceSpec extends FreeSpec with MockitoSugar with Sc
       val result = service.removeAsset("utr", "internalId", RemoveAsset(LocalDate.of(2013, 2, 20), 0, "nonEEABusiness"))
       whenReady(result) { _ =>
         verify(transformationService).addNewTransform("utr",
-          "internalId", RemoveNonEeaBusinessAssetTransform(0, nonEeaBusinessAsset, LocalDate.of(2013, 2, 20)))
+          "internalId", RemoveNonEeaBusinessAssetTransform(0, nonEeaBusinessAsset, LocalDate.of(2013, 2, 20), "nonEEABusiness"))
       }
     }
 

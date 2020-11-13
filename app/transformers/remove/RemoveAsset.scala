@@ -27,7 +27,7 @@ object RemoveAsset {
     "nonEEABusiness"
   )
 
-  val reads: Reads[RemoveAsset] = Json.reads[RemoveAsset].filter(rb => validAssetTypes.contains(rb.`type`))
+  val reads: Reads[RemoveAsset] = Json.reads[RemoveAsset].filter(ra => validAssetTypes.contains(ra.`type`))
   val writes: OWrites[RemoveAsset] = Json.writes[RemoveAsset]
 
   implicit val formats: Format[RemoveAsset] = Format(reads, writes)
