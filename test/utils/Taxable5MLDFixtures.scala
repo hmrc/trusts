@@ -54,7 +54,33 @@ object Taxable5MLDFixtures extends JsonFixtures {
      */
 
     object LeadTrustee {
-      lazy val taxable5mld2134514321LeadTrustee: JsValue = getJsonValueFromFile("5MLD/Taxable/trusts/2134514321-taxable-lead-trustee.json")
+      lazy val taxable5mld2134514321LeadTrustee: JsValue =
+        getJsonValueFromFile("5MLD/Taxable/trusts/lead-trustee/2134514321-taxable-lead-trustee.json")
+    }
+
+    object Trustees {
+      lazy val taxable5mld2134514321Trustees: JsValue =
+        getJsonValueFromFile("5MLD/Taxable/trusts/trustees/2134514321-taxable-trustees.json")
+    }
+
+    object Beneficiaries {
+      lazy val taxable5mld2134514321Beneficiaries: JsValue =
+        getJsonValueFromFile("5MLD/Taxable/trusts/beneficiaries/2134514321-taxable-beneficiaries.json")
+    }
+
+    object Settlors {
+      lazy val taxable5mld2134514321Settlors: JsValue =
+        getJsonValueFromFile("5MLD/Taxable/trusts/settlors/2134514321-taxable-settlors.json")
+    }
+
+    object Protectors {
+      lazy val taxable5mld2134514321Protectors: JsValue =
+        getJsonValueFromFile("5MLD/Taxable/trusts/protectors/2134514321-taxable-protectors.json")
+    }
+
+    object OtherIndividuals {
+      lazy val taxable5mld2134514321OtherIndividuals: JsValue =
+        getJsonValueFromFile("5MLD/Taxable/trusts/other-individuals/2134514321-taxable-other-individuals.json")
     }
 
   }

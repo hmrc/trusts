@@ -68,7 +68,10 @@
             "identification": {
               "safeId": "2222200000000"
             },
-            "entityStart": "2017-02-28"
+            "entityStart": "2017-02-28",
+            "countryOfResidence": "GB",
+            "nationality": "DE",
+            "legallyIncapable": false
           }
         ],
         "beneficiary": {
@@ -89,7 +92,10 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB",
+              "nationality": "DE",
+              "legallyIncapable": false
             }
           ],
           "company": [
@@ -102,7 +108,8 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB"
             }
           ],
           "trust": [
@@ -115,7 +122,8 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB"
             }
           ],
           "charity": [
@@ -128,7 +136,8 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB"
             }
           ],
           "unidentified": [
@@ -157,7 +166,8 @@
               },
               "beneficiaryDiscretion": true,
               "beneficiaryShareOfIncome": "0",
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB"
             }
           ],
           "other": [
@@ -175,7 +185,8 @@
               },
               "beneficiaryDiscretion": true,
               "beneficiaryShareOfIncome": "0",
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB"
             }
           ]
         },
@@ -192,7 +203,9 @@
           "identification": {
             "safeId": "2222200000000"
           },
-          "entityStart": "2017-02-28"
+          "entityStart": "2017-02-28",
+          "countryOfResidence": "GB",
+          "nationality": "DE"
         },
         "leadTrustees": {
           "lineNo": "1",
@@ -228,7 +241,10 @@
                 "safeId": "2222200000000"
               },
               "phoneNumber": "+447456788112",
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB",
+              "nationality": "DE",
+              "legallyIncapable": false
             }
           },
           {
@@ -241,7 +257,8 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB"
             }
           }
         ],
@@ -259,7 +276,10 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB",
+              "nationality": "DE",
+              "legallyIncapable": false
             }
           ],
           "protectorCompany": [
@@ -270,7 +290,8 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB"
             }
           ]
         },
@@ -288,7 +309,10 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB",
+              "nationality": "DE",
+              "legallyIncapable": false
             }
           ],
           "settlorCompany": [
@@ -301,7 +325,8 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB"
             }
           ]
         }
