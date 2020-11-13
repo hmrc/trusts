@@ -487,6 +487,49 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
               |}""".stripMargin)
         }
       }
+
+      "return 200 - Ok with trust details with 5mld data" in {
+
+        val cached = Taxable5MLDFixtures.Cache.taxable5mld2134514321
+
+        val processedResponse = models.get_trust.TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
+
+        when(transformationService.getTransformedData(any[String], any[String])(any()))
+          .thenReturn(Future.successful(processedResponse))
+
+        val result = getTrustController.getTrustDetails(utr).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          status(result) mustBe OK
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe Json.parse(
+            """
+              |{
+              |"startDate": "1920-03-28",
+              |"lawCountry": "AD",
+              |"administrationCountry": "GB",
+              |"residentialStatus": {
+              |  "uk": {
+              |    "scottishLaw": false,
+              |    "preOffShore": "GB"
+              |  }
+              |},
+              |"typeOfTrust": "Will Trust or Intestacy Trust",
+              |"deedOfVariation": "Previously there was only an absolute interest under the will",
+              |"interVivos": true,
+              |"efrbsStartDate": "1920-02-28",
+              |"trustTaxable": true,
+              |"expressTrust": true,
+              |"trustUKResident": true,
+              |"trustUKProperty": true,
+              |"trustRecorded": false,
+              |"trustUKRelation": false
+              |}""".stripMargin)
+        }
+      }
+
       "return 500 - Internal server error for invalid content" in {
 
         when(transformationService.getTransformedData(any(), any())(any()))
