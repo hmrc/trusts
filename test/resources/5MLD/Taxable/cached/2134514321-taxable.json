@@ -228,7 +228,10 @@
                 "safeId": "2222200000000"
               },
               "phoneNumber": "+447456788112",
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB",
+              "nationality": "DE",
+              "legallyIncapable": false
             }
           },
           {
@@ -241,7 +244,8 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB"
             }
           }
         ],
