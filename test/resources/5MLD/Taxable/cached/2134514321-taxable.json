@@ -89,7 +89,10 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB",
+              "nationality": "DE",
+              "legallyIncapable": false
             }
           ],
           "company": [
@@ -102,7 +105,8 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB"
             }
           ],
           "trust": [
@@ -115,7 +119,8 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB"
             }
           ],
           "charity": [
@@ -128,7 +133,8 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB"
             }
           ],
           "unidentified": [
@@ -157,7 +163,8 @@
               },
               "beneficiaryDiscretion": true,
               "beneficiaryShareOfIncome": "0",
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB"
             }
           ],
           "other": [
@@ -175,7 +182,8 @@
               },
               "beneficiaryDiscretion": true,
               "beneficiaryShareOfIncome": "0",
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB"
             }
           ]
         },
