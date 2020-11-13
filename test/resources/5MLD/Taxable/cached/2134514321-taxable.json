@@ -200,7 +200,9 @@
           "identification": {
             "safeId": "2222200000000"
           },
-          "entityStart": "2017-02-28"
+          "entityStart": "2017-02-28",
+          "countryOfResidence": "GB",
+          "nationality": "DE"
         },
         "leadTrustees": {
           "lineNo": "1",
@@ -300,7 +302,10 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB",
+              "nationality": "DE",
+              "legallyIncapable": false
             }
           ],
           "settlorCompany": [
@@ -313,7 +318,8 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28"
+              "entityStart": "2017-02-28",
+              "countryOfResidence": "GB"
             }
           ]
         }

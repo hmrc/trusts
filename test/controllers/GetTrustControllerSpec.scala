@@ -707,6 +707,26 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         }
       }
 
+      "return 200 - Ok with processed content with 5mld data" in {
+
+        val cached = Taxable5MLDFixtures.Cache.taxable5mld2134514321
+
+        val processedResponse = models.get_trust.TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
+
+        when(transformationService.getTransformedData(any[String], any[String])(any()))
+          .thenReturn(Future.successful(processedResponse))
+
+        val result = getTrustController.getSettlors(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/settlors"))
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          status(result) mustBe OK
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe Taxable5MLDFixtures.Trusts.Settlors.taxable5mld2134514321Settlors
+        }
+      }
+
       "return 500 - Internal server error for invalid content" in {
 
         when(transformationService.getTransformedData(any(), any())(any()))
