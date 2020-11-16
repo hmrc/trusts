@@ -18,7 +18,7 @@ package utils
 
 import play.api.libs.json.JsValue
 
-object NonTaxable5MLDFixtures extends JsonFixtures {
+object Taxable5MLDFixtures extends JsonFixtures {
 
   object DES {
     /**
@@ -26,7 +26,6 @@ object NonTaxable5MLDFixtures extends JsonFixtures {
      * These fixtures must conform with the schema for API#1488
      */
 
-    lazy val get5MLDTrustNonTaxableResponse: String = getJsonFromFile("5MLD/NonTaxable/des/valid-get-trust-5mld-non-taxable-des-response.json")
 
   }
 
@@ -42,17 +41,47 @@ object NonTaxable5MLDFixtures extends JsonFixtures {
      * The data is returned as part of a TrustProcessedResponse
      */
 
-    lazy val getTransformedNonTaxableTrustResponse: JsValue = getJsonValueFromFile("5MLD/NonTaxable/cached/transformed-get-non-taxable-trust-response.json")
+    lazy val taxable5mld2134514321: JsValue = getJsonValueFromFile("5MLD/Taxable/cached/2134514321-taxable.json")
 
   }
 
   object Trusts {
     /**
      * These fixtures are used to test the response from the trusts microservice at the:
-     * /trusts/$identifier and /trusts/$identifier/transformed endpoints
+     * /trusts/:identifier
+     * /trusts/:identifier/transformed endpoints
+     * /trusts/:identifier/transformed/lead-trustee
      */
 
-    lazy val getTransformedNonTaxableTrustResponse: JsValue = getJsonValueFromFile("5MLD/NonTaxable/trusts/get-trust-transformed-non-taxable-response.json")
+    object LeadTrustee {
+      lazy val taxable5mld2134514321LeadTrustee: JsValue =
+        getJsonValueFromFile("5MLD/Taxable/trusts/lead-trustee/2134514321-taxable-lead-trustee.json")
+    }
+
+    object Trustees {
+      lazy val taxable5mld2134514321Trustees: JsValue =
+        getJsonValueFromFile("5MLD/Taxable/trusts/trustees/2134514321-taxable-trustees.json")
+    }
+
+    object Beneficiaries {
+      lazy val taxable5mld2134514321Beneficiaries: JsValue =
+        getJsonValueFromFile("5MLD/Taxable/trusts/beneficiaries/2134514321-taxable-beneficiaries.json")
+    }
+
+    object Settlors {
+      lazy val taxable5mld2134514321Settlors: JsValue =
+        getJsonValueFromFile("5MLD/Taxable/trusts/settlors/2134514321-taxable-settlors.json")
+    }
+
+    object Protectors {
+      lazy val taxable5mld2134514321Protectors: JsValue =
+        getJsonValueFromFile("5MLD/Taxable/trusts/protectors/2134514321-taxable-protectors.json")
+    }
+
+    object OtherIndividuals {
+      lazy val taxable5mld2134514321OtherIndividuals: JsValue =
+        getJsonValueFromFile("5MLD/Taxable/trusts/other-individuals/2134514321-taxable-other-individuals.json")
+    }
 
   }
 

@@ -65,7 +65,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         when(mockDesService.registerTrust(any[Registration]))
           .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
-        when(rosmPatternService.enrolAndLogResult(any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentSuccess))
+        when(rosmPatternService.enrolAndLogResult(any(), any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentSuccess))
 
         val SUT = new RegisterTrustController(
           mockDesService,
@@ -82,7 +82,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         status(result) mustBe OK
         (contentAsJson(result) \ "trn").as[String] mustBe trnResponse
 
-        verify(rosmPatternService, times(1)).enrolAndLogResult(any(), any())(any[HeaderCarrier])
+        verify(rosmPatternService, times(1)).enrolAndLogResult(any(), any(), any())(any[HeaderCarrier])
       }
 
       "individual user called the register endpoint with a valid 5mld json payload " in {
@@ -92,7 +92,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         when(mockDesService.registerTrust(any[Registration]))
           .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
-        when(rosmPatternService.enrolAndLogResult(any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentSuccess))
+        when(rosmPatternService.enrolAndLogResult(any(), any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentSuccess))
 
         val SUT = new RegisterTrustController(
           mockDesService,
@@ -109,7 +109,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         status(result) mustBe OK
         (contentAsJson(result) \ "trn").as[String] mustBe trnResponse
 
-        verify(rosmPatternService, times(1)).enrolAndLogResult(any(), any())(any[HeaderCarrier])
+        verify(rosmPatternService, times(1)).enrolAndLogResult(any(), any(), any())(any[HeaderCarrier])
       }
 
       "individual user called the register endpoint with a valid 5mld nontaxable json payload " in {
@@ -119,7 +119,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         when(mockDesService.registerTrust(any[Registration]))
           .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
-        when(rosmPatternService.enrolAndLogResult(any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentSuccess))
+        when(rosmPatternService.enrolAndLogResult(any(), any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentSuccess))
 
         val SUT = new RegisterTrustController(
           mockDesService,
@@ -136,7 +136,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         status(result) mustBe OK
         (contentAsJson(result) \ "trn").as[String] mustBe trnResponse
 
-        verify(rosmPatternService, times(1)).enrolAndLogResult(any(), any())(any[HeaderCarrier])
+        verify(rosmPatternService, times(1)).enrolAndLogResult(any(), any(), any())(any[HeaderCarrier])
       }
 
       "individual user called the register endpoint with a valid json payload " when {
@@ -146,7 +146,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           when(mockDesService.registerTrust(any[Registration]))
             .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
-          when(rosmPatternService.enrolAndLogResult(any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentFailure))
+          when(rosmPatternService.enrolAndLogResult(any(), any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentFailure))
 
           val SUT = new RegisterTrustController(
             mockDesService,
@@ -163,13 +163,13 @@ class RegisterTrustControllerSpec extends BaseSpec {
           status(result) mustBe OK
           (contentAsJson(result) \ "trn").as[String] mustBe trnResponse
 
-          verify(rosmPatternService, times(1)).enrolAndLogResult(any(), any())(any[HeaderCarrier])
+          verify(rosmPatternService, times(1)).enrolAndLogResult(any(), any(), any())(any[HeaderCarrier])
         }
       }
 
       "agent user submits trusts payload" in {
 
-        when(rosmPatternService.enrolAndLogResult(any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentNotProcessed))
+        when(rosmPatternService.enrolAndLogResult(any(), any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentNotProcessed))
 
         val SUT = new RegisterTrustController(
           mockDesService,
@@ -188,7 +188,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
         (contentAsJson(result) \ "trn").as[String] mustBe trnResponse
 
-        verify(rosmPatternService, times(1)).enrolAndLogResult(any(), any())(any[HeaderCarrier])
+        verify(rosmPatternService, times(1)).enrolAndLogResult(any(), any(), any())(any[HeaderCarrier])
       }
     }
 
@@ -217,7 +217,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         (output \ "code").as[String] mustBe "ALREADY_REGISTERED"
         (output \ "message").as[String] mustBe "The trust is already registered."
 
-        verify(rosmPatternService, times(0)).enrolAndLogResult(any(), any())(any[HeaderCarrier])
+        verify(rosmPatternService, times(0)).enrolAndLogResult(any(), any(), any())(any[HeaderCarrier])
       }
     }
 
@@ -243,7 +243,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         val output = contentAsJson(result)
         (output \ "code").as[String] mustBe "NO_MATCH"
         (output \ "message").as[String] mustBe "No match has been found in HMRC's records."
-        verify(rosmPatternService, times(0)).enrolAndLogResult(any(), any())(any[HeaderCarrier])
+        verify(rosmPatternService, times(0)).enrolAndLogResult(any(), any(), any())(any[HeaderCarrier])
       }
     }
 
@@ -270,7 +270,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         (output \ "code").as[String] mustBe "BAD_REQUEST"
         (output \ "message").as[String] mustBe "Provided request is invalid."
 
-        verify(rosmPatternService, times(0)).enrolAndLogResult(any(), any())(any[HeaderCarrier])
+        verify(rosmPatternService, times(0)).enrolAndLogResult(any(), any(), any())(any[HeaderCarrier])
       }
 
       "input request fails business validation" in {
@@ -291,7 +291,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         val output = contentAsJson(result)
         (output \ "code").as[String] mustBe "BAD_REQUEST"
         (output \ "message").as[String] mustBe "Provided request is invalid."
-        verify(rosmPatternService, times(0)).enrolAndLogResult(any(), any())(any[HeaderCarrier])
+        verify(rosmPatternService, times(0)).enrolAndLogResult(any(), any(), any())(any[HeaderCarrier])
       }
 
       "no draft id is provided in the headers" in {
@@ -319,7 +319,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         (output \ "code").as[String] mustBe "NO_DRAFT_ID"
         (output \ "message").as[String] mustBe "No draft registration identifier provided."
 
-        verify(rosmPatternService, times(0)).enrolAndLogResult(any(), any())(any[HeaderCarrier])
+        verify(rosmPatternService, times(0)).enrolAndLogResult(any(), any(), any())(any[HeaderCarrier])
       }
 
     }
@@ -348,7 +348,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         val output = contentAsJson(result)
         (output \ "code").as[String] mustBe "INTERNAL_SERVER_ERROR"
         (output \ "message").as[String] mustBe "Internal server error."
-        verify(rosmPatternService, times(0)).enrolAndLogResult(any(), any())(any[HeaderCarrier])
+        verify(rosmPatternService, times(0)).enrolAndLogResult(any(), any(), any())(any[HeaderCarrier])
       }
     }
 
@@ -376,7 +376,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         val output = contentAsJson(result)
         (output \ "code").as[String] mustBe "INTERNAL_SERVER_ERROR"
         (output \ "message").as[String] mustBe "Internal server error."
-        verify(rosmPatternService, times(0)).enrolAndLogResult(any(), any())(any[HeaderCarrier])
+        verify(rosmPatternService, times(0)).enrolAndLogResult(any(), any(), any())(any[HeaderCarrier])
       }
     }
 
@@ -404,7 +404,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         val output = contentAsJson(result)
         (output \ "code").as[String] mustBe "INTERNAL_SERVER_ERROR"
         (output \ "message").as[String] mustBe "Internal server error."
-        verify(rosmPatternService, times(0)).enrolAndLogResult(any(), any())(any[HeaderCarrier])
+        verify(rosmPatternService, times(0)).enrolAndLogResult(any(), any(), any())(any[HeaderCarrier])
       }
     }
   }

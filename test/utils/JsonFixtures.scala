@@ -53,10 +53,15 @@ trait JsonFixtures extends JsonUtils {
   lazy val getTransformedApiResponse: JsValue = getJsonValueFromFile("trust-transformed-get-api-result.json")
   lazy val getTransformedLeadTrusteeResponse: JsValue = getJsonValueFromFile("trust-transformed-get-lead-trustee-result.json")
   lazy val getTransformedTrusteesResponse: JsValue = getJsonValueFromFile("trust-transformed-get-trustees-result.json")
+
   lazy val getTransformedBeneficiariesResponse: JsValue = getJsonValueFromFile("trust-transformed-get-beneficiary-result.json")
   lazy val getTransformedSettlorsResponse: JsValue = getJsonValueFromFile("trust-transformed-get-settlor-result.json")
-  lazy val getTransformedTrustDeceasedSettlorWithoutDeathResponse: JsValue = getJsonValueFromFile("transformed-get-trust-response-deceased-settlor-without-date-of-death.json")
+
+  lazy val getTransformedTrustDeceasedSettlorWithoutDeathResponse: JsValue =
+    getJsonValueFromFile("transformed-get-trust-response-deceased-settlor-without-date-of-death.json")
+
   lazy val getTransformedProtectorsResponse: JsValue = getJsonValueFromFile("trust-transformed-get-protector-result.json")
+
   lazy val getTransformedOtherIndividualsResponse: JsValue = getJsonValueFromFile("trust-transformed-get-other-individual-result.json")
 
   lazy val getTrustOrEstateProcessingResponseJson: String = getJsonFromFile("valid-get-trust-or-estate-in-processing-response.json")

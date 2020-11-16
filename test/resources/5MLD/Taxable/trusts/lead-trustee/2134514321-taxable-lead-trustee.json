@@ -1,0 +1,19 @@
+{
+  "lineNo": "1",
+  "bpMatchStatus": "01",
+  "name": {
+    "firstName": "Jimmy",
+    "middleName": "Hingis",
+    "lastName": "Jones"
+  },
+  "dateOfBirth": "1965-02-28",
+  "phoneNumber": "+1234567",
+  "email": "a",
+  "identification": {
+    "nino": "NH111111A"
+  },
+  "entityStart": "2017-02-28",
+  "countryOfResidence": "GB",
+  "nationality": "DE",
+  "legallyIncapable": false
+}

@@ -1,0 +1,125 @@
+{
+  "beneficiary": {
+    "individualDetails": [
+      {
+        "lineNo": "1",
+        "bpMatchStatus": "01",
+        "name": {
+          "firstName": "Nicola",
+          "middleName": "Andrey",
+          "lastName": "Jackson"
+        },
+        "dateOfBirth": "1970-02-28",
+        "vulnerableBeneficiary": true,
+        "beneficiaryType": "Director",
+        "beneficiaryDiscretion": true,
+        "beneficiaryShareOfIncome": "0",
+        "identification": {
+          "safeId": "2222200000000"
+        },
+        "entityStart": "2017-02-28",
+        "provisional": false,
+        "countryOfResidence": "GB",
+        "nationality": "DE",
+        "legallyIncapable": false
+      }
+    ],
+    "company": [
+      {
+        "lineNo": "1",
+        "bpMatchStatus": "01",
+        "organisationName": " ",
+        "beneficiaryDiscretion": true,
+        "beneficiaryShareOfIncome": "0",
+        "identification": {
+          "safeId": "2222200000000"
+        },
+        "entityStart": "2017-02-28",
+        "provisional": false,
+        "countryOfResidence": "GB"
+      }
+    ],
+    "trust": [
+      {
+        "lineNo": "1",
+        "bpMatchStatus": "01",
+        "organisationName": "Nelson Ltd ",
+        "beneficiaryDiscretion": true,
+        "beneficiaryShareOfIncome": "0",
+        "identification": {
+          "safeId": "2222200000000"
+        },
+        "entityStart": "2017-02-28",
+        "provisional": false,
+        "countryOfResidence": "GB"
+      }
+    ],
+    "charity": [
+      {
+        "lineNo": "1",
+        "bpMatchStatus": "01",
+        "organisationName": "Nelson Ltd",
+        "beneficiaryDiscretion": true,
+        "beneficiaryShareOfIncome": "0",
+        "identification": {
+          "safeId": "2222200000000"
+        },
+        "entityStart": "2017-02-28",
+        "provisional": false,
+        "countryOfResidence": "GB"
+      }
+    ],
+    "unidentified": [
+      {
+        "lineNo": "1",
+        "bpMatchStatus": "01",
+        "description": "Reserve money",
+        "beneficiaryDiscretion": true,
+        "beneficiaryShareOfIncome": "0",
+        "entityStart": "2017-02-28",
+        "provisional": false
+      }
+    ],
+    "large": [
+      {
+        "lineNo": "1",
+        "bpMatchStatus": "01",
+        "organisationName": "Nelson Ltd",
+        "description": "This is a must",
+        "description1": "This is a must",
+        "description2": "This is a must",
+        "description3": "This is a must",
+        "description4": "This is a must",
+        "numberOfBeneficiary": "0",
+        "identification": {
+          "safeId": "2222200000000"
+        },
+        "beneficiaryDiscretion": true,
+        "beneficiaryShareOfIncome": "0",
+        "entityStart": "2017-02-28",
+        "provisional": false,
+        "countryOfResidence": "GB"
+      }
+    ],
+    "other": [
+      {
+        "lineNo": "1",
+        "bpMatchStatus": "01",
+        "description": "Joint Fund",
+        "address": {
+          "line1": "1010 EASY ST",
+          "line2": "OTTAWA",
+          "line3": "ONTARIO",
+          "line4": "ONTARIO",
+          "postCode": "K1A 0B1",
+          "country": "GB"
+        },
+        "beneficiaryDiscretion": true,
+        "beneficiaryShareOfIncome": "0",
+        "entityStart": "2017-02-28",
+        "provisional": false,
+        "countryOfResidence": "GB"
+      }
+    ]
+  }
+}
