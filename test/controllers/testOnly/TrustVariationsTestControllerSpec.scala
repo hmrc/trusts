@@ -92,8 +92,6 @@ class TrustVariationsTestControllerSpec extends BaseSpec with BeforeAndAfter wit
         when(mockDesService.trustVariation(any[JsValue]))
           .thenReturn(Future.successful(VariationResponse(tvnResponse)))
 
-        when(mockConfig.auditingEnabled).thenReturn(false)
-
         val requestPayLoad = Json.parse(validTrustVariations4mldRequestJson)
 
         val SUT = trustVariationsController
@@ -116,8 +114,6 @@ class TrustVariationsTestControllerSpec extends BaseSpec with BeforeAndAfter wit
 
         when(mockDesService.trustVariation(any[JsValue]))
           .thenReturn(Future.successful(VariationResponse(tvnResponse)))
-
-        when(mockConfig.auditingEnabled).thenReturn(true)
 
         val requestPayLoad = Json.parse(validTrustVariations4mldRequestJson)
 

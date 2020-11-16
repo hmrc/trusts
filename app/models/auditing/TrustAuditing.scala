@@ -23,8 +23,10 @@ object TrustAuditing {
   val GET_TRUST = "GetTrust"
 
   val TRUST_VARIATION = "TrustVariation"
-  val TRUST_VARIATION_ATTEMPT = "TrustVariationAttempt"
   val TRUST_TRANSFORMATIONS = "TrustTransformations"
+  val TRUST_VARIATION_ATTEMPT = "TrustVariationAttempt"
+  val TRUST_VARIATION_PREPARATION_FAILED = "VariationPreparationFailed"
+  val TRUST_VARIATION_SUBMISSION_FAILED = "VariationSubmissionFailed"
 
   val VARIATION_SUBMITTED_BY_ORGANISATION = "VariationSubmittedByOrganisation"
   val VARIATION_SUBMITTED_BY_AGENT = "VariationSubmittedByAgent"

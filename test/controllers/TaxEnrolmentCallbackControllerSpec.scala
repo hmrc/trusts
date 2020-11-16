@@ -26,14 +26,27 @@ import play.api.test.Helpers.{status, _}
 class TaxEnrolmentCallbackControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
   val auditConnector = mock[AuditConnector]
+  val trn = "XTRN1234567"
 
-  ".subscriptionCallback" should {
+  ".taxableSubscriptionCallback" should {
 
     "return 200 " when {
       "tax enrolment callback for subscription id enrolment  " in {
         val SUT = new TaxEnrolmentCallbackController(Helpers.stubControllerComponents())
 
-        val result = SUT.subscriptionCallback().apply(postRequestWithPayload(Json.parse({"""{ "url" : "http//","state" : "SUCCESS"}"""})))
+        val result = SUT.taxableSubscriptionCallback(trn).apply(postRequestWithPayload(Json.parse({"""{ "url" : "http//","state" : "SUCCESS"}"""})))
+        status(result) mustBe OK
+      }
+    }
+  }
+
+  ".nonTaxableSubscriptionCallback" should {
+
+    "return 200 " when {
+      "tax enrolment callback for subscription id enrolment  " in {
+        val SUT = new TaxEnrolmentCallbackController(Helpers.stubControllerComponents())
+
+        val result = SUT.nonTaxableSubscriptionCallback(trn).apply(postRequestWithPayload(Json.parse({"""{ "url" : "http//","state" : "SUCCESS"}"""})))
         status(result) mustBe OK
       }
     }

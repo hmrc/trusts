@@ -438,59 +438,9 @@ class DesConnectorSpec extends ConnectorSpecHelper {
 
       }
 
-      "return InvalidUTRResponse" when {
-
-        "des has returned a 400 with the code INVALID_UTR" in {
-
-          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
-            """
-              |{
-              | "name": "5mld",
-              | "isEnabled": false
-              |}""".stripMargin
-          )))
-
-          val invalidUTR = "123456789"
-          stubForGet(server, get4MLDTrustEndpoint(invalidUTR), BAD_REQUEST,
-            Json.stringify(jsonResponse400InvalidUTR))
-
-          val futureResult = connector.getTrustInfo(invalidUTR)
-
-
-          whenReady(futureResult) { result =>
-            result mustBe InvalidUTRResponse
-          }
-        }
-      }
-
-      "return InvalidRegimeResponse" when {
-
-        "des has returned a 400 with the code INVALID_REGIME" in {
-
-          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
-            """
-              |{
-              | "name": "5mld",
-              | "isEnabled": false
-              |}""".stripMargin
-          )))
-
-          val utr = "1234567891"
-          stubForGet(server, get4MLDTrustEndpoint(utr), BAD_REQUEST,
-            Json.stringify(jsonResponse400InvalidRegime))
-
-          val futureResult = connector.getTrustInfo(utr)
-
-
-          whenReady(futureResult) { result =>
-            result mustBe InvalidRegimeResponse
-          }
-        }
-      }
-
       "return BadRequestResponse" when {
 
-        "des has returned a 400 with a code which is not INVALID_UTR OR INVALID_REGIME" in {
+        "des has returned a 400" in {
 
           stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
             """
@@ -634,37 +584,8 @@ class DesConnectorSpec extends ConnectorSpecHelper {
 
             whenReady(futureResult) { result =>
 
-              val expectedHeader: ResponseHeader = (get5MLDTrustResponse \ "responseHeader").as[ResponseHeader]
-              val expectedJson = (get5MLDTrustResponse \ "trustOrEstateDisplay").as[JsValue]
-
-              result match {
-                case r: TrustProcessedResponse =>
-                  r.responseHeader mustBe expectedHeader
-                  r.getTrust mustBe expectedJson
-                case _ => fail
-              }
-            }
-          }
-
-          "des has returned a 200 with trust details with trustTaxable set to false" in {
-
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
-              """
-                |{
-                | "name": "5mld",
-                | "isEnabled": true
-                |}""".stripMargin
-            )))
-
-            val utr = "1234567890"
-            stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, get5MLDTrustResponseJsonWithNonTaxable.toString)
-
-            val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(utr)
-
-            whenReady(futureResult) { result =>
-
-              val expectedHeader: ResponseHeader = (get5MLDTrustResponseJsonWithNonTaxable \ "responseHeader").as[ResponseHeader]
-              val expectedJson = (get5MLDTrustResponseJsonWithNonTaxable \ "trustOrEstateDisplay").as[JsValue]
+              val expectedHeader: ResponseHeader = (get4MLDTrustResponse \ "responseHeader").as[ResponseHeader]
+              val expectedJson = (get4MLDTrustResponse \ "trustOrEstateDisplay").as[JsValue]
 
               result match {
                 case r: TrustProcessedResponse =>
@@ -693,8 +614,8 @@ class DesConnectorSpec extends ConnectorSpecHelper {
 
             whenReady(futureResult) { result =>
 
-              val expectedHeader: ResponseHeader = (getTrustPropertyLandNoPreviousValueJson5mld \ "responseHeader").as[ResponseHeader]
-              val expectedJson = (getTrustPropertyLandNoPreviousValueJson5mld \ "trustOrEstateDisplay").as[JsValue]
+              val expectedHeader: ResponseHeader = (getTrustPropertyLandNoPreviousValueJson \ "responseHeader").as[ResponseHeader]
+              val expectedJson = (getTrustPropertyLandNoPreviousValueJson \ "trustOrEstateDisplay").as[JsValue]
 
               result match {
                 case r: TrustProcessedResponse =>
@@ -754,59 +675,9 @@ class DesConnectorSpec extends ConnectorSpecHelper {
 
         }
 
-        "return InvalidUTRResponse" when {
-
-          "des has returned a 400 with the code INVALID_UTR" in {
-
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
-              """
-                |{
-                | "name": "5mld",
-                | "isEnabled": true
-                |}""".stripMargin
-            )))
-
-            val invalidUTR = "1234567890"
-            stubForGet(server, get5MLDTrustUTREndpoint(invalidUTR), BAD_REQUEST,
-              Json.stringify(jsonResponse400InvalidUTR))
-
-            val futureResult = connector.getTrustInfo(invalidUTR)
-
-
-            whenReady(futureResult) { result =>
-              result mustBe InvalidUTRResponse
-            }
-          }
-        }
-
-        "return InvalidRegimeResponse" when {
-
-          "des has returned a 400 with the code INVALID_REGIME" in {
-
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
-              """
-                |{
-                | "name": "5mld",
-                | "isEnabled": true
-                |}""".stripMargin
-            )))
-
-            val utr = "1234567891"
-            stubForGet(server, get5MLDTrustUTREndpoint(utr), BAD_REQUEST,
-              Json.stringify(jsonResponse400InvalidRegime))
-
-            val futureResult = connector.getTrustInfo(utr)
-
-
-            whenReady(futureResult) { result =>
-              result mustBe InvalidRegimeResponse
-            }
-          }
-        }
-
         "return BadRequestResponse" when {
 
-          "des has returned a 400 with a code which is not INVALID_UTR OR INVALID_REGIME" in {
+          "des has returned a 400" in {
 
             stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
               """
@@ -821,7 +692,6 @@ class DesConnectorSpec extends ConnectorSpecHelper {
               Json.stringify(jsonResponse400))
 
             val futureResult = connector.getTrustInfo(utr)
-
 
             whenReady(futureResult) { result =>
               result mustBe BadRequestResponse
@@ -979,8 +849,8 @@ class DesConnectorSpec extends ConnectorSpecHelper {
 
             whenReady(futureResult) { result =>
 
-              val expectedHeader: ResponseHeader = (getTrustPropertyLandNoPreviousValueJson5mld \ "responseHeader").as[ResponseHeader]
-              val expectedJson = (getTrustPropertyLandNoPreviousValueJson5mld \ "trustOrEstateDisplay").as[JsValue]
+              val expectedHeader: ResponseHeader = (getTrustPropertyLandNoPreviousValueJson \ "responseHeader").as[ResponseHeader]
+              val expectedJson = (getTrustPropertyLandNoPreviousValueJson \ "trustOrEstateDisplay").as[JsValue]
 
               result match {
                 case r: TrustProcessedResponse =>
@@ -1039,57 +909,9 @@ class DesConnectorSpec extends ConnectorSpecHelper {
 
         }
 
-        "return InvalidUTRResponse" when {
-
-          "des has returned a 400 with the code INVALID_UTR" in {
-
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
-              """
-                |{
-                | "name": "5mld",
-                | "isEnabled": true
-                |}""".stripMargin
-            )))
-
-            val urn = "1234567890ADCEF"
-            stubForGet(server, get5MLDTrustURNEndpoint(urn), BAD_REQUEST,
-              Json.stringify(jsonResponse400InvalidUTR))
-
-            val futureResult = connector.getTrustInfo(urn)
-
-            whenReady(futureResult) { result =>
-              result mustBe InvalidUTRResponse
-            }
-          }
-        }
-
-        "return InvalidRegimeResponse" when {
-
-          "des has returned a 400 with the code INVALID_REGIME" in {
-
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
-              """
-                |{
-                | "name": "5mld",
-                | "isEnabled": true
-                |}""".stripMargin
-            )))
-
-            val urn = "1234567890ADCEF"
-            stubForGet(server, get5MLDTrustURNEndpoint(urn), BAD_REQUEST,
-              Json.stringify(jsonResponse400InvalidRegime))
-
-            val futureResult = connector.getTrustInfo(urn)
-
-            whenReady(futureResult) { result =>
-              result mustBe InvalidRegimeResponse
-            }
-          }
-        }
-
         "return BadRequestResponse" when {
 
-          "des has returned a 400 with a code which is not INVALID_UTR OR INVALID_REGIME" in {
+          "des has returned a 400" in {
 
             stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
               """
@@ -1101,7 +923,7 @@ class DesConnectorSpec extends ConnectorSpecHelper {
 
             val urn = "1234567890ADCEF"
             stubForGet(server, get5MLDTrustURNEndpoint(urn), BAD_REQUEST,
-              Json.stringify(jsonResponse400))
+              Json.stringify(jsonResponse4005mld))
 
             val futureResult = connector.getTrustInfo(urn)
 

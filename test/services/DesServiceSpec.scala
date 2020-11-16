@@ -197,6 +197,7 @@ class DesServiceSpec extends BaseSpec {
   ".getTrustInfo" should {
 
     "return TrustFoundResponse" when {
+
       "TrustFoundResponse is returned from DES Connector with a Processed flag and a trust body when not cached" in new DesServiceFixture {
         val utr = "1234567890"
         val fullEtmpResponseJson = get4MLDTrustResponse
@@ -249,36 +250,8 @@ class DesServiceSpec extends BaseSpec {
       }
     }
 
-    "return InvalidUTRResponse" when {
-
-      "InvalidUTRResponse is returned from DES Connector" in new DesServiceFixture {
-
-        when(mockConnector.getTrustInfo(any())).thenReturn(Future.successful(InvalidUTRResponse))
-
-        val invalidUtr = "123456789"
-        val futureResult = SUT.getTrustInfo(invalidUtr, myId)
-
-        whenReady(futureResult) { result =>
-          result mustBe InvalidUTRResponse
-        }
-      }
-    }
-
-    "return InvalidRegimeResponse" when {
-      "InvalidRegimeResponse is returned from DES Connector" in new DesServiceFixture {
-
-        when(mockConnector.getTrustInfo(any())).thenReturn(Future.successful(InvalidRegimeResponse))
-
-        val utr = "123456789"
-        val futureResult = SUT.getTrustInfo(utr, myId)
-
-        whenReady(futureResult) { result =>
-          result mustBe InvalidRegimeResponse
-        }
-      }
-    }
-
     "return BadRequestResponse" when {
+
       "BadRequestResponse is returned from DES Connector" in new DesServiceFixture {
 
         when(mockConnector.getTrustInfo(any())).thenReturn(Future.successful(BadRequestResponse))
@@ -293,6 +266,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return ResourceNotFoundResponse" when {
+
       "ResourceNotFoundResponse is returned from DES Connector" in new DesServiceFixture {
 
         when(mockConnector.getTrustInfo(any())).thenReturn(Future.successful(ResourceNotFoundResponse))
@@ -307,6 +281,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return InternalServerErrorResponse" when {
+
       "InternalServerErrorResponse is returned from DES Connector" in new DesServiceFixture {
 
         when(mockConnector.getTrustInfo(any())).thenReturn(Future.successful(InternalServerErrorResponse))
@@ -321,6 +296,7 @@ class DesServiceSpec extends BaseSpec {
     }
 
     "return ServiceUnavailableResponse" when {
+
       "ServiceUnavailableResponse is returned from DES Connector" in new DesServiceFixture {
 
         when(mockConnector.getTrustInfo(any())).thenReturn(Future.successful(ServiceUnavailableResponse))
@@ -336,6 +312,7 @@ class DesServiceSpec extends BaseSpec {
   }
 
   ".trustVariation" should {
+
     "return a VariationTvnResponse" when {
 
       "connector returns VariationResponse." in new DesServiceFixture {
