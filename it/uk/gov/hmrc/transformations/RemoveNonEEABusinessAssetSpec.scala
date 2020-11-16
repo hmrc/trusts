@@ -64,12 +64,12 @@ class RemoveNonEEABusinessAssetSpec extends AsyncFreeSpec with MustMatchers with
       val removeNonEEABusinessAssetAtIndex = Json.parse(
         """
           |{
-          |	"index": 0,
-          |	"endDate": "2010-10-10"
+          |  "index": 0,
+          |  "endDate": "2010-10-10",
+          |  "type": "nonEEABusiness"
           |}
           |""".stripMargin)
-
-      val removeRequest = FakeRequest(PUT, s"/trusts/assets/non-eea-business/$identifier/remove")
+      val removeRequest = FakeRequest(PUT, s"/trusts/assets/non-eea-business/remove/$identifier")
         .withBody(Json.toJson(removeNonEEABusinessAssetAtIndex))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
