@@ -18,22 +18,21 @@ package transformers
 
 import java.time.LocalDate
 
-import play.api.libs.json.{JsPath, JsResult, JsValue, Json}
+import play.api.libs.json._
 
-trait AmendEntityTransform extends DeltaTransform with JsonOperations {
+case class AmendNonEeaBusinessAssetTransform(index: Int,
+                                             amended: JsValue,
+                                             original: JsValue,
+                                             endDate: LocalDate) extends AmendEntityTransform {
 
-  val index: Int
-  val amended: JsValue
-  val original: JsValue
-  val endDate: LocalDate
-  val path: JsPath
-  val endDateField: String = "entityEnd"
+  override val path: JsPath = __ \ 'details \ 'trust \ 'assets \ 'nonEEABusiness
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    amendAtPosition(input, path, index, Json.toJson(amended))
-  }
+  override val endDateField: String = "endDate"
+}
 
-  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    endEntity(input, path, original, endDate, endDateField)
-  }
+object AmendNonEeaBusinessAssetTransform {
+
+  val key = "AmendNonEeaBusinessAssetTransform"
+
+  implicit val format: Format[AmendNonEeaBusinessAssetTransform] = Json.format[AmendNonEeaBusinessAssetTransform]
 }

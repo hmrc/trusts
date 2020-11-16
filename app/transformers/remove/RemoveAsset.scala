@@ -14,26 +14,21 @@
  * limitations under the License.
  */
 
-package transformers
+package transformers.remove
 
 import java.time.LocalDate
 
-import play.api.libs.json.{JsPath, JsResult, JsValue, Json}
+import play.api.libs.json.{Format, Json, OWrites, Reads}
 
-trait AmendEntityTransform extends DeltaTransform with JsonOperations {
+case class RemoveAsset(endDate: LocalDate, index: Int, `type`: String)
 
-  val index: Int
-  val amended: JsValue
-  val original: JsValue
-  val endDate: LocalDate
-  val path: JsPath
-  val endDateField: String = "entityEnd"
+object RemoveAsset {
+  val validAssetTypes: Seq[String] = Seq(
+    "nonEEABusiness"
+  )
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    amendAtPosition(input, path, index, Json.toJson(amended))
-  }
+  val reads: Reads[RemoveAsset] = Json.reads[RemoveAsset].filter(ra => validAssetTypes.contains(ra.`type`))
+  val writes: OWrites[RemoveAsset] = Json.writes[RemoveAsset]
 
-  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    endEntity(input, path, original, endDate, endDateField)
-  }
+  implicit val formats: Format[RemoveAsset] = Format(reads, writes)
 }
