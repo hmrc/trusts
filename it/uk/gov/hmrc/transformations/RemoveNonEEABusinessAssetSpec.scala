@@ -76,13 +76,14 @@ class RemoveNonEEABusinessAssetSpec extends AsyncFreeSpec with MustMatchers with
       val RemoveNonEEABusinessAssetResult = route(application, removeRequest).get
       status(RemoveNonEEABusinessAssetResult) mustBe OK
 
-      val newResult = route(application, FakeRequest(GET, s"/trusts/assets/$identifier/transformed/non-eea-business")).get
+      val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(newResult) mustBe OK
 
-      val trustees = (contentAsJson(newResult) \ "nonEEABusiness").as[JsArray]
+      val trustees = (contentAsJson(newResult) \ "getTrust" \ "trusts" \ "assets" \ "nonEEABusiness").as[JsArray]
       trustees mustBe Json.parse(
         """
-          |{
+          |[
+          | {
           |  "address": {
           |      "line1": "Line 1",
           |      "line2": "Line 2",
@@ -93,7 +94,8 @@ class RemoveNonEEABusinessAssetSpec extends AsyncFreeSpec with MustMatchers with
           |  "startDate": "2002-01-01",
           |  "lineNo": "1",
           |  "orgName": "TestOrg"
-          |}
+          | }
+          |]
           |""".stripMargin)
 
     }
