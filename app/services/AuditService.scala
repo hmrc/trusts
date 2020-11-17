@@ -16,15 +16,15 @@
 
 package services
 
-import javax.inject.Inject
-import play.api.libs.json.{JsPath, JsString, JsValue, Json}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import config.AppConfig
+import javax.inject.Inject
 import models.Registration
 import models.auditing.{GetTrustOrEstateAuditEvent, TrustAuditing, TrustRegistrationSubmissionAuditEvent}
 import models.registration.RegistrationResponse
 import models.variation.VariationResponse
+import play.api.libs.json.{JsPath, JsValue, Json}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig){
 
