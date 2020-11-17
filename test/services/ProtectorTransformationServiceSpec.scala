@@ -19,7 +19,6 @@ package services
 import java.time.LocalDate
 
 import models.NameType
-import models.get_trust.{ResponseHeader, TrustProcessedResponse}
 import models.variation.{Protector, ProtectorCompany}
 import org.mockito.Matchers
 import org.mockito.Matchers._
@@ -134,11 +133,8 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
 
         val desResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-        when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(
-            Future.successful(
-              TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
-            ))
+        when(transformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(desResponse.as[JsObject]))
 
         val result = service.amendIndividualProtectorTransformer("utr", 0, "internalId", amendedProtector)
         whenReady(result) { _ =>
@@ -159,11 +155,9 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
 
         when(transformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
-        when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(TrustProcessedResponse(
-            buildInputJson("protector", Seq(protector)),
-            ResponseHeader("status", "formBundlNo")
-          )))
+
+        when(transformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(buildInputJson("protector", Seq(protector))))
 
         val result = service.removeProtector("utr", "internalId", RemoveProtector(LocalDate.of(2013, 2, 20), 0, "protector"))
         whenReady(result) { _ =>
@@ -224,11 +218,8 @@ class ProtectorTransformationServiceSpec extends FreeSpec with MockitoSugar with
 
         when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-        when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(
-            buildInputJson("protectorCompany", Seq(original)),
-            ResponseHeader("status", "formBundleNo")
-          )))
+        when(transformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(buildInputJson("protectorCompany", Seq(original))))
 
         val result = service.amendBusinessProtectorTransformer("utr", index, "internalId", newCompany)
         whenReady(result) { _ =>

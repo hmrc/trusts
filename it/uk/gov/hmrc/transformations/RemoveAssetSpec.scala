@@ -25,7 +25,7 @@ import org.scalatest.{Assertion, AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
-import play.api.libs.json.{JsArray, JsObject, JsValue, Json}
+import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
@@ -34,7 +34,7 @@ import utils.{JsonUtils, NonTaxable5MLDFixtures}
 
 import scala.concurrent.Future
 
-class RemoveNonEEABusinessAssetSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
+class RemoveAssetSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
 
   "a remove nonEEABusinessAsset call" - {
 
@@ -69,7 +69,7 @@ class RemoveNonEEABusinessAssetSpec extends AsyncFreeSpec with MustMatchers with
           |  "type": "nonEEABusiness"
           |}
           |""".stripMargin)
-      val removeRequest = FakeRequest(PUT, s"/trusts/assets/non-eea-business/remove/$identifier")
+      val removeRequest = FakeRequest(PUT, s"/trusts/assets/$identifier/remove")
         .withBody(Json.toJson(removeNonEEABusinessAssetAtIndex))
         .withHeaders(CONTENT_TYPE -> "application/json")
 

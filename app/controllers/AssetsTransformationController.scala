@@ -20,22 +20,21 @@ import controllers.actions.IdentifierAction
 import javax.inject.Inject
 import models.variation._
 import play.api.Logging
-import play.api.libs.json.{JsError, JsString, JsSuccess, JsValue}
+import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.{Action, ControllerComponents}
-import services.{AssetsTransformationService, BeneficiaryTransformationService}
-import transformers.remove.{RemoveAsset, RemoveBeneficiary}
+import services.AssetsTransformationService
+import transformers.remove.RemoveAsset
 import utils.ValidationUtil
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class AssetsTransformationController @Inject()(
-                                          identify: IdentifierAction,
-                                          assetsTransformationService: AssetsTransformationService
-                                        )(implicit val executionContext: ExecutionContext,
-                                          cc: ControllerComponents)
+                                                identify: IdentifierAction,
+                                                assetsTransformationService: AssetsTransformationService
+                                              )(implicit val executionContext: ExecutionContext, cc: ControllerComponents)
   extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
-  def amendNonEeaBusinessAsset(identifier: String, index: Int): Action[JsValue] = identify.async(parse.json) {
+  def amendNonEeaBusiness(identifier: String, index: Int): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[NonEEABusinessType] match {
         case JsSuccess(nonEEABusiness, _) =>
@@ -49,17 +48,16 @@ class AssetsTransformationController @Inject()(
           }
         case JsError(errors) =>
           logger.warn(s"[amendNonEeaBusinessAsset][Session ID: ${request.sessionId}]" +
-            s" Supplied description could not be read as a JsString - $errors")
+            s" Supplied json could not be read as a NonEEABusinessType - $errors")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def addNonEeaBusinessAsset(identifier: String): Action[JsValue] = identify.async(parse.json) {
+  def addNonEeaBusiness(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[NonEEABusinessType] match {
         case JsSuccess(newEeaBusinessAsset, _) =>
-
           assetsTransformationService.addNonEeaBusinessAssetTransformer(
             identifier,
             request.identifier,
@@ -68,14 +66,14 @@ class AssetsTransformationController @Inject()(
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[addNonEeaBusinessAsset][Session ID: ${request.sessionId}] " +
-            s"Supplied json could not be read as an addEeaBusiness Asset - $errors")
+          logger.warn(s"[addNonEeaBusinessAsset][Session ID: ${request.sessionId}]" +
+            s" Supplied json could not be read as a NonEEABusinessType - $errors")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def removeNonEeaBusinessAsset(identifier: String): Action[JsValue] = identify.async(parse.json) {
+  def removeAsset(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[RemoveAsset] match {
         case JsSuccess(asset, _) =>

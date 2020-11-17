@@ -19,7 +19,6 @@ package services
 import exceptions.InternalServerErrorException
 import javax.inject.Inject
 import models.Success
-import models.get_trust.TrustProcessedResponse
 import models.variation._
 import play.api.libs.json.{JsObject, JsValue, Json, __}
 import transformers._
@@ -29,34 +28,28 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}
 
-class AssetsTransformationService @Inject()(
-                                             transformationService: TransformationService,
-                                             localDateService: LocalDateService
+class AssetsTransformationService @Inject()(transformationService: TransformationService,
+                                            localDateService: LocalDateService
                                            )(implicit ec:ExecutionContext) extends JsonOperations {
 
-  def removeAsset(identifier: String, internalId: String, removeAsset: RemoveAsset)(implicit hc: HeaderCarrier): Future[Success.type] = {
+  def removeAsset(identifier: String, internalId: String, removeAsset: RemoveAsset)
+                 (implicit hc: HeaderCarrier): Future[Success.type] = {
 
-    getTransformedTrustJson(identifier, internalId)
+    transformationService.getTransformedTrustJson(identifier, internalId)
       .map(findAssetJson(_, removeAsset.`type`, removeAsset.index))
       .flatMap(Future.fromTry)
       .flatMap {assetJson =>
-        transformationService.addNewTransform (identifier, internalId,
-            RemoveNonEeaBusinessAssetTransform(
-              removeAsset.index,
-              assetJson,
-              removeAsset.endDate,
-              removeAsset.`type`
-            )
+        transformationService.addNewTransform(
+          identifier,
+          internalId,
+          RemoveAssetTransform(
+            removeAsset.index,
+            assetJson,
+            removeAsset.endDate,
+            removeAsset.`type`
+          )
         ).map(_ => Success)
       }
-  }
-
-  private def getTransformedTrustJson(identifier: String, internalId: String)(implicit hc: HeaderCarrier): Future[JsObject] = {
-
-    transformationService.getTransformedData(identifier, internalId).flatMap {
-      case TrustProcessedResponse(json, _) => Future.successful(json.as[JsObject])
-      case _ => Future.failed(InternalServerErrorException("Trust is not in processed state."))
-    }
   }
 
   private def findAssetJson(json: JsValue, assetType: String, index: Int): Try[JsObject] = {
@@ -69,17 +62,25 @@ class AssetsTransformationService @Inject()(
 
   def amendNonEeaBusinessAssetTransformer(identifier: String, index: Int, internalId: String, amended: NonEEABusinessType)
                                          (implicit hc: HeaderCarrier): Future[Success.type] = {
-    getTransformedTrustJson(identifier, internalId)
-    .map(findAssetJson(_, "nonEEABusiness", index))
+
+    transformationService.getTransformedTrustJson(identifier, internalId)
+      .map(findAssetJson(_, "nonEEABusiness", index))
       .flatMap(Future.fromTry)
       .flatMap { assetJson =>
-
-      transformationService.addNewTransform(identifier, internalId, AmendNonEeaBusinessAssetTransform(index, Json.toJson(amended), assetJson, localDateService.now))
-        .map(_ => Success)
+        transformationService.addNewTransform(
+          identifier,
+          internalId,
+          AmendNonEeaBusinessAssetTransform(
+            index,
+            Json.toJson(amended),
+            assetJson,
+            localDateService.now
+          )
+        ).map(_ => Success)
       }
   }
 
   def addNonEeaBusinessAssetTransformer(identifier: String, internalId: String, newNonEEABusinessAsset: NonEEABusinessType): Future[Boolean] = {
     transformationService.addNewTransform(identifier, internalId, AddNonEeaBusinessAssetTransform(newNonEEABusinessAsset))
   }
- }
+}

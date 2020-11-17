@@ -84,7 +84,7 @@ class AmendNonEEABusinessAssetSpec extends AsyncFreeSpec with MustMatchers with 
           |}
           |""".stripMargin)
 
-      val amendRequest = FakeRequest(POST, s"/trusts/assets/non-eea-business/amend/$identifier/0")
+      val amendRequest = FakeRequest(POST, s"/trusts/assets/amend-non-eea-business/$identifier/0")
         .withBody(payload)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
