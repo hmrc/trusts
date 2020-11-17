@@ -17,15 +17,12 @@
 package connector
 
 import com.google.inject.ImplementedBy
-import javax.inject.Inject
-import play.api.libs.json.{JsValue, Json, Writes}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.HttpClient
 import config.AppConfig
-import exceptions.InternalServerErrorException
+import javax.inject.Inject
 import models.tax_enrolments.{TaxEnrolmentSubscription, TaxEnrolmentSuscriberResponse}
-import services.TrustsStoreService
 import play.api.Logging
+import play.api.libs.json.{JsValue, Json, Writes}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utils.Constants._
 
 import scala.concurrent.ExecutionContext.Implicits.global

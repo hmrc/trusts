@@ -16,11 +16,11 @@
 
 package connector
 
-import javax.inject.Inject
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.HttpClient
 import config.AppConfig
+import javax.inject.Inject
 import models.FeatureResponse
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.HttpReads.Implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
 

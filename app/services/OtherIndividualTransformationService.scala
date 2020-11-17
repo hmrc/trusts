@@ -16,12 +16,11 @@
 
 package services
 
-import javax.inject.Inject
-import play.api.libs.json.{JsObject, JsValue, Json, __}
 import exceptions.InternalServerErrorException
+import javax.inject.Inject
 import models.Success
-import models.get_trust.TrustProcessedResponse
 import models.variation.NaturalPersonType
+import play.api.libs.json.{JsObject, JsValue, Json, __}
 import transformers._
 import transformers.remove.RemoveOtherIndividual
 import uk.gov.hmrc.http.HeaderCarrier
@@ -33,9 +32,10 @@ class OtherIndividualTransformationService @Inject()(transformationService: Tran
                                                      localDateService: LocalDateService
                                                     )(implicit ec:ExecutionContext) extends JsonOperations {
 
-  def removeOtherIndividual(identifier: String, internalId: String, removeOtherIndividual: RemoveOtherIndividual)(implicit hc: HeaderCarrier): Future[Success.type] = {
+  def removeOtherIndividual(identifier: String, internalId: String, removeOtherIndividual: RemoveOtherIndividual)
+                           (implicit hc: HeaderCarrier): Future[Success.type] = {
 
-    getTransformedTrustJson(identifier, internalId)
+    transformationService.getTransformedTrustJson(identifier, internalId)
       .map(findOtherIndividualJson(_, removeOtherIndividual.index))
       .flatMap(Future.fromTry)
       .flatMap { otherIndividualJson =>
@@ -53,24 +53,22 @@ class OtherIndividualTransformationService @Inject()(transformationService: Tran
                                       index: Int,
                                       internalId: String,
                                       amended: NaturalPersonType)(implicit hc: HeaderCarrier): Future[Success.type] = {
-    getTransformedTrustJson(identifier, internalId)
+
+    transformationService.getTransformedTrustJson(identifier, internalId)
       .map(findOtherIndividualJson(_, index))
       .flatMap(Future.fromTry)
       .flatMap { original =>
         transformationService.addNewTransform(
           identifier,
           internalId,
-          AmendOtherIndividualTransform(index, Json.toJson(amended), original, localDateService.now)
+          AmendOtherIndividualTransform(
+            index,
+            Json.toJson(amended),
+            original,
+            localDateService.now
+          )
         ).map(_ => Success)
       }
-  }
-
-  private def getTransformedTrustJson(identifier: String, internalId: String)(implicit hc: HeaderCarrier): Future[JsObject] = {
-
-    transformationService.getTransformedData(identifier, internalId).flatMap {
-      case TrustProcessedResponse(json, _) => Future.successful(json.as[JsObject])
-      case _ => Future.failed(InternalServerErrorException("Trust is not in processed state."))
-    }
   }
 
   private def findOtherIndividualJson(json: JsValue, index: Int): Try[JsObject] = {

@@ -18,7 +18,7 @@ package services
 
 import java.time.LocalDate
 
-import models.get_trust.{ResponseHeader, TrustProcessedResponse}
+import models.get_trust.ResponseHeader
 import models.variation.{AmendDeceasedSettlor, IdentificationOrgType, Settlor, SettlorCompany}
 import models.{AddressType, NameType, variation}
 import org.mockito.Matchers._
@@ -73,11 +73,9 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
       when(transformationService.addNewTransform(any(), any(), any()))
         .thenReturn(Future.successful(true))
-      when(transformationService.getTransformedData(any(), any())(any()))
-        .thenReturn(Future.successful(TrustProcessedResponse(
-          buildInputJson("settlor", Seq(settlor)),
-          ResponseHeader("status", "formBundlNo")
-        )))
+
+      when(transformationService.getTransformedTrustJson(any(), any())(any()))
+        .thenReturn(Future.successful(buildInputJson("settlor", Seq(settlor))))
 
       val result = service.removeSettlor("utr", "internalId", RemoveSettlor(LocalDate.of(2013, 2, 20), 0, "settlor"))
       whenReady(result) { _ =>
@@ -174,11 +172,8 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
         when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-        when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(TrustProcessedResponse(
-            buildInputJson("settlor", Seq(originalSettlorJson)),
-            ResponseHeader("status", "formBundlNo")
-          )))
+        when(transformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(buildInputJson("settlor", Seq(originalSettlorJson))))
 
         val result = service.amendIndividualSettlorTransformer("utr", index, "internalId", newSettlor)
         whenReady(result) { _ =>
@@ -225,11 +220,8 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any())(any()))
-        .thenReturn(
-          Future.successful(models.get_trust.TrustProcessedResponse(buildInputJson("settlorCompany", Seq(originalSettlorJson)),
-          ResponseHeader("status", "formBundlNo")
-        )))
+      when(transformationService.getTransformedTrustJson(any(), any())(any()))
+        .thenReturn(Future.successful(buildInputJson("settlorCompany", Seq(originalSettlorJson))))
 
       val result = service.amendBusinessSettlorTransformer("utr", index, "internalId", newSettlor)
       whenReady(result) { _ =>
@@ -281,6 +273,9 @@ class SettlorTransformationServiceSpec extends FreeSpec with MockitoSugar with S
           Future.successful(
             models.get_trust.TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
           ))
+
+      when(transformationService.getTransformedTrustJson(any(), any())(any()))
+        .thenReturn(Future.successful(desResponse.as[JsObject]))
 
       val result = service.amendDeceasedSettlor("utr", "internalId", amendedSettlor)
       whenReady(result) { _ =>

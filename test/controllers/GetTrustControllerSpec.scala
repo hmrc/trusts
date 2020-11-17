@@ -30,7 +30,7 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
-import services.{AuditService, DesService, TransformationService, TrustsStoreService}
+import services.{AuditService, DesService, TransformationService}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import utils.{JsonFixtures, NonTaxable5MLDFixtures, Taxable5MLDFixtures}

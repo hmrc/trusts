@@ -77,7 +77,7 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
         .withBody(Json.toJson(nonEEABusiness))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val result = controller.amendNonEeaBusinessAsset("aUTR", index).apply(request)
+      val result = controller.amendNonEeaBusiness("aUTR", index).apply(request)
 
       status(result) mustBe OK
       verify(nonEeaBusinessAssetTransformationService).amendNonEeaBusinessAssetTransformer(
@@ -96,7 +96,7 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
         .withBody(Json.parse("{}"))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val result = controller.amendNonEeaBusinessAsset("aUTR", index).apply(request)
+      val result = controller.amendNonEeaBusiness("aUTR", index).apply(request)
       status(result) mustBe BAD_REQUEST
     }
   }
@@ -118,7 +118,7 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
         ))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val result = controller.removeNonEeaBusinessAsset("UTRUTRUTR").apply(request)
+      val result = controller.removeAsset("UTRUTRUTR").apply(request)
 
       status(result) mustBe OK
       verify(nonEeaBusinessAssetTransformationService)
@@ -136,7 +136,7 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
         .withBody(Json.obj("field" -> "value"))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val result = OUT.removeNonEeaBusinessAsset("UTRUTRUTR")(request)
+      val result = OUT.removeAsset("UTRUTRUTR")(request)
 
       status(result) mustBe BAD_REQUEST
     }
@@ -164,7 +164,7 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
         .withBody(Json.toJson(newNonEeaBusinessAsset))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val result = controller.addNonEeaBusinessAsset("aUTR").apply(request)
+      val result = controller.addNonEeaBusiness("aUTR").apply(request)
 
       status(result) mustBe OK
       verify(nonEeaBusinessAssetTransformationService).addNonEeaBusinessAssetTransformer("aUTR", "id", newNonEeaBusinessAsset)
@@ -178,7 +178,7 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
         .withBody(Json.parse("{}"))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val result = controller.addNonEeaBusinessAsset("aUTR").apply(request)
+      val result = controller.addNonEeaBusiness("aUTR").apply(request)
       status(result) mustBe BAD_REQUEST
     }
   }
