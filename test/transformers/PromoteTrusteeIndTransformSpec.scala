@@ -40,6 +40,9 @@ class PromoteTrusteeIndTransformSpec extends FreeSpec with MustMatchers {
       |     "identification":{
       |       "nino":"ST123456"
       |     },
+      |     "legallyIncapable": false,
+      |     "nationality": "FR",
+      |     "countryOfResidence": "FR",
       |     "entityStart":"2000-01-01"
       |   }
       |}
@@ -54,6 +57,7 @@ class PromoteTrusteeIndTransformSpec extends FreeSpec with MustMatchers {
       val result = transformToTest.applyTransform(beforeJson).get
       result mustBe afterJson
     }
+
     "re-add the removed trustee with an end date at declaration time if it existed before" in {
       val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind.json")
       val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind-declare.json")
@@ -70,9 +74,9 @@ class PromoteTrusteeIndTransformSpec extends FreeSpec with MustMatchers {
       phoneNumber = "Phone",
       email = Some("Email"),
       identification = IdentificationType(Some("ST123456"), None, None, None),
-      countryOfResidence = None,
-      legallyIncapable = None,
-      nationality = None
+      countryOfResidence = Some("FR"),
+      legallyIncapable = Some(false),
+      nationality = Some("FR")
     )
     PromoteTrusteeIndTransform(
       index = 0,

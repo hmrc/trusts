@@ -61,17 +61,17 @@ trait PromoteTrusteeCommon {
     (oldLeadIndTrustee, oldLeadOrgTrustee) match {
       case (Some(indLead), None) =>
         val demotedTrustee = TrusteeIndividualType(
-          None,
-          None,
-          indLead.name,
-          Some(indLead.dateOfBirth),
-          Some(indLead.phoneNumber),
-          Some(getIdentification(indLead.identification)),
-          None,
-          None,
-          None,
-          indLead.entityStart,
-          indLead.entityEnd
+          lineNo = None,
+          bpMatchStatus = None,
+          name = indLead.name,
+          dateOfBirth = Some(indLead.dateOfBirth),
+          phoneNumber = Some(indLead.phoneNumber),
+          identification = Some(getIdentification(indLead.identification)),
+          countryOfResidence = indLead.countryOfResidence,
+          legallyIncapable = indLead.legallyIncapable,
+          nationality = indLead.nationality,
+          entityStart = indLead.entityStart,
+          entityEnd = indLead.entityEnd
         )
 
         AddTrusteeIndTransform(demotedTrustee)
@@ -79,13 +79,13 @@ trait PromoteTrusteeCommon {
       case (None, Some(orgLead)) =>
 
         val demotedTrustee = TrusteeOrgType(
-          None,
-          None,
-          orgLead.name,
-          Some(orgLead.phoneNumber),
-          orgLead.email,
-          Some(getIdentification(orgLead.identification)),
-          None,
+          lineNo = None,
+          bpMatchStatus = None,
+          name = orgLead.name,
+          phoneNumber = Some(orgLead.phoneNumber),
+          email = orgLead.email,
+          identification = Some(getIdentification(orgLead.identification)),
+          countryOfResidence = orgLead.countryOfResidence,
           orgLead.entityStart,
           orgLead.entityEnd
         )
