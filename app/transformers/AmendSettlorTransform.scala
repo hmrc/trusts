@@ -29,7 +29,7 @@ trait AmendSettlorTransform extends AmendEntityTransform with JsonOperations {
       _ => JsSuccess(input),
       lineNo => {
         stripEtmpStatusForMatching(input, lineNo).fold(
-          _ => endEntity(input, path, original, endDate),
+          _ => endEntity(input, path, original, endDate, endDateField),
           newEntries => addEndedEntity(input, newEntries)
         )
       }

@@ -16,24 +16,23 @@
 
 package transformers
 
-import java.time.LocalDate
+import models.variation.NonEEABusinessType
+import play.api.libs.json._
 
-import play.api.libs.json.{JsPath, JsResult, JsValue, Json}
+case class AddNonEeaBusinessAssetTransform(nonEEABusiness: NonEEABusinessType) extends DeltaTransform with JsonOperations {
 
-trait AmendEntityTransform extends DeltaTransform with JsonOperations {
-
-  val index: Int
-  val amended: JsValue
-  val original: JsValue
-  val endDate: LocalDate
-  val path: JsPath
-  val endDateField: String = "entityEnd"
+  private lazy val path = __ \ 'details \ 'trust \ 'assets \ 'nonEEABusiness
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    amendAtPosition(input, path, index, Json.toJson(amended))
-  }
-
-  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    endEntity(input, path, original, endDate, endDateField)
+    addToList(input, path, Json.toJson(nonEEABusiness))
   }
 }
+
+object AddNonEeaBusinessAssetTransform {
+
+  val key = "AddNonEeaBusinessAssetTransform"
+
+  implicit val format: Format[AddNonEeaBusinessAssetTransform] = Json.format[AddNonEeaBusinessAssetTransform]
+}
+
+

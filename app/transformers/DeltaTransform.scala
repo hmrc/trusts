@@ -36,11 +36,12 @@ object DeltaTransform {
     value =>
       (
         trusteeReads orElse
-        beneficiaryReads orElse
-        settlorReads orElse
-        protectorReads orElse
-        otherIndividualReads orElse
-        trustDetailsTransformsReads
+          beneficiaryReads orElse
+          settlorReads orElse
+          protectorReads orElse
+          otherIndividualReads orElse
+          trustDetailsReads orElse
+          nonEeaBusinessAssetReads
       ) (value.as[JsObject]) orElse (throw new Exception(s"Don't know how to deserialise transform"))
   )
 
@@ -97,13 +98,19 @@ object DeltaTransform {
     readsForTransform[AddOtherIndividualTransform](AddOtherIndividualTransform.key)
   }
 
-  def trustDetailsTransformsReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
+  def trustDetailsReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
     readsForTransform[SetExpressTransform](SetExpressTransform.key) orElse
     readsForTransform[SetPropertyTransform](SetPropertyTransform.key) orElse
     readsForTransform[SetRecordedTransform](SetRecordedTransform.key) orElse
     readsForTransform[SetResidentTransform](SetResidentTransform.key) orElse
     readsForTransform[SetTaxableTransform](SetTaxableTransform.key) orElse
     readsForTransform[SetUKRelationTransform](SetUKRelationTransform.key)
+  }
+
+  def nonEeaBusinessAssetReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
+    readsForTransform[AddNonEeaBusinessAssetTransform](AddNonEeaBusinessAssetTransform.key) orElse
+    readsForTransform[AmendNonEeaBusinessAssetTransform](AmendNonEeaBusinessAssetTransform.key) orElse
+    readsForTransform[RemoveAssetTransform](RemoveAssetTransform.key)
   }
 
   def trusteeWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
@@ -205,7 +212,12 @@ object DeltaTransform {
       Json.obj(RemoveProtectorsTransform.key -> Json.toJson(transform)(RemoveProtectorsTransform.format))
   }
 
-  def otherIndividualsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+  def addOtherIndividualsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
+    case transform: AddOtherIndividualTransform =>
+      Json.obj(AddOtherIndividualTransform.key -> Json.toJson(transform)(AddOtherIndividualTransform.format))
+  }
+
+  def amendOtherIndividualsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
     case transform: AmendOtherIndividualTransform =>
       Json.obj(AmendOtherIndividualTransform.key -> Json.toJson(transform)(AmendOtherIndividualTransform.format))
   }
@@ -215,9 +227,19 @@ object DeltaTransform {
       Json.obj(RemoveOtherIndividualsTransform.key -> Json.toJson(transform)(RemoveOtherIndividualsTransform.format))
   }
 
-  def addOtherIndividualsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
-    case transform: AddOtherIndividualTransform =>
-      Json.obj(AddOtherIndividualTransform.key -> Json.toJson(transform)(AddOtherIndividualTransform.format))
+  def addNonEeaBusinessAssetWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
+    case transform: AddNonEeaBusinessAssetTransform =>
+      Json.obj(AddNonEeaBusinessAssetTransform.key -> Json.toJson(transform)(AddNonEeaBusinessAssetTransform.format))
+  }
+
+  def amendNonEeaBusinessAssetWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+    case transform: AmendNonEeaBusinessAssetTransform =>
+      Json.obj(AmendNonEeaBusinessAssetTransform.key -> Json.toJson(transform)(AmendNonEeaBusinessAssetTransform.format))
+  }
+
+  def removeNonEeaBusinessAssetWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
+    case transform: RemoveAssetTransform =>
+      Json.obj(RemoveAssetTransform.key -> Json.toJson(transform)(RemoveAssetTransform.format))
   }
 
   def trustDetailsTransformsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
@@ -250,10 +272,13 @@ object DeltaTransform {
       addProtectorsWrites orElse
       amendProtectorsWrites orElse
       removeProtectorsWrites orElse
-      otherIndividualsWrites orElse
+      amendOtherIndividualsWrites orElse
       removeOtherIndividualsWrites orElse
       addOtherIndividualsWrites orElse
       trustDetailsTransformsWrites orElse
+      addNonEeaBusinessAssetWrites orElse
+      amendNonEeaBusinessAssetWrites orElse
+      removeNonEeaBusinessAssetWrites orElse
       defaultWrites
       ).apply(deltaTransform)
   }

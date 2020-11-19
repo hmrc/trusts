@@ -16,8 +16,6 @@
 
 package models.get_trust
 
-import models.Taxability
-import models.Taxability.{ConvertedFromNonTaxableToTaxable, NonTaxable, Taxable}
 import play.api.libs.json._
 import transformers.mdtp.beneficiaries.Beneficiaries
 import transformers.mdtp.protectors.Protectors
@@ -36,18 +34,6 @@ case class TrustProcessedResponse(getTrust: JsValue, responseHeader: ResponseHea
     ).map {
       json =>
         TrustProcessedResponse(json, responseHeader)
-    }
-  }
-
-  def taxability: Taxability = {
-    val matchDataPath: JsPath = JsPath \ 'matchData
-    val utrPath: JsPath = matchDataPath \ 'utr
-    val urnPath: JsPath = matchDataPath \ 'urn
-
-    (getTrust.transform(utrPath.json.pick).isSuccess, getTrust.transform(urnPath.json.pick).isSuccess) match {
-      case (true, false) => Taxable
-      case (false, true) => NonTaxable
-      case (true, true) => ConvertedFromNonTaxableToTaxable
     }
   }
 

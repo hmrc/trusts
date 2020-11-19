@@ -32,6 +32,9 @@
               "identification":{
                 "nino":"ST123456"
               },
+              "legallyIncapable": false,
+              "nationality": "FR",
+              "countryOfResidence": "FR",
               "entityStart":"2000-01-01"
             }
           },
@@ -44,6 +47,7 @@
               "identification": {
                 "utr": "5465416546"
               },
+              "countryOfResidence": "DE",
               "entityStart":"1999-01-01"
             }
           },

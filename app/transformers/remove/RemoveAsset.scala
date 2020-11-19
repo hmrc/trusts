@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-package models
+package transformers.remove
 
-sealed trait Taxability
+import java.time.LocalDate
 
-object Taxability extends Enumerable.Implicits {
+import play.api.libs.json.{Format, Json, OWrites, Reads}
 
-  case object Taxable extends Taxability
-  case object NonTaxable extends Taxability
-  case object ConvertedFromNonTaxableToTaxable extends Taxability
+case class RemoveAsset(endDate: LocalDate, index: Int, `type`: String)
+
+object RemoveAsset {
+  val validAssetTypes: Seq[String] = Seq(
+    "nonEEABusiness"
+  )
+
+  val reads: Reads[RemoveAsset] = Json.reads[RemoveAsset].filter(ra => validAssetTypes.contains(ra.`type`))
+  val writes: OWrites[RemoveAsset] = Json.writes[RemoveAsset]
+
+  implicit val formats: Format[RemoveAsset] = Format(reads, writes)
 }

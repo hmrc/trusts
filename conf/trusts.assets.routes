@@ -1,0 +1,6 @@
+
+POST       /add-non-eea-business/:identifier                      controllers.AssetsTransformationController.addNonEeaBusiness(identifier: String)
+
+POST       /amend-non-eea-business/:identifier/:index             controllers.AssetsTransformationController.amendNonEeaBusiness(identifier: String, index: Int)
+
+PUT        /:identifier/remove                                    controllers.AssetsTransformationController.removeAsset(identifier: String)

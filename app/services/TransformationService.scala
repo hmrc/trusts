@@ -16,6 +16,7 @@
 
 package services
 
+import exceptions.InternalServerErrorException
 import javax.inject.Inject
 import models.auditing.TrustAuditing
 import models.get_trust.{GetTrustResponse, TransformationErrorResponse, TrustProcessedResponse}
@@ -32,6 +33,13 @@ import scala.concurrent.Future
 class TransformationService @Inject()(repository: TransformationRepository,
                                       desService: DesService,
                                       auditService: AuditService) extends Logging {
+
+  def getTransformedTrustJson(identifier: String, internalId: String)(implicit hc: HeaderCarrier): Future[JsObject] = {
+    getTransformedData(identifier, internalId).flatMap {
+      case TrustProcessedResponse(json, _) => Future.successful(json.as[JsObject])
+      case _ => Future.failed(InternalServerErrorException("Trust is not in a processed state."))
+    }
+  }
 
   def getTransformedData(identifier: String, internalId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
     desService.getTrustInfo(identifier, internalId).flatMap {

@@ -1,0 +1,46 @@
+{
+  "details":{
+    "trust":{
+      "assets": {
+        "nonEEABusiness": [
+          {
+            "lineNo": "1",
+            "orgName": "First Example",
+            "address": {
+              "line1": "Line 1",
+              "line2": "Line 2",
+              "postCode": "NE11NE",
+              "country": "GB"
+            },
+            "govLawCountry": "GB",
+            "startDate": "2000-01-01"
+          },
+          {
+            "lineNo": "2",
+            "orgName": "Amended Name",
+            "address": {
+              "line1": "Line 1",
+              "line2": "Line 2",
+              "postCode": "NE11NE",
+              "country": "GB"
+            },
+            "govLawCountry": "GB",
+            "startDate": "2010-01-01"
+          },
+          {
+            "lineNo": "3",
+            "orgName": "Third Example",
+            "address": {
+              "line1": "Line 1",
+              "line2": "Line 2",
+              "postCode": "NE11NE",
+              "country": "GB"
+            },
+            "govLawCountry": "GB",
+            "startDate": "2020-01-01"
+          }
+        ]
+      }
+    }
+  }
+}
