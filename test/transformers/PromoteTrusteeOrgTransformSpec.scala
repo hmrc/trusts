@@ -34,6 +34,7 @@ class PromoteTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {
       |    "identification": {
       |      "utr": "5465416546"
       |    },
+      |    "countryOfResidence": "DE",
       |    "entityStart":"1999-01-01"
       |  }
       |}
@@ -63,7 +64,7 @@ class PromoteTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {
       phoneNumber = "0121546546",
       email = None,
       identification = IdentificationOrgType(Some("5465416546"), None, None),
-      countryOfResidence = None
+      countryOfResidence = Some("DE")
     )
     val transformer = PromoteTrusteeOrgTransform(
       index = 1,
