@@ -20,7 +20,7 @@ import utils.NonTaxable5MLDFixtures.getJsonFromFile
 
 import scala.concurrent.Future
 
-class SuccessfulSubmissionSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
+class SubmissionSuccessSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
 
   val utr = "5174384721"
   val internalId = "internalId"

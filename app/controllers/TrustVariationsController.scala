@@ -57,7 +57,10 @@ class TrustVariationsController @Inject()(
           variationService
             .submitDeclaration(identifier, request.identifier, declarationForApi)
             .map(response => Ok(Json.toJson(response)))
-        } recover responseHandler.recoverFromException(TrustAuditing.TRUST_VARIATION_SUBMISSION_FAILED)
+        } recover {
+          println("??")
+          responseHandler.recoverFromException(TrustAuditing.TRUST_VARIATION_SUBMISSION_FAILED)
+        }
       )
     }
   }
