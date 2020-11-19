@@ -16,7 +16,6 @@
 
 package models.get_trust
 
-import models.existing_trust.DesErrorResponse
 import models.get_trust
 import play.api.Logging
 import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK, SERVICE_UNAVAILABLE}
@@ -59,46 +58,35 @@ object GetTrustSuccessResponse {
 
 object GetTrustResponse extends Logging {
 
-  implicit lazy val httpReads: HttpReads[GetTrustResponse] = new HttpReads[GetTrustResponse] {
-      override def read(method: String, url: String, response: HttpResponse): GetTrustResponse = {
-        logger.info(s"response status received from des: ${response.status}")
-        response.status match {
-          case OK =>
-            parseOkResponse(response)
-          case BAD_REQUEST =>
-            parseBadRequestResponse(response)
-          case NOT_FOUND =>
-            ResourceNotFoundResponse
-          case SERVICE_UNAVAILABLE =>
-            ServiceUnavailableResponse
-          case _ =>
-            InternalServerErrorResponse
-        }
-      }
-    }
-
-  private def parseOkResponse(response: HttpResponse) : GetTrustResponse = {
-    response.json.validate[GetTrustSuccessResponse] match {
-      case JsSuccess(trustFound, _) => trustFound
-      case JsError(errors) =>
-        logger.error(s"Cannot parse as TrustFoundResponse due to $errors")
-        NotEnoughDataResponse(response.json, JsError.toJson(errors))
+  implicit def httpReads(identifier: String): HttpReads[GetTrustResponse] = (_: String, _: String, response: HttpResponse) => {
+    response.status match {
+      case OK =>
+        parseOkResponse(response, identifier)
+      case BAD_REQUEST =>
+        logger.warn(s"[UTR/URN: $identifier]" +
+          s" bad request returned from des: ${response.json}")
+        BadRequestResponse
+      case NOT_FOUND =>
+        logger.info(s"[UTR/URN: $identifier]" +
+          s" trust not found in ETMP for given identifier")
+        ResourceNotFoundResponse
+      case SERVICE_UNAVAILABLE =>
+        logger.warn(s"[UTR/URN: $identifier]" +
+          s" service is unavailable, unable to get trust")
+        ServiceUnavailableResponse
+      case status =>
+        logger.error(s"[UTR/URN: $identifier]" +
+          s" error occurred when getting trust, status: $status")
+        InternalServerErrorResponse
     }
   }
 
-  private def parseBadRequestResponse(response: HttpResponse) : TrustErrorResponse = {
-    response.json.asOpt[DesErrorResponse] match {
-      case Some(desErrorResponse) =>
-        desErrorResponse.code match {
-          case "INVALID_UTR" =>
-            InvalidUTRResponse
-          case "INVALID_REGIME" =>
-            InvalidRegimeResponse
-          case _ =>
-            BadRequestResponse
-        }
-      case None =>
-        InternalServerErrorResponse
+  private def parseOkResponse(response: HttpResponse, identifier: String) : GetTrustResponse = {
+    response.json.validate[GetTrustSuccessResponse] match {
+      case JsSuccess(trustFound, _) => trustFound
+      case JsError(errors) =>
+        logger.error(s"[UTR/URN: $identifier] Cannot parse as TrustFoundResponse due to ${JsError.toJson(errors)}")
+        NotEnoughDataResponse(response.json, JsError.toJson(errors))
     }
   }
 }

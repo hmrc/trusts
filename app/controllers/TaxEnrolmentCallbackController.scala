@@ -32,12 +32,21 @@ class TaxEnrolmentCallbackController @Inject()(
                                                 cc: ControllerComponents
                                                ) extends BackendController(cc) with Logging {
 
-  def subscriptionCallback() = Action.async(parse.json) {
+  def taxableSubscriptionCallback(trn: String) = Action.async(parse.json) {
     implicit request =>
       val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
-      logger.info(s"[subscriptionCallback][Session ID: ${Session.id(hc)}]" +
-        s" Tax-Enrolment: subscription callback message was  : ${request.body}")
+      logger.info(s"[taxableSubscriptionCallback][Session ID: ${Session.id(hc)}]" +
+        s" Tax-Enrolment: taxable subscription callback message was  : ${request.body}")
+      Future(Ok(""))
+  }
+
+  def nonTaxableSubscriptionCallback(trn: String) = Action.async(parse.json) {
+    implicit request =>
+      val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+
+      logger.info(s"[nonTaxableSubscriptionCallback][Session ID: ${Session.id(hc)}]" +
+        s" Tax-Enrolment: non-taxable subscription callback message was  : ${request.body}")
       Future(Ok(""))
   }
 

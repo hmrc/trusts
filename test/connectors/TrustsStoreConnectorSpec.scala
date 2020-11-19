@@ -19,7 +19,7 @@ package connectors
 import connector.TrustsStoreConnector
 import org.scalatest.RecoverMethods
 import play.api.http.Status
-import uk.gov.hmrc.http.{BadRequestException, UpstreamErrorResponse}
+import uk.gov.hmrc.http.UpstreamErrorResponse
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -68,7 +68,7 @@ class TrustsStoreConnectorSpec extends ConnectorSpecHelper with RecoverMethods {
 
         val futureResult = connector.getFeature("5mld")
         whenReady(futureResult.failed) {
-          result => result mustBe a[BadRequestException]
+          result => result mustBe a[UpstreamErrorResponse]
         }
       }
 

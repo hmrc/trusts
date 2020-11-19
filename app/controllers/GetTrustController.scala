@@ -20,10 +20,11 @@ import controllers.actions.{IdentifierAction, ValidateIdentifierActionProvider}
 import javax.inject.{Inject, Singleton}
 import models.auditing.TrustAuditing
 import models.get_trust.{BadRequestResponse, _}
+import models.requests.IdentifierRequest
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
-import services.{AuditService, DesService, TransformationService, TrustsStoreService}
+import services.{AuditService, DesService, TransformationService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,13 +36,10 @@ class GetTrustController @Inject()(identify: IdentifierAction,
                                    desService: DesService,
                                    transformationService: TransformationService,
                                    validateIdentifier : ValidateIdentifierActionProvider,
-                                   trustsStoreService: TrustsStoreService,
                                    cc: ControllerComponents) extends BackendController(cc) with Logging {
 
 
   val errorAuditMessages: Map[GetTrustResponse, String] = Map(
-    InvalidUTRResponse -> "The UTR/URN provided is invalid.",
-    InvalidRegimeResponse -> "Invalid regime received from DES.",
     BadRequestResponse -> "Bad Request received from DES.",
     ResourceNotFoundResponse -> "Not Found received from DES.",
     InternalServerErrorResponse -> "Internal Server Error received from DES.",
@@ -188,58 +186,71 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
   }
 
-  private def doGet(identifier: String,
-                    applyTransformations: Boolean,
-                    refreshEtmpData: Boolean = false
-                   )
-                   (handleResult: GetTrustSuccessResponse => Result): Action[AnyContent] =
-    (validateIdentifier(identifier) andThen identify).async {
+  private def doGet(identifier: String, applyTransformations: Boolean, refreshEtmpData: Boolean = false)
+                   (f: GetTrustSuccessResponse => Result): Action[AnyContent] = (validateIdentifier(identifier) andThen identify).async {
       implicit request =>
-
-        (for {
-          _ <- resetCacheIfRequested(identifier, request.identifier, refreshEtmpData)
-          data <- if (applyTransformations) {
-            transformationService.getTransformedData(identifier, request.identifier)
-          } else {
-            desService.getTrustInfo(identifier, request.identifier)
-          }
-        } yield data match {
-          case response: GetTrustSuccessResponse =>
-            auditService.audit(
-              event = TrustAuditing.GET_TRUST,
-              request = Json.obj("utr" -> identifier),
-              internalId = request.identifier,
-              response = Json.toJson(response)
-            )
-
-            handleResult(response)
-          case NotEnoughDataResponse(json, errors) =>
-            val reason = Json.obj(
-              "response" -> json,
-              "reason" -> "Missing mandatory fields in response received from DES",
-              "errors" -> errors
-            )
-
-            auditService.audit(
-              event = TrustAuditing.GET_TRUST,
-              request = Json.obj("utr" -> identifier),
-              internalId = request.identifier,
-              response = reason
-            )
-
-            NoContent
-          case err =>
-            auditService.auditErrorResponse(
-              TrustAuditing.GET_TRUST,
-              Json.obj("utr" -> identifier),
-              request.identifier,
-              errorAuditMessages.getOrElse(err, "UNKNOWN")
-            )
-            errorResponses.getOrElse(err, InternalServerError)
-        }) recover {
+        {
+          for {
+            _ <- resetCacheIfRequested(identifier, request.identifier, refreshEtmpData)
+            data <- if (applyTransformations) {
+              transformationService.getTransformedData(identifier, request.identifier)
+            } else {
+              desService.getTrustInfo(identifier, request.identifier)
+            }
+          } yield (
+            successResponse(f, identifier) orElse
+            notEnoughDataResponse(identifier) orElse
+            errorResponse(identifier)
+          ).apply(data)
+        } recover {
           case e =>
             logger.error(s"[Session ID: ${request.sessionId}][UTR/URN: $identifier] Failed to get trust info ${e.getMessage}")
             InternalServerError
         }
     }
+
+  private def successResponse(f: GetTrustSuccessResponse => Result,
+                              identifier: String)
+                             (implicit request: IdentifierRequest[AnyContent]): PartialFunction[GetTrustResponse, Result] = {
+    case response: GetTrustSuccessResponse =>
+      auditService.audit(
+        event = TrustAuditing.GET_TRUST,
+        request = Json.obj("utr" -> identifier),
+        internalId = request.identifier,
+        response = Json.toJson(response)
+      )
+
+      f(response)
+  }
+
+  private def notEnoughDataResponse(identifier: String)
+                           (implicit request: IdentifierRequest[AnyContent]): PartialFunction[GetTrustResponse, Result] = {
+    case NotEnoughDataResponse(json, errors) =>
+      val reason = Json.obj(
+        "response" -> json,
+        "reason" -> "Missing mandatory fields in response received from DES",
+        "errors" -> errors
+      )
+
+      auditService.audit(
+        event = TrustAuditing.GET_TRUST,
+        request = Json.obj("utr" -> identifier),
+        internalId = request.identifier,
+        response = reason
+      )
+
+      NoContent
+  }
+
+  private def errorResponse(identifier: String)
+                           (implicit request: IdentifierRequest[AnyContent]): PartialFunction[GetTrustResponse, Result] = {
+    case err =>
+      auditService.auditErrorResponse(
+        TrustAuditing.GET_TRUST,
+        Json.obj("utr" -> identifier),
+        request.identifier,
+        errorAuditMessages.getOrElse(err, "UNKNOWN")
+      )
+      errorResponses.getOrElse(err, InternalServerError)
+  }
 }

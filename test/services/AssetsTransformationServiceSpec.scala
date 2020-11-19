@@ -19,7 +19,6 @@ package services
 import java.time.LocalDate
 
 import models.AddressType
-import models.get_trust.{ResponseHeader, TrustProcessedResponse}
 import models.variation._
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -41,7 +40,7 @@ class AssetsTransformationServiceSpec extends FreeSpec with MockitoSugar with Sc
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  private def NonEeaBusinessAssetJson(value1: String, endDate: Option[LocalDate] = None) = {
+  private def nonEeaBusinessAssetJson(value1: String, endDate: Option[LocalDate] = None) = {
     if (endDate.isDefined) {
       Json.obj("field1" -> value1, "field2" -> "value20", "endDate" -> endDate.get, "lineNo" -> 65)
     } else {
@@ -68,20 +67,18 @@ class AssetsTransformationServiceSpec extends FreeSpec with MockitoSugar with Sc
     "must add a new remove NonEeaBusinessAsset transform using the transformation service" in {
       val transformationService = mock[TransformationService]
       val service = new AssetsTransformationService(transformationService, LocalDateMock)
-      val nonEeaBusinessAsset = NonEeaBusinessAssetJson("Blah Blah Blah")
+      val nonEeaBusinessAsset = nonEeaBusinessAssetJson("Blah Blah Blah")
 
       when(transformationService.addNewTransform(any(), any(), any()))
         .thenReturn(Future.successful(true))
-      when(transformationService.getTransformedData(any(), any())(any()))
-        .thenReturn(Future.successful(TrustProcessedResponse(
-          buildInputJson("nonEEABusiness", Seq(nonEeaBusinessAsset)),
-          ResponseHeader("status", "formBundlNo")
-        )))
+
+      when(transformationService.getTransformedTrustJson(any(), any())(any()))
+        .thenReturn(Future.successful(buildInputJson("nonEEABusiness", Seq(nonEeaBusinessAsset))))
 
       val result = service.removeAsset("utr", "internalId", RemoveAsset(LocalDate.of(2013, 2, 20), 0, "nonEEABusiness"))
       whenReady(result) { _ =>
         verify(transformationService).addNewTransform("utr",
-          "internalId", RemoveNonEeaBusinessAssetTransform(0, nonEeaBusinessAsset, LocalDate.of(2013, 2, 20), "nonEEABusiness"))
+          "internalId", RemoveAssetTransform(0, nonEeaBusinessAsset, LocalDate.of(2013, 2, 20), "nonEEABusiness"))
       }
     }
 
@@ -95,11 +92,8 @@ class AssetsTransformationServiceSpec extends FreeSpec with MockitoSugar with Sc
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any())(any()))
-        .thenReturn(Future.successful(TrustProcessedResponse(
-          buildInputJson("nonEEABusiness", Seq(originalNonEeaBusinessAssetJson)),
-          ResponseHeader("status", "formBundlNo")
-        )))
+      when(transformationService.getTransformedTrustJson(any(), any())(any()))
+        .thenReturn(Future.successful(buildInputJson("nonEEABusiness", Seq(originalNonEeaBusinessAssetJson))))
 
       val result = service.amendNonEeaBusinessAssetTransformer("utr", index, "internalId", amendedNonEeaBusinessAssetJson)
       whenReady(result) { _ =>

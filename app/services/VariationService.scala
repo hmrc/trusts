@@ -60,11 +60,31 @@ class VariationService @Inject()(desService: DesService,
             case JsSuccess(transformedJson, _) =>
               val response = TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
               transformAndSubmit(identifier, internalId, declaration, originalJson, response)
-            case JsError(errors) =>
+            case e@JsError(errors) =>
+
+              auditService.auditVariationTransformationError(
+                internalId,
+                identifier,
+                originalJson,
+                JsString("Declaration Transforms"),
+                "Failed to apply declaration transformations.",
+                JsError.toJson(e)
+              )
+
               logging.error(s"Failed to transform trust info ${JsError.toJson(errors)}")
               Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
           }
-        case JsError(errors) =>
+        case e@JsError(errors) =>
+
+          auditService.auditVariationTransformationError(
+            internalId,
+            identifier,
+            originalResponse.getTrust,
+            JsString("Populate lead trustees transforms"),
+            "Failed to populate lead trustee address",
+            JsError.toJson(e)
+          )
+
           logging.error(s"Failed to populate lead trustee address ${JsError.toJson(errors)}")
           Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
       }
@@ -86,11 +106,21 @@ class VariationService @Inject()(desService: DesService,
         declarationTransformer.transform(response, originalJson, declaration, localDateService.now, is5mld) match {
           case JsSuccess(value, _) =>
             logging.info("successfully transformed json for declaration")
-            doSubmit(identifier, value, internalId)
+            doSubmit(value, internalId)
           case JsError(errors) =>
-            logging.error(s"Problem transforming data for ETMP submissio: ${JsError.toJson(errors)}")
+
+            auditService.auditVariationTransformationError(
+              internalId = internalId,
+              utr = identifier,
+              transforms = JsString("Declaration transforms"),
+              data = originalJson,
+              errorReason = "Problem transforming data for ETMP submission"
+            )
+
+            logging.error(s"Problem transforming data for ETMP submission: ${JsError.toJson(errors)}")
             Future.failed(InternalServerErrorException(s"There was a problem transforming data for submission to ETMP: ${JsError.toJson(errors)}"))
         }
+
     } recoverWith {
       case e =>
         logging.error(s"Exception transforming and submitting ${e.getMessage} ${e.getCause}")
@@ -115,7 +145,7 @@ class VariationService @Inject()(desService: DesService,
     }
   }
 
-  private def doSubmit(identifier: String, value: JsValue, internalId: String)
+  private def doSubmit(value: JsValue, internalId: String)
                       (implicit hc: HeaderCarrier, logging: LoggingContext): Future[VariationResponse] = {
 
     val payload = value.applyRules

@@ -84,7 +84,7 @@ class AddNonEEABusinessAssetSpec extends AsyncFreeSpec with MustMatchers with Mo
       status(result) mustBe OK
       contentAsJson(result) mustBe expectedInitialGetJson
 
-      val addRequest = FakeRequest(POST, s"/trusts/assets/non-eea-business/add/$identifier")
+      val addRequest = FakeRequest(POST, s"/trusts/assets/add-non-eea-business/$identifier")
         .withBody(newNonEEABusinessJson)
         .withHeaders(CONTENT_TYPE -> "application/json")
 

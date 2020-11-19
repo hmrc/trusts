@@ -31,21 +31,21 @@ import scala.util.control.NonFatal
 
 class RosmPatternServiceImpl @Inject()( desService :DesService, taxEnrolmentService : TaxEnrolmentsService) extends RosmPatternService with Logging {
 
-  override def setSubscriptionId(trn : String)(implicit hc : HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] ={
+  override def setSubscriptionId(trn : String, taxable: Boolean)(implicit hc : HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] ={
 
     for {
       subscriptionIdResponse <- desService.getSubscriptionId(trn = trn)
-      taxEnrolmentSuscriberResponse <- taxEnrolmentService.setSubscriptionId(subscriptionIdResponse.subscriptionId)
+      taxEnrolmentSuscriberResponse <- taxEnrolmentService.setSubscriptionId(subscriptionIdResponse.subscriptionId, taxable, trn)
     } yield {
       taxEnrolmentSuscriberResponse
     }
   }
 
-  override def enrolAndLogResult(trn: String, affinityGroup: AffinityGroup)
+  override def enrolAndLogResult(trn: String, affinityGroup: AffinityGroup, taxable: Boolean)
                                                     (implicit hc: HeaderCarrier) : Future[TaxEnrolmentSuscriberResponse] = {
     affinityGroup match {
       case AffinityGroup.Organisation =>
-        setSubscriptionId(trn) map {
+        setSubscriptionId(trn, taxable) map {
           case TaxEnrolmentSuccess =>
             logger.info(s"[enrolAndLogResult][Session ID: ${Session.id(hc)}]" +
               s" Rosm completed successfully for provided trn : $trn.")
@@ -72,6 +72,6 @@ class RosmPatternServiceImpl @Inject()( desService :DesService, taxEnrolmentServ
 }
 @ImplementedBy(classOf[RosmPatternServiceImpl])
 trait RosmPatternService {
-  def setSubscriptionId(trn : String)(implicit hc : HeaderCarrier): Future[TaxEnrolmentSuscriberResponse]
-  def enrolAndLogResult(trn: String, affinityGroup: AffinityGroup)(implicit hc: HeaderCarrier) : Future[TaxEnrolmentSuscriberResponse]
+  def setSubscriptionId(trn : String, taxable: Boolean)(implicit hc : HeaderCarrier): Future[TaxEnrolmentSuscriberResponse]
+  def enrolAndLogResult(trn: String, affinityGroup: AffinityGroup, taxable: Boolean)(implicit hc: HeaderCarrier) : Future[TaxEnrolmentSuscriberResponse]
 }

@@ -72,7 +72,6 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) extends Lo
 
     case e =>
       logger.error(s"[Session ID: ${request.sessionId}] Exception returned ${e.getMessage}")
-
       auditService.auditErrorResponse(
         auditType,
         request.body,

@@ -18,7 +18,6 @@ package services
 
 import java.time.LocalDate
 
-import models.get_trust.{ResponseHeader, TrustProcessedResponse}
 import models.variation._
 import models.{AddressType, NameType}
 import org.mockito.Matchers
@@ -73,11 +72,9 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any()))
         .thenReturn(Future.successful(true))
-      when(transformationService.getTransformedData(any(), any())(any()))
-        .thenReturn(Future.successful(TrustProcessedResponse(
-          buildInputJson("individualDetails", Seq(beneficiary)),
-          ResponseHeader("status", "formBundlNo")
-        )))
+
+      when(transformationService.getTransformedTrustJson(any(), any())(any()))
+        .thenReturn(Future.successful(buildInputJson("individualDetails", Seq(beneficiary))))
 
       val result = service.removeBeneficiary("utr", "internalId", RemoveBeneficiary(LocalDate.of(2013, 2, 20), 0, "individualDetails"))
       whenReady(result) { _ =>
@@ -103,11 +100,8 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any())(any()))
-        .thenReturn(Future.successful(TrustProcessedResponse(
-          buildInputJson("unidentified", Seq(originalBeneficiaryJson)),
-          ResponseHeader("status", "formBundlNo")
-        )))
+      when(transformationService.getTransformedTrustJson(any(), any())(any()))
+        .thenReturn(Future.successful(buildInputJson("unidentified", Seq(originalBeneficiaryJson))))
 
       val result = service.amendUnidentifiedBeneficiaryTransformer("utr", index, "internalId", newDescription)
       whenReady(result) { _ =>
@@ -180,11 +174,8 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any())(any()))
-        .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(
-          buildInputJson("individualDetails", Seq(original)),
-          ResponseHeader("status", "formBundlNo")
-        )))
+      when(transformationService.getTransformedTrustJson(any(), any())(any()))
+        .thenReturn(Future.successful(buildInputJson("individualDetails", Seq(original))))
 
       val result = service.amendIndividualBeneficiaryTransformer("utr", index, "internalId", newIndividual)
       whenReady(result) { _ =>
@@ -282,11 +273,8 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any())(any()))
-        .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(
-          buildInputJson("charity", Seq(original)),
-          ResponseHeader("status", "formBundleNo")
-        )))
+      when(transformationService.getTransformedTrustJson(any(), any())(any()))
+        .thenReturn(Future.successful(buildInputJson("charity", Seq(original))))
 
       val result = service.amendCharityBeneficiaryTransformer("utr", index, "internalId", newCharity)
       whenReady(result) { _ =>
@@ -381,11 +369,8 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any())(any()))
-        .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(
-          buildInputJson("company", Seq(original)),
-          ResponseHeader("status", "formBundleNo")
-        )))
+      when(transformationService.getTransformedTrustJson(any(), any())(any()))
+        .thenReturn(Future.successful(buildInputJson("company", Seq(original))))
 
       val result = service.amendCompanyBeneficiaryTransformer("utr", index, "internalId", newCompany)
       whenReady(result) { _ =>
@@ -459,11 +444,8 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any())(any()))
-        .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(
-          buildInputJson("other", Seq(original)),
-          ResponseHeader("status", "formBundleNo")
-        )))
+      when(transformationService.getTransformedTrustJson(any(), any())(any()))
+        .thenReturn(Future.successful(buildInputJson("other", Seq(original))))
 
       val result = service.amendOtherBeneficiaryTransformer("utr", index, "internalId", newBeneficiary)
       whenReady(result) { _ =>
@@ -507,11 +489,8 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any())(any()))
-        .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(
-          buildInputJson("trust", Seq(original)),
-          ResponseHeader("status", "formBundleNo")
-        )))
+      when(transformationService.getTransformedTrustJson(any(), any())(any()))
+        .thenReturn(Future.successful(buildInputJson("trust", Seq(original))))
 
       val result = service.amendTrustBeneficiaryTransformer("utr", index, "internalId", newTrust)
       whenReady(result) { _ =>
@@ -607,11 +586,8 @@ class BeneficiaryTransformationServiceSpec extends FreeSpec with MockitoSugar wi
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(transformationService.getTransformedData(any(), any())(any()))
-        .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(
-          buildInputJson("large", Seq(original)),
-          ResponseHeader("status", "formBundleNo")
-        )))
+      when(transformationService.getTransformedTrustJson(any(), any())(any()))
+        .thenReturn(Future.successful(buildInputJson("large", Seq(original))))
 
       val result = service.amendLargeBeneficiaryTransformer("utr", index, "internalId", newBeneficiary)
       whenReady(result) { _ =>

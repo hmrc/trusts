@@ -30,7 +30,7 @@ object NonTaxable5MLDFixtures extends JsonFixtures {
     lazy val newGet5MLDTrustNonTaxableResponse: String = getJsonFromFile("5MLD/NonTaxable/des/new-valid-get-trust-5mld-non-taxable-des-response.json")
   }
 
-  object TransformCache {
+  object Cache {
     /**
      * These fixtures are used to mock the behaviour when the CacheRepository finds a record for Display or variation in the mongo cache.
      * The shape of the data is such that the HTTP reads has already been completed in GetTrustResponse.httpReads

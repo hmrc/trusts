@@ -11,7 +11,8 @@
 
 POST        /check                                                     controllers.CheckTrustController.checkExistingTrust
 
-POST        /tax-enrolment/callback/subscriptions                      controllers.TaxEnrolmentCallbackController.subscriptionCallback
+POST        /tax-enrolment/registration/taxable/hmrc-ters-org/:trn/subscriptions            controllers.TaxEnrolmentCallbackController.taxableSubscriptionCallback(trn: String)
+POST        /tax-enrolment/registration/non-taxable/hmrc-tersnt-org/:trn/subscriptions      controllers.TaxEnrolmentCallbackController.nonTaxableSubscriptionCallback(trn: String)
 
 GET         /:identifier/refresh                                       controllers.GetTrustController.getFromEtmp(identifier: String)
 

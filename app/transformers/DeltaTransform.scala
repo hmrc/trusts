@@ -110,7 +110,7 @@ object DeltaTransform {
   def nonEeaBusinessAssetReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
     readsForTransform[AddNonEeaBusinessAssetTransform](AddNonEeaBusinessAssetTransform.key) orElse
     readsForTransform[AmendNonEeaBusinessAssetTransform](AmendNonEeaBusinessAssetTransform.key) orElse
-    readsForTransform[RemoveNonEeaBusinessAssetTransform](RemoveNonEeaBusinessAssetTransform.key)
+    readsForTransform[RemoveAssetTransform](RemoveAssetTransform.key)
   }
 
   def trusteeWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
@@ -238,8 +238,8 @@ object DeltaTransform {
   }
 
   def removeNonEeaBusinessAssetWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
-    case transform: RemoveNonEeaBusinessAssetTransform =>
-      Json.obj(RemoveNonEeaBusinessAssetTransform.key -> Json.toJson(transform)(RemoveNonEeaBusinessAssetTransform.format))
+    case transform: RemoveAssetTransform =>
+      Json.obj(RemoveAssetTransform.key -> Json.toJson(transform)(RemoveAssetTransform.format))
   }
 
   def trustDetailsTransformsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {

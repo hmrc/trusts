@@ -19,7 +19,6 @@ package services
 import java.time.LocalDate
 
 import models.NameType
-import models.get_trust.{ResponseHeader, TrustProcessedResponse}
 import models.variation.NaturalPersonType
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -75,11 +74,9 @@ class OtherIndividualTransformationServiceSpec extends FreeSpec with MockitoSuga
 
         when(transformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
-        when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(TrustProcessedResponse(
-            buildInputJson(Seq(otherIndividual)),
-            ResponseHeader("status", "formBundlNo")
-          )))
+
+        when(transformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(buildInputJson(Seq(otherIndividual))))
 
         val result = service.removeOtherIndividual("utr", "internalId", RemoveOtherIndividual(LocalDate.of(2013, 2, 20), 0))
         whenReady(result) { _ =>
@@ -127,11 +124,8 @@ class OtherIndividualTransformationServiceSpec extends FreeSpec with MockitoSuga
 
         val desResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-        when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(
-            Future.successful(
-              TrustProcessedResponse(desResponse, ResponseHeader("status", "formBundlNo"))
-            ))
+        when(transformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(desResponse.as[JsObject]))
 
         val result = service.amendOtherIndividualTransformer("utr", 0, "internalId", amendedOtherIndividual)
         whenReady(result) { _ =>

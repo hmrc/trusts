@@ -20,12 +20,12 @@ import java.time.LocalDate
 
 import play.api.libs.json._
 
-case class RemoveNonEeaBusinessAssetTransform(
-                                               index : Int,
-                                               nonEEABusinessAsset : JsValue,
-                                               endDate : LocalDate,
-                                               assetType : String
-                                             ) extends DeltaTransform with JsonOperations {
+case class RemoveAssetTransform(
+                                 index : Int,
+                                 nonEEABusinessAsset : JsValue,
+                                 endDate : LocalDate,
+                                 assetType : String
+                               ) extends DeltaTransform with JsonOperations {
 
   private lazy val path = __ \ "details" \ "trust" \ "assets" \ assetType
 
@@ -38,8 +38,8 @@ case class RemoveNonEeaBusinessAssetTransform(
   }
 }
 
-object RemoveNonEeaBusinessAssetTransform {
+object RemoveAssetTransform {
   val key = "RemoveNonEeaBusinessAssetTransform"
 
-  implicit val format: Format[RemoveNonEeaBusinessAssetTransform] = Json.format[RemoveNonEeaBusinessAssetTransform]
+  implicit val format: Format[RemoveAssetTransform] = Json.format[RemoveAssetTransform]
 }

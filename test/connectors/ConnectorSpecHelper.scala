@@ -36,7 +36,15 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
           "microservice.services.des-display-trust-or-estate.port" -> server.port(),
           "microservice.services.des-vary-trust-or-estate.port" -> server.port(),
           "microservice.services.tax-enrolments.port" -> server.port(),
-          "microservice.services.trusts-store.port" -> server.port()
+          "microservice.services.trusts-store.port" -> server.port(),
+
+          "microservice.services.tax-enrolments.non-taxable.serviceName" -> "serviceNameNonTaxable",
+          "microservice.services.tax-enrolments.non-taxable.callback" ->
+            "http://localhost:9782/trusts/tax-enrolment/registration/non-taxable/hmrc-tersnt-org/:trn/subscriptions",
+
+          "microservice.services.tax-enrolments.taxable.serviceName" -> "serviceNameTaxable",
+          "microservice.services.tax-enrolments.taxable.callback" ->
+            "http://localhost:9782/trusts/tax-enrolment/registration/taxable/hmrc-ters-org/:trn/subscriptions",
         ): _*)
   }
 
@@ -46,6 +54,19 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
        | "code": "INVALID_PAYLOAD",
        | "reason": "Submission has not passed validation. Invalid Payload."
        |}""".stripMargin)
+
+  val jsonResponse4005mld: JsValue = Json.parse(
+    s"""
+       |{
+       |  "failures": [
+       |    {
+       |      "code" : "INVALID_IDTYPE",
+       |      "reason" : "Submission has not passed validation. Invalid parameter idType."
+       |    }
+       |  ]
+       |}
+     """.stripMargin
+  )
 
   val jsonResponseAlreadyRegistered: JsValue = Json.parse(
     s"""
@@ -100,6 +121,7 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
        |}
      """.stripMargin
   )
+
 
   val jsonResponse400InvalidRegime: JsValue = Json.parse(
     s"""

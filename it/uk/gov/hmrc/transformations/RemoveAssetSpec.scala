@@ -25,7 +25,7 @@ import org.scalatest.{Assertion, AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
-import play.api.libs.json.{JsArray, JsValue, Json}
+import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
@@ -34,7 +34,7 @@ import utils.{JsonUtils, NonTaxable5MLDFixtures}
 
 import scala.concurrent.Future
 
-class RemoveNonEEABusinessAssetSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
+class RemoveAssetSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
 
   "a remove nonEEABusinessAsset call" - {
 
@@ -69,7 +69,7 @@ class RemoveNonEEABusinessAssetSpec extends AsyncFreeSpec with MustMatchers with
           |  "type": "nonEEABusiness"
           |}
           |""".stripMargin)
-      val removeRequest = FakeRequest(PUT, s"/trusts/assets/non-eea-business/remove/$identifier")
+      val removeRequest = FakeRequest(PUT, s"/trusts/assets/$identifier/remove")
         .withBody(Json.toJson(removeNonEEABusinessAssetAtIndex))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -79,24 +79,8 @@ class RemoveNonEEABusinessAssetSpec extends AsyncFreeSpec with MustMatchers with
       val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(newResult) mustBe OK
 
-      val trustees = (contentAsJson(newResult) \ "getTrust" \ "trusts" \ "assets" \ "nonEEABusiness").as[JsArray]
-      trustees mustBe Json.parse(
-        """
-          |[
-          | {
-          |  "address": {
-          |      "line1": "Line 1",
-          |      "line2": "Line 2",
-          |      "postCode": "NE1 1NE",
-          |      "country": "GB"
-          |  },
-          |  "govLawCountry": "GB",
-          |  "startDate": "2002-01-01",
-          |  "lineNo": "1",
-          |  "orgName": "TestOrg"
-          | }
-          |]
-          |""".stripMargin)
+      val assets = (contentAsJson(newResult) \ "getTrust" \ "trust" \ "assets" \ "nonEEABusiness").asOpt[JsObject]
+      assets mustBe None
 
     }
   }
