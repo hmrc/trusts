@@ -117,8 +117,18 @@ class DeclarationTransformerSpec extends FreeSpec with MustMatchers with OptionV
       result.asOpt.value mustBe afterJson
     }
 
-    "add a submission date if 5mld" in {
+    "add a submission date if 5mld and not received one at playback" in {
       val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json")
+      val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-5mld.json")
+      val transformer = new DeclarationTransformer
+
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = true)
+      result.asOpt.value mustBe afterJson
+    }
+
+    "override the submission date if 5mld and received one at playback" in {
+      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-with-submission-date.json")
       val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-5mld.json")
       val transformer = new DeclarationTransformer
