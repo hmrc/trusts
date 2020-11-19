@@ -52,7 +52,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
   private val transformationService = mock[TransformationService]
 
-  private val auditService = new AuditService(mockAuditConnector, mockConfig)
+  private val auditService = new AuditService(mockAuditConnector)
 
   private val validateIdentifierAction = app.injector.instanceOf[ValidateIdentifierActionProvider]
 
@@ -171,7 +171,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
       "return 200 - Ok with processed content" in {
 
-        val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(JsonFixtures.getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))

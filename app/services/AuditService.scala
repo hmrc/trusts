@@ -17,16 +17,15 @@
 package services
 
 import javax.inject.Inject
-import play.api.libs.json.{JsPath, JsString, JsValue, Json}
+import play.api.libs.json.{JsPath, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import config.AppConfig
 import models.Registration
 import models.auditing.{GetTrustOrEstateAuditEvent, TrustAuditing, TrustRegistrationSubmissionAuditEvent}
 import models.registration.RegistrationResponse
 import models.variation.VariationResponse
 
-class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig){
+class AuditService @Inject()(auditConnector: AuditConnector){
 
   import scala.concurrent.ExecutionContext.Implicits._
 
@@ -43,7 +42,7 @@ class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig)
         response = response
       )
 
-      auditConnector.sendExplicitAudit(
+    auditConnector.sendExplicitAudit(
         event,
         auditPayload
       )
@@ -60,7 +59,7 @@ class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig)
         response = response
       )
 
-      auditConnector.sendExplicitAudit(
+    auditConnector.sendExplicitAudit(
         event,
         auditPayload
       )
@@ -101,28 +100,6 @@ class AuditService @Inject()(auditConnector: AuditConnector, config : AppConfig)
       response = Json.toJson(response)
     )
   }
-
-  def auditVariationFailed(internalId: String,
-                           payload: JsValue,
-                           response: String)
-                          (implicit hc: HeaderCarrier): Unit =
-    auditErrorResponse(
-      eventName = TrustAuditing.TRUST_VARIATION_SUBMISSION_FAILED,
-      request = Json.toJson(payload),
-      internalId = internalId,
-      errorReason = response
-    )
-
-  def auditVariationError(internalId: String,
-                          payload: JsValue,
-                          errorReason: String)
-                         (implicit hc: HeaderCarrier): Unit =
-    auditErrorResponse(
-      eventName = TrustAuditing.TRUST_VARIATION_SUBMISSION_FAILED,
-      request = Json.toJson(payload),
-      internalId = internalId,
-      errorReason = errorReason
-    )
 
   def auditVariationTransformationError(internalId: String,
                                         utr: String,

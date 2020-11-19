@@ -51,7 +51,7 @@ class TrustVariationsTestControllerSpec extends BaseSpec with BeforeAndAfter wit
   private val mockAuditConnector: AuditConnector = mock[AuditConnector]
   private val mockConfig: AppConfig = mock[AppConfig]
 
-  private val auditService = new AuditService(mockAuditConnector, mockConfig)
+  private val auditService = new AuditService(mockAuditConnector)
   private val validationService = new ValidationService()
 
   private val mockVariationService = mock[VariationService]

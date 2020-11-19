@@ -24,8 +24,8 @@ import config.AppConfig
 import models.Registration
 import models.registration.RegistrationResponse
 
-class FakeAuditService @Inject()(auditConnector: AuditConnector, config: AppConfig)
-  extends AuditService(auditConnector, config) {
+class FakeAuditService @Inject()(auditConnector: AuditConnector)
+  extends AuditService(auditConnector) {
 
   override def audit(event: String, registration: Registration, draftId: String, internalId: String, response: RegistrationResponse)
                     (implicit hc: HeaderCarrier): Unit = ()

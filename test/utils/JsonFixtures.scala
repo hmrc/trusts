@@ -19,6 +19,8 @@ package utils
 import play.api.libs.json.JsValue
 import models._
 
+object JsonFixtures extends JsonFixtures
+
 trait JsonFixtures extends JsonUtils {
 
   lazy val validRegistrationRequestJson: String =  getJsonFromFile("valid-trusts-registration-api.json")

@@ -77,7 +77,7 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Cache
       case Some(x) =>
         x.validate[GetTrustSuccessResponse].fold(
           errs => {
-            logger.error(s"Unable to parse json from cache as GetTrustSuccessResponse - $errs")
+              logger.error(s"Unable to parse json from cache as GetTrustSuccessResponse - $errs")
             Future.failed[GetTrustResponse](new Exception(errs.toString))
           },
           response => {
