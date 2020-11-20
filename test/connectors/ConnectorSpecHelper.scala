@@ -28,7 +28,7 @@ import utils.WireMockHelper
 
 class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationPatience {
 
-  override def applicationBuilder(): GuiceApplicationBuilder = {
+  override def  applicationBuilder(): GuiceApplicationBuilder = {
     super.applicationBuilder()
       .configure(
         Seq(

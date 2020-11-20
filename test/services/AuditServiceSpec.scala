@@ -30,7 +30,7 @@ class AuditServiceSpec extends BaseSpec {
     "send Variation Submitted by Organisation" when {
       "there are no special JSON fields" in {
         val connector = mock[AuditConnector]
-        val service = new AuditService(connector, appConfig)
+        val service = new AuditService(connector)
 
         val request = Json.obj()
 
@@ -52,7 +52,7 @@ class AuditServiceSpec extends BaseSpec {
     "send Variation Submitted by Agent" when {
       "there is an AgentDetails JSON field" in {
         val connector = mock[AuditConnector]
-        val service = new AuditService(connector, appConfig)
+        val service = new AuditService(connector)
 
         val request = Json.obj(
           "agentDetails" -> Json.obj() // Doesn't care about contents of object
@@ -76,7 +76,7 @@ class AuditServiceSpec extends BaseSpec {
     "send Closure Submitted by Organisation" when {
       "there is an endTrustDate field" in {
         val connector = mock[AuditConnector]
-        val service = new AuditService(connector, appConfig)
+        val service = new AuditService(connector)
 
         val request = Json.obj(
           "trustEndDate" -> "2012-02-12"
@@ -100,7 +100,7 @@ class AuditServiceSpec extends BaseSpec {
     "send Closure Submitted by Agent" when {
       "there are agentDetails and endTrustDate JSON fields" in {
         val connector = mock[AuditConnector]
-        val service = new AuditService(connector, appConfig)
+        val service = new AuditService(connector)
 
         val request = Json.obj(
           "trustEndDate" -> "2012-02-12",
