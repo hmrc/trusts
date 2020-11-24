@@ -36,8 +36,8 @@ class TaxEnrolmentCallbackController @Inject()(
     implicit request =>
       val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
-      logger.info(s"[taxableSubscriptionCallback][Session ID: ${Session.id(hc)}]" +
-        s" Tax-Enrolment: taxable subscription callback message was  : ${request.body}")
+      logger.info(s"[taxableSubscriptionCallback][Session ID: ${Session.id(hc)}][TRN: $trn]" +
+        s" Tax-enrolment: taxable subscription callback message was: ${request.body}")
       Future(Ok(""))
   }
 
@@ -45,8 +45,8 @@ class TaxEnrolmentCallbackController @Inject()(
     implicit request =>
       val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
-      logger.info(s"[nonTaxableSubscriptionCallback][Session ID: ${Session.id(hc)}]" +
-        s" Tax-Enrolment: non-taxable subscription callback message was  : ${request.body}")
+      logger.info(s"[nonTaxableSubscriptionCallback][Session ID: ${Session.id(hc)}][TRN: $trn]" +
+        s" Tax-enrolment: non-taxable subscription callback message was: ${request.body}")
       Future(Ok(""))
   }
 
