@@ -58,15 +58,13 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "CorrelationId"
-  val OLD_CORRELATION_HEADER = "Correlation-Id"
 
   private def desHeaders(correlationId : String) : Seq[(String, String)] =
     Seq(
       HeaderNames.AUTHORIZATION -> s"Bearer ${config.desToken}",
       CONTENT_TYPE -> CONTENT_TYPE_JSON,
       ENVIRONMENT_HEADER -> config.desEnvironment,
-      CORRELATION_HEADER -> correlationId,
-      OLD_CORRELATION_HEADER -> correlationId
+      CORRELATION_HEADER -> correlationId
     )
 
   def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest)
