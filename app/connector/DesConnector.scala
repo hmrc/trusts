@@ -88,6 +88,8 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
+    logger.debug(s"[Session ID: ${Session.id(hc)}] registration payload ${Json.toJson(registration)}")
+
     logger.info(s"[Session ID: ${Session.id(hc)}] registering trust for correlationId: $correlationId")
 
     val response = http.POST[JsValue, RegistrationResponse](trustRegistrationEndpoint, Json.toJson(registration))
@@ -133,6 +135,8 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
     val correlationId = UUID.randomUUID().toString
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
+
+    logger.debug(s"[Session ID: ${Session.id(hc)}] variation payload $trustVariations}")
 
     logger.info(s"[Session ID: ${Session.id(hc)}]" +
       s" submitting trust variation for correlationId: $correlationId")
