@@ -18,19 +18,19 @@ package connector
 
 import java.util.UUID
 
-import javax.inject.Inject
-import play.api.Logging
-import play.api.http.HeaderNames
-import play.api.libs.json._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import config.AppConfig
+import javax.inject.Inject
 import models._
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
 import models.get_trust.GetTrustResponse
-import models.registration.{RegistrationResponse, RegistrationTrnResponse}
+import models.registration.RegistrationResponse
 import models.tax_enrolments.SubscriptionIdResponse
 import models.variation.VariationResponse
+import play.api.Logging
+import play.api.http.HeaderNames
+import play.api.libs.json._
 import services.TrustsStoreService
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utils.Constants._
 import utils.Session
 
@@ -84,21 +84,16 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
 
   def registerTrust(registration: Registration)
                             : Future[RegistrationResponse] = {
-    if (config.desEnvironment == "ist0") {
-      Future.successful(RegistrationTrnResponse("XXTRN1234567890"))
-    } else {
+    val correlationId = UUID.randomUUID().toString
 
-      val correlationId = UUID.randomUUID().toString
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
-      implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
+    logger.info(s"[Session ID: ${Session.id(hc)}] registering trust for correlationId: $correlationId")
 
-      logger.info(s"[Session ID: ${Session.id(hc)}] registering trust for correlationId: $correlationId")
+    val response = http.POST[JsValue, RegistrationResponse](trustRegistrationEndpoint, Json.toJson(registration))
+    (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc), implicitly[ExecutionContext])
 
-      val response = http.POST[JsValue, RegistrationResponse](trustRegistrationEndpoint, Json.toJson(registration))
-      (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc), implicitly[ExecutionContext])
-
-      response
-    }
+    response
   }
 
   def getSubscriptionId(trn: String): Future[SubscriptionIdResponse] = {
@@ -141,12 +136,12 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
 
     logger.info(s"[Session ID: ${Session.id(hc)}]" +
       s" submitting trust variation for correlationId: $correlationId")
-    if (config.desEnvironment == "ist0") {
-      Future.successful(VariationResponse("XXTVN1234567890"))
-    } else {
-      http.POST[JsValue, VariationResponse](trustVariationsEndpoint, Json.toJson(trustVariations))(
-        implicitly[Writes[JsValue]], VariationResponse.httpReads, implicitly[HeaderCarrier](hc), implicitly[ExecutionContext])
-    }
 
+    http.POST[JsValue, VariationResponse](trustVariationsEndpoint, Json.toJson(trustVariations))(
+      implicitly[Writes[JsValue]],
+      VariationResponse.httpReads,
+      implicitly[HeaderCarrier](hc),
+      implicitly[ExecutionContext]
+    )
   }
 }
