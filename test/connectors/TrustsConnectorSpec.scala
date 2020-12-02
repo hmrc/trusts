@@ -16,7 +16,7 @@
 
 package connectors
 
-import connector.IfsConnector
+import connector.TrustsConnector
 import exceptions.{AlreadyRegisteredException, _}
 import models.existing_trust.ExistingCheckRequest
 import models.existing_trust.ExistingCheckRequest._
@@ -30,9 +30,9 @@ import utils.NonTaxable5MLDFixtures
 
 import scala.concurrent.Future
 
-class IfsConnectorSpec extends ConnectorSpecHelper {
+class TrustsConnectorSpec extends ConnectorSpecHelper {
 
-  lazy val connector: IfsConnector = injector.instanceOf[IfsConnector]
+  lazy val connector: TrustsConnector = injector.instanceOf[TrustsConnector]
 
   lazy val request = ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
 

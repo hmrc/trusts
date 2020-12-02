@@ -34,7 +34,7 @@ import scala.concurrent.Future
 
 class TrustVariationsTestController @Inject()(
                                                identify: IdentifierAction,
-                                               desService: TrustService,
+                                               trustsService: TrustsService,
                                                auditService: AuditService,
                                                validator: ValidationService,
                                                config : AppConfig,
@@ -67,7 +67,7 @@ class TrustVariationsTestController @Inject()(
               Future.successful(invalidRequestErrorResponse)
             },
             variationRequest => {
-              desService.trustVariation(Json.toJson(variationRequest)) map { response =>
+              trustsService.trustVariation(Json.toJson(variationRequest)) map { response =>
 
                 auditService.audit(
                   TrustAuditing.TRUST_VARIATION,

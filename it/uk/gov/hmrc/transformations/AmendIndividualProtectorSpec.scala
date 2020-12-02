@@ -27,7 +27,7 @@ import play.api.test.Helpers.{GET, contentAsJson, route, status, _}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
-import connector.IfsConnector
+import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import play.api.Application
@@ -48,15 +48,15 @@ class AmendIndividualProtectorSpec extends AsyncFreeSpec with MustMatchers with 
       val expectedGetAfterAmendProtectorJson: JsValue =
         JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-individual-protector.json")
 
-      val stubbedDesConnector = mock[IfsConnector]
+      val stubbedTrustsConnector = mock[TrustsConnector]
 
-      when(stubbedDesConnector.getTrustInfo(any()))
+      when(stubbedTrustsConnector.getTrustInfo(any()))
         .thenReturn(Future.successful(getTrustResponseFromDES))
 
       val application = applicationBuilder
         .overrides(
           bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-          bind[IfsConnector].toInstance(stubbedDesConnector)
+          bind[TrustsConnector].toInstance(stubbedTrustsConnector)
         )
         .build()
 

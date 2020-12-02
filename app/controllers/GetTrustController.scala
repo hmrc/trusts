@@ -24,7 +24,7 @@ import models.requests.IdentifierRequest
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
-import services.{AuditService, TrustService, TransformationService}
+import services.{AuditService, TrustsService, TransformationService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,7 +33,7 @@ import scala.concurrent.Future
 @Singleton
 class GetTrustController @Inject()(identify: IdentifierAction,
                                    auditService: AuditService,
-                                   desService: TrustService,
+                                   trustsService: TrustsService,
                                    transformationService: TransformationService,
                                    validateIdentifier : ValidateIdentifierActionProvider,
                                    cc: ControllerComponents) extends BackendController(cc) with Logging {
@@ -176,7 +176,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   private def resetCacheIfRequested(identifier: String, internalId: String, refreshEtmpData: Boolean) = {
     if (refreshEtmpData) {
       val resetTransforms = transformationService.removeAllTransformations(identifier, internalId)
-      val resetCache = desService.resetCache(identifier, internalId)
+      val resetCache = trustsService.resetCache(identifier, internalId)
       for {
         _ <- resetTransforms
         cache <- resetCache
@@ -195,7 +195,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
             data <- if (applyTransformations) {
               transformationService.getTransformedData(identifier, request.identifier)
             } else {
-              desService.getTrustInfo(identifier, request.identifier)
+              trustsService.getTrustInfo(identifier, request.identifier)
             }
           } yield (
             successResponse(f, identifier) orElse

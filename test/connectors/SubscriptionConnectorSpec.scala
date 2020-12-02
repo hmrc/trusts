@@ -16,15 +16,15 @@
 
 package connectors
 
-import connector.DesConnector
+import connector.SubscriptionConnector
 import exceptions.{BadRequestException, InternalServerErrorException, NotFoundException, ServiceNotAvailableException}
 import models.tax_enrolments.SubscriptionIdResponse
 import play.api.http.Status._
 import play.api.libs.json.Json
 
-class DesConnectorSpec extends ConnectorSpecHelper {
+class SubscriptionConnectorSpec extends ConnectorSpecHelper {
 
-  lazy val connector: DesConnector = injector.instanceOf[DesConnector]
+  lazy val connector: SubscriptionConnector = injector.instanceOf[SubscriptionConnector]
 
   ".getSubscriptionId" should {
 

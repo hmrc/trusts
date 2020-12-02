@@ -26,11 +26,11 @@ import scala.concurrent.Future
 
 class RosmPatternServiceSpec extends BaseSpec {
 
-  private val mockDesService = mock[TrustService]
+  private val mockTrustsService = mock[TrustsService]
   private val mockTaxEnrolmentsService = mock[TaxEnrolmentsService]
 
 
-  private val SUT = new RosmPatternServiceImpl(mockDesService, mockTaxEnrolmentsService)
+  private val SUT = new RosmPatternServiceImpl(mockTrustsService, mockTaxEnrolmentsService)
 
   ".completeRosmTransaction" should {
 
@@ -39,7 +39,7 @@ class RosmPatternServiceSpec extends BaseSpec {
 
     "return success taxEnrolmentSuscriberResponse " when {
       "successfully sets subscriptionId id in tax enrolments for provided trn." in {
-        when(mockDesService.getSubscriptionId(trn)).
+        when(mockTrustsService.getSubscriptionId(trn)).
           thenReturn(Future.successful(SubscriptionIdResponse("123456789")))
         when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn)).
           thenReturn(Future.successful(TaxEnrolmentSuccess))
@@ -54,7 +54,7 @@ class RosmPatternServiceSpec extends BaseSpec {
 
     "return InternalServerErrorException " when {
       "des is down and not able to return subscription id." in {
-        when(mockDesService.getSubscriptionId(trn)).
+        when(mockTrustsService.getSubscriptionId(trn)).
           thenReturn(Future.failed(InternalServerErrorException("")))
         when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn)).
           thenReturn(Future.successful(TaxEnrolmentSuccess))
@@ -69,7 +69,7 @@ class RosmPatternServiceSpec extends BaseSpec {
 
     "return InternalServerErrorException " when {
       "tax enrolment service is down " in {
-        when(mockDesService.getSubscriptionId(trn)).
+        when(mockTrustsService.getSubscriptionId(trn)).
           thenReturn(Future.successful(SubscriptionIdResponse("123456789")))
         when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn)).
           thenReturn(Future.successful(TaxEnrolmentFailure))
@@ -83,7 +83,7 @@ class RosmPatternServiceSpec extends BaseSpec {
     }
     "return BadRequestException " when {
       "tax enrolment service does not found provided subscription id." in {
-        when(mockDesService.getSubscriptionId(trn)).
+        when(mockTrustsService.getSubscriptionId(trn)).
           thenReturn(Future.successful(SubscriptionIdResponse("123456789")))
         when(mockTaxEnrolmentsService.setSubscriptionId("123456789", taxable, trn)).
           thenReturn(Future.failed(BadRequestException))

@@ -99,7 +99,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
   "must transform json data with the current transforms" in {
     val repository = mock[TransformationRepositoryImpl]
-    val service = new TransformationService(repository, mock[TrustService], auditService)
+    val service = new TransformationService(repository, mock[TrustsService], auditService)
 
     val existingTransforms = Seq(
       RemoveTrusteeTransform(LocalDate.parse("2019-12-21"), 0, originalTrusteeIndJson),
@@ -119,7 +119,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
   }
   "must transform json data when no current transforms" in {
     val repository = mock[TransformationRepositoryImpl]
-    val service = new TransformationService(repository, mock[TrustService], auditService)
+    val service = new TransformationService(repository, mock[TrustsService], auditService)
 
     when(repository.get(any(), any())).thenReturn(Future.successful(None))
     when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
@@ -134,7 +134,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
   }
   "must apply the correspondence address to the lead trustee's address if it doesn't have one" in {
     val repository = mock[TransformationRepositoryImpl]
-    val service = new TransformationService(repository, mock[TrustService], auditService)
+    val service = new TransformationService(repository, mock[TrustsService], auditService)
 
     val beforeJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-and-correspondence-address.json")
     val afterJson = JsonUtils.getJsonValueFromFile("trusts-lead-trustee-and-correspondence-address-after.json")
@@ -146,15 +146,15 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
   "must fix lead trustee address of ETMP json read from DES service" in {
     val response = get4MLDTrustResponse.as[GetTrustSuccessResponse]
     val processedResponse = response.asInstanceOf[TrustProcessedResponse]
-    val desService = mock[TrustService]
-    when(desService.getTrustInfo(any(), any())).thenReturn(Future.successful(response))
+    val trustsService = mock[TrustsService]
+    when(trustsService.getTrustInfo(any(), any())).thenReturn(Future.successful(response))
 
     val transformedJson = JsonUtils.getJsonValueFromFile("valid-get-trust-response-transformed.json")
     val expectedResponse = TrustProcessedResponse(transformedJson, processedResponse.responseHeader)
 
     val repository = mock[TransformationRepositoryImpl]
     when(repository.get(any(), any())).thenReturn(Future.successful(None))
-    val service = new TransformationService(repository, desService, auditService)
+    val service = new TransformationService(repository, trustsService, auditService)
     val result = service.getTransformedData("utr", "internalId")
     whenReady(result) {
       r => r mustEqual expectedResponse
@@ -163,8 +163,8 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
   "must apply transformations to ETMP json read from DES service" in {
     val response = get4MLDTrustResponse.as[GetTrustSuccessResponse]
     val processedResponse = response.asInstanceOf[TrustProcessedResponse]
-    val desService = mock[TrustService]
-    when(desService.getTrustInfo(any(), any())).thenReturn(Future.successful(response))
+    val trustsService = mock[TrustsService]
+    when(trustsService.getTrustInfo(any(), any())).thenReturn(Future.successful(response))
 
     val newLeadTrusteeIndInfo = AmendedLeadTrusteeIndType(
       name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
@@ -192,7 +192,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     val transformedJson = JsonUtils.getJsonValueFromFile("valid-get-trust-response-transformed-with-amend.json")
     val expectedResponse = models.get_trust.TrustProcessedResponse(transformedJson, processedResponse.responseHeader)
 
-    val service = new TransformationService(repository, desService, auditService)
+    val service = new TransformationService(repository, trustsService, auditService)
 
     val result = service.getTransformedData("utr", "internalId")
     whenReady(result) {
@@ -204,7 +204,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
     "must write a corresponding transform to the transformation repository with no existing transforms" in {
       val repository = mock[TransformationRepositoryImpl]
-      val service = new TransformationService(repository, mock[TrustService], auditService)
+      val service = new TransformationService(repository, mock[TrustsService], auditService)
 
       when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(Nil))))
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
@@ -220,7 +220,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
     "must write a corresponding transform to the transformation repository with existing transforms" in {
       val repository = mock[TransformationRepositoryImpl]
-      val service = new TransformationService(repository, mock[TrustService], auditService)
+      val service = new TransformationService(repository, mock[TrustsService], auditService)
 
       val existingTransforms = Seq(AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo))
       when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))

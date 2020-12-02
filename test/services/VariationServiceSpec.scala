@@ -79,7 +79,7 @@ class VariationServiceSpec extends WordSpec
 
     "submit data correctly when the version matches, and then reset the cache" in {
 
-      val desService = mock[TrustService]
+      val trustsService = mock[TrustsService]
 
       val transformationService = mock[TransformationService]
       val auditService = app.injector.instanceOf[FakeAuditService]
@@ -87,21 +87,21 @@ class VariationServiceSpec extends WordSpec
 
       when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any())).thenReturn(JsSuccess(trustInfoJson))
       when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
-      when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
+      when(trustsService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
 
       val response = TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
 
-      when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))).thenReturn(Future.successful(
+      when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId))).thenReturn(Future.successful(
         response
       ))
 
-      when(desService.trustVariation(any())).thenReturn(Future.successful(
+      when(trustsService.trustVariation(any())).thenReturn(Future.successful(
         VariationResponse("TVN34567890")
       ))
 
       when(transformer.transform(any(),any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
 
-      val OUT = new VariationService(desService,
+      val OUT = new VariationService(trustsService,
         transformationService,
         transformer,
         auditService,
@@ -115,7 +115,7 @@ class VariationServiceSpec extends WordSpec
         verify(transformationService, times( 1)).applyDeclarationTransformations(equalTo(utr), equalTo(internalId), equalTo(trustInfoJson))(any[HeaderCarrier])
         verify(transformer, times(1)).transform(equalTo(transformedResponse), equalTo(response.getTrust), equalTo(declarationForApi), any(), equalTo(false))
         val arg: ArgumentCaptor[JsValue] = ArgumentCaptor.forClass(classOf[JsValue])
-        verify(desService, times(1)).trustVariation(arg.capture())
+        verify(trustsService, times(1)).trustVariation(arg.capture())
         arg.getValue mustBe transformedJson
       }}
     }
@@ -123,7 +123,7 @@ class VariationServiceSpec extends WordSpec
 
   "passes 5mld=true to the transformer when the feature is set" in {
 
-    val desService = mock[TrustService]
+    val trustsService = mock[TrustsService]
 
     val transformationService = mock[TransformationService]
     val auditService = app.injector.instanceOf[FakeAuditService]
@@ -131,21 +131,21 @@ class VariationServiceSpec extends WordSpec
 
     when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any())).thenReturn(JsSuccess(trustInfoJson))
     when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
-    when(desService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
+    when(trustsService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
 
     val response = TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
 
-    when(desService.getTrustInfo(equalTo(utr), equalTo(internalId))).thenReturn(Future.successful(
+    when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId))).thenReturn(Future.successful(
       response
     ))
 
-    when(desService.trustVariation(any())).thenReturn(Future.successful(
+    when(trustsService.trustVariation(any())).thenReturn(Future.successful(
       VariationResponse("TVN34567890")
     ))
 
     when(transformer.transform(any(),any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
 
-    val OUT = new VariationService(desService,
+    val OUT = new VariationService(trustsService,
       transformationService,
       transformer,
       auditService,
@@ -159,31 +159,31 @@ class VariationServiceSpec extends WordSpec
       verify(transformationService, times( 1)).applyDeclarationTransformations(equalTo(utr), equalTo(internalId), equalTo(trustInfoJson))(any[HeaderCarrier])
       verify(transformer, times(1)).transform(equalTo(transformedResponse), equalTo(response.getTrust), equalTo(declarationForApi), any(), equalTo(true))
       val arg: ArgumentCaptor[JsValue] = ArgumentCaptor.forClass(classOf[JsValue])
-      verify(desService, times(1)).trustVariation(arg.capture())
+      verify(trustsService, times(1)).trustVariation(arg.capture())
       arg.getValue mustBe transformedJson
     }}
   }
 
   "Fail if the etmp data version doesn't match our submission data" in {
-    val desService = mock[TrustService]
+    val trustsService = mock[TrustsService]
     val transformationService = mock[TransformationService]
     val transformer = mock[DeclarationTransformer]
 
-    when(desService.getTrustInfoFormBundleNo(utr))
+    when(trustsService.getTrustInfoFormBundleNo(utr))
       .thenReturn(Future.successful("31415900000"))
 
     when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
       .thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
 
-    when(desService.getTrustInfo(equalTo(utr), equalTo(internalId)))
+    when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId)))
       .thenReturn(Future.successful(TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))))
 
-    when(desService.trustVariation(any()))
+    when(trustsService.trustVariation(any()))
       .thenReturn(Future.successful(VariationResponse("TVN34567890")))
 
     when(transformer.transform(any(),any(),any(),any(), any())).thenReturn(JsSuccess(transformedJson))
 
-    val OUT = new VariationService(desService,
+    val OUT = new VariationService(trustsService,
       transformationService,
       transformer,
       auditService,
@@ -193,22 +193,22 @@ class VariationServiceSpec extends WordSpec
     whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { exception => {
       exception mustBe an[EtmpCacheDataStaleException.type]
 
-      verify(desService, times(0)).trustVariation(any())
+      verify(trustsService, times(0)).trustVariation(any())
 
     }}
   }
 
   "auditing" should {
 
-    val desService = mock[TrustService]
+    val trustsService = mock[TrustsService]
     val transformationService = mock[TransformationService]
     val transformer = mock[DeclarationTransformer]
 
-    when(desService.getTrustInfoFormBundleNo(utr))
+    when(trustsService.getTrustInfoFormBundleNo(utr))
       .thenReturn(Future.successful(formBundleNo))
 
     val OUT = new VariationService(
-      desService,
+      trustsService,
       transformationService,
       transformer,
       auditService,
@@ -218,7 +218,7 @@ class VariationServiceSpec extends WordSpec
 
     "capture variation success" in {
 
-      val desService = mock[TrustService]
+      val trustsService = mock[TrustsService]
       val transformationService = mock[TransformationService]
       val transformer = mock[DeclarationTransformer]
 
@@ -230,13 +230,13 @@ class VariationServiceSpec extends WordSpec
       when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any()))
         .thenReturn(JsSuccess(trustInfoJson))
 
-      when(desService.getTrustInfoFormBundleNo(utr))
+      when(trustsService.getTrustInfoFormBundleNo(utr))
         .thenReturn(Future.successful(formBundleNo))
 
-      when(desService.getTrustInfo(equalTo(utr), equalTo(internalId)))
+      when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId)))
         .thenReturn(Future.successful(response))
 
-      when(desService.trustVariation(any()))
+      when(trustsService.trustVariation(any()))
         .thenReturn(Future.successful(
         VariationResponse("TVN34567890")
       ))
@@ -244,7 +244,7 @@ class VariationServiceSpec extends WordSpec
       when(transformer.transform(any(),any(),any(),any(),any()))
         .thenReturn(JsSuccess(transformedJson))
 
-      val OUT = new VariationService(desService,
+      val OUT = new VariationService(trustsService,
         transformationService,
         transformer,
         auditService,
@@ -272,7 +272,7 @@ class VariationServiceSpec extends WordSpec
       when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any()))
         .thenReturn(JsSuccess(trustInfoJson))
 
-      when(desService.getTrustInfo(equalTo(utr), equalTo(internalId)))
+      when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId)))
         .thenReturn(Future.successful(response))
 
       whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { _ => {
@@ -296,7 +296,7 @@ class VariationServiceSpec extends WordSpec
       when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any()))
         .thenReturn(JsError("Error"))
 
-      when(desService.getTrustInfo(equalTo(utr), equalTo(internalId)))
+      when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId)))
         .thenReturn(Future.successful(response))
 
       whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { _ => {

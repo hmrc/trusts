@@ -31,7 +31,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TransformationService @Inject()(repository: TransformationRepository,
-                                      desService: TrustService,
+                                      trustsService: TrustsService,
                                       auditService: AuditService) extends Logging {
 
   def getTransformedTrustJson(identifier: String, internalId: String)(implicit hc: HeaderCarrier): Future[JsObject] = {
@@ -42,7 +42,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
   }
 
   def getTransformedData(identifier: String, internalId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
-    desService.getTrustInfo(identifier, internalId).flatMap {
+    trustsService.getTrustInfo(identifier, internalId).flatMap {
       case response: TrustProcessedResponse =>
         populateLeadTrusteeAddress(response.getTrust) match {
           case JsSuccess(fixed, _) =>

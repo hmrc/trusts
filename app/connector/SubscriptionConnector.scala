@@ -30,7 +30,7 @@ import utils.Session
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
-class DesConnector @Inject()(http: HttpClient, config: AppConfig) extends Logging {
+class SubscriptionConnector @Inject()(http: HttpClient, config: AppConfig) extends Logging {
 
   private lazy val trustsServiceUrl : String = s"${config.subscriptionBaseUrl}/trusts"
 

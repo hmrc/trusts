@@ -36,7 +36,7 @@ import utils.Session
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
-class IfsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreService: TrustsStoreService) extends Logging {
+class TrustsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreService: TrustsStoreService) extends Logging {
 
   private lazy val trustsServiceUrl : String = s"${config.registrationBaseUrl}/trusts"
   private lazy val matchTrustsEndpoint : String = s"$trustsServiceUrl/match"
@@ -58,7 +58,7 @@ class IfsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "CorrelationId"
 
-  private def ifsHeaders(correlationId : String) : Seq[(String, String)] =
+  private def registrationHeaders(correlationId : String) : Seq[(String, String)] =
     Seq(
       HeaderNames.AUTHORIZATION -> s"Bearer ${config.registrationToken}",
       CONTENT_TYPE -> CONTENT_TYPE_JSON,
@@ -71,7 +71,7 @@ class IfsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
 
     val correlationId = UUID.randomUUID().toString
 
-    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = ifsHeaders(correlationId))
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
     logger.info(s"[Session ID: ${Session.id(hc)}] matching trust for correlationId: $correlationId")
 
@@ -85,7 +85,7 @@ class IfsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
                             : Future[RegistrationResponse] = {
     val correlationId = UUID.randomUUID().toString
 
-    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = ifsHeaders(correlationId))
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
     logger.debug(s"[Session ID: ${Session.id(hc)}] registration payload ${Json.toJson(registration)}")
 
@@ -100,7 +100,7 @@ class IfsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
   def getTrustInfo(identifier: String): Future[GetTrustResponse] = {
     val correlationId = UUID.randomUUID().toString
 
-    implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = ifsHeaders(correlationId))
+    implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
     logger.info(s"[Session ID: ${Session.id(hc)}][UTR/URN: $identifier]" +
       s" getting playback for trust for correlationId: $correlationId")
@@ -117,7 +117,7 @@ class IfsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
   def trustVariation(trustVariations: JsValue): Future[VariationResponse] = {
     val correlationId = UUID.randomUUID().toString
 
-    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = ifsHeaders(correlationId))
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
     logger.debug(s"[Session ID: ${Session.id(hc)}] variation payload $trustVariations}")
 

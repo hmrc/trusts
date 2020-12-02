@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.transformations
 
-import connector.IfsConnector
+import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import org.mockito.Matchers._
@@ -41,15 +41,15 @@ class SetRelationSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar 
       val getTrustResponseFromDES : JsValue = JsonUtils
         .getJsonValueFromFile("trusts-etmp-received.json")
 
-      val stubbedDesConnector = mock[IfsConnector]
+      val stubbedTrustsConnector = mock[TrustsConnector]
 
-      when(stubbedDesConnector.getTrustInfo(any()))
+      when(stubbedTrustsConnector.getTrustInfo(any()))
         .thenReturn(Future.successful(getTrustResponseFromDES.as[GetTrustSuccessResponse]))
 
       val application = applicationBuilder
         .overrides(
           bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-          bind[IfsConnector].toInstance(stubbedDesConnector)
+          bind[TrustsConnector].toInstance(stubbedTrustsConnector)
         )
         .build()
 

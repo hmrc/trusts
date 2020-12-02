@@ -16,7 +16,7 @@
 
 package services
 
-import connector.{IfsConnector, DesConnector}
+import connector.{TrustsConnector, SubscriptionConnector}
 import exceptions.InternalServerErrorException
 import javax.inject.Inject
 import models._
@@ -32,12 +32,12 @@ import repositories.CacheRepository
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TrustService @Inject()(val ifsConnector: IfsConnector,
-                             val desConnector: DesConnector,
-                             val repository: CacheRepository) extends Logging {
+class TrustsService @Inject()(val trustsConnector: TrustsConnector,
+                              val subscriptionConnector: SubscriptionConnector,
+                              val repository: CacheRepository) extends Logging {
 
   def getTrustInfoFormBundleNo(identifier: String): Future[String] =
-    ifsConnector.getTrustInfo(identifier).map {
+    trustsConnector.getTrustInfo(identifier).map {
       case response: GetTrustSuccessResponse => response.responseHeader.formBundleNo
       case response =>
         val msg = s"Failed to retrieve latest form bundle no from ETMP : $response"
@@ -46,15 +46,15 @@ class TrustService @Inject()(val ifsConnector: IfsConnector,
     }
 
   def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest): Future[ExistingCheckResponse] = {
-    ifsConnector.checkExistingTrust(existingTrustCheckRequest)
+    trustsConnector.checkExistingTrust(existingTrustCheckRequest)
   }
 
   def registerTrust(registration: Registration): Future[RegistrationResponse] = {
-    ifsConnector.registerTrust(registration)
+    trustsConnector.registerTrust(registration)
   }
 
   def getSubscriptionId(trn: String): Future[SubscriptionIdResponse] = {
-    desConnector.getSubscriptionId(trn)
+    subscriptionConnector.getSubscriptionId(trn)
   }
 
   def resetCache(identifier: String, internalId: String) : Future[Unit] = {
@@ -65,7 +65,7 @@ class TrustService @Inject()(val ifsConnector: IfsConnector,
 
   def refreshCacheAndGetTrustInfo(identifier: String, internalId: String): Future[GetTrustResponse] = {
     repository.resetCache(identifier, internalId).flatMap { _ =>
-      ifsConnector.getTrustInfo(identifier).flatMap {
+      trustsConnector.getTrustInfo(identifier).flatMap {
         case response: TrustProcessedResponse =>
           repository.set(identifier, internalId, Json.toJson(response)(TrustProcessedResponse.mongoWrites))
             .map(_ => response)
@@ -92,7 +92,7 @@ class TrustService @Inject()(val ifsConnector: IfsConnector,
   }
 
   def trustVariation(trustVariation: JsValue): Future[VariationResponse] =
-    ifsConnector.trustVariation(trustVariation: JsValue)
+    trustsConnector.trustVariation(trustVariation: JsValue)
 }
 
 
