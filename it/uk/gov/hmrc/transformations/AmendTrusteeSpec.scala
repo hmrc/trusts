@@ -18,7 +18,7 @@ package uk.gov.hmrc.transformations
 
 import java.time.LocalDate
 
-import connector.DesConnector
+import connector.IfsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.NameType
 import models.get_trust.{DisplayTrustIdentificationType, DisplayTrustTrusteeIndividualType, GetTrustSuccessResponse}
@@ -65,13 +65,13 @@ class AmendTrusteeSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar
 
       val expectedGetAfterAmendTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-trustee.json")
 
-      val stubbedDesConnector = mock[DesConnector]
+      val stubbedDesConnector = mock[IfsConnector]
       when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
 
       val application = applicationBuilder
         .overrides(
           bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-          bind[DesConnector].toInstance(stubbedDesConnector)
+          bind[IfsConnector].toInstance(stubbedDesConnector)
         )
         .build()
 

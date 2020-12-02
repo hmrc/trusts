@@ -16,7 +16,7 @@
 
 package services
 
-import connector.DesConnector
+import connector.{IfsConnector, DesConnector}
 import exceptions.InternalServerErrorException
 import javax.inject.Inject
 import models._
@@ -32,10 +32,12 @@ import repositories.CacheRepository
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class DesService @Inject()(val desConnector: DesConnector, val repository: CacheRepository) extends Logging {
+class DesService @Inject()(val ifsConnector: IfsConnector,
+                           val desConnector: DesConnector,
+                           val repository: CacheRepository) extends Logging {
 
   def getTrustInfoFormBundleNo(identifier: String): Future[String] =
-    desConnector.getTrustInfo(identifier).map {
+    ifsConnector.getTrustInfo(identifier).map {
       case response: GetTrustSuccessResponse => response.responseHeader.formBundleNo
       case response =>
         val msg = s"Failed to retrieve latest form bundle no from ETMP : $response"
@@ -44,11 +46,11 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Cache
     }
 
   def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest): Future[ExistingCheckResponse] = {
-    desConnector.checkExistingTrust(existingTrustCheckRequest)
+    ifsConnector.checkExistingTrust(existingTrustCheckRequest)
   }
 
   def registerTrust(registration: Registration): Future[RegistrationResponse] = {
-    desConnector.registerTrust(registration)
+    ifsConnector.registerTrust(registration)
   }
 
   def getSubscriptionId(trn: String): Future[SubscriptionIdResponse] = {
@@ -63,7 +65,7 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Cache
 
   def refreshCacheAndGetTrustInfo(identifier: String, internalId: String): Future[GetTrustResponse] = {
     repository.resetCache(identifier, internalId).flatMap { _ =>
-      desConnector.getTrustInfo(identifier).flatMap {
+      ifsConnector.getTrustInfo(identifier).flatMap {
         case response: TrustProcessedResponse =>
           repository.set(identifier, internalId, Json.toJson(response)(TrustProcessedResponse.mongoWrites))
             .map(_ => response)
@@ -90,7 +92,7 @@ class DesService @Inject()(val desConnector: DesConnector, val repository: Cache
   }
 
   def trustVariation(trustVariation: JsValue): Future[VariationResponse] =
-    desConnector.trustVariation(trustVariation: JsValue)
+    ifsConnector.trustVariation(trustVariation: JsValue)
 }
 
 

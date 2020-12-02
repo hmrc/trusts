@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.transformations
 
-import connector.DesConnector
+import connector.IfsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import org.mockito.Matchers._
@@ -38,7 +38,7 @@ class RemoveSettlorSpec extends AsyncFreeSpec with MustMatchers with MockitoSuga
 
   "a remove settlor call" - {
 
-      val stubbedDesConnector = mock[DesConnector]
+      val stubbedDesConnector = mock[IfsConnector]
 
       val getTrustResponseFromDES : JsValue = JsonUtils
         .getJsonValueFromFile("trusts-etmp-received-multiple-settlors.json")
@@ -48,7 +48,7 @@ class RemoveSettlorSpec extends AsyncFreeSpec with MustMatchers with MockitoSuga
       val application = applicationBuilder
         .overrides(
           bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-          bind[DesConnector].toInstance(stubbedDesConnector)
+          bind[IfsConnector].toInstance(stubbedDesConnector)
         )
         .build()
 

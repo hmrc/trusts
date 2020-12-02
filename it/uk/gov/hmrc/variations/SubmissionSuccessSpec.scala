@@ -1,6 +1,6 @@
 package uk.gov.hmrc.variations
 
-import connector.{DesConnector, TrustsStoreConnector}
+import connector.{IfsConnector, TrustsStoreConnector}
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.{GetTrustSuccessResponse, ResponseHeader}
 import models.variation.VariationResponse
@@ -27,7 +27,7 @@ class SubmissionSuccessSpec extends AsyncFreeSpec with MustMatchers with Mockito
 
   "submit a successful variation" in {
 
-    val stubbedDesConnector = mock[DesConnector]
+    val stubbedDesConnector = mock[IfsConnector]
     val stubbedCacheRepository = mock[CacheRepository]
     val stubbedTrustStoreConnector = mock[TrustsStoreConnector]
 
@@ -58,7 +58,7 @@ class SubmissionSuccessSpec extends AsyncFreeSpec with MustMatchers with Mockito
     lazy val application = applicationBuilder
       .overrides(
         bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-        bind[DesConnector].toInstance(stubbedDesConnector),
+        bind[IfsConnector].toInstance(stubbedDesConnector),
         bind[TrustsStoreConnector].toInstance(stubbedTrustStoreConnector),
         bind[CacheRepository].toInstance(stubbedCacheRepository)
       )

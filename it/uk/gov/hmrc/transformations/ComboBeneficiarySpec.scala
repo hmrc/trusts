@@ -30,7 +30,7 @@ import play.api.test.Helpers.{CONTENT_TYPE, GET, POST, contentAsJson, route, sta
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
-import connector.DesConnector
+import connector.IfsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import models.variation.VariationResponse
@@ -60,13 +60,13 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoS
       val trustsStoreServiceMock = mock[TrustsStoreService]
       when(trustsStoreServiceMock.is5mldEnabled()(any(), any())).thenReturn(Future.successful(false))
 
-      val stubbedDesConnector = mock[DesConnector]
+      val stubbedDesConnector = mock[IfsConnector]
       when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
 
       val application = applicationBuilder
         .overrides(
           bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-          bind[DesConnector].toInstance(stubbedDesConnector),
+          bind[IfsConnector].toInstance(stubbedDesConnector),
           bind[LocalDateService].toInstance(TestLocalDateService),
           bind[TrustsStoreService].toInstance(trustsStoreServiceMock)
         )

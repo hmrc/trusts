@@ -23,11 +23,15 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 @Singleton
 class AppConfig @Inject()(configuration: Configuration, servicesConfig: ServicesConfig) {
 
-  val registerTrustsUrl : String = servicesConfig.baseUrl("des-trusts")
+  val ifsTrustsBaseUrl : String = servicesConfig.baseUrl("ifs-trusts")
+  val desTrustsBaseUrl : String = servicesConfig.baseUrl("des-trusts")
   val taxEnrolmentsUrl : String = servicesConfig.baseUrl("tax-enrolments")
   val getTrustOrEstateUrl : String = servicesConfig.baseUrl("des-display-trust-or-estate")
   val varyTrustOrEstateUrl : String = servicesConfig.baseUrl("des-vary-trust-or-estate")
   val trustsStoreUrl : String = servicesConfig.baseUrl("trusts-store")
+
+  val ifsEnvironment : String = configuration.get[String]("microservice.services.ifs-trusts.environment")
+  val ifsToken : String = configuration.get[String]("microservice.services.ifs-trusts.token")
 
   val desEnvironment : String = configuration.get[String]("microservice.services.des-trusts.environment")
   val desToken : String = configuration.get[String]("microservice.services.des-trusts.token")

@@ -1,6 +1,6 @@
 package uk.gov.hmrc.variations
 
-import connector.{DesConnector, TrustsStoreConnector}
+import connector.{IfsConnector, TrustsStoreConnector}
 import connectors.ConnectorSpecHelper
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.auditing.TrustAuditing

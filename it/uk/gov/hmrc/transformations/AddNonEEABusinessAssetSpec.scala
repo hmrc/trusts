@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.transformations
 
-import connector.DesConnector
+import connector.IfsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import org.mockito.Matchers._
@@ -64,13 +64,13 @@ class AddNonEEABusinessAssetSpec extends AsyncFreeSpec with MustMatchers with Mo
     lazy val expectedGetAfterAddNonEEABusinessJson: JsValue =
       JsonUtils.getJsonValueFromFile("5MLD/NonTaxable/add-nonEEABusiness-asset-after-etmp-call.json")
 
-    val stubbedDesConnector = mock[DesConnector]
+    val stubbedDesConnector = mock[IfsConnector]
     when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
 
     val application = applicationBuilder
       .overrides(
         bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-        bind[DesConnector].toInstance(stubbedDesConnector)
+        bind[IfsConnector].toInstance(stubbedDesConnector)
       )
       .build()
 
