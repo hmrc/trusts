@@ -32,16 +32,16 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class DesConnector @Inject()(http: HttpClient, config: AppConfig) extends Logging {
 
-  private lazy val trustsServiceUrl : String = s"${config.desTrustsBaseUrl}/trusts"
+  private lazy val trustsServiceUrl : String = s"${config.subscriptionBaseUrl}/trusts"
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "CorrelationId"
 
   private def desHeaders(correlationId : String) : Seq[(String, String)] =
     Seq(
-      HeaderNames.AUTHORIZATION -> s"Bearer ${config.desToken}",
+      HeaderNames.AUTHORIZATION -> s"Bearer ${config.subscriptionToken}",
       CONTENT_TYPE -> CONTENT_TYPE_JSON,
-      ENVIRONMENT_HEADER -> config.desEnvironment,
+      ENVIRONMENT_HEADER -> config.subscriptionEnvironment,
       CORRELATION_HEADER -> correlationId
     )
 

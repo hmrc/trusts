@@ -38,7 +38,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class IfsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreService: TrustsStoreService) extends Logging {
 
-  private lazy val trustsServiceUrl : String = s"${config.ifsTrustsBaseUrl}/trusts"
+  private lazy val trustsServiceUrl : String = s"${config.registrationBaseUrl}/trusts"
   private lazy val matchTrustsEndpoint : String = s"$trustsServiceUrl/match"
   private lazy val trustRegistrationEndpoint : String = s"$trustsServiceUrl/registration"
   private lazy val getTrustOrEstateUrl: String =  s"${config.getTrustOrEstateUrl}/trusts"
@@ -60,9 +60,9 @@ class IfsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
 
   private def ifsHeaders(correlationId : String) : Seq[(String, String)] =
     Seq(
-      HeaderNames.AUTHORIZATION -> s"Bearer ${config.ifsToken}",
+      HeaderNames.AUTHORIZATION -> s"Bearer ${config.registrationToken}",
       CONTENT_TYPE -> CONTENT_TYPE_JSON,
-      ENVIRONMENT_HEADER -> config.ifsEnvironment,
+      ENVIRONMENT_HEADER -> config.registrationEnvironment,
       CORRELATION_HEADER -> correlationId
     )
 

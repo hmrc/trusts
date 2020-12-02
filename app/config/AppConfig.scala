@@ -23,18 +23,18 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 @Singleton
 class AppConfig @Inject()(configuration: Configuration, servicesConfig: ServicesConfig) {
 
-  val ifsTrustsBaseUrl : String = servicesConfig.baseUrl("ifs-trusts")
-  val desTrustsBaseUrl : String = servicesConfig.baseUrl("des-trusts")
+  val registrationBaseUrl : String = servicesConfig.baseUrl("registration")
+  val subscriptionBaseUrl : String = servicesConfig.baseUrl("subscription")
   val taxEnrolmentsUrl : String = servicesConfig.baseUrl("tax-enrolments")
-  val getTrustOrEstateUrl : String = servicesConfig.baseUrl("des-display-trust-or-estate")
-  val varyTrustOrEstateUrl : String = servicesConfig.baseUrl("des-vary-trust-or-estate")
+  val getTrustOrEstateUrl : String = servicesConfig.baseUrl("playback")
+  val varyTrustOrEstateUrl : String = servicesConfig.baseUrl("variation")
   val trustsStoreUrl : String = servicesConfig.baseUrl("trusts-store")
 
-  val ifsEnvironment : String = configuration.get[String]("microservice.services.ifs-trusts.environment")
-  val ifsToken : String = configuration.get[String]("microservice.services.ifs-trusts.token")
+  val registrationEnvironment : String = configuration.get[String]("microservice.services.registration.environment")
+  val registrationToken : String = configuration.get[String]("microservice.services.registration.token")
 
-  val desEnvironment : String = configuration.get[String]("microservice.services.des-trusts.environment")
-  val desToken : String = configuration.get[String]("microservice.services.des-trusts.token")
+  val subscriptionEnvironment : String = configuration.get[String]("microservice.services.subscription.environment")
+  val subscriptionToken : String = configuration.get[String]("microservice.services.subscription.token")
 
   val trustsApiRegistrationSchema4MLD : String  = "/resources/schemas/4MLD/trusts-api-registration-schema-5.0.0.json"
   val trustsApiRegistrationSchema5MLD : String  = "/resources/schemas/5MLD/trusts-api-registration-schema-1.3.0.json"
