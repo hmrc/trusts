@@ -28,14 +28,14 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import controllers.actions.FakeIdentifierAction
 import models.existing_trust.ExistingCheckRequest
 import models.existing_trust.ExistingCheckResponse.{AlreadyRegistered, Matched, NotMatched, ServiceUnavailable}
-import services.{DesService, ValidationService}
+import services.{TrustService, ValidationService}
 
 import scala.concurrent.Future
 
 class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
   lazy val validatationService: ValidationService = new ValidationService()
-  val mockDesService = mock[DesService]
+  val mockDesService = mock[TrustService]
 
   lazy val bodyParsers = injector.instanceOf[BodyParsers.Default]
 

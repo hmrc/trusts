@@ -33,7 +33,7 @@ import utils.JsonUtils
 
 import scala.concurrent.Future
 
-class DesServiceSpec extends BaseSpec {
+class TrustServiceSpec extends BaseSpec {
 
   private trait DesServiceFixture {
     lazy val request = ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
@@ -44,7 +44,7 @@ class DesServiceSpec extends BaseSpec {
     when(mockRepository.resetCache(any[String], any[String])).thenReturn(Future.successful(None))
     val myId = "myId"
 
-    val SUT = new DesService(mockIfsConnector, mockDesConnector, mockRepository)
+    val SUT = new TrustService(mockIfsConnector, mockDesConnector, mockRepository)
   }
 
   ".checkExistingTrust" should {
@@ -124,7 +124,7 @@ class DesServiceSpec extends BaseSpec {
     val mockRepository = mock[CacheRepositoryImpl]
     when(mockIfsConnector.getTrustInfo(any())).thenReturn(Future.successful(etmpData))
 
-    val OUT = new DesService(mockIfsConnector, mockDesConnector, mockRepository)
+    val OUT = new TrustService(mockIfsConnector, mockDesConnector, mockRepository)
 
     whenReady(OUT.getTrustInfoFormBundleNo("75464876")) {formBundleNo =>
       formBundleNo mustBe etmpData.responseHeader.formBundleNo

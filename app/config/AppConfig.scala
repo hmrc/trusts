@@ -26,8 +26,8 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
   val ifsTrustsBaseUrl : String = servicesConfig.baseUrl("ifs-trusts")
   val desTrustsBaseUrl : String = servicesConfig.baseUrl("des-trusts")
   val taxEnrolmentsUrl : String = servicesConfig.baseUrl("tax-enrolments")
-  val getTrustOrEstateUrl : String = servicesConfig.baseUrl("des-display-trust-or-estate")
-  val varyTrustOrEstateUrl : String = servicesConfig.baseUrl("des-vary-trust-or-estate")
+  val getTrustOrEstateUrl : String = servicesConfig.baseUrl("ifs-display-trust-or-estate")
+  val varyTrustOrEstateUrl : String = servicesConfig.baseUrl("ifs-vary-trust-or-estate")
   val trustsStoreUrl : String = servicesConfig.baseUrl("trusts-store")
 
   val ifsEnvironment : String = configuration.get[String]("microservice.services.ifs-trusts.environment")

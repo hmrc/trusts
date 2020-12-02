@@ -24,7 +24,7 @@ import models.requests.IdentifierRequest
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
-import services.{AuditService, DesService, TransformationService}
+import services.{AuditService, TrustService, TransformationService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,7 +33,7 @@ import scala.concurrent.Future
 @Singleton
 class GetTrustController @Inject()(identify: IdentifierAction,
                                    auditService: AuditService,
-                                   desService: DesService,
+                                   desService: TrustService,
                                    transformationService: TransformationService,
                                    validateIdentifier : ValidateIdentifierActionProvider,
                                    cc: ControllerComponents) extends BackendController(cc) with Logging {

@@ -30,7 +30,7 @@ import models.registration.ApiResponse._
 import models.registration.RegistrationTrnResponse._
 import models.registration.{RegistrationFailureResponse, RegistrationTrnResponse}
 import models.requests.IdentifierRequest
-import services.{AuditService, DesService, RosmPatternService, ValidationService, _}
+import services.{AuditService, TrustService, RosmPatternService, ValidationService, _}
 import utils.ErrorResponses._
 import utils.Headers
 import utils.JsonOps._
@@ -39,7 +39,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-class RegisterTrustController @Inject()(desService: DesService, config: AppConfig,
+class RegisterTrustController @Inject()(desService: TrustService, config: AppConfig,
                                         validationService: ValidationService,
                                         identify: IdentifierAction,
                                         rosmPatternService: RosmPatternService,

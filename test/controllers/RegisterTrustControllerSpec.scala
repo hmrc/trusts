@@ -36,7 +36,7 @@ import scala.concurrent.Future
 
 class RegisterTrustControllerSpec extends BaseSpec {
 
-  private val mockDesService: DesService = mock[DesService]
+  private val mockDesService: TrustService = mock[TrustService]
   private val rosmPatternService: RosmPatternService = mock[RosmPatternService]
   private val mockTrustsStoreService: TrustsStoreService = mock[TrustsStoreService]
 

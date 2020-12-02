@@ -44,7 +44,7 @@ class TrustVariationsTestControllerSpec extends BaseSpec with BeforeAndAfter wit
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
-  private lazy val mockDesService: DesService = mock[DesService]
+  private lazy val mockDesService: TrustService = mock[TrustService]
 
   private lazy val mockAuditService: AuditService = mock[AuditService]
 

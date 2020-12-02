@@ -32,9 +32,9 @@ import repositories.CacheRepository
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class DesService @Inject()(val ifsConnector: IfsConnector,
-                           val desConnector: DesConnector,
-                           val repository: CacheRepository) extends Logging {
+class TrustService @Inject()(val ifsConnector: IfsConnector,
+                             val desConnector: DesConnector,
+                             val repository: CacheRepository) extends Logging {
 
   def getTrustInfoFormBundleNo(identifier: String): Future[String] =
     ifsConnector.getTrustInfo(identifier).map {

@@ -33,7 +33,7 @@ import utils.Session
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class VariationService @Inject()(desService: DesService,
+class VariationService @Inject()(desService: TrustService,
                                  transformationService: TransformationService,
                                  declarationTransformer: DeclarationTransformer,
                                  auditService: AuditService,

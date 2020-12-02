@@ -27,7 +27,7 @@ import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
 import repositories.TransformationRepository
-import services.{AuditService, DesService, TransformationService}
+import services.{AuditService, TrustService, TransformationService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.JsonUtils
 
@@ -136,7 +136,7 @@ class RemoveAssetTransformSpec extends FreeSpec with MustMatchers with ScalaFutu
       ))
 
       val repo = mock[TransformationRepository]
-      val desService = mock[DesService]
+      val desService = mock[TrustService]
       val auditService = mock[AuditService]
       val transforms = Seq(RemoveAssetTransform( 1, nonEeaBusinessAssetJson("Two"), LocalDate.of(2018, 4, 21), "nonEEABusiness"))
       when(repo.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))
@@ -152,7 +152,7 @@ class RemoveAssetTransformSpec extends FreeSpec with MustMatchers with ScalaFutu
     "ignore a nonEeaBusinessAsset that was added then removed" in {
 
       val repo = mock[TransformationRepository]
-      val desService = mock[DesService]
+      val desService = mock[TrustService]
       val auditService = mock[AuditService]
       val transforms = Seq(
         AddNonEeaBusinessAssetTransform(NonEEABusinessType("01", "TestOrg", AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK"), "UK", LocalDate.parse("1967-12-30"),None)),

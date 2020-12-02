@@ -24,12 +24,12 @@ import controllers.actions.IdentifierAction
 import models.registration.ApiResponse._
 import models.existing_trust.ExistingCheckRequest
 import models.existing_trust.ExistingCheckResponse._
-import services.DesService
+import services.TrustService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton()
-class CheckTrustController @Inject()(desService: DesService,
+class CheckTrustController @Inject()(desService: TrustService,
                                      cc: ControllerComponents,
                                      identify: IdentifierAction) extends TrustsBaseController(cc) with Logging {
 

@@ -26,7 +26,7 @@ import scala.concurrent.Future
 
 class RosmPatternServiceSpec extends BaseSpec {
 
-  private val mockDesService = mock[DesService]
+  private val mockDesService = mock[TrustService]
   private val mockTaxEnrolmentsService = mock[TaxEnrolmentsService]
 
 

@@ -30,7 +30,7 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
-import services.{AuditService, DesService, TransformationService}
+import services.{AuditService, TrustService, TransformationService}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import utils.{JsonFixtures, NonTaxable5MLDFixtures, Taxable5MLDFixtures}
@@ -44,7 +44,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
   private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 
-  private val desService: DesService = mock[DesService]
+  private val desService: TrustService = mock[TrustService]
   private val mockedAuditService: AuditService = mock[AuditService]
 
   private val mockAuditConnector = mock[AuditConnector]

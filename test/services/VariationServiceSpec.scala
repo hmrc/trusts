@@ -79,7 +79,7 @@ class VariationServiceSpec extends WordSpec
 
     "submit data correctly when the version matches, and then reset the cache" in {
 
-      val desService = mock[DesService]
+      val desService = mock[TrustService]
 
       val transformationService = mock[TransformationService]
       val auditService = app.injector.instanceOf[FakeAuditService]
@@ -123,7 +123,7 @@ class VariationServiceSpec extends WordSpec
 
   "passes 5mld=true to the transformer when the feature is set" in {
 
-    val desService = mock[DesService]
+    val desService = mock[TrustService]
 
     val transformationService = mock[TransformationService]
     val auditService = app.injector.instanceOf[FakeAuditService]
@@ -165,7 +165,7 @@ class VariationServiceSpec extends WordSpec
   }
 
   "Fail if the etmp data version doesn't match our submission data" in {
-    val desService = mock[DesService]
+    val desService = mock[TrustService]
     val transformationService = mock[TransformationService]
     val transformer = mock[DeclarationTransformer]
 
@@ -200,7 +200,7 @@ class VariationServiceSpec extends WordSpec
 
   "auditing" should {
 
-    val desService = mock[DesService]
+    val desService = mock[TrustService]
     val transformationService = mock[TransformationService]
     val transformer = mock[DeclarationTransformer]
 
@@ -218,7 +218,7 @@ class VariationServiceSpec extends WordSpec
 
     "capture variation success" in {
 
-      val desService = mock[DesService]
+      val desService = mock[TrustService]
       val transformationService = mock[TransformationService]
       val transformer = mock[DeclarationTransformer]
 

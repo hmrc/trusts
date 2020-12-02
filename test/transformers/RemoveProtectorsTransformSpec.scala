@@ -26,7 +26,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import repositories.TransformationRepository
-import services.{AuditService, DesService, TransformationService}
+import services.{AuditService, TrustService, TransformationService}
 import utils.JsonUtils
 
 import scala.concurrent.Future
@@ -155,7 +155,7 @@ class RemoveProtectorsTransformSpec extends FreeSpec with MustMatchers with Scal
       ))
 
       val repo = mock[TransformationRepository]
-      val desService = mock[DesService]
+      val desService = mock[TrustService]
       val auditService = mock[AuditService]
       val transforms = Seq(RemoveProtectorsTransform(1, protectorJson("Two"), LocalDate.of(2018, 4, 21), "protectorCompany"))
       when(repo.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))
