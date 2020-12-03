@@ -33,15 +33,15 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TrustVariationsTestController @Inject()(
-                                               identify: IdentifierAction,
-                                               trustsService: TrustsService,
-                                               auditService: AuditService,
-                                               validator: ValidationService,
-                                               config : AppConfig,
-                                               variationService: VariationService,
-                                               responseHandler: VariationsResponseHandler,
-                                               trustsStoreService: TrustsStoreService,
-                                               cc: ControllerComponents
+                                           identify: IdentifierAction,
+                                           trustsService: TrustsService,
+                                           auditService: AuditService,
+                                           validator: ValidationService,
+                                           config : AppConfig,
+                                           variationService: VariationService,
+                                           responseHandler: VariationsResponseHandler,
+                                           trustsStoreService: TrustsStoreService,
+                                           cc: ControllerComponents
                                     ) extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
   def trustVariation(): Action[JsValue] = identify.async(parse.json) {
