@@ -1061,9 +1061,7 @@
         "startDate",
         "trustTaxable",
         "expressTrust",
-        "trustUKResident",
-        "trustRecorded",
-        "trustUKRelation"
+        "trustUKResident"
       ],
       "additionalProperties": false
     },
