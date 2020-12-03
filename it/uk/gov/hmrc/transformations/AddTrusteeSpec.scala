@@ -38,12 +38,12 @@ class AddTrusteeSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar w
 
   "an add trustee call" - {
 
-      val getTrustResponseFromDES : JsValue = JsonUtils
+      val getTrustResponse : JsValue = JsonUtils
         .getJsonValueFromFile("trusts-etmp-received-no-trustees.json")
 
       val stubbedTrustsConnector = mock[TrustsConnector]
 
-      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES.as[GetTrustSuccessResponse]))
+      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse.as[GetTrustSuccessResponse]))
 
       val application = applicationBuilder
         .overrides(

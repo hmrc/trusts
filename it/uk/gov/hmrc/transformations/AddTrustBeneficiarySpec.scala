@@ -36,7 +36,7 @@ import scala.concurrent.Future
 
 class AddTrustBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
 
-  lazy val getTrustResponseFromDES: GetTrustSuccessResponse =
+  lazy val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
   lazy val expectedInitialGetJson: JsValue =
@@ -67,7 +67,7 @@ class AddTrustBeneficiarySpec extends AsyncFreeSpec with MustMatchers with Mocki
         JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-add-trust-beneficiary.json")
 
       val stubbedTrustsConnector = mock[TrustsConnector]
-      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
 
       val application = applicationBuilder
         .overrides(

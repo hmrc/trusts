@@ -36,7 +36,7 @@ import scala.concurrent.Future
 
 class AddBusinessSettlorSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
 
-  lazy val getTrustResponseFromDES: GetTrustSuccessResponse =
+  lazy val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
   lazy val expectedInitialGetJson: JsValue =
@@ -61,7 +61,7 @@ class AddBusinessSettlorSpec extends AsyncFreeSpec with MustMatchers with Mockit
       JsonUtils.getJsonValueFromFile("add-business-settlor-after-etmp-call.json")
 
     val stubbedTrustsConnector = mock[TrustsConnector]
-    when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+    when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
 
     val application = applicationBuilder
       .overrides(

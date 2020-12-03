@@ -37,7 +37,7 @@ import scala.concurrent.Future
 
 class AddUnidentifiedBeneficiarySpec extends AsyncFreeSpec with MustMatchers with ScalaFutures with MockitoSugar with IntegrationTestBase {
 
-  lazy val getTrustResponseFromDES: GetTrustSuccessResponse =
+  lazy val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
   lazy val expectedInitialGetJson: JsValue =
@@ -58,7 +58,7 @@ class AddUnidentifiedBeneficiarySpec extends AsyncFreeSpec with MustMatchers wit
         JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-add-unidentified-beneficiary.json")
 
       val stubbedTrustsConnector = mock[TrustsConnector]
-      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
 
       val application = applicationBuilder
         .overrides(

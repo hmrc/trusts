@@ -40,10 +40,10 @@ class RemoveAssetSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar 
 
       val stubbedTrustsConnector = mock[TrustsConnector]
 
-    lazy val getTrustResponseFromDES: GetTrustSuccessResponse =
+    lazy val getTrustResponse: GetTrustSuccessResponse =
       JsonUtils.getJsonValueFromString(NonTaxable5MLDFixtures.DES.newGet5MLDTrustNonTaxableResponse).as[GetTrustSuccessResponse]
 
-      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
 
       val application = applicationBuilder
         .overrides(

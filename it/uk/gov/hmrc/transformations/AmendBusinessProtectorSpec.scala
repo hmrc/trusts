@@ -37,7 +37,7 @@ import scala.concurrent.Future
 
 class AmendBusinessProtectorSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase with ScalaFutures {
 
-  val getTrustResponseFromDES: GetTrustSuccessResponse =
+  val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
   val expectedInitialGetJson: JsValue =
@@ -49,7 +49,7 @@ class AmendBusinessProtectorSpec extends AsyncFreeSpec with MustMatchers with Mo
         JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-business-protector.json")
 
       val stubbedTrustsConnector = mock[TrustsConnector]
-      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
 
       val application = applicationBuilder
         .overrides(

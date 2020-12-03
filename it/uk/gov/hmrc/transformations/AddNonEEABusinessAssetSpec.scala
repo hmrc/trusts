@@ -36,7 +36,7 @@ import scala.concurrent.Future
 
 class AddNonEEABusinessAssetSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
 
-  lazy val getTrustResponseFromDES: GetTrustSuccessResponse =
+  lazy val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromString(NonTaxable5MLDFixtures.DES.newGet5MLDTrustNonTaxableResponse).as[GetTrustSuccessResponse]
 
   lazy val expectedInitialGetJson: JsValue =
@@ -65,7 +65,7 @@ class AddNonEEABusinessAssetSpec extends AsyncFreeSpec with MustMatchers with Mo
       JsonUtils.getJsonValueFromFile("5MLD/NonTaxable/add-nonEEABusiness-asset-after-etmp-call.json")
 
     val stubbedTrustsConnector = mock[TrustsConnector]
-    when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+    when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
 
     val application = applicationBuilder
       .overrides(

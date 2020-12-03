@@ -38,13 +38,13 @@ class SetExpressSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar w
 
   "a set trust details express call" - {
 
-      val getTrustResponseFromDES : JsValue = JsonUtils
+      val getTrustResponse : JsValue = JsonUtils
         .getJsonValueFromFile("trusts-etmp-received.json")
 
       val stubbedTrustsConnector = mock[TrustsConnector]
 
       when(stubbedTrustsConnector.getTrustInfo(any()))
-        .thenReturn(Future.successful(getTrustResponseFromDES.as[GetTrustSuccessResponse]))
+        .thenReturn(Future.successful(getTrustResponse.as[GetTrustSuccessResponse]))
 
       val application = applicationBuilder
         .overrides(

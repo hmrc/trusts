@@ -37,7 +37,7 @@ import scala.concurrent.Future
 
 class AmendUnidentifiedBeneficiarySpec extends AsyncFreeSpec with MustMatchers with ScalaFutures with MockitoSugar with IntegrationTestBase {
 
-  val getTrustResponseFromDES: GetTrustSuccessResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
+  val getTrustResponse: GetTrustSuccessResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
   val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an amend unidentified beneficiary call" - {
@@ -47,7 +47,7 @@ class AmendUnidentifiedBeneficiarySpec extends AsyncFreeSpec with MustMatchers w
       val expectedGetAfterAmendBeneficiaryJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-unidentified-beneficiary.json")
 
       val stubbedTrustsConnector = mock[TrustsConnector]
-      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
 
       val application = applicationBuilder
         .overrides(

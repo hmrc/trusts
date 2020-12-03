@@ -40,10 +40,10 @@ class RemoveOtherIndividualSpec extends AsyncFreeSpec with MustMatchers with Moc
 
       val stubbedTrustsConnector = mock[TrustsConnector]
 
-      val getTrustResponseFromDES : JsValue = JsonUtils
+      val getTrustResponse : JsValue = JsonUtils
         .getJsonValueFromFile("trusts-etmp-received-multiple-otherIndividuals.json")
 
-      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES.as[GetTrustSuccessResponse]))
+      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse.as[GetTrustSuccessResponse]))
 
       val application = applicationBuilder
         .overrides(

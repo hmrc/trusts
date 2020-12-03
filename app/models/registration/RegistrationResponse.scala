@@ -61,10 +61,10 @@ object RegistrationResponse extends Logging {
             response.json.as[RegistrationTrnResponse]
           case FORBIDDEN =>
             response.json.asOpt[DesErrorResponse] match {
-              case Some(desReponse) if desReponse.code == ALREADY_REGISTERED_CODE =>
+              case Some(registrationReponse) if registrationReponse.code == ALREADY_REGISTERED_CODE =>
                 logger.info(s"already registered response from des.")
                 throw AlreadyRegisteredException
-              case Some(desReponse) if desReponse.code == NO_MATCH_CODE =>
+              case Some(registrationReponse) if registrationReponse.code == NO_MATCH_CODE =>
                 logger.info(s"No match response from des.")
                 throw NoMatchException
               case _ =>
