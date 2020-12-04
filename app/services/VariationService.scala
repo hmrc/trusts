@@ -33,7 +33,7 @@ import utils.Session
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class VariationService @Inject()(desService: DesService,
+class VariationService @Inject()(trustsService: TrustsService,
                                  transformationService: TransformationService,
                                  declarationTransformer: DeclarationTransformer,
                                  auditService: AuditService,
@@ -130,8 +130,8 @@ class VariationService @Inject()(desService: DesService,
 
   private def getCachedTrustData(identifier: String, internalId: String)(implicit logging: LoggingContext): Future[TrustProcessedResponse] = {
     for {
-      response <- desService.getTrustInfo(identifier, internalId)
-      fbn <- desService.getTrustInfoFormBundleNo(identifier)
+      response <- trustsService.getTrustInfo(identifier, internalId)
+      fbn <- trustsService.getTrustInfoFormBundleNo(identifier)
     } yield response match {
       case tpr: TrustProcessedResponse if tpr.responseHeader.formBundleNo == fbn =>
         logging.info("returning TrustProcessedResponse")
@@ -157,7 +157,7 @@ class VariationService @Inject()(desService: DesService,
       Json.toJson(Json.obj())
     )
 
-    desService.trustVariation(payload) map { response =>
+    trustsService.trustVariation(payload) map { response =>
 
       logging.info("variation submitted")
 

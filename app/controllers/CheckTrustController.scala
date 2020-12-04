@@ -24,19 +24,19 @@ import controllers.actions.IdentifierAction
 import models.registration.ApiResponse._
 import models.existing_trust.ExistingCheckRequest
 import models.existing_trust.ExistingCheckResponse._
-import services.DesService
+import services.TrustsService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton()
-class CheckTrustController @Inject()(desService: DesService,
+class CheckTrustController @Inject()(trustsService: TrustsService,
                                      cc: ControllerComponents,
                                      identify: IdentifierAction) extends TrustsBaseController(cc) with Logging {
 
   def checkExistingTrust() = identify.async(parse.json) { implicit request =>
     withJsonBody[ExistingCheckRequest] {
       trustsCheckRequest =>
-        desService.checkExistingTrust(trustsCheckRequest).map {
+        trustsService.checkExistingTrust(trustsCheckRequest).map {
           result =>
             logger.info(s"[checkExistingTrust][Session ID: ${request.sessionId}] response: $result")
             result match {

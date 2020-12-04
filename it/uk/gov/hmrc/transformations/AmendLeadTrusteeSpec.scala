@@ -28,7 +28,7 @@ import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
-import connector.DesConnector
+import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import models.variation.IdentificationType
@@ -40,7 +40,7 @@ import scala.concurrent.Future
 
 class AmendLeadTrusteeSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
 
-  val getTrustResponseFromDES: GetTrustSuccessResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
+  val getTrustResponse: GetTrustSuccessResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
   val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an amend lead trustee call" - {
@@ -65,13 +65,13 @@ class AmendLeadTrusteeSpec extends AsyncFreeSpec with MustMatchers with MockitoS
 
       val expectedGetAfterAmendLeadTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-lead-trustee.json")
 
-      val stubbedDesConnector = mock[DesConnector]
-      when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+      val stubbedTrustsConnector = mock[TrustsConnector]
+      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
 
       val application = applicationBuilder
         .overrides(
           bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-          bind[DesConnector].toInstance(stubbedDesConnector)
+          bind[TrustsConnector].toInstance(stubbedTrustsConnector)
         )
         .build()
 

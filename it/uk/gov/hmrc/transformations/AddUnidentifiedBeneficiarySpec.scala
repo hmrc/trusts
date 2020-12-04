@@ -27,7 +27,7 @@ import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
-import connector.DesConnector
+import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import play.api.Application
@@ -37,7 +37,7 @@ import scala.concurrent.Future
 
 class AddUnidentifiedBeneficiarySpec extends AsyncFreeSpec with MustMatchers with ScalaFutures with MockitoSugar with IntegrationTestBase {
 
-  lazy val getTrustResponseFromDES: GetTrustSuccessResponse =
+  lazy val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
   lazy val expectedInitialGetJson: JsValue =
@@ -57,13 +57,13 @@ class AddUnidentifiedBeneficiarySpec extends AsyncFreeSpec with MustMatchers wit
       lazy val expectedGetAfterAddBeneficiaryJson: JsValue =
         JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-add-unidentified-beneficiary.json")
 
-      val stubbedDesConnector = mock[DesConnector]
-      when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+      val stubbedTrustsConnector = mock[TrustsConnector]
+      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
 
       val application = applicationBuilder
         .overrides(
           bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-          bind[DesConnector].toInstance(stubbedDesConnector)
+          bind[TrustsConnector].toInstance(stubbedTrustsConnector)
         )
         .build()
 

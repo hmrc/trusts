@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.transformations
 
-import connector.DesConnector
+import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import org.mockito.Matchers.any
@@ -37,7 +37,7 @@ import scala.concurrent.Future
 
 class AmendNonEEABusinessAssetSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase with ScalaFutures {
 
-  lazy val getTrustResponseFromDES: GetTrustSuccessResponse =
+  lazy val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromString(NonTaxable5MLDFixtures.DES.newGet5MLDTrustNonTaxableResponse).as[GetTrustSuccessResponse]
 
   lazy val expectedInitialGetJson: JsValue =
@@ -48,13 +48,13 @@ class AmendNonEEABusinessAssetSpec extends AsyncFreeSpec with MustMatchers with 
       val expectedGetAfterAmendNonEEABusinessAssetJson: JsValue =
         JsonUtils.getJsonValueFromFile("5MLD/NonTaxable/amended-nonEEABusiness-asset-after-etmp-call.json")
 
-      val stubbedDesConnector = mock[DesConnector]
-      when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+      val stubbedTrustsConnector = mock[TrustsConnector]
+      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
 
       val application = applicationBuilder
         .overrides(
           bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-          bind[DesConnector].toInstance(stubbedDesConnector)
+          bind[TrustsConnector].toInstance(stubbedTrustsConnector)
         )
         .build()
 

@@ -36,7 +36,7 @@ import scala.concurrent.Future
 
 class RegisterTrustControllerSpec extends BaseSpec {
 
-  private val mockDesService: DesService = mock[DesService]
+  private val mockTrustsService: TrustsService = mock[TrustsService]
   private val rosmPatternService: RosmPatternService = mock[RosmPatternService]
   private val mockTrustsStoreService: TrustsStoreService = mock[TrustsStoreService]
 
@@ -62,13 +62,13 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
       "individual user called the register endpoint with a valid json payload " in {
 
-        when(mockDesService.registerTrust(any[Registration]))
+        when(mockTrustsService.registerTrust(any[Registration]))
           .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
         when(rosmPatternService.enrolAndLogResult(any(), any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentSuccess))
 
         val SUT = new RegisterTrustController(
-          mockDesService,
+          mockTrustsService,
           appConfig,
           validationService,
           fakeOrganisationAuthAction,
@@ -89,13 +89,13 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
         when(mockTrustsStoreService.is5mldEnabled()(any(), any())).thenReturn(Future.successful(true))
 
-        when(mockDesService.registerTrust(any[Registration]))
+        when(mockTrustsService.registerTrust(any[Registration]))
           .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
         when(rosmPatternService.enrolAndLogResult(any(), any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentSuccess))
 
         val SUT = new RegisterTrustController(
-          mockDesService,
+          mockTrustsService,
           appConfig,
           validationService,
           fakeOrganisationAuthAction,
@@ -116,13 +116,13 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
         when(mockTrustsStoreService.is5mldEnabled()(any(), any())).thenReturn(Future.successful(true))
 
-        when(mockDesService.registerTrust(any[Registration]))
+        when(mockTrustsService.registerTrust(any[Registration]))
           .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
         when(rosmPatternService.enrolAndLogResult(any(), any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentSuccess))
 
         val SUT = new RegisterTrustController(
-          mockDesService,
+          mockTrustsService,
           appConfig,
           validationService,
           fakeOrganisationAuthAction,
@@ -143,13 +143,13 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
         "tax enrolment failed to enrol user" in {
 
-          when(mockDesService.registerTrust(any[Registration]))
+          when(mockTrustsService.registerTrust(any[Registration]))
             .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
           when(rosmPatternService.enrolAndLogResult(any(), any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentFailure))
 
           val SUT = new RegisterTrustController(
-            mockDesService,
+            mockTrustsService,
             appConfig,
             validationService,
             fakeOrganisationAuthAction,
@@ -172,7 +172,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         when(rosmPatternService.enrolAndLogResult(any(), any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentNotProcessed))
 
         val SUT = new RegisterTrustController(
-          mockDesService,
+          mockTrustsService,
           appConfig,
           validationService,
           fakeAgentAuthAction,
@@ -196,7 +196,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
       "trusts is already registered with provided details." in {
 
         val SUT = new RegisterTrustController(
-          mockDesService,
+          mockTrustsService,
           appConfig,
           validationService,
           fakeOrganisationAuthAction,
@@ -206,7 +206,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           mockTrustsStoreService
         )
 
-        when(mockDesService.registerTrust(any[Registration]))
+        when(mockTrustsService.registerTrust(any[Registration]))
           .thenReturn(Future.failed(AlreadyRegisteredException))
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
@@ -224,11 +224,11 @@ class RegisterTrustControllerSpec extends BaseSpec {
     "return a Forbidden" when {
 
       "no match found for provided existing trusts details." in {
-        when(mockDesService.registerTrust(any[Registration]))
+        when(mockTrustsService.registerTrust(any[Registration]))
           .thenReturn(Future.failed(NoMatchException))
 
         val SUT = new RegisterTrustController(
-          mockDesService,
+          mockTrustsService,
           appConfig,
           validationService,
           fakeOrganisationAuthAction,
@@ -252,7 +252,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
       "input request fails schema validation" in {
 
         val SUT = new RegisterTrustController(
-          mockDesService,
+          mockTrustsService,
           appConfig,
           validationService,
           fakeOrganisationAuthAction,
@@ -276,7 +276,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
       "input request fails business validation" in {
 
         val SUT = new RegisterTrustController(
-          mockDesService,
+          mockTrustsService,
           appConfig,
           validationService,
           fakeOrganisationAuthAction,
@@ -296,11 +296,11 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
       "no draft id is provided in the headers" in {
 
-        when(mockDesService.registerTrust(any[Registration]))
+        when(mockTrustsService.registerTrust(any[Registration]))
           .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
         val SUT = new RegisterTrustController(
-          mockDesService,
+          mockTrustsService,
           appConfig,
           validationService,
           fakeOrganisationAuthAction,
@@ -328,11 +328,11 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
       "the register endpoint called and something goes wrong." in {
 
-        when(mockDesService.registerTrust(any[Registration]))
+        when(mockTrustsService.registerTrust(any[Registration]))
           .thenReturn(Future.failed(InternalServerErrorException("some error")))
 
         val SUT = new RegisterTrustController(
-          mockDesService,
+          mockTrustsService,
           appConfig,
           validationService,
           fakeOrganisationAuthAction,
@@ -357,7 +357,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
       "the des returns BAD REQUEST" in {
 
         val SUT = new RegisterTrustController(
-          mockDesService,
+          mockTrustsService,
           appConfig,
           validationService,
           fakeOrganisationAuthAction,
@@ -367,7 +367,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           mockTrustsStoreService
         )
 
-        when(mockDesService.registerTrust(any[Registration])).
+        when(mockTrustsService.registerTrust(any[Registration])).
           thenReturn(Future.failed(BadRequestException))
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
@@ -385,7 +385,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
       "the des returns Service Unavailable as dependent service is down. " in {
 
         val SUT = new RegisterTrustController(
-          mockDesService,
+          mockTrustsService,
           appConfig,
           validationService,
           fakeOrganisationAuthAction,
@@ -395,7 +395,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           mockTrustsStoreService
         )
 
-        when(mockDesService.registerTrust(any[Registration]))
+        when(mockTrustsService.registerTrust(any[Registration]))
           .thenReturn(Future.failed(ServiceNotAvailableException("dependent service is down")))
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))

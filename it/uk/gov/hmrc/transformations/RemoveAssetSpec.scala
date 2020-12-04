@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.transformations
 
-import connector.DesConnector
+import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import org.mockito.Matchers._
@@ -38,17 +38,17 @@ class RemoveAssetSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar 
 
   "a remove nonEEABusinessAsset call" - {
 
-      val stubbedDesConnector = mock[DesConnector]
+      val stubbedTrustsConnector = mock[TrustsConnector]
 
-    lazy val getTrustResponseFromDES: GetTrustSuccessResponse =
+    lazy val getTrustResponse: GetTrustSuccessResponse =
       JsonUtils.getJsonValueFromString(NonTaxable5MLDFixtures.DES.newGet5MLDTrustNonTaxableResponse).as[GetTrustSuccessResponse]
 
-      when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
 
       val application = applicationBuilder
         .overrides(
           bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-          bind[DesConnector].toInstance(stubbedDesConnector)
+          bind[TrustsConnector].toInstance(stubbedTrustsConnector)
         )
         .build()
 

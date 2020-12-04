@@ -27,7 +27,7 @@ import play.api.test.Helpers.{GET, contentAsJson, route, status, _}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
-import connector.DesConnector
+import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import play.api.Application
@@ -37,7 +37,7 @@ import scala.concurrent.Future
 
 class AmendIndividualProtectorSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase with ScalaFutures {
 
-  val getTrustResponseFromDES: GetTrustSuccessResponse =
+  val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
   val expectedInitialGetJson: JsValue =
@@ -48,15 +48,15 @@ class AmendIndividualProtectorSpec extends AsyncFreeSpec with MustMatchers with 
       val expectedGetAfterAmendProtectorJson: JsValue =
         JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-individual-protector.json")
 
-      val stubbedDesConnector = mock[DesConnector]
+      val stubbedTrustsConnector = mock[TrustsConnector]
 
-      when(stubbedDesConnector.getTrustInfo(any()))
-        .thenReturn(Future.successful(getTrustResponseFromDES))
+      when(stubbedTrustsConnector.getTrustInfo(any()))
+        .thenReturn(Future.successful(getTrustResponse))
 
       val application = applicationBuilder
         .overrides(
           bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-          bind[DesConnector].toInstance(stubbedDesConnector)
+          bind[TrustsConnector].toInstance(stubbedTrustsConnector)
         )
         .build()
 

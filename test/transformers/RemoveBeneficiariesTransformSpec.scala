@@ -27,7 +27,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import models.variation.UnidentifiedType
 import repositories.TransformationRepository
-import services.{AuditService, DesService, TransformationService}
+import services.{AuditService, TrustsService, TransformationService}
 import utils.JsonUtils
 
 import scala.concurrent.Future
@@ -151,12 +151,12 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with S
       ))
 
       val repo = mock[TransformationRepository]
-      val desService = mock[DesService]
+      val trustsService = mock[TrustsService]
       val auditService = mock[AuditService]
       val transforms = Seq(RemoveBeneficiariesTransform( 1, beneficiaryJson("Two"), LocalDate.of(2018, 4, 21), "unidentified"))
       when(repo.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))
 
-      val SUT = new TransformationService(repo, desService, auditService)
+      val SUT = new TransformationService(repo, trustsService, auditService)
 
       SUT.applyDeclarationTransformations("UTRUTRUTR", "InternalId", inputJson)(HeaderCarrier()).futureValue match {
         case JsSuccess(value, _) => value mustBe expectedOutput
@@ -172,7 +172,7 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with S
       ))
 
       val repo = mock[TransformationRepository]
-      val desService = mock[DesService]
+      val trustsService = mock[TrustsService]
       val auditService = mock[AuditService]
       val transforms = Seq(
         AddUnidentifiedBeneficiaryTransform(UnidentifiedType(None, None, "Description", None, None, LocalDate.parse("1967-12-30"), None)),
@@ -181,7 +181,7 @@ class RemoveBeneficiariesTransformSpec extends FreeSpec with MustMatchers with S
 
       when(repo.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))
 
-      val SUT = new TransformationService(repo, desService, auditService)
+      val SUT = new TransformationService(repo, trustsService, auditService)
 
       SUT.applyDeclarationTransformations("UTRUTRUTR", "InternalId", inputJson)(HeaderCarrier()).futureValue match {
         case JsSuccess(value, _) => value mustBe inputJson

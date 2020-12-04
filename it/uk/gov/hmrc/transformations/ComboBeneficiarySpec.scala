@@ -30,7 +30,7 @@ import play.api.test.Helpers.{CONTENT_TYPE, GET, POST, contentAsJson, route, sta
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
-import connector.DesConnector
+import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import models.variation.VariationResponse
@@ -40,7 +40,7 @@ import utils.JsonUtils
 import scala.concurrent.Future
 
 class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
-  private lazy val getTrustResponseFromDES: GetTrustSuccessResponse =
+  private lazy val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
   private lazy val expectedInitialGetJson: JsValue =
@@ -60,13 +60,13 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoS
       val trustsStoreServiceMock = mock[TrustsStoreService]
       when(trustsStoreServiceMock.is5mldEnabled()(any(), any())).thenReturn(Future.successful(false))
 
-      val stubbedDesConnector = mock[DesConnector]
-      when(stubbedDesConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponseFromDES))
+      val stubbedTrustsConnector = mock[TrustsConnector]
+      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
 
       val application = applicationBuilder
         .overrides(
           bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-          bind[DesConnector].toInstance(stubbedDesConnector),
+          bind[TrustsConnector].toInstance(stubbedTrustsConnector),
           bind[LocalDateService].toInstance(TestLocalDateService),
           bind[TrustsStoreService].toInstance(trustsStoreServiceMock)
         )
@@ -98,7 +98,7 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoS
       lazy val variationResponse = VariationResponse("TVN12345678")
       val payloadCaptor = ArgumentCaptor.forClass(classOf[JsValue])
 
-      when(stubbedDesConnector.trustVariation(payloadCaptor.capture())).thenReturn(Future.successful(variationResponse))
+      when(stubbedTrustsConnector.trustVariation(payloadCaptor.capture())).thenReturn(Future.successful(variationResponse))
 
       val declaration = Json.parse(
         """

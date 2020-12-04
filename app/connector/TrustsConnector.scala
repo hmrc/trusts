@@ -24,7 +24,6 @@ import models._
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
 import models.get_trust.GetTrustResponse
 import models.registration.RegistrationResponse
-import models.tax_enrolments.SubscriptionIdResponse
 import models.variation.VariationResponse
 import play.api.Logging
 import play.api.http.HeaderNames
@@ -37,9 +36,9 @@ import utils.Session
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
-class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreService: TrustsStoreService) extends Logging {
+class TrustsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreService: TrustsStoreService) extends Logging {
 
-  private lazy val trustsServiceUrl : String = s"${config.registerTrustsUrl}/trusts"
+  private lazy val trustsServiceUrl : String = s"${config.registrationBaseUrl}/trusts"
   private lazy val matchTrustsEndpoint : String = s"$trustsServiceUrl/match"
   private lazy val trustRegistrationEndpoint : String = s"$trustsServiceUrl/registration"
   private lazy val getTrustOrEstateUrl: String =  s"${config.getTrustOrEstateUrl}/trusts"
@@ -59,11 +58,11 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "CorrelationId"
 
-  private def desHeaders(correlationId : String) : Seq[(String, String)] =
+  private def registrationHeaders(correlationId : String) : Seq[(String, String)] =
     Seq(
-      HeaderNames.AUTHORIZATION -> s"Bearer ${config.desToken}",
+      HeaderNames.AUTHORIZATION -> s"Bearer ${config.registrationToken}",
       CONTENT_TYPE -> CONTENT_TYPE_JSON,
-      ENVIRONMENT_HEADER -> config.desEnvironment,
+      ENVIRONMENT_HEADER -> config.registrationEnvironment,
       CORRELATION_HEADER -> correlationId
     )
 
@@ -72,7 +71,7 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
 
     val correlationId = UUID.randomUUID().toString
 
-    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
     logger.info(s"[Session ID: ${Session.id(hc)}] matching trust for correlationId: $correlationId")
 
@@ -86,7 +85,7 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
                             : Future[RegistrationResponse] = {
     val correlationId = UUID.randomUUID().toString
 
-    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
     logger.debug(s"[Session ID: ${Session.id(hc)}] registration payload ${Json.toJson(registration)}")
 
@@ -98,26 +97,10 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
     response
   }
 
-  def getSubscriptionId(trn: String): Future[SubscriptionIdResponse] = {
-
-    val correlationId = UUID.randomUUID().toString
-
-    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
-
-    val subscriptionIdEndpointUrl = s"$trustsServiceUrl/trn/$trn/subscription"
-    logger.debug(s"[getSubscriptionId][Session ID: ${Session.id(hc)}][TRN: $trn]" +
-      s" Sending get subscription id request to DES, url=$subscriptionIdEndpointUrl")
-
-    val response = http.GET[SubscriptionIdResponse](subscriptionIdEndpointUrl)
-    (SubscriptionIdResponse.httpReads, implicitly[HeaderCarrier](hc), implicitly[ExecutionContext])
-
-    response
-  }
-
   def getTrustInfo(identifier: String): Future[GetTrustResponse] = {
     val correlationId = UUID.randomUUID().toString
 
-    implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
+    implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
     logger.info(s"[Session ID: ${Session.id(hc)}][UTR/URN: $identifier]" +
       s" getting playback for trust for correlationId: $correlationId")
@@ -134,7 +117,7 @@ class DesConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreSer
   def trustVariation(trustVariations: JsValue): Future[VariationResponse] = {
     val correlationId = UUID.randomUUID().toString
 
-    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
     logger.debug(s"[Session ID: ${Session.id(hc)}] variation payload $trustVariations}")
 

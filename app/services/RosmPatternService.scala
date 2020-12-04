@@ -29,12 +29,12 @@ import scala.concurrent.Future
 import scala.util.control.NonFatal
 
 
-class RosmPatternServiceImpl @Inject()( desService :DesService, taxEnrolmentService : TaxEnrolmentsService) extends RosmPatternService with Logging {
+class RosmPatternServiceImpl @Inject()(trustsService :TrustsService, taxEnrolmentService : TaxEnrolmentsService) extends RosmPatternService with Logging {
 
   override def setSubscriptionId(trn : String, taxable: Boolean)(implicit hc : HeaderCarrier): Future[TaxEnrolmentSuscriberResponse] ={
 
     for {
-      subscriptionIdResponse <- desService.getSubscriptionId(trn = trn)
+      subscriptionIdResponse <- trustsService.getSubscriptionId(trn = trn)
       taxEnrolmentSuscriberResponse <- taxEnrolmentService.setSubscriptionId(subscriptionIdResponse.subscriptionId, taxable, trn)
     } yield {
       taxEnrolmentSuscriberResponse
