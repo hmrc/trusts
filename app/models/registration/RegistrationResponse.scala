@@ -18,7 +18,7 @@ package models.registration
 
 import play.api.Logging
 import play.api.http.Status._
-import play.api.libs.json.{Format, JsResult, JsValue, Json}
+import play.api.libs.json.{Format, JsResult, JsValue, Json, OFormat}
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import exceptions._
 import models.existing_trust.DesErrorResponse
@@ -29,13 +29,13 @@ sealed trait RegistrationResponse
 case class RegistrationTrnResponse(trn: String) extends RegistrationResponse
 
 object RegistrationTrnResponse {
-  implicit val formats = Json.format[RegistrationTrnResponse]
+  implicit val formats: OFormat[RegistrationTrnResponse] = Json.format[RegistrationTrnResponse]
 }
 
 case class RegistrationFailureResponse(status: Int, code: String, message: String) extends RegistrationResponse
 
 object RegistrationFailureResponse {
-  implicit val formats = Json.format[RegistrationFailureResponse]
+  implicit val formats: OFormat[RegistrationFailureResponse] = Json.format[RegistrationFailureResponse]
 }
 
 object RegistrationResponse extends Logging {
@@ -52,6 +52,22 @@ object RegistrationResponse extends Logging {
 
   }
 
+  // TODO, bad code smell, return ADT rather than throwing exception
+  // Having to use return type Nothing to satisfy the compiler
+  private def parseForbiddenResponse(json : JsValue): Nothing = {
+    json.toString() match {
+      case x if x.contains(ALREADY_REGISTERED_CODE) =>
+        logger.info(s"already registered response from des.")
+        throw AlreadyRegisteredException
+      case x if x.contains(NO_MATCH_CODE) =>
+        logger.info(s"No match response from des.")
+        throw NoMatchException
+      case _ =>
+        logger.error("Forbidden response from des.")
+        throw InternalServerErrorException("Forbidden response from des.")
+    }
+  }
+
   implicit lazy val httpReads: HttpReads[RegistrationResponse] =
     new HttpReads[RegistrationResponse] {
       override def read(method: String, url: String, response: HttpResponse): RegistrationResponse = {
@@ -60,17 +76,7 @@ object RegistrationResponse extends Logging {
           case OK =>
             response.json.as[RegistrationTrnResponse]
           case FORBIDDEN =>
-            response.json.asOpt[DesErrorResponse] match {
-              case Some(registrationReponse) if registrationReponse.code == ALREADY_REGISTERED_CODE =>
-                logger.info(s"already registered response from des.")
-                throw AlreadyRegisteredException
-              case Some(registrationReponse) if registrationReponse.code == NO_MATCH_CODE =>
-                logger.info(s"No match response from des.")
-                throw NoMatchException
-              case _ =>
-                logger.error("Forbidden response from des.")
-                throw InternalServerErrorException("Forbidden response from des.")
-            }
+            parseForbiddenResponse(response.json)
           case BAD_REQUEST =>
             throw BadRequestException
           case SERVICE_UNAVAILABLE =>
