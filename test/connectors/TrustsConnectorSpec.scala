@@ -41,6 +41,10 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
   def get5MLDTrustUTREndpoint(utr: String) = s"/trusts/registration/UTR/$utr"
   def get5MLDTrustURNEndpoint(urn: String) = s"/trusts/registration/URN/$urn"
 
+  implicit class StringToJson(s: String) {
+    def json: JsValue = Json.parse(s)
+  }
+
   ".checkExistingTrust" should {
 
     "return Matched" when {
@@ -291,7 +295,9 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
       "valid request to register a trust" in {
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
-        stubForPost(server, "/trusts/registration", requestBody, OK, """{"trn": "XTRN1234567"}""")
+        stubForPost(server, "/trusts/registration", requestBody, OK,
+        """{"trn": "XTRN1234567"}"""
+        )
 
         val futureResult = connector.registerTrust(registrationRequest)
 
@@ -307,13 +313,14 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
         "payload sent downstream is invalid" in {
           val requestBody = Json.stringify(Json.toJson(invalidRegistrationRequest))
-          stubForPost(server, "/trusts/registration", requestBody, BAD_REQUEST, Json.stringify(Json.parse(
+          stubForPost(server, "/trusts/registration", requestBody, BAD_REQUEST,
             s"""
                |{
                | "code": "INVALID_PAYLOAD",
                | "reason": "Submission has not passed validation. Invalid Payload."
                |}
-               |""".stripMargin)))
+               |""".stripMargin
+          )
 
           val futureResult = connector.registerTrust(invalidRegistrationRequest)
 
@@ -329,13 +336,14 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
         "trusts is already registered with provided details" in {
           val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
-          stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN, Json.stringify(Json.parse(
+          stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN,
             s"""
                |{
                | "code": "ALREADY_REGISTERED",
                | "reason": "Trust/ Estate is already registered."
                |}
-               |""".stripMargin)))
+               |""".stripMargin
+          )
 
           val futureResult = connector.registerTrust(registrationRequest)
 
@@ -350,13 +358,14 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
         "payload has UTR that does not match" in {
           val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
-          stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN, Json.stringify(Json.parse(
+          stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN,
             s"""
                |{
                | "code": "NO_MATCH",
                | "reason": "There is no match in HMRC records."
                |}
-               |""".stripMargin)))
+               |""".stripMargin
+          )
 
           val futureResult = connector.registerTrust(registrationRequest)
 
@@ -371,13 +380,14 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
         "downstream dependent service is not responding" in {
           val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
-          stubForPost(server, "/trusts/registration", requestBody, SERVICE_UNAVAILABLE, Json.stringify(Json.parse(
+          stubForPost(server, "/trusts/registration", requestBody, SERVICE_UNAVAILABLE,
             s"""
                |{
                | "code": "SERVICE_UNAVAILABLE",
                | "reason": "Dependent systems are currently not responding"
                |}
-               |""".stripMargin)))
+               |""".stripMargin
+          )
 
           val futureResult = connector.registerTrust(registrationRequest)
 
@@ -392,13 +402,14 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
         "downstream is experiencing some problem" in {
           val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
-          stubForPost(server, "/trusts/registration", requestBody, INTERNAL_SERVER_ERROR, Json.stringify(Json.parse(
+          stubForPost(server, "/trusts/registration", requestBody, INTERNAL_SERVER_ERROR,
             s"""
                |{
                | "code": "SERVER_ERROR",
                | "reason": "DES is currently experiencing problems that require live service intervention"
                |}
-               |""".stripMargin)))
+               |""".stripMargin
+          )
 
           val futureResult = connector.registerTrust(registrationRequest)
 
@@ -430,7 +441,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
         "payload sent downstream is invalid" in {
           val requestBody = Json.stringify(Json.toJson(invalidRegistrationRequest))
-          stubForPost(server, "/trusts/registration", requestBody, BAD_REQUEST, Json.stringify(Json.parse(
+          stubForPost(server, "/trusts/registration", requestBody, BAD_REQUEST,
             s"""
                |{
                |  "failures": [
@@ -440,7 +451,8 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
                |    }
                |  ]
                |}
-               |""".stripMargin)))
+               |""".stripMargin
+          )
 
           val futureResult = connector.registerTrust(invalidRegistrationRequest)
 
@@ -456,7 +468,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
         "trusts is already registered with provided details" in {
           val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
-          stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN, Json.stringify(Json.parse(
+          stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN,
             s"""
                |{
                |  "failures": [
@@ -466,8 +478,8 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
                |    }
                |  ]
                |}
-               |""".stripMargin)
-          ))
+               |""".stripMargin
+          )
 
           val futureResult = connector.registerTrust(registrationRequest)
 
@@ -482,7 +494,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
         "payload has UTR that does not match" in {
           val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
-          stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN, Json.stringify(Json.parse(
+          stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN,
             s"""
                |{
                |  "failures": [
@@ -492,8 +504,8 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
                |    }
                |  ]
                |}
-               |""".stripMargin)
-          ))
+               |""".stripMargin
+          )
 
           val futureResult = connector.registerTrust(registrationRequest)
 
@@ -508,7 +520,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
         "downstream dependent service is not responding" in {
           val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
-          stubForPost(server, "/trusts/registration", requestBody, SERVICE_UNAVAILABLE, Json.stringify(Json.parse(
+          stubForPost(server, "/trusts/registration", requestBody, SERVICE_UNAVAILABLE,
             s"""
                |{
                |  "failures": [
@@ -518,8 +530,8 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
                |    }
                |  ]
                |}
-               |""".stripMargin)
-          ))
+               |""".stripMargin
+          )
 
           val futureResult = connector.registerTrust(registrationRequest)
 
@@ -534,7 +546,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
         "downstream is experiencing some problem" in {
           val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
-          stubForPost(server, "/trusts/registration", requestBody, INTERNAL_SERVER_ERROR, Json.stringify(Json.parse(
+          stubForPost(server, "/trusts/registration", requestBody, INTERNAL_SERVER_ERROR,
             s"""
                |{
                |  "failures": [
@@ -544,8 +556,8 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
                |    }
                |  ]
                |}
-               |""".stripMargin)
-          ))
+               |""".stripMargin
+          )
 
           val futureResult = connector.registerTrust(registrationRequest)
 
@@ -582,13 +594,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
         "des has returned a 200 with trust details" in {
 
-          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+          stubForGet(server, "/trusts-store/features/5mld", OK,
             """
               |{
               | "name": "5mld",
               | "isEnabled": false
               |}""".stripMargin
-          )))
+          )
 
           val utr = "1234567890"
           stubForGet(server, get4MLDTrustEndpoint(utr), OK, get4MLDTrustResponseJson)
@@ -611,13 +623,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
         "des has returned a 200 with property or land asset with no previous value" in {
 
-          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+          stubForGet(server, "/trusts-store/features/5mld", OK,
             """
               |{
               | "name": "5mld",
               | "isEnabled": false
               |}""".stripMargin
-          )))
+          )
 
           val utr = "1234567890"
           stubForGet(server, get4MLDTrustEndpoint(utr), OK, getTrustPropertyLandNoPreviousValue)
@@ -641,19 +653,18 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
         "des has returned a 200 and indicated that the submission is still being processed" in {
 
-          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+          stubForGet(server, "/trusts-store/features/5mld", OK,
             """
               |{
               | "name": "5mld",
               | "isEnabled": false
               |}""".stripMargin
-          )))
+          )
 
           val utr = "1234567800"
           stubForGet(server, get4MLDTrustEndpoint(utr), OK, getTrustOrEstateProcessingResponseJson)
 
           val futureResult = connector.getTrustInfo(utr)
-
 
           whenReady(futureResult) { result =>
             result mustBe TrustFoundResponse(ResponseHeader("In Processing", "1"))
@@ -665,19 +676,18 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
         "json does not validate as GetData model" in {
 
-          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+          stubForGet(server, "/trusts-store/features/5mld", OK,
             """
               |{
               | "name": "5mld",
               | "isEnabled": false
               |}""".stripMargin
-          )))
+          )
 
           val utr = "123456789"
           stubForGet(server, get4MLDTrustEndpoint(utr), OK, getTrustMalformedJsonResponse)
 
           val futureResult = connector.getTrustInfo(utr)
-
 
           whenReady(futureResult) { result =>
             result mustBe NotEnoughDataResponse(Json.parse(getTrustMalformedJsonResponse), Json.parse(
@@ -693,20 +703,19 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
         "des has returned a 400" in {
 
-          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+          stubForGet(server, "/trusts-store/features/5mld", OK,
             """
               |{
               | "name": "5mld",
               | "isEnabled": false
               |}""".stripMargin
-          )))
+          )
 
           val utr = "1234567891"
           stubForGet(server, get4MLDTrustEndpoint(utr), BAD_REQUEST,
             Json.stringify(jsonResponse400))
 
           val futureResult = connector.getTrustInfo(utr)
-
 
           whenReady(futureResult) { result =>
             result mustBe BadRequestResponse
@@ -718,19 +727,18 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
         "des has returned a 204" in {
 
-          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+          stubForGet(server, "/trusts-store/features/5mld", OK,
             """
               |{
               | "name": "5mld",
               | "isEnabled": false
               |}""".stripMargin
-          )))
+          )
 
           val utr = "6666666666"
           stubForGet(server, get4MLDTrustEndpoint(utr), OK, Json.stringify(jsonResponse204))
 
           val futureResult = connector.getTrustInfo(utr)
-
 
           whenReady(futureResult) { result =>
             result mustBe NotEnoughDataResponse(jsonResponse204, Json.parse(
@@ -745,13 +753,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
         "des has returned a 404" in {
 
-          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+          stubForGet(server, "/trusts-store/features/5mld", OK,
             """
               |{
               | "name": "5mld",
               | "isEnabled": false
               |}""".stripMargin
-          )))
+          )
 
           val utr = "1234567892"
           stubForGet(server, get4MLDTrustEndpoint(utr), NOT_FOUND, "")
@@ -768,13 +776,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
         "des has returned a 500 with the code SERVER_ERROR" in {
 
-          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+          stubForGet(server, "/trusts-store/features/5mld", OK,
             """
               |{
               | "name": "5mld",
               | "isEnabled": false
               |}""".stripMargin
-          )))
+          )
 
           val utr = "1234567893"
           stubForGet(server, get4MLDTrustEndpoint(utr), INTERNAL_SERVER_ERROR, "")
@@ -791,13 +799,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
         "des has returned a 503 with the code SERVICE_UNAVAILABLE" in {
 
-          stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+          stubForGet(server, "/trusts-store/features/5mld", OK,
             """
               |{
               | "name": "5mld",
               | "isEnabled": false
               |}""".stripMargin
-          )))
+          )
 
           val utr = "1234567894"
           stubForGet(server, get4MLDTrustEndpoint(utr), SERVICE_UNAVAILABLE, "")
@@ -820,13 +828,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           "des has returned a 200 with trust details" in {
 
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            stubForGet(server, "/trusts-store/features/5mld", OK,
               """
                 |{
                 | "name": "5mld",
                 | "isEnabled": true
                 |}""".stripMargin
-            )))
+            )
 
             val utr = "1234567890"
             stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, get4MLDTrustResponseJson)
@@ -849,19 +857,18 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           "des has returned a 200 with property or land asset with no previous value" in {
 
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            stubForGet(server, "/trusts-store/features/5mld", OK,
               """
                 |{
                 | "name": "5mld",
                 | "isEnabled": true
                 |}""".stripMargin
-            )))
+            )
 
             val utr = "1234567890"
             stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, getTrustPropertyLandNoPreviousValue)
 
             val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(utr)
-
 
             whenReady(futureResult) { result =>
 
@@ -879,19 +886,18 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           "des has returned a 200 and indicated that the submission is still being processed" in {
 
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            stubForGet(server, "/trusts-store/features/5mld", OK,
               """
                 |{
                 | "name": "5mld",
                 | "isEnabled": true
                 |}""".stripMargin
-            )))
+            )
 
             val utr = "1234567800"
             stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, getTrustOrEstateProcessingResponseJson)
 
             val futureResult = connector.getTrustInfo(utr)
-
 
             whenReady(futureResult) { result =>
               result mustBe TrustFoundResponse(ResponseHeader("In Processing", "1"))
@@ -903,13 +909,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           "json does not validate as GetData model" in {
 
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            stubForGet(server, "/trusts-store/features/5mld", OK,
               """
                 |{
                 | "name": "5mld",
                 | "isEnabled": true
                 |}""".stripMargin
-            )))
+            )
 
             val utr = "1234567890"
             stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, getTrustMalformedJsonResponse)
@@ -930,13 +936,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           "des has returned a 400" in {
 
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            stubForGet(server, "/trusts-store/features/5mld", OK,
               """
                 |{
                 | "name": "5mld",
                 | "isEnabled": true
                 |}""".stripMargin
-            )))
+            )
 
             val utr = "1234567891"
             stubForGet(server, get5MLDTrustUTREndpoint(utr), BAD_REQUEST,
@@ -954,19 +960,18 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           "des has returned a 204" in {
 
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            stubForGet(server, "/trusts-store/features/5mld", OK,
               """
                 |{
                 | "name": "5mld",
                 | "isEnabled": true
                 |}""".stripMargin
-            )))
+            )
 
             val utr = "6666666666"
             stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, Json.stringify(jsonResponse204))
 
             val futureResult = connector.getTrustInfo(utr)
-
 
             whenReady(futureResult) { result =>
               result mustBe NotEnoughDataResponse(jsonResponse204, Json.parse(
@@ -981,13 +986,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           "des has returned a 404" in {
 
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            stubForGet(server, "/trusts-store/features/5mld", OK,
               """
                 |{
                 | "name": "5mld",
                 | "isEnabled": true
                 |}""".stripMargin
-            )))
+            )
 
             val utr = "1234567892"
             stubForGet(server, get5MLDTrustUTREndpoint(utr), NOT_FOUND, "")
@@ -1004,13 +1009,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           "des has returned a 500 with the code SERVER_ERROR" in {
 
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            stubForGet(server, "/trusts-store/features/5mld", OK,
               """
                 |{
                 | "name": "5mld",
                 | "isEnabled": true
                 |}""".stripMargin
-            )))
+            )
 
             val utr = "1234567893"
             stubForGet(server, get5MLDTrustUTREndpoint(utr), INTERNAL_SERVER_ERROR, "")
@@ -1027,13 +1032,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           "des has returned a 503 with the code SERVICE_UNAVAILABLE" in {
 
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            stubForGet(server, "/trusts-store/features/5mld", OK,
               """
                 |{
                 | "name": "5mld",
                 | "isEnabled": true
                 |}""".stripMargin
-            )))
+            )
 
             val utr = "1234567894"
             stubForGet(server, get5MLDTrustUTREndpoint(utr), SERVICE_UNAVAILABLE, "")
@@ -1053,13 +1058,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           "des has returned a 200 with trust details" in {
 
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            stubForGet(server, "/trusts-store/features/5mld", OK,
               """
                 |{
                 | "name": "5mld",
                 | "isEnabled": true
                 |}""".stripMargin
-            )))
+            )
 
             val urn = "1234567890ADCEF"
             stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, NonTaxable5MLDFixtures.DES.get5MLDTrustNonTaxableResponse)
@@ -1085,13 +1090,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           "des has returned a 200 with property or land asset with no previous value" in {
 
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            stubForGet(server, "/trusts-store/features/5mld", OK,
               """
                 |{
                 | "name": "5mld",
                 | "isEnabled": true
                 |}""".stripMargin
-            )))
+            )
 
             val urn = "1234567890ADCEF"
             stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, getTrustPropertyLandNoPreviousValue)
@@ -1114,13 +1119,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           "des has returned a 200 and indicated that the submission is still being processed" in {
 
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            stubForGet(server, "/trusts-store/features/5mld", OK,
               """
                 |{
                 | "name": "5mld",
                 | "isEnabled": true
                 |}""".stripMargin
-            )))
+            )
 
             val urn = "1234567890ADCEF"
             stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, getTrustOrEstateProcessingResponseJson)
@@ -1137,13 +1142,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           "json does not validate as GetData model" in {
 
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            stubForGet(server, "/trusts-store/features/5mld", OK,
               """
                 |{
                 | "name": "5mld",
                 | "isEnabled": true
                 |}""".stripMargin
-            )))
+            )
 
             val urn = "1234567890ADCEF"
             stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, getTrustMalformedJsonResponse)
@@ -1164,13 +1169,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           "des has returned a 400" in {
 
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            stubForGet(server, "/trusts-store/features/5mld", OK,
               """
                 |{
                 | "name": "5mld",
                 | "isEnabled": true
                 |}""".stripMargin
-            )))
+            )
 
             val urn = "1234567890ADCEF"
             stubForGet(server, get5MLDTrustURNEndpoint(urn), BAD_REQUEST,
@@ -1188,13 +1193,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           "des has returned a 204" in {
 
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            stubForGet(server, "/trusts-store/features/5mld", OK,
               """
                 |{
                 | "name": "5mld",
                 | "isEnabled": true
                 |}""".stripMargin
-            )))
+            )
 
             val urn = "1234567890ADCEF"
             stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, Json.stringify(jsonResponse204))
@@ -1214,13 +1219,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           "des has returned a 404" in {
 
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            stubForGet(server, "/trusts-store/features/5mld", OK,
               """
                 |{
                 | "name": "5mld",
                 | "isEnabled": true
                 |}""".stripMargin
-            )))
+            )
 
             val urn = "1234567890ADCEF"
             stubForGet(server, get5MLDTrustURNEndpoint(urn), NOT_FOUND, "")
@@ -1237,13 +1242,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           "des has returned a 500 with the code SERVER_ERROR" in {
 
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            stubForGet(server, "/trusts-store/features/5mld", OK,
               """
                 |{
                 | "name": "5mld",
                 | "isEnabled": true
                 |}""".stripMargin
-            )))
+            )
 
             val urn = "1234567890ADCEF"
             stubForGet(server, get5MLDTrustURNEndpoint(urn), INTERNAL_SERVER_ERROR, "")
@@ -1260,13 +1265,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           "des has returned a 503 with the code SERVICE_UNAVAILABLE" in {
 
-            stubForGet(server, "/trusts-store/features/5mld", OK, Json.stringify(Json.parse(
+            stubForGet(server, "/trusts-store/features/5mld", OK,
               """
                 |{
                 | "name": "5mld",
                 | "isEnabled": true
                 |}""".stripMargin
-            )))
+            )
 
             val urn = "1234567890ADCEF"
             stubForGet(server, get5MLDTrustURNEndpoint(urn), SERVICE_UNAVAILABLE, "")
@@ -1292,7 +1297,9 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
       "des has returned a 200 with a trn" in {
 
         val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
-        stubForPost(server, url, requestBody, OK, """{"tvn": "XXTVN1234567890"}""")
+        stubForPost(server, url, requestBody, OK,
+          s"""{"tvn": "XXTVN1234567890"}"""
+        )
 
         val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest))
 
@@ -1326,7 +1333,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
         val variation = invalidTrustVariationsRequest.validate[TrustVariation].get
 
         val requestBody = Json.stringify(Json.toJson(variation))
-        stubForPost(server, url, requestBody, BAD_REQUEST, Json.stringify(jsonResponse400))
+        stubForPost(server, url, requestBody, BAD_REQUEST,
+          s"""
+             |{
+             | "code": "INVALID_PAYLOAD",
+             | "reason": "Submission has not passed validation. Invalid Payload."
+             |}""".stripMargin
+        )
 
         val futureResult = connector.trustVariation(Json.toJson(variation))
 
@@ -1342,7 +1355,14 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
         val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
 
-        stubForPost(server, url, requestBody, CONFLICT, Json.stringify(jsonResponse409DuplicateCorrelation))
+        stubForPost(server, url, requestBody, CONFLICT,
+          s"""
+             |{
+             | "code": "DUPLICATE_SUBMISSION",
+             | "reason": "Duplicate Correlation Id was submitted."
+             |}""".stripMargin
+        )
+
         val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest))
 
         whenReady(futureResult.failed) {
@@ -1355,7 +1375,14 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
       "trusts provides an invalid Correlation ID." in {
         val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
 
-        stubForPost(server, url, requestBody, BAD_REQUEST, Json.stringify(jsonResponse400CorrelationId))
+        stubForPost(server, url, requestBody, BAD_REQUEST,
+          s"""
+             |{
+             | "code": "INVALID_CORRELATIONID",
+             | "reason": "Submission has not passed validation. Invalid CorrelationId."
+             |}""".stripMargin
+        )
+
         val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest))
 
         whenReady(futureResult.failed) {
@@ -1368,7 +1395,13 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
       "des dependent service is not responding " in {
         val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
 
-        stubForPost(server, url, requestBody, SERVICE_UNAVAILABLE, Json.stringify(jsonResponse503))
+        stubForPost(server, url, requestBody, SERVICE_UNAVAILABLE,
+          s"""
+             |{
+             | "code": "SERVICE_UNAVAILABLE",
+             | "reason": "Dependent systems are currently not responding"
+             |}""".stripMargin
+        )
 
         val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest))
 
@@ -1382,10 +1415,15 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
       "des is experiencing some problem." in {
         val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
 
-        stubForPost(server, url, requestBody, INTERNAL_SERVER_ERROR, Json.stringify(jsonResponse500))
+        stubForPost(server, url, requestBody, INTERNAL_SERVER_ERROR,
+          s"""
+             |{
+             | "code": "SERVER_ERROR",
+             | "reason": "DES is currently experiencing problems that require live service intervention"
+             |}""".stripMargin
+        )
 
         val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest))
-
 
         whenReady(futureResult.failed) {
           result => result mustBe an[InternalServerErrorException]
