@@ -41,10 +41,6 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
   def get5MLDTrustUTREndpoint(utr: String) = s"/trusts/registration/UTR/$utr"
   def get5MLDTrustURNEndpoint(urn: String) = s"/trusts/registration/URN/$urn"
 
-  implicit class StringToJson(s: String) {
-    def json: JsValue = Json.parse(s)
-  }
-
   ".checkExistingTrust" should {
 
     "return Matched" when {
