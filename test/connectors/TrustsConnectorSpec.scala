@@ -288,7 +288,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
   ".registerTrust" should {
 
     "return TRN" when {
-      "valid request to des register trust." in {
+      "valid request to register a trust" in {
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
         stubForPost(server, "/trusts/registration", requestBody, OK, """{"trn": "XTRN1234567"}""")
@@ -298,90 +298,280 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
         whenReady(futureResult) {
           result => result mustBe RegistrationTrnResponse("XTRN1234567")
         }
-
       }
     }
 
-    "return BadRequestException" when {
-      "payload sent to des is invalid" in {
-        val requestBody = Json.stringify(Json.toJson(invalidRegistrationRequest))
-        stubForPost(server, "/trusts/registration", requestBody, BAD_REQUEST, Json.stringify(jsonResponse400))
+    "4MLD" when {
 
-        val futureResult = connector.registerTrust(invalidRegistrationRequest)
+      "return BadRequestException" when {
 
-        whenReady(futureResult.failed) {
-          result => result mustBe BadRequestException
-        }
+        "payload sent downstream is invalid" in {
+          val requestBody = Json.stringify(Json.toJson(invalidRegistrationRequest))
+          stubForPost(server, "/trusts/registration", requestBody, BAD_REQUEST, Json.stringify(Json.parse(
+            s"""
+               |{
+               | "code": "INVALID_PAYLOAD",
+               | "reason": "Submission has not passed validation. Invalid Payload."
+               |}
+               |""".stripMargin)))
 
-      }
-    }
+          val futureResult = connector.registerTrust(invalidRegistrationRequest)
 
-    "return AlreadyRegisteredException" when {
-      "trusts is already registered with provided details" in {
-        val requestBody = Json.stringify(Json.toJson(registrationRequest))
+          whenReady(futureResult.failed) {
+            result => result mustBe BadRequestException
+          }
 
-        stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN, Json.stringify(jsonResponseAlreadyRegistered))
-        val futureResult = connector.registerTrust(registrationRequest)
-
-        whenReady(futureResult.failed) {
-          result => result mustBe AlreadyRegisteredException
         }
       }
-    }
 
-    "return NoMatchException" when {
-      "trusts is already registered with provided details" in {
-        val requestBody = Json.stringify(Json.toJson(registrationRequest))
+      "return AlreadyRegisteredException" when {
 
-        stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN, Json.stringify(jsonResponse403NoMatch))
-        val futureResult = connector.registerTrust(registrationRequest)
+        "trusts is already registered with provided details" in {
+          val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
-        whenReady(futureResult.failed) {
-          result => result mustBe NoMatchException
+          stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN, Json.stringify(Json.parse(
+            s"""
+               |{
+               | "code": "ALREADY_REGISTERED",
+               | "reason": "Trust/ Estate is already registered."
+               |}
+               |""".stripMargin)))
+
+          val futureResult = connector.registerTrust(registrationRequest)
+
+          whenReady(futureResult.failed) {
+            result => result mustBe AlreadyRegisteredException
+          }
+        }
+      }
+
+      "return NoMatchException" when {
+
+        "payload has UTR that does not match" in {
+          val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+          stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN, Json.stringify(Json.parse(
+            s"""
+               |{
+               | "code": "NO_MATCH",
+               | "reason": "There is no match in HMRC records."
+               |}
+               |""".stripMargin)))
+
+          val futureResult = connector.registerTrust(registrationRequest)
+
+          whenReady(futureResult.failed) {
+            result => result mustBe NoMatchException
+          }
+        }
+      }
+
+      "return ServiceUnavailableException" when {
+
+        "downstream dependent service is not responding" in {
+          val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+          stubForPost(server, "/trusts/registration", requestBody, SERVICE_UNAVAILABLE, Json.stringify(Json.parse(
+            s"""
+               |{
+               | "code": "SERVICE_UNAVAILABLE",
+               | "reason": "Dependent systems are currently not responding"
+               |}
+               |""".stripMargin)))
+
+          val futureResult = connector.registerTrust(registrationRequest)
+
+          whenReady(futureResult.failed) {
+            result => result mustBe an[ServiceNotAvailableException]
+          }
+        }
+      }
+
+      "return InternalServerErrorException" when {
+
+        "downstream is experiencing some problem" in {
+          val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+          stubForPost(server, "/trusts/registration", requestBody, INTERNAL_SERVER_ERROR, Json.stringify(Json.parse(
+            s"""
+               |{
+               | "code": "SERVER_ERROR",
+               | "reason": "DES is currently experiencing problems that require live service intervention"
+               |}
+               |""".stripMargin)))
+
+          val futureResult = connector.registerTrust(registrationRequest)
+
+
+          whenReady(futureResult.failed) {
+            result => result mustBe an[InternalServerErrorException]
+          }
+        }
+      }
+
+      "return InternalServerErrorException" when {
+
+        "des is returning 403 without ALREADY REGISTERED code" in {
+          val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+          stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN, "{}")
+          val futureResult = connector.registerTrust(registrationRequest)
+
+          whenReady(futureResult.failed) {
+            result => result mustBe an[InternalServerErrorException]
+          }
         }
       }
     }
 
-    "return ServiceUnavailableException" when {
-      "des dependent service is not responding" in {
-        val requestBody = Json.stringify(Json.toJson(registrationRequest))
-        stubForPost(server, "/trusts/registration", requestBody, SERVICE_UNAVAILABLE, Json.stringify(jsonResponse503))
-        val futureResult = connector.registerTrust(registrationRequest)
+    "5MLD" when {
 
-        whenReady(futureResult.failed) {
-          result => result mustBe an[ServiceNotAvailableException]
+      "return BadRequestException" when {
+
+        "payload sent downstream is invalid" in {
+          val requestBody = Json.stringify(Json.toJson(invalidRegistrationRequest))
+          stubForPost(server, "/trusts/registration", requestBody, BAD_REQUEST, Json.stringify(Json.parse(
+            s"""
+               |{
+               |  "failures": [
+               |    {
+               |      "code": "INVALID_PAYLOAD",
+               |      "reason": "Submission has not passed validation. Invalid payload."
+               |    }
+               |  ]
+               |}
+               |""".stripMargin)))
+
+          val futureResult = connector.registerTrust(invalidRegistrationRequest)
+
+          whenReady(futureResult.failed) {
+            result => result mustBe BadRequestException
+          }
+
+        }
+      }
+
+      "return AlreadyRegisteredException" when {
+
+        "trusts is already registered with provided details" in {
+          val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+          stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN, Json.stringify(Json.parse(
+            s"""
+               |{
+               |  "failures": [
+               |    {
+               |      "code": "ALREADY_REGISTERED",
+               |      "reason": "Trust/ Estate is already registered."
+               |    }
+               |  ]
+               |}
+               |""".stripMargin)
+          ))
+
+          val futureResult = connector.registerTrust(registrationRequest)
+
+          whenReady(futureResult.failed) {
+            result => result mustBe AlreadyRegisteredException
+          }
+        }
+      }
+
+      "return NoMatchException" when {
+
+        "payload has UTR that does not match" in {
+          val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+          stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN, Json.stringify(Json.parse(
+            s"""
+               |{
+               |  "failures": [
+               |    {
+               |      "code": "NO_MATCH",
+               |      "reason": "There is no match in HMRC records."
+               |    }
+               |  ]
+               |}
+               |""".stripMargin)
+          ))
+
+          val futureResult = connector.registerTrust(registrationRequest)
+
+          whenReady(futureResult.failed) {
+            result => result mustBe NoMatchException
+          }
+        }
+      }
+
+      "return ServiceUnavailableException" when {
+
+        "downstream dependent service is not responding" in {
+          val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+          stubForPost(server, "/trusts/registration", requestBody, SERVICE_UNAVAILABLE, Json.stringify(Json.parse(
+            s"""
+               |{
+               |  "failures": [
+               |    {
+               |      "code": "SERVICE_UNAVAILABLE",
+               |      "reason": "Dependent systems are currently not responding."
+               |    }
+               |  ]
+               |}
+               |""".stripMargin)
+          ))
+
+          val futureResult = connector.registerTrust(registrationRequest)
+
+          whenReady(futureResult.failed) {
+            result => result mustBe an[ServiceNotAvailableException]
+          }
+        }
+      }
+
+      "return InternalServerErrorException" when {
+
+        "downstream is experiencing some problem" in {
+          val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+          stubForPost(server, "/trusts/registration", requestBody, INTERNAL_SERVER_ERROR, Json.stringify(Json.parse(
+            s"""
+               |{
+               |  "failures": [
+               |    {
+               |      "code": "SERVER_ERROR",
+               |      "reason": "IF is currently experiencing problems that require live service intervention."
+               |    }
+               |  ]
+               |}
+               |""".stripMargin)
+          ))
+
+          val futureResult = connector.registerTrust(registrationRequest)
+
+
+          whenReady(futureResult.failed) {
+            result => result mustBe an[InternalServerErrorException]
+          }
+        }
+      }
+
+      "return InternalServerErrorException" when {
+
+        "downstream is returning 403 without ALREADY REGISTERED code" in {
+          val requestBody = Json.stringify(Json.toJson(registrationRequest))
+
+          stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN, "{}")
+          val futureResult = connector.registerTrust(registrationRequest)
+
+
+          whenReady(futureResult.failed) {
+            result => result mustBe an[InternalServerErrorException]
+          }
         }
       }
     }
 
-    "return InternalServerErrorException" when {
-      "des is experiencing some problem" in {
-        val requestBody = Json.stringify(Json.toJson(registrationRequest))
-
-        stubForPost(server, "/trusts/registration", requestBody, INTERNAL_SERVER_ERROR, Json.stringify(jsonResponse500))
-
-        val futureResult = connector.registerTrust(registrationRequest)
-
-
-        whenReady(futureResult.failed) {
-          result => result mustBe an[InternalServerErrorException]
-        }
-      }
-    }
-
-    "return InternalServerErrorException" when {
-      "des is returning 403 without ALREADY REGISTERED code" in {
-        val requestBody = Json.stringify(Json.toJson(registrationRequest))
-
-        stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN, "{}")
-        val futureResult = connector.registerTrust(registrationRequest)
-
-
-        whenReady(futureResult.failed) {
-          result => result mustBe an[InternalServerErrorException]
-        }
-      }
-    }
   }
 
   ".getTrustInfoJson" when {
