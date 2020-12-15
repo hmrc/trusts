@@ -50,11 +50,11 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
   }
 
   val jsonResponse400: JsValue = Json.parse(
-    s"""
-       |{
-       | "code": "INVALID_PAYLOAD",
-       | "reason": "Submission has not passed validation. Invalid Payload."
-       |}""".stripMargin)
+      s"""
+         |{
+         | "code": "INVALID_PAYLOAD",
+         | "reason": "Submission has not passed validation. Invalid Payload."
+         |}""".stripMargin)
 
   val jsonResponse4005mld: JsValue = Json.parse(
     s"""
