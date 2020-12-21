@@ -30,4 +30,6 @@ case class NotEnoughDataResponse(json: JsValue, errors: JsValue) extends TrustEr
 
 case object ServiceUnavailableResponse extends TrustErrorResponse
 
+case object ClosedRequestResponse extends TrustErrorResponse
+
 case class TransformationErrorResponse(errors: String) extends TrustErrorResponse

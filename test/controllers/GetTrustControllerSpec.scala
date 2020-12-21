@@ -18,6 +18,7 @@ package controllers
 
 import config.AppConfig
 import controllers.actions.{FakeIdentifierAction, ValidateIdentifierActionProvider}
+import models.get_trust.GetTrustResponse.CLOSED_REQUEST_STATUS
 import models.get_trust._
 import org.mockito.Matchers.{any, eq => mockEq}
 import org.mockito.Mockito.{reset, times, verify, when}
@@ -30,7 +31,7 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
-import services.{AuditService, TrustsService, TransformationService}
+import services.{AuditService, TransformationService, TrustsService}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import utils.{JsonFixtures, NonTaxable5MLDFixtures, Taxable5MLDFixtures}
@@ -264,7 +265,20 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
           whenReady(result) { _ =>
             verify(mockedAuditService).auditErrorResponse(mockEq("GetTrust"), any[JsValue], any[String], any[String])(any())
-            status(result) mustBe INTERNAL_SERVER_ERROR
+            status(result) mustBe SERVICE_UNAVAILABLE
+          }
+        }
+
+        "the get endpoint returns a ClosedRequestResponse" in {
+
+          when(trustsService.getTrustInfo(any(), any()))
+            .thenReturn(Future.successful(ClosedRequestResponse))
+
+          val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
+
+          whenReady(result) { _ =>
+            verify(mockedAuditService).auditErrorResponse(mockEq("GetTrust"), any[JsValue], any[String], any[String])(any())
+            status(result) mustBe CLOSED_REQUEST_STATUS
           }
         }
       }
@@ -368,7 +382,20 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
           whenReady(result) { _ =>
             verify(mockedAuditService).auditErrorResponse(mockEq("GetTrust"), any[JsValue], any[String], any[String])(any())
-            status(result) mustBe INTERNAL_SERVER_ERROR
+            status(result) mustBe SERVICE_UNAVAILABLE
+          }
+        }
+
+        "the get endpoint returns a ClosedRequestResponse" in {
+
+          when(trustsService.getTrustInfo(any(), any()))
+            .thenReturn(Future.successful(ClosedRequestResponse))
+
+          val result = getTrustController.get(urn).apply(FakeRequest(GET, s"/trusts/$urn"))
+
+          whenReady(result) { _ =>
+            verify(mockedAuditService).auditErrorResponse(mockEq("GetTrust"), any[JsValue], any[String], any[String])(any())
+            status(result) mustBe CLOSED_REQUEST_STATUS
           }
         }
       }
