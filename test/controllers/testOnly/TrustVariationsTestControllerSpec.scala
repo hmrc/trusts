@@ -168,6 +168,7 @@ class TrustVariationsTestControllerSpec extends BaseSpec with BeforeAndAfter wit
         (contentAsJson(result) \ "tvn").as[String] mustBe tvnResponse
 
       }
+
       "individual user called the register endpoint with a valid 5mld json payload in 5mld mode" in {
 
         when(mockTrustsStoreService.is5mldEnabled()(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(true))
@@ -176,6 +177,34 @@ class TrustVariationsTestControllerSpec extends BaseSpec with BeforeAndAfter wit
           .thenReturn(Future.successful(VariationResponse(tvnResponse)))
 
         val requestPayLoad = Json.parse(validTrustVariations5mldRequestJson)
+
+        val SUT = trustVariationsController
+
+        val result = SUT.trustVariation()(
+          postRequestWithPayload(requestPayLoad, withDraftId = false)
+            .withHeaders(Headers.CORRELATION_HEADER -> UUID.randomUUID().toString)
+        )
+
+        status(result) mustBe OK
+
+        verify(mockAuditService).audit(
+          Meq(trustVariationsAuditEvent),
+          any(),
+          Meq("id"),
+          Meq(Json.obj("tvn" -> tvnResponse))
+        )(any())
+
+        (contentAsJson(result) \ "tvn").as[String] mustBe tvnResponse
+      }
+
+      "valid 5mld json payload with tax years in 5mld mode" in {
+
+        when(mockTrustsStoreService.is5mldEnabled()(any[HeaderCarrier], any[ExecutionContext])).thenReturn(Future.successful(true))
+
+        when(mockTrustsService.trustVariation(any[JsValue]))
+          .thenReturn(Future.successful(VariationResponse(tvnResponse)))
+
+        val requestPayLoad = Json.parse(validTrustVariationsTaxYears5mldRequestJson)
 
         val SUT = trustVariationsController
 
