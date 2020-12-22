@@ -338,16 +338,22 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
       }
   }
 
-  def getCorrespondenceAddress(draftId: String) : Action[AnyContent] = identify.async {
+  def getCorrespondenceAddress(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
-      val path = JsPath \ "registration" \ "correspondence/address"
+      val path: JsPath = JsPath \ "registration" \ "correspondence/address"
       getAtPath[AddressType](draftId, path)
   }
 
-  def getAgentAddress(draftId: String) : Action[AnyContent] = identify.async {
+  def getAgentAddress(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
-      val path = JsPath \ "registration" \ "agentDetails/agentAddress"
+      val path: JsPath = JsPath \ "registration" \ "agentDetails" \ "agentAddress"
       getAtPath[AddressType](draftId, path)
+  }
+
+  def getClientReference(draftId: String): Action[AnyContent] = identify.async {
+    implicit request =>
+      val path: JsPath = JsPath \ "registration" \ "agentDetails" \ "clientReference"
+      getAtPath[String](draftId, path)
   }
 
   private def getAtPath[T](draftId: String, path: JsPath)

@@ -70,7 +70,7 @@
 			"additionalProperties": false
 		},
 		"trust": {
-					"$ref": "#/definitions/trustType"
+			"$ref": "#/definitions/trustType"
 		},
 		"agentDetails": {
 			"$ref": "#/definitions/agentDetailsType"
