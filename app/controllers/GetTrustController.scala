@@ -19,12 +19,13 @@ package controllers
 import controllers.actions.{IdentifierAction, ValidateIdentifierActionProvider}
 import javax.inject.{Inject, Singleton}
 import models.auditing.TrustAuditing
-import models.get_trust.{BadRequestResponse, _}
+import models.get_trust.GetTrustResponse.CLOSED_REQUEST_STATUS
+import models.get_trust.{BadRequestResponse, ResourceNotFoundResponse, _}
 import models.requests.IdentifierRequest
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
-import services.{AuditService, TrustsService, TransformationService}
+import services.{AuditService, TransformationService, TrustsService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -43,11 +44,14 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     BadRequestResponse -> "Bad Request received from DES.",
     ResourceNotFoundResponse -> "Not Found received from DES.",
     InternalServerErrorResponse -> "Internal Server Error received from DES.",
-    ServiceUnavailableResponse -> "Service Unavailable received from DES."
+    ServiceUnavailableResponse -> "Service Unavailable received from DES.",
+    ClosedRequestResponse -> "Closed Request response received from DES."
   )
 
   val errorResponses: Map[GetTrustResponse, Result] = Map (
-    ResourceNotFoundResponse -> NotFound
+    ResourceNotFoundResponse -> NotFound,
+    ClosedRequestResponse -> Status(CLOSED_REQUEST_STATUS),
+    ServiceUnavailableResponse -> ServiceUnavailable
   )
 
   def getFromEtmp(identifier: String): Action[AnyContent] =

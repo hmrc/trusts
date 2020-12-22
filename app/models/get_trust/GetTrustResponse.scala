@@ -58,6 +58,8 @@ object GetTrustSuccessResponse {
 
 object GetTrustResponse extends Logging {
 
+  final val CLOSED_REQUEST_STATUS = 499
+
   implicit def httpReads(identifier: String): HttpReads[GetTrustResponse] = (_: String, _: String, response: HttpResponse) => {
     response.status match {
       case OK =>
@@ -74,6 +76,10 @@ object GetTrustResponse extends Logging {
         logger.warn(s"[UTR/URN: $identifier]" +
           s" service is unavailable, unable to get trust")
         ServiceUnavailableResponse
+      case CLOSED_REQUEST_STATUS =>
+        logger.warn(s"[UTR/URN: $identifier]" +
+          s" service is unavailable, server closed the request")
+        ClosedRequestResponse
       case status =>
         logger.error(s"[UTR/URN: $identifier]" +
           s" error occurred when getting trust, status: $status")
