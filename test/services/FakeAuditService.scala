@@ -16,13 +16,13 @@
 
 package services
 
-import javax.inject.Inject
+import models.Registration
+import models.registration.RegistrationResponse
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import config.AppConfig
-import models.Registration
-import models.registration.RegistrationResponse
+
+import javax.inject.Inject
 
 class FakeAuditService @Inject()(auditConnector: AuditConnector)
   extends AuditService(auditConnector) {
