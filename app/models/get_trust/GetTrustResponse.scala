@@ -58,7 +58,7 @@ object GetTrustSuccessResponse {
 
 object GetTrustResponse extends Logging {
 
-  val CLOSED_REQUEST_STATUS = 499
+  final val CLOSED_REQUEST_STATUS = 499
 
   implicit def httpReads(identifier: String): HttpReads[GetTrustResponse] = (_: String, _: String, response: HttpResponse) => {
     response.status match {
