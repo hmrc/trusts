@@ -16,20 +16,19 @@
 
 package controllers
 
-import java.time.LocalDate
-
 import controllers.actions.IdentifierAction
-import javax.inject.Inject
 import models._
 import models.registration.RegistrationSubmission.{AnswerSection, MappedPiece}
 import models.registration.{RegistrationSubmission, RegistrationSubmissionDraft, RegistrationSubmissionDraftData}
 import models.requests.IdentifierRequest
 import play.api.Logging
 import play.api.libs.json._
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.RegistrationSubmissionRepository
 import services.LocalDateTimeService
 
+import java.time.LocalDate
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -303,24 +302,8 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
 
   def getLeadTrustee(draftId: String) : Action[AnyContent] = identify.async {
     implicit request =>
-      submissionRepository.getDraft(draftId, request.identifier).map {
-        case Some(draft) =>
-          val path = JsPath \ "registration" \ "trust/entities/leadTrustees"
-          draft.draftData.transform(path.json.pick).map(_.as[LeadTrusteeType]) match {
-            case JsSuccess(leadTrusteeType, _) =>
-              logger.info(s"[Session ID: ${request.sessionId}]" +
-                s" found lead trustee")
-              Ok(Json.toJson(leadTrusteeType)(LeadTrusteeType.writes))
-            case _ : JsError =>
-              logger.info(s"[Session ID: ${request.sessionId}]" +
-                s" no lead trustee")
-              NotFound
-          }
-        case None =>
-          logger.info(s"[Session ID: ${request.sessionId}]" +
-            s" no draft, cannot return lead trustee")
-          NotFound
-      }
+      val path = JsPath \ "registration" \ "trust/entities/leadTrustees"
+      getAtPath[LeadTrusteeType](draftId, path)(request, LeadTrusteeType.leadTrusteeTypeReads, LeadTrusteeType.writes)
   }
 
   def reset(draftId: String, section: String, mappedDataKey : String) : Action[AnyContent] = identify.async {
@@ -355,26 +338,40 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
       }
   }
 
-  def getCorrespondenceAddress(draftId: String) : Action[AnyContent] = identify.async {
+  def getCorrespondenceAddress(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
-      submissionRepository.getDraft(draftId, request.identifier).map {
-        case Some(draft) =>
-          val path = JsPath \ "registration" \ "correspondence/address"
-          draft.draftData.transform(path.json.pick).map(_.as[AddressType]) match {
-            case JsSuccess(leadTrusteeType, _) =>
-              logger.info(s"[Session ID: ${request.sessionId}]" +
-                s" found correspondence address")
-              Ok(Json.toJson(leadTrusteeType))
-            case _ : JsError =>
-              logger.info(s"[Session ID: ${request.sessionId}]" +
-                s" no correspondence address")
-              NotFound
-          }
-        case None =>
-          logger.info(s"[Session ID: ${request.sessionId}]" +
-            s" no draft, cannot return correspondence address")
-          NotFound
-      }
+      val path: JsPath = JsPath \ "registration" \ "correspondence/address"
+      getAtPath[AddressType](draftId, path)
+  }
+
+  def getAgentAddress(draftId: String): Action[AnyContent] = identify.async {
+    implicit request =>
+      val path: JsPath = JsPath \ "registration" \ "agentDetails" \ "agentAddress"
+      getAtPath[AddressType](draftId, path)
+  }
+
+  def getClientReference(draftId: String): Action[AnyContent] = identify.async {
+    implicit request =>
+      val path: JsPath = JsPath \ "registration" \ "agentDetails" \ "clientReference"
+      getAtPath[String](draftId, path)
+  }
+
+  private def getAtPath[T](draftId: String, path: JsPath)
+                          (implicit request: IdentifierRequest[AnyContent], rds: Reads[T], wts: Writes[T]): Future[Result] = {
+    submissionRepository.getDraft(draftId, request.identifier).map {
+      case Some(draft) =>
+        draft.draftData.transform(path.json.pick).map(_.as[T]) match {
+          case JsSuccess(value, _) =>
+            logger.info(s"[Session ID: ${request.sessionId}] value found at $path")
+            Ok(Json.toJson(value))
+          case _ : JsError =>
+            logger.info(s"[Session ID: ${request.sessionId}] value not found at $path")
+            NotFound
+        }
+      case None =>
+        logger.info(s"[Session ID: ${request.sessionId}] no draft, cannot return value at $path")
+        NotFound
+    }
   }
 
   def removeRoleInCompany(draftId: String): Action[AnyContent] = identify.async {

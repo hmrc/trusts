@@ -16,8 +16,9 @@
 
 package controllers
 
-import java.time.LocalDateTime
-
+import controllers.actions.FakeIdentifierAction
+import models._
+import models.registration.{RegistrationSubmission, RegistrationSubmissionDraft}
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import org.scalatest._
@@ -28,14 +29,12 @@ import play.api.libs.json.{JsNull, JsString, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
-import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
-import controllers.actions.FakeIdentifierAction
-import models._
-import models.registration.{RegistrationSubmission, RegistrationSubmissionDraft}
 import repositories.RegistrationSubmissionRepository
 import services.LocalDateTimeService
+import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import utils.JsonFixtures
 
+import java.time.LocalDateTime
 import scala.concurrent.Future
 
 class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
@@ -178,6 +177,35 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       |            "line2": "Address line2",
       |            "postCode": "NE1 1EN",
       |            "country": "GB"
+      |          }
+      |        }
+      |    },
+      |    "inProgress" : true
+      |}
+      |""".stripMargin).as[RegistrationSubmissionDraft]
+
+  private lazy val mockSubmissionDraftAgentDetails = Json.parse(
+    """
+      |{
+      |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+      |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
+      |    "createdAt" : { "$date" : 1597323808000 },
+      |    "draftData" : {
+      |        "main" : {
+      |            "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+      |            "progress" : "InProgress",
+      |            "createdAt" : "2020-08-13T13:37:53.787Z",
+      |            "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54"
+      |        },
+      |        "registration": {
+      |          "agentDetails": {
+      |            "agentAddress": {
+      |              "line1": "Agent address line1",
+      |              "line2": "Agent address line2",
+      |              "postCode": "AB1 1AB",
+      |              "country": "GB"
+      |            },
+      |            "clientReference": "client-ref"
       |          }
       |        }
       |    },
@@ -1226,7 +1254,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       status(result) mustBe NOT_FOUND
     }
 
-    "respond with NotFound when no start date in draft" in {
+    "respond with NotFound when no correspondence address in draft" in {
       val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
@@ -1423,6 +1451,159 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
+    }
+  }
+
+  ".getAgentAddress" should {
+
+    "respond with OK with the agent address" in {
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents()
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(mockSubmissionDraftAgentDetails)))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getAgentAddress("DRAFTID").apply(request)
+
+      status(result) mustBe OK
+
+      val expectedDraftJson = Json.parse(
+        """
+          |{
+          | "line1": "Agent address line1",
+          | "line2": "Agent address line2",
+          | "postCode": "AB1 1AB",
+          | "country": "GB"
+          |}
+          |""".stripMargin)
+
+      contentType(result) mustBe Some(JSON)
+      contentAsJson(result) mustBe expectedDraftJson
+    }
+
+    "respond with NotFound when no draft" in {
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents()
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getAgentAddress("DRAFTID").apply(request)
+
+      status(result) mustBe NOT_FOUND
+    }
+
+    "respond with NotFound when no agent address in draft" in {
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents()
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(mockSubmissionDraftNoData)))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getAgentAddress("DRAFTID").apply(request)
+
+      status(result) mustBe NOT_FOUND
+    }
+  }
+
+  ".getClientReference" should {
+
+    "respond with OK with the client reference" in {
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents()
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(mockSubmissionDraftAgentDetails)))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getClientReference("DRAFTID").apply(request)
+
+      status(result) mustBe OK
+
+      val expectedDraftJson = Json.parse(
+        """
+          |"client-ref"
+          |""".stripMargin)
+
+      contentType(result) mustBe Some(JSON)
+      contentAsJson(result) mustBe expectedDraftJson
+    }
+
+    "respond with NotFound when no draft" in {
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents()
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getClientReference("DRAFTID").apply(request)
+
+      status(result) mustBe NOT_FOUND
+    }
+
+    "respond with NotFound when no client reference in draft" in {
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents()
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(mockSubmissionDraftNoData)))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getClientReference("DRAFTID").apply(request)
+
+      status(result) mustBe NOT_FOUND
     }
   }
 }

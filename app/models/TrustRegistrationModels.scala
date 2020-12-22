@@ -32,8 +32,7 @@ case class Registration(matchData: Option[MatchData],
                         declaration: Declaration,
                         trust: Trust,
                         submissionDate: Option[LocalDate],      // new 5MLD required
-                        agentDetails: Option[AgentDetails] = None
-                       )
+                        agentDetails: Option[AgentDetails] = None)
 
 object Registration {
  implicit val registrationReads :Reads[Registration] = Json.reads[Registration]
@@ -71,7 +70,6 @@ case class Correspondence(abroadIndicator: Boolean,
 
 object Correspondence {
   implicit val correspondenceFormat : Format[Correspondence] = Json.format[Correspondence]
-
 }
 
 case class YearsReturns(var returns: Option[List[YearReturnType]])
@@ -119,10 +117,9 @@ object DeclarationForApi {
   implicit val declarationForApiFormat: Format[DeclarationForApi] = Json.format[DeclarationForApi]
 }
 
-case class Trust(
-                  details: TrustDetailsType,
-                  entities: TrustEntitiesType,
-                  assets: Option[Assets])   // now optional with 5MLD
+case class Trust(details: TrustDetailsType,
+                 entities: TrustEntitiesType,
+                 assets: Option[Assets])   // now optional with 5MLD
 
 object Trust {
   implicit val trustFormat: Format[Trust] = Json.format[Trust]
@@ -135,6 +132,7 @@ case class TrustEntitiesType(naturalPerson: Option[List[NaturalPersonType]],
                              trustees: Option[List[TrusteeType]],
                              protectors: Option[ProtectorsType],
                              settlors: Option[Settlors])
+
 object TrustEntitiesType {
   implicit val trustEntitiesTypeFormat: Format[TrustEntitiesType] = Json.format[TrustEntitiesType]
 }
@@ -165,9 +163,9 @@ object ProtectorCompany {
   implicit val protectorCompanyFormat: Format[ProtectorCompany] = Json.format[ProtectorCompany]
 }
 
+case class TrusteeType(trusteeInd: Option[TrusteeIndividualType],
+                       trusteeOrg: Option[TrusteeOrgType])
 
-
-case class TrusteeType(trusteeInd : Option[TrusteeIndividualType], trusteeOrg : Option[TrusteeOrgType] )
 object TrusteeType {
   implicit val trusteeTypeFormat : Format[TrusteeType] = Json.format[TrusteeType]
 }
@@ -183,13 +181,12 @@ object TrusteeOrgType {
 }
 
 case class TrusteeIndividualType(name: NameType,
-                       dateOfBirth: Option[LocalDate],
-                       phoneNumber: Option[String],
-                       identification: Option[IdentificationType],
-                       countryOfResidence: Option[String],  // new 5MLD optional
-                       nationality: Option[String],         // new 5MLD optional
-                       legallyIncapable: Option[Boolean])   // new 5MLD optional
-
+                                 dateOfBirth: Option[LocalDate],
+                                 phoneNumber: Option[String],
+                                 identification: Option[IdentificationType],
+                                 countryOfResidence: Option[String],  // new 5MLD optional
+                                 nationality: Option[String],         // new 5MLD optional
+                                 legallyIncapable: Option[Boolean])   // new 5MLD optional
 
 object TrusteeIndividualType {
   implicit val trusteeIndividualTypeFormat : Format[TrusteeIndividualType] = Json.format[TrusteeIndividualType]
@@ -209,7 +206,6 @@ case class Settlor(name: NameType,
                    nationality: Option[String],         // new 5MLD optional
                    legallyIncapable: Option[Boolean])   // new 5MLD optional
 
-
 object Settlor {
   implicit val settlorFormat: Format[Settlor] = Json.format[Settlor]
 }
@@ -220,56 +216,49 @@ case class SettlorCompany(name: String,
                           identification: Option[IdentificationOrgType],
                           countryOfResidence: Option[String])  // new 5MLD optional
 
-
 object SettlorCompany {
   implicit val settlorCompanyFormat: Format[SettlorCompany] = Json.format[SettlorCompany]
 }
 
-case class LeadTrusteeIndType (
-                            name: NameType,
-                            dateOfBirth: LocalDate,
-                            phoneNumber: String,
-                            email: Option[String] = None,
-                            identification: IdentificationType,
-                            countryOfResidence: Option[String],  // new 5MLD required
-                            nationality: Option[String],         // new 5MLD required
-                            legallyIncapable: Option[Boolean]    // new 5MLD optional
-)
+case class LeadTrusteeIndType (name: NameType,
+                               dateOfBirth: LocalDate,
+                               phoneNumber: String,
+                               email: Option[String] = None,
+                               identification: IdentificationType,
+                               countryOfResidence: Option[String],  // new 5MLD required
+                               nationality: Option[String],         // new 5MLD required
+                               legallyIncapable: Option[Boolean])   // new 5MLD optional
 
 object LeadTrusteeIndType {
   implicit val leadTrusteeIndTypeFormat: Format[LeadTrusteeIndType] = Json.format[LeadTrusteeIndType]
 }
 
-case class LeadTrusteeOrgType(
-                               name: String,
-                               phoneNumber: String,
-                               email: Option[String] = None,
-                               identification: IdentificationOrgType,
-                               countryOfResidence: Option[String])    // new 5MLD required
+case class LeadTrusteeOrgType(name: String,
+                              phoneNumber: String,
+                              email: Option[String] = None,
+                              identification: IdentificationOrgType,
+                              countryOfResidence: Option[String])    // new 5MLD required
 
 object LeadTrusteeOrgType {
   implicit val leadTrusteeOrgTypeFormat: Format[LeadTrusteeOrgType] = Json.format[LeadTrusteeOrgType]
 }
 
-case class LeadTrusteeType(
-                            leadTrusteeInd : Option[LeadTrusteeIndType] = None,
-                            leadTrusteeOrg : Option[LeadTrusteeOrgType] = None
-                          )
+case class LeadTrusteeType(leadTrusteeInd : Option[LeadTrusteeIndType] = None,
+                           leadTrusteeOrg : Option[LeadTrusteeOrgType] = None)
 
 object LeadTrusteeType {
-  implicit val leadTrusteeTypeReads:Reads[LeadTrusteeType] = Json.reads[LeadTrusteeType]
+  implicit val leadTrusteeTypeReads: Reads[LeadTrusteeType] = Json.reads[LeadTrusteeType]
 
   // For when you need normal writes.
-  val writes:Writes[LeadTrusteeType] = Json.writes[LeadTrusteeType]
+  val writes: Writes[LeadTrusteeType] = Json.writes[LeadTrusteeType]
 
-  implicit val leadTrusteeWritesToDes : Writes[LeadTrusteeType] = Writes {
-    leadTrustee=> leadTrustee.leadTrusteeInd match {
+  implicit val leadTrusteeWritesToDes: Writes[LeadTrusteeType] = Writes {
+    leadTrustee => leadTrustee.leadTrusteeInd match {
       case Some(indLeadTrutee) => Json.toJson(indLeadTrutee)
       case None => Json.toJson(leadTrustee.leadTrusteeOrg)
     }
   }
 }
-
 
 case class BeneficiaryType(individualDetails: Option[List[IndividualDetailsType]],
                            company: Option[List[BeneficiaryCompanyType]],
@@ -401,8 +390,7 @@ case class TrustDetailsType(startDate: LocalDate,
                             trustUKResident: Option[Boolean],     // new 5MLD required
                             trustUKProperty: Option[Boolean],     // new 5MLD optional
                             trustRecorded: Option[Boolean],       // new 5MLD required
-                            trustUKRelation: Option[Boolean]      // new 5MLD required
-                           ) {
+                            trustUKRelation: Option[Boolean]) {   // new 5MLD required
 
   def isEmploymentRelatedTrust : Boolean = typeOfTrust.contains(Employment)
 
@@ -545,6 +533,7 @@ case class AgentDetails(arn: String,
                         agentAddress: AddressType,
                         agentTelephoneNumber: String,
                         clientReference: String)
+
 object AgentDetails {
   implicit val agentDetailsFormat: Format[AgentDetails] = Json.format[AgentDetails]
 }

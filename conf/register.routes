@@ -45,6 +45,13 @@ GET         /submission-drafts/:draftId/settlors              controllers.Submis
 POST        /submission-drafts/:draftId/set/settlors          controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "settlors")
 POST        /submission-drafts/:draftId/set/beneficiaries/remove-role-in-company        controllers.SubmissionDraftController.removeRoleInCompany(draftId: String)
 
+# Used by register-trust-agent-details-frontend
+GET         /submission-drafts/:draftId/agent-details              controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "agentDetails")
+POST        /submission-drafts/:draftId/set/agent-details          controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "agentDetails")
+
+GET         /submission-drafts/:draftId/agent-address             controllers.SubmissionDraftController.getAgentAddress(draftId: String)
+GET         /submission-drafts/:draftId/client-reference           controllers.SubmissionDraftController.getClientReference(draftId: String)
+
 GET         /submission-drafts/:draftId/when-trust-setup       controllers.SubmissionDraftController.getWhenTrustSetup(draftId: String)
 
 GET         /submission-drafts/:draftId/trust-name       controllers.SubmissionDraftController.getTrustName(draftId: String)
