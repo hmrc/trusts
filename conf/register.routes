@@ -44,6 +44,8 @@ POST        /submission-drafts/:draftId/set/assets          controllers.Submissi
 GET         /submission-drafts/:draftId/settlors              controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "settlors")
 POST        /submission-drafts/:draftId/set/settlors          controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "settlors")
 POST        /submission-drafts/:draftId/set/beneficiaries/remove-role-in-company        controllers.SubmissionDraftController.removeRoleInCompany(draftId: String)
+POST        /submission-drafts/:draftId/remove-mapped-piece/deceased-settlor            controllers.SubmissionDraftController.removeDeceasedSettlorMappedPiece(draftId: String)
+POST        /submission-drafts/:draftId/remove-mapped-piece/living-settlors             controllers.SubmissionDraftController.removeLivingSettlorsMappedPiece(draftId: String)
 
 # Used by register-trust-agent-details-frontend
 GET         /submission-drafts/:draftId/agent-details              controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "agentDetails")

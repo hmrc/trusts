@@ -1606,4 +1606,226 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       status(result) mustBe NOT_FOUND
     }
   }
+
+  ".removeDeceasedSettlorMappedPiece" should {
+
+    "return Ok" when {
+      "draft data successfully updated" in {
+
+        lazy val dataBefore = Json.parse(
+          """
+            |{
+            |  "draftId": "98c002e9-ef92-420b-83f6-62e6fff0c301",
+            |  "internalId": "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
+            |  "createdAt": {
+            |    "$date": 1597323808000
+            |  },
+            |  "draftData": {
+            |    "registration": {
+            |      "trust/entities/deceased": {
+            |        "key": "value"
+            |      }
+            |    }
+            |  }
+            |}
+            |""".stripMargin).as[RegistrationSubmissionDraft]
+
+        lazy val dataAfter = Json.parse(
+          """
+            |{
+            |  "draftId": "98c002e9-ef92-420b-83f6-62e6fff0c301",
+            |  "internalId": "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
+            |  "createdAt": {
+            |    "$date": 1597323808000
+            |  },
+            |  "draftData": {
+            |    "registration": {
+            |    }
+            |  }
+            |}
+            |""".stripMargin).as[RegistrationSubmissionDraft]
+
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
+
+        when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(dataBefore)))
+
+        when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
+
+        val request = FakeRequest("GET", "path")
+
+        val result = controller.removeDeceasedSettlorMappedPiece("draftId").apply(request)
+
+        status(result) mustBe OK
+
+        verify(submissionRepository).setDraft(dataAfter)
+      }
+    }
+
+    "return NotFound" when {
+      "failure getting draft" in {
+
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
+
+        when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(None))
+
+        val request = FakeRequest("GET", "path")
+
+        val result = controller.removeDeceasedSettlorMappedPiece("draftId").apply(request)
+
+        status(result) mustBe NOT_FOUND
+      }
+    }
+
+    "return InternalServerError" when {
+      "failure setting draft" in {
+
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
+
+        when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(mockSubmissionDraft)))
+
+        when(submissionRepository.setDraft(any())).thenReturn(Future.successful(false))
+
+        val request = FakeRequest("GET", "path")
+
+        val result = controller.removeDeceasedSettlorMappedPiece("draftId").apply(request)
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+    }
+  }
+
+  ".removeLivingSettlorsMappedPiece" should {
+
+    "return Ok" when {
+      "draft data successfully updated" in {
+
+        lazy val dataBefore = Json.parse(
+          """
+            |{
+            |  "draftId": "98c002e9-ef92-420b-83f6-62e6fff0c301",
+            |  "internalId": "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
+            |  "createdAt": {
+            |    "$date": 1597323808000
+            |  },
+            |  "draftData": {
+            |    "registration": {
+            |      "trust/entities/settlors": {
+            |        "key": "value"
+            |      }
+            |    }
+            |  }
+            |}
+            |""".stripMargin).as[RegistrationSubmissionDraft]
+
+        lazy val dataAfter = Json.parse(
+          """
+            |{
+            |  "draftId": "98c002e9-ef92-420b-83f6-62e6fff0c301",
+            |  "internalId": "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
+            |  "createdAt": {
+            |    "$date": 1597323808000
+            |  },
+            |  "draftData": {
+            |    "registration": {
+            |    }
+            |  }
+            |}
+            |""".stripMargin).as[RegistrationSubmissionDraft]
+
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
+
+        when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(dataBefore)))
+
+        when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
+
+        val request = FakeRequest("GET", "path")
+
+        val result = controller.removeLivingSettlorsMappedPiece("draftId").apply(request)
+
+        status(result) mustBe OK
+
+        verify(submissionRepository).setDraft(dataAfter)
+      }
+    }
+
+    "return NotFound" when {
+      "failure getting draft" in {
+
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
+
+        when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(None))
+
+        val request = FakeRequest("GET", "path")
+
+        val result = controller.removeLivingSettlorsMappedPiece("draftId").apply(request)
+
+        status(result) mustBe NOT_FOUND
+      }
+    }
+
+    "return InternalServerError" when {
+      "failure setting draft" in {
+
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
+
+        when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(mockSubmissionDraft)))
+
+        when(submissionRepository.setDraft(any())).thenReturn(Future.successful(false))
+
+        val request = FakeRequest("GET", "path")
+
+        val result = controller.removeLivingSettlorsMappedPiece("draftId").apply(request)
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+    }
+  }
 }

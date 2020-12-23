@@ -395,4 +395,41 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
         case _ => Future.successful(InternalServerError)
       }
   }
+
+  def removeDeceasedSettlorMappedPiece(draftId: String): Action[AnyContent] = identify.async {
+    implicit request =>
+
+      val path: JsPath = JsPath \ "registration" \ "trust/entities/deceased"
+      removeAtPath(draftId, path)
+  }
+
+  def removeLivingSettlorsMappedPiece(draftId: String): Action[AnyContent] = identify.async {
+    implicit request =>
+
+      val path: JsPath = JsPath \ "registration" \ "trust/entities/settlors"
+      removeAtPath(draftId, path)
+  }
+
+  private def removeAtPath(draftId: String, path: JsPath)
+                          (implicit request: IdentifierRequest[AnyContent]): Future[Result] = {
+
+    submissionRepository.getDraft(draftId, request.identifier).flatMap {
+      case Some(draft) =>
+
+        val initialDraftData: JsValue = draft.draftData
+
+        val updatedDraftData: JsValue = initialDraftData.transform(path.json.prune) match {
+          case JsSuccess(value, _) => value
+          case _ => initialDraftData
+        }
+
+        val newDraft = draft.copy(draftData = updatedDraftData)
+
+        submissionRepository.setDraft(newDraft).map(
+          result => if (result) Ok else InternalServerError
+        )
+
+      case _ => Future.successful(NotFound)
+    }
+  }
 }
