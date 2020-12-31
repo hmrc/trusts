@@ -59,7 +59,7 @@ class AddTrusteeSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar w
 
     def runTest(identifier: String, application: Application): Assertion = {
       // Ensure passes schema
-      val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
+      val result = route(application, FakeRequest(GET, s"/trusts/trustees/$identifier/transformed/trustee")).get
       status(result) mustBe OK
 
       val addTrusteeJson = Json.parse(
@@ -81,7 +81,7 @@ class AddTrusteeSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar w
       status(addedResponse) mustBe OK
 
       // ensure they're in the trust response with the provisional flag
-      val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed/trustees")).get
+      val newResult = route(application, FakeRequest(GET, s"/trusts/trustees/$identifier/transformed/trustee")).get
       status(newResult) mustBe OK
 
       val trustees = (contentAsJson(newResult) \ "trustees").as[JsArray]
