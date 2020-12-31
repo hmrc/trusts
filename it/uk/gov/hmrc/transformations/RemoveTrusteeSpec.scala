@@ -58,7 +58,7 @@ class RemoveTrusteeSpec extends AsyncFreeSpec with MustMatchers with MockitoSuga
     }
 
     def runTest(identifier: String, application: Application): Assertion = {
-      val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
+      val result = route(application, FakeRequest(GET, s"/trusts/trustees/$identifier/transformed/trustee")).get
       status(result) mustBe OK
 
       val removeAtIndex = Json.parse(
@@ -69,7 +69,7 @@ class RemoveTrusteeSpec extends AsyncFreeSpec with MustMatchers with MockitoSuga
           |}
           |""".stripMargin)
 
-      val amendRequest = FakeRequest(PUT, s"/trusts/$identifier/trustees/remove")
+      val amendRequest = FakeRequest(PUT, s"/trusts/trustees/$identifier/remove")
         .withBody(Json.toJson(removeAtIndex))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -79,7 +79,7 @@ class RemoveTrusteeSpec extends AsyncFreeSpec with MustMatchers with MockitoSuga
       val secondRemoveResult = route(application, amendRequest).get
       status(secondRemoveResult) mustBe OK
 
-      val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed/trustees")).get
+      val newResult = route(application, FakeRequest(GET, s"/trusts/trustees/$identifier/transformed/trustee")).get
       status(newResult) mustBe OK
 
       val trustees = (contentAsJson(newResult) \ "trustees").as[JsArray]

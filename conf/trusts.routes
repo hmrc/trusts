@@ -20,13 +20,9 @@ GET         /:identifier                                               controlle
 
 GET         /:identifier/transformed                                   controllers.GetTrustController.get(identifier: String, applyTransforms: Boolean = true)
 
-GET         /:identifier/transformed/lead-trustee                      controllers.GetTrustController.getLeadTrustee(identifier: String)
-
 GET         /:identifier/trust-details                                 controllers.GetTrustController.getTrustDetails(identifier: String)
 
 GET         /:identifier/transformed/beneficiaries                     controllers.GetTrustController.getBeneficiaries(identifier: String)
-
-GET         /:identifier/transformed/trustees                          controllers.GetTrustController.getTrustees(identifier: String)
 
 GET         /:identifier/transformed/settlors                          controllers.GetTrustController.getSettlors(identifier: String)
 
@@ -43,16 +39,6 @@ GET         /:identifier/transformed/deceased-settlor-death-recorded   controlle
 POST        /variation                                                 controllers.testOnly.TrustVariationsTestController.trustVariation
 
 POST        /declare/:identifier                                       controllers.TrustVariationsController.declare(identifier: String)
-
-POST        /amend-lead-trustee/:identifier                            controllers.TrusteeTransformationController.amendLeadTrustee(identifier: String)
-
-POST        /add-trustee/:identifier                                   controllers.TrusteeTransformationController.addTrustee(identifier: String)
-
-POST        /amend-trustee/:identifier/:index                          controllers.TrusteeTransformationController.amendTrustee(identifier: String, index: Int)
-
-POST        /promote-trustee/:identifier/:index                        controllers.TrusteeTransformationController.promoteTrustee(identifier: String, index: Int)
-
-PUT         /:identifier/trustees/remove                               controllers.TrusteeTransformationController.removeTrustee(identifier: String)
 
 POST        /add-unidentified-beneficiary/:identifier                  controllers.BeneficiaryTransformationController.addUnidentifiedBeneficiary(identifier: String)
 
