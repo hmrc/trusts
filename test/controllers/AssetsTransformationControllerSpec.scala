@@ -25,7 +25,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
@@ -44,141 +44,1083 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
+  
+  private val utr: String = "utr"
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+  private val index: Int = 0
+  private val amount: Long = 1000L
 
-  "Amend nonEeaBusinessAsset" - {
+  private def removeAsset(assetType: String): RemoveAsset = RemoveAsset(
+    endDate = LocalDate.parse("2018-02-24"),
+    index = index,
+    `type` = assetType
+  )
 
-    val nonEEABusiness = NonEEABusinessType(
-      "1",
-      "TestOrg",
-      AddressType(
-        "Line 1",
-        "Line 2",
-        None,
-        None,
-        Some("NE11NE"), "UK"),
-      "UK",
-      LocalDate.parse("2000-01-01"),
-      None
-    )
+  private val invalidBody: JsValue = Json.parse("{}")
+  
+  "Assets Transformation Controller" - {
 
-    val index = 0
+    "money asset" - {
 
-    "must add a new amend nonEeaBusinessAssetJson transform" in {
-      val nonEeaBusinessAssetTransformationService = mock[AssetsTransformationService]
-      val controller = new AssetsTransformationController(identifierAction, nonEeaBusinessAssetTransformationService)(Implicits.global, Helpers.stubControllerComponents())
-
-      when(nonEeaBusinessAssetTransformationService.amendAsset(any(), any(), any(), any())(any(), any()))
-        .thenReturn(Future.successful(Success))
-
-      val request = FakeRequest("POST", "path")
-        .withBody(Json.toJson(nonEEABusiness))
-        .withHeaders(CONTENT_TYPE -> "application/json")
-
-      val result = controller.amendNonEeaBusiness("aUTR", index).apply(request)
-
-      status(result) mustBe OK
-      verify(nonEeaBusinessAssetTransformationService).amendAsset(
-        equalTo("aUTR"),
-        equalTo(index),
-        equalTo("id"),
-        equalTo(nonEEABusiness)
-      )(any(), any())
-    }
-
-    "must return an error for malformed json" in {
-      val nonEeaBusinessAssetTransformationService = mock[AssetsTransformationService]
-      val controller = new AssetsTransformationController(identifierAction, nonEeaBusinessAssetTransformationService)(Implicits.global, Helpers.stubControllerComponents())
-
-      val request = FakeRequest("POST", "path")
-        .withBody(Json.parse("{}"))
-        .withHeaders(CONTENT_TYPE -> "application/json")
-
-      val result = controller.amendNonEeaBusiness("aUTR", index).apply(request)
-      status(result) mustBe BAD_REQUEST
-    }
-  }
-
-  "remove nonEeaBusinessAsset" - {
-
-    "add a new remove nonEeaBusinessAsset transform " in {
-      val nonEeaBusinessAssetTransformationService = mock[AssetsTransformationService]
-      val controller = new AssetsTransformationController(identifierAction, nonEeaBusinessAssetTransformationService)(Implicits.global, Helpers.stubControllerComponents())
-
-      when(nonEeaBusinessAssetTransformationService.removeAsset(any(), any(), any())(any()))
-        .thenReturn(Future.successful(Success))
-
-      val request = FakeRequest("POST", "path")
-        .withBody(Json.obj(
-          "type" -> "nonEEABusiness",
-          "endDate" -> LocalDate.of(2018, 2, 24),
-          "index" -> 24
-        ))
-        .withHeaders(CONTENT_TYPE -> "application/json")
-
-      val result = controller.removeAsset("UTRUTRUTR").apply(request)
-
-      status(result) mustBe OK
-      verify(nonEeaBusinessAssetTransformationService)
-        .removeAsset(
-          equalTo("UTRUTRUTR"),
-          equalTo("id"),
-          equalTo(RemoveAsset(LocalDate.of(2018, 2, 24), 24, "nonEEABusiness"))
-        )(any())
-    }
-
-    "return an error when json is invalid" in {
-      val OUT = new AssetsTransformationController(identifierAction, mock[AssetsTransformationService])(Implicits.global, Helpers.stubControllerComponents())
-
-      val request = FakeRequest("POST", "path")
-        .withBody(Json.obj("field" -> "value"))
-        .withHeaders(CONTENT_TYPE -> "application/json")
-
-      val result = OUT.removeAsset("UTRUTRUTR")(request)
-
-      status(result) mustBe BAD_REQUEST
-    }
-
-  }
-
-  "Add nonEeaBusinessAsset" - {
-
-    "must add a new add nonEeaBusinessAsset transform" in {
-      val nonEeaBusinessAssetTransformationService = mock[AssetsTransformationService]
-      val controller = new AssetsTransformationController(identifierAction, nonEeaBusinessAssetTransformationService)(Implicits.global, Helpers.stubControllerComponents())
-
-      val newNonEeaBusinessAsset = NonEEABusinessType("1",
-        "TestOrg",
-        AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK"),
-        "UK",
-        LocalDate.parse("2000-01-01"),
-        None
+      val asset = AssetMonetaryAmount(
+        assetMonetaryAmount = amount
       )
 
-      when(nonEeaBusinessAssetTransformationService.addAsset(any(), any(), any())(any()))
-        .thenReturn(Future.successful(true))
+      "add" - {
 
-      val request = FakeRequest("POST", "path")
-        .withBody(Json.toJson(newNonEeaBusinessAsset))
-        .withHeaders(CONTENT_TYPE -> "application/json")
+        "must add a new add transform" in {
 
-      val result = controller.addNonEeaBusiness("aUTR").apply(request)
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
 
-      status(result) mustBe OK
-      verify(nonEeaBusinessAssetTransformationService).addAsset("aUTR", "id", newNonEeaBusinessAsset)
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.addAsset(any(), any(), any())(any()))
+            .thenReturn(Future.successful(true))
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(asset))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.addMoney(utr).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .addAsset(equalTo(utr), any(), equalTo(asset))(any())
+
+        }
+
+        "must return an error for invalid json" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.addMoney(utr).apply(request)
+
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
+
+      "amend" - {
+
+        "must add a new amend transform" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.amendAsset(any(), any(), any(), any())(any(), any()))
+            .thenReturn(Future.successful(Success))
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(asset))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.amendMoney(utr, index).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .amendAsset(equalTo(utr), equalTo(index), any(), equalTo(asset))(any(), any())
+
+        }
+
+        "must return an error for invalid json" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.amendMoney(utr, index).apply(request)
+
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
+
+      "remove" - {
+
+        "add a new remove transform" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.removeAsset(any(), any(), any())(any()))
+            .thenReturn(Future.successful(Success))
+
+          val body = removeAsset("monetary")
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(body))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.removeAsset(utr).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .removeAsset(equalTo(utr), any(), equalTo(body))(any())
+
+        }
+
+        "return an error for invalid json" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.removeAsset(utr)(request)
+
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
     }
 
-    "must return an error for malformed json" in {
-      val nonEeaBusinessAssetTransformationService = mock[AssetsTransformationService]
-      val controller = new AssetsTransformationController(identifierAction, nonEeaBusinessAssetTransformationService)(Implicits.global, Helpers.stubControllerComponents())
+    "property or land asset" - {
 
-      val request = FakeRequest("POST", "path")
-        .withBody(Json.parse("{}"))
-        .withHeaders(CONTENT_TYPE -> "application/json")
+      val asset = PropertyLandType(
+        buildingLandName = None,
+        address = None,
+        valueFull = amount,
+        valuePrevious = None
+      )
 
-      val result = controller.addNonEeaBusiness("aUTR").apply(request)
-      status(result) mustBe BAD_REQUEST
+      "add" - {
+
+        "must add a new add transform" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.addAsset(any(), any(), any())(any()))
+            .thenReturn(Future.successful(true))
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(asset))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.addPropertyOrLand(utr).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .addAsset(equalTo(utr), any(), equalTo(asset))(any())
+
+        }
+
+        "must return an error for invalid json" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.addPropertyOrLand(utr).apply(request)
+
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
+
+      "amend" - {
+
+        "must add a new amend transform" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.amendAsset(any(), any(), any(), any())(any(), any()))
+            .thenReturn(Future.successful(Success))
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(asset))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.amendPropertyOrLand(utr, index).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .amendAsset(equalTo(utr), equalTo(index), any(), equalTo(asset))(any(), any())
+
+        }
+
+        "must return an error for invalid json" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.amendPropertyOrLand(utr, index).apply(request)
+
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
+
+      "remove" - {
+
+        "add a new remove transform" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.removeAsset(any(), any(), any())(any()))
+            .thenReturn(Future.successful(Success))
+
+          val body = removeAsset("propertyOrLand")
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(body))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.removeAsset(utr).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .removeAsset(equalTo(utr), any(), equalTo(body))(any())
+
+        }
+
+        "return an error for invalid json" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.removeAsset(utr)(request)
+
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
+    }
+
+    "shares asset" - {
+
+      val asset = SharesType(
+        numberOfShares = None,
+        orgName = "Name",
+        utr = None,
+        shareClass = None,
+        typeOfShare = None,
+        value = None
+      )
+
+      "add" - {
+
+        "must add a new add transform" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.addAsset(any(), any(), any())(any()))
+            .thenReturn(Future.successful(true))
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(asset))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.addShares(utr).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .addAsset(equalTo(utr), any(), equalTo(asset))(any())
+
+        }
+
+        "must return an error for invalid json" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.addShares(utr).apply(request)
+
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
+
+      "amend" - {
+
+        "must add a new amend transform" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.amendAsset(any(), any(), any(), any())(any(), any()))
+            .thenReturn(Future.successful(Success))
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(asset))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.amendShares(utr, index).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .amendAsset(equalTo(utr), equalTo(index), any(), equalTo(asset))(any(), any())
+
+        }
+
+        "must return an error for invalid json" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.amendShares(utr, index).apply(request)
+
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
+
+      "remove" - {
+
+        "add a new remove transform" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.removeAsset(any(), any(), any())(any()))
+            .thenReturn(Future.successful(Success))
+
+          val body = removeAsset("shares")
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(body))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.removeAsset(utr).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .removeAsset(equalTo(utr), any(), equalTo(body))(any())
+
+        }
+
+        "return an error for invalid json" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.removeAsset(utr)(request)
+
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
+    }
+
+    "business asset" - {
+
+      val asset = BusinessAssetType(
+        utr = None,
+        orgName = "Name",
+        businessDescription = "Description",
+        address = None,
+        businessValue = None
+      )
+
+      "add" - {
+
+        "must add a new add transform" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.addAsset(any(), any(), any())(any()))
+            .thenReturn(Future.successful(true))
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(asset))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.addBusiness(utr).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .addAsset(equalTo(utr), any(), equalTo(asset))(any())
+
+        }
+
+        "must return an error for invalid json" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.addBusiness(utr).apply(request)
+
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
+
+      "amend" - {
+
+        "must add a new amend transform" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.amendAsset(any(), any(), any(), any())(any(), any()))
+            .thenReturn(Future.successful(Success))
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(asset))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.amendBusiness(utr, index).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .amendAsset(equalTo(utr), equalTo(index), any(), equalTo(asset))(any(), any())
+
+        }
+
+        "must return an error for invalid json" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.amendBusiness(utr, index).apply(request)
+
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
+
+      "remove" - {
+
+        "add a new remove transform" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.removeAsset(any(), any(), any())(any()))
+            .thenReturn(Future.successful(Success))
+
+          val body = removeAsset("business")
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(body))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.removeAsset(utr).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .removeAsset(equalTo(utr), any(), equalTo(body))(any())
+
+        }
+
+        "return an error for invalid json" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.removeAsset(utr)(request)
+
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
+    }
+
+    "partnership asset" - {
+
+      val asset = PartnershipType(
+        utr = None,
+        description = "Description",
+        partnershipStart = None
+      )
+
+      "add" - {
+
+        "must add a new add transform" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.addAsset(any(), any(), any())(any()))
+            .thenReturn(Future.successful(true))
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(asset))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.addPartnership(utr).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .addAsset(equalTo(utr), any(), equalTo(asset))(any())
+
+        }
+
+        "must return an error for invalid json" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.addPartnership(utr).apply(request)
+
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
+
+      "amend" - {
+
+        "must add a new amend transform" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.amendAsset(any(), any(), any(), any())(any(), any()))
+            .thenReturn(Future.successful(Success))
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(asset))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.amendPartnership(utr, index).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .amendAsset(equalTo(utr), equalTo(index), any(), equalTo(asset))(any(), any())
+
+        }
+
+        "must return an error for invalid json" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.amendPartnership(utr, index).apply(request)
+
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
+
+      "remove" - {
+
+        "add a new remove transform" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.removeAsset(any(), any(), any())(any()))
+            .thenReturn(Future.successful(Success))
+
+          val body = removeAsset("partnerShip")
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(body))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.removeAsset(utr).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .removeAsset(equalTo(utr), any(), equalTo(body))(any())
+
+        }
+
+        "return an error for invalid json" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.removeAsset(utr)(request)
+
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
+    }
+
+    "other asset" - {
+
+      val asset = OtherAssetType(
+        description = "Description",
+        value = None
+      )
+
+      "add" - {
+
+        "must add a new add transform" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.addAsset(any(), any(), any())(any()))
+            .thenReturn(Future.successful(true))
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(asset))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.addOther(utr).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .addAsset(equalTo(utr), any(), equalTo(asset))(any())
+
+        }
+
+        "must return an error for invalid json" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.addOther(utr).apply(request)
+
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
+
+      "amend" - {
+
+        "must add a new amend transform" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.amendAsset(any(), any(), any(), any())(any(), any()))
+            .thenReturn(Future.successful(Success))
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(asset))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.amendOther(utr, index).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .amendAsset(equalTo(utr), equalTo(index), any(), equalTo(asset))(any(), any())
+
+        }
+
+        "must return an error for invalid json" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.amendOther(utr, index).apply(request)
+
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
+
+      "remove" - {
+
+        "add a new remove transform" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.removeAsset(any(), any(), any())(any()))
+            .thenReturn(Future.successful(Success))
+
+          val body = removeAsset("other")
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(body))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.removeAsset(utr).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .removeAsset(equalTo(utr), any(), equalTo(body))(any())
+
+        }
+
+        "return an error for invalid json" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.removeAsset(utr)(request)
+
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
+    }
+    
+    "non-EEA business asset" - {
+
+      val asset = NonEEABusinessType(
+        lineNo = "1",
+        orgName = "Name",
+        address = AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK"),
+        govLawCountry = "UK",
+        startDate = LocalDate.parse("2000-01-01"),
+        endDate = None
+      )
+      
+      "add" - {
+
+        "must add a new add transform" in {
+          
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+          
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.addAsset(any(), any(), any())(any()))
+            .thenReturn(Future.successful(true))
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(asset))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.addNonEeaBusiness(utr).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .addAsset(equalTo(utr), any(), equalTo(asset))(any())
+
+        }
+
+        "must return an error for invalid json" in {
+          
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+          
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.addNonEeaBusiness(utr).apply(request)
+
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
+      
+      "amend" - {
+
+        "must add a new amend transform" in {
+          
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+          
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.amendAsset(any(), any(), any(), any())(any(), any()))
+            .thenReturn(Future.successful(Success))
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(asset))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.amendNonEeaBusiness(utr, index).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .amendAsset(equalTo(utr), equalTo(index), any(), equalTo(asset))(any(), any())
+
+        }
+
+        "must return an error for invalid json" in {
+          
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.amendNonEeaBusiness(utr, index).apply(request)
+          
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
+      
+      "remove" - {
+
+        "add a new remove transform" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          when(mockAssetsTransformationService.removeAsset(any(), any(), any())(any()))
+            .thenReturn(Future.successful(Success))
+
+          val body = removeAsset("nonEEABusiness")
+
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(body))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.removeAsset(utr).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockAssetsTransformationService)
+            .removeAsset(equalTo(utr), any(), equalTo(body))(any())
+
+        }
+
+        "return an error for invalid json" in {
+
+          val mockAssetsTransformationService = mock[AssetsTransformationService]
+
+          val controller = new AssetsTransformationController(
+            identifierAction,
+            mockAssetsTransformationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(POST, "path")
+            .withBody(invalidBody)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.removeAsset(utr)(request)
+
+          status(result) mustBe BAD_REQUEST
+
+        }
+      }
     }
   }
 }
