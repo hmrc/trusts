@@ -72,11 +72,11 @@ class AssetsTransformationService @Inject()(transformationService: Transformatio
     transformationService.getTransformedTrustJson(identifier, internalId)
       .map(findAssetJson(_, asset.`type`, asset.index))
       .flatMap(Future.fromTry)
-      .flatMap {assetJson =>
+      .flatMap { assetJson =>
         transformationService.addNewTransform(
-          identifier,
-          internalId,
-          RemoveAssetTransform(
+          identifier = identifier,
+          internalId = internalId,
+          newTransform = RemoveAssetTransform(
             index = asset.index,
             asset = assetJson,
             endDate = asset.endDate,

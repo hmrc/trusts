@@ -20,10 +20,10 @@ import play.api.libs.json._
 
 import java.time.LocalDate
 
-case class RemoveAssetTransform(index : Int,
-                                asset : JsValue,
-                                endDate : LocalDate,
-                                assetType : String) extends DeltaTransform with JsonOperations {
+case class RemoveAssetTransform(index: Int,
+                                asset: JsValue,
+                                endDate: LocalDate,
+                                assetType: String) extends DeltaTransform with JsonOperations {
 
   private lazy val path = __ \ "details" \ "trust" \ "assets" \ assetType
 

@@ -87,19 +87,19 @@ class AssetsTransformationServiceSpec extends FreeSpec with MockitoSugar with Sc
       val service = new AssetsTransformationService(transformationService, LocalDateMock)
       val address = AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK")
       val originalNonEeaBusinessAssetJson = Json.toJson(NonEEABusinessType("1", "TestOrg", address, "UK", LocalDate.parse("2000-01-01"), None))
-      val amendedNonEeaBusinessAssetJson = NonEEABusinessType("1", "TestOrg2", address, "UK", LocalDate.parse("2000-01-01"), None)
+      val amendedNonEeaBusinessAsset = NonEEABusinessType("1", "TestOrg2", address, "UK", LocalDate.parse("2000-01-01"), None)
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
       when(transformationService.getTransformedTrustJson(any(), any())(any()))
         .thenReturn(Future.successful(buildInputJson("nonEEABusiness", Seq(originalNonEeaBusinessAssetJson))))
 
-      val result = service.amendAsset("utr", index, "internalId", amendedNonEeaBusinessAssetJson)
+      val result = service.amendAsset("utr", index, "internalId", amendedNonEeaBusinessAsset)
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",
           "internalId",
-          AmendAssetTransform(index, Json.toJson(amendedNonEeaBusinessAssetJson), originalNonEeaBusinessAssetJson, LocalDateMock.now, amendedNonEeaBusinessAssetJson.toString))
+          AmendAssetTransform(index, Json.toJson(amendedNonEeaBusinessAsset), originalNonEeaBusinessAssetJson, LocalDateMock.now, amendedNonEeaBusinessAsset.toString))
       }
     }
 

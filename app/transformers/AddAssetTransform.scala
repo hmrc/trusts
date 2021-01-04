@@ -18,12 +18,13 @@ package transformers
 
 import play.api.libs.json._
 
-case class AddAssetTransform(asset: JsValue, assetType: String) extends DeltaTransform with JsonOperations {
+case class AddAssetTransform(asset: JsValue,
+                             assetType: String) extends DeltaTransform with JsonOperations {
 
   private lazy val path = __ \ 'details \ 'trust \ 'assets \ assetType
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addToList(input, path, Json.toJson(asset))
+    addToList(input, path, asset)
   }
 }
 
