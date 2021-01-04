@@ -42,7 +42,7 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
           transformService.amendIndividualSettlorTransformer(
             identifier,
             index,
-            request.identifier,
+            request.internalId,
             settlor
           ) map { _ =>
             Ok
@@ -62,7 +62,7 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
 
           transformService.addIndividualSettlorTransformer(
             identifier,
-            request.identifier,
+            request.internalId,
             settlor
           ) map { _ =>
             Ok
@@ -82,7 +82,7 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
 
           transformService.addBusinessSettlorTransformer(
             identifier,
-            request.identifier,
+            request.internalId,
             companySettlor
           ) map { _ =>
             Ok
@@ -104,7 +104,7 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
           transformService.amendBusinessSettlorTransformer(
             identifier,
             index,
-            request.identifier,
+            request.internalId,
             settlor
           ) map { _ =>
             Ok
@@ -121,7 +121,7 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
     implicit request => {
       request.body.validate[RemoveSettlor] match {
         case JsSuccess(settlor, _) =>
-          transformService.removeSettlor(identifier, request.identifier, settlor) map { _ =>
+          transformService.removeSettlor(identifier, request.internalId, settlor) map { _ =>
             Ok
           }
         case JsError(errors) =>
@@ -136,7 +136,7 @@ class SettlorTransformationController @Inject()(identify: IdentifierAction,
     implicit request =>
       request.body.validate[AmendDeceasedSettlor] match {
         case JsSuccess(settlor, _) =>
-          transformService.amendDeceasedSettlor(identifier, request.identifier, settlor) map { _ =>
+          transformService.amendDeceasedSettlor(identifier, request.internalId, settlor) map { _ =>
             Ok
           }
         case JsError(errors) =>

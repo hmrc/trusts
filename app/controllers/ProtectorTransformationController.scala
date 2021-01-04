@@ -38,7 +38,7 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
     implicit request => {
       request.body.validate[RemoveProtector] match {
         case JsSuccess(protector, _) =>
-          transformService.removeProtector(identifier, request.identifier, protector) map { _ =>
+          transformService.removeProtector(identifier, request.internalId, protector) map { _ =>
             Ok
           }
         case JsError(_) => Future.successful(BadRequest)
@@ -53,7 +53,7 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
 
           transformService.addIndividualProtectorTransformer(
             identifier,
-            request.identifier,
+            request.internalId,
             protector
           ) map { _ =>
             Ok
@@ -71,7 +71,7 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
         case JsSuccess(protectorCompany, _) =>
           transformService.addBusinessProtectorTransformer(
             identifier,
-            request.identifier,
+            request.internalId,
             protectorCompany
           ) map { _ =>
             Ok
@@ -91,7 +91,7 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
           transformService.amendIndividualProtectorTransformer(
             identifier,
             index,
-            request.identifier,
+            request.internalId,
             protector
           ) map { _ =>
             Ok
@@ -111,7 +111,7 @@ class ProtectorTransformationController @Inject()(identify: IdentifierAction,
           transformService.amendBusinessProtectorTransformer(
             identifier,
             index,
-            request.identifier,
+            request.internalId,
             businessProtector
           ) map { _ =>
             Ok

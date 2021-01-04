@@ -66,21 +66,21 @@ class AssetsTransformationService @Inject()(transformationService: Transformatio
       }
   }
 
-  def removeAsset(identifier: String, internalId: String, removeAsset: RemoveAsset)
+  def removeAsset(identifier: String, internalId: String, asset: RemoveAsset)
                  (implicit hc: HeaderCarrier): Future[Success.type] = {
 
     transformationService.getTransformedTrustJson(identifier, internalId)
-      .map(findAssetJson(_, removeAsset.`type`, removeAsset.index))
+      .map(findAssetJson(_, asset.`type`, asset.index))
       .flatMap(Future.fromTry)
       .flatMap {assetJson =>
         transformationService.addNewTransform(
           identifier,
           internalId,
           RemoveAssetTransform(
-            index = removeAsset.index,
+            index = asset.index,
             asset = assetJson,
-            endDate = removeAsset.endDate,
-            assetType = removeAsset.`type`
+            endDate = asset.endDate,
+            assetType = asset.`type`
           )
         ).map(_ => Success)
       }
@@ -89,7 +89,7 @@ class AssetsTransformationService @Inject()(transformationService: Transformatio
   private def findAssetJson(json: JsValue, assetType: String, index: Int): Try[JsObject] = {
     val assetPath = (__ \ 'details \ 'trust \ 'assets \ assetType \ index).json
     json.transform(assetPath.pick).fold(
-      _ => Failure(InternalServerErrorException("Could not locate assetType at index")),
+      _ => Failure(InternalServerErrorException(s"Could not locate asset of type $assetType at index $index")),
       value => scala.util.Success(value.as[JsObject])
     )
   }

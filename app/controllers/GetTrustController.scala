@@ -195,11 +195,11 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       implicit request =>
         {
           for {
-            _ <- resetCacheIfRequested(identifier, request.identifier, refreshEtmpData)
+            _ <- resetCacheIfRequested(identifier, request.internalId, refreshEtmpData)
             data <- if (applyTransformations) {
-              transformationService.getTransformedData(identifier, request.identifier)
+              transformationService.getTransformedData(identifier, request.internalId)
             } else {
-              trustsService.getTrustInfo(identifier, request.identifier)
+              trustsService.getTrustInfo(identifier, request.internalId)
             }
           } yield (
             successResponse(f, identifier) orElse
@@ -220,7 +220,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       auditService.audit(
         event = TrustAuditing.GET_TRUST,
         request = Json.obj("utr" -> identifier),
-        internalId = request.identifier,
+        internalId = request.internalId,
         response = Json.toJson(response)
       )
 
@@ -239,7 +239,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       auditService.audit(
         event = TrustAuditing.GET_TRUST,
         request = Json.obj("utr" -> identifier),
-        internalId = request.identifier,
+        internalId = request.internalId,
         response = reason
       )
 
@@ -252,7 +252,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       auditService.auditErrorResponse(
         TrustAuditing.GET_TRUST,
         Json.obj("utr" -> identifier),
-        request.identifier,
+        request.internalId,
         errorAuditMessages.getOrElse(err, "UNKNOWN")
       )
       errorResponses.getOrElse(err, InternalServerError)

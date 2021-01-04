@@ -51,9 +51,9 @@ class AssetsTransformationController @Inject()(
     request.body.validate[T] match {
       case JsSuccess(asset, _) =>
         assetsTransformationService.addAsset(
-          identifier,
-          request.identifier,
-          asset
+          identifier = identifier,
+          internalId = request.internalId,
+          asset = asset
         ) map { _ =>
           Ok
         }
@@ -70,10 +70,10 @@ class AssetsTransformationController @Inject()(
     request.body.validate[T] match {
       case JsSuccess(asset, _) =>
         assetsTransformationService.amendAsset(
-          identifier,
-          index,
-          request.identifier,
-          asset
+          identifier = identifier,
+          index = index,
+          internalId = request.internalId,
+          asset = asset
         ) map { _ =>
           Ok
         }
@@ -89,7 +89,11 @@ class AssetsTransformationController @Inject()(
 
       request.body.validate[RemoveAsset] match {
         case JsSuccess(asset, _) =>
-          assetsTransformationService.removeAsset(identifier, request.identifier, asset) map { _ =>
+          assetsTransformationService.removeAsset(
+            identifier = identifier,
+            internalId = request.internalId,
+            asset = asset
+          ) map { _ =>
             Ok
           }
         case JsError(_) => Future.successful(BadRequest)

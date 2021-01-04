@@ -60,7 +60,7 @@ class TrustVariationsTestController @Inject()(
               auditService.auditErrorResponse(
                 TrustAuditing.TRUST_VARIATION,
                 request.body,
-                request.identifier,
+                request.internalId,
                 errorReason = "Provided request is invalid."
               )
 
@@ -72,7 +72,7 @@ class TrustVariationsTestController @Inject()(
                 auditService.audit(
                   TrustAuditing.TRUST_VARIATION,
                   Json.toJson(variationRequest),
-                  request.identifier,
+                  request.internalId,
                   Json.toJson(response)
                 )
 

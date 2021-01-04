@@ -41,11 +41,11 @@ class TrusteeTransformationController @Inject()(
 
       val result = request.body.validate[AmendedLeadTrusteeIndType].map {
         leadTrustee =>
-          trusteeTransformationService.addAmendLeadTrusteeIndTransformer(identifier, request.identifier, leadTrustee)
+          trusteeTransformationService.addAmendLeadTrusteeIndTransformer(identifier, request.internalId, leadTrustee)
       }.orElse {
         request.body.validate[AmendedLeadTrusteeOrgType].map {
           leadTrustee =>
-            trusteeTransformationService.addAmendLeadTrusteeOrgTransformer(identifier, request.identifier, leadTrustee)
+            trusteeTransformationService.addAmendLeadTrusteeOrgTransformer(identifier, request.internalId, leadTrustee)
         }
       }
 
@@ -63,7 +63,7 @@ class TrusteeTransformationController @Inject()(
     implicit request => {
       request.body.validate[RemoveTrustee] match {
         case JsSuccess(model, _) =>
-          trusteeTransformationService.addRemoveTrusteeTransformer(identifier, request.identifier, model) map { _ =>
+          trusteeTransformationService.addRemoveTrusteeTransformer(identifier, request.internalId, model) map { _ =>
             Ok
           }
         case JsError(errors) =>
@@ -82,11 +82,11 @@ class TrusteeTransformationController @Inject()(
 
       (trusteeInd, trusteeOrg) match {
         case (Some(ind), _) =>
-          trusteeTransformationService.addAddTrusteeTransformer(identifier, request.identifier, TrusteeType(Some(ind), None)) map { _ =>
+          trusteeTransformationService.addAddTrusteeTransformer(identifier, request.internalId, TrusteeType(Some(ind), None)) map { _ =>
             Ok
           }
         case (_, Some(org)) =>
-          trusteeTransformationService.addAddTrusteeTransformer(identifier, request.identifier, TrusteeType(None, Some(org))) map { _ =>
+          trusteeTransformationService.addAddTrusteeTransformer(identifier, request.internalId, TrusteeType(None, Some(org))) map { _ =>
             Ok
           }
         case _ =>
@@ -105,11 +105,11 @@ class TrusteeTransformationController @Inject()(
 
       (trusteeInd, trusteeOrg) match {
         case (Some(ind), _) =>
-          trusteeTransformationService.addAmendTrusteeTransformer(identifier, index, request.identifier, TrusteeType(Some(ind), None)) map { _ =>
+          trusteeTransformationService.addAmendTrusteeTransformer(identifier, index, request.internalId, TrusteeType(Some(ind), None)) map { _ =>
             Ok
           }
         case (_, Some(org)) =>
-          trusteeTransformationService.addAmendTrusteeTransformer(identifier, index, request.identifier, TrusteeType(None, Some(org))) map { _ =>
+          trusteeTransformationService.addAmendTrusteeTransformer(identifier, index, request.internalId, TrusteeType(None, Some(org))) map { _ =>
             Ok
           }
         case _ =>
@@ -130,7 +130,7 @@ class TrusteeTransformationController @Inject()(
         case (Some(ind), _) =>
           trusteeTransformationService.addPromoteTrusteeIndTransformer(
             identifier,
-            request.identifier,
+            request.internalId,
             index,
             ind,
             localDateService.now
@@ -138,7 +138,7 @@ class TrusteeTransformationController @Inject()(
         case (_, Some(org)) =>
           trusteeTransformationService.addPromoteTrusteeOrgTransformer(
             identifier,
-            request.identifier,
+            request.internalId,
             index,
             org,
             localDateService.now
