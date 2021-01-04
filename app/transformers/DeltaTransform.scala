@@ -41,7 +41,7 @@ object DeltaTransform {
           protectorReads orElse
           otherIndividualReads orElse
           trustDetailsReads orElse
-          nonEeaBusinessAssetReads
+          assetReads
       ) (value.as[JsObject]) orElse (throw new Exception(s"Don't know how to deserialise transform"))
   )
 
@@ -107,7 +107,7 @@ object DeltaTransform {
     readsForTransform[SetUKRelationTransform](SetUKRelationTransform.key)
   }
 
-  def nonEeaBusinessAssetReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
+  def assetReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
     readsForTransform[AddAssetTransform](AddAssetTransform.key) orElse
     readsForTransform[AmendAssetTransform](AmendAssetTransform.key) orElse
     readsForTransform[RemoveAssetTransform](RemoveAssetTransform.key)

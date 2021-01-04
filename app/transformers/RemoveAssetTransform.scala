@@ -16,6 +16,7 @@
 
 package transformers
 
+import models.variation.NonEEABusinessType
 import play.api.libs.json._
 
 import java.time.LocalDate
@@ -32,7 +33,11 @@ case class RemoveAssetTransform(index: Int,
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    endEntity(input, path, Json.toJson(asset), endDate, "endDate")
+    if (assetType == NonEEABusinessType.toString) {
+      endEntity(input, path, Json.toJson(asset), endDate, "endDate")
+    } else {
+      JsSuccess(input)
+    }
   }
 }
 
