@@ -32,7 +32,6 @@ import play.api.test.{FakeRequest, Helpers}
 import services.AssetsTransformationService
 import transformers.remove.RemoveAsset
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
-import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits
@@ -46,7 +45,6 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
   
   private val utr: String = "utr"
-
   private val index: Int = 0
   private val amount: Long = 1000L
 
