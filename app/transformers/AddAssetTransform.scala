@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,20 @@
 
 package transformers
 
-import models.variation.NonEEABusinessType
 import play.api.libs.json._
 
-case class AddNonEeaBusinessAssetTransform(nonEEABusiness: NonEEABusinessType) extends DeltaTransform with JsonOperations {
+case class AddAssetTransform(asset: JsValue, assetType: String) extends DeltaTransform with JsonOperations {
 
-  private lazy val path = __ \ 'details \ 'trust \ 'assets \ 'nonEEABusiness
+  private lazy val path = __ \ 'details \ 'trust \ 'assets \ assetType
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addToList(input, path, Json.toJson(nonEEABusiness))
+    addToList(input, path, Json.toJson(asset))
   }
 }
 
-object AddNonEeaBusinessAssetTransform {
+object AddAssetTransform {
 
-  val key = "AddNonEeaBusinessAssetTransform"
+  val key = "AddAssetTransform"
 
-  implicit val format: Format[AddNonEeaBusinessAssetTransform] = Json.format[AddNonEeaBusinessAssetTransform]
+  implicit val format: Format[AddAssetTransform] = Json.format[AddAssetTransform]
 }
-
-

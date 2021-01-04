@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package transformers
 
-import java.time.LocalDate
-
 import models.AddressType
 import models.variation.NonEEABusinessType
 import org.mockito.Matchers.any
@@ -27,10 +25,11 @@ import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
 import repositories.TransformationRepository
-import services.{AuditService, TrustsService, TransformationService}
+import services.{AuditService, TransformationService, TrustsService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.JsonUtils
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class RemoveAssetTransformSpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar {
@@ -155,7 +154,7 @@ class RemoveAssetTransformSpec extends FreeSpec with MustMatchers with ScalaFutu
       val trustsService = mock[TrustsService]
       val auditService = mock[AuditService]
       val transforms = Seq(
-        AddNonEeaBusinessAssetTransform(NonEEABusinessType("01", "TestOrg", AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK"), "UK", LocalDate.parse("1967-12-30"),None)),
+        AddAssetTransform(Json.toJson(NonEEABusinessType("01", "TestOrg", AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK"), "UK", LocalDate.parse("1967-12-30"), None)), "nonEEABusiness"),
         RemoveAssetTransform(3, nonEeaBusinessAssetJson("Two", None, withLineNo = false), LocalDate.of(2018, 4, 21), "nonEEABusiness")
       )
 

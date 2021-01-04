@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 package models.registration
 
+import exceptions._
 import play.api.Logging
 import play.api.http.Status._
-import play.api.libs.json.{Format, JsResult, JsValue, Json, OFormat}
+import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
-import exceptions._
-import models.existing_trust.DesErrorResponse
 import utils.Constants._
 
 sealed trait RegistrationResponse

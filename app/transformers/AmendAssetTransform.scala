@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,24 @@
 
 package transformers
 
-import java.time.LocalDate
-
 import play.api.libs.json._
 
-case class AmendNonEeaBusinessAssetTransform(index: Int,
-                                             amended: JsValue,
-                                             original: JsValue,
-                                             endDate: LocalDate) extends AmendEntityTransform {
+import java.time.LocalDate
 
-  override val path: JsPath = __ \ 'details \ 'trust \ 'assets \ 'nonEEABusiness
+case class AmendAssetTransform(index: Int,
+                               amended: JsValue,
+                               original: JsValue,
+                               endDate: LocalDate,
+                               assetType: String) extends AmendEntityTransform {
+
+  override val path: JsPath = __ \ 'details \ 'trust \ 'assets \ assetType
 
   override val endDateField: String = "endDate"
 }
 
-object AmendNonEeaBusinessAssetTransform {
+object AmendAssetTransform {
 
-  val key = "AmendNonEeaBusinessAssetTransform"
+  val key = "AmendAssetTransform"
 
-  implicit val format: Format[AmendNonEeaBusinessAssetTransform] = Json.format[AmendNonEeaBusinessAssetTransform]
+  implicit val format: Format[AmendAssetTransform] = Json.format[AmendAssetTransform]
 }

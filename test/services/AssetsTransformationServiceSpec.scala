@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package services
 
-import java.time.LocalDate
-
 import models.AddressType
 import models.variation._
 import org.mockito.Matchers._
@@ -32,6 +30,7 @@ import transformers.remove.RemoveAsset
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{JsonFixtures, JsonUtils}
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -95,12 +94,12 @@ class AssetsTransformationServiceSpec extends FreeSpec with MockitoSugar with Sc
       when(transformationService.getTransformedTrustJson(any(), any())(any()))
         .thenReturn(Future.successful(buildInputJson("nonEEABusiness", Seq(originalNonEeaBusinessAssetJson))))
 
-      val result = service.amendNonEeaBusinessAssetTransformer("utr", index, "internalId", amendedNonEeaBusinessAssetJson)
+      val result = service.amendAsset("utr", index, "internalId", amendedNonEeaBusinessAssetJson)
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",
           "internalId",
-          AmendNonEeaBusinessAssetTransform(index, Json.toJson(amendedNonEeaBusinessAssetJson), originalNonEeaBusinessAssetJson, LocalDateMock.now))
+          AmendAssetTransform(index, Json.toJson(amendedNonEeaBusinessAssetJson), originalNonEeaBusinessAssetJson, LocalDateMock.now, amendedNonEeaBusinessAssetJson.toString))
       }
     }
 
@@ -123,11 +122,11 @@ class AssetsTransformationServiceSpec extends FreeSpec with MockitoSugar with Sc
 
       when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
 
-      val result = service.addNonEeaBusinessAssetTransformer("utr", "internalId", newNonEeaBusinessAsset)
+      val result = service.addAsset("utr", "internalId", newNonEeaBusinessAsset)
       whenReady(result) { _ =>
 
         verify(transformationService).addNewTransform("utr",
-          "internalId", AddNonEeaBusinessAssetTransform(newNonEeaBusinessAsset))
+          "internalId", AddAssetTransform(Json.toJson(newNonEeaBusinessAsset), newNonEeaBusinessAsset.toString))
       }
     }
   }

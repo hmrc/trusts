@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package transformers
 
-import java.time.LocalDate
-
 import models.AddressType
 import models.variation.NonEEABusinessType
 import org.scalatest.{FreeSpec, MustMatchers}
+import play.api.libs.json.Json
 import utils.JsonUtils
 
-class AddNonEeaBusinessAssetTransformSpec extends FreeSpec with MustMatchers {
+import java.time.LocalDate
+
+class AddAssetTransformSpec extends FreeSpec with MustMatchers {
 
   val nonEeaBusinessAsset = NonEEABusinessType(
     "1",
@@ -47,7 +48,7 @@ class AddNonEeaBusinessAssetTransformSpec extends FreeSpec with MustMatchers {
 
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-NonEeaBusinessAsset.json")
 
-      val transformer = AddNonEeaBusinessAssetTransform(nonEeaBusinessAsset)
+      val transformer = AddAssetTransform(Json.toJson(nonEeaBusinessAsset), nonEeaBusinessAsset.toString)
 
       val result = transformer.applyTransform(trustJson).get
 
@@ -60,7 +61,7 @@ class AddNonEeaBusinessAssetTransformSpec extends FreeSpec with MustMatchers {
 
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-second-NonEeaBusinessAsset.json")
 
-      val transformer = AddNonEeaBusinessAssetTransform(nonEeaBusinessAsset)
+      val transformer = AddAssetTransform(Json.toJson(nonEeaBusinessAsset), nonEeaBusinessAsset.toString)
 
       val result = transformer.applyTransform(trustJson).get
 

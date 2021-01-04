@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package controllers
-
-import java.time.LocalDate
 
 import controllers.actions.FakeIdentifierAction
 import models.variation._
@@ -36,6 +34,7 @@ import transformers.remove.RemoveAsset
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
@@ -70,7 +69,7 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
       val nonEeaBusinessAssetTransformationService = mock[AssetsTransformationService]
       val controller = new AssetsTransformationController(identifierAction, nonEeaBusinessAssetTransformationService)(Implicits.global, Helpers.stubControllerComponents())
 
-      when(nonEeaBusinessAssetTransformationService.amendNonEeaBusinessAssetTransformer(any(), any(), any(), any())(any()))
+      when(nonEeaBusinessAssetTransformationService.amendAsset(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(Success))
 
       val request = FakeRequest("POST", "path")
@@ -80,12 +79,12 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
       val result = controller.amendNonEeaBusiness("aUTR", index).apply(request)
 
       status(result) mustBe OK
-      verify(nonEeaBusinessAssetTransformationService).amendNonEeaBusinessAssetTransformer(
+      verify(nonEeaBusinessAssetTransformationService).amendAsset(
         equalTo("aUTR"),
         equalTo(index),
         equalTo("id"),
         equalTo(nonEEABusiness)
-      )(any())
+      )(any(), any())
     }
 
     "must return an error for malformed json" in {
@@ -157,7 +156,7 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
         None
       )
 
-      when(nonEeaBusinessAssetTransformationService.addNonEeaBusinessAssetTransformer(any(), any(), any()))
+      when(nonEeaBusinessAssetTransformationService.addAsset(any(), any(), any())(any()))
         .thenReturn(Future.successful(true))
 
       val request = FakeRequest("POST", "path")
@@ -167,7 +166,7 @@ class AssetsTransformationControllerSpec extends FreeSpec with MockitoSugar with
       val result = controller.addNonEeaBusiness("aUTR").apply(request)
 
       status(result) mustBe OK
-      verify(nonEeaBusinessAssetTransformationService).addNonEeaBusinessAssetTransformer("aUTR", "id", newNonEeaBusinessAsset)
+      verify(nonEeaBusinessAssetTransformationService).addAsset("aUTR", "id", newNonEeaBusinessAsset)
     }
 
     "must return an error for malformed json" in {

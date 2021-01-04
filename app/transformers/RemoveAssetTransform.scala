@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,14 @@
 
 package transformers
 
-import java.time.LocalDate
-
 import play.api.libs.json._
 
-case class RemoveAssetTransform(
-                                 index : Int,
-                                 nonEEABusinessAsset : JsValue,
-                                 endDate : LocalDate,
-                                 assetType : String
-                               ) extends DeltaTransform with JsonOperations {
+import java.time.LocalDate
+
+case class RemoveAssetTransform(index : Int,
+                                asset : JsValue,
+                                endDate : LocalDate,
+                                assetType : String) extends DeltaTransform with JsonOperations {
 
   private lazy val path = __ \ "details" \ "trust" \ "assets" \ assetType
 
@@ -34,12 +32,12 @@ case class RemoveAssetTransform(
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    endEntity(input, path, Json.toJson(nonEEABusinessAsset), endDate, "endDate")
+    endEntity(input, path, Json.toJson(asset), endDate, "endDate")
   }
 }
 
 object RemoveAssetTransform {
-  val key = "RemoveNonEeaBusinessAssetTransform"
+  val key = "RemoveAssetTransform"
 
   implicit val format: Format[RemoveAssetTransform] = Json.format[RemoveAssetTransform]
 }
