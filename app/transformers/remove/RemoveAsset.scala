@@ -24,6 +24,12 @@ case class RemoveAsset(endDate: LocalDate, index: Int, `type`: String)
 
 object RemoveAsset {
   val validAssetTypes: Seq[String] = Seq(
+    "monetary",
+    "propertyOrLand",
+    "shares",
+    "business",
+    "partnerShip",
+    "other",
     "nonEEABusiness"
   )
 
