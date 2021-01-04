@@ -732,11 +732,11 @@ object IdentificationOrgType {
 
 // new 5MLD type
 case class NonEEABusinessType(lineNo: String,
-                               orgName: String,
-                               address: AddressType,
-                               govLawCountry: String,
-                               startDate: LocalDate,
-                               endDate: Option[LocalDate]) extends AssetType {
+                              orgName: String,
+                              address: AddressType,
+                              govLawCountry: String,
+                              startDate: LocalDate,
+                              endDate: Option[LocalDate]) extends AssetType {
 
   override def toString: String = NonEEABusinessType.toString
 }
