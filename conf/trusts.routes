@@ -96,3 +96,5 @@ PUT         /:identifier/trust-details/taxable                         controlle
 PUT         /:identifier/trust-details/uk-property                     controllers.TrustDetailsTransformationController.setProperty(identifier: String)
 PUT         /:identifier/trust-details/recorded                        controllers.TrustDetailsTransformationController.setRecorded(identifier: String)
 PUT         /:identifier/trust-details/uk-relation                     controllers.TrustDetailsTransformationController.setUKRelation(identifier: String)
+
+DELETE      /:identifier/transforms/migrate-to-taxable                 controllers.TrustVariationsController.removeTaxableMigrationTransforms(identifier: String)

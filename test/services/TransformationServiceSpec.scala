@@ -16,13 +16,12 @@
 
 package services
 
-import java.time.LocalDate
-
 import models.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
 import models.variation.{AmendedLeadTrusteeIndType, IdentificationType}
 import models.{AddressType, NameType}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
+import org.scalatest.RecoverMethods.recoverToSucceededIf
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
@@ -33,11 +32,13 @@ import transformers._
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{JsonFixtures, JsonUtils}
 
+import java.time.LocalDate
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonFixtures {
-  private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 
+  private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 
   private val unitTestLeadTrusteeInfo = AmendedLeadTrusteeIndType(
     name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
@@ -235,6 +236,82 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
             AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo),
             AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo))))
       }
+    }
+  }
+
+  ".removeTaxableMigrationTransforms" - {
+    
+    val utr: String = "utr"
+    val internalId: String = "internalId"
+
+    "must set transforms as empty list when there are none" in {
+      val repository = mock[TransformationRepositoryImpl]
+      val service = new TransformationService(repository, mock[TrustsService], auditService)
+
+      when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(Nil))))
+      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+
+      val result = service.removeTaxableMigrationTransforms(utr, internalId)
+
+      whenReady(result) { _ =>
+        verify(repository).set(
+          identifier = utr,
+          internalId = internalId,
+          transforms = ComposedDeltaTransform(Nil)
+        )
+      }
+    }
+
+    "must remove any transforms flagged with isTaxableMigrationTransform = true" in {
+      val repository = mock[TransformationRepositoryImpl]
+      val service = new TransformationService(repository, mock[TrustsService], auditService)
+
+      val initialTransforms = ComposedDeltaTransform(Seq(
+        AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo),
+        AddAssetTransform(Json.obj(), ""),
+        AmendAssetTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2021-01-01"), ""),
+        RemoveAssetTransform(0, Json.obj(), LocalDate.parse("2021-01-01"), "")
+      ))
+
+      val expectedTransformsAfterTaxableMigrationTransformsRemoved = ComposedDeltaTransform(Seq(
+        AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo)
+      ))
+
+      when(repository.get(any(), any())).thenReturn(Future.successful(Some(initialTransforms)))
+      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+
+      val result = service.removeTaxableMigrationTransforms(utr, internalId)
+
+      whenReady(result) { _ =>
+        verify(repository).set(
+          identifier = utr,
+          internalId = internalId,
+          transforms = expectedTransformsAfterTaxableMigrationTransformsRemoved
+        )
+      }
+    }
+
+    "must fail when get from transformation repository fails" in {
+      val repository = mock[TransformationRepositoryImpl]
+      val service = new TransformationService(repository, mock[TrustsService], auditService)
+
+      when(repository.get(any(), any())).thenReturn(Future.failed(new Throwable("repository.get failed")))
+
+      val result = service.removeTaxableMigrationTransforms(utr, internalId)
+
+      recoverToSucceededIf[Exception](result)
+    }
+
+    "must fail when set to transformation repository fails" in {
+      val repository = mock[TransformationRepositoryImpl]
+      val service = new TransformationService(repository, mock[TrustsService], auditService)
+
+      when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(Nil))))
+      when(repository.set(any(), any(), any())).thenReturn(Future.failed(new Throwable("repository.set failed")))
+
+      val result = service.removeTaxableMigrationTransforms(utr, internalId)
+
+      recoverToSucceededIf[Exception](result)
     }
   }
 }

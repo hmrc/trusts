@@ -29,6 +29,8 @@ case class AmendAssetTransform(index: Int,
   override val path: JsPath = __ \ 'details \ 'trust \ 'assets \ assetType
 
   override val endDateField: String = "endDate"
+
+  override val isTaxableMigrationTransform: Boolean = true
 }
 
 object AmendAssetTransform {

@@ -26,6 +26,8 @@ case class AddAssetTransform(asset: JsValue,
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     addToList(input, path, asset)
   }
+
+  override val isTaxableMigrationTransform: Boolean = true
 }
 
 object AddAssetTransform {

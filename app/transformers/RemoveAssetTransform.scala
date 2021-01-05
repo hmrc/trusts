@@ -39,6 +39,8 @@ case class RemoveAssetTransform(index: Int,
       JsSuccess(input)
     }
   }
+
+  override val isTaxableMigrationTransform: Boolean = true
 }
 
 object RemoveAssetTransform {

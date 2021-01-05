@@ -16,16 +16,16 @@
 
 package controllers
 
-import javax.inject.Inject
-import play.api.Logging
-import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, ControllerComponents}
 import controllers.actions.IdentifierAction
 import models.DeclarationForApi
 import models.auditing.TrustAuditing
-import services.{AuditService, VariationService}
+import play.api.Logging
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import services.{AuditService, TransformationService, VariationService}
 import utils.ValidationUtil
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -33,9 +33,10 @@ class TrustVariationsController @Inject()(
                                            identify: IdentifierAction,
                                            auditService: AuditService,
                                            variationService: VariationService,
+                                           transformationService: TransformationService,
                                            responseHandler: VariationsResponseHandler,
                                            cc: ControllerComponents
-                                    ) extends TrustsBaseController(cc) with ValidationUtil with Logging {
+                                         ) extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
   def declare(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
@@ -61,5 +62,8 @@ class TrustVariationsController @Inject()(
       )
     }
   }
-}
 
+  def removeTaxableMigrationTransforms(identifier: String): Action[AnyContent] = identify.async { request =>
+    transformationService.removeTaxableMigrationTransforms(identifier, request.internalId).map { _ => Ok }
+  }
+}

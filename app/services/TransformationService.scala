@@ -137,6 +137,21 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
+  def removeTaxableMigrationTransforms(identifier: String, internalId: String): Future[Boolean] = {
+    repository.get(identifier, internalId).map {
+      case Some(composedTransform) =>
+        composedTransform.deltaTransforms.filterNot(_.isTaxableMigrationTransform)
+      case None =>
+        Nil
+    }.flatMap { updatedTransforms =>
+      repository.set(identifier, internalId, ComposedDeltaTransform(updatedTransforms))
+    }.recoverWith {
+      case e =>
+        logger.error(s"Exception removing taxable migration transforms: ${e.getMessage}")
+        Future.failed(e)
+    }
+  }
+
   def removeAllTransformations(identifier: String, internalId: String): Future[Option[JsObject]] = {
     repository.resetCache(identifier, internalId)
   }

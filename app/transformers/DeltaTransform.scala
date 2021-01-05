@@ -23,6 +23,8 @@ trait DeltaTransform {
   def applyTransform(input: JsValue): JsResult[JsValue]
 
   def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = JsSuccess(input)
+
+  val isTaxableMigrationTransform: Boolean = false
 }
 
 object DeltaTransform {
