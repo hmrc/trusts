@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions.IdentifierAction
 import play.api.Logging
-import play.api.libs.json.{JsError, JsSuccess, JsValue}
+import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents}
 import services.TrustDetailsTransformationService
 import transformers.trustDetails.SetTrustDetailTransform
@@ -32,21 +32,22 @@ class TrustDetailsTransformationController @Inject()(identify: IdentifierAction,
                                                     (implicit val executionContext: ExecutionContext, cc: ControllerComponents)
   extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
-  def setExpress(identifier: String): Action[JsValue] = set(identifier, "expressTrust")
-  def setResident(identifier: String): Action[JsValue] = set(identifier, "trustUKResident")
-  def setTaxable(identifier: String): Action[JsValue] = set(identifier, "trustTaxable")
-  def setProperty(identifier: String): Action[JsValue] = set(identifier, "trustUKProperty")
-  def setRecorded(identifier: String): Action[JsValue] = set(identifier, "trustRecorded")
-  def setUKRelation(identifier: String): Action[JsValue] = set(identifier, "trustUKRelation")
+  def setExpress(identifier: String): Action[JsValue] = set[Boolean](identifier, "expressTrust")
+  def setResident(identifier: String): Action[JsValue] = set[Boolean](identifier, "trustUKResident")
+  def setTaxable(identifier: String): Action[JsValue] = set[Boolean](identifier, "trustTaxable")
+  def setProperty(identifier: String): Action[JsValue] = set[Boolean](identifier, "trustUKProperty")
+  def setRecorded(identifier: String): Action[JsValue] = set[Boolean](identifier, "trustRecorded")
+  def setUKRelation(identifier: String): Action[JsValue] = set[Boolean](identifier, "trustUKRelation")
 
-  private def set(identifier: String, trustDetail: String): Action[JsValue] = identify.async(parse.json) {
+  private def set[T](identifier: String, trustDetail: String)
+                    (implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
-      request.body.validate[Boolean] match {
+      request.body.validate[T] match {
         case JsSuccess(value, _) =>
           transformService.set(
             identifier,
             request.internalId,
-            SetTrustDetailTransform(value, trustDetail)
+            SetTrustDetailTransform(Json.toJson(value), trustDetail)
           ) map { _ =>
             Ok
           }

@@ -22,6 +22,7 @@ import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.libs.json.JsBoolean
 import transformers.trustDetails._
 import utils.{JsonFixtures, JsonUtils}
 
@@ -52,7 +53,7 @@ class TrustDetailsTransformationServiceSpec extends FreeSpec
           }
         }
 
-        val transform = SetTrustDetailTransform(value = true, "expressTrust")
+        val transform = SetTrustDetailTransform(JsBoolean(true), "expressTrust")
 
         val result = service.set("utr", "internalId", transform)
 
@@ -76,7 +77,7 @@ class TrustDetailsTransformationServiceSpec extends FreeSpec
           }
         }
 
-        val transform = SetTrustDetailTransform(value = true, "trustUKProperty")
+        val transform = SetTrustDetailTransform(JsBoolean(true), "trustUKProperty")
 
         val result = service.set("utr", "internalId", transform)
 
@@ -100,7 +101,7 @@ class TrustDetailsTransformationServiceSpec extends FreeSpec
           }
         }
 
-        val transform = SetTrustDetailTransform(value = true, "trustRecorded")
+        val transform = SetTrustDetailTransform(JsBoolean(true), "trustRecorded")
 
         val result = service.set("utr", "internalId", transform)
 
@@ -124,7 +125,7 @@ class TrustDetailsTransformationServiceSpec extends FreeSpec
           }
         }
 
-        val transform = SetTrustDetailTransform(value = true, "trustUKResident")
+        val transform = SetTrustDetailTransform(JsBoolean(true), "trustUKResident")
 
         val result = service.set("utr", "internalId", transform)
 
@@ -148,7 +149,7 @@ class TrustDetailsTransformationServiceSpec extends FreeSpec
           }
         }
 
-        val transform = SetTrustDetailTransform(value = true, "trustTaxable")
+        val transform = SetTrustDetailTransform(JsBoolean(true), "trustTaxable")
 
         val result = service.set("utr", "internalId", transform)
 
@@ -172,7 +173,7 @@ class TrustDetailsTransformationServiceSpec extends FreeSpec
           }
         }
 
-        val transform = SetTrustDetailTransform(value = true, "trustUKRelation")
+        val transform = SetTrustDetailTransform(JsBoolean(true), "trustUKRelation")
 
         val result = service.set("utr", "internalId", transform)
 

@@ -17,6 +17,7 @@
 package transformers.trustDetails
 
 import org.scalatest.{FreeSpec, MustMatchers}
+import play.api.libs.json.JsBoolean
 import utils.JsonUtils
 
 class SetTaxableTransformSpec extends FreeSpec with MustMatchers {
@@ -31,7 +32,7 @@ class SetTaxableTransformSpec extends FreeSpec with MustMatchers {
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-taxable.json")
           val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-taxable.json")
 
-          val transformer = SetTrustDetailTransform(value = false, "trustTaxable")
+          val transformer = SetTrustDetailTransform(JsBoolean(false), "trustTaxable")
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -42,7 +43,7 @@ class SetTaxableTransformSpec extends FreeSpec with MustMatchers {
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before.json")
           val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-taxable.json")
 
-          val transformer = SetTrustDetailTransform(value = false, "trustTaxable")
+          val transformer = SetTrustDetailTransform(JsBoolean(false), "trustTaxable")
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson

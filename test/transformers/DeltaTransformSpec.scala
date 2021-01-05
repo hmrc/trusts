@@ -19,7 +19,7 @@ package transformers
 import models.variation._
 import models.{AddressType, NameType}
 import org.scalatest.{FreeSpec, MustMatchers}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsBoolean, Json}
 import transformers.trustDetails._
 
 import java.time.LocalDate
@@ -296,17 +296,17 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
       val addOtherIndividualTransform = AddOtherIndividualTransform(otherIndividual)
 
-      val setExpressTransform = SetTrustDetailTransform(value = true, "expressTrust")
+      val setExpressTransform = SetTrustDetailTransform(JsBoolean(true), "expressTrust")
 
-      val setPropertyTransform = SetTrustDetailTransform(value = true, "trustUKProperty")
+      val setPropertyTransform = SetTrustDetailTransform(JsBoolean(true), "trustUKProperty")
 
-      val setRecordedTransform = SetTrustDetailTransform(value = true, "trustRecorded")
+      val setRecordedTransform = SetTrustDetailTransform(JsBoolean(true), "trustRecorded")
 
-      val setResidentTransform = SetTrustDetailTransform(value = true, "trustUKResident")
+      val setResidentTransform = SetTrustDetailTransform(JsBoolean(true), "trustUKResident")
 
-      val setTaxableTransform = SetTrustDetailTransform(value = true, "trustTaxable")
+      val setTaxableTransform = SetTrustDetailTransform(JsBoolean(true), "trustTaxable")
 
-      val setUKRelationTransform = SetTrustDetailTransform(value = true, "trustUKRelation")
+      val setUKRelationTransform = SetTrustDetailTransform(JsBoolean(true), "trustUKRelation")
 
       val json = Json.parse(
         s"""{

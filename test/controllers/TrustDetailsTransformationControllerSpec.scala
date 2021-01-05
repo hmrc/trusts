@@ -68,7 +68,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
         verify(service).set(
           equalTo("aUTR"),
           equalTo("id"),
-          equalTo(SetTrustDetailTransform(value = true, "expressTrust")))
+          equalTo(SetTrustDetailTransform(JsBoolean(true), "expressTrust")))
       }
 
       "return an BadRequest for malformed json" in {
@@ -111,7 +111,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
         verify(service).set(
           equalTo("aUTR"),
           equalTo("id"),
-          equalTo(SetTrustDetailTransform(value = true, "trustUKProperty")))
+          equalTo(SetTrustDetailTransform(JsBoolean(true), "trustUKProperty")))
       }
 
       "return an BadRequest for malformed json" in {
@@ -154,7 +154,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
         verify(service).set(
           equalTo("aUTR"),
           equalTo("id"),
-          equalTo(SetTrustDetailTransform(value = true, "trustRecorded")))
+          equalTo(SetTrustDetailTransform(JsBoolean(true), "trustRecorded")))
       }
 
       "return an BadRequest for malformed json" in {
@@ -197,7 +197,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
         verify(service).set(
           equalTo("aUTR"),
           equalTo("id"),
-          equalTo(SetTrustDetailTransform(value = true, "trustUKResident")))
+          equalTo(SetTrustDetailTransform(JsBoolean(true), "trustUKResident")))
       }
 
       "return an BadRequest for malformed json" in {
@@ -240,7 +240,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
         verify(service).set(
           equalTo("aUTR"),
           equalTo("id"),
-          equalTo(SetTrustDetailTransform(value = true, "trustTaxable")))
+          equalTo(SetTrustDetailTransform(JsBoolean(true), "trustTaxable")))
       }
 
       "return an BadRequest for malformed json" in {
@@ -283,7 +283,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
         verify(service).set(
           equalTo("aUTR"),
           equalTo("id"),
-          equalTo(SetTrustDetailTransform(value = true, "trustUKRelation")))
+          equalTo(SetTrustDetailTransform(JsBoolean(true), "trustUKRelation")))
       }
 
       "return an BadRequest for malformed json" in {
