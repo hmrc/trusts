@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package transformers
 
 import play.api.libs.json.{JsValue, _}
-import transformers.trustDetails.{SetExpressTransform, SetPropertyTransform, SetRecordedTransform, SetResidentTransform, SetTaxableTransform, SetUKRelationTransform}
+import transformers.trustDetails._
 
 trait DeltaTransform {
   def applyTransform(input: JsValue): JsResult[JsValue]
@@ -41,7 +41,7 @@ object DeltaTransform {
           protectorReads orElse
           otherIndividualReads orElse
           trustDetailsReads orElse
-          nonEeaBusinessAssetReads
+          assetReads
       ) (value.as[JsObject]) orElse (throw new Exception(s"Don't know how to deserialise transform"))
   )
 
@@ -107,9 +107,9 @@ object DeltaTransform {
     readsForTransform[SetUKRelationTransform](SetUKRelationTransform.key)
   }
 
-  def nonEeaBusinessAssetReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
-    readsForTransform[AddNonEeaBusinessAssetTransform](AddNonEeaBusinessAssetTransform.key) orElse
-    readsForTransform[AmendNonEeaBusinessAssetTransform](AmendNonEeaBusinessAssetTransform.key) orElse
+  def assetReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
+    readsForTransform[AddAssetTransform](AddAssetTransform.key) orElse
+    readsForTransform[AmendAssetTransform](AmendAssetTransform.key) orElse
     readsForTransform[RemoveAssetTransform](RemoveAssetTransform.key)
   }
 
@@ -228,13 +228,13 @@ object DeltaTransform {
   }
 
   def addNonEeaBusinessAssetWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
-    case transform: AddNonEeaBusinessAssetTransform =>
-      Json.obj(AddNonEeaBusinessAssetTransform.key -> Json.toJson(transform)(AddNonEeaBusinessAssetTransform.format))
+    case transform: AddAssetTransform =>
+      Json.obj(AddAssetTransform.key -> Json.toJson(transform)(AddAssetTransform.format))
   }
 
   def amendNonEeaBusinessAssetWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
-    case transform: AmendNonEeaBusinessAssetTransform =>
-      Json.obj(AmendNonEeaBusinessAssetTransform.key -> Json.toJson(transform)(AmendNonEeaBusinessAssetTransform.format))
+    case transform: AmendAssetTransform =>
+      Json.obj(AmendAssetTransform.key -> Json.toJson(transform)(AmendAssetTransform.format))
   }
 
   def removeNonEeaBusinessAssetWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {

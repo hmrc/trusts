@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package models.variation
 
-import java.time.LocalDate
-
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
 import models.JsonWithoutNulls._
 import models._
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
+
+import java.time.LocalDate
 
 case class TrustVariation(
                       matchData: MatchData,
@@ -624,72 +624,93 @@ object SettlorCompany {
   ).withoutNulls
 }
 
-case class Assets(
-                   monetary: Option[List[AssetMonetaryAmount]],
-                   propertyOrLand: Option[List[PropertyLandType]],
-                   shares: Option[List[SharesType]],
-                   business: Option[List[BusinessAssetType]],
-                   partnerShip: Option[List[PartnershipType]],
-                   other: Option[List[OtherAssetType]],
-                   nonEEABusiness: Option[List[NonEEABusinessType]]
-                 )
+sealed trait AssetType
+
+case class Assets(monetary: Option[List[AssetMonetaryAmount]],
+                  propertyOrLand: Option[List[PropertyLandType]],
+                  shares: Option[List[SharesType]],
+                  business: Option[List[BusinessAssetType]],
+                  partnerShip: Option[List[PartnershipType]],
+                  other: Option[List[OtherAssetType]],
+                  nonEEABusiness: Option[List[NonEEABusinessType]])
 
 object Assets {
   implicit val assetsFormat: Format[Assets] = Json.format[Assets]
 }
 
+case class AssetMonetaryAmount(assetMonetaryAmount: Long) extends AssetType {
+  override def toString: String = AssetMonetaryAmount.toString
+}
+
+object AssetMonetaryAmount {
+  implicit val assetMonetaryAmountFormat: Format[AssetMonetaryAmount] = Json.format[AssetMonetaryAmount]
+  override def toString: String = "monetary"
+}
+
 case class PropertyLandType(buildingLandName: Option[String],
                             address: Option[AddressType],
                             valueFull: Long,
-                            valuePrevious: Option[Long])
+                            valuePrevious: Option[Long]) extends AssetType {
+
+  override def toString: String = PropertyLandType.toString
+}
 
 object PropertyLandType {
   implicit val propertyLandTypeFormat: Format[PropertyLandType] = Json.format[PropertyLandType]
+  override def toString: String = "propertyOrLand"
 }
 
-case class SharesType(
-                       numberOfShares: Option[String],
-                       orgName: String,
-                       utr: Option[String],
-                       shareClass: Option[String],
-                       typeOfShare: Option[String],
-                       value: Option[Long]
-                     )
+case class SharesType(numberOfShares: Option[String],
+                      orgName: String,
+                      utr: Option[String],
+                      shareClass: Option[String],
+                      typeOfShare: Option[String],
+                      value: Option[Long]) extends AssetType {
+
+  override def toString: String = SharesType.toString
+}
 
 object SharesType {
   implicit val sharesTypeFormat: Format[SharesType] = Json.format[SharesType]
+  override def toString: String = "shares"
 }
 
-case class BusinessAssetType(
-                              utr: Option[String],
-                              orgName: String,
-                              businessDescription: String,
-                              address: Option[AddressType],
-                              businessValue: Option[Long]
-                            )
+case class BusinessAssetType(utr: Option[String],
+                             orgName: String,
+                             businessDescription: String,
+                             address: Option[AddressType],
+                             businessValue: Option[Long]) extends AssetType {
+
+  override def toString: String = BusinessAssetType.toString
+}
 
 object BusinessAssetType {
   implicit val businessAssetTypeFormat: Format[BusinessAssetType] = Json.format[BusinessAssetType]
+  override def toString: String = "business"
 }
 
-case class PartnershipType(
-                            utr: Option[String],
-                            description: String,
-                            partnershipStart: Option[LocalDate]
-                          )
+case class PartnershipType(utr: Option[String],
+                           description: String,
+                           partnershipStart: Option[LocalDate]) extends AssetType {
+
+  override def toString: String = PartnershipType.toString
+}
 
 object PartnershipType {
-
   implicit val partnershipTypeFormat: Format[PartnershipType] = Json.format[PartnershipType]
+  override def toString: String = "partnerShip"
 }
 
 case class OtherAssetType(description: String,
-                          value: Option[Long])
+                          value: Option[Long]) extends AssetType {
+
+  override def toString: String = OtherAssetType.toString
+}
 
 object OtherAssetType {
   implicit val otherAssetTypeFormat: Format[OtherAssetType] = Json.format[OtherAssetType]
+  override def toString: String = "other"
 }
-
 
 case class IdentificationType(nino: Option[String],
                               passport: Option[PassportType],
@@ -711,13 +732,16 @@ object IdentificationOrgType {
 
 // new 5MLD type
 case class NonEEABusinessType(lineNo: String,
-                               orgName: String,
-                               address: AddressType,
-                               govLawCountry: String,
-                               startDate: LocalDate,
-                               endDate: Option[LocalDate])
+                              orgName: String,
+                              address: AddressType,
+                              govLawCountry: String,
+                              startDate: LocalDate,
+                              endDate: Option[LocalDate]) extends AssetType {
+
+  override def toString: String = NonEEABusinessType.toString
+}
 
 object NonEEABusinessType {
   implicit val format: Format[NonEEABusinessType] = Json.format[NonEEABusinessType]
+  override def toString: String = "nonEEABusiness"
 }
-

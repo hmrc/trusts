@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,5 +19,5 @@ package models.requests
 import play.api.mvc.{Request, WrappedRequest}
 import uk.gov.hmrc.auth.core.AffinityGroup
 
-case class IdentifierRequest[A](request: Request[A], identifier: String, sessionId: String, affinityGroup: AffinityGroup)
+case class IdentifierRequest[A](request: Request[A], internalId: String, sessionId: String, affinityGroup: AffinityGroup)
   extends WrappedRequest[A](request)

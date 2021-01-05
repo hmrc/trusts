@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ class OtherIndividualTransformationController @Inject()(
       implicit request => {
         request.body.validate[RemoveOtherIndividual] match {
           case JsSuccess(otherIndividual, _) =>
-            transformService.removeOtherIndividual(identifier, request.identifier, otherIndividual) map { _ =>
+            transformService.removeOtherIndividual(identifier, request.internalId, otherIndividual) map { _ =>
               Ok
             }
           case JsError(_) => Future.successful(BadRequest)
@@ -53,7 +53,7 @@ class OtherIndividualTransformationController @Inject()(
             transformService.amendOtherIndividualTransformer(
               identifier,
               index,
-              request.identifier,
+              request.internalId,
               otherIndividual
             ) map { _ =>
               Ok
@@ -73,7 +73,7 @@ class OtherIndividualTransformationController @Inject()(
 
             transformService.addOtherIndividualTransformer(
               identifier,
-              request.identifier,
+              request.internalId,
               otherIndividual
             ) map { _ =>
               Ok

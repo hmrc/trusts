@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,11 +42,11 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
     implicit request => {
       request.body.validate[RegistrationSubmissionDraftData] match {
         case JsSuccess(draftData, _) =>
-          submissionRepository.getDraft(draftId, request.identifier).flatMap(
+          submissionRepository.getDraft(draftId, request.internalId).flatMap(
             result => {
               val draft: RegistrationSubmissionDraft = result match {
                 case Some(draft) => draft
-                case None => RegistrationSubmissionDraft(draftId, request.identifier, localDateTimeService.now, Json.obj(), None, Some(true))
+                case None => RegistrationSubmissionDraft(draftId, request.internalId, localDateTimeService.now, Json.obj(), None, Some(true))
               }
 
               val body: JsValue = draftData.data
@@ -126,11 +126,11 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
     implicit request => {
       request.body.validate[RegistrationSubmission.DataSet] match {
         case JsSuccess(dataSet, _) =>
-          submissionRepository.getDraft(draftId, request.identifier).flatMap(
+          submissionRepository.getDraft(draftId, request.internalId).flatMap(
             result => {
               val draft: RegistrationSubmissionDraft = result match {
                 case Some(draft) => draft
-                case None => RegistrationSubmissionDraft(draftId, request.identifier, localDateTimeService.now, Json.obj(), None, Some(true))
+                case None => RegistrationSubmissionDraft(draftId, request.internalId, localDateTimeService.now, Json.obj(), None, Some(true))
               }
 
               applyDataSet(draft, dataSetOperations(sectionKey, dataSet))
@@ -177,7 +177,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
 
   def getSection(draftId: String, sectionKey: String): Action[AnyContent] = identify.async {
     implicit request: IdentifierRequest[AnyContent] =>
-      submissionRepository.getDraft(draftId, request.identifier).map {
+      submissionRepository.getDraft(draftId, request.internalId).map {
         case Some(draft) =>
           val path = JsPath() \ sectionKey
           draft.draftData.transform(path.json.pick) match {
@@ -189,7 +189,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
   }
 
   def getDrafts: Action[AnyContent] = identify.async { request =>
-    submissionRepository.getRecentDrafts(request.identifier, request.affinityGroup).map {
+    submissionRepository.getRecentDrafts(request.internalId, request.affinityGroup).map {
       drafts =>
         implicit val draftWrites: Writes[RegistrationSubmissionDraft] = new Writes[RegistrationSubmissionDraft] {
           override def writes(draft: RegistrationSubmissionDraft): JsValue =
@@ -210,7 +210,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
   }
 
   def removeDraft(draftId: String): Action[AnyContent] = identify.async { request =>
-    submissionRepository.removeDraft(draftId, request.identifier).map { _ => Ok }
+    submissionRepository.removeDraft(draftId, request.internalId).map { _ => Ok }
   }
 
   private def buildResponseJson(draft: RegistrationSubmissionDraft, data: JsValue) = {
@@ -230,7 +230,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
 
   def getWhenTrustSetup(draftId: String) : Action[AnyContent] = identify.async {
     implicit request =>
-      submissionRepository.getDraft(draftId, request.identifier).map {
+      submissionRepository.getDraft(draftId, request.internalId).map {
         case Some(draft) =>
           // Todo remove old path once trusts-details has migrated to register-trust-details-frontend and is in production
           // Added the ability for both paths due to 28 days S4L for draft registrations
@@ -268,7 +268,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
 
   def getTrustName(draftId: String) : Action[AnyContent] = identify.async {
     implicit request =>
-      submissionRepository.getDraft(draftId, request.identifier).map {
+      submissionRepository.getDraft(draftId, request.internalId).map {
         case Some(draft) =>
           val matchingPath = JsPath \ "main" \ "data" \ "matching" \ "trustName"
           val detailsPath = JsPath \ "trustDetails" \ "data" \ "trustDetails" \ "trustName"
@@ -308,7 +308,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
 
   def reset(draftId: String, section: String, mappedDataKey : String) : Action[AnyContent] = identify.async {
     implicit request =>
-      submissionRepository.getDraft(draftId, request.identifier).flatMap {
+      submissionRepository.getDraft(draftId, request.internalId).flatMap {
         case Some(draft) =>
           val statusPath = registration.Status.path \ section
           val userAnswersPath = __ \ section
@@ -358,7 +358,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
 
   private def getAtPath[T](draftId: String, path: JsPath)
                           (implicit request: IdentifierRequest[AnyContent], rds: Reads[T], wts: Writes[T]): Future[Result] = {
-    submissionRepository.getDraft(draftId, request.identifier).map {
+    submissionRepository.getDraft(draftId, request.internalId).map {
       case Some(draft) =>
         draft.draftData.transform(path.json.pick).map(_.as[T]) match {
           case JsSuccess(value, _) =>
@@ -379,7 +379,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
 
       import utils.JsonOps.RemoveRoleInCompanyFields
 
-      submissionRepository.getDraft(draftId, request.identifier).flatMap {
+      submissionRepository.getDraft(draftId, request.internalId).flatMap {
         case Some(draft) =>
 
           val initialDraftData: JsValue = draft.draftData
@@ -413,7 +413,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
   private def removeAtPath(draftId: String, path: JsPath)
                           (implicit request: IdentifierRequest[AnyContent]): Future[Result] = {
 
-    submissionRepository.getDraft(draftId, request.identifier).flatMap {
+    submissionRepository.getDraft(draftId, request.internalId).flatMap {
       case Some(draft) =>
 
         val initialDraftData: JsValue = draft.draftData

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ object NonTaxable5MLDFixtures extends JsonFixtures {
 
     lazy val get5MLDTrustNonTaxableResponse: String = getJsonFromFile("5MLD/NonTaxable/des/valid-get-trust-5mld-non-taxable-des-response.json")
     lazy val newGet5MLDTrustNonTaxableResponse: String = getJsonFromFile("5MLD/NonTaxable/des/new-valid-get-trust-5mld-non-taxable-des-response.json")
+    lazy val get5MLDTrustNonTaxableResponseWithAllAssetTypes: String = getJsonFromFile("5MLD/NonTaxable/des/valid-get-trust-5mld-non-taxable-des-response-with-all-asset-types.json")
   }
 
   object Cache {
@@ -54,6 +55,7 @@ object NonTaxable5MLDFixtures extends JsonFixtures {
 
     lazy val getTransformedNonTaxableTrustResponse: JsValue = getJsonValueFromFile("5MLD/NonTaxable/trusts/get-trust-transformed-non-taxable-response.json")
     lazy val newGetTransformedNonTaxableTrustResponse: JsValue = getJsonValueFromFile("5MLD/NonTaxable/trusts/new-get-trust-transformed-non-taxable-response.json")
+    lazy val getTransformedNonTaxableTrustResponseWithAllAssetTypes: JsValue = getJsonValueFromFile("5MLD/NonTaxable/trusts/get-trust-transformed-non-taxable-response-with-all-asset-types.json")
 
   }
 

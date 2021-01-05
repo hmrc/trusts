@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ class RegisterTrustController @Inject()(trustsService: TrustsService, config: Ap
                         event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
                         registration = trustsRegistrationRequest,
                         draftId = draftId,
-                        internalId = request.identifier,
+                        internalId = request.internalId,
                         response = response
                       )
 
@@ -96,7 +96,7 @@ class RegisterTrustController @Inject()(trustsService: TrustsService, config: Ap
                         event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
                         registration = trustsRegistrationRequest,
                         draftId = draftId,
-                        internalId = request.identifier,
+                        internalId = request.internalId,
                         response = RegistrationFailureResponse(403, "ALREADY_REGISTERED", "Trust is already registered.")
                       )
 
@@ -109,7 +109,7 @@ class RegisterTrustController @Inject()(trustsService: TrustsService, config: Ap
                         event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
                         registration = trustsRegistrationRequest,
                         draftId = draftId,
-                        internalId = request.identifier,
+                        internalId = request.internalId,
                         response = RegistrationFailureResponse(403, "NO_MATCH", "There is no match in HMRC records.")
                       )
 
@@ -122,7 +122,7 @@ class RegisterTrustController @Inject()(trustsService: TrustsService, config: Ap
                         event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
                         registration = trustsRegistrationRequest,
                         draftId = draftId,
-                        internalId = request.identifier,
+                        internalId = request.internalId,
                         response = RegistrationFailureResponse(503, "SERVICE_UNAVAILABLE", "Dependent systems are currently not responding.")
                       )
 
@@ -135,7 +135,7 @@ class RegisterTrustController @Inject()(trustsService: TrustsService, config: Ap
                         event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
                         registration = trustsRegistrationRequest,
                         draftId = draftId,
-                        internalId = request.identifier,
+                        internalId = request.internalId,
                         response = RegistrationFailureResponse(400, "INVALID_PAYLOAD", "Submission has not passed validation. Invalid payload..")
                       )
 

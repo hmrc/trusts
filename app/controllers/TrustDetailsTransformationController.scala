@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ class TrustDetailsTransformationController @Inject()(
           case JsSuccess(express, _) =>
             transformService.setExpressTransformer(
               identifier,
-              request.identifier,
+              request.internalId,
               express
             ) map { _ =>
               Ok
@@ -57,7 +57,7 @@ class TrustDetailsTransformationController @Inject()(
           case JsSuccess(resident, _) =>
             transformService.setResidentTransformer(
               identifier,
-              request.identifier,
+              request.internalId,
               resident
             ) map { _ =>
               Ok
@@ -76,7 +76,7 @@ class TrustDetailsTransformationController @Inject()(
           case JsSuccess(taxable, _) =>
             transformService.setTaxableTransformer(
               identifier,
-              request.identifier,
+              request.internalId,
               taxable
             ) map { _ =>
               Ok
@@ -95,7 +95,7 @@ class TrustDetailsTransformationController @Inject()(
           case JsSuccess(property, _) =>
             transformService.setPropertyTransformer(
               identifier,
-              request.identifier,
+              request.internalId,
               property
             ) map { _ =>
               Ok
@@ -114,7 +114,7 @@ class TrustDetailsTransformationController @Inject()(
           case JsSuccess(recorded, _) =>
             transformService.setRecordedTransformer(
               identifier,
-              request.identifier,
+              request.internalId,
               recorded
             ) map { _ =>
               Ok
@@ -133,7 +133,7 @@ class TrustDetailsTransformationController @Inject()(
         case JsSuccess(ukRelation, _) =>
           transformService.setUKRelationTransformer(
             identifier,
-            request.identifier,
+            request.internalId,
             ukRelation
           ) map { _ =>
             Ok

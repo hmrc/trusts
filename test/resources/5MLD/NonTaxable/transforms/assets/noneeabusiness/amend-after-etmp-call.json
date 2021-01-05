@@ -332,6 +332,37 @@
         }
       },
       "assets": {
+        "monetary": [
+          {
+            "assetMonetaryAmount": 1000
+          }
+        ],
+        "propertyOrLand": [
+          {
+            "valueFull": 1000
+          }
+        ],
+        "shares": [
+          {
+            "orgName": "Shares Ltd"
+          }
+        ],
+        "business": [
+          {
+            "orgName": "Business Ltd",
+            "businessDescription": "Business description"
+          }
+        ],
+        "partnerShip": [
+          {
+            "description": "Partnership description"
+          }
+        ],
+        "other": [
+          {
+            "description": "Other description"
+          }
+        ],
         "nonEEABusiness": [
           {
             "address": {

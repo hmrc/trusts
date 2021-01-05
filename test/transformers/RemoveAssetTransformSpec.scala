@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package transformers
 
-import java.time.LocalDate
-
 import models.AddressType
 import models.variation.NonEEABusinessType
 import org.mockito.Matchers.any
@@ -27,15 +25,16 @@ import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
 import repositories.TransformationRepository
-import services.{AuditService, TrustsService, TransformationService}
+import services.{AuditService, TransformationService, TrustsService}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.JsonUtils
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class RemoveAssetTransformSpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar {
 
-  private def nonEeaBusinessAssetJson(value1 : String, endDate: Option[LocalDate] = None, withLineNo: Boolean = true) = {
+  private def assetJson(value1 : String, endDate: Option[LocalDate] = None, withLineNo: Boolean = true) = {
     val a = Json.obj("field1" -> value1, "field2" -> "value20")
 
     val b = if (endDate.isDefined) {a.deepMerge(Json.obj("endDate" -> endDate.get))} else a
@@ -53,15 +52,15 @@ class RemoveAssetTransformSpec extends FreeSpec with MustMatchers with ScalaFutu
   }
 
   private val inputJson = buildInputJson(Seq(
-    nonEeaBusinessAssetJson("One"),
-    nonEeaBusinessAssetJson("Two"),
-    nonEeaBusinessAssetJson("Three")
+    assetJson("One"),
+    assetJson("Two"),
+    assetJson("Three")
   ))
 
-  "Remove nonEeaBusinessAsset Transforms should round trip through JSON as part of Composed Transform" in {
+  "Remove asset transforms should round trip through JSON as part of Composed Transform" in {
     val OUT = ComposedDeltaTransform(Seq(
-      RemoveAssetTransform(56, nonEeaBusinessAssetJson("Blah Blah Blah"), LocalDate.of(1563, 10, 23),"nonEEABusiness"),
-      RemoveAssetTransform(12, nonEeaBusinessAssetJson("Foo"), LocalDate.of(2317, 12, 21), "nonEEABusiness")
+      RemoveAssetTransform(56, assetJson("Blah Blah Blah"), LocalDate.of(1563, 10, 23),"nonEEABusiness"),
+      RemoveAssetTransform(12, assetJson("Foo"), LocalDate.of(2317, 12, 21), "nonEEABusiness")
     ))
 
     Json.toJson(OUT).validate[ComposedDeltaTransform] match {
@@ -70,13 +69,13 @@ class RemoveAssetTransformSpec extends FreeSpec with MustMatchers with ScalaFutu
     }
   }
 
-  "the remove nonEeaBusiness asset normal transform must" - {
+  "the remove asset normal transform must" - {
 
-    "remove a nonEeaBusiness asset from the list that is returned to the frontend" in {
+    "remove an asset from the list that is returned to the frontend" in {
 
       val expectedOutput = buildInputJson(Seq(
-        nonEeaBusinessAssetJson("One"),
-        nonEeaBusinessAssetJson("Three")
+        assetJson("One"),
+        assetJson("Three")
       ))
 
       val OUT = ComposedDeltaTransform(Seq(RemoveAssetTransform(1, Json.obj(), LocalDate.of(2018, 4, 21), "nonEEABusiness")))
@@ -106,11 +105,13 @@ class RemoveAssetTransformSpec extends FreeSpec with MustMatchers with ScalaFutu
         case _ => fail("Transform failed")
       }
     }
-    "remove the section if the last nonEeaBusinessAsset in that section is removed" in {
-      val inputJson = buildInputJson(Seq(nonEeaBusinessAssetJson("One")))
+
+    "remove the section if the last asset in that section is removed" in {
+
+      val inputJson = buildInputJson(Seq(assetJson("One")))
 
       val transforms = Seq(
-        RemoveAssetTransform(0, nonEeaBusinessAssetJson("One", None, withLineNo = false), LocalDate.of(2018, 4, 21), "nonEEABusiness")
+        RemoveAssetTransform(0, assetJson("One", None, withLineNo = false), LocalDate.of(2018, 4, 21), "nonEEABusiness")
       )
 
       val OUT = ComposedDeltaTransform(transforms)
@@ -121,42 +122,66 @@ class RemoveAssetTransformSpec extends FreeSpec with MustMatchers with ScalaFutu
         case _ => fail("Transform failed")
       }
     }
-
   }
 
-  "the remove nonEeaBusinessAsset declaration transform must" - {
+  "the remove asset declaration transform must" - {
 
-    "set an end date on  an nonEeaBusinessAsset from the list that is sent to ETMP" in {
+    "when non-EEA business asset" - {
+      "must set an end date" in {
 
-      val expectedOutput = buildInputJson(Seq(
-        nonEeaBusinessAssetJson("One"),
-        nonEeaBusinessAssetJson("Three"),
-        nonEeaBusinessAssetJson("Two", Some(LocalDate.of(2018, 4, 21)))
+        val expectedOutput = buildInputJson(Seq(
+          assetJson("One"),
+          assetJson("Three"),
+          assetJson("Two", Some(LocalDate.of(2018, 4, 21)))
+        ))
 
-      ))
+        val repo = mock[TransformationRepository]
+        val trustsService = mock[TrustsService]
+        val auditService = mock[AuditService]
+        val transforms = Seq(RemoveAssetTransform(1, assetJson("Two"), LocalDate.of(2018, 4, 21), "nonEEABusiness"))
+        when(repo.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))
 
-      val repo = mock[TransformationRepository]
-      val trustsService = mock[TrustsService]
-      val auditService = mock[AuditService]
-      val transforms = Seq(RemoveAssetTransform( 1, nonEeaBusinessAssetJson("Two"), LocalDate.of(2018, 4, 21), "nonEEABusiness"))
-      when(repo.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))
+        val SUT = new TransformationService(repo, trustsService, auditService)
 
-      val SUT = new TransformationService(repo, trustsService, auditService)
-
-      SUT.applyDeclarationTransformations("UTRUTRUTR", "InternalId", inputJson)(HeaderCarrier()).futureValue match {
-        case JsSuccess(value, _) => value mustBe expectedOutput
-        case _ => fail("Transform failed")
+        SUT.applyDeclarationTransformations("UTRUTRUTR", "InternalId", inputJson)(HeaderCarrier()).futureValue match {
+          case JsSuccess(value, _) => value mustBe expectedOutput
+          case _ => fail("Transform failed")
+        }
       }
     }
 
-    "ignore a nonEeaBusinessAsset that was added then removed" in {
+    "when not non-EEA business asset" - {
+      "must not set an end date" in {
+
+        val expectedOutput = buildInputJson(Seq(
+          assetJson("One"),
+          assetJson("Two"),
+          assetJson("Three")
+        ))
+
+        val repo = mock[TransformationRepository]
+        val trustsService = mock[TrustsService]
+        val auditService = mock[AuditService]
+        val transforms = Seq(RemoveAssetTransform(1, assetJson("Two"), LocalDate.of(2018, 4, 21), "other"))
+        when(repo.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))
+
+        val SUT = new TransformationService(repo, trustsService, auditService)
+
+        SUT.applyDeclarationTransformations("UTRUTRUTR", "InternalId", inputJson)(HeaderCarrier()).futureValue match {
+          case JsSuccess(value, _) => value mustBe expectedOutput
+          case _ => fail("Transform failed")
+        }
+      }
+    }
+
+    "ignore an asset that was added then removed" in {
 
       val repo = mock[TransformationRepository]
       val trustsService = mock[TrustsService]
       val auditService = mock[AuditService]
       val transforms = Seq(
-        AddNonEeaBusinessAssetTransform(NonEEABusinessType("01", "TestOrg", AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK"), "UK", LocalDate.parse("1967-12-30"),None)),
-        RemoveAssetTransform(3, nonEeaBusinessAssetJson("Two", None, withLineNo = false), LocalDate.of(2018, 4, 21), "nonEEABusiness")
+        AddAssetTransform(Json.toJson(NonEEABusinessType("01", "TestOrg", AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK"), "UK", LocalDate.parse("1967-12-30"), None)), "nonEEABusiness"),
+        RemoveAssetTransform(3, assetJson("Two", None, withLineNo = false), LocalDate.of(2018, 4, 21), "nonEEABusiness")
       )
 
       when(repo.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))

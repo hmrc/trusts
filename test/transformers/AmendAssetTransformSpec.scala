@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 package transformers
 
-import java.time.LocalDate
-
 import models.AddressType
 import models.variation.NonEEABusinessType
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
 import utils.JsonUtils
 
-class AmendNonEeaBusinessAssetTransformSpec extends FreeSpec with MustMatchers {
+import java.time.LocalDate
+
+class AmendAssetTransformSpec extends FreeSpec with MustMatchers {
 
   private val address =  AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "GB")
 
@@ -50,7 +50,7 @@ class AmendNonEeaBusinessAssetTransformSpec extends FreeSpec with MustMatchers {
         val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-non-eea-business-asset-transform-before.json")
         val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-non-eea-business-asset-transform-after.json")
 
-        val transformer = AmendNonEeaBusinessAssetTransform(1, Json.toJson(amendedNonEeaBusinessAsset), Json.toJson(originalNonEeaBusinessAsset), endDate)
+        val transformer = AmendAssetTransform(1, Json.toJson(amendedNonEeaBusinessAsset), Json.toJson(originalNonEeaBusinessAsset), endDate, amendedNonEeaBusinessAsset.toString)
 
         val result = transformer.applyTransform(beforeJson).get
         result mustBe afterJson
@@ -64,7 +64,7 @@ class AmendNonEeaBusinessAssetTransformSpec extends FreeSpec with MustMatchers {
         val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-non-eea-business-asset-transform-before.json")
         val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-non-eea-business-asset-transform-after-declaration.json")
 
-        val transformer = AmendNonEeaBusinessAssetTransform(1, Json.toJson(amendedNonEeaBusinessAsset), Json.toJson(originalNonEeaBusinessAsset), endDate)
+        val transformer = AmendAssetTransform(1, Json.toJson(amendedNonEeaBusinessAsset), Json.toJson(originalNonEeaBusinessAsset), endDate, amendedNonEeaBusinessAsset.toString)
 
         val transformed = transformer.applyTransform(beforeJson).get
         val result = transformer.applyDeclarationTransform(transformed).get

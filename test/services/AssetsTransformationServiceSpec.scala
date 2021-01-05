@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package services
 
-import java.time.LocalDate
-
 import models.AddressType
 import models.variation._
 import org.mockito.Matchers._
@@ -32,15 +30,26 @@ import transformers.remove.RemoveAsset
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{JsonFixtures, JsonUtils}
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class AssetsTransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonFixtures {
-  private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
+  
+  private implicit val pc: PatienceConfig = PatienceConfig(
+    timeout = Span(1000, Millis),
+    interval = Span(15, Millis)
+  )
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+  private implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  private def nonEeaBusinessAssetJson(value1: String, endDate: Option[LocalDate] = None) = {
+  private val index: Int = 0
+  private val utr: String = "utr"
+  private val internalId: String = "internalId"
+  private val arbitraryAssetType: String = "nonEEABusiness"
+  private val date: LocalDate = LocalDate.parse("2000-01-01")
+
+  private def assetJson(value1: String, endDate: Option[LocalDate] = None): JsObject = {
     if (endDate.isDefined) {
       Json.obj("field1" -> value1, "field2" -> "value20", "endDate" -> endDate.get, "lineNo" -> 65)
     } else {
@@ -52,82 +61,110 @@ class AssetsTransformationServiceSpec extends FreeSpec with MockitoSugar with Sc
     override def now: LocalDate = LocalDate.of(1999, 3, 14)
   }
 
-  def buildInputJson(nonEeaBusinessAssetType: String, nonEeaBusinessAssetData: Seq[JsValue]): JsObject = {
+  def buildInputJson(assetType: String, assetData: Seq[JsValue]): JsObject = {
     val baseJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-    val adder = (__ \ "details" \ "trust" \ "assets" \ nonEeaBusinessAssetType).json
-      .put(JsArray(nonEeaBusinessAssetData))
+    val adder = (__ \ "details" \ "trust" \ "assets" \ assetType).json.put(JsArray(assetData))
 
     baseJson.as[JsObject](__.json.update(adder))
   }
+  
+  private def buildAsset(orgName: String): NonEEABusinessType = NonEEABusinessType(
+    lineNo = "1",
+    orgName = orgName,
+    address = AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK"),
+    govLawCountry = "UK",
+    startDate = date,
+    endDate = None
+  )
 
+  "Assets transformation service" - {
 
-  "The NonEeaBusinessAsset transformation service" - {
+    "must add a new add asset transform using the transformation service" in {
 
-    "must add a new remove NonEeaBusinessAsset transform using the transformation service" in {
       val transformationService = mock[TransformationService]
       val service = new AssetsTransformationService(transformationService, LocalDateMock)
-      val nonEeaBusinessAsset = nonEeaBusinessAssetJson("Blah Blah Blah")
+
+      when(transformationService.addNewTransform(any(), any(), any()))
+        .thenReturn(Future.successful(true))
+      
+      val asset = buildAsset("TestOrg")
+
+      val result = service.addAsset(utr, internalId, asset)
+
+      whenReady(result) { _ => verify(transformationService).addNewTransform(
+        utr,
+        internalId,
+        AddAssetTransform(
+          Json.toJson(asset),
+          asset.toString
+        )
+      )}
+    }
+
+    "must add a new amend asset transform using the transformation service" in {
+
+      val transformationService = mock[TransformationService]
+      val service = new AssetsTransformationService(transformationService, LocalDateMock)
+
+      val originalAssetJson = Json.toJson(buildAsset("TestOrg"))
+      val amendedAsset = buildAsset("TestOrg2")
 
       when(transformationService.addNewTransform(any(), any(), any()))
         .thenReturn(Future.successful(true))
 
       when(transformationService.getTransformedTrustJson(any(), any())(any()))
-        .thenReturn(Future.successful(buildInputJson("nonEEABusiness", Seq(nonEeaBusinessAsset))))
+        .thenReturn(Future.successful(buildInputJson(arbitraryAssetType, Seq(originalAssetJson))))
 
-      val result = service.removeAsset("utr", "internalId", RemoveAsset(LocalDate.of(2013, 2, 20), 0, "nonEEABusiness"))
-      whenReady(result) { _ =>
-        verify(transformationService).addNewTransform("utr",
-          "internalId", RemoveAssetTransform(0, nonEeaBusinessAsset, LocalDate.of(2013, 2, 20), "nonEEABusiness"))
-      }
+      val result = service.amendAsset(utr, index, internalId, amendedAsset)
+      
+      whenReady(result) { _ => verify(transformationService).addNewTransform(
+        utr,
+        internalId,
+        AmendAssetTransform(
+          index,
+          Json.toJson(amendedAsset),
+          originalAssetJson,
+          LocalDateMock.now,
+          amendedAsset.toString
+        )
+      )}
     }
 
-    "must add a new amend NonEeaBusinessAsset transform using the transformation service" in {
-      val index = 0
+    "must add a new remove asset transform using the transformation service" in {
+      
       val transformationService = mock[TransformationService]
       val service = new AssetsTransformationService(transformationService, LocalDateMock)
-      val address = AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK")
-      val originalNonEeaBusinessAssetJson = Json.toJson(NonEEABusinessType("1", "TestOrg", address, "UK", LocalDate.parse("2000-01-01"), None))
-      val amendedNonEeaBusinessAssetJson = NonEEABusinessType("1", "TestOrg2", address, "UK", LocalDate.parse("2000-01-01"), None)
 
-      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
+      val asset = assetJson("TestOrg")
+
+      when(transformationService.addNewTransform(any(), any(), any()))
+        .thenReturn(Future.successful(true))
 
       when(transformationService.getTransformedTrustJson(any(), any())(any()))
-        .thenReturn(Future.successful(buildInputJson("nonEEABusiness", Seq(originalNonEeaBusinessAssetJson))))
+        .thenReturn(Future.successful(buildInputJson(arbitraryAssetType, Seq(asset))))
 
-      val result = service.amendNonEeaBusinessAssetTransformer("utr", index, "internalId", amendedNonEeaBusinessAssetJson)
-      whenReady(result) { _ =>
-
-        verify(transformationService).addNewTransform("utr",
-          "internalId",
-          AmendNonEeaBusinessAssetTransform(index, Json.toJson(amendedNonEeaBusinessAssetJson), originalNonEeaBusinessAssetJson, LocalDateMock.now))
-      }
-    }
-
-    "must add a new add NonEeaBusinessAsset transform using the transformation service" in {
-      val transformationService = mock[TransformationService]
-      val service = new AssetsTransformationService(transformationService, LocalDateMock)
-      val newNonEeaBusinessAsset = NonEEABusinessType(
-        "1",
-        "TestOrg",
-        AddressType(
-          "Line 1",
-          "Line 2",
-          None,
-          None,
-          Some("NE11NE"), "UK"),
-        "UK",
-        LocalDate.parse("2000-01-01"),
-        None
+      val result = service.removeAsset(
+        utr,
+        internalId,
+        RemoveAsset(
+          date,
+          index,
+          arbitraryAssetType
+        )
       )
 
-      when(transformationService.addNewTransform(any(), any(), any())).thenReturn(Future.successful(true))
-
-      val result = service.addNonEeaBusinessAssetTransformer("utr", "internalId", newNonEeaBusinessAsset)
       whenReady(result) { _ =>
-
-        verify(transformationService).addNewTransform("utr",
-          "internalId", AddNonEeaBusinessAssetTransform(newNonEeaBusinessAsset))
+        verify(transformationService).addNewTransform(
+          utr,
+          internalId,
+          RemoveAssetTransform(
+            index,
+            asset,
+            date,
+            arbitraryAssetType
+          )
+        )
       }
     }
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ class TrustVariationsController @Inject()(
           auditService.audit(
             TrustAuditing.TRUST_VARIATION,
             Json.obj("declaration" -> request.body),
-            request.identifier,
+            request.internalId,
             Json.toJson(Json.obj())
           )
 
@@ -55,7 +55,7 @@ class TrustVariationsController @Inject()(
         },
         declarationForApi => {
           variationService
-            .submitDeclaration(identifier, request.identifier, declarationForApi)
+            .submitDeclaration(identifier, request.internalId, declarationForApi)
             .map(response => Ok(Json.toJson(response)))
         } recover responseHandler.recoverFromException(TrustAuditing.TRUST_VARIATION_SUBMISSION_FAILED)
       )

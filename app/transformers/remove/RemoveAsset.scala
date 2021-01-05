@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,22 @@
 
 package transformers.remove
 
-import java.time.LocalDate
-
+import models.variation._
 import play.api.libs.json.{Format, Json, OWrites, Reads}
+
+import java.time.LocalDate
 
 case class RemoveAsset(endDate: LocalDate, index: Int, `type`: String)
 
 object RemoveAsset {
   val validAssetTypes: Seq[String] = Seq(
-    "nonEEABusiness"
+    AssetMonetaryAmount.toString,
+    PropertyLandType.toString,
+    SharesType.toString,
+    BusinessAssetType.toString,
+    PartnershipType.toString,
+    OtherAssetType.toString,
+    NonEEABusinessType.toString
   )
 
   val reads: Reads[RemoveAsset] = Json.reads[RemoveAsset].filter(ra => validAssetTypes.contains(ra.`type`))

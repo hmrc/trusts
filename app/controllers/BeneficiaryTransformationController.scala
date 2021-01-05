@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ class BeneficiaryTransformationController @Inject()(
           beneficiaryTransformationService.amendUnidentifiedBeneficiaryTransformer(
             identifier,
             index,
-            request.identifier,
+            request.internalId,
             description.value
           ) map { _ =>
             Ok
@@ -62,7 +62,7 @@ class BeneficiaryTransformationController @Inject()(
 
           beneficiaryTransformationService.addUnidentifiedBeneficiaryTransformer(
             identifier,
-            request.identifier,
+            request.internalId,
             newBeneficiary
           ) map { _ =>
             Ok
@@ -81,7 +81,7 @@ class BeneficiaryTransformationController @Inject()(
         case JsSuccess(newBeneficiary, _) =>
           beneficiaryTransformationService.addIndividualBeneficiaryTransformer(
             identifier,
-            request.identifier,
+            request.internalId,
             newBeneficiary
           ) map { _ =>
             Ok
@@ -98,7 +98,7 @@ class BeneficiaryTransformationController @Inject()(
     implicit request => {
       request.body.validate[RemoveBeneficiary] match {
         case JsSuccess(beneficiary, _) =>
-          beneficiaryTransformationService.removeBeneficiary(identifier, request.identifier, beneficiary) map { _ =>
+          beneficiaryTransformationService.removeBeneficiary(identifier, request.internalId, beneficiary) map { _ =>
           Ok
         }
         case JsError(_) => Future.successful(BadRequest)
@@ -113,7 +113,7 @@ class BeneficiaryTransformationController @Inject()(
           beneficiaryTransformationService.amendIndividualBeneficiaryTransformer(
             identifier,
             index,
-            request.identifier,
+            request.internalId,
             individual
           ) map { _ =>
             Ok
@@ -131,7 +131,7 @@ class BeneficiaryTransformationController @Inject()(
         case JsSuccess(newBeneficiary, _) =>
           beneficiaryTransformationService.addCharityBeneficiaryTransformer(
             identifier,
-            request.identifier,
+            request.internalId,
             newBeneficiary
           ) map { _ =>
             Ok
@@ -151,7 +151,7 @@ class BeneficiaryTransformationController @Inject()(
           beneficiaryTransformationService.amendCharityBeneficiaryTransformer(
             identifier,
             index,
-            request.identifier,
+            request.internalId,
             charity
           ) map { _ =>
             Ok
@@ -169,7 +169,7 @@ class BeneficiaryTransformationController @Inject()(
         case JsSuccess(newBeneficiary, _) =>
           beneficiaryTransformationService.addOtherBeneficiaryTransformer(
             identifier,
-            request.identifier,
+            request.internalId,
             newBeneficiary
           ) map { _ =>
             Ok
@@ -189,7 +189,7 @@ class BeneficiaryTransformationController @Inject()(
           beneficiaryTransformationService.amendOtherBeneficiaryTransformer(
             identifier,
             index,
-            request.identifier,
+            request.internalId,
             otherBeneficiary
           ) map { _ =>
             Ok
@@ -207,7 +207,7 @@ class BeneficiaryTransformationController @Inject()(
         case JsSuccess(newBeneficiary, _) =>
           beneficiaryTransformationService.addCompanyBeneficiaryTransformer(
             identifier,
-            request.identifier,
+            request.internalId,
             newBeneficiary
           ) map { _ =>
             Ok
@@ -226,7 +226,7 @@ class BeneficiaryTransformationController @Inject()(
         case JsSuccess(newBeneficiary, _) =>
           beneficiaryTransformationService.addTrustBeneficiaryTransformer(
             identifier,
-            request.identifier,
+            request.internalId,
             newBeneficiary
           ) map { _ =>
             Ok
@@ -245,7 +245,7 @@ class BeneficiaryTransformationController @Inject()(
           beneficiaryTransformationService.amendCompanyBeneficiaryTransformer(
             identifier,
             index,
-            request.identifier,
+            request.internalId,
             companyBeneficiary
           ) map { _ =>
             Ok
@@ -264,7 +264,7 @@ class BeneficiaryTransformationController @Inject()(
           beneficiaryTransformationService.amendTrustBeneficiaryTransformer(
             identifier,
             index,
-            request.identifier,
+            request.internalId,
             charity
           ) map { _ =>
             Ok
@@ -282,7 +282,7 @@ class BeneficiaryTransformationController @Inject()(
         case JsSuccess(newBeneficiary, _) =>
           beneficiaryTransformationService.addLargeBeneficiaryTransformer(
             identifier,
-            request.identifier,
+            request.internalId,
             newBeneficiary
           ) map { _ =>
             Ok
@@ -302,7 +302,7 @@ class BeneficiaryTransformationController @Inject()(
           beneficiaryTransformationService.amendLargeBeneficiaryTransformer(
             identifier,
             index,
-            request.identifier,
+            request.internalId,
             largeBeneficiary
           ) map { _ =>
             Ok

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) extends Lo
       auditService.auditErrorResponse(
         auditType,
         request.body,
-        request.identifier,
+        request.internalId,
         errorReason = "Submission has not passed validation. Invalid CorrelationId."
       )
       invalidCorrelationIdErrorResponse
@@ -45,7 +45,7 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) extends Lo
       auditService.auditErrorResponse(
         auditType,
         request.body,
-        request.identifier,
+        request.internalId,
         errorReason = "Duplicate Correlation Id was submitted."
       )
       duplicateSubmissionErrorResponse
@@ -55,7 +55,7 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) extends Lo
       auditService.auditErrorResponse(
         auditType,
         request.body,
-        request.identifier,
+        request.internalId,
         errorReason = "Service unavailable."
       )
       serviceUnavailableErrorResponse
@@ -65,7 +65,7 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) extends Lo
       auditService.auditErrorResponse(
         auditType,
         request.body,
-        request.identifier,
+        request.internalId,
         errorReason = "Cached ETMP data stale."
       )
       etmpDataStaleErrorResponse
@@ -75,7 +75,7 @@ class VariationsResponseHandler @Inject()(auditService: AuditService) extends Lo
       auditService.auditErrorResponse(
         auditType,
         request.body,
-        request.identifier,
+        request.internalId,
         errorReason = s"${e.getMessage}"
       )
       internalServerErrorErrorResponse
