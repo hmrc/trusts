@@ -42,24 +42,22 @@ class AddNonEEABusinessAssetSpec extends AsyncFreeSpec with MustMatchers with Mo
   lazy val expectedInitialGetJson: JsValue =
     NonTaxable5MLDFixtures.Trusts.newGetTransformedNonTaxableTrustResponse
 
-
   "an add NonEEABusiness Asset call" - {
-    val newNonEEABusinessJson = (
-      """
-        |{
-        |  "address": {
-        |      "line1": "Line 1",
-        |      "line2": "Line 2",
-        |      "postCode": "NE1 1NE",
-        |      "country": "GB"
-        |  },
-        |  "govLawCountry": "GB",
-        |  "startDate": "2002-01-01",
-        |  "lineNo": "1",
-        |  "orgName": "TestOrg"
-        |}
-        |""".stripMargin
-      )
+
+    val asset = """
+      |{
+      |  "address": {
+      |      "line1": "Line 1",
+      |      "line2": "Line 2",
+      |      "postCode": "NE1 1NE",
+      |      "country": "GB"
+      |  },
+      |  "govLawCountry": "GB",
+      |  "startDate": "2002-01-01",
+      |  "lineNo": "1",
+      |  "orgName": "TestOrg"
+      |}
+      |""".stripMargin
 
     lazy val expectedGetAfterAddNonEEABusinessJson: JsValue =
       JsonUtils.getJsonValueFromFile("5MLD/NonTaxable/add-nonEEABusiness-asset-after-etmp-call.json")
@@ -71,10 +69,9 @@ class AddNonEEABusinessAssetSpec extends AsyncFreeSpec with MustMatchers with Mo
       .overrides(
         bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(stubbedTrustsConnector)
-      )
-      .build()
+      ).build()
 
-    "must return add data in a subsequent 'get' call with a UTR" in assertMongoTest(application) { application =>
+    "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
       runTest("5465416546", application)
       runTest("0123456789ABCDE", application)
     }
@@ -85,7 +82,7 @@ class AddNonEEABusinessAssetSpec extends AsyncFreeSpec with MustMatchers with Mo
       contentAsJson(result) mustBe expectedInitialGetJson
 
       val addRequest = FakeRequest(POST, s"/trusts/assets/add-non-eea-business/$identifier")
-        .withBody(newNonEEABusinessJson)
+        .withBody(asset)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val addResult = route(application, addRequest).get

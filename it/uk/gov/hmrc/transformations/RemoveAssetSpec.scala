@@ -25,9 +25,10 @@ import org.scalatest.{Assertion, AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
+import transformers.remove.RemoveAsset
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
 import utils.{JsonUtils, NonTaxable5MLDFixtures}
@@ -36,52 +37,61 @@ import scala.concurrent.Future
 
 class RemoveAssetSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
 
-  "a remove nonEEABusinessAsset call" - {
+  private val utr: String = "5174384721"
+  private val urn: String = "0123456789ABCDE"
 
-      val stubbedTrustsConnector = mock[TrustsConnector]
+  private def runTest(identifier: String, application: Application, assetType: String): Assertion = {
 
-    lazy val getTrustResponse: GetTrustSuccessResponse =
-      JsonUtils.getJsonValueFromString(NonTaxable5MLDFixtures.DES.newGet5MLDTrustNonTaxableResponse).as[GetTrustSuccessResponse]
+    val body: JsValue = Json.parse(
+      s"""
+         |{
+         |  "index": 0,
+         |  "endDate": "2010-10-10",
+         |  "type": "$assetType"
+         |}
+         |""".stripMargin
+    )
 
-      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
+    val initialGetResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
+    status(initialGetResult) mustBe OK
 
-      val application = applicationBuilder
-        .overrides(
-          bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-          bind[TrustsConnector].toInstance(stubbedTrustsConnector)
-        )
-        .build()
+    val removeRequest = FakeRequest(PUT, s"/trusts/assets/$identifier/remove")
+      .withBody(Json.toJson(body))
+      .withHeaders(CONTENT_TYPE -> "application/json")
 
-    "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
-      runTest("5174384721", application)
-      runTest("0123456789ABCDE", application)
-    }
+    val removeResult = route(application, removeRequest).get
+    status(removeResult) mustBe OK
 
-    def runTest(identifier: String, application: Application): Assertion = {
-      val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
-      status(result) mustBe OK
+    val subsequentGetResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
+    status(subsequentGetResult) mustBe OK
 
-      val removeNonEEABusinessAssetAtIndex = Json.parse(
-        """
-          |{
-          |  "index": 0,
-          |  "endDate": "2010-10-10",
-          |  "type": "nonEEABusiness"
-          |}
-          |""".stripMargin)
-      val removeRequest = FakeRequest(PUT, s"/trusts/assets/$identifier/remove")
-        .withBody(Json.toJson(removeNonEEABusinessAssetAtIndex))
-        .withHeaders(CONTENT_TYPE -> "application/json")
+    val assetsAfterRemoval = (contentAsJson(subsequentGetResult) \ "getTrust" \ "trust" \ "assets" \ assetType).asOpt[JsObject]
+    assetsAfterRemoval mustBe None
+  }
 
-      val RemoveNonEEABusinessAssetResult = route(application, removeRequest).get
-      status(RemoveNonEEABusinessAssetResult) mustBe OK
+  private val getTrustResponse: GetTrustSuccessResponse = JsonUtils
+    .getJsonValueFromString(NonTaxable5MLDFixtures.DES.get5MLDTrustNonTaxableResponseWithAllAssetTypes)
+    .as[GetTrustSuccessResponse]
 
-      val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
-      status(newResult) mustBe OK
+  private lazy val application: Application = {
+    val mockTrustsConnector = mock[TrustsConnector]
+    when(mockTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
 
-      val assets = (contentAsJson(newResult) \ "getTrust" \ "trust" \ "assets" \ "nonEEABusiness").asOpt[JsObject]
-      assets mustBe None
+    applicationBuilder.overrides(
+      bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+      bind[TrustsConnector].toInstance(mockTrustsConnector)
+    ).build()
+  }
 
+  "Remove asset" - {
+    "must return amended data in a subsequent 'get' call for each asset type" in assertMongoTest(application) { app =>
+
+      for (assetType <- RemoveAsset.validAssetTypes) {
+        runTest(utr, app, assetType)
+        runTest(urn, app, assetType)
+      }
+
+      RemoveAsset.validAssetTypes.length mustBe 7
     }
   }
 }

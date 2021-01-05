@@ -29,8 +29,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}
 
 class AssetsTransformationService @Inject()(transformationService: TransformationService,
-                                            localDateService: LocalDateService
-                                           )(implicit ec:ExecutionContext) extends JsonOperations {
+                                            localDateService: LocalDateService)
+                                           (implicit ec:ExecutionContext) extends JsonOperations {
 
   def addAsset[T <: AssetType](identifier: String, internalId: String, asset: T)
                               (implicit wts: Writes[T]): Future[Boolean] = {

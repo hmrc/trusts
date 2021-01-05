@@ -28,6 +28,7 @@ object NonTaxable5MLDFixtures extends JsonFixtures {
 
     lazy val get5MLDTrustNonTaxableResponse: String = getJsonFromFile("5MLD/NonTaxable/des/valid-get-trust-5mld-non-taxable-des-response.json")
     lazy val newGet5MLDTrustNonTaxableResponse: String = getJsonFromFile("5MLD/NonTaxable/des/new-valid-get-trust-5mld-non-taxable-des-response.json")
+    lazy val get5MLDTrustNonTaxableResponseWithAllAssetTypes: String = getJsonFromFile("5MLD/NonTaxable/des/valid-get-trust-5mld-non-taxable-des-response-with-all-asset-types.json")
   }
 
   object Cache {

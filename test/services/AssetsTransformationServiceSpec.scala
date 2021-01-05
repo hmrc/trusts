@@ -106,6 +106,7 @@ class AssetsTransformationServiceSpec extends FreeSpec with MockitoSugar with Sc
 
       val transformationService = mock[TransformationService]
       val service = new AssetsTransformationService(transformationService, LocalDateMock)
+
       val originalAssetJson = Json.toJson(buildAsset("TestOrg"))
       val amendedAsset = buildAsset("TestOrg2")
 

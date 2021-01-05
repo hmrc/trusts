@@ -55,8 +55,7 @@ class AmendNonEEABusinessAssetSpec extends AsyncFreeSpec with MustMatchers with 
         .overrides(
           bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
           bind[TrustsConnector].toInstance(stubbedTrustsConnector)
-        )
-        .build()
+        ).build()
 
     "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
       runTest("5174384721", application)
