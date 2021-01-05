@@ -31,7 +31,7 @@ class SetExpressTransformSpec extends FreeSpec with MustMatchers {
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-express.json")
           val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-express.json")
 
-          val transformer = SetExpressTransform(false)
+          val transformer = SetTrustDetailTransform(value = false, "expressTrust")
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -42,7 +42,7 @@ class SetExpressTransformSpec extends FreeSpec with MustMatchers {
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before.json")
           val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-express.json")
 
-          val transformer = SetExpressTransform(false)
+          val transformer = SetTrustDetailTransform(value = false, "expressTrust")
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson

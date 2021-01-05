@@ -31,7 +31,7 @@ class SetRecordedTransformSpec extends FreeSpec with MustMatchers {
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-recorded.json")
           val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-recorded.json")
 
-          val transformer = SetRecordedTransform(false)
+          val transformer = SetTrustDetailTransform(value = false, "trustRecorded")
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -42,7 +42,7 @@ class SetRecordedTransformSpec extends FreeSpec with MustMatchers {
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before.json")
           val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-recorded.json")
 
-          val transformer = SetRecordedTransform(false)
+          val transformer = SetTrustDetailTransform(value = false, "trustRecorded")
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson

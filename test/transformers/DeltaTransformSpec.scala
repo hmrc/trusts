@@ -16,13 +16,13 @@
 
 package transformers
 
-import java.time.LocalDate
-
-import org.scalatest.{FreeSpec, MustMatchers}
-import play.api.libs.json.Json
 import models.variation._
 import models.{AddressType, NameType}
-import transformers.trustDetails.{SetExpressTransform, SetPropertyTransform, SetRecordedTransform, SetResidentTransform, SetTaxableTransform, SetUKRelationTransform}
+import org.scalatest.{FreeSpec, MustMatchers}
+import play.api.libs.json.Json
+import transformers.trustDetails._
+
+import java.time.LocalDate
 
 class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
@@ -296,17 +296,17 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
       val addOtherIndividualTransform = AddOtherIndividualTransform(otherIndividual)
 
-      val setExpressTransform = SetExpressTransform(expressTrust = true)
+      val setExpressTransform = SetTrustDetailTransform(value = true, "expressTrust")
 
-      val setPropertyTransform = SetPropertyTransform(trustUKProperty = true)
+      val setPropertyTransform = SetTrustDetailTransform(value = true, "trustUKProperty")
 
-      val setRecordedTransform = SetRecordedTransform(trustRecorded = true)
+      val setRecordedTransform = SetTrustDetailTransform(value = true, "trustRecorded")
 
-      val setResidentTransform = SetResidentTransform(trustUKResident = true)
+      val setResidentTransform = SetTrustDetailTransform(value = true, "trustUKResident")
 
-      val setTaxableTransform = SetTaxableTransform(trustTaxable = true)
+      val setTaxableTransform = SetTrustDetailTransform(value = true, "trustTaxable")
 
-      val setUKRelationTransform = SetUKRelationTransform(trustUKRelation = true)
+      val setUKRelationTransform = SetTrustDetailTransform(value = true, "trustUKRelation")
 
       val json = Json.parse(
         s"""{
@@ -420,22 +420,22 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           |               "AddOtherIndividualTransform": ${Json.toJson(addOtherIndividualTransform)}
           |            },
           |            {
-          |               "SetExpressTransform": ${Json.toJson(setExpressTransform)}
+          |               "SetTrustDetailTransform": ${Json.toJson(setExpressTransform)}
           |            },
           |            {
-          |               "SetPropertyTransform": ${Json.toJson(setPropertyTransform)}
+          |               "SetTrustDetailTransform": ${Json.toJson(setPropertyTransform)}
           |            },
           |            {
-          |               "SetRecordedTransform": ${Json.toJson(setRecordedTransform)}
+          |               "SetTrustDetailTransform": ${Json.toJson(setRecordedTransform)}
           |            },
           |            {
-          |               "SetResidentTransform": ${Json.toJson(setResidentTransform)}
+          |               "SetTrustDetailTransform": ${Json.toJson(setResidentTransform)}
           |            },
           |            {
-          |               "SetTaxableTransform": ${Json.toJson(setTaxableTransform)}
+          |               "SetTrustDetailTransform": ${Json.toJson(setTaxableTransform)}
           |            },
           |            {
-          |               "SetUKRelationTransform": ${Json.toJson(setUKRelationTransform)}
+          |               "SetTrustDetailTransform": ${Json.toJson(setUKRelationTransform)}
           |            }
           |        ]
           |    }

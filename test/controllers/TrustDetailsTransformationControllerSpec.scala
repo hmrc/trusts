@@ -26,10 +26,11 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsBoolean, Json}
 import play.api.mvc.BodyParsers
+import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
 import services.TrustDetailsTransformationService
+import transformers.trustDetails.SetTrustDetailTransform
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
-import play.api.test.Helpers.{CONTENT_TYPE, _}
 
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
@@ -53,7 +54,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.setExpressTransformer(any(), any(), any()))
+        when(service.set(any(), any(), any()))
           .thenReturn(Future.successful(Success))
 
         val request = FakeRequest("POST", "path")
@@ -64,10 +65,10 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).setExpressTransformer(
+        verify(service).set(
           equalTo("aUTR"),
           equalTo("id"),
-          equalTo(true))
+          equalTo(SetTrustDetailTransform(value = true, "expressTrust")))
       }
 
       "return an BadRequest for malformed json" in {
@@ -75,7 +76,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.setExpressTransformer(any(), any(), any()))
+        when(service.set(any(), any(), any()))
           .thenReturn(Future.successful(Success))
 
         val request = FakeRequest("POST", "path")
@@ -96,7 +97,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.setPropertyTransformer(any(), any(), any()))
+        when(service.set(any(), any(), any()))
           .thenReturn(Future.successful(Success))
 
         val request = FakeRequest("POST", "path")
@@ -107,10 +108,10 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).setPropertyTransformer(
+        verify(service).set(
           equalTo("aUTR"),
           equalTo("id"),
-          equalTo(true))
+          equalTo(SetTrustDetailTransform(value = true, "trustUKProperty")))
       }
 
       "return an BadRequest for malformed json" in {
@@ -118,7 +119,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.setPropertyTransformer(any(), any(), any()))
+        when(service.set(any(), any(), any()))
           .thenReturn(Future.successful(Success))
 
         val request = FakeRequest("POST", "path")
@@ -139,7 +140,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.setRecordedTransformer(any(), any(), any()))
+        when(service.set(any(), any(), any()))
           .thenReturn(Future.successful(Success))
 
         val request = FakeRequest("POST", "path")
@@ -150,10 +151,10 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).setRecordedTransformer(
+        verify(service).set(
           equalTo("aUTR"),
           equalTo("id"),
-          equalTo(true))
+          equalTo(SetTrustDetailTransform(value = true, "trustRecorded")))
       }
 
       "return an BadRequest for malformed json" in {
@@ -161,7 +162,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.setRecordedTransformer(any(), any(), any()))
+        when(service.set(any(), any(), any()))
           .thenReturn(Future.successful(Success))
 
         val request = FakeRequest("POST", "path")
@@ -182,7 +183,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.setResidentTransformer(any(), any(), any()))
+        when(service.set(any(), any(), any()))
           .thenReturn(Future.successful(Success))
 
         val request = FakeRequest("POST", "path")
@@ -193,10 +194,10 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).setResidentTransformer(
+        verify(service).set(
           equalTo("aUTR"),
           equalTo("id"),
-          equalTo(true))
+          equalTo(SetTrustDetailTransform(value = true, "trustUKResident")))
       }
 
       "return an BadRequest for malformed json" in {
@@ -204,7 +205,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.setResidentTransformer(any(), any(), any()))
+        when(service.set(any(), any(), any()))
           .thenReturn(Future.successful(Success))
 
         val request = FakeRequest("POST", "path")
@@ -225,7 +226,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.setTaxableTransformer(any(), any(), any()))
+        when(service.set(any(), any(), any()))
           .thenReturn(Future.successful(Success))
 
         val request = FakeRequest("POST", "path")
@@ -236,10 +237,10 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).setTaxableTransformer(
+        verify(service).set(
           equalTo("aUTR"),
           equalTo("id"),
-          equalTo(true))
+          equalTo(SetTrustDetailTransform(value = true, "trustTaxable")))
       }
 
       "return an BadRequest for malformed json" in {
@@ -247,7 +248,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.setTaxableTransformer(any(), any(), any()))
+        when(service.set(any(), any(), any()))
           .thenReturn(Future.successful(Success))
 
         val request = FakeRequest("POST", "path")
@@ -268,7 +269,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.setUKRelationTransformer(any(), any(), any()))
+        when(service.set(any(), any(), any()))
           .thenReturn(Future.successful(Success))
 
         val request = FakeRequest("POST", "path")
@@ -279,10 +280,10 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).setUKRelationTransformer(
+        verify(service).set(
           equalTo("aUTR"),
           equalTo("id"),
-          equalTo(true))
+          equalTo(SetTrustDetailTransform(value = true, "trustUKRelation")))
       }
 
       "return an BadRequest for malformed json" in {
@@ -290,7 +291,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.setUKRelationTransformer(any(), any(), any()))
+        when(service.set(any(), any(), any()))
           .thenReturn(Future.successful(Success))
 
         val request = FakeRequest("POST", "path")
@@ -303,7 +304,5 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
       }
 
     }
-
   }
-
 }

@@ -31,7 +31,7 @@ class SetPropertyTransformSpec extends FreeSpec with MustMatchers {
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-property.json")
           val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-property.json")
 
-          val transformer = SetPropertyTransform(false)
+          val transformer = SetTrustDetailTransform(value = false, "trustUKProperty")
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -42,7 +42,7 @@ class SetPropertyTransformSpec extends FreeSpec with MustMatchers {
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before.json")
           val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-property.json")
 
-          val transformer = SetPropertyTransform(false)
+          val transformer = SetTrustDetailTransform(value = false, "trustUKProperty")
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson

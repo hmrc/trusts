@@ -16,60 +16,20 @@
 
 package services
 
-import javax.inject.Inject
 import models.Success
-import transformers.trustDetails._
+import transformers.DeltaTransform
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TrustDetailsTransformationService @Inject()(transformationService: TransformationService) {
 
-  def setExpressTransformer(identifier: String, internalId: String, express: Boolean): Future[Success.type] = {
+  def set[T <: DeltaTransform](identifier: String, internalId: String, transform: T): Future[Success.type] = {
     transformationService.addNewTransform(
       identifier,
       internalId,
-      SetExpressTransform(express)
-    ).map(_ => Success)
-  }
-
-  def setResidentTransformer(identifier: String, internalId: String, resident: Boolean): Future[Success.type] = {
-    transformationService.addNewTransform(
-      identifier,
-      internalId,
-      SetResidentTransform(resident)
-    ).map(_ => Success)
-  }
-
-  def setTaxableTransformer(identifier: String, internalId: String, taxable: Boolean): Future[Success.type] = {
-    transformationService.addNewTransform(
-      identifier,
-      internalId,
-      SetTaxableTransform(taxable)
-    ).map(_ => Success)
-  }
-
-  def setPropertyTransformer(identifier: String, internalId: String, property: Boolean): Future[Success.type] = {
-    transformationService.addNewTransform(
-      identifier,
-      internalId,
-      SetPropertyTransform(property)
-    ).map(_ => Success)
-  }
-
-  def setRecordedTransformer(identifier: String, internalId: String, recorded: Boolean): Future[Success.type] = {
-    transformationService.addNewTransform(
-      identifier,
-      internalId,
-      SetRecordedTransform(recorded)
-    ).map(_ => Success)
-  }
-
-  def setUKRelationTransformer(identifier: String, internalId: String, ukRelation: Boolean): Future[Success.type] = {
-    transformationService.addNewTransform(
-      identifier,
-      internalId,
-      SetUKRelationTransform(ukRelation)
+      transform
     ).map(_ => Success)
   }
 
