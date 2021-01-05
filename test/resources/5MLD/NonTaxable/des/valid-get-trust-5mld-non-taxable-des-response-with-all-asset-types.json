@@ -74,6 +74,8 @@
           ],
           "nonEEABusiness": [
             {
+              "lineNo": "1",
+              "orgName": "Panda care Ltd",
               "address": {
                 "country": "CA",
                 "line1": "1010 EASY ST",
@@ -82,8 +84,6 @@
                 "line4": "ONTARIO"
               },
               "govLawCountry": "CA",
-              "lineNo": "1",
-              "orgName": "Panda care Ltd",
               "startDate": "2020-01-05"
             }
           ]

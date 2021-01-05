@@ -37,7 +37,7 @@ import scala.concurrent.Future
 
 class RemoveAssetSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
 
-  private val utr: String = "5174384721"
+  private val utr: String = "0123456789"
   private val urn: String = "0123456789ABCDE"
 
   private def runTest(identifier: String, application: Application, assetType: String): Assertion = {

@@ -25,7 +25,7 @@ import org.scalatest.{Assertion, AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
@@ -37,60 +37,59 @@ import scala.concurrent.Future
 class AddNonEEABusinessAssetSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
 
   lazy val getTrustResponse: GetTrustSuccessResponse =
-    JsonUtils.getJsonValueFromString(NonTaxable5MLDFixtures.DES.newGet5MLDTrustNonTaxableResponse).as[GetTrustSuccessResponse]
+    JsonUtils.getJsonValueFromString(NonTaxable5MLDFixtures.DES.get5MLDTrustNonTaxableResponseWithAllAssetTypes).as[GetTrustSuccessResponse]
 
-  lazy val expectedInitialGetJson: JsValue =
-    NonTaxable5MLDFixtures.Trusts.newGetTransformedNonTaxableTrustResponse
+  lazy val expectedInitialGetJson: JsValue = NonTaxable5MLDFixtures.Trusts.getTransformedNonTaxableTrustResponseWithAllAssetTypes
 
-  "an add NonEEABusiness Asset call" - {
+  lazy val expectedSubsequentGetJson: JsValue = JsonUtils.getJsonValueFromFile("5MLD/NonTaxable/transforms/assets/noneeabusiness/add-after-etmp-call.json")
 
-    val asset = """
-      |{
-      |  "address": {
-      |      "line1": "Line 1",
-      |      "line2": "Line 2",
-      |      "postCode": "NE1 1NE",
-      |      "country": "GB"
-      |  },
-      |  "govLawCountry": "GB",
-      |  "startDate": "2002-01-01",
-      |  "lineNo": "1",
-      |  "orgName": "TestOrg"
-      |}
-      |""".stripMargin
+  "an add non-EEA business asset call" - {
 
-    lazy val expectedGetAfterAddNonEEABusinessJson: JsValue =
-      JsonUtils.getJsonValueFromFile("5MLD/NonTaxable/add-nonEEABusiness-asset-after-etmp-call.json")
+    val payload = Json.parse(
+      """
+        |{
+        |  "lineNo": "1",
+        |  "orgName": "TestOrg",
+        |  "address": {
+        |    "line1": "Line 1",
+        |    "line2": "Line 2",
+        |    "postCode": "NE1 1NE",
+        |    "country": "GB"
+        |  },
+        |  "govLawCountry": "GB",
+        |  "startDate": "2002-01-01"
+        |}
+        |""".stripMargin)
 
-    val stubbedTrustsConnector = mock[TrustsConnector]
-    when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
+    val mockTrustsConnector = mock[TrustsConnector]
+    when(mockTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
 
     val application = applicationBuilder
       .overrides(
         bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-        bind[TrustsConnector].toInstance(stubbedTrustsConnector)
+        bind[TrustsConnector].toInstance(mockTrustsConnector)
       ).build()
 
     "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
-      runTest("5465416546", application)
+      runTest("0123456789", application)
       runTest("0123456789ABCDE", application)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {
-      val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
-      status(result) mustBe OK
-      contentAsJson(result) mustBe expectedInitialGetJson
+      val initialGetResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
+      status(initialGetResult) mustBe OK
+      contentAsJson(initialGetResult) mustBe expectedInitialGetJson
 
       val addRequest = FakeRequest(POST, s"/trusts/assets/add-non-eea-business/$identifier")
-        .withBody(asset)
+        .withBody(payload)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val addResult = route(application, addRequest).get
       status(addResult) mustBe OK
 
-      val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
-      status(newResult) mustBe OK
-      contentAsJson(newResult) mustBe expectedGetAfterAddNonEEABusinessJson
+      val subsequentGetResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
+      status(subsequentGetResult) mustBe OK
+      contentAsJson(subsequentGetResult) mustBe expectedSubsequentGetJson
     }
   }
 }
