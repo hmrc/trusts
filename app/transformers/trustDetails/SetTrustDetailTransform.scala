@@ -25,7 +25,7 @@ case class SetTrustDetailTransform(value: JsValue, key: String) extends DeltaTra
   private lazy val path = __ \ 'details \ 'trust \ 'details \ key
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addTo(input, path, value)
+    pruneThenAddTo(input, path, value)
   }
 
   override val isTaxableMigrationTransform: Boolean = {
