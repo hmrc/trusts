@@ -194,6 +194,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
         implicit val draftWrites: Writes[RegistrationSubmissionDraft] = new Writes[RegistrationSubmissionDraft] {
           override def writes(draft: RegistrationSubmissionDraft): JsValue =
             if (draft.reference.isDefined) {
+              // TODO refactor this to pull from another JsPath for agent details
               Json.obj(
                 "createdAt" -> draft.createdAt,
                 "draftId" -> draft.draftId,
@@ -346,13 +347,13 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
 
   def getAgentAddress(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
-      val path: JsPath = JsPath \ "registration" \ "agentDetails" \ "agentAddress"
+      val path: JsPath = JsPath \ "registration" \ "trust/entities/agent" \ "agentAddress"
       getAtPath[AddressType](draftId, path)
   }
 
   def getClientReference(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
-      val path: JsPath = JsPath \ "registration" \ "agentDetails" \ "clientReference"
+      val path: JsPath = JsPath \ "registration" \ "trust/entities/agent" \ "clientReference"
       getAtPath[String](draftId, path)
   }
 
