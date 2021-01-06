@@ -31,6 +31,14 @@ case class AmendAssetTransform(index: Int,
 
   override val endDateField: String = "endDate"
 
+  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
+    if (isNonEeaBusiness) {
+      endEntity(input, path, original, endDate, endDateField)
+    } else {
+      JsSuccess(input)
+    }
+  }
+
   override val isTaxableMigrationTransform: Boolean = !isNonEeaBusiness
 }
 

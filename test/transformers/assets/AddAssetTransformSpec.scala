@@ -14,55 +14,48 @@
  * limitations under the License.
  */
 
-package transformers
+package transformers.assets
 
 import models.AddressType
 import models.variation.NonEEABusinessType
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
-import transformers.assets.AddAssetTransform
 import utils.JsonUtils
 
 import java.time.LocalDate
 
 class AddAssetTransformSpec extends FreeSpec with MustMatchers {
 
-  val nonEeaBusinessAsset = NonEEABusinessType(
+  val asset: NonEEABusinessType = NonEEABusinessType(
     "1",
     "TestOrg",
-  AddressType(
-    "Line 1",
-    "Line 2",
-    None,
-    None,
-    Some("NE11NE"),
-    "UK"),
+    AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK"),
     "UK",
     LocalDate.parse("2000-01-01"),
     None
   )
 
-  "the add NonEeaBusinessAsset transformer should" - {
+  "the add asset transformer should" - {
 
-    "add a new NonEeaBusinessAsset when there are no NonEeaBusinessAssets existing" in {
+    "add a new asset when there are no assets existing of the same type" in {
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-NonEeaBusinessAsset.json")
 
-      val transformer = AddAssetTransform(Json.toJson(nonEeaBusinessAsset), nonEeaBusinessAsset.toString)
+      val transformer = AddAssetTransform(Json.toJson(asset), asset.toString)
 
       val result = transformer.applyTransform(trustJson).get
 
       result mustBe afterJson
     }
 
-    "add a new NonEeaBusinessAsset when there are NonEeaBusinessAssets existing" in {
+    "add a new asset when there are assets existing of the same type" in {
 
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-NonEeaBusinessAsset.json")
 
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-second-NonEeaBusinessAsset.json")
 
-      val transformer = AddAssetTransform(Json.toJson(nonEeaBusinessAsset), nonEeaBusinessAsset.toString)
+      val transformer = AddAssetTransform(Json.toJson(asset), asset.toString)
 
       val result = transformer.applyTransform(trustJson).get
 

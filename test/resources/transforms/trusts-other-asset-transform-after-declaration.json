@@ -1,0 +1,19 @@
+{
+  "details":{
+    "trust":{
+      "assets": {
+        "other": [
+          {
+            "description": "Amended description 1"
+          },
+          {
+            "description": "Original description 2"
+          },
+          {
+            "description": "Original description 3"
+          }
+        ]
+      }
+    }
+  }
+}
