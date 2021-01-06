@@ -64,7 +64,7 @@ class TrustDetailsTransformationController @Inject()(identify: IdentifierAction,
           }
         case JsError(errors) =>
           logger.warn(s"[set][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
-            s"Supplied json could not be read as a Boolean - $errors")
+            s"Supplied json did not pass validation - $errors")
           Future.successful(BadRequest)
       }
     }
