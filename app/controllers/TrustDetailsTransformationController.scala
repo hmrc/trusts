@@ -17,133 +17,56 @@
 package controllers
 
 import controllers.actions.IdentifierAction
-import javax.inject.Inject
+import models.ResidentialStatusType
 import play.api.Logging
-import play.api.libs.json.{JsError, JsSuccess, JsValue}
+import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents}
 import services.TrustDetailsTransformationService
+import transformers.trustDetails.SetTrustDetailTransform
+import utils.Constants._
 import utils.ValidationUtil
 
+import java.time.LocalDate
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class TrustDetailsTransformationController @Inject()(
-                                                      identify: IdentifierAction,
-                                                      transformService: TrustDetailsTransformationService
-                                                    )(implicit val executionContext: ExecutionContext,cc: ControllerComponents)
+class TrustDetailsTransformationController @Inject()(identify: IdentifierAction,
+                                                     transformService: TrustDetailsTransformationService)
+                                                    (implicit val executionContext: ExecutionContext, cc: ControllerComponents)
   extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
-  def setExpress(identifier: String): Action[JsValue] = identify.async(parse.json) {
-      implicit request => {
-        request.body.validate[Boolean] match {
-          case JsSuccess(express, _) =>
-            transformService.setExpressTransformer(
-              identifier,
-              request.internalId,
-              express
-            ) map { _ =>
-              Ok
-            }
-          case JsError(errors) =>
-            logger.warn(s"[setExpress][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
-              s"Supplied json could not be read as an Boolean - $errors")
-            Future.successful(BadRequest)
-        }
-      }
-    }
+  def setExpress(identifier: String): Action[JsValue] = set[Boolean](identifier, EXPRESS)
+  def setResident(identifier: String): Action[JsValue] = set[Boolean](identifier, UK_RESIDENT)
+  def setTaxable(identifier: String): Action[JsValue] = set[Boolean](identifier, TAXABLE)
+  def setProperty(identifier: String): Action[JsValue] = set[Boolean](identifier, UK_PROPERTY)
+  def setRecorded(identifier: String): Action[JsValue] = set[Boolean](identifier, RECORDED)
+  def setUKRelation(identifier: String): Action[JsValue] = set[Boolean](identifier, UK_RELATION)
 
-  def setResident(identifier: String): Action[JsValue] = identify.async(parse.json) {
-      implicit request => {
-        request.body.validate[Boolean] match {
-          case JsSuccess(resident, _) =>
-            transformService.setResidentTransformer(
-              identifier,
-              request.internalId,
-              resident
-            ) map { _ =>
-              Ok
-            }
-          case JsError(errors) =>
-            logger.warn(s"[setResident][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
-              s"Supplied json could not be read as an Boolean - $errors")
-            Future.successful(BadRequest)
-        }
-      }
-    }
+  def setLawCountry(identifier: String): Action[JsValue] = set[String](identifier, LAW_COUNTRY)
+  def setAdministrationCountry(identifier: String): Action[JsValue] = set[String](identifier, ADMINISTRATION_COUNTRY)
+  def setTypeOfTrust(identifier: String): Action[JsValue] = set[String](identifier, TYPE_OF_TRUST)
+  def setDeedOfVariation(identifier: String): Action[JsValue] = set[String](identifier, DEED_OF_VARIATION)
+  def setInterVivos(identifier: String): Action[JsValue] = set[Boolean](identifier, INTER_VIVOS)
+  def setEfrbsStartDate(identifier: String): Action[JsValue] = set[LocalDate](identifier, EFRBS_START_DATE)
+  def setResidentialStatus(identifier: String): Action[JsValue] = set[ResidentialStatusType](identifier, RESIDENTIAL_STATUS)
 
-  def setTaxable(identifier: String): Action[JsValue] = identify.async(parse.json) {
-      implicit request => {
-        request.body.validate[Boolean] match {
-          case JsSuccess(taxable, _) =>
-            transformService.setTaxableTransformer(
-              identifier,
-              request.internalId,
-              taxable
-            ) map { _ =>
-              Ok
-            }
-          case JsError(errors) =>
-            logger.warn(s"[setTaxable][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
-              s"Supplied json could not be read as an Boolean - $errors")
-            Future.successful(BadRequest)
-        }
-      }
-    }
-
-  def setProperty(identifier: String): Action[JsValue] = identify.async(parse.json) {
-      implicit request => {
-        request.body.validate[Boolean] match {
-          case JsSuccess(property, _) =>
-            transformService.setPropertyTransformer(
-              identifier,
-              request.internalId,
-              property
-            ) map { _ =>
-              Ok
-            }
-          case JsError(errors) =>
-            logger.warn(s"[setProperty][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
-              s"Supplied json could not be read as an Boolean - $errors")
-            Future.successful(BadRequest)
-        }
-      }
-    }
-
-  def setRecorded(identifier: String): Action[JsValue] = identify.async(parse.json) {
-      implicit request => {
-        request.body.validate[Boolean] match {
-          case JsSuccess(recorded, _) =>
-            transformService.setRecordedTransformer(
-              identifier,
-              request.internalId,
-              recorded
-            ) map { _ =>
-              Ok
-            }
-          case JsError(errors) =>
-            logger.warn(s"[setRecorded][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
-              s"Supplied json could not be read as an Boolean - $errors")
-            Future.successful(BadRequest)
-        }
-      }
-    }
-
-  def setUKRelation(identifier: String): Action[JsValue] = identify.async(parse.json) {
+  private def set[T](identifier: String, key: String)
+                    (implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
-      request.body.validate[Boolean] match {
-        case JsSuccess(ukRelation, _) =>
-          transformService.setUKRelationTransformer(
+      request.body.validate[T] match {
+        case JsSuccess(value, _) =>
+          transformService.set(
             identifier,
             request.internalId,
-            ukRelation
+            SetTrustDetailTransform(Json.toJson(value), key)
           ) map { _ =>
             Ok
           }
         case JsError(errors) =>
-          logger.warn(s"[setUkRelation][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
-            s"Supplied json could not be read as an Boolean - $errors")
+          logger.warn(s"[set][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
+            s"Supplied json did not pass validation - $errors")
           Future.successful(BadRequest)
       }
     }
   }
-
 }

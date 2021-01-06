@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package transformers
+package transformers.assets
 
 import models.AddressType
 import models.variation.NonEEABusinessType
@@ -26,6 +26,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
 import repositories.TransformationRepository
 import services.{AuditService, TransformationService, TrustsService}
+import transformers.ComposedDeltaTransform
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.JsonUtils
 

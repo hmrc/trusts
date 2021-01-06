@@ -67,6 +67,14 @@ trait JsonOperations {
     })
   }
 
+  def pruneThenAddTo(input: JsValue, path: JsPath, jsonToAdd: JsValue): JsResult[JsValue] = {
+    val updatedInput = input.transform(path.json.prune) match {
+      case JsSuccess(value, _) => value
+      case _ => input
+    }
+    addTo(updatedInput, path, jsonToAdd)
+  }
+
   def addToList(input: JsValue,
                 path: JsPath,
                 jsonToAdd: JsValue) : JsResult[JsValue] = {

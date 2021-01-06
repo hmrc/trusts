@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package transformers
+package transformers.assets
 
 import play.api.libs.json._
+import transformers.AmendEntityTransform
 
 import java.time.LocalDate
 
@@ -24,11 +25,21 @@ case class AmendAssetTransform(index: Int,
                                amended: JsValue,
                                original: JsValue,
                                endDate: LocalDate,
-                               assetType: String) extends AmendEntityTransform {
+                               override val assetType: String) extends AssetTransform with AmendEntityTransform {
 
   override val path: JsPath = __ \ 'details \ 'trust \ 'assets \ assetType
 
   override val endDateField: String = "endDate"
+
+  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
+    if (isNonEeaBusiness) {
+      endEntity(input, path, original, endDate, endDateField)
+    } else {
+      JsSuccess(input)
+    }
+  }
+
+  override val isTaxableMigrationTransform: Boolean = !isNonEeaBusiness
 }
 
 object AmendAssetTransform {

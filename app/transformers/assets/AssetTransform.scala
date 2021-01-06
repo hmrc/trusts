@@ -14,24 +14,11 @@
  * limitations under the License.
  */
 
-package transformers.trustDetails
+package transformers.assets
 
-import play.api.libs.json._
-import transformers.{DeltaTransform, JsonOperations}
+import models.variation.NonEEABusinessType
 
-case class SetResidentTransform(trustUKResident: Boolean) extends DeltaTransform with JsonOperations {
-
-  private lazy val path = __ \ 'details \ 'trust \ 'details \ 'trustUKResident
-
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addTo(input, path, Json.toJson(trustUKResident))
-  }
-
-}
-
-object SetResidentTransform {
-
-  val key = "SetResidentTransform"
-
-  implicit val format: Format[SetResidentTransform] = Json.format[SetResidentTransform]
+trait AssetTransform {
+  val assetType: String
+  def isNonEeaBusiness: Boolean = assetType == NonEEABusinessType.toString
 }

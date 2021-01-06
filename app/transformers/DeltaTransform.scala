@@ -17,12 +17,15 @@
 package transformers
 
 import play.api.libs.json.{JsValue, _}
+import transformers.assets.{AddAssetTransform, AmendAssetTransform, RemoveAssetTransform}
 import transformers.trustDetails._
 
 trait DeltaTransform {
   def applyTransform(input: JsValue): JsResult[JsValue]
 
   def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = JsSuccess(input)
+
+  val isTaxableMigrationTransform: Boolean = false
 }
 
 object DeltaTransform {
@@ -99,12 +102,7 @@ object DeltaTransform {
   }
 
   def trustDetailsReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
-    readsForTransform[SetExpressTransform](SetExpressTransform.key) orElse
-    readsForTransform[SetPropertyTransform](SetPropertyTransform.key) orElse
-    readsForTransform[SetRecordedTransform](SetRecordedTransform.key) orElse
-    readsForTransform[SetResidentTransform](SetResidentTransform.key) orElse
-    readsForTransform[SetTaxableTransform](SetTaxableTransform.key) orElse
-    readsForTransform[SetUKRelationTransform](SetUKRelationTransform.key)
+    readsForTransform[SetTrustDetailTransform](SetTrustDetailTransform.key)
   }
 
   def assetReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
@@ -227,34 +225,24 @@ object DeltaTransform {
       Json.obj(RemoveOtherIndividualsTransform.key -> Json.toJson(transform)(RemoveOtherIndividualsTransform.format))
   }
 
-  def addNonEeaBusinessAssetWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
+  def addAssetWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
     case transform: AddAssetTransform =>
       Json.obj(AddAssetTransform.key -> Json.toJson(transform)(AddAssetTransform.format))
   }
 
-  def amendNonEeaBusinessAssetWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+  def amendAssetWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
     case transform: AmendAssetTransform =>
       Json.obj(AmendAssetTransform.key -> Json.toJson(transform)(AmendAssetTransform.format))
   }
 
-  def removeNonEeaBusinessAssetWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
+  def removeAssetWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
     case transform: RemoveAssetTransform =>
       Json.obj(RemoveAssetTransform.key -> Json.toJson(transform)(RemoveAssetTransform.format))
   }
 
   def trustDetailsTransformsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
-    case transform: SetExpressTransform =>
-      Json.obj(SetExpressTransform.key -> Json.toJson(transform)(SetExpressTransform.format))
-    case transform: SetPropertyTransform =>
-      Json.obj(SetPropertyTransform.key -> Json.toJson(transform)(SetPropertyTransform.format))
-    case transform: SetRecordedTransform =>
-      Json.obj(SetRecordedTransform.key -> Json.toJson(transform)(SetRecordedTransform.format))
-    case transform: SetResidentTransform =>
-      Json.obj(SetResidentTransform.key -> Json.toJson(transform)(SetResidentTransform.format))
-    case transform: SetTaxableTransform =>
-      Json.obj(SetTaxableTransform.key -> Json.toJson(transform)(SetTaxableTransform.format))
-    case transform: SetUKRelationTransform =>
-      Json.obj(SetUKRelationTransform.key -> Json.toJson(transform)(SetUKRelationTransform.format))
+    case transform: SetTrustDetailTransform =>
+      Json.obj(SetTrustDetailTransform.key -> Json.toJson(transform)(SetTrustDetailTransform.format))
   }
 
   def defaultWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
@@ -276,9 +264,9 @@ object DeltaTransform {
       removeOtherIndividualsWrites orElse
       addOtherIndividualsWrites orElse
       trustDetailsTransformsWrites orElse
-      addNonEeaBusinessAssetWrites orElse
-      amendNonEeaBusinessAssetWrites orElse
-      removeNonEeaBusinessAssetWrites orElse
+      addAssetWrites orElse
+      amendAssetWrites orElse
+      removeAssetWrites orElse
       defaultWrites
       ).apply(deltaTransform)
   }

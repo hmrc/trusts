@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-package transformers.trustDetails
+package transformers.assets
 
 import play.api.libs.json._
 import transformers.{DeltaTransform, JsonOperations}
 
-case class SetPropertyTransform(trustUKProperty: Boolean) extends DeltaTransform with JsonOperations {
+case class AddAssetTransform(asset: JsValue, override val assetType: String)
+  extends AssetTransform with DeltaTransform with JsonOperations {
 
-  private lazy val path = __ \ 'details \ 'trust \ 'details \ 'trustUKProperty
+  private lazy val path = __ \ 'details \ 'trust \ 'assets \ assetType
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addTo(input, path, JsBoolean(trustUKProperty))
+    addToList(input, path, asset)
   }
 
+  override val isTaxableMigrationTransform: Boolean = !isNonEeaBusiness
 }
 
-object SetPropertyTransform {
+object AddAssetTransform {
 
-  val key = "SetPropertyTransform"
+  val key = "AddAssetTransform"
 
-  implicit val format: Format[SetPropertyTransform] = Json.format[SetPropertyTransform]
+  implicit val format: Format[AddAssetTransform] = Json.format[AddAssetTransform]
 }

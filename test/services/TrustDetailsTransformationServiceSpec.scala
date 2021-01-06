@@ -22,6 +22,7 @@ import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.libs.json.JsBoolean
 import transformers.trustDetails._
 import utils.{JsonFixtures, JsonUtils}
 
@@ -52,12 +53,12 @@ class TrustDetailsTransformationServiceSpec extends FreeSpec
           }
         }
 
-        val result = service.setExpressTransformer("utr", "internalId", express = true)
+        val transform = SetTrustDetailTransform(JsBoolean(true), "expressTrust")
+
+        val result = service.set("utr", "internalId", transform)
 
         whenReady(result) { _ =>
-          verify(transformationService).addNewTransform("utr",
-            "internalId", SetExpressTransform(expressTrust = true)
-          )
+          verify(transformationService).addNewTransform("utr", "internalId", transform)
         }
       }
 
@@ -76,12 +77,12 @@ class TrustDetailsTransformationServiceSpec extends FreeSpec
           }
         }
 
-        val result = service.setPropertyTransformer("utr", "internalId", property = true)
+        val transform = SetTrustDetailTransform(JsBoolean(true), "trustUKProperty")
+
+        val result = service.set("utr", "internalId", transform)
 
         whenReady(result) { _ =>
-          verify(transformationService).addNewTransform("utr",
-            "internalId", SetPropertyTransform(trustUKProperty = true)
-          )
+          verify(transformationService).addNewTransform("utr", "internalId", transform)
         }
       }
 
@@ -100,12 +101,12 @@ class TrustDetailsTransformationServiceSpec extends FreeSpec
           }
         }
 
-        val result = service.setRecordedTransformer("utr", "internalId", recorded = true)
+        val transform = SetTrustDetailTransform(JsBoolean(true), "trustRecorded")
+
+        val result = service.set("utr", "internalId", transform)
 
         whenReady(result) { _ =>
-          verify(transformationService).addNewTransform("utr",
-            "internalId", SetRecordedTransform(trustRecorded = true)
-          )
+          verify(transformationService).addNewTransform("utr", "internalId", transform)
         }
       }
 
@@ -124,12 +125,12 @@ class TrustDetailsTransformationServiceSpec extends FreeSpec
           }
         }
 
-        val result = service.setResidentTransformer("utr", "internalId", resident = true)
+        val transform = SetTrustDetailTransform(JsBoolean(true), "trustUKResident")
+
+        val result = service.set("utr", "internalId", transform)
 
         whenReady(result) { _ =>
-          verify(transformationService).addNewTransform("utr",
-            "internalId", SetResidentTransform(trustUKResident = true)
-          )
+          verify(transformationService).addNewTransform("utr", "internalId", transform)
         }
       }
 
@@ -148,12 +149,12 @@ class TrustDetailsTransformationServiceSpec extends FreeSpec
           }
         }
 
-        val result = service.setTaxableTransformer("utr", "internalId", taxable = true)
+        val transform = SetTrustDetailTransform(JsBoolean(true), "trustTaxable")
+
+        val result = service.set("utr", "internalId", transform)
 
         whenReady(result) { _ =>
-          verify(transformationService).addNewTransform("utr",
-            "internalId", SetTaxableTransform(trustTaxable = true)
-          )
+          verify(transformationService).addNewTransform("utr", "internalId", transform)
         }
       }
 
@@ -172,17 +173,14 @@ class TrustDetailsTransformationServiceSpec extends FreeSpec
           }
         }
 
-        val result = service.setUKRelationTransformer("utr", "internalId", ukRelation = true)
+        val transform = SetTrustDetailTransform(JsBoolean(true), "trustUKRelation")
+
+        val result = service.set("utr", "internalId", transform)
 
         whenReady(result) { _ =>
-          verify(transformationService).addNewTransform("utr",
-            "internalId", SetUKRelationTransform(trustUKRelation = true)
-          )
+          verify(transformationService).addNewTransform("utr", "internalId", transform)
         }
       }
-
     }
-
   }
-
 }

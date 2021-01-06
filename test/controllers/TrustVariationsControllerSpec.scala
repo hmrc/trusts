@@ -17,6 +17,10 @@
 package controllers
 
 import base.BaseSpec
+import controllers.actions.FakeIdentifierAction
+import exceptions._
+import models.auditing.TrustAuditing
+import models.{DeclarationForApi, DeclarationName, NameType}
 import org.mockito.Matchers.{eq => Meq, _}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.IntegrationPatience
@@ -24,12 +28,8 @@ import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
-import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
-import controllers.actions.FakeIdentifierAction
-import exceptions._
-import models.auditing.TrustAuditing
-import models.{DeclarationForApi, DeclarationName, NameType}
 import services._
+import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 
 import scala.concurrent.Future
 
@@ -40,6 +40,8 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
   private lazy val mockAuditService: AuditService = mock[AuditService]
 
   private val mockVariationService = mock[VariationService]
+
+  private val mockTransformationService = mock[TransformationService]
 
   private val responseHandler = new VariationsResponseHandler(mockAuditService)
 
@@ -52,6 +54,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       new FakeIdentifierAction(bodyParsers, Organisation),
       mockAuditService,
       mockVariationService,
+      mockTransformationService,
       responseHandler,
       Helpers.stubControllerComponents()
     )
@@ -87,5 +90,20 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       )(any())
     }
   }
-}
 
+  ".removeTaxableMigrationTransforms" should {
+
+    "remove all taxable migration transforms" in {
+
+      when(mockTransformationService.removeTaxableMigrationTransforms(any(), any()))
+        .thenReturn(Future.successful(true))
+
+      val request = FakeRequest(GET, "path")
+
+      val result = trustVariationsController.removeTaxableMigrationTransforms("DRAFTID").apply(request)
+      status(result) mustBe OK
+
+      verify(mockTransformationService).removeTaxableMigrationTransforms("DRAFTID", "id")
+    }
+  }
+}
