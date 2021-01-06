@@ -40,4 +40,20 @@ object Constants {
   val INVALID_UTR_CODE = "INVALID_UTR"
   val INVALID_UTR_MESSAGE = "The UTR provided is invalid."
 
+
+  val EXPRESS = "expressTrust"
+  val UK_RESIDENT = "trustUKResident"
+  val TAXABLE = "trustTaxable"
+  val UK_PROPERTY = "trustUKProperty"
+  val RECORDED = "trustRecorded"
+  val UK_RELATION = "trustUKRelation"
+
+  val LAW_COUNTRY = "lawCountry"
+  val ADMINISTRATION_COUNTRY = "administrationCountry"
+  val TYPE_OF_TRUST = "typeOfTrust"
+  val DEED_OF_VARIATION = "deedOfVariation"
+  val INTER_VIVOS = "interVivos"
+  val EFRBS_START_DATE = "efrbsStartDate"
+  val RESIDENTIAL_STATUS = "residentialStatus"
+
 }

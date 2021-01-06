@@ -97,4 +97,12 @@ PUT         /:identifier/trust-details/uk-property                     controlle
 PUT         /:identifier/trust-details/recorded                        controllers.TrustDetailsTransformationController.setRecorded(identifier: String)
 PUT         /:identifier/trust-details/uk-relation                     controllers.TrustDetailsTransformationController.setUKRelation(identifier: String)
 
+PUT         /:identifier/trust-details/law-country                     controllers.TrustDetailsTransformationController.setLawCountry(identifier: String)
+PUT         /:identifier/trust-details/admininstration-country         controllers.TrustDetailsTransformationController.setAdministrationCountry(identifier: String)
+PUT         /:identifier/trust-details/type-of-trust                   controllers.TrustDetailsTransformationController.setTypeOfTrust(identifier: String)
+PUT         /:identifier/trust-details/deed-of-variation               controllers.TrustDetailsTransformationController.setDeedOfVariation(identifier: String)
+PUT         /:identifier/trust-details/inter-vivos                     controllers.TrustDetailsTransformationController.setInterVivos(identifier: String)
+PUT         /:identifier/trust-details/efrbs-start-date                controllers.TrustDetailsTransformationController.setEfrbsStartDate(identifier: String)
+PUT         /:identifier/trust-details/residential-status              controllers.TrustDetailsTransformationController.setResidentialStatus(identifier: String)
+
 DELETE      /:identifier/transforms/migrate-to-taxable                 controllers.TrustVariationsController.removeTaxableMigrationTransforms(identifier: String)
