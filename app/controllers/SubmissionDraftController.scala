@@ -194,7 +194,6 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
         implicit val draftWrites: Writes[RegistrationSubmissionDraft] = new Writes[RegistrationSubmissionDraft] {
           override def writes(draft: RegistrationSubmissionDraft): JsValue =
             if (draft.reference.isDefined) {
-              // TODO refactor this to pull from another JsPath for agent details
               Json.obj(
                 "createdAt" -> draft.createdAt,
                 "draftId" -> draft.draftId,
