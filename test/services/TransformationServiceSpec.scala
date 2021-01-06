@@ -30,6 +30,7 @@ import play.api.libs.json.{JsResult, JsValue, Json}
 import repositories.TransformationRepositoryImpl
 import transformers._
 import transformers.assets.{AddAssetTransform, AmendAssetTransform, RemoveAssetTransform}
+import transformers.trustDetails.SetTrustDetailTransform
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{JsonFixtures, JsonUtils}
 
@@ -276,14 +277,37 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
         AddAssetTransform(Json.obj(), NonEEABusinessType.toString),
         AmendAssetTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2021-01-01"), NonEEABusinessType.toString),
-        RemoveAssetTransform(0, Json.obj(), LocalDate.parse("2021-01-01"), NonEEABusinessType.toString)
+        RemoveAssetTransform(0, Json.obj(), LocalDate.parse("2021-01-01"), NonEEABusinessType.toString),
+
+        SetTrustDetailTransform(Json.obj(), "expressTrust"),
+        SetTrustDetailTransform(Json.obj(), "trustUKResident"),
+        SetTrustDetailTransform(Json.obj(), "trustTaxable"),
+        SetTrustDetailTransform(Json.obj(), "trustUKProperty"),
+        SetTrustDetailTransform(Json.obj(), "trustRecorded"),
+        SetTrustDetailTransform(Json.obj(), "trustUKRelation"),
+
+        SetTrustDetailTransform(Json.obj(), "lawCountry"),
+        SetTrustDetailTransform(Json.obj(), "administrationCountry"),
+        SetTrustDetailTransform(Json.obj(), "typeOfTrust"),
+        SetTrustDetailTransform(Json.obj(), "deedOfVariation"),
+        SetTrustDetailTransform(Json.obj(), "interVivos"),
+        SetTrustDetailTransform(Json.obj(), "efrbsStartDate"),
+        SetTrustDetailTransform(Json.obj(), "residentialStatus")
       ))
 
       val expectedTransformsAfterTaxableMigrationTransformsRemoved = ComposedDeltaTransform(Seq(
         AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo),
+
         AddAssetTransform(Json.obj(), NonEEABusinessType.toString),
         AmendAssetTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2021-01-01"), NonEEABusinessType.toString),
-        RemoveAssetTransform(0, Json.obj(), LocalDate.parse("2021-01-01"), NonEEABusinessType.toString)
+        RemoveAssetTransform(0, Json.obj(), LocalDate.parse("2021-01-01"), NonEEABusinessType.toString),
+
+        SetTrustDetailTransform(Json.obj(), "expressTrust"),
+        SetTrustDetailTransform(Json.obj(), "trustUKResident"),
+        SetTrustDetailTransform(Json.obj(), "trustTaxable"),
+        SetTrustDetailTransform(Json.obj(), "trustUKProperty"),
+        SetTrustDetailTransform(Json.obj(), "trustRecorded"),
+        SetTrustDetailTransform(Json.obj(), "trustUKRelation")
       ))
 
       when(repository.get(any(), any())).thenReturn(Future.successful(Some(initialTransforms)))
