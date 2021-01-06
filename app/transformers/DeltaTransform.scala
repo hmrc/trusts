@@ -17,6 +17,7 @@
 package transformers
 
 import play.api.libs.json.{JsValue, _}
+import transformers.assets.{AddAssetTransform, AmendAssetTransform, RemoveAssetTransform}
 import transformers.trustDetails._
 
 trait DeltaTransform {

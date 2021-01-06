@@ -21,6 +21,7 @@ import models.Success
 import models.variation._
 import play.api.libs.json.{JsObject, JsValue, Json, Writes, __}
 import transformers._
+import transformers.assets.{AddAssetTransform, AmendAssetTransform, RemoveAssetTransform}
 import transformers.remove.RemoveAsset
 import uk.gov.hmrc.http.HeaderCarrier
 

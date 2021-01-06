@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package transformers
+package transformers.assets
 
 import play.api.libs.json._
+import transformers.{DeltaTransform, JsonOperations}
 
-case class AddAssetTransform(asset: JsValue,
-                             assetType: String) extends DeltaTransform with JsonOperations {
+case class AddAssetTransform(asset: JsValue, override val assetType: String)
+  extends AssetTransform with DeltaTransform with JsonOperations {
 
   private lazy val path = __ \ 'details \ 'trust \ 'assets \ assetType
 
@@ -27,7 +28,7 @@ case class AddAssetTransform(asset: JsValue,
     addToList(input, path, asset)
   }
 
-  override val isTaxableMigrationTransform: Boolean = true
+  override val isTaxableMigrationTransform: Boolean = !isNonEeaBusiness
 }
 
 object AddAssetTransform {

@@ -20,6 +20,7 @@ import models.AddressType
 import models.variation.NonEEABusinessType
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
+import transformers.assets.AddAssetTransform
 import utils.JsonUtils
 
 import java.time.LocalDate

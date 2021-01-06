@@ -17,7 +17,7 @@
 package services
 
 import models.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
-import models.variation.{AmendedLeadTrusteeIndType, IdentificationType}
+import models.variation.{AmendedLeadTrusteeIndType, IdentificationType, NonEEABusinessType, OtherAssetType}
 import models.{AddressType, NameType}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -29,6 +29,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.{JsResult, JsValue, Json}
 import repositories.TransformationRepositoryImpl
 import transformers._
+import transformers.assets.{AddAssetTransform, AmendAssetTransform, RemoveAssetTransform}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{JsonFixtures, JsonUtils}
 
@@ -268,13 +269,21 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
       val initialTransforms = ComposedDeltaTransform(Seq(
         AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo),
-        AddAssetTransform(Json.obj(), ""),
-        AmendAssetTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2021-01-01"), ""),
-        RemoveAssetTransform(0, Json.obj(), LocalDate.parse("2021-01-01"), "")
+
+        AddAssetTransform(Json.obj(), OtherAssetType.toString),
+        AmendAssetTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2021-01-01"), OtherAssetType.toString),
+        RemoveAssetTransform(0, Json.obj(), LocalDate.parse("2021-01-01"), OtherAssetType.toString),
+
+        AddAssetTransform(Json.obj(), NonEEABusinessType.toString),
+        AmendAssetTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2021-01-01"), NonEEABusinessType.toString),
+        RemoveAssetTransform(0, Json.obj(), LocalDate.parse("2021-01-01"), NonEEABusinessType.toString)
       ))
 
       val expectedTransformsAfterTaxableMigrationTransformsRemoved = ComposedDeltaTransform(Seq(
-        AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo)
+        AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo),
+        AddAssetTransform(Json.obj(), NonEEABusinessType.toString),
+        AmendAssetTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2021-01-01"), NonEEABusinessType.toString),
+        RemoveAssetTransform(0, Json.obj(), LocalDate.parse("2021-01-01"), NonEEABusinessType.toString)
       ))
 
       when(repository.get(any(), any())).thenReturn(Future.successful(Some(initialTransforms)))

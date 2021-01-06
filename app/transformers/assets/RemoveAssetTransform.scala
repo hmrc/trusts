@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package transformers
+package transformers.assets
 
-import models.variation.NonEEABusinessType
 import play.api.libs.json._
+import transformers.{DeltaTransform, JsonOperations}
 
 import java.time.LocalDate
 
 case class RemoveAssetTransform(index: Int,
                                 asset: JsValue,
                                 endDate: LocalDate,
-                                assetType: String) extends DeltaTransform with JsonOperations {
+                                override val assetType: String) extends AssetTransform with DeltaTransform with JsonOperations {
 
   private lazy val path = __ \ "details" \ "trust" \ "assets" \ assetType
 
@@ -33,14 +33,14 @@ case class RemoveAssetTransform(index: Int,
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    if (assetType == NonEEABusinessType.toString) {
+    if (isNonEeaBusiness) {
       endEntity(input, path, Json.toJson(asset), endDate, "endDate")
     } else {
       JsSuccess(input)
     }
   }
 
-  override val isTaxableMigrationTransform: Boolean = true
+  override val isTaxableMigrationTransform: Boolean = !isNonEeaBusiness
 }
 
 object RemoveAssetTransform {
