@@ -346,13 +346,13 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
 
   def getAgentAddress(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
-      val path: JsPath = JsPath \ "registration" \ "trust/entities/agent" \ "agentAddress"
+      val path: JsPath = JsPath \ "registration" \ "agentDetails" \ "agentAddress"
       getAtPath[AddressType](draftId, path)
   }
 
   def getClientReference(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
-      val path: JsPath = JsPath \ "registration" \ "trust/entities/agent" \ "clientReference"
+      val path: JsPath = JsPath \ "registration" \ "agentDetails" \ "clientReference"
       getAtPath[String](draftId, path)
   }
 
