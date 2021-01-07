@@ -18,7 +18,7 @@ package controllers
 
 import javax.inject.Inject
 import play.api.Logging
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsBoolean, JsObject, JsPath, JsString, JsValue, Json, Reads, __}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.http.BadRequestException
 import config.AppConfig
@@ -30,7 +30,7 @@ import models.registration.ApiResponse._
 import models.registration.RegistrationTrnResponse._
 import models.registration.{RegistrationFailureResponse, RegistrationTrnResponse}
 import models.requests.IdentifierRequest
-import services.{AuditService, TrustsService, RosmPatternService, ValidationService, _}
+import services.{AuditService, RosmPatternService, TrustsService, ValidationService, _}
 import utils.ErrorResponses._
 import utils.Headers
 import utils.JsonOps._
@@ -58,11 +58,46 @@ class RegisterTrustController @Inject()(trustsService: TrustsService, config: Ap
   def registration(): Action[JsValue] = identify.async(parse.json) {
     implicit request =>
 
-      val payload = request.body.applyRules.toString
+//      val payload = request.body.applyRules.toString //TODO: Uncomment this line when all 5mld data is available
       val draftIdOption = request.headers.get(Headers.DraftRegistrationId)
 
       schemaF.flatMap {
         schema =>
+
+//TODO: Remove the defaulted data for 5mld below when the services are updated to add real data for 5mld
+          val payload = if (schema == config.trustsApiRegistrationSchema5MLD) {
+
+            def putNewValue(path: JsPath, value: JsValue ): Reads[JsObject] =
+              __.json.update(path.json.put(value))
+
+            val leadTrusteeIndPath = (__ \ 'trust \ 'entities \ 'leadTrustees \ 'leadTrusteeInd).json
+
+            request.body.applyRules.transform(
+              if (request.body.transform(leadTrusteeIndPath.pick).isSuccess) {
+                putNewValue((__ \ 'trust \ 'entities \ 'leadTrustees \ 'leadTrusteeInd \ 'countryOfResidence), JsString("GB")) andThen
+                putNewValue((__ \ 'trust \ 'entities \ 'leadTrustees \ 'leadTrusteeInd \ 'nationality), JsString("GB")) andThen
+                putNewValue((__ \ 'trust \ 'details \ 'expressTrust), JsBoolean(false)) andThen
+                putNewValue((__ \ 'trust \ 'details \ 'trustTaxable), JsBoolean(true)) andThen
+                putNewValue((__ \ 'trust \ 'details \ 'trustUKResident), JsBoolean(true)) andThen
+                putNewValue((__ \ 'submissionDate), JsString("2021-01-01"))
+              } else {
+                putNewValue((__ \ 'trust \ 'entities \ 'leadTrustees \ 'leadTrusteeOrg \ 'countryOfResidence), JsString("GB")) andThen
+                putNewValue((__ \ 'trust \ 'details \ 'expressTrust), JsBoolean(false)) andThen
+                putNewValue((__ \ 'trust \ 'details \ 'trustTaxable), JsBoolean(true)) andThen
+                putNewValue((__ \ 'trust \ 'details \ 'trustUKResident), JsBoolean(true)) andThen
+                putNewValue((__ \ 'submissionDate), JsString("2021-01-01"))
+              }
+            ).fold(
+              _ => {
+                logger.error("[registration] Could not add temporary data for 5mld tests")
+                request.body.applyRules.toString
+              },
+              value => value.toString)
+          } else {
+            request.body.applyRules.toString
+          }
+//TODO: When ALL services are updated with real 5mld data delete all of the above and uncomment val payload above
+
           validationService
             .get(schema)
             .validate[Registration](payload) match {
