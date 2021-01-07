@@ -18,7 +18,12 @@ package transformers
 
 import play.api.libs.json.{JsValue, _}
 import transformers.assets.{AddAssetTransform, AmendAssetTransform, RemoveAssetTransform}
-import transformers.trustDetails._
+import transformers.beneficiaries.{AddCharityBeneficiaryTransform, AddCompanyBeneficiaryTransform, AddIndividualBeneficiaryTransform, AddLargeBeneficiaryTransform, AddOtherBeneficiaryTransform, AddTrustBeneficiaryTransform, AddUnidentifiedBeneficiaryTransform, AmendCharityBeneficiaryTransform, AmendCompanyBeneficiaryTransform, AmendIndividualBeneficiaryTransform, AmendLargeBeneficiaryTransform, AmendOtherBeneficiaryTransform, AmendTrustBeneficiaryTransform, AmendUnidentifiedBeneficiaryTransform, RemoveBeneficiariesTransform}
+import transformers.otherindividuals.{AddOtherIndividualTransform, AmendOtherIndividualTransform, RemoveOtherIndividualsTransform}
+import transformers.protectors.{AddCompanyProtectorTransform, AddIndividualProtectorTransform, AmendBusinessProtectorTransform, AmendIndividualProtectorTransform, RemoveProtectorsTransform}
+import transformers.settlors.{AddBusinessSettlorTransform, AddIndividualSettlorTransform, AmendBusinessSettlorTransform, AmendDeceasedSettlorTransform, AmendIndividualSettlorTransform, RemoveSettlorsTransform}
+import transformers.trustdetails._
+import transformers.trustees.{AddTrusteeIndTransform, AddTrusteeOrgTransform, AmendLeadTrusteeIndTransform, AmendLeadTrusteeOrgTransform, AmendTrusteeIndTransform, AmendTrusteeOrgTransform, PromoteTrusteeIndTransform, PromoteTrusteeOrgTransform, RemoveTrusteeTransform}
 
 trait DeltaTransform {
   def applyTransform(input: JsValue): JsResult[JsValue]

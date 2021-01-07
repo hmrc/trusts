@@ -17,10 +17,10 @@
 package transformers
 
 import java.time.LocalDate
-
 import org.scalatest.{FreeSpec, MustMatchers}
 import models.NameType
 import models.variation.{IdentificationType, TrusteeIndividualType}
+import transformers.trustees.AddTrusteeIndTransform
 import utils.JsonUtils
 
 class AddTrusteeIndTransformSpec extends FreeSpec with MustMatchers {

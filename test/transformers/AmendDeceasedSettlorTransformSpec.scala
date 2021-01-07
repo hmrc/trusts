@@ -20,6 +20,7 @@ import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.{JsValue, Json}
 import models.NameType
 import models.variation.AmendDeceasedSettlor
+import transformers.settlors.AmendDeceasedSettlorTransform
 import utils.JsonUtils
 
 class AmendDeceasedSettlorTransformSpec extends FreeSpec with MustMatchers {

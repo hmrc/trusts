@@ -17,11 +17,13 @@
 package services
 
 import exceptions.InternalServerErrorException
+
 import javax.inject.Inject
 import models.Success
 import models.variation._
 import play.api.libs.json.{JsObject, JsValue, Json, __}
 import transformers._
+import transformers.beneficiaries.{AddCharityBeneficiaryTransform, AddCompanyBeneficiaryTransform, AddIndividualBeneficiaryTransform, AddLargeBeneficiaryTransform, AddOtherBeneficiaryTransform, AddTrustBeneficiaryTransform, AddUnidentifiedBeneficiaryTransform, AmendCharityBeneficiaryTransform, AmendCompanyBeneficiaryTransform, AmendIndividualBeneficiaryTransform, AmendLargeBeneficiaryTransform, AmendOtherBeneficiaryTransform, AmendTrustBeneficiaryTransform, AmendUnidentifiedBeneficiaryTransform, RemoveBeneficiariesTransform}
 import transformers.remove.RemoveBeneficiary
 import uk.gov.hmrc.http.HeaderCarrier
 

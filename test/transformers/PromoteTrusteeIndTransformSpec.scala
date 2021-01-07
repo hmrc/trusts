@@ -17,11 +17,11 @@
 package transformers
 
 import java.time.LocalDate
-
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
 import models.NameType
 import models.variation.{AmendedLeadTrusteeIndType, IdentificationType}
+import transformers.trustees.PromoteTrusteeIndTransform
 import utils.JsonUtils
 
 class PromoteTrusteeIndTransformSpec extends FreeSpec with MustMatchers {

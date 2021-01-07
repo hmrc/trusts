@@ -17,9 +17,9 @@
 package transformers
 
 import java.time.LocalDate
-
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import models.variation.{IdentificationOrgType, SettlorCompany}
+import transformers.settlors.AddBusinessSettlorTransform
 import utils.JsonUtils
 
 class AddBusinessSettlorTransformSpec extends FreeSpec with MustMatchers with OptionValues {

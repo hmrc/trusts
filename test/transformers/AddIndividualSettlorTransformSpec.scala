@@ -17,10 +17,10 @@
 package transformers
 
 import java.time.LocalDate
-
 import org.scalatest.{FreeSpec, MustMatchers}
 import models.NameType
 import models.variation.{IdentificationType, Settlor}
+import transformers.settlors.AddIndividualSettlorTransform
 import utils.JsonUtils
 
 class AddIndividualSettlorTransformSpec extends FreeSpec with MustMatchers {

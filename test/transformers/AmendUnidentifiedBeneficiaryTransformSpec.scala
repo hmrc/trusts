@@ -17,9 +17,9 @@
 package transformers
 
 import java.time.LocalDate
-
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
+import transformers.beneficiaries.AmendUnidentifiedBeneficiaryTransform
 import utils.JsonUtils
 
 class AmendUnidentifiedBeneficiaryTransformSpec extends FreeSpec with MustMatchers {

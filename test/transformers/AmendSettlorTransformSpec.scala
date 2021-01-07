@@ -17,9 +17,9 @@
 package transformers
 
 import java.time.LocalDate
-
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.{JsPath, JsValue, Json, __}
+import transformers.settlors.AmendSettlorTransform
 
 case class TestAmendSettlorTransform(index: Int,
                                 amended: JsValue,

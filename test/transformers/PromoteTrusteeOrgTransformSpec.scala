@@ -17,10 +17,10 @@
 package transformers
 
 import java.time.LocalDate
-
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
 import models.variation.{AmendedLeadTrusteeOrgType, IdentificationOrgType}
+import transformers.trustees.PromoteTrusteeOrgTransform
 import utils.JsonUtils
 
 class PromoteTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {

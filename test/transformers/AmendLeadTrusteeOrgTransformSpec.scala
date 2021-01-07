@@ -18,6 +18,7 @@ package transformers
 
 import org.scalatest.{FreeSpec, MustMatchers}
 import models.variation.{AmendedLeadTrusteeOrgType, IdentificationOrgType}
+import transformers.trustees.AmendLeadTrusteeOrgTransform
 import utils.JsonUtils
 
 class AmendLeadTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {

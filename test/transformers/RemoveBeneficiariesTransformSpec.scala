@@ -17,7 +17,6 @@
 package transformers
 
 import java.time.LocalDate
-
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
@@ -27,7 +26,8 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import models.variation.UnidentifiedType
 import repositories.TransformationRepository
-import services.{AuditService, TrustsService, TransformationService}
+import services.{AuditService, TransformationService, TrustsService}
+import transformers.beneficiaries.{AddUnidentifiedBeneficiaryTransform, RemoveBeneficiariesTransform}
 import utils.JsonUtils
 
 import scala.concurrent.Future

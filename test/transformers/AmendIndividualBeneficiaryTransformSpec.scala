@@ -17,11 +17,11 @@
 package transformers
 
 import java.time.LocalDate
-
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.{JsValue, Json}
 import models.variation.{IdentificationType, IndividualDetailsType}
 import models.{NameType, PassportType}
+import transformers.beneficiaries.AmendIndividualBeneficiaryTransform
 import utils.JsonUtils
 
 class AmendIndividualBeneficiaryTransformSpec extends FreeSpec with MustMatchers {

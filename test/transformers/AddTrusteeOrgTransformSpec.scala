@@ -17,9 +17,9 @@
 package transformers
 
 import java.time.LocalDate
-
 import org.scalatest.{FreeSpec, MustMatchers}
 import models.variation.TrusteeOrgType
+import transformers.trustees.AddTrusteeOrgTransform
 import utils.JsonUtils
 
 class AddTrusteeOrgTransformSpec extends FreeSpec with MustMatchers {

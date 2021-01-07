@@ -17,10 +17,10 @@
 package transformers
 
 import java.time.LocalDate
-
 import org.scalatest.{FreeSpec, MustMatchers}
 import models.AddressType
 import models.variation.{BeneficiaryCharityType, IdentificationOrgType}
+import transformers.beneficiaries.AddCharityBeneficiaryTransform
 import utils.JsonUtils
 
 class AddCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers {

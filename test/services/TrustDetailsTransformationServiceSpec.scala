@@ -23,7 +23,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.JsBoolean
-import transformers.trustDetails._
+import transformers.trustdetails._
 import utils.{JsonFixtures, JsonUtils}
 
 import scala.concurrent.Future

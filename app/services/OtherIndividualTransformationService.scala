@@ -17,11 +17,13 @@
 package services
 
 import exceptions.InternalServerErrorException
+
 import javax.inject.Inject
 import models.Success
 import models.variation.NaturalPersonType
 import play.api.libs.json.{JsObject, JsValue, Json, __}
 import transformers._
+import transformers.otherindividuals.{AddOtherIndividualTransform, AmendOtherIndividualTransform, RemoveOtherIndividualsTransform}
 import transformers.remove.RemoveOtherIndividual
 import uk.gov.hmrc.http.HeaderCarrier
 

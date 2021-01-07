@@ -17,9 +17,9 @@
 package transformers
 
 import java.time.LocalDate
-
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json._
+import transformers.trustees.RemoveTrusteeTransform
 import utils.JsonUtils
 
 class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers  {

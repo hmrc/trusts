@@ -17,11 +17,11 @@
 package transformers
 
 import java.time.LocalDate
-
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
+import transformers.otherindividuals.RemoveOtherIndividualsTransform
 import utils.JsonUtils
 
 class RemoveOtherIndividualsTransformSpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar {

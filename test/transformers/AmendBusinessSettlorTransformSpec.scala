@@ -17,10 +17,10 @@
 package transformers
 
 import java.time.LocalDate
-
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.{JsValue, Json}
 import models.variation.SettlorCompany
+import transformers.settlors.AmendBusinessSettlorTransform
 import utils.JsonUtils
 
 class AmendBusinessSettlorTransformSpec extends FreeSpec with MustMatchers {

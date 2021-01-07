@@ -17,7 +17,6 @@
 package services
 
 import java.time.LocalDate
-
 import models.NameType
 import models.variation.NaturalPersonType
 import org.mockito.Matchers._
@@ -28,6 +27,7 @@ import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
 import transformers._
+import transformers.otherindividuals.{AmendOtherIndividualTransform, RemoveOtherIndividualsTransform}
 import transformers.remove.RemoveOtherIndividual
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{JsonFixtures, JsonUtils}

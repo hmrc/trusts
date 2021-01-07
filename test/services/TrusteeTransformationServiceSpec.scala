@@ -17,7 +17,6 @@
 package services
 
 import java.time.LocalDate
-
 import models.NameType
 import models.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
 import models.variation._
@@ -30,6 +29,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
 import transformers._
 import transformers.remove.RemoveTrustee
+import transformers.trustees.{AddTrusteeIndTransform, AddTrusteeOrgTransform, AmendLeadTrusteeIndTransform, AmendTrusteeIndTransform, PromoteTrusteeIndTransform, PromoteTrusteeOrgTransform, RemoveTrusteeTransform}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.JsonFixtures
 

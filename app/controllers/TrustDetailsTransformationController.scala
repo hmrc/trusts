@@ -22,7 +22,7 @@ import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents}
 import services.TrustDetailsTransformationService
-import transformers.trustDetails.SetTrustDetailTransform
+import transformers.trustdetails.SetTrustDetailTransform
 import utils.Constants._
 import utils.ValidationUtil
 

@@ -17,7 +17,6 @@
 package services
 
 import java.time.LocalDate
-
 import javax.inject.Inject
 import play.api.libs.json.{__, _}
 import exceptions.InternalServerErrorException
@@ -26,6 +25,7 @@ import models.get_trust.TrustProcessedResponse
 import models.variation.{AmendedLeadTrusteeIndType, AmendedLeadTrusteeOrgType, TrusteeType}
 import transformers._
 import transformers.remove.RemoveTrustee
+import transformers.trustees.{AddTrusteeIndTransform, AddTrusteeOrgTransform, AmendLeadTrusteeIndTransform, AmendLeadTrusteeOrgTransform, AmendTrusteeIndTransform, AmendTrusteeOrgTransform, PromoteTrusteeIndTransform, PromoteTrusteeOrgTransform, RemoveTrusteeTransform}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
