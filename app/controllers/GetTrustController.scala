@@ -61,8 +61,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
 
   def get(identifier: String, applyTransformations: Boolean = false): Action[AnyContent] =
     doGet(identifier, applyTransformations) {
-      result: GetTrustSuccessResponse =>
-        Ok(Json.toJson(result))
+      result: GetTrustSuccessResponse => Ok(Json.toJson(result))
     }
 
   def getLeadTrustee(identifier: String): Action[AnyContent] =
