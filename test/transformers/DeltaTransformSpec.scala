@@ -20,7 +20,12 @@ import models.variation._
 import models.{AddressType, NameType}
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.{JsBoolean, Json}
-import transformers.trustDetails._
+import transformers.beneficiaries._
+import transformers.otherindividuals._
+import transformers.protectors._
+import transformers.settlors._
+import transformers.trustdetails._
+import transformers.trustees._
 
 import java.time.LocalDate
 

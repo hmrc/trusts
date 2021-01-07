@@ -19,19 +19,18 @@ package services
 import akka.actor.ActorSystem
 import akka.pattern.after
 import com.google.inject.ImplementedBy
-import javax.inject.Inject
-import play.api.Logging
-import uk.gov.hmrc.http.HeaderCarrier
 import config.AppConfig
 import connector.TaxEnrolmentConnector
 import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentSuscriberResponse}
+import play.api.Logging
+import uk.gov.hmrc.http.HeaderCarrier
 import utils.Session
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
-
 
 class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector :TaxEnrolmentConnector, config: AppConfig) extends TaxEnrolmentsService with Logging {
 

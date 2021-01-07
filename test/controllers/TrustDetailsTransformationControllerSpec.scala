@@ -29,7 +29,7 @@ import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
 import services.TrustDetailsTransformationService
-import transformers.trustDetails.SetTrustDetailTransform
+import transformers.trustdetails.SetTrustDetailTransform
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 
 import java.time.LocalDate

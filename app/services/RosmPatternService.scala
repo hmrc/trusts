@@ -17,17 +17,16 @@
 package services
 
 import com.google.inject.ImplementedBy
-import javax.inject.Inject
+import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSuccess, TaxEnrolmentSuscriberResponse}
 import play.api.Logging
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.http.HeaderCarrier
-import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSuccess, TaxEnrolmentSuscriberResponse}
 import utils.Session
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
-
 
 class RosmPatternServiceImpl @Inject()(trustsService :TrustsService, taxEnrolmentService : TaxEnrolmentsService) extends RosmPatternService with Logging {
 

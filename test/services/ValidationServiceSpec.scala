@@ -17,9 +17,9 @@
 package services
 
 import base.BaseSpec
-import org.scalatest.{Assertion, EitherValues}
 import models.existing_trust.ExistingCheckRequest
 import models.{Assets, Registration}
+import org.scalatest.{Assertion, EitherValues}
 import utils.{DataExamples, JsonUtils}
 
 class ValidationServiceSpec extends BaseSpec

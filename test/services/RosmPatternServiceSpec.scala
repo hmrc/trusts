@@ -17,12 +17,11 @@
 package services
 
 import base.BaseSpec
-import org.mockito.Mockito.when
 import exceptions._
 import models.tax_enrolments.{SubscriptionIdResponse, TaxEnrolmentFailure, TaxEnrolmentSuccess}
+import org.mockito.Mockito.when
 
 import scala.concurrent.Future
-
 
 class RosmPatternServiceSpec extends BaseSpec {
 

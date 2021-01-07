@@ -17,16 +17,15 @@
 package services
 
 import base.BaseSpec
-import org.mockito.Matchers.any
-import org.mockito.Mockito.{times, verify, when, _}
-import uk.gov.hmrc.http.HeaderCarrier
 import connector.TaxEnrolmentConnector
 import exceptions.{BadRequestException, InternalServerErrorException}
 import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentSuccess}
+import org.mockito.Matchers.any
+import org.mockito.Mockito.{times, verify, when, _}
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
-
 
 class TaxEnrolmentsServiceSpec extends BaseSpec {
 

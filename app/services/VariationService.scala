@@ -16,9 +16,7 @@
 
 package services
 
-
 import exceptions.{EtmpCacheDataStaleException, InternalServerErrorException}
-import javax.inject.Inject
 import models.DeclarationForApi
 import models.auditing.TrustAuditing
 import models.get_trust.TrustProcessedResponse
@@ -30,6 +28,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.JsonOps._
 import utils.Session
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 

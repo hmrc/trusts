@@ -17,7 +17,6 @@
 package services
 
 import exceptions.InternalServerErrorException
-import javax.inject.Inject
 import models.auditing.TrustAuditing
 import models.get_trust.{GetTrustResponse, TransformationErrorResponse, TrustProcessedResponse}
 import play.api.Logging
@@ -27,6 +26,7 @@ import transformers._
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.Session
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 

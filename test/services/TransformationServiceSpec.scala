@@ -29,8 +29,9 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.{JsResult, JsValue, Json}
 import repositories.TransformationRepositoryImpl
 import transformers._
-import transformers.assets.{AddAssetTransform, AmendAssetTransform, RemoveAssetTransform}
-import transformers.trustDetails.SetTrustDetailTransform
+import transformers.assets._
+import transformers.trustdetails.SetTrustDetailTransform
+import transformers.trustees._
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{JsonFixtures, JsonUtils}
 

@@ -16,8 +16,6 @@
 
 package services
 
-import java.time.LocalDate
-
 import models.NameType
 import models.variation.{Protector, ProtectorCompany}
 import org.mockito.Matchers
@@ -28,11 +26,12 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
-import transformers._
+import transformers.protectors._
 import transformers.remove.RemoveProtector
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{JsonFixtures, JsonUtils}
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 

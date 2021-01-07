@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.repositories
 
-import java.time.LocalDate
-
-import org.scalatest.{AsyncFreeSpec, MustMatchers}
-import uk.gov.hmrc.itbase.IntegrationTestBase
 import models.NameType
 import models.variation.{AmendedLeadTrusteeIndType, IdentificationType, TrusteeIndividualType}
+import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import repositories.TransformationRepository
-import transformers.{AddTrusteeIndTransform, AmendLeadTrusteeIndTransform, ComposedDeltaTransform}
+import transformers.ComposedDeltaTransform
+import transformers.trustees._
+import uk.gov.hmrc.itbase.IntegrationTestBase
+
+import java.time.LocalDate
 
 class TransformRepositorySpec extends AsyncFreeSpec with MustMatchers with IntegrationTestBase {
 

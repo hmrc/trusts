@@ -16,9 +16,8 @@
 
 package services
 
-import connector.{TrustsConnector, SubscriptionConnector}
+import connector.{SubscriptionConnector, TrustsConnector}
 import exceptions.InternalServerErrorException
-import javax.inject.Inject
 import models._
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
 import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse, TrustProcessedResponse}
@@ -29,6 +28,7 @@ import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import repositories.CacheRepository
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
