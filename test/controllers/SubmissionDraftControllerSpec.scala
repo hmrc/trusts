@@ -198,7 +198,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       |            "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54"
       |        },
       |        "registration": {
-      |          "trust/entities/agent": {
+      |          "agentDetails": {
       |            "agentAddress": {
       |              "line1": "Agent address line1",
       |              "line2": "Agent address line2",
