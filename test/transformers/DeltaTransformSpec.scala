@@ -20,12 +20,12 @@ import models.variation._
 import models.{AddressType, NameType}
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.{JsBoolean, Json}
-import transformers.beneficiaries.{AddCharityBeneficiaryTransform, AddCompanyBeneficiaryTransform, AddIndividualBeneficiaryTransform, AddLargeBeneficiaryTransform, AddOtherBeneficiaryTransform, AddTrustBeneficiaryTransform, AddUnidentifiedBeneficiaryTransform, AmendCharityBeneficiaryTransform, AmendCompanyBeneficiaryTransform, AmendIndividualBeneficiaryTransform, AmendLargeBeneficiaryTransform, AmendOtherBeneficiaryTransform, AmendTrustBeneficiaryTransform, AmendUnidentifiedBeneficiaryTransform, RemoveBeneficiariesTransform}
-import transformers.otherindividuals.{AddOtherIndividualTransform, AmendOtherIndividualTransform, RemoveOtherIndividualsTransform}
-import transformers.protectors.{AddCompanyProtectorTransform, AddIndividualProtectorTransform, AmendBusinessProtectorTransform, RemoveProtectorsTransform}
-import transformers.settlors.{AddIndividualSettlorTransform, AmendBusinessSettlorTransform, AmendDeceasedSettlorTransform, AmendIndividualSettlorTransform, RemoveSettlorsTransform}
+import transformers.beneficiaries._
+import transformers.otherindividuals._
+import transformers.protectors._
+import transformers.settlors._
 import transformers.trustdetails._
-import transformers.trustees.{AddTrusteeIndTransform, AddTrusteeOrgTransform, AmendLeadTrusteeIndTransform, AmendLeadTrusteeOrgTransform, AmendTrusteeIndTransform, AmendTrusteeOrgTransform, PromoteTrusteeIndTransform, PromoteTrusteeOrgTransform, RemoveTrusteeTransform}
+import transformers.trustees._
 
 import java.time.LocalDate
 
