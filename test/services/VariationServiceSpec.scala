@@ -16,8 +16,6 @@
 
 package services
 
-import java.time.LocalDate
-
 import exceptions.EtmpCacheDataStaleException
 import models.get_trust.{ResponseHeader, TrustProcessedResponse}
 import models.variation.VariationResponse
@@ -34,6 +32,7 @@ import transformers.DeclarationTransformer
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.JsonFixtures
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class VariationServiceSpec extends WordSpec

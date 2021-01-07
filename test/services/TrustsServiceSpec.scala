@@ -17,7 +17,7 @@
 package services
 
 import base.BaseSpec
-import connector.{TrustsConnector, SubscriptionConnector}
+import connector.{SubscriptionConnector, TrustsConnector}
 import exceptions._
 import models.existing_trust.ExistingCheckResponse._
 import models.existing_trust._

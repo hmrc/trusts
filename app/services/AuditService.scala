@@ -16,7 +16,6 @@
 
 package services
 
-import javax.inject.Inject
 import models.Registration
 import models.auditing.{GetTrustOrEstateAuditEvent, TrustAuditing, TrustRegistrationSubmissionAuditEvent}
 import models.registration.RegistrationResponse
@@ -24,6 +23,8 @@ import models.variation.VariationResponse
 import play.api.libs.json.{JsPath, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+
+import javax.inject.Inject
 
 class AuditService @Inject()(auditConnector: AuditConnector){
 

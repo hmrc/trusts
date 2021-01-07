@@ -17,16 +17,15 @@
 package services
 
 import exceptions.InternalServerErrorException
-
-import javax.inject.Inject
 import models.Success
 import models.variation._
 import play.api.libs.json.{JsObject, JsValue, Json, __}
 import transformers._
 import transformers.remove.RemoveSettlor
-import transformers.settlors.{AddBusinessSettlorTransform, AddIndividualSettlorTransform, AmendBusinessSettlorTransform, AmendDeceasedSettlorTransform, AmendIndividualSettlorTransform, RemoveSettlorsTransform}
+import transformers.settlors._
 import uk.gov.hmrc.http.HeaderCarrier
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}
 

@@ -20,12 +20,12 @@ import com.github.fge.jackson.JsonLoader
 import com.github.fge.jsonschema.core.report.LogLevel.ERROR
 import com.github.fge.jsonschema.core.report.ProcessingReport
 import com.github.fge.jsonschema.main.{JsonSchema, JsonSchemaFactory}
-import javax.inject.Inject
+import models.Registration
 import play.api.Logging
 import play.api.libs.json.{JsPath, Json, JsonValidationError, Reads}
-import models.Registration
 import utils.BusinessValidation
 
+import javax.inject.Inject
 import scala.collection.JavaConverters._
 import scala.io.Source
 import scala.util.{Failure, Success, Try}

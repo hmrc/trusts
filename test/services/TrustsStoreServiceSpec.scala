@@ -17,10 +17,10 @@
 package services
 
 import base.BaseSpec
-import org.mockito.Matchers.any
-import org.mockito.Mockito.when
 import connector.TrustsStoreConnector
 import models.FeatureResponse
+import org.mockito.Matchers.any
+import org.mockito.Mockito.when
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future

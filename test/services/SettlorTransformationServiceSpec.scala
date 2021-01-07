@@ -16,7 +16,6 @@
 
 package services
 
-import java.time.LocalDate
 import models.get_trust.ResponseHeader
 import models.variation.{AmendDeceasedSettlor, IdentificationOrgType, Settlor, SettlorCompany}
 import models.{AddressType, NameType, variation}
@@ -27,12 +26,12 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
-import transformers._
 import transformers.remove.RemoveSettlor
-import transformers.settlors.{AddBusinessSettlorTransform, AddIndividualSettlorTransform, AmendBusinessSettlorTransform, AmendDeceasedSettlorTransform, AmendIndividualSettlorTransform, RemoveSettlorsTransform}
+import transformers.settlors._
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{JsonFixtures, JsonUtils}
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 

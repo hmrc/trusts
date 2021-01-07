@@ -17,12 +17,12 @@
 package services
 
 import base.BaseSpec
+import models.auditing.GetTrustOrEstateAuditEvent
+import models.variation.VariationResponse
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito.verify
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import models.auditing.GetTrustOrEstateAuditEvent
-import models.variation.VariationResponse
 
 class AuditServiceSpec extends BaseSpec {
 
