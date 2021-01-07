@@ -18,22 +18,21 @@ package controllers
 
 import controllers.actions.IdentifierAction
 import models.ResidentialStatusType
-import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents}
-import services.TrustDetailsTransformationService
+import services.TransformationService
+import transformers.DeltaTransform
 import transformers.trustdetails.SetTrustDetailTransform
 import utils.Constants._
-import utils.ValidationUtil
 
 import java.time.LocalDate
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class TrustDetailsTransformationController @Inject()(identify: IdentifierAction,
-                                                     transformService: TrustDetailsTransformationService)
-                                                    (implicit val executionContext: ExecutionContext, cc: ControllerComponents)
-  extends TrustsBaseController(cc) with ValidationUtil with Logging {
+                                                     transformationService: TransformationService)
+                                                    (implicit ec: ExecutionContext, cc: ControllerComponents)
+  extends TransformationController(identify, transformationService) {
 
   def setExpress(identifier: String): Action[JsValue] = set[Boolean](identifier, EXPRESS)
   def setResident(identifier: String): Action[JsValue] = set[Boolean](identifier, UK_RESIDENT)
@@ -50,23 +49,7 @@ class TrustDetailsTransformationController @Inject()(identify: IdentifierAction,
   def setEfrbsStartDate(identifier: String): Action[JsValue] = set[LocalDate](identifier, EFRBS_START_DATE)
   def setResidentialStatus(identifier: String): Action[JsValue] = set[ResidentialStatusType](identifier, RESIDENTIAL_STATUS)
 
-  private def set[T](identifier: String, key: String)
-                    (implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = identify.async(parse.json) {
-    implicit request => {
-      request.body.validate[T] match {
-        case JsSuccess(value, _) =>
-          transformService.set(
-            identifier,
-            request.internalId,
-            SetTrustDetailTransform(Json.toJson(value), key)
-          ) map { _ =>
-            Ok
-          }
-        case JsError(errors) =>
-          logger.warn(s"[set][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
-            s"Supplied json did not pass validation - $errors")
-          Future.successful(BadRequest)
-      }
-    }
+  override def transform[T](value: T, key: String)(implicit wts: Writes[T]): DeltaTransform = {
+    SetTrustDetailTransform(Json.toJson(value), key)
   }
 }

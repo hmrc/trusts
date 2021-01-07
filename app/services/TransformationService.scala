@@ -17,6 +17,7 @@
 package services
 
 import exceptions.InternalServerErrorException
+import models.Success
 import models.auditing.TrustAuditing
 import models.get_trust.{GetTrustResponse, TransformationErrorResponse, TrustProcessedResponse}
 import play.api.Logging
@@ -49,7 +50,6 @@ class TransformationService @Inject()(repository: TransformationRepository,
 
             applyTransformations(identifier, internalId, fixed).map {
               case JsSuccess(transformed, _) =>
-
                 TrustProcessedResponse(transformed, response.responseHeader)
               case JsError(errors) => TransformationErrorResponse(errors.toString)
             }
@@ -119,6 +119,14 @@ class TransformationService @Inject()(repository: TransformationRepository,
       val copyAddress = __.json.update(pathToLeadTrusteeAddress.json.copyFrom(pathToCorrespondenceAddress.json.pick))
       beforeJson.transform(copyAddress)
     }
+  }
+
+  def set[T <: DeltaTransform](identifier: String, internalId: String, transform: T): Future[Success.type] = {
+    addNewTransform(
+      identifier,
+      internalId,
+      transform
+    ).map(_ => Success)
   }
 
   def addNewTransform(identifier: String, internalId: String, newTransform: DeltaTransform): Future[Boolean] = {

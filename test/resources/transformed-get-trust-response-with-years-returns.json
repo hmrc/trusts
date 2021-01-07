@@ -62,13 +62,7 @@
         "typeOfTrust": "Will Trust or Intestacy Trust",
         "deedOfVariation": "Previously there was only an absolute interest under the will",
         "interVivos": true,
-        "efrbsStartDate": "1920-02-28",
-        "trustTaxable": true,
-        "expressTrust": true,
-        "trustUKResident": true,
-        "trustUKProperty": true,
-        "trustRecorded": false,
-        "trustUKRelation": false
+        "efrbsStartDate": "1920-02-28"
       },
       "entities": {
         "naturalPerson": [
@@ -84,10 +78,7 @@
             "identification": {
               "safeId": "2222200000000"
             },
-            "entityStart": "2017-02-28",
-            "countryOfResidence": "GB",
-            "nationality": "DE",
-            "legallyIncapable": false
+            "entityStart": "2017-02-28"
           }
         ],
         "beneficiary": {
@@ -108,10 +99,7 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28",
-              "countryOfResidence": "GB",
-              "nationality": "DE",
-              "legallyIncapable": false
+              "entityStart": "2017-02-28"
             }
           ],
           "company": [
@@ -124,8 +112,7 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28",
-              "countryOfResidence": "GB"
+              "entityStart": "2017-02-28"
             }
           ],
           "trust": [
@@ -138,8 +125,7 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28",
-              "countryOfResidence": "GB"
+              "entityStart": "2017-02-28"
             }
           ],
           "charity": [
@@ -152,8 +138,7 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28",
-              "countryOfResidence": "GB"
+              "entityStart": "2017-02-28"
             }
           ],
           "unidentified": [
@@ -182,8 +167,7 @@
               },
               "beneficiaryDiscretion": true,
               "beneficiaryShareOfIncome": "0",
-              "entityStart": "2017-02-28",
-              "countryOfResidence": "GB"
+              "entityStart": "2017-02-28"
             }
           ],
           "other": [
@@ -201,8 +185,7 @@
               },
               "beneficiaryDiscretion": true,
               "beneficiaryShareOfIncome": "0",
-              "entityStart": "2017-02-28",
-              "countryOfResidence": "GB"
+              "entityStart": "2017-02-28"
             }
           ]
         },
@@ -219,9 +202,7 @@
           "identification": {
             "safeId": "2222200000000"
           },
-          "entityStart": "2017-02-28",
-          "countryOfResidence": "GB",
-          "nationality": "DE"
+          "entityStart": "2017-02-28"
         },
         "leadTrustees": {
           "lineNo": "1",
@@ -237,10 +218,7 @@
           "identification": {
             "nino": "NH111111A"
           },
-          "entityStart": "2017-02-28",
-          "countryOfResidence": "GB",
-          "nationality": "DE",
-          "legallyIncapable": false
+          "entityStart": "2017-02-28"
         },
         "trustees": [
           {
@@ -257,10 +235,7 @@
                 "safeId": "2222200000000"
               },
               "phoneNumber": "+447456788112",
-              "entityStart": "2017-02-28",
-              "countryOfResidence": "GB",
-              "nationality": "DE",
-              "legallyIncapable": false
+              "entityStart": "2017-02-28"
             }
           },
           {
@@ -273,8 +248,7 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28",
-              "countryOfResidence": "GB"
+              "entityStart": "2017-02-28"
             }
           }
         ],
@@ -292,10 +266,7 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28",
-              "countryOfResidence": "GB",
-              "nationality": "DE",
-              "legallyIncapable": false
+              "entityStart": "2017-02-28"
             }
           ],
           "protectorCompany": [
@@ -306,8 +277,7 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28",
-              "countryOfResidence": "GB"
+              "entityStart": "2017-02-28"
             }
           ]
         },
@@ -325,10 +295,7 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28",
-              "countryOfResidence": "GB",
-              "nationality": "DE",
-              "legallyIncapable": false
+              "entityStart": "2017-02-28"
             }
           ],
           "settlorCompany": [
@@ -341,8 +308,7 @@
               "identification": {
                 "safeId": "2222200000000"
               },
-              "entityStart": "2017-02-28",
-              "countryOfResidence": "GB"
+              "entityStart": "2017-02-28"
             }
           ]
         }

@@ -51,6 +51,4 @@ object SetTrustDetailTransform {
 
   implicit val format: Format[SetTrustDetailTransform] = Json.format[SetTrustDetailTransform]
 
-  def apply(value: JsValue, key: String): SetTrustDetailTransform = new SetTrustDetailTransform(value, key)
-
 }
