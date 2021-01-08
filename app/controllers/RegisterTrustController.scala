@@ -18,7 +18,7 @@ package controllers
 
 import javax.inject.Inject
 import play.api.Logging
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsBoolean, JsObject, JsPath, JsString, JsValue, Json, Reads, __}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.http.BadRequestException
 import config.AppConfig
@@ -30,7 +30,7 @@ import models.registration.ApiResponse._
 import models.registration.RegistrationTrnResponse._
 import models.registration.{RegistrationFailureResponse, RegistrationTrnResponse}
 import models.requests.IdentifierRequest
-import services.{AuditService, TrustsService, RosmPatternService, ValidationService, _}
+import services.{AuditService, RosmPatternService, TrustsService, ValidationService, _}
 import utils.ErrorResponses._
 import utils.Headers
 import utils.JsonOps._
@@ -45,7 +45,8 @@ class RegisterTrustController @Inject()(trustsService: TrustsService, config: Ap
                                         rosmPatternService: RosmPatternService,
                                         auditService: AuditService,
                                         cc: ControllerComponents,
-                                        trustsStoreService: TrustsStoreService
+                                        trustsStoreService: TrustsStoreService,
+                                        default5mldDataService: Default5mldDataService
                                         ) extends TrustsBaseController(cc) with Logging {
 
   private def schemaF(implicit request: IdentifierRequest[JsValue]): Future[String] = {
@@ -58,11 +59,17 @@ class RegisterTrustController @Inject()(trustsService: TrustsService, config: Ap
   def registration(): Action[JsValue] = identify.async(parse.json) {
     implicit request =>
 
-      val payload = request.body.applyRules.toString
+//      val payload = request.body.applyRules.toString //TODO: Uncomment this line when when the services are updated to add real data for 5mld
       val draftIdOption = request.headers.get(Headers.DraftRegistrationId)
 
       schemaF.flatMap {
         schema =>
+
+          //TODO: Remove this when the services are updated to add real data for 5mld
+          val fiveMldEnabled: Boolean = (schema == config.trustsApiRegistrationSchema5MLD)
+          val payload = default5mldDataService.addDefault5mldData(fiveMldEnabled, request.body)
+          //TODO: Remove this when the services are updated to add real data for 5mld
+
           validationService
             .get(schema)
             .validate[Registration](payload) match {
