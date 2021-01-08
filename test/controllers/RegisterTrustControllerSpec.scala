@@ -39,7 +39,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
   private val mockTrustsService: TrustsService = mock[TrustsService]
   private val rosmPatternService: RosmPatternService = mock[RosmPatternService]
   private val mockTrustsStoreService: TrustsStoreService = mock[TrustsStoreService]
-
+  private val default5mldDataService: Default5mldDataService = injector.instanceOf[Default5mldDataService]
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   private val fakeOrganisationAuthAction = new FakeIdentifierAction(bodyParsers, Organisation)
@@ -75,7 +75,8 @@ class RegisterTrustControllerSpec extends BaseSpec {
           rosmPatternService,
           mockedAuditService,
           Helpers.stubControllerComponents(),
-          mockTrustsStoreService
+          mockTrustsStoreService,
+          default5mldDataService
         )
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
@@ -102,7 +103,8 @@ class RegisterTrustControllerSpec extends BaseSpec {
           rosmPatternService,
           mockedAuditService,
           Helpers.stubControllerComponents(),
-          mockTrustsStoreService
+          mockTrustsStoreService,
+          default5mldDataService
         )
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistration5MldRequestJson)))
@@ -129,7 +131,8 @@ class RegisterTrustControllerSpec extends BaseSpec {
           rosmPatternService,
           mockedAuditService,
           Helpers.stubControllerComponents(),
-          mockTrustsStoreService
+          mockTrustsStoreService,
+          default5mldDataService
         )
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistration5MldNontaxableRequestJson)))
@@ -156,7 +159,8 @@ class RegisterTrustControllerSpec extends BaseSpec {
             rosmPatternService,
             mockedAuditService,
             Helpers.stubControllerComponents(),
-            mockTrustsStoreService
+            mockTrustsStoreService,
+            default5mldDataService
           )
 
           val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
@@ -179,7 +183,8 @@ class RegisterTrustControllerSpec extends BaseSpec {
           rosmPatternService,
           mockedAuditService,
           Helpers.stubControllerComponents(),
-          mockTrustsStoreService
+          mockTrustsStoreService,
+          default5mldDataService
         )
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
@@ -203,7 +208,8 @@ class RegisterTrustControllerSpec extends BaseSpec {
           rosmPatternService,
           mockedAuditService,
           Helpers.stubControllerComponents(),
-          mockTrustsStoreService
+          mockTrustsStoreService,
+          default5mldDataService
         )
 
         when(mockTrustsService.registerTrust(any[Registration]))
@@ -235,7 +241,8 @@ class RegisterTrustControllerSpec extends BaseSpec {
           rosmPatternService,
           mockedAuditService,
           Helpers.stubControllerComponents(),
-          mockTrustsStoreService
+          mockTrustsStoreService,
+          default5mldDataService
         )
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
@@ -259,7 +266,8 @@ class RegisterTrustControllerSpec extends BaseSpec {
           rosmPatternService,
           mockedAuditService,
           Helpers.stubControllerComponents(),
-          mockTrustsStoreService
+          mockTrustsStoreService,
+          default5mldDataService
         )
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(invalidRegistrationRequestJson)))
@@ -283,7 +291,8 @@ class RegisterTrustControllerSpec extends BaseSpec {
           rosmPatternService,
           mockedAuditService,
           Helpers.stubControllerComponents(),
-          mockTrustsStoreService
+          mockTrustsStoreService,
+          default5mldDataService
         )
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(invalidTrustBusinessValidation)))
@@ -307,7 +316,8 @@ class RegisterTrustControllerSpec extends BaseSpec {
           rosmPatternService,
           mockedAuditService,
           Helpers.stubControllerComponents(),
-          mockTrustsStoreService
+          mockTrustsStoreService,
+          default5mldDataService
         )
 
         val request = postRequestWithPayload(Json.parse(validRegistrationRequestJson), withDraftId = false)
@@ -339,7 +349,8 @@ class RegisterTrustControllerSpec extends BaseSpec {
           rosmPatternService,
           mockedAuditService,
           Helpers.stubControllerComponents(),
-          mockTrustsStoreService
+          mockTrustsStoreService,
+          default5mldDataService
         )
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
@@ -364,7 +375,8 @@ class RegisterTrustControllerSpec extends BaseSpec {
           rosmPatternService,
           mockedAuditService,
           Helpers.stubControllerComponents(),
-          mockTrustsStoreService
+          mockTrustsStoreService,
+          default5mldDataService
         )
 
         when(mockTrustsService.registerTrust(any[Registration])).
@@ -392,7 +404,8 @@ class RegisterTrustControllerSpec extends BaseSpec {
           rosmPatternService,
           mockedAuditService,
           Helpers.stubControllerComponents(),
-          mockTrustsStoreService
+          mockTrustsStoreService,
+          default5mldDataService
         )
 
         when(mockTrustsService.registerTrust(any[Registration]))
