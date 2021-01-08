@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.transformations
 
+import controllers.TrustsBaseController
 import controllers.actions.IdentifierAction
 import play.api.Logging
 import play.api.libs.json._
@@ -26,7 +27,7 @@ import transformers.DeltaTransform
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class TransformationController @Inject()(identify: IdentifierAction,
+abstract class AddTransformationController @Inject()(identify: IdentifierAction,
                                                      transformationService: TransformationService)
                                                     (implicit ec: ExecutionContext, cc: ControllerComponents)
   extends TrustsBaseController(cc) with Logging {
@@ -37,16 +38,18 @@ abstract class TransformationController @Inject()(identify: IdentifierAction,
     identify.async(parse.json) {
       implicit request => {
         request.body.validate[T] match {
-          case JsSuccess(value, _) =>
+
+          case JsSuccess(entityToAdd, _) =>
             transformationService.addNewTransform(
               identifier,
               request.internalId,
-              transform(value, key)
+              transform(entityToAdd, key)
             ) map { _ =>
               Ok
             }
+
           case JsError(errors) =>
-            logger.warn(s"[set][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
+            logger.warn(s"[addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
               s"Supplied json did not pass validation - $errors")
             Future.successful(BadRequest)
         }

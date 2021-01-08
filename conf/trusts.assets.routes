@@ -1,23 +1,23 @@
 
-POST       /add-money/:identifier                                 controllers.AssetsTransformationController.addMoney(identifier: String)
-POST       /amend-money/:identifier/:index                        controllers.AssetsTransformationController.amendMoney(identifier: String, index: Int)
+POST       /add-money/:identifier                                 controllers.transformations.assets.AddAssetController.addMoney(identifier: String)
+POST       /amend-money/:identifier/:index                        controllers.transformations.assets.AmendAssetController.amendMoney(identifier: String, index: Int)
 
-POST       /add-property-or-land/:identifier                      controllers.AssetsTransformationController.addPropertyOrLand(identifier: String)
-POST       /amend-property-or-land/:identifier/:index             controllers.AssetsTransformationController.amendPropertyOrLand(identifier: String, index: Int)
+POST       /add-property-or-land/:identifier                      controllers.transformations.assets.AddAssetController.addPropertyOrLand(identifier: String)
+POST       /amend-property-or-land/:identifier/:index             controllers.transformations.assets.AmendAssetController.amendPropertyOrLand(identifier: String, index: Int)
 
-POST       /add-shares/:identifier                                controllers.AssetsTransformationController.addShares(identifier: String)
-POST       /amend-shares/:identifier/:index                       controllers.AssetsTransformationController.amendShares(identifier: String, index: Int)
+POST       /add-shares/:identifier                                controllers.transformations.assets.AddAssetController.addShares(identifier: String)
+POST       /amend-shares/:identifier/:index                       controllers.transformations.assets.AmendAssetController.amendShares(identifier: String, index: Int)
 
-POST       /add-business/:identifier                              controllers.AssetsTransformationController.addBusiness(identifier: String)
-POST       /amend-business/:identifier/:index                     controllers.AssetsTransformationController.amendBusiness(identifier: String, index: Int)
+POST       /add-business/:identifier                              controllers.transformations.assets.AddAssetController.addBusiness(identifier: String)
+POST       /amend-business/:identifier/:index                     controllers.transformations.assets.AmendAssetController.amendBusiness(identifier: String, index: Int)
 
-POST       /add-partnership/:identifier                           controllers.AssetsTransformationController.addPartnership(identifier: String)
-POST       /amend-partnership/:identifier/:index                  controllers.AssetsTransformationController.amendPartnership(identifier: String, index: Int)
+POST       /add-partnership/:identifier                           controllers.transformations.assets.AddAssetController.addPartnership(identifier: String)
+POST       /amend-partnership/:identifier/:index                  controllers.transformations.assets.AmendAssetController.amendPartnership(identifier: String, index: Int)
 
-POST       /add-other/:identifier                                 controllers.AssetsTransformationController.addOther(identifier: String)
-POST       /amend-other/:identifier/:index                        controllers.AssetsTransformationController.amendOther(identifier: String, index: Int)
+POST       /add-other/:identifier                                 controllers.transformations.assets.AddAssetController.addOther(identifier: String)
+POST       /amend-other/:identifier/:index                        controllers.transformations.assets.AmendAssetController.amendOther(identifier: String, index: Int)
 
-POST       /add-non-eea-business/:identifier                      controllers.AssetsTransformationController.addNonEeaBusiness(identifier: String)
-POST       /amend-non-eea-business/:identifier/:index             controllers.AssetsTransformationController.amendNonEeaBusiness(identifier: String, index: Int)
+POST       /add-non-eea-business/:identifier                      controllers.transformations.assets.AddAssetController.addNonEeaBusiness(identifier: String)
+POST       /amend-non-eea-business/:identifier/:index             controllers.transformations.assets.AmendAssetController.amendNonEeaBusiness(identifier: String, index: Int)
 
-PUT        /:identifier/remove                                    controllers.AssetsTransformationController.removeAsset(identifier: String)
+PUT        /:identifier/remove                                    controllers.transformations.assets.RemoveAssetController.removeAsset(identifier: String)

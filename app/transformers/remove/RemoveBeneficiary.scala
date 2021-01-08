@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import play.api.libs.json._
 
-case class RemoveBeneficiary (endDate: LocalDate, index: Int, `type`: String)
+case class RemoveBeneficiary(endDate: LocalDate, index: Int, `type`: String)
 
 object RemoveBeneficiary {
   val validBeneficiaryTypes: Seq[String] = Seq(

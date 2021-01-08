@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.transformations.trustdetails
 
 import controllers.actions.FakeIdentifierAction
 import models.{NonUKType, ResidentialStatusType}

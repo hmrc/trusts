@@ -14,24 +14,14 @@
  * limitations under the License.
  */
 
-package transformers.assets
+package transformers.remove
 
-import play.api.libs.json._
-import transformers.{DeltaTransform, JsonOperations}
+import java.time.LocalDate
 
-case class AddAssetTransform(asset: JsValue, override val assetType: String)
-  extends AssetTransform with DeltaTransform with JsonOperations {
+trait Remove {
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addToList(input, path, asset)
-  }
+  val endDate: LocalDate
+  val index: Int
+  val `type`: String
 
-  override val isTaxableMigrationTransform: Boolean = !isNonEeaBusiness
-}
-
-object AddAssetTransform {
-
-  val key = "AddAssetTransform"
-
-  implicit val format: Format[AddAssetTransform] = Json.format[AddAssetTransform]
 }

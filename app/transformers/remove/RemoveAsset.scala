@@ -21,7 +21,7 @@ import play.api.libs.json.{Format, Json, OWrites, Reads}
 
 import java.time.LocalDate
 
-case class RemoveAsset(endDate: LocalDate, index: Int, `type`: String)
+case class RemoveAsset(override val endDate: LocalDate, override val index: Int, override val `type`: String) extends Remove
 
 object RemoveAsset {
   val validAssetTypes: Seq[String] = Seq(

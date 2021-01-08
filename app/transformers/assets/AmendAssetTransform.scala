@@ -27,8 +27,6 @@ case class AmendAssetTransform(index: Int,
                                endDate: LocalDate,
                                override val assetType: String) extends AssetTransform with AmendEntityTransform {
 
-  override val path: JsPath = __ \ 'details \ 'trust \ 'assets \ assetType
-
   override val endDateField: String = "endDate"
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.transformations.taxliability
 
 import controllers.actions.IdentifierAction
+import controllers.transformations.AddTransformationController
 import models.YearsReturns
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents}
@@ -30,7 +31,7 @@ import scala.concurrent.ExecutionContext
 class TaxLiabilityTransformationController @Inject()(identify: IdentifierAction,
                                                      transformationService: TransformationService)
                                                     (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends TransformationController(identify, transformationService) {
+  extends AddTransformationController(identify, transformationService) {
 
   def setYearsReturns(identifier: String): Action[JsValue] = addNewTransform[YearsReturns](identifier)
 

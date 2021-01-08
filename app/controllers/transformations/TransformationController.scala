@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package transformers.assets
+package controllers.transformations
 
-import play.api.libs.json._
-import transformers.{DeltaTransform, JsonOperations}
+import exceptions.InternalServerErrorException
+import play.api.libs.json.{JsObject, JsValue, __}
 
-case class AddAssetTransform(asset: JsValue, override val assetType: String)
-  extends AssetTransform with DeltaTransform with JsonOperations {
+import scala.util.{Failure, Try}
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addToList(input, path, asset)
+trait TransformationController {
+
+  val section: String
+
+  def findJson(json: JsValue, key: String, index: Int): Try[JsObject] = {
+    val path = __ \ 'details \ 'trust \ section \ key \ index
+    json.transform(path.json.pick).fold(
+      _ => Failure(InternalServerErrorException(s"Could not locate json at $path")),
+      value => scala.util.Success(value.as[JsObject])
+    )
   }
 
-  override val isTaxableMigrationTransform: Boolean = !isNonEeaBusiness
-}
-
-object AddAssetTransform {
-
-  val key = "AddAssetTransform"
-
-  implicit val format: Format[AddAssetTransform] = Json.format[AddAssetTransform]
 }

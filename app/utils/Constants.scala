@@ -40,6 +40,8 @@ object Constants {
   val INVALID_UTR_CODE = "INVALID_UTR"
   val INVALID_UTR_MESSAGE = "The UTR provided is invalid."
 
+  val ASSETS = "assets"
+
 
   val EXPRESS = "expressTrust"
   val UK_RESIDENT = "trustUKResident"

@@ -17,8 +17,11 @@
 package transformers.assets
 
 import models.variation.NonEEABusinessType
+import play.api.libs.json.{JsPath, __}
+import utils.Constants.ASSETS
 
 trait AssetTransform {
   val assetType: String
   def isNonEeaBusiness: Boolean = assetType == NonEEABusinessType.toString
+  val path: JsPath = __ \ 'details \ 'trust \ ASSETS \ assetType
 }

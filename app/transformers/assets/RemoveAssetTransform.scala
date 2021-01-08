@@ -26,8 +26,6 @@ case class RemoveAssetTransform(index: Int,
                                 endDate: LocalDate,
                                 override val assetType: String) extends AssetTransform with DeltaTransform with JsonOperations {
 
-  private lazy val path = __ \ "details" \ "trust" \ "assets" \ assetType
-
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     removeAtPosition(input, path, index)
   }
