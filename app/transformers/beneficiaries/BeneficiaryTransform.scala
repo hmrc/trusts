@@ -16,24 +16,10 @@
 
 package transformers.beneficiaries
 
-import models.variation.LargeType
-import play.api.libs.json._
-import transformers.{DeltaTransform, JsonOperations}
+import play.api.libs.json.{JsPath, __}
+import utils.Constants.BENEFICIARIES
 
-case class AddLargeBeneficiaryTransform(newBeneficiary: LargeType)
-  extends DeltaTransform
-  with JsonOperations {
-
-  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'large
-
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addToList(input, path, Json.toJson(newBeneficiary))
-  }
-}
-
-object AddLargeBeneficiaryTransform {
-
-  val key = "AddLargeBeneficiaryTransform"
-
-  implicit val format: Format[AddLargeBeneficiaryTransform] = Json.format[AddLargeBeneficiaryTransform]
+trait BeneficiaryTransform {
+  val `type`: String
+  val path: JsPath = __ \ 'details \ 'trust \ 'entities \ BENEFICIARIES \ `type`
 }

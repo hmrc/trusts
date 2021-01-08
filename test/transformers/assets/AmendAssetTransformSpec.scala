@@ -50,7 +50,7 @@ class AmendAssetTransformSpec extends FreeSpec with MustMatchers {
         val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-non-eea-business-asset-transform-before.json")
         val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-non-eea-business-asset-transform-after.json")
 
-        val transformer = AmendAssetTransform(1, Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, amendedAsset.toString)
+        val transformer = AmendAssetTransform(1, Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, "nonEEABusiness")
 
         val result = transformer.applyTransform(beforeJson).get
         result mustBe afterJson
@@ -65,7 +65,7 @@ class AmendAssetTransformSpec extends FreeSpec with MustMatchers {
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-non-eea-business-asset-transform-before.json")
           val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-non-eea-business-asset-transform-after-declaration.json")
 
-          val transformer = AmendAssetTransform(1, Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, amendedAsset.toString)
+          val transformer = AmendAssetTransform(1, Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, "nonEEABusiness")
 
           val transformed = transformer.applyTransform(beforeJson).get
 
@@ -87,7 +87,7 @@ class AmendAssetTransformSpec extends FreeSpec with MustMatchers {
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-other-asset-transform-before.json")
           val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-other-asset-transform-after-declaration.json")
 
-          val transformer = AmendAssetTransform(0, Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, amendedAsset.toString)
+          val transformer = AmendAssetTransform(0, Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, "other")
 
           val transformed = transformer.applyTransform(beforeJson).get
 

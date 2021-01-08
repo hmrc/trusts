@@ -24,7 +24,7 @@ import java.time.LocalDate
 case class RemoveAssetTransform(index: Int,
                                 asset: JsValue,
                                 endDate: LocalDate,
-                                override val assetType: String) extends AssetTransform with DeltaTransform with JsonOperations {
+                                override val `type`: String) extends AssetTransform with DeltaTransform with JsonOperations {
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     removeAtPosition(input, path, index)
@@ -42,6 +42,7 @@ case class RemoveAssetTransform(index: Int,
 }
 
 object RemoveAssetTransform {
+
   val key = "RemoveAssetTransform"
 
   implicit val format: Format[RemoveAssetTransform] = Json.format[RemoveAssetTransform]

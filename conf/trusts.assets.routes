@@ -20,4 +20,4 @@ POST       /amend-other/:identifier/:index                        controllers.tr
 POST       /add-non-eea-business/:identifier                      controllers.transformations.assets.AddAssetController.addNonEeaBusiness(identifier: String)
 POST       /amend-non-eea-business/:identifier/:index             controllers.transformations.assets.AmendAssetController.amendNonEeaBusiness(identifier: String, index: Int)
 
-PUT        /:identifier/remove                                    controllers.transformations.assets.RemoveAssetController.removeAsset(identifier: String)
+PUT        /:identifier/remove                                    controllers.transformations.assets.RemoveAssetController.remove(identifier: String)

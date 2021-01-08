@@ -16,25 +16,28 @@
 
 package transformers.beneficiaries
 
-import models.variation.UnidentifiedType
 import play.api.libs.json._
 import transformers.{DeltaTransform, JsonOperations}
 
-case class AddUnidentifiedBeneficiaryTransform(newBeneficiary: UnidentifiedType)
-  extends DeltaTransform
-  with JsonOperations {
+import java.time.LocalDate
 
-  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'unidentified
+case class RemoveBeneficiaryTransform(index: Int,
+                                      beneficiary: JsValue,
+                                      endDate: LocalDate,
+                                      override val `type`: String) extends BeneficiaryTransform with DeltaTransform with JsonOperations {
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addToList(input, path, Json.toJson(newBeneficiary))
+    removeAtPosition(input, path, index)
+  }
+
+  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
+    endEntity(input, path, Json.toJson(beneficiary), endDate)
   }
 }
 
-object AddUnidentifiedBeneficiaryTransform {
+object RemoveBeneficiaryTransform {
 
-  val key = "AddUnidentifiedBeneficiaryTransform"
+  val key = "RemoveBeneficiaryTransform"
 
-  implicit val format: Format[AddUnidentifiedBeneficiaryTransform] = Json.format[AddUnidentifiedBeneficiaryTransform]
+  implicit val format: Format[RemoveBeneficiaryTransform] = Json.format[RemoveBeneficiaryTransform]
 }
-

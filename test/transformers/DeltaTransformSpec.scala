@@ -19,7 +19,7 @@ package transformers
 import models.variation._
 import models.{AddressType, NameType}
 import org.scalatest.{FreeSpec, MustMatchers}
-import play.api.libs.json.{JsBoolean, Json}
+import play.api.libs.json.{JsBoolean, JsString, Json}
 import transformers.beneficiaries._
 import transformers.otherindividuals._
 import transformers.protectors._
@@ -204,7 +204,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
         None
       )
 
-      val addTrustBeneficiaryTransform = AddTrustBeneficiaryTransform(newTrustBeneficiary)
+      val addTrustBeneficiaryTransform = AddBeneficiaryTransform(Json.toJson(newTrustBeneficiary), "trust")
 
       val amendLeadTrusteeIndTransform = AmendLeadTrusteeIndTransform(newLeadTrustee)
 
@@ -241,42 +241,46 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
       val amendTrusteeIndTransform = AmendTrusteeIndTransform(0, newTrusteeInd, Json.obj(), currentDate)
       val amendTrusteeOrgTransform = AmendTrusteeOrgTransform(0, newTrusteeOrg, Json.obj(), currentDate)
 
-      val amendCharityBeneficiaryTransform = AmendCharityBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate)
-      val amendCompanyBeneficiaryTransform = AmendCompanyBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate)
-      val amendOtherBeneficiaryTransform = AmendOtherBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate)
-      val amendTrustBeneficiaryTransform = AmendTrustBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate)
-      val amendUnidentifiedBeneficiaryTransform = AmendUnidentifiedBeneficiaryTransform(0, "New Description", genericOriginalData, amendedDate)
+      val amendCharityBeneficiaryTransform = AmendBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate, "charity")
+      val amendCompanyBeneficiaryTransform = AmendBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate, "company")
+      val amendOtherBeneficiaryTransform = AmendBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate, "other")
+      val amendTrustBeneficiaryTransform = AmendBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate, "trust")
+      val amendUnidentifiedBeneficiaryTransform = AmendBeneficiaryTransform(0, JsString("New Description"), genericOriginalData, amendedDate, "unidentified")
 
-      val amendIndividualBenTransform = AmendIndividualBeneficiaryTransform(0, Json.toJson(individualBeneficiary), Json.obj(), LocalDate.parse("2020-03-25"))
+      val amendIndividualBenTransform = AmendBeneficiaryTransform(0, Json.toJson(individualBeneficiary), Json.obj(), LocalDate.parse("2020-03-25"), "individualDetails")
 
-      val addUnidentifiedBeneficiaryTransform = AddUnidentifiedBeneficiaryTransform(
-        UnidentifiedType(None, None, "desc", None, None, LocalDate.parse("2010-10-10"), None)
+      val addUnidentifiedBeneficiaryTransform = AddBeneficiaryTransform(
+        Json.toJson(UnidentifiedType(None, None, "desc", None, None, LocalDate.parse("2010-10-10"), None)),
+        "unidentified"
       )
 
-      val addIndividualBeneficiaryTransform = AddIndividualBeneficiaryTransform(individualBeneficiary)
+      val addIndividualBeneficiaryTransform = AddBeneficiaryTransform(Json.toJson(individualBeneficiary), "individualDetails")
 
-      val addCharityBeneficiaryTransform = AddCharityBeneficiaryTransform(
-        BeneficiaryCharityType(
+      val addCharityBeneficiaryTransform = AddBeneficiaryTransform(
+        Json.toJson(BeneficiaryCharityType(
           None, None, "New Organisation Name", Some(true),
           None, None, None, LocalDate.parse("2010-02-23"), None
-        )
+        )),
+        "charity"
       )
 
-      val addOtherBeneficiaryTransform = AddOtherBeneficiaryTransform(
-        OtherType(
+      val addOtherBeneficiaryTransform = AddBeneficiaryTransform(
+        Json.toJson(OtherType(
           None, None, "description", None, None, None, None, LocalDate.parse("2010-02-23"), None
-        )
+        )),
+        "other"
       )
 
-      val addCompanyBeneficiaryTransform = AddCompanyBeneficiaryTransform(
-        BeneficiaryCompanyType(None, None, "Organisation", None, None, None, None, LocalDate.parse("2010-02-23"), None)
+      val addCompanyBeneficiaryTransform = AddBeneficiaryTransform(
+        Json.toJson(BeneficiaryCompanyType(None, None, "Organisation", None, None, None, None, LocalDate.parse("2010-02-23"), None)),
+        "company"
       )
 
-      val addLargeBeneficiaryTransform = AddLargeBeneficiaryTransform(newLargeBeneficiary)
+      val addLargeBeneficiaryTransform = AddBeneficiaryTransform(Json.toJson(newLargeBeneficiary), "large")
 
-      val amendLargeBeneficiaryTransform = AmendLargeBeneficiaryTransform(0, Json.toJson(newLargeBeneficiary), Json.obj(), currentDate)
+      val amendLargeBeneficiaryTransform = AmendBeneficiaryTransform(0, Json.toJson(newLargeBeneficiary), Json.obj(), currentDate, "large")
 
-      val removeBeneficiariesTransform = RemoveBeneficiariesTransform(3, Json.toJson(individualBeneficiary), LocalDate.parse("2012-02-06"), "BeneficiaryType")
+      val removeBeneficiariesTransform = RemoveBeneficiaryTransform(3, Json.toJson(individualBeneficiary), LocalDate.parse("2012-02-06"), "unidentified")
 
       val amendIndividualSettlorTransform = AmendIndividualSettlorTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2020-03-25"))
 
@@ -344,49 +348,49 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           |               "AmendTrusteeOrgTransform": ${Json.toJson(amendTrusteeOrgTransform)}
           |            },
           |            {
-          |               "AmendIndividualBeneficiaryTransform": ${Json.toJson(amendIndividualBenTransform)}
+          |               "AmendBeneficiaryTransform": ${Json.toJson(amendIndividualBenTransform)}
           |            },
           |            {
-          |               "AddTrustBeneficiaryTransform": ${Json.toJson(addTrustBeneficiaryTransform)}
+          |               "AddBeneficiaryTransform": ${Json.toJson(addTrustBeneficiaryTransform)}
           |            },
           |            {
-          |               "AddUnidentifiedBeneficiaryTransform": ${Json.toJson(addUnidentifiedBeneficiaryTransform)}
+          |               "AddBeneficiaryTransform": ${Json.toJson(addUnidentifiedBeneficiaryTransform)}
           |            },
           |            {
-          |               "AddIndividualBeneficiaryTransform": ${Json.toJson(addIndividualBeneficiaryTransform)}
+          |               "AddBeneficiaryTransform": ${Json.toJson(addIndividualBeneficiaryTransform)}
           |            },
           |            {
-          |               "AmendCharityBeneficiaryTransform": ${Json.toJson(amendCharityBeneficiaryTransform)}
+          |               "AmendBeneficiaryTransform": ${Json.toJson(amendCharityBeneficiaryTransform)}
           |            },
           |            {
-          |               "AmendCompanyBeneficiaryTransform": ${Json.toJson(amendCompanyBeneficiaryTransform)}
+          |               "AmendBeneficiaryTransform": ${Json.toJson(amendCompanyBeneficiaryTransform)}
           |            },
           |            {
-          |               "AmendOtherBeneficiaryTransform": ${Json.toJson(amendOtherBeneficiaryTransform)}
+          |               "AmendBeneficiaryTransform": ${Json.toJson(amendOtherBeneficiaryTransform)}
           |            },
           |            {
-          |               "AmendTrustBeneficiaryTransform": ${Json.toJson(amendTrustBeneficiaryTransform)}
+          |               "AmendBeneficiaryTransform": ${Json.toJson(amendTrustBeneficiaryTransform)}
           |            },
           |            {
-          |               "AmendUnidentifiedBeneficiaryTransform": ${Json.toJson(amendUnidentifiedBeneficiaryTransform)}
+          |               "AmendBeneficiaryTransform": ${Json.toJson(amendUnidentifiedBeneficiaryTransform)}
           |            },
           |            {
-          |               "AddCharityBeneficiaryTransform": ${Json.toJson(addCharityBeneficiaryTransform)}
+          |               "AddBeneficiaryTransform": ${Json.toJson(addCharityBeneficiaryTransform)}
           |            },
           |            {
-          |               "AddOtherBeneficiaryTransform": ${Json.toJson(addOtherBeneficiaryTransform)}
+          |               "AddBeneficiaryTransform": ${Json.toJson(addOtherBeneficiaryTransform)}
           |            },
           |            {
-          |               "AddCompanyBeneficiaryTransform": ${Json.toJson(addCompanyBeneficiaryTransform)}
+          |               "AddBeneficiaryTransform": ${Json.toJson(addCompanyBeneficiaryTransform)}
           |            },
           |            {
-          |               "AddLargeBeneficiaryTransform": ${Json.toJson(addLargeBeneficiaryTransform)}
+          |               "AddBeneficiaryTransform": ${Json.toJson(addLargeBeneficiaryTransform)}
           |            },
           |            {
-          |               "AmendLargeBeneficiaryTransform": ${Json.toJson(amendLargeBeneficiaryTransform)}
+          |               "AmendBeneficiaryTransform": ${Json.toJson(amendLargeBeneficiaryTransform)}
           |            },
           |            {
-          |               "RemoveBeneficiariesTransform": ${Json.toJson(removeBeneficiariesTransform)}
+          |               "RemoveBeneficiaryTransform": ${Json.toJson(removeBeneficiariesTransform)}
           |            },
           |            {
           |               "AmendIndividualSettlorTransform": ${Json.toJson(amendIndividualSettlorTransform)}

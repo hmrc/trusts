@@ -19,12 +19,12 @@ package controllers.transformations.assets
 import controllers.actions.IdentifierAction
 import controllers.transformations.AmendTransformationController
 import models.variation._
-import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.libs.json.{JsPath, JsValue, Json, Writes, __}
 import play.api.mvc.{Action, ControllerComponents}
 import services.{LocalDateService, TransformationService}
 import transformers.DeltaTransform
 import transformers.assets.AmendAssetTransform
-import utils.Constants.ASSETS
+import utils.Constants._
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -35,23 +35,23 @@ class AmendAssetController @Inject()(identify: IdentifierAction,
                                     (implicit ec: ExecutionContext, cc: ControllerComponents)
   extends AmendTransformationController(identify, transformationService) {
 
-  override val section: String = ASSETS
+  override def path(`type`: String, index: Int): JsPath = __ \ 'details \ 'trust \ ASSETS \ `type` \ index
 
-  def amendMoney(identifier: String, index: Int): Action[JsValue] = addNewTransform[AssetMonetaryAmount](identifier, index)
+  def amendMoney(identifier: String, index: Int): Action[JsValue] = addNewTransform[AssetMonetaryAmount](identifier, index, MONEY_ASSET)
 
-  def amendPropertyOrLand(identifier: String, index: Int): Action[JsValue] = addNewTransform[PropertyLandType](identifier, index)
+  def amendPropertyOrLand(identifier: String, index: Int): Action[JsValue] = addNewTransform[PropertyLandType](identifier, index, PROPERTY_OR_LAND_ASSET)
 
-  def amendShares(identifier: String, index: Int): Action[JsValue] = addNewTransform[SharesType](identifier, index)
+  def amendShares(identifier: String, index: Int): Action[JsValue] = addNewTransform[SharesType](identifier, index, SHARES_ASSET)
 
-  def amendBusiness(identifier: String, index: Int): Action[JsValue] = addNewTransform[BusinessAssetType](identifier, index)
+  def amendBusiness(identifier: String, index: Int): Action[JsValue] = addNewTransform[BusinessAssetType](identifier, index, BUSINESS_ASSET)
 
-  def amendPartnership(identifier: String, index: Int): Action[JsValue] = addNewTransform[PartnershipType](identifier, index)
+  def amendPartnership(identifier: String, index: Int): Action[JsValue] = addNewTransform[PartnershipType](identifier, index, PARTNERSHIP_ASSET)
 
-  def amendOther(identifier: String, index: Int): Action[JsValue] = addNewTransform[OtherAssetType](identifier, index)
+  def amendOther(identifier: String, index: Int): Action[JsValue] = addNewTransform[OtherAssetType](identifier, index, OTHER_ASSET)
 
-  def amendNonEeaBusiness(identifier: String, index: Int): Action[JsValue] = addNewTransform[NonEEABusinessType](identifier, index)
+  def amendNonEeaBusiness(identifier: String, index: Int): Action[JsValue] = addNewTransform[NonEEABusinessType](identifier, index, NON_EEA_BUSINESS_ASSET)
 
-  override def transform[T](original: JsValue, amended: T, index: Int)(implicit wts: Writes[T]): DeltaTransform = {
-    AmendAssetTransform(index, Json.toJson(amended), original, localDateService.now, amended.toString)
+  override def transform[T](original: JsValue, amended: T, index: Int, `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
+    AmendAssetTransform(index, Json.toJson(amended), original, localDateService.now, `type`)
   }
 }

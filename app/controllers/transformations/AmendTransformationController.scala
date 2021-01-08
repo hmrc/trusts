@@ -32,9 +32,9 @@ abstract class AmendTransformationController @Inject()(identify: IdentifierActio
                                                       (implicit ec: ExecutionContext, cc: ControllerComponents)
   extends TrustsBaseController(cc) with TransformationController with Logging {
 
-  def transform[T](original: JsValue, amended: T, index: Int)(implicit wts: Writes[T]): DeltaTransform
+  def transform[T](original: JsValue, amended: T, index: Int, `type`: String)(implicit wts: Writes[T]): DeltaTransform
 
-  def addNewTransform[T](identifier: String, index: Int)(implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = {
+  def addNewTransform[T](identifier: String, index: Int, `type`: String)(implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = {
     identify.async(parse.json) {
       implicit request => {
         request.body.validate[T] match {
@@ -42,8 +42,8 @@ abstract class AmendTransformationController @Inject()(identify: IdentifierActio
           case JsSuccess(amendedEntity, _) =>
             for {
               json <- transformationService.getTransformedTrustJson(identifier, request.internalId)
-              originalEntity <- Future.fromTry(findJson(json, amendedEntity.toString, index))
-              _ <- transformationService.addNewTransform(identifier, request.internalId, transform(originalEntity, amendedEntity, index))
+              originalEntity <- Future.fromTry(findJson(json, `type`, index))
+              _ <- transformationService.addNewTransform(identifier, request.internalId, transform(originalEntity, amendedEntity, index, `type`))
             } yield {
               Ok
             }

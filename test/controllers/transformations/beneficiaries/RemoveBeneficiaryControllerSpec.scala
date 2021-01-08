@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package controllers.transformations.assets
+package controllers.transformations.beneficiaries
 
 import controllers.actions.FakeIdentifierAction
-import models.AddressType
+import models.NameType
 import models.variation._
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito._
@@ -30,8 +30,8 @@ import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
 import services.TransformationService
-import transformers.assets.RemoveAssetTransform
-import transformers.remove.RemoveAsset
+import transformers.beneficiaries.RemoveBeneficiaryTransform
+import transformers.remove.RemoveBeneficiary
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import utils.JsonUtils
 
@@ -39,238 +39,66 @@ import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
-class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers
+class RemoveBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers
  with GuiceOneAppPerSuite {
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
-  
+
   private val utr: String = "utr"
   private val index: Int = 0
-  private val amount: Long = 1000L
-  private val endDate: LocalDate = LocalDate.parse("2018-02-24")
+  private val startDate: LocalDate = LocalDate.parse("2020-01-01")
+  private val endDate: LocalDate = LocalDate.parse("2021-01-01")
 
-  private def removeAsset(assetType: String): RemoveAsset = RemoveAsset(
+  private def removeBeneficiary(beneficiaryType: String): RemoveBeneficiary = RemoveBeneficiary(
     endDate = endDate,
     index = index,
-    `type` = assetType
+    `type` = beneficiaryType
   )
 
   private val invalidBody: JsValue = Json.parse("{}")
 
-  private def buildInputJson(assetType: String, assetData: Seq[JsValue]): JsObject = {
+  private def buildInputJson(beneficiaryType: String, beneficiaryData: Seq[JsValue]): JsObject = {
     val baseJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-    val adder = (__ \ "details" \ "trust" \ "assets" \ assetType).json.put(JsArray(assetData))
+    val adder = (__ \ "details" \ "trust" \ "entities" \ "beneficiary" \ beneficiaryType).json.put(JsArray(beneficiaryData))
 
     baseJson.as[JsObject](__.json.update(adder))
   }
   
-  "Remove asset controller" - {
+  "Remove beneficiary controller" - {
 
-    "money asset" - {
+    "unidentified beneficiary" - {
 
-      val asset = AssetMonetaryAmount(
-        assetMonetaryAmount = amount
-      )
-
-      val assetType: String = "monetary"
-
-      "add a new remove transform" in {
-
-        val mockTransformationService = mock[TransformationService]
-
-        val controller = new RemoveAssetController(
-          identifierAction,
-          mockTransformationService
-        )(Implicits.global, Helpers.stubControllerComponents())
-
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(asset)))))
-
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
-        val body = removeAsset("monetary")
-
-        val request = FakeRequest(POST, "path")
-          .withBody(Json.toJson(body))
-          .withHeaders(CONTENT_TYPE -> "application/json")
-
-        val result = controller.remove(utr).apply(request)
-
-        status(result) mustBe OK
-
-        val transform = RemoveAssetTransform(index, Json.toJson(asset), endDate, assetType)
-
-        verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
-
-      }
-    }
-
-    "property or land asset" - {
-
-      val asset = PropertyLandType(
-        buildingLandName = None,
-        address = None,
-        valueFull = amount,
-        valuePrevious = None
-      )
-
-      val assetType: String = "propertyOrLand"
-
-      "add a new remove transform" in {
-
-        val mockTransformationService = mock[TransformationService]
-
-        val controller = new RemoveAssetController(
-          identifierAction,
-          mockTransformationService
-        )(Implicits.global, Helpers.stubControllerComponents())
-
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(asset)))))
-
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
-        val body = removeAsset("propertyOrLand")
-
-        val request = FakeRequest(POST, "path")
-          .withBody(Json.toJson(body))
-          .withHeaders(CONTENT_TYPE -> "application/json")
-
-        val result = controller.remove(utr).apply(request)
-
-        status(result) mustBe OK
-
-        val transform = RemoveAssetTransform(index, Json.toJson(asset), endDate, assetType)
-
-        verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
-
-      }
-    }
-
-    "shares asset" - {
-
-      val asset = SharesType(
-        numberOfShares = None,
-        orgName = "Name",
-        utr = None,
-        shareClass = None,
-        typeOfShare = None,
-        value = None
-      )
-
-      val assetType: String = "shares"
-
-      "add a new remove transform" in {
-
-        val mockTransformationService = mock[TransformationService]
-
-        val controller = new RemoveAssetController(
-          identifierAction,
-          mockTransformationService
-        )(Implicits.global, Helpers.stubControllerComponents())
-
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(asset)))))
-
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
-        val body = removeAsset("shares")
-
-        val request = FakeRequest(POST, "path")
-          .withBody(Json.toJson(body))
-          .withHeaders(CONTENT_TYPE -> "application/json")
-
-        val result = controller.remove(utr).apply(request)
-
-        status(result) mustBe OK
-
-        val transform = RemoveAssetTransform(index, Json.toJson(asset), endDate, assetType)
-
-        verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
-
-      }
-    }
-
-    "business asset" - {
-
-      val asset = BusinessAssetType(
-        utr = None,
-        orgName = "Name",
-        businessDescription = "Description",
-        address = None,
-        businessValue = None
-      )
-      
-      val assetType: String = "business"
-
-      "add a new remove transform" in {
-
-        val mockTransformationService = mock[TransformationService]
-
-        val controller = new RemoveAssetController(
-          identifierAction,
-          mockTransformationService
-        )(Implicits.global, Helpers.stubControllerComponents())
-
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(asset)))))
-
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
-        val body = removeAsset("business")
-
-        val request = FakeRequest(POST, "path")
-          .withBody(Json.toJson(body))
-          .withHeaders(CONTENT_TYPE -> "application/json")
-
-        val result = controller.remove(utr).apply(request)
-
-        status(result) mustBe OK
-
-        val transform = RemoveAssetTransform(index, Json.toJson(asset), endDate, assetType)
-
-        verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
-
-      }
-    }
-
-    "partnership asset" - {
-
-      val asset = PartnershipType(
-        utr = None,
+      val beneficiary = UnidentifiedType(
+        lineNo = None,
+        bpMatchStatus = None,
         description = "Description",
-        partnershipStart = None
+        beneficiaryDiscretion = None,
+        beneficiaryShareOfIncome = None,
+        entityStart = startDate,
+        entityEnd = None
       )
 
-      val assetType: String = "partnerShip"
+      val beneficiaryType: String = "unidentified"
 
-      "add a new remove transform" in {
+      "must add a new remove transform" in {
 
         val mockTransformationService = mock[TransformationService]
 
-        val controller = new RemoveAssetController(
+        val controller = new RemoveBeneficiaryController(
           identifierAction,
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(asset)))))
+          .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary)))))
 
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
-        val body = removeAsset("partnerShip")
+        val body = removeBeneficiary(beneficiaryType)
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(body))
@@ -280,7 +108,7 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
 
         status(result) mustBe OK
 
-        val transform = RemoveAssetTransform(index, Json.toJson(asset), endDate, assetType)
+        val transform = RemoveBeneficiaryTransform(index, Json.toJson(beneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -288,31 +116,141 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
       }
     }
 
-    "other asset" - {
+    "individual beneficiary" - {
 
-      val asset = OtherAssetType(
+      val beneficiary = IndividualDetailsType(
+        lineNo = None,
+        bpMatchStatus = None,
+        name = NameType("Joe", None, "Bloggs"),
+        dateOfBirth = None,
+        vulnerableBeneficiary = None,
+        beneficiaryType = None,
+        beneficiaryDiscretion = None,
+        beneficiaryShareOfIncome = None,
+        identification = None,
+        countryOfResidence = None,
+        legallyIncapable = None,
+        nationality = None,
+        entityStart = startDate,
+        entityEnd = None
+      )
+
+      val beneficiaryType: String = "individualDetails"
+
+      "must add a new remove transform" in {
+
+        val mockTransformationService = mock[TransformationService]
+
+        val controller = new RemoveBeneficiaryController(
+          identifierAction,
+          mockTransformationService
+        )(Implicits.global, Helpers.stubControllerComponents())
+
+        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary)))))
+
+        when(mockTransformationService.addNewTransform(any(), any(), any()))
+          .thenReturn(Future.successful(true))
+
+        val body = removeBeneficiary(beneficiaryType)
+
+        val request = FakeRequest(POST, "path")
+          .withBody(Json.toJson(body))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.remove(utr).apply(request)
+
+        status(result) mustBe OK
+
+        val transform = RemoveBeneficiaryTransform(index, Json.toJson(beneficiary), endDate, beneficiaryType)
+
+        verify(mockTransformationService)
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+
+      }
+    }
+
+    "charity beneficiary" - {
+
+      val beneficiary = BeneficiaryCharityType(
+        lineNo = None,
+        bpMatchStatus = None,
+        organisationName = "Name",
+        beneficiaryDiscretion = None,
+        beneficiaryShareOfIncome = None,
+        identification = None,
+        countryOfResidence = None,
+        entityStart = startDate,
+        entityEnd = None
+      )
+
+      val beneficiaryType: String = "charity"
+
+      "must add a new remove transform" in {
+
+        val mockTransformationService = mock[TransformationService]
+
+        val controller = new RemoveBeneficiaryController(
+          identifierAction,
+          mockTransformationService
+        )(Implicits.global, Helpers.stubControllerComponents())
+
+        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary)))))
+
+        when(mockTransformationService.addNewTransform(any(), any(), any()))
+          .thenReturn(Future.successful(true))
+
+        val body = removeBeneficiary(beneficiaryType)
+
+        val request = FakeRequest(POST, "path")
+          .withBody(Json.toJson(body))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.remove(utr).apply(request)
+
+        status(result) mustBe OK
+
+        val transform = RemoveBeneficiaryTransform(index, Json.toJson(beneficiary), endDate, beneficiaryType)
+
+        verify(mockTransformationService)
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+
+      }
+    }
+
+    "other beneficiary" - {
+
+      val beneficiary = OtherType(
+        lineNo = None,
+        bpMatchStatus = None,
         description = "Description",
-        value = None
+        address = None,
+        beneficiaryDiscretion = None,
+        beneficiaryShareOfIncome = None,
+        countryOfResidence = None,
+        entityStart = startDate,
+        entityEnd = None
       )
 
-      val assetType: String = "other"
+      val beneficiaryType: String = "other"
 
-      "add a new remove transform" in {
+      "must add a new remove transform" in {
 
         val mockTransformationService = mock[TransformationService]
 
-        val controller = new RemoveAssetController(
+        val controller = new RemoveBeneficiaryController(
           identifierAction,
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(asset)))))
+          .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary)))))
 
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
-        val body = removeAsset("other")
+        val body = removeBeneficiary(beneficiaryType)
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(body))
@@ -322,43 +260,46 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
 
         status(result) mustBe OK
 
-        val transform = RemoveAssetTransform(index, Json.toJson(asset), endDate, assetType)
+        val transform = RemoveBeneficiaryTransform(index, Json.toJson(beneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
 
       }
     }
-    
-    "non-EEA business asset" - {
 
-      val asset = NonEEABusinessType(
-        lineNo = "1",
-        orgName = "Name",
-        address = AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK"),
-        govLawCountry = "UK",
-        startDate = LocalDate.parse("2000-01-01"),
-        endDate = None
+    "company beneficiary" - {
+
+      val beneficiary = BeneficiaryCompanyType(
+        lineNo = None,
+        bpMatchStatus = None,
+        organisationName = "Name",
+        beneficiaryDiscretion = None,
+        beneficiaryShareOfIncome = None,
+        identification = None,
+        countryOfResidence = None,
+        entityStart = startDate,
+        entityEnd = None
       )
 
-      val assetType: String = "nonEEABusiness"
+      val beneficiaryType: String = "company"
 
-      "add a new remove transform" in {
+      "must add a new remove transform" in {
 
         val mockTransformationService = mock[TransformationService]
 
-        val controller = new RemoveAssetController(
+        val controller = new RemoveBeneficiaryController(
           identifierAction,
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(asset)))))
+          .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary)))))
 
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
-        val body = removeAsset("nonEEABusiness")
+        val body = removeBeneficiary(beneficiaryType)
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(body))
@@ -368,7 +309,7 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
 
         status(result) mustBe OK
 
-        val transform = RemoveAssetTransform(index, Json.toJson(asset), endDate, assetType)
+        val transform = RemoveBeneficiaryTransform(index, Json.toJson(beneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -376,11 +317,115 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
       }
     }
 
-    "return an error for invalid json" in {
+    "trust beneficiary" - {
+
+      val beneficiary = BeneficiaryTrustType(
+        lineNo = None,
+        bpMatchStatus = None,
+        organisationName = "Name",
+        beneficiaryDiscretion = None,
+        beneficiaryShareOfIncome = None,
+        identification = None,
+        countryOfResidence = None,
+        entityStart = startDate,
+        entityEnd = None
+      )
+
+      val beneficiaryType: String = "trust"
+
+      "must add a new remove transform" in {
+
+        val mockTransformationService = mock[TransformationService]
+
+        val controller = new RemoveBeneficiaryController(
+          identifierAction,
+          mockTransformationService
+        )(Implicits.global, Helpers.stubControllerComponents())
+
+        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary)))))
+
+        when(mockTransformationService.addNewTransform(any(), any(), any()))
+          .thenReturn(Future.successful(true))
+
+        val body = removeBeneficiary(beneficiaryType)
+
+        val request = FakeRequest(POST, "path")
+          .withBody(Json.toJson(body))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.remove(utr).apply(request)
+
+        status(result) mustBe OK
+
+        val transform = RemoveBeneficiaryTransform(index, Json.toJson(beneficiary), endDate, beneficiaryType)
+
+        verify(mockTransformationService)
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+
+      }
+    }
+
+    "large beneficiary" - {
+
+      val beneficiary = LargeType(
+        lineNo = None,
+        bpMatchStatus = None,
+        organisationName = "Name",
+        description = "Description",
+        description1 = None,
+        description2 = None,
+        description3 = None,
+        description4 = None,
+        numberOfBeneficiary = "501",
+        identification = None,
+        beneficiaryDiscretion = None,
+        beneficiaryShareOfIncome = None,
+        countryOfResidence = None,
+        entityStart = startDate,
+        entityEnd = None
+      )
+
+      val beneficiaryType: String = "large"
+
+      "must add a new remove transform" in {
+
+        val mockTransformationService = mock[TransformationService]
+
+        val controller = new RemoveBeneficiaryController(
+          identifierAction,
+          mockTransformationService
+        )(Implicits.global, Helpers.stubControllerComponents())
+
+        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary)))))
+
+        when(mockTransformationService.addNewTransform(any(), any(), any()))
+          .thenReturn(Future.successful(true))
+
+        val body = removeBeneficiary(beneficiaryType)
+
+        val request = FakeRequest(POST, "path")
+          .withBody(Json.toJson(body))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.remove(utr).apply(request)
+
+        status(result) mustBe OK
+
+        val transform = RemoveBeneficiaryTransform(index, Json.toJson(beneficiary), endDate, beneficiaryType)
+
+        verify(mockTransformationService)
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+
+      }
+    }
+
+    "must return an error for invalid json" in {
 
       val mockTransformationService = mock[TransformationService]
 
-      val controller = new RemoveAssetController(
+      val controller = new RemoveBeneficiaryController(
         identifierAction,
         mockTransformationService
       )(Implicits.global, Helpers.stubControllerComponents())
@@ -389,7 +434,7 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
         .withBody(invalidBody)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val result = controller.remove(utr)(request)
+      val result = controller.remove(utr).apply(request)
 
       status(result) mustBe BAD_REQUEST
 

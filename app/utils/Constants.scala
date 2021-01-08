@@ -41,7 +41,23 @@ object Constants {
   val INVALID_UTR_MESSAGE = "The UTR provided is invalid."
 
   val ASSETS = "assets"
+  val BENEFICIARIES = "beneficiary"
 
+  val MONEY_ASSET = "monetary"
+  val PROPERTY_OR_LAND_ASSET = "propertyOrLand"
+  val SHARES_ASSET = "shares"
+  val BUSINESS_ASSET = "business"
+  val PARTNERSHIP_ASSET = "partnerShip"
+  val OTHER_ASSET = "other"
+  val NON_EEA_BUSINESS_ASSET = "nonEEABusiness"
+
+  val INDIVIDUAL_BENEFICIARY = "individualDetails"
+  val COMPANY_BENEFICIARY = "company"
+  val TRUST_BENEFICIARY = "trust"
+  val CHARITY_BENEFICIARY = "charity"
+  val UNIDENTIFIED_BENEFICIARY = "unidentified"
+  val LARGE_BENEFICIARY = "large"
+  val OTHER_BENEFICIARY = "other"
 
   val EXPRESS = "expressTrust"
   val UK_RESIDENT = "trustUKResident"

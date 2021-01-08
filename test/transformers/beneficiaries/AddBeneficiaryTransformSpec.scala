@@ -19,32 +19,35 @@ package transformers.beneficiaries
 import models.AddressType
 import models.variation.{BeneficiaryCharityType, IdentificationOrgType}
 import org.scalatest.{FreeSpec, MustMatchers}
+import play.api.libs.json.Json
 import utils.JsonUtils
 
 import java.time.LocalDate
 
-class AddCharityBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
+class AddBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
 
-  val newBeneficiary = BeneficiaryCharityType(
-    None,
-    None,
-    "Charity",
-    Some(false),
-    Some("50"),
-    Some(IdentificationOrgType(None, Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")), None)),
-    None,
-    LocalDate.parse("1990-10-10"),
-    None
+  private val beneficiary: BeneficiaryCharityType = BeneficiaryCharityType(
+    lineNo = None,
+    bpMatchStatus = None,
+    organisationName = "Charity",
+    beneficiaryDiscretion = Some(false),
+    beneficiaryShareOfIncome = Some("50"),
+    identification = Some(IdentificationOrgType(None, Some(AddressType("Line 1", "Line 2", None, None, Some("NE1 1NE"), "GB")), None)),
+    countryOfResidence = None,
+    entityStart = LocalDate.parse("1990-10-10"),
+    entityEnd = None
   )
 
-  "the add charity beneficiary transformer should" - {
+  val beneficiaryType: String = "charity"
 
-    "add a new charity beneficiary" in {
+  "the add beneficiary transformer should" - {
+
+    "add a new beneficiary" in {
       val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-only-other-beneficiary.json")
 
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-charity-beneficiary.json")
 
-      val transformer = new AddCharityBeneficiaryTransform(newBeneficiary)
+      val transformer = new AddBeneficiaryTransform(Json.toJson(beneficiary), beneficiaryType)
 
       val result = transformer.applyTransform(trustJson).get
 

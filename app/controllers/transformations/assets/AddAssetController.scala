@@ -18,12 +18,13 @@ package controllers.transformations.assets
 
 import controllers.actions.IdentifierAction
 import controllers.transformations.AddTransformationController
-import models.variation.{AssetMonetaryAmount, BusinessAssetType, NonEEABusinessType, OtherAssetType, PartnershipType, PropertyLandType, SharesType}
+import models.variation._
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc.{Action, ControllerComponents}
 import services.TransformationService
 import transformers.DeltaTransform
 import transformers.assets.AddAssetTransform
+import utils.Constants._
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -33,21 +34,21 @@ class AddAssetController @Inject()(identify: IdentifierAction,
                                   (implicit ec: ExecutionContext, cc: ControllerComponents)
   extends AddTransformationController(identify, transformationService) {
 
-  def addMoney(identifier: String): Action[JsValue] = addNewTransform[AssetMonetaryAmount](identifier)
+  def addMoney(identifier: String): Action[JsValue] = addNewTransform[AssetMonetaryAmount](identifier, MONEY_ASSET)
 
-  def addPropertyOrLand(identifier: String): Action[JsValue] = addNewTransform[PropertyLandType](identifier)
+  def addPropertyOrLand(identifier: String): Action[JsValue] = addNewTransform[PropertyLandType](identifier, PROPERTY_OR_LAND_ASSET)
 
-  def addShares(identifier: String): Action[JsValue] = addNewTransform[SharesType](identifier)
+  def addShares(identifier: String): Action[JsValue] = addNewTransform[SharesType](identifier, SHARES_ASSET)
 
-  def addBusiness(identifier: String): Action[JsValue] = addNewTransform[BusinessAssetType](identifier)
+  def addBusiness(identifier: String): Action[JsValue] = addNewTransform[BusinessAssetType](identifier, BUSINESS_ASSET)
 
-  def addPartnership(identifier: String): Action[JsValue] = addNewTransform[PartnershipType](identifier)
+  def addPartnership(identifier: String): Action[JsValue] = addNewTransform[PartnershipType](identifier, PARTNERSHIP_ASSET)
 
-  def addOther(identifier: String): Action[JsValue] = addNewTransform[OtherAssetType](identifier)
+  def addOther(identifier: String): Action[JsValue] = addNewTransform[OtherAssetType](identifier, OTHER_ASSET)
 
-  def addNonEeaBusiness(identifier: String): Action[JsValue] = addNewTransform[NonEEABusinessType](identifier)
+  def addNonEeaBusiness(identifier: String): Action[JsValue] = addNewTransform[NonEEABusinessType](identifier, NON_EEA_BUSINESS_ASSET)
 
-  override def transform[T](value: T, key: String)(implicit wts: Writes[T]): DeltaTransform = {
-    AddAssetTransform(Json.toJson(value), value.toString)
+  override def transform[T](value: T, `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
+    AddAssetTransform(Json.toJson(value), `type`)
   }
 }

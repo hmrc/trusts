@@ -17,7 +17,7 @@
 package services
 
 import models.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
-import models.variation.{AmendedLeadTrusteeIndType, IdentificationType, NonEEABusinessType, OtherAssetType}
+import models.variation.{AmendedLeadTrusteeIndType, IdentificationType}
 import models.{AddressType, NameType}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -33,6 +33,7 @@ import transformers.assets._
 import transformers.trustdetails.SetTrustDetailTransform
 import transformers.trustees._
 import uk.gov.hmrc.http.HeaderCarrier
+import utils.Constants._
 import utils.{JsonFixtures, JsonUtils}
 
 import java.time.LocalDate
@@ -280,13 +281,13 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       val initialTransforms = ComposedDeltaTransform(Seq(
         AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo),
 
-        AddAssetTransform(Json.obj(), OtherAssetType.toString),
-        AmendAssetTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2021-01-01"), OtherAssetType.toString),
-        RemoveAssetTransform(0, Json.obj(), LocalDate.parse("2021-01-01"), OtherAssetType.toString),
+        AddAssetTransform(Json.obj(), OTHER_ASSET),
+        AmendAssetTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2021-01-01"), OTHER_ASSET),
+        RemoveAssetTransform(0, Json.obj(), LocalDate.parse("2021-01-01"), OTHER_ASSET),
 
-        AddAssetTransform(Json.obj(), NonEEABusinessType.toString),
-        AmendAssetTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2021-01-01"), NonEEABusinessType.toString),
-        RemoveAssetTransform(0, Json.obj(), LocalDate.parse("2021-01-01"), NonEEABusinessType.toString),
+        AddAssetTransform(Json.obj(), NON_EEA_BUSINESS_ASSET),
+        AmendAssetTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2021-01-01"), NON_EEA_BUSINESS_ASSET),
+        RemoveAssetTransform(0, Json.obj(), LocalDate.parse("2021-01-01"), NON_EEA_BUSINESS_ASSET),
 
         SetTrustDetailTransform(Json.obj(), "expressTrust"),
         SetTrustDetailTransform(Json.obj(), "trustUKResident"),
@@ -307,9 +308,9 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       val expectedTransformsAfterTaxableMigrationTransformsRemoved = ComposedDeltaTransform(Seq(
         AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo),
 
-        AddAssetTransform(Json.obj(), NonEEABusinessType.toString),
-        AmendAssetTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2021-01-01"), NonEEABusinessType.toString),
-        RemoveAssetTransform(0, Json.obj(), LocalDate.parse("2021-01-01"), NonEEABusinessType.toString),
+        AddAssetTransform(Json.obj(), NON_EEA_BUSINESS_ASSET),
+        AmendAssetTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2021-01-01"), NON_EEA_BUSINESS_ASSET),
+        RemoveAssetTransform(0, Json.obj(), LocalDate.parse("2021-01-01"), NON_EEA_BUSINESS_ASSET),
 
         SetTrustDetailTransform(Json.obj(), "expressTrust"),
         SetTrustDetailTransform(Json.obj(), "trustUKResident"),

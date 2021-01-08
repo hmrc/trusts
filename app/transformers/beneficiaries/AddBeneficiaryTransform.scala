@@ -16,24 +16,20 @@
 
 package transformers.beneficiaries
 
-import models.variation.BeneficiaryCompanyType
 import play.api.libs.json._
 import transformers.{DeltaTransform, JsonOperations}
 
-case class AddCompanyBeneficiaryTransform(newBeneficiary: BeneficiaryCompanyType)
-  extends DeltaTransform
-  with JsonOperations {
-
-  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'company
+case class AddBeneficiaryTransform(beneficiary: JsValue, override val `type`: String)
+  extends BeneficiaryTransform with DeltaTransform with JsonOperations {
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addToList(input, path, Json.toJson(newBeneficiary))
+    addToList(input, path, beneficiary)
   }
 }
 
-object AddCompanyBeneficiaryTransform {
+object AddBeneficiaryTransform {
 
-  val key = "AddCompanyBeneficiaryTransform"
+  val key = "AddBeneficiaryTransform"
 
-  implicit val format: Format[AddCompanyBeneficiaryTransform] = Json.format[AddCompanyBeneficiaryTransform]
+  implicit val format: Format[AddBeneficiaryTransform] = Json.format[AddBeneficiaryTransform]
 }

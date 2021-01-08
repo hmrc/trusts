@@ -32,9 +32,9 @@ abstract class AddTransformationController @Inject()(identify: IdentifierAction,
                                                     (implicit ec: ExecutionContext, cc: ControllerComponents)
   extends TrustsBaseController(cc) with Logging {
 
-  def transform[T](value: T, key: String)(implicit wts: Writes[T]): DeltaTransform
+  def transform[T](value: T, `type`: String)(implicit wts: Writes[T]): DeltaTransform
 
-  def addNewTransform[T](identifier: String, key: String = "")(implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = {
+  def addNewTransform[T](identifier: String, `type`: String = "")(implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = {
     identify.async(parse.json) {
       implicit request => {
         request.body.validate[T] match {
@@ -43,7 +43,7 @@ abstract class AddTransformationController @Inject()(identify: IdentifierAction,
             transformationService.addNewTransform(
               identifier,
               request.internalId,
-              transform(entityToAdd, key)
+              transform(entityToAdd, `type`)
             ) map { _ =>
               Ok
             }

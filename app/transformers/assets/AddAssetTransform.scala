@@ -19,7 +19,7 @@ package transformers.assets
 import play.api.libs.json._
 import transformers.{DeltaTransform, JsonOperations}
 
-case class AddAssetTransform(asset: JsValue, override val assetType: String)
+case class AddAssetTransform(asset: JsValue, override val `type`: String)
   extends AssetTransform with DeltaTransform with JsonOperations {
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {

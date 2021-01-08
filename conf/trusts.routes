@@ -40,36 +40,6 @@ POST        /variation                                                 controlle
 
 POST        /declare/:identifier                                       controllers.TrustVariationsController.declare(identifier: String)
 
-POST        /add-unidentified-beneficiary/:identifier                  controllers.BeneficiaryTransformationController.addUnidentifiedBeneficiary(identifier: String)
-
-POST        /amend-unidentified-beneficiary/:identifier/:index         controllers.BeneficiaryTransformationController.amendUnidentifiedBeneficiary(identifier: String, index: Int)
-
-POST        /amend-individual-beneficiary/:identifier/:index           controllers.BeneficiaryTransformationController.amendIndividualBeneficiary(identifier: String, index: Int)
-
-POST        /add-individual-beneficiary/:identifier                    controllers.BeneficiaryTransformationController.addIndividualBeneficiary(identifier: String)
-
-POST        /add-charity-beneficiary/:identifier                       controllers.BeneficiaryTransformationController.addCharityBeneficiary(identifier: String)
-
-POST        /amend-charity-beneficiary/:identifier/:index              controllers.BeneficiaryTransformationController.amendCharityBeneficiary(identifier: String, index: Int)
-
-POST        /add-other-beneficiary/:identifier                         controllers.BeneficiaryTransformationController.addOtherBeneficiary(identifier: String)
-
-POST        /amend-other-beneficiary/:identifier/:index                controllers.BeneficiaryTransformationController.amendOtherBeneficiary(identifier: String, index: Int)
-
-POST        /add-company-beneficiary/:identifier                       controllers.BeneficiaryTransformationController.addCompanyBeneficiary(identifier: String)
-
-POST        /add-trust-beneficiary/:identifier                         controllers.BeneficiaryTransformationController.addTrustBeneficiary(identifier: String)
-
-POST        /amend-company-beneficiary/:identifier/:index              controllers.BeneficiaryTransformationController.amendCompanyBeneficiary(identifier: String, index: Int)
-
-POST        /amend-trust-beneficiary/:identifier/:index                controllers.BeneficiaryTransformationController.amendTrustBeneficiary(identifier: String, index: Int)
-
-POST        /add-large-beneficiary/:identifier                         controllers.BeneficiaryTransformationController.addLargeBeneficiary(identifier: String)
-
-POST        /amend-large-beneficiary/:identifier/:index                controllers.BeneficiaryTransformationController.amendLargeBeneficiary(identifier: String, index: Int)
-
-PUT         /:identifier/beneficiaries/remove                          controllers.BeneficiaryTransformationController.removeBeneficiary(identifier: String)
-
 POST        /amend-individual-settlor/:identifier/:index               controllers.SettlorTransformationController.amendIndividualSettlor(identifier: String, index: Int)
 
 POST        /amend-business-settlor/:identifier/:index                 controllers.SettlorTransformationController.amendBusinessSettlor(identifier: String, index: Int)

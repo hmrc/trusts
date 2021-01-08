@@ -21,11 +21,11 @@ import transformers.AmendEntityTransform
 
 import java.time.LocalDate
 
-case class AmendAssetTransform(index: Int,
-                               amended: JsValue,
-                               original: JsValue,
-                               endDate: LocalDate,
-                               override val assetType: String) extends AssetTransform with AmendEntityTransform {
+case class AmendAssetTransform(override val index: Int,
+                               override val amended: JsValue,
+                               override val original: JsValue,
+                               override val endDate: LocalDate,
+                               override val `type`: String) extends AssetTransform with AmendEntityTransform {
 
   override val endDateField: String = "endDate"
 

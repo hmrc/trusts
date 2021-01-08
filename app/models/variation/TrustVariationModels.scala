@@ -238,22 +238,20 @@ object OtherType {
   ).withoutNulls
 }
 
-case class IndividualDetailsType(
-                                  lineNo: Option[String],
-                                  bpMatchStatus: Option[String],
-                                  name: NameType,
-                                  dateOfBirth: Option[LocalDate],
-                                  vulnerableBeneficiary: Option[Boolean], // Optional in 5MLD for non-tax trust
-                                  beneficiaryType: Option[String],
-                                  beneficiaryDiscretion: Option[Boolean],
-                                  beneficiaryShareOfIncome: Option[String],
-                                  identification: Option[IdentificationType],
-                                  countryOfResidence: Option[String],    // new 5MLD optional
-                                  legallyIncapable: Option[Boolean],     // new 5MLD optional
-                                  nationality: Option[String],           // new 5MLD optional
-                                  entityStart: LocalDate,
-                                  entityEnd: Option[LocalDate]
-                                )
+case class IndividualDetailsType(lineNo: Option[String],
+                                 bpMatchStatus: Option[String],
+                                 name: NameType,
+                                 dateOfBirth: Option[LocalDate],
+                                 vulnerableBeneficiary: Option[Boolean], // Optional in 5MLD for non-tax trust
+                                 beneficiaryType: Option[String],
+                                 beneficiaryDiscretion: Option[Boolean],
+                                 beneficiaryShareOfIncome: Option[String],
+                                 identification: Option[IdentificationType],
+                                 countryOfResidence: Option[String],    // new 5MLD optional
+                                 legallyIncapable: Option[Boolean],     // new 5MLD optional
+                                 nationality: Option[String],           // new 5MLD optional
+                                 entityStart: LocalDate,
+                                 entityEnd: Option[LocalDate])
 
 object IndividualDetailsType {
   implicit val individualDetailsTypeFormat: Format[IndividualDetailsType] = Json.format[IndividualDetailsType]
@@ -624,8 +622,6 @@ object SettlorCompany {
   ).withoutNulls
 }
 
-sealed trait AssetType
-
 case class Assets(monetary: Option[List[AssetMonetaryAmount]],
                   propertyOrLand: Option[List[PropertyLandType]],
                   shares: Option[List[SharesType]],
@@ -638,26 +634,19 @@ object Assets {
   implicit val assetsFormat: Format[Assets] = Json.format[Assets]
 }
 
-case class AssetMonetaryAmount(assetMonetaryAmount: Long) extends AssetType {
-  override def toString: String = AssetMonetaryAmount.toString
-}
+case class AssetMonetaryAmount(assetMonetaryAmount: Long)
 
 object AssetMonetaryAmount {
   implicit val assetMonetaryAmountFormat: Format[AssetMonetaryAmount] = Json.format[AssetMonetaryAmount]
-  override def toString: String = "monetary"
 }
 
 case class PropertyLandType(buildingLandName: Option[String],
                             address: Option[AddressType],
                             valueFull: Long,
-                            valuePrevious: Option[Long]) extends AssetType {
-
-  override def toString: String = PropertyLandType.toString
-}
+                            valuePrevious: Option[Long])
 
 object PropertyLandType {
   implicit val propertyLandTypeFormat: Format[PropertyLandType] = Json.format[PropertyLandType]
-  override def toString: String = "propertyOrLand"
 }
 
 case class SharesType(numberOfShares: Option[String],
@@ -665,51 +654,35 @@ case class SharesType(numberOfShares: Option[String],
                       utr: Option[String],
                       shareClass: Option[String],
                       typeOfShare: Option[String],
-                      value: Option[Long]) extends AssetType {
-
-  override def toString: String = SharesType.toString
-}
+                      value: Option[Long])
 
 object SharesType {
   implicit val sharesTypeFormat: Format[SharesType] = Json.format[SharesType]
-  override def toString: String = "shares"
 }
 
 case class BusinessAssetType(utr: Option[String],
                              orgName: String,
                              businessDescription: String,
                              address: Option[AddressType],
-                             businessValue: Option[Long]) extends AssetType {
-
-  override def toString: String = BusinessAssetType.toString
-}
+                             businessValue: Option[Long])
 
 object BusinessAssetType {
   implicit val businessAssetTypeFormat: Format[BusinessAssetType] = Json.format[BusinessAssetType]
-  override def toString: String = "business"
 }
 
 case class PartnershipType(utr: Option[String],
                            description: String,
-                           partnershipStart: Option[LocalDate]) extends AssetType {
-
-  override def toString: String = PartnershipType.toString
-}
+                           partnershipStart: Option[LocalDate])
 
 object PartnershipType {
   implicit val partnershipTypeFormat: Format[PartnershipType] = Json.format[PartnershipType]
-  override def toString: String = "partnerShip"
 }
 
 case class OtherAssetType(description: String,
-                          value: Option[Long]) extends AssetType {
-
-  override def toString: String = OtherAssetType.toString
-}
+                          value: Option[Long])
 
 object OtherAssetType {
   implicit val otherAssetTypeFormat: Format[OtherAssetType] = Json.format[OtherAssetType]
-  override def toString: String = "other"
 }
 
 case class IdentificationType(nino: Option[String],
@@ -736,14 +709,10 @@ case class NonEEABusinessType(lineNo: String,
                               address: AddressType,
                               govLawCountry: String,
                               startDate: LocalDate,
-                              endDate: Option[LocalDate]) extends AssetType {
-
-  override def toString: String = NonEEABusinessType.toString
-}
+                              endDate: Option[LocalDate])
 
 object NonEEABusinessType {
   implicit val format: Format[NonEEABusinessType] = Json.format[NonEEABusinessType]
-  override def toString: String = "nonEEABusiness"
 }
 
 case class YearsReturns(taxReturnsNoDues: Option[Boolean],

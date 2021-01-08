@@ -17,18 +17,18 @@
 package controllers.transformations
 
 import exceptions.InternalServerErrorException
-import play.api.libs.json.{JsObject, JsValue, __}
+import play.api.libs.json.{JsObject, JsPath, JsValue}
 
 import scala.util.{Failure, Try}
 
 trait TransformationController {
 
-  val section: String
+  def path(`type`: String, index: Int): JsPath
 
-  def findJson(json: JsValue, key: String, index: Int): Try[JsObject] = {
-    val path = __ \ 'details \ 'trust \ section \ key \ index
-    json.transform(path.json.pick).fold(
-      _ => Failure(InternalServerErrorException(s"Could not locate json at $path")),
+  def findJson(json: JsValue, `type`: String, index: Int): Try[JsObject] = {
+    val p = path(`type`, index)
+    json.transform(p.json.pick).fold(
+      _ => Failure(InternalServerErrorException(s"Could not locate json at $p")),
       value => scala.util.Success(value.as[JsObject])
     )
   }
