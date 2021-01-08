@@ -32,7 +32,7 @@ class TaxLiabilityTransformationController @Inject()(identify: IdentifierAction,
                                                     (implicit ec: ExecutionContext, cc: ControllerComponents)
   extends TransformationController(identify, transformationService) {
 
-  def setYearsReturns(identifier: String): Action[JsValue] = set[YearsReturns](identifier)
+  def setYearsReturns(identifier: String): Action[JsValue] = addNewTransform[YearsReturns](identifier)
 
   override def transform[T](value: T, key: String)(implicit wts: Writes[T]): DeltaTransform = {
     SetTaxLiabilityTransform(Json.toJson(value))

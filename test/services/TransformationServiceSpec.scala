@@ -18,7 +18,7 @@ package services
 
 import models.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
 import models.variation.{AmendedLeadTrusteeIndType, IdentificationType, NonEEABusinessType, OtherAssetType}
-import models.{AddressType, NameType, Success}
+import models.{AddressType, NameType}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.RecoverMethods.recoverToSucceededIf
@@ -208,45 +208,6 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     val result = service.getTransformedData(utr, internalId)
     whenReady(result) {
       _ mustEqual expectedResponse
-    }
-  }
-
-  ".set" - {
-
-    "must return Success" in {
-      val repository = mock[TransformationRepositoryImpl]
-      val service = new TransformationService(repository, mock[TrustsService], auditService)
-
-      when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(Nil))))
-      when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
-
-      val result = service.set(utr, internalId, SetTrustDetailTransform(Json.obj(), ""))
-      whenReady(result) {
-        _ mustBe Success
-      }
-    }
-
-    "must return Exception" - {
-      "when repository get fails" in {
-        val repository = mock[TransformationRepositoryImpl]
-        val service = new TransformationService(repository, mock[TrustsService], auditService)
-
-        when(repository.get(any(), any())).thenReturn(Future.failed(new Throwable("repository.get failed")))
-
-        val result = service.set(utr, internalId, SetTrustDetailTransform(Json.obj(), ""))
-        recoverToSucceededIf[Exception](result)
-      }
-
-      "when repository set fails" in {
-        val repository = mock[TransformationRepositoryImpl]
-        val service = new TransformationService(repository, mock[TrustsService], auditService)
-
-        when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(Nil))))
-        when(repository.set(any(), any(), any())).thenReturn(Future.failed(new Throwable("repository.set failed")))
-
-        val result = service.set(utr, internalId, SetTrustDetailTransform(Json.obj(), ""))
-        recoverToSucceededIf[Exception](result)
-      }
     }
   }
 

@@ -17,7 +17,6 @@
 package controllers
 
 import controllers.actions.FakeIdentifierAction
-import models.Success
 import models.variation.YearsReturns
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito.{verify, when}
@@ -58,8 +57,8 @@ class TaxLiabilityTransformationControllerSpec extends FreeSpec
 
         val controller = new TaxLiabilityTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.set(any(), any(), any()))
-          .thenReturn(Future.successful(Success))
+        when(service.addNewTransform(any(), any(), any()))
+          .thenReturn(Future.successful(true))
 
         val body = Json.toJson(YearsReturns(None, None))
 
@@ -71,7 +70,7 @@ class TaxLiabilityTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).set(
+        verify(service).addNewTransform(
           equalTo(utr),
           any(),
           equalTo(SetTaxLiabilityTransform(Json.toJson(body)))
@@ -84,8 +83,8 @@ class TaxLiabilityTransformationControllerSpec extends FreeSpec
 
         val controller = new TaxLiabilityTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.set(any(), any(), any()))
-          .thenReturn(Future.successful(Success))
+        when(service.addNewTransform(any(), any(), any()))
+          .thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.parse(

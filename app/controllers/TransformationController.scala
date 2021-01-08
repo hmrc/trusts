@@ -33,12 +33,12 @@ abstract class TransformationController @Inject()(identify: IdentifierAction,
 
   def transform[T](value: T, key: String)(implicit wts: Writes[T]): DeltaTransform
 
-  def set[T](identifier: String, key: String = "")(implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = {
+  def addNewTransform[T](identifier: String, key: String = "")(implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = {
     identify.async(parse.json) {
       implicit request => {
         request.body.validate[T] match {
           case JsSuccess(value, _) =>
-            transformationService.set(
+            transformationService.addNewTransform(
               identifier,
               request.internalId,
               transform(value, key)
