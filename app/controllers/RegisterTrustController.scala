@@ -46,7 +46,7 @@ class RegisterTrustController @Inject()(trustsService: TrustsService, config: Ap
                                         auditService: AuditService,
                                         cc: ControllerComponents,
                                         trustsStoreService: TrustsStoreService,
-                                        default5mldDataService: Default5mldDataService,
+                                        default5mldDataService: Default5mldDataService
                                         ) extends TrustsBaseController(cc) with Logging {
 
   private def schemaF(implicit request: IdentifierRequest[JsValue]): Future[String] = {
