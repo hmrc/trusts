@@ -67,5 +67,7 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
   val ttlInSeconds: Int = configuration.get[Int]("mongodb.ttlSeconds")
 
   val registrationTtlInSeconds: Int = configuration.get[Int]("mongodb.registration.ttlSeconds")
+
+  val stubMissingJourneysFor5MLD: Boolean = configuration.get[Boolean]("features.stubMissingJourneysFor5MLD")
 }
 
