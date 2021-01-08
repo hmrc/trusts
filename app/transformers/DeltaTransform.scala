@@ -22,6 +22,7 @@ import transformers.beneficiaries._
 import transformers.otherindividuals._
 import transformers.protectors._
 import transformers.settlors._
+import transformers.taxliability.SetTaxLiabilityTransform
 import transformers.trustdetails._
 import transformers.trustees._
 
@@ -49,7 +50,8 @@ object DeltaTransform {
           protectorReads orElse
           otherIndividualReads orElse
           trustDetailsReads orElse
-          assetReads
+          assetReads orElse
+          taxLiabilityReads
       ) (value.as[JsObject]) orElse (throw new Exception(s"Don't know how to deserialise transform"))
   )
 
@@ -114,6 +116,10 @@ object DeltaTransform {
     readsForTransform[AddAssetTransform](AddAssetTransform.key) orElse
     readsForTransform[AmendAssetTransform](AmendAssetTransform.key) orElse
     readsForTransform[RemoveAssetTransform](RemoveAssetTransform.key)
+  }
+
+  def taxLiabilityReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
+    readsForTransform[SetTaxLiabilityTransform](SetTaxLiabilityTransform.key)
   }
 
   def trusteeWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
@@ -245,9 +251,14 @@ object DeltaTransform {
       Json.obj(RemoveAssetTransform.key -> Json.toJson(transform)(RemoveAssetTransform.format))
   }
 
-  def trustDetailsTransformsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
+  def trustDetailsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
     case transform: SetTrustDetailTransform =>
       Json.obj(SetTrustDetailTransform.key -> Json.toJson(transform)(SetTrustDetailTransform.format))
+  }
+
+  def taxLiabilityWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
+    case transform: SetTaxLiabilityTransform =>
+      Json.obj(SetTaxLiabilityTransform.key -> Json.toJson(transform)(SetTaxLiabilityTransform.format))
   }
 
   def defaultWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
@@ -268,10 +279,11 @@ object DeltaTransform {
       amendOtherIndividualsWrites orElse
       removeOtherIndividualsWrites orElse
       addOtherIndividualsWrites orElse
-      trustDetailsTransformsWrites orElse
+      trustDetailsWrites orElse
       addAssetWrites orElse
       amendAssetWrites orElse
       removeAssetWrites orElse
+      taxLiabilityWrites orElse
       defaultWrites
       ).apply(deltaTransform)
   }

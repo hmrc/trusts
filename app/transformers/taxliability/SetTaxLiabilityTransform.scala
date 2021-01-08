@@ -14,23 +14,27 @@
  * limitations under the License.
  */
 
-package services
+package transformers.taxliability
 
-import models.Success
-import transformers.DeltaTransform
+import play.api.libs.json._
+import transformers.{DeltaTransform, JsonOperations}
 
-import javax.inject.Inject
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+case class SetTaxLiabilityTransform(value: JsValue) extends DeltaTransform with JsonOperations {
 
-class TrustDetailsTransformationService @Inject()(transformationService: TransformationService) {
+  private lazy val path = __ \ 'yearsReturns
 
-  def set[T <: DeltaTransform](identifier: String, internalId: String, transform: T): Future[Success.type] = {
-    transformationService.addNewTransform(
-      identifier,
-      internalId,
-      transform
-    ).map(_ => Success)
+  override def applyTransform(input: JsValue): JsResult[JsValue] = {
+    pruneThenAddTo(input, path, value)
   }
+
+  override val isTaxableMigrationTransform: Boolean = true
+
+}
+
+object SetTaxLiabilityTransform {
+
+  val key = "SetTaxLiabilityTransform"
+
+  implicit val format: Format[SetTaxLiabilityTransform] = Json.format[SetTaxLiabilityTransform]
 
 }

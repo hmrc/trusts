@@ -28,7 +28,7 @@ import play.api.libs.json.{JsBoolean, JsString, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
-import services.TrustDetailsTransformationService
+import services.TransformationService
 import transformers.trustdetails.SetTrustDetailTransform
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 
@@ -53,7 +53,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting express question" - {
 
       "must return an OK" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -76,7 +76,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
       }
 
       "return an BadRequest for malformed json" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -97,7 +97,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting property question" - {
 
       "must return an OK" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -120,7 +120,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
       }
 
       "return an BadRequest for malformed json" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -141,7 +141,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting recorded question" - {
 
       "must return an OK" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -164,7 +164,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
       }
 
       "return an BadRequest for malformed json" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -185,7 +185,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting resident question" - {
 
       "must return an OK" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -208,7 +208,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
       }
 
       "return an BadRequest for malformed json" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -229,7 +229,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting taxable question" - {
 
       "must return an OK" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -252,7 +252,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
       }
 
       "return an BadRequest for malformed json" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -273,7 +273,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting uk relation question" - {
 
       "must return an OK" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -296,7 +296,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
       }
 
       "return an BadRequest for malformed json" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -317,7 +317,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting law country question" - {
 
       "must return an OK" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -342,7 +342,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
       }
 
       "return an BadRequest for malformed json" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -363,7 +363,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting administration country question" - {
 
       "must return an OK" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -388,7 +388,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
       }
 
       "return an BadRequest for malformed json" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -409,7 +409,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting type of trust question" - {
 
       "must return an OK" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -434,7 +434,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
       }
 
       "return an BadRequest for malformed json" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -455,7 +455,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting deed of variation question" - {
 
       "must return an OK" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -480,7 +480,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
       }
 
       "return an BadRequest for malformed json" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -501,7 +501,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting inter vivos question" - {
 
       "must return an OK" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -526,7 +526,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
       }
 
       "return an BadRequest for malformed json" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -547,7 +547,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting EFRBS start date question" - {
 
       "must return an OK" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -572,7 +572,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
       }
 
       "return an BadRequest for malformed json" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -593,7 +593,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting residential status question" - {
 
       "must return an OK" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
@@ -618,7 +618,7 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
       }
 
       "return an BadRequest for malformed json" in {
-        val service = mock[TrustDetailsTransformationService]
+        val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 

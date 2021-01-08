@@ -83,6 +83,9 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   def getTrustDetails(identifier: String): Action[AnyContent] =
     getItemAtPath(identifier, JsPath \ 'details \ 'trust \ 'details)
 
+  def getYearsReturns(identifier: String): Action[AnyContent] =
+    getItemAtPath(identifier, JsPath \ 'yearsReturns)
+
   def getTrustees(identifier: String) : Action[AnyContent] =
     getArrayAtPath(identifier, JsPath \ 'details \ 'trust \ 'entities \ 'trustees, "trustees")
 
@@ -143,9 +146,11 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   }
 
   private def getItemAtPath(identifier: String, path: JsPath): Action[AnyContent] = {
-    getElementAtPath(identifier,
+    getElementAtPath(
+      identifier,
       path,
-      Json.obj()) {
+      Json.obj()
+    ) {
         json => json
       }
   }

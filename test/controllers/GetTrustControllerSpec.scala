@@ -570,6 +570,105 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       }
     }
 
+    ".getYearsReturns" should {
+
+      "return 403 - Forbidden with parked content" in {
+
+        when(transformationService.getTransformedData(any(), any())(any()))
+          .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
+
+        val result = getTrustController.getYearsReturns(utr).apply(FakeRequest(GET, s"/trusts/$utr/years-returns"))
+
+        whenReady(result) { _ =>
+          status(result) mustBe FORBIDDEN
+        }
+      }
+
+      "return 200 - Ok with processed content" in {
+
+        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponseWithYearsReturns, ResponseHeader("Processed", "1"))
+
+        when(transformationService.getTransformedData(any[String], any[String])(any()))
+          .thenReturn(Future.successful(processedResponse))
+
+        val result = getTrustController.getYearsReturns(utr).apply(FakeRequest(GET, s"/trusts/$utr/years-returns"))
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          status(result) mustBe OK
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe Json.parse(
+            """
+              |{
+              |  "returns": [
+              |    {
+              |      "taxReturnYear": "18",
+              |      "taxConsequence": true
+              |    },
+              |    {
+              |      "taxReturnYear": "19",
+              |      "taxConsequence": true
+              |    },
+              |    {
+              |      "taxReturnYear": "20",
+              |      "taxConsequence": true
+              |    }
+              |  ]
+              |}""".stripMargin)
+        }
+      }
+
+      "return 200 - Ok with years returns with 5mld data" in {
+
+        val cached = Taxable5MLDFixtures.Cache.taxable5mld2134514321
+
+        val processedResponse = models.get_trust.TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
+
+        when(transformationService.getTransformedData(any[String], any[String])(any()))
+          .thenReturn(Future.successful(processedResponse))
+
+        val result = getTrustController.getYearsReturns(utr).apply(FakeRequest(GET, s"/trusts/$utr/years-returns"))
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          status(result) mustBe OK
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe Json.parse(
+            """
+              |{
+              |  "returns": [
+              |    {
+              |      "taxReturnYear": "18",
+              |      "taxConsequence": true
+              |    },
+              |    {
+              |      "taxReturnYear": "19",
+              |      "taxConsequence": true
+              |    },
+              |    {
+              |      "taxReturnYear": "20",
+              |      "taxConsequence": true
+              |    }
+              |  ]
+              |}""".stripMargin)
+        }
+      }
+
+      "return 500 - Internal server error for invalid content" in {
+
+        when(transformationService.getTransformedData(any(), any())(any()))
+          .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+
+        val result = getTrustController.getYearsReturns(utr).apply(FakeRequest(GET, s"/trusts/$utr/years-returns"))
+
+        whenReady(result) { _ =>
+          status(result) mustBe INTERNAL_SERVER_ERROR
+        }
+      }
+    }
+
     ".getTrustees" should {
 
       "return 403 - Forbidden with parked content" in {
