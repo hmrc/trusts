@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package transformers.beneficiaries
+package transformers
 
-import play.api.libs.json._
-import transformers.AddEntityTransform
+import play.api.libs.json.{JsPath, JsResult, JsValue}
 
-case class AddBeneficiaryTransform(override val entity: JsValue,
-                                   override val `type`: String) extends BeneficiaryTransform with AddEntityTransform
+trait AddEntityTransform extends DeltaTransform with JsonOperations {
 
-object AddBeneficiaryTransform {
+  val path: JsPath
+  val entity: JsValue
 
-  val key = "AddBeneficiaryTransform"
-
-  implicit val format: Format[AddBeneficiaryTransform] = Json.format[AddBeneficiaryTransform]
+  override def applyTransform(input: JsValue): JsResult[JsValue] = {
+    addToList(input, path, entity)
+  }
 }

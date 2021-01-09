@@ -39,7 +39,7 @@ import java.time.LocalDate
 import scala.concurrent.Future
 
 class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
-  
+
   private lazy val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 

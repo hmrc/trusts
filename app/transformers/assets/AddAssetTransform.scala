@@ -17,14 +17,10 @@
 package transformers.assets
 
 import play.api.libs.json._
-import transformers.{DeltaTransform, JsonOperations}
+import transformers.AddEntityTransform
 
-case class AddAssetTransform(asset: JsValue, override val `type`: String)
-  extends AssetTransform with DeltaTransform with JsonOperations {
-
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addToList(input, path, asset)
-  }
+case class AddAssetTransform(override val entity: JsValue,
+                             override val `type`: String) extends AssetTransform with AddEntityTransform {
 
   override val isTaxableMigrationTransform: Boolean = !isNonEeaBusiness
 }
