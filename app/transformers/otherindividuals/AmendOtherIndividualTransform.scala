@@ -22,15 +22,12 @@ import transformers.AmendEntityTransform
 import java.time.LocalDate
 
 case class AmendOtherIndividualTransform(index: Int,
-                                        amended: JsValue,
-                                        original: JsValue,
-                                        endDate: LocalDate
-                                        ) extends AmendEntityTransform {
-
-  override val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'naturalPerson
-}
+                                         amended: JsValue,
+                                         original: JsValue,
+                                         endDate: LocalDate) extends OtherIndividualTransform with AmendEntityTransform
 
 object AmendOtherIndividualTransform {
+
   val key = "AmendOtherIndividualTransform"
 
   implicit val format: Format[AmendOtherIndividualTransform] = Json.format[AmendOtherIndividualTransform]

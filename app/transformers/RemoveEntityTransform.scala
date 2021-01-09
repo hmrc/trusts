@@ -14,31 +14,25 @@
  * limitations under the License.
  */
 
-package transformers.otherindividuals
+package transformers
 
-import play.api.libs.json._
-import transformers.{DeltaTransform, JsonOperations}
+import play.api.libs.json.{JsPath, JsResult, JsValue, Json}
 
 import java.time.LocalDate
 
-case class RemoveOtherIndividualsTransform(index : Int,
-                                           otherIndividualData : JsValue,
-                                           endDate : LocalDate
-                                  ) extends DeltaTransform with JsonOperations {
+trait RemoveEntityTransform extends DeltaTransform with JsonOperations {
 
-  private lazy val path = __ \ "details" \ "trust" \ "entities" \ "naturalPerson"
+  val index: Int
+  val entity: JsValue
+  val endDate: LocalDate
+  val path: JsPath
+  val endDateField: String = "entityEnd"
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     removeAtPosition(input, path, index)
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    endEntity(input, path, Json.toJson(otherIndividualData), endDate)
+    endEntity(input, path, Json.toJson(entity), endDate, endDateField)
   }
-}
-
-object RemoveOtherIndividualsTransform {
-  val key = "RemoveOtherIndividualsTransform"
-
-  implicit val format: Format[RemoveOtherIndividualsTransform] = Json.format[RemoveOtherIndividualsTransform]
 }

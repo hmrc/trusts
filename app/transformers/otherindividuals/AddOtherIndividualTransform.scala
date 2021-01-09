@@ -16,20 +16,10 @@
 
 package transformers.otherindividuals
 
-import models.variation.NaturalPersonType
 import play.api.libs.json._
-import transformers.{DeltaTransform, JsonOperations}
+import transformers.AddEntityTransform
 
-case class AddOtherIndividualTransform(otherIndividual: NaturalPersonType)
-  extends DeltaTransform
-  with JsonOperations {
-
-  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'naturalPerson
-
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addToList(input, path, Json.toJson(otherIndividual))
-  }
-}
+case class AddOtherIndividualTransform(entity: JsValue) extends OtherIndividualTransform with AddEntityTransform
 
 object AddOtherIndividualTransform {
 

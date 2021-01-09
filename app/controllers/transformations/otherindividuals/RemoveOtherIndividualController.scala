@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers.transformations.assets
+package controllers.transformations.otherindividuals
 
 import controllers.actions.IdentifierAction
 import controllers.transformations.RemoveTransformationController
@@ -22,23 +22,23 @@ import play.api.libs.json.{JsPath, JsValue}
 import play.api.mvc.{Action, ControllerComponents}
 import services.TransformationService
 import transformers.DeltaTransform
-import transformers.assets.RemoveAssetTransform
-import transformers.remove.{Remove, RemoveAsset}
+import transformers.otherindividuals.RemoveOtherIndividualTransform
+import transformers.remove.{Remove, RemoveOtherIndividual}
 import utils.Constants._
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class RemoveAssetController @Inject()(identify: IdentifierAction,
-                                      transformationService: TransformationService)
-                                     (implicit ec: ExecutionContext, cc: ControllerComponents)
+class RemoveOtherIndividualController @Inject()(identify: IdentifierAction,
+                                                transformationService: TransformationService)
+                                               (implicit ec: ExecutionContext, cc: ControllerComponents)
   extends RemoveTransformationController(identify, transformationService) {
 
-  override def path(`type`: String, index: Int): JsPath = TRUST \ ASSETS \ `type` \ index
+  override def path(`type`: String, index: Int): JsPath =  ENTITIES \ OTHER_INDIVIDUALS \ index
 
-  def remove(identifier: String): Action[JsValue] = addNewTransform[RemoveAsset](identifier)
+  def remove(identifier: String): Action[JsValue] = addNewTransform[RemoveOtherIndividual](identifier)
 
   override def transform[T <: Remove](remove: T, entity: JsValue): DeltaTransform = {
-    RemoveAssetTransform(remove.index, entity, remove.endDate, remove.`type`)
+    RemoveOtherIndividualTransform(remove.index, entity, remove.endDate)
   }
 }

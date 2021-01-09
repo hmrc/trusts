@@ -16,10 +16,10 @@
 
 package transformers.beneficiaries
 
-import play.api.libs.json.{JsPath, __}
-import utils.Constants.BENEFICIARIES
+import play.api.libs.json.JsPath
+import utils.Constants._
 
 trait BeneficiaryTransform {
   val `type`: String
-  val path: JsPath = __ \ 'details \ 'trust \ 'entities \ BENEFICIARIES \ `type`
+  val path: JsPath = ENTITIES \ BENEFICIARIES \ `type`
 }

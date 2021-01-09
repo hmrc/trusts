@@ -21,8 +21,8 @@ import utils.Constants._
 
 import java.time.LocalDate
 
-case class RemoveAsset(override val endDate: LocalDate,
-                       override val index: Int,
+case class RemoveAsset(endDate: LocalDate,
+                       index: Int,
                        override val `type`: String) extends Remove
 
 object RemoveAsset {

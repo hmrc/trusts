@@ -21,8 +21,8 @@ import utils.Constants._
 
 import java.time.LocalDate
 
-case class RemoveBeneficiary(override val endDate: LocalDate,
-                             override val index: Int,
+case class RemoveBeneficiary(endDate: LocalDate,
+                             index: Int,
                              override val `type`: String) extends Remove
 
 object RemoveBeneficiary {

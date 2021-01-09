@@ -92,7 +92,7 @@ object DeltaTransform {
 
   def otherIndividualReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
     readsForTransform[AmendOtherIndividualTransform](AmendOtherIndividualTransform.key) orElse
-    readsForTransform[RemoveOtherIndividualsTransform](RemoveOtherIndividualsTransform.key) orElse
+    readsForTransform[RemoveOtherIndividualTransform](RemoveOtherIndividualTransform.key) orElse
     readsForTransform[AddOtherIndividualTransform](AddOtherIndividualTransform.key)
   }
 
@@ -190,8 +190,8 @@ object DeltaTransform {
   }
 
   def removeOtherIndividualsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
-    case transform: RemoveOtherIndividualsTransform =>
-      Json.obj(RemoveOtherIndividualsTransform.key -> Json.toJson(transform)(RemoveOtherIndividualsTransform.format))
+    case transform: RemoveOtherIndividualTransform =>
+      Json.obj(RemoveOtherIndividualTransform.key -> Json.toJson(transform)(RemoveOtherIndividualTransform.format))
   }
 
   def assetsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {

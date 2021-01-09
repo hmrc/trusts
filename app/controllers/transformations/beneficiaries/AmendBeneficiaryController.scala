@@ -35,7 +35,7 @@ class AmendBeneficiaryController @Inject()(identify: IdentifierAction,
                                           (implicit ec: ExecutionContext, cc: ControllerComponents)
   extends AmendTransformationController(identify, transformationService) {
 
-  override def path(`type`: String, index: Int): JsPath = __ \ 'details \ 'trust \ 'entities \ BENEFICIARIES \ `type` \ index
+  override def path(`type`: String, index: Int): JsPath = ENTITIES \ BENEFICIARIES \ `type` \ index
 
   def amendUnidentified(identifier: String, index: Int): Action[JsValue] = addNewTransform[String](identifier, index, UNIDENTIFIED_BENEFICIARY)
 

@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package transformers.remove
+package transformers.otherindividuals
 
-import java.time.LocalDate
+import play.api.libs.json.JsPath
+import utils.Constants._
 
-trait Remove {
-
-  val endDate: LocalDate
-  val index: Int
-  val `type`: String = ""
-
+trait OtherIndividualTransform {
+  val path: JsPath = ENTITIES \ OTHER_INDIVIDUALS
 }

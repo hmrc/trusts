@@ -22,11 +22,11 @@ import utils.Constants.UNIDENTIFIED_BENEFICIARY
 
 import java.time.LocalDate
 
-case class AmendBeneficiaryTransform(override val index: Int,
-                                     override val amended: JsValue,
-                                     override val original: JsValue,
-                                     override val endDate: LocalDate,
-                                     override val `type`: String) extends BeneficiaryTransform with AmendEntityTransform {
+case class AmendBeneficiaryTransform(index: Int,
+                                     amended: JsValue,
+                                     original: JsValue,
+                                     endDate: LocalDate,
+                                     `type`: String) extends BeneficiaryTransform with AmendEntityTransform {
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     if (`type` == UNIDENTIFIED_BENEFICIARY) {

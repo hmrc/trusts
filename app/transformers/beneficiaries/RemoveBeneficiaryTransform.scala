@@ -17,23 +17,14 @@
 package transformers.beneficiaries
 
 import play.api.libs.json._
-import transformers.{DeltaTransform, JsonOperations}
+import transformers.RemoveEntityTransform
 
 import java.time.LocalDate
 
 case class RemoveBeneficiaryTransform(index: Int,
-                                      beneficiary: JsValue,
+                                      entity: JsValue,
                                       endDate: LocalDate,
-                                      override val `type`: String) extends BeneficiaryTransform with DeltaTransform with JsonOperations {
-
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    removeAtPosition(input, path, index)
-  }
-
-  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    endEntity(input, path, Json.toJson(beneficiary), endDate)
-  }
-}
+                                      `type`: String) extends BeneficiaryTransform with RemoveEntityTransform
 
 object RemoveBeneficiaryTransform {
 

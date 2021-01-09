@@ -16,6 +16,8 @@
 
 package utils
 
+import play.api.libs.json.{JsPath, __}
+
 object Constants {
 
   val ALREADY_REGISTERED_CODE = "ALREADY_REGISTERED"
@@ -40,8 +42,12 @@ object Constants {
   val INVALID_UTR_CODE = "INVALID_UTR"
   val INVALID_UTR_MESSAGE = "The UTR provided is invalid."
 
+  val TRUST: JsPath = __ \ "details" \ "trust"
+  val ENTITIES: JsPath = TRUST \ "entities"
+
   val ASSETS = "assets"
   val BENEFICIARIES = "beneficiary"
+  val OTHER_INDIVIDUALS = "naturalPerson"
 
   val MONEY_ASSET = "monetary"
   val PROPERTY_OR_LAND_ASSET = "propertyOrLand"

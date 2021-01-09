@@ -19,8 +19,8 @@ package transformers.beneficiaries
 import play.api.libs.json._
 import transformers.AddEntityTransform
 
-case class AddBeneficiaryTransform(override val entity: JsValue,
-                                   override val `type`: String) extends BeneficiaryTransform with AddEntityTransform
+case class AddBeneficiaryTransform(entity: JsValue,
+                                   `type`: String) extends BeneficiaryTransform with AddEntityTransform
 
 object AddBeneficiaryTransform {
 

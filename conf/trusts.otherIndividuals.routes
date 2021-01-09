@@ -1,7 +1,7 @@
 
-POST        /amend/:identifier/:index                       controllers.OtherIndividualTransformationController.amendOtherIndividual(identifier: String, index: Int)
+POST        /add/:identifier                                controllers.transformations.otherindividuals.AddOtherIndividualController.add(identifier: String)
 
-POST        /add/:identifier                                controllers.OtherIndividualTransformationController.addOtherIndividual(identifier: String)
+POST        /amend/:identifier/:index                       controllers.transformations.otherindividuals.AmendOtherIndividualController.amend(identifier: String, index: Int)
 
-PUT         /:identifier/remove                             controllers.OtherIndividualTransformationController.removeOtherIndividual(identifier: String)
+PUT         /:identifier/remove                             controllers.transformations.otherindividuals.RemoveOtherIndividualController.remove(identifier: String)
 

@@ -25,7 +25,7 @@ import utils.JsonUtils
 
 import java.time.LocalDate
 
-class RemoveOtherIndividualsTransformSpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar {
+class RemoveOtherIndividualTransformSpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar {
 
   private def otherIndividualJson(endDate: Option[LocalDate] = None, withLineNo: Boolean = true) = {
     val a = Json.obj("field1" -> "value20")
@@ -48,8 +48,8 @@ class RemoveOtherIndividualsTransformSpec extends FreeSpec with MustMatchers wit
 
   "Remove OtherIndividual Transforms should round trip through JSON as part of Composed Transform" in {
     val OUT = ComposedDeltaTransform(Seq(
-      RemoveOtherIndividualsTransform(56, otherIndividualJson(), LocalDate.of(1563, 10, 23)),
-      RemoveOtherIndividualsTransform(12, otherIndividualJson(), LocalDate.of(2317, 12, 21))
+      RemoveOtherIndividualTransform(56, otherIndividualJson(), LocalDate.of(1563, 10, 23)),
+      RemoveOtherIndividualTransform(12, otherIndividualJson(), LocalDate.of(2317, 12, 21))
     ))
 
     Json.toJson(OUT).validate[ComposedDeltaTransform] match {
@@ -73,7 +73,7 @@ class RemoveOtherIndividualsTransformSpec extends FreeSpec with MustMatchers wit
         otherIndividualJson()
       ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveOtherIndividualsTransform(1, Json.obj(), LocalDate.of(2018, 4, 21))))
+      val OUT = ComposedDeltaTransform(Seq(RemoveOtherIndividualTransform(1, Json.obj(), LocalDate.of(2018, 4, 21))))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe expectedOutput
@@ -88,7 +88,7 @@ class RemoveOtherIndividualsTransformSpec extends FreeSpec with MustMatchers wit
         otherIndividualJson()
       ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveOtherIndividualsTransform(10, Json.obj(), LocalDate.of(2018, 4, 21))))
+      val OUT = ComposedDeltaTransform(Seq(RemoveOtherIndividualTransform(10, Json.obj(), LocalDate.of(2018, 4, 21))))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
@@ -103,7 +103,7 @@ class RemoveOtherIndividualsTransformSpec extends FreeSpec with MustMatchers wit
         otherIndividualJson()
       ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveOtherIndividualsTransform(-1, Json.obj(), LocalDate.of(2018, 4, 21))))
+      val OUT = ComposedDeltaTransform(Seq(RemoveOtherIndividualTransform(-1, Json.obj(), LocalDate.of(2018, 4, 21))))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
@@ -117,7 +117,7 @@ class RemoveOtherIndividualsTransformSpec extends FreeSpec with MustMatchers wit
       ))
 
       val transforms = Seq(
-        RemoveOtherIndividualsTransform(0, otherIndividualJson(None, withLineNo = false), LocalDate.of(2018, 4, 21))
+        RemoveOtherIndividualTransform(0, otherIndividualJson(None, withLineNo = false), LocalDate.of(2018, 4, 21))
       )
 
       val OUT = ComposedDeltaTransform(transforms)

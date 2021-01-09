@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-package transformers.remove
+package transformers.otherindividuals
+
+import play.api.libs.json._
+import transformers.RemoveEntityTransform
 
 import java.time.LocalDate
 
-trait Remove {
+case class RemoveOtherIndividualTransform(index: Int,
+                                          entity: JsValue,
+                                          endDate: LocalDate) extends OtherIndividualTransform with RemoveEntityTransform
 
-  val endDate: LocalDate
-  val index: Int
-  val `type`: String = ""
+object RemoveOtherIndividualTransform {
 
+  val key = "RemoveOtherIndividualTransform"
+
+  implicit val format: Format[RemoveOtherIndividualTransform] = Json.format[RemoveOtherIndividualTransform]
 }
