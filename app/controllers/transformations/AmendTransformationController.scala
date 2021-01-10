@@ -34,7 +34,7 @@ abstract class AmendTransformationController @Inject()(identify: IdentifierActio
 
   def transform[T](original: JsValue, amended: T, index: Int, `type`: String)(implicit wts: Writes[T]): DeltaTransform
 
-  def addNewTransform[T](identifier: String, index: Int, `type`: String = "")(implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = {
+  def addNewTransform[T](identifier: String, index: Int = 0, `type`: String = "")(implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = {
     identify.async(parse.json) {
       implicit request => {
         request.body.validate[T] match {

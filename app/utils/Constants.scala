@@ -49,6 +49,7 @@ object Constants {
   val BENEFICIARIES = "beneficiary"
   val OTHER_INDIVIDUALS = "naturalPerson"
   val PROTECTORS = "protectors"
+  val SETTLORS = "settlors"
 
   val MONEY_ASSET = "monetary"
   val PROPERTY_OR_LAND_ASSET = "propertyOrLand"
@@ -69,6 +70,10 @@ object Constants {
   val INDIVIDUAL_PROTECTOR = "protector"
   val BUSINESS_PROTECTOR = "protectorCompany"
 
+  val DECEASED_SETTLOR = "deceased"
+  val INDIVIDUAL_SETTLOR = "settlor"
+  val BUSINESS_SETTLOR = "settlorCompany"
+
   val EXPRESS = "expressTrust"
   val UK_RESIDENT = "trustUKResident"
   val TAXABLE = "trustTaxable"
@@ -83,5 +88,9 @@ object Constants {
   val INTER_VIVOS = "interVivos"
   val EFRBS_START_DATE = "efrbsStartDate"
   val RESIDENTIAL_STATUS = "residentialStatus"
+
+  val LINE_NUMBER = "lineNo"
+  val BP_MATCH_STATUS = "bpMatchStatus"
+  val ENTITY_START = "entityStart"
 
 }

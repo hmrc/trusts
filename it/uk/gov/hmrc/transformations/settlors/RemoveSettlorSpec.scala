@@ -70,7 +70,7 @@ class RemoveSettlorSpec extends AsyncFreeSpec with MustMatchers with MockitoSuga
           |}
           |""".stripMargin)
 
-      val removeSettlorRequest = FakeRequest(PUT, s"/trusts/$identifier/settlors/remove")
+      val removeSettlorRequest = FakeRequest(PUT, s"/trusts/settlors/$identifier/remove")
         .withBody(Json.toJson(removeSettlorAtIndex))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -86,7 +86,7 @@ class RemoveSettlorSpec extends AsyncFreeSpec with MustMatchers with MockitoSuga
           |}
           |""".stripMargin)
 
-      val removeSettlorCompanyRequest = FakeRequest(PUT, s"/trusts/$identifier/settlors/remove")
+      val removeSettlorCompanyRequest = FakeRequest(PUT, s"/trusts/settlors/$identifier/remove")
         .withBody(Json.toJson(removeSettlorCompanyAtIndex))
         .withHeaders(CONTENT_TYPE -> "application/json")
 

@@ -282,15 +282,15 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
       val removeBeneficiariesTransform = RemoveBeneficiaryTransform(3, Json.toJson(individualBeneficiary), LocalDate.parse("2012-02-06"), "unidentified")
 
-      val amendIndividualSettlorTransform = AmendIndividualSettlorTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2020-03-25"))
+      val amendIndividualSettlorTransform = AmendSettlorTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2020-03-25"), "settlor")
 
-      val amendBusinessSettlorTransform = AmendBusinessSettlorTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2020-03-25"))
+      val amendBusinessSettlorTransform = AmendSettlorTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2020-03-25"), "settlorCompany")
 
-      val removeSettlorsTransform = RemoveSettlorsTransform(3, Json.toJson(settlor), LocalDate.parse("2012-02-06"), "settlor")
+      val removeSettlorsTransform = RemoveSettlorTransform(3, Json.toJson(settlor), LocalDate.parse("2012-02-06"), "settlor")
 
-      val amendDeceasedSettlorTransform = AmendDeceasedSettlorTransform(Json.obj(), Json.obj())
+      val amendDeceasedSettlorTransform = AmendSettlorTransform(0, Json.obj(), Json.obj(), LocalDate.now(), "deceased")
 
-      val addIndividualSettlorTransform = AddIndividualSettlorTransform(settlor)
+      val addIndividualSettlorTransform = AddSettlorTransform(Json.toJson(settlor), "settlor")
 
       val addIndividualProtectorTransform = AddProtectorTransform(Json.toJson(protector), "protector")
 
@@ -393,19 +393,19 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           |               "RemoveBeneficiaryTransform": ${Json.toJson(removeBeneficiariesTransform)}
           |            },
           |            {
-          |               "AmendIndividualSettlorTransform": ${Json.toJson(amendIndividualSettlorTransform)}
+          |               "AmendSettlorTransform": ${Json.toJson(amendIndividualSettlorTransform)}
           |            },
           |            {
-          |               "AmendBusinessSettlorTransform": ${Json.toJson(amendBusinessSettlorTransform)}
+          |               "AmendSettlorTransform": ${Json.toJson(amendBusinessSettlorTransform)}
           |            },
           |            {
-          |               "RemoveSettlorsTransform": ${Json.toJson(removeSettlorsTransform)}
+          |               "RemoveSettlorTransform": ${Json.toJson(removeSettlorsTransform)}
           |            },
           |            {
-          |               "AmendDeceasedSettlorTransform": ${Json.toJson(amendDeceasedSettlorTransform)}
+          |               "AmendSettlorTransform": ${Json.toJson(amendDeceasedSettlorTransform)}
           |            },
           |            {
-          |               "AddIndividualSettlorTransform": ${Json.toJson(addIndividualSettlorTransform)}
+          |               "AddSettlorTransform": ${Json.toJson(addIndividualSettlorTransform)}
           |            },
           |            {
           |               "AddProtectorTransform": ${Json.toJson(addIndividualProtectorTransform)}

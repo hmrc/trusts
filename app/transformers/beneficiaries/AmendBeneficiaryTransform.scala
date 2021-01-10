@@ -18,7 +18,7 @@ package transformers.beneficiaries
 
 import play.api.libs.json._
 import transformers.AmendEntityTransform
-import utils.Constants.UNIDENTIFIED_BENEFICIARY
+import utils.Constants._
 
 import java.time.LocalDate
 
@@ -31,7 +31,7 @@ case class AmendBeneficiaryTransform(index: Int,
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     if (`type` == UNIDENTIFIED_BENEFICIARY) {
       val description: String = amended.as[JsString].value
-      val originalAndAmendedMerged: JsObject = original.as[JsObject].deepMerge(Json.obj("description" -> description)) - "lineNo" - "bpMatchStatus"
+      val originalAndAmendedMerged: JsObject = original.as[JsObject].deepMerge(Json.obj("description" -> description)) - LINE_NUMBER - BP_MATCH_STATUS
       amendAtPosition(input, path, index, originalAndAmendedMerged)
     } else {
       super.applyTransform(input)

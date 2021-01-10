@@ -16,21 +16,10 @@
 
 package transformers.settlors
 
-import play.api.libs.json._
+import play.api.libs.json.JsPath
+import utils.Constants._
 
-import java.time.LocalDate
-
-case class AmendBusinessSettlorTransform(index: Int,
-                                         amended: JsValue,
-                                         original: JsValue,
-                                         endDate: LocalDate) extends AmendSettlorTransform {
-  override val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'settlors \ 'settlorCompany
-}
-
-object AmendBusinessSettlorTransform {
-
-  val key = "AmendBusinessSettlorTransform"
-
-  implicit val format: Format[AmendBusinessSettlorTransform] =
-    Json.format[AmendBusinessSettlorTransform]
+trait SettlorTransform {
+  val `type`: String
+  val path: JsPath = ENTITIES \ SETTLORS \ `type`
 }

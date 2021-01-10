@@ -17,46 +17,95 @@
 package transformers.settlors
 
 import play.api.libs.json._
-import transformers.{AmendEntityTransform, JsonOperations}
+import transformers.AmendEntityTransform
+import utils.Constants._
 
-trait AmendSettlorTransform extends AmendEntityTransform with JsonOperations {
+import java.time.LocalDate
+
+case class AmendSettlorTransform(index: Int,
+                                 amended: JsValue,
+                                 original: JsValue,
+                                 endDate: LocalDate,
+                                 `type`: String) extends SettlorTransform with AmendEntityTransform {
+
+  private val isDeceasedSettlor: Boolean = `type` == DECEASED_SETTLOR
+
+  override val path: JsPath = {
+    if (isDeceasedSettlor) {
+      ENTITIES \ `type`
+    } else {
+      ENTITIES \ SETTLORS \ `type`
+    }
+  }
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    amendAtPosition(input, path, index, Json.toJson(preserveEtmpStatus(amended, original)))
+    if (isDeceasedSettlor) {
+      for {
+        lineNo <- original.transform((__ \ LINE_NUMBER).json.pick)
+        bpMatchStatus <- original.transform((__ \ BP_MATCH_STATUS).json.pick)
+        entityStart <- original.transform((__ \ ENTITY_START).json.pick)
+
+        lineNoAndStatusPreserved = amended.as[JsObject] +
+          (LINE_NUMBER -> lineNo) +
+          (BP_MATCH_STATUS -> bpMatchStatus) +
+          (ENTITY_START -> entityStart)
+
+        trustWithAmendedDeceased <- input.transform(
+          path.json.prune andThen
+            __.json.update {
+              path.json.put(lineNoAndStatusPreserved)
+            }
+        )
+      } yield {
+        trustWithAmendedDeceased
+      }
+    } else {
+      amendAtPosition(input, path, index, Json.toJson(preserveEtmpStatus(amended, original)))
+    }
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    original.transform(lineNoPick).fold(
-      _ => JsSuccess(input),
-      lineNo => {
-        stripEtmpStatusForMatching(input, lineNo).fold(
-          _ => endEntity(input, path, original, endDate, endDateField),
-          newEntries => addEndedEntity(input, newEntries)
-        )
-      }
-    )
+    if (isDeceasedSettlor) {
+      JsSuccess(input)
+    } else {
+      original.transform(lineNoPick).fold(
+        _ => JsSuccess(input),
+        lineNo => {
+          stripEtmpStatusForMatching(input, lineNo).fold(
+            _ => endEntity(input, path, original, endDate, endDateField),
+            newEntries => addEndedEntity(input, newEntries)
+          )
+        }
+      )
+    }
   }
 
-  private def addEndedEntity(input: JsValue, newEntities: Seq[JsObject]) = {
+  private def preserveEtmpStatus(amended: JsValue, original: JsValue): JsValue = {
+    copyField(original, LINE_NUMBER, copyField(original, BP_MATCH_STATUS, amended))
+  }
+
+  private def stripEtmpStatusForMatching(input: JsValue, lineNo: JsValue): JsResult[Seq[JsObject]] = {
+    input.transform(path.json.pick).map {
+      value =>
+        value.as[Seq[JsObject]].collect {
+          case x: JsObject if x \ LINE_NUMBER == JsDefined(lineNo) => x - LINE_NUMBER - BP_MATCH_STATUS
+          case x => x
+        }
+    }
+  }
+
+  private def addEndedEntity(input: JsValue, newEntities: Seq[JsObject]): JsResult[JsObject] = {
     input.transform(__.json.update(
       path.json.put(
         JsArray(newEntities ++ Seq(objectPlusField(original, "entityEnd", Json.toJson(endDate))))
       )
     ))
   }
+}
 
-  private def stripEtmpStatusForMatching(input: JsValue, lineNo: JsValue) = {
-    input.transform(path.json.pick).map {
-      value =>
-        value.as[Seq[JsObject]].collect {
-          case x: JsObject if (x \ "lineNo" == JsDefined(lineNo)) => x - "lineNo" - "bpMatchStatus"
-          case x => x
-        }
-    }
-  }
+object AmendSettlorTransform {
 
-  private def preserveEtmpStatus(amended: JsValue, original: JsValue): JsValue =
-    copyField(original, "lineNo",
-      copyField(original, "bpMatchStatus", amended)
-    )
+  val key = "AmendSettlorTransform"
+
+  implicit val format: Format[AmendSettlorTransform] = Json.format[AmendSettlorTransform]
 }

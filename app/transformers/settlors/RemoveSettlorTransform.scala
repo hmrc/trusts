@@ -16,25 +16,19 @@
 
 package transformers.settlors
 
-import models.variation.Settlor
 import play.api.libs.json._
-import transformers.{DeltaTransform, JsonOperations}
+import transformers.RemoveEntityTransform
 
-case class AddIndividualSettlorTransform(newSettlor: Settlor)
-  extends DeltaTransform
-  with JsonOperations {
+import java.time.LocalDate
 
-  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'settlors \ 'settlor
+case class RemoveSettlorTransform(index: Int,
+                                  entity: JsValue,
+                                  endDate: LocalDate,
+                                  `type`: String) extends SettlorTransform with RemoveEntityTransform
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addToList(input, path, Json.toJson(newSettlor))
-  }
+object RemoveSettlorTransform {
+
+  val key = "RemoveSettlorTransform"
+
+  implicit val format: Format[RemoveSettlorTransform] = Json.format[RemoveSettlorTransform]
 }
-
-  object AddIndividualSettlorTransform {
-
-    val key = "AddIndividualSettlorTransform"
-
-    implicit val format: Format[AddIndividualSettlorTransform] = Json.format[AddIndividualSettlorTransform]
-  }
-

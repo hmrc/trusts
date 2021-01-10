@@ -16,25 +16,15 @@
 
 package transformers.settlors
 
-import models.variation.SettlorCompany
 import play.api.libs.json._
-import transformers.{DeltaTransform, JsonOperations}
+import transformers.AddEntityTransform
 
-case class AddBusinessSettlorTransform(newCompanySettlor: SettlorCompany)
-  extends DeltaTransform
-  with JsonOperations {
+case class AddSettlorTransform(entity: JsValue,
+                              `type`: String) extends SettlorTransform with AddEntityTransform
 
-  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'settlors \ 'settlorCompany
+object AddSettlorTransform {
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addToList(input, path, Json.toJson(newCompanySettlor))
-  }
+  val key = "AddSettlorTransform"
+
+  implicit val format: Format[AddSettlorTransform] = Json.format[AddSettlorTransform]
 }
-
-object AddBusinessSettlorTransform {
-
-  val key = "AddBuisnessSettlorTransform"
-
-  implicit val format: Format[AddBusinessSettlorTransform] = Json.format[AddBusinessSettlorTransform]
-}
-
