@@ -31,7 +31,7 @@ import utils.JsonUtils
 import java.time.LocalDate
 import scala.concurrent.Future
 
-class RemoveProtectorsTransformSpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar {
+class RemoveProtectorTransformSpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar {
 
   private def protectorJson(value1 : String, endDate: Option[LocalDate] = None, withLineNo: Boolean = true) = {
     val a = Json.obj("field1" -> value1, "field2" -> "value20")
@@ -54,8 +54,8 @@ class RemoveProtectorsTransformSpec extends FreeSpec with MustMatchers with Scal
 
   "Remove Protector Transforms should round trip through JSON as part of Composed Transform" in {
     val OUT = ComposedDeltaTransform(Seq(
-      RemoveProtectorsTransform(56, protectorJson("Blah Blah Blah"), LocalDate.of(1563, 10, 23), "protector"),
-      RemoveProtectorsTransform(12, protectorJson("Foo"), LocalDate.of(2317, 12, 21),  "protectorCompany")
+      RemoveProtectorTransform(56, protectorJson("Blah Blah Blah"), LocalDate.of(1563, 10, 23), "protector"),
+      RemoveProtectorTransform(12, protectorJson("Foo"), LocalDate.of(2317, 12, 21),  "protectorCompany")
     ))
 
     Json.toJson(OUT).validate[ComposedDeltaTransform] match {
@@ -79,7 +79,7 @@ class RemoveProtectorsTransformSpec extends FreeSpec with MustMatchers with Scal
         protectorJson("Three")
       ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveProtectorsTransform(1, Json.obj(), LocalDate.of(2018, 4, 21), "protector")))
+      val OUT = ComposedDeltaTransform(Seq(RemoveProtectorTransform(1, Json.obj(), LocalDate.of(2018, 4, 21), "protector")))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe expectedOutput
@@ -94,7 +94,7 @@ class RemoveProtectorsTransformSpec extends FreeSpec with MustMatchers with Scal
         protectorJson("Three")
       ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveProtectorsTransform(10, Json.obj(), LocalDate.of(2018, 4, 21), "protector")))
+      val OUT = ComposedDeltaTransform(Seq(RemoveProtectorTransform(10, Json.obj(), LocalDate.of(2018, 4, 21), "protector")))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
@@ -109,7 +109,7 @@ class RemoveProtectorsTransformSpec extends FreeSpec with MustMatchers with Scal
         protectorJson("Three")
       ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveProtectorsTransform(-1, Json.obj(), LocalDate.of(2018, 4, 21), "protector")))
+      val OUT = ComposedDeltaTransform(Seq(RemoveProtectorTransform(-1, Json.obj(), LocalDate.of(2018, 4, 21), "protector")))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
@@ -123,7 +123,7 @@ class RemoveProtectorsTransformSpec extends FreeSpec with MustMatchers with Scal
       ))
 
       val transforms = Seq(
-        RemoveProtectorsTransform(0, protectorJson("One", None, withLineNo = false), LocalDate.of(2018, 4, 21), "protector")
+        RemoveProtectorTransform(0, protectorJson("One", None, withLineNo = false), LocalDate.of(2018, 4, 21), "protector")
       )
 
       val OUT = ComposedDeltaTransform(transforms)
@@ -157,7 +157,7 @@ class RemoveProtectorsTransformSpec extends FreeSpec with MustMatchers with Scal
       val repo = mock[TransformationRepository]
       val trustsService = mock[TrustsService]
       val auditService = mock[AuditService]
-      val transforms = Seq(RemoveProtectorsTransform(1, protectorJson("Two"), LocalDate.of(2018, 4, 21), "protectorCompany"))
+      val transforms = Seq(RemoveProtectorTransform(1, protectorJson("Two"), LocalDate.of(2018, 4, 21), "protectorCompany"))
       when(repo.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))
 
       val SUT = new TransformationService(repo, trustsService, auditService)
@@ -175,7 +175,7 @@ class RemoveProtectorsTransformSpec extends FreeSpec with MustMatchers with Scal
         protectorJson("Three")
       ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveProtectorsTransform(10, Json.obj(), LocalDate.of(2018, 4, 21), "protectorCompany")))
+      val OUT = ComposedDeltaTransform(Seq(RemoveProtectorTransform(10, Json.obj(), LocalDate.of(2018, 4, 21), "protectorCompany")))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
@@ -190,7 +190,7 @@ class RemoveProtectorsTransformSpec extends FreeSpec with MustMatchers with Scal
         protectorJson("Three")
       ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveProtectorsTransform(-1, Json.obj(), LocalDate.of(2018, 4, 21), "protectorCompany")))
+      val OUT = ComposedDeltaTransform(Seq(RemoveProtectorTransform(-1, Json.obj(), LocalDate.of(2018, 4, 21), "protectorCompany")))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson

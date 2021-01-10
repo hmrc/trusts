@@ -52,14 +52,6 @@ POST        /add-individual-settlor/:identifier                        controlle
 
 POST        /add-business-settlor/:identifier                          controllers.SettlorTransformationController.addBusinessSettlor(identifier: String)
 
-POST        /add-individual-protector/:identifier                      controllers.ProtectorTransformationController.addIndividualProtector(identifier: String)
-
-POST        /add-business-protector/:identifier                        controllers.ProtectorTransformationController.addBusinessProtector(identifier: String)
-
-POST        /amend-business-protector/:identifier/:index               controllers.ProtectorTransformationController.amendBusinessProtector(identifier: String, index: Int)
-
-PUT         /:identifier/protectors/remove                             controllers.ProtectorTransformationController.removeProtector(identifier: String)
-
 PUT         /:identifier/trust-details/express                         controllers.transformations.trustdetails.TrustDetailsTransformationController.setExpress(identifier: String)
 PUT         /:identifier/trust-details/uk-resident                     controllers.transformations.trustdetails.TrustDetailsTransformationController.setResident(identifier: String)
 PUT         /:identifier/trust-details/taxable                         controllers.transformations.trustdetails.TrustDetailsTransformationController.setTaxable(identifier: String)

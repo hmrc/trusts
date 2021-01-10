@@ -17,20 +17,14 @@
 package transformers.protectors
 
 import play.api.libs.json._
-import transformers.AmendEntityTransform
+import transformers.AddEntityTransform
 
-import java.time.LocalDate
+case class AddProtectorTransform(entity: JsValue,
+                                 `type`: String) extends ProtectorTransform with AddEntityTransform
 
-case class AmendBusinessProtectorTransform(index: Int,
-                                           amended: JsValue,
-                                           original: JsValue,
-                                           endDate: LocalDate) extends AmendEntityTransform {
+object AddProtectorTransform {
 
-  override val path: JsPath = __ \ 'details \ 'trust \ 'entities \ 'protectors \ 'protectorCompany
-}
+  val key = "AddProtectorTransform"
 
-object AmendBusinessProtectorTransform {
-  val key = "AmendBusinessProtectorTransform"
-
-  implicit val format: Format[AmendBusinessProtectorTransform] = Json.format[AmendBusinessProtectorTransform]
+  implicit val format: Format[AddProtectorTransform] = Json.format[AddProtectorTransform]
 }

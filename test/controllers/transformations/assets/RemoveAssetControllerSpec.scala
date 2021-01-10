@@ -92,7 +92,7 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
-        val body = removeAsset("monetary")
+        val body = removeAsset(assetType)
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(body))
@@ -136,7 +136,7 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
-        val body = removeAsset("propertyOrLand")
+        val body = removeAsset(assetType)
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(body))
@@ -182,7 +182,7 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
-        val body = removeAsset("shares")
+        val body = removeAsset(assetType)
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(body))
@@ -227,7 +227,7 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
-        val body = removeAsset("business")
+        val body = removeAsset(assetType)
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(body))
@@ -270,7 +270,7 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
-        val body = removeAsset("partnerShip")
+        val body = removeAsset(assetType)
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(body))
@@ -312,7 +312,7 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
-        val body = removeAsset("other")
+        val body = removeAsset(assetType)
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(body))
@@ -358,7 +358,7 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
-        val body = removeAsset("nonEEABusiness")
+        val body = removeAsset(assetType)
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(body))

@@ -292,12 +292,12 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
       val addIndividualSettlorTransform = AddIndividualSettlorTransform(settlor)
 
-      val addIndividualProtectorTransform = AddIndividualProtectorTransform(protector)
+      val addIndividualProtectorTransform = AddProtectorTransform(Json.toJson(protector), "protector")
 
-      val removeProtectorsTransform = RemoveProtectorsTransform(3, Json.toJson(protector), LocalDate.parse("2012-02-06"), "protector")
-      val addCompanyProtectorTransform = AddCompanyProtectorTransform(newCompanyProtector)
+      val removeProtectorsTransform = RemoveProtectorTransform(3, Json.toJson(protector), LocalDate.parse("2012-02-06"), "protector")
+      val addCompanyProtectorTransform = AddProtectorTransform(Json.toJson(newCompanyProtector), "protectorCompany")
 
-      val amendBusinessProtectorTransform = AmendBusinessProtectorTransform(0, Json.toJson(newCompanyProtector), Json.obj(), LocalDate.parse("2020-03-25"))
+      val amendBusinessProtectorTransform = AmendProtectorTransform(0, Json.toJson(newCompanyProtector), Json.obj(), LocalDate.parse("2020-03-25"), "protectorCompany")
 
       val removeOtherIndividualsTransform = RemoveOtherIndividualTransform(3, Json.toJson(otherIndividual), LocalDate.parse("2012-02-06"))
 
@@ -408,16 +408,16 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           |               "AddIndividualSettlorTransform": ${Json.toJson(addIndividualSettlorTransform)}
           |            },
           |            {
-          |               "AddIndividualProtectorTransform": ${Json.toJson(addIndividualProtectorTransform)}
+          |               "AddProtectorTransform": ${Json.toJson(addIndividualProtectorTransform)}
           |            },
           |            {
-          |               "RemoveProtectorsTransform": ${Json.toJson(removeProtectorsTransform)}
+          |               "RemoveProtectorTransform": ${Json.toJson(removeProtectorsTransform)}
           |            },
           |            {
-          |               "AddCompanyProtectorTransform": ${Json.toJson(addCompanyProtectorTransform)}
+          |               "AddProtectorTransform": ${Json.toJson(addCompanyProtectorTransform)}
           |            },
           |            {
-          |               "AmendBusinessProtectorTransform": ${Json.toJson(amendBusinessProtectorTransform)}
+          |               "AmendProtectorTransform": ${Json.toJson(amendBusinessProtectorTransform)}
           |            },
           |            {
           |               "RemoveOtherIndividualTransform": ${Json.toJson(removeOtherIndividualsTransform)}

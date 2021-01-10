@@ -70,7 +70,7 @@ class RemoveProtectorSpec extends AsyncFreeSpec with MustMatchers with MockitoSu
           |}
           |""".stripMargin)
 
-      val removeProtectorRequest = FakeRequest(PUT, s"/trusts/$identifier/protectors/remove")
+      val removeProtectorRequest = FakeRequest(PUT, s"/trusts/protectors/$identifier/remove")
         .withBody(Json.toJson(removeProtectorAtIndex))
         .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -86,7 +86,7 @@ class RemoveProtectorSpec extends AsyncFreeSpec with MustMatchers with MockitoSu
           |}
           |""".stripMargin)
 
-      val removeProtectorCompanyRequest = FakeRequest(PUT, s"/trusts/$identifier/protectors/remove")
+      val removeProtectorCompanyRequest = FakeRequest(PUT, s"/trusts/protectors/$identifier/remove")
         .withBody(Json.toJson(removeProtectorCompanyAtIndex))
         .withHeaders(CONTENT_TYPE -> "application/json")
 

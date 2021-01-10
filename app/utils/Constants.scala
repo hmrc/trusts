@@ -48,6 +48,7 @@ object Constants {
   val ASSETS = "assets"
   val BENEFICIARIES = "beneficiary"
   val OTHER_INDIVIDUALS = "naturalPerson"
+  val PROTECTORS = "protectors"
 
   val MONEY_ASSET = "monetary"
   val PROPERTY_OR_LAND_ASSET = "propertyOrLand"
@@ -64,6 +65,9 @@ object Constants {
   val UNIDENTIFIED_BENEFICIARY = "unidentified"
   val LARGE_BENEFICIARY = "large"
   val OTHER_BENEFICIARY = "other"
+
+  val INDIVIDUAL_PROTECTOR = "protector"
+  val BUSINESS_PROTECTOR = "protectorCompany"
 
   val EXPRESS = "expressTrust"
   val UK_RESIDENT = "trustUKResident"

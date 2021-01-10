@@ -16,25 +16,19 @@
 
 package transformers.protectors
 
-import models.variation.ProtectorCompany
 import play.api.libs.json._
-import transformers.{DeltaTransform, JsonOperations}
+import transformers.RemoveEntityTransform
 
-case class AddCompanyProtectorTransform(newCompanyProtector: ProtectorCompany)
-  extends DeltaTransform
-  with JsonOperations {
+import java.time.LocalDate
 
-  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'protectors \ 'protectorCompany
+case class RemoveProtectorTransform(index: Int,
+                                    entity: JsValue,
+                                    endDate: LocalDate,
+                                    `type`: String) extends ProtectorTransform with RemoveEntityTransform
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addToList(input, path, Json.toJson(newCompanyProtector))
-  }
+object RemoveProtectorTransform {
+
+  val key = "RemoveProtectorTransform"
+
+  implicit val format: Format[RemoveProtectorTransform] = Json.format[RemoveProtectorTransform]
 }
-
-object AddCompanyProtectorTransform {
-
-  val key = "AddCompanyProtectorTransform"
-
-  implicit val format: Format[AddCompanyProtectorTransform] = Json.format[AddCompanyProtectorTransform]
-}
-
