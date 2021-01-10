@@ -25,6 +25,9 @@ class SetTrustDetailTransformSpec extends FreeSpec with MustMatchers {
   "the set trust detail transformer" - {
 
     "when express" - {
+
+      val detailType = "expressTrust"
+
       "before declaration" - {
         "amend trust details by setting the field" - {
 
@@ -33,7 +36,7 @@ class SetTrustDetailTransformSpec extends FreeSpec with MustMatchers {
             val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-express.json")
             val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-express.json")
 
-            val transformer = SetTrustDetailTransform(JsBoolean(false), "expressTrust")
+            val transformer = SetTrustDetailTransform(JsBoolean(false), detailType)
 
             val result = transformer.applyTransform(beforeJson).get
             result mustBe afterJson
@@ -44,7 +47,7 @@ class SetTrustDetailTransformSpec extends FreeSpec with MustMatchers {
             val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before.json")
             val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-express.json")
 
-            val transformer = SetTrustDetailTransform(JsBoolean(false), "expressTrust")
+            val transformer = SetTrustDetailTransform(JsBoolean(false), detailType)
 
             val result = transformer.applyTransform(beforeJson).get
             result mustBe afterJson
@@ -54,6 +57,9 @@ class SetTrustDetailTransformSpec extends FreeSpec with MustMatchers {
     }
 
     "when property" - {
+
+      val detailType = "trustUKProperty"
+
       "before declaration" - {
         "amend trust details by setting the field" - {
 
@@ -62,7 +68,7 @@ class SetTrustDetailTransformSpec extends FreeSpec with MustMatchers {
             val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-property.json")
             val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-property.json")
 
-            val transformer = SetTrustDetailTransform(JsBoolean(false), "trustUKProperty")
+            val transformer = SetTrustDetailTransform(JsBoolean(false), detailType)
 
             val result = transformer.applyTransform(beforeJson).get
             result mustBe afterJson
@@ -73,7 +79,7 @@ class SetTrustDetailTransformSpec extends FreeSpec with MustMatchers {
             val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before.json")
             val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-property.json")
 
-            val transformer = SetTrustDetailTransform(JsBoolean(false), "trustUKProperty")
+            val transformer = SetTrustDetailTransform(JsBoolean(false), detailType)
 
             val result = transformer.applyTransform(beforeJson).get
             result mustBe afterJson
@@ -83,6 +89,9 @@ class SetTrustDetailTransformSpec extends FreeSpec with MustMatchers {
     }
 
     "when recorded" - {
+
+      val detailType = "trustRecorded"
+
       "before declaration" - {
         "amend trust details by setting the field" - {
 
@@ -91,7 +100,7 @@ class SetTrustDetailTransformSpec extends FreeSpec with MustMatchers {
             val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-recorded.json")
             val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-recorded.json")
 
-            val transformer = SetTrustDetailTransform(JsBoolean(false), "trustRecorded")
+            val transformer = SetTrustDetailTransform(JsBoolean(false), detailType)
 
             val result = transformer.applyTransform(beforeJson).get
             result mustBe afterJson
@@ -102,7 +111,7 @@ class SetTrustDetailTransformSpec extends FreeSpec with MustMatchers {
             val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before.json")
             val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-recorded.json")
 
-            val transformer = SetTrustDetailTransform(JsBoolean(false), "trustRecorded")
+            val transformer = SetTrustDetailTransform(JsBoolean(false), detailType)
 
             val result = transformer.applyTransform(beforeJson).get
             result mustBe afterJson
@@ -112,6 +121,9 @@ class SetTrustDetailTransformSpec extends FreeSpec with MustMatchers {
     }
 
     "when resident" - {
+
+      val detailType = "trustUKResident"
+
       "before declaration" - {
         "amend trust details by setting the field" - {
 
@@ -120,7 +132,7 @@ class SetTrustDetailTransformSpec extends FreeSpec with MustMatchers {
             val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-resident.json")
             val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-resident.json")
 
-            val transformer = SetTrustDetailTransform(JsBoolean(false), "trustUKResident")
+            val transformer = SetTrustDetailTransform(JsBoolean(false), detailType)
 
             val result = transformer.applyTransform(beforeJson).get
             result mustBe afterJson
@@ -131,7 +143,7 @@ class SetTrustDetailTransformSpec extends FreeSpec with MustMatchers {
             val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before.json")
             val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-resident.json")
 
-            val transformer = SetTrustDetailTransform(JsBoolean(false), "trustUKResident")
+            val transformer = SetTrustDetailTransform(JsBoolean(false), detailType)
 
             val result = transformer.applyTransform(beforeJson).get
             result mustBe afterJson
@@ -141,6 +153,9 @@ class SetTrustDetailTransformSpec extends FreeSpec with MustMatchers {
     }
 
     "when taxable" - {
+
+      val detailType = "trustTaxable"
+
       "before declaration" - {
         "amend trust details by setting the field" - {
 
@@ -149,7 +164,7 @@ class SetTrustDetailTransformSpec extends FreeSpec with MustMatchers {
             val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before-populated-taxable.json")
             val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-taxable.json")
 
-            val transformer = SetTrustDetailTransform(JsBoolean(false), "trustTaxable")
+            val transformer = SetTrustDetailTransform(JsBoolean(false), detailType)
 
             val result = transformer.applyTransform(beforeJson).get
             result mustBe afterJson
@@ -160,7 +175,7 @@ class SetTrustDetailTransformSpec extends FreeSpec with MustMatchers {
             val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-before.json")
             val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-details-transform-after-taxable.json")
 
-            val transformer = SetTrustDetailTransform(JsBoolean(false), "trustTaxable")
+            val transformer = SetTrustDetailTransform(JsBoolean(false), detailType)
 
             val result = transformer.applyTransform(beforeJson).get
             result mustBe afterJson
