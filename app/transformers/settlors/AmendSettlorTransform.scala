@@ -30,6 +30,8 @@ case class AmendSettlorTransform(index: Int,
 
   private val isDeceasedSettlor: Boolean = `type` == DECEASED_SETTLOR
 
+  private val etmpFields: Seq[String] = Seq(LINE_NUMBER, BP_MATCH_STATUS)
+
   override val path: JsPath = {
     if (isDeceasedSettlor) {
       ENTITIES \ `type`
@@ -40,27 +42,9 @@ case class AmendSettlorTransform(index: Int,
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     if (isDeceasedSettlor) {
-      for {
-        lineNo <- original.transform((__ \ LINE_NUMBER).json.pick)
-        bpMatchStatus <- original.transform((__ \ BP_MATCH_STATUS).json.pick)
-        entityStart <- original.transform((__ \ ENTITY_START).json.pick)
-
-        lineNoAndStatusPreserved = amended.as[JsObject] +
-          (LINE_NUMBER -> lineNo) +
-          (BP_MATCH_STATUS -> bpMatchStatus) +
-          (ENTITY_START -> entityStart)
-
-        trustWithAmendedDeceased <- input.transform(
-          path.json.prune andThen
-            __.json.update {
-              path.json.put(lineNoAndStatusPreserved)
-            }
-        )
-      } yield {
-        trustWithAmendedDeceased
-      }
+      amendDeceasedAndPreserveData(input)
     } else {
-      amendAtPosition(input, path, index, Json.toJson(preserveEtmpStatus(amended, original)))
+      amendAtPosition(input, path, index, preserveFields(etmpFields))
     }
   }
 
@@ -68,20 +52,35 @@ case class AmendSettlorTransform(index: Int,
     if (isDeceasedSettlor) {
       JsSuccess(input)
     } else {
-      original.transform(lineNoPick).fold(
-        _ => JsSuccess(input),
-        lineNo => {
-          stripEtmpStatusForMatching(input, lineNo).fold(
-            _ => endEntity(input, path, original, endDate, endDateField),
-            newEntries => addEndedEntity(input, newEntries)
-          )
-        }
-      )
+      endSettlorIfKnownToEtmp(input)
     }
   }
 
-  private def preserveEtmpStatus(amended: JsValue, original: JsValue): JsValue = {
-    copyField(original, LINE_NUMBER, copyField(original, BP_MATCH_STATUS, amended))
+  private def amendDeceasedAndPreserveData(input: JsValue): JsResult[JsObject] = {
+    input.transform(
+      path.json.prune andThen
+        __.json.update {
+          path.json.put(preserveFields(etmpFields :+ ENTITY_START))
+        }
+    )
+  }
+
+  private def preserveFields(fields: Seq[String]): JsValue = {
+    fields.foldLeft[JsValue](amended)((updated, field) => {
+      copyField(original, field, updated)
+    })
+  }
+
+  private def endSettlorIfKnownToEtmp(input:JsValue): JsResult[JsValue] = {
+    original.transform(lineNoPick).fold(
+      _ => JsSuccess(input),
+      lineNo => {
+        stripEtmpStatusForMatching(input, lineNo).fold(
+          _ => endEntity(input, path, original, endDate, endDateField),
+          newEntries => addEndedEntity(input, newEntries)
+        )
+      }
+    )
   }
 
   private def stripEtmpStatusForMatching(input: JsValue, lineNo: JsValue): JsResult[Seq[JsObject]] = {
