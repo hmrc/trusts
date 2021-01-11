@@ -16,11 +16,6 @@
 
 package controllers
 
-import javax.inject.Inject
-import play.api.Logging
-import play.api.libs.json.{JsBoolean, JsObject, JsPath, JsString, JsValue, Json, Reads, __}
-import play.api.mvc.{Action, ControllerComponents}
-import uk.gov.hmrc.http.BadRequestException
 import config.AppConfig
 import controllers.actions.IdentifierAction
 import exceptions._
@@ -30,11 +25,15 @@ import models.registration.ApiResponse._
 import models.registration.RegistrationTrnResponse._
 import models.registration.{RegistrationFailureResponse, RegistrationTrnResponse}
 import models.requests.IdentifierRequest
+import play.api.Logging
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.{Action, ControllerComponents}
 import services.{AuditService, RosmPatternService, TrustsService, ValidationService, _}
+import uk.gov.hmrc.http.BadRequestException
 import utils.ErrorResponses._
 import utils.Headers
-import utils.JsonOps._
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
