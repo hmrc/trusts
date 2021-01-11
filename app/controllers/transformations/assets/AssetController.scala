@@ -16,19 +16,15 @@
 
 package controllers.transformations.assets
 
-import play.api.Logging
 import play.api.libs.json.JsPath
 import utils.Constants._
 
-trait AssetController extends Logging {
+trait AssetController {
 
   def path(`type`: String, index: Option[Int]): JsPath = {
     index match {
-      case Some(i) =>
-        TRUST \ ASSETS \ `type` \ i
-      case _ =>
-        logger.warn(s"Index should not be None for asset type ${`type`}.")
-        JsPath
+      case Some(i) => TRUST \ ASSETS \ `type` \ i
+      case _ => throw new Exception(s"Index should not be None for asset type ${`type`}.")
     }
   }
 }

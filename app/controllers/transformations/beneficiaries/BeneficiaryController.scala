@@ -16,19 +16,15 @@
 
 package controllers.transformations.beneficiaries
 
-import play.api.Logging
 import play.api.libs.json.JsPath
 import utils.Constants._
 
-trait BeneficiaryController extends Logging {
+trait BeneficiaryController {
 
   def path(`type`: String, index: Option[Int]): JsPath = {
     index match {
-      case Some(i) =>
-        ENTITIES \ BENEFICIARIES \ `type` \ i
-      case _ =>
-        logger.warn(s"Index should not be None for beneficiary type ${`type`}.")
-        JsPath
+      case Some(i) => ENTITIES \ BENEFICIARIES \ `type` \ i
+      case _ => throw new Exception(s"Index should not be None for beneficiary type ${`type`}.")
     }
   }
 }
