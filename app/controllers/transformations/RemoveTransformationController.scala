@@ -43,7 +43,7 @@ abstract class RemoveTransformationController @Inject()(identify: IdentifierActi
           case JsSuccess(remove, _) =>
             for {
               json <- transformationService.getTransformedTrustJson(identifier, request.internalId)
-              entity <- Future.fromTry(findJson(json, remove.`type`, remove.index))
+              entity <- Future.fromTry(findJson(json, remove.`type`, Some(remove.index)))
               _ <- transformationService.addNewTransform(identifier, request.internalId, transform(remove, entity))
             } yield {
               Ok

@@ -22,7 +22,7 @@ import utils.Constants._
 
 import java.time.LocalDate
 
-case class AmendBeneficiaryTransform(index: Int,
+case class AmendBeneficiaryTransform(index: Option[Int],
                                      amended: JsValue,
                                      original: JsValue,
                                      endDate: LocalDate,

@@ -47,7 +47,7 @@ class TransformRepositorySpec extends AsyncFreeSpec with MustMatchers with Integ
   private val data: ComposedDeltaTransform = ComposedDeltaTransform(
     Seq(
       AmendTrusteeTransform(
-        0,
+        None,
         Json.toJson(AmendedLeadTrusteeIndType(
           NameType("New", Some("lead"), "Trustee"),
           LocalDate.parse("2000-01-01"),

@@ -105,7 +105,7 @@ class AmendOtherIndividualControllerSpec extends FreeSpec with MockitoSugar with
 
       status(result) mustBe OK
 
-      val transform = AmendOtherIndividualTransform(index, Json.toJson(amendedOtherIndividual), Json.toJson(originalOtherIndividual), endDate)
+      val transform = AmendOtherIndividualTransform(Some(index), Json.toJson(amendedOtherIndividual), Json.toJson(originalOtherIndividual), endDate)
 
       verify(mockTransformationService)
         .addNewTransform(equalTo(utr), any(), equalTo(transform))

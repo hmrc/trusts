@@ -117,7 +117,7 @@ class PromoteTrusteeControllerSpec extends FreeSpec with MockitoSugar with Scala
 
         status(result) mustBe OK
 
-        val transform = PromoteTrusteeTransform(index, Json.toJson(promotedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
+        val transform = PromoteTrusteeTransform(Some(index), Json.toJson(promotedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -197,7 +197,7 @@ class PromoteTrusteeControllerSpec extends FreeSpec with MockitoSugar with Scala
 
         status(result) mustBe OK
 
-        val transform = PromoteTrusteeTransform(index, Json.toJson(promotedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
+        val transform = PromoteTrusteeTransform(Some(index), Json.toJson(promotedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))

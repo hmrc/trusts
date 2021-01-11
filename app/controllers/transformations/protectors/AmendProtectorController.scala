@@ -35,11 +35,11 @@ class AmendProtectorController @Inject()(identify: IdentifierAction,
                                         (implicit ec: ExecutionContext, cc: ControllerComponents)
   extends AmendTransformationController(identify, transformationService) with ProtectorController {
 
-  def amendIndividual(identifier: String, index: Int): Action[JsValue] = addNewTransform[Protector](identifier, index, INDIVIDUAL_PROTECTOR)
+  def amendIndividual(identifier: String, index: Int): Action[JsValue] = addNewTransform[Protector](identifier, Some(index), INDIVIDUAL_PROTECTOR)
 
-  def amendBusiness(identifier: String, index: Int): Action[JsValue] = addNewTransform[ProtectorCompany](identifier, index, BUSINESS_PROTECTOR)
+  def amendBusiness(identifier: String, index: Int): Action[JsValue] = addNewTransform[ProtectorCompany](identifier, Some(index), BUSINESS_PROTECTOR)
 
-  override def transform[T](original: JsValue, amended: T, index: Int, `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
     AmendProtectorTransform(index, Json.toJson(amended), original, localDateService.now, `type`)
   }
 }

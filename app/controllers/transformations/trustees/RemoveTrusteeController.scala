@@ -43,6 +43,6 @@ class RemoveTrusteeController @Inject()(identify: IdentifierAction,
     } else {
       BUSINESS_TRUSTEE
     }
-    RemoveTrusteeTransform(remove.index, entity, remove.endDate, `type`)
+    RemoveTrusteeTransform(Some(remove.index), entity, remove.endDate, `type`)
   }
 }

@@ -17,16 +17,20 @@
 package controllers.transformations.trustees
 
 import models.requests.IdentifierRequest
+import play.api.Logging
 import play.api.libs.json.{JsPath, JsValue, Reads}
 import utils.Constants._
 
-trait TrusteeController {
+trait TrusteeController extends Logging {
 
-  def path(`type`: String, index: Int): JsPath = {
-    if (`type` == INDIVIDUAL_LEAD_TRUSTEE || `type` == BUSINESS_LEAD_TRUSTEE) {
-      ENTITIES \ LEAD_TRUSTEE
-    } else {
-      ENTITIES \ TRUSTEES \ index
+  def path(`type`: String, index: Option[Int]): JsPath = {
+    index match {
+      case Some(i) =>
+        logger.info(s"Index defined. Trustee is not the lead trustee and is of type ${`type`}.")
+        ENTITIES \ TRUSTEES \ i
+      case _ =>
+        logger.info(s"Index not defined. Trustee is the lead trustee and is of type ${`type`}.")
+        ENTITIES \ LEAD_TRUSTEE
     }
   }
 

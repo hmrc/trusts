@@ -36,15 +36,15 @@ class AmendSettlorController @Inject()(identify: IdentifierAction,
   extends AmendTransformationController(identify, transformationService) with SettlorController {
 
   def amendIndividual(identifier: String, index: Int): Action[JsValue] =
-    addNewTransform[Settlor](identifier, index, `type` = INDIVIDUAL_SETTLOR)
+    addNewTransform[Settlor](identifier, Some(index), INDIVIDUAL_SETTLOR)
 
   def amendBusiness(identifier: String, index: Int): Action[JsValue] =
-    addNewTransform[SettlorCompany](identifier, index, `type` = BUSINESS_SETTLOR)
+    addNewTransform[SettlorCompany](identifier, Some(index), BUSINESS_SETTLOR)
 
   def amendDeceased(identifier: String): Action[JsValue] =
-    addNewTransform[AmendDeceasedSettlor](identifier, `type` = DECEASED_SETTLOR)
+    addNewTransform[AmendDeceasedSettlor](identifier, None, DECEASED_SETTLOR)
 
-  override def transform[T](original: JsValue, amended: T, index: Int, `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
     AmendSettlorTransform(index, Json.toJson(amended), original, localDateService.now, `type`)
   }
 }

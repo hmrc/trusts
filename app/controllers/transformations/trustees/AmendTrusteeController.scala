@@ -69,18 +69,18 @@ class AmendTrusteeController @Inject()(identify: IdentifierAction,
   }
 
   def amendLeadIndividual(identifier: String)(implicit request: IdentifierRequest[JsValue]): Future[Result] =
-    addNewTransform[AmendedLeadTrusteeIndType](identifier, `type` = INDIVIDUAL_LEAD_TRUSTEE).apply(request)
+    addNewTransform[AmendedLeadTrusteeIndType](identifier, None, INDIVIDUAL_LEAD_TRUSTEE).apply(request)
 
   def amendLeadBusiness(identifier: String)(implicit request: IdentifierRequest[JsValue]): Future[Result] =
-    addNewTransform[AmendedLeadTrusteeOrgType](identifier, `type` = BUSINESS_LEAD_TRUSTEE).apply(request)
+    addNewTransform[AmendedLeadTrusteeOrgType](identifier, None, BUSINESS_LEAD_TRUSTEE).apply(request)
 
   def amendIndividual(identifier: String, index: Int)(implicit request: IdentifierRequest[JsValue]): Future[Result] =
-    addNewTransform[TrusteeIndividualType](identifier, index, `type` = INDIVIDUAL_TRUSTEE).apply(request)
+    addNewTransform[TrusteeIndividualType](identifier, Some(index), `type` = INDIVIDUAL_TRUSTEE).apply(request)
 
   def amendBusiness(identifier: String, index: Int)(implicit request: IdentifierRequest[JsValue]): Future[Result] =
-    addNewTransform[TrusteeOrgType](identifier, index, `type` = BUSINESS_TRUSTEE).apply(request)
+    addNewTransform[TrusteeOrgType](identifier, Some(index), `type` = BUSINESS_TRUSTEE).apply(request)
 
-  override def transform[T](original: JsValue, amended: T, index: Int, `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
     AmendTrusteeTransform(index, Json.toJson(amended), original, localDateService.now, `type`)
   }
 

@@ -16,16 +16,20 @@
 
 package controllers.transformations.settlors
 
+import play.api.Logging
 import play.api.libs.json.JsPath
 import utils.Constants._
 
-trait SettlorController {
+trait SettlorController extends Logging {
 
-  def path(`type`: String, index: Int): JsPath = {
-    if (`type` == DECEASED_SETTLOR) {
-      ENTITIES \ `type`
-    } else {
-      ENTITIES \ SETTLORS \ `type` \ index
+  def path(`type`: String, index: Option[Int]): JsPath = {
+    index match {
+      case Some(i) =>
+        logger.info(s"Index defined. Settlor is living and of type ${`type`}.")
+        ENTITIES \ SETTLORS \ `type` \ i
+      case _ =>
+        logger.info(s"Index not defined. Settlor is deceased.")
+        ENTITIES \ `type`
     }
   }
 }

@@ -16,10 +16,19 @@
 
 package controllers.transformations.protectors
 
+import play.api.Logging
 import play.api.libs.json.JsPath
 import utils.Constants._
 
-trait ProtectorController {
+trait ProtectorController extends Logging {
 
-  def path(`type`: String, index: Int): JsPath = ENTITIES \ PROTECTORS \ `type` \ index
+  def path(`type`: String, index: Option[Int]): JsPath = {
+    index match {
+      case Some(i) =>
+        ENTITIES \ PROTECTORS \ `type` \ i
+      case _ =>
+        logger.warn(s"Index should not be None for protector type ${`type`}.")
+        JsPath
+    }
+  }
 }

@@ -22,7 +22,7 @@ import java.time.LocalDate
 
 trait RemoveEntityTransform extends DeltaTransform with JsonOperations {
 
-  val index: Int
+  val index: Option[Int]
   val entity: JsValue
   val endDate: LocalDate
   val path: JsPath

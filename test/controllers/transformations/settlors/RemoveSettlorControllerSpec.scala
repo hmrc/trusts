@@ -110,7 +110,7 @@ class RemoveSettlorControllerSpec extends FreeSpec with MockitoSugar with ScalaF
 
         status(result) mustBe OK
 
-        val transform = RemoveSettlorTransform(index, Json.toJson(settlor), endDate, settlorType)
+        val transform = RemoveSettlorTransform(Some(index), Json.toJson(settlor), endDate, settlorType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -159,7 +159,7 @@ class RemoveSettlorControllerSpec extends FreeSpec with MockitoSugar with ScalaF
 
         status(result) mustBe OK
 
-        val transform = RemoveSettlorTransform(index, Json.toJson(settlor), endDate, settlorType)
+        val transform = RemoveSettlorTransform(Some(index), Json.toJson(settlor), endDate, settlorType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))

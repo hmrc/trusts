@@ -21,7 +21,7 @@ import transformers.AmendEntityTransform
 
 import java.time.LocalDate
 
-case class AmendAssetTransform(index: Int,
+case class AmendAssetTransform(index: Option[Int],
                                amended: JsValue,
                                original: JsValue,
                                endDate: LocalDate,

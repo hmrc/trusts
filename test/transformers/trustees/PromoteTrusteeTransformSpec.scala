@@ -67,7 +67,7 @@ class PromoteTrusteeTransformSpec extends FreeSpec with MustMatchers {
           nationality = Some("FR")
         )
 
-        PromoteTrusteeTransform(0, Json.toJson(newTrusteeInfo), trustee0Json, endDate, "trusteeInd")
+        PromoteTrusteeTransform(Some(0), Json.toJson(newTrusteeInfo), trustee0Json, endDate, "trusteeInd")
       }
 
       "successfully promote a trustee to lead and demote the existing lead trustee" in {
@@ -114,7 +114,7 @@ class PromoteTrusteeTransformSpec extends FreeSpec with MustMatchers {
           countryOfResidence = Some("DE")
         )
 
-        PromoteTrusteeTransform(1, Json.toJson(newTrusteeInfo), trustee1Json, endDate, "trusteeOrg")
+        PromoteTrusteeTransform(Some(1), Json.toJson(newTrusteeInfo), trustee1Json, endDate, "trusteeOrg")
       }
 
       "successfully promote a trustee to lead and demote the existing lead trustee" in {

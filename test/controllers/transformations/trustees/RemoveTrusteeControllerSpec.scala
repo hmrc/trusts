@@ -108,7 +108,7 @@ class RemoveTrusteeControllerSpec extends FreeSpec with MockitoSugar with ScalaF
 
         status(result) mustBe OK
 
-        val transform = RemoveTrusteeTransform(index, Json.toJson(trustee), endDate, "trusteeInd")
+        val transform = RemoveTrusteeTransform(Some(index), Json.toJson(trustee), endDate, "trusteeInd")
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -155,7 +155,7 @@ class RemoveTrusteeControllerSpec extends FreeSpec with MockitoSugar with ScalaF
 
         status(result) mustBe OK
 
-        val transform = RemoveTrusteeTransform(index, Json.toJson(trustee), endDate, "trusteeOrg")
+        val transform = RemoveTrusteeTransform(Some(index), Json.toJson(trustee), endDate, "trusteeOrg")
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))

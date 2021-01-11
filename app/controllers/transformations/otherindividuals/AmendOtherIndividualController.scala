@@ -34,9 +34,9 @@ class AmendOtherIndividualController @Inject()(identify: IdentifierAction,
                                               (implicit ec: ExecutionContext, cc: ControllerComponents)
   extends AmendTransformationController(identify, transformationService) with OtherIndividualController {
 
-  def amend(identifier: String, index: Int): Action[JsValue] = addNewTransform[NaturalPersonType](identifier, index)
+  def amend(identifier: String, index: Int): Action[JsValue] = addNewTransform[NaturalPersonType](identifier, Some(index))
 
-  override def transform[T](original: JsValue, amended: T, index: Int, `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
     AmendOtherIndividualTransform(index, Json.toJson(amended), original, localDateService.now)
   }
 }

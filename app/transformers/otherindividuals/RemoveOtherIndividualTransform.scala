@@ -21,7 +21,7 @@ import transformers.RemoveEntityTransform
 
 import java.time.LocalDate
 
-case class RemoveOtherIndividualTransform(index: Int,
+case class RemoveOtherIndividualTransform(index: Option[Int],
                                           entity: JsValue,
                                           endDate: LocalDate) extends OtherIndividualTransform with RemoveEntityTransform
 

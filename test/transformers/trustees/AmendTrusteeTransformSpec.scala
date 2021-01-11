@@ -71,7 +71,7 @@ class AmendTrusteeTransformSpec extends FreeSpec with MustMatchers  {
             |}
             |""".stripMargin)
 
-        val transformer = AmendTrusteeTransform(0, Json.toJson(newTrusteeInfo), originalTrusteeInfo, endDate, "trusteeInd")
+        val transformer = AmendTrusteeTransform(Some(0), Json.toJson(newTrusteeInfo), originalTrusteeInfo, endDate, "trusteeInd")
 
         val result = transformer.applyTransform(beforeJson).get
         result mustBe afterJson
@@ -113,7 +113,7 @@ class AmendTrusteeTransformSpec extends FreeSpec with MustMatchers  {
             |}
             |""".stripMargin)
 
-        val transformer = AmendTrusteeTransform(1, Json.toJson(newTrusteeInfo), originalTrusteeInfo, endDate, "trusteeOrg")
+        val transformer = AmendTrusteeTransform(Some(1), Json.toJson(newTrusteeInfo), originalTrusteeInfo, endDate, "trusteeOrg")
 
         val result = transformer.applyTransform(beforeJson).get
         result mustBe afterJson
@@ -138,7 +138,7 @@ class AmendTrusteeTransformSpec extends FreeSpec with MustMatchers  {
           nationality = None
         )
 
-        val transformer = AmendTrusteeTransform(0, Json.toJson(newTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
+        val transformer = AmendTrusteeTransform(None, Json.toJson(newTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
 
         val result = transformer.applyTransform(beforeJson).get
         result mustBe afterJson
@@ -160,7 +160,7 @@ class AmendTrusteeTransformSpec extends FreeSpec with MustMatchers  {
           countryOfResidence = None
         )
 
-        val transformer = AmendTrusteeTransform(0, Json.toJson(newTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeOrg")
+        val transformer = AmendTrusteeTransform(None, Json.toJson(newTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeOrg")
 
         val result = transformer.applyTransform(beforeJson).get
         result mustBe afterJson

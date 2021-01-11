@@ -23,9 +23,9 @@ import scala.util.{Failure, Try}
 
 trait TransformationController {
 
-  def path(`type`: String, index: Int): JsPath
+  def path(`type`: String, index: Option[Int]): JsPath
 
-  def findJson(json: JsValue, `type`: String, index: Int): Try[JsObject] = {
+  def findJson(json: JsValue, `type`: String, index: Option[Int]): Try[JsObject] = {
     val p = path(`type`, index)
     json.transform(p.json.pick).fold(
       _ => Failure(InternalServerErrorException(s"Could not locate json at $p")),

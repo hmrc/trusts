@@ -105,7 +105,7 @@ class AmendBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Sca
 
         status(result) mustBe OK
 
-        val transform = AmendBeneficiaryTransform(index, Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
+        val transform = AmendBeneficiaryTransform(Some(index), Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -186,7 +186,7 @@ class AmendBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Sca
 
         status(result) mustBe OK
 
-        val transform = AmendBeneficiaryTransform(index, Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
+        val transform = AmendBeneficiaryTransform(Some(index), Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -262,7 +262,7 @@ class AmendBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Sca
 
         status(result) mustBe OK
 
-        val transform = AmendBeneficiaryTransform(index, Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
+        val transform = AmendBeneficiaryTransform(Some(index), Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -338,7 +338,7 @@ class AmendBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Sca
 
         status(result) mustBe OK
 
-        val transform = AmendBeneficiaryTransform(index, Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
+        val transform = AmendBeneficiaryTransform(Some(index), Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -414,7 +414,7 @@ class AmendBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Sca
 
         status(result) mustBe OK
 
-        val transform = AmendBeneficiaryTransform(index, Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
+        val transform = AmendBeneficiaryTransform(Some(index), Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -490,7 +490,7 @@ class AmendBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Sca
 
         status(result) mustBe OK
 
-        val transform = AmendBeneficiaryTransform(index, Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
+        val transform = AmendBeneficiaryTransform(Some(index), Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -572,7 +572,7 @@ class AmendBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Sca
 
         status(result) mustBe OK
 
-        val transform = AmendBeneficiaryTransform(index, Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
+        val transform = AmendBeneficiaryTransform(Some(index), Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))

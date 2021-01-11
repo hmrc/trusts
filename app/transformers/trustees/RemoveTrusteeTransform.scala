@@ -22,7 +22,7 @@ import utils.Constants.{ENTITY_END, LINE_NUMBER}
 
 import java.time.LocalDate
 
-case class RemoveTrusteeTransform(index: Int,
+case class RemoveTrusteeTransform(index: Option[Int],
                                   entity: JsValue,
                                   endDate: LocalDate,
                                   `type`: String) extends TrusteeTransform with RemoveEntityTransform {

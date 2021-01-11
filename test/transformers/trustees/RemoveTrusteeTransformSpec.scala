@@ -36,7 +36,7 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers  {
 
       val transformedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-remove-trustee-ind.json")
 
-      val transformer = new RemoveTrusteeTransform(index = 0, originalTrusteeJson, endDate = endDate, "trusteeInd")
+      val transformer = new RemoveTrusteeTransform(index = Some(0), originalTrusteeJson, endDate = endDate, "trusteeInd")
 
       val result = transformer.applyTransform(cachedJson).get
 
@@ -51,7 +51,7 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers  {
 
       val transformedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-transformed-trustee-at-tail-removed.json")
 
-      val transformer = new RemoveTrusteeTransform(index = 1, originalTrusteeJson, endDate, "trusteeInd")
+      val transformer = new RemoveTrusteeTransform(index = Some(1), originalTrusteeJson, endDate, "trusteeInd")
 
       val result = transformer.applyTransform(cachedJson).get
 
@@ -80,7 +80,7 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers  {
           |          }
           |""".stripMargin)
 
-      val transformer = new RemoveTrusteeTransform(index = 2, trustee, endDate, "trusteeInd")
+      val transformer = new RemoveTrusteeTransform(index = Some(2), trustee, endDate, "trusteeInd")
 
       val result = transformer.applyTransform(cachedJson).get
 
@@ -93,7 +93,7 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers  {
       // 4 trustees in the list, last index is 3
       val cachedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-multiple-trustees.json")
 
-      val transformer = new RemoveTrusteeTransform(index = 4, originalTrusteeJson, endDate, "trusteeInd")
+      val transformer = new RemoveTrusteeTransform(index = Some(4), originalTrusteeJson, endDate, "trusteeInd")
 
       val result = transformer.applyTransform(cachedJson).get
 
@@ -110,10 +110,10 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers  {
       val transformedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-multiple-trustees-removed.json")
 
       // remove trustee individual
-      val firstTrusteeRemoved = new RemoveTrusteeTransform(index = 0, originalTrusteeJson, endDate, "trusteeInd").applyTransform(cachedJson).get
+      val firstTrusteeRemoved = new RemoveTrusteeTransform(index = Some(0), originalTrusteeJson, endDate, "trusteeInd").applyTransform(cachedJson).get
 
       // remove trustee organisation
-      val result = new RemoveTrusteeTransform(1, originalTrusteeJson, endDate, "trusteeOrg").applyTransform(firstTrusteeRemoved).get
+      val result = new RemoveTrusteeTransform(Some(1), originalTrusteeJson, endDate, "trusteeOrg").applyTransform(firstTrusteeRemoved).get
 
       result mustBe transformedJson
 
@@ -161,8 +161,8 @@ class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers  {
 
       val transformedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-multiple-trustees-removed-declared.json")
 
-      val transform1 = new RemoveTrusteeTransform(1, removeKnownTrusteeToEtmp, endDate, "trusteeInd")
-      val transform2 = new RemoveTrusteeTransform(1, removeNewlyAddedTrustee, endDate, "trusteeOrg")
+      val transform1 = new RemoveTrusteeTransform(Some(1), removeKnownTrusteeToEtmp, endDate, "trusteeInd")
+      val transform2 = new RemoveTrusteeTransform(Some(1), removeNewlyAddedTrustee, endDate, "trusteeOrg")
 
       val declaredResult = for {
         result <- transform1.applyTransform(cachedEtmp)

@@ -105,7 +105,7 @@ class RemoveOtherIndividualControllerSpec extends FreeSpec with MockitoSugar wit
 
       status(result) mustBe OK
 
-      val transform = RemoveOtherIndividualTransform(index, Json.toJson(otherIndividual), endDate)
+      val transform = RemoveOtherIndividualTransform(Some(index), Json.toJson(otherIndividual), endDate)
 
       verify(mockTransformationService)
         .addNewTransform(equalTo(utr), any(), equalTo(transform))

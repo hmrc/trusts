@@ -21,7 +21,7 @@ import transformers.AmendEntityTransform
 
 import java.time.LocalDate
 
-case class AmendOtherIndividualTransform(index: Int,
+case class AmendOtherIndividualTransform(index: Option[Int],
                                          amended: JsValue,
                                          original: JsValue,
                                          endDate: LocalDate) extends OtherIndividualTransform with AmendEntityTransform

@@ -108,7 +108,7 @@ class RemoveBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Sc
 
         status(result) mustBe OK
 
-        val transform = RemoveBeneficiaryTransform(index, Json.toJson(beneficiary), endDate, beneficiaryType)
+        val transform = RemoveBeneficiaryTransform(Some(index), Json.toJson(beneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -162,7 +162,7 @@ class RemoveBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Sc
 
         status(result) mustBe OK
 
-        val transform = RemoveBeneficiaryTransform(index, Json.toJson(beneficiary), endDate, beneficiaryType)
+        val transform = RemoveBeneficiaryTransform(Some(index), Json.toJson(beneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -211,7 +211,7 @@ class RemoveBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Sc
 
         status(result) mustBe OK
 
-        val transform = RemoveBeneficiaryTransform(index, Json.toJson(beneficiary), endDate, beneficiaryType)
+        val transform = RemoveBeneficiaryTransform(Some(index), Json.toJson(beneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -260,7 +260,7 @@ class RemoveBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Sc
 
         status(result) mustBe OK
 
-        val transform = RemoveBeneficiaryTransform(index, Json.toJson(beneficiary), endDate, beneficiaryType)
+        val transform = RemoveBeneficiaryTransform(Some(index), Json.toJson(beneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -309,7 +309,7 @@ class RemoveBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Sc
 
         status(result) mustBe OK
 
-        val transform = RemoveBeneficiaryTransform(index, Json.toJson(beneficiary), endDate, beneficiaryType)
+        val transform = RemoveBeneficiaryTransform(Some(index), Json.toJson(beneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -358,7 +358,7 @@ class RemoveBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Sc
 
         status(result) mustBe OK
 
-        val transform = RemoveBeneficiaryTransform(index, Json.toJson(beneficiary), endDate, beneficiaryType)
+        val transform = RemoveBeneficiaryTransform(Some(index), Json.toJson(beneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -413,7 +413,7 @@ class RemoveBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Sc
 
         status(result) mustBe OK
 
-        val transform = RemoveBeneficiaryTransform(index, Json.toJson(beneficiary), endDate, beneficiaryType)
+        val transform = RemoveBeneficiaryTransform(Some(index), Json.toJson(beneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))

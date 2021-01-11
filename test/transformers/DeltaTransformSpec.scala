@@ -206,30 +206,30 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
       val addTrustBeneficiaryTransform = AddBeneficiaryTransform(Json.toJson(newTrustBeneficiary), "trust")
 
-      val amendLeadTrusteeIndTransform = AmendTrusteeTransform(0, Json.toJson(newLeadTrustee), Json.obj(), LocalDate.now(), "leadTrusteeInd")
+      val amendLeadTrusteeIndTransform = AmendTrusteeTransform(None, Json.toJson(newLeadTrustee), Json.obj(), LocalDate.now(), "leadTrusteeInd")
 
-      val amendLeadTrusteeOrgTransform = AmendTrusteeTransform(0, Json.toJson(newLeadTrusteeOrg), Json.obj(), LocalDate.now(), "leadTrusteeOrg")
+      val amendLeadTrusteeOrgTransform = AmendTrusteeTransform(None, Json.toJson(newLeadTrusteeOrg), Json.obj(), LocalDate.now(), "leadTrusteeOrg")
 
       val addTrusteeIndTransform = AddTrusteeTransform(Json.toJson(newTrusteeInd), "trusteeInd")
 
       val addTrusteeOrgTransform = AddTrusteeTransform(Json.toJson(newTrusteeOrg), "trusteeOrg")
 
-      val removeTrusteeTransform = RemoveTrusteeTransform(index = 0, Json.obj(), endDate = LocalDate.parse("2010-01-01"), "trusteeInd")
+      val removeTrusteeTransform = RemoveTrusteeTransform(index = Some(0), Json.obj(), endDate = LocalDate.parse("2010-01-01"), "trusteeInd")
 
-      val promoteTrusteeIndTransform = PromoteTrusteeTransform(2, Json.toJson(newLeadTrustee), Json.obj(), LocalDate.parse("2012-02-06"), "trusteeInd")
+      val promoteTrusteeIndTransform = PromoteTrusteeTransform(Some(2), Json.toJson(newLeadTrustee), Json.obj(), LocalDate.parse("2012-02-06"), "trusteeInd")
 
-      val promoteTrusteeOrgTransform = PromoteTrusteeTransform(2, Json.toJson(newLeadTrusteeOrg), Json.obj(), LocalDate.parse("2012-02-06"), "trusteeOrg")
+      val promoteTrusteeOrgTransform = PromoteTrusteeTransform(Some(2), Json.toJson(newLeadTrusteeOrg), Json.obj(), LocalDate.parse("2012-02-06"), "trusteeOrg")
 
-      val amendTrusteeIndTransform = AmendTrusteeTransform(0, Json.toJson(newTrusteeInd), Json.obj(), currentDate, "trusteeInd")
-      val amendTrusteeOrgTransform = AmendTrusteeTransform(0, Json.toJson(newTrusteeOrg), Json.obj(), currentDate, "trusteeOrg")
+      val amendTrusteeIndTransform = AmendTrusteeTransform(Some(0), Json.toJson(newTrusteeInd), Json.obj(), currentDate, "trusteeInd")
+      val amendTrusteeOrgTransform = AmendTrusteeTransform(Some(0), Json.toJson(newTrusteeOrg), Json.obj(), currentDate, "trusteeOrg")
 
-      val amendCharityBeneficiaryTransform = AmendBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate, "charity")
-      val amendCompanyBeneficiaryTransform = AmendBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate, "company")
-      val amendOtherBeneficiaryTransform = AmendBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate, "other")
-      val amendTrustBeneficiaryTransform = AmendBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate, "trust")
-      val amendUnidentifiedBeneficiaryTransform = AmendBeneficiaryTransform(0, JsString("New Description"), genericOriginalData, amendedDate, "unidentified")
+      val amendCharityBeneficiaryTransform = AmendBeneficiaryTransform(Some(0), genericAmendedData, genericOriginalData, amendedDate, "charity")
+      val amendCompanyBeneficiaryTransform = AmendBeneficiaryTransform(Some(0), genericAmendedData, genericOriginalData, amendedDate, "company")
+      val amendOtherBeneficiaryTransform = AmendBeneficiaryTransform(Some(0), genericAmendedData, genericOriginalData, amendedDate, "other")
+      val amendTrustBeneficiaryTransform = AmendBeneficiaryTransform(Some(0), genericAmendedData, genericOriginalData, amendedDate, "trust")
+      val amendUnidentifiedBeneficiaryTransform = AmendBeneficiaryTransform(Some(0), JsString("New Description"), genericOriginalData, amendedDate, "unidentified")
 
-      val amendIndividualBenTransform = AmendBeneficiaryTransform(0, Json.toJson(individualBeneficiary), Json.obj(), LocalDate.parse("2020-03-25"), "individualDetails")
+      val amendIndividualBenTransform = AmendBeneficiaryTransform(Some(0), Json.toJson(individualBeneficiary), Json.obj(), LocalDate.parse("2020-03-25"), "individualDetails")
 
       val addUnidentifiedBeneficiaryTransform = AddBeneficiaryTransform(
         Json.toJson(UnidentifiedType(None, None, "desc", None, None, LocalDate.parse("2010-10-10"), None)),
@@ -260,30 +260,30 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
       val addLargeBeneficiaryTransform = AddBeneficiaryTransform(Json.toJson(newLargeBeneficiary), "large")
 
-      val amendLargeBeneficiaryTransform = AmendBeneficiaryTransform(0, Json.toJson(newLargeBeneficiary), Json.obj(), currentDate, "large")
+      val amendLargeBeneficiaryTransform = AmendBeneficiaryTransform(Some(0), Json.toJson(newLargeBeneficiary), Json.obj(), currentDate, "large")
 
-      val removeBeneficiariesTransform = RemoveBeneficiaryTransform(3, Json.toJson(individualBeneficiary), LocalDate.parse("2012-02-06"), "unidentified")
+      val removeBeneficiariesTransform = RemoveBeneficiaryTransform(Some(3), Json.toJson(individualBeneficiary), LocalDate.parse("2012-02-06"), "unidentified")
 
-      val amendIndividualSettlorTransform = AmendSettlorTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2020-03-25"), "settlor")
+      val amendIndividualSettlorTransform = AmendSettlorTransform(Some(0), Json.obj(), Json.obj(), LocalDate.parse("2020-03-25"), "settlor")
 
-      val amendBusinessSettlorTransform = AmendSettlorTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2020-03-25"), "settlorCompany")
+      val amendBusinessSettlorTransform = AmendSettlorTransform(Some(0), Json.obj(), Json.obj(), LocalDate.parse("2020-03-25"), "settlorCompany")
 
-      val removeSettlorsTransform = RemoveSettlorTransform(3, Json.toJson(settlor), LocalDate.parse("2012-02-06"), "settlor")
+      val removeSettlorsTransform = RemoveSettlorTransform(Some(3), Json.toJson(settlor), LocalDate.parse("2012-02-06"), "settlor")
 
-      val amendDeceasedSettlorTransform = AmendSettlorTransform(0, Json.obj(), Json.obj(), LocalDate.now(), "deceased")
+      val amendDeceasedSettlorTransform = AmendSettlorTransform(None, Json.obj(), Json.obj(), LocalDate.now(), "deceased")
 
       val addIndividualSettlorTransform = AddSettlorTransform(Json.toJson(settlor), "settlor")
 
       val addIndividualProtectorTransform = AddProtectorTransform(Json.toJson(protector), "protector")
 
-      val removeProtectorsTransform = RemoveProtectorTransform(3, Json.toJson(protector), LocalDate.parse("2012-02-06"), "protector")
+      val removeProtectorsTransform = RemoveProtectorTransform(Some(3), Json.toJson(protector), LocalDate.parse("2012-02-06"), "protector")
       val addCompanyProtectorTransform = AddProtectorTransform(Json.toJson(newCompanyProtector), "protectorCompany")
 
-      val amendBusinessProtectorTransform = AmendProtectorTransform(0, Json.toJson(newCompanyProtector), Json.obj(), LocalDate.parse("2020-03-25"), "protectorCompany")
+      val amendBusinessProtectorTransform = AmendProtectorTransform(Some(0), Json.toJson(newCompanyProtector), Json.obj(), LocalDate.parse("2020-03-25"), "protectorCompany")
 
-      val removeOtherIndividualsTransform = RemoveOtherIndividualTransform(3, Json.toJson(otherIndividual), LocalDate.parse("2012-02-06"))
+      val removeOtherIndividualsTransform = RemoveOtherIndividualTransform(Some(3), Json.toJson(otherIndividual), LocalDate.parse("2012-02-06"))
 
-      val amendOtherIndividualTransform = AmendOtherIndividualTransform(0, Json.toJson(otherIndividual), Json.obj(), LocalDate.parse("2020-03-25"))
+      val amendOtherIndividualTransform = AmendOtherIndividualTransform(Some(0), Json.toJson(otherIndividual), Json.obj(), LocalDate.parse("2020-03-25"))
 
       val addOtherIndividualTransform = AddOtherIndividualTransform(Json.toJson(otherIndividual))
 

@@ -16,10 +16,19 @@
 
 package controllers.transformations.otherindividuals
 
+import play.api.Logging
 import play.api.libs.json.JsPath
 import utils.Constants._
 
-trait OtherIndividualController {
+trait OtherIndividualController extends Logging {
 
-  def path(`type`: String, index: Int): JsPath =  ENTITIES \ OTHER_INDIVIDUALS \ index
+  def path(`type`: String, index: Option[Int]): JsPath = {
+    index match {
+      case Some(i) =>
+        ENTITIES \ OTHER_INDIVIDUALS \ i
+      case _ =>
+        logger.warn(s"Index should not be None for ${`type`}.")
+        JsPath
+    }
+  }
 }

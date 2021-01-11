@@ -78,7 +78,7 @@ class AmendProtectorTransformSpec extends FreeSpec with MustMatchers {
               |}
               |""".stripMargin)
 
-          val transformer = AmendProtectorTransform(1, Json.toJson(amended), original, LocalDate.parse("2020-03-25"), `type`)
+          val transformer = AmendProtectorTransform(Some(1), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), `type`)
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -134,7 +134,7 @@ class AmendProtectorTransformSpec extends FreeSpec with MustMatchers {
               |}
               |""".stripMargin)
 
-          val transformer = AmendProtectorTransform(1, Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
+          val transformer = AmendProtectorTransform(Some(1), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
 
           val applied = transformer.applyTransform(beforeJson).get
           val result = transformer.applyDeclarationTransform(applied).get
@@ -172,7 +172,7 @@ class AmendProtectorTransformSpec extends FreeSpec with MustMatchers {
               |}
               |""".stripMargin)
 
-          val transformer = AmendProtectorTransform(2, Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
+          val transformer = AmendProtectorTransform(Some(2), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
 
           val applied = transformer.applyTransform(beforeJson).get
           val result = transformer.applyDeclarationTransform(applied).get
@@ -219,7 +219,7 @@ class AmendProtectorTransformSpec extends FreeSpec with MustMatchers {
               |}
               |""".stripMargin)
 
-          val transformer = AmendProtectorTransform(1, Json.toJson(amended), original, LocalDate.parse("2020-03-25"), `type`)
+          val transformer = AmendProtectorTransform(Some(1), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), `type`)
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -263,7 +263,7 @@ class AmendProtectorTransformSpec extends FreeSpec with MustMatchers {
               |}
               |""".stripMargin)
 
-          val transformer = AmendProtectorTransform(1, Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
+          val transformer = AmendProtectorTransform(Some(1), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
 
           val applied = transformer.applyTransform(beforeJson).get
           val result = transformer.applyDeclarationTransform(applied).get
@@ -295,7 +295,7 @@ class AmendProtectorTransformSpec extends FreeSpec with MustMatchers {
               |}
               |""".stripMargin)
 
-          val transformer = AmendProtectorTransform(2, Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
+          val transformer = AmendProtectorTransform(Some(2), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
 
           val applied = transformer.applyTransform(beforeJson).get
           val result = transformer.applyDeclarationTransform(applied).get

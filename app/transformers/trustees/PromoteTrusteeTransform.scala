@@ -23,7 +23,7 @@ import utils.Constants._
 
 import java.time.LocalDate
 
-case class PromoteTrusteeTransform(index: Int,
+case class PromoteTrusteeTransform(index: Option[Int],
                                    amended: JsValue,
                                    original: JsValue,
                                    endDate: LocalDate,

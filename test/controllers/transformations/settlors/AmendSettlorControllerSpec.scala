@@ -109,7 +109,7 @@ class AmendSettlorControllerSpec extends FreeSpec with MockitoSugar with ScalaFu
 
         status(result) mustBe OK
 
-        val transform = AmendSettlorTransform(index, Json.toJson(amendedSettlor), Json.toJson(originalSettlor), endDate, settlorType)
+        val transform = AmendSettlorTransform(Some(index), Json.toJson(amendedSettlor), Json.toJson(originalSettlor), endDate, settlorType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -185,7 +185,7 @@ class AmendSettlorControllerSpec extends FreeSpec with MockitoSugar with ScalaFu
 
         status(result) mustBe OK
 
-        val transform = AmendSettlorTransform(index, Json.toJson(amendedSettlor), Json.toJson(originalSettlor), endDate, settlorType)
+        val transform = AmendSettlorTransform(Some(index), Json.toJson(amendedSettlor), Json.toJson(originalSettlor), endDate, settlorType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -273,7 +273,7 @@ class AmendSettlorControllerSpec extends FreeSpec with MockitoSugar with ScalaFu
 
         status(result) mustBe OK
 
-          val transform = AmendSettlorTransform(0, Json.toJson(amendedSettlor), Json.toJson(originalSettlor), endDate, settlorType)
+          val transform = AmendSettlorTransform(None, Json.toJson(amendedSettlor), Json.toJson(originalSettlor), endDate, settlorType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))

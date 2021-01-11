@@ -21,7 +21,7 @@ import transformers.RemoveEntityTransform
 
 import java.time.LocalDate
 
-case class RemoveSettlorTransform(index: Int,
+case class RemoveSettlorTransform(index: Option[Int],
                                   entity: JsValue,
                                   endDate: LocalDate,
                                   `type`: String) extends SettlorTransform with RemoveEntityTransform

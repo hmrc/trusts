@@ -66,7 +66,7 @@ class AmendSettlorTransformSpec extends FreeSpec with MustMatchers {
               |}
               |""".stripMargin)
 
-          val transformer = AmendSettlorTransform(0, Json.toJson(amended), original, LocalDate.parse("2020-03-25"), `type`)
+          val transformer = AmendSettlorTransform(Some(0), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), `type`)
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -107,7 +107,7 @@ class AmendSettlorTransformSpec extends FreeSpec with MustMatchers {
               |}
               |""".stripMargin)
 
-          val transformer = AmendSettlorTransform(0, Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
+          val transformer = AmendSettlorTransform(Some(0), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
 
           val applied = transformer.applyTransform(beforeJson).get
           val result = transformer.applyDeclarationTransform(applied).get
@@ -143,7 +143,7 @@ class AmendSettlorTransformSpec extends FreeSpec with MustMatchers {
               |}
               |""".stripMargin)
 
-          val transformer = AmendSettlorTransform(1, Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
+          val transformer = AmendSettlorTransform(Some(1), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
 
           val applied = transformer.applyTransform(beforeJson).get
           val result = transformer.applyDeclarationTransform(applied).get
@@ -185,7 +185,7 @@ class AmendSettlorTransformSpec extends FreeSpec with MustMatchers {
               |}
               |""".stripMargin)
 
-          val transformer = AmendSettlorTransform(0, Json.toJson(amended), original, LocalDate.parse("2020-03-25"), `type`)
+          val transformer = AmendSettlorTransform(Some(0), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), `type`)
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -221,7 +221,7 @@ class AmendSettlorTransformSpec extends FreeSpec with MustMatchers {
               |}
               |""".stripMargin)
 
-          val transformer = AmendSettlorTransform(0, Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
+          val transformer = AmendSettlorTransform(Some(0), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
 
           val applied = transformer.applyTransform(beforeJson).get
           val result = transformer.applyDeclarationTransform(applied).get
@@ -253,7 +253,7 @@ class AmendSettlorTransformSpec extends FreeSpec with MustMatchers {
               |}
               |""".stripMargin)
 
-          val transformer = AmendSettlorTransform(1, Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
+          val transformer = AmendSettlorTransform(Some(1), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
 
           val applied = transformer.applyTransform(beforeJson).get
           val result = transformer.applyDeclarationTransform(applied).get
@@ -299,7 +299,7 @@ class AmendSettlorTransformSpec extends FreeSpec with MustMatchers {
               |}
               |""".stripMargin)
 
-          val transformer = AmendSettlorTransform(0, Json.toJson(amended), original, LocalDate.now(), `type`)
+          val transformer = AmendSettlorTransform(None, Json.toJson(amended), original, LocalDate.now(), `type`)
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -339,7 +339,7 @@ class AmendSettlorTransformSpec extends FreeSpec with MustMatchers {
               |}
               |""".stripMargin)
 
-          val transformer = AmendSettlorTransform(0, Json.toJson(amended), original, LocalDate.now(), `type`)
+          val transformer = AmendSettlorTransform(None, Json.toJson(amended), original, LocalDate.now(), `type`)
 
           val applied = transformer.applyTransform(beforeJson).get
           val result = transformer.applyDeclarationTransform(applied).get

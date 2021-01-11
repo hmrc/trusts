@@ -21,7 +21,7 @@ import transformers.RemoveEntityTransform
 
 import java.time.LocalDate
 
-case class RemoveAssetTransform(index: Int,
+case class RemoveAssetTransform(index: Option[Int],
                                 entity: JsValue,
                                 endDate: LocalDate,
                                 `type`: String) extends AssetTransform with RemoveEntityTransform {

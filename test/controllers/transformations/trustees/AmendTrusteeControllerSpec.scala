@@ -110,7 +110,7 @@ class AmendTrusteeControllerSpec extends FreeSpec with MockitoSugar with ScalaFu
 
         status(result) mustBe OK
 
-        val transform = AmendTrusteeTransform(index, Json.toJson(amendedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
+        val transform = AmendTrusteeTransform(Some(index), Json.toJson(amendedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -186,7 +186,7 @@ class AmendTrusteeControllerSpec extends FreeSpec with MockitoSugar with ScalaFu
 
         status(result) mustBe OK
 
-        val transform = AmendTrusteeTransform(index, Json.toJson(amendedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
+        val transform = AmendTrusteeTransform(Some(index), Json.toJson(amendedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -274,7 +274,7 @@ class AmendTrusteeControllerSpec extends FreeSpec with MockitoSugar with ScalaFu
 
         status(result) mustBe OK
 
-        val transform = AmendTrusteeTransform(0, Json.toJson(amendedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
+        val transform = AmendTrusteeTransform(None, Json.toJson(amendedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -359,7 +359,7 @@ class AmendTrusteeControllerSpec extends FreeSpec with MockitoSugar with ScalaFu
 
         status(result) mustBe OK
 
-        val transform = AmendTrusteeTransform(0, Json.toJson(amendedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
+        val transform = AmendTrusteeTransform(None, Json.toJson(amendedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))

@@ -110,7 +110,7 @@ class RemoveProtectorControllerSpec extends FreeSpec with MockitoSugar with Scal
 
         status(result) mustBe OK
 
-        val transform = RemoveProtectorTransform(index, Json.toJson(protector), endDate, protectorType)
+        val transform = RemoveProtectorTransform(Some(index), Json.toJson(protector), endDate, protectorType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -157,7 +157,7 @@ class RemoveProtectorControllerSpec extends FreeSpec with MockitoSugar with Scal
 
         status(result) mustBe OK
 
-        val transform = RemoveProtectorTransform(index, Json.toJson(protector), endDate, protectorType)
+        val transform = RemoveProtectorTransform(Some(index), Json.toJson(protector), endDate, protectorType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))

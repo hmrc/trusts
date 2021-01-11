@@ -36,6 +36,6 @@ class RemoveSettlorController @Inject()(identify: IdentifierAction,
   def remove(identifier: String): Action[JsValue] = addNewTransform[RemoveSettlor](identifier)
 
   override def transform[T <: Remove](remove: T, entity: JsValue): DeltaTransform = {
-    RemoveSettlorTransform(remove.index, entity, remove.endDate, remove.`type`)
+    RemoveSettlorTransform(Some(remove.index), entity, remove.endDate, remove.`type`)
   }
 }

@@ -36,6 +36,6 @@ class RemoveProtectorController @Inject()(identify: IdentifierAction,
   def remove(identifier: String): Action[JsValue] = addNewTransform[RemoveProtector](identifier)
 
   override def transform[T <: Remove](remove: T, entity: JsValue): DeltaTransform = {
-    RemoveProtectorTransform(remove.index, entity, remove.endDate, remove.`type`)
+    RemoveProtectorTransform(Some(remove.index), entity, remove.endDate, remove.`type`)
   }
 }

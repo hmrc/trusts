@@ -36,6 +36,6 @@ class RemoveAssetController @Inject()(identify: IdentifierAction,
   def remove(identifier: String): Action[JsValue] = addNewTransform[RemoveAsset](identifier)
 
   override def transform[T <: Remove](remove: T, entity: JsValue): DeltaTransform = {
-    RemoveAssetTransform(remove.index, entity, remove.endDate, remove.`type`)
+    RemoveAssetTransform(Some(remove.index), entity, remove.endDate, remove.`type`)
   }
 }

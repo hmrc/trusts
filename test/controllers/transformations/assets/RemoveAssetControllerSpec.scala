@@ -102,7 +102,7 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
 
         status(result) mustBe OK
 
-        val transform = RemoveAssetTransform(index, Json.toJson(asset), endDate, assetType)
+        val transform = RemoveAssetTransform(Some(index), Json.toJson(asset), endDate, assetType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -146,7 +146,7 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
 
         status(result) mustBe OK
 
-        val transform = RemoveAssetTransform(index, Json.toJson(asset), endDate, assetType)
+        val transform = RemoveAssetTransform(Some(index), Json.toJson(asset), endDate, assetType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -192,7 +192,7 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
 
         status(result) mustBe OK
 
-        val transform = RemoveAssetTransform(index, Json.toJson(asset), endDate, assetType)
+        val transform = RemoveAssetTransform(Some(index), Json.toJson(asset), endDate, assetType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -237,7 +237,7 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
 
         status(result) mustBe OK
 
-        val transform = RemoveAssetTransform(index, Json.toJson(asset), endDate, assetType)
+        val transform = RemoveAssetTransform(Some(index), Json.toJson(asset), endDate, assetType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -280,7 +280,7 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
 
         status(result) mustBe OK
 
-        val transform = RemoveAssetTransform(index, Json.toJson(asset), endDate, assetType)
+        val transform = RemoveAssetTransform(Some(index), Json.toJson(asset), endDate, assetType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -322,7 +322,7 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
 
         status(result) mustBe OK
 
-        val transform = RemoveAssetTransform(index, Json.toJson(asset), endDate, assetType)
+        val transform = RemoveAssetTransform(Some(index), Json.toJson(asset), endDate, assetType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -368,7 +368,7 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
 
         status(result) mustBe OK
 
-        val transform = RemoveAssetTransform(index, Json.toJson(asset), endDate, assetType)
+        val transform = RemoveAssetTransform(Some(index), Json.toJson(asset), endDate, assetType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))

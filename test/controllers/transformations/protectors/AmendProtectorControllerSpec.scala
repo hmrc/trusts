@@ -109,7 +109,7 @@ class AmendProtectorControllerSpec extends FreeSpec with MockitoSugar with Scala
 
         status(result) mustBe OK
 
-        val transform = AmendProtectorTransform(index, Json.toJson(amendedProtector), Json.toJson(originalProtector), endDate, protectorType)
+        val transform = AmendProtectorTransform(Some(index), Json.toJson(amendedProtector), Json.toJson(originalProtector), endDate, protectorType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -183,7 +183,7 @@ class AmendProtectorControllerSpec extends FreeSpec with MockitoSugar with Scala
 
         status(result) mustBe OK
 
-        val transform = AmendProtectorTransform(index, Json.toJson(amendedProtector), Json.toJson(originalProtector), endDate, protectorType)
+        val transform = AmendProtectorTransform(Some(index), Json.toJson(amendedProtector), Json.toJson(originalProtector), endDate, protectorType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))

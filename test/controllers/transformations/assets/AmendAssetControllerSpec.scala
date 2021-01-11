@@ -101,7 +101,7 @@ class AmendAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFutu
 
         status(result) mustBe OK
 
-        val transform = AmendAssetTransform(index, Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
+        val transform = AmendAssetTransform(Some(index), Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -172,7 +172,7 @@ class AmendAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFutu
 
         status(result) mustBe OK
 
-        val transform = AmendAssetTransform(index, Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
+        val transform = AmendAssetTransform(Some(index), Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -245,7 +245,7 @@ class AmendAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFutu
 
         status(result) mustBe OK
 
-        val transform = AmendAssetTransform(index, Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
+        val transform = AmendAssetTransform(Some(index), Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -317,7 +317,7 @@ class AmendAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFutu
 
         status(result) mustBe OK
 
-        val transform = AmendAssetTransform(index, Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
+        val transform = AmendAssetTransform(Some(index), Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -387,7 +387,7 @@ class AmendAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFutu
 
         status(result) mustBe OK
 
-        val transform = AmendAssetTransform(index, Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
+        val transform = AmendAssetTransform(Some(index), Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -456,7 +456,7 @@ class AmendAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFutu
 
         status(result) mustBe OK
 
-        val transform = AmendAssetTransform(index, Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
+        val transform = AmendAssetTransform(Some(index), Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -529,7 +529,7 @@ class AmendAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFutu
 
         status(result) mustBe OK
 
-        val transform = AmendAssetTransform(index, Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
+        val transform = AmendAssetTransform(Some(index), Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))

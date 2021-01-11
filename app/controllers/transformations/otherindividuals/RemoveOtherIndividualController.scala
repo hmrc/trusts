@@ -36,6 +36,6 @@ class RemoveOtherIndividualController @Inject()(identify: IdentifierAction,
   def remove(identifier: String): Action[JsValue] = addNewTransform[RemoveOtherIndividual](identifier)
 
   override def transform[T <: Remove](remove: T, entity: JsValue): DeltaTransform = {
-    RemoveOtherIndividualTransform(remove.index, entity, remove.endDate)
+    RemoveOtherIndividualTransform(Some(remove.index), entity, remove.endDate)
   }
 }

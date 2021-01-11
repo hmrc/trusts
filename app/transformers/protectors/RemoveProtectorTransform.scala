@@ -21,7 +21,7 @@ import transformers.RemoveEntityTransform
 
 import java.time.LocalDate
 
-case class RemoveProtectorTransform(index: Int,
+case class RemoveProtectorTransform(index: Option[Int],
                                     entity: JsValue,
                                     endDate: LocalDate,
                                     `type`: String) extends ProtectorTransform with RemoveEntityTransform

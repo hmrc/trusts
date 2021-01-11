@@ -22,8 +22,10 @@ import utils.Constants._
 trait TrusteeTransform {
   val `type`: String
   val path: JsPath = ENTITIES \ TRUSTEES
+
   def isLeadTrustee: Boolean = isIndividualLeadTrustee || isBusinessLeadTrustee
-  def isIndividualLeadTrustee: Boolean = `type` == INDIVIDUAL_LEAD_TRUSTEE
-  def isBusinessLeadTrustee: Boolean = `type` == BUSINESS_LEAD_TRUSTEE
+  private def isIndividualLeadTrustee: Boolean = `type` == INDIVIDUAL_LEAD_TRUSTEE
+  private def isBusinessLeadTrustee: Boolean = `type` == BUSINESS_LEAD_TRUSTEE
+
   val leadTrusteePath: JsPath = ENTITIES \ LEAD_TRUSTEE
 }

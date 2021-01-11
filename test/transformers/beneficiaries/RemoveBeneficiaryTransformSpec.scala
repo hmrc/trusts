@@ -55,8 +55,8 @@ class RemoveBeneficiaryTransformSpec extends FreeSpec with MustMatchers with Sca
 
   "Remove Beneficiary Transforms should round trip through JSON as part of Composed Transform" in {
     val OUT = ComposedDeltaTransform(Seq(
-      RemoveBeneficiaryTransform(56, beneficiaryJson("Blah Blah Blah"), LocalDate.of(1563, 10, 23), "unidentified"),
-      RemoveBeneficiaryTransform(12, beneficiaryJson("Foo"), LocalDate.of(2317, 12, 21),  "individualDetails")
+      RemoveBeneficiaryTransform(Some(56), beneficiaryJson("Blah Blah Blah"), LocalDate.of(1563, 10, 23), "unidentified"),
+      RemoveBeneficiaryTransform(Some(12), beneficiaryJson("Foo"), LocalDate.of(2317, 12, 21),  "individualDetails")
     ))
 
     Json.toJson(OUT).validate[ComposedDeltaTransform] match {
@@ -78,7 +78,7 @@ class RemoveBeneficiaryTransformSpec extends FreeSpec with MustMatchers with Sca
         beneficiaryJson("Three")
       ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiaryTransform(1, Json.obj(), LocalDate.of(2018, 4, 21), "unidentified")))
+      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiaryTransform(Some(1), Json.obj(), LocalDate.of(2018, 4, 21), "unidentified")))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe expectedOutput
@@ -93,7 +93,7 @@ class RemoveBeneficiaryTransformSpec extends FreeSpec with MustMatchers with Sca
         beneficiaryJson("Three")
       ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiaryTransform(10, Json.obj(), LocalDate.of(2018, 4, 21), "unidentified")))
+      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiaryTransform(Some(10), Json.obj(), LocalDate.of(2018, 4, 21), "unidentified")))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
@@ -108,7 +108,7 @@ class RemoveBeneficiaryTransformSpec extends FreeSpec with MustMatchers with Sca
         beneficiaryJson("Three")
       ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiaryTransform(-1, Json.obj(), LocalDate.of(2018, 4, 21), "unidentified")))
+      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiaryTransform(Some(-1), Json.obj(), LocalDate.of(2018, 4, 21), "unidentified")))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
@@ -121,7 +121,7 @@ class RemoveBeneficiaryTransformSpec extends FreeSpec with MustMatchers with Sca
       ))
 
       val transforms = Seq(
-        RemoveBeneficiaryTransform(0, beneficiaryJson("One", None, withLineNo = false), LocalDate.of(2018, 4, 21), "charity")
+        RemoveBeneficiaryTransform(Some(0), beneficiaryJson("One", None, withLineNo = false), LocalDate.of(2018, 4, 21), "charity")
       )
 
       val OUT = ComposedDeltaTransform(transforms)
@@ -153,7 +153,7 @@ class RemoveBeneficiaryTransformSpec extends FreeSpec with MustMatchers with Sca
       val repo = mock[TransformationRepository]
       val trustsService = mock[TrustsService]
       val auditService = mock[AuditService]
-      val transforms = Seq(RemoveBeneficiaryTransform( 1, beneficiaryJson("Two"), LocalDate.of(2018, 4, 21), "unidentified"))
+      val transforms = Seq(RemoveBeneficiaryTransform(Some(1), beneficiaryJson("Two"), LocalDate.of(2018, 4, 21), "unidentified"))
       when(repo.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))
 
       val SUT = new TransformationService(repo, trustsService, auditService)
@@ -176,7 +176,7 @@ class RemoveBeneficiaryTransformSpec extends FreeSpec with MustMatchers with Sca
       val auditService = mock[AuditService]
       val transforms = Seq(
         AddBeneficiaryTransform(Json.toJson(UnidentifiedType(None, None, "Description", None, None, LocalDate.parse("1967-12-30"), None)), "unidentified"),
-        RemoveBeneficiaryTransform(3, beneficiaryJson("Two", None, withLineNo = false), LocalDate.of(2018, 4, 21), "unidentified")
+        RemoveBeneficiaryTransform(Some(3), beneficiaryJson("Two", None, withLineNo = false), LocalDate.of(2018, 4, 21), "unidentified")
       )
 
       when(repo.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))
@@ -196,7 +196,7 @@ class RemoveBeneficiaryTransformSpec extends FreeSpec with MustMatchers with Sca
         beneficiaryJson("Three")
       ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiaryTransform(10, Json.obj(), LocalDate.of(2018, 4, 21), "unidentified")))
+      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiaryTransform(Some(10), Json.obj(), LocalDate.of(2018, 4, 21), "unidentified")))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
@@ -211,7 +211,7 @@ class RemoveBeneficiaryTransformSpec extends FreeSpec with MustMatchers with Sca
         beneficiaryJson("Three")
       ))
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiaryTransform(-1, Json.obj(), LocalDate.of(2018, 4, 21), "unidentified")))
+      val OUT = ComposedDeltaTransform(Seq(RemoveBeneficiaryTransform(Some(-1), Json.obj(), LocalDate.of(2018, 4, 21), "unidentified")))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
