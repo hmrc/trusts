@@ -18,7 +18,7 @@ package controllers.transformations.taxliability
 
 import controllers.actions.IdentifierAction
 import controllers.transformations.AddTransformationController
-import models.variation.YearsReturns
+import models.YearsReturns
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents}
 import services.TransformationService

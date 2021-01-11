@@ -714,10 +714,3 @@ case class NonEEABusinessType(lineNo: String,
 object NonEEABusinessType {
   implicit val format: Format[NonEEABusinessType] = Json.format[NonEEABusinessType]
 }
-
-case class YearsReturns(taxReturnsNoDues: Option[Boolean],
-                        returns: Option[List[YearReturnType]])
-
-object YearsReturns {
-  implicit val yearsReturnsFormat: Format[YearsReturns] = Json.format[YearsReturns]
-}

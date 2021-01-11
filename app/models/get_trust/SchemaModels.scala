@@ -63,8 +63,8 @@ case class GetTrust(matchData: MatchData,
                     correspondence: Correspondence,
                     declaration: Declaration,
                     trust: DisplayTrust,
-                    submissionDate: Option[LocalDate] // New to 5MLD response, mandatory in 5MLD
-                   )
+                    submissionDate: Option[LocalDate], // New to 5MLD response, mandatory in 5MLD
+                    yearsReturn: Option[YearsReturns])
 
 object GetTrust {
   implicit val writes: Writes[GetTrust] = Json.writes[GetTrust]
@@ -74,7 +74,8 @@ object GetTrust {
       (JsPath \ "correspondence").read[Correspondence] and
       (JsPath \ "declaration").read[Declaration] and
       (JsPath \ "details" \ "trust").read[DisplayTrust] and
-      (JsPath \ "submissionDate").readNullable[LocalDate]
+      (JsPath \ "submissionDate").readNullable[LocalDate] and
+      (JsPath \ "yearsReturn").readNullable[YearsReturns]
     ) (GetTrust.apply _)
 }
 
