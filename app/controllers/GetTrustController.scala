@@ -84,7 +84,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     getItemAtPath(identifier, JsPath \ 'details \ 'trust \ 'details)
 
   def getYearsReturns(identifier: String): Action[AnyContent] =
-    getItemAtPath(identifier, JsPath \ 'yearsReturns)
+    getItemAtPath(identifier, JsPath \ 'yearsReturn)
 
   def getTrustees(identifier: String) : Action[AnyContent] =
     getArrayAtPath(identifier, JsPath \ 'details \ 'trust \ 'entities \ 'trustees, "trustees")

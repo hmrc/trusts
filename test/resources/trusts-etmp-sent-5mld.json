@@ -15,6 +15,18 @@
     },
     "phoneNumber": "0754545454"
   },
+  "yearsReturns": {
+    "returns": [
+      {
+        "taxReturnYear": "18",
+        "taxConsequence": true
+      },
+      {
+        "taxReturnYear": "19",
+        "taxConsequence": true
+      }
+    ]
+  },
   "submissionDate": "2020-01-30",
   "declaration": {
     "name": {
