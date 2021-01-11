@@ -36,5 +36,4 @@ object SetTaxLiabilityTransform {
   val key = "SetTaxLiabilityTransform"
 
   implicit val format: Format[SetTaxLiabilityTransform] = Json.format[SetTaxLiabilityTransform]
-
 }
