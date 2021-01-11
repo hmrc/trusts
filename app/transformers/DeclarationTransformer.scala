@@ -37,7 +37,7 @@ class DeclarationTransformer {
     responseJson.transform(
       (__ \ 'applicationType).json.prune andThen
         (__ \ 'declaration).json.prune andThen
-        (__ \ 'yearsReturns).json.prune andThen
+        keepYearsReturnsIf5mld(is5mld) andThen
         updateCorrespondence(responseJson) andThen
         fixLeadTrusteeAddress(responseJson, pathToLeadTrustees) andThen
         convertLeadTrustee(responseJson) andThen
@@ -78,7 +78,7 @@ class DeclarationTransformer {
         leadTrusteeJson.transform((leadTrusteePath \ 'identification \ 'nino).json.pick).isSuccess) {
       (leadTrusteePath \ 'identification \ 'address).json.prune
     } else {
-      __.json.pick[JsObject]
+      doNothing()
     }
   }
 
@@ -115,7 +115,7 @@ class DeclarationTransformer {
             case JsSuccess(value, _) => addPreviousLeadTrusteeAsExpiredStep(value, date)
             case e: JsError => Reads(_ => e)
           }
-      case _ => __.json.pick[JsObject]
+      case _ => doNothing()
     }
   }
 
@@ -140,7 +140,7 @@ class DeclarationTransformer {
       case JsSuccess(JsArray(e), _) if e.isEmpty =>
         pathToTrustees.json.prune
       case _ =>
-        __.json.pick[JsObject]
+        doNothing()
     }
   }
 
@@ -154,12 +154,14 @@ class DeclarationTransformer {
     }
   }
 
-  private def addAgentIfDefined(agentDetails: Option[AgentDetails]): Reads[JsObject] = if (agentDetails.isDefined) {
-    __.json.update(
-      (__ \ 'agentDetails).json.put(Json.toJson(agentDetails.get))
-    )
-  } else {
-    __.json.pick[JsObject]
+  private def addAgentIfDefined(agentDetails: Option[AgentDetails]): Reads[JsObject] = {
+    if (agentDetails.isDefined) {
+      __.json.update(
+        (__ \ 'agentDetails).json.put(Json.toJson(agentDetails.get))
+      )
+    } else {
+      doNothing()
+    }
   }
 
   private def addEndDateIfDefined(endDate: Option[LocalDate]): Reads[JsObject] = {
@@ -169,7 +171,7 @@ class DeclarationTransformer {
           (__ \ 'trustEndDate).json.put(Json.toJson(date))
         )
       case _ =>
-        __.json.pick[JsObject]
+        doNothing()
     }
   }
 
@@ -179,7 +181,19 @@ class DeclarationTransformer {
         (__ \ 'submissionDate).json.put(Json.toJson(submissionDate))
       )
     } else {
-      __.json.pick[JsObject]
+      doNothing()
     }
+  }
+
+  private def keepYearsReturnsIf5mld(is5mld: Boolean): Reads[JsObject] = {
+    if (!is5mld) {
+      (__ \ 'yearsReturns).json.prune
+    } else {
+      doNothing()
+    }
+  }
+
+  private def doNothing(): Reads[JsObject] = {
+    __.json.pick[JsObject]
   }
 }
