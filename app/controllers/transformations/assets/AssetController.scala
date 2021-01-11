@@ -14,21 +14,12 @@
  * limitations under the License.
  */
 
-package transformers.trustees
+package controllers.transformations.assets
 
-import models.variation.AmendedLeadTrusteeOrgType
-import play.api.libs.json._
-import transformers.DeltaTransform
+import play.api.libs.json.JsPath
+import utils.Constants._
 
-case class AmendLeadTrusteeOrgTransform(leadTrustee: AmendedLeadTrusteeOrgType) extends DeltaTransform with AmendLeadTrusteeCommon {
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    setLeadTrustee(input, Json.toJson(leadTrustee))
-  }
-}
+trait AssetController {
 
-object AmendLeadTrusteeOrgTransform {
-
-  val key = "AmendLeadTrusteeOrgTransform"
-
-  implicit val format: Format[AmendLeadTrusteeOrgTransform] = Json.format[AmendLeadTrusteeOrgTransform]
+  def path(`type`: String, index: Int): JsPath = TRUST \ ASSETS \ `type` \ index
 }

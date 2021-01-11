@@ -24,7 +24,6 @@ import play.api.mvc.{Action, ControllerComponents}
 import services.{LocalDateService, TransformationService}
 import transformers.DeltaTransform
 import transformers.otherindividuals.AmendOtherIndividualTransform
-import utils.Constants._
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -33,9 +32,7 @@ class AmendOtherIndividualController @Inject()(identify: IdentifierAction,
                                                transformationService: TransformationService,
                                                localDateService: LocalDateService)
                                               (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AmendTransformationController(identify, transformationService) {
-
-  override def path(`type`: String, index: Int): JsPath =  ENTITIES \ OTHER_INDIVIDUALS \ index
+  extends AmendTransformationController(identify, transformationService) with OtherIndividualController {
 
   def amend(identifier: String, index: Int): Action[JsValue] = addNewTransform[NaturalPersonType](identifier, index)
 

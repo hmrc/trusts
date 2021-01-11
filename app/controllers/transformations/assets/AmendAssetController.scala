@@ -19,7 +19,7 @@ package controllers.transformations.assets
 import controllers.actions.IdentifierAction
 import controllers.transformations.AmendTransformationController
 import models.variation._
-import play.api.libs.json.{JsPath, JsValue, Json, Writes}
+import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc.{Action, ControllerComponents}
 import services.{LocalDateService, TransformationService}
 import transformers.DeltaTransform
@@ -33,9 +33,7 @@ class AmendAssetController @Inject()(identify: IdentifierAction,
                                      transformationService: TransformationService,
                                      localDateService: LocalDateService)
                                     (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AmendTransformationController(identify, transformationService) {
-
-  override def path(`type`: String, index: Int): JsPath = TRUST \ ASSETS \ `type` \ index
+  extends AmendTransformationController(identify, transformationService) with AssetController {
 
   def amendMoney(identifier: String, index: Int): Action[JsValue] = addNewTransform[AssetMonetaryAmount](identifier, index, MONEY_ASSET)
 

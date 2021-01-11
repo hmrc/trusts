@@ -14,28 +14,35 @@
  * limitations under the License.
  */
 
-package controllers.transformations.protectors
+package controllers.transformations.trustees
 
 import controllers.actions.IdentifierAction
 import controllers.transformations.RemoveTransformationController
+import models.variation.TrusteeIndividualType
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, ControllerComponents}
 import services.TransformationService
 import transformers.DeltaTransform
-import transformers.protectors.RemoveProtectorTransform
-import transformers.remove.{Remove, RemoveProtector}
+import transformers.remove.{Remove, RemoveTrustee}
+import transformers.trustees.RemoveTrusteeTransform
+import utils.Constants._
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class RemoveProtectorController @Inject()(identify: IdentifierAction,
-                                          transformationService: TransformationService)
-                                         (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends RemoveTransformationController(identify, transformationService) with ProtectorController {
+class RemoveTrusteeController @Inject()(identify: IdentifierAction,
+                                        transformationService: TransformationService)
+                                       (implicit ec: ExecutionContext, cc: ControllerComponents)
+  extends RemoveTransformationController(identify, transformationService) with TrusteeController {
 
-  def remove(identifier: String): Action[JsValue] = addNewTransform[RemoveProtector](identifier)
+  def remove(identifier: String): Action[JsValue] = addNewTransform[RemoveTrustee](identifier)
 
   override def transform[T <: Remove](remove: T, entity: JsValue): DeltaTransform = {
-    RemoveProtectorTransform(remove.index, entity, remove.endDate, remove.`type`)
+    val `type`: String = if (entity.validate[TrusteeIndividualType].isSuccess) {
+      INDIVIDUAL_TRUSTEE
+    } else {
+      BUSINESS_TRUSTEE
+    }
+    RemoveTrusteeTransform(remove.index, entity, remove.endDate, `type`)
   }
 }

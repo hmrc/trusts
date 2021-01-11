@@ -77,7 +77,7 @@ trait JsonOperations {
 
   def addToList(input: JsValue,
                 path: JsPath,
-                jsonToAdd: JsValue) : JsResult[JsValue] = {
+                jsonToAdd: JsValue): JsResult[JsValue] = {
 
     import play.api.libs.json._
 
@@ -99,7 +99,7 @@ trait JsonOperations {
     }
   }
 
-  def amendAtPosition(input : JsValue, path: JsPath, index: Int, newValue: JsValue) : JsResult[JsValue] = {
+  def amendAtPosition(input: JsValue, path: JsPath, index: Int, newValue: JsValue): JsResult[JsValue] = {
     input.transform(path.json.pick) match {
 
       case JsSuccess(json, _) =>
@@ -119,7 +119,7 @@ trait JsonOperations {
     }
   }
 
-  def removeAtPosition(input : JsValue, path: JsPath, index: Int) : JsResult[JsValue] = {
+  def removeAtPosition(input: JsValue, path: JsPath, index: Int): JsResult[JsValue] = {
 
     input.transform(path.json.pick) match {
       case JsSuccess(json, _) =>
@@ -142,7 +142,7 @@ trait JsonOperations {
     }
   }
 
-  def objectPlusField[A](json: JsValue, field: String, value: JsValue) : JsValue = json.as[JsObject] + (field -> value)
+  def objectPlusField[A](json: JsValue, field: String, value: JsValue): JsValue = json.as[JsObject] + (field -> value)
 
   def copyField(original: JsValue, field: String, amended: JsValue): JsValue = {
     val pickField = (__ \ field).json.pick

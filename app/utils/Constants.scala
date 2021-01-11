@@ -50,6 +50,8 @@ object Constants {
   val OTHER_INDIVIDUALS = "naturalPerson"
   val PROTECTORS = "protectors"
   val SETTLORS = "settlors"
+  val TRUSTEES = "trustees"
+  val LEAD_TRUSTEE = "leadTrustees"
 
   val MONEY_ASSET = "monetary"
   val PROPERTY_OR_LAND_ASSET = "propertyOrLand"
@@ -74,6 +76,11 @@ object Constants {
   val INDIVIDUAL_SETTLOR = "settlor"
   val BUSINESS_SETTLOR = "settlorCompany"
 
+  val INDIVIDUAL_LEAD_TRUSTEE = "leadTrusteeInd"
+  val BUSINESS_LEAD_TRUSTEE = "leadTrusteeOrg"
+  val INDIVIDUAL_TRUSTEE = "trusteeInd"
+  val BUSINESS_TRUSTEE = "trusteeOrg"
+
   val EXPRESS = "expressTrust"
   val UK_RESIDENT = "trustUKResident"
   val TAXABLE = "trustTaxable"
@@ -92,5 +99,6 @@ object Constants {
   val LINE_NUMBER = "lineNo"
   val BP_MATCH_STATUS = "bpMatchStatus"
   val ENTITY_START = "entityStart"
+  val ENTITY_END = "entityEnd"
 
 }

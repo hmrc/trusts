@@ -3,12 +3,12 @@ GET         /:identifier/transformed/lead-trustee     controllers.GetTrustContro
 
 GET         /:identifier/transformed/trustee          controllers.GetTrustController.getTrustees(identifier: String)
 
-POST        /amend-lead/:identifier                   controllers.TrusteeTransformationController.amendLeadTrustee(identifier: String)
+POST        /amend-lead/:identifier                   controllers.transformations.trustees.AmendTrusteeController.amendLeadTrustee(identifier: String)
 
-POST        /add/:identifier                          controllers.TrusteeTransformationController.addTrustee(identifier: String)
+POST        /add/:identifier                          controllers.transformations.trustees.AddTrusteeController.add(identifier: String)
 
-POST        /amend/:identifier/:index                 controllers.TrusteeTransformationController.amendTrustee(identifier: String, index: Int)
+POST        /amend/:identifier/:index                 controllers.transformations.trustees.AmendTrusteeController.amendTrustee(identifier: String, index: Int)
 
-POST        /promote/:identifier/:index               controllers.TrusteeTransformationController.promoteTrustee(identifier: String, index: Int)
+POST        /promote/:identifier/:index               controllers.transformations.trustees.PromoteTrusteeController.promote(identifier: String, index: Int)
 
-PUT         /:identifier/remove                       controllers.TrusteeTransformationController.removeTrustee(identifier: String)
+PUT         /:identifier/remove                       controllers.transformations.trustees.RemoveTrusteeController.remove(identifier: String)

@@ -110,8 +110,8 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     val service = new TransformationService(repository, mock[TrustsService], auditService)
 
     val existingTransforms = Seq(
-      RemoveTrusteeTransform(LocalDate.parse("2019-12-21"), 0, originalTrusteeIndJson),
-      AmendLeadTrusteeIndTransform(unitTestLeadTrusteeInfo)
+      RemoveTrusteeTransform(0, originalTrusteeIndJson, LocalDate.parse("2019-12-21"), "trusteeInd"),
+      AmendTrusteeTransform(0, Json.toJson(unitTestLeadTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
     )
     when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
     when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
@@ -194,7 +194,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     )
 
     val existingTransforms = Seq(
-      AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo)
+      AmendTrusteeTransform(0, Json.toJson(newLeadTrusteeIndInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
     )
 
     val repository = mock[TransformationRepositoryImpl]
@@ -221,13 +221,18 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(Nil))))
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
-      val result = service.addNewTransform(utr, internalId, AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo))
+      val result = service.addNewTransform(
+        utr,
+        internalId,
+        AmendTrusteeTransform(0, Json.toJson(newLeadTrusteeIndInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
+
+      )
       whenReady(result) { _ =>
 
         verify(repository).set(
           utr,
           internalId,
-          ComposedDeltaTransform(Seq(AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo)))
+          ComposedDeltaTransform(Seq(AmendTrusteeTransform(0, Json.toJson(newLeadTrusteeIndInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")))
         )
       }
     }
@@ -236,18 +241,23 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       val repository = mock[TransformationRepositoryImpl]
       val service = new TransformationService(repository, mock[TrustsService], auditService)
 
-      val existingTransforms = Seq(AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo))
+      val existingTransforms = Seq(AmendTrusteeTransform(0, Json.toJson(existingLeadTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd"))
       when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
       when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
-      val result = service.addNewTransform(utr, internalId, AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo))
+      val result = service.addNewTransform(
+        utr,
+        internalId,
+        AmendTrusteeTransform(0, Json.toJson(newLeadTrusteeIndInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
+      )
+
       whenReady(result) { _ =>
         verify(repository).set(
           utr,
           internalId,
           ComposedDeltaTransform(Seq(
-            AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo),
-            AmendLeadTrusteeIndTransform(newLeadTrusteeIndInfo)
+            AmendTrusteeTransform(0, Json.toJson(existingLeadTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd"),
+            AmendTrusteeTransform(0, Json.toJson(newLeadTrusteeIndInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
           ))
         )
       }
@@ -279,7 +289,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       val service = new TransformationService(repository, mock[TrustsService], auditService)
 
       val initialTransforms = ComposedDeltaTransform(Seq(
-        AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo),
+        AmendTrusteeTransform(0, Json.toJson(existingLeadTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd"),
 
         AddAssetTransform(Json.obj(), OTHER_ASSET),
         AmendAssetTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2021-01-01"), OTHER_ASSET),
@@ -306,7 +316,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       ))
 
       val expectedTransformsAfterTaxableMigrationTransformsRemoved = ComposedDeltaTransform(Seq(
-        AmendLeadTrusteeIndTransform(existingLeadTrusteeInfo),
+        AmendTrusteeTransform(0, Json.toJson(existingLeadTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd"),
 
         AddAssetTransform(Json.obj(), NON_EEA_BUSINESS_ASSET),
         AmendAssetTransform(0, Json.obj(), Json.obj(), LocalDate.parse("2021-01-01"), NON_EEA_BUSINESS_ASSET),

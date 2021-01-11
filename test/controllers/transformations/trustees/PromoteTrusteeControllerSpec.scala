@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers.transformations.settlors
+package controllers.transformations.trustees
 
 import controllers.actions.FakeIdentifierAction
 import models.NameType
@@ -30,7 +30,7 @@ import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
 import services.{LocalDateService, TransformationService}
-import transformers.settlors.AmendSettlorTransform
+import transformers.trustees.PromoteTrusteeTransform
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import utils.JsonUtils
 
@@ -38,7 +38,7 @@ import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
-class AmendSettlorControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers
+class PromoteTrusteeControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers
  with GuiceOneAppPerSuite {
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
@@ -51,50 +51,58 @@ class AmendSettlorControllerSpec extends FreeSpec with MockitoSugar with ScalaFu
 
   private val invalidBody: JsValue = Json.parse("{}")
 
-  private def buildInputJson(settlorType: String, settlorData: JsValue): JsObject = {
+  private def buildInputJson(trusteeData: Seq[JsValue]): JsObject = {
     val baseJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-    val adder = (__ \ "details" \ "trust" \ "entities" \ "settlors" \ settlorType).json.put(JsArray(Seq(settlorData)))
+    val adder = (__ \ "details" \ "trust" \ "entities" \ "trustees").json.put(JsArray(trusteeData))
 
     baseJson.as[JsObject](__.json.update(adder))
   }
   
-  "Amend settlor controller" - {
+  "Promote trustee controller" - {
 
-    "individual settlor" - {
+    "individual trustee" - {
 
-      val originalSettlor = Settlor(
+      val originalTrustee = TrusteeIndividualType(
         lineNo = None,
         bpMatchStatus = None,
         name = NameType("Joe", None, "Bloggs"),
         dateOfBirth = None,
+        phoneNumber = None,
         identification = None,
         countryOfResidence = None,
         legallyIncapable = None,
         nationality = None,
-        entityStart = LocalDate.parse("2010-05-03"),
+        entityStart = LocalDate.parse("2012-03-14"),
         entityEnd = None
       )
 
-      val amendedSettlor = originalSettlor.copy(
-        name = NameType("John", None, "Doe")
+      val promotedTrustee = AmendedLeadTrusteeIndType(
+        name = NameType("Joe", None, "Bloggs"),
+        dateOfBirth = LocalDate.parse("1980-03-30"),
+        phoneNumber = "tel",
+        email = None,
+        identification = IdentificationType(None, None, None, None),
+        countryOfResidence = None,
+        nationality = None,
+        legallyIncapable = None
       )
 
-      val settlorType: String = "settlor"
+      val trusteeType: String = "trusteeInd"
 
       "must add a new amend transform" in {
 
         val mockTransformationService = mock[TransformationService]
         val mockLocalDateService = mock[LocalDateService]
 
-        val controller = new AmendSettlorController(
+        val controller = new PromoteTrusteeController(
           identifierAction,
           mockTransformationService,
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(settlorType, Json.toJson(originalSettlor))))
+          .thenReturn(Future.successful(buildInputJson(Seq(Json.toJson(originalTrustee)))))
 
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
@@ -102,14 +110,14 @@ class AmendSettlorControllerSpec extends FreeSpec with MockitoSugar with ScalaFu
         when(mockLocalDateService.now).thenReturn(endDate)
 
         val request = FakeRequest(POST, "path")
-          .withBody(Json.toJson(amendedSettlor))
+          .withBody(Json.toJson(promotedTrustee))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
-        val result = controller.amendIndividual(utr, index).apply(request)
+        val result = controller.promote(utr, index).apply(request)
 
         status(result) mustBe OK
 
-        val transform = AmendSettlorTransform(index, Json.toJson(amendedSettlor), Json.toJson(originalSettlor), endDate, settlorType)
+        val transform = PromoteTrusteeTransform(index, Json.toJson(promotedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -121,7 +129,7 @@ class AmendSettlorControllerSpec extends FreeSpec with MockitoSugar with ScalaFu
         val mockTransformationService = mock[TransformationService]
         val mockLocalDateService = mock[LocalDateService]
 
-        val controller = new AmendSettlorController(
+        val controller = new PromoteTrusteeController(
           identifierAction,
           mockTransformationService,
           mockLocalDateService
@@ -131,46 +139,50 @@ class AmendSettlorControllerSpec extends FreeSpec with MockitoSugar with ScalaFu
           .withBody(invalidBody)
           .withHeaders(CONTENT_TYPE -> "application/json")
 
-        val result = controller.amendIndividual(utr, index).apply(request)
+        val result = controller.promote(utr, index).apply(request)
 
         status(result) mustBe BAD_REQUEST
 
       }
     }
 
-    "business settlor" - {
+    "business trustee" - {
 
-      val originalSettlor = SettlorCompany(
+      val originalTrustee = TrusteeOrgType(
         lineNo = None,
         bpMatchStatus = None,
         name = "Name",
-        companyType = None,
-        companyTime = None,
+        phoneNumber = None,
+        email = None,
         identification = None,
         countryOfResidence = None,
-        entityStart = LocalDate.parse("2010-05-03"),
+        entityStart = LocalDate.parse("2012-03-14"),
         entityEnd = None
       )
 
-      val amendedSettlor = originalSettlor.copy(
-        name = "Amended Name"
+      val promotedTrustee = AmendedLeadTrusteeOrgType(
+        name = "Name",
+        phoneNumber = "tel",
+        email = None,
+        identification = IdentificationOrgType(None, None, None),
+        countryOfResidence = None
       )
 
-      val settlorType: String = "settlorCompany"
+      val trusteeType: String = "trusteeOrg"
 
       "must add a new amend transform" in {
 
         val mockTransformationService = mock[TransformationService]
         val mockLocalDateService = mock[LocalDateService]
 
-        val controller = new AmendSettlorController(
+        val controller = new PromoteTrusteeController(
           identifierAction,
           mockTransformationService,
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(settlorType, Json.toJson(originalSettlor))))
+          .thenReturn(Future.successful(buildInputJson(Seq(Json.toJson(originalTrustee)))))
 
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
@@ -178,14 +190,14 @@ class AmendSettlorControllerSpec extends FreeSpec with MockitoSugar with ScalaFu
         when(mockLocalDateService.now).thenReturn(endDate)
 
         val request = FakeRequest(POST, "path")
-          .withBody(Json.toJson(amendedSettlor))
+          .withBody(Json.toJson(promotedTrustee))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
-        val result = controller.amendBusiness(utr, index).apply(request)
+        val result = controller.promote(utr, index).apply(request)
 
         status(result) mustBe OK
 
-        val transform = AmendSettlorTransform(index, Json.toJson(amendedSettlor), Json.toJson(originalSettlor), endDate, settlorType)
+        val transform = PromoteTrusteeTransform(index, Json.toJson(promotedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))
@@ -197,7 +209,7 @@ class AmendSettlorControllerSpec extends FreeSpec with MockitoSugar with ScalaFu
         val mockTransformationService = mock[TransformationService]
         val mockLocalDateService = mock[LocalDateService]
 
-        val controller = new AmendSettlorController(
+        val controller = new PromoteTrusteeController(
           identifierAction,
           mockTransformationService,
           mockLocalDateService
@@ -207,95 +219,7 @@ class AmendSettlorControllerSpec extends FreeSpec with MockitoSugar with ScalaFu
           .withBody(invalidBody)
           .withHeaders(CONTENT_TYPE -> "application/json")
 
-        val result = controller.amendBusiness(utr, index).apply(request)
-
-        status(result) mustBe BAD_REQUEST
-
-      }
-    }
-
-    "deceased settlor" - {
-
-      val originalSettlor = Json.parse(
-        """
-          |{
-          |  "lineNo":"1",
-          |  "bpMatchStatus": "01",
-          |  "name":{
-          |    "firstName":"John",
-          |    "middleName":"William",
-          |    "lastName":"O'Connor"
-          |  },
-          |  "dateOfBirth":"1956-02-12",
-          |  "dateOfDeath":"2016-01-01",
-          |  "identification":{
-          |    "nino":"KC456736"
-          |  },
-          |  "entityStart":"1998-02-12"
-          |}
-          |""".stripMargin)
-
-      val amendedSettlor = AmendDeceasedSettlor(
-        name = NameType("John", None, "Doe"),
-        dateOfBirth = None,
-        dateOfDeath = None,
-        identification = None
-      )
-
-      val settlorType: String = "deceased"
-
-      "must add a new amend transform" in {
-
-        val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
-
-        val controller = new AmendSettlorController(
-          identifierAction,
-          mockTransformationService,
-          mockLocalDateService
-        )(Implicits.global, Helpers.stubControllerComponents())
-
-        val desResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
-
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(desResponse.as[JsObject]))
-
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
-        when(mockLocalDateService.now).thenReturn(endDate)
-
-        val request = FakeRequest(POST, "path")
-          .withBody(Json.toJson(amendedSettlor))
-          .withHeaders(CONTENT_TYPE -> "application/json")
-
-        val result = controller.amendDeceased(utr).apply(request)
-
-        status(result) mustBe OK
-
-          val transform = AmendSettlorTransform(0, Json.toJson(amendedSettlor), Json.toJson(originalSettlor), endDate, settlorType)
-
-        verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
-
-      }
-
-      "must return an error for invalid json" in {
-
-        val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
-
-        val controller = new AmendSettlorController(
-          identifierAction,
-          mockTransformationService,
-          mockLocalDateService
-        )(Implicits.global, Helpers.stubControllerComponents())
-
-        val request = FakeRequest(POST, "path")
-          .withBody(invalidBody)
-          .withHeaders(CONTENT_TYPE -> "application/json")
-
-        val result = controller.amendDeceased(utr).apply(request)
+        val result = controller.promote(utr, index).apply(request)
 
         status(result) mustBe BAD_REQUEST
 

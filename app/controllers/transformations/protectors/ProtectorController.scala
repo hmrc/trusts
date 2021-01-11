@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package transformers.remove
+package controllers.transformations.protectors
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.JsPath
+import utils.Constants._
 
-import java.time.LocalDate
+trait ProtectorController {
 
-case class RemoveTrustee(endDate: LocalDate,
-                         index: Int) extends Remove
-
-object RemoveTrustee {
-  implicit val formats : Format[RemoveTrustee] = Json.format[RemoveTrustee]
+  def path(`type`: String, index: Int): JsPath = ENTITIES \ PROTECTORS \ `type` \ index
 }

@@ -206,40 +206,22 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
       val addTrustBeneficiaryTransform = AddBeneficiaryTransform(Json.toJson(newTrustBeneficiary), "trust")
 
-      val amendLeadTrusteeIndTransform = AmendLeadTrusteeIndTransform(newLeadTrustee)
+      val amendLeadTrusteeIndTransform = AmendTrusteeTransform(0, Json.toJson(newLeadTrustee), Json.obj(), LocalDate.now(), "leadTrusteeInd")
 
-      val amendLeadTrusteeOrgTransform = AmendLeadTrusteeOrgTransform(
-        newLeadTrusteeOrg
-      )
+      val amendLeadTrusteeOrgTransform = AmendTrusteeTransform(0, Json.toJson(newLeadTrusteeOrg), Json.obj(), LocalDate.now(), "leadTrusteeOrg")
 
-      val addTrusteeIndTransform = AddTrusteeIndTransform(newTrusteeInd)
+      val addTrusteeIndTransform = AddTrusteeTransform(Json.toJson(newTrusteeInd), "trusteeInd")
 
-      val addTrusteeOrgTransform = AddTrusteeOrgTransform(newTrusteeOrg)
+      val addTrusteeOrgTransform = AddTrusteeTransform(Json.toJson(newTrusteeOrg), "trusteeOrg")
 
-      val removeTrusteeTransform = RemoveTrusteeTransform(
-        endDate = LocalDate.parse("2010-01-01"),
-        index = 0,
-        Json.obj()
-      )
+      val removeTrusteeTransform = RemoveTrusteeTransform(index = 0, Json.obj(), endDate = LocalDate.parse("2010-01-01"), "trusteeInd")
 
-      val promoteTrusteeIndTransform = PromoteTrusteeIndTransform(
-        2,
-        newLeadTrustee,
-        LocalDate.parse("2012-02-06"),
-        Json.obj(),
-        currentDate
-      )
+      val promoteTrusteeIndTransform = PromoteTrusteeTransform(2, Json.toJson(newLeadTrustee), Json.obj(), LocalDate.parse("2012-02-06"), "trusteeInd")
 
-      val promoteTrusteeOrgTransform = PromoteTrusteeOrgTransform(
-        2,
-        newLeadTrusteeOrg,
-        LocalDate.parse("2012-02-06"),
-        Json.obj(),
-        currentDate
-      )
+      val promoteTrusteeOrgTransform = PromoteTrusteeTransform(2, Json.toJson(newLeadTrusteeOrg), Json.obj(), LocalDate.parse("2012-02-06"), "trusteeOrg")
 
-      val amendTrusteeIndTransform = AmendTrusteeIndTransform(0, newTrusteeInd, Json.obj(), currentDate)
-      val amendTrusteeOrgTransform = AmendTrusteeOrgTransform(0, newTrusteeOrg, Json.obj(), currentDate)
+      val amendTrusteeIndTransform = AmendTrusteeTransform(0, Json.toJson(newTrusteeInd), Json.obj(), currentDate, "trusteeInd")
+      val amendTrusteeOrgTransform = AmendTrusteeTransform(0, Json.toJson(newTrusteeOrg), Json.obj(), currentDate, "trusteeOrg")
 
       val amendCharityBeneficiaryTransform = AmendBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate, "charity")
       val amendCompanyBeneficiaryTransform = AmendBeneficiaryTransform(0, genericAmendedData, genericOriginalData, amendedDate, "company")
@@ -321,31 +303,31 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
         s"""{
           |        "deltaTransforms" : [
           |            {
-          |               "AmendLeadTrusteeIndTransform": ${Json.toJson(amendLeadTrusteeIndTransform)}
+          |               "AmendTrusteeTransform": ${Json.toJson(amendLeadTrusteeIndTransform)}
           |            },
           |            {
-          |               "AmendLeadTrusteeOrgTransform": ${Json.toJson(amendLeadTrusteeOrgTransform)}
+          |               "AmendTrusteeTransform": ${Json.toJson(amendLeadTrusteeOrgTransform)}
           |            },
           |            {
-          |               "AddTrusteeIndTransform": ${Json.toJson(addTrusteeIndTransform)}
+          |               "AddTrusteeTransform": ${Json.toJson(addTrusteeIndTransform)}
           |            },
           |            {
-          |               "AddTrusteeOrgTransform": ${Json.toJson(addTrusteeOrgTransform)}
+          |               "AddTrusteeTransform": ${Json.toJson(addTrusteeOrgTransform)}
           |            },
           |            {
           |               "RemoveTrusteeTransform": ${Json.toJson(removeTrusteeTransform)}
           |            },
           |            {
-          |               "PromoteTrusteeIndTransform": ${Json.toJson(promoteTrusteeIndTransform)}
+          |               "PromoteTrusteeTransform": ${Json.toJson(promoteTrusteeIndTransform)}
           |            },
           |            {
-          |               "PromoteTrusteeOrgTransform": ${Json.toJson(promoteTrusteeOrgTransform)}
+          |               "PromoteTrusteeTransform": ${Json.toJson(promoteTrusteeOrgTransform)}
           |            },
           |            {
-          |               "AmendTrusteeIndTransform": ${Json.toJson(amendTrusteeIndTransform)}
+          |               "AmendTrusteeTransform": ${Json.toJson(amendTrusteeIndTransform)}
           |            },
           |            {
-          |               "AmendTrusteeOrgTransform": ${Json.toJson(amendTrusteeOrgTransform)}
+          |               "AmendTrusteeTransform": ${Json.toJson(amendTrusteeOrgTransform)}
           |            },
           |            {
           |               "AmendBeneficiaryTransform": ${Json.toJson(amendIndividualBenTransform)}

@@ -33,15 +33,7 @@ class AmendSettlorController @Inject()(identify: IdentifierAction,
                                        transformationService: TransformationService,
                                        localDateService: LocalDateService)
                                       (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AmendTransformationController(identify, transformationService) {
-
-  override def path(`type`: String, index: Int): JsPath = {
-    if (`type` == DECEASED_SETTLOR) {
-      ENTITIES \ `type`
-    } else {
-      ENTITIES \ SETTLORS \ `type` \ index
-    }
-  }
+  extends AmendTransformationController(identify, transformationService) with SettlorController {
 
   def amendIndividual(identifier: String, index: Int): Action[JsValue] =
     addNewTransform[Settlor](identifier, index, `type` = INDIVIDUAL_SETTLOR)

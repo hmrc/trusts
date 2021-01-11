@@ -16,19 +16,14 @@
 
 package transformers.trustees
 
-import models.variation.AmendedLeadTrusteeIndType
-import play.api.libs.json._
-import transformers.DeltaTransform
+import play.api.libs.json.JsPath
+import utils.Constants._
 
-case class AmendLeadTrusteeIndTransform(leadTrustee: AmendedLeadTrusteeIndType) extends DeltaTransform with AmendLeadTrusteeCommon {
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    setLeadTrustee(input, Json.toJson(leadTrustee))
-  }
-}
-
-object AmendLeadTrusteeIndTransform {
-
-  val key = "AmendLeadTrusteeIndTransform"
-
-  implicit val format: Format[AmendLeadTrusteeIndTransform] = Json.format[AmendLeadTrusteeIndTransform]
+trait TrusteeTransform {
+  val `type`: String
+  val path: JsPath = ENTITIES \ TRUSTEES
+  def isLeadTrustee: Boolean = isIndividualLeadTrustee || isBusinessLeadTrustee
+  def isIndividualLeadTrustee: Boolean = `type` == INDIVIDUAL_LEAD_TRUSTEE
+  def isBusinessLeadTrustee: Boolean = `type` == BUSINESS_LEAD_TRUSTEE
+  val leadTrusteePath: JsPath = ENTITIES \ LEAD_TRUSTEE
 }

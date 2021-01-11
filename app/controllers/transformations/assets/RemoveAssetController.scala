@@ -18,13 +18,12 @@ package controllers.transformations.assets
 
 import controllers.actions.IdentifierAction
 import controllers.transformations.RemoveTransformationController
-import play.api.libs.json.{JsPath, JsValue}
+import play.api.libs.json.JsValue
 import play.api.mvc.{Action, ControllerComponents}
 import services.TransformationService
 import transformers.DeltaTransform
 import transformers.assets.RemoveAssetTransform
 import transformers.remove.{Remove, RemoveAsset}
-import utils.Constants._
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -32,9 +31,7 @@ import scala.concurrent.ExecutionContext
 class RemoveAssetController @Inject()(identify: IdentifierAction,
                                       transformationService: TransformationService)
                                      (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends RemoveTransformationController(identify, transformationService) {
-
-  override def path(`type`: String, index: Int): JsPath = TRUST \ ASSETS \ `type` \ index
+  extends RemoveTransformationController(identify, transformationService) with AssetController {
 
   def remove(identifier: String): Action[JsValue] = addNewTransform[RemoveAsset](identifier)
 

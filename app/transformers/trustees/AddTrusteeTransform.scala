@@ -16,25 +16,20 @@
 
 package transformers.trustees
 
-import models.variation.TrusteeOrgType
-import play.api.libs.json.{Json, _}
-import transformers.{DeltaTransform, JsonOperations}
+import play.api.libs.json._
+import transformers.AddEntityTransform
 
-case class AddTrusteeOrgTransform(trustee: TrusteeOrgType) extends DeltaTransform
-  with JsonOperations {
-
-  private lazy val path = __ \ 'details \ 'trust \ 'entities \ 'trustees
+case class AddTrusteeTransform(entity: JsValue,
+                               `type`: String) extends TrusteeTransform with AddEntityTransform {
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    addToList(input, path, Json.obj(
-      TrusteeOrg.toString -> Json.toJson(trustee)
-    ))
+    addToList(input, path, Json.obj(`type` -> entity))
   }
 }
 
-object AddTrusteeOrgTransform {
+object AddTrusteeTransform {
 
-  val key = "AddTrusteeOrgTransform"
+  val key = "AddTrusteeTransform"
 
-  implicit val format: Format[AddTrusteeOrgTransform] = Json.format[AddTrusteeOrgTransform]
+  implicit val format: Format[AddTrusteeTransform] = Json.format[AddTrusteeTransform]
 }

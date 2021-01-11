@@ -19,6 +19,7 @@ package uk.gov.hmrc.repositories
 import models.NameType
 import models.variation.{AmendedLeadTrusteeIndType, IdentificationType, TrusteeIndividualType}
 import org.scalatest.{AsyncFreeSpec, MustMatchers}
+import play.api.libs.json.Json
 import repositories.TransformationRepository
 import transformers.ComposedDeltaTransform
 import transformers.trustees._
@@ -43,10 +44,11 @@ class TransformRepositorySpec extends AsyncFreeSpec with MustMatchers with Integ
     }
   }
 
-  val data = ComposedDeltaTransform(
+  private val data: ComposedDeltaTransform = ComposedDeltaTransform(
     Seq(
-      AmendLeadTrusteeIndTransform(
-        AmendedLeadTrusteeIndType(
+      AmendTrusteeTransform(
+        0,
+        Json.toJson(AmendedLeadTrusteeIndType(
           NameType("New", Some("lead"), "Trustee"),
           LocalDate.parse("2000-01-01"),
           "",
@@ -55,10 +57,13 @@ class TransformRepositorySpec extends AsyncFreeSpec with MustMatchers with Integ
           countryOfResidence = None,
           legallyIncapable = None,
           nationality = None
-        )
+        )),
+        Json.obj(),
+        LocalDate.now(),
+        "leadTrusteeInd"
       ),
-      AddTrusteeIndTransform(
-        TrusteeIndividualType(
+      AddTrusteeTransform(
+        Json.toJson(TrusteeIndividualType(
           Some("lineNo"),
           Some("bpMatchStatus"),
           NameType("New", None, "Trustee"),
@@ -70,7 +75,8 @@ class TransformRepositorySpec extends AsyncFreeSpec with MustMatchers with Integ
           nationality = None,
           LocalDate.parse("2010-10-10"),
           None
-        )
+        )),
+        "trusteeInd",
       )
     )
   )

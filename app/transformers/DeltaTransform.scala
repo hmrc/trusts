@@ -56,14 +56,9 @@ object DeltaTransform {
   )
 
   def trusteeReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
-    readsForTransform[PromoteTrusteeIndTransform](PromoteTrusteeIndTransform.key) orElse
-    readsForTransform[PromoteTrusteeOrgTransform](PromoteTrusteeOrgTransform.key) orElse
-    readsForTransform[AmendLeadTrusteeIndTransform](AmendLeadTrusteeIndTransform.key) orElse
-    readsForTransform[AmendLeadTrusteeOrgTransform](AmendLeadTrusteeOrgTransform.key) orElse
-    readsForTransform[AddTrusteeIndTransform](AddTrusteeIndTransform.key) orElse
-    readsForTransform[AddTrusteeOrgTransform](AddTrusteeOrgTransform.key) orElse
-    readsForTransform[AmendTrusteeIndTransform](AmendTrusteeIndTransform.key) orElse
-    readsForTransform[AmendTrusteeOrgTransform](AmendTrusteeOrgTransform.key) orElse
+    readsForTransform[AddTrusteeTransform](AddTrusteeTransform.key) orElse
+    readsForTransform[AmendTrusteeTransform](AmendTrusteeTransform.key) orElse
+    readsForTransform[PromoteTrusteeTransform](PromoteTrusteeTransform.key) orElse
     readsForTransform[RemoveTrusteeTransform](RemoveTrusteeTransform.key)
   }
 
@@ -106,22 +101,12 @@ object DeltaTransform {
   }
 
   def trusteeWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
-    case transform: PromoteTrusteeIndTransform =>
-      Json.obj(PromoteTrusteeIndTransform.key -> Json.toJson(transform)(PromoteTrusteeIndTransform.format))
-    case transform: PromoteTrusteeOrgTransform =>
-      Json.obj(PromoteTrusteeOrgTransform.key -> Json.toJson(transform)(PromoteTrusteeOrgTransform.format))
-    case transform: AmendLeadTrusteeIndTransform =>
-      Json.obj(AmendLeadTrusteeIndTransform.key -> Json.toJson(transform)(AmendLeadTrusteeIndTransform.format))
-    case transform: AmendLeadTrusteeOrgTransform =>
-      Json.obj(AmendLeadTrusteeOrgTransform.key -> Json.toJson(transform)(AmendLeadTrusteeOrgTransform.format))
-    case transform: AmendTrusteeIndTransform =>
-      Json.obj(AmendTrusteeIndTransform.key -> Json.toJson(transform)(AmendTrusteeIndTransform.format))
-    case transform: AmendTrusteeOrgTransform =>
-      Json.obj(AmendTrusteeOrgTransform.key -> Json.toJson(transform)(AmendTrusteeOrgTransform.format))
-    case transform: AddTrusteeIndTransform =>
-      Json.obj(AddTrusteeIndTransform.key -> Json.toJson(transform)(AddTrusteeIndTransform.format))
-    case transform: AddTrusteeOrgTransform =>
-      Json.obj(AddTrusteeOrgTransform.key -> Json.toJson(transform)(AddTrusteeOrgTransform.format))
+    case transform: AddTrusteeTransform =>
+      Json.obj(AddTrusteeTransform.key -> Json.toJson(transform)(AddTrusteeTransform.format))
+    case transform: AmendTrusteeTransform =>
+      Json.obj(AmendTrusteeTransform.key -> Json.toJson(transform)(AmendTrusteeTransform.format))
+    case transform: PromoteTrusteeTransform =>
+      Json.obj(PromoteTrusteeTransform.key -> Json.toJson(transform)(PromoteTrusteeTransform.format))
     case transform: RemoveTrusteeTransform =>
       Json.obj(RemoveTrusteeTransform.key -> Json.toJson(transform)(RemoveTrusteeTransform.format))
   }

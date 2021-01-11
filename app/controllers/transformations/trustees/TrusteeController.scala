@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
-package transformers.remove
+package controllers.transformations.trustees
 
-import play.api.libs.json.{Format, Json}
+import models.requests.IdentifierRequest
+import play.api.libs.json.{JsPath, JsValue, Reads}
+import utils.Constants._
 
-import java.time.LocalDate
+trait TrusteeController {
 
-case class RemoveTrustee(endDate: LocalDate,
-                         index: Int) extends Remove
+  def path(`type`: String, index: Int): JsPath = {
+    if (`type` == INDIVIDUAL_LEAD_TRUSTEE || `type` == BUSINESS_LEAD_TRUSTEE) {
+      ENTITIES \ LEAD_TRUSTEE
+    } else {
+      ENTITIES \ TRUSTEES \ index
+    }
+  }
 
-object RemoveTrustee {
-  implicit val formats : Format[RemoveTrustee] = Json.format[RemoveTrustee]
+  def validate[T](implicit request: IdentifierRequest[JsValue], rds: Reads[T]): Option[T] = {
+    request.body.validateOpt[T].getOrElse(None)
+  }
 }

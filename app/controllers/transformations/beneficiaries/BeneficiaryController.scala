@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package transformers.trustees
+package controllers.transformations.beneficiaries
 
-case class TrusteeIndOrOrg(trustee: String) {
+import play.api.libs.json.JsPath
+import utils.Constants._
 
-  override val toString: String = trustee
+trait BeneficiaryController {
 
+  def path(`type`: String, index: Int): JsPath = ENTITIES \ BENEFICIARIES \ `type` \ index
 }
-
-object TrusteeInd extends TrusteeIndOrOrg("trusteeInd")
-object TrusteeOrg extends TrusteeIndOrOrg("trusteeOrg")
