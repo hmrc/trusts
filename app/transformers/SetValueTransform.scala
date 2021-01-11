@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-package transformers.taxliability
+package transformers
 
-import play.api.libs.json._
-import transformers.SetValueTransform
+import play.api.libs.json.{JsPath, JsResult, JsValue}
 
-case class SetTaxLiabilityTransform(value: JsValue) extends SetValueTransform {
+trait SetValueTransform extends DeltaTransform with JsonOperations {
 
-  override val path: JsPath = __ \ 'yearsReturn
+  val path: JsPath
+  val value: JsValue
 
-  override val isTaxableMigrationTransform: Boolean = true
-}
-
-object SetTaxLiabilityTransform {
-
-  val key = "SetTaxLiabilityTransform"
-
-  implicit val format: Format[SetTaxLiabilityTransform] = Json.format[SetTaxLiabilityTransform]
+  override def applyTransform(input: JsValue): JsResult[JsValue] = {
+    pruneThenAddTo(input, path, value)
+  }
 }

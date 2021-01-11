@@ -17,16 +17,12 @@
 package transformers.trustdetails
 
 import play.api.libs.json._
-import transformers.{DeltaTransform, JsonOperations}
+import transformers.SetValueTransform
 import utils.Constants._
 
-case class SetTrustDetailTransform(value: JsValue, `type`: String) extends DeltaTransform with JsonOperations {
+case class SetTrustDetailTransform(value: JsValue, `type`: String) extends SetValueTransform {
 
-  private lazy val path = __ \ 'details \ 'trust \ 'details \ `type`
-
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    pruneThenAddTo(input, path, value)
-  }
+  override val path: JsPath = __ \ 'details \ 'trust \ 'details \ `type`
 
   override val isTaxableMigrationTransform: Boolean = {
 
@@ -42,7 +38,6 @@ case class SetTrustDetailTransform(value: JsValue, `type`: String) extends Delta
 
     taxableMigrationDetailTypes.contains(`type`)
   }
-
 }
 
 object SetTrustDetailTransform {
