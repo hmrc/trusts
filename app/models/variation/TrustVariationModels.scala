@@ -745,10 +745,3 @@ object NonEEABusinessType {
   implicit val format: Format[NonEEABusinessType] = Json.format[NonEEABusinessType]
   override def toString: String = "nonEEABusiness"
 }
-
-case class YearsReturns(taxReturnsNoDues: Option[Boolean],
-                        returns: Option[List[YearReturnType]])
-
-object YearsReturns {
-  implicit val yearsReturnsFormat: Format[YearsReturns] = Json.format[YearsReturns]
-}

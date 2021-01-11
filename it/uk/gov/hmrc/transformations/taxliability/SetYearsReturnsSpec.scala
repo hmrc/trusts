@@ -18,9 +18,8 @@ package uk.gov.hmrc.transformations.taxliability
 
 import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import models.YearReturnType
 import models.get_trust.GetTrustSuccessResponse
-import models.variation.YearsReturns
+import models.{YearReturnType, YearsReturns}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.{Assertion, AsyncFreeSpec, MustMatchers}
@@ -65,7 +64,6 @@ class SetYearsReturnsSpec extends AsyncFreeSpec with MustMatchers with MockitoSu
       val initialYearsReturns = contentAsJson(initialGetResult).as[JsValue]
 
       val body = Json.toJson(YearsReturns(
-        taxReturnsNoDues = None,
         returns = Some(List(
           YearReturnType("18", taxConsequence = true),
           YearReturnType("19", taxConsequence = true),

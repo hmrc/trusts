@@ -72,7 +72,7 @@ object Correspondence {
   implicit val correspondenceFormat : Format[Correspondence] = Json.format[Correspondence]
 }
 
-case class YearsReturns(var returns: Option[List[YearReturnType]])
+case class YearsReturns(returns: Option[List[YearReturnType]])
 
 object YearsReturns {
   implicit val yearsReturnsFormat: Format[YearsReturns] = Json.format[YearsReturns]
@@ -482,13 +482,6 @@ case class YearReturnType(taxReturnYear: String, taxConsequence: Boolean)
 object YearReturnType {
   implicit val yearReturnTypeFormat: Format[YearReturnType] = Json.format[YearReturnType]
 }
-
-case class YearsReturnType(returns: Option[Array[YearReturnType]])
-
-object YearsReturnType {
-  implicit val yearsReturnTypeFormat: Format[YearsReturnType] = Json.format[YearsReturnType]
-}
-
 
 case class PassportType(number: String,
                         expirationDate: LocalDate,
