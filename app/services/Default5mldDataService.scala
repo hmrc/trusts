@@ -45,7 +45,6 @@ class Default5mldDataService @Inject()(appConfig: AppConfig) extends Logging {
             putNewValue((__ \ 'trust \ 'details \ 'trustUKResident), JsBoolean(true)) andThen
             putNewValue((__ \ 'submissionDate), JsString("2021-01-01"))
         } else {
-          putNewValue((__ \ 'trust \ 'entities \ 'leadTrustees \ 'leadTrusteeOrg \ 'countryOfResidence), JsString("GB")) andThen
             putNewValue((__ \ 'trust \ 'details \ 'expressTrust), JsBoolean(false)) andThen
             putNewValue((__ \ 'trust \ 'details \ 'trustTaxable), JsBoolean(true)) andThen
             putNewValue((__ \ 'trust \ 'details \ 'trustUKResident), JsBoolean(true)) andThen
