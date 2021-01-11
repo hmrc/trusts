@@ -17,7 +17,7 @@
 package controllers.transformations.taxliability
 
 import controllers.actions.FakeIdentifierAction
-import models.variation.YearsReturns
+import models.YearsReturns
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
@@ -60,7 +60,7 @@ class TaxLiabilityTransformationControllerSpec extends FreeSpec
         when(service.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
-        val body = Json.toJson(YearsReturns(None, None))
+        val body = Json.toJson(YearsReturns(None))
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(body))
