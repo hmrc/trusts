@@ -108,4 +108,10 @@ object Constants {
   val ENTITY_END = "entityEnd"
   val DATE_OF_DEATH = "dateOfDeath"
 
+  val TRUST_OR_ESTATE_DISPLAY = "trustOrEstateDisplay"
+  val GET_TRUST = "getTrust"
+  val RESPONSE_HEADER = "responseHeader"
+  val DFMCA_RETURN_USER_STATUS = "dfmcaReturnUserStatus"
+  val FORM_BUNDLE_NUMBER = "formBundleNo"
+
 }

@@ -30,8 +30,8 @@ case class GetTrustDesResponse(getTrust: Option[GetTrust],
 object GetTrustDesResponse {
   implicit val writes: Writes[GetTrustDesResponse] = Json.writes[GetTrustDesResponse]
   implicit val reads: Reads[GetTrustDesResponse] = (
-    (JsPath \ "trustOrEstateDisplay").readNullable[GetTrust] and
-      (JsPath \ "responseHeader").read[ResponseHeader]
+    (JsPath \ TRUST_OR_ESTATE_DISPLAY).readNullable[GetTrust] and
+      (JsPath \ RESPONSE_HEADER).read[ResponseHeader]
     ) (GetTrustDesResponse.apply _)
 }
 
@@ -42,13 +42,13 @@ object ResponseHeader {
   implicit val apiWrites: Writes[ResponseHeader] = Json.writes[ResponseHeader]
 
   val mongoWrites: Writes[ResponseHeader] = (header: ResponseHeader) => Json.obj(
-    "dfmcaReturnUserStatus" -> header.status,
-    "formBundleNo" -> header.formBundleNo
+    DFMCA_RETURN_USER_STATUS -> header.status,
+    FORM_BUNDLE_NUMBER -> header.formBundleNo
   )
 
   implicit val reads: Reads[ResponseHeader] = (
-    (JsPath \ "dfmcaReturnUserStatus").read[String] and
-      (JsPath \ "formBundleNo").read[String]
+    (JsPath \ DFMCA_RETURN_USER_STATUS).read[String] and
+      (JsPath \ FORM_BUNDLE_NUMBER).read[String]
     )(ResponseHeader.apply _)
 }
 
