@@ -31,8 +31,8 @@ case class AmendBeneficiaryTransform(index: Option[Int],
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     if (`type` == UNIDENTIFIED_BENEFICIARY) {
       val description: String = amended.as[JsString].value
-      val originalAndAmendedMerged: JsObject = original.as[JsObject].deepMerge(Json.obj("description" -> description)) - LINE_NUMBER - BP_MATCH_STATUS
-      amendAtPosition(input, path, index, originalAndAmendedMerged)
+      val originalAndAmendedMerged: JsObject = original.as[JsObject].deepMerge(Json.obj("description" -> description))
+      amendAtPosition(input, path, index, removeFields(originalAndAmendedMerged, etmpFields))
     } else {
       super.applyTransform(input)
     }

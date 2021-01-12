@@ -26,6 +26,7 @@ import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.RegistrationSubmissionRepository
 import services.LocalDateTimeService
+import utils.Constants._
 
 import java.time.LocalDate
 import javax.inject.Inject
@@ -36,7 +37,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
                                           identify: IdentifierAction,
                                           localDateTimeService: LocalDateTimeService,
                                           cc: ControllerComponents
-                                       ) extends TrustsBaseController(cc) with Logging {
+                                         ) extends TrustsBaseController(cc) with Logging {
 
   def setSection(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
@@ -86,7 +87,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
   // Play 2.5 throws if the path to be pruned does not exist.
   // So we do this hacky thing to keep it all self-contained.
   // If upgraded to play 2.6, this can turn into simply "path.json.prune".
-  private def prunePath(path: JsPath) = {
+  private def prunePath(path: JsPath): Reads[JsObject] = {
     JsPath.json.update {
       path.json.put(Json.toJson(Json.obj()))
     } andThen path.json.prune
@@ -119,7 +120,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
   private def setAnswerSections(key: String, answerSections: List[RegistrationSubmission.AnswerSection]): Reads[JsObject] = {
     val sectionPath = AnswerSection.path \ key
 
-      prunePath(sectionPath) andThen JsPath.json.update(sectionPath.json.put(Json.toJson(answerSections)))
+    prunePath(sectionPath) andThen JsPath.json.update(sectionPath.json.put(Json.toJson(answerSections)))
   }
 
   def setSectionSet(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
@@ -141,7 +142,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
     }
   }
 
-  private def dataSetOperations(sectionKey: String, incomingDraftData: RegistrationSubmission.DataSet) = {
+  private def dataSetOperations(sectionKey: String, incomingDraftData: RegistrationSubmission.DataSet): List[Reads[JsObject]] = {
     val sectionPath = JsPath() \ sectionKey
 
     List(
@@ -154,7 +155,8 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
     ) ++ setRegistrationSections(incomingDraftData.registrationPieces)
   }
 
-  private def applyDataSet(draft: RegistrationSubmissionDraft, operations: List[Reads[JsObject]])(implicit request: IdentifierRequest[JsValue]) = {
+  private def applyDataSet(draft: RegistrationSubmissionDraft, operations: List[Reads[JsObject]])
+                          (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
     operations.foldLeft[JsResult[JsValue]](JsSuccess(draft.draftData))((cur, xform) =>
       cur.flatMap(_.transform(xform))) match {
       case JsSuccess(newDraftData, _) =>
@@ -192,17 +194,15 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
     submissionRepository.getRecentDrafts(request.internalId, request.affinityGroup).map {
       drafts =>
         implicit val draftWrites: Writes[RegistrationSubmissionDraft] = new Writes[RegistrationSubmissionDraft] {
-          override def writes(draft: RegistrationSubmissionDraft): JsValue =
-            if (draft.reference.isDefined) {
-              Json.obj(
-                "createdAt" -> draft.createdAt,
-                "draftId" -> draft.draftId,
-                "reference" -> draft.reference)
-            } else {
-              Json.obj(
-                "createdAt" -> draft.createdAt,
-                "draftId" -> draft.draftId)
-            }
+          override def writes(draft: RegistrationSubmissionDraft): JsValue = {
+
+            val obj = Json.obj(
+              CREATED_AT -> draft.createdAt,
+              DRAFT_ID -> draft.draftId
+            )
+
+            addReferenceIfDefined(obj, draft.reference)
+          }
         }
 
         Ok(Json.toJson(drafts))
@@ -213,57 +213,31 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
     submissionRepository.removeDraft(draftId, request.internalId).map { _ => Ok }
   }
 
-  private def buildResponseJson(draft: RegistrationSubmissionDraft, data: JsValue) = {
-    if (draft.reference.isDefined) {
-      Json.obj(
-        "createdAt" -> draft.createdAt,
-        "data" -> data,
-        "reference" -> draft.reference
-      )
-    } else {
-      Json.obj(
-        "createdAt" -> draft.createdAt,
-        "data" -> data
-      )
+  private def buildResponseJson(draft: RegistrationSubmissionDraft, data: JsValue): JsObject = {
+
+    val obj = Json.obj(
+      CREATED_AT -> draft.createdAt,
+      DATA -> data
+    )
+
+    addReferenceIfDefined(obj, draft.reference)
+  }
+
+  private def addReferenceIfDefined(obj: JsObject, reference: Option[String]): JsObject = {
+    reference match {
+      case Some(r) => obj + (REFERENCE -> JsString(r))
+      case _ => obj
     }
   }
 
-  def getWhenTrustSetup(draftId: String) : Action[AnyContent] = identify.async {
+  def getWhenTrustSetup(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
-      submissionRepository.getDraft(draftId, request.internalId).map {
-        case Some(draft) =>
-          // Todo remove old path once trusts-details has migrated to register-trust-details-frontend and is in production
-          // Added the ability for both paths due to 28 days S4L for draft registrations
-          // Implemented on 01 October 2020
-          val oldPath = JsPath \ "main" \ "data" \ "trustDetails" \ "whenTrustSetup"
-          val newPath = JsPath \ "trustDetails" \ "data" \ "trustDetails" \ "whenTrustSetup"
 
-          def getDate(path: JsPath) =
-            draft.draftData.transform(path.json.pick).map(_.as[LocalDate])
+      val reads: Reads[LocalDate] = Reads.DefaultLocalDateReads
+      val writes: Writes[LocalDate] = (date: LocalDate) => Json.obj("startDate" -> date)
 
-          val dateAtOldPath = getDate(oldPath)
-
-          val dateAtNewPath = getDate(newPath)
-
-          (dateAtOldPath, dateAtNewPath) match {
-            case (JsSuccess(date, _), JsError(_)) =>
-              logger.info(s"[Session ID: ${request.sessionId}]" +
-                s" found trust start date at old path")
-              Ok(Json.obj("startDate" -> date))
-            case (JsError(_), JsSuccess(date, _)) =>
-              logger.info(s"[Session ID: ${request.sessionId}]" +
-                s" found trust start date at new path")
-              Ok(Json.obj("startDate" -> date))
-            case _ =>
-              logger.info(s"[Session ID: ${request.sessionId}]" +
-                s" no trust start date")
-              NotFound
-          }
-        case None =>
-          logger.info(s"[Session ID: ${request.sessionId}]" +
-            s" no draft, cannot return start date")
-          NotFound
-      }
+      val path = JsPath \ "trustDetails" \ "data" \ "trustDetails" \ "whenTrustSetup"
+      getAtPath[LocalDate](draftId, path)(request, reads, writes)
   }
 
   def getTrustName(draftId: String) : Action[AnyContent] = identify.async {
@@ -273,11 +247,8 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           val matchingPath = JsPath \ "main" \ "data" \ "matching" \ "trustName"
           val detailsPath = JsPath \ "trustDetails" \ "data" \ "trustDetails" \ "trustName"
 
-          def getData(path: JsPath) =
-            draft.draftData.transform(path.json.pick).map(_.as[String])
-
-          val matchingName = getData(matchingPath)
-          val detailsName = getData(detailsPath)
+          val matchingName = get[String](draft.draftData, matchingPath)
+          val detailsName = get[String](draft.draftData, detailsPath)
 
           (matchingName, detailsName) match {
             case (JsSuccess(date, _), JsError(_)) =>
@@ -298,6 +269,10 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
             s" no draft, cannot return trust name")
           NotFound
       }
+  }
+
+  private def get[T](draftData: JsValue, path: JsPath)(implicit rds: Reads[T]): JsResult[T] = {
+    draftData.transform(path.json.pick).map(_.as[T])
   }
 
   def getLeadTrustee(draftId: String) : Action[AnyContent] = identify.async {

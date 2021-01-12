@@ -21,6 +21,7 @@ import play.api.Logging
 import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK, SERVICE_UNAVAILABLE}
 import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
+import utils.Constants._
 
 trait GetTrustResponse
 
@@ -33,16 +34,16 @@ object GetTrustSuccessResponse {
   implicit val writes: Writes[GetTrustSuccessResponse] = Writes{
     case TrustProcessedResponse(trust, header) =>
       Json.obj(
-        "responseHeader" -> header,
-        "getTrust" -> Json.toJson(trust.as[GetTrust])
+        RESPONSE_HEADER -> header,
+        GET_TRUST -> Json.toJson(trust.as[GetTrust])
       )
     case TrustFoundResponse(header) =>
-      Json.obj("responseHeader" -> header)
+      Json.obj(RESPONSE_HEADER -> header)
   }
 
   implicit val reads: Reads[GetTrustSuccessResponse] = (json: JsValue) => {
-    val header = (json \ "responseHeader").validate[ResponseHeader]
-    (json \ "trustOrEstateDisplay").toOption match {
+    val header = (json \ RESPONSE_HEADER).validate[ResponseHeader]
+    (json \ TRUST_OR_ESTATE_DISPLAY).toOption match {
       case None =>
         header.map(TrustFoundResponse)
       case Some(x) =>

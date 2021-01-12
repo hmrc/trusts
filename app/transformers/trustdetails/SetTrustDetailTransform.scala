@@ -22,7 +22,7 @@ import utils.Constants._
 
 case class SetTrustDetailTransform(value: JsValue, `type`: String) extends SetValueTransform {
 
-  override val path: JsPath = __ \ 'details \ 'trust \ 'details \ `type`
+  override val path: JsPath = TRUST \ DETAILS \ `type`
 
   override val isTaxableMigrationTransform: Boolean = {
 

@@ -17,6 +17,7 @@
 package controllers
 
 import controllers.actions.{IdentifierAction, ValidateIdentifierActionProvider}
+
 import javax.inject.{Inject, Singleton}
 import models.auditing.TrustAuditing
 import models.get_trust.GetTrustResponse.CLOSED_REQUEST_STATUS
@@ -27,6 +28,7 @@ import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import services.{AuditService, TransformationService, TrustsService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import utils.Constants._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -38,7 +40,6 @@ class GetTrustController @Inject()(identify: IdentifierAction,
                                    transformationService: TransformationService,
                                    validateIdentifier : ValidateIdentifierActionProvider,
                                    cc: ControllerComponents) extends BackendController(cc) with Logging {
-
 
   val errorAuditMessages: Map[GetTrustResponse, String] = Map(
     BadRequestResponse -> "Bad Request received from DES.",
@@ -67,7 +68,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   def getLeadTrustee(identifier: String): Action[AnyContent] =
     doGet(identifier, applyTransformations = true) {
       case processed: TrustProcessedResponse =>
-        val pick = (JsPath \ 'details \ 'trust \ 'entities \ 'leadTrustees).json.pick
+        val pick = (ENTITIES \ LEAD_TRUSTEE).json.pick
         processed.getTrust.transform(pick).fold(
           _ => InternalServerError,
           json => {
@@ -81,53 +82,53 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
 
   def getTrustDetails(identifier: String): Action[AnyContent] =
-    getItemAtPath(identifier, JsPath \ 'details \ 'trust \ 'details)
+    getItemAtPath(identifier, TRUST \ DETAILS)
 
   def getYearsReturns(identifier: String): Action[AnyContent] =
-    getItemAtPath(identifier, JsPath \ 'yearsReturn)
+    getItemAtPath(identifier, YEARS_RETURNS)
 
   def getTrustees(identifier: String) : Action[AnyContent] =
-    getArrayAtPath(identifier, JsPath \ 'details \ 'trust \ 'entities \ 'trustees, "trustees")
+    getArrayAtPath(identifier, ENTITIES \ TRUSTEES, TRUSTEES)
 
   def getBeneficiaries(identifier: String) : Action[AnyContent] =
-    getArrayAtPath(identifier, JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary, "beneficiary")
+    getArrayAtPath(identifier, ENTITIES \ BENEFICIARIES, BENEFICIARIES)
 
   def getSettlors(identifier: String) : Action[AnyContent] =
     processEtmpData(identifier) {
       transformed =>
-        val settlorsPath = JsPath \ 'details \ 'trust \ 'entities \ 'settlors
-        val deceasedPath = JsPath \ 'details \ 'trust \ 'entities \ 'deceased
+        val settlorsPath = ENTITIES \ SETTLORS
+        val deceasedPath = ENTITIES \ DECEASED_SETTLOR
 
         val settlors = transformed.transform(settlorsPath.json.pick).getOrElse(Json.obj())
         val deceased = transformed.transform(deceasedPath.json.pick)
         val amendedSettlors = deceased.map {
-          deceased => settlors.as[JsObject] + ("deceased" -> deceased)
+          deceased => settlors.as[JsObject] + (DECEASED_SETTLOR -> deceased)
         }.getOrElse(settlors)
 
-        Json.obj("settlors" -> amendedSettlors)
+        Json.obj(SETTLORS -> amendedSettlors)
     }
 
   def getDeceasedSettlorDeathRecorded(identifier: String) : Action[AnyContent] =
     processEtmpData(identifier, applyTransformations = false) {
       etmpData =>
-        val deceasedDeathDatePath = JsPath \ 'details \ 'trust \ 'entities \ 'deceased \ 'dateOfDeath
+        val deceasedDeathDatePath = ENTITIES \ DECEASED_SETTLOR \ DATE_OF_DEATH
         JsBoolean(etmpData.transform(deceasedDeathDatePath.json.pick).isSuccess)
     }
 
-  private val protectorsPath = JsPath \ 'details \ 'trust \ 'entities \ 'protectors
+  private val protectorsPath = ENTITIES \ PROTECTORS
 
   def getProtectorsAlreadyExist(identifier: String) : Action[AnyContent] =
     processEtmpData(identifier) {
       trustData =>
         JsBoolean(!trustData.transform(protectorsPath.json.pick).asOpt.contains(
-          Json.obj("protector" -> JsArray(), "protectorCompany" -> JsArray()))
+          Json.obj(INDIVIDUAL_PROTECTOR -> JsArray(), BUSINESS_PROTECTOR -> JsArray()))
         )
     }
 
   def getProtectors(identifier: String) : Action[AnyContent] =
-    getArrayAtPath(identifier, protectorsPath, "protectors")
+    getArrayAtPath(identifier, protectorsPath, PROTECTORS)
 
-  private val otherIndividualsPath = JsPath \ 'details \ 'trust \ 'entities \ 'naturalPerson
+  private val otherIndividualsPath = ENTITIES \ OTHER_INDIVIDUALS
 
   def getOtherIndividualsAlreadyExist(identifier: String): Action[AnyContent] =
     processEtmpData(identifier) {
@@ -135,14 +136,14 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
 
   def getOtherIndividuals(identifier: String) : Action[AnyContent] =
-    getArrayAtPath(identifier, otherIndividualsPath, "naturalPerson")
+    getArrayAtPath(identifier, otherIndividualsPath, OTHER_INDIVIDUALS)
 
   private def getArrayAtPath(identifier: String, path: JsPath, fieldName: String): Action[AnyContent] = {
     getElementAtPath(identifier,
       path,
       Json.obj(fieldName -> JsArray())) {
-        json => Json.obj(fieldName -> json)
-      }
+      json => Json.obj(fieldName -> json)
+    }
   }
 
   private def getItemAtPath(identifier: String, path: JsPath): Action[AnyContent] = {
@@ -151,13 +152,13 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       path,
       Json.obj()
     ) {
-        json => json
-      }
+      json => json
+    }
   }
 
   private def getElementAtPath(identifier: String,
-                             path: JsPath,
-                             defaultValue: JsValue)
+                               path: JsPath,
+                               defaultValue: JsValue)
                               (insertIntoObject: JsValue => JsValue): Action[AnyContent] = {
     processEtmpData(identifier) {
       transformed => transformed
@@ -168,7 +169,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   }
 
   private def processEtmpData(identifier: String, applyTransformations: Boolean = true)
-                              (processObject: JsValue => JsValue): Action[AnyContent] = {
+                             (processObject: JsValue => JsValue): Action[AnyContent] = {
     doGet(identifier, applyTransformations) {
       case processed: TrustProcessedResponse =>
         processed.transform.map {
@@ -182,7 +183,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
   }
 
-  private def resetCacheIfRequested(identifier: String, internalId: String, refreshEtmpData: Boolean) = {
+  private def resetCacheIfRequested(identifier: String, internalId: String, refreshEtmpData: Boolean): Future[Unit] = {
     if (refreshEtmpData) {
       val resetTransforms = transformationService.removeAllTransformations(identifier, internalId)
       val resetCache = trustsService.resetCache(identifier, internalId)
@@ -197,26 +198,26 @@ class GetTrustController @Inject()(identify: IdentifierAction,
 
   private def doGet(identifier: String, applyTransformations: Boolean, refreshEtmpData: Boolean = false)
                    (f: GetTrustSuccessResponse => Result): Action[AnyContent] = (validateIdentifier(identifier) andThen identify).async {
-      implicit request =>
-        {
-          for {
-            _ <- resetCacheIfRequested(identifier, request.internalId, refreshEtmpData)
-            data <- if (applyTransformations) {
-              transformationService.getTransformedData(identifier, request.internalId)
-            } else {
-              trustsService.getTrustInfo(identifier, request.internalId)
-            }
-          } yield (
-            successResponse(f, identifier) orElse
+    implicit request =>
+      {
+        for {
+          _ <- resetCacheIfRequested(identifier, request.internalId, refreshEtmpData)
+          data <- if (applyTransformations) {
+            transformationService.getTransformedData(identifier, request.internalId)
+          } else {
+            trustsService.getTrustInfo(identifier, request.internalId)
+          }
+        } yield (
+          successResponse(f, identifier) orElse
             notEnoughDataResponse(identifier) orElse
             errorResponse(identifier)
           ).apply(data)
-        } recover {
-          case e =>
-            logger.error(s"[Session ID: ${request.sessionId}][UTR/URN: $identifier] Failed to get trust info ${e.getMessage}")
-            InternalServerError
-        }
-    }
+      } recover {
+        case e =>
+          logger.error(s"[Session ID: ${request.sessionId}][UTR/URN: $identifier] Failed to get trust info ${e.getMessage}")
+          InternalServerError
+      }
+  }
 
   private def successResponse(f: GetTrustSuccessResponse => Result,
                               identifier: String)
@@ -233,7 +234,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   }
 
   private def notEnoughDataResponse(identifier: String)
-                           (implicit request: IdentifierRequest[AnyContent]): PartialFunction[GetTrustResponse, Result] = {
+                                   (implicit request: IdentifierRequest[AnyContent]): PartialFunction[GetTrustResponse, Result] = {
     case NotEnoughDataResponse(json, errors) =>
       val reason = Json.obj(
         "response" -> json,

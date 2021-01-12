@@ -17,10 +17,10 @@
 package models.get_trust
 
 import java.time.LocalDate
-
 import models._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import utils.Constants._
 import utils.DeedOfVariation.DeedOfVariation
 import utils.TypeOfTrust.TypeOfTrust
 
@@ -30,8 +30,8 @@ case class GetTrustDesResponse(getTrust: Option[GetTrust],
 object GetTrustDesResponse {
   implicit val writes: Writes[GetTrustDesResponse] = Json.writes[GetTrustDesResponse]
   implicit val reads: Reads[GetTrustDesResponse] = (
-    (JsPath \ "trustOrEstateDisplay").readNullable[GetTrust] and
-      (JsPath \ "responseHeader").read[ResponseHeader]
+    (JsPath \ TRUST_OR_ESTATE_DISPLAY).readNullable[GetTrust] and
+      (JsPath \ RESPONSE_HEADER).read[ResponseHeader]
     ) (GetTrustDesResponse.apply _)
 }
 
@@ -42,13 +42,13 @@ object ResponseHeader {
   implicit val apiWrites: Writes[ResponseHeader] = Json.writes[ResponseHeader]
 
   val mongoWrites: Writes[ResponseHeader] = (header: ResponseHeader) => Json.obj(
-    "dfmcaReturnUserStatus" -> header.status,
-    "formBundleNo" -> header.formBundleNo
+    DFMCA_RETURN_USER_STATUS -> header.status,
+    FORM_BUNDLE_NUMBER -> header.formBundleNo
   )
 
   implicit val reads: Reads[ResponseHeader] = (
-    (JsPath \ "dfmcaReturnUserStatus").read[String] and
-      (JsPath \ "formBundleNo").read[String]
+    (JsPath \ DFMCA_RETURN_USER_STATUS).read[String] and
+      (JsPath \ FORM_BUNDLE_NUMBER).read[String]
     )(ResponseHeader.apply _)
 }
 
@@ -70,12 +70,12 @@ object GetTrust {
   implicit val writes: Writes[GetTrust] = Json.writes[GetTrust]
 
   implicit val reads: Reads[GetTrust] = (
-    (JsPath \ "matchData").read[MatchData] and
-      (JsPath \ "correspondence").read[Correspondence] and
-      (JsPath \ "declaration").read[Declaration] and
-      (JsPath \ "details" \ "trust").read[DisplayTrust] and
-      (JsPath \ "submissionDate").readNullable[LocalDate] and
-      (JsPath \ "yearsReturn").readNullable[YearsReturns]
+    MATCH_DATA.read[MatchData] and
+      CORRESPONDENCE.read[Correspondence] and
+      DECLARATION.read[Declaration] and
+      TRUST.read[DisplayTrust] and
+      SUBMISSION_DATE.readNullable[LocalDate] and
+      YEARS_RETURNS.readNullable[YearsReturns]
     ) (GetTrust.apply _)
 }
 
@@ -145,13 +145,13 @@ case class DisplayTrustEntitiesType(naturalPerson: Option[List[DisplayTrustNatur
 object DisplayTrustEntitiesType {
 
   implicit val displayTrustEntitiesTypeReads : Reads[DisplayTrustEntitiesType] = (
-    (__ \ "naturalPerson").readNullable[List[DisplayTrustNaturalPersonType]] and
-    (__ \ "beneficiary").read[DisplayTrustBeneficiaryType] and
-    (__ \ "deceased").readNullable[DisplayTrustWillType] and
-    (__ \ "leadTrustees").read[DisplayTrustLeadTrusteeType] and
-    (__ \ "trustees").readNullable[List[DisplayTrustTrusteeType]] and
-    (__ \ "protectors").readNullable[DisplayTrustProtectorsType] and
-    (__ \ "settlors").readNullable[DisplayTrustSettlors]
+    (__ \ OTHER_INDIVIDUALS).readNullable[List[DisplayTrustNaturalPersonType]] and
+    (__ \ BENEFICIARIES).read[DisplayTrustBeneficiaryType] and
+    (__ \ DECEASED_SETTLOR).readNullable[DisplayTrustWillType] and
+    (__ \ LEAD_TRUSTEE).read[DisplayTrustLeadTrusteeType] and
+    (__ \ TRUSTEES).readNullable[List[DisplayTrustTrusteeType]] and
+    (__ \ PROTECTORS).readNullable[DisplayTrustProtectorsType] and
+    (__ \ SETTLORS).readNullable[DisplayTrustSettlors]
   )(
     (natural, beneficiary, deceased, leadTrustee, trustees, protectors, settlors) =>
       DisplayTrustEntitiesType(

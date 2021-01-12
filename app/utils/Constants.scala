@@ -29,7 +29,6 @@ object Constants {
   val INTERNAL_SERVER_ERROR_CODE = "INTERNAL_SERVER_ERROR"
   val INTERNAL_SERVER_ERROR_MESSAGE = "Internal server error."
 
-
   val INSUFFICIENT_ENROLMENT_MESSAGE = "Insufficient enrolment for authorised user."
   val UNAUTHORISED = "UNAUTHORISED"
 
@@ -44,6 +43,11 @@ object Constants {
 
   val TRUST: JsPath = __ \ "details" \ "trust"
   val ENTITIES: JsPath = TRUST \ "entities"
+  val MATCH_DATA: JsPath = __ \ "matchData"
+  val CORRESPONDENCE: JsPath = __ \ "correspondence"
+  val DECLARATION: JsPath = __ \ "declaration"
+  val SUBMISSION_DATE: JsPath = __ \ "submissionDate"
+  val YEARS_RETURNS: JsPath = __ \ "yearsReturn"
 
   val ASSETS = "assets"
   val BENEFICIARIES = "beneficiary"
@@ -52,6 +56,8 @@ object Constants {
   val SETTLORS = "settlors"
   val TRUSTEES = "trustees"
   val LEAD_TRUSTEE = "leadTrustees"
+
+  val DETAILS = "details"
 
   val MONEY_ASSET = "monetary"
   val PROPERTY_OR_LAND_ASSET = "propertyOrLand"
@@ -100,5 +106,17 @@ object Constants {
   val BP_MATCH_STATUS = "bpMatchStatus"
   val ENTITY_START = "entityStart"
   val ENTITY_END = "entityEnd"
+  val DATE_OF_DEATH = "dateOfDeath"
+
+  val TRUST_OR_ESTATE_DISPLAY = "trustOrEstateDisplay"
+  val GET_TRUST = "getTrust"
+  val RESPONSE_HEADER = "responseHeader"
+  val DFMCA_RETURN_USER_STATUS = "dfmcaReturnUserStatus"
+  val FORM_BUNDLE_NUMBER = "formBundleNo"
+
+  val CREATED_AT = "createdAt"
+  val DRAFT_ID = "draftId"
+  val REFERENCE = "reference"
+  val DATA = "data"
 
 }
