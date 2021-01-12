@@ -114,4 +114,9 @@ object Constants {
   val DFMCA_RETURN_USER_STATUS = "dfmcaReturnUserStatus"
   val FORM_BUNDLE_NUMBER = "formBundleNo"
 
+  val CREATED_AT = "createdAt"
+  val DRAFT_ID = "draftId"
+  val REFERENCE = "reference"
+  val DATA = "data"
+
 }
