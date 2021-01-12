@@ -28,18 +28,6 @@ case class AmendSettlorTransform(index: Option[Int],
                                  endDate: LocalDate,
                                  `type`: String) extends SettlorTransform with AmendEntityTransform {
 
-  private val isDeceasedSettlor: Boolean = `type` == DECEASED_SETTLOR
-
-  private val etmpFields: Seq[String] = Seq(LINE_NUMBER, BP_MATCH_STATUS)
-
-  override val path: JsPath = {
-    if (isDeceasedSettlor) {
-      ENTITIES \ `type`
-    } else {
-      ENTITIES \ SETTLORS \ `type`
-    }
-  }
-
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     if (isDeceasedSettlor) {
       amendDeceasedAndPreserveData(input)
@@ -77,7 +65,7 @@ case class AmendSettlorTransform(index: Option[Int],
       lineNo => {
         stripEtmpStatusForMatching(input, lineNo).fold(
           _ => endEntity(input, path, original, endDate, endDateField),
-          newEntries => addEndedEntity(input, newEntries)
+          newEntities => addEndedEntity(input, newEntities)
         )
       }
     )
@@ -87,7 +75,7 @@ case class AmendSettlorTransform(index: Option[Int],
     input.transform(path.json.pick).map {
       value =>
         value.as[Seq[JsObject]].collect {
-          case x: JsObject if x \ LINE_NUMBER == JsDefined(lineNo) => x - LINE_NUMBER - BP_MATCH_STATUS
+          case x: JsObject if x \ LINE_NUMBER == JsDefined(lineNo) => removeFields(x, etmpFields)
           case x => x
         }
     }
@@ -96,7 +84,7 @@ case class AmendSettlorTransform(index: Option[Int],
   private def addEndedEntity(input: JsValue, newEntities: Seq[JsObject]): JsResult[JsObject] = {
     input.transform(__.json.update(
       path.json.put(
-        JsArray(newEntities ++ Seq(objectPlusField(original, "entityEnd", Json.toJson(endDate))))
+        JsArray(newEntities ++ Seq(objectPlusField(original, ENTITY_END, Json.toJson(endDate))))
       )
     ))
   }

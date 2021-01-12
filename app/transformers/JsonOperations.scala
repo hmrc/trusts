@@ -17,12 +17,12 @@
 package transformers
 
 import java.time.LocalDate
-
 import play.api.libs.json._
+import utils.Constants._
 
 trait JsonOperations {
 
-  def lineNoPick: Reads[JsValue] = (__ \ 'lineNo).json.pick
+  def lineNoPick: Reads[JsValue] = (__ \ LINE_NUMBER).json.pick
 
   def isKnownToEtmp(json: JsValue): Boolean = {
     json.transform(lineNoPick).isSuccess
@@ -31,7 +31,7 @@ trait JsonOperations {
   def getTypeAtPosition[T](input: JsValue,
                            path: JsPath,
                            index: Int)
-                       (implicit reads: Reads[T]): T = {
+                          (implicit reads: Reads[T]): T = {
 
     input.transform(path.json.pick) match {
 
@@ -51,7 +51,7 @@ trait JsonOperations {
     }
   }
 
-  def endEntity(input: JsValue, path: JsPath, entityJson: JsValue, endDate: LocalDate, endDateField: String = "entityEnd"): JsResult[JsValue] = {
+  def endEntity(input: JsValue, path: JsPath, entityJson: JsValue, endDate: LocalDate, endDateField: String = ENTITY_END): JsResult[JsValue] = {
     if (isKnownToEtmp(entityJson)) {
       addToList(input, path, objectPlusField(entityJson, endDateField, Json.toJson(endDate)))
     } else {
@@ -147,6 +147,12 @@ trait JsonOperations {
         }
       case _ => JsError("Cannot remove at position if index is None")
     }
+  }
+
+  def removeFields(value: JsObject, fields: Seq[String]): JsObject = {
+    fields.foldLeft[JsObject](value)((updated, field) => {
+      updated - field
+    })
   }
 
   def objectPlusField[A](json: JsValue, field: String, value: JsValue): JsValue = json.as[JsObject] + (field -> value)

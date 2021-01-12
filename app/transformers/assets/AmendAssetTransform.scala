@@ -27,7 +27,7 @@ case class AmendAssetTransform(index: Option[Int],
                                endDate: LocalDate,
                                `type`: String) extends AssetTransform with AmendEntityTransform {
 
-  override val endDateField: String = "endDate"
+  override val endDateField: String = nonEeaBusinessEndDateField
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
     if (isNonEeaBusiness) {

@@ -21,5 +21,13 @@ import utils.Constants._
 
 trait SettlorTransform {
   val `type`: String
-  val path: JsPath = ENTITIES \ SETTLORS \ `type`
+  val path: JsPath = {
+    if (isDeceasedSettlor) {
+      ENTITIES \ `type`
+    } else {
+      ENTITIES \ SETTLORS \ `type`
+    }
+  }
+
+  def isDeceasedSettlor: Boolean = `type` == DECEASED_SETTLOR
 }

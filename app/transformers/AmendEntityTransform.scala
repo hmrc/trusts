@@ -17,8 +17,8 @@
 package transformers
 
 import java.time.LocalDate
-
 import play.api.libs.json.{JsPath, JsResult, JsValue, Json}
+import utils.Constants.{BP_MATCH_STATUS, LINE_NUMBER}
 
 trait AmendEntityTransform extends DeltaTransform with JsonOperations {
 
@@ -36,4 +36,6 @@ trait AmendEntityTransform extends DeltaTransform with JsonOperations {
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
     endEntity(input, path, original, endDate, endDateField)
   }
+
+  val etmpFields: Seq[String] = Seq(LINE_NUMBER, BP_MATCH_STATUS)
 }
