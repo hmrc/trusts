@@ -1030,37 +1030,6 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
   ".getWhenTrustSetup" should {
 
-     "respond with OK with the start date at the old path" in {
-       val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
-       val submissionRepository = mock[RegistrationSubmissionRepository]
-
-       val controller = new SubmissionDraftController(
-         submissionRepository,
-         identifierAction,
-         LocalDateTimeServiceStub,
-         Helpers.stubControllerComponents()
-       )
-
-       when(submissionRepository.getDraft(any(), any()))
-         .thenReturn(Future.successful(Some(mockSubmissionDraft)))
-
-       val request = FakeRequest("GET", "path")
-
-       val result = controller.getWhenTrustSetup("DRAFTID").apply(request)
-
-       status(result) mustBe OK
-
-       val expectedDraftJson = Json.parse(
-         """
-           |{
-           | "startDate": "2010-08-21"
-           |}
-           |""".stripMargin)
-
-       contentType(result) mustBe Some(JSON)
-       contentAsJson(result) mustBe expectedDraftJson
-     }
-
     "respond with OK with the start date at the new path" in {
       val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]

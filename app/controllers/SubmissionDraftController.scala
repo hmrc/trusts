@@ -230,38 +230,14 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
     }
   }
 
-  def getWhenTrustSetup(draftId: String) : Action[AnyContent] = identify.async {
+  def getWhenTrustSetup(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
-      submissionRepository.getDraft(draftId, request.internalId).map {
-        case Some(draft) =>
-          // Todo remove old path once trusts-details has migrated to register-trust-details-frontend and is in production
-          // Added the ability for both paths due to 28 days S4L for draft registrations
-          // Implemented on 01 October 2020
-          val oldPath = JsPath \ "main" \ "data" \ "trustDetails" \ "whenTrustSetup"
-          val newPath = JsPath \ "trustDetails" \ "data" \ "trustDetails" \ "whenTrustSetup"
 
-          val dateAtOldPath = get[LocalDate](draft.draftData, oldPath)
-          val dateAtNewPath = get[LocalDate](draft.draftData, newPath)
+      val reads: Reads[LocalDate] = Reads.DefaultLocalDateReads
+      val writes: Writes[LocalDate] = (date: LocalDate) => Json.obj("startDate" -> date)
 
-          (dateAtOldPath, dateAtNewPath) match {
-            case (JsSuccess(date, _), JsError(_)) =>
-              logger.info(s"[Session ID: ${request.sessionId}]" +
-                s" found trust start date at old path")
-              Ok(Json.obj("startDate" -> date))
-            case (JsError(_), JsSuccess(date, _)) =>
-              logger.info(s"[Session ID: ${request.sessionId}]" +
-                s" found trust start date at new path")
-              Ok(Json.obj("startDate" -> date))
-            case _ =>
-              logger.info(s"[Session ID: ${request.sessionId}]" +
-                s" no trust start date")
-              NotFound
-          }
-        case None =>
-          logger.info(s"[Session ID: ${request.sessionId}]" +
-            s" no draft, cannot return start date")
-          NotFound
-      }
+      val path = JsPath \ "trustDetails" \ "data" \ "trustDetails" \ "whenTrustSetup"
+      getAtPath[LocalDate](draftId, path)(request, reads, writes)
   }
 
   def getTrustName(draftId: String) : Action[AnyContent] = identify.async {
