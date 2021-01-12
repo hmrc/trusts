@@ -18,10 +18,11 @@ package transformers.taxliability
 
 import play.api.libs.json._
 import transformers.SetValueTransform
+import utils.Constants._
 
 case class SetTaxLiabilityTransform(value: JsValue) extends SetValueTransform {
 
-  override val path: JsPath = __ \ 'yearsReturn
+  override val path: JsPath = YEARS_RETURNS
 
   override val isTaxableMigrationTransform: Boolean = true
 }

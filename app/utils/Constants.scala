@@ -29,7 +29,6 @@ object Constants {
   val INTERNAL_SERVER_ERROR_CODE = "INTERNAL_SERVER_ERROR"
   val INTERNAL_SERVER_ERROR_MESSAGE = "Internal server error."
 
-
   val INSUFFICIENT_ENROLMENT_MESSAGE = "Insufficient enrolment for authorised user."
   val UNAUTHORISED = "UNAUTHORISED"
 
@@ -44,6 +43,7 @@ object Constants {
 
   val TRUST: JsPath = __ \ "details" \ "trust"
   val ENTITIES: JsPath = TRUST \ "entities"
+  val YEARS_RETURNS: JsPath = __ \ "yearsReturn"
 
   val ASSETS = "assets"
   val BENEFICIARIES = "beneficiary"
@@ -52,6 +52,8 @@ object Constants {
   val SETTLORS = "settlors"
   val TRUSTEES = "trustees"
   val LEAD_TRUSTEE = "leadTrustees"
+
+  val DETAILS = "details"
 
   val MONEY_ASSET = "monetary"
   val PROPERTY_OR_LAND_ASSET = "propertyOrLand"
@@ -100,5 +102,6 @@ object Constants {
   val BP_MATCH_STATUS = "bpMatchStatus"
   val ENTITY_START = "entityStart"
   val ENTITY_END = "entityEnd"
+  val DATE_OF_DEATH = "dateOfDeath"
 
 }
