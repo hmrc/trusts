@@ -17,10 +17,10 @@
 package models.get_trust
 
 import java.time.LocalDate
-
 import models._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import utils.Constants._
 import utils.DeedOfVariation.DeedOfVariation
 import utils.TypeOfTrust.TypeOfTrust
 
@@ -70,12 +70,12 @@ object GetTrust {
   implicit val writes: Writes[GetTrust] = Json.writes[GetTrust]
 
   implicit val reads: Reads[GetTrust] = (
-    (JsPath \ "matchData").read[MatchData] and
-      (JsPath \ "correspondence").read[Correspondence] and
-      (JsPath \ "declaration").read[Declaration] and
-      (JsPath \ "details" \ "trust").read[DisplayTrust] and
-      (JsPath \ "submissionDate").readNullable[LocalDate] and
-      (JsPath \ "yearsReturn").readNullable[YearsReturns]
+    MATCH_DATA.read[MatchData] and
+      CORRESPONDENCE.read[Correspondence] and
+      DECLARATION.read[Declaration] and
+      TRUST.read[DisplayTrust] and
+      SUBMISSION_DATE.readNullable[LocalDate] and
+      YEARS_RETURNS.readNullable[YearsReturns]
     ) (GetTrust.apply _)
 }
 
@@ -145,13 +145,13 @@ case class DisplayTrustEntitiesType(naturalPerson: Option[List[DisplayTrustNatur
 object DisplayTrustEntitiesType {
 
   implicit val displayTrustEntitiesTypeReads : Reads[DisplayTrustEntitiesType] = (
-    (__ \ "naturalPerson").readNullable[List[DisplayTrustNaturalPersonType]] and
-    (__ \ "beneficiary").read[DisplayTrustBeneficiaryType] and
-    (__ \ "deceased").readNullable[DisplayTrustWillType] and
-    (__ \ "leadTrustees").read[DisplayTrustLeadTrusteeType] and
-    (__ \ "trustees").readNullable[List[DisplayTrustTrusteeType]] and
-    (__ \ "protectors").readNullable[DisplayTrustProtectorsType] and
-    (__ \ "settlors").readNullable[DisplayTrustSettlors]
+    (__ \ OTHER_INDIVIDUALS).readNullable[List[DisplayTrustNaturalPersonType]] and
+    (__ \ BENEFICIARIES).read[DisplayTrustBeneficiaryType] and
+    (__ \ DECEASED_SETTLOR).readNullable[DisplayTrustWillType] and
+    (__ \ LEAD_TRUSTEE).read[DisplayTrustLeadTrusteeType] and
+    (__ \ TRUSTEES).readNullable[List[DisplayTrustTrusteeType]] and
+    (__ \ PROTECTORS).readNullable[DisplayTrustProtectorsType] and
+    (__ \ SETTLORS).readNullable[DisplayTrustSettlors]
   )(
     (natural, beneficiary, deceased, leadTrustee, trustees, protectors, settlors) =>
       DisplayTrustEntitiesType(

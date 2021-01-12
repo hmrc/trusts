@@ -18,7 +18,7 @@ package transformers
 
 import java.time.LocalDate
 import play.api.libs.json.{JsPath, JsResult, JsValue, Json}
-import utils.Constants.{BP_MATCH_STATUS, LINE_NUMBER}
+import utils.Constants._
 
 trait AmendEntityTransform extends DeltaTransform with JsonOperations {
 

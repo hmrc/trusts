@@ -43,6 +43,10 @@ object Constants {
 
   val TRUST: JsPath = __ \ "details" \ "trust"
   val ENTITIES: JsPath = TRUST \ "entities"
+  val MATCH_DATA: JsPath = __ \ "matchData"
+  val CORRESPONDENCE: JsPath = __ \ "correspondence"
+  val DECLARATION: JsPath = __ \ "declaration"
+  val SUBMISSION_DATE: JsPath = __ \ "submissionDate"
   val YEARS_RETURNS: JsPath = __ \ "yearsReturn"
 
   val ASSETS = "assets"
