@@ -17,46 +17,34 @@
 package transformers.trustees
 
 import play.api.libs.json._
-import transformers.{DeltaTransform, JsonOperations}
+import transformers.RemoveEntityTransform
+import utils.Constants.{ENTITY_END, LINE_NUMBER}
 
 import java.time.LocalDate
 
-case class RemoveTrusteeTransform(endDate: LocalDate, index: Int, trusteeToRemove: JsValue)
-  extends DeltaTransform
-    with JsonOperations {
-
-  private val trusteePath = (__ \ 'details \ 'trust \ 'entities \ 'trustees)
-
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    removeAtPosition(input, trusteePath, index)
-  }
+case class RemoveTrusteeTransform(index: Option[Int],
+                                  entity: JsValue,
+                                  endDate: LocalDate,
+                                  `type`: String) extends TrusteeTransform with RemoveEntityTransform {
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    if (trusteeIsKnownToEtmp(trusteeToRemove)) {
-      trusteeToRemove.transform(addEntityEnd(trusteeToRemove, endDate)) match {
-        case JsSuccess(endedTrusteeJson, _) => addToList(input, trusteePath, endedTrusteeJson)
+    if (isTrusteeKnownToEtmp) {
+      entity.transform(putEndDate) match {
+        case JsSuccess(endedTrusteeJson, _) => addToList(input, path, endedTrusteeJson)
         case e: JsError => e
       }
     } else {
-      // Do not add the trustee back into the record
-      super.applyDeclarationTransform(input)
+      JsSuccess(input)
     }
   }
 
-  private def trusteeIsKnownToEtmp(json: JsValue): Boolean = {
-    json.transform((__ \ 'trusteeInd \ 'lineNo).json.pick).isSuccess |
-      json.transform((__ \ 'trusteeOrg \ 'lineNo).json.pick).isSuccess
+  private def isTrusteeKnownToEtmp: Boolean = {
+    entity.transform((__ \ `type` \ LINE_NUMBER).json.pick).isSuccess
   }
 
-  private def addEntityEnd(trusteeToRemove: JsValue, endDate: LocalDate): Reads[JsObject] = {
-    val entityEndPath =
-      if (trusteeToRemove.transform((__ \ 'trusteeInd).json.pick).isSuccess) {
-        (__ \ 'trusteeInd \ 'entityEnd).json
-      } else {
-        (__ \ 'trusteeOrg \ 'entityEnd).json
-      }
-
-    __.json.update(entityEndPath.put(Json.toJson(endDate)))
+  private def putEndDate: Reads[JsObject] = {
+    val entityEndPath: JsPath = __ \ `type` \ ENTITY_END
+    __.json.update(entityEndPath.json.put(Json.toJson(endDate)))
   }
 }
 

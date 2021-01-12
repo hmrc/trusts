@@ -17,15 +17,61 @@
 package transformers.settlors
 
 import play.api.libs.json._
-import transformers.{AmendEntityTransform, JsonOperations}
+import transformers.AmendEntityTransform
+import utils.Constants._
 
-trait AmendSettlorTransform extends AmendEntityTransform with JsonOperations {
+import java.time.LocalDate
+
+case class AmendSettlorTransform(index: Option[Int],
+                                 amended: JsValue,
+                                 original: JsValue,
+                                 endDate: LocalDate,
+                                 `type`: String) extends SettlorTransform with AmendEntityTransform {
+
+  private val isDeceasedSettlor: Boolean = `type` == DECEASED_SETTLOR
+
+  private val etmpFields: Seq[String] = Seq(LINE_NUMBER, BP_MATCH_STATUS)
+
+  override val path: JsPath = {
+    if (isDeceasedSettlor) {
+      ENTITIES \ `type`
+    } else {
+      ENTITIES \ SETTLORS \ `type`
+    }
+  }
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    amendAtPosition(input, path, index, Json.toJson(preserveEtmpStatus(amended, original)))
+    if (isDeceasedSettlor) {
+      amendDeceasedAndPreserveData(input)
+    } else {
+      amendAtPosition(input, path, index, preserveFields(etmpFields))
+    }
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
+    if (isDeceasedSettlor) {
+      JsSuccess(input)
+    } else {
+      endSettlorIfKnownToEtmp(input)
+    }
+  }
+
+  private def amendDeceasedAndPreserveData(input: JsValue): JsResult[JsObject] = {
+    input.transform(
+      path.json.prune andThen
+        __.json.update {
+          path.json.put(preserveFields(etmpFields :+ ENTITY_START))
+        }
+    )
+  }
+
+  private def preserveFields(fields: Seq[String]): JsValue = {
+    fields.foldLeft[JsValue](amended)((updated, field) => {
+      copyField(original, field, updated)
+    })
+  }
+
+  private def endSettlorIfKnownToEtmp(input:JsValue): JsResult[JsValue] = {
     original.transform(lineNoPick).fold(
       _ => JsSuccess(input),
       lineNo => {
@@ -37,26 +83,28 @@ trait AmendSettlorTransform extends AmendEntityTransform with JsonOperations {
     )
   }
 
-  private def addEndedEntity(input: JsValue, newEntities: Seq[JsObject]) = {
+  private def stripEtmpStatusForMatching(input: JsValue, lineNo: JsValue): JsResult[Seq[JsObject]] = {
+    input.transform(path.json.pick).map {
+      value =>
+        value.as[Seq[JsObject]].collect {
+          case x: JsObject if x \ LINE_NUMBER == JsDefined(lineNo) => x - LINE_NUMBER - BP_MATCH_STATUS
+          case x => x
+        }
+    }
+  }
+
+  private def addEndedEntity(input: JsValue, newEntities: Seq[JsObject]): JsResult[JsObject] = {
     input.transform(__.json.update(
       path.json.put(
         JsArray(newEntities ++ Seq(objectPlusField(original, "entityEnd", Json.toJson(endDate))))
       )
     ))
   }
+}
 
-  private def stripEtmpStatusForMatching(input: JsValue, lineNo: JsValue) = {
-    input.transform(path.json.pick).map {
-      value =>
-        value.as[Seq[JsObject]].collect {
-          case x: JsObject if (x \ "lineNo" == JsDefined(lineNo)) => x - "lineNo" - "bpMatchStatus"
-          case x => x
-        }
-    }
-  }
+object AmendSettlorTransform {
 
-  private def preserveEtmpStatus(amended: JsValue, original: JsValue): JsValue =
-    copyField(original, "lineNo",
-      copyField(original, "bpMatchStatus", amended)
-    )
+  val key = "AmendSettlorTransform"
+
+  implicit val format: Format[AmendSettlorTransform] = Json.format[AmendSettlorTransform]
 }

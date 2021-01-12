@@ -1,10 +1,8 @@
 
-POST        /add-individual/:identifier                     controllers.ProtectorTransformationController.addIndividualProtector(identifier: String)
+POST        /add-individual/:identifier                     controllers.transformations.protectors.AddProtectorController.addIndividual(identifier: String)
+POST        /amend-individual/:identifier/:index            controllers.transformations.protectors.AmendProtectorController.amendIndividual(identifier: String, index: Int)
 
-POST        /add-business/:identifier                       controllers.ProtectorTransformationController.addBusinessProtector(identifier: String)
+POST        /add-business/:identifier                       controllers.transformations.protectors.AddProtectorController.addBusiness(identifier: String)
+POST        /amend-business/:identifier/:index              controllers.transformations.protectors.AmendProtectorController.amendBusiness(identifier: String, index: Int)
 
-POST        /amend-individual/:identifier/:index            controllers.ProtectorTransformationController.amendIndividualProtector(identifier: String, index: Int)
-
-POST        /amend-business/:identifier/:index              controllers.ProtectorTransformationController.amendBusinessProtector(identifier: String, index: Int)
-
-PUT         /:identifier/remove                             controllers.ProtectorTransformationController.removeProtector(identifier: String)
+PUT         /:identifier/remove                             controllers.transformations.protectors.RemoveProtectorController.remove(identifier: String)

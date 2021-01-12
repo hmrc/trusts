@@ -17,24 +17,20 @@
 package transformers.assets
 
 import play.api.libs.json._
-import transformers.{DeltaTransform, JsonOperations}
+import transformers.RemoveEntityTransform
 
 import java.time.LocalDate
 
-case class RemoveAssetTransform(index: Int,
-                                asset: JsValue,
+case class RemoveAssetTransform(index: Option[Int],
+                                entity: JsValue,
                                 endDate: LocalDate,
-                                override val assetType: String) extends AssetTransform with DeltaTransform with JsonOperations {
+                                `type`: String) extends AssetTransform with RemoveEntityTransform {
 
-  private lazy val path = __ \ "details" \ "trust" \ "assets" \ assetType
-
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    removeAtPosition(input, path, index)
-  }
+  override val endDateField: String = "endDate"
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
     if (isNonEeaBusiness) {
-      endEntity(input, path, Json.toJson(asset), endDate, "endDate")
+      super.applyDeclarationTransform(input)
     } else {
       JsSuccess(input)
     }
@@ -44,6 +40,7 @@ case class RemoveAssetTransform(index: Int,
 }
 
 object RemoveAssetTransform {
+
   val key = "RemoveAssetTransform"
 
   implicit val format: Format[RemoveAssetTransform] = Json.format[RemoveAssetTransform]

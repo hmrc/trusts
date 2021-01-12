@@ -16,496 +16,335 @@
 
 package transformers.settlors
 
+import models.NameType
+import models.variation.{AmendDeceasedSettlor, Settlor, SettlorCompany}
 import org.scalatest.{FreeSpec, MustMatchers}
-import play.api.libs.json.{JsPath, JsValue, Json, __}
+import play.api.libs.json.{JsValue, Json}
+import utils.JsonUtils
 
 import java.time.LocalDate
 
-case class TestAmendSettlorTransform(index: Int,
-                                amended: JsValue,
-                                original: JsValue,
-                                endDate: LocalDate)  extends AmendSettlorTransform {
-  override val path: JsPath = __ \ 'settlors \ 'settlorEntities
-}
-
 class AmendSettlorTransformSpec extends FreeSpec with MustMatchers {
-  "AmendSettlorTransform should" - {
 
-    "before declaration" - {
+  "the amend settlor transformer" - {
 
-      "amend non-ETMP settlor details by replacing the settlor" in {
-        val amended = Json.parse(
-          """
-            |{
-            | "field1": "newValue1",
-            | "field3": "newValue3"
-            |}
-            |""".stripMargin)
+    "when individual" - {
 
-        val original = Json.parse(
-          """
-            |{
-            | "field1": "value1",
-            | "field2": "value2"
-            |}
-            |""".stripMargin)
+      val `type` = "settlor"
 
-        val input = Json.parse(
-          """
-            |{
-            | "settlors": {
-            |   "settlorEntities": [
-            |     {
-            |       "field1": "valueA",
-            |       "field2": "valueB"
-            |     },
-            |     {
-            |       "field1": "value1",
-            |       "field2": "value2"
-            |     }
-            |   ]
-            | }
-            |}
-            |""".stripMargin)
+      "before declaration" - {
 
-        val transform = TestAmendSettlorTransform(1, amended, original, LocalDate.of(2012, 2, 20))
-        val result = transform.applyTransform(input)
-        val expected = Json.parse(
-          """
-            |{
-            | "settlors": {
-            |   "settlorEntities": [
-            |     {
-            |       "field1": "valueA",
-            |       "field2": "valueB"
-            |     },
-            |     {
-            |       "field1": "newValue1",
-            |       "field3": "newValue3"
-            |     }
-            |   ]
-            | }
-            |}
-            |""".stripMargin)
+        "amend settlor details by replacing the settlor" in {
 
-        result.get mustBe expected
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-settlor-transform-before.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-settlor-transform-after.json")
+
+          val amended = Settlor(
+            lineNo = None,
+            bpMatchStatus = None,
+            NameType("First updated", None, "Last updated"),
+            None,
+            identification = None,
+            countryOfResidence = None,
+            legallyIncapable = None,
+            nationality = None,
+            LocalDate.parse("2018-02-28"),
+            None
+          )
+
+          val original: JsValue = Json.parse(
+            """
+              |{
+              |  "lineNo": "1",
+              |  "bpMatchStatus": "01",
+              |  "name": {
+              |    "firstName": "First",
+              |    "lastName": "Last"
+              |  },
+              |  "dateOfBirth": "2010-05-03",
+              |  "entityStart": "2018-02-28"
+              |}
+              |""".stripMargin)
+
+          val transformer = AmendSettlorTransform(Some(0), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), `type`)
+
+          val result = transformer.applyTransform(beforeJson).get
+          result mustBe afterJson
+        }
       }
-      "amend matched ETMP settlor details by replacing the settlor" in {
-        val amended = Json.parse(
-          """
-            |{
-            | "field1": "newValue1",
-            | "field3": "newValue3"
-            |}
-            |""".stripMargin)
 
-        val original = Json.parse(
-          """
-            |{
-            | "lineNo": 3,
-            | "bpMatchStatus": "01",
-            | "field1": "value1",
-            | "field2": "value2"
-            |}
-            |""".stripMargin)
+      "at declaration time" - {
 
-        val input = Json.parse(
-          """
-            |{
-            | "settlors": {
-            |   "settlorEntities": [
-            |     {
-            |       "field1": "valueA",
-            |       "field2": "valueB"
-            |     },
-            |     {
-            |       "lineNo": 3,
-            |       "bpMatchStatus": "01",
-            |       "field1": "value1",
-            |       "field2": "value2"
-            |     }
-            |   ]
-            | }
-            |}
-            |""".stripMargin)
+        "set an end date for the original settlor, adding in the amendment as a new settlor for a settlor known by etmp" in {
 
-        val transform = TestAmendSettlorTransform(1, amended, original, LocalDate.of(2012, 2, 20))
-        val result = transform.applyTransform(input)
-        val expected = Json.parse(
-          """
-            |{
-            | "settlors": {
-            |   "settlorEntities": [
-            |     {
-            |       "field1": "valueA",
-            |       "field2": "valueB"
-            |     },
-            |     {
-            |       "lineNo": 3,
-            |       "bpMatchStatus": "01",
-            |       "field1": "newValue1",
-            |       "field3": "newValue3"
-            |     }
-            |   ]
-            | }
-            |}
-            |""".stripMargin)
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-settlor-transform-before.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-settlor-transform-after-declaration.json")
 
-        result.get mustBe expected
-      }
-      "amend unmatched ETMP settlor details by replacing the settlor" in {
-        val amended = Json.parse(
-          """
-            |{
-            | "field1": "newValue1",
-            | "field3": "newValue3"
-            |}
-            |""".stripMargin)
+          val amended = Settlor(
+            lineNo = None,
+            bpMatchStatus = None,
+            NameType("First updated", None, "Last updated"),
+            None,
+            identification = None,
+            countryOfResidence = None,
+            legallyIncapable = None,
+            nationality = None,
+            LocalDate.parse("2018-02-28"),
+            None
+          )
 
-        val original = Json.parse(
-          """
-            |{
-            | "lineNo": 3,
-            | "field1": "value1",
-            | "field2": "value2"
-            |}
-            |""".stripMargin)
+          val original: JsValue = Json.parse(
+            """
+              |{
+              |  "lineNo": "1",
+              |  "bpMatchStatus": "01",
+              |  "name": {
+              |    "firstName": "First",
+              |    "lastName": "Last"
+              |  },
+              |  "dateOfBirth": "2010-05-03",
+              |  "entityStart": "2018-02-28"
+              |}
+              |""".stripMargin)
 
-        val input = Json.parse(
-          """
-            |{
-            | "settlors": {
-            |   "settlorEntities": [
-            |     {
-            |       "field1": "valueA",
-            |       "field2": "valueB"
-            |     },
-            |     {
-            |       "lineNo": 3,
-            |       "field1": "value1",
-            |       "field2": "value2"
-            |     }
-            |   ]
-            | }
-            |}
-            |""".stripMargin)
+          val transformer = AmendSettlorTransform(Some(0), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
 
-        val transform = TestAmendSettlorTransform(1, amended, original, LocalDate.of(2012, 2, 20))
-        val result = transform.applyTransform(input)
-        val expected = Json.parse(
-          """
-            |{
-            | "settlors": {
-            |   "settlorEntities": [
-            |     {
-            |       "field1": "valueA",
-            |       "field2": "valueB"
-            |     },
-            |     {
-            |       "lineNo": 3,
-            |       "field1": "newValue1",
-            |       "field3": "newValue3"
-            |     }
-            |   ]
-            | }
-            |}
-            |""".stripMargin)
+          val applied = transformer.applyTransform(beforeJson).get
+          val result = transformer.applyDeclarationTransform(applied).get
+          result mustBe afterJson
+        }
 
-        result.get mustBe expected
+        "amend the new settlor that is not known to etmp" in {
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-new-individual-settlor-transform-before.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-new-individual-settlor-transform-after-declaration.json")
+
+          val amended = Settlor(
+            lineNo = None,
+            bpMatchStatus = None,
+            NameType("Second updated", None, "Second updated"),
+            None,
+            identification = None,
+            countryOfResidence = None,
+            legallyIncapable = None,
+            nationality = None,
+            LocalDate.parse("2020-02-28"),
+            None
+          )
+
+          val original: JsValue = Json.parse(
+            """
+              |{
+              |  "name": {
+              |    "firstName": "Second",
+              |    "lastName": "Last"
+              |  },
+              |  "dateOfBirth": "2010-05-03",
+              |  "entityStart": "2020-02-28"
+              |}
+              |""".stripMargin)
+
+          val transformer = AmendSettlorTransform(Some(1), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
+
+          val applied = transformer.applyTransform(beforeJson).get
+          val result = transformer.applyDeclarationTransform(applied).get
+          result mustBe afterJson
+        }
       }
     }
-    "at declaration time" - {
 
-      "do nothing for non-ETMP settlor" in {
-        val amended = Json.parse(
-          """
-            |{
-            | "field1": "newValue1",
-            | "field3": "newValue3"
-            |}
-            |""".stripMargin)
+    "when business" - {
 
-        val original = Json.parse(
-          """
-            |{
-            | "field1": "value1",
-            | "field2": "value2"
-            |}
-            |""".stripMargin)
+      val `type` = "settlorCompany"
 
-        val input = Json.parse(
-          """
-            |{
-            | "settlors": {
-            |   "settlorEntities": [
-            |     {
-            |       "field1": "valueA",
-            |       "field2": "valueB"
-            |     },
-            |     {
-            |       "field1": "newValue1",
-            |       "field3": "newValue3"
-            |     }
-            |   ]
-            | }
-            |}
-            |""".stripMargin)
+      "before declaration" - {
 
-        val transform = TestAmendSettlorTransform(1, amended, original, LocalDate.of(2012, 2, 20))
-        val result = transform.applyDeclarationTransform(input)
-        val expected = Json.parse(
-          """
-            |{
-            | "settlors": {
-            |   "settlorEntities": [
-            |     {
-            |       "field1": "valueA",
-            |       "field2": "valueB"
-            |     },
-            |     {
-            |       "field1": "newValue1",
-            |       "field3": "newValue3"
-            |     }
-            |   ]
-            | }
-            |}
-            |""".stripMargin)
+        "amend settlor details by replacing the settlor" in {
 
-        result.get mustBe expected
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-business-settlor-transform-before.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-business-settlor-transform-after.json")
+
+          val amended = SettlorCompany(
+            lineNo = None,
+            bpMatchStatus = None,
+            name = "New Company",
+            companyType = None,
+            companyTime = None,
+            identification = None,
+            countryOfResidence = None,
+            entityStart = LocalDate.parse("2018-02-28"),
+            entityEnd = None
+          )
+
+          val original: JsValue = Json.parse(
+            """
+              |{
+              |  "lineNo": "1",
+              |  "bpMatchStatus": "01",
+              |  "name": "Company",
+              |  "entityStart": "2018-02-28"
+              |}
+              |""".stripMargin)
+
+          val transformer = AmendSettlorTransform(Some(0), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), `type`)
+
+          val result = transformer.applyTransform(beforeJson).get
+          result mustBe afterJson
+        }
       }
-      "add ended entity and strip ETMP status for matched ETMP settlor" in {
-        val amended = Json.parse(
-          """
-            |{
-            | "field1": "newValue1",
-            | "field3": "newValue3"
-            |}
-            |""".stripMargin)
 
-        val original = Json.parse(
-          """
-            |{
-            | "lineNo": 3,
-            | "bpMatchStatus": "01",
-            | "field1": "value1",
-            | "field2": "value2"
-            |}
-            |""".stripMargin)
+      "at declaration time" - {
 
-        val input = Json.parse(
-          """
-            |{
-            | "settlors": {
-            |   "settlorEntities": [
-            |     {
-            |       "field1": "valueA",
-            |       "field2": "valueB"
-            |     },
-            |     {
-            |       "lineNo": 3,
-            |       "bpMatchStatus": "01",
-            |       "field1": "newValue1",
-            |       "field3": "newValue3"
-            |     }
-            |   ]
-            | }
-            |}
-            |""".stripMargin)
+        "set an end date for the original settlor, adding in the amendment as a new settlor for a settlor known by etmp" in {
 
-        val transform = TestAmendSettlorTransform(1, amended, original, LocalDate.of(2012, 2, 20))
-        val result = transform.applyDeclarationTransform(input)
-        val expected = Json.parse(
-          """
-            |{
-            | "settlors": {
-            |   "settlorEntities": [
-            |     {
-            |       "field1": "valueA",
-            |       "field2": "valueB"
-            |     },
-            |     {
-            |       "field1": "newValue1",
-            |       "field3": "newValue3"
-            |     },
-            |     {
-            |       "lineNo": 3,
-            |       "bpMatchStatus": "01",
-            |       "field1": "value1",
-            |       "field2": "value2",
-            |       "entityEnd": "2012-02-20"
-            |     }
-            |   ]
-            | }
-            |}
-            |""".stripMargin)
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-business-settlor-transform-before.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-business-settlor-transform-after-declaration.json")
 
-        result.get mustBe expected
+          val amended = SettlorCompany(
+            lineNo = None,
+            bpMatchStatus = None,
+            name = "New Company",
+            companyType = None,
+            companyTime = None,
+            identification = None,
+            countryOfResidence = None,
+            entityStart = LocalDate.parse("2018-02-28"),
+            entityEnd = None
+          )
+
+          val original: JsValue = Json.parse(
+            """
+              |{
+              |  "lineNo": "1",
+              |  "bpMatchStatus": "01",
+              |  "name": "Company",
+              |  "entityStart": "2018-02-28"
+              |}
+              |""".stripMargin)
+
+          val transformer = AmendSettlorTransform(Some(0), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
+
+          val applied = transformer.applyTransform(beforeJson).get
+          val result = transformer.applyDeclarationTransform(applied).get
+          result mustBe afterJson
+        }
+
+        "amend the new settlor that is not known to etmp" in {
+
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-new-business-settlor-transform-before.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-new-business-settlor-transform-after-declaration.json")
+
+          val amended = SettlorCompany(
+            lineNo = None,
+            bpMatchStatus = None,
+            name = "Second company updated",
+            companyType = None,
+            companyTime = None,
+            identification = None,
+            countryOfResidence = None,
+            entityStart = LocalDate.parse("2020-02-28"),
+            entityEnd = None
+          )
+
+          val original: JsValue = Json.parse(
+            """
+              |{
+              |  "name": "Second",
+              |  "entityStart": "2020-02-28"
+              |}
+              |""".stripMargin)
+
+          val transformer = AmendSettlorTransform(Some(1), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
+
+          val applied = transformer.applyTransform(beforeJson).get
+          val result = transformer.applyDeclarationTransform(applied).get
+          result mustBe afterJson
+        }
       }
-      "add ended entity and strip ETMP status for matched ETMP settlor in different position" in {
-        val amended = Json.parse(
-          """
-            |{
-            | "field1": "newValue1",
-            | "field3": "newValue3"
-            |}
-            |""".stripMargin)
+    }
 
-        val original = Json.parse(
-          """
-            |{
-            | "lineNo": 3,
-            | "bpMatchStatus": "01",
-            | "field1": "value1",
-            | "field2": "value2"
-            |}
-            |""".stripMargin)
+    "when deceased" - {
 
-        val input = Json.parse(
-          """
-            |{
-            | "settlors": {
-            |   "settlorEntities": [
-            |     {
-            |       "lineNo": 3,
-            |       "bpMatchStatus": "01",
-            |       "field1": "newValue1",
-            |       "field3": "newValue3"
-            |     }
-            |   ]
-            | }
-            |}
-            |""".stripMargin)
+      val `type` = "deceased"
 
-        val transform = TestAmendSettlorTransform(1, amended, original, LocalDate.of(2012, 2, 20))
-        val result = transform.applyDeclarationTransform(input)
-        val expected = Json.parse(
-          """
-            |{
-            | "settlors": {
-            |   "settlorEntities": [
-            |     {
-            |       "field1": "newValue1",
-            |       "field3": "newValue3"
-            |     },
-            |     {
-            |       "lineNo": 3,
-            |       "bpMatchStatus": "01",
-            |       "field1": "value1",
-            |       "field2": "value2",
-            |       "entityEnd": "2012-02-20"
-            |     }
-            |   ]
-            | }
-            |}
-            |""".stripMargin)
+      "before declaration" - {
 
-        result.get mustBe expected
+        "amend settlor details by replacing it, but retaining their start date, bpMatchStatus and lineNo" in {
+
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-deceased-settlor-transform-before.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-deceased-settlor-transform-after.json")
+
+          val amended = AmendDeceasedSettlor(
+            name = NameType("updated first", None, "updated last"),
+            dateOfBirth = None,
+            dateOfDeath = None,
+            identification = None
+          )
+
+          val original: JsValue = Json.parse(
+            """
+              |{
+              |  "lineNo":"1",
+              |  "bpMatchStatus": "01",
+              |  "name":{
+              |    "firstName":"John",
+              |    "middleName":"William",
+              |    "lastName":"O'Connor"
+              |  },
+              |  "dateOfBirth":"1956-02-12",
+              |  "dateOfDeath":"2016-01-01",
+              |  "identification":{
+              |    "nino":"KC456736"
+              |  },
+              |  "entityStart":"1998-02-12"
+              |}
+              |""".stripMargin)
+
+          val transformer = AmendSettlorTransform(None, Json.toJson(amended), original, LocalDate.now(), `type`)
+
+          val result = transformer.applyTransform(beforeJson).get
+          result mustBe afterJson
+        }
       }
-      "add ended entity for matched ETMP settlor that has been deleted" in {
-        val amended = Json.parse(
-          """
-            |{
-            | "field1": "newValue1",
-            | "field3": "newValue3"
-            |}
-            |""".stripMargin)
 
-        val original = Json.parse(
-          """
-            |{
-            | "lineNo": 3,
-            | "bpMatchStatus": "01",
-            | "field1": "value1",
-            | "field2": "value2"
-            |}
-            |""".stripMargin)
+      "at declaration time" - {
 
-        val input = Json.parse(
-          """
-            |{
-            | "settlors": {
-            |   "settlorEntities": [
-            |     {
-            |       "field1": "valueA",
-            |       "field2": "valueB"
-            |     }
-            |   ]
-            | }
-            |}
-            |""".stripMargin)
+        "amend settlor details by replacing it, but retaining their start date, bpMatchStatus and lineNo" in {
 
-        val transform = TestAmendSettlorTransform(1, amended, original, LocalDate.of(2012, 2, 20))
-        val result = transform.applyDeclarationTransform(input)
-        val expected = Json.parse(
-          """
-            |{
-            | "settlors": {
-            |   "settlorEntities": [
-            |     {
-            |       "field1": "valueA",
-            |       "field2": "valueB"
-            |     },
-            |     {
-            |       "lineNo": 3,
-            |       "bpMatchStatus": "01",
-            |       "field1": "value1",
-            |       "field2": "value2",
-            |       "entityEnd": "2012-02-20"
-            |     }
-            |   ]
-            | }
-            |}
-            |""".stripMargin)
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-deceased-settlor-transform-before.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-deceased-settlor-transform-after.json")
 
-        result.get mustBe expected
-      }
-      "add ended entity for matched ETMP settlor with all settlors deleted" in {
-        val amended = Json.parse(
-          """
-            |{
-            | "field1": "newValue1",
-            | "field3": "newValue3"
-            |}
-            |""".stripMargin)
+          val amended = AmendDeceasedSettlor(
+            name = NameType("updated first", None, "updated last"),
+            dateOfBirth = None,
+            dateOfDeath = None,
+            identification = None
+          )
 
-        val original = Json.parse(
-          """
-            |{
-            | "lineNo": 3,
-            | "bpMatchStatus": "01",
-            | "field1": "value1",
-            | "field2": "value2"
-            |}
-            |""".stripMargin)
+          val original: JsValue = Json.parse(
+            """
+              |{
+              |  "lineNo":"1",
+              |  "bpMatchStatus": "01",
+              |  "name":{
+              |    "firstName":"John",
+              |    "middleName":"William",
+              |    "lastName":"O'Connor"
+              |  },
+              |  "dateOfBirth":"1956-02-12",
+              |  "dateOfDeath":"2016-01-01",
+              |  "identification":{
+              |    "nino":"KC456736"
+              |  },
+              |  "entityStart":"1998-02-12"
+              |}
+              |""".stripMargin)
 
-        val input = Json.parse(
-          """
-            |{
-            | "settlors": {
-            | }
-            |}
-            |""".stripMargin)
+          val transformer = AmendSettlorTransform(None, Json.toJson(amended), original, LocalDate.now(), `type`)
 
-        val transform = TestAmendSettlorTransform(1, amended, original, LocalDate.of(2012, 2, 20))
-        val result = transform.applyDeclarationTransform(input)
-        val expected = Json.parse(
-          """
-            |{
-            | "settlors": {
-            |   "settlorEntities": [
-            |     {
-            |       "lineNo": 3,
-            |       "bpMatchStatus": "01",
-            |       "field1": "value1",
-            |       "field2": "value2",
-            |       "entityEnd": "2012-02-20"
-            |     }
-            |   ]
-            | }
-            |}
-            |""".stripMargin)
-
-        result.get mustBe expected
+          val applied = transformer.applyTransform(beforeJson).get
+          val result = transformer.applyDeclarationTransform(applied).get
+          result mustBe afterJson
+        }
       }
     }
   }

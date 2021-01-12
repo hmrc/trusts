@@ -17,15 +17,17 @@
 package transformers.remove
 
 import java.time.LocalDate
-
 import play.api.libs.json.{Format, Json, OWrites, Reads}
+import utils.Constants._
 
-case class RemoveProtector(endDate: LocalDate, index: Int, `type`: String)
+case class RemoveProtector(endDate: LocalDate,
+                           index: Int,
+                           override val `type`: String) extends Remove
 
 object RemoveProtector {
   val validProtectorTypes: Seq[String] = Seq(
-    "protector",
-    "protectorCompany"
+    INDIVIDUAL_PROTECTOR,
+    BUSINESS_PROTECTOR
   )
 
   val reads: Reads[RemoveProtector] = Json.reads[RemoveProtector].filter(rb => validProtectorTypes.contains(rb.`type`))

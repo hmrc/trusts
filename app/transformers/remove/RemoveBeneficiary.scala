@@ -16,21 +16,24 @@
 
 package transformers.remove
 
+import play.api.libs.json._
+import utils.Constants._
+
 import java.time.LocalDate
 
-import play.api.libs.json._
-
-case class RemoveBeneficiary (endDate: LocalDate, index: Int, `type`: String)
+case class RemoveBeneficiary(endDate: LocalDate,
+                             index: Int,
+                             override val `type`: String) extends Remove
 
 object RemoveBeneficiary {
   val validBeneficiaryTypes: Seq[String] = Seq(
-    "individualDetails",
-    "unidentified",
-    "company",
-    "large",
-    "trust",
-    "charity",
-    "other"
+    INDIVIDUAL_BENEFICIARY,
+    UNIDENTIFIED_BENEFICIARY,
+    COMPANY_BENEFICIARY,
+    LARGE_BENEFICIARY,
+    TRUST_BENEFICIARY,
+    CHARITY_BENEFICIARY,
+    OTHER_BENEFICIARY
   )
 
   val reads: Reads[RemoveBeneficiary] = Json.reads[RemoveBeneficiary].filter(rb => validBeneficiaryTypes.contains(rb.`type`))

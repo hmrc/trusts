@@ -16,11 +16,12 @@
 
 package transformers.remove
 
-import java.time.LocalDate
-
 import play.api.libs.json.{Format, Json}
 
-case class RemoveTrustee(endDate: LocalDate, index: Int)
+import java.time.LocalDate
+
+case class RemoveTrustee(endDate: LocalDate,
+                         index: Int) extends Remove
 
 object RemoveTrustee {
   implicit val formats : Format[RemoveTrustee] = Json.format[RemoveTrustee]

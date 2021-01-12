@@ -22,7 +22,7 @@ import play.api.libs.json.{JsPath, JsResult, JsValue, Json}
 
 trait AmendEntityTransform extends DeltaTransform with JsonOperations {
 
-  val index: Int
+  val index: Option[Int]
   val amended: JsValue
   val original: JsValue
   val endDate: LocalDate

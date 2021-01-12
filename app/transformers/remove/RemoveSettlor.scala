@@ -17,15 +17,17 @@
 package transformers.remove
 
 import java.time.LocalDate
-
 import play.api.libs.json.{Format, Json, OWrites, Reads}
+import utils.Constants._
 
-case class RemoveSettlor(endDate: LocalDate, index: Int, `type`: String)
+case class RemoveSettlor(endDate: LocalDate,
+                         index: Int,
+                         override val `type`: String) extends Remove
 
 object RemoveSettlor {
   val validSettlorTypes: Seq[String] = Seq(
-    "settlor",
-    "settlorCompany"
+    INDIVIDUAL_SETTLOR,
+    BUSINESS_SETTLOR
   )
 
   val reads: Reads[RemoveSettlor] = Json.reads[RemoveSettlor].filter(rb => validSettlorTypes.contains(rb.`type`))

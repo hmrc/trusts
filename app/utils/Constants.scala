@@ -16,6 +16,8 @@
 
 package utils
 
+import play.api.libs.json.{JsPath, __}
+
 object Constants {
 
   val ALREADY_REGISTERED_CODE = "ALREADY_REGISTERED"
@@ -40,6 +42,44 @@ object Constants {
   val INVALID_UTR_CODE = "INVALID_UTR"
   val INVALID_UTR_MESSAGE = "The UTR provided is invalid."
 
+  val TRUST: JsPath = __ \ "details" \ "trust"
+  val ENTITIES: JsPath = TRUST \ "entities"
+
+  val ASSETS = "assets"
+  val BENEFICIARIES = "beneficiary"
+  val OTHER_INDIVIDUALS = "naturalPerson"
+  val PROTECTORS = "protectors"
+  val SETTLORS = "settlors"
+  val TRUSTEES = "trustees"
+  val LEAD_TRUSTEE = "leadTrustees"
+
+  val MONEY_ASSET = "monetary"
+  val PROPERTY_OR_LAND_ASSET = "propertyOrLand"
+  val SHARES_ASSET = "shares"
+  val BUSINESS_ASSET = "business"
+  val PARTNERSHIP_ASSET = "partnerShip"
+  val OTHER_ASSET = "other"
+  val NON_EEA_BUSINESS_ASSET = "nonEEABusiness"
+
+  val INDIVIDUAL_BENEFICIARY = "individualDetails"
+  val COMPANY_BENEFICIARY = "company"
+  val TRUST_BENEFICIARY = "trust"
+  val CHARITY_BENEFICIARY = "charity"
+  val UNIDENTIFIED_BENEFICIARY = "unidentified"
+  val LARGE_BENEFICIARY = "large"
+  val OTHER_BENEFICIARY = "other"
+
+  val INDIVIDUAL_PROTECTOR = "protector"
+  val BUSINESS_PROTECTOR = "protectorCompany"
+
+  val DECEASED_SETTLOR = "deceased"
+  val INDIVIDUAL_SETTLOR = "settlor"
+  val BUSINESS_SETTLOR = "settlorCompany"
+
+  val INDIVIDUAL_LEAD_TRUSTEE = "leadTrusteeInd"
+  val BUSINESS_LEAD_TRUSTEE = "leadTrusteeOrg"
+  val INDIVIDUAL_TRUSTEE = "trusteeInd"
+  val BUSINESS_TRUSTEE = "trusteeOrg"
 
   val EXPRESS = "expressTrust"
   val UK_RESIDENT = "trustUKResident"
@@ -55,5 +95,10 @@ object Constants {
   val INTER_VIVOS = "interVivos"
   val EFRBS_START_DATE = "efrbsStartDate"
   val RESIDENTIAL_STATUS = "residentialStatus"
+
+  val LINE_NUMBER = "lineNo"
+  val BP_MATCH_STATUS = "bpMatchStatus"
+  val ENTITY_START = "entityStart"
+  val ENTITY_END = "entityEnd"
 
 }

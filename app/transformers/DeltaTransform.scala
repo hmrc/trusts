@@ -56,56 +56,34 @@ object DeltaTransform {
   )
 
   def trusteeReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
-    readsForTransform[PromoteTrusteeIndTransform](PromoteTrusteeIndTransform.key) orElse
-    readsForTransform[PromoteTrusteeOrgTransform](PromoteTrusteeOrgTransform.key) orElse
-    readsForTransform[AmendLeadTrusteeIndTransform](AmendLeadTrusteeIndTransform.key) orElse
-    readsForTransform[AmendLeadTrusteeOrgTransform](AmendLeadTrusteeOrgTransform.key) orElse
-    readsForTransform[AddTrusteeIndTransform](AddTrusteeIndTransform.key) orElse
-    readsForTransform[AddTrusteeOrgTransform](AddTrusteeOrgTransform.key) orElse
-    readsForTransform[AmendTrusteeIndTransform](AmendTrusteeIndTransform.key) orElse
-    readsForTransform[AmendTrusteeOrgTransform](AmendTrusteeOrgTransform.key) orElse
+    readsForTransform[AddTrusteeTransform](AddTrusteeTransform.key) orElse
+    readsForTransform[AmendTrusteeTransform](AmendTrusteeTransform.key) orElse
+    readsForTransform[PromoteTrusteeTransform](PromoteTrusteeTransform.key) orElse
     readsForTransform[RemoveTrusteeTransform](RemoveTrusteeTransform.key)
   }
 
   def beneficiaryReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
-    readsForTransform[AddUnidentifiedBeneficiaryTransform](AddUnidentifiedBeneficiaryTransform.key) orElse
-    readsForTransform[AmendUnidentifiedBeneficiaryTransform](AmendUnidentifiedBeneficiaryTransform.key) orElse
-    readsForTransform[AddIndividualBeneficiaryTransform](AddIndividualBeneficiaryTransform.key) orElse
-    readsForTransform[AmendIndividualBeneficiaryTransform](AmendIndividualBeneficiaryTransform.key) orElse
-    readsForTransform[AddCharityBeneficiaryTransform](AddCharityBeneficiaryTransform.key) orElse
-    readsForTransform[AmendCharityBeneficiaryTransform](AmendCharityBeneficiaryTransform.key) orElse
-    readsForTransform[AddTrustBeneficiaryTransform](AddTrustBeneficiaryTransform.key) orElse
-    readsForTransform[AmendTrustBeneficiaryTransform](AmendTrustBeneficiaryTransform.key) orElse
-    readsForTransform[AddCompanyBeneficiaryTransform](AddCompanyBeneficiaryTransform.key) orElse
-    readsForTransform[AmendCompanyBeneficiaryTransform](AmendCompanyBeneficiaryTransform.key) orElse
-    readsForTransform[AddLargeBeneficiaryTransform](AddLargeBeneficiaryTransform.key) orElse
-    readsForTransform[AmendLargeBeneficiaryTransform](AmendLargeBeneficiaryTransform.key) orElse
-    readsForTransform[AddOtherBeneficiaryTransform](AddOtherBeneficiaryTransform.key) orElse
-    readsForTransform[AmendOtherBeneficiaryTransform](AmendOtherBeneficiaryTransform.key) orElse
-    readsForTransform[RemoveBeneficiariesTransform](RemoveBeneficiariesTransform.key)
+    readsForTransform[AddBeneficiaryTransform](AddBeneficiaryTransform.key) orElse
+    readsForTransform[AmendBeneficiaryTransform](AmendBeneficiaryTransform.key) orElse
+    readsForTransform[RemoveBeneficiaryTransform](RemoveBeneficiaryTransform.key)
   }
 
   def settlorReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
-    readsForTransform[AddIndividualSettlorTransform](AddIndividualSettlorTransform.key) orElse
-    readsForTransform[AmendIndividualSettlorTransform](AmendIndividualSettlorTransform.key) orElse
-    readsForTransform[AddBusinessSettlorTransform](AddBusinessSettlorTransform.key) orElse
-    readsForTransform[AmendBusinessSettlorTransform](AmendBusinessSettlorTransform.key) orElse
-    readsForTransform[AmendDeceasedSettlorTransform](AmendDeceasedSettlorTransform.key) orElse
-    readsForTransform[RemoveSettlorsTransform](RemoveSettlorsTransform.key)
+    readsForTransform[AddSettlorTransform](AddSettlorTransform.key) orElse
+    readsForTransform[AmendSettlorTransform](AmendSettlorTransform.key) orElse
+    readsForTransform[RemoveSettlorTransform](RemoveSettlorTransform.key)
   }
 
   def protectorReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
-    readsForTransform[AddIndividualProtectorTransform](AddIndividualProtectorTransform.key) orElse
-    readsForTransform[AddCompanyProtectorTransform](AddCompanyProtectorTransform.key) orElse
-    readsForTransform[AmendIndividualProtectorTransform](AmendIndividualProtectorTransform.key) orElse
-    readsForTransform[AmendBusinessProtectorTransform](AmendBusinessProtectorTransform.key) orElse
-    readsForTransform[RemoveProtectorsTransform](RemoveProtectorsTransform.key)
+    readsForTransform[AddProtectorTransform](AddProtectorTransform.key) orElse
+    readsForTransform[AmendProtectorTransform](AmendProtectorTransform.key) orElse
+    readsForTransform[RemoveProtectorTransform](RemoveProtectorTransform.key)
   }
 
   def otherIndividualReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
+    readsForTransform[AddOtherIndividualTransform](AddOtherIndividualTransform.key) orElse
     readsForTransform[AmendOtherIndividualTransform](AmendOtherIndividualTransform.key) orElse
-    readsForTransform[RemoveOtherIndividualsTransform](RemoveOtherIndividualsTransform.key) orElse
-    readsForTransform[AddOtherIndividualTransform](AddOtherIndividualTransform.key)
+    readsForTransform[RemoveOtherIndividualTransform](RemoveOtherIndividualTransform.key)
   }
 
   def trustDetailsReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
@@ -123,140 +101,67 @@ object DeltaTransform {
   }
 
   def trusteeWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
-    case transform: PromoteTrusteeIndTransform =>
-      Json.obj(PromoteTrusteeIndTransform.key -> Json.toJson(transform)(PromoteTrusteeIndTransform.format))
-    case transform: PromoteTrusteeOrgTransform =>
-      Json.obj(PromoteTrusteeOrgTransform.key -> Json.toJson(transform)(PromoteTrusteeOrgTransform.format))
-    case transform: AmendLeadTrusteeIndTransform =>
-      Json.obj(AmendLeadTrusteeIndTransform.key -> Json.toJson(transform)(AmendLeadTrusteeIndTransform.format))
-    case transform: AmendLeadTrusteeOrgTransform =>
-      Json.obj(AmendLeadTrusteeOrgTransform.key -> Json.toJson(transform)(AmendLeadTrusteeOrgTransform.format))
-    case transform: AmendTrusteeIndTransform =>
-      Json.obj(AmendTrusteeIndTransform.key -> Json.toJson(transform)(AmendTrusteeIndTransform.format))
-    case transform: AmendTrusteeOrgTransform =>
-      Json.obj(AmendTrusteeOrgTransform.key -> Json.toJson(transform)(AmendTrusteeOrgTransform.format))
-    case transform: AddTrusteeIndTransform =>
-      Json.obj(AddTrusteeIndTransform.key -> Json.toJson(transform)(AddTrusteeIndTransform.format))
-    case transform: AddTrusteeOrgTransform =>
-      Json.obj(AddTrusteeOrgTransform.key -> Json.toJson(transform)(AddTrusteeOrgTransform.format))
+    case transform: AddTrusteeTransform =>
+      Json.obj(AddTrusteeTransform.key -> Json.toJson(transform)(AddTrusteeTransform.format))
+    case transform: AmendTrusteeTransform =>
+      Json.obj(AmendTrusteeTransform.key -> Json.toJson(transform)(AmendTrusteeTransform.format))
+    case transform: PromoteTrusteeTransform =>
+      Json.obj(PromoteTrusteeTransform.key -> Json.toJson(transform)(PromoteTrusteeTransform.format))
     case transform: RemoveTrusteeTransform =>
       Json.obj(RemoveTrusteeTransform.key -> Json.toJson(transform)(RemoveTrusteeTransform.format))
   }
 
-  def addBeneficiariesWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
-    case transform: AddUnidentifiedBeneficiaryTransform =>
-      Json.obj(AddUnidentifiedBeneficiaryTransform.key -> Json.toJson(transform)(AddUnidentifiedBeneficiaryTransform.format))
-    case transform: AddIndividualBeneficiaryTransform =>
-      Json.obj(AddIndividualBeneficiaryTransform.key -> Json.toJson(transform)(AddIndividualBeneficiaryTransform.format))
-    case transform: AddCharityBeneficiaryTransform =>
-      Json.obj(AddCharityBeneficiaryTransform.key -> Json.toJson(transform)(AddCharityBeneficiaryTransform.format))
-    case transform: AddOtherBeneficiaryTransform =>
-      Json.obj(AddOtherBeneficiaryTransform.key -> Json.toJson(transform)(AddOtherBeneficiaryTransform.format))
-    case transform: AddCompanyBeneficiaryTransform =>
-      Json.obj(AddCompanyBeneficiaryTransform.key -> Json.toJson(transform)(AddCompanyBeneficiaryTransform.format))
-    case transform: AddTrustBeneficiaryTransform =>
-      Json.obj(AddTrustBeneficiaryTransform.key -> Json.toJson(transform)(AddTrustBeneficiaryTransform.format))
-    case transform: AddLargeBeneficiaryTransform =>
-      Json.obj(AddLargeBeneficiaryTransform.key -> Json.toJson(transform)(AddLargeBeneficiaryTransform.format))
+  def beneficiariesWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+    case transform: AddBeneficiaryTransform =>
+      Json.obj(AddBeneficiaryTransform.key -> Json.toJson(transform)(AddBeneficiaryTransform.format))
+    case transform: AmendBeneficiaryTransform =>
+      Json.obj(AmendBeneficiaryTransform.key -> Json.toJson(transform)(AmendBeneficiaryTransform.format))
+    case transform: RemoveBeneficiaryTransform =>
+      Json.obj(RemoveBeneficiaryTransform.key -> Json.toJson(transform)(RemoveBeneficiaryTransform.format))
   }
 
-  def amendBeneficiariesWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
-    case transform: AmendUnidentifiedBeneficiaryTransform =>
-      Json.obj(AmendUnidentifiedBeneficiaryTransform.key -> Json.toJson(transform)(AmendUnidentifiedBeneficiaryTransform.format))
-    case transform: AmendIndividualBeneficiaryTransform =>
-      Json.obj(AmendIndividualBeneficiaryTransform.key -> Json.toJson(transform)(AmendIndividualBeneficiaryTransform.format))
-    case transform: AmendCharityBeneficiaryTransform =>
-      Json.obj(AmendCharityBeneficiaryTransform.key -> Json.toJson(transform)(AmendCharityBeneficiaryTransform.format))
-    case transform: AmendCompanyBeneficiaryTransform =>
-      Json.obj(AmendCompanyBeneficiaryTransform.key -> Json.toJson(transform)(AmendCompanyBeneficiaryTransform.format))
-    case transform: AmendOtherBeneficiaryTransform =>
-      Json.obj(AmendOtherBeneficiaryTransform.key -> Json.toJson(transform)(AmendOtherBeneficiaryTransform.format))
-    case transform: AmendTrustBeneficiaryTransform =>
-      Json.obj(AmendTrustBeneficiaryTransform.key -> Json.toJson(transform)(AmendTrustBeneficiaryTransform.format))
-    case transform: AmendLargeBeneficiaryTransform =>
-      Json.obj(AmendLargeBeneficiaryTransform.key -> Json.toJson(transform)(AmendLargeBeneficiaryTransform.format))
+  def settlorsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+    case transform: AddSettlorTransform =>
+      Json.obj(AddSettlorTransform.key -> Json.toJson(transform)(AddSettlorTransform.format))
+    case transform: AmendSettlorTransform =>
+      Json.obj(AmendSettlorTransform.key -> Json.toJson(transform)(AmendSettlorTransform.format))
+    case transform: RemoveSettlorTransform =>
+      Json.obj(RemoveSettlorTransform.key -> Json.toJson(transform)(RemoveSettlorTransform.format))
   }
 
-  def removeBeneficiariesWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
-    case transform: RemoveBeneficiariesTransform =>
-      Json.obj(RemoveBeneficiariesTransform.key -> Json.toJson(transform)(RemoveBeneficiariesTransform.format))
+  def protectorsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+    case transform: AddProtectorTransform =>
+      Json.obj(AddProtectorTransform.key -> Json.toJson(transform)(AddProtectorTransform.format))
+    case transform: AmendProtectorTransform =>
+      Json.obj(AmendProtectorTransform.key -> Json.toJson(transform)(AmendProtectorTransform.format))
+    case transform: RemoveProtectorTransform =>
+      Json.obj(RemoveProtectorTransform.key -> Json.toJson(transform)(RemoveProtectorTransform.format))
   }
 
-  def addSettlorsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
-    case transform: AddIndividualSettlorTransform =>
-      Json.obj(AddIndividualSettlorTransform.key -> Json.toJson(transform)(AddIndividualSettlorTransform.format))
-    case transform: AddBusinessSettlorTransform =>
-      Json.obj(AddBusinessSettlorTransform.key -> Json.toJson(transform)(AddBusinessSettlorTransform.format))
-  }
-
-  def amendSettlorsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
-    case transform: AmendIndividualSettlorTransform =>
-      Json.obj(AmendIndividualSettlorTransform.key -> Json.toJson(transform)(AmendIndividualSettlorTransform.format))
-    case transform: AmendBusinessSettlorTransform =>
-      Json.obj(AmendBusinessSettlorTransform.key -> Json.toJson(transform)(AmendBusinessSettlorTransform.format))
-    case transform: AmendDeceasedSettlorTransform =>
-      Json.obj(AmendDeceasedSettlorTransform.key -> Json.toJson(transform)(AmendDeceasedSettlorTransform.format))
-  }
-
-  def removeSettlorsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
-    case transform: RemoveSettlorsTransform =>
-      Json.obj(RemoveSettlorsTransform.key -> Json.toJson(transform)(RemoveSettlorsTransform.format))
-  }
-
-  def addProtectorsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
-    case transform: AddIndividualProtectorTransform =>
-      Json.obj(AddIndividualProtectorTransform.key -> Json.toJson(transform)(AddIndividualProtectorTransform.format))
-    case transform: AddCompanyProtectorTransform =>
-      Json.obj(AddCompanyProtectorTransform.key -> Json.toJson(transform)(AddCompanyProtectorTransform.format))  }
-
-  def amendProtectorsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
-    case transform: AmendIndividualProtectorTransform =>
-      Json.obj(AmendIndividualProtectorTransform.key -> Json.toJson(transform)(AmendIndividualProtectorTransform.format))
-    case transform: AmendBusinessProtectorTransform =>
-      Json.obj(AmendBusinessProtectorTransform.key -> Json.toJson(transform)(AmendBusinessProtectorTransform.format))
-  }
-
-  def removeProtectorsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
-    case transform: RemoveProtectorsTransform =>
-      Json.obj(RemoveProtectorsTransform.key -> Json.toJson(transform)(RemoveProtectorsTransform.format))
-  }
-
-  def addOtherIndividualsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
+  def otherIndividualsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
     case transform: AddOtherIndividualTransform =>
       Json.obj(AddOtherIndividualTransform.key -> Json.toJson(transform)(AddOtherIndividualTransform.format))
-  }
-
-  def amendOtherIndividualsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
     case transform: AmendOtherIndividualTransform =>
       Json.obj(AmendOtherIndividualTransform.key -> Json.toJson(transform)(AmendOtherIndividualTransform.format))
+    case transform: RemoveOtherIndividualTransform =>
+      Json.obj(RemoveOtherIndividualTransform.key -> Json.toJson(transform)(RemoveOtherIndividualTransform.format))
   }
 
-  def removeOtherIndividualsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
-    case transform: RemoveOtherIndividualsTransform =>
-      Json.obj(RemoveOtherIndividualsTransform.key -> Json.toJson(transform)(RemoveOtherIndividualsTransform.format))
-  }
-
-  def addAssetWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
+  def assetsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
     case transform: AddAssetTransform =>
       Json.obj(AddAssetTransform.key -> Json.toJson(transform)(AddAssetTransform.format))
-  }
-
-  def amendAssetWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
     case transform: AmendAssetTransform =>
       Json.obj(AmendAssetTransform.key -> Json.toJson(transform)(AmendAssetTransform.format))
-  }
-
-  def removeAssetWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
     case transform: RemoveAssetTransform =>
       Json.obj(RemoveAssetTransform.key -> Json.toJson(transform)(RemoveAssetTransform.format))
   }
 
-  def trustDetailsWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
+  def trustDetailsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
     case transform: SetTrustDetailTransform =>
       Json.obj(SetTrustDetailTransform.key -> Json.toJson(transform)(SetTrustDetailTransform.format))
   }
 
-  def taxLiabilityWrites[T <: DeltaTransform] : PartialFunction[T, JsValue] = {
+  def taxLiabilityWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
     case transform: SetTaxLiabilityTransform =>
       Json.obj(SetTaxLiabilityTransform.key -> Json.toJson(transform)(SetTaxLiabilityTransform.format))
   }
@@ -267,22 +172,12 @@ object DeltaTransform {
 
   implicit val writes: Writes[DeltaTransform] = Writes[DeltaTransform] { deltaTransform =>
     (trusteeWrites orElse
-      addBeneficiariesWrites orElse
-      amendBeneficiariesWrites orElse
-      removeBeneficiariesWrites orElse
-      addSettlorsWrites orElse
-      amendSettlorsWrites orElse
-      removeSettlorsWrites orElse
-      addProtectorsWrites orElse
-      amendProtectorsWrites orElse
-      removeProtectorsWrites orElse
-      amendOtherIndividualsWrites orElse
-      removeOtherIndividualsWrites orElse
-      addOtherIndividualsWrites orElse
+      beneficiariesWrites orElse
+      settlorsWrites orElse
+      protectorsWrites orElse
+      otherIndividualsWrites orElse
       trustDetailsWrites orElse
-      addAssetWrites orElse
-      amendAssetWrites orElse
-      removeAssetWrites orElse
+      assetsWrites orElse
       taxLiabilityWrites orElse
       defaultWrites
       ).apply(deltaTransform)

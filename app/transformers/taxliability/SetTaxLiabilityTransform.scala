@@ -17,18 +17,13 @@
 package transformers.taxliability
 
 import play.api.libs.json._
-import transformers.{DeltaTransform, JsonOperations}
+import transformers.SetValueTransform
 
-case class SetTaxLiabilityTransform(value: JsValue) extends DeltaTransform with JsonOperations {
+case class SetTaxLiabilityTransform(value: JsValue) extends SetValueTransform {
 
-  private lazy val path = __ \ 'yearsReturn
-
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
-    pruneThenAddTo(input, path, value)
-  }
+  override val path: JsPath = __ \ 'yearsReturn
 
   override val isTaxableMigrationTransform: Boolean = true
-
 }
 
 object SetTaxLiabilityTransform {
@@ -36,5 +31,4 @@ object SetTaxLiabilityTransform {
   val key = "SetTaxLiabilityTransform"
 
   implicit val format: Format[SetTaxLiabilityTransform] = Json.format[SetTaxLiabilityTransform]
-
 }

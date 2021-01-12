@@ -39,6 +39,7 @@ import java.time.LocalDate
 import scala.concurrent.Future
 
 class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
+
   private lazy val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
@@ -206,7 +207,7 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoS
         | "type": "charity"
         |}
         |""".stripMargin)
-    val addRequest = FakeRequest(PUT, s"/trusts/$identifier/beneficiaries/remove")
+    val addRequest = FakeRequest(PUT, s"/trusts/beneficiaries/$identifier/remove")
       .withBody(removeJson)
       .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -249,7 +250,7 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MustMatchers with MockitoS
         | "type": "other"
         |}
         |""".stripMargin)
-    val addRequest = FakeRequest(PUT, s"/trusts/$identifier/beneficiaries/remove")
+    val addRequest = FakeRequest(PUT, s"/trusts/beneficiaries/$identifier/remove")
       .withBody(removeJson)
       .withHeaders(CONTENT_TYPE -> "application/json")
 

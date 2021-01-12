@@ -35,6 +35,8 @@ class AddAssetTransformSpec extends FreeSpec with MustMatchers {
     None
   )
 
+  val assetType: String = "nonEEABusiness"
+
   "the add asset transformer should" - {
 
     "add a new asset when there are no assets existing of the same type" in {
@@ -42,7 +44,7 @@ class AddAssetTransformSpec extends FreeSpec with MustMatchers {
 
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-NonEeaBusinessAsset.json")
 
-      val transformer = AddAssetTransform(Json.toJson(asset), asset.toString)
+      val transformer = AddAssetTransform(Json.toJson(asset), assetType)
 
       val result = transformer.applyTransform(trustJson).get
 
@@ -55,7 +57,7 @@ class AddAssetTransformSpec extends FreeSpec with MustMatchers {
 
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-second-NonEeaBusinessAsset.json")
 
-      val transformer = AddAssetTransform(Json.toJson(asset), asset.toString)
+      val transformer = AddAssetTransform(Json.toJson(asset), assetType)
 
       val result = transformer.applyTransform(trustJson).get
 

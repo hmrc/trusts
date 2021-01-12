@@ -16,22 +16,24 @@
 
 package transformers.remove
 
-import models.variation._
 import play.api.libs.json.{Format, Json, OWrites, Reads}
+import utils.Constants._
 
 import java.time.LocalDate
 
-case class RemoveAsset(endDate: LocalDate, index: Int, `type`: String)
+case class RemoveAsset(endDate: LocalDate,
+                       index: Int,
+                       override val `type`: String) extends Remove
 
 object RemoveAsset {
   val validAssetTypes: Seq[String] = Seq(
-    AssetMonetaryAmount.toString,
-    PropertyLandType.toString,
-    SharesType.toString,
-    BusinessAssetType.toString,
-    PartnershipType.toString,
-    OtherAssetType.toString,
-    NonEEABusinessType.toString
+    MONEY_ASSET,
+    PROPERTY_OR_LAND_ASSET,
+    SHARES_ASSET,
+    BUSINESS_ASSET,
+    PARTNERSHIP_ASSET,
+    OTHER_ASSET,
+    NON_EEA_BUSINESS_ASSET
   )
 
   val reads: Reads[RemoveAsset] = Json.reads[RemoveAsset].filter(ra => validAssetTypes.contains(ra.`type`))
