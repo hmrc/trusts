@@ -51,9 +51,16 @@ object DeltaTransform {
           otherIndividualReads orElse
           trustDetailsReads orElse
           assetReads orElse
-          taxLiabilityReads
-      ) (value.as[JsObject]) orElse (throw new Exception(s"Don't know how to deserialise transform"))
+          taxLiabilityReads orElse
+          defaultReads
+      )(value.as[JsObject]) recover {
+        case _ => throw new Exception(s"Don't know how to de-serialise transform")
+      }
   )
+
+  def defaultReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
+    case _ => throw new Exception(s"Don't know how to de-serialise transform")
+  }
 
   def trusteeReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
     readsForTransform[AddTrusteeTransform](AddTrusteeTransform.key) orElse

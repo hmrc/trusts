@@ -481,5 +481,29 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
       Json.toJson(data) mustEqual json
       json.as[ComposedDeltaTransform] mustEqual data
     }
+
+    "must not throw match error when parsing an old json transform" in {
+      val json = Json.parse(
+        s"""{
+           |  "deltaTransforms" : [
+           |      {
+           |          "AddTrusteeIndTransform": {
+           |             "trustee": {
+           |               "name":{"firstName":"Adam","middleName":"Middle","lastName":"Last"},
+           |               "dateOfBirth":"1990-05-01",
+           |               "identification":{"nino":"JP121212A"},
+           |               "entityStart":"2020-01-31"
+           |             }
+           |          }
+           |      }
+           |  ]
+           |}
+           |""".stripMargin)
+
+      val e = intercept[Exception] {
+        json.as[ComposedDeltaTransform]
+      }
+      e.getMessage mustBe "Don't know how to de-serialise transform"
+    }
   }
 }
