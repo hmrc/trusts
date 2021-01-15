@@ -40,13 +40,9 @@ class Default5mldDataService @Inject()(appConfig: AppConfig) extends Logging {
         if (json.transform(leadTrusteeIndPath.pick).isSuccess) {
           putNewValue((__ \ 'trust \ 'entities \ 'leadTrustees \ 'leadTrusteeInd \ 'countryOfResidence), JsString("GB")) andThen
             putNewValue((__ \ 'trust \ 'entities \ 'leadTrustees \ 'leadTrusteeInd \ 'nationality), JsString("GB")) andThen
-            putNewValue((__ \ 'trust \ 'details \ 'expressTrust), JsBoolean(false)) andThen
-            putNewValue((__ \ 'trust \ 'details \ 'trustTaxable), JsBoolean(true)) andThen
             putNewValue((__ \ 'trust \ 'details \ 'trustUKResident), JsBoolean(true)) andThen
             putNewValue((__ \ 'submissionDate), JsString("2021-01-01"))
         } else {
-            putNewValue((__ \ 'trust \ 'details \ 'expressTrust), JsBoolean(false)) andThen
-            putNewValue((__ \ 'trust \ 'details \ 'trustTaxable), JsBoolean(true)) andThen
             putNewValue((__ \ 'trust \ 'details \ 'trustUKResident), JsBoolean(true)) andThen
             putNewValue((__ \ 'submissionDate), JsString("2021-01-01"))
         }
