@@ -16,6 +16,7 @@
 
 package transformers
 
+import models.variation._
 import play.api.libs.json.{JsValue, _}
 import transformers.assets.{AddAssetTransform, AmendAssetTransform, RemoveAssetTransform}
 import transformers.beneficiaries._
@@ -25,6 +26,7 @@ import transformers.settlors._
 import transformers.taxliability.SetTaxLiabilityTransform
 import transformers.trustdetails._
 import transformers.trustees._
+import utils.Constants._
 
 trait DeltaTransform {
   def applyTransform(input: JsValue): JsResult[JsValue]
@@ -52,6 +54,7 @@ object DeltaTransform {
           trustDetailsReads orElse
           assetReads orElse
           taxLiabilityReads orElse
+          backwardsCompatibilityReads orElse
           defaultReads
       )(value.as[JsObject]) recover {
         case _ => throw new Exception(s"Don't know how to de-serialise transform")
@@ -105,6 +108,38 @@ object DeltaTransform {
 
   def taxLiabilityReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
     readsForTransform[SetTaxLiabilityTransform](SetTaxLiabilityTransform.key)
+  }
+
+  // TODO - remove code once deployed and users no longer using old transforms
+  def backwardsCompatibilityReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
+
+    val addBeneficiaryReads = {
+      readsForTransform[AddBeneficiaryTransform]("AddCharityBeneficiaryTransform")(AddBeneficiaryTransform.reads[BeneficiaryCharityType](CHARITY_BENEFICIARY)) orElse
+        readsForTransform[AddBeneficiaryTransform]("AddCompanyBeneficiaryTransform")(AddBeneficiaryTransform.reads[BeneficiaryCompanyType](COMPANY_BENEFICIARY)) orElse
+        readsForTransform[AddBeneficiaryTransform]("AddIndividualBeneficiaryTransform")(AddBeneficiaryTransform.reads[IndividualDetailsType](INDIVIDUAL_BENEFICIARY)) orElse
+        readsForTransform[AddBeneficiaryTransform]("AddLargeBeneficiaryTransform")(AddBeneficiaryTransform.reads[LargeType](LARGE_BENEFICIARY)) orElse
+        readsForTransform[AddBeneficiaryTransform]("AddOtherBeneficiaryTransform")(AddBeneficiaryTransform.reads[OtherType](OTHER_BENEFICIARY)) orElse
+        readsForTransform[AddBeneficiaryTransform]("AddTrustBeneficiaryTransform")(AddBeneficiaryTransform.reads[BeneficiaryTrustType](TRUST_BENEFICIARY)) orElse
+        readsForTransform[AddBeneficiaryTransform]("AddUnidentifiedBeneficiaryTransform")(AddBeneficiaryTransform.reads[UnidentifiedType](UNIDENTIFIED_BENEFICIARY))
+    }
+
+    val amendBeneficiaryReads = {
+      readsForTransform[AmendBeneficiaryTransform]("AmendCharityBeneficiaryTransform")(AmendBeneficiaryTransform.reads(CHARITY_BENEFICIARY)) orElse
+        readsForTransform[AmendBeneficiaryTransform]("AmendCompanyBeneficiaryTransform")(AmendBeneficiaryTransform.reads(COMPANY_BENEFICIARY)) orElse
+        readsForTransform[AmendBeneficiaryTransform]("AmendIndividualBeneficiaryTransform")(AmendBeneficiaryTransform.reads(INDIVIDUAL_BENEFICIARY)) orElse
+        readsForTransform[AmendBeneficiaryTransform]("AmendLargeBeneficiaryTransform")(AmendBeneficiaryTransform.reads(LARGE_BENEFICIARY)) orElse
+        readsForTransform[AmendBeneficiaryTransform]("AmendOtherBeneficiaryTransform")(AmendBeneficiaryTransform.reads(OTHER_BENEFICIARY)) orElse
+        readsForTransform[AmendBeneficiaryTransform]("AmendTrustBeneficiaryTransform")(AmendBeneficiaryTransform.reads(TRUST_BENEFICIARY)) orElse
+        readsForTransform[AmendBeneficiaryTransform]("AmendUnidentifiedBeneficiaryTransform")(AmendBeneficiaryTransform.reads(UNIDENTIFIED_BENEFICIARY, "description"))
+    }
+
+    val removeBeneficiaryReads = {
+      readsForTransform[RemoveBeneficiaryTransform]("RemoveBeneficiariesTransform")(RemoveBeneficiaryTransform.reads)
+    }
+
+    addBeneficiaryReads orElse
+      amendBeneficiaryReads orElse
+      removeBeneficiaryReads
   }
 
   def trusteeWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {

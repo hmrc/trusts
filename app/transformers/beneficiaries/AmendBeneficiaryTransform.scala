@@ -16,6 +16,7 @@
 
 package transformers.beneficiaries
 
+import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import transformers.AmendEntityTransform
 import utils.Constants._
@@ -44,4 +45,14 @@ object AmendBeneficiaryTransform {
   val key = "AmendBeneficiaryTransform"
 
   implicit val format: Format[AmendBeneficiaryTransform] = Json.format[AmendBeneficiaryTransform]
+
+  // TODO - remove code once deployed and users no longer using old transforms
+  def reads(`type`: String, amendmentField: String = "amended"): Reads[AmendBeneficiaryTransform] =
+    ((__ \ "index").read[Int] and
+      (__ \ amendmentField).read[JsValue] and
+      (__ \ "original").read[JsValue] and
+      (__ \ "endDate").read[LocalDate]).tupled.map {
+      case (index, amended, original, endDate) =>
+        AmendBeneficiaryTransform(Some(index), amended, original, endDate, `type`)
+    }
 }

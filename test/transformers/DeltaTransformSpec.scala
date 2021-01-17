@@ -505,5 +505,381 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
       }
       e.getMessage mustBe "Don't know how to de-serialise transform"
     }
+
+    "must de-serialise backwards compatible transforms" - {
+
+      val index: Int = 0
+      val name: String = "Name"
+      val description: String = "Description"
+      val forename = "Joe"
+      val surname = "Bloggs"
+      val date: String = "2021-01-01"
+
+      "when beneficiary" - {
+
+        "when adding" - {
+
+          "charity" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AddCharityBeneficiaryTransform": {
+                 |    "newBeneficiary": {
+                 |      "organisationName": "$name",
+                 |      "entityStart": "$date"
+                 |    }
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = BeneficiaryCharityType(
+              lineNo = None,
+              bpMatchStatus = None,
+              organisationName = name,
+              beneficiaryDiscretion = None,
+              beneficiaryShareOfIncome = None,
+              identification = None,
+              countryOfResidence = None,
+              entityStart = LocalDate.parse(date),
+              entityEnd = None
+            )
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AddBeneficiaryTransform(Json.toJson(entity), "charity")
+          }
+
+          "company" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AddCompanyBeneficiaryTransform": {
+                 |    "newBeneficiary": {
+                 |      "organisationName": "$name",
+                 |      "entityStart": "$date"
+                 |    }
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = BeneficiaryCompanyType(
+              lineNo = None,
+              bpMatchStatus = None,
+              organisationName = name,
+              beneficiaryDiscretion = None,
+              beneficiaryShareOfIncome = None,
+              identification = None,
+              countryOfResidence = None,
+              entityStart = LocalDate.parse(date),
+              entityEnd = None
+            )
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AddBeneficiaryTransform(Json.toJson(entity), "company")
+          }
+
+          "individual" in {
+
+            val json = Json.parse(
+              s"""{
+                 |  "AddIndividualBeneficiaryTransform": {
+                 |    "newBeneficiary": {
+                 |      "name": {
+                 |        "firstName": "$forename",
+                 |        "lastName": "$surname"
+                 |      },
+                 |      "entityStart": "$date"
+                 |    }
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = IndividualDetailsType(
+              lineNo = None,
+              bpMatchStatus = None,
+              name = NameType(forename, None, surname),
+              dateOfBirth = None,
+              vulnerableBeneficiary = None,
+              beneficiaryType = None,
+              beneficiaryDiscretion = None,
+              beneficiaryShareOfIncome = None,
+              identification = None,
+              countryOfResidence = None,
+              legallyIncapable = None,
+              nationality = None,
+              entityStart = LocalDate.parse(date),
+              entityEnd = None
+            )
+
+            val result = json.as[DeltaTransform]
+            result mustBe AddBeneficiaryTransform(Json.toJson(entity), "individualDetails")
+          }
+
+          "large" in {
+
+            val numberOfBeneficiary = "501"
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AddLargeBeneficiaryTransform": {
+                 |    "newBeneficiary": {
+                 |      "organisationName": "$name",
+                 |      "description": "$description",
+                 |      "numberOfBeneficiary": "$numberOfBeneficiary",
+                 |      "entityStart": "$date"
+                 |    }
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = LargeType(
+              lineNo = None,
+              bpMatchStatus = None,
+              organisationName = name,
+              description = description,
+              description1 = None,
+              description2 = None,
+              description3 = None,
+              description4 = None,
+              numberOfBeneficiary = numberOfBeneficiary,
+              identification = None,
+              beneficiaryDiscretion = None,
+              beneficiaryShareOfIncome = None,
+              countryOfResidence = None,
+              entityStart = LocalDate.parse(date),
+              entityEnd = None
+            )
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AddBeneficiaryTransform(Json.toJson(entity), "large")
+          }
+
+          "other" in {
+
+            val json = Json.parse(
+              s"""{
+                 |  "AddOtherBeneficiaryTransform": {
+                 |    "newBeneficiary": {
+                 |      "description": "$description",
+                 |      "entityStart": "$date"
+                 |    }
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = OtherType(
+              lineNo = None,
+              bpMatchStatus = None,
+              description = description,
+              address = None,
+              beneficiaryDiscretion = None,
+              beneficiaryShareOfIncome = None,
+              countryOfResidence = None,
+              entityStart = LocalDate.parse(date),
+              entityEnd = None
+            )
+
+            val result = json.as[DeltaTransform]
+            result mustBe AddBeneficiaryTransform(Json.toJson(entity), "other")
+          }
+
+          "trust" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AddTrustBeneficiaryTransform": {
+                 |    "newBeneficiary": {
+                 |      "organisationName": "$name",
+                 |      "entityStart": "$date"
+                 |    }
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = BeneficiaryTrustType(
+              lineNo = None,
+              bpMatchStatus = None,
+              organisationName = name,
+              beneficiaryDiscretion = None,
+              beneficiaryShareOfIncome = None,
+              identification = None,
+              countryOfResidence = None,
+              entityStart = LocalDate.parse(date),
+              entityEnd = None
+            )
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AddBeneficiaryTransform(Json.toJson(entity), "trust")
+          }
+
+          "unidentified" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AddUnidentifiedBeneficiaryTransform": {
+                 |    "newBeneficiary": {
+                 |      "description": "$description",
+                 |      "entityStart": "$date"
+                 |    }
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = UnidentifiedType(
+              lineNo = None,
+              bpMatchStatus = None,
+              description = description,
+              beneficiaryDiscretion = None,
+              beneficiaryShareOfIncome = None,
+              entityStart = LocalDate.parse(date),
+              entityEnd = None
+            )
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AddBeneficiaryTransform(Json.toJson(entity), "unidentified")
+          }
+        }
+
+        "when amending" - {
+
+          "charity" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AmendCharityBeneficiaryTransform": {
+                 |    "index": $index,
+                 |    "amended": {},
+                 |    "original": {},
+                 |    "endDate": "$date"
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AmendBeneficiaryTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date), "charity")
+          }
+
+          "company" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AmendCompanyBeneficiaryTransform": {
+                 |    "index": $index,
+                 |    "amended": {},
+                 |    "original": {},
+                 |    "endDate": "$date"
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AmendBeneficiaryTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date), "company")
+          }
+
+          "individual" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AmendIndividualBeneficiaryTransform": {
+                 |    "index": $index,
+                 |    "amended": {},
+                 |    "original": {},
+                 |    "endDate": "$date"
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AmendBeneficiaryTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date), "individualDetails")
+          }
+
+          "large" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AmendLargeBeneficiaryTransform": {
+                 |    "index": $index,
+                 |    "amended": {},
+                 |    "original": {},
+                 |    "endDate": "$date"
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AmendBeneficiaryTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date), "large")
+          }
+
+          "other" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AmendOtherBeneficiaryTransform": {
+                 |    "index": $index,
+                 |    "amended": {},
+                 |    "original": {},
+                 |    "endDate": "$date"
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AmendBeneficiaryTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date), "other")
+          }
+
+          "trust" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AmendTrustBeneficiaryTransform": {
+                 |    "index": $index,
+                 |    "amended": {},
+                 |    "original": {},
+                 |    "endDate": "$date"
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AmendBeneficiaryTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date), "trust")
+          }
+
+          "unidentified" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AmendUnidentifiedBeneficiaryTransform": {
+                 |    "index": $index,
+                 |    "description": "$description",
+                 |    "original": {},
+                 |    "endDate": "$date"
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AmendBeneficiaryTransform(Some(index), JsString(description), Json.obj(), LocalDate.parse(date), "unidentified")
+          }
+        }
+
+        "when removing" in {
+
+          val `type`: String = "type"
+
+          val transformJson = Json.parse(
+            s"""{
+               |  "RemoveBeneficiariesTransform": {
+               |    "index": $index,
+               |    "beneficiaryData": {},
+               |    "endDate": "$date",
+               |    "beneficiaryType": "${`type`}"
+               |  }
+               |}
+               |""".stripMargin)
+
+          val result = transformJson.as[DeltaTransform]
+          result mustBe RemoveBeneficiaryTransform(Some(index), Json.obj(), LocalDate.parse(date), `type`)
+        }
+      }
+    }
   }
 }

@@ -18,6 +18,7 @@ package transformers.beneficiaries
 
 import play.api.libs.json._
 import transformers.RemoveEntityTransform
+import play.api.libs.functional.syntax._
 
 import java.time.LocalDate
 
@@ -31,4 +32,14 @@ object RemoveBeneficiaryTransform {
   val key = "RemoveBeneficiaryTransform"
 
   implicit val format: Format[RemoveBeneficiaryTransform] = Json.format[RemoveBeneficiaryTransform]
+
+  // TODO - remove code once deployed and users no longer using old transforms
+  def reads: Reads[RemoveBeneficiaryTransform] =
+    ((__ \ "index").read[Int] and
+      (__ \ "beneficiaryData").read[JsValue] and
+      (__ \ "endDate").read[LocalDate] and
+      (__ \ "beneficiaryType").read[String]).tupled.map {
+      case (index, entity, endDate, bType) =>
+        RemoveBeneficiaryTransform(Some(index), entity, endDate, bType)
+    }
 }
