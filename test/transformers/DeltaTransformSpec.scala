@@ -506,9 +506,12 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
       val index: Int = 0
       val name: String = "Name"
       val description: String = "Description"
-      val forename = "Joe"
-      val surname = "Bloggs"
+      val forename: String = "Joe"
+      val surname: String = "Bloggs"
       val date: String = "2021-01-01"
+      val tel: String = "tel"
+      val nino: String = "nino"
+      val utr: String = "utr"
 
       "when beneficiary" - {
 
@@ -1012,6 +1015,354 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
           val result = transformJson.as[DeltaTransform]
           result mustBe RemoveSettlorTransform(Some(index), Json.obj(), LocalDate.parse(date), `type`)
+        }
+      }
+
+      "when trustee" - {
+
+        "when adding" - {
+
+          "individual" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AddTrusteeIndTransform": {
+                 |    "trustee": {
+                 |      "name": {
+                 |        "firstName": "$forename",
+                 |        "lastName": "$surname"
+                 |      },
+                 |      "entityStart": "$date"
+                 |    }
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = TrusteeIndividualType(
+              lineNo = None,
+              bpMatchStatus = None,
+              name = NameType(forename, None, surname),
+              dateOfBirth = None,
+              phoneNumber = None,
+              identification = None,
+              countryOfResidence = None,
+              legallyIncapable = None,
+              nationality = None,
+              entityStart = LocalDate.parse(date),
+              entityEnd = None
+            )
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AddTrusteeTransform(Json.toJson(entity), "trusteeInd")
+          }
+
+          "business" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AddTrusteeOrgTransform": {
+                 |    "trustee": {
+                 |      "name": "$name",
+                 |      "entityStart": "$date"
+                 |    }
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = TrusteeOrgType(
+              lineNo = None,
+              bpMatchStatus = None,
+              name = name,
+              phoneNumber = None,
+              email = None,
+              identification = None,
+              countryOfResidence = None,
+              entityStart = LocalDate.parse(date),
+              entityEnd = None
+            )
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AddTrusteeTransform(Json.toJson(entity), "trusteeOrg")
+          }
+        }
+
+        "when amending" - {
+
+          "lead individual" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AmendLeadTrusteeIndTransform": {
+                 |    "leadTrustee": {
+                 |      "name": {
+                 |        "firstName": "$forename",
+                 |        "lastName": "$surname"
+                 |      },
+                 |      "dateOfBirth": "$date",
+                 |      "phoneNumber": "$tel",
+                 |      "identification": {
+                 |        "nino": "$nino"
+                 |      }
+                 |    }
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = AmendedLeadTrusteeIndType(
+              name = NameType(forename, None, surname),
+              dateOfBirth = LocalDate.parse(date),
+              phoneNumber = tel,
+              email = None,
+              identification = IdentificationType(Some(nino), None, None, None),
+              countryOfResidence = None,
+              legallyIncapable = None,
+              nationality = None
+            )
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AmendTrusteeTransform(None, Json.toJson(entity), Json.obj(), LocalDate.now(), "leadTrusteeInd")
+          }
+
+          "lead business" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AmendLeadTrusteeOrgTransform": {
+                 |    "leadTrustee": {
+                 |      "name": "$name",
+                 |      "phoneNumber": "$tel",
+                 |      "identification": {
+                 |        "utr": "$utr"
+                 |      }
+                 |    }
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = AmendedLeadTrusteeOrgType(
+              name = name,
+              phoneNumber = tel,
+              email = None,
+              identification = IdentificationOrgType(Some(utr), None, None),
+              countryOfResidence = None
+            )
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AmendTrusteeTransform(None, Json.toJson(entity), Json.obj(), LocalDate.now(), "leadTrusteeOrg")
+          }
+
+          "individual" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AmendTrusteeIndTransform": {
+                 |    "index": $index,
+                 |    "newTrustee": {
+                 |      "name": {
+                 |        "firstName": "$forename",
+                 |        "lastName": "$surname"
+                 |      },
+                 |      "entityStart": "$date"
+                 |    },
+                 |    "originalTrusteeJson": {},
+                 |    "currentDate": "$date"
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = TrusteeIndividualType(
+              lineNo = None,
+              bpMatchStatus = None,
+              name = NameType(forename, None, surname),
+              dateOfBirth = None,
+              phoneNumber = None,
+              identification = None,
+              countryOfResidence = None,
+              legallyIncapable = None,
+              nationality = None,
+              entityStart = LocalDate.parse(date),
+              entityEnd = None
+            )
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AmendTrusteeTransform(Some(index), Json.toJson(entity), Json.obj(), LocalDate.parse(date), "trusteeInd")
+          }
+
+          "business" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AmendTrusteeOrgTransform": {
+                 |    "index": $index,
+                 |    "trustee": {
+                 |      "name": "$name",
+                 |      "entityStart": "$date"
+                 |    },
+                 |    "originalTrusteeJson": {},
+                 |    "currentDate": "$date"
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = TrusteeOrgType(
+              lineNo = None,
+              bpMatchStatus = None,
+              name = name,
+              phoneNumber = None,
+              email = None,
+              identification = None,
+              countryOfResidence = None,
+              entityStart = LocalDate.parse(date),
+              entityEnd = None
+            )
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AmendTrusteeTransform(Some(index), Json.toJson(entity), Json.obj(), LocalDate.parse(date), "trusteeOrg")
+          }
+        }
+
+        "when promoting" - {
+
+          "individual" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "PromoteTrusteeIndTransform": {
+                 |    "index": $index,
+                 |    "newLeadTrustee": {
+                 |      "name": {
+                 |        "firstName": "$forename",
+                 |        "lastName": "$surname"
+                 |      },
+                 |      "dateOfBirth": "$date",
+                 |      "phoneNumber": "$tel",
+                 |      "identification": {
+                 |        "nino": "$nino"
+                 |      }
+                 |    },
+                 |    "endDate": "$date",
+                 |    "originalTrusteeJson": {},
+                 |    "currentDate": "$date"
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = AmendedLeadTrusteeIndType(
+              name = NameType(forename, None, surname),
+              dateOfBirth = LocalDate.parse(date),
+              phoneNumber = tel,
+              email = None,
+              identification = IdentificationType(Some(nino), None, None, None),
+              countryOfResidence = None,
+              legallyIncapable = None,
+              nationality = None
+            )
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe PromoteTrusteeTransform(Some(index), Json.toJson(entity), Json.obj(), LocalDate.parse(date), "trusteeInd")
+          }
+
+          "business" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "PromoteTrusteeOrgTransform": {
+                 |    "index": $index,
+                 |    "newLeadTrustee": {
+                 |      "name": "$name",
+                 |      "phoneNumber": "$tel",
+                 |      "identification": {
+                 |        "utr": "$utr"
+                 |      }
+                 |    },
+                 |    "endDate": "$date",
+                 |    "originalTrusteeJson": {},
+                 |    "currentDate": "$date"
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = AmendedLeadTrusteeOrgType(
+              name = name,
+              phoneNumber = tel,
+              email = None,
+              identification = IdentificationOrgType(Some(utr), None, None),
+              countryOfResidence = None
+            )
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe PromoteTrusteeTransform(Some(index), Json.toJson(entity), Json.obj(), LocalDate.parse(date), "trusteeOrg")
+          }
+        }
+
+        "when removing" - {
+
+          "individual" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "RemoveTrusteeTransform": {
+                 |    "endDate": "$date",
+                 |    "index": $index,
+                 |    "trusteeToRemove": {
+                 |      "name": {
+                 |        "firstName": "$forename",
+                 |        "lastName": "$surname"
+                 |      },
+                 |      "entityStart": "$date"
+                 |    }
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = TrusteeIndividualType(
+              lineNo = None,
+              bpMatchStatus = None,
+              name = NameType(forename, None, surname),
+              dateOfBirth = None,
+              phoneNumber = None,
+              identification = None,
+              countryOfResidence = None,
+              legallyIncapable = None,
+              nationality = None,
+              entityStart = LocalDate.parse(date),
+              entityEnd = None
+            )
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe RemoveTrusteeTransform(Some(index), Json.toJson(entity), LocalDate.parse(date), "trusteeInd")
+          }
+
+          "business" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "RemoveTrusteeTransform": {
+                 |    "endDate": "$date",
+                 |    "index": $index,
+                 |    "trusteeToRemove": {
+                 |      "name": "$name",
+                 |      "entityStart": "$date"
+                 |    }
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = TrusteeOrgType(
+              lineNo = None,
+              bpMatchStatus = None,
+              name = name,
+              phoneNumber = None,
+              email = None,
+              identification = None,
+              countryOfResidence = None,
+              entityStart = LocalDate.parse(date),
+              entityEnd = None
+            )
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe RemoveTrusteeTransform(Some(index), Json.toJson(entity), LocalDate.parse(date), "trusteeOrg")
+          }
         }
       }
     }

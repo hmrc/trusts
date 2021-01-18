@@ -17,6 +17,7 @@
 package transformers.trustees
 
 import models.variation._
+import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import transformers.{AmendEntityTransform, DeltaTransform}
 import utils.Constants._
@@ -120,4 +121,15 @@ object PromoteTrusteeTransform {
   val key = "PromoteTrusteeTransform"
 
   implicit val format: Format[PromoteTrusteeTransform] = Json.format[PromoteTrusteeTransform]
+
+  // TODO - remove code once deployed and users no longer using old transforms
+  def reads[T](`type`: String)(implicit rds: Reads[T], wts: Writes[T]): Reads[PromoteTrusteeTransform] =
+    ((__ \ "index").read[Int] and
+      (__ \ "newLeadTrustee").read[T] and
+      (__ \ "endDate").read[LocalDate] and
+      (__ \ "originalTrusteeJson").read[JsValue] and
+      (__ \ "currentDate").read[LocalDate]).tupled.map {
+      case (index, promoted, endDate, original, _) =>
+        PromoteTrusteeTransform(Some(index), Json.toJson(promoted), original, endDate, `type`)
+    }
 }

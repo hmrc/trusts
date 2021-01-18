@@ -98,7 +98,7 @@ object AmendSettlorTransform {
   implicit val format: Format[AmendSettlorTransform] = Json.format[AmendSettlorTransform]
 
   // TODO - remove code once deployed and users no longer using old transforms
-  def reads(`type`: String): Reads[AmendSettlorTransform] =
+  def livingReads(`type`: String): Reads[AmendSettlorTransform] =
     ((__ \ "index").read[Int] and
       (__ \ "amended").read[JsValue] and
       (__ \ "original").read[JsValue] and

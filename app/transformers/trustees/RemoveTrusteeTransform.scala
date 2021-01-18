@@ -16,9 +16,11 @@
 
 package transformers.trustees
 
+import models.variation.TrusteeIndividualType
+import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import transformers.RemoveEntityTransform
-import utils.Constants.{ENTITY_END, LINE_NUMBER}
+import utils.Constants._
 
 import java.time.LocalDate
 
@@ -53,4 +55,18 @@ object RemoveTrusteeTransform {
   val key = "RemoveTrusteeTransform"
 
   implicit val format: Format[RemoveTrusteeTransform] = Json.format[RemoveTrusteeTransform]
+
+  // TODO - remove code once deployed and users no longer using old transforms
+  def reads: Reads[RemoveTrusteeTransform] =
+    ((__ \ "endDate").read[LocalDate] and
+      (__ \ "index").read[Int] and
+      (__ \ "trusteeToRemove").read[JsValue]).tupled.map {
+      case (endDate, index, entity) =>
+        val `type` = if (entity.validate[TrusteeIndividualType].isSuccess) {
+          INDIVIDUAL_TRUSTEE
+        } else {
+          BUSINESS_TRUSTEE
+        }
+        RemoveTrusteeTransform(Some(index), entity, endDate, `type`)
+    }
 }

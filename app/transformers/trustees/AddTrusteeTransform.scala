@@ -32,4 +32,10 @@ object AddTrusteeTransform {
   val key = "AddTrusteeTransform"
 
   implicit val format: Format[AddTrusteeTransform] = Json.format[AddTrusteeTransform]
+
+  // TODO - remove code once deployed and users no longer using old transforms
+  def reads[T](`type`: String)(implicit rds: Reads[T], wts: Writes[T]): Reads[AddTrusteeTransform] =
+    (__ \ "trustee").read[T].map {
+      entity => AddTrusteeTransform(Json.toJson(entity), `type`)
+    }
 }

@@ -39,7 +39,7 @@ trait DeltaTransform {
 object DeltaTransform {
 
   private def readsForTransform[T](key: String)(implicit reads: Reads[T]): PartialFunction[JsObject, JsResult[T]] = {
-    case json if json.keys.contains(key) =>
+    case json if json.keys.contains(key) && (json \ key).validate[T].isSuccess =>
       (json \ key).validate[T]
   }
 
@@ -56,13 +56,11 @@ object DeltaTransform {
           taxLiabilityReads orElse
           backwardsCompatibilityReads orElse
           defaultReads
-      )(value.as[JsObject]) recover {
-        case _ => throw new Exception(s"Don't know how to de-serialise transform")
-      }
+      )(value.as[JsObject])
   )
 
   def defaultReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
-    case _ => throw new Exception(s"Don't know how to de-serialise transform")
+    case _ => throw new Exception("Don't know how to de-serialise transform")
   }
 
   def trusteeReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
@@ -113,7 +111,7 @@ object DeltaTransform {
   // TODO - remove code once deployed and users no longer using old transforms
   def backwardsCompatibilityReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
 
-    val addBeneficiaryReads = {
+    lazy val addBeneficiaryReads = {
       readsForTransform[AddBeneficiaryTransform]("AddCharityBeneficiaryTransform")(AddBeneficiaryTransform.reads[BeneficiaryCharityType](CHARITY_BENEFICIARY)) orElse
         readsForTransform[AddBeneficiaryTransform]("AddCompanyBeneficiaryTransform")(AddBeneficiaryTransform.reads[BeneficiaryCompanyType](COMPANY_BENEFICIARY)) orElse
         readsForTransform[AddBeneficiaryTransform]("AddIndividualBeneficiaryTransform")(AddBeneficiaryTransform.reads[IndividualDetailsType](INDIVIDUAL_BENEFICIARY)) orElse
@@ -123,7 +121,7 @@ object DeltaTransform {
         readsForTransform[AddBeneficiaryTransform]("AddUnidentifiedBeneficiaryTransform")(AddBeneficiaryTransform.reads[UnidentifiedType](UNIDENTIFIED_BENEFICIARY))
     }
 
-    val amendBeneficiaryReads = {
+    lazy val amendBeneficiaryReads = {
       readsForTransform[AmendBeneficiaryTransform]("AmendCharityBeneficiaryTransform")(AmendBeneficiaryTransform.reads(CHARITY_BENEFICIARY)) orElse
         readsForTransform[AmendBeneficiaryTransform]("AmendCompanyBeneficiaryTransform")(AmendBeneficiaryTransform.reads(COMPANY_BENEFICIARY)) orElse
         readsForTransform[AmendBeneficiaryTransform]("AmendIndividualBeneficiaryTransform")(AmendBeneficiaryTransform.reads(INDIVIDUAL_BENEFICIARY)) orElse
@@ -133,24 +131,45 @@ object DeltaTransform {
         readsForTransform[AmendBeneficiaryTransform]("AmendUnidentifiedBeneficiaryTransform")(AmendBeneficiaryTransform.reads(UNIDENTIFIED_BENEFICIARY, "description"))
     }
 
-    val removeBeneficiaryReads = {
+    lazy val removeBeneficiaryReads = {
       readsForTransform[RemoveBeneficiaryTransform]("RemoveBeneficiariesTransform")(RemoveBeneficiaryTransform.reads)
     }
 
     // NB - spelling mistake is intentional as this is how it was before
-    val addSettlorReads = {
+    lazy val addSettlorReads = {
       readsForTransform[AddSettlorTransform]("AddBuisnessSettlorTransform")(AddSettlorTransform.reads[SettlorCompany](BUSINESS_SETTLOR, "newCompanySettlor")) orElse
       readsForTransform[AddSettlorTransform]("AddIndividualSettlorTransform")(AddSettlorTransform.reads[Settlor](INDIVIDUAL_SETTLOR, "newSettlor"))
     }
 
-    val amendSettlorReads = {
-      readsForTransform[AmendSettlorTransform]("AmendBusinessSettlorTransform")(AmendSettlorTransform.reads(BUSINESS_SETTLOR)) orElse
+    lazy val amendSettlorReads = {
+      readsForTransform[AmendSettlorTransform]("AmendBusinessSettlorTransform")(AmendSettlorTransform.livingReads(BUSINESS_SETTLOR)) orElse
       readsForTransform[AmendSettlorTransform]("AmendDeceasedSettlorTransform")(AmendSettlorTransform.deceasedReads) orElse
-      readsForTransform[AmendSettlorTransform]("AmendIndividualSettlorTransform")(AmendSettlorTransform.reads(INDIVIDUAL_SETTLOR))
+      readsForTransform[AmendSettlorTransform]("AmendIndividualSettlorTransform")(AmendSettlorTransform.livingReads(INDIVIDUAL_SETTLOR))
     }
 
-    val removeSettlorReads = {
+    lazy val removeSettlorReads = {
       readsForTransform[RemoveSettlorTransform]("RemoveSettlorsTransform")(RemoveSettlorTransform.reads)
+    }
+
+    lazy val addTrusteeReads = {
+      readsForTransform[AddTrusteeTransform]("AddTrusteeIndTransform")(AddTrusteeTransform.reads[TrusteeIndividualType](INDIVIDUAL_TRUSTEE)) orElse
+      readsForTransform[AddTrusteeTransform]("AddTrusteeOrgTransform")(AddTrusteeTransform.reads[TrusteeOrgType](BUSINESS_TRUSTEE))
+    }
+
+    lazy val amendTrusteeReads = {
+      readsForTransform[AmendTrusteeTransform]("AmendLeadTrusteeIndTransform")(AmendTrusteeTransform.leadReads[AmendedLeadTrusteeIndType](INDIVIDUAL_LEAD_TRUSTEE)) orElse
+      readsForTransform[AmendTrusteeTransform]("AmendLeadTrusteeOrgTransform")(AmendTrusteeTransform.leadReads[AmendedLeadTrusteeOrgType](BUSINESS_LEAD_TRUSTEE)) orElse
+      readsForTransform[AmendTrusteeTransform]("AmendTrusteeIndTransform")(AmendTrusteeTransform.nonLeadReads[TrusteeIndividualType](INDIVIDUAL_TRUSTEE, "newTrustee")) orElse
+      readsForTransform[AmendTrusteeTransform]("AmendTrusteeOrgTransform")(AmendTrusteeTransform.nonLeadReads[TrusteeOrgType](BUSINESS_TRUSTEE, "trustee"))
+    }
+
+    lazy val promoteTrusteeReads = {
+      readsForTransform[PromoteTrusteeTransform]("PromoteTrusteeIndTransform")(PromoteTrusteeTransform.reads[AmendedLeadTrusteeIndType](INDIVIDUAL_TRUSTEE)) orElse
+      readsForTransform[PromoteTrusteeTransform]("PromoteTrusteeOrgTransform")(PromoteTrusteeTransform.reads[AmendedLeadTrusteeOrgType](BUSINESS_TRUSTEE))
+    }
+
+    lazy val removeTrusteeReads = {
+      readsForTransform[RemoveTrusteeTransform]("RemoveTrusteeTransform")(RemoveTrusteeTransform.reads)
     }
 
     addBeneficiaryReads orElse
@@ -158,7 +177,11 @@ object DeltaTransform {
       removeBeneficiaryReads orElse
       addSettlorReads orElse
       amendSettlorReads orElse
-      removeSettlorReads
+      removeSettlorReads orElse
+      addTrusteeReads orElse
+      amendTrusteeReads orElse
+      promoteTrusteeReads orElse
+      removeTrusteeReads
   }
 
   def trusteeWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
