@@ -16,6 +16,7 @@
 
 package transformers.otherindividuals
 
+import models.variation.NaturalPersonType
 import play.api.libs.json._
 import transformers.AddEntityTransform
 
@@ -26,6 +27,12 @@ object AddOtherIndividualTransform {
   val key = "AddOtherIndividualTransform"
 
   implicit val format: Format[AddOtherIndividualTransform] = Json.format[AddOtherIndividualTransform]
+
+  // TODO - remove code once deployed and users no longer using old transforms
+  def reads: Reads[AddOtherIndividualTransform] =
+    (__ \ "otherIndividual").read[NaturalPersonType].map {
+      entity => AddOtherIndividualTransform(Json.toJson(entity))
+    }
 }
 
 

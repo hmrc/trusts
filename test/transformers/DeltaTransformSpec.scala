@@ -1487,6 +1487,75 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           result mustBe RemoveProtectorTransform(Some(index), Json.obj(), LocalDate.parse(date), `type`)
         }
       }
+
+      "when other individual" - {
+
+        "when adding" in {
+
+          val transformJson = Json.parse(
+            s"""{
+               |  "AddOtherIndividualTransform": {
+               |    "otherIndividual": {
+               |      "name": {
+               |        "firstName": "$forename",
+               |        "lastName": "$surname"
+               |      },
+               |      "entityStart": "$date"
+               |    }
+               |  }
+               |}
+               |""".stripMargin)
+
+          val entity = NaturalPersonType(
+            lineNo = None,
+            bpMatchStatus = None,
+            name = NameType(forename, None, surname),
+            dateOfBirth = None,
+            identification = None,
+            countryOfResidence = None,
+            legallyIncapable = None,
+            nationality = None,
+            entityStart = LocalDate.parse(date),
+            entityEnd = None
+          )
+
+          val result = transformJson.as[DeltaTransform]
+          result mustBe AddOtherIndividualTransform(Json.toJson(entity))
+        }
+
+        "when amending" in {
+
+          val transformJson = Json.parse(
+            s"""{
+               |  "AmendOtherIndividualTransform": {
+               |    "index": $index,
+               |    "amended": {},
+               |    "original": {},
+               |    "endDate": "$date"
+               |  }
+               |}
+               |""".stripMargin)
+
+          val result = transformJson.as[DeltaTransform]
+          result mustBe AmendOtherIndividualTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date))
+        }
+
+        "when removing" in {
+
+          val transformJson = Json.parse(
+            s"""{
+               |  "RemoveOtherIndividualsTransform": {
+               |    "index": $index,
+               |    "otherIndividualData": {},
+               |    "endDate": "$date"
+               |  }
+               |}
+               |""".stripMargin)
+
+          val result = transformJson.as[DeltaTransform]
+          result mustBe RemoveOtherIndividualTransform(Some(index), Json.obj(), LocalDate.parse(date))
+        }
+      }
     }
   }
 }

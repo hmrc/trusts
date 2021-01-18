@@ -16,6 +16,7 @@
 
 package transformers.otherindividuals
 
+import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import transformers.RemoveEntityTransform
 
@@ -30,4 +31,13 @@ object RemoveOtherIndividualTransform {
   val key = "RemoveOtherIndividualTransform"
 
   implicit val format: Format[RemoveOtherIndividualTransform] = Json.format[RemoveOtherIndividualTransform]
+
+  // TODO - remove code once deployed and users no longer using old transforms
+  def reads: Reads[RemoveOtherIndividualTransform] =
+    ((__ \ "index").read[Int] and
+      (__ \ "otherIndividualData").read[JsValue] and
+      (__ \ "endDate").read[LocalDate]).tupled.map {
+      case (index, entity, endDate) =>
+        RemoveOtherIndividualTransform(Some(index), entity, endDate)
+    }
 }
