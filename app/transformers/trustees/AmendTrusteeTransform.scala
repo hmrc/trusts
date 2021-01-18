@@ -16,6 +16,7 @@
 
 package transformers.trustees
 
+import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import transformers.AmendEntityTransform
 import utils.Constants._
@@ -79,4 +80,20 @@ object AmendTrusteeTransform {
   val key = "AmendTrusteeTransform"
 
   implicit val format: Format[AmendTrusteeTransform] = Json.format[AmendTrusteeTransform]
+
+  // TODO - remove code once deployed and users no longer using old transforms
+  def leadReads[T](`type`: String)(implicit rds: Reads[T], wts: Writes[T]): Reads[AmendTrusteeTransform] =
+    (__ \ "leadTrustee").read[T].map {
+      entity => AmendTrusteeTransform(None, Json.toJson(entity), Json.obj(), LocalDate.now(), `type`)
+    }
+
+  // TODO - remove code once deployed and users no longer using old transforms
+  def nonLeadReads[T](`type`: String, amendmentField: String)(implicit rds: Reads[T], wts: Writes[T]): Reads[AmendTrusteeTransform] =
+    ((__ \ "index").read[Int] and
+      (__ \ amendmentField).read[T] and
+      (__ \ "originalTrusteeJson").read[JsValue] and
+      (__ \ "currentDate").read[LocalDate]).tupled.map {
+      case (index, amended, original, endDate) =>
+        AmendTrusteeTransform(Some(index), Json.toJson(amended), original, endDate, `type`)
+    }
 }

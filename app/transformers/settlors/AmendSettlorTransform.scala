@@ -16,6 +16,7 @@
 
 package transformers.settlors
 
+import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import transformers.AmendEntityTransform
 import utils.Constants._
@@ -95,4 +96,22 @@ object AmendSettlorTransform {
   val key = "AmendSettlorTransform"
 
   implicit val format: Format[AmendSettlorTransform] = Json.format[AmendSettlorTransform]
+
+  // TODO - remove code once deployed and users no longer using old transforms
+  def livingReads(`type`: String): Reads[AmendSettlorTransform] =
+    ((__ \ "index").read[Int] and
+      (__ \ "amended").read[JsValue] and
+      (__ \ "original").read[JsValue] and
+      (__ \ "endDate").read[LocalDate]).tupled.map {
+      case (index, amended, original, endDate) =>
+        AmendSettlorTransform(Some(index), amended, original, endDate, `type`)
+    }
+
+  // TODO - remove code once deployed and users no longer using old transforms
+  def deceasedReads: Reads[AmendSettlorTransform] =
+    ((__ \ "amended").read[JsValue] and
+      (__ \ "original").read[JsValue]).tupled.map {
+      case (amended, original) =>
+        AmendSettlorTransform(None, amended, original, LocalDate.now(), DECEASED_SETTLOR)
+    }
 }

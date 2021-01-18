@@ -16,6 +16,7 @@
 
 package transformers
 
+import models.variation._
 import play.api.libs.json.{JsValue, _}
 import transformers.assets.{AddAssetTransform, AmendAssetTransform, RemoveAssetTransform}
 import transformers.beneficiaries._
@@ -25,6 +26,7 @@ import transformers.settlors._
 import transformers.taxliability.SetTaxLiabilityTransform
 import transformers.trustdetails._
 import transformers.trustees._
+import utils.Constants._
 
 trait DeltaTransform {
   def applyTransform(input: JsValue): JsResult[JsValue]
@@ -37,7 +39,7 @@ trait DeltaTransform {
 object DeltaTransform {
 
   private def readsForTransform[T](key: String)(implicit reads: Reads[T]): PartialFunction[JsObject, JsResult[T]] = {
-    case json if json.keys.contains(key) =>
+    case json if json.keys.contains(key) && (json \ key).validate[T].isSuccess =>
       (json \ key).validate[T]
   }
 
@@ -52,14 +54,13 @@ object DeltaTransform {
           trustDetailsReads orElse
           assetReads orElse
           taxLiabilityReads orElse
+          backwardsCompatibilityReads orElse
           defaultReads
-      )(value.as[JsObject]) recover {
-        case _ => throw new Exception(s"Don't know how to de-serialise transform")
-      }
+      )(value.as[JsObject])
   )
 
   def defaultReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
-    case _ => throw new Exception(s"Don't know how to de-serialise transform")
+    case _ => throw new Exception("Don't know how to de-serialise transform")
   }
 
   def trusteeReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
@@ -105,6 +106,114 @@ object DeltaTransform {
 
   def taxLiabilityReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
     readsForTransform[SetTaxLiabilityTransform](SetTaxLiabilityTransform.key)
+  }
+
+  // TODO - remove code once deployed and users no longer using old transforms
+  def backwardsCompatibilityReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
+
+    lazy val addBeneficiaryReads = {
+      readsForTransform[AddBeneficiaryTransform]("AddCharityBeneficiaryTransform")(AddBeneficiaryTransform.reads[BeneficiaryCharityType](CHARITY_BENEFICIARY)) orElse
+        readsForTransform[AddBeneficiaryTransform]("AddCompanyBeneficiaryTransform")(AddBeneficiaryTransform.reads[BeneficiaryCompanyType](COMPANY_BENEFICIARY)) orElse
+        readsForTransform[AddBeneficiaryTransform]("AddIndividualBeneficiaryTransform")(AddBeneficiaryTransform.reads[IndividualDetailsType](INDIVIDUAL_BENEFICIARY)) orElse
+        readsForTransform[AddBeneficiaryTransform]("AddLargeBeneficiaryTransform")(AddBeneficiaryTransform.reads[LargeType](LARGE_BENEFICIARY)) orElse
+        readsForTransform[AddBeneficiaryTransform]("AddOtherBeneficiaryTransform")(AddBeneficiaryTransform.reads[OtherType](OTHER_BENEFICIARY)) orElse
+        readsForTransform[AddBeneficiaryTransform]("AddTrustBeneficiaryTransform")(AddBeneficiaryTransform.reads[BeneficiaryTrustType](TRUST_BENEFICIARY)) orElse
+        readsForTransform[AddBeneficiaryTransform]("AddUnidentifiedBeneficiaryTransform")(AddBeneficiaryTransform.reads[UnidentifiedType](UNIDENTIFIED_BENEFICIARY))
+    }
+
+    lazy val amendBeneficiaryReads = {
+      readsForTransform[AmendBeneficiaryTransform]("AmendCharityBeneficiaryTransform")(AmendBeneficiaryTransform.reads(CHARITY_BENEFICIARY)) orElse
+        readsForTransform[AmendBeneficiaryTransform]("AmendCompanyBeneficiaryTransform")(AmendBeneficiaryTransform.reads(COMPANY_BENEFICIARY)) orElse
+        readsForTransform[AmendBeneficiaryTransform]("AmendIndividualBeneficiaryTransform")(AmendBeneficiaryTransform.reads(INDIVIDUAL_BENEFICIARY)) orElse
+        readsForTransform[AmendBeneficiaryTransform]("AmendLargeBeneficiaryTransform")(AmendBeneficiaryTransform.reads(LARGE_BENEFICIARY)) orElse
+        readsForTransform[AmendBeneficiaryTransform]("AmendOtherBeneficiaryTransform")(AmendBeneficiaryTransform.reads(OTHER_BENEFICIARY)) orElse
+        readsForTransform[AmendBeneficiaryTransform]("AmendTrustBeneficiaryTransform")(AmendBeneficiaryTransform.reads(TRUST_BENEFICIARY)) orElse
+        readsForTransform[AmendBeneficiaryTransform]("AmendUnidentifiedBeneficiaryTransform")(AmendBeneficiaryTransform.reads(UNIDENTIFIED_BENEFICIARY, "description"))
+    }
+
+    lazy val removeBeneficiaryReads = {
+      readsForTransform[RemoveBeneficiaryTransform]("RemoveBeneficiariesTransform")(RemoveBeneficiaryTransform.reads)
+    }
+
+    // NB - spelling mistake is intentional as this is how it was before
+    lazy val addSettlorReads = {
+      readsForTransform[AddSettlorTransform]("AddBuisnessSettlorTransform")(AddSettlorTransform.reads[SettlorCompany](BUSINESS_SETTLOR, "newCompanySettlor")) orElse
+      readsForTransform[AddSettlorTransform]("AddIndividualSettlorTransform")(AddSettlorTransform.reads[Settlor](INDIVIDUAL_SETTLOR, "newSettlor"))
+    }
+
+    lazy val amendSettlorReads = {
+      readsForTransform[AmendSettlorTransform]("AmendBusinessSettlorTransform")(AmendSettlorTransform.livingReads(BUSINESS_SETTLOR)) orElse
+      readsForTransform[AmendSettlorTransform]("AmendDeceasedSettlorTransform")(AmendSettlorTransform.deceasedReads) orElse
+      readsForTransform[AmendSettlorTransform]("AmendIndividualSettlorTransform")(AmendSettlorTransform.livingReads(INDIVIDUAL_SETTLOR))
+    }
+
+    lazy val removeSettlorReads = {
+      readsForTransform[RemoveSettlorTransform]("RemoveSettlorsTransform")(RemoveSettlorTransform.reads)
+    }
+
+    lazy val addTrusteeReads = {
+      readsForTransform[AddTrusteeTransform]("AddTrusteeIndTransform")(AddTrusteeTransform.reads[TrusteeIndividualType](INDIVIDUAL_TRUSTEE)) orElse
+      readsForTransform[AddTrusteeTransform]("AddTrusteeOrgTransform")(AddTrusteeTransform.reads[TrusteeOrgType](BUSINESS_TRUSTEE))
+    }
+
+    lazy val amendTrusteeReads = {
+      readsForTransform[AmendTrusteeTransform]("AmendLeadTrusteeIndTransform")(AmendTrusteeTransform.leadReads[AmendedLeadTrusteeIndType](INDIVIDUAL_LEAD_TRUSTEE)) orElse
+      readsForTransform[AmendTrusteeTransform]("AmendLeadTrusteeOrgTransform")(AmendTrusteeTransform.leadReads[AmendedLeadTrusteeOrgType](BUSINESS_LEAD_TRUSTEE)) orElse
+      readsForTransform[AmendTrusteeTransform]("AmendTrusteeIndTransform")(AmendTrusteeTransform.nonLeadReads[TrusteeIndividualType](INDIVIDUAL_TRUSTEE, "newTrustee")) orElse
+      readsForTransform[AmendTrusteeTransform]("AmendTrusteeOrgTransform")(AmendTrusteeTransform.nonLeadReads[TrusteeOrgType](BUSINESS_TRUSTEE, "trustee"))
+    }
+
+    lazy val promoteTrusteeReads = {
+      readsForTransform[PromoteTrusteeTransform]("PromoteTrusteeIndTransform")(PromoteTrusteeTransform.reads[AmendedLeadTrusteeIndType](INDIVIDUAL_TRUSTEE)) orElse
+      readsForTransform[PromoteTrusteeTransform]("PromoteTrusteeOrgTransform")(PromoteTrusteeTransform.reads[AmendedLeadTrusteeOrgType](BUSINESS_TRUSTEE))
+    }
+
+    lazy val removeTrusteeReads = {
+      readsForTransform[RemoveTrusteeTransform]("RemoveTrusteeTransform")(RemoveTrusteeTransform.reads)
+    }
+
+    lazy val addProtectorReads = {
+      readsForTransform[AddProtectorTransform]("AddCompanyProtectorTransform")(AddProtectorTransform.reads[ProtectorCompany](BUSINESS_PROTECTOR, "newCompanyProtector")) orElse
+        readsForTransform[AddProtectorTransform]("AddIndividualProtectorTransform")(AddProtectorTransform.reads[Protector](INDIVIDUAL_PROTECTOR, "newProtector"))
+    }
+
+    lazy val amendProtectorReads = {
+      readsForTransform[AmendProtectorTransform]("AmendBusinessProtectorTransform")(AmendProtectorTransform.reads(BUSINESS_PROTECTOR)) orElse
+        readsForTransform[AmendProtectorTransform]("AmendIndividualProtectorTransform")(AmendProtectorTransform.reads(INDIVIDUAL_PROTECTOR))
+    }
+
+    lazy val removeProtectorReads = {
+      readsForTransform[RemoveProtectorTransform]("RemoveProtectorsTransform")(RemoveProtectorTransform.reads)
+    }
+
+    lazy val addOtherIndividualReads = {
+      readsForTransform[AddOtherIndividualTransform]("AddOtherIndividualTransform")(AddOtherIndividualTransform.reads)
+    }
+
+    lazy val amendOtherIndividualReads = {
+      readsForTransform[AmendOtherIndividualTransform]("AmendOtherIndividualTransform")(AmendOtherIndividualTransform.reads)
+    }
+
+    lazy val removeOtherIndividualReads = {
+      readsForTransform[RemoveOtherIndividualTransform]("RemoveOtherIndividualsTransform")(RemoveOtherIndividualTransform.reads)
+    }
+
+    addBeneficiaryReads orElse
+      amendBeneficiaryReads orElse
+      removeBeneficiaryReads orElse
+      addSettlorReads orElse
+      amendSettlorReads orElse
+      removeSettlorReads orElse
+      addTrusteeReads orElse
+      amendTrusteeReads orElse
+      promoteTrusteeReads orElse
+      removeTrusteeReads orElse
+      addProtectorReads orElse
+      amendProtectorReads orElse
+      removeProtectorReads orElse
+      addOtherIndividualReads orElse
+      amendOtherIndividualReads orElse
+      removeOtherIndividualReads
   }
 
   def trusteeWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
