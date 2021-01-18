@@ -16,28 +16,26 @@
 
 package repositories
 
-import java.sql.Timestamp
-import java.time.LocalDateTime
-
-import javax.inject.{Inject, Singleton}
-import play.api.Logging
+import config.AppConfig
 import play.api.libs.json._
 import reactivemongo.api.WriteConcern
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.BSONDocument
 import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
 import reactivemongo.play.json.collection.JSONCollection
-import config.AppConfig
 
+import java.sql.Timestamp
+import java.time.LocalDateTime
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class CacheRepositoryImpl @Inject()(
-                                          mongo: MongoDriver,
-                                          config: AppConfig
-                                   )(implicit ec: ExecutionContext) extends CacheRepository with Logging {
+                                     mongo: MongoDriver,
+                                     config: AppConfig
+                                   )(implicit ec: ExecutionContext) extends IndexesManager(mongo, config) with CacheRepository {
 
-  private val collectionName: String = "trusts"
+  override val collectionName: String = "trusts"
   private val cacheTtl = config.ttlInSeconds
 
   private def collection: Future[JSONCollection] =

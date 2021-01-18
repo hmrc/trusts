@@ -16,29 +16,27 @@
 
 package repositories
 
-import java.sql.Timestamp
-import java.time.LocalDateTime
-
-import javax.inject.{Inject, Singleton}
-import play.api.Logging
+import config.AppConfig
 import play.api.libs.json._
 import reactivemongo.api.WriteConcern
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.BSONDocument
 import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
 import reactivemongo.play.json.collection.JSONCollection
-import config.AppConfig
 import transformers.ComposedDeltaTransform
 
+import java.sql.Timestamp
+import java.time.LocalDateTime
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class TransformationRepositoryImpl @Inject()(
                             mongo: MongoDriver,
                             config: AppConfig
-                          )(implicit ec: ExecutionContext) extends TransformationRepository with Logging {
+                          )(implicit ec: ExecutionContext) extends IndexesManager(mongo, config) with TransformationRepository {
 
-  private val collectionName: String = "transforms"
+  override val collectionName: String = "transforms"
   private val cacheTtl = config.ttlInSeconds
 
   private def collection: Future[JSONCollection] =
