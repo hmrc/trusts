@@ -172,6 +172,20 @@ object DeltaTransform {
       readsForTransform[RemoveTrusteeTransform]("RemoveTrusteeTransform")(RemoveTrusteeTransform.reads)
     }
 
+    lazy val addProtectorReads = {
+      readsForTransform[AddProtectorTransform]("AddCompanyProtectorTransform")(AddProtectorTransform.reads[ProtectorCompany](BUSINESS_PROTECTOR, "newCompanyProtector")) orElse
+        readsForTransform[AddProtectorTransform]("AddIndividualProtectorTransform")(AddProtectorTransform.reads[Protector](INDIVIDUAL_PROTECTOR, "newProtector"))
+    }
+
+    lazy val amendProtectorReads = {
+      readsForTransform[AmendProtectorTransform]("AmendBusinessProtectorTransform")(AmendProtectorTransform.reads(BUSINESS_PROTECTOR)) orElse
+        readsForTransform[AmendProtectorTransform]("AmendIndividualProtectorTransform")(AmendProtectorTransform.reads(INDIVIDUAL_PROTECTOR))
+    }
+
+    lazy val removeProtectorReads = {
+      readsForTransform[RemoveProtectorTransform]("RemoveProtectorsTransform")(RemoveProtectorTransform.reads)
+    }
+
     addBeneficiaryReads orElse
       amendBeneficiaryReads orElse
       removeBeneficiaryReads orElse
@@ -181,7 +195,10 @@ object DeltaTransform {
       addTrusteeReads orElse
       amendTrusteeReads orElse
       promoteTrusteeReads orElse
-      removeTrusteeReads
+      removeTrusteeReads orElse
+      addProtectorReads orElse
+      amendProtectorReads orElse
+      removeProtectorReads
   }
 
   def trusteeWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {

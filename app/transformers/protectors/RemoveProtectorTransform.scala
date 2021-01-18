@@ -16,6 +16,7 @@
 
 package transformers.protectors
 
+import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import transformers.RemoveEntityTransform
 
@@ -31,4 +32,14 @@ object RemoveProtectorTransform {
   val key = "RemoveProtectorTransform"
 
   implicit val format: Format[RemoveProtectorTransform] = Json.format[RemoveProtectorTransform]
+
+  // TODO - remove code once deployed and users no longer using old transforms
+  def reads: Reads[RemoveProtectorTransform] =
+    ((__ \ "index").read[Int] and
+      (__ \ "protectorData").read[JsValue] and
+      (__ \ "endDate").read[LocalDate] and
+      (__ \ "protectorType").read[String]).tupled.map {
+      case (index, entity, endDate, pType) =>
+        RemoveProtectorTransform(Some(index), entity, endDate, pType)
+    }
 }

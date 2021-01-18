@@ -1365,6 +1365,128 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
           }
         }
       }
+
+      "when protector" - {
+
+        "when adding" - {
+
+          "business" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AddCompanyProtectorTransform": {
+                 |    "newCompanyProtector": {
+                 |      "name": "$name",
+                 |      "entityStart": "$date"
+                 |    }
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = ProtectorCompany(
+              lineNo = None,
+              bpMatchStatus = None,
+              name = name,
+              identification = None,
+              countryOfResidence = None,
+              entityStart = LocalDate.parse(date),
+              entityEnd = None
+            )
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AddProtectorTransform(Json.toJson(entity), "protectorCompany")
+          }
+
+          "individual" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AddIndividualProtectorTransform": {
+                 |    "newProtector": {
+                 |      "name": {
+                 |        "firstName": "$forename",
+                 |        "lastName": "$surname"
+                 |      },
+                 |      "entityStart": "$date"
+                 |    }
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = Protector(
+              lineNo = None,
+              bpMatchStatus = None,
+              name = NameType(forename, None, surname),
+              dateOfBirth = None,
+              identification = None,
+              countryOfResidence = None,
+              legallyIncapable = None,
+              nationality = None,
+              entityStart = LocalDate.parse(date),
+              entityEnd = None
+            )
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AddProtectorTransform(Json.toJson(entity), "protector")
+          }
+        }
+
+        "when amending" - {
+
+          "business" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AmendBusinessProtectorTransform": {
+                 |    "index": $index,
+                 |    "amended": {},
+                 |    "original": {},
+                 |    "endDate": "$date"
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AmendProtectorTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date), "protectorCompany")
+          }
+
+          "individual" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AmendIndividualProtectorTransform": {
+                 |    "index": $index,
+                 |    "amended": {},
+                 |    "original": {},
+                 |    "endDate": "$date"
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AmendProtectorTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date), "protector")
+          }
+        }
+
+        "when removing" in {
+
+          val `type`: String = "type"
+
+          val transformJson = Json.parse(
+            s"""{
+               |  "RemoveProtectorsTransform": {
+               |    "index": $index,
+               |    "protectorData": {},
+               |    "endDate": "$date",
+               |    "protectorType": "${`type`}"
+               |  }
+               |}
+               |""".stripMargin)
+
+          val result = transformJson.as[DeltaTransform]
+          result mustBe RemoveProtectorTransform(Some(index), Json.obj(), LocalDate.parse(date), `type`)
+        }
+      }
     }
   }
 }
