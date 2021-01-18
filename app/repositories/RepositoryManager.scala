@@ -43,33 +43,6 @@ abstract class RepositoryManager @Inject()(
 
   val key: String
 
-  def ensureIndexes: Future[Boolean] = {
-    logger.info("Ensuring collection indexes")
-
-    lazy val lastUpdatedIndex: Index = Index(
-      key = Seq("updatedAt" -> IndexType.Ascending),
-      name = Some(lastUpdatedIndexName),
-      options = BSONDocument("expireAfterSeconds" -> cacheTtl)
-    )
-
-    lazy val idIndex: Index = Index(
-      key = Seq("id" -> IndexType.Ascending),
-      name = Some("id-index")
-    )
-
-    for {
-      collection              <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
-      createdLastUpdatedIndex <- collection.indexesManager.ensure(lastUpdatedIndex)
-      createdIdIndex          <- collection.indexesManager.ensure(idIndex)
-    } yield createdLastUpdatedIndex && createdIdIndex
-  }
-
-  def collection: Future[JSONCollection] =
-    for {
-      _ <- ensureIndexes
-      res <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
-    } yield res
-
   def get[T](identifier: String, internalId: String)(implicit rds: Reads[T]): Future[Option[T]] = {
     collection.flatMap { collection =>
       collection.find(selector(identifier, internalId), None).one[JsObject].map(opt =>
@@ -102,6 +75,33 @@ abstract class RepositoryManager @Inject()(
     collection.flatMap(_.findAndRemove(selector(identifier, internalId), None, None, WriteConcern.Default, None, None, Seq.empty).map(
       _.value
     ))
+  }
+
+  private def collection: Future[JSONCollection] =
+    for {
+      _ <- ensureIndexes
+      res <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
+    } yield res
+
+  private def ensureIndexes: Future[Boolean] = {
+    logger.info("Ensuring collection indexes")
+
+    lazy val lastUpdatedIndex: Index = Index(
+      key = Seq("updatedAt" -> IndexType.Ascending),
+      name = Some(lastUpdatedIndexName),
+      options = BSONDocument("expireAfterSeconds" -> cacheTtl)
+    )
+
+    lazy val idIndex: Index = Index(
+      key = Seq("id" -> IndexType.Ascending),
+      name = Some("id-index")
+    )
+
+    for {
+      collection              <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
+      createdLastUpdatedIndex <- collection.indexesManager.ensure(lastUpdatedIndex)
+      createdIdIndex          <- collection.indexesManager.ensure(idIndex)
+    } yield createdLastUpdatedIndex && createdIdIndex
   }
 
   private def selector(identifier: String, internalId: String): JsObject = Json.obj(
