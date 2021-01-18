@@ -20,10 +20,10 @@ trait IntegrationTestBase extends ScalaFutures {
 
   implicit val defaultPatience: PatienceConfig = PatienceConfig(timeout = Span(30, Seconds), interval = Span(15, Millis))
 
-  val connectionString = "mongodb://localhost:27017/estates-integration"
+  val connectionString = "mongodb://localhost:27017/trusts-integration"
 
   def getDatabase(connection: MongoConnection): DefaultDB = {
-    Await.result(connection.database("estates-integration"), Duration.Inf)
+    Await.result(connection.database("trusts-integration"), Duration.Inf)
   }
 
   def getConnection(application: Application): Try[MongoConnection] = {
@@ -46,7 +46,8 @@ trait IntegrationTestBase extends ScalaFutures {
         "mongodb.uri" -> connectionString,
         "metrics.enabled" -> false,
         "auditing.enabled" -> false,
-        "mongo-async-driver.akka.log-dead-letters" -> 0
+        "mongo-async-driver.akka.log-dead-letters" -> 0,
+        "features.mongo.dropIndexes" -> true
       ): _*)
 
   def createApplication : Application = applicationBuilder
