@@ -31,8 +31,6 @@ class CacheRepositoryImpl @Inject()(
 
   override val collectionName: String = "trusts"
 
-  override val cacheTtl: Int = config.ttlInSeconds
-
   override val lastUpdatedIndexName: String = "etmp-data-updated-at-index"
 
   override val key: String = "etmpData"

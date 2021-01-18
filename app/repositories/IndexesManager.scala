@@ -37,7 +37,7 @@ abstract class IndexesManager @Inject()(
 
   val collectionName: String
 
-  val cacheTtl: Int
+  val cacheTtl: Int = config.ttlInSeconds
 
   val lastUpdatedIndexName: String
 

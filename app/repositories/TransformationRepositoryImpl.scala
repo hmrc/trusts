@@ -32,8 +32,6 @@ class TransformationRepositoryImpl @Inject()(
 
   override val collectionName: String = "transforms"
 
-  override val cacheTtl: Int = config.ttlInSeconds
-
   override val lastUpdatedIndexName: String = "transformation-data-updated-at-index"
 
   override val key: String = "transforms"
