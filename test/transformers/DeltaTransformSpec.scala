@@ -485,17 +485,12 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
     "must not throw match error when parsing an old json transform" in {
       val json = Json.parse(
         s"""{
-           |  "deltaTransforms" : [
-           |      {
-           |          "AddTrusteeIndTransform": {
-           |             "trustee": {
-           |               "name":{"firstName":"Adam","middleName":"Middle","lastName":"Last"},
-           |               "dateOfBirth":"1990-05-01",
-           |               "identification":{"nino":"JP121212A"},
-           |               "entityStart":"2020-01-31"
-           |             }
-           |          }
+           |  "deltaTransforms": [
+           |    {
+           |      "SomeOldTransform": {
+           |        "key": "value"
            |      }
+           |    }
            |  ]
            |}
            |""".stripMargin)
@@ -878,6 +873,145 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
           val result = transformJson.as[DeltaTransform]
           result mustBe RemoveBeneficiaryTransform(Some(index), Json.obj(), LocalDate.parse(date), `type`)
+        }
+      }
+
+      "when settlor" - {
+
+        "when adding" - {
+
+          "business" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AddBuisnessSettlorTransform": {
+                 |    "newCompanySettlor": {
+                 |      "name": "$name",
+                 |      "entityStart": "$date"
+                 |    }
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = SettlorCompany(
+              lineNo = None,
+              bpMatchStatus = None,
+              name = name,
+              companyType = None,
+              companyTime = None,
+              identification = None,
+              countryOfResidence = None,
+              entityStart = LocalDate.parse(date),
+              entityEnd = None
+            )
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AddSettlorTransform(Json.toJson(entity), "settlorCompany")
+          }
+
+          "individual" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AddIndividualSettlorTransform": {
+                 |    "newSettlor": {
+                 |      "name": {
+                 |        "firstName": "$forename",
+                 |        "lastName": "$surname"
+                 |      },
+                 |      "entityStart": "$date"
+                 |    }
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val entity = Settlor(
+              lineNo = None,
+              bpMatchStatus = None,
+              name = NameType(forename, None, surname),
+              dateOfBirth = None,
+              identification = None,
+              countryOfResidence = None,
+              legallyIncapable = None,
+              nationality = None,
+              entityStart = LocalDate.parse(date),
+              entityEnd = None
+            )
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AddSettlorTransform(Json.toJson(entity), "settlor")
+          }
+        }
+
+        "when amending" - {
+
+          "business" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AmendBusinessSettlorTransform": {
+                 |    "index": $index,
+                 |    "amended": {},
+                 |    "original": {},
+                 |    "endDate": "$date"
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AmendSettlorTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date), "settlorCompany")
+          }
+
+          "deceased" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AmendDeceasedSettlorTransform": {
+                 |    "amended": {},
+                 |    "original": {}
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AmendSettlorTransform(None, Json.obj(), Json.obj(), LocalDate.now(), "deceased")
+          }
+
+          "individual" in {
+
+            val transformJson = Json.parse(
+              s"""{
+                 |  "AmendIndividualSettlorTransform": {
+                 |    "index": $index,
+                 |    "amended": {},
+                 |    "original": {},
+                 |    "endDate": "$date"
+                 |  }
+                 |}
+                 |""".stripMargin)
+
+            val result = transformJson.as[DeltaTransform]
+            result mustBe AmendSettlorTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date), "settlor")
+          }
+        }
+
+        "when removing" in {
+
+          val `type`: String = "type"
+
+          val transformJson = Json.parse(
+            s"""{
+               |  "RemoveSettlorsTransform": {
+               |    "index": $index,
+               |    "settlorData": {},
+               |    "endDate": "$date",
+               |    "settlorType": "${`type`}"
+               |  }
+               |}
+               |""".stripMargin)
+
+          val result = transformJson.as[DeltaTransform]
+          result mustBe RemoveSettlorTransform(Some(index), Json.obj(), LocalDate.parse(date), `type`)
         }
       }
     }

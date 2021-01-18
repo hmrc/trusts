@@ -16,6 +16,7 @@
 
 package transformers.settlors
 
+import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import transformers.RemoveEntityTransform
 
@@ -31,4 +32,14 @@ object RemoveSettlorTransform {
   val key = "RemoveSettlorTransform"
 
   implicit val format: Format[RemoveSettlorTransform] = Json.format[RemoveSettlorTransform]
+
+  // TODO - remove code once deployed and users no longer using old transforms
+  def reads: Reads[RemoveSettlorTransform] =
+    ((__ \ "index").read[Int] and
+      (__ \ "settlorData").read[JsValue] and
+      (__ \ "endDate").read[LocalDate] and
+      (__ \ "settlorType").read[String]).tupled.map {
+      case (index, entity, endDate, sType) =>
+        RemoveSettlorTransform(Some(index), entity, endDate, sType)
+    }
 }

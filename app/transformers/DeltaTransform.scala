@@ -137,9 +137,28 @@ object DeltaTransform {
       readsForTransform[RemoveBeneficiaryTransform]("RemoveBeneficiariesTransform")(RemoveBeneficiaryTransform.reads)
     }
 
+    // NB - spelling mistake is intentional as this is how it was before
+    val addSettlorReads = {
+      readsForTransform[AddSettlorTransform]("AddBuisnessSettlorTransform")(AddSettlorTransform.reads[SettlorCompany](BUSINESS_SETTLOR, "newCompanySettlor")) orElse
+      readsForTransform[AddSettlorTransform]("AddIndividualSettlorTransform")(AddSettlorTransform.reads[Settlor](INDIVIDUAL_SETTLOR, "newSettlor"))
+    }
+
+    val amendSettlorReads = {
+      readsForTransform[AmendSettlorTransform]("AmendBusinessSettlorTransform")(AmendSettlorTransform.reads(BUSINESS_SETTLOR)) orElse
+      readsForTransform[AmendSettlorTransform]("AmendDeceasedSettlorTransform")(AmendSettlorTransform.deceasedReads) orElse
+      readsForTransform[AmendSettlorTransform]("AmendIndividualSettlorTransform")(AmendSettlorTransform.reads(INDIVIDUAL_SETTLOR))
+    }
+
+    val removeSettlorReads = {
+      readsForTransform[RemoveSettlorTransform]("RemoveSettlorsTransform")(RemoveSettlorTransform.reads)
+    }
+
     addBeneficiaryReads orElse
       amendBeneficiaryReads orElse
-      removeBeneficiaryReads
+      removeBeneficiaryReads orElse
+      addSettlorReads orElse
+      amendSettlorReads orElse
+      removeSettlorReads
   }
 
   def trusteeWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {

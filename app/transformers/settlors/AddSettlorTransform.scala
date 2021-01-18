@@ -27,4 +27,10 @@ object AddSettlorTransform {
   val key = "AddSettlorTransform"
 
   implicit val format: Format[AddSettlorTransform] = Json.format[AddSettlorTransform]
+
+  // TODO - remove code once deployed and users no longer using old transforms
+  def reads[T](`type`: String, field: String)(implicit rds: Reads[T], wts: Writes[T]): Reads[AddSettlorTransform] =
+    (__ \ field).read[T].map {
+      entity => AddSettlorTransform(Json.toJson(entity), `type`)
+    }
 }
