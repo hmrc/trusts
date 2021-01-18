@@ -513,6 +513,24 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
       val nino: String = "nino"
       val utr: String = "utr"
 
+      val `type`: String = "type"
+
+      val key: String = "key"
+      val original: String = "Some original value"
+      val amended: String = "Some amended value"
+
+      val originalJson = Json.parse(
+        s"""{
+           |  "$key": "$original"
+           |}
+           |""".stripMargin)
+
+      val amendedJson = Json.parse(
+        s"""{
+           |  "$key": "$amended"
+           |}
+           |""".stripMargin)
+
       "when beneficiary" - {
 
         "when adding" - {
@@ -745,15 +763,19 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
               s"""{
                  |  "AmendCharityBeneficiaryTransform": {
                  |    "index": $index,
-                 |    "amended": {},
-                 |    "original": {},
+                 |    "amended": {
+                 |      "$key": "$amended"
+                 |    },
+                 |    "original": {
+                 |      "$key": "$original"
+                 |    },
                  |    "endDate": "$date"
                  |  }
                  |}
                  |""".stripMargin)
 
             val result = transformJson.as[DeltaTransform]
-            result mustBe AmendBeneficiaryTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date), "charity")
+            result mustBe AmendBeneficiaryTransform(Some(index), amendedJson, originalJson, LocalDate.parse(date), "charity")
           }
 
           "company" in {
@@ -762,15 +784,19 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
               s"""{
                  |  "AmendCompanyBeneficiaryTransform": {
                  |    "index": $index,
-                 |    "amended": {},
-                 |    "original": {},
+                 |    "amended": {
+                 |      "$key": "$amended"
+                 |    },
+                 |    "original": {
+                 |      "$key": "$original"
+                 |    },
                  |    "endDate": "$date"
                  |  }
                  |}
                  |""".stripMargin)
 
             val result = transformJson.as[DeltaTransform]
-            result mustBe AmendBeneficiaryTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date), "company")
+            result mustBe AmendBeneficiaryTransform(Some(index), amendedJson, originalJson, LocalDate.parse(date), "company")
           }
 
           "individual" in {
@@ -779,15 +805,19 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
               s"""{
                  |  "AmendIndividualBeneficiaryTransform": {
                  |    "index": $index,
-                 |    "amended": {},
-                 |    "original": {},
+                 |    "amended": {
+                 |      "$key": "$amended"
+                 |    },
+                 |    "original": {
+                 |      "$key": "$original"
+                 |    },
                  |    "endDate": "$date"
                  |  }
                  |}
                  |""".stripMargin)
 
             val result = transformJson.as[DeltaTransform]
-            result mustBe AmendBeneficiaryTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date), "individualDetails")
+            result mustBe AmendBeneficiaryTransform(Some(index), amendedJson, originalJson, LocalDate.parse(date), "individualDetails")
           }
 
           "large" in {
@@ -796,15 +826,19 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
               s"""{
                  |  "AmendLargeBeneficiaryTransform": {
                  |    "index": $index,
-                 |    "amended": {},
-                 |    "original": {},
+                 |    "amended": {
+                 |      "$key": "$amended"
+                 |    },
+                 |    "original": {
+                 |      "$key": "$original"
+                 |    },
                  |    "endDate": "$date"
                  |  }
                  |}
                  |""".stripMargin)
 
             val result = transformJson.as[DeltaTransform]
-            result mustBe AmendBeneficiaryTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date), "large")
+            result mustBe AmendBeneficiaryTransform(Some(index), amendedJson, originalJson, LocalDate.parse(date), "large")
           }
 
           "other" in {
@@ -813,15 +847,19 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
               s"""{
                  |  "AmendOtherBeneficiaryTransform": {
                  |    "index": $index,
-                 |    "amended": {},
-                 |    "original": {},
+                 |    "amended": {
+                 |      "$key": "$amended"
+                 |    },
+                 |    "original": {
+                 |      "$key": "$original"
+                 |    },
                  |    "endDate": "$date"
                  |  }
                  |}
                  |""".stripMargin)
 
             val result = transformJson.as[DeltaTransform]
-            result mustBe AmendBeneficiaryTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date), "other")
+            result mustBe AmendBeneficiaryTransform(Some(index), amendedJson, originalJson, LocalDate.parse(date), "other")
           }
 
           "trust" in {
@@ -830,15 +868,19 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
               s"""{
                  |  "AmendTrustBeneficiaryTransform": {
                  |    "index": $index,
-                 |    "amended": {},
-                 |    "original": {},
+                 |    "amended": {
+                 |      "$key": "$amended"
+                 |    },
+                 |    "original": {
+                 |      "$key": "$original"
+                 |    },
                  |    "endDate": "$date"
                  |  }
                  |}
                  |""".stripMargin)
 
             val result = transformJson.as[DeltaTransform]
-            result mustBe AmendBeneficiaryTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date), "trust")
+            result mustBe AmendBeneficiaryTransform(Some(index), amendedJson, originalJson, LocalDate.parse(date), "trust")
           }
 
           "unidentified" in {
@@ -848,26 +890,28 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
                  |  "AmendUnidentifiedBeneficiaryTransform": {
                  |    "index": $index,
                  |    "description": "$description",
-                 |    "original": {},
+                 |    "original": {
+                 |      "$key": "$original"
+                 |    },
                  |    "endDate": "$date"
                  |  }
                  |}
                  |""".stripMargin)
 
             val result = transformJson.as[DeltaTransform]
-            result mustBe AmendBeneficiaryTransform(Some(index), JsString(description), Json.obj(), LocalDate.parse(date), "unidentified")
+            result mustBe AmendBeneficiaryTransform(Some(index), JsString(description), originalJson, LocalDate.parse(date), "unidentified")
           }
         }
 
         "when removing" in {
 
-          val `type`: String = "type"
-
           val transformJson = Json.parse(
             s"""{
                |  "RemoveBeneficiariesTransform": {
                |    "index": $index,
-               |    "beneficiaryData": {},
+               |    "beneficiaryData": {
+               |      "$key": "$original"
+               |    },
                |    "endDate": "$date",
                |    "beneficiaryType": "${`type`}"
                |  }
@@ -875,7 +919,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
                |""".stripMargin)
 
           val result = transformJson.as[DeltaTransform]
-          result mustBe RemoveBeneficiaryTransform(Some(index), Json.obj(), LocalDate.parse(date), `type`)
+          result mustBe RemoveBeneficiaryTransform(Some(index), originalJson, LocalDate.parse(date), `type`)
         }
       }
 
@@ -954,15 +998,19 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
               s"""{
                  |  "AmendBusinessSettlorTransform": {
                  |    "index": $index,
-                 |    "amended": {},
-                 |    "original": {},
+                 |    "amended": {
+                 |      "$key": "$amended"
+                 |    },
+                 |    "original": {
+                 |      "$key": "$original"
+                 |    },
                  |    "endDate": "$date"
                  |  }
                  |}
                  |""".stripMargin)
 
             val result = transformJson.as[DeltaTransform]
-            result mustBe AmendSettlorTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date), "settlorCompany")
+            result mustBe AmendSettlorTransform(Some(index), amendedJson, originalJson, LocalDate.parse(date), "settlorCompany")
           }
 
           "deceased" in {
@@ -970,14 +1018,18 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
             val transformJson = Json.parse(
               s"""{
                  |  "AmendDeceasedSettlorTransform": {
-                 |    "amended": {},
-                 |    "original": {}
+                 |    "amended": {
+                 |      "$key": "$amended"
+                 |    },
+                 |    "original": {
+                 |      "$key": "$original"
+                 |    }
                  |  }
                  |}
                  |""".stripMargin)
 
             val result = transformJson.as[DeltaTransform]
-            result mustBe AmendSettlorTransform(None, Json.obj(), Json.obj(), LocalDate.now(), "deceased")
+            result mustBe AmendSettlorTransform(None, amendedJson, originalJson, LocalDate.now(), "deceased")
           }
 
           "individual" in {
@@ -986,27 +1038,31 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
               s"""{
                  |  "AmendIndividualSettlorTransform": {
                  |    "index": $index,
-                 |    "amended": {},
-                 |    "original": {},
+                 |    "amended": {
+                 |      "$key": "$amended"
+                 |    },
+                 |    "original": {
+                 |      "$key": "$original"
+                 |    },
                  |    "endDate": "$date"
                  |  }
                  |}
                  |""".stripMargin)
 
             val result = transformJson.as[DeltaTransform]
-            result mustBe AmendSettlorTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date), "settlor")
+            result mustBe AmendSettlorTransform(Some(index), amendedJson, originalJson, LocalDate.parse(date), "settlor")
           }
         }
 
         "when removing" in {
 
-          val `type`: String = "type"
-
           val transformJson = Json.parse(
             s"""{
                |  "RemoveSettlorsTransform": {
                |    "index": $index,
-               |    "settlorData": {},
+               |    "settlorData": {
+               |      "$key": "$original"
+               |    },
                |    "endDate": "$date",
                |    "settlorType": "${`type`}"
                |  }
@@ -1014,7 +1070,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
                |""".stripMargin)
 
           val result = transformJson.as[DeltaTransform]
-          result mustBe RemoveSettlorTransform(Some(index), Json.obj(), LocalDate.parse(date), `type`)
+          result mustBe RemoveSettlorTransform(Some(index), originalJson, LocalDate.parse(date), `type`)
         }
       }
 
@@ -1164,7 +1220,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
                  |      },
                  |      "entityStart": "$date"
                  |    },
-                 |    "originalTrusteeJson": {},
+                 |    "originalTrusteeJson": {
+                 |      "$key": "$original"
+                 |    },
                  |    "currentDate": "$date"
                  |  }
                  |}
@@ -1185,7 +1243,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
             )
 
             val result = transformJson.as[DeltaTransform]
-            result mustBe AmendTrusteeTransform(Some(index), Json.toJson(entity), Json.obj(), LocalDate.parse(date), "trusteeInd")
+            result mustBe AmendTrusteeTransform(Some(index), Json.toJson(entity), originalJson, LocalDate.parse(date), "trusteeInd")
           }
 
           "business" in {
@@ -1198,7 +1256,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
                  |      "name": "$name",
                  |      "entityStart": "$date"
                  |    },
-                 |    "originalTrusteeJson": {},
+                 |    "originalTrusteeJson": {
+                 |      "$key": "$original"
+                 |    },
                  |    "currentDate": "$date"
                  |  }
                  |}
@@ -1217,7 +1277,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
             )
 
             val result = transformJson.as[DeltaTransform]
-            result mustBe AmendTrusteeTransform(Some(index), Json.toJson(entity), Json.obj(), LocalDate.parse(date), "trusteeOrg")
+            result mustBe AmendTrusteeTransform(Some(index), Json.toJson(entity), originalJson, LocalDate.parse(date), "trusteeOrg")
           }
         }
 
@@ -1241,7 +1301,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
                  |      }
                  |    },
                  |    "endDate": "$date",
-                 |    "originalTrusteeJson": {},
+                 |    "originalTrusteeJson": {
+                 |      "$key": "$original"
+                 |    },
                  |    "currentDate": "$date"
                  |  }
                  |}
@@ -1259,7 +1321,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
             )
 
             val result = transformJson.as[DeltaTransform]
-            result mustBe PromoteTrusteeTransform(Some(index), Json.toJson(entity), Json.obj(), LocalDate.parse(date), "trusteeInd")
+            result mustBe PromoteTrusteeTransform(Some(index), Json.toJson(entity), originalJson, LocalDate.parse(date), "trusteeInd")
           }
 
           "business" in {
@@ -1276,7 +1338,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
                  |      }
                  |    },
                  |    "endDate": "$date",
-                 |    "originalTrusteeJson": {},
+                 |    "originalTrusteeJson": {
+                 |      "$key": "$original"
+                 |    },
                  |    "currentDate": "$date"
                  |  }
                  |}
@@ -1291,7 +1355,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
             )
 
             val result = transformJson.as[DeltaTransform]
-            result mustBe PromoteTrusteeTransform(Some(index), Json.toJson(entity), Json.obj(), LocalDate.parse(date), "trusteeOrg")
+            result mustBe PromoteTrusteeTransform(Some(index), Json.toJson(entity), originalJson, LocalDate.parse(date), "trusteeOrg")
           }
         }
 
@@ -1439,15 +1503,19 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
               s"""{
                  |  "AmendBusinessProtectorTransform": {
                  |    "index": $index,
-                 |    "amended": {},
-                 |    "original": {},
+                 |    "amended": {
+                 |      "$key": "$amended"
+                 |    },
+                 |    "original": {
+                 |      "$key": "$original"
+                 |    },
                  |    "endDate": "$date"
                  |  }
                  |}
                  |""".stripMargin)
 
             val result = transformJson.as[DeltaTransform]
-            result mustBe AmendProtectorTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date), "protectorCompany")
+            result mustBe AmendProtectorTransform(Some(index), amendedJson, originalJson, LocalDate.parse(date), "protectorCompany")
           }
 
           "individual" in {
@@ -1456,15 +1524,19 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
               s"""{
                  |  "AmendIndividualProtectorTransform": {
                  |    "index": $index,
-                 |    "amended": {},
-                 |    "original": {},
+                 |    "amended": {
+                 |      "$key": "$amended"
+                 |    },
+                 |    "original": {
+                 |      "$key": "$original"
+                 |    },
                  |    "endDate": "$date"
                  |  }
                  |}
                  |""".stripMargin)
 
             val result = transformJson.as[DeltaTransform]
-            result mustBe AmendProtectorTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date), "protector")
+            result mustBe AmendProtectorTransform(Some(index), amendedJson, originalJson, LocalDate.parse(date), "protector")
           }
         }
 
@@ -1476,7 +1548,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
             s"""{
                |  "RemoveProtectorsTransform": {
                |    "index": $index,
-               |    "protectorData": {},
+               |    "protectorData": {
+               |      "$key": "$original"
+               |    },
                |    "endDate": "$date",
                |    "protectorType": "${`type`}"
                |  }
@@ -1484,7 +1558,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
                |""".stripMargin)
 
           val result = transformJson.as[DeltaTransform]
-          result mustBe RemoveProtectorTransform(Some(index), Json.obj(), LocalDate.parse(date), `type`)
+          result mustBe RemoveProtectorTransform(Some(index), originalJson, LocalDate.parse(date), `type`)
         }
       }
 
@@ -1529,15 +1603,19 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
             s"""{
                |  "AmendOtherIndividualTransform": {
                |    "index": $index,
-               |    "amended": {},
-               |    "original": {},
+               |    "amended": {
+               |      "$key": "$amended"
+               |    },
+               |    "original": {
+               |      "$key": "$original"
+               |    },
                |    "endDate": "$date"
                |  }
                |}
                |""".stripMargin)
 
           val result = transformJson.as[DeltaTransform]
-          result mustBe AmendOtherIndividualTransform(Some(index), Json.obj(), Json.obj(), LocalDate.parse(date))
+          result mustBe AmendOtherIndividualTransform(Some(index), amendedJson, originalJson, LocalDate.parse(date))
         }
 
         "when removing" in {
@@ -1546,14 +1624,16 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
             s"""{
                |  "RemoveOtherIndividualsTransform": {
                |    "index": $index,
-               |    "otherIndividualData": {},
+               |    "otherIndividualData": {
+               |      "$key": "$original"
+               |    },
                |    "endDate": "$date"
                |  }
                |}
                |""".stripMargin)
 
           val result = transformJson.as[DeltaTransform]
-          result mustBe RemoveOtherIndividualTransform(Some(index), Json.obj(), LocalDate.parse(date))
+          result mustBe RemoveOtherIndividualTransform(Some(index), originalJson, LocalDate.parse(date))
         }
       }
     }
