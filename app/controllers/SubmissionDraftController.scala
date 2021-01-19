@@ -240,6 +240,13 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
       getAtPath[LocalDate](draftId, path)(request, reads, writes)
   }
 
+  def getTrustTaxable(draftId: String): Action[AnyContent] = identify.async {
+    implicit request =>
+
+      val path = JsPath \ "main" \ "data" \ "trustTaxable"
+      getAtPath[Boolean](draftId, path)
+  }
+
   def getTrustName(draftId: String) : Action[AnyContent] = identify.async {
     implicit request =>
       submissionRepository.getDraft(draftId, request.internalId).map {

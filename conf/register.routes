@@ -63,3 +63,7 @@ GET         /submission-drafts/:draftId/lead-trustee           controllers.Submi
 POST        /submission-drafts/:draftId/reset/taxLiability   controllers.SubmissionDraftController.reset(draftId: String, section: String = "taxLiability", mappedDataKey: String = "yearsReturns")
 
 GET         /submission-drafts/:draftId/correspondence-address controllers.SubmissionDraftController.getCorrespondenceAddress(draftId: String)
+
+#Used by all register-trust frontends to determine taxable / non taxable journey
+
+GET         /submission-drafts/:draftId/is-trust-taxable       controllers.SubmissionDraftController.getTrustTaxable(draftId: String)
