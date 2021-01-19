@@ -25,7 +25,7 @@ import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.{JsNull, JsString, Json}
+import play.api.libs.json.{JsBoolean, JsNull, JsString, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
@@ -874,6 +874,99 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       status(result) mustBe OK
 
       verify(submissionRepository).removeDraft("DRAFTID", "id")
+    }
+  }
+
+  ".getTrustTaxable" should {
+
+    "respond with OK and true when trust is taxable" in {
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents()
+      )
+
+      val cache = Json.parse(
+        """
+          |{
+          |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+          |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
+          |    "createdAt" : { "$date" : 1597323808000 },
+          |    "draftData" : {
+          |       "main" : {
+          |            "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+          |            "data" : {
+          |                    "trustTaxable" : true
+          |            },
+          |            "progress" : "InProgress",
+          |            "createdAt" : "2020-08-13T13:37:53.787Z",
+          |            "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54"
+          |        }
+          |    },
+          |    "inProgress" : true
+          |}
+          |""".stripMargin).as[RegistrationSubmissionDraft]
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(cache)))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getTrustTaxable("DRAFTID").apply(request)
+
+      status(result) mustBe OK
+
+      contentType(result) mustBe Some(JSON)
+      contentAsJson(result) mustBe JsBoolean(true)
+    }
+
+    "respond with OK and false when trust is non taxable" in {
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents()
+      )
+
+      val cache = Json.parse(
+        """
+          |{
+          |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+          |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
+          |    "createdAt" : { "$date" : 1597323808000 },
+          |    "draftData" : {
+          |       "main" : {
+          |            "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+          |            "data" : {
+          |                    "trustTaxable" : false
+          |            },
+          |            "progress" : "InProgress",
+          |            "createdAt" : "2020-08-13T13:37:53.787Z",
+          |            "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54"
+          |        }
+          |    },
+          |    "inProgress" : true
+          |}
+          |""".stripMargin).as[RegistrationSubmissionDraft]
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(cache)))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getTrustTaxable("DRAFTID").apply(request)
+
+      status(result) mustBe OK
+
+      contentType(result) mustBe Some(JSON)
+      contentAsJson(result) mustBe JsBoolean(false)
     }
   }
 
