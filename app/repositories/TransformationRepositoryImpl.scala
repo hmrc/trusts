@@ -23,7 +23,6 @@ import transformers.ComposedDeltaTransform
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-@Singleton
 class TransformationRepositoryImpl @Inject()(
                                               mongo: MongoDriver,
                                               config: AppConfig

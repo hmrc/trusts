@@ -33,7 +33,6 @@ import utils.Constants._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-@Singleton
 class GetTrustController @Inject()(identify: IdentifierAction,
                                    auditService: AuditService,
                                    trustsService: TrustsService,
