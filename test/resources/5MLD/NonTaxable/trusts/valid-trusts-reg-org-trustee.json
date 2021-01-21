@@ -1,0 +1,130 @@
+{
+  "trust": {
+    "assets": {
+      "nonEEABusiness": [
+        {
+          "address": {
+            "line1": "EEA Address Line 1",
+            "line2": "EEA Address Line 2",
+            "line3": "EEA Address Line 3",
+            "country": "FR"
+          },
+          "orgName": "Non-EEA Company Name",
+          "govLawCountry": "FR",
+          "startDate": "2018-01-10"
+        }
+      ]
+    },
+    "entities": {
+      "beneficiary": {
+        "large": [
+          {
+            "organisationName": "Beneficiary Large Description",
+            "description2": "Description 3",
+            "beneficiaryDiscretion": true,
+            "description": "Description 1",
+            "countryOfResidence": "US",
+            "description1": "Description 2",
+            "description4": "Description 5",
+            "numberOfBeneficiary": "11",
+            "description3": "Description 4"
+          }
+        ],
+        "charity": [
+          {
+            "organisationName": "Benficiary Charity Description",
+            "beneficiaryDiscretion": true,
+            "countryOfResidence": "FR"
+          }
+        ],
+        "trust": [
+          {
+            "organisationName": "Benficiary Trust Description",
+            "beneficiaryDiscretion": true,
+            "countryOfResidence": "GB"
+          }
+        ],
+        "unidentified": [
+          {
+            "description": "Beneficiary Unknown\\Description"
+          }
+        ],
+        "company": [
+          {
+            "organisationName": "Benficiary Org Description",
+            "beneficiaryDiscretion": true,
+            "countryOfResidence": "GB"
+          }
+        ]
+      },
+      "protectors": {
+        "protectorCompany": [
+          {
+            "name": "Protector OrgName",
+            "countryOfResidence": "GB"
+          }
+        ]
+      },
+      "leadTrustees": {
+        "leadTrusteeOrg": {
+          "email": "b@c.com",
+          "countryOfResidence": "GB",
+          "phoneNumber": "0987654321",
+          "name": "Lead Trustee OrgName",
+          "identification": {
+            "utr": "9999999999"
+          }
+        }
+      },
+      "settlors": {
+        "settlorCompany": [
+          {
+            "name": "Settlor OrgName",
+            "countryOfResidence": "US"
+          }
+        ]
+      },
+      "trustees": [
+        {
+          "trusteeOrg": {
+            "name": "Trustee OrgName",
+            "countryOfResidence": "US"
+          }
+        }
+      ]
+    },
+    "details": {
+      "expressTrust": true,
+      "trustUKProperty": false,
+      "trustUKResident": true,
+      "trustUKRelation": false,
+      "trustTaxable": false,
+      "startDate": "2018-01-10",
+      "trustRecorded": false
+    }
+  },
+  "correspondence": {
+    "abroadIndicator": false,
+    "name": "Non-Taxable Trust Registration Test 07",
+    "address": {
+      "line1": "Address Test Line 1",
+      "line2": "Address Test Line 2",
+      "line3": "Address Test Line 3",
+      "country": "US"
+    },
+    "phoneNumber": "01912526083"
+  },
+  "submissionDate": "2021-01-01",
+  "declaration": {
+    "name": {
+      "firstName": "Adam",
+      "lastName": "Chicken"
+    },
+    "address": {
+      "line1": "Dec Address Line 1",
+      "line2": "Dec Address Line 2",
+      "line3": "Dec Address Line 3",
+      "country": "FR"
+    }
+  }
+}
