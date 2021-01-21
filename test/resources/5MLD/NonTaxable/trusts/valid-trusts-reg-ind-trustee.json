@@ -1,76 +1,54 @@
 {
-  "trust": {
-    "assets": {
-      "nonEEABusiness": [
-        {
-          "address": {
-            "line1": "EEA Address Line 1",
-            "line2": "EEA Address Line 2",
-            "line3": "EEA Address Line 3",
-            "country": "AE"
-          },
-          "orgName": "EEA Test Org Name 1",
-          "govLawCountry": "AE",
-          "startDate": "2020-01-01"
-        }
-      ]
+  "submissionDate": "2021-01-18",
+  "correspondence": {
+    "abroadIndicator": false,
+    "name": "Non-Taxable Trust Registration Test 08",
+    "address": {
+      "line1": "Address Test Line 1",
+      "line2": "Address Test Line 2",
+      "line3": "Address Test Line 3",
+      "line4": "Address Test Line 4",
+      "postCode": "NE99 1ZZ",
+      "country": "GB"
     },
-    "agentDetails": {
-      "arn": "BARN1234567",
-      "agentTelephoneNumber": "01913759261",
-      "agentAddress": {
-        "line2": "Agent Address Line 2",
-        "line1": "Agent Address Line 1",
-        "country": "GB",
-        "postCode": "BA12 9GA",
-        "line4": "Agent Address Line 4",
-        "line3": "Agent Address Line 3"
-      },
-      "clientReference": "Agent Ref (1)",
-      "agentName": "Agent Name 1"
+    "phoneNumber": "01916837562"
+  },
+  "declaration": {
+    "name": {
+      "firstName": "Julie",
+      "lastName": "Hindmarch"
+    },
+    "address": {
+      "line1": "Dec Address Line 1",
+      "line2": "Dec Address Line 2",
+      "line3": "Dec Address Line 3",
+      "line4": "Dec Address Line 4",
+      "postCode": "NE12 8GB",
+      "country": "GB"
+    }
+  },
+  "trust": {
+    "details": {
+      "startDate": "2019-07-04",
+      "trustTaxable": false,
+      "expressTrust": true,
+      "trustUKResident": true,
+      "trustUKProperty": false,
+      "trustRecorded": true
     },
     "entities": {
-      "leadTrustees": {
-        "leadTrusteeInd": {
-          "identification": {
-            "nino": "AA111111A"
-          },
-          "phoneNumber": "1234567890",
-          "nationality": "GB",
+      "naturalPerson": [
+        {
           "name": {
-            "firstName": "TO BE SUPPLIED",
-            "middleName": "TO BE SUPPLIED",
-            "lastName": "TO BE SUPPLIED"
+            "firstName": "Mark",
+            "middleName": "Richard",
+            "lastName": "Owen"
           },
-          "dateOfBirth": "2015-03-20",
-          "countryOfResidence": "GB"
+          "dateOfBirth": "1974-08-31",
+          "countryOfResidence": "GB",
+          "nationality": "GB"
         }
-      },
-      "protectors": {
-        "protector": [
-          {
-            "name": {
-              "firstName": "Paul",
-              "middleName": "James",
-              "lastName": "Jones"
-            },
-            "dateOfBirth": "2000-08-31",
-            "countryOfResidence": "GB",
-            "nationality": "GB"
-          }
-        ]
-      },
-      "deceased": {
-        "dateOfBirth": "1972-06-24",
-        "nationality": "GB",
-        "countryOfResidence": "US",
-        "dateOfDeath": "2019-07-04",
-        "name": {
-          "firstName": "John",
-          "middleName": "Paul",
-          "lastName": "Smith"
-        }
-      },
+      ],
       "beneficiary": {
         "individualDetails": [
           {
@@ -84,6 +62,33 @@
             "nationality": "GB"
           }
         ]
+      },
+      "deceased": {
+        "name": {
+          "firstName": "John",
+          "middleName": "Paul",
+          "lastName": "Smith"
+        },
+        "dateOfBirth": "1972-06-24",
+        "dateOfDeath": "2019-07-04",
+        "countryOfResidence": "US",
+        "nationality": "GB"
+      },
+      "leadTrustees": {
+        "leadTrusteeInd": {
+          "name": {
+            "firstName": "TO BE SUPPLIED",
+            "middleName": "TO BE SUPPLIED",
+            "lastName": "TO BE SUPPLIED"
+          },
+          "dateOfBirth": "2015-03-20",
+          "identification": {
+            "nino": "AA111111A"
+          },
+          "phoneNumber": "1234567890",
+          "countryOfResidence": "GB",
+          "nationality": "GB"
+        }
       },
       "trustees": [
         {
@@ -99,54 +104,49 @@
           }
         }
       ],
-      "naturalPerson": [
+      "protectors": {
+        "protector": [
+          {
+            "name": {
+              "firstName": "Paul",
+              "middleName": "James",
+              "lastName": "Jones"
+            },
+            "dateOfBirth": "2000-08-31",
+            "countryOfResidence": "GB",
+            "nationality": "GB"
+          }
+        ]
+      }
+    },
+    "assets": {
+      "nonEEABusiness": [
         {
-          "name": {
-            "firstName": "Mark",
-            "middleName": "Richard",
-            "lastName": "Owen"
+          "address": {
+            "line1": "EEA Address Line 1",
+            "line2": "EEA Address Line 2",
+            "line3": "EEA Address Line 3",
+            "country": "AE"
           },
-          "dateOfBirth": "1974-08-31",
-          "countryOfResidence": "GB",
-          "nationality": "GB"
+          "orgName": "EEA Test Org Name 1",
+          "govLawCountry": "AE",
+          "startDate": "2020-01-01"
         }
       ]
-    },
-    "details": {
-      "expressTrust": true,
-      "trustUKProperty": false,
-      "trustUKResident": true,
-      "trustTaxable": false,
-      "startDate": "2019-07-04",
-      "trustRecorded": true
     }
   },
-  "correspondence": {
-    "abroadIndicator": false,
-    "name": "Non-Taxable Trust Registration Test 08",
-    "address": {
-      "line4": "Address Test Line 4",
-      "line1": "Address Test Line 1",
-      "line3": "Address Test Line 3",
-      "country": "GB",
-      "line2": "Address Test Line 2",
-      "postCode": "NE99 1ZZ"
+  "agentDetails": {
+    "arn": "BARN1234567",
+    "agentName": "Agent Name 1",
+    "agentAddress": {
+      "line1": "Agent Address Line 1",
+      "line2": "Agent Address Line 2",
+      "line3": "Agent Address Line 3",
+      "line4": "Agent Address Line 4",
+      "postCode": "BA12 9GA",
+      "country": "GB"
     },
-    "phoneNumber": "01916837562"
-  },
-  "submissionDate": "2021-01-01",
-  "declaration": {
-    "name": {
-      "firstName": "Julie",
-      "lastName": "Hindmarch"
-    },
-    "address": {
-      "line2": "Dec Address Line 2",
-      "postCode": "NE12 8GB",
-      "line4": "Dec Address Line 4",
-      "country": "GB",
-      "line3": "Dec Address Line 3",
-      "line1": "Dec Address Line 1"
-    }
+    "agentTelephoneNumber": "01913759261",
+    "clientReference": "Agent Ref (1)"
   }
 }
