@@ -168,11 +168,13 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
 
   def validateSettlor: Option[TrustsValidationError] = {
     val trustType = registration.trust.details.typeOfTrust
+    val isTaxable = registration.trust.details.trustTaxable
 
-    trustType match {
-      case Some(TypeOfTrust.DeedOfVariationOrFamilyAgreement) => validateDeedOfVariation(TypeOfTrust.DeedOfVariationOrFamilyAgreement)
-      case Some(TypeOfTrust.Will) => validateDeceasedSettlor
-      case _ => validateTrustHasLivingSettlor
+    (trustType, isTaxable) match {
+      case (Some(TypeOfTrust.DeedOfVariationOrFamilyAgreement), _) => validateDeedOfVariation(TypeOfTrust.DeedOfVariationOrFamilyAgreement)
+      case (Some(TypeOfTrust.Will), _) => validateDeceasedSettlor
+      case (_, Some(false)) => None
+      case (_, _) => validateTrustHasLivingSettlor
     }
   }
 

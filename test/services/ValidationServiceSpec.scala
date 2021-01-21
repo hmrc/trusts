@@ -26,45 +26,29 @@ class ValidationServiceSpec extends BaseSpec
   with DataExamples with EitherValues {
 
   private lazy val validationService: ValidationService = new ValidationService()
-  private lazy val trustValidator4MLD : Validator = validationService.get("/resources/schemas/4MLD/trusts-api-registration-schema-5.0.0.json")
-  private lazy val trustValidator5MLD : Validator = validationService.get("/resources/schemas/5MLD/trusts-api-registration-schema-1.3.0.json")
-
+  private lazy val trustValidator : Validator = validationService.get("/resources/schemas/4MLD/trusts-api-registration-schema-5.0.0.json")
 
   "a validator " should {
     "return an empty list of errors when " when {
       "Json having all required fields" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
 
-        trustValidator4MLD.validate[Registration](jsonString) must not be 'left
-        trustValidator4MLD.validate[Registration](jsonString).right.value mustBe a[Registration]
+        trustValidator.validate[Registration](jsonString) must not be 'left
+        trustValidator.validate[Registration](jsonString).right.value mustBe a[Registration]
       }
 
       "Json having trust with organisation trustees" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-org-trustees.json")
 
-        trustValidator4MLD.validate[Registration](jsonString) must not be 'left
-        trustValidator4MLD.validate[Registration](jsonString).right.value mustBe a[Registration]
-      }
-
-      "5MLD Json having trust with organisation trustees" in {
-        val jsonString = JsonUtils.getJsonFromFile("5MLD/NonTaxable/trusts/valid-trusts-reg-org-trustee.json")
-
-        trustValidator5MLD.validate[Registration](jsonString) must not be 'left
-        trustValidator5MLD.validate[Registration](jsonString).right.value mustBe a[Registration]
-      }
-
-      "5MLD Json having trust with individual trustees" in {
-        val jsonString = JsonUtils.getJsonFromFile("5MLD/NonTaxable/trusts/valid-trusts-reg-ind-trustee.json")
-
-        trustValidator5MLD.validate[Registration](jsonString) must not be 'left
-        trustValidator5MLD.validate[Registration](jsonString).right.value mustBe a[Registration]
+        trustValidator.validate[Registration](jsonString) must not be 'left
+        trustValidator.validate[Registration](jsonString).right.value mustBe a[Registration]
       }
     }
 
     "return registration domain" when {
       "valid json having large type beneficiary with 5 description" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
-       val registration =  trustValidator4MLD.validate[Registration](jsonString).right.get
+       val registration =  trustValidator.validate[Registration](jsonString).right.get
         registration.trust.entities.beneficiary.large.get.map{
           largeBeneficiary =>
             largeBeneficiary.description mustBe "Description"
@@ -77,7 +61,7 @@ class ValidationServiceSpec extends BaseSpec
 
       "valid json having large type beneficiary with 1 required description " in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-org-trustees.json")
-        val registration =  trustValidator4MLD.validate[Registration](jsonString).right.get
+        val registration =  trustValidator.validate[Registration](jsonString).right.get
         registration.trust.entities.beneficiary.large.get.map{
           largeBeneficiary =>
             largeBeneficiary.description mustBe "Description"
@@ -98,7 +82,7 @@ class ValidationServiceSpec extends BaseSpec
         }
 
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
-        val registration =  trustValidator4MLD.validate[Registration](jsonString).right.get
+        val registration =  trustValidator.validate[Registration](jsonString).right.get
 
         val assets: Assets = registration.trust.assets.get
 
@@ -110,55 +94,55 @@ class ValidationServiceSpec extends BaseSpec
 
       "individual trustees has no identification" in {
         val jsonString = JsonUtils.getJsonFromFile("trusts-without-trustees-identification.json")
-        trustValidator4MLD.validate[Registration](jsonString) mustBe 'right
+        trustValidator.validate[Registration](jsonString) mustBe 'right
       }
 
       "natural people identification is not provided." in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-deed-of-variation-01.json")
-        trustValidator4MLD.validate[Registration](jsonString) mustBe 'right
+        trustValidator.validate[Registration](jsonString) mustBe 'right
       }
     }
 
     "return a list of validation errors " when {
       "json document is invalid" in {
         val jsonString = JsonUtils.getJsonFromFile("invalid-payload-trusts-registration.json")
-        trustValidator4MLD.validate[Registration](jsonString) mustBe 'left
+        trustValidator.validate[Registration](jsonString) mustBe 'left
       }
 
       "json document is valid but failed to match with Domain" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
-        trustValidator4MLD.validate[ExistingCheckRequest](jsonString) mustBe 'left
+        trustValidator.validate[ExistingCheckRequest](jsonString) mustBe 'left
       }
 
       "date of birth of trustee is before 1500/01/01" in {
         val jsonString = JsonUtils.getJsonFromFile("trustees-invalid-dob.json")
-        val errorList =trustValidator4MLD.validate[Registration](jsonString).left.get.
+        val errorList =trustValidator.validate[Registration](jsonString).left.get.
           filter(_.location=="/trust/entities/trustees/0/trusteeInd/dateOfBirth")
         errorList.size mustBe 1
       }
 
       "no beneficiary is provided" in {
-        val errorList = trustValidator4MLD.validate[Registration](trustWithoutBeneficiary).left.get.
+        val errorList = trustValidator.validate[Registration](trustWithoutBeneficiary).left.get.
           filter(_.message=="object has missing required properties ([\"beneficiary\"])")
         errorList.size mustBe 1
       }
 
       "date of birth of individual beneficiary is before 1500/01/01" in {
         val jsonString = trustWithValues(indBenficiaryDob = "1499-12-31")
-        val errorList = trustValidator4MLD.validate[Registration](jsonString).left.get.
+        val errorList = trustValidator.validate[Registration](jsonString).left.get.
           filter(_.location=="/trust/entities/beneficiary/individualDetails/0/dateOfBirth")
         errorList.size mustBe 1
       }
 
       "no description provided for large type beneficiary" in {
         val jsonString =JsonUtils.getJsonFromFile("trust-without-large-ben-description.json")
-        val errorList = trustValidator4MLD.validate[Registration](jsonString).left.get.
+        val errorList = trustValidator.validate[Registration](jsonString).left.get.
           filter(_.location=="/trust/entities/beneficiary/large/0")
         errorList.size mustBe 1
       }
 
       "no asset type is provided" in {
-        val errorList = trustValidator4MLD.validate[Registration](trustWithoutAssets).left.get.
+        val errorList = trustValidator.validate[Registration](trustWithoutAssets).left.get.
           filter(_.location=="/trust/assets")
         errorList.size mustBe 1
       }
@@ -168,7 +152,7 @@ class ValidationServiceSpec extends BaseSpec
 
       "json request is valid but failed in business rules for trust start date, efrbs start date " in {
         val jsonString = JsonUtils.getJsonFromFile("trust-business-validation-fail.json")
-        val errors = trustValidator4MLD.validate[Registration](jsonString).left.get
+        val errors = trustValidator.validate[Registration](jsonString).left.get
 
         errors.map(_.message) mustBe List(
           "Trusts start date must be today or in the past.",
@@ -184,21 +168,21 @@ class ValidationServiceSpec extends BaseSpec
 
       "individual trustees has same NINO " in {
         val jsonString = JsonUtils.getJsonFromFile("trust-business-validation-fail.json")
-        val errorList = trustValidator4MLD.validate[Registration](jsonString).left.get.
+        val errorList = trustValidator.validate[Registration](jsonString).left.get.
           filter(_.message=="NINO is already used for another individual trustee.")
         errorList.size mustBe 2
       }
 
       "business trustees has same utr " in {
         val jsonString = JsonUtils.getJsonFromFile("trust-business-validation-fail.json")
-        val errorList =trustValidator4MLD.validate[Registration](jsonString).left.get.
+        val errorList =trustValidator.validate[Registration](jsonString).left.get.
           filter(_.message=="Utr is already used for another business trustee.")
         errorList.size mustBe 1
       }
 
       "business trustees has same utr as trust utr" in {
         val jsonString = JsonUtils.getJsonFromFile("trust-business-validation-fail.json")
-        val errorList =trustValidator4MLD.validate[Registration](jsonString).left.get.
+        val errorList =trustValidator.validate[Registration](jsonString).left.get.
           filter(_.message=="Business trustee utr is same as trust utr.")
         errorList.size mustBe 2
       }

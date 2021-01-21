@@ -38,6 +38,7 @@
   "trust": {
     "details": {
       "startDate": "2015-01-01",
+      "trustTaxable": true,
       "administrationCountry": "GB",
       "residentialStatus": {
         "uk": {
