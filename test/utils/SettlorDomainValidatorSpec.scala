@@ -117,7 +117,7 @@ class SettlorDomainValidatorSpec extends BaseSpec with DataExamples {
     }
 
     "return NO validation error when settlor is not provided for employment related trust that is None taxable" in {
-      val interVivosNonTaxable = willNonTaxableTrustWithValues(typeOfTrust = TypeOfTrust.IntervivosSettlement)
+      val interVivosNonTaxable = nonTaxableTrustWithValues()
       SUT(interVivosNonTaxable).validateSettlor mustBe None
       BusinessValidation.check(interVivosNonTaxable).size mustBe 0
     }

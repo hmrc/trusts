@@ -184,19 +184,17 @@ trait DataExamples extends  JsonFixtures {
       validate[Registration].get
   }
 
-  def willNonTaxableTrustWithValues(
+  def nonTaxableTrustWithValues(
                            deceasedDateOfBirth : String ="2001-01-01",
                            deceasedDateOfDeath : String ="2016-01-01",
                            deceasedNino :String = "KC456736",
-                           typeOfTrust : TypeOfTrust = TypeOfTrust.Will,
                            protectorNino :String = "AB123456K") : Registration = {
 
-    val json = getJsonValueFromFile("will-trust-dynamic-non-taxable.json")
+    val json = getJsonValueFromFile("trusts-dynamic-non-taxable.json")
 
     getJsonValueFromString(json.toString().
       replace("{deceasedDateOfBirth}", deceasedDateOfBirth).
       replace("{deceasedDateOfDeath}", deceasedDateOfDeath).
-      replace("{typeOfTrust}", typeOfTrust.toString).
       replace("{protectorNino}", protectorNino).
       replace("{deceasedNino}", deceasedNino)).
       validate[Registration].get
