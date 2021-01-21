@@ -37,7 +37,7 @@ class ValidationServiceSpec extends BaseSpec
         trustValidator.validate[Registration](jsonString).right.value mustBe a[Registration]
       }
 
-      "Json having trust with organisation  trustees" in {
+      "Json having trust with organisation trustees" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-org-trustees.json")
 
         trustValidator.validate[Registration](jsonString) must not be 'left
@@ -189,4 +189,5 @@ class ValidationServiceSpec extends BaseSpec
 
     }
   }
+
 }
