@@ -28,7 +28,6 @@ import services.TrustsService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-@Singleton()
 class CheckTrustController @Inject()(trustsService: TrustsService,
                                      cc: ControllerComponents,
                                      identify: IdentifierAction) extends TrustsBaseController(cc) with Logging {

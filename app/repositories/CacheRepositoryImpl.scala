@@ -22,7 +22,6 @@ import play.api.libs.json._
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-@Singleton
 class CacheRepositoryImpl @Inject()(
                                      mongo: MongoDriver,
                                      config: AppConfig

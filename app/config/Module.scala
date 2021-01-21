@@ -24,12 +24,12 @@ class Module extends AbstractModule {
 
   override def configure(): Unit = {
     // For session based storage instead of cred based, change to SessionIdentifierAction
-    bind(classOf[IdentifierAction]).to(classOf[AuthenticatedIdentifierAction]).asEagerSingleton()
+    bind(classOf[IdentifierAction]).to(classOf[AuthenticatedIdentifierAction])
 
     bind(classOf[MongoDriver]).to(classOf[TrustsMongoDriver]).asEagerSingleton()
 
-    bind(classOf[TransformationRepository]).to(classOf[TransformationRepositoryImpl]).asEagerSingleton()
-    bind(classOf[CacheRepository]).to(classOf[CacheRepositoryImpl]).asEagerSingleton()
-    bind(classOf[RegistrationSubmissionRepository]).to(classOf[RegistrationSubmissionRepositoryImpl]).asEagerSingleton()
+    bind(classOf[TransformationRepository]).to(classOf[TransformationRepositoryImpl])
+    bind(classOf[CacheRepository]).to(classOf[CacheRepositoryImpl])
+    bind(classOf[RegistrationSubmissionRepository]).to(classOf[RegistrationSubmissionRepositoryImpl])
   }
 }
