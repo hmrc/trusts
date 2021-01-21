@@ -173,7 +173,7 @@ trait DataExamples extends  JsonFixtures {
                            typeOfTrust : TypeOfTrust = TypeOfTrust.Will,
                            protectorNino :String = "AB123456K") : Registration = {
 
-    val json = getJsonValueFromFile("will-trust-dynamic-taxable.json")
+    val json = getJsonValueFromFile("will-trust-dynamic.json")
 
     getJsonValueFromString(json.toString().
       replace("{deceasedDateOfBirth}", deceasedDateOfBirth).
