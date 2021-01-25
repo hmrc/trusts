@@ -1309,7 +1309,9 @@
 			"required": [
 				"startDate",
 				"expressTrust",
-				"trustUKResident"
+				"trustUKResident",
+				"trustRecorded",
+				"trustUKRelation"
 			],
 			"additionalProperties": false
 		},
