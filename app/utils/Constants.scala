@@ -47,7 +47,7 @@ object Constants {
   val CORRESPONDENCE: JsPath = __ \ "correspondence"
   val DECLARATION: JsPath = __ \ "declaration"
   val SUBMISSION_DATE: JsPath = __ \ "submissionDate"
-  val YEARS_RETURNS: JsPath = __ \ "yearsReturn"
+  val YEARS_RETURNS: JsPath = __ \ "yearsReturns"
 
   val ASSETS = "assets"
   val BENEFICIARIES = "beneficiary"

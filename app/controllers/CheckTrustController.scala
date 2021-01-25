@@ -16,7 +16,7 @@
 
 package controllers
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 import play.api.Logging
 import play.api.libs.json.Json
 import play.api.mvc.ControllerComponents

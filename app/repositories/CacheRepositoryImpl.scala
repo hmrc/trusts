@@ -19,7 +19,7 @@ package repositories
 import config.AppConfig
 import play.api.libs.json._
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CacheRepositoryImpl @Inject()(
