@@ -17,11 +17,11 @@
 package transformers
 
 import java.time.LocalDate
-
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import models._
 import models.get_trust.TrustProcessedResponse
+import utils.JsonOps.doNothing
 
 class DeclarationTransformer {
 
@@ -191,9 +191,5 @@ class DeclarationTransformer {
     } else {
       doNothing()
     }
-  }
-
-  private def doNothing(): Reads[JsObject] = {
-    __.json.pick[JsObject]
   }
 }

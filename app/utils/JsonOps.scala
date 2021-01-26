@@ -22,6 +22,10 @@ import scala.util.{Failure, Success, Try}
 
 object JsonOps {
 
+  def doNothing(): Reads[JsObject] = {
+    __.json.pick[JsObject]
+  }
+
   type JsPathNodes = Seq[Either[Int, String]]
   type JsEntry = (JsPathNodes, JsValue)
   type JsTraverse = PartialFunction[JsEntry, JsValue]
