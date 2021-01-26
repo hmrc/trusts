@@ -19,7 +19,7 @@ package services
 import config.AppConfig
 import play.api.Logging
 import play.api.libs.json.{JsBoolean, JsObject, JsPath, JsString, JsValue, Reads, __}
-import utils.JsonOps.JsValueOps
+import utils.JsonOps.{JsValueOps, doNothing}
 
 import javax.inject.Inject
 
@@ -34,18 +34,26 @@ class Default5mldDataService @Inject()(appConfig: AppConfig) extends Logging {
       def putNewValue(path: JsPath, value: JsValue): Reads[JsObject] =
         __.json.update(path.json.put(value))
 
-      val leadTrusteeIndPath = (__ \ 'trust \ 'entities \ 'leadTrustees \ 'leadTrusteeInd).json
+      def defaultPuts: Reads[JsObject] = {
+        putNewValue(__ \ 'trust \ 'details \ 'trustUKResident, JsBoolean(true)) andThen
+          putNewValue(__ \ 'trust \ 'details \ 'trustRecorded, JsBoolean(true)) andThen
+          putNewValue(__ \ 'trust \ 'details \ 'trustUKRelation, JsBoolean(true)) andThen
+          putNewValue(__ \ 'submissionDate, JsString("2021-01-01"))
+      }
+
+      def conditionalPuts: Reads[JsObject] = {
+        val leadTrusteeIndPath = (__ \ 'trust \ 'entities \ 'leadTrustees \ 'leadTrusteeInd).json
+        if (json.transform(leadTrusteeIndPath.pick).isSuccess) {
+          putNewValue(__ \ 'trust \ 'entities \ 'leadTrustees \ 'leadTrusteeInd \ 'countryOfResidence, JsString("GB")) andThen
+            putNewValue(__ \ 'trust \ 'entities \ 'leadTrustees \ 'leadTrusteeInd \ 'nationality, JsString("GB"))
+        } else {
+          doNothing()
+        }
+      }
 
       json.applyRules.transform(
-        if (json.transform(leadTrusteeIndPath.pick).isSuccess) {
-          putNewValue((__ \ 'trust \ 'entities \ 'leadTrustees \ 'leadTrusteeInd \ 'countryOfResidence), JsString("GB")) andThen
-            putNewValue((__ \ 'trust \ 'entities \ 'leadTrustees \ 'leadTrusteeInd \ 'nationality), JsString("GB")) andThen
-            putNewValue((__ \ 'trust \ 'details \ 'trustUKResident), JsBoolean(true)) andThen
-            putNewValue((__ \ 'submissionDate), JsString("2021-01-01"))
-        } else {
-            putNewValue((__ \ 'trust \ 'details \ 'trustUKResident), JsBoolean(true)) andThen
-            putNewValue((__ \ 'submissionDate), JsString("2021-01-01"))
-        }
+        defaultPuts andThen
+          conditionalPuts
       ).fold(
         _ => {
           logger.error("[addDefault5mldData] Could not add temporary data for 5mld tests")
