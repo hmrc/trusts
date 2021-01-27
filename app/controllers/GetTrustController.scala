@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions.{IdentifierAction, ValidateIdentifierActionProvider}
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 import models.auditing.TrustAuditing
 import models.get_trust.GetTrustResponse.CLOSED_REQUEST_STATUS
 import models.get_trust.{BadRequestResponse, ResourceNotFoundResponse, _}

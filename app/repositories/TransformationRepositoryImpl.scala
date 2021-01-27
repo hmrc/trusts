@@ -20,7 +20,7 @@ import config.AppConfig
 import play.api.libs.json._
 import transformers.ComposedDeltaTransform
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class TransformationRepositoryImpl @Inject()(

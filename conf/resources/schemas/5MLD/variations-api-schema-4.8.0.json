@@ -46,7 +46,7 @@
 			],
 			"additionalProperties": false
 		},
-		"yearsReturn": {
+		"yearsReturns": {
 			"$ref": "#/definitions/yearsReturnType"
 		},
 		"declaration": {

@@ -64,7 +64,7 @@ case class GetTrust(matchData: MatchData,
                     declaration: Declaration,
                     trust: DisplayTrust,
                     submissionDate: Option[LocalDate], // New to 5MLD response, mandatory in 5MLD
-                    yearsReturn: Option[YearsReturns])
+                    yearsReturns: Option[YearsReturns])
 
 object GetTrust {
   implicit val writes: Writes[GetTrust] = Json.writes[GetTrust]

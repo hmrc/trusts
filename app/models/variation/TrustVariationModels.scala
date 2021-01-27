@@ -41,7 +41,7 @@ object TrustVariation {
     (
       (__ \ "matchData").read[MatchData] and
         (__ \ "correspondence").read[Correspondence] and
-        (__ \ "yearsReturn").readNullable[YearsReturns] and
+        (__ \ "yearsReturns").readNullable[YearsReturns] and
         (__ \ "declaration").read[Declaration] and
         (__ \ "details" \ "trust").read[Trust] and
         (__ \ "agentDetails").readNullable[AgentDetails] and
@@ -54,7 +54,7 @@ object TrustVariation {
   val writeToDes: Writes[TrustVariation] = (
     (JsPath \ "matchData").write[MatchData] and
       (JsPath \ "correspondence").write[Correspondence] and
-      (JsPath \ "yearsReturn").writeNullable[YearsReturns] and
+      (JsPath \ "yearsReturns").writeNullable[YearsReturns] and
       (JsPath \ "declaration").write[Declaration] and
       (JsPath \ "details" \ "trust").write[Trust] and
       (JsPath \ "agentDetails").writeNullable[AgentDetails] and
