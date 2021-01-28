@@ -35,10 +35,7 @@ class Default5mldDataService @Inject()(appConfig: AppConfig) extends Logging {
         __.json.update(path.json.put(value))
 
       def defaultPuts: Reads[JsObject] = {
-        putNewValue(__ \ 'trust \ 'details \ 'trustUKResident, JsBoolean(true)) andThen
-          putNewValue(__ \ 'trust \ 'details \ 'trustRecorded, JsBoolean(true)) andThen
-          putNewValue(__ \ 'trust \ 'details \ 'trustUKRelation, JsBoolean(true)) andThen
-          putNewValue(__ \ 'submissionDate, JsString("2021-01-01"))
+        putNewValue(__ \ 'submissionDate, JsString("2021-01-01"))
       }
 
       def conditionalPuts: Reads[JsObject] = {
