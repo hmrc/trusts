@@ -14,6 +14,44 @@
             "status" : "completed"
           },
           {
+            "propertyOrLandTotalValue" : 4000,
+            "propertyOrLandValueInTrust" : 2000,
+            "propertyOrLandAddressYesNo" : false,
+            "propertyOrLandTrustOwnsAllYesNo" : false,
+            "whatKindOfAsset" : "PropertyOrLand",
+            "propertyOrLandDescription" : "Description",
+            "status" : "completed"
+          },
+          {
+            "propertyOrLandAddressUkYesNo" : true,
+            "propertyOrLandTotalValue" : 4000,
+            "propertyOrLandAddressYesNo" : true,
+            "propertyOrLandTrustOwnsAllYesNo" : true,
+            "propertyOrLandUkAddress" : {
+              "line1" : "Line 1",
+              "line2" : "Line 2",
+              "line3" : "Line 3",
+              "line4" : "Line 4",
+              "postcode" : "AB1 1AB"
+            },
+            "whatKindOfAsset" : "PropertyOrLand",
+            "status" : "completed"
+          },
+          {
+            "propertyOrLandAddressUkYesNo" : false,
+            "propertyOrLandTotalValue" : 4000,
+            "propertyOrLandInternationalAddress" : {
+              "line1" : "Line 1",
+              "line2" : "Line 2",
+              "line3" : "Line 3",
+              "country" : "FR"
+            },
+            "propertyOrLandAddressYesNo" : true,
+            "propertyOrLandTrustOwnsAllYesNo" : true,
+            "whatKindOfAsset" : "PropertyOrLand",
+            "status" : "completed"
+          },
+          {
             "portfolioSharesName" : "Share",
             "sharesInPortfolioYesNo" : true,
             "portfolioSharesOnStockExchangeYesNo" : true,
@@ -116,6 +154,44 @@
           {
             "assetMoneyValue" : "45345435",
             "whatKindOfAsset" : "Money",
+            "status" : "completed"
+          },
+          {
+            "propertyOrLandValueTrust" : 2000,
+            "trustOwnAllThePropertyOrLand" : false,
+            "propertyOrLandTotalValue" : 4000,
+            "propertyOrLandAddressYesNo" : false,
+            "whatKindOfAsset" : "PropertyOrLand",
+            "propertyOrLandDescription" : "Description",
+            "status" : "completed"
+          },
+          {
+            "trustOwnAllThePropertyOrLand" : true,
+            "propertyOrLandTotalValue" : 4000,
+            "ukAddress" : {
+              "line1" : "Line 1",
+              "line2" : "Line 2",
+              "line3" : "Line 3",
+              "line4" : "Line 4",
+              "postcode" : "AB1 1AB"
+            },
+            "propertyOrLandAddressUKYesNo" : true,
+            "propertyOrLandAddressYesNo" : true,
+            "whatKindOfAsset" : "PropertyOrLand",
+            "status" : "completed"
+          },
+          {
+            "trustOwnAllThePropertyOrLand" : true,
+            "propertyOrLandTotalValue" : 4000,
+            "internationalAddress" : {
+              "line1" : "Line 1",
+              "line2" : "Line 2",
+              "line3" : "Line 3",
+              "country" : "FR"
+            },
+            "propertyOrLandAddressUKYesNo" : false,
+            "propertyOrLandAddressYesNo" : true,
+            "whatKindOfAsset" : "PropertyOrLand",
             "status" : "completed"
           },
           {

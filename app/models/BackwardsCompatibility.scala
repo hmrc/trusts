@@ -81,6 +81,16 @@ object AgentDetailsBC {
   }
 }
 
+case class AddressTypeNoCountry(line1: String,
+                                line2: String,
+                                line3: Option[String],
+                                line4: Option[String],
+                                postcode: Option[String])
+
+object AddressTypeNoCountry {
+  implicit val formats: Format[AddressTypeNoCountry] = Json.format[AddressTypeNoCountry]
+}
+
 sealed trait AssetBC
 
 object AssetBC {
@@ -94,6 +104,7 @@ object AssetBC {
 
   implicit lazy val reads: Reads[AssetBC] = {
     MoneyAssetBC.oldReads or
+      PropertyOrLandAssetBC.oldReads or
       SharesAssetBC.oldReads or
       BusinessAssetBC.oldReads or
       PartnershipAssetBC.formats or
@@ -102,15 +113,27 @@ object AssetBC {
 
 }
 
+sealed trait AssetBCFormats {
+
+  implicit class StringToLong(reads: Reads[String]) {
+    def toLong: Reads[Long] = reads.map(_.toLong)
+  }
+
+  implicit class OptionalStringToLong(reads: Reads[Option[String]]) {
+    def toLong: Reads[Option[Long]] = reads.map(_.map(_.toLong))
+  }
+
+}
+
 case class MoneyAssetBC(value: Long,
                         `type`: String,
                         status: String) extends AssetBC
 
-object MoneyAssetBC {
+object MoneyAssetBC extends AssetBCFormats {
 
   implicit val oldReads: Reads[MoneyAssetBC] = {
     (
-      (__ \ "assetMoneyValue").read[String].map(_.toLong) and
+      (__ \ "assetMoneyValue").read[String].toLong and
         (__ \ "whatKindOfAsset").read[String] and
         (__ \ "status").read[String]
       )(MoneyAssetBC.apply _)
@@ -122,6 +145,50 @@ object MoneyAssetBC {
         (__ \ "whatKindOfAsset").write[String] and
         (__ \ "status").write[String]
       )(unlift(MoneyAssetBC.unapply))
+  }
+}
+
+case class PropertyOrLandAssetBC(hasAddress: Boolean,
+                                 hasUkAddress: Option[Boolean],
+                                 ukAddress: Option[AddressTypeNoCountry],
+                                 internationalAddress: Option[AddressType],
+                                 description: Option[String],
+                                 totalValue: Long,
+                                 trustOwnsPropertyOrLand: Boolean,
+                                 valueInTrust: Option[Long],
+                                 `type`: String,
+                                 status: String) extends AssetBC
+
+object PropertyOrLandAssetBC extends AssetBCFormats {
+
+  implicit val oldReads: Reads[PropertyOrLandAssetBC] = {
+    (
+      (__ \ "propertyOrLandAddressYesNo").read[Boolean] and
+        (__ \ "propertyOrLandAddressUKYesNo").readNullable[Boolean] and
+        (__ \ "ukAddress").readNullable[AddressTypeNoCountry] and
+        (__ \ "internationalAddress").readNullable[AddressType] and
+        (__ \ "propertyOrLandDescription").readNullable[String] and
+        (__ \ "propertyOrLandTotalValue").read[Long] and
+        (__ \ "trustOwnAllThePropertyOrLand").read[Boolean] and
+        (__ \ "propertyOrLandValueTrust").readNullable[Long] and
+        (__ \ "whatKindOfAsset").read[String] and
+        (__ \ "status").read[String]
+      )(PropertyOrLandAssetBC.apply _)
+  }
+
+  implicit val newWrites: Writes[PropertyOrLandAssetBC] = {
+    (
+      (__ \ "propertyOrLandAddressYesNo").write[Boolean] and
+        (__ \ "propertyOrLandAddressUkYesNo").writeNullable[Boolean] and
+        (__ \ "propertyOrLandUkAddress").writeNullable[AddressTypeNoCountry] and
+        (__ \ "propertyOrLandInternationalAddress").writeNullable[AddressType] and
+        (__ \ "propertyOrLandDescription").writeNullable[String] and
+        (__ \ "propertyOrLandTotalValue").write[Long] and
+        (__ \ "propertyOrLandTrustOwnsAllYesNo").write[Boolean] and
+        (__ \ "propertyOrLandValueInTrust").writeNullable[Long] and
+        (__ \ "whatKindOfAsset").write[String] and
+        (__ \ "status").write[String]
+      )(unlift(PropertyOrLandAssetBC.unapply))
   }
 }
 
@@ -138,11 +205,7 @@ case class SharesAssetBC(sharesInPortfolio: Boolean,
                          `type`: String,
                          status: String) extends AssetBC
 
-object SharesAssetBC {
-
-  implicit class StringToLong(reads: Reads[Option[String]]) {
-    def toLong: Reads[Option[Long]] = reads.map(_.map(_.toLong))
-  }
+object SharesAssetBC extends AssetBCFormats {
 
   implicit val oldReads: Reads[SharesAssetBC] = {
     (
@@ -177,16 +240,6 @@ object SharesAssetBC {
         (__ \ "status").write[String]
       )(unlift(SharesAssetBC.unapply))
   }
-}
-
-case class AddressTypeNoCountry(line1: String,
-                                line2: String,
-                                line3: Option[String],
-                                line4: Option[String],
-                                postcode: Option[String])
-
-object AddressTypeNoCountry {
-  implicit val formats: Format[AddressTypeNoCountry] = Json.format[AddressTypeNoCountry]
 }
 
 case class BusinessAssetBC(name: String,

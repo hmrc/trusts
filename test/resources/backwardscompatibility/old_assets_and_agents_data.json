@@ -27,6 +27,44 @@
             "status" : "completed"
           },
           {
+            "propertyOrLandValueTrust" : 2000,
+            "trustOwnAllThePropertyOrLand" : false,
+            "propertyOrLandTotalValue" : 4000,
+            "propertyOrLandAddressYesNo" : false,
+            "whatKindOfAsset" : "PropertyOrLand",
+            "propertyOrLandDescription" : "Description",
+            "status" : "completed"
+          },
+          {
+            "trustOwnAllThePropertyOrLand" : true,
+            "propertyOrLandTotalValue" : 4000,
+            "ukAddress" : {
+              "line1" : "Line 1",
+              "line2" : "Line 2",
+              "line3" : "Line 3",
+              "line4" : "Line 4",
+              "postcode" : "AB1 1AB"
+            },
+            "propertyOrLandAddressUKYesNo" : true,
+            "propertyOrLandAddressYesNo" : true,
+            "whatKindOfAsset" : "PropertyOrLand",
+            "status" : "completed"
+          },
+          {
+            "trustOwnAllThePropertyOrLand" : true,
+            "propertyOrLandTotalValue" : 4000,
+            "internationalAddress" : {
+              "line1" : "Line 1",
+              "line2" : "Line 2",
+              "line3" : "Line 3",
+              "country" : "FR"
+            },
+            "propertyOrLandAddressUKYesNo" : false,
+            "propertyOrLandAddressYesNo" : true,
+            "whatKindOfAsset" : "PropertyOrLand",
+            "status" : "completed"
+          },
+          {
             "portfolioQuantityInTheTrust" : "100",
             "sharesInAPortfolio" : true,
             "name" : "Share",

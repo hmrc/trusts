@@ -96,13 +96,16 @@ class BackwardsCompatibilityService extends Logging {
         val newArray = array.value.zipWithIndex.foldLeft(JsArray())((acc, asset) => {
           asset._1.validate[AssetBC] match {
             case JsSuccess(value, _) =>
+              
+              def append[T <: AssetBC](asset: T)(implicit wts: Writes[T]): JsArray = acc :+ Json.toJson(asset)
+              
               value match {
-                case x: MoneyAssetBC => acc :+ Json.toJson(x)
-                case x: SharesAssetBC => acc :+ Json.toJson(x)
-                case x: BusinessAssetBC => acc :+ Json.toJson(x)
-                case x: PartnershipAssetBC => acc :+ Json.toJson(x)
-                case x: OtherAssetBC => acc :+ Json.toJson(x)
-                case _ => acc
+                case x: MoneyAssetBC => append(x)
+                case x: PropertyOrLandAssetBC => append(x)
+                case x: SharesAssetBC => append(x)
+                case x: BusinessAssetBC => append(x)
+                case x: PartnershipAssetBC => append(x)
+                case x: OtherAssetBC => append(x)
               }
             case _ => acc
           }

@@ -177,6 +177,7 @@ class BackwardsCompatibilitySpec extends BaseSpec {
       val value: Long  = 4000L
       val quantity: Long  = 100L
       val description: String = "Description"
+      val ukAddress: AddressTypeNoCountry = AddressTypeNoCountry("Line 1", "Line 2", Some("Line 3"), Some("Line 4"), Some("AB1 1AB"))
 
       "money" must {
 
@@ -216,6 +217,192 @@ class BackwardsCompatibilitySpec extends BaseSpec {
                |  "status": "$status"
                |}
                |""".stripMargin)
+        }
+      }
+
+      "property or land" must {
+
+        val `type`: String = "PropertyOrLand"
+
+        val propertyOrLandDescription = PropertyOrLandAssetBC(
+          hasAddress = false,
+          hasUkAddress = None,
+          ukAddress = None,
+          internationalAddress = None,
+          description = Some(description),
+          totalValue = value,
+          trustOwnsPropertyOrLand = false,
+          valueInTrust = Some(quantity),
+          `type` = `type`,
+          status = status
+        )
+
+        val propertyOrLandUkAddress = PropertyOrLandAssetBC(
+          hasAddress = true,
+          hasUkAddress = Some(true),
+          ukAddress = Some(ukAddress),
+          internationalAddress = None,
+          description = None,
+          totalValue = value,
+          trustOwnsPropertyOrLand = true,
+          valueInTrust = None,
+          `type` = `type`,
+          status = status
+        )
+
+        val propertyOrLandNonUkAddress = PropertyOrLandAssetBC(
+          hasAddress = true,
+          hasUkAddress = Some(false),
+          ukAddress = None,
+          internationalAddress = Some(nonUkAddress),
+          description = None,
+          totalValue = value,
+          trustOwnsPropertyOrLand = true,
+          valueInTrust = None,
+          `type` = `type`,
+          status = status
+        )
+
+        "validate old style" when {
+
+          "description" in {
+
+            val json = Json.parse(
+              s"""
+                 |{
+                 |  "propertyOrLandAddressYesNo": false,
+                 |  "propertyOrLandDescription": "$description",
+                 |  "propertyOrLandTotalValue": $value,
+                 |  "trustOwnAllThePropertyOrLand": false,
+                 |  "propertyOrLandValueTrust": $quantity,
+                 |  "whatKindOfAsset": "${`type`}",
+                 |  "status": "$status"
+                 |}
+                 |""".stripMargin)
+
+            val result = json.validate[PropertyOrLandAssetBC].get
+
+            result mustBe propertyOrLandDescription
+          }
+
+          "uk address" in {
+
+            val json = Json.parse(
+              s"""
+                 |{
+                 |  "propertyOrLandAddressYesNo": true,
+                 |  "propertyOrLandAddressUKYesNo": true,
+                 |  "ukAddress": {
+                 |    "line1": "Line 1",
+                 |    "line2": "Line 2",
+                 |    "line3": "Line 3",
+                 |    "line4": "Line 4",
+                 |    "postcode": "AB1 1AB"
+                 |  },
+                 |  "propertyOrLandTotalValue": $value,
+                 |  "trustOwnAllThePropertyOrLand": true,
+                 |  "whatKindOfAsset": "${`type`}",
+                 |  "status": "$status"
+                 |}
+                 |""".stripMargin)
+
+            val result = json.validate[PropertyOrLandAssetBC].get
+
+            result mustBe propertyOrLandUkAddress
+          }
+
+          "non-uk address" in {
+
+            val json = Json.parse(
+              s"""
+                 |{
+                 |  "propertyOrLandAddressYesNo": true,
+                 |  "propertyOrLandAddressUKYesNo": false,
+                 |  "internationalAddress": {
+                 |    "line1": "Line 1",
+                 |    "line2": "Line 2",
+                 |    "line3": "Line 3",
+                 |    "country": "FR"
+                 |  },
+                 |  "propertyOrLandTotalValue": $value,
+                 |  "trustOwnAllThePropertyOrLand": true,
+                 |  "whatKindOfAsset": "${`type`}",
+                 |  "status": "$status"
+                 |}
+                 |""".stripMargin)
+
+            val result = json.validate[PropertyOrLandAssetBC].get
+
+            result mustBe propertyOrLandNonUkAddress
+          }
+        }
+
+        "write new style" when {
+
+          "description" in {
+
+            val result = Json.toJson(propertyOrLandDescription)
+
+            result mustBe Json.parse(
+              s"""
+                 |{
+                 |  "propertyOrLandAddressYesNo": false,
+                 |  "propertyOrLandDescription": "$description",
+                 |  "propertyOrLandTotalValue": $value,
+                 |  "propertyOrLandTrustOwnsAllYesNo": false,
+                 |  "propertyOrLandValueInTrust": $quantity,
+                 |  "whatKindOfAsset": "${`type`}",
+                 |  "status": "$status"
+                 |}
+                 |""".stripMargin)
+          }
+
+          "uk address" in {
+
+            val result = Json.toJson(propertyOrLandUkAddress)
+
+            result mustBe Json.parse(
+              s"""
+                 |{
+                 |  "propertyOrLandAddressYesNo": true,
+                 |  "propertyOrLandAddressUkYesNo": true,
+                 |  "propertyOrLandUkAddress": {
+                 |    "line1": "Line 1",
+                 |    "line2": "Line 2",
+                 |    "line3": "Line 3",
+                 |    "line4": "Line 4",
+                 |    "postcode": "AB1 1AB"
+                 |  },
+                 |  "propertyOrLandTotalValue": $value,
+                 |  "propertyOrLandTrustOwnsAllYesNo": true,
+                 |  "whatKindOfAsset": "${`type`}",
+                 |  "status": "$status"
+                 |}
+                 |""".stripMargin)
+          }
+
+          "non-uk address" in {
+
+            val result = Json.toJson(propertyOrLandNonUkAddress)
+
+            result mustBe Json.parse(
+              s"""
+                 |{
+                 |  "propertyOrLandAddressYesNo": true,
+                 |  "propertyOrLandAddressUkYesNo": false,
+                 |  "propertyOrLandInternationalAddress": {
+                 |    "line1": "Line 1",
+                 |    "line2": "Line 2",
+                 |    "line3": "Line 3",
+                 |    "country": "FR"
+                 |  },
+                 |  "propertyOrLandTotalValue": $value,
+                 |  "propertyOrLandTrustOwnsAllYesNo": true,
+                 |  "whatKindOfAsset": "${`type`}",
+                 |  "status": "$status"
+                 |}
+                 |""".stripMargin)
+          }
         }
       }
 
@@ -343,8 +530,6 @@ class BackwardsCompatibilitySpec extends BaseSpec {
       "business" must {
 
         val `type`: String = "Business"
-
-        val ukAddress: AddressTypeNoCountry = AddressTypeNoCountry("Line 1", "Line 2", Some("Line 3"), Some("Line 4"), Some("AB1 1AB"))
 
         val assetUk = BusinessAssetBC(
           name = name,
