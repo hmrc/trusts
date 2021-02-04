@@ -17,6 +17,7 @@
 package services
 
 import models.registration.RegistrationSubmissionDraft
+import models.{AgentDetailsBC, AssetBC, MoneyAssetBC, OtherAssetBC}
 import play.api.Logging
 import play.api.libs.json._
 import utils.JsonOps.{doNothing, putNewValue}
@@ -25,13 +26,20 @@ class BackwardsCompatibilityService extends Logging {
 
   def adjustData(draft: RegistrationSubmissionDraft): JsValue = {
 
-    val reads = adjustAssets(draft) andThen adjustAgentDetails(draft)
+    val reads = adjustAssets(draft) andThen
+      adjustAgentDetails(draft)
 
     draft.draftData.transform(reads) match {
       case JsSuccess(updatedData, _) =>
-        updatedData
+        updatedData.transform(rewriteAgentDetails(updatedData) andThen rewriteAssets(updatedData)) match {
+          case JsSuccess(value, _) =>
+            value
+          case JsError(errors) =>
+            logger.warn(s"Failed to rewrite data: $errors. Returning original data and taking the hit of lost data.")
+            draft.draftData
+        }
       case JsError(errors) =>
-        logger.warn(s"Failed to adjust data: $errors")
+        logger.warn(s"Failed to adjust data: $errors. Returning original data and taking the hit of lost data.")
         draft.draftData
     }
   }
@@ -58,7 +66,47 @@ class BackwardsCompatibilityService extends Logging {
           "internalId" -> draft.internalId
         )
         putNewValue(newPath, newObj)
-      case _ =>
+      case JsError(errors) =>
+        logger.info(s"Unable to pick json at $oldPath: $errors")
+        doNothing()
+    }
+  }
+
+  private def rewriteAgentDetails(data: JsValue): Reads[JsObject] = {
+    val path: JsPath = __ \ "draftData" \ "agentDetails" \ "data" \ "agent"
+    data.transform(path.json.pick) match {
+      case JsSuccess(value, _) =>
+        value.validate[AgentDetailsBC] match {
+          case JsSuccess(value, _) =>
+            path.json.prune andThen putNewValue(path, Json.toJson(value))
+          case JsError(errors) =>
+            logger.info(s"Unable to validate json at $path as type AgentDetailsBC: $errors")
+            doNothing()
+        }
+      case JsError(errors) =>
+        logger.info(s"Unable to pick json at $path: $errors")
+        doNothing()
+    }
+  }
+
+  private def rewriteAssets(data: JsValue): Reads[JsObject] = {
+    val path: JsPath = __ \ "draftData" \ "assets" \ "data" \ "assets"
+    data.transform(path.json.pick[JsArray]) match {
+      case JsSuccess(array, _) =>
+        val newArray = array.value.zipWithIndex.foldLeft(JsArray())((acc, asset) => {
+          asset._1.validate[AssetBC] match {
+            case JsSuccess(value, _) =>
+              value match {
+                case x: MoneyAssetBC => acc :+ Json.toJson(x)
+                case x: OtherAssetBC => acc :+ Json.toJson(x)
+                case _ => acc
+              }
+            case _ => acc
+          }
+        })
+        path.json.prune andThen putNewValue(path, newArray)
+      case JsError(errors) =>
+        logger.info(s"Unable to pick json at $path: $errors")
         doNothing()
     }
   }

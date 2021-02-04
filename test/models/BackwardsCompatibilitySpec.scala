@@ -32,7 +32,7 @@ class BackwardsCompatibilitySpec extends BaseSpec {
       val ukAddress: AddressType = AddressType("Line 1", "Line 2", Some("Line 3"), Some("Line 4"), Some("AB1 1AB"), "GB")
       val nonUkAddress: AddressType = AddressType("Line 1", "Line 2", Some("Line 3"), None, None, "FR")
 
-      "validate old-style" when {
+      "validate old style" when {
 
         "uk address" in {
 
@@ -100,7 +100,7 @@ class BackwardsCompatibilitySpec extends BaseSpec {
         }
       }
 
-      "write new-style" when {
+      "write new style" when {
 
         "uk address" in {
 
@@ -164,6 +164,98 @@ class BackwardsCompatibilitySpec extends BaseSpec {
                |  },
                |  "telephoneNumber": "$tel",
                |  "agentARN": "$arn"
+               |}
+               |""".stripMargin)
+        }
+      }
+    }
+
+    "assets" when {
+
+      val status: String = "completed"
+      val value: Long  = 4000L
+      val description: String = "Description"
+
+      "money" must {
+
+        val `type`: String = "Money"
+
+        val asset = MoneyAssetBC(
+          value = value,
+          `type` = `type`,
+          status = status
+        )
+
+        "validate old style" in {
+
+          val json = Json.parse(
+            s"""
+               |{
+               |  "assetMoneyValue": "$value",
+               |  "whatKindOfAsset": "${`type`}",
+               |  "status": "$status"
+               |}
+               |""".stripMargin)
+
+          val result = json.validate[MoneyAssetBC].get
+
+          result mustBe asset
+        }
+
+        "write new style" in {
+
+          val result = Json.toJson(asset)
+
+          result mustBe Json.parse(
+            s"""
+               |{
+               |  "moneyValue": $value,
+               |  "whatKindOfAsset": "${`type`}",
+               |  "status": "$status"
+               |}
+               |""".stripMargin)
+        }
+      }
+
+      "other" must {
+
+        val `type`: String = "Other"
+
+        val asset = OtherAssetBC(
+          description = description,
+          value = value,
+          `type` = `type`,
+          status = status
+        )
+
+        "validate old style" in {
+
+          val json = Json.parse(
+            s"""
+               |{
+               |  "otherAssetDescription": "$description",
+               |  "otherAssetValue": "$value",
+               |  "whatKindOfAsset": "${`type`}",
+               |  "status": "$status"
+               |}
+               |""".stripMargin)
+
+          val result = json.validate[OtherAssetBC].get
+
+          result mustBe asset
+        }
+
+        "write new style" in {
+
+          val result = Json.toJson(asset)
+
+          result mustBe Json.parse(
+            s"""
+               |{
+               |  "otherDescription": "$description",
+               |  "otherValue": $value,
+               |  "whatKindOfAsset": "${`type`}",
+               |  "status": "$status"
                |}
                |""".stripMargin)
         }

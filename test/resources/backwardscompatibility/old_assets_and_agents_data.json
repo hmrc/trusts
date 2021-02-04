@@ -25,6 +25,12 @@
             "assetMoneyValue" : "45345435",
             "whatKindOfAsset" : "Money",
             "status" : "completed"
+          },
+          {
+            "otherAssetDescription" : "Description",
+            "otherAssetValue" : "4000",
+            "whatKindOfAsset" : "Other",
+            "status" : "completed"
           }
         ],
         "trustRegisteredOnline" : false,

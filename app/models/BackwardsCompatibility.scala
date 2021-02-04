@@ -78,3 +78,70 @@ object AgentDetailsBC {
       )(unlift(AgentDetailsBC.unapply))
   }
 }
+
+sealed trait AssetBC
+
+object AssetBC {
+
+  implicit class ReadsWithContravariantOr[A](a: Reads[A]) {
+    def or[B >: A](b: Reads[B]): Reads[B] =
+      a.map[B](identity).orElse(b)
+  }
+
+  implicit def convertToSupertype[A, B >: A](a: Reads[A]): Reads[B] = a.map(identity)
+
+  implicit lazy val reads: Reads[AssetBC] = {
+    MoneyAssetBC.oldReads or
+      OtherAssetBC.oldReads
+  }
+
+}
+
+case class MoneyAssetBC(value: Long,
+                       `type`: String,
+                        status: String) extends AssetBC
+
+object MoneyAssetBC {
+
+  implicit val oldReads: Reads[MoneyAssetBC] = {
+    (
+      (__ \ "assetMoneyValue").read[String].map(_.toLong) and
+        (__ \ "whatKindOfAsset").read[String] and
+        (__ \ "status").read[String]
+      )(MoneyAssetBC.apply _)
+  }
+
+  implicit val newWrites: Writes[MoneyAssetBC] = {
+    (
+      (__ \ "moneyValue").write[Long] and
+        (__ \ "whatKindOfAsset").write[String] and
+        (__ \ "status").write[String]
+      )(unlift(MoneyAssetBC.unapply))
+  }
+}
+
+case class OtherAssetBC(description: String,
+                        value: Long,
+                        `type`: String,
+                        status: String) extends AssetBC
+
+object OtherAssetBC {
+
+  implicit val oldReads: Reads[OtherAssetBC] = {
+    (
+      (__ \ "otherAssetDescription").read[String] and
+        (__ \ "otherAssetValue").read[String].map(_.toLong) and
+        (__ \ "whatKindOfAsset").read[String] and
+        (__ \ "status").read[String]
+      )(OtherAssetBC.apply _)
+  }
+
+  implicit val newWrites: Writes[OtherAssetBC] = {
+    (
+      (__ \ "otherDescription").write[String] and
+        (__ \ "otherValue").write[Long] and
+        (__ \ "whatKindOfAsset").write[String] and
+        (__ \ "status").write[String]
+    )(unlift(OtherAssetBC.unapply))
+  }
+}

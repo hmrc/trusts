@@ -29,7 +29,7 @@ class BackwardsCompatibilityServiceSpec extends BaseSpec {
 
     val service = new BackwardsCompatibilityService()
 
-    "map old-style registration data to new-style registration data" ignore {
+    "map old-style registration data to new-style registration data" in {
 
       val draftId: String = "358df5dd-63e3-4cad-aa93-403c83af97cd"
       val internalId: String = "Int-d387bcea-3ca2-48ab-b6bc-3919a050414d"
