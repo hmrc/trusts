@@ -14,6 +14,35 @@
             "status" : "completed"
           },
           {
+            "businessUkAddress" : {
+              "line1" : "Line 1",
+              "line2" : "Line 2",
+              "line3" : "Line 3",
+              "line4" : "Line 4",
+              "postcode" : "AB1 1AB"
+            },
+            "businessDescription" : "Description",
+            "businessValue" : 4000,
+            "businessName" : "Business",
+            "whatKindOfAsset" : "Business",
+            "businessAddressUkYesNo" : true,
+            "status" : "completed"
+          },
+          {
+            "businessDescription" : "Description",
+            "businessValue" : 4000,
+            "businessName" : "Business",
+            "whatKindOfAsset" : "Business",
+            "businessAddressUkYesNo" : false,
+            "businessInternationalAddress" : {
+              "line1" : "Line 1",
+              "line2" : "Line 2",
+              "line3" : "Line 3",
+              "country" : "FR"
+            },
+            "status" : "completed"
+          },
+          {
             "partnershipStartDate" : "2000-01-01",
             "partnershipDescription" : "Description",
             "whatKindOfAsset" : "Partnership",
@@ -68,6 +97,35 @@
           {
             "assetMoneyValue" : "45345435",
             "whatKindOfAsset" : "Money",
+            "status" : "completed"
+          },
+          {
+            "name" : "Business",
+            "description" : "Description",
+            "ukAddress" : {
+              "line1" : "Line 1",
+              "line2" : "Line 2",
+              "line3" : "Line 3",
+              "line4" : "Line 4",
+              "postcode" : "AB1 1AB"
+            },
+            "value" : "4000",
+            "addressUkYesNo" : true,
+            "whatKindOfAsset" : "Business",
+            "status" : "completed"
+          },
+          {
+            "name" : "Business",
+            "description" : "Description",
+            "internationalAddress" : {
+              "line1" : "Line 1",
+              "line2" : "Line 2",
+              "line3" : "Line 3",
+              "country" : "FR"
+            },
+            "value" : "4000",
+            "addressUkYesNo" : false,
+            "whatKindOfAsset" : "Business",
             "status" : "completed"
           },
           {

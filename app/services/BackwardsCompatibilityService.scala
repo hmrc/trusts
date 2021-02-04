@@ -98,6 +98,7 @@ class BackwardsCompatibilityService extends Logging {
             case JsSuccess(value, _) =>
               value match {
                 case x: MoneyAssetBC => acc :+ Json.toJson(x)
+                case x: BusinessAssetBC => acc :+ Json.toJson(x)
                 case x: PartnershipAssetBC => acc :+ Json.toJson(x)
                 case x: OtherAssetBC => acc :+ Json.toJson(x)
                 case _ => acc

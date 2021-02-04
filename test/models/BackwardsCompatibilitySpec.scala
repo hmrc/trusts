@@ -23,14 +23,15 @@ class BackwardsCompatibilitySpec extends BaseSpec {
 
   "BackwardsCompatibility" when {
 
+    val name: String = "Name"
+    val nonUkAddress: AddressType = AddressType("Line 1", "Line 2", Some("Line 3"), None, None, "FR")
+
     "agent details" must {
 
       val ref: String = "1234567890"
-      val name: String = "Agency"
       val tel: String = "0191 00000000"
       val arn: String = "0987654321"
       val ukAddress: AddressType = AddressType("Line 1", "Line 2", Some("Line 3"), Some("Line 4"), Some("AB1 1AB"), "GB")
-      val nonUkAddress: AddressType = AddressType("Line 1", "Line 2", Some("Line 3"), None, None, "FR")
 
       "validate old style" when {
 
@@ -43,11 +44,11 @@ class BackwardsCompatibilitySpec extends BaseSpec {
               |  "name": "$name",
               |  "addressYesNo": true,
               |  "ukAddress": {
-              |    "line1" : "Line 1",
-              |    "line2" : "Line 2",
-              |    "line3" : "Line 3",
-              |    "line4" : "Line 4",
-              |    "postcode" : "AB1 1AB"
+              |    "line1": "Line 1",
+              |    "line2": "Line 2",
+              |    "line3": "Line 3",
+              |    "line4": "Line 4",
+              |    "postcode": "AB1 1AB"
               |  },
               |  "telephoneNumber": "$tel",
               |  "agentARN": "$arn"
@@ -59,7 +60,7 @@ class BackwardsCompatibilitySpec extends BaseSpec {
           result mustBe AgentDetailsBC(
             internalReference = ref,
             name = name,
-            addressUKYesNo = true,
+            hasUkAddress = true,
             ukAddress = Some(ukAddress),
             internationalAddress = None,
             telephoneNumber = tel,
@@ -76,10 +77,10 @@ class BackwardsCompatibilitySpec extends BaseSpec {
                |  "name": "$name",
                |  "addressYesNo": false,
                |  "internationalAddress": {
-               |    "line1" : "Line 1",
-               |    "line2" : "Line 2",
-               |    "line3" : "Line 3",
-               |    "country" : "FR"
+               |    "line1": "Line 1",
+               |    "line2": "Line 2",
+               |    "line3": "Line 3",
+               |    "country": "FR"
                |  },
                |  "telephoneNumber": "$tel",
                |  "agentARN": "$arn"
@@ -91,7 +92,7 @@ class BackwardsCompatibilitySpec extends BaseSpec {
           result mustBe AgentDetailsBC(
             internalReference = ref,
             name = name,
-            addressUKYesNo = false,
+            hasUkAddress = false,
             ukAddress = None,
             internationalAddress = Some(nonUkAddress),
             telephoneNumber = tel,
@@ -107,7 +108,7 @@ class BackwardsCompatibilitySpec extends BaseSpec {
           val agency = AgentDetailsBC(
             internalReference = ref,
             name = name,
-            addressUKYesNo = true,
+            hasUkAddress = true,
             ukAddress = Some(ukAddress),
             internationalAddress = None,
             telephoneNumber = tel,
@@ -123,11 +124,11 @@ class BackwardsCompatibilitySpec extends BaseSpec {
                |  "name": "$name",
                |  "addressUKYesNo": true,
                |  "ukAddress": {
-               |    "line1" : "Line 1",
-               |    "line2" : "Line 2",
-               |    "line3" : "Line 3",
-               |    "line4" : "Line 4",
-               |    "postcode" : "AB1 1AB",
+               |    "line1": "Line 1",
+               |    "line2": "Line 2",
+               |    "line3": "Line 3",
+               |    "line4": "Line 4",
+               |    "postcode": "AB1 1AB",
                |    "country": "GB"
                |  },
                |  "telephoneNumber": "$tel",
@@ -141,7 +142,7 @@ class BackwardsCompatibilitySpec extends BaseSpec {
           val agency = AgentDetailsBC(
             internalReference = ref,
             name = name,
-            addressUKYesNo = false,
+            hasUkAddress = false,
             ukAddress = None,
             internationalAddress = Some(nonUkAddress),
             telephoneNumber = tel,
@@ -157,9 +158,9 @@ class BackwardsCompatibilitySpec extends BaseSpec {
                |  "name": "$name",
                |  "addressUKYesNo": false,
                |  "internationalAddress": {
-               |    "line1" : "Line 1",
-               |    "line2" : "Line 2",
-               |    "line3" : "Line 3",
+               |    "line1": "Line 1",
+               |    "line2": "Line 2",
+               |    "line3": "Line 3",
                |    "country": "FR"
                |  },
                |  "telephoneNumber": "$tel",
@@ -214,6 +215,100 @@ class BackwardsCompatibilitySpec extends BaseSpec {
                |  "status": "$status"
                |}
                |""".stripMargin)
+        }
+      }
+
+      "business" must {
+
+        val `type`: String = "Business"
+
+        val ukAddress: AddressTypeNoCountry = AddressTypeNoCountry("Line 1", "Line 2", Some("Line 3"), Some("Line 4"), Some("AB1 1AB"))
+
+        val assetUk = BusinessAssetBC(
+          name = name,
+          description = description,
+          hasUkAddress = true,
+          ukAddress = Some(ukAddress),
+          internationalAddress = None,
+          value = value,
+          `type` = `type`,
+          status = status
+        )
+
+        val assetNonUk = BusinessAssetBC(
+          name = name,
+          description = description,
+          hasUkAddress = false,
+          ukAddress = None,
+          internationalAddress = Some(nonUkAddress),
+          value = value,
+          `type` = `type`,
+          status = status
+        )
+
+        "validate old style" when {
+
+          "uk address" in {
+
+            val json = Json.parse(
+              s"""
+                 |{
+                 |  "name": "$name",
+                 |  "description": "$description",
+                 |  "addressUkYesNo": true,
+                 |  "ukAddress": {
+                 |    "line1": "Line 1",
+                 |    "line2": "Line 2",
+                 |    "line3": "Line 3",
+                 |    "line4": "Line 4",
+                 |    "postcode": "AB1 1AB"
+                 |  },
+                 |  "value": "$value",
+                 |  "whatKindOfAsset": "${`type`}",
+                 |  "status": "$status"
+                 |}
+                 |""".stripMargin)
+
+            val result = json.validate[BusinessAssetBC].get
+
+            result mustBe assetUk
+          }
+
+          "non-uk address" in {
+
+            val json = Json.parse(
+              s"""
+                 |{
+                 |  "name": "$name",
+                 |  "description": "$description",
+                 |  "addressUkYesNo": false,
+                 |  "internationalAddress": {
+                 |    "line1": "Line 1",
+                 |    "line2": "Line 2",
+                 |    "line3": "Line 3",
+                 |    "country": "FR"
+                 |  },
+                 |  "value": "$value",
+                 |  "whatKindOfAsset": "${`type`}",
+                 |  "status": "$status"
+                 |}
+                 |""".stripMargin)
+
+            val result = json.validate[BusinessAssetBC].get
+
+            result mustBe assetNonUk
+          }
+        }
+
+        "write new style" when {
+
+          "uk address" in {
+
+          }
+
+          "non-uk address" in {
+
+          }
         }
       }
 

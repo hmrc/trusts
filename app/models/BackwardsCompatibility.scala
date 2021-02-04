@@ -23,7 +23,7 @@ import java.time.LocalDate
 
 case class AgentDetailsBC(internalReference: String,
                           name: String,
-                          addressUKYesNo: Boolean,
+                          hasUkAddress: Boolean,
                           ukAddress: Option[AddressType],
                           internationalAddress: Option[AddressType],
                           telephoneNumber: String,
@@ -94,6 +94,7 @@ object AssetBC {
 
   implicit lazy val reads: Reads[AssetBC] = {
     MoneyAssetBC.oldReads or
+      BusinessAssetBC.oldReads or
       PartnershipAssetBC.formats or
       OtherAssetBC.oldReads
   }
@@ -120,6 +121,54 @@ object MoneyAssetBC {
         (__ \ "whatKindOfAsset").write[String] and
         (__ \ "status").write[String]
       )(unlift(MoneyAssetBC.unapply))
+  }
+}
+
+case class AddressTypeNoCountry(line1: String,
+                                line2: String,
+                                line3: Option[String],
+                                line4: Option[String],
+                                postcode: Option[String])
+
+object AddressTypeNoCountry {
+  implicit val formats: Format[AddressTypeNoCountry] = Json.format[AddressTypeNoCountry]
+}
+
+case class BusinessAssetBC(name: String,
+                           description: String,
+                           hasUkAddress: Boolean,
+                           ukAddress: Option[AddressTypeNoCountry],
+                           internationalAddress: Option[AddressType],
+                           value: Long,
+                           `type`: String,
+                           status: String) extends AssetBC
+
+object BusinessAssetBC {
+
+  implicit val oldReads: Reads[BusinessAssetBC] = {
+    (
+      (__ \ "name").read[String] and
+        (__ \ "description").read[String] and
+        (__ \ "addressUkYesNo").read[Boolean] and
+        (__ \ "ukAddress").readNullable[AddressTypeNoCountry] and
+        (__ \ "internationalAddress").readNullable[AddressType] and
+        (__ \ "value").read[String].map(_.toLong) and
+        (__ \ "whatKindOfAsset").read[String] and
+        (__ \ "status").read[String]
+      )(BusinessAssetBC.apply _)
+  }
+
+  implicit val newWrites: Writes[BusinessAssetBC] = {
+    (
+      (__ \ "businessName").write[String] and
+        (__ \ "businessDescription").write[String] and
+        (__ \ "businessAddressUkYesNo").write[Boolean] and
+        (__ \ "businessUkAddress").writeNullable[AddressTypeNoCountry] and
+        (__ \ "businessInternationalAddress").writeNullable[AddressType] and
+        (__ \ "businessValue").write[Long] and
+        (__ \ "whatKindOfAsset").write[String] and
+        (__ \ "status").write[String]
+      )(unlift(BusinessAssetBC.unapply))
   }
 }
 
