@@ -19,6 +19,8 @@ package models
 import base.BaseSpec
 import play.api.libs.json.Json
 
+import java.time.LocalDate
+
 class BackwardsCompatibilitySpec extends BaseSpec {
 
   "BackwardsCompatibility" when {
@@ -184,9 +186,9 @@ class BackwardsCompatibilitySpec extends BaseSpec {
         val `type`: String = "Money"
 
         val asset = MoneyAssetBC(
-          value = value,
           `type` = `type`,
-          status = status
+          value = Some(value),
+          status = Some(status)
         )
 
         "validate old style" in {
@@ -225,42 +227,42 @@ class BackwardsCompatibilitySpec extends BaseSpec {
         val `type`: String = "PropertyOrLand"
 
         val propertyOrLandDescription = PropertyOrLandAssetBC(
-          hasAddress = false,
+          `type` = `type`,
+          hasAddress = Some(false),
           hasUkAddress = None,
           ukAddress = None,
           internationalAddress = None,
           description = Some(description),
-          totalValue = value,
-          trustOwnsPropertyOrLand = false,
+          totalValue = Some(value),
+          trustOwnsPropertyOrLand = Some(false),
           valueInTrust = Some(quantity),
-          `type` = `type`,
-          status = status
+          status = Some(status)
         )
 
         val propertyOrLandUkAddress = PropertyOrLandAssetBC(
-          hasAddress = true,
+          `type` = `type`,
+          hasAddress = Some(true),
           hasUkAddress = Some(true),
           ukAddress = Some(ukAddress),
           internationalAddress = None,
           description = None,
-          totalValue = value,
-          trustOwnsPropertyOrLand = true,
+          totalValue = Some(value),
+          trustOwnsPropertyOrLand = Some(true),
           valueInTrust = None,
-          `type` = `type`,
-          status = status
+          status = Some(status)
         )
 
         val propertyOrLandNonUkAddress = PropertyOrLandAssetBC(
-          hasAddress = true,
+          `type` = `type`,
+          hasAddress = Some(true),
           hasUkAddress = Some(false),
           ukAddress = None,
           internationalAddress = Some(nonUkAddress),
           description = None,
-          totalValue = value,
-          trustOwnsPropertyOrLand = true,
+          totalValue = Some(value),
+          trustOwnsPropertyOrLand = Some(true),
           valueInTrust = None,
-          `type` = `type`,
-          status = status
+          status = Some(status)
         )
 
         "validate old style" when {
@@ -413,7 +415,8 @@ class BackwardsCompatibilitySpec extends BaseSpec {
         val shareClass: String = "ordinary"
 
         val shareInPortfolio = SharesAssetBC(
-          sharesInPortfolio = true,
+          `type` = `type`,
+          sharesInPortfolio = Some(true),
           portfolioSharesName = Some(name),
           portfolioSharesOnStockExchangeYesNo = Some(true),
           portfolioSharesQuantity = Some(quantity),
@@ -423,12 +426,12 @@ class BackwardsCompatibilitySpec extends BaseSpec {
           nonPortfolioSharesClass = None,
           nonPortfolioSharesQuantity = None,
           nonPortfolioSharesValue = None,
-          `type` = `type`,
-          status = status
+          status = Some(status)
         )
 
         val shareNotInPortfolio = SharesAssetBC(
-          sharesInPortfolio = false,
+          `type` = `type`,
+          sharesInPortfolio = Some(false),
           portfolioSharesName = None,
           portfolioSharesOnStockExchangeYesNo = None,
           portfolioSharesQuantity = None,
@@ -438,8 +441,7 @@ class BackwardsCompatibilitySpec extends BaseSpec {
           nonPortfolioSharesClass = Some(shareClass),
           nonPortfolioSharesQuantity = Some(quantity),
           nonPortfolioSharesValue = Some(value),
-          `type` = `type`,
-          status = status
+          status = Some(status)
         )
 
         "validate old style" when {
@@ -532,25 +534,25 @@ class BackwardsCompatibilitySpec extends BaseSpec {
         val `type`: String = "Business"
 
         val assetUk = BusinessAssetBC(
-          name = name,
-          description = description,
-          hasUkAddress = true,
+          `type` = `type`,
+          name = Some(name),
+          description = Some(description),
+          hasUkAddress = Some(true),
           ukAddress = Some(ukAddress),
           internationalAddress = None,
-          value = value,
-          `type` = `type`,
-          status = status
+          value = Some(value),
+          status = Some(status)
         )
 
         val assetNonUk = BusinessAssetBC(
-          name = name,
-          description = description,
-          hasUkAddress = false,
+          `type` = `type`,
+          name = Some(name),
+          description = Some(description),
+          hasUkAddress = Some(false),
           ukAddress = None,
           internationalAddress = Some(nonUkAddress),
-          value = value,
-          `type` = `type`,
-          status = status
+          value = Some(value),
+          status = Some(status)
         )
 
         "validate old style" when {
@@ -658,15 +660,61 @@ class BackwardsCompatibilitySpec extends BaseSpec {
         }
       }
 
+      "partnership" must {
+
+        val `type`: String = "Partnership"
+
+        val date = "2000-01-01"
+
+        val asset = PartnershipAssetBC(
+          `type` = `type`,
+          description = Some(description),
+          startDate = Some(LocalDate.parse(date)),
+          status = Some(status)
+        )
+
+        "validate old style" in {
+
+          val json = Json.parse(
+            s"""
+               |{
+               |  "partnershipDescription": "$description",
+               |  "partnershipStartDate": "$date",
+               |  "whatKindOfAsset": "${`type`}",
+               |  "status": "$status"
+               |}
+               |""".stripMargin)
+
+          val result = json.validate[PartnershipAssetBC].get
+
+          result mustBe asset
+        }
+
+        "write new style" in {
+
+          val result = Json.toJson(asset)
+
+          result mustBe Json.parse(
+            s"""
+               |{
+               |  "partnershipDescription": "$description",
+               |  "partnershipStartDate": "$date",
+               |  "whatKindOfAsset": "${`type`}",
+               |  "status": "$status"
+               |}
+               |""".stripMargin)
+        }
+      }
+
       "other" must {
 
         val `type`: String = "Other"
 
         val asset = OtherAssetBC(
-          description = description,
-          value = value,
           `type` = `type`,
-          status = status
+          description = Some(description),
+          value = Some(value),
+          status = Some(status)
         )
 
         "validate old style" in {

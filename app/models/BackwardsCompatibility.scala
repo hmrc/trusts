@@ -107,7 +107,7 @@ object AssetBC {
       PropertyOrLandAssetBC.oldReads or
       SharesAssetBC.oldReads or
       BusinessAssetBC.oldReads or
-      PartnershipAssetBC.formats or
+      PartnershipAssetBC.oldReads or
       OtherAssetBC.oldReads
   }
 
@@ -125,74 +125,75 @@ sealed trait AssetBCFormats {
 
 }
 
-case class MoneyAssetBC(value: Long,
-                        `type`: String,
-                        status: String) extends AssetBC
+case class MoneyAssetBC(`type`: String,
+                        value: Option[Long],
+                        status: Option[String]) extends AssetBC
 
 object MoneyAssetBC extends AssetBCFormats {
 
   implicit val oldReads: Reads[MoneyAssetBC] = {
     (
-      (__ \ "assetMoneyValue").read[String].toLong and
-        (__ \ "whatKindOfAsset").read[String] and
-        (__ \ "status").read[String]
+      (__ \ "whatKindOfAsset").read[String].filter(_ == "Money") and
+        (__ \ "assetMoneyValue").readNullable[String].toLong and
+        (__ \ "status").readNullable[String]
       )(MoneyAssetBC.apply _)
   }
 
   implicit val newWrites: Writes[MoneyAssetBC] = {
     (
-      (__ \ "moneyValue").write[Long] and
-        (__ \ "whatKindOfAsset").write[String] and
-        (__ \ "status").write[String]
+      (__ \ "whatKindOfAsset").write[String] and
+        (__ \ "moneyValue").writeNullable[Long] and
+        (__ \ "status").writeNullable[String]
       )(unlift(MoneyAssetBC.unapply))
   }
 }
 
-case class PropertyOrLandAssetBC(hasAddress: Boolean,
+case class PropertyOrLandAssetBC(`type`: String,
+                                 hasAddress: Option[Boolean],
                                  hasUkAddress: Option[Boolean],
                                  ukAddress: Option[AddressTypeNoCountry],
                                  internationalAddress: Option[AddressType],
                                  description: Option[String],
-                                 totalValue: Long,
-                                 trustOwnsPropertyOrLand: Boolean,
+                                 totalValue: Option[Long],
+                                 trustOwnsPropertyOrLand: Option[Boolean],
                                  valueInTrust: Option[Long],
-                                 `type`: String,
-                                 status: String) extends AssetBC
+                                 status: Option[String]) extends AssetBC
 
 object PropertyOrLandAssetBC extends AssetBCFormats {
 
   implicit val oldReads: Reads[PropertyOrLandAssetBC] = {
     (
-      (__ \ "propertyOrLandAddressYesNo").read[Boolean] and
+      (__ \ "whatKindOfAsset").read[String].filter(_ == "PropertyOrLand") and
+        (__ \ "propertyOrLandAddressYesNo").readNullable[Boolean] and
         (__ \ "propertyOrLandAddressUKYesNo").readNullable[Boolean] and
         (__ \ "ukAddress").readNullable[AddressTypeNoCountry] and
         (__ \ "internationalAddress").readNullable[AddressType] and
         (__ \ "propertyOrLandDescription").readNullable[String] and
-        (__ \ "propertyOrLandTotalValue").read[Long] and
-        (__ \ "trustOwnAllThePropertyOrLand").read[Boolean] and
+        (__ \ "propertyOrLandTotalValue").readNullable[Long] and
+        (__ \ "trustOwnAllThePropertyOrLand").readNullable[Boolean] and
         (__ \ "propertyOrLandValueTrust").readNullable[Long] and
-        (__ \ "whatKindOfAsset").read[String] and
-        (__ \ "status").read[String]
+        (__ \ "status").readNullable[String]
       )(PropertyOrLandAssetBC.apply _)
   }
 
   implicit val newWrites: Writes[PropertyOrLandAssetBC] = {
     (
-      (__ \ "propertyOrLandAddressYesNo").write[Boolean] and
+      (__ \ "whatKindOfAsset").write[String] and
+        (__ \ "propertyOrLandAddressYesNo").writeNullable[Boolean] and
         (__ \ "propertyOrLandAddressUkYesNo").writeNullable[Boolean] and
         (__ \ "propertyOrLandUkAddress").writeNullable[AddressTypeNoCountry] and
         (__ \ "propertyOrLandInternationalAddress").writeNullable[AddressType] and
         (__ \ "propertyOrLandDescription").writeNullable[String] and
-        (__ \ "propertyOrLandTotalValue").write[Long] and
-        (__ \ "propertyOrLandTrustOwnsAllYesNo").write[Boolean] and
+        (__ \ "propertyOrLandTotalValue").writeNullable[Long] and
+        (__ \ "propertyOrLandTrustOwnsAllYesNo").writeNullable[Boolean] and
         (__ \ "propertyOrLandValueInTrust").writeNullable[Long] and
-        (__ \ "whatKindOfAsset").write[String] and
-        (__ \ "status").write[String]
+        (__ \ "status").writeNullable[String]
       )(unlift(PropertyOrLandAssetBC.unapply))
   }
 }
 
-case class SharesAssetBC(sharesInPortfolio: Boolean,
+case class SharesAssetBC(`type`: String,
+                         sharesInPortfolio: Option[Boolean],
                          portfolioSharesName: Option[String],
                          portfolioSharesOnStockExchangeYesNo: Option[Boolean],
                          portfolioSharesQuantity: Option[Long],
@@ -202,14 +203,14 @@ case class SharesAssetBC(sharesInPortfolio: Boolean,
                          nonPortfolioSharesClass: Option[String],
                          nonPortfolioSharesQuantity: Option[Long],
                          nonPortfolioSharesValue: Option[Long],
-                         `type`: String,
-                         status: String) extends AssetBC
+                         status: Option[String]) extends AssetBC
 
 object SharesAssetBC extends AssetBCFormats {
 
   implicit val oldReads: Reads[SharesAssetBC] = {
     (
-      (__ \ "sharesInAPortfolio").read[Boolean] and
+      (__ \ "whatKindOfAsset").read[String].filter(_ == "Shares") and
+        (__ \ "sharesInAPortfolio").readNullable[Boolean] and
         (__ \ "name").readNullable[String] and
         (__ \ "portfolioListedOnTheStockExchange").readNullable[Boolean] and
         (__ \ "portfolioQuantityInTheTrust").readNullable[String].toLong and
@@ -219,14 +220,14 @@ object SharesAssetBC extends AssetBCFormats {
         (__ \ "class").readNullable[String] and
         (__ \ "quantityInTheTrust").readNullable[String].toLong and
         (__ \ "value").readNullable[String].toLong and
-        (__ \ "whatKindOfAsset").read[String] and
-        (__ \ "status").read[String]
+        (__ \ "status").readNullable[String]
       )(SharesAssetBC.apply _)
   }
 
   implicit val newWrites: Writes[SharesAssetBC] = {
     (
-      (__ \ "sharesInPortfolioYesNo").write[Boolean] and
+      (__ \ "whatKindOfAsset").write[String] and
+        (__ \ "sharesInPortfolioYesNo").writeNullable[Boolean] and
         (__ \ "portfolioSharesName").writeNullable[String] and
         (__ \ "portfolioSharesOnStockExchangeYesNo").writeNullable[Boolean] and
         (__ \ "portfolioSharesQuantity").writeNullable[Long] and
@@ -236,82 +237,97 @@ object SharesAssetBC extends AssetBCFormats {
         (__ \ "nonPortfolioSharesClass").writeNullable[String] and
         (__ \ "nonPortfolioSharesQuantity").writeNullable[Long] and
         (__ \ "nonPortfolioSharesValue").writeNullable[Long] and
-        (__ \ "whatKindOfAsset").write[String] and
-        (__ \ "status").write[String]
+        (__ \ "status").writeNullable[String]
       )(unlift(SharesAssetBC.unapply))
   }
 }
 
-case class BusinessAssetBC(name: String,
-                           description: String,
-                           hasUkAddress: Boolean,
+case class BusinessAssetBC(`type`: String,
+                           name: Option[String],
+                           description: Option[String],
+                           hasUkAddress: Option[Boolean],
                            ukAddress: Option[AddressTypeNoCountry],
                            internationalAddress: Option[AddressType],
-                           value: Long,
-                           `type`: String,
-                           status: String) extends AssetBC
+                           value: Option[Long],
+                           status: Option[String]) extends AssetBC
 
-object BusinessAssetBC {
+object BusinessAssetBC extends AssetBCFormats {
 
   implicit val oldReads: Reads[BusinessAssetBC] = {
     (
-      (__ \ "name").read[String] and
-        (__ \ "description").read[String] and
-        (__ \ "addressUkYesNo").read[Boolean] and
+      (__ \ "whatKindOfAsset").read[String].filter(_ == "Business") and
+        (__ \ "name").readNullable[String] and
+        (__ \ "description").readNullable[String] and
+        (__ \ "addressUkYesNo").readNullable[Boolean] and
         (__ \ "ukAddress").readNullable[AddressTypeNoCountry] and
         (__ \ "internationalAddress").readNullable[AddressType] and
-        (__ \ "value").read[String].map(_.toLong) and
-        (__ \ "whatKindOfAsset").read[String] and
-        (__ \ "status").read[String]
+        (__ \ "value").readNullable[String].toLong and
+        (__ \ "status").readNullable[String]
       )(BusinessAssetBC.apply _)
   }
 
   implicit val newWrites: Writes[BusinessAssetBC] = {
     (
-      (__ \ "businessName").write[String] and
-        (__ \ "businessDescription").write[String] and
-        (__ \ "businessAddressUkYesNo").write[Boolean] and
+      (__ \ "whatKindOfAsset").write[String] and
+        (__ \ "businessName").writeNullable[String] and
+        (__ \ "businessDescription").writeNullable[String] and
+        (__ \ "businessAddressUkYesNo").writeNullable[Boolean] and
         (__ \ "businessUkAddress").writeNullable[AddressTypeNoCountry] and
         (__ \ "businessInternationalAddress").writeNullable[AddressType] and
-        (__ \ "businessValue").write[Long] and
-        (__ \ "whatKindOfAsset").write[String] and
-        (__ \ "status").write[String]
+        (__ \ "businessValue").writeNullable[Long] and
+        (__ \ "status").writeNullable[String]
       )(unlift(BusinessAssetBC.unapply))
   }
 }
 
-case class PartnershipAssetBC(partnershipDescription: String,
-                              partnershipStartDate: LocalDate,
-                              whatKindOfAsset: String,
-                              status: String) extends AssetBC
+case class PartnershipAssetBC(`type`: String,
+                              description: Option[String],
+                              startDate: Option[LocalDate],
+                              status: Option[String]) extends AssetBC
 
-// partnership keys haven't changed so only need formats
 object PartnershipAssetBC {
-  implicit val formats: Format[PartnershipAssetBC] = Json.format[PartnershipAssetBC]
+
+  implicit val oldReads: Reads[PartnershipAssetBC] = {
+    (
+      (__ \ "whatKindOfAsset").read[String].filter(_ == "Partnership") and
+        (__ \ "partnershipDescription").readNullable[String] and
+        (__ \ "partnershipStartDate").readNullable[LocalDate] and
+        (__ \ "status").readNullable[String]
+      )(PartnershipAssetBC.apply _)
+  }
+
+  implicit val newWrites: Writes[PartnershipAssetBC] = {
+    (
+      (__ \ "whatKindOfAsset").write[String] and
+        (__ \ "partnershipDescription").writeNullable[String] and
+        (__ \ "partnershipStartDate").writeNullable[LocalDate] and
+        (__ \ "status").writeNullable[String]
+      )(unlift(PartnershipAssetBC.unapply))
+  }
 }
 
-case class OtherAssetBC(description: String,
-                        value: Long,
-                        `type`: String,
-                        status: String) extends AssetBC
+case class OtherAssetBC(`type`: String,
+                        description: Option[String],
+                        value: Option[Long],
+                        status: Option[String]) extends AssetBC
 
-object OtherAssetBC {
+object OtherAssetBC extends AssetBCFormats {
 
   implicit val oldReads: Reads[OtherAssetBC] = {
     (
-      (__ \ "otherAssetDescription").read[String] and
-        (__ \ "otherAssetValue").read[String].map(_.toLong) and
-        (__ \ "whatKindOfAsset").read[String] and
-        (__ \ "status").read[String]
+      (__ \ "whatKindOfAsset").read[String].filter(_ == "Other") and
+        (__ \ "otherAssetDescription").readNullable[String] and
+        (__ \ "otherAssetValue").readNullable[String].toLong and
+        (__ \ "status").readNullable[String]
       )(OtherAssetBC.apply _)
   }
 
   implicit val newWrites: Writes[OtherAssetBC] = {
     (
-      (__ \ "otherDescription").write[String] and
-        (__ \ "otherValue").write[Long] and
-        (__ \ "whatKindOfAsset").write[String] and
-        (__ \ "status").write[String]
+      (__ \ "whatKindOfAsset").write[String] and
+        (__ \ "otherDescription").writeNullable[String] and
+        (__ \ "otherValue").writeNullable[Long] and
+        (__ \ "status").writeNullable[String]
       )(unlift(OtherAssetBC.unapply))
   }
 }
