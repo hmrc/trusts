@@ -27,6 +27,7 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.RegistrationSubmissionRepository
 import services.{BackwardsCompatibilityService, LocalDateTimeService}
 import utils.Constants._
+import utils.JsonOps.prunePath
 
 import java.time.LocalDate
 import javax.inject.Inject
@@ -83,15 +84,6 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
         case _ => Future.successful(BadRequest)
       }
     }
-  }
-
-  // Play 2.5 throws if the path to be pruned does not exist.
-  // So we do this hacky thing to keep it all self-contained.
-  // If upgraded to play 2.6, this can turn into simply "path.json.prune".
-  private def prunePath(path: JsPath): Reads[JsObject] = {
-    JsPath.json.update {
-      path.json.put(Json.toJson(Json.obj()))
-    } andThen path.json.prune
   }
 
   private def setRegistrationSection(path: String, registrationSectionData: JsValue) : Reads[JsObject] = {

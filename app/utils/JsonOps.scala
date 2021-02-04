@@ -30,6 +30,15 @@ object JsonOps {
     __.json.update(path.json.put(value))
   }
 
+  // Play 2.5 throws if the path to be pruned does not exist.
+  // So we do this hacky thing to keep it all self-contained.
+  // If upgraded to play 2.6, this can turn into simply "path.json.prune".
+  def prunePath(path: JsPath): Reads[JsObject] = {
+    JsPath.json.update {
+      path.json.put(Json.toJson(Json.obj()))
+    } andThen path.json.prune
+  }
+
   type JsPathNodes = Seq[Either[Int, String]]
   type JsEntry = (JsPathNodes, JsValue)
   type JsTraverse = PartialFunction[JsEntry, JsValue]

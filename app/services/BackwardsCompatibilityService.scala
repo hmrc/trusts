@@ -20,7 +20,7 @@ import models._
 import models.registration.RegistrationSubmissionDraft
 import play.api.Logging
 import play.api.libs.json._
-import utils.JsonOps.{doNothing, putNewValue}
+import utils.JsonOps.{doNothing, prunePath, putNewValue}
 
 class BackwardsCompatibilityService extends Logging {
 
@@ -30,16 +30,24 @@ class BackwardsCompatibilityService extends Logging {
       adjustAgentDetails(draft)
 
     draft.draftData.transform(reads) match {
-      case JsSuccess(updatedData, _) =>
-        updatedData.transform(rewriteAgentDetails(updatedData) andThen rewriteAssets(updatedData)) match {
-          case JsSuccess(value, _) =>
-            value // do we want to prune the agent details and assets data in main at this point?
+      case JsSuccess(updatedData, _) if updatedData != draft.draftData =>
+        updatedData.transform(
+          rewriteAgentDetails(updatedData) andThen
+            rewriteAssets(updatedData) andThen
+            pruneAgentDetails andThen
+            pruneAssets
+        ) match {
+          case JsSuccess(adjustedData, _) =>
+            adjustedData
           case JsError(errors) =>
-            logger.warn(s"Failed to rewrite data: $errors. Returning original data and taking the hit of lost data.")
+            logger.warn(s"[Draft ID: ${draft.draftId}] Failed to rewrite data: $errors. Returning original data.")
             draft.draftData
         }
       case JsError(errors) =>
-        logger.warn(s"Failed to adjust data: $errors. Returning original data and taking the hit of lost data.")
+        logger.warn(s"[Draft ID: ${draft.draftId}] Failed to adjust data: $errors. Returning original data.")
+        draft.draftData
+      case _ =>
+        logger.info(s"[Draft ID: ${draft.draftId}] Data does not need adjusting. Returning original data.")
         draft.draftData
     }
   }
@@ -115,5 +123,14 @@ class BackwardsCompatibilityService extends Logging {
         logger.info(s"Unable to pick json at $path: $errors")
         doNothing()
     }
+  }
+
+  private def pruneAgentDetails: Reads[JsObject] = {
+    prunePath(__ \ "draftData" \ "main" \ "data" \ "agent")
+  }
+
+  private def pruneAssets: Reads[JsObject] = {
+    prunePath(__ \ "draftData" \ "main" \ "data" \ "assets") andThen
+      prunePath(__ \ "draftData" \ "main" \ "data" \ "addAssets")
   }
 }
