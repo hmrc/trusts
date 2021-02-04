@@ -25,7 +25,7 @@ import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.RegistrationSubmissionRepository
-import services.LocalDateTimeService
+import services.{BackwardsCompatibilityService, LocalDateTimeService}
 import utils.Constants._
 
 import java.time.LocalDate
@@ -36,7 +36,8 @@ import scala.concurrent.Future
 class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubmissionRepository,
                                           identify: IdentifierAction,
                                           localDateTimeService: LocalDateTimeService,
-                                          cc: ControllerComponents
+                                          cc: ControllerComponents,
+                                          backwardsCompatibilityService: BackwardsCompatibilityService
                                          ) extends TrustsBaseController(cc) with Logging {
 
   def setSection(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
@@ -206,6 +207,18 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
         }
 
         Ok(Json.toJson(drafts))
+    }
+  }
+
+  def adjustDraft(draftId: String): Action[AnyContent] = identify.async { request =>
+    submissionRepository.getDraft(draftId, request.internalId) flatMap {
+      case Some(draft) =>
+        val updatedDraft = backwardsCompatibilityService.adjustData(draft)
+        submissionRepository.setDraft(draft.copy(draftData = updatedDraft)) map { _ =>
+          Ok
+        }
+      case _ =>
+        Future.successful(NotFound)
     }
   }
 
