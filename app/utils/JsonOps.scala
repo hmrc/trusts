@@ -26,6 +26,10 @@ object JsonOps {
     __.json.pick[JsObject]
   }
 
+  def putNewValue(path: JsPath, value: JsValue): Reads[JsObject] = {
+    __.json.update(path.json.put(value))
+  }
+
   type JsPathNodes = Seq[Either[Int, String]]
   type JsEntry = (JsPathNodes, JsValue)
   type JsTraverse = PartialFunction[JsEntry, JsValue]

@@ -18,8 +18,8 @@ package services
 
 import config.AppConfig
 import play.api.Logging
-import play.api.libs.json.{JsBoolean, JsObject, JsPath, JsString, JsValue, Reads, __}
-import utils.JsonOps.{JsValueOps, doNothing}
+import play.api.libs.json._
+import utils.JsonOps.{JsValueOps, putNewValue}
 
 import javax.inject.Inject
 
@@ -30,9 +30,6 @@ class Default5mldDataService @Inject()(appConfig: AppConfig) extends Logging {
   def addDefault5mldData(fiveMldEnabled: Boolean, json: JsValue): String = {
 
     if (fiveMldEnabled && appConfig.stubMissingJourneysFor5MLD) {
-
-      def putNewValue(path: JsPath, value: JsValue): Reads[JsObject] =
-        __.json.update(path.json.put(value))
 
       json.applyRules.transform(
         putNewValue(__ \ 'submissionDate, JsString("2021-01-01"))
