@@ -16,8 +16,8 @@
 
 package services
 
+import models._
 import models.registration.RegistrationSubmissionDraft
-import models.{AgentDetailsBC, AssetBC, MoneyAssetBC, OtherAssetBC}
 import play.api.Logging
 import play.api.libs.json._
 import utils.JsonOps.{doNothing, putNewValue}
@@ -33,7 +33,7 @@ class BackwardsCompatibilityService extends Logging {
       case JsSuccess(updatedData, _) =>
         updatedData.transform(rewriteAgentDetails(updatedData) andThen rewriteAssets(updatedData)) match {
           case JsSuccess(value, _) =>
-            value
+            value // do we want to prune the agent details and assets data in main at this point?
           case JsError(errors) =>
             logger.warn(s"Failed to rewrite data: $errors. Returning original data and taking the hit of lost data.")
             draft.draftData
@@ -98,6 +98,7 @@ class BackwardsCompatibilityService extends Logging {
             case JsSuccess(value, _) =>
               value match {
                 case x: MoneyAssetBC => acc :+ Json.toJson(x)
+                case x: PartnershipAssetBC => acc :+ Json.toJson(x)
                 case x: OtherAssetBC => acc :+ Json.toJson(x)
                 case _ => acc
               }

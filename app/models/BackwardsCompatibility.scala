@@ -17,7 +17,9 @@
 package models
 
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{Reads, Writes, __}
+import play.api.libs.json._
+
+import java.time.LocalDate
 
 case class AgentDetailsBC(internalReference: String,
                           name: String,
@@ -92,6 +94,7 @@ object AssetBC {
 
   implicit lazy val reads: Reads[AssetBC] = {
     MoneyAssetBC.oldReads or
+      PartnershipAssetBC.formats or
       OtherAssetBC.oldReads
   }
 
@@ -118,6 +121,16 @@ object MoneyAssetBC {
         (__ \ "status").write[String]
       )(unlift(MoneyAssetBC.unapply))
   }
+}
+
+case class PartnershipAssetBC(partnershipDescription: String,
+                              partnershipStartDate: LocalDate,
+                              whatKindOfAsset: String,
+                              status: String) extends AssetBC
+
+// partnership keys haven't changed so only need formats
+object PartnershipAssetBC {
+  implicit val formats: Format[PartnershipAssetBC] = Json.format[PartnershipAssetBC]
 }
 
 case class OtherAssetBC(description: String,

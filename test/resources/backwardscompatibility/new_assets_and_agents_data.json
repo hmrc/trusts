@@ -14,6 +14,12 @@
             "status" : "completed"
           },
           {
+            "partnershipStartDate" : "2000-01-01",
+            "partnershipDescription" : "Description",
+            "whatKindOfAsset" : "Partnership",
+            "status" : "completed"
+          },
+          {
             "otherDescription" : "Description",
             "otherValue" : 4000,
             "whatKindOfAsset" : "Other",
@@ -62,6 +68,12 @@
           {
             "assetMoneyValue" : "45345435",
             "whatKindOfAsset" : "Money",
+            "status" : "completed"
+          },
+          {
+            "partnershipStartDate" : "2000-01-01",
+            "partnershipDescription" : "Description",
+            "whatKindOfAsset" : "Partnership",
             "status" : "completed"
           },
           {
