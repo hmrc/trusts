@@ -25,14 +25,14 @@ import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.{JsBoolean, JsNull, JsString, Json}
+import play.api.libs.json.{JsBoolean, JsNull, JsString, JsValue, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
 import repositories.RegistrationSubmissionRepository
 import services.{BackwardsCompatibilityService, LocalDateTimeService}
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
-import utils.JsonFixtures
+import utils.{JsonFixtures, JsonUtils}
 
 import java.time.LocalDateTime
 import scala.concurrent.Future
@@ -1937,10 +1937,18 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
   ".adjustDraft" must {
 
-    val draft = mockSubmissionDraft
+    val draftId: String = "358df5dd-63e3-4cad-aa93-403c83af97cd"
+    val internalId: String = "Int-d387bcea-3ca2-48ab-b6bc-3919a050414d"
+    val createdAt: LocalDateTime = LocalDateTime.of(2021, 2, 3, 14, 0)
+    val reference: String = "234425525"
 
-    "return Ok" when {
-      "updated data successfully set" in {
+    val oldData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/old_assets_and_agents_data.json")
+    val newData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/new_assets_and_agents_data.json")
+
+    def buildDraft(data: JsValue) = RegistrationSubmissionDraft(draftId, internalId, createdAt, data, Some(reference), Some(true))
+
+    "return Ok with body true" when {
+      "data needed adjusting" in {
 
         val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
         val submissionRepository = mock[RegistrationSubmissionRepository]
@@ -1953,17 +1961,47 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           backwardsCompatibilityService
         )
 
-        when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(draft)))
-        when(backwardsCompatibilityService.adjustData(any())).thenReturn(draft.draftData)
+        when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(buildDraft(oldData))))
+        when(backwardsCompatibilityService.adjustData(any())).thenReturn(newData)
         when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
 
         val request = FakeRequest("GET", "path")
 
-        val result = controller.adjustDraft(draft.draftId).apply(request)
+        val result = controller.adjustDraft(draftId).apply(request)
 
         status(result) mustBe OK
+        contentAsJson(result) mustBe JsBoolean(true)
 
-        verify(submissionRepository).setDraft(draft)
+        verify(submissionRepository).setDraft(buildDraft(newData))
+      }
+    }
+
+    "return Ok with body false" when {
+      "data did not need adjusting" in {
+
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents(),
+          backwardsCompatibilityService
+        )
+
+        when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(buildDraft(newData))))
+        when(backwardsCompatibilityService.adjustData(any())).thenReturn(newData)
+        when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
+
+        val request = FakeRequest("GET", "path")
+
+        val result = controller.adjustDraft(draftId).apply(request)
+
+        status(result) mustBe OK
+        contentAsJson(result) mustBe JsBoolean(false)
+
+        verify(submissionRepository).setDraft(buildDraft(newData))
       }
     }
 
@@ -1985,7 +2023,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
         val request = FakeRequest("GET", "path")
 
-        val result = controller.adjustDraft(draft.draftId).apply(request)
+        val result = controller.adjustDraft(draftId).apply(request)
 
         status(result) mustBe NOT_FOUND
       }

@@ -10,7 +10,7 @@ GET         /submission-drafts/:draftId/main                controllers.Submissi
 POST        /submission-drafts/:draftId/main                controllers.SubmissionDraftController.setSection(draftId: String, sectionKey: String = "main")
 
 GET         /submission-drafts                              controllers.SubmissionDraftController.getDrafts()
-PUT         /submission-drafts/:draftId                     controllers.SubmissionDraftController.adjustDraft(draftId: String)
+POST        /submission-drafts/:draftId                     controllers.SubmissionDraftController.adjustDraft(draftId: String)
 DELETE      /submission-drafts/:draftId                     controllers.SubmissionDraftController.removeDraft(draftId: String)
 
 # Used by register-trust-beneficiary-frontend

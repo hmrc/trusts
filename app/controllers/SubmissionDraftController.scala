@@ -207,7 +207,8 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
       case Some(draft) =>
         val updatedDraft = backwardsCompatibilityService.adjustData(draft)
         submissionRepository.setDraft(draft.copy(draftData = updatedDraft)) map { _ =>
-          Ok
+          val draftNeededAdjusting: Boolean = draft.draftData != updatedDraft
+          Ok(JsBoolean(draftNeededAdjusting))
         }
       case _ =>
         Future.successful(NotFound)
