@@ -175,6 +175,7 @@ class BackwardsCompatibilitySpec extends BaseSpec {
 
       val status: String = "completed"
       val value: Long  = 4000L
+      val quantity: Long  = 100L
       val description: String = "Description"
 
       "money" must {
@@ -215,6 +216,127 @@ class BackwardsCompatibilitySpec extends BaseSpec {
                |  "status": "$status"
                |}
                |""".stripMargin)
+        }
+      }
+
+      "shares" must {
+
+        val `type`: String = "Shares"
+
+        val shareClass: String = "ordinary"
+
+        val shareInPortfolio = SharesAssetBC(
+          sharesInPortfolio = true,
+          portfolioSharesName = Some(name),
+          portfolioSharesOnStockExchangeYesNo = Some(true),
+          portfolioSharesQuantity = Some(quantity),
+          portfolioSharesValue = Some(value),
+          nonPortfolioSharesName = None,
+          nonPortfolioSharesOnStockExchangeYesNo = None,
+          nonPortfolioSharesClass = None,
+          nonPortfolioSharesQuantity = None,
+          nonPortfolioSharesValue = None,
+          `type` = `type`,
+          status = status
+        )
+
+        val shareNotInPortfolio = SharesAssetBC(
+          sharesInPortfolio = false,
+          portfolioSharesName = None,
+          portfolioSharesOnStockExchangeYesNo = None,
+          portfolioSharesQuantity = None,
+          portfolioSharesValue = None,
+          nonPortfolioSharesName = Some(name),
+          nonPortfolioSharesOnStockExchangeYesNo = Some(false),
+          nonPortfolioSharesClass = Some(shareClass),
+          nonPortfolioSharesQuantity = Some(quantity),
+          nonPortfolioSharesValue = Some(value),
+          `type` = `type`,
+          status = status
+        )
+
+        "validate old style" when {
+
+          "in a portfolio" in {
+
+            val json = Json.parse(
+              s"""
+                 |{
+                 |  "portfolioQuantityInTheTrust": "$quantity",
+                 |  "sharesInAPortfolio": true,
+                 |  "name": "$name",
+                 |  "portfolioListedOnTheStockExchange": true,
+                 |  "portfolioValue": "$value",
+                 |  "whatKindOfAsset": "${`type`}",
+                 |  "status": "$status"
+                 |}
+                 |""".stripMargin)
+
+            val result = json.validate[SharesAssetBC].get
+
+            result mustBe shareInPortfolio
+          }
+
+          "not in a portfolio" in {
+
+            val json = Json.parse(
+              s"""
+                 |{
+                 |  "listedOnTheStockExchange": false,
+                 |  "shareCompanyName": "$name",
+                 |  "sharesInAPortfolio": false,
+                 |  "class": "$shareClass",
+                 |  "quantityInTheTrust": "$quantity",
+                 |  "value": "$value",
+                 |  "whatKindOfAsset": "${`type`}",
+                 |  "status": "$status"
+                 |}
+                 |""".stripMargin)
+
+            val result = json.validate[SharesAssetBC].get
+
+            result mustBe shareNotInPortfolio
+          }
+        }
+
+        "write new style" when {
+
+          "in a portfolio" in {
+
+            val result = Json.toJson(shareInPortfolio)
+
+            result mustBe Json.parse(
+              s"""
+                 |{
+                 |  "sharesInPortfolioYesNo": true,
+                 |  "portfolioSharesName": "$name",
+                 |  "portfolioSharesOnStockExchangeYesNo": true,
+                 |  "portfolioSharesValue": $value,
+                 |  "portfolioSharesQuantity": $quantity,
+                 |  "whatKindOfAsset": "${`type`}",
+                 |  "status": "$status"
+                 |}
+                 |""".stripMargin)
+          }
+
+          "not in a portfolio" in {
+
+            val result = Json.toJson(shareNotInPortfolio)
+
+            result mustBe Json.parse(
+              s"""
+                 |{
+                 |  "sharesInPortfolioYesNo": false,
+                 |  "nonPortfolioSharesName": "$name",
+                 |  "nonPortfolioSharesOnStockExchangeYesNo": false,
+                 |  "nonPortfolioSharesClass": "$shareClass",
+                 |  "nonPortfolioSharesValue": $value,
+                 |  "nonPortfolioSharesQuantity": $quantity,
+                 |  "whatKindOfAsset": "${`type`}",
+                 |  "status": "$status"
+                 |}
+                 |""".stripMargin)
+          }
         }
       }
 
@@ -304,10 +426,49 @@ class BackwardsCompatibilitySpec extends BaseSpec {
 
           "uk address" in {
 
+            val result = Json.toJson(assetUk)
+
+            result mustBe Json.parse(
+              s"""
+                 |{
+                 |  "businessName": "$name",
+                 |  "businessDescription": "$description",
+                 |  "businessAddressUkYesNo": true,
+                 |  "businessUkAddress": {
+                 |    "line1": "Line 1",
+                 |    "line2": "Line 2",
+                 |    "line3": "Line 3",
+                 |    "line4": "Line 4",
+                 |    "postcode": "AB1 1AB"
+                 |  },
+                 |  "businessValue": $value,
+                 |  "whatKindOfAsset": "${`type`}",
+                 |  "status": "$status"
+                 |}
+                 |""".stripMargin)
           }
 
           "non-uk address" in {
 
+            val result = Json.toJson(assetNonUk)
+
+            result mustBe Json.parse(
+              s"""
+                 |{
+                 |  "businessName": "$name",
+                 |  "businessDescription": "$description",
+                 |  "businessAddressUkYesNo": false,
+                 |  "businessInternationalAddress": {
+                 |    "line1": "Line 1",
+                 |    "line2": "Line 2",
+                 |    "line3": "Line 3",
+                 |    "country": "FR"
+                 |  },
+                 |  "businessValue": $value,
+                 |  "whatKindOfAsset": "${`type`}",
+                 |  "status": "$status"
+                 |}
+                 |""".stripMargin)
           }
         }
       }

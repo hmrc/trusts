@@ -27,6 +27,25 @@
             "status" : "completed"
           },
           {
+            "portfolioQuantityInTheTrust" : "100",
+            "sharesInAPortfolio" : true,
+            "name" : "Share",
+            "portfolioListedOnTheStockExchange" : true,
+            "portfolioValue" : "4000",
+            "whatKindOfAsset" : "Shares",
+            "status" : "completed"
+          },
+          {
+            "listedOnTheStockExchange" : false,
+            "shareCompanyName" : "Share",
+            "sharesInAPortfolio" : false,
+            "class" : "ordinary",
+            "quantityInTheTrust" : "100",
+            "value" : "4000",
+            "whatKindOfAsset" : "Shares",
+            "status" : "completed"
+          },
+          {
             "name" : "Business",
             "description" : "Description",
             "ukAddress" : {

@@ -94,6 +94,7 @@ object AssetBC {
 
   implicit lazy val reads: Reads[AssetBC] = {
     MoneyAssetBC.oldReads or
+      SharesAssetBC.oldReads or
       BusinessAssetBC.oldReads or
       PartnershipAssetBC.formats or
       OtherAssetBC.oldReads
@@ -102,7 +103,7 @@ object AssetBC {
 }
 
 case class MoneyAssetBC(value: Long,
-                       `type`: String,
+                        `type`: String,
                         status: String) extends AssetBC
 
 object MoneyAssetBC {
@@ -121,6 +122,60 @@ object MoneyAssetBC {
         (__ \ "whatKindOfAsset").write[String] and
         (__ \ "status").write[String]
       )(unlift(MoneyAssetBC.unapply))
+  }
+}
+
+case class SharesAssetBC(sharesInPortfolio: Boolean,
+                         portfolioSharesName: Option[String],
+                         portfolioSharesOnStockExchangeYesNo: Option[Boolean],
+                         portfolioSharesQuantity: Option[Long],
+                         portfolioSharesValue: Option[Long],
+                         nonPortfolioSharesName:Option[String],
+                         nonPortfolioSharesOnStockExchangeYesNo: Option[Boolean],
+                         nonPortfolioSharesClass: Option[String],
+                         nonPortfolioSharesQuantity: Option[Long],
+                         nonPortfolioSharesValue: Option[Long],
+                         `type`: String,
+                         status: String) extends AssetBC
+
+object SharesAssetBC {
+
+  implicit class StringToLong(reads: Reads[Option[String]]) {
+    def toLong: Reads[Option[Long]] = reads.map(_.map(_.toLong))
+  }
+
+  implicit val oldReads: Reads[SharesAssetBC] = {
+    (
+      (__ \ "sharesInAPortfolio").read[Boolean] and
+        (__ \ "name").readNullable[String] and
+        (__ \ "portfolioListedOnTheStockExchange").readNullable[Boolean] and
+        (__ \ "portfolioQuantityInTheTrust").readNullable[String].toLong and
+        (__ \ "portfolioValue").readNullable[String].toLong and
+        (__ \ "shareCompanyName").readNullable[String] and
+        (__ \ "listedOnTheStockExchange").readNullable[Boolean] and
+        (__ \ "class").readNullable[String] and
+        (__ \ "quantityInTheTrust").readNullable[String].toLong and
+        (__ \ "value").readNullable[String].toLong and
+        (__ \ "whatKindOfAsset").read[String] and
+        (__ \ "status").read[String]
+      )(SharesAssetBC.apply _)
+  }
+
+  implicit val newWrites: Writes[SharesAssetBC] = {
+    (
+      (__ \ "sharesInPortfolioYesNo").write[Boolean] and
+        (__ \ "portfolioSharesName").writeNullable[String] and
+        (__ \ "portfolioSharesOnStockExchangeYesNo").writeNullable[Boolean] and
+        (__ \ "portfolioSharesQuantity").writeNullable[Long] and
+        (__ \ "portfolioSharesValue").writeNullable[Long] and
+        (__ \ "nonPortfolioSharesName").writeNullable[String] and
+        (__ \ "nonPortfolioSharesOnStockExchangeYesNo").writeNullable[Boolean] and
+        (__ \ "nonPortfolioSharesClass").writeNullable[String] and
+        (__ \ "nonPortfolioSharesQuantity").writeNullable[Long] and
+        (__ \ "nonPortfolioSharesValue").writeNullable[Long] and
+        (__ \ "whatKindOfAsset").write[String] and
+        (__ \ "status").write[String]
+      )(unlift(SharesAssetBC.unapply))
   }
 }
 
@@ -204,6 +259,6 @@ object OtherAssetBC {
         (__ \ "otherValue").write[Long] and
         (__ \ "whatKindOfAsset").write[String] and
         (__ \ "status").write[String]
-    )(unlift(OtherAssetBC.unapply))
+      )(unlift(OtherAssetBC.unapply))
   }
 }

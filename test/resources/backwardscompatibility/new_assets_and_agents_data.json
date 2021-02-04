@@ -14,6 +14,25 @@
             "status" : "completed"
           },
           {
+            "portfolioSharesName" : "Share",
+            "sharesInPortfolioYesNo" : true,
+            "portfolioSharesOnStockExchangeYesNo" : true,
+            "portfolioSharesValue" : 4000,
+            "portfolioSharesQuantity" : 100,
+            "whatKindOfAsset" : "Shares",
+            "status" : "completed"
+          },
+          {
+            "nonPortfolioSharesName" : "Share",
+            "sharesInPortfolioYesNo" : false,
+            "nonPortfolioSharesOnStockExchangeYesNo" : false,
+            "nonPortfolioSharesValue" : 4000,
+            "nonPortfolioSharesQuantity" : 100,
+            "nonPortfolioSharesClass" : "ordinary",
+            "whatKindOfAsset" : "Shares",
+            "status" : "completed"
+          },
+          {
             "businessUkAddress" : {
               "line1" : "Line 1",
               "line2" : "Line 2",
@@ -97,6 +116,25 @@
           {
             "assetMoneyValue" : "45345435",
             "whatKindOfAsset" : "Money",
+            "status" : "completed"
+          },
+          {
+            "portfolioQuantityInTheTrust" : "100",
+            "sharesInAPortfolio" : true,
+            "name" : "Share",
+            "portfolioListedOnTheStockExchange" : true,
+            "portfolioValue" : "4000",
+            "whatKindOfAsset" : "Shares",
+            "status" : "completed"
+          },
+          {
+            "listedOnTheStockExchange" : false,
+            "shareCompanyName" : "Share",
+            "sharesInAPortfolio" : false,
+            "class" : "ordinary",
+            "quantityInTheTrust" : "100",
+            "value" : "4000",
+            "whatKindOfAsset" : "Shares",
             "status" : "completed"
           },
           {
