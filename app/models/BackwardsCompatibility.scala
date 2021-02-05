@@ -64,7 +64,7 @@ object AgentDetailsBC {
           (__ \ "line2").write[String] and
           (__ \ "line3").writeNullable[String] and
           (__ \ "line4").writeNullable[String] and
-          (__ \ "postcode").writeNullable[String] and
+          (__ \ "postCode").writeNullable[String] and
           (__ \ "country").write[String]
         )(unlift(AddressType.unapply))
     }

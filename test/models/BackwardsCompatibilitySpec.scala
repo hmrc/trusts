@@ -130,7 +130,7 @@ class BackwardsCompatibilitySpec extends BaseSpec {
                |    "line2": "Line 2",
                |    "line3": "Line 3",
                |    "line4": "Line 4",
-               |    "postcode": "AB1 1AB",
+               |    "postCode": "AB1 1AB",
                |    "country": "GB"
                |  },
                |  "telephoneNumber": "$tel",

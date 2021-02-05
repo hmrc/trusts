@@ -121,7 +121,7 @@
         "ukAddress" : {
           "line1" : "21 Test Lane",
           "line2" : "Testville",
-          "postcode" : "NE1 1NE",
+          "postCode" : "NE1 1NE",
           "country" : "GB"
         },
         "addressUKYesNo" : true
