@@ -25,8 +25,9 @@ import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.RegistrationSubmissionRepository
-import services.LocalDateTimeService
+import services.{BackwardsCompatibilityService, LocalDateTimeService}
 import utils.Constants._
+import utils.JsonOps.prunePath
 
 import java.time.LocalDate
 import javax.inject.Inject
@@ -36,7 +37,8 @@ import scala.concurrent.Future
 class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubmissionRepository,
                                           identify: IdentifierAction,
                                           localDateTimeService: LocalDateTimeService,
-                                          cc: ControllerComponents
+                                          cc: ControllerComponents,
+                                          backwardsCompatibilityService: BackwardsCompatibilityService
                                          ) extends TrustsBaseController(cc) with Logging {
 
   def setSection(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
@@ -82,15 +84,6 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
         case _ => Future.successful(BadRequest)
       }
     }
-  }
-
-  // Play 2.5 throws if the path to be pruned does not exist.
-  // So we do this hacky thing to keep it all self-contained.
-  // If upgraded to play 2.6, this can turn into simply "path.json.prune".
-  private def prunePath(path: JsPath): Reads[JsObject] = {
-    JsPath.json.update {
-      path.json.put(Json.toJson(Json.obj()))
-    } andThen path.json.prune
   }
 
   private def setRegistrationSection(path: String, registrationSectionData: JsValue) : Reads[JsObject] = {
@@ -206,6 +199,18 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
         }
 
         Ok(Json.toJson(drafts))
+    }
+  }
+
+  def adjustDraft(draftId: String): Action[AnyContent] = identify.async { request =>
+    submissionRepository.getDraft(draftId, request.internalId) flatMap {
+      case Some(draft) =>
+        val updatedDraftData = backwardsCompatibilityService.adjustDraftData(draft)
+        submissionRepository.setDraft(draft.copy(draftData = updatedDraftData)) map { _ =>
+          Ok
+        }
+      case _ =>
+        Future.successful(NotFound)
     }
   }
 

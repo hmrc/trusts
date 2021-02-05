@@ -25,14 +25,14 @@ import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.{JsBoolean, JsNull, JsString, Json}
+import play.api.libs.json.{JsBoolean, JsNull, JsString, JsValue, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
 import repositories.RegistrationSubmissionRepository
-import services.LocalDateTimeService
+import services.{BackwardsCompatibilityService, LocalDateTimeService}
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
-import utils.JsonFixtures
+import utils.{JsonFixtures, JsonUtils}
 
 import java.time.LocalDateTime
 import scala.concurrent.Future
@@ -47,6 +47,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
   private object LocalDateTimeServiceStub extends LocalDateTimeService {
     override def now: LocalDateTime = currentDateTime
   }
+
+  private val backwardsCompatibilityService = mock[BackwardsCompatibilityService]
 
   private val existingDraftData = Json.parse(
     """
@@ -252,7 +254,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
       val body = Json.parse(
         """
@@ -282,7 +285,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -335,7 +339,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
 
@@ -396,7 +401,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
 
@@ -529,7 +535,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -652,7 +659,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -687,7 +695,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
 
@@ -719,7 +728,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -742,7 +752,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       val drafts = List(
@@ -787,7 +798,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       val drafts = List(
@@ -832,7 +844,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getRecentDrafts(any(), any()))
@@ -862,7 +875,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.removeDraft(any(), any()))
@@ -887,7 +901,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       val cache = Json.parse(
@@ -932,7 +947,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       val cache = Json.parse(
@@ -980,7 +996,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       val cache = Json.parse(
@@ -1034,7 +1051,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       val cache = Json.parse(
@@ -1085,7 +1103,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -1106,7 +1125,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -1131,7 +1151,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -1162,7 +1183,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -1183,7 +1205,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -1208,7 +1231,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -1245,7 +1269,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -1269,7 +1294,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -1303,7 +1329,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -1324,9 +1351,9 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
-
 
       when(submissionRepository.getDraft(any(), any()))
         .thenReturn(Future.successful(Some(mockSubmissionDraftNoData)))
@@ -1350,7 +1377,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       lazy val expectedAfterCleanup = Json.parse(
@@ -1428,7 +1456,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -1453,7 +1482,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           submissionRepository,
           identifierAction,
           LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents()
+          Helpers.stubControllerComponents(),
+          backwardsCompatibilityService
         )
 
         when(submissionRepository.getDraft(any(), any()))
@@ -1478,7 +1508,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           submissionRepository,
           identifierAction,
           LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents()
+          Helpers.stubControllerComponents(),
+          backwardsCompatibilityService
         )
 
         when(submissionRepository.getDraft(any(), any()))
@@ -1499,7 +1530,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           submissionRepository,
           identifierAction,
           LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents()
+          Helpers.stubControllerComponents(),
+          backwardsCompatibilityService
         )
 
         when(submissionRepository.getDraft(any(), any()))
@@ -1526,7 +1558,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -1560,7 +1593,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -1581,7 +1615,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -1605,7 +1640,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -1634,7 +1670,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -1655,7 +1692,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents()
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -1714,7 +1752,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           submissionRepository,
           identifierAction,
           LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents()
+          Helpers.stubControllerComponents(),
+          backwardsCompatibilityService
         )
 
         when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(dataBefore)))
@@ -1741,7 +1780,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           submissionRepository,
           identifierAction,
           LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents()
+          Helpers.stubControllerComponents(),
+          backwardsCompatibilityService
         )
 
         when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(None))
@@ -1764,7 +1804,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           submissionRepository,
           identifierAction,
           LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents()
+          Helpers.stubControllerComponents(),
+          backwardsCompatibilityService
         )
 
         when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(mockSubmissionDraft)))
@@ -1825,7 +1866,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           submissionRepository,
           identifierAction,
           LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents()
+          Helpers.stubControllerComponents(),
+          backwardsCompatibilityService
         )
 
         when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(dataBefore)))
@@ -1852,7 +1894,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           submissionRepository,
           identifierAction,
           LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents()
+          Helpers.stubControllerComponents(),
+          backwardsCompatibilityService
         )
 
         when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(None))
@@ -1875,7 +1918,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           submissionRepository,
           identifierAction,
           LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents()
+          Helpers.stubControllerComponents(),
+          backwardsCompatibilityService
         )
 
         when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(mockSubmissionDraft)))
@@ -1887,6 +1931,97 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         val result = controller.removeLivingSettlorsMappedPiece("draftId").apply(request)
 
         status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+    }
+  }
+
+  ".adjustDraft" must {
+
+    val draftId: String = "358df5dd-63e3-4cad-aa93-403c83af97cd"
+    val internalId: String = "Int-d387bcea-3ca2-48ab-b6bc-3919a050414d"
+    val createdAt: LocalDateTime = LocalDateTime.of(2021, 2, 3, 14, 0)
+    val reference: String = "234425525"
+
+    val oldData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/old_assets_and_agents_draft_data.json")
+    val newData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/new_assets_and_agents_draft_data.json")
+
+    def buildDraft(data: JsValue) = RegistrationSubmissionDraft(draftId, internalId, createdAt, data, Some(reference), Some(true))
+
+    "return Ok" when {
+      "draft has old-style data" in {
+
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents(),
+          backwardsCompatibilityService
+        )
+
+        when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(buildDraft(oldData))))
+        when(backwardsCompatibilityService.adjustDraftData(any())).thenReturn(newData)
+        when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
+
+        val request = FakeRequest("GET", "path")
+
+        val result = controller.adjustDraft(draftId).apply(request)
+
+        status(result) mustBe OK
+
+        verify(submissionRepository).setDraft(buildDraft(newData))
+      }
+
+      "draft has new-style data" in {
+
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents(),
+          backwardsCompatibilityService
+        )
+
+        when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(buildDraft(newData))))
+        when(backwardsCompatibilityService.adjustDraftData(any())).thenReturn(newData)
+        when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
+
+        val request = FakeRequest("GET", "path")
+
+        val result = controller.adjustDraft(draftId).apply(request)
+
+        status(result) mustBe OK
+
+        verify(submissionRepository).setDraft(buildDraft(newData))
+      }
+    }
+
+    "return NotFound" when {
+      "draft not found" in {
+
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents(),
+          backwardsCompatibilityService
+        )
+
+        when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(None))
+
+        val request = FakeRequest("GET", "path")
+
+        val result = controller.adjustDraft(draftId).apply(request)
+
+        status(result) mustBe NOT_FOUND
       }
     }
   }

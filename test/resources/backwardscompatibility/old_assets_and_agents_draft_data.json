@@ -1,0 +1,131 @@
+{
+  "main" : {
+    "_id" : "3d21c5ca-b61e-468d-8f38-30c9cd077c69",
+    "data" : {
+      "hasTaxLiabilityInCurrentTaxYear" : true,
+      "agent" : {
+        "addressYesNo" : true,
+        "telephoneNumber" : "456788996",
+        "name" : "Agency",
+        "agentARN" : "SARN1234567",
+        "internalReference" : "234425525",
+        "ukAddress" : {
+          "line1" : "21 Test Lane",
+          "line2" : "Testville",
+          "postcode" : "NE1 1NE"
+        }
+      },
+      "assets" : [
+        {
+          "assetMoneyValue" : "45345435",
+          "whatKindOfAsset" : "Money",
+          "status" : "completed"
+        },
+        {
+          "propertyOrLandValueTrust" : 2000,
+          "trustOwnAllThePropertyOrLand" : false,
+          "propertyOrLandTotalValue" : 4000,
+          "propertyOrLandAddressYesNo" : false,
+          "whatKindOfAsset" : "PropertyOrLand",
+          "propertyOrLandDescription" : "Description",
+          "status" : "completed"
+        },
+        {
+          "trustOwnAllThePropertyOrLand" : true,
+          "propertyOrLandTotalValue" : 4000,
+          "ukAddress" : {
+            "line1" : "Line 1",
+            "line2" : "Line 2",
+            "line3" : "Line 3",
+            "line4" : "Line 4",
+            "postcode" : "AB1 1AB"
+          },
+          "propertyOrLandAddressUKYesNo" : true,
+          "propertyOrLandAddressYesNo" : true,
+          "whatKindOfAsset" : "PropertyOrLand",
+          "status" : "completed"
+        },
+        {
+          "trustOwnAllThePropertyOrLand" : true,
+          "propertyOrLandTotalValue" : 4000,
+          "internationalAddress" : {
+            "line1" : "Line 1",
+            "line2" : "Line 2",
+            "line3" : "Line 3",
+            "country" : "FR"
+          },
+          "propertyOrLandAddressUKYesNo" : false,
+          "propertyOrLandAddressYesNo" : true,
+          "whatKindOfAsset" : "PropertyOrLand",
+          "status" : "completed"
+        },
+        {
+          "portfolioQuantityInTheTrust" : "100",
+          "sharesInAPortfolio" : true,
+          "name" : "Share",
+          "portfolioListedOnTheStockExchange" : true,
+          "portfolioValue" : "4000",
+          "whatKindOfAsset" : "Shares",
+          "status" : "completed"
+        },
+        {
+          "listedOnTheStockExchange" : false,
+          "shareCompanyName" : "Share",
+          "sharesInAPortfolio" : false,
+          "class" : "ordinary",
+          "quantityInTheTrust" : "100",
+          "value" : "4000",
+          "whatKindOfAsset" : "Shares",
+          "status" : "completed"
+        },
+        {
+          "name" : "Business",
+          "description" : "Description",
+          "ukAddress" : {
+            "line1" : "Line 1",
+            "line2" : "Line 2",
+            "line3" : "Line 3",
+            "line4" : "Line 4",
+            "postcode" : "AB1 1AB"
+          },
+          "value" : "4000",
+          "addressUkYesNo" : true,
+          "whatKindOfAsset" : "Business",
+          "status" : "completed"
+        },
+        {
+          "name" : "Business",
+          "description" : "Description",
+          "internationalAddress" : {
+            "line1" : "Line 1",
+            "line2" : "Line 2",
+            "line3" : "Line 3",
+            "country" : "FR"
+          },
+          "value" : "4000",
+          "addressUkYesNo" : false,
+          "whatKindOfAsset" : "Business",
+          "status" : "completed"
+        },
+        {
+          "partnershipStartDate" : "2000-01-01",
+          "partnershipDescription" : "Description",
+          "whatKindOfAsset" : "Partnership",
+          "status" : "completed"
+        },
+        {
+          "otherAssetDescription" : "Description",
+          "otherAssetValue" : "4000",
+          "whatKindOfAsset" : "Other",
+          "status" : "completed"
+        }
+      ],
+      "trustRegisteredOnline" : false,
+      "trustHaveAUTR" : false,
+      "addAssets" : "no-complete"
+    },
+    "progress" : "InProgress",
+    "createdAt" : "2021-02-03T14:06:32.981Z",
+    "internalId" : "Int-b8dc3fef-ee9e-4c83-8340-b26a17672e02"
+  }
+}

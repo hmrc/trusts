@@ -16,12 +16,13 @@
 
 package transformers
 
-import java.time.LocalDate
-import play.api.libs.json.Reads._
-import play.api.libs.json._
 import models._
 import models.get_trust.TrustProcessedResponse
-import utils.JsonOps.doNothing
+import play.api.libs.json.Reads._
+import play.api.libs.json._
+import utils.JsonOps.{doNothing, putNewValue}
+
+import java.time.LocalDate
 
 class DeclarationTransformer {
 
@@ -121,9 +122,6 @@ class DeclarationTransformer {
 
   private def convertLeadTrustee(json: JsValue): Reads[JsObject] = pathToLeadTrustees.json.update( of[JsObject]
     .map{ a => Json.arr(Json.obj(trusteeField(json) -> a )) })
-
-  private def putNewValue(path: JsPath, value: JsValue ): Reads[JsObject] =
-    __.json.update(path.json.put(value))
 
   private def declarationAddress(agentDetails: Option[AgentDetails], responseJson: JsValue): JsResult[AddressType] = {
     if (agentDetails.isDefined) {
