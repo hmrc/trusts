@@ -1947,8 +1947,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
     def buildDraft(data: JsValue) = RegistrationSubmissionDraft(draftId, internalId, createdAt, data, Some(reference), Some(true))
 
-    "return Ok with body true" when {
-      "data needed adjusting" in {
+    "return Ok" when {
+      "draft has old-style data" in {
 
         val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
         val submissionRepository = mock[RegistrationSubmissionRepository]
@@ -1970,14 +1970,11 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         val result = controller.adjustDraft(draftId).apply(request)
 
         status(result) mustBe OK
-        contentAsJson(result) mustBe JsBoolean(true)
 
         verify(submissionRepository).setDraft(buildDraft(newData))
       }
-    }
 
-    "return Ok with body false" when {
-      "data did not need adjusting" in {
+      "draft has new-style data" in {
 
         val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
         val submissionRepository = mock[RegistrationSubmissionRepository]
@@ -1999,7 +1996,6 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         val result = controller.adjustDraft(draftId).apply(request)
 
         status(result) mustBe OK
-        contentAsJson(result) mustBe JsBoolean(false)
 
         verify(submissionRepository).setDraft(buildDraft(newData))
       }
