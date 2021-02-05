@@ -1942,8 +1942,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
     val createdAt: LocalDateTime = LocalDateTime.of(2021, 2, 3, 14, 0)
     val reference: String = "234425525"
 
-    val oldData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/old_assets_and_agents_data.json")
-    val newData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/new_assets_and_agents_data.json")
+    val oldData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/old_assets_and_agents_draft_data.json")
+    val newData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/new_assets_and_agents_draft_data.json")
 
     def buildDraft(data: JsValue) = RegistrationSubmissionDraft(draftId, internalId, createdAt, data, Some(reference), Some(true))
 
@@ -1962,7 +1962,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         )
 
         when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(buildDraft(oldData))))
-        when(backwardsCompatibilityService.adjustData(any())).thenReturn(newData)
+        when(backwardsCompatibilityService.adjustDraftData(any())).thenReturn(newData)
         when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
 
         val request = FakeRequest("GET", "path")
@@ -1991,7 +1991,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         )
 
         when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(buildDraft(newData))))
-        when(backwardsCompatibilityService.adjustData(any())).thenReturn(newData)
+        when(backwardsCompatibilityService.adjustDraftData(any())).thenReturn(newData)
         when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
 
         val request = FakeRequest("GET", "path")

@@ -24,7 +24,7 @@ import utils.JsonOps.{doNothing, prunePath, putNewValue}
 
 class BackwardsCompatibilityService extends Logging {
 
-  def adjustData(draft: RegistrationSubmissionDraft): JsValue = {
+  def adjustDraftData(draft: RegistrationSubmissionDraft): JsValue = {
 
     val reads = adjustAssets(draft) andThen
       adjustAgentDetails(draft)
@@ -62,10 +62,10 @@ class BackwardsCompatibilityService extends Logging {
 
   private def adjust[T <: JsValue](draft: RegistrationSubmissionDraft, oldKey: String, newKey: String)
                                   (implicit rds: Reads[T], wts: Writes[T]): Reads[JsObject] = {
-    val oldPath: JsPath = __ \ "draftData" \ "main" \ "data" \ oldKey
+    val oldPath: JsPath = __ \ "main" \ "data" \ oldKey
     draft.draftData.transform(oldPath.json.pick[T]) match {
       case JsSuccess(value, _) =>
-        val newPath: JsPath = __ \ "draftData" \ newKey
+        val newPath: JsPath = __ \ newKey
         val newObj = Json.obj(
           "_id" -> draft.draftId,
           "data" -> Json.obj(
@@ -81,7 +81,7 @@ class BackwardsCompatibilityService extends Logging {
   }
 
   private def rewriteAgentDetails(data: JsValue): Reads[JsObject] = {
-    val path: JsPath = __ \ "draftData" \ "agentDetails" \ "data" \ "agent"
+    val path: JsPath = __ \ "agentDetails" \ "data" \ "agent"
     data.transform(path.json.pick) match {
       case JsSuccess(value, _) =>
         value.validate[AgentDetailsBC] match {
@@ -98,7 +98,7 @@ class BackwardsCompatibilityService extends Logging {
   }
 
   private def rewriteAssets(data: JsValue): Reads[JsObject] = {
-    val path: JsPath = __ \ "draftData" \ "assets" \ "data" \ "assets"
+    val path: JsPath = __ \ "assets" \ "data" \ "assets"
     data.transform(path.json.pick[JsArray]) match {
       case JsSuccess(array, _) =>
         val newArray = array.value.zipWithIndex.foldLeft(JsArray())((acc, asset) => {
@@ -126,11 +126,11 @@ class BackwardsCompatibilityService extends Logging {
   }
 
   private def pruneAgentDetails: Reads[JsObject] = {
-    prunePath(__ \ "draftData" \ "main" \ "data" \ "agent")
+    prunePath(__ \ "main" \ "data" \ "agent")
   }
 
   private def pruneAssets: Reads[JsObject] = {
-    prunePath(__ \ "draftData" \ "main" \ "data" \ "assets") andThen
-      prunePath(__ \ "draftData" \ "main" \ "data" \ "addAssets")
+    prunePath(__ \ "main" \ "data" \ "assets") andThen
+      prunePath(__ \ "main" \ "data" \ "addAssets")
   }
 }

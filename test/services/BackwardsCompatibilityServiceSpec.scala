@@ -34,37 +34,37 @@ class BackwardsCompatibilityServiceSpec extends BaseSpec {
     val createdAt: LocalDateTime = LocalDateTime.of(2021, 2, 3, 14, 0)
     val reference: String = "234425525"
 
-    val oldAgentData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/old_assets_and_agents_data.json")
-    val newAgentData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/new_assets_and_agents_data.json")
+    val oldAgentData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/old_assets_and_agents_draft_data.json")
+    val newAgentData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/new_assets_and_agents_draft_data.json")
 
-    val oldOrgData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/old_assets_data.json")
-    val newOrgData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/new_assets_data.json")
+    val oldOrgData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/old_assets_draft_data.json")
+    val newOrgData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/new_assets_draft_data.json")
 
     def draft(data: JsValue) = RegistrationSubmissionDraft(draftId, internalId, createdAt, data, Some(reference), Some(true))
 
     "map old style registration data to new style registration data" when {
 
       "agent user" in {
-        val result = service.adjustData(draft(oldAgentData))
-        result mustBe newAgentData
+        val result = service.adjustDraftData(draft(oldAgentData))
+        result mustEqual newAgentData
       }
 
       "org user" in {
-        val result = service.adjustData(draft(oldOrgData))
-        result mustBe newOrgData
+        val result = service.adjustDraftData(draft(oldOrgData))
+        result mustEqual newOrgData
       }
     }
 
     "not affect registration already in new style" when {
 
       "agent user" in {
-        val result = service.adjustData(draft(newAgentData))
-        result mustBe newAgentData
+        val result = service.adjustDraftData(draft(newAgentData))
+        result mustEqual newAgentData
       }
 
       "org user" in {
-        val result = service.adjustData(draft(newOrgData))
-        result mustBe newOrgData
+        val result = service.adjustDraftData(draft(newOrgData))
+        result mustEqual newOrgData
       }
     }
   }

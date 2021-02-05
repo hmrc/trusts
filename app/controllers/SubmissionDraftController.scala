@@ -205,9 +205,9 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
   def adjustDraft(draftId: String): Action[AnyContent] = identify.async { request =>
     submissionRepository.getDraft(draftId, request.internalId) flatMap {
       case Some(draft) =>
-        val updatedDraft = backwardsCompatibilityService.adjustData(draft)
-        submissionRepository.setDraft(draft.copy(draftData = updatedDraft)) map { _ =>
-          val draftNeededAdjusting: Boolean = draft.draftData != updatedDraft
+        val updatedDraftData = backwardsCompatibilityService.adjustDraftData(draft)
+        submissionRepository.setDraft(draft.copy(draftData = updatedDraftData)) map { _ =>
+          val draftNeededAdjusting: Boolean = draft.draftData != updatedDraftData
           Ok(JsBoolean(draftNeededAdjusting))
         }
       case _ =>
