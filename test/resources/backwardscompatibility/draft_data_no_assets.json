@@ -1,0 +1,13 @@
+{
+  "main" : {
+    "_id" : "3d21c5ca-b61e-468d-8f38-30c9cd077c69",
+    "data" : {
+      "hasTaxLiabilityInCurrentTaxYear" : true,
+      "trustRegisteredOnline" : false,
+      "trustHaveAUTR" : false
+    },
+    "progress" : "InProgress",
+    "createdAt" : "2021-02-03T14:06:32.981Z",
+    "internalId" : "Int-b8dc3fef-ee9e-4c83-8340-b26a17672e02"
+  }
+}
