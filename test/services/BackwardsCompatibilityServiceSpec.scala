@@ -34,37 +34,60 @@ class BackwardsCompatibilityServiceSpec extends BaseSpec {
     val createdAt: LocalDateTime = LocalDateTime.of(2021, 2, 3, 14, 0)
     val reference: String = "234425525"
 
-    val oldAgentData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/old_assets_and_agents_draft_data.json")
     val newAgentData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/new_assets_and_agents_draft_data.json")
-
-    val oldOrgData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/old_assets_draft_data.json")
     val newOrgData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/new_assets_draft_data.json")
 
     def draft(data: JsValue) = RegistrationSubmissionDraft(draftId, internalId, createdAt, data, Some(reference), Some(true))
 
-    "map old style registration data to new style registration data" when {
+    "adjust draft data" when {
+      "draft data in old style" when {
 
-      "agent user" in {
-        val result = service.adjustDraftData(draft(oldAgentData))
-        result mustEqual newAgentData
-      }
+        "agent user" when {
 
-      "org user" in {
-        val result = service.adjustDraftData(draft(oldOrgData))
-        result mustEqual newOrgData
+          "draft data includes assets" in {
+            val oldData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/old_assets_and_agents_draft_data.json")
+            val result = service.adjustDraftData(draft(oldData))
+            result mustEqual newAgentData
+          }
+
+          "draft date includes no assets" in {
+            val oldData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/old_agents_draft_data.json")
+            val newData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/new_agents_draft_data.json")
+
+            val result = service.adjustDraftData(draft(oldData))
+            result mustEqual newData
+          }
+        }
+
+        "org user" in {
+          val oldData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/old_assets_draft_data.json")
+          val result = service.adjustDraftData(draft(oldData))
+          result mustEqual newOrgData
+        }
       }
     }
 
-    "not affect registration already in new style" when {
+    "not adjust draft data" when {
+      "draft data already in new style" when {
 
-      "agent user" in {
-        val result = service.adjustDraftData(draft(newAgentData))
-        result mustEqual newAgentData
-      }
+        "agent user" in {
+          val result = service.adjustDraftData(draft(newAgentData))
+          result mustEqual newAgentData
+        }
 
-      "org user" in {
-        val result = service.adjustDraftData(draft(newOrgData))
-        result mustEqual newOrgData
+        "org user" when {
+
+          "draft data includes assets" in {
+            val result = service.adjustDraftData(draft(newOrgData))
+            result mustEqual newOrgData
+          }
+
+          "draft data includes no assets" in {
+            val data: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/draft_data_no_assets.json")
+            val result = service.adjustDraftData(draft(data))
+            result mustEqual data
+          }
+        }
       }
     }
   }
