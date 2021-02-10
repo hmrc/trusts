@@ -1,4 +1,6 @@
 
+GET         /:identifier/transformed                        controllers.GetTrustController.getProtectors(identifier: String)
+
 POST        /add-individual/:identifier                     controllers.transformations.protectors.AddProtectorController.addIndividual(identifier: String)
 POST        /amend-individual/:identifier/:index            controllers.transformations.protectors.AmendProtectorController.amendIndividual(identifier: String, index: Int)
 

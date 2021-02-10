@@ -22,7 +22,10 @@ GET         /:identifier/transformed                                   controlle
 
 GET         /:identifier/trust-details                                 controllers.GetTrustController.getTrustDetails(identifier: String)
 
+# TODO - remove endpoints once maintain-protectors-frontend has been deployed with connector pointing to new routes
+# -------
 GET         /:identifier/transformed/protectors                        controllers.GetTrustController.getProtectors(identifier: String)
+# -------
 
 GET         /:identifier/transformed/other-individuals                 controllers.GetTrustController.getOtherIndividuals(identifier: String)
 
