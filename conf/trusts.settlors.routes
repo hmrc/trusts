@@ -1,10 +1,14 @@
 
-POST        /add-individual/:identifier                        controllers.transformations.settlors.AddSettlorController.addIndividual(identifier: String)
-POST        /amend-individual/:identifier/:index               controllers.transformations.settlors.AmendSettlorController.amendIndividual(identifier: String, index: Int)
+GET         /:identifier/transformed                                    controllers.GetTrustController.getSettlors(identifier: String)
 
-POST        /add-business/:identifier                          controllers.transformations.settlors.AddSettlorController.addBusiness(identifier: String)
-POST        /amend-business/:identifier/:index                 controllers.transformations.settlors.AmendSettlorController.amendBusiness(identifier: String, index: Int)
+GET         /:identifier/transformed/deceased-settlor-death-recorded    controllers.GetTrustController.getDeceasedSettlorDeathRecorded(identifier: String)
 
-POST        /amend-deceased/:identifier                        controllers.transformations.settlors.AmendSettlorController.amendDeceased(identifier: String)
+POST        /add-individual/:identifier                                 controllers.transformations.settlors.AddSettlorController.addIndividual(identifier: String)
+POST        /amend-individual/:identifier/:index                        controllers.transformations.settlors.AmendSettlorController.amendIndividual(identifier: String, index: Int)
 
-PUT         /:identifier/remove                                controllers.transformations.settlors.RemoveSettlorController.remove(identifier: String)
+POST        /add-business/:identifier                                   controllers.transformations.settlors.AddSettlorController.addBusiness(identifier: String)
+POST        /amend-business/:identifier/:index                          controllers.transformations.settlors.AmendSettlorController.amendBusiness(identifier: String, index: Int)
+
+POST        /amend-deceased/:identifier                                 controllers.transformations.settlors.AmendSettlorController.amendDeceased(identifier: String)
+
+PUT         /:identifier/remove                                         controllers.transformations.settlors.RemoveSettlorController.remove(identifier: String)
