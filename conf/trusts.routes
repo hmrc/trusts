@@ -22,8 +22,6 @@ GET         /:identifier/transformed                                   controlle
 
 GET         /:identifier/trust-details                                 controllers.GetTrustController.getTrustDetails(identifier: String)
 
-GET         /:identifier/transformed/settlors                          controllers.GetTrustController.getSettlors(identifier: String)
-
 GET         /:identifier/transformed/protectors                        controllers.GetTrustController.getProtectors(identifier: String)
 
 GET         /:identifier/transformed/other-individuals                 controllers.GetTrustController.getOtherIndividuals(identifier: String)
@@ -31,8 +29,6 @@ GET         /:identifier/transformed/other-individuals                 controlle
 GET         /:identifier/transformed/protectors-already-exist          controllers.GetTrustController.getProtectorsAlreadyExist(identifier: String)
 
 GET         /:identifier/transformed/other-individuals-already-exist   controllers.GetTrustController.getOtherIndividualsAlreadyExist(identifier: String)
-
-GET         /:identifier/transformed/deceased-settlor-death-recorded   controllers.GetTrustController.getDeceasedSettlorDeathRecorded(identifier: String)
 
 POST        /variation                                                 controllers.testOnly.TrustVariationsTestController.trustVariation
 
@@ -59,12 +55,18 @@ POST        /amend-large-beneficiary/:identifier/:index                controlle
 PUT         /:identifier/beneficiaries/remove                          controllers.transformations.beneficiaries.RemoveBeneficiaryController.remove(identifier: String)
 # -------
 
+# TODO - remove endpoints once maintain-settlors-frontend has been deployed with connector pointing to new routes
+# -------
+GET         /:identifier/transformed/settlors                          controllers.GetTrustController.getSettlors(identifier: String)
+GET         /:identifier/transformed/deceased-settlor-death-recorded   controllers.GetTrustController.getDeceasedSettlorDeathRecorded(identifier: String)
+
 POST        /add-individual-settlor/:identifier                        controllers.transformations.settlors.AddSettlorController.addIndividual(identifier: String)
 POST        /amend-individual-settlor/:identifier/:index               controllers.transformations.settlors.AmendSettlorController.amendIndividual(identifier: String, index: Int)
 POST        /add-business-settlor/:identifier                          controllers.transformations.settlors.AddSettlorController.addBusiness(identifier: String)
 POST        /amend-business-settlor/:identifier/:index                 controllers.transformations.settlors.AmendSettlorController.amendBusiness(identifier: String, index: Int)
 POST        /amend-deceased-settlor/:identifier                        controllers.transformations.settlors.AmendSettlorController.amendDeceased(identifier: String)
 PUT         /:identifier/settlors/remove                               controllers.transformations.settlors.RemoveSettlorController.remove(identifier: String)
+# -------
 
 PUT         /:identifier/trust-details/express                         controllers.transformations.trustdetails.TrustDetailsTransformationController.setExpress(identifier: String)
 PUT         /:identifier/trust-details/uk-resident                     controllers.transformations.trustdetails.TrustDetailsTransformationController.setResident(identifier: String)
