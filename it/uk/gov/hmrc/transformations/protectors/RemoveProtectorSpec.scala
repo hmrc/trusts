@@ -93,7 +93,7 @@ class RemoveProtectorSpec extends AsyncFreeSpec with MustMatchers with MockitoSu
       val removeProtectorCompanyResult = route(application, removeProtectorCompanyRequest).get
       status(removeProtectorCompanyResult) mustBe OK
 
-      val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed/protectors")).get
+      val newResult = route(application, FakeRequest(GET, s"/trusts/protectors/$identifier/transformed")).get
       status(newResult) mustBe OK
 
       val protectors = (contentAsJson(newResult) \ "protectors" \ "protector").as[JsArray]

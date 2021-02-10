@@ -93,7 +93,7 @@ class RemoveSettlorSpec extends AsyncFreeSpec with MustMatchers with MockitoSuga
       val removeSettlorCompanyResult = route(application, removeSettlorCompanyRequest).get
       status(removeSettlorCompanyResult) mustBe OK
 
-      val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed/settlors")).get
+      val newResult = route(application, FakeRequest(GET, s"/trusts/settlors/$identifier/transformed")).get
       status(newResult) mustBe OK
 
       val settlors = (contentAsJson(newResult) \ "settlors" \ "settlor").as[JsArray]
