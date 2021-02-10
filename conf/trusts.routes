@@ -22,8 +22,6 @@ GET         /:identifier/transformed                                   controlle
 
 GET         /:identifier/trust-details                                 controllers.GetTrustController.getTrustDetails(identifier: String)
 
-GET         /:identifier/transformed/beneficiaries                     controllers.GetTrustController.getBeneficiaries(identifier: String)
-
 GET         /:identifier/transformed/settlors                          controllers.GetTrustController.getSettlors(identifier: String)
 
 GET         /:identifier/transformed/protectors                        controllers.GetTrustController.getProtectors(identifier: String)
@@ -40,6 +38,10 @@ POST        /variation                                                 controlle
 
 POST        /declare/:identifier                                       controllers.TrustVariationsController.declare(identifier: String)
 
+# TODO - remove endpoints once maintain-beneficiaries-frontend has been deployed with connector pointing to new routes
+# -------
+GET         /:identifier/transformed/beneficiaries                     controllers.GetTrustController.getBeneficiaries(identifier: String)
+
 POST        /add-unidentified-beneficiary/:identifier                  controllers.transformations.beneficiaries.AddBeneficiaryController.addUnidentified(identifier: String)
 POST        /amend-unidentified-beneficiary/:identifier/:index         controllers.transformations.beneficiaries.AmendBeneficiaryController.amendUnidentified(identifier: String, index: Int)
 POST        /add-individual-beneficiary/:identifier                    controllers.transformations.beneficiaries.AddBeneficiaryController.addIndividual(identifier: String)
@@ -55,6 +57,7 @@ POST        /amend-trust-beneficiary/:identifier/:index                controlle
 POST        /add-large-beneficiary/:identifier                         controllers.transformations.beneficiaries.AddBeneficiaryController.addLarge(identifier: String)
 POST        /amend-large-beneficiary/:identifier/:index                controllers.transformations.beneficiaries.AmendBeneficiaryController.amendLarge(identifier: String, index: Int)
 PUT         /:identifier/beneficiaries/remove                          controllers.transformations.beneficiaries.RemoveBeneficiaryController.remove(identifier: String)
+# -------
 
 POST        /add-individual-settlor/:identifier                        controllers.transformations.settlors.AddSettlorController.addIndividual(identifier: String)
 POST        /amend-individual-settlor/:identifier/:index               controllers.transformations.settlors.AmendSettlorController.amendIndividual(identifier: String, index: Int)
