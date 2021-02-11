@@ -19,7 +19,6 @@ package controllers
 import config.AppConfig
 import controllers.actions.IdentifierAction
 import exceptions._
-import javax.inject.Inject
 import models._
 import models.auditing.TrustAuditing
 import models.registration.ApiResponse._
@@ -34,17 +33,20 @@ import uk.gov.hmrc.http.BadRequestException
 import utils.ErrorResponses._
 import utils.Headers
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class RegisterTrustController @Inject()(trustsService: TrustsService, config: AppConfig,
-                                        validationService: ValidationService,
-                                        identify: IdentifierAction,
-                                        rosmPatternService: RosmPatternService,
-                                        auditService: AuditService,
-                                        cc: ControllerComponents,
-                                        trustsStoreService: TrustsStoreService,
-                                        default5mldDataService: Default5mldDataService
+class RegisterTrustController @Inject()(
+                                         trustsService: TrustsService,
+                                         config: AppConfig,
+                                         validationService: ValidationService,
+                                         identify: IdentifierAction,
+                                         rosmPatternService: RosmPatternService,
+                                         auditService: AuditService,
+                                         cc: ControllerComponents,
+                                         trustsStoreService: TrustsStoreService,
+                                         amendSubmissionDataService: AmendSubmissionDataService
                                        ) extends TrustsBaseController(cc) with Logging {
 
   def registration(): Action[JsValue] = identify.async(parse.json) {
@@ -57,10 +59,10 @@ class RegisterTrustController @Inject()(trustsService: TrustsService, config: Ap
         schemaF.flatMap {
           schema =>
 
-            val fiveMldEnabled: Boolean = schema == config.trustsApiRegistrationSchema5MLD
-            val payload = default5mldDataService.addDefault5mldData(fiveMldEnabled, request.body)
+            val is5mldEnabled: Boolean = schema == config.trustsApiRegistrationSchema5MLD
+            val payload = amendSubmissionDataService.applyRulesAndAddSubmissionDate(is5mldEnabled, request.body)
 
-            val validation = validationService.get(schema).validate[Registration](payload)
+            val validation = validationService.get(schema).validate[Registration](payload.toString())
 
             validation.fold(
               _ => {
@@ -88,14 +90,14 @@ class RegisterTrustController @Inject()(trustsService: TrustsService, config: Ap
                     }
                 } recover[Result](
                   handleBusinessErrors(v, draftId) orElse
-                  handleHttpError(v, draftId)
-                )
+                    handleHttpError(v, draftId)
+                  )
             )
         }
-    }
+      }
   }
 
-  private def handleHttpError(v : Registration, draftId: String)(implicit request : IdentifierRequest[_]) : PartialFunction[Throwable, Result] = {
+  private def handleHttpError(v: Registration, draftId: String)(implicit request: IdentifierRequest[_]): PartialFunction[Throwable, Result] = {
     case _: ServiceNotAvailableException =>
       auditService.audit(
         event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
@@ -104,8 +106,7 @@ class RegisterTrustController @Inject()(trustsService: TrustsService, config: Ap
         internalId = request.internalId,
         response = RegistrationFailureResponse(SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", "Dependent systems are currently not responding.")
       )
-      logger.error(s"[registration][Session ID: ${request.sessionId}]" +
-        s" Service unavailable response from DES")
+      logger.error(s"[registration][Session ID: ${request.sessionId}] Service unavailable response from DES")
       InternalServerError(Json.toJson(internalServerErrorResponse))
 
     case _: BadRequestException =>
@@ -114,19 +115,17 @@ class RegisterTrustController @Inject()(trustsService: TrustsService, config: Ap
         registration = v,
         draftId = draftId,
         internalId = request.internalId,
-        response = RegistrationFailureResponse(BAD_REQUEST, "INVALID_PAYLOAD", "Submission has not passed validation. Invalid payload..")
+        response = RegistrationFailureResponse(BAD_REQUEST, "INVALID_PAYLOAD", "Submission has not passed validation. Invalid payload.")
       )
-      logger.error(s"[registration][Session ID: ${request.sessionId}]" +
-        s" bad request response from DES")
+      logger.error(s"[registration][Session ID: ${request.sessionId}] bad request response from DES")
       InternalServerError(Json.toJson(internalServerErrorResponse))
 
     case e =>
-      logger.error(s"[registration][Session ID: ${request.sessionId}]" +
-        s" Exception received : $e.")
+      logger.error(s"[registration][Session ID: ${request.sessionId}] Exception received: $e.")
       InternalServerError(Json.toJson(internalServerErrorResponse))
   }
 
-  def handleBusinessErrors(v : Registration, draftId: String)(implicit request : IdentifierRequest[_]) : PartialFunction[Throwable, Result] = {
+  def handleBusinessErrors(v: Registration, draftId: String)(implicit request: IdentifierRequest[_]): PartialFunction[Throwable, Result] = {
     case AlreadyRegisteredException =>
       auditService.audit(
         event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
@@ -135,8 +134,7 @@ class RegisterTrustController @Inject()(trustsService: TrustsService, config: Ap
         internalId = request.internalId,
         response = RegistrationFailureResponse(FORBIDDEN, "ALREADY_REGISTERED", "Trust is already registered.")
       )
-      logger.info(s"[registration][Session ID: ${request.sessionId}]" +
-        " Returning already registered response.")
+      logger.info(s"[registration][Session ID: ${request.sessionId}] Returning already registered response.")
       Conflict(Json.toJson(alreadyRegisteredTrustsResponse))
 
     case NoMatchException =>
@@ -147,8 +145,7 @@ class RegisterTrustController @Inject()(trustsService: TrustsService, config: Ap
         internalId = request.internalId,
         response = RegistrationFailureResponse(FORBIDDEN, "NO_MATCH", "There is no match in HMRC records.")
       )
-      logger.info(s"[registration][Session ID: ${request.sessionId}]" +
-        s" Returning no match response.")
+      logger.info(s"[registration][Session ID: ${request.sessionId}] Returning no match response.")
       Forbidden(Json.toJson(noMatchRegistrationResponse))
   }
 

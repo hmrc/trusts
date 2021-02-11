@@ -16,33 +16,32 @@
 
 package controllers.testOnly
 
-import javax.inject.Inject
-import play.api.Logging
-import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, ControllerComponents, Result}
 import config.AppConfig
 import controllers._
 import controllers.actions.IdentifierAction
 import models.auditing.TrustAuditing
 import models.variation.TrustVariation
+import play.api.Logging
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.{Action, ControllerComponents, Result}
 import services._
 import utils.ErrorResponses._
 import utils.ValidationUtil
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TrustVariationsTestController @Inject()(
-                                           identify: IdentifierAction,
-                                           trustsService: TrustsService,
-                                           auditService: AuditService,
-                                           validator: ValidationService,
-                                           config : AppConfig,
-                                           variationService: VariationService,
-                                           responseHandler: VariationsResponseHandler,
-                                           trustsStoreService: TrustsStoreService,
-                                           cc: ControllerComponents
-                                    ) extends TrustsBaseController(cc) with ValidationUtil with Logging {
+                                               identify: IdentifierAction,
+                                               trustsService: TrustsService,
+                                               auditService: AuditService,
+                                               validator: ValidationService,
+                                               config : AppConfig,
+                                               responseHandler: VariationsResponseHandler,
+                                               trustsStoreService: TrustsStoreService,
+                                               cc: ControllerComponents
+                                             ) extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
   def trustVariation(): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
@@ -85,4 +84,3 @@ class TrustVariationsTestController @Inject()(
     }
   }
 }
-

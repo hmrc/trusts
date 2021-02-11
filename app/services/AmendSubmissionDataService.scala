@@ -16,27 +16,27 @@
 
 package services
 
-import java.time.LocalDate
-
-import javax.inject.Inject
 import play.api.Logging
 import play.api.libs.json._
-import utils.JsonOps.{JsValueOps, putNewValue}
+import utils.JsonOps.{JsValueOps, doNothing, putNewValue}
 
-class Default5mldDataService @Inject()(localDateService: LocalDateService) extends Logging {
+import javax.inject.Inject
 
-  def addDefault5mldData(fiveMldEnabled: Boolean, json: JsValue): String = {
-    if (fiveMldEnabled) {
-      json.applyRules.transform(
+class AmendSubmissionDataService @Inject()(localDateService: LocalDateService) extends Logging {
+
+  def applyRulesAndAddSubmissionDate(is5mldEnabled: Boolean, json: JsValue): JsValue = {
+    json.applyRules.transform {
+      if (is5mldEnabled) {
         putNewValue(__ \ 'submissionDate, Json.toJson(localDateService.now))
-      ).fold(
-        _ => {
-          logger.error("[Submission Date] could not add submission date")
-          json.applyRules.toString
-        },
-        value => value.toString)
-    } else {
-      json.applyRules.toString
-    }
+      } else {
+        doNothing()
+      }
+    }.fold(
+      _ => {
+        logger.error("[Submission Date] could not add submission date")
+        json.applyRules
+      },
+      value => value
+    )
   }
 }
