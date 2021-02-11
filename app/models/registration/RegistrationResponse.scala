@@ -23,33 +23,19 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import utils.Constants._
 
-sealed trait RegistrationResponse
-
-case class RegistrationTrnResponse(trn: String) extends RegistrationResponse
+case class RegistrationTrnResponse(trn: String)
 
 object RegistrationTrnResponse {
   implicit val formats: OFormat[RegistrationTrnResponse] = Json.format[RegistrationTrnResponse]
 }
 
-case class RegistrationFailureResponse(status: Int, code: String, message: String) extends RegistrationResponse
+case class RegistrationFailureResponse(status: Int, code: String, message: String)
 
 object RegistrationFailureResponse {
   implicit val formats: OFormat[RegistrationFailureResponse] = Json.format[RegistrationFailureResponse]
 }
 
 object RegistrationResponse extends Logging {
-
-  implicit object RegistrationResponseFormats extends Format[RegistrationResponse] with Logging {
-
-    override def reads(json: JsValue): JsResult[RegistrationResponse] = json.validate[RegistrationTrnResponse]
-
-    override def writes(o: RegistrationResponse): JsValue = o match {
-      case x : RegistrationTrnResponse => Json.toJson(x)(RegistrationTrnResponse.formats)
-      case x : RegistrationFailureResponse => Json.toJson(x)(RegistrationFailureResponse.formats)
-
-    }
-
-  }
 
   // TODO, bad code smell, return ADT rather than throwing exception
   // Having to use return type Nothing to satisfy the compiler
@@ -67,23 +53,20 @@ object RegistrationResponse extends Logging {
     }
   }
 
-  implicit lazy val httpReads: HttpReads[RegistrationResponse] =
-    new HttpReads[RegistrationResponse] {
-      override def read(method: String, url: String, response: HttpResponse): RegistrationResponse = {
-        logger.info(s"response status received from des: ${response.status}")
-        response.status match {
-          case OK =>
-            response.json.as[RegistrationTrnResponse]
-          case FORBIDDEN =>
-            parseForbiddenResponse(response.json)
-          case BAD_REQUEST =>
-            throw BadRequestException
-          case SERVICE_UNAVAILABLE =>
-            logger.error("Service unavailable response from des.")
-            throw ServiceNotAvailableException("Des dependent service is down.")
-          case status =>
-            throw InternalServerErrorException(s"Error response from des $status body: ${response.body}")
-        }
+  implicit lazy val httpReads: HttpReads[RegistrationTrnResponse] = (_: String, _: String, response: HttpResponse) => {
+      logger.info(s"response status received from des: ${response.status}")
+      response.status match {
+        case OK =>
+          response.json.as[RegistrationTrnResponse]
+        case FORBIDDEN =>
+          parseForbiddenResponse(response.json)
+        case BAD_REQUEST =>
+          throw BadRequestException
+        case SERVICE_UNAVAILABLE =>
+          logger.error("Service unavailable response from des.")
+          throw ServiceNotAvailableException("Des dependent service is down.")
+        case status =>
+          throw InternalServerErrorException(s"Error response from des $status body: ${response.body}")
       }
     }
 

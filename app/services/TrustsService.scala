@@ -18,17 +18,17 @@ package services
 
 import connector.{SubscriptionConnector, TrustsConnector}
 import exceptions.InternalServerErrorException
+import javax.inject.Inject
 import models._
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
 import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse, TrustProcessedResponse}
-import models.registration.RegistrationResponse
+import models.registration.RegistrationTrnResponse
 import models.tax_enrolments.SubscriptionIdResponse
 import models.variation.VariationResponse
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import repositories.CacheRepository
 
-import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -49,7 +49,7 @@ class TrustsService @Inject()(val trustsConnector: TrustsConnector,
     trustsConnector.checkExistingTrust(existingTrustCheckRequest)
   }
 
-  def registerTrust(registration: Registration): Future[RegistrationResponse] = {
+  def registerTrust(registration: Registration): Future[RegistrationTrnResponse] = {
     trustsConnector.registerTrust(registration)
   }
 

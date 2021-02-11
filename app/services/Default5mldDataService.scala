@@ -16,26 +16,22 @@
 
 package services
 
-import config.AppConfig
+import java.time.LocalDate
+
+import javax.inject.Inject
 import play.api.Logging
 import play.api.libs.json._
 import utils.JsonOps.{JsValueOps, putNewValue}
 
-import javax.inject.Inject
-
-//TODO: Delete this class when the services are updated to add real data for 5mld
-
-class Default5mldDataService @Inject()(appConfig: AppConfig) extends Logging {
+class Default5mldDataService @Inject()(localDateService: LocalDateService) extends Logging {
 
   def addDefault5mldData(fiveMldEnabled: Boolean, json: JsValue): String = {
-
-    if (fiveMldEnabled && appConfig.stubMissingJourneysFor5MLD) {
-
+    if (fiveMldEnabled) {
       json.applyRules.transform(
-        putNewValue(__ \ 'submissionDate, JsString("2021-01-01"))
+        putNewValue(__ \ 'submissionDate, Json.toJson(localDateService.now))
       ).fold(
         _ => {
-          logger.error("[addDefault5mldData] Could not add temporary data for 5mld tests")
+          logger.error("[Submission Date] could not add submission date")
           json.applyRules.toString
         },
         value => value.toString)

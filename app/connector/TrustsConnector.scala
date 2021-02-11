@@ -23,7 +23,7 @@ import javax.inject.Inject
 import models._
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
 import models.get_trust.GetTrustResponse
-import models.registration.RegistrationResponse
+import models.registration.{RegistrationResponse, RegistrationTrnResponse}
 import models.variation.VariationResponse
 import play.api.Logging
 import play.api.http.HeaderNames
@@ -82,17 +82,19 @@ class TrustsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStore
   }
 
   def registerTrust(registration: Registration)
-                            : Future[RegistrationResponse] = {
+                            : Future[RegistrationTrnResponse] = {
     val correlationId = UUID.randomUUID().toString
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
-    logger.debug(s"[Session ID: ${Session.id(hc)}] registration payload ${Json.toJson(registration)}")
+    val reads = RegistrationResponse.httpReads
 
     logger.info(s"[Session ID: ${Session.id(hc)}] registering trust for correlationId: $correlationId")
 
-    val response = http.POST[JsValue, RegistrationResponse](trustRegistrationEndpoint, Json.toJson(registration))
-    (implicitly[Writes[JsValue]], RegistrationResponse.httpReads, implicitly[HeaderCarrier](hc), implicitly[ExecutionContext])
+    val response = http.POST[JsValue, RegistrationTrnResponse](
+      trustRegistrationEndpoint,
+      Json.toJson(registration)
+    )(implicitly[Writes[JsValue]], reads, implicitly[HeaderCarrier](hc), implicitly[ExecutionContext])
 
     response
   }
@@ -118,8 +120,6 @@ class TrustsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStore
     val correlationId = UUID.randomUUID().toString
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
-
-    logger.debug(s"[Session ID: ${Session.id(hc)}] variation payload $trustVariations}")
 
     logger.info(s"[Session ID: ${Session.id(hc)}]" +
       s" submitting trust variation for correlationId: $correlationId")
