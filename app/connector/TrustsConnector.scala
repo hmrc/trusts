@@ -66,9 +66,7 @@ class TrustsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStore
       CORRELATION_HEADER -> correlationId
     )
 
-  def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest)
-                                 : Future[ExistingCheckResponse] = {
-
+  def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest): Future[ExistingCheckResponse] = {
     val correlationId = UUID.randomUUID().toString
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
@@ -81,8 +79,7 @@ class TrustsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStore
     response
   }
 
-  def registerTrust(registration: Registration)
-                            : Future[RegistrationTrnResponse] = {
+  def registerTrust(registration: Registration): Future[RegistrationTrnResponse] = {
     val correlationId = UUID.randomUUID().toString
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
