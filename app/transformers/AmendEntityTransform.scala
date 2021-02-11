@@ -27,7 +27,7 @@ trait AmendEntityTransform extends DeltaTransform with JsonOperations {
   val original: JsValue
   val endDate: LocalDate
   val path: JsPath
-  val endDateField: String = "entityEnd"
+  val endDateField: String = ENTITY_END
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     amendAtPosition(input, path, index, Json.toJson(amended))

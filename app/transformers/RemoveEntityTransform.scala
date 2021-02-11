@@ -17,6 +17,7 @@
 package transformers
 
 import play.api.libs.json.{JsPath, JsResult, JsValue, Json}
+import utils.Constants.ENTITY_END
 
 import java.time.LocalDate
 
@@ -26,7 +27,7 @@ trait RemoveEntityTransform extends DeltaTransform with JsonOperations {
   val entity: JsValue
   val endDate: LocalDate
   val path: JsPath
-  val endDateField: String = "entityEnd"
+  val endDateField: String = ENTITY_END
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     removeAtPosition(input, path, index)

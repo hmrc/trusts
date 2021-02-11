@@ -16,23 +16,23 @@
 
 package controllers
 
-import javax.inject.Inject
-import play.api.Logging
-import play.api.libs.json.Json
-import play.api.mvc.ControllerComponents
 import controllers.actions.IdentifierAction
-import models.registration.ApiResponse._
 import models.existing_trust.ExistingCheckRequest
 import models.existing_trust.ExistingCheckResponse._
+import models.registration.ApiResponse._
+import play.api.Logging
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.{Action, ControllerComponents}
 import services.TrustsService
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class CheckTrustController @Inject()(trustsService: TrustsService,
                                      cc: ControllerComponents,
                                      identify: IdentifierAction) extends TrustsBaseController(cc) with Logging {
 
-  def checkExistingTrust() = identify.async(parse.json) { implicit request =>
+  def checkExistingTrust(): Action[JsValue] = identify.async(parse.json) { implicit request =>
     withJsonBody[ExistingCheckRequest] {
       trustsCheckRequest =>
         trustsService.checkExistingTrust(trustsCheckRequest).map {
@@ -46,7 +46,6 @@ class CheckTrustController @Inject()(trustsService: TrustsService,
             }
         }
     }
-
   }
 
 }

@@ -103,18 +103,7 @@ class BackwardsCompatibilityService extends Logging {
       case JsSuccess(array, _) =>
         val newArray = array.value.zipWithIndex.foldLeft(JsArray())((acc, asset) => {
           asset._1.validate[AssetBC] match {
-            case JsSuccess(value, _) =>
-              
-              def append[T <: AssetBC](asset: T)(implicit wts: Writes[T]): JsArray = acc :+ Json.toJson(asset)
-              
-              value match {
-                case x: MoneyAssetBC => append(x)
-                case x: PropertyOrLandAssetBC => append(x)
-                case x: SharesAssetBC => append(x)
-                case x: BusinessAssetBC => append(x)
-                case x: PartnershipAssetBC => append(x)
-                case x: OtherAssetBC => append(x)
-              }
+            case JsSuccess(value, _) => appendAssetToArray(value, acc)
             case _ => acc
           }
         })
@@ -122,6 +111,20 @@ class BackwardsCompatibilityService extends Logging {
       case JsError(errors) =>
         logger.info(s"Unable to pick json at $path: $errors")
         doNothing()
+    }
+  }
+
+  private def appendAssetToArray(asset: AssetBC, array: JsArray) = {
+
+    def append[T <: AssetBC](asset: T)(implicit wts: Writes[T]): JsArray = array :+ Json.toJson(asset)
+
+    asset match {
+      case x: MoneyAssetBC => append(x)
+      case x: PropertyOrLandAssetBC => append(x)
+      case x: SharesAssetBC => append(x)
+      case x: BusinessAssetBC => append(x)
+      case x: PartnershipAssetBC => append(x)
+      case x: OtherAssetBC => append(x)
     }
   }
 

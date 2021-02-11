@@ -25,32 +25,28 @@ import models.registration.ApiResponse.invalidUTRErrorResponse
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.matching.Regex
 
-class ValidateIdentifierActionProvider @Inject()()(implicit
-                                                   val parser: BodyParsers.Default,
-                                                   executionContext: ExecutionContext) {
+class ValidateIdentifierActionProvider @Inject()()
+                                                (implicit val parser: BodyParsers.Default, executionContext: ExecutionContext) {
 
   def apply(identifier: String) = new ValidateIdentifierAction(identifier)
 
 }
 
-class ValidateIdentifierAction @Inject()(identifier: String)(implicit val parser: BodyParsers.Default,
-                                                             val executionContext: ExecutionContext)
+class ValidateIdentifierAction @Inject()(identifier: String)
+                                        (implicit val parser: BodyParsers.Default, val executionContext: ExecutionContext)
   extends ActionFilter[Request] with ActionBuilder[Request, AnyContent] {
 
   override protected def filter[A](request: Request[A]): Future[Option[Result]] = Future.successful{
 
     identifier match {
-      case Identifiers.UtrPattern(_) => None
-      case Identifiers.UrnPattern(_) => None
-      case _ =>
-        Some(BadRequest(toJson(invalidUTRErrorResponse)))
+      case Identifiers.utrPattern(_) => None
+      case Identifiers.urnPattern(_) => None
+      case _ => Some(BadRequest(toJson(invalidUTRErrorResponse)))
     }
   }
 }
 
 object Identifiers {
-
-  val UtrPattern: Regex = "^([0-9]){10}$".r
-  val UrnPattern: Regex = "^([A-Z0-9]){15}$".r
-
+  val utrPattern: Regex = "^([0-9]){10}$".r
+  val urnPattern: Regex = "^([A-Z0-9]){15}$".r
 }

@@ -40,11 +40,10 @@ case class TrustProcessedResponse(getTrust: JsValue, responseHeader: ResponseHea
 }
 
 object TrustProcessedResponse {
-  val mongoWrites: Writes[TrustProcessedResponse] = new Writes[TrustProcessedResponse] {
-    override def writes(o: TrustProcessedResponse): JsValue = Json.obj(
-      "responseHeader" -> Json.toJson(o.responseHeader)(ResponseHeader.mongoWrites),
-      "trustOrEstateDisplay" -> o.getTrust)
-  }
+  val mongoWrites: Writes[TrustProcessedResponse] = (o: TrustProcessedResponse) => Json.obj(
+    "responseHeader" -> Json.toJson(o.responseHeader)(ResponseHeader.mongoWrites),
+    "trustOrEstateDisplay" -> o.getTrust
+  )
 }
 
 case class TrustFoundResponse(responseHeader: ResponseHeader) extends GetTrustSuccessResponse
