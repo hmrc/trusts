@@ -113,10 +113,10 @@ class RegisterTrustController @Inject()(
         ) map { _ =>
           Ok(Json.toJson(response))
         }
-    } recover[Result](
+    } recover {
       handleBusinessErrors(registration, draftId) orElse
         handleHttpError(registration, draftId)
-      )
+    }
   }
 
   def handleBusinessErrors(registration: Registration, draftId: String)
