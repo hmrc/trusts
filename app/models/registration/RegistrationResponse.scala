@@ -71,6 +71,3 @@ object RegistrationResponse extends Logging {
     }
 
 }
-
-
-

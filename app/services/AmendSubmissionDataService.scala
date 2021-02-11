@@ -25,18 +25,19 @@ import javax.inject.Inject
 class AmendSubmissionDataService @Inject()(localDateService: LocalDateService) extends Logging {
 
   def applyRulesAndAddSubmissionDate(is5mldEnabled: Boolean, json: JsValue): JsValue = {
-    json.applyRules.transform {
+    val amendedJson = json.applyRules
+    amendedJson.transform {
       if (is5mldEnabled) {
         putNewValue(__ \ 'submissionDate, Json.toJson(localDateService.now))
       } else {
         doNothing()
       }
-    }.fold(
-      _ => {
-        logger.error("[Submission Date] could not add submission date")
-        json.applyRules
-      },
-      value => value
-    )
+    } match {
+      case JsSuccess(value, _) =>
+        value
+      case JsError(errors) =>
+        logger.error(s"[Submission Date] could not add submission date: $errors")
+        amendedJson
+    }
   }
 }

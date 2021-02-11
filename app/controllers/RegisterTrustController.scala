@@ -28,7 +28,7 @@ import models.requests.IdentifierRequest
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents, Result}
-import services.{AuditService, RosmPatternService, TrustsService, ValidationService, _}
+import services._
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import utils.ErrorResponses._
 import utils.Headers
@@ -113,10 +113,35 @@ class RegisterTrustController @Inject()(
         ) map { _ =>
           Ok(Json.toJson(response))
         }
-    } recover[Result] {
+    } recover[Result](
       handleBusinessErrors(registration, draftId) orElse
         handleHttpError(registration, draftId)
-    }
+      )
+  }
+
+  def handleBusinessErrors(registration: Registration, draftId: String)
+                          (implicit request: IdentifierRequest[_]): PartialFunction[Throwable, Result] = {
+    case AlreadyRegisteredException =>
+      auditService.audit(
+        event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
+        registration = registration,
+        draftId = draftId,
+        internalId = request.internalId,
+        response = RegistrationFailureResponse(FORBIDDEN, "ALREADY_REGISTERED", "Trust is already registered.")
+      )
+      logger.info(s"[registration][Session ID: ${request.sessionId}] Returning already registered response.")
+      Conflict(Json.toJson(alreadyRegisteredTrustsResponse))
+
+    case NoMatchException =>
+      auditService.audit(
+        event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
+        registration = registration,
+        draftId = draftId,
+        internalId = request.internalId,
+        response = RegistrationFailureResponse(FORBIDDEN, "NO_MATCH", "There is no match in HMRC records.")
+      )
+      logger.info(s"[registration][Session ID: ${request.sessionId}] Returning no match response.")
+      Forbidden(Json.toJson(noMatchRegistrationResponse))
   }
 
   private def handleHttpError(registration: Registration, draftId: String)
@@ -146,31 +171,6 @@ class RegisterTrustController @Inject()(
     case e =>
       logger.error(s"[registration][Session ID: ${request.sessionId}] Exception received: $e.")
       InternalServerError(Json.toJson(internalServerErrorResponse))
-  }
-
-  def handleBusinessErrors(registration: Registration, draftId: String)
-                          (implicit request: IdentifierRequest[_]): PartialFunction[Throwable, Result] = {
-    case AlreadyRegisteredException =>
-      auditService.audit(
-        event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
-        registration = registration,
-        draftId = draftId,
-        internalId = request.internalId,
-        response = RegistrationFailureResponse(FORBIDDEN, "ALREADY_REGISTERED", "Trust is already registered.")
-      )
-      logger.info(s"[registration][Session ID: ${request.sessionId}] Returning already registered response.")
-      Conflict(Json.toJson(alreadyRegisteredTrustsResponse))
-
-    case NoMatchException =>
-      auditService.audit(
-        event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
-        registration = registration,
-        draftId = draftId,
-        internalId = request.internalId,
-        response = RegistrationFailureResponse(FORBIDDEN, "NO_MATCH", "There is no match in HMRC records.")
-      )
-      logger.info(s"[registration][Session ID: ${request.sessionId}] Returning no match response.")
-      Forbidden(Json.toJson(noMatchRegistrationResponse))
   }
 
 }
