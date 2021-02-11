@@ -45,7 +45,9 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
         if (result.flatten.isDefined && result.flatten.get) {
           Some(TrustsValidationError(s"Date of death is after date of birth",
             s"/trust/entities/deceased/dateOfDeath"))
-        } else None
+        } else {
+          None
+        }
     }
   }
 
@@ -59,7 +61,9 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
             if (deceasedNino.isDefined && trusteeNino.contains(deceasedNino)) {
               Some(TrustsValidationError(s"Deceased NINO is same as trustee NINO.",
                 s"/trust/entities/deceased/identification/nino"))
-            } else None
+            } else {
+              None
+            }
           }
         }
     }
@@ -75,7 +79,9 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
             if (deceasedNino.isDefined && beneficiaryNino.contains(deceasedNino)) {
               Some(TrustsValidationError(s"Deceased NINO is same as beneficiary NINO.",
                 s"/trust/entities/deceased/identification/nino"))
-            } else None
+            } else {
+              None
+            }
           }
         }
     }
@@ -91,13 +97,15 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
             if (deceasedNino.isDefined && protectorNino.contains(deceasedNino)) {
               Some(TrustsValidationError(s"Deceased NINO is same as individual protector NINO.",
                 s"/trust/entities/deceased/identification/nino"))
-            } else None
+            } else {
+              None
+            }
           }
         }
     }
   }
 
-  private def validateDeedOfVariation(trustType : TypeOfTrust) : Option[TrustsValidationError] = {
+  private def validateDeedOfVariation(trustType: TypeOfTrust): Option[TrustsValidationError] = {
     registration.trust.details.deedOfVariation match {
       case None =>
         Some(TrustsValidationError(
@@ -139,7 +147,7 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
     }
   }
 
-  private def validateTrustHasLivingSettlor = {
+  private def validateTrustHasLivingSettlor: Option[TrustsValidationError] = {
     val livingSettlors = registration.trust.entities.settlors
     livingSettlors match {
       case Some(_) => None
@@ -153,7 +161,7 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
     }
   }
 
-  private def validateDeceasedSettlor : Option[TrustsValidationError] = {
+  private def validateDeceasedSettlor: Option[TrustsValidationError] = {
     registration.trust.entities.deceased match {
       case Some(_) => None
       case None =>
@@ -179,54 +187,54 @@ class SettlorDomainValidation(registration: Registration) extends ValidationUtil
 
   def livingSettlorDuplicateNino: List[Option[TrustsValidationError]] = {
     getSettlorIndividuals(registration).map{
-          settlorIndividuals =>
-            val ninoList: List[(String, Int)] = getSettlorNinoWithIndex(settlorIndividuals)
-            val duplicatesNino = findDuplicates(ninoList).reverse
-            logger.info(s"Number of Duplicate Nino found : ${duplicatesNino.size} ")
-            duplicatesNino.map {
-              case (nino, index) =>
-                Some(TrustsValidationError(s"NINO is already used for another individual settlor.",
-                  s"/trust/entities/settlors/settlor/$index/identification/nino"))
-            }
+      settlorIndividuals =>
+        val ninoList: List[(String, Int)] = getSettlorNinoWithIndex(settlorIndividuals)
+        val duplicatesNino = findDuplicates(ninoList).reverse
+        logger.info(s"Number of Duplicate Nino found: ${duplicatesNino.size} ")
+        duplicatesNino.map {
+          case (_, index) =>
+            Some(TrustsValidationError(s"NINO is already used for another individual settlor.",
+              s"/trust/entities/settlors/settlor/$index/identification/nino"))
+        }
     }.toList.flatten
   }
 
   def livingSettlorDobIsNotFutureDate: List[Option[TrustsValidationError]] = {
     getSettlorIndividuals(registration).map{
       settlorIndividuals =>
-            val errors = settlorIndividuals.zipWithIndex.map {
-              case (individualSettlor, index) =>
-                isNotFutureDate(individualSettlor.dateOfBirth, s"/trust/entities/settlors/settlor/$index/dateOfBirth", "Date of birth")
-            }
-            errors
+        val errors = settlorIndividuals.zipWithIndex.map {
+          case (individualSettlor, index) =>
+            isNotFutureDate(individualSettlor.dateOfBirth, s"/trust/entities/settlors/settlor/$index/dateOfBirth", "Date of birth")
+        }
+        errors
     }.toList.flatten
   }
 
   def livingSettlorDuplicatePassportNumber: List[Option[TrustsValidationError]] = {
     getSettlorIndividuals(registration).map{
-          settlorIndividuals =>
-            val utrList: List[(String, Int)] = getSettlorPassportNumberWithIndex(settlorIndividuals)
-            val duplicateUtrList = findDuplicates(utrList).reverse
-            logger.info(s"Number of Duplicate passport number found : ${duplicateUtrList.size} ")
-            duplicateUtrList.map {
-              case (utr, index) =>
-                Some(TrustsValidationError(s"Passport number is already used for another individual settlor.",
-                  s"/trust/entities/settlors/settlor/$index/identification/passport/number"))
-            }
+      settlorIndividuals =>
+        val utrList: List[(String, Int)] = getSettlorPassportNumberWithIndex(settlorIndividuals)
+        val duplicateUtrList = findDuplicates(utrList).reverse
+        logger.info(s"Number of Duplicate passport number found: ${duplicateUtrList.size} ")
+        duplicateUtrList.map {
+          case (_, index) =>
+            Some(TrustsValidationError(s"Passport number is already used for another individual settlor.",
+              s"/trust/entities/settlors/settlor/$index/identification/passport/number"))
+        }
     }.toList.flatten
   }
 
   def livingSettlorDuplicateUtr: List[Option[TrustsValidationError]] = {
     getSettlorCompanies(registration).map{
       settlorCompanies =>
-            val passportNumberList: List[(String, Int)] = getSettlorUtrNumberWithIndex(settlorCompanies)
-            val duplicatePassportNumberList = findDuplicates(passportNumberList).reverse
-            logger.info(s"Number of Duplicate utr found : ${duplicatePassportNumberList.size} ")
-            duplicatePassportNumberList.map {
-              case (passport, index) =>
-                Some(TrustsValidationError(s"Utr is already used for another settlor company.",
-                  s"/trust/entities/settlors/settlorCompany/$index/identification/utr"))
-            }
+        val passportNumberList: List[(String, Int)] = getSettlorUtrNumberWithIndex(settlorCompanies)
+        val duplicatePassportNumberList = findDuplicates(passportNumberList).reverse
+        logger.info(s"Number of Duplicate utr found: ${duplicatePassportNumberList.size} ")
+        duplicatePassportNumberList.map {
+          case (_, index) =>
+            Some(TrustsValidationError(s"Utr is already used for another settlor company.",
+              s"/trust/entities/settlors/settlorCompany/$index/identification/utr"))
+        }
     }.toList.flatten
   }
 
