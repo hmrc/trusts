@@ -60,14 +60,14 @@ class BaseSpec extends WordSpec
 
   def fakeRequest : FakeRequest[JsValue] = FakeRequest("POST", "")
     .withHeaders(CONTENT_TYPE -> "application/json")
-    .withHeaders(Headers.DraftRegistrationId -> UUID.randomUUID().toString)
+    .withHeaders(Headers.DRAFT_REGISTRATION_ID -> UUID.randomUUID().toString)
     .withBody(Json.parse("{}"))
 
   def postRequestWithPayload(payload: JsValue, withDraftId: Boolean = true): FakeRequest[JsValue] = {
     if (withDraftId) {
       FakeRequest("POST", "/trusts/register")
         .withHeaders(CONTENT_TYPE -> "application/json")
-        .withHeaders(Headers.DraftRegistrationId -> UUID.randomUUID().toString)
+        .withHeaders(Headers.DRAFT_REGISTRATION_ID -> UUID.randomUUID().toString)
         .withBody(payload)
     } else {
       FakeRequest("POST", "/trusts/register")

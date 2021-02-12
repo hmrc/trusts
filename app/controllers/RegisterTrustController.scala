@@ -51,7 +51,7 @@ class RegisterTrustController @Inject()(
 
   def registration(): Action[JsValue] = identify.async(parse.json) {
     implicit request =>
-      request.headers.get(Headers.DraftRegistrationId) match {
+      request.headers.get(Headers.DRAFT_REGISTRATION_ID) match {
         case Some(draftId) =>
           determineMldVersion(draftId)
         case _ =>
