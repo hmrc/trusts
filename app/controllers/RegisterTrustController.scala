@@ -22,8 +22,8 @@ import exceptions._
 import models._
 import models.auditing.TrustAuditing
 import models.registration.ApiResponse._
-import models.registration.RegistrationFailureResponse
 import models.registration.RegistrationTrnResponse._
+import models.registration.{RegistrationFailureResponse, RegistrationTrnResponse}
 import models.requests.IdentifierRequest
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
@@ -51,24 +51,19 @@ class RegisterTrustController @Inject()(
 
   def registration(): Action[JsValue] = identify.async(parse.json) {
     implicit request =>
-      getDraftId
-  }
-
-  private def getDraftId(implicit request: IdentifierRequest[JsValue]): Future[Result] = {
-    request.headers.get(Headers.DraftRegistrationId) match {
-      case Some(draftId) =>
-        determineMldVersion(draftId)
-      case _ =>
-        logger.error(s"[Session ID: ${request.sessionId}] no draft id provided in headers")
-        Future.successful(BadRequest(Json.toJson(noDraftIdProvided)))
-    }
+      request.headers.get(Headers.DraftRegistrationId) match {
+        case Some(draftId) =>
+          determineMldVersion(draftId)
+        case _ =>
+          logger.error(s"[Session ID: ${request.sessionId}] no draft id provided in headers")
+          Future.successful(BadRequest(Json.toJson(noDraftIdProvided)))
+      }
   }
 
   private def determineMldVersion(draftId: String)
                                  (implicit request: IdentifierRequest[JsValue], hc: HeaderCarrier): Future[Result] = {
-    trustsStoreService.is5mldEnabled.flatMap {
-      is5mldEnabled =>
-        amendRegistration(draftId, is5mldEnabled)
+    trustsStoreService.is5mldEnabled.flatMap { is5mldEnabled =>
+      amendRegistration(draftId, is5mldEnabled)
     }
   }
 
@@ -96,31 +91,36 @@ class RegisterTrustController @Inject()(
 
   private def register(registration: Registration, draftId: String)
                       (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
-    trustsService.registerTrust(registration).flatMap {
-      response =>
-        auditService.audit(
-          event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
-          registration = registration,
-          draftId = draftId,
-          internalId = request.internalId,
-          response = response
-        )
-
-        rosmPatternService.enrolAndLogResult(
-          trn = response.trn,
-          affinityGroup = request.affinityGroup,
-          taxable = registration.trust.details.trustTaxable.getOrElse(true)
-        ) map { _ =>
-          Ok(Json.toJson(response))
-        }
+    trustsService.registerTrust(registration).flatMap { response =>
+      auditResponseAndEnrol(response, registration, draftId)
     } recover {
       handleBusinessErrors(registration, draftId) orElse
         handleHttpError(registration, draftId)
     }
   }
 
-  def handleBusinessErrors(registration: Registration, draftId: String)
-                          (implicit request: IdentifierRequest[_]): PartialFunction[Throwable, Result] = {
+  private def auditResponseAndEnrol(response: RegistrationTrnResponse, registration: Registration, draftId: String)
+                                   (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
+
+    auditService.audit(
+      event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
+      registration = registration,
+      draftId = draftId,
+      internalId = request.internalId,
+      response = response
+    )
+
+    rosmPatternService.enrolAndLogResult(
+      trn = response.trn,
+      affinityGroup = request.affinityGroup,
+      taxable = registration.trust.details.trustTaxable.getOrElse(true)
+    ) map { _ =>
+      Ok(Json.toJson(response))
+    }
+  }
+
+  private def handleBusinessErrors(registration: Registration, draftId: String)
+                                  (implicit request: IdentifierRequest[_]): PartialFunction[Throwable, Result] = {
     case AlreadyRegisteredException =>
       auditService.audit(
         event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
