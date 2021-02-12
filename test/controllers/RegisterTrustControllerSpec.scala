@@ -39,7 +39,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
   private val mockTrustsService: TrustsService = mock[TrustsService]
   private val rosmPatternService: RosmPatternService = mock[RosmPatternService]
   private val mockTrustsStoreService: TrustsStoreService = mock[TrustsStoreService]
-  private val default5mldDataService: Default5mldDataService = injector.instanceOf[Default5mldDataService]
+  private val default5mldDataService: AmendSubmissionDataService = injector.instanceOf[AmendSubmissionDataService]
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   private val fakeOrganisationAuthAction = new FakeIdentifierAction(bodyParsers, Organisation)

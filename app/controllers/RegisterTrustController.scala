@@ -27,141 +27,150 @@ import models.registration.{RegistrationFailureResponse, RegistrationTrnResponse
 import models.requests.IdentifierRequest
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, ControllerComponents}
-import services.{AuditService, RosmPatternService, TrustsService, ValidationService, _}
-import uk.gov.hmrc.http.BadRequestException
+import play.api.mvc.{Action, ControllerComponents, Result}
+import services._
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import utils.ErrorResponses._
 import utils.Headers
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.control.NonFatal
 
-class RegisterTrustController @Inject()(trustsService: TrustsService, config: AppConfig,
-                                        validationService: ValidationService,
-                                        identify: IdentifierAction,
-                                        rosmPatternService: RosmPatternService,
-                                        auditService: AuditService,
-                                        cc: ControllerComponents,
-                                        trustsStoreService: TrustsStoreService,
-                                        default5mldDataService: Default5mldDataService
-                                        ) extends TrustsBaseController(cc) with Logging {
-
-  private def schemaF(implicit request: IdentifierRequest[JsValue]): Future[String] = {
-    trustsStoreService.is5mldEnabled.map {
-      case true => config.trustsApiRegistrationSchema5MLD
-      case _ => config.trustsApiRegistrationSchema4MLD
-    }
-  }
+class RegisterTrustController @Inject()(
+                                         trustsService: TrustsService,
+                                         config: AppConfig,
+                                         validationService: ValidationService,
+                                         identify: IdentifierAction,
+                                         rosmPatternService: RosmPatternService,
+                                         auditService: AuditService,
+                                         cc: ControllerComponents,
+                                         trustsStoreService: TrustsStoreService,
+                                         amendSubmissionDataService: AmendSubmissionDataService
+                                       ) extends TrustsBaseController(cc) with Logging {
 
   def registration(): Action[JsValue] = identify.async(parse.json) {
     implicit request =>
-
-//      val payload = request.body.applyRules.toString //TODO: Uncomment this line when when the services are updated to add real data for 5mld
-      val draftIdOption = request.headers.get(Headers.DraftRegistrationId)
-
-      schemaF.flatMap {
-        schema =>
-
-          //TODO: Remove this when the services are updated to add real data for 5mld
-          val fiveMldEnabled: Boolean = (schema == config.trustsApiRegistrationSchema5MLD)
-          val payload = default5mldDataService.addDefault5mldData(fiveMldEnabled, request.body)
-          //TODO: Remove this when the services are updated to add real data for 5mld
-
-          validationService
-            .get(schema)
-            .validate[Registration](payload) match {
-
-            case Right(trustsRegistrationRequest) =>
-
-              draftIdOption match {
-                case Some(draftId) =>
-                  trustsService.registerTrust(trustsRegistrationRequest).flatMap {
-                    case response: RegistrationTrnResponse =>
-
-                      auditService.audit(
-                        event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
-                        registration = trustsRegistrationRequest,
-                        draftId = draftId,
-                        internalId = request.internalId,
-                        response = response
-                      )
-
-                      rosmPatternService.enrolAndLogResult(response.trn,
-                        request.affinityGroup,
-                        trustsRegistrationRequest.trust.details.trustTaxable.getOrElse(true)
-                      ) map {
-                        _ =>
-                          Ok(Json.toJson(response))
-                      }
-                  } recover {
-                    case AlreadyRegisteredException =>
-
-                      auditService.audit(
-                        event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
-                        registration = trustsRegistrationRequest,
-                        draftId = draftId,
-                        internalId = request.internalId,
-                        response = RegistrationFailureResponse(403, "ALREADY_REGISTERED", "Trust is already registered.")
-                      )
-
-                      logger.info(s"[registration][Session ID: ${request.sessionId}]" +
-                        " Returning already registered response.")
-                      Conflict(Json.toJson(alreadyRegisteredTrustsResponse))
-                    case NoMatchException =>
-
-                      auditService.audit(
-                        event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
-                        registration = trustsRegistrationRequest,
-                        draftId = draftId,
-                        internalId = request.internalId,
-                        response = RegistrationFailureResponse(403, "NO_MATCH", "There is no match in HMRC records.")
-                      )
-
-                      logger.info(s"[registration][Session ID: ${request.sessionId}]" +
-                        s" Returning no match response.")
-                      Forbidden(Json.toJson(noMatchRegistrationResponse))
-                    case _: ServiceNotAvailableException =>
-
-                      auditService.audit(
-                        event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
-                        registration = trustsRegistrationRequest,
-                        draftId = draftId,
-                        internalId = request.internalId,
-                        response = RegistrationFailureResponse(503, "SERVICE_UNAVAILABLE", "Dependent systems are currently not responding.")
-                      )
-
-                      logger.error(s"[registration][Session ID: ${request.sessionId}]" +
-                        s" Service unavailable response from DES")
-                      InternalServerError(Json.toJson(internalServerErrorResponse))
-                    case _: BadRequestException =>
-
-                      auditService.audit(
-                        event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
-                        registration = trustsRegistrationRequest,
-                        draftId = draftId,
-                        internalId = request.internalId,
-                        response = RegistrationFailureResponse(400, "INVALID_PAYLOAD", "Submission has not passed validation. Invalid payload..")
-                      )
-
-                      logger.error(s"[registration][Session ID: ${request.sessionId}]" +
-                        s" bad request response from DES")
-                      InternalServerError(Json.toJson(internalServerErrorResponse))
-                    case NonFatal(e) =>
-                      logger.error(s"[registration][Session ID: ${request.sessionId}]" +
-                        s" Exception received : $e.")
-                      InternalServerError(Json.toJson(internalServerErrorResponse))
-                  }
-                case None =>
-                  Future.successful(BadRequest(Json.toJson(noDraftIdProvided)))
-              }
-            case Left(_) =>
-              logger.error(s"[Session ID: ${request.sessionId}]" +
-                s" trusts validation errors, returning bad request.")
-              Future.successful(invalidRequestErrorResponse)
-          }
+      request.headers.get(Headers.DRAFT_REGISTRATION_ID) match {
+        case Some(draftId) =>
+          determineMldVersion(draftId)
+        case _ =>
+          logger.error(s"[Session ID: ${request.sessionId}] no draft id provided in headers")
+          Future.successful(BadRequest(Json.toJson(noDraftIdProvided)))
       }
+  }
+
+  private def determineMldVersion(draftId: String)
+                                 (implicit request: IdentifierRequest[JsValue], hc: HeaderCarrier): Future[Result] = {
+    trustsStoreService.is5mldEnabled.flatMap { is5mldEnabled =>
+      amendRegistration(draftId, is5mldEnabled)
+    }
+  }
+
+  private def amendRegistration(draftId: String, is5mldEnabled: Boolean)
+                               (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
+    val payload: JsValue = amendSubmissionDataService.applyRulesAndAddSubmissionDate(is5mldEnabled, request.body)
+    val schema: String = if (is5mldEnabled) {
+      config.trustsApiRegistrationSchema5MLD
+    } else {
+      config.trustsApiRegistrationSchema4MLD
+    }
+    validateRegistration(draftId, schema, payload)
+  }
+
+  private def validateRegistration(draftId: String, schema: String, data: JsValue)
+                                  (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
+    validationService.get(schema).validate[Registration](data.toString()) match {
+      case Right(registration) =>
+        register(registration, draftId)
+      case Left(validationErrors) =>
+        logger.error(s"[Session ID: ${request.sessionId}] problem validating submission: $validationErrors")
+        Future.successful(invalidRequestErrorResponse)
+    }
+  }
+
+  private def register(registration: Registration, draftId: String)
+                      (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
+    trustsService.registerTrust(registration).flatMap { response =>
+      auditResponseAndEnrol(response, registration, draftId)
+    } recover {
+      handleBusinessErrors(registration, draftId) orElse
+        handleHttpError(registration, draftId)
+    }
+  }
+
+  private def auditResponseAndEnrol(response: RegistrationTrnResponse, registration: Registration, draftId: String)
+                                   (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
+
+    auditService.audit(
+      event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
+      registration = registration,
+      draftId = draftId,
+      internalId = request.internalId,
+      response = response
+    )
+
+    rosmPatternService.enrolAndLogResult(
+      trn = response.trn,
+      affinityGroup = request.affinityGroup,
+      taxable = registration.trust.details.trustTaxable.getOrElse(true)
+    ) map { _ =>
+      Ok(Json.toJson(response))
+    }
+  }
+
+  private def handleBusinessErrors(registration: Registration, draftId: String)
+                                  (implicit request: IdentifierRequest[_]): PartialFunction[Throwable, Result] = {
+    case AlreadyRegisteredException =>
+      auditService.audit(
+        event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
+        registration = registration,
+        draftId = draftId,
+        internalId = request.internalId,
+        response = RegistrationFailureResponse(FORBIDDEN, "ALREADY_REGISTERED", "Trust is already registered.")
+      )
+      logger.info(s"[registration][Session ID: ${request.sessionId}] Returning already registered response.")
+      Conflict(Json.toJson(alreadyRegisteredTrustsResponse))
+
+    case NoMatchException =>
+      auditService.audit(
+        event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
+        registration = registration,
+        draftId = draftId,
+        internalId = request.internalId,
+        response = RegistrationFailureResponse(FORBIDDEN, "NO_MATCH", "There is no match in HMRC records.")
+      )
+      logger.info(s"[registration][Session ID: ${request.sessionId}] Returning no match response.")
+      Forbidden(Json.toJson(noMatchRegistrationResponse))
+  }
+
+  private def handleHttpError(registration: Registration, draftId: String)
+                             (implicit request: IdentifierRequest[_]): PartialFunction[Throwable, Result] = {
+    case _: ServiceNotAvailableException =>
+      auditService.audit(
+        event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
+        registration = registration,
+        draftId = draftId,
+        internalId = request.internalId,
+        response = RegistrationFailureResponse(SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", "Dependent systems are currently not responding.")
+      )
+      logger.error(s"[registration][Session ID: ${request.sessionId}] Service unavailable response from DES")
+      InternalServerError(Json.toJson(internalServerErrorResponse))
+
+    case _: BadRequestException =>
+      auditService.audit(
+        event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
+        registration = registration,
+        draftId = draftId,
+        internalId = request.internalId,
+        response = RegistrationFailureResponse(BAD_REQUEST, "INVALID_PAYLOAD", "Submission has not passed validation. Invalid payload.")
+      )
+      logger.error(s"[registration][Session ID: ${request.sessionId}] bad request response from DES")
+      InternalServerError(Json.toJson(internalServerErrorResponse))
+
+    case e =>
+      logger.error(s"[registration][Session ID: ${request.sessionId}] Exception received: $e.")
+      InternalServerError(Json.toJson(internalServerErrorResponse))
   }
 
 }

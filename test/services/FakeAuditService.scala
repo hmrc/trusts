@@ -16,19 +16,22 @@
 
 package services
 
+import javax.inject.Inject
 import models.Registration
-import models.registration.RegistrationResponse
+import models.registration.{RegistrationFailureResponse, RegistrationTrnResponse}
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
-import javax.inject.Inject
-
 class FakeAuditService @Inject()(auditConnector: AuditConnector)
   extends AuditService(auditConnector) {
 
-  override def audit(event: String, registration: Registration, draftId: String, internalId: String, response: RegistrationResponse)
+  override def audit(event: String, registration: Registration, draftId: String, internalId: String, response: RegistrationTrnResponse)
                     (implicit hc: HeaderCarrier): Unit = ()
+
+  override def audit(event: String, registration: Registration, draftId: String, internalId: String, response: RegistrationFailureResponse)
+                    (implicit hc: HeaderCarrier): Unit =
+    ()
 
   override def audit(event: String, request: JsValue, internalId: String, response: JsValue)
                     (implicit hc: HeaderCarrier): Unit = ()

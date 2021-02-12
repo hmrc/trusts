@@ -22,7 +22,7 @@ import com.github.fge.jsonschema.core.report.ProcessingReport
 import com.github.fge.jsonschema.main.{JsonSchema, JsonSchemaFactory}
 import models.Registration
 import play.api.Logging
-import play.api.libs.json.{JsPath, Json, JsonValidationError, Reads}
+import play.api.libs.json.{Format, JsPath, Json, JsonValidationError, Reads}
 import utils.BusinessValidation
 
 import javax.inject.Inject
@@ -110,5 +110,5 @@ class Validator(schema: JsonSchema) extends Logging {
 case class TrustsValidationError(message: String, location: String)
 
 object TrustsValidationError {
-  implicit val formats = Json.format[TrustsValidationError]
+  implicit val formats: Format[TrustsValidationError] = Json.format[TrustsValidationError]
 }

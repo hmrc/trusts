@@ -16,15 +16,14 @@
 
 package services
 
+import javax.inject.Inject
 import models.Registration
-import models.auditing.{GetTrustOrEstateAuditEvent, TrustAuditing, TrustRegistrationSubmissionAuditEvent}
-import models.registration.RegistrationResponse
+import models.auditing.{GetTrustOrEstateAuditEvent, TrustAuditing, TrustRegistrationFailureAuditEvent, TrustRegistrationSubmissionAuditEvent}
+import models.registration.{RegistrationFailureResponse, RegistrationTrnResponse}
 import models.variation.VariationResponse
 import play.api.libs.json.{JsPath, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-
-import javax.inject.Inject
 
 class AuditService @Inject()(auditConnector: AuditConnector){
 
@@ -34,7 +33,7 @@ class AuditService @Inject()(auditConnector: AuditConnector){
             registration: Registration,
             draftId: String,
             internalId: String,
-            response: RegistrationResponse)(implicit hc: HeaderCarrier): Unit = {
+            response: RegistrationTrnResponse)(implicit hc: HeaderCarrier): Unit = {
 
       val auditPayload = TrustRegistrationSubmissionAuditEvent(
         registration = registration,
@@ -47,6 +46,25 @@ class AuditService @Inject()(auditConnector: AuditConnector){
         event,
         auditPayload
       )
+  }
+
+  def audit(event: String,
+            registration: Registration,
+            draftId: String,
+            internalId: String,
+            response: RegistrationFailureResponse)(implicit hc: HeaderCarrier): Unit = {
+
+    val auditPayload = TrustRegistrationFailureAuditEvent(
+      registration = registration,
+      draftId = draftId,
+      internalAuthId = internalId,
+      response = response
+    )
+
+    auditConnector.sendExplicitAudit(
+      event,
+      auditPayload
+    )
   }
 
   def audit(event: String,

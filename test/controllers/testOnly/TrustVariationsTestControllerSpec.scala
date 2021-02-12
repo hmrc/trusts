@@ -16,9 +16,12 @@
 
 package controllers.testOnly
 
-import java.util.UUID
-
 import base.BaseSpec
+import config.AppConfig
+import controllers._
+import controllers.actions.FakeIdentifierAction
+import exceptions._
+import models.variation.VariationResponse
 import org.mockito.Matchers.{eq => Meq, _}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.IntegrationPatience
@@ -27,17 +30,13 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers
 import play.api.test.Helpers._
+import services._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import config.AppConfig
-import controllers._
-import controllers.actions.FakeIdentifierAction
-import exceptions._
-import models.variation.VariationResponse
-import services._
 import utils.Headers
 
+import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 class TrustVariationsTestControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach  with IntegrationPatience {
@@ -53,8 +52,6 @@ class TrustVariationsTestControllerSpec extends BaseSpec with BeforeAndAfter wit
 
   private val auditService = new AuditService(mockAuditConnector)
   private val validationService = new ValidationService()
-
-  private val mockVariationService = mock[VariationService]
 
   private val mockTrustsStoreService = mock[TrustsStoreService]
 
@@ -74,7 +71,6 @@ class TrustVariationsTestControllerSpec extends BaseSpec with BeforeAndAfter wit
       mockAuditService,
       validationService,
       mockConfig,
-      mockVariationService,
       responseHandler,
       mockTrustsStoreService,
       Helpers.stubControllerComponents()
@@ -123,7 +119,6 @@ class TrustVariationsTestControllerSpec extends BaseSpec with BeforeAndAfter wit
           auditService,
           validationService,
           mockConfig,
-          mockVariationService,
           responseHandler,
           mockTrustsStoreService,
           Helpers.stubControllerComponents())

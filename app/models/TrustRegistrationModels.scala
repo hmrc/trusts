@@ -35,7 +35,9 @@ case class Registration(matchData: Option[MatchData],
                         agentDetails: Option[AgentDetails] = None)
 
 object Registration {
- implicit val registrationReads :Reads[Registration] = Json.reads[Registration]
+
+ implicit val registrationReads: Reads[Registration] = Json.reads[Registration]
+
  implicit val writeToDes :Writes[Registration] = (
     (JsPath \ "matchData").writeNullable[MatchData] and
     (JsPath \ "correspondence").write[Correspondence] and
