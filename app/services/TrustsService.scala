@@ -18,17 +18,17 @@ package services
 
 import connector.{SubscriptionConnector, TrustsConnector}
 import exceptions.InternalServerErrorException
-import javax.inject.Inject
 import models._
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
 import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse, TrustProcessedResponse}
-import models.registration.RegistrationTrnResponse
+import models.registration.RegistrationResponse
 import models.tax_enrolments.SubscriptionIdResponse
 import models.variation.VariationResponse
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import repositories.CacheRepository
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -40,7 +40,7 @@ class TrustsService @Inject()(val trustsConnector: TrustsConnector,
     trustsConnector.getTrustInfo(identifier).map {
       case response: GetTrustSuccessResponse => response.responseHeader.formBundleNo
       case response =>
-        val msg = s"Failed to retrieve latest form bundle no from ETMP : $response"
+        val msg = s"Failed to retrieve latest form bundle no from ETMP: $response"
         logger.warn(s"[getTrustInfoFormBundleNo][UTR/URN: $identifier] $msg")
         throw InternalServerErrorException(s"Submission could not proceed, $msg")
     }
@@ -49,7 +49,7 @@ class TrustsService @Inject()(val trustsConnector: TrustsConnector,
     trustsConnector.checkExistingTrust(existingTrustCheckRequest)
   }
 
-  def registerTrust(registration: Registration): Future[RegistrationTrnResponse] = {
+  def registerTrust(registration: Registration): Future[RegistrationResponse] = {
     trustsConnector.registerTrust(registration)
   }
 
@@ -57,7 +57,7 @@ class TrustsService @Inject()(val trustsConnector: TrustsConnector,
     subscriptionConnector.getSubscriptionId(trn)
   }
 
-  def resetCache(identifier: String, internalId: String) : Future[Unit] = {
+  def resetCache(identifier: String, internalId: String): Future[Unit] = {
     repository.resetCache(identifier, internalId).map { _ =>
       Future.successful(())
     }
@@ -79,13 +79,13 @@ class TrustsService @Inject()(val trustsConnector: TrustsConnector,
       case Some(x) =>
         x.validate[GetTrustSuccessResponse].fold(
           errs => {
-              logger.error(s"Unable to parse json from cache as GetTrustSuccessResponse - $errs")
+            logger.error(s"Unable to parse json from cache as GetTrustSuccessResponse - $errs")
             Future.failed[GetTrustResponse](new Exception(errs.toString))
           },
           response => {
             Future.successful(response)
           }
-      )
+        )
       case None =>
         refreshCacheAndGetTrustInfo(identifier, internalId)
     }
@@ -94,5 +94,3 @@ class TrustsService @Inject()(val trustsConnector: TrustsConnector,
   def trustVariation(trustVariation: JsValue): Future[VariationResponse] =
     trustsConnector.trustVariation(trustVariation: JsValue)
 }
-
-

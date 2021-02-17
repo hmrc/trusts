@@ -16,14 +16,11 @@
 
 package connector
 
-import java.util.UUID
-
 import config.AppConfig
-import javax.inject.Inject
 import models._
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
 import models.get_trust.GetTrustResponse
-import models.registration.{RegistrationResponse, RegistrationTrnResponse}
+import models.registration.RegistrationResponse
 import models.variation.VariationResponse
 import play.api.Logging
 import play.api.http.HeaderNames
@@ -33,14 +30,16 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utils.Constants._
 import utils.Session
 
+import java.util.UUID
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
 class TrustsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreService: TrustsStoreService) extends Logging {
 
-  private lazy val trustsServiceUrl : String = s"${config.registrationBaseUrl}/trusts"
-  private lazy val matchTrustsEndpoint : String = s"$trustsServiceUrl/match"
-  private lazy val trustRegistrationEndpoint : String = s"$trustsServiceUrl/registration"
+  private lazy val trustsServiceUrl: String = s"${config.registrationBaseUrl}/trusts"
+  private lazy val matchTrustsEndpoint: String = s"$trustsServiceUrl/match"
+  private lazy val trustRegistrationEndpoint: String = s"$trustsServiceUrl/registration"
   private lazy val getTrustOrEstateUrl: String =  s"${config.getTrustOrEstateUrl}/trusts"
 
   def get4MLDTrustOrEstateEndpoint(utr: String): String = s"$getTrustOrEstateUrl/registration/$utr"
@@ -53,12 +52,12 @@ class TrustsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStore
     }
   }
 
-  private lazy val trustVariationsEndpoint : String = s"${config.varyTrustOrEstateUrl}/trusts/variation"
+  private lazy val trustVariationsEndpoint: String = s"${config.varyTrustOrEstateUrl}/trusts/variation"
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "CorrelationId"
 
-  private def registrationHeaders(correlationId : String) : Seq[(String, String)] =
+  private def registrationHeaders(correlationId: String): Seq[(String, String)] =
     Seq(
       HeaderNames.AUTHORIZATION -> s"Bearer ${config.registrationToken}",
       CONTENT_TYPE -> CONTENT_TYPE_JSON,
@@ -73,13 +72,13 @@ class TrustsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStore
 
     logger.info(s"[Session ID: ${Session.id(hc)}] matching trust for correlationId: $correlationId")
 
-    val response = http.POST[JsValue, ExistingCheckResponse](matchTrustsEndpoint, Json.toJson(existingTrustCheckRequest))
-    (implicitly[Writes[JsValue]], ExistingCheckResponse.httpReads, implicitly[HeaderCarrier](hc),implicitly[ExecutionContext])
-
-    response
+    http.POST[JsValue, ExistingCheckResponse](
+      matchTrustsEndpoint,
+      Json.toJson(existingTrustCheckRequest)
+    )(implicitly[Writes[JsValue]], ExistingCheckResponse.httpReads, implicitly[HeaderCarrier](hc), implicitly[ExecutionContext])
   }
 
-  def registerTrust(registration: Registration): Future[RegistrationTrnResponse] = {
+  def registerTrust(registration: Registration): Future[RegistrationResponse] = {
     val correlationId = UUID.randomUUID().toString
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
@@ -88,18 +87,16 @@ class TrustsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStore
 
     logger.info(s"[Session ID: ${Session.id(hc)}] registering trust for correlationId: $correlationId")
 
-    val response = http.POST[JsValue, RegistrationTrnResponse](
+    http.POST[JsValue, RegistrationResponse](
       trustRegistrationEndpoint,
       Json.toJson(registration)
     )(implicitly[Writes[JsValue]], reads, implicitly[HeaderCarrier](hc), implicitly[ExecutionContext])
-
-    response
   }
 
   def getTrustInfo(identifier: String): Future[GetTrustResponse] = {
     val correlationId = UUID.randomUUID().toString
 
-    implicit val hc : HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
+    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
     logger.info(s"[Session ID: ${Session.id(hc)}][UTR/URN: $identifier]" +
       s" getting playback for trust for correlationId: $correlationId")
