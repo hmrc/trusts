@@ -27,10 +27,4 @@ object AddBeneficiaryTransform {
   val key = "AddBeneficiaryTransform"
 
   implicit val format: Format[AddBeneficiaryTransform] = Json.format[AddBeneficiaryTransform]
-
-  // TODO - remove code once deployed and users no longer using old transforms
-  def reads[T](`type`: String)(implicit rds: Reads[T], wts: Writes[T]): Reads[AddBeneficiaryTransform] =
-    (__ \ "newBeneficiary").read[T].map {
-      entity => AddBeneficiaryTransform(Json.toJson(entity), `type`)
-    }
 }
