@@ -17,7 +17,7 @@
 package services
 
 import exceptions.EtmpCacheDataStaleException
-import models.get_trust.{ResponseHeader, TrustProcessedResponse}
+import models.get_trust.{GetTrustSuccessResponse, ResponseHeader, TrustProcessedResponse}
 import models.variation.VariationResponse
 import models.{DeclarationForApi, DeclarationName, NameType}
 import org.mockito.ArgumentCaptor
@@ -30,9 +30,9 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import transformers.DeclarationTransformer
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.JsonFixtures
-
+import utils.{JsonFixtures, JsonUtils, NonTaxable5MLDFixtures}
 import java.time.LocalDate
+
 import scala.concurrent.Future
 
 class VariationServiceSpec extends WordSpec
@@ -47,8 +47,10 @@ class VariationServiceSpec extends WordSpec
   private val utr = "1234567890"
   private val internalId = "InternalId"
   private val fullEtmpResponseJson = get4MLDTrustResponse
+  private val fullEtmpResponseJson5MLD = JsonUtils.getJsonValueFromString(NonTaxable5MLDFixtures.DES.get5MLDTrustNonTaxableResponse)
   private val transformedEtmpResponseJson = Json.parse("""{ "field": "Arbitrary transformed JSON" }""")
   private val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
+  private val trustInfoJson5MLD = (fullEtmpResponseJson5MLD \ "trustOrEstateDisplay").as[JsValue]
   private val transformedJson = Json.obj("field" -> "value")
 
   private val declaration = DeclarationName(
@@ -128,11 +130,11 @@ class VariationServiceSpec extends WordSpec
     val auditService = app.injector.instanceOf[FakeAuditService]
     val transformer = mock[DeclarationTransformer]
 
-    when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any())).thenReturn(JsSuccess(trustInfoJson))
+    when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any())).thenReturn(JsSuccess(trustInfoJson5MLD))
     when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
     when(trustsService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
 
-    val response = TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
+    val response = TrustProcessedResponse(trustInfoJson5MLD, ResponseHeader("Processed", formBundleNo))
 
     when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId))).thenReturn(Future.successful(
       response
@@ -155,7 +157,7 @@ class VariationServiceSpec extends WordSpec
 
     whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { variationResponse => {
       variationResponse mustBe VariationResponse("TVN34567890")
-      verify(transformationService, times( 1)).applyDeclarationTransformations(equalTo(utr), equalTo(internalId), equalTo(trustInfoJson))(any[HeaderCarrier])
+      verify(transformationService, times( 1)).applyDeclarationTransformations(equalTo(utr), equalTo(internalId), equalTo(trustInfoJson5MLD))(any[HeaderCarrier])
       verify(transformer, times(1)).transform(equalTo(transformedResponse), equalTo(response.getTrust), equalTo(declarationForApi), any(), equalTo(true))
       val arg: ArgumentCaptor[JsValue] = ArgumentCaptor.forClass(classOf[JsValue])
       verify(trustsService, times(1)).trustVariation(arg.capture())

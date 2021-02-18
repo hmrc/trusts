@@ -21,9 +21,10 @@ import models.Registration
 import models.auditing.{GetTrustOrEstateAuditEvent, TrustAuditing, TrustRegistrationFailureAuditEvent, TrustRegistrationSubmissionAuditEvent}
 import models.registration.{RegistrationFailureResponse, RegistrationTrnResponse}
 import models.variation.VariationResponse
-import play.api.libs.json.{JsPath, JsValue, Json}
+import play.api.libs.json.{JsDefined, JsPath, JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import utils.Constants._
 
 class AuditService @Inject()(auditConnector: AuditConnector){
 
@@ -96,10 +97,12 @@ class AuditService @Inject()(auditConnector: AuditConnector){
 
   def auditVariationSubmitted(internalId: String,
                               payload: JsValue,
-                              response: VariationResponse
+                              variationResponse: VariationResponse
                              )(implicit hc: HeaderCarrier): Unit = {
     val hasField = (field: String) =>
       payload.transform((JsPath \ field).json.pick).isSuccess
+
+    val trustTaxable = Json.toJson(payload) \ DETAILS \ TRUSTS \ DETAILS \ TAXABLE
 
     val isAgent = hasField("agentDetails")
     val isClose = hasField("trustEndDate")
@@ -112,11 +115,20 @@ class AuditService @Inject()(auditConnector: AuditConnector){
 
     }
 
+    val response = trustTaxable match {
+      case JsDefined(value) =>
+        Json.obj(
+        "tvn" -> variationResponse.tvn,
+        "trustTaxable"-> value
+        )
+      case _ => Json.toJson(variationResponse)
+    }
+
     audit(
       event = event,
       request = payload,
       internalId = internalId,
-      response = Json.toJson(response)
+      response = response
     )
   }
 
