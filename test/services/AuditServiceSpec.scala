@@ -79,11 +79,22 @@ class AuditServiceSpec extends BaseSpec {
         val service = new AuditService(connector)
 
         val request = Json.obj(
-          "trustEndDate" -> "2012-02-12"
+          "trustEndDate" -> "2012-02-12",
+          "details" -> Json.obj(
+            "trust" -> Json.obj(
+              "details" -> Json.obj(
+                "trustTaxable" -> true
+              )
+            )
+          )
         )
 
-        val response = VariationResponse("TRN123456")
-        service.auditVariationSubmitted("internalId", request, response)
+        val response = Json.obj(
+          "tvn" -> "TRN123456",
+          "trustTaxable" -> true
+        )
+
+        service.auditVariationSubmitted("internalId", request, VariationResponse("TRN123456"))
 
         val expectedAuditData = GetTrustOrEstateAuditEvent(
           request,
@@ -104,11 +115,22 @@ class AuditServiceSpec extends BaseSpec {
 
         val request = Json.obj(
           "trustEndDate" -> "2012-02-12",
-          "agentDetails" -> Json.obj() // Doesn't care about contents of object
+          "agentDetails" -> Json.obj(), // Doesn't care about contents of object
+          "details" -> Json.obj(
+            "trust" -> Json.obj(
+              "details" -> Json.obj(
+                "trustTaxable" -> false
+              )
+            )
+          )
         )
 
-        val response = VariationResponse("TRN123456")
-        service.auditVariationSubmitted("internalId", request, response)
+        val response = Json.obj(
+          "tvn" -> "TRN123456",
+          "trustTaxable" -> false
+        )
+
+        service.auditVariationSubmitted("internalId", request, VariationResponse("TRN123456"))
 
         val expectedAuditData = GetTrustOrEstateAuditEvent(
           request,

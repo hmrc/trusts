@@ -96,10 +96,12 @@ class AuditService @Inject()(auditConnector: AuditConnector){
 
   def auditVariationSubmitted(internalId: String,
                               payload: JsValue,
-                              response: VariationResponse
+                              variationResponse: VariationResponse
                              )(implicit hc: HeaderCarrier): Unit = {
     val hasField = (field: String) =>
       payload.transform((JsPath \ field).json.pick).isSuccess
+
+    val trustTaxable = Json.toJson(payload) \ "details" \ "trust" \ "details" \ "trustTaxable"
 
     val isAgent = hasField("agentDetails")
     val isClose = hasField("trustEndDate")
@@ -112,11 +114,18 @@ class AuditService @Inject()(auditConnector: AuditConnector){
 
     }
 
+    val response = if (trustTaxable.isDefined) {
+      Json.obj(
+        "tvn" -> variationResponse.tvn,
+        "trustTaxable"-> trustTaxable.get
+      )
+    } else {Json.toJson(variationResponse)}
+
     audit(
       event = event,
       request = payload,
       internalId = internalId,
-      response = Json.toJson(response)
+      response = response
     )
   }
 
