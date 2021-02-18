@@ -57,7 +57,6 @@ object Constants {
   val TRUSTEES = "trustees"
   val LEAD_TRUSTEE = "leadTrustees"
 
-  val TRUSTS = "trust"
   val DETAILS = "details"
 
   val MONEY_ASSET = "monetary"

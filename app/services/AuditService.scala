@@ -16,15 +16,16 @@
 
 package services
 
-import javax.inject.Inject
 import models.Registration
 import models.auditing.{GetTrustOrEstateAuditEvent, TrustAuditing, TrustRegistrationFailureAuditEvent, TrustRegistrationSubmissionAuditEvent}
 import models.registration.{RegistrationFailureResponse, RegistrationTrnResponse}
 import models.variation.VariationResponse
-import play.api.libs.json.{JsDefined, JsPath, JsValue, Json}
+import play.api.libs.json.{JsBoolean, JsPath, JsSuccess, JsValue, Json, Reads}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import utils.Constants._
+
+import javax.inject.Inject
 
 class AuditService @Inject()(auditConnector: AuditConnector){
 
@@ -36,17 +37,17 @@ class AuditService @Inject()(auditConnector: AuditConnector){
             internalId: String,
             response: RegistrationTrnResponse)(implicit hc: HeaderCarrier): Unit = {
 
-      val auditPayload = TrustRegistrationSubmissionAuditEvent(
-        registration = registration,
-        draftId = draftId,
-        internalAuthId = internalId,
-        response = response
-      )
+    val auditPayload = TrustRegistrationSubmissionAuditEvent(
+      registration = registration,
+      draftId = draftId,
+      internalAuthId = internalId,
+      response = response
+    )
 
     auditConnector.sendExplicitAudit(
-        event,
-        auditPayload
-      )
+      event,
+      auditPayload
+    )
   }
 
   def audit(event: String,
@@ -73,26 +74,26 @@ class AuditService @Inject()(auditConnector: AuditConnector){
             internalId: String,
             response: JsValue)(implicit hc: HeaderCarrier): Unit = {
 
-      val auditPayload = GetTrustOrEstateAuditEvent(
-        request = request,
-        internalAuthId = internalId,
-        response = response
-      )
+    val auditPayload = GetTrustOrEstateAuditEvent(
+      request = request,
+      internalAuthId = internalId,
+      response = response
+    )
 
     auditConnector.sendExplicitAudit(
-        event,
-        auditPayload
-      )
+      event,
+      auditPayload
+    )
   }
 
   def auditErrorResponse(eventName: String, request: JsValue, internalId: String, errorReason: String)(implicit hc: HeaderCarrier): Unit = {
 
-      audit(
-        event = eventName,
-        request = request,
-        internalId = internalId,
-        response = Json.obj("errorReason" -> errorReason)
-      )
+    audit(
+      event = eventName,
+      request = request,
+      internalId = internalId,
+      response = Json.obj("errorReason" -> errorReason)
+    )
   }
 
   def auditVariationSubmitted(internalId: String,
@@ -102,8 +103,6 @@ class AuditService @Inject()(auditConnector: AuditConnector){
     val hasField = (field: String) =>
       payload.transform((JsPath \ field).json.pick).isSuccess
 
-    val trustTaxable = Json.toJson(payload) \ DETAILS \ TRUSTS \ DETAILS \ TAXABLE
-
     val isAgent = hasField("agentDetails")
     val isClose = hasField("trustEndDate")
 
@@ -112,14 +111,14 @@ class AuditService @Inject()(auditConnector: AuditConnector){
       case (false, true) => TrustAuditing.CLOSURE_SUBMITTED_BY_ORGANISATION
       case (true, false) => TrustAuditing.VARIATION_SUBMITTED_BY_AGENT
       case _ => TrustAuditing.CLOSURE_SUBMITTED_BY_AGENT
-
     }
 
-    val response = trustTaxable match {
-      case JsDefined(value) =>
+    val trustTaxablePick: Reads[JsBoolean] = (TRUST \ DETAILS \ TAXABLE).json.pick[JsBoolean]
+    val response = payload.transform(trustTaxablePick) match {
+      case JsSuccess(JsBoolean(trustTaxable), _) =>
         Json.obj(
-        "tvn" -> variationResponse.tvn,
-        "trustTaxable"-> value
+          "tvn" -> variationResponse.tvn,
+          "trustTaxable" -> trustTaxable
         )
       case _ => Json.toJson(variationResponse)
     }
