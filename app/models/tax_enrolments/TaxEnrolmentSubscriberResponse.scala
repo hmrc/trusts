@@ -16,36 +16,30 @@
 
 package models.tax_enrolments
 
+import exceptions._
 import play.api.Logging
 import play.api.http.Status._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
-import exceptions._
 
+sealed trait TaxEnrolmentSubscriberResponse
 
-sealed trait TaxEnrolmentSuscriberResponse
+case object TaxEnrolmentSuccess extends TaxEnrolmentSubscriberResponse
+case object TaxEnrolmentFailure extends TaxEnrolmentSubscriberResponse
+case object TaxEnrolmentNotProcessed extends TaxEnrolmentSubscriberResponse
 
-case object TaxEnrolmentSuccess extends TaxEnrolmentSuscriberResponse
-case object TaxEnrolmentFailure extends TaxEnrolmentSuscriberResponse
-case object TaxEnrolmentNotProcessed extends TaxEnrolmentSuscriberResponse
+object TaxEnrolmentSubscriberResponse extends Logging {
 
-object TaxEnrolmentSuscriberResponse extends Logging {
-
-  implicit lazy val httpReads: HttpReads[TaxEnrolmentSuscriberResponse] =
-    new HttpReads[TaxEnrolmentSuscriberResponse] {
-      override def read(method: String, url: String, response: HttpResponse): TaxEnrolmentSuscriberResponse = {
-
-        logger.info(s"Response status received from tax enrolment: ${response.status}")
-        response.status match {
-          case NO_CONTENT =>
-            TaxEnrolmentSuccess
-          case BAD_REQUEST =>
-            logger.error("Bad request response received from tax enrolment")
-            throw  BadRequestException
-          case status =>
-            logger.error(s"Error response from tax enrolment:  $status")
-            throw  InternalServerErrorException(s"Error response from tax enrolment:  $status")
-        }
-      }
+  implicit lazy val httpReads: HttpReads[TaxEnrolmentSubscriberResponse] = (_: String, _: String, response: HttpResponse) => {
+    logger.info(s"Response status received from tax enrolment: ${response.status}")
+    response.status match {
+      case NO_CONTENT =>
+        TaxEnrolmentSuccess
+      case BAD_REQUEST =>
+        logger.error("Bad request response received from tax enrolment")
+        throw BadRequestException
+      case status =>
+        logger.error(s"Error response from tax enrolment: $status")
+        throw InternalServerErrorException(s"Error response from tax enrolment: $status")
     }
+  }
 }
-

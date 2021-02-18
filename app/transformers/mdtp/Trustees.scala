@@ -23,7 +23,7 @@ object Trustees {
 
   private val pathToTrustees = JsPath \ 'details \ 'trust \ 'entities \ 'trustees
 
-  def transform(response : JsValue) : Reads[JsObject] = {
+  def transform(response: JsValue): Reads[JsObject] = {
     response.transform(pathToTrustees.json.pick).fold(
       _ => {
         JsPath.json.update(
@@ -41,6 +41,8 @@ object Trustees {
             Json.obj(
               "trusteeOrg" -> Json.toJson(trusteeOrg)(TrusteeOrgType.writeToMaintain)
             )
+          case _ =>
+            Json.obj()
         })
 
         JsPath.json.update(

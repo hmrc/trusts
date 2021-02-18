@@ -19,7 +19,7 @@ package connector
 import com.google.inject.ImplementedBy
 import config.AppConfig
 import javax.inject.Inject
-import models.tax_enrolments.{TaxEnrolmentSubscription, TaxEnrolmentSuscriberResponse}
+import models.tax_enrolments.{TaxEnrolmentSubscription, TaxEnrolmentSubscriberResponse}
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
@@ -32,10 +32,7 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
                                           config: AppConfig
                                          ) extends TaxEnrolmentConnector with Logging {
 
-  def headers =
-    Seq(
-      CONTENT_TYPE -> CONTENT_TYPE_JSON
-    )
+  private def headers = Seq(CONTENT_TYPE -> CONTENT_TYPE_JSON)
 
   override def getTaxEnrolmentSubscription(subscriptionId: String, taxable: Boolean, trn: String): TaxEnrolmentSubscription = {
     if (taxable) {
@@ -52,21 +49,22 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
   }
 
   override def getResponse(subscriptionId: String,
-                  taxable: Boolean,
-                  trn: String)(implicit hc: HeaderCarrier) :  Future[TaxEnrolmentSuscriberResponse] = {
+                           taxable: Boolean,
+                           trn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
 
     val taxEnrolmentsEndpoint = s"${config.taxEnrolmentsUrl}/tax-enrolments/subscriptions/$subscriptionId/subscriber"
     val taxEnrolmentHeaders = hc.withExtraHeaders(headers: _*)
 
     val taxEnrolmentSubscriptionRequest: TaxEnrolmentSubscription = getTaxEnrolmentSubscription(subscriptionId, taxable, trn)
 
-    val response = http.PUT[JsValue, TaxEnrolmentSuscriberResponse](taxEnrolmentsEndpoint, Json.toJson(taxEnrolmentSubscriptionRequest))
-    (Writes.JsValueWrites ,TaxEnrolmentSuscriberResponse.httpReads,taxEnrolmentHeaders.headers, global)
-    response
+    http.PUT[JsValue, TaxEnrolmentSubscriberResponse](
+      taxEnrolmentsEndpoint,
+      Json.toJson(taxEnrolmentSubscriptionRequest)
+    )(Writes.JsValueWrites, TaxEnrolmentSubscriberResponse.httpReads, taxEnrolmentHeaders, global)
   }
 
 
-  override def enrolSubscriber(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier) :  Future[TaxEnrolmentSuscriberResponse] = {
+  override def enrolSubscriber(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
     getResponse(subscriptionId, taxable, trn)
   }
 
@@ -75,6 +73,6 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
 @ImplementedBy(classOf[TaxEnrolmentConnectorImpl])
 trait TaxEnrolmentConnector {
   def getTaxEnrolmentSubscription(subscriptionId: String, taxable: Boolean, trn: String): TaxEnrolmentSubscription
-  def enrolSubscriber(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier):  Future[TaxEnrolmentSuscriberResponse]
-  def getResponse(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier) : Future[TaxEnrolmentSuscriberResponse]
+  def enrolSubscriber(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse]
+  def getResponse(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse]
 }

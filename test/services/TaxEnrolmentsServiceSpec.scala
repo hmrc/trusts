@@ -43,7 +43,7 @@ class TaxEnrolmentsServiceSpec extends BaseSpec {
     val trn = "XTRN1234567"
 
     "return TaxEnrolmentSuccess  " when {
-      "connector returns success taxEnrolmentSuscriberResponse." in {
+      "connector returns success taxEnrolmentSubscriberResponse." in {
         when(mockConnector.enrolSubscriber("123456789", taxable, trn)).
           thenReturn(Future.successful(TaxEnrolmentSuccess))
 
