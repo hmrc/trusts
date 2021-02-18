@@ -18,18 +18,17 @@ package controllers
 
 import config.AppConfig
 import controllers.actions.IdentifierAction
-import exceptions._
 import models._
 import models.auditing.TrustAuditing
 import models.registration.ApiResponse._
 import models.registration.RegistrationTrnResponse._
-import models.registration.{RegistrationFailureResponse, RegistrationTrnResponse}
+import models.registration._
 import models.requests.IdentifierRequest
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents, Result}
 import services._
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
+import uk.gov.hmrc.http.HeaderCarrier
 import utils.ErrorResponses._
 import utils.Headers
 
@@ -91,11 +90,19 @@ class RegisterTrustController @Inject()(
 
   private def register(registration: Registration, draftId: String)
                       (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
-    trustsService.registerTrust(registration).flatMap { response =>
-      auditResponseAndEnrol(response, registration, draftId)
-    } recover {
-      handleBusinessErrors(registration, draftId) orElse
-        handleHttpError(registration, draftId)
+    trustsService.registerTrust(registration).flatMap {
+      case response: RegistrationTrnResponse =>
+        auditResponseAndEnrol(response, registration, draftId)
+      case AlreadyRegisteredResponse =>
+        handleAlreadyRegisteredResponse(registration, draftId)
+      case NoMatchResponse =>
+        handleNoMatchResponse(registration, draftId)
+      case BadRequestResponse =>
+        handleBadRequestResponse(registration, draftId)
+      case ServiceUnavailableResponse =>
+        handleServiceUnavailableResponse(registration, draftId)
+      case _ =>
+        handleInternalServerErrorResponse()
     }
   }
 
@@ -119,58 +126,61 @@ class RegisterTrustController @Inject()(
     }
   }
 
-  private def handleBusinessErrors(registration: Registration, draftId: String)
-                                  (implicit request: IdentifierRequest[_]): PartialFunction[Throwable, Result] = {
-    case AlreadyRegisteredException =>
-      auditService.audit(
-        event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
-        registration = registration,
-        draftId = draftId,
-        internalId = request.internalId,
-        response = RegistrationFailureResponse(FORBIDDEN, "ALREADY_REGISTERED", "Trust is already registered.")
-      )
-      logger.info(s"[registration][Session ID: ${request.sessionId}] Returning already registered response.")
-      Conflict(Json.toJson(alreadyRegisteredTrustsResponse))
-
-    case NoMatchException =>
-      auditService.audit(
-        event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
-        registration = registration,
-        draftId = draftId,
-        internalId = request.internalId,
-        response = RegistrationFailureResponse(FORBIDDEN, "NO_MATCH", "There is no match in HMRC records.")
-      )
-      logger.info(s"[registration][Session ID: ${request.sessionId}] Returning no match response.")
-      Forbidden(Json.toJson(noMatchRegistrationResponse))
+  private def handleAlreadyRegisteredResponse(registration: Registration, draftId: String)
+                                             (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
+    auditService.audit(
+      event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
+      registration = registration,
+      draftId = draftId,
+      internalId = request.internalId,
+      response = RegistrationFailureResponse(FORBIDDEN, "ALREADY_REGISTERED", "Trust is already registered.")
+    )
+    logger.info(s"[registration][Session ID: ${request.sessionId}] Returning already registered response.")
+    Future.successful(Conflict(Json.toJson(alreadyRegisteredTrustsResponse)))
   }
 
-  private def handleHttpError(registration: Registration, draftId: String)
-                             (implicit request: IdentifierRequest[_]): PartialFunction[Throwable, Result] = {
-    case _: ServiceNotAvailableException =>
-      auditService.audit(
-        event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
-        registration = registration,
-        draftId = draftId,
-        internalId = request.internalId,
-        response = RegistrationFailureResponse(SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", "Dependent systems are currently not responding.")
-      )
-      logger.error(s"[registration][Session ID: ${request.sessionId}] Service unavailable response from DES")
-      InternalServerError(Json.toJson(internalServerErrorResponse))
+  private def handleNoMatchResponse(registration: Registration, draftId: String)
+                                   (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
+    auditService.audit(
+      event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
+      registration = registration,
+      draftId = draftId,
+      internalId = request.internalId,
+      response = RegistrationFailureResponse(FORBIDDEN, "NO_MATCH", "There is no match in HMRC records.")
+    )
+    logger.info(s"[registration][Session ID: ${request.sessionId}] Returning no match response.")
+    Future.successful(Forbidden(Json.toJson(noMatchRegistrationResponse)))
+  }
 
-    case _: BadRequestException =>
-      auditService.audit(
-        event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
-        registration = registration,
-        draftId = draftId,
-        internalId = request.internalId,
-        response = RegistrationFailureResponse(BAD_REQUEST, "INVALID_PAYLOAD", "Submission has not passed validation. Invalid payload.")
-      )
-      logger.error(s"[registration][Session ID: ${request.sessionId}] bad request response from DES")
-      InternalServerError(Json.toJson(internalServerErrorResponse))
+  private def handleBadRequestResponse(registration: Registration, draftId: String)
+                                      (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
+    auditService.audit(
+      event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
+      registration = registration,
+      draftId = draftId,
+      internalId = request.internalId,
+      response = RegistrationFailureResponse(BAD_REQUEST, "INVALID_PAYLOAD", "Submission has not passed validation. Invalid payload.")
+    )
+    logger.error(s"[registration][Session ID: ${request.sessionId}] bad request response from DES")
+    Future.successful(InternalServerError(Json.toJson(internalServerErrorResponse)))
+  }
 
-    case e =>
-      logger.error(s"[registration][Session ID: ${request.sessionId}] Exception received: $e.")
-      InternalServerError(Json.toJson(internalServerErrorResponse))
+  private def handleServiceUnavailableResponse(registration: Registration, draftId: String)
+                                              (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
+    auditService.audit(
+      event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
+      registration = registration,
+      draftId = draftId,
+      internalId = request.internalId,
+      response = RegistrationFailureResponse(SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", "Dependent systems are currently not responding.")
+    )
+    logger.error(s"[registration][Session ID: ${request.sessionId}] Service unavailable response from DES")
+    Future.successful(InternalServerError(Json.toJson(internalServerErrorResponse)))
+  }
+
+  private def handleInternalServerErrorResponse()(implicit request: IdentifierRequest[JsValue]): Future[Result] = {
+    logger.error(s"[registration][Session ID: ${request.sessionId}] Internal server error.")
+    Future.successful(InternalServerError(Json.toJson(internalServerErrorResponse)))
   }
 
 }

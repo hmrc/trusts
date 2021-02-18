@@ -17,20 +17,19 @@
 package controllers
 
 import base.BaseSpec
+import controllers.actions.FakeIdentifierAction
+import models._
+import models.registration._
+import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSuccess}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{when, _}
 import play.api.libs.json.Json
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers
 import play.api.test.Helpers.{status, _}
+import services._
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.http.HeaderCarrier
-import controllers.actions.FakeIdentifierAction
-import exceptions._
-import models._
-import models.registration.RegistrationTrnResponse
-import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSuccess}
-import services._
 
 import scala.concurrent.Future
 
@@ -213,7 +212,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         )
 
         when(mockTrustsService.registerTrust(any[Registration]))
-          .thenReturn(Future.failed(AlreadyRegisteredException))
+          .thenReturn(Future.successful(AlreadyRegisteredResponse))
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
 
@@ -231,7 +230,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
       "no match found for provided existing trusts details." in {
         when(mockTrustsService.registerTrust(any[Registration]))
-          .thenReturn(Future.failed(NoMatchException))
+          .thenReturn(Future.successful(NoMatchResponse))
 
         val SUT = new RegisterTrustController(
           mockTrustsService,
@@ -339,7 +338,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
       "the register endpoint called and something goes wrong." in {
 
         when(mockTrustsService.registerTrust(any[Registration]))
-          .thenReturn(Future.failed(InternalServerErrorException("some error")))
+          .thenReturn(Future.successful(InternalServerErrorResponse))
 
         val SUT = new RegisterTrustController(
           mockTrustsService,
@@ -380,7 +379,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         )
 
         when(mockTrustsService.registerTrust(any[Registration])).
-          thenReturn(Future.failed(BadRequestException))
+          thenReturn(Future.successful(BadRequestResponse))
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
 
@@ -409,7 +408,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
         )
 
         when(mockTrustsService.registerTrust(any[Registration]))
-          .thenReturn(Future.failed(ServiceNotAvailableException("dependent service is down")))
+          .thenReturn(Future.successful(ServiceUnavailableResponse))
 
         val result = SUT.registration().apply(postRequestWithPayload(Json.parse(validRegistrationRequestJson)))
 

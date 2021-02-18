@@ -16,7 +16,6 @@
 
 package transformers.otherindividuals
 
-import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import transformers.AmendEntityTransform
 
@@ -32,14 +31,4 @@ object AmendOtherIndividualTransform {
   val key = "AmendOtherIndividualTransform"
 
   implicit val format: Format[AmendOtherIndividualTransform] = Json.format[AmendOtherIndividualTransform]
-
-  // TODO - remove code once deployed and users no longer using old transforms
-  def reads: Reads[AmendOtherIndividualTransform] =
-    ((__ \ "index").read[Int] and
-      (__ \ "amended").read[JsValue] and
-      (__ \ "original").read[JsValue] and
-      (__ \ "endDate").read[LocalDate]).tupled.map {
-      case (index, amended, original, endDate) =>
-        AmendOtherIndividualTransform(Some(index), amended, original, endDate)
-    }
 }
