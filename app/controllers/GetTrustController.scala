@@ -77,7 +77,8 @@ class GetTrustController @Inject()(identify: IdentifierAction,
               case JsSuccess(DisplayTrustLeadTrusteeType(None, Some(leadTrusteeOrg)), _) =>
                 Ok(Json.toJson(leadTrusteeOrg))
               case _ =>
-                logger.error(s"[getLeadTrustee][UTR/URN: $identifier] something unexpected has happened.")
+                logger.error(s"[getLeadTrustee][UTR/URN: $identifier] something unexpected has happened. " +
+                  s"doGet has succeeded but picked lead trustee json has failed validation.")
                 InternalServerError
             }
           }
