@@ -71,10 +71,16 @@ class GetTrustController @Inject()(identify: IdentifierAction,
         processed.getTrust.transform(pick).fold(
           _ => InternalServerError,
           json => {
-            Ok(json.as[DisplayTrustLeadTrusteeType] match {
-              case DisplayTrustLeadTrusteeType(Some(leadTrusteeInd), None) => Json.toJson(leadTrusteeInd)
-              case DisplayTrustLeadTrusteeType(None, Some(leadTrusteeOrg)) => Json.toJson(leadTrusteeOrg)
-            })
+            json.validate[DisplayTrustLeadTrusteeType] match {
+              case JsSuccess(DisplayTrustLeadTrusteeType(Some(leadTrusteeInd), None), _) =>
+                Ok(Json.toJson(leadTrusteeInd))
+              case JsSuccess(DisplayTrustLeadTrusteeType(None, Some(leadTrusteeOrg)), _) =>
+                Ok(Json.toJson(leadTrusteeOrg))
+              case _ =>
+                logger.error(s"[getLeadTrustee][UTR/URN: $identifier] something unexpected has happened. " +
+                  s"doGet has succeeded but picked lead trustee json has failed validation.")
+                InternalServerError
+            }
           }
         )
       case _ => Forbidden

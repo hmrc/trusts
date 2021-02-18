@@ -36,7 +36,7 @@ class RosmPatternServiceSpec extends BaseSpec {
     val taxable: Boolean = false
     val trn = "XTRN1234567"
 
-    "return success taxEnrolmentSuscriberResponse " when {
+    "return success taxEnrolmentSubscriberResponse " when {
       "successfully sets subscriptionId id in tax enrolments for provided trn." in {
         when(mockTrustsService.getSubscriptionId(trn)).
           thenReturn(Future.successful(SubscriptionIdResponse("123456789")))

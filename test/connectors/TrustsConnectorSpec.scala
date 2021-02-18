@@ -17,12 +17,11 @@
 package connectors
 
 import connector.TrustsConnector
-import exceptions.{AlreadyRegisteredException, _}
+import exceptions._
 import models.existing_trust.ExistingCheckRequest
 import models.existing_trust.ExistingCheckRequest._
 import models.existing_trust.ExistingCheckResponse._
 import models.get_trust._
-import models.registration.RegistrationTrnResponse
 import models.variation.{TrustVariation, VariationResponse}
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json, Reads}
@@ -34,7 +33,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
   lazy val connector: TrustsConnector = injector.instanceOf[TrustsConnector]
 
-  lazy val request = ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
+  lazy val request: ExistingCheckRequest = ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
 
   def get4MLDTrustEndpoint(utr: String) = s"/trusts/registration/$utr"
 
@@ -298,7 +297,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
         val futureResult = connector.registerTrust(registrationRequest)
 
         whenReady(futureResult) {
-          result => result mustBe RegistrationTrnResponse("XTRN1234567")
+          result => result mustBe models.registration.RegistrationTrnResponse("XTRN1234567")
         }
       }
     }
@@ -320,8 +319,8 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           val futureResult = connector.registerTrust(invalidRegistrationRequest)
 
-          whenReady(futureResult.failed) {
-            result => result mustBe BadRequestException
+          whenReady(futureResult) {
+            result => result mustBe models.registration.BadRequestResponse
           }
 
         }
@@ -343,8 +342,8 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           val futureResult = connector.registerTrust(registrationRequest)
 
-          whenReady(futureResult.failed) {
-            result => result mustBe AlreadyRegisteredException
+          whenReady(futureResult) {
+            result => result mustBe models.registration.AlreadyRegisteredResponse
           }
         }
       }
@@ -365,8 +364,8 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           val futureResult = connector.registerTrust(registrationRequest)
 
-          whenReady(futureResult.failed) {
-            result => result mustBe NoMatchException
+          whenReady(futureResult) {
+            result => result mustBe models.registration.NoMatchResponse
           }
         }
       }
@@ -387,8 +386,8 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           val futureResult = connector.registerTrust(registrationRequest)
 
-          whenReady(futureResult.failed) {
-            result => result mustBe an[ServiceNotAvailableException]
+          whenReady(futureResult) {
+            result => result mustBe models.registration.ServiceUnavailableResponse
           }
         }
       }
@@ -410,8 +409,8 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
           val futureResult = connector.registerTrust(registrationRequest)
 
 
-          whenReady(futureResult.failed) {
-            result => result mustBe an[InternalServerErrorException]
+          whenReady(futureResult) {
+            result => result mustBe models.registration.InternalServerErrorResponse
           }
         }
       }
@@ -424,8 +423,8 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
           stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN, "{}")
           val futureResult = connector.registerTrust(registrationRequest)
 
-          whenReady(futureResult.failed) {
-            result => result mustBe an[InternalServerErrorException]
+          whenReady(futureResult) {
+            result => result mustBe models.registration.InternalServerErrorResponse
           }
         }
       }
@@ -452,8 +451,8 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           val futureResult = connector.registerTrust(invalidRegistrationRequest)
 
-          whenReady(futureResult.failed) {
-            result => result mustBe BadRequestException
+          whenReady(futureResult) {
+            result => result mustBe models.registration.BadRequestResponse
           }
 
         }
@@ -479,8 +478,8 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           val futureResult = connector.registerTrust(registrationRequest)
 
-          whenReady(futureResult.failed) {
-            result => result mustBe AlreadyRegisteredException
+          whenReady(futureResult) {
+            result => result mustBe models.registration.AlreadyRegisteredResponse
           }
         }
       }
@@ -505,8 +504,8 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           val futureResult = connector.registerTrust(registrationRequest)
 
-          whenReady(futureResult.failed) {
-            result => result mustBe NoMatchException
+          whenReady(futureResult) {
+            result => result mustBe models.registration.NoMatchResponse
           }
         }
       }
@@ -531,8 +530,8 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           val futureResult = connector.registerTrust(registrationRequest)
 
-          whenReady(futureResult.failed) {
-            result => result mustBe an[ServiceNotAvailableException]
+          whenReady(futureResult) {
+            result => result mustBe models.registration.ServiceUnavailableResponse
           }
         }
       }
@@ -558,8 +557,8 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
           val futureResult = connector.registerTrust(registrationRequest)
 
 
-          whenReady(futureResult.failed) {
-            result => result mustBe an[InternalServerErrorException]
+          whenReady(futureResult) {
+            result => result mustBe models.registration.InternalServerErrorResponse
           }
         }
       }
@@ -573,8 +572,8 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
           val futureResult = connector.registerTrust(registrationRequest)
 
 
-          whenReady(futureResult.failed) {
-            result => result mustBe an[InternalServerErrorException]
+          whenReady(futureResult) {
+            result => result mustBe models.registration.InternalServerErrorResponse
           }
         }
       }

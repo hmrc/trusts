@@ -27,10 +27,4 @@ object AddProtectorTransform {
   val key = "AddProtectorTransform"
 
   implicit val format: Format[AddProtectorTransform] = Json.format[AddProtectorTransform]
-
-  // TODO - remove code once deployed and users no longer using old transforms
-  def reads[T](`type`: String, field: String)(implicit rds: Reads[T], wts: Writes[T]): Reads[AddProtectorTransform] =
-    (__ \ field).read[T].map {
-      entity => AddProtectorTransform(Json.toJson(entity), `type`)
-    }
 }

@@ -16,7 +16,6 @@
 
 package transformers.protectors
 
-import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import transformers.AmendEntityTransform
 
@@ -33,14 +32,4 @@ object AmendProtectorTransform {
   val key = "AmendProtectorTransform"
 
   implicit val format: Format[AmendProtectorTransform] = Json.format[AmendProtectorTransform]
-
-  // TODO - remove code once deployed and users no longer using old transforms
-  def reads(`type`: String): Reads[AmendProtectorTransform] =
-    ((__ \ "index").read[Int] and
-      (__ \ "amended").read[JsValue] and
-      (__ \ "original").read[JsValue] and
-      (__ \ "endDate").read[LocalDate]).tupled.map {
-      case (index, amended, original, endDate) =>
-        AmendProtectorTransform(Some(index), amended, original, endDate, `type`)
-    }
 }

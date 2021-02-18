@@ -23,6 +23,8 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import utils.Constants._
 
+import scala.language.implicitConversions
+
 trait GetTrustResponse
 
 trait GetTrustSuccessResponse extends GetTrustResponse {
