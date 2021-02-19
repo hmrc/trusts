@@ -2054,24 +2054,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         backwardsCompatibilityService
       )
 
-      val initialDraftData = Json.parse(
-        """
-          |{
-          |  "taxLiability": {
-          |    "data": {
-          |    }
-          |  },
-          |  "trustDetails": {
-          |    "data": {
-          |      "trustDetails": {
-          |      }
-          |    }
-          |  },
-          |  "status": {
-          |    "taxLiability": "completed"
-          |  }
-          |}
-          |""".stripMargin)
+      val initialDraftData = Json.obj()
 
       val expectedDraftData = initialDraftData
 
@@ -2080,7 +2063,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.updateTaxLiabilityStatus(draftId).apply(request)
+      val result = controller.updateTaxLiability(draftId).apply(request)
 
       status(result) mustBe OK
 
@@ -2117,6 +2100,18 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           |  },
           |  "status": {
           |    "taxLiability": "completed"
+          |  },
+          |  "registration": {
+          |    "yearsReturns": {
+          |      "foo": "bar"
+          |    }
+          |  },
+          |  "answerSections": {
+          |    "taxLiability": [
+          |      {
+          |        "foo": "bar"
+          |      }
+          |    ]
           |  }
           |}
           |""".stripMargin)
@@ -2128,7 +2123,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.updateTaxLiabilityStatus(draftId).apply(request)
+      val result = controller.updateTaxLiability(draftId).apply(request)
 
       status(result) mustBe OK
 
@@ -2165,6 +2160,18 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           |  },
           |  "status": {
           |    "taxLiability": "completed"
+          |  },
+          |  "registration": {
+          |    "yearsReturns": {
+          |      "foo": "bar"
+          |    }
+          |  },
+          |  "answerSections": {
+          |    "taxLiability": [
+          |      {
+          |        "foo": "bar"
+          |      }
+          |    ]
           |  }
           |}
           |""".stripMargin)
@@ -2185,6 +2192,10 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           |    }
           |  },
           |  "status": {
+          |  },
+          |  "registration": {
+          |  },
+          |  "answerSections": {
           |  }
           |}
           |""".stripMargin)
@@ -2196,7 +2207,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.updateTaxLiabilityStatus(draftId).apply(request)
+      val result = controller.updateTaxLiability(draftId).apply(request)
 
       status(result) mustBe OK
 
@@ -2244,7 +2255,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.updateTaxLiabilityStatus(draftId).apply(request)
+      val result = controller.updateTaxLiability(draftId).apply(request)
 
       status(result) mustBe INTERNAL_SERVER_ERROR
     }
@@ -2267,7 +2278,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.updateTaxLiabilityStatus(draftId).apply(request)
+      val result = controller.updateTaxLiability(draftId).apply(request)
 
       status(result) mustBe NOT_FOUND
     }

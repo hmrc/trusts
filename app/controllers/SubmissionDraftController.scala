@@ -324,8 +324,13 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           Future.successful(InternalServerError)
       }
   }
-  
-  def updateTaxLiabilityStatus(draftId: String): Action[AnyContent] = identify.async {
+
+  /**
+   * If the user fills in trust details, then answers the tax liability questions, then changes the trust start date,
+   * we need to set the tax liability status to in progress and remove the yearsReturns answers from the registration
+   * in case the answers no longer align with the updated date.
+   */
+  def updateTaxLiability(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
       submissionRepository.getDraft(draftId, request.internalId).flatMap {
         case Some(draft) =>
@@ -341,8 +346,12 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
 
           areStartDatesEqual match {
             case JsSuccess(false, _) =>
-              val updatedStatusReads = setStatus("taxLiability")
-              draft.draftData.transform(updatedStatusReads) match {
+
+              val updatedTaxLiabilityReads = setStatus("taxLiability") andThen
+                prunePath(__ \ "registration" \ "yearsReturns") andThen
+                prunePath(__ \ "answerSections" \ "taxLiability")
+
+              draft.draftData.transform(updatedTaxLiabilityReads) match {
                 case JsSuccess(data, _) =>
                   val draftWithStatusUpdated = draft.copy(draftData = data)
                   logger.info(s"[updateTaxLiabilityStatus][Session ID: ${request.sessionId}]" +
