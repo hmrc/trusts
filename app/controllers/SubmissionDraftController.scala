@@ -340,21 +340,21 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           }
 
           areStartDatesEqual match {
-            case JsSuccess(true, _) =>
-              Future.successful(Ok)
-            case _ =>
+            case JsSuccess(false, _) =>
               val updatedStatusReads = setStatus("taxLiability")
               draft.draftData.transform(updatedStatusReads) match {
                 case JsSuccess(data, _) =>
                   val draftWithStatusUpdated = draft.copy(draftData = data)
                   logger.info(s"[updateTaxLiabilityStatus][Session ID: ${request.sessionId}]" +
-                    s" successfully updated tax liability status to In Progress")
+                    s" successfully updated tax liability status")
                   submissionRepository.setDraft(draftWithStatusUpdated).map(x => if (x) Ok else InternalServerError)
                 case JsError(errors) =>
                   logger.error(s"[updateTaxLiabilityStatus][Session ID: ${request.sessionId}]" +
                     s" failed to update tax liability status: $errors")
                   Future.successful(InternalServerError)
               }
+            case _ =>
+              Future.successful(Ok)
           }
         case None =>
           logger.info(s"[reset][Session ID: ${request.sessionId}]" +

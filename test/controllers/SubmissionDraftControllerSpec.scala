@@ -2041,7 +2041,53 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       inProgress = None
     )
 
-    "respond with OK and not update the status when the dates are the same" in {
+    "response with Ok when the dates are not present" in {
+
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
+      )
+
+      val initialDraftData = Json.parse(
+        """
+          |{
+          |  "taxLiability": {
+          |    "data": {
+          |    }
+          |  },
+          |  "trustDetails": {
+          |    "data": {
+          |      "trustDetails": {
+          |      }
+          |    }
+          |  },
+          |  "status": {
+          |    "taxLiability": "completed"
+          |  }
+          |}
+          |""".stripMargin)
+
+      val expectedDraftData = initialDraftData
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(mockDraft(initialDraftData))))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.updateTaxLiabilityStatus(draftId).apply(request)
+
+      status(result) mustBe OK
+
+      verify(submissionRepository, times(0)).setDraft(mockDraft(expectedDraftData))
+    }
+
+    "respond with Ok and not update the status when the dates are the same" in {
 
       val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
@@ -2089,7 +2135,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       verify(submissionRepository, times(0)).setDraft(mockDraft(expectedDraftData))
     }
 
-    "respond with OK and update the status when the dates are different" in {
+    "respond with Ok and update the status when the dates are different" in {
 
       val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
@@ -2155,6 +2201,52 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       status(result) mustBe OK
 
       verify(submissionRepository, times(1)).setDraft(mockDraft(expectedDraftData))
+    }
+
+    "respond with InternalServerError when error setting the updated draft data" in {
+
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
+      )
+
+      val initialDraftData = Json.parse(
+        """
+          |{
+          |  "taxLiability": {
+          |    "data": {
+          |      "trustStartDate": "1996-02-03"
+          |    }
+          |  },
+          |  "trustDetails": {
+          |    "data": {
+          |      "trustDetails": {
+          |        "whenTrustSetup": "1997-02-03"
+          |      }
+          |    }
+          |  },
+          |  "status": {
+          |    "taxLiability": "completed"
+          |  }
+          |}
+          |""".stripMargin)
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(mockDraft(initialDraftData))))
+
+      when(submissionRepository.setDraft(any())).thenReturn(Future.successful(false))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.updateTaxLiabilityStatus(draftId).apply(request)
+
+      status(result) mustBe INTERNAL_SERVER_ERROR
     }
 
     "respond with NotFound when no draft" in {
