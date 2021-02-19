@@ -62,7 +62,7 @@ GET         /submission-drafts/:draftId/trust-name       controllers.SubmissionD
 GET         /submission-drafts/:draftId/lead-trustee           controllers.SubmissionDraftController.getLeadTrustee(draftId: String)
 
 POST        /submission-drafts/:draftId/reset/taxLiability   controllers.SubmissionDraftController.reset(draftId: String, section: String = "taxLiability", mappedDataKey: String = "yearsReturns")
-PUT         /submission-drafts/:draftId/update/tax-liability  controllers.SubmissionDraftController.updateTaxLiability(draftId: String)
+POST        /submission-drafts/:draftId/update/tax-liability  controllers.SubmissionDraftController.updateTaxLiability(draftId: String)
 
 GET         /submission-drafts/:draftId/correspondence-address controllers.SubmissionDraftController.getCorrespondenceAddress(draftId: String)
 
