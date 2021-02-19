@@ -86,12 +86,12 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
     }
   }
 
-  private def setRegistrationSection(path: String, registrationSectionData: JsValue) : Reads[JsObject] = {
+  private def setRegistrationSection(path: String, registrationSectionData: JsValue): Reads[JsObject] = {
     val sectionPath = MappedPiece.path \ path
     prunePath(sectionPath) andThen JsPath.json.update(sectionPath.json.put(registrationSectionData))
   }
 
-  private def setRegistrationSections(pieces: List[RegistrationSubmission.MappedPiece]) : List[Reads[JsObject]] = {
+  private def setRegistrationSections(pieces: List[RegistrationSubmission.MappedPiece]): List[Reads[JsObject]] = {
     pieces.map {
       case RegistrationSubmission.MappedPiece(path, JsNull) =>
         prunePath(MappedPiece.path \ path)
@@ -100,7 +100,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
     }
   }
 
-  private def setStatus(key: String, statusOpt: Option[registration.Status]): Reads[JsObject] = {
+  private def setStatus(key: String, statusOpt: Option[registration.Status] = None): Reads[JsObject] = {
     val sectionPath = registration.Status.path \ key
 
     statusOpt match {
@@ -252,7 +252,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
       getAtPath[Boolean](draftId, path)
   }
 
-  def getTrustName(draftId: String) : Action[AnyContent] = identify.async {
+  def getTrustName(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
       submissionRepository.getDraft(draftId, request.internalId).map {
         case Some(draft) =>
@@ -287,13 +287,13 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
     draftData.transform(path.json.pick).map(_.as[T])
   }
 
-  def getLeadTrustee(draftId: String) : Action[AnyContent] = identify.async {
+  def getLeadTrustee(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
       val path = JsPath \ "registration" \ "trust/entities/leadTrustees"
       getAtPath[LeadTrusteeType](draftId, path)(request, LeadTrusteeType.leadTrusteeTypeReads, LeadTrusteeType.writes)
   }
 
-  def reset(draftId: String, section: String, mappedDataKey : String) : Action[AnyContent] = identify.async {
+  def reset(draftId: String, section: String, mappedDataKey: String): Action[AnyContent] = identify.async {
     implicit request =>
       submissionRepository.getDraft(draftId, request.internalId).flatMap {
         case Some(draft) =>
@@ -313,7 +313,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
               logger.info(s"[reset][Session ID: ${request.sessionId}]" +
                 s" removed status, mapped data, answers and status for $section")
               submissionRepository.setDraft(draftWithStatusRemoved).map(x => if (x) Ok else InternalServerError)
-            case _ : JsError =>
+            case _: JsError =>
               logger.info(s"[reset][Session ID: ${request.sessionId}]" +
                 s" failed to reset for $section")
               Future.successful(InternalServerError)
@@ -322,6 +322,44 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           logger.info(s"[reset][Session ID: ${request.sessionId}]" +
             s" no draft, cannot reset status for $section")
           Future.successful(InternalServerError)
+      }
+  }
+  
+  def updateTaxLiabilityStatus(draftId: String): Action[AnyContent] = identify.async {
+    implicit request =>
+      submissionRepository.getDraft(draftId, request.internalId).flatMap {
+        case Some(draft) =>
+          val trustDetailsStartDatePath = __ \ "trustDetails" \ "data" \ "trustDetails" \ "whenTrustSetup"
+          val taxLiabilityStartDatePath = __ \ "taxLiability" \ "data" \ "trustStartDate"
+
+          val areStartDatesEqual = for {
+            trustDetailsStartDate <- get[LocalDate](draft.draftData, trustDetailsStartDatePath)
+            taxLiabilityStartDate <- get[LocalDate](draft.draftData, taxLiabilityStartDatePath)
+          } yield {
+            trustDetailsStartDate == taxLiabilityStartDate
+          }
+
+          areStartDatesEqual match {
+            case JsSuccess(true, _) =>
+              Future.successful(Ok)
+            case _ =>
+              val updatedStatusReads = setStatus("taxLiability")
+              draft.draftData.transform(updatedStatusReads) match {
+                case JsSuccess(data, _) =>
+                  val draftWithStatusUpdated = draft.copy(draftData = data)
+                  logger.info(s"[updateTaxLiabilityStatus][Session ID: ${request.sessionId}]" +
+                    s" successfully updated tax liability status to In Progress")
+                  submissionRepository.setDraft(draftWithStatusUpdated).map(x => if (x) Ok else InternalServerError)
+                case JsError(errors) =>
+                  logger.error(s"[updateTaxLiabilityStatus][Session ID: ${request.sessionId}]" +
+                    s" failed to update tax liability status: $errors")
+                  Future.successful(InternalServerError)
+              }
+          }
+        case None =>
+          logger.info(s"[reset][Session ID: ${request.sessionId}]" +
+            s" no draft, cannot update tax liability status")
+          Future.successful(NotFound)
       }
   }
 
@@ -351,7 +389,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
           case JsSuccess(value, _) =>
             logger.info(s"[Session ID: ${request.sessionId}] value found at $path")
             Ok(Json.toJson(value))
-          case _ : JsError =>
+          case _: JsError =>
             logger.info(s"[Session ID: ${request.sessionId}] value not found at $path")
             NotFound
         }

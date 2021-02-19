@@ -48,6 +48,10 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
     override def now: LocalDateTime = currentDateTime
   }
 
+  private val draftId: String = "draftId"
+  private val internalId: String = "id"
+  private val createdAt: LocalDateTime = LocalDateTime.of(1997, 3, 14, 14, 45)
+
   private val backwardsCompatibilityService = mock[BackwardsCompatibilityService]
 
   private val existingDraftData = Json.parse(
@@ -235,12 +239,12 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       |""".stripMargin).as[RegistrationSubmissionDraft]
 
   private val existingDraft = RegistrationSubmissionDraft(
-    "DRAFTID",
-    "id",
-    LocalDateTime.of(1997, 3, 14, 14, 45),
-    existingDraftData,
-    Some("theRef"),
-    Some(true)
+    draftId = draftId,
+    internalId = internalId,
+    createdAt = createdAt,
+    draftData = existingDraftData,
+    reference = Some("theRef"),
+    inProgress = Some(true)
   )
 
   ".setSection" should {
@@ -273,7 +277,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
         .withBody(body)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
-      val result = controller.setSection("DRAFTID", "sectionKey").apply(request)
+      val result = controller.setSection(draftId, "sectionKey").apply(request)
       status(result) mustBe BAD_REQUEST
     }
 
@@ -322,12 +326,12 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           |}
           |""".stripMargin)
 
-      val expectedDraft = RegistrationSubmissionDraft("DRAFTID", "id", currentDateTime, draftData, Some("theReference"), Some(true))
+      val expectedDraft = RegistrationSubmissionDraft(draftId, internalId, currentDateTime, draftData, Some("theReference"), Some(true))
 
-      val result = controller.setSection("DRAFTID", "sectionKey").apply(request)
+      val result = controller.setSection(draftId, "sectionKey").apply(request)
       status(result) mustBe OK
 
-      verify(submissionRepository).getDraft("DRAFTID", "id")
+      verify(submissionRepository).getDraft(draftId, internalId)
       verify(submissionRepository).setDraft(expectedDraft)
     }
 
@@ -381,12 +385,12 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           |}
           |""".stripMargin)
 
-      val expectedDraft = RegistrationSubmissionDraft("DRAFTID", "id", existingDraft.createdAt, draftData, Some("newRef"), Some(true))
+      val expectedDraft = RegistrationSubmissionDraft(draftId, internalId, existingDraft.createdAt, draftData, Some("newRef"), Some(true))
 
-      val result = controller.setSection("DRAFTID", "sectionKey").apply(request)
+      val result = controller.setSection(draftId, "sectionKey").apply(request)
       status(result) mustBe OK
 
-      verify(submissionRepository).getDraft("DRAFTID", "id")
+      verify(submissionRepository).getDraft(draftId, internalId)
       verify(submissionRepository).setDraft(expectedDraft)
     }
   }
@@ -513,17 +517,17 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           |""".stripMargin)
 
       val expectedDraft = RegistrationSubmissionDraft(
-        "DRAFTID",
-        "id",
+        draftId,
+        internalId,
         existingDraft.createdAt,
         draftData,
         existingDraft.reference,
         existingDraft.inProgress)
 
-      val result = controller.setSectionSet("DRAFTID", "sectionKey").apply(request)
+      val result = controller.setSectionSet(draftId, "sectionKey").apply(request)
       status(result) mustBe OK
 
-      verify(submissionRepository).getDraft("DRAFTID", "id")
+      verify(submissionRepository).getDraft(draftId, internalId)
       verify(submissionRepository).setDraft(expectedDraft)
     }
 
@@ -633,17 +637,17 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
           |""".stripMargin)
 
       val expectedDraft = RegistrationSubmissionDraft(
-        "DRAFTID",
-        "id",
+        draftId,
+        internalId,
         existingDraft.createdAt,
         draftData,
         existingDraft.reference,
         existingDraft.inProgress)
 
-      val result = controller.setSectionSet("DRAFTID", "sectionKey").apply(request)
+      val result = controller.setSectionSet(draftId, "sectionKey").apply(request)
       status(result) mustBe OK
 
-      verify(submissionRepository).getDraft("DRAFTID", "id")
+      verify(submissionRepository).getDraft(draftId, internalId)
       verify(submissionRepository).setDraft(expectedDraft)
     }
 
@@ -668,7 +672,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getSection("DRAFTID", "sectionKey").apply(request)
+      val result = controller.getSection(draftId, "sectionKey").apply(request)
       status(result) mustBe OK
 
       val expectedDraftJson = Json.parse(
@@ -705,7 +709,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getSection("DRAFTID", "sectionKey2").apply(request)
+      val result = controller.getSection(draftId, "sectionKey2").apply(request)
       status(result) mustBe OK
       val expectedDraftJson = Json.parse(
         """
@@ -737,7 +741,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getSection("DRAFTID", "sectionKey2").apply(request)
+      val result = controller.getSection(draftId, "sectionKey2").apply(request)
       status(result) mustBe NOT_FOUND
     }
   }
@@ -757,8 +761,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       )
 
       val drafts = List(
-        RegistrationSubmissionDraft("draftId1", "id", LocalDateTime.of(2012, 2, 3, 9, 30), Json.obj(), Some("ref"), Some(true)),
-        RegistrationSubmissionDraft("draftId2", "id", LocalDateTime.of(2010, 10, 10, 14, 40), Json.obj(), None, Some(true))
+        RegistrationSubmissionDraft("draftId1", internalId, LocalDateTime.of(2012, 2, 3, 9, 30), Json.obj(), Some("ref"), Some(true)),
+        RegistrationSubmissionDraft("draftId2", internalId, LocalDateTime.of(2010, 10, 10, 14, 40), Json.obj(), None, Some(true))
       )
 
       when(submissionRepository.getRecentDrafts(any(), any()))
@@ -769,7 +773,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       val result = controller.getDrafts().apply(request)
       status(result) mustBe OK
 
-      verify(submissionRepository).getRecentDrafts("id", Organisation)
+      verify(submissionRepository).getRecentDrafts(internalId, Organisation)
 
       val expectedDraftJson = Json.parse(
         """
@@ -803,8 +807,8 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       )
 
       val drafts = List(
-        RegistrationSubmissionDraft("draftId1", "id", LocalDateTime.of(2012, 2, 3, 9, 30), Json.obj(), Some("ref"), Some(true)),
-        RegistrationSubmissionDraft("draftId2", "id", LocalDateTime.of(2010, 10, 10, 14, 40), Json.obj(), None, Some(true))
+        RegistrationSubmissionDraft("draftId1", internalId, LocalDateTime.of(2012, 2, 3, 9, 30), Json.obj(), Some("ref"), Some(true)),
+        RegistrationSubmissionDraft("draftId2", internalId, LocalDateTime.of(2010, 10, 10, 14, 40), Json.obj(), None, Some(true))
       )
 
       when(submissionRepository.getRecentDrafts(any(), any()))
@@ -815,7 +819,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       val result = controller.getDrafts().apply(request)
       status(result) mustBe OK
 
-      verify(submissionRepository).getRecentDrafts("id", Agent)
+      verify(submissionRepository).getRecentDrafts(internalId, Agent)
 
       val expectedDraftJson = Json.parse(
         """
@@ -856,7 +860,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
       val result = controller.getDrafts().apply(request)
       status(result) mustBe OK
 
-      verify(submissionRepository).getRecentDrafts("id", Organisation)
+      verify(submissionRepository).getRecentDrafts(internalId, Organisation)
 
       val expectedDraftJson = Json.parse("[]")
 
@@ -884,10 +888,10 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.removeDraft("DRAFTID").apply(request)
+      val result = controller.removeDraft(draftId).apply(request)
       status(result) mustBe OK
 
-      verify(submissionRepository).removeDraft("DRAFTID", "id")
+      verify(submissionRepository).removeDraft(draftId, internalId)
     }
   }
 
@@ -931,7 +935,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getTrustTaxable("DRAFTID").apply(request)
+      val result = controller.getTrustTaxable(draftId).apply(request)
 
       status(result) mustBe OK
 
@@ -977,7 +981,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getTrustTaxable("DRAFTID").apply(request)
+      val result = controller.getTrustTaxable(draftId).apply(request)
 
       status(result) mustBe OK
 
@@ -1028,7 +1032,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getTrustName("DRAFTID").apply(request)
+      val result = controller.getTrustName(draftId).apply(request)
 
       status(result) mustBe OK
 
@@ -1080,7 +1084,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getTrustName("DRAFTID").apply(request)
+      val result = controller.getTrustName(draftId).apply(request)
 
       status(result) mustBe OK
 
@@ -1112,7 +1116,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getTrustName("DRAFTID").apply(request)
+      val result = controller.getTrustName(draftId).apply(request)
 
       status(result) mustBe NOT_FOUND
     }
@@ -1134,7 +1138,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getTrustName("DRAFTID").apply(request)
+      val result = controller.getTrustName(draftId).apply(request)
 
       status(result) mustBe NOT_FOUND
     }
@@ -1160,7 +1164,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getWhenTrustSetup("DRAFTID").apply(request)
+      val result = controller.getWhenTrustSetup(draftId).apply(request)
 
       status(result) mustBe OK
 
@@ -1192,7 +1196,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getWhenTrustSetup("DRAFTID").apply(request)
+      val result = controller.getWhenTrustSetup(draftId).apply(request)
 
       status(result) mustBe NOT_FOUND
     }
@@ -1214,7 +1218,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getWhenTrustSetup("DRAFTID").apply(request)
+      val result = controller.getWhenTrustSetup(draftId).apply(request)
 
       status(result) mustBe NOT_FOUND
     }
@@ -1240,7 +1244,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getLeadTrustee("DRAFTID").apply(request)
+      val result = controller.getLeadTrustee(draftId).apply(request)
 
       status(result) mustBe OK
 
@@ -1278,7 +1282,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getLeadTrustee("DRAFTID").apply(request)
+      val result = controller.getLeadTrustee(draftId).apply(request)
 
       status(result) mustBe NOT_FOUND
     }
@@ -1303,7 +1307,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getCorrespondenceAddress("DRAFTID").apply(request)
+      val result = controller.getCorrespondenceAddress(draftId).apply(request)
 
       status(result) mustBe OK
 
@@ -1338,7 +1342,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getCorrespondenceAddress("DRAFTID").apply(request)
+      val result = controller.getCorrespondenceAddress(draftId).apply(request)
 
       status(result) mustBe NOT_FOUND
     }
@@ -1360,7 +1364,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getCorrespondenceAddress("DRAFTID").apply(request)
+      val result = controller.getCorrespondenceAddress(draftId).apply(request)
 
       status(result) mustBe NOT_FOUND
     }
@@ -1440,11 +1444,11 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.reset("DRAFTID", "taxLiability", "yearsReturns").apply(request)
+      val result = controller.reset(draftId, "taxLiability", "yearsReturns").apply(request)
 
       status(result) mustBe OK
 
-      verify(submissionRepository).getDraft("DRAFTID", "id")
+      verify(submissionRepository).getDraft(draftId, internalId)
       verify(submissionRepository).setDraft(expectedAfterCleanup)
     }
 
@@ -1465,7 +1469,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.reset("DRAFTID", "taxLiability", "yearsReturns").apply(request)
+      val result = controller.reset(draftId, "taxLiability", "yearsReturns").apply(request)
 
       status(result) mustBe INTERNAL_SERVER_ERROR
     }
@@ -1493,7 +1497,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
         val request = FakeRequest("GET", "path")
 
-        val result = controller.removeRoleInCompany("draftId").apply(request)
+        val result = controller.removeRoleInCompany(draftId).apply(request)
 
         status(result) mustBe OK
       }
@@ -1517,7 +1521,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
         val request = FakeRequest("GET", "path")
 
-        val result = controller.removeRoleInCompany("draftId").apply(request)
+        val result = controller.removeRoleInCompany(draftId).apply(request)
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
@@ -1541,7 +1545,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
         val request = FakeRequest("GET", "path")
 
-        val result = controller.removeRoleInCompany("draftId").apply(request)
+        val result = controller.removeRoleInCompany(draftId).apply(request)
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
@@ -1567,7 +1571,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getAgentAddress("DRAFTID").apply(request)
+      val result = controller.getAgentAddress(draftId).apply(request)
 
       status(result) mustBe OK
 
@@ -1602,7 +1606,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getAgentAddress("DRAFTID").apply(request)
+      val result = controller.getAgentAddress(draftId).apply(request)
 
       status(result) mustBe NOT_FOUND
     }
@@ -1624,7 +1628,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getAgentAddress("DRAFTID").apply(request)
+      val result = controller.getAgentAddress(draftId).apply(request)
 
       status(result) mustBe NOT_FOUND
     }
@@ -1649,7 +1653,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getClientReference("DRAFTID").apply(request)
+      val result = controller.getClientReference(draftId).apply(request)
 
       status(result) mustBe OK
 
@@ -1679,7 +1683,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getClientReference("DRAFTID").apply(request)
+      val result = controller.getClientReference(draftId).apply(request)
 
       status(result) mustBe NOT_FOUND
     }
@@ -1701,7 +1705,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
       val request = FakeRequest("GET", "path")
 
-      val result = controller.getClientReference("DRAFTID").apply(request)
+      val result = controller.getClientReference(draftId).apply(request)
 
       status(result) mustBe NOT_FOUND
     }
@@ -1762,7 +1766,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
         val request = FakeRequest("GET", "path")
 
-        val result = controller.removeDeceasedSettlorMappedPiece("draftId").apply(request)
+        val result = controller.removeDeceasedSettlorMappedPiece(draftId).apply(request)
 
         status(result) mustBe OK
 
@@ -1788,7 +1792,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
         val request = FakeRequest("GET", "path")
 
-        val result = controller.removeDeceasedSettlorMappedPiece("draftId").apply(request)
+        val result = controller.removeDeceasedSettlorMappedPiece(draftId).apply(request)
 
         status(result) mustBe NOT_FOUND
       }
@@ -1814,7 +1818,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
         val request = FakeRequest("GET", "path")
 
-        val result = controller.removeDeceasedSettlorMappedPiece("draftId").apply(request)
+        val result = controller.removeDeceasedSettlorMappedPiece(draftId).apply(request)
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
@@ -1876,7 +1880,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
         val request = FakeRequest("GET", "path")
 
-        val result = controller.removeLivingSettlorsMappedPiece("draftId").apply(request)
+        val result = controller.removeLivingSettlorsMappedPiece(draftId).apply(request)
 
         status(result) mustBe OK
 
@@ -1902,7 +1906,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
         val request = FakeRequest("GET", "path")
 
-        val result = controller.removeLivingSettlorsMappedPiece("draftId").apply(request)
+        val result = controller.removeLivingSettlorsMappedPiece(draftId).apply(request)
 
         status(result) mustBe NOT_FOUND
       }
@@ -1928,7 +1932,7 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
         val request = FakeRequest("GET", "path")
 
-        val result = controller.removeLivingSettlorsMappedPiece("draftId").apply(request)
+        val result = controller.removeLivingSettlorsMappedPiece(draftId).apply(request)
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
@@ -2023,6 +2027,157 @@ class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
 
         status(result) mustBe NOT_FOUND
       }
+    }
+  }
+
+  ".updateTaxLiabilityStatus" should {
+
+    def mockDraft(draftData: JsValue) = RegistrationSubmissionDraft(
+      draftId = draftId,
+      internalId = internalId,
+      createdAt = createdAt,
+      draftData = draftData,
+      reference = None,
+      inProgress = None
+    )
+
+    "respond with OK and not update the status when the dates are the same" in {
+
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
+      )
+
+      val initialDraftData = Json.parse(
+        """
+          |{
+          |  "taxLiability": {
+          |    "data": {
+          |      "trustStartDate": "1996-02-03"
+          |    }
+          |  },
+          |  "trustDetails": {
+          |    "data": {
+          |      "trustDetails": {
+          |        "whenTrustSetup": "1996-02-03"
+          |      }
+          |    }
+          |  },
+          |  "status": {
+          |    "taxLiability": "completed"
+          |  }
+          |}
+          |""".stripMargin)
+
+      val expectedDraftData = initialDraftData
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(mockDraft(initialDraftData))))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.updateTaxLiabilityStatus(draftId).apply(request)
+
+      status(result) mustBe OK
+
+      verify(submissionRepository, times(0)).setDraft(mockDraft(expectedDraftData))
+    }
+
+    "respond with OK and update the status when the dates are different" in {
+
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
+      )
+
+      val initialDraftData = Json.parse(
+        """
+          |{
+          |  "taxLiability": {
+          |    "data": {
+          |      "trustStartDate": "1996-02-03"
+          |    }
+          |  },
+          |  "trustDetails": {
+          |    "data": {
+          |      "trustDetails": {
+          |        "whenTrustSetup": "1997-02-03"
+          |      }
+          |    }
+          |  },
+          |  "status": {
+          |    "taxLiability": "completed"
+          |  }
+          |}
+          |""".stripMargin)
+
+      val expectedDraftData = Json.parse(
+        """
+          |{
+          |  "taxLiability": {
+          |    "data": {
+          |      "trustStartDate": "1996-02-03"
+          |    }
+          |  },
+          |  "trustDetails": {
+          |    "data": {
+          |      "trustDetails": {
+          |        "whenTrustSetup": "1997-02-03"
+          |      }
+          |    }
+          |  },
+          |  "status": {
+          |  }
+          |}
+          |""".stripMargin)
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(mockDraft(initialDraftData))))
+
+      when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.updateTaxLiabilityStatus(draftId).apply(request)
+
+      status(result) mustBe OK
+
+      verify(submissionRepository, times(1)).setDraft(mockDraft(expectedDraftData))
+    }
+
+    "respond with NotFound when no draft" in {
+
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.updateTaxLiabilityStatus(draftId).apply(request)
+
+      status(result) mustBe NOT_FOUND
     }
   }
 }
