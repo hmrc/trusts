@@ -34,9 +34,13 @@ object JsonOps {
   // So we do this hacky thing to keep it all self-contained.
   // If upgraded to play 2.6, this can turn into simply "path.json.prune".
   def prunePath(path: JsPath): Reads[JsObject] = {
-    JsPath.json.update {
-      path.json.put(Json.toJson(Json.obj()))
+    __.json.update {
+      path.json.put(Json.obj())
     } andThen path.json.prune
+  }
+
+  def prunePathAndPutNewValue(path: JsPath, value: JsValue): Reads[JsObject] = {
+    prunePath(path) andThen putNewValue(path, value)
   }
 
   type JsPathNodes = Seq[Either[Int, String]]

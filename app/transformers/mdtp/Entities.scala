@@ -18,7 +18,7 @@ package transformers.mdtp
 
 import models.variation.Entity
 import play.api.libs.json._
-import utils.JsonOps.putNewValue
+import utils.JsonOps.{prunePathAndPutNewValue, putNewValue}
 
 trait Entities[T <: Entity[T]] {
 
@@ -31,11 +31,8 @@ trait Entities[T <: Entity[T]] {
       },
       entities => {
         val updatedEntities = updateEntities(entities)
-        
-        JsPath.json.update(
-          path.json.prune andThen
-            path.json.put(updatedEntities)
-        )
+
+        prunePathAndPutNewValue(path, updatedEntities)
       }
     )
   }

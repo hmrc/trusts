@@ -16,9 +16,11 @@
 
 package transformers
 
-import java.time.LocalDate
 import play.api.libs.json._
 import utils.Constants._
+import utils.JsonOps.prunePathAndPutNewValue
+
+import java.time.LocalDate
 
 trait JsonOperations {
 
@@ -111,10 +113,7 @@ trait JsonOperations {
             val updated = (array.value.take(i) :+ newValue) ++ array.value.drop(i + 1)
 
             input.transform(
-              path.json.prune andThen
-                JsPath.json.update {
-                  path.json.put(Json.toJson(updated))
-                }
+              prunePathAndPutNewValue(path, Json.toJson(updated))
             )
 
           case e: JsError => e
@@ -136,10 +135,7 @@ trait JsonOperations {
               input.transform(path.json.prune)
             } else {
               input.transform(
-                path.json.prune andThen
-                  JsPath.json.update {
-                    path.json.put(Json.toJson(filtered))
-                  }
+                prunePathAndPutNewValue(path, Json.toJson(filtered))
               )
             }
 

@@ -20,7 +20,7 @@ import models._
 import models.registration.RegistrationSubmissionDraft
 import play.api.Logging
 import play.api.libs.json._
-import utils.JsonOps.{doNothing, prunePath, putNewValue}
+import utils.JsonOps.{doNothing, prunePath, prunePathAndPutNewValue, putNewValue}
 
 class BackwardsCompatibilityService extends Logging {
 
@@ -86,7 +86,7 @@ class BackwardsCompatibilityService extends Logging {
       case JsSuccess(value, _) =>
         value.validate[AgentDetailsBC] match {
           case JsSuccess(value, _) =>
-            path.json.prune andThen putNewValue(path, Json.toJson(value))
+            prunePathAndPutNewValue(path, Json.toJson(value))
           case JsError(errors) =>
             logger.info(s"Unable to validate json at $path as type AgentDetailsBC: $errors")
             doNothing()
@@ -107,7 +107,7 @@ class BackwardsCompatibilityService extends Logging {
             case _ => acc
           }
         })
-        path.json.prune andThen putNewValue(path, newArray)
+        prunePathAndPutNewValue(path, Json.toJson(newArray))
       case JsError(errors) =>
         logger.info(s"Unable to pick json at $path: $errors")
         doNothing()
