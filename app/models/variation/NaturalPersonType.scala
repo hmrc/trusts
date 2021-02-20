@@ -31,7 +31,10 @@ case class NaturalPersonType(lineNo: Option[String],
                              legallyIncapable: Option[Boolean],
                              nationality: Option[String],
                              entityStart: LocalDate,
-                             entityEnd: Option[LocalDate])
+                             entityEnd: Option[LocalDate]) extends Entity[NaturalPersonType] {
+
+  override val writeToMaintain: Writes[NaturalPersonType] = NaturalPersonType.writeToMaintain
+}
 
 object NaturalPersonType {
   implicit val naturalPersonTypeFormat: Format[NaturalPersonType] = Json.format[NaturalPersonType]

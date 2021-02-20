@@ -16,33 +16,11 @@
 
 package transformers.mdtp
 
+import models.variation.{Entities, NaturalPersonType}
 import play.api.libs.json._
-import models.variation.NaturalPersonType
 
-object OtherIndividuals {
+object OtherIndividuals extends Entities[NaturalPersonType] {
 
-  private val path = JsPath \ 'details \ 'trust \ 'entities \ 'naturalPerson
-
-  def transform(response : JsValue) : Reads[JsObject] = {
-    response.transform(path.json.pick).fold(
-      _ => {
-        JsPath.json.update(
-          path.json.put(JsArray())
-        )
-      },
-      otherIndividuals => {
-
-        val otherIndividualsUpdated = JsArray(otherIndividuals.as[List[NaturalPersonType]].map {
-          otherIndividual =>
-            Json.toJson(otherIndividual)(NaturalPersonType.writeToMaintain)
-        })
-
-        JsPath.json.update(
-          path.json.prune andThen
-            path.json.put(otherIndividualsUpdated)
-        )
-      }
-    )
-  }
+  override val path: JsPath = JsPath \ 'details \ 'trust \ 'entities \ 'naturalPerson
 
 }
