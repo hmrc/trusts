@@ -84,7 +84,10 @@ object AmendedLeadTrusteeOrgType {
 }
 
 case class TrusteeType(trusteeInd: Option[TrusteeIndividualType],
-                       trusteeOrg: Option[TrusteeOrgType])
+                       trusteeOrg: Option[TrusteeOrgType]) extends Entity[TrusteeType] {
+
+  override val writeToMaintain: Writes[TrusteeType] = TrusteeType.trusteeTypeFormat
+}
 
 object TrusteeType {
   implicit val trusteeTypeFormat: Format[TrusteeType] = Json.format[TrusteeType]

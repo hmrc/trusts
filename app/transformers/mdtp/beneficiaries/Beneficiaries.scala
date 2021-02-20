@@ -16,8 +16,9 @@
 
 package transformers.mdtp.beneficiaries
 
-import models.variation.{Beneficiary, Entities}
+import models.variation.Beneficiary
 import play.api.libs.json._
+import transformers.mdtp.Entities
 
 trait Beneficiaries[T <: Beneficiary[T]] extends Entities[T]
 

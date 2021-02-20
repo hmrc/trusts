@@ -16,7 +16,7 @@
 
 package transformers.mdtp
 
-import models.variation.{Entities, NaturalPersonType}
+import models.variation.NaturalPersonType
 import play.api.libs.json._
 
 object OtherIndividuals extends Entities[NaturalPersonType] {

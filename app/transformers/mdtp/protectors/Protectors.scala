@@ -16,8 +16,9 @@
 
 package transformers.mdtp.protectors
 
-import models.variation.{Entities, Protector}
+import models.variation.Protector
 import play.api.libs.json._
+import transformers.mdtp.Entities
 
 trait Protectors[T <: Protector[T]] extends Entities[T]
 

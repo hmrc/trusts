@@ -16,35 +16,7 @@
 
 package models.variation
 
-import play.api.libs.json.{JsArray, JsObject, JsPath, JsValue, Json, Reads, Writes}
-
-trait Entities[T <: Entity[T]] {
-
-  val path: JsPath
-
-  def transform(response: JsValue)(implicit rds: Reads[T]): Reads[JsObject] = {
-    response.transform(path.json.pick).fold(
-      _ => {
-        JsPath.json.update(
-          path.json.put(JsArray())
-        )
-      },
-      entities => {
-
-        val entitiesUpdated = JsArray(entities.as[List[T]].map {
-          entity =>
-            Json.toJson(entity)(entity.writeToMaintain)
-        })
-
-        JsPath.json.update(
-          path.json.prune andThen
-            path.json.put(entitiesUpdated)
-        )
-      }
-    )
-  }
-
-}
+import play.api.libs.json.Writes
 
 trait Entity[T] {
   val writeToMaintain: Writes[T]

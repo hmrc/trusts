@@ -16,41 +16,26 @@
 
 package transformers.mdtp
 
-import play.api.libs.json._
 import models.variation.{TrusteeIndividualType, TrusteeOrgType, TrusteeType}
+import play.api.libs.json._
 
-object Trustees {
+object Trustees extends Entities[TrusteeType] {
 
-  private val pathToTrustees = JsPath \ 'details \ 'trust \ 'entities \ 'trustees
+  override val path: JsPath = JsPath \ 'details \ 'trust \ 'entities \ 'trustees
 
-  def transform(response: JsValue): Reads[JsObject] = {
-    response.transform(pathToTrustees.json.pick).fold(
-      _ => {
-        JsPath.json.update(
-          pathToTrustees.json.put(JsArray())
+  override def updateEntities(entities: JsValue)(implicit rds: Reads[TrusteeType]): JsArray = {
+    JsArray(entities.as[List[TrusteeType]].map {
+      case TrusteeType(Some(trusteeInd), None) =>
+        Json.obj(
+          "trusteeInd" -> Json.toJson(trusteeInd)(TrusteeIndividualType.writeToMaintain)
         )
-      },
-      trustees => {
-
-        val trusteesUpdated = JsArray(trustees.as[List[TrusteeType]].map {
-          case TrusteeType(Some(trusteeInd), None) =>
-            Json.obj(
-              "trusteeInd" -> Json.toJson(trusteeInd)(TrusteeIndividualType.writeToMaintain)
-            )
-          case TrusteeType(None, Some(trusteeOrg)) =>
-            Json.obj(
-              "trusteeOrg" -> Json.toJson(trusteeOrg)(TrusteeOrgType.writeToMaintain)
-            )
-          case _ =>
-            Json.obj()
-        })
-
-        JsPath.json.update(
-          pathToTrustees.json.prune andThen
-            pathToTrustees.json.put(trusteesUpdated)
+      case TrusteeType(None, Some(trusteeOrg)) =>
+        Json.obj(
+          "trusteeOrg" -> Json.toJson(trusteeOrg)(TrusteeOrgType.writeToMaintain)
         )
-      }
-    )
+      case _ =>
+        Json.obj()
+    })
   }
 
 }
