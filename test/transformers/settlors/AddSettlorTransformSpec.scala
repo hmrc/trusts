@@ -17,7 +17,7 @@
 package transformers.settlors
 
 import models.NameType
-import models.variation.{IdentificationOrgType, IdentificationType, Settlor, SettlorCompany}
+import models.variation.{IdentificationOrgType, IdentificationType, SettlorIndividual, SettlorCompany}
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
 import utils.JsonUtils
@@ -32,7 +32,7 @@ class AddSettlorTransformSpec extends FreeSpec with MustMatchers {
 
       "when individual" - {
 
-        val newSettlor = Settlor(
+        val newSettlor = SettlorIndividual(
           lineNo = Some("1"),
           bpMatchStatus = None,
           name = NameType("abcdefghijkl", Some("abcdefghijklmn"), "abcde"),

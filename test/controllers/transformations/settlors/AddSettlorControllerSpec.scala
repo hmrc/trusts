@@ -18,7 +18,7 @@ package controllers.transformations.settlors
 
 import controllers.actions.FakeIdentifierAction
 import models.NameType
-import models.variation.{Settlor, SettlorCompany}
+import models.variation.{SettlorIndividual, SettlorCompany}
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
@@ -52,7 +52,7 @@ class AddSettlorControllerSpec extends FreeSpec with MockitoSugar with ScalaFutu
 
     "individual settlor" - {
 
-      val settlor = Settlor(
+      val settlor = SettlorIndividual(
         lineNo = None,
         bpMatchStatus = None,
         name = NameType("Joe", None, "Bloggs"),

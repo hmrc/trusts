@@ -16,35 +16,10 @@
 
 package transformers.mdtp.beneficiaries
 
-import models.variation.Beneficiary
+import models.variation.{Beneficiary, Entities}
 import play.api.libs.json._
 
-trait Beneficiaries[T <: Beneficiary[T]] {
-
-  val path: JsPath
-
-  def transform(response: JsValue)(implicit rds: Reads[T]): Reads[JsObject] = {
-    response.transform(path.json.pick).fold(
-      _ => {
-        JsPath.json.update(
-          path.json.put(JsArray())
-        )
-      },
-      beneficiaries => {
-
-        val beneficiariesUpdated = JsArray(beneficiaries.as[List[T]].map {
-          beneficiary =>
-            Json.toJson(beneficiary)(beneficiary.writeToMaintain)
-        })
-
-        JsPath.json.update(
-          path.json.prune andThen
-            path.json.put(beneficiariesUpdated)
-        )
-      }
-    )
-  }
-}
+trait Beneficiaries[T <: Beneficiary[T]] extends Entities[T]
 
 object Beneficiaries {
 

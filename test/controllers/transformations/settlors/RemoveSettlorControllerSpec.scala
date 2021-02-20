@@ -70,7 +70,7 @@ class RemoveSettlorControllerSpec extends FreeSpec with MockitoSugar with ScalaF
 
     "individual settlor" - {
 
-      val settlor = Settlor(
+      val settlor = SettlorIndividual(
         lineNo = None,
         bpMatchStatus = None,
         name = NameType("Joe", None, "Bloggs"),

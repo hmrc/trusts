@@ -16,33 +16,11 @@
 
 package transformers.mdtp.settlors
 
-import play.api.libs.json._
 import models.variation.SettlorCompany
+import play.api.libs.json._
 
-object Business {
+object Business extends Settlors[SettlorCompany] {
 
-  private val path = JsPath \ 'details \ 'trust \ 'entities \ 'settlors \ 'settlorCompany
-
-  def transform(response : JsValue) : Reads[JsObject] = {
-    response.transform(path.json.pick).fold(
-      _ => {
-        JsPath.json.update(
-          path.json.put(JsArray())
-        )
-      },
-      settlors => {
-
-        val settlorsUpdated = JsArray(settlors.as[List[SettlorCompany]].map {
-          settlor =>
-            Json.toJson(settlor)(SettlorCompany.writeToMaintain)
-        })
-
-        JsPath.json.update(
-          path.json.prune andThen
-            path.json.put(settlorsUpdated)
-        )
-      }
-    )
-  }
+  override val path: JsPath = JsPath \ 'details \ 'trust \ 'entities \ 'settlors \ 'settlorCompany
 
 }

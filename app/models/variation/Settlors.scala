@@ -22,28 +22,33 @@ import play.api.libs.json.{Format, Json, Writes}
 
 import java.time.LocalDate
 
-case class Settlors(settlor: Option[List[Settlor]],
+trait Settlor[T] extends Entity[T]
+
+case class Settlors(settlor: Option[List[SettlorIndividual]],
                     settlorCompany: Option[List[SettlorCompany]])
 
 object Settlors {
   implicit val settlorsFormat: Format[Settlors] = Json.format[Settlors]
 }
 
-case class Settlor(lineNo: Option[String],
-                   bpMatchStatus: Option[String],
-                   name: NameType,
-                   dateOfBirth: Option[LocalDate],
-                   identification: Option[IdentificationType],
-                   countryOfResidence: Option[String],
-                   legallyIncapable: Option[Boolean],
-                   nationality: Option[String],
-                   entityStart: LocalDate,
-                   entityEnd: Option[LocalDate])
+case class SettlorIndividual(lineNo: Option[String],
+                             bpMatchStatus: Option[String],
+                             name: NameType,
+                             dateOfBirth: Option[LocalDate],
+                             identification: Option[IdentificationType],
+                             countryOfResidence: Option[String],
+                             legallyIncapable: Option[Boolean],
+                             nationality: Option[String],
+                             entityStart: LocalDate,
+                             entityEnd: Option[LocalDate]) extends Settlor[SettlorIndividual] {
 
-object Settlor {
-  implicit val settlorFormat: Format[Settlor] = Json.format[Settlor]
+  override val writeToMaintain: Writes[SettlorIndividual] = SettlorIndividual.writeToMaintain
+}
 
-  val writeToMaintain: Writes[Settlor] = (o: Settlor) => Json.obj(
+object SettlorIndividual {
+  implicit val settlorFormat: Format[SettlorIndividual] = Json.format[SettlorIndividual]
+
+  val writeToMaintain: Writes[SettlorIndividual] = (o: SettlorIndividual) => Json.obj(
     "lineNo" -> o.lineNo,
     "bpMatchStatus" -> o.bpMatchStatus,
     "name" -> o.name,
@@ -66,7 +71,10 @@ case class SettlorCompany(lineNo: Option[String],
                           identification: Option[IdentificationOrgType],
                           countryOfResidence: Option[String],
                           entityStart: LocalDate,
-                          entityEnd: Option[LocalDate])
+                          entityEnd: Option[LocalDate]) extends Settlor[SettlorCompany] {
+
+  override val writeToMaintain: Writes[SettlorCompany] = SettlorCompany.writeToMaintain
+}
 
 object SettlorCompany {
   implicit val settlorCompanyFormat: Format[SettlorCompany] = Json.format[SettlorCompany]

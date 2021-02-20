@@ -22,9 +22,7 @@ import play.api.libs.json.{Format, Json, Writes}
 
 import java.time.LocalDate
 
-trait Beneficiary[T] {
-  val writeToMaintain: Writes[T]
-}
+trait Beneficiary[T] extends Entity[T]
 
 case class BeneficiaryType(individualDetails: Option[List[IndividualDetailsType]],
                            company: Option[List[BeneficiaryCompanyType]],

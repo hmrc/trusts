@@ -140,7 +140,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
         None
       )
 
-      val settlor = Settlor(
+      val settlor = SettlorIndividual(
         None,
         None,
         NameType("Individual", None, "Settlor"),
