@@ -17,7 +17,7 @@
 package transformers.protectors
 
 import models.NameType
-import models.variation.{IdentificationType, Protector, ProtectorCompany}
+import models.variation.{IdentificationType, ProtectorIndividual, ProtectorCompany}
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.Json
 import utils.JsonUtils
@@ -32,7 +32,7 @@ class AddProtectorTransformSpec extends FreeSpec with MustMatchers {
 
       "when individual" - {
 
-        val newProtector = Protector(Some("1"),
+        val newProtector = ProtectorIndividual(Some("1"),
           None,
           NameType("abcdefghijkl",Some("abcdefghijklmn"), "abcde"),
           Some(LocalDate.parse("2000-01-01")),
@@ -44,7 +44,7 @@ class AddProtectorTransformSpec extends FreeSpec with MustMatchers {
           None
         )
 
-        val newSecondProtector = Protector(None,
+        val newSecondProtector = ProtectorIndividual(None,
           None,
           NameType("second",None, "protector"),
           Some(LocalDate.parse("2000-01-01")),

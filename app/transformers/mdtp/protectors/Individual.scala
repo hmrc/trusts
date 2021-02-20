@@ -16,33 +16,11 @@
 
 package transformers.mdtp.protectors
 
+import models.variation.ProtectorIndividual
 import play.api.libs.json._
-import models.variation.Protector
 
-object Individual {
+object Individual extends Protectors[ProtectorIndividual] {
 
-  private val path = JsPath \ 'details \ 'trust \ 'entities \ 'protectors \ 'protector
-
-  def transform(response : JsValue) : Reads[JsObject] = {
-    response.transform(path.json.pick).fold(
-      _ => {
-        JsPath.json.update(
-          path.json.put(JsArray())
-        )
-      },
-      protectors => {
-
-        val protectorsUpdated = JsArray(protectors.as[List[Protector]].map {
-          protector =>
-            Json.toJson(protector)(Protector.writeToMaintain)
-        })
-
-        JsPath.json.update(
-          path.json.prune andThen
-            path.json.put(protectorsUpdated)
-        )
-      }
-    )
-  }
+  override val path: JsPath = JsPath \ 'details \ 'trust \ 'entities \ 'protectors \ 'protector
 
 }

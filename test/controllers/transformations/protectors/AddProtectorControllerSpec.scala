@@ -18,7 +18,7 @@ package controllers.transformations.protectors
 
 import controllers.actions.FakeIdentifierAction
 import models.NameType
-import models.variation.{Protector, ProtectorCompany}
+import models.variation.{ProtectorIndividual, ProtectorCompany}
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
@@ -52,7 +52,7 @@ class AddProtectorControllerSpec extends FreeSpec with MockitoSugar with ScalaFu
 
     "individual protector" - {
 
-      val protector = Protector(
+      val protector = ProtectorIndividual(
         lineNo = None,
         bpMatchStatus = None,
         name = NameType("Joe", None, "Bloggs"),

@@ -63,7 +63,7 @@ class AmendProtectorControllerSpec extends FreeSpec with MockitoSugar with Scala
 
     "individual protector" - {
 
-      val originalProtector = Protector(
+      val originalProtector = ProtectorIndividual(
         lineNo = None,
         bpMatchStatus = None,
         name = NameType("Joe", None, "Bloggs"),

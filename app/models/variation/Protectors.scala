@@ -22,28 +22,33 @@ import play.api.libs.json.{Format, Json, Writes}
 
 import java.time.LocalDate
 
-case class ProtectorsType(protector: Option[List[Protector]],
+trait Protector[T] extends Entity[T]
+
+case class ProtectorsType(protector: Option[List[ProtectorIndividual]],
                           protectorCompany: Option[List[ProtectorCompany]])
 
 object ProtectorsType {
   implicit val protectorsTypeFormat: Format[ProtectorsType] = Json.format[ProtectorsType]
 }
 
-case class Protector(lineNo: Option[String],
-                     bpMatchStatus: Option[String],
-                     name: NameType,
-                     dateOfBirth: Option[LocalDate],
-                     identification: Option[IdentificationType],
-                     countryOfResidence: Option[String],
-                     legallyIncapable: Option[Boolean],
-                     nationality: Option[String],
-                     entityStart: LocalDate,
-                     entityEnd: Option[LocalDate])
+case class ProtectorIndividual(lineNo: Option[String],
+                               bpMatchStatus: Option[String],
+                               name: NameType,
+                               dateOfBirth: Option[LocalDate],
+                               identification: Option[IdentificationType],
+                               countryOfResidence: Option[String],
+                               legallyIncapable: Option[Boolean],
+                               nationality: Option[String],
+                               entityStart: LocalDate,
+                               entityEnd: Option[LocalDate]) extends Protector[ProtectorIndividual] {
 
-object Protector {
-  implicit val protectorFormat: Format[Protector] = Json.format[Protector]
+  override val writeToMaintain: Writes[ProtectorIndividual] = ProtectorIndividual.writeToMaintain
+}
 
-  val writeToMaintain: Writes[Protector] = (o: Protector) => Json.obj(
+object ProtectorIndividual {
+  implicit val protectorFormat: Format[ProtectorIndividual] = Json.format[ProtectorIndividual]
+
+  val writeToMaintain: Writes[ProtectorIndividual] = (o: ProtectorIndividual) => Json.obj(
     "lineNo" -> o.lineNo,
     "bpMatchStatus" -> o.bpMatchStatus,
     "name" -> o.name,
@@ -64,10 +69,12 @@ case class ProtectorCompany(lineNo: Option[String],
                             identification: Option[IdentificationOrgType],
                             countryOfResidence: Option[String],
                             entityStart: LocalDate,
-                            entityEnd: Option[LocalDate])
+                            entityEnd: Option[LocalDate]) extends Protector[ProtectorCompany] {
+
+  override val writeToMaintain: Writes[ProtectorCompany] = ProtectorCompany.writeToMaintain
+}
 
 object ProtectorCompany {
-
   implicit val protectorCompanyFormat: Format[ProtectorCompany] = Json.format[ProtectorCompany]
 
   val writeToMaintain: Writes[ProtectorCompany] = (o: ProtectorCompany) => Json.obj(

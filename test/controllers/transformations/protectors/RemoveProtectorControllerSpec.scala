@@ -70,7 +70,7 @@ class RemoveProtectorControllerSpec extends FreeSpec with MockitoSugar with Scal
 
     "individual protector" - {
 
-      val protector = Protector(
+      val protector = ProtectorIndividual(
         lineNo = None,
         bpMatchStatus = None,
         name = NameType("Joe", None, "Bloggs"),

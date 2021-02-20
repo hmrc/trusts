@@ -18,7 +18,7 @@ package controllers.transformations.protectors
 
 import controllers.actions.IdentifierAction
 import controllers.transformations.AddTransformationController
-import models.variation.{Protector, ProtectorCompany}
+import models.variation.{ProtectorIndividual, ProtectorCompany}
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc.{Action, ControllerComponents}
 import services.TransformationService
@@ -34,7 +34,7 @@ class AddProtectorController @Inject()(identify: IdentifierAction,
                                       (implicit ec: ExecutionContext, cc: ControllerComponents)
   extends AddTransformationController(identify, transformationService) {
 
-  def addIndividual(identifier: String): Action[JsValue] = addNewTransform[Protector](identifier, INDIVIDUAL_PROTECTOR)
+  def addIndividual(identifier: String): Action[JsValue] = addNewTransform[ProtectorIndividual](identifier, INDIVIDUAL_PROTECTOR)
 
   def addBusiness(identifier: String): Action[JsValue] = addNewTransform[ProtectorCompany](identifier, BUSINESS_PROTECTOR)
 
