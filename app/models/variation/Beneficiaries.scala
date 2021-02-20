@@ -22,6 +22,10 @@ import play.api.libs.json.{Format, Json, Writes}
 
 import java.time.LocalDate
 
+trait Beneficiary[T] {
+  val writeToMaintain: Writes[T]
+}
+
 case class BeneficiaryType(individualDetails: Option[List[IndividualDetailsType]],
                            company: Option[List[BeneficiaryCompanyType]],
                            trust: Option[List[BeneficiaryTrustType]],
@@ -47,7 +51,10 @@ case class IndividualDetailsType(lineNo: Option[String],
                                  legallyIncapable: Option[Boolean],
                                  nationality: Option[String],
                                  entityStart: LocalDate,
-                                 entityEnd: Option[LocalDate])
+                                 entityEnd: Option[LocalDate]) extends Beneficiary[IndividualDetailsType] {
+
+  override val writeToMaintain: Writes[IndividualDetailsType] = IndividualDetailsType.writeToMaintain
+}
 
 object IndividualDetailsType {
   implicit val individualDetailsTypeFormat: Format[IndividualDetailsType] = Json.format[IndividualDetailsType]
@@ -79,7 +86,10 @@ case class BeneficiaryCompanyType(lineNo: Option[String],
                                   identification: Option[IdentificationOrgType],
                                   countryOfResidence: Option[String],
                                   entityStart: LocalDate,
-                                  entityEnd: Option[LocalDate])
+                                  entityEnd: Option[LocalDate]) extends Beneficiary[BeneficiaryCompanyType] {
+
+  override val writeToMaintain: Writes[BeneficiaryCompanyType] = BeneficiaryCompanyType.writeToMaintain
+}
 
 object BeneficiaryCompanyType {
   implicit val companyTypeFormat: Format[BeneficiaryCompanyType] = Json.format[BeneficiaryCompanyType]
@@ -106,7 +116,10 @@ case class BeneficiaryTrustType(lineNo: Option[String],
                                 identification: Option[IdentificationOrgType],
                                 countryOfResidence: Option[String],
                                 entityStart: LocalDate,
-                                entityEnd: Option[LocalDate])
+                                entityEnd: Option[LocalDate]) extends Beneficiary[BeneficiaryTrustType] {
+
+  override val writeToMaintain: Writes[BeneficiaryTrustType] = BeneficiaryTrustType.writeToMaintain
+}
 
 object BeneficiaryTrustType {
   implicit val beneficiaryTrustTypeFormat: Format[BeneficiaryTrustType] = Json.format[BeneficiaryTrustType]
@@ -133,7 +146,10 @@ case class BeneficiaryCharityType(lineNo: Option[String],
                                   identification: Option[IdentificationOrgType],
                                   countryOfResidence: Option[String],
                                   entityStart: LocalDate,
-                                  entityEnd: Option[LocalDate])
+                                  entityEnd: Option[LocalDate]) extends Beneficiary[BeneficiaryCharityType] {
+
+  override val writeToMaintain: Writes[BeneficiaryCharityType] = BeneficiaryCharityType.writeToMaintain
+}
 
 object BeneficiaryCharityType {
   implicit val charityTypeFormat: Format[BeneficiaryCharityType] = Json.format[BeneficiaryCharityType]
@@ -158,7 +174,10 @@ case class UnidentifiedType(lineNo: Option[String],
                             beneficiaryDiscretion: Option[Boolean],
                             beneficiaryShareOfIncome: Option[String],
                             entityStart: LocalDate,
-                            entityEnd: Option[LocalDate])
+                            entityEnd: Option[LocalDate]) extends Beneficiary[UnidentifiedType] {
+
+  override val writeToMaintain: Writes[UnidentifiedType] = UnidentifiedType.writeToMaintain
+}
 
 object UnidentifiedType {
   implicit val unidentifiedTypeFormat: Format[UnidentifiedType] = Json.format[UnidentifiedType]
@@ -189,7 +208,10 @@ case class LargeType(lineNo: Option[String],
                      beneficiaryShareOfIncome: Option[String],
                      countryOfResidence: Option[String],
                      entityStart: LocalDate,
-                     entityEnd: Option[LocalDate])
+                     entityEnd: Option[LocalDate]) extends Beneficiary[LargeType] {
+
+  override val writeToMaintain: Writes[LargeType] = LargeType.writeToMaintain
+}
 
 object LargeType {
   implicit val largeTypeFormat: Format[LargeType] = Json.format[LargeType]
@@ -222,7 +244,10 @@ case class OtherType(lineNo: Option[String],
                      beneficiaryShareOfIncome: Option[String],
                      countryOfResidence: Option[String],
                      entityStart: LocalDate,
-                     entityEnd: Option[LocalDate])
+                     entityEnd: Option[LocalDate]) extends Beneficiary[OtherType] {
+
+  override val writeToMaintain: Writes[OtherType] = OtherType.writeToMaintain
+}
 
 object OtherType {
   implicit val otherTypeFormat: Format[OtherType] = Json.format[OtherType]

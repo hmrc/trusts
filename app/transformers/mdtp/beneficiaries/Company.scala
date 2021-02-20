@@ -16,33 +16,11 @@
 
 package transformers.mdtp.beneficiaries
 
-import play.api.libs.json._
 import models.variation.BeneficiaryCompanyType
+import play.api.libs.json._
 
-object Company {
+object Company extends Beneficiaries[BeneficiaryCompanyType] {
 
-  private val path = JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'company
-
-  def transform(response : JsValue) : Reads[JsObject] = {
-    response.transform(path.json.pick).fold(
-      _ => {
-        JsPath.json.update(
-          path.json.put(JsArray())
-        )
-      },
-      beneficiaries => {
-
-        val beneficiariesUpdated = JsArray(beneficiaries.as[List[BeneficiaryCompanyType]].map {
-          beneficiary =>
-            Json.toJson(beneficiary)(BeneficiaryCompanyType.writeToMaintain)
-        })
-
-        JsPath.json.update(
-          path.json.prune andThen
-            path.json.put(beneficiariesUpdated)
-        )
-      }
-    )
-  }
+  override val path: JsPath = JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'company
 
 }
