@@ -30,22 +30,6 @@ trait JsonOperations {
     json.transform(lineNoPick).isSuccess
   }
 
-  def getTypeAtPosition[T](input: JsValue, path: JsPath, index: Int)(implicit reads: Reads[T]): T = {
-    input.transform(path.json.pick[JsArray]) match {
-      case JsSuccess(array, _) =>
-        val list = array.value.toList
-
-        list(index).validate[T] match {
-          case JsSuccess(value, _) =>
-            value
-          case JsError(errors) =>
-            throw JsResultException(errors)
-        }
-      case JsError(errors) =>
-        throw JsResultException(errors)
-    }
-  }
-
   def endEntity(input: JsValue, path: JsPath, entityJson: JsValue, endDate: LocalDate, endDateField: String = ENTITY_END): JsResult[JsValue] = {
     if (isKnownToEtmp(entityJson)) {
       addToList(input, path, objectPlusField(entityJson, endDateField, Json.toJson(endDate)))
