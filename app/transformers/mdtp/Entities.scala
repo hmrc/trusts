@@ -30,18 +30,17 @@ trait Entities[T <: Entity[T]] {
         putNewValue(path, JsArray())
       },
       entities => {
-        val updatedEntities = updateEntities(entities)
+        val updatedEntities = JsArray(entities.as[List[T]].map {
+          entity => updateEntity(entity)
+        })
 
         prunePathAndPutNewValue(path, updatedEntities)
       }
     )
   }
 
-  def updateEntities(entities: JsValue)(implicit rds: Reads[T]): JsArray = {
-    JsArray(entities.as[List[T]].map {
-      entity =>
-        Json.toJson(entity)(entity.writeToMaintain)
-    })
+  def updateEntity(entity: T): JsValue = {
+    Json.toJson(entity)(entity.writeToMaintain)
   }
 
 }
