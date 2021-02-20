@@ -107,7 +107,7 @@ class BackwardsCompatibilityService extends Logging {
             case _ => acc
           }
         })
-        prunePathAndPutNewValue(path, Json.toJson(newArray))
+        prunePathAndPutNewValue(path, newArray)
       case JsError(errors) =>
         logger.info(s"Unable to pick json at $path: $errors")
         doNothing()

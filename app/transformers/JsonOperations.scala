@@ -18,7 +18,7 @@ package transformers
 
 import play.api.libs.json._
 import utils.Constants._
-import utils.JsonOps.prunePathAndPutNewValue
+import utils.JsonOps.{prunePathAndPutNewValue, putNewValue}
 
 import java.time.LocalDate
 
@@ -26,25 +26,18 @@ trait JsonOperations {
 
   def lineNoPick: Reads[JsValue] = (__ \ LINE_NUMBER).json.pick
 
-  def isKnownToEtmp(json: JsValue): Boolean = {
+  private def isKnownToEtmp(json: JsValue): Boolean = {
     json.transform(lineNoPick).isSuccess
   }
 
-  def getTypeAtPosition[T](input: JsValue,
-                           path: JsPath,
-                           index: Int)
-                          (implicit reads: Reads[T]): T = {
-
-    input.transform(path.json.pick) match {
-
-      case JsSuccess(json, _) =>
-
-        val list = json.as[JsArray].value.toList
+  def getTypeAtPosition[T](input: JsValue, path: JsPath, index: Int)(implicit reads: Reads[T]): T = {
+    input.transform(path.json.pick[JsArray]) match {
+      case JsSuccess(array, _) =>
+        val list = array.value.toList
 
         list(index).validate[T] match {
           case JsSuccess(value, _) =>
             value
-
           case JsError(errors) =>
             throw JsResultException(errors)
         }
@@ -61,61 +54,36 @@ trait JsonOperations {
     }
   }
 
-  def addTo(input: JsValue, path: JsPath, jsonToAdd: JsValue): JsResult[JsValue] = {
-    input.transform(__.json.update {
-      path.json.put(
-        jsonToAdd
-      )
-    })
+  private def addTo(input: JsValue, path: JsPath, jsonToAdd: JsValue): JsResult[JsValue] = {
+    input.transform(putNewValue(path, jsonToAdd))
   }
 
   def pruneThenAddTo(input: JsValue, path: JsPath, jsonToAdd: JsValue): JsResult[JsValue] = {
-    val updatedInput = input.transform(path.json.prune) match {
-      case JsSuccess(value, _) => value
-      case _ => input
-    }
-    addTo(updatedInput, path, jsonToAdd)
+    input.transform(prunePathAndPutNewValue(path, jsonToAdd))
   }
 
-  def addToList(input: JsValue,
-                path: JsPath,
-                jsonToAdd: JsValue): JsResult[JsValue] = {
-
-    import play.api.libs.json._
-
+  def addToList(input: JsValue, path: JsPath, jsonToAdd: JsValue): JsResult[JsValue] = {
     input.transform(path.json.pick[JsArray]) match {
       case JsSuccess(_, _) =>
-
         val updatedItems: Reads[JsObject] = path.json.update(
           Reads.of[JsArray].map { array =>
-              array :+ jsonToAdd
-            }
-          )
+            array :+ jsonToAdd
+          }
+        )
 
         input.transform(updatedItems)
       case JsError(_) =>
-        addTo(
-          input, path, JsArray(
-            Seq(jsonToAdd))
-        )
+        addTo(input, path, JsArray(Seq(jsonToAdd)))
     }
   }
 
   def amendAtPosition(input: JsValue, path: JsPath, index: Option[Int], newValue: JsValue): JsResult[JsValue] = {
     index match {
       case Some(i) =>
-        input.transform(path.json.pick) match {
-
-          case JsSuccess(json, _) =>
-
-            val array = json.as[JsArray]
-
+        input.transform(path.json.pick[JsArray]) match {
+          case JsSuccess(array, _) =>
             val updated = (array.value.take(i) :+ newValue) ++ array.value.drop(i + 1)
-
-            input.transform(
-              prunePathAndPutNewValue(path, Json.toJson(updated))
-            )
-
+            pruneThenAddTo(input, path, JsArray(updated))
           case e: JsError => e
         }
       case _ => JsError("Cannot amend at position if index is None")
@@ -125,20 +93,14 @@ trait JsonOperations {
   def removeAtPosition(input: JsValue, path: JsPath, index: Option[Int]): JsResult[JsValue] = {
     index match {
       case Some(i) =>
-        input.transform(path.json.pick) match {
-          case JsSuccess(json, _) =>
-
-            val array = json.as[JsArray]
-
+        input.transform(path.json.pick[JsArray]) match {
+          case JsSuccess(array, _) =>
             val filtered = array.value.take(i) ++ array.value.drop(i + 1)
             if (filtered.isEmpty) {
               input.transform(path.json.prune)
             } else {
-              input.transform(
-                prunePathAndPutNewValue(path, Json.toJson(filtered))
-              )
+              pruneThenAddTo(input, path, JsArray(filtered))
             }
-
           case e: JsError => e
         }
       case _ => JsError("Cannot remove at position if index is None")
@@ -151,7 +113,9 @@ trait JsonOperations {
     })
   }
 
-  def objectPlusField[A](json: JsValue, field: String, value: JsValue): JsValue = json.as[JsObject] + (field -> value)
+  def objectPlusField[A](json: JsValue, field: String, value: JsValue): JsValue = {
+    json.as[JsObject] + (field -> value)
+  }
 
   def copyField(original: JsValue, field: String, amended: JsValue): JsValue = {
     val pickField = (__ \ field).json.pick
