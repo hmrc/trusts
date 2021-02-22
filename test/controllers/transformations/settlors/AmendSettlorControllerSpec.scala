@@ -63,7 +63,7 @@ class AmendSettlorControllerSpec extends FreeSpec with MockitoSugar with ScalaFu
 
     "individual settlor" - {
 
-      val originalSettlor = Settlor(
+      val originalSettlor = SettlorIndividual(
         lineNo = None,
         bpMatchStatus = None,
         name = NameType("Joe", None, "Bloggs"),

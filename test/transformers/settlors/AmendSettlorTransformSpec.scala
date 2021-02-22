@@ -17,7 +17,7 @@
 package transformers.settlors
 
 import models.NameType
-import models.variation.{AmendDeceasedSettlor, Settlor, SettlorCompany}
+import models.variation.{AmendDeceasedSettlor, SettlorIndividual, SettlorCompany}
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.{JsValue, Json}
 import utils.JsonUtils
@@ -39,7 +39,7 @@ class AmendSettlorTransformSpec extends FreeSpec with MustMatchers {
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-settlor-transform-before.json")
           val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-settlor-transform-after.json")
 
-          val amended = Settlor(
+          val amended = SettlorIndividual(
             lineNo = None,
             bpMatchStatus = None,
             NameType("First updated", None, "Last updated"),
@@ -80,7 +80,7 @@ class AmendSettlorTransformSpec extends FreeSpec with MustMatchers {
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-settlor-transform-before.json")
           val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-settlor-transform-after-declaration.json")
 
-          val amended = Settlor(
+          val amended = SettlorIndividual(
             lineNo = None,
             bpMatchStatus = None,
             NameType("First updated", None, "Last updated"),
@@ -118,7 +118,7 @@ class AmendSettlorTransformSpec extends FreeSpec with MustMatchers {
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-new-individual-settlor-transform-before.json")
           val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-new-individual-settlor-transform-after-declaration.json")
 
-          val amended = Settlor(
+          val amended = SettlorIndividual(
             lineNo = None,
             bpMatchStatus = None,
             NameType("Second updated", None, "Second updated"),

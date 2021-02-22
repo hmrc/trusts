@@ -16,7 +16,11 @@
 
 package transformers.mdtp.settlors
 
+import models.variation.Settlor
 import play.api.libs.json._
+import transformers.mdtp.Entities
+
+trait Settlors[T <: Settlor[T]] extends Entities[T]
 
 object Settlors {
 

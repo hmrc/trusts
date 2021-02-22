@@ -16,18 +16,8 @@
 
 package models.variation
 
-import java.time.LocalDate
+import play.api.libs.json.Writes
 
-import play.api.libs.json.{Format, Json}
-import models.NameType
-
-case class AmendDeceasedSettlor(name: NameType,
-                                dateOfBirth: Option[LocalDate],
-                                dateOfDeath: Option[LocalDate],
-                                identification: Option[IdentificationType])
-
-object AmendDeceasedSettlor {
-
-  implicit val formats : Format[AmendDeceasedSettlor] = Json.format[AmendDeceasedSettlor]
-
+trait Entity[T] {
+  val writeToMaintain: Writes[T]
 }

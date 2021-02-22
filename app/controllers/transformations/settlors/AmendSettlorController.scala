@@ -36,7 +36,7 @@ class AmendSettlorController @Inject()(identify: IdentifierAction,
   extends AmendTransformationController(identify, transformationService) with SettlorController {
 
   def amendIndividual(identifier: String, index: Int): Action[JsValue] =
-    addNewTransform[Settlor](identifier, Some(index), INDIVIDUAL_SETTLOR)
+    addNewTransform[SettlorIndividual](identifier, Some(index), INDIVIDUAL_SETTLOR)
 
   def amendBusiness(identifier: String, index: Int): Action[JsValue] =
     addNewTransform[SettlorCompany](identifier, Some(index), BUSINESS_SETTLOR)

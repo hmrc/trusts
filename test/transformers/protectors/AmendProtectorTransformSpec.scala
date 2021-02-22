@@ -16,7 +16,7 @@
 
 package transformers.protectors
 
-import models.variation.{IdentificationOrgType, IdentificationType, Protector, ProtectorCompany}
+import models.variation.{IdentificationOrgType, IdentificationType, ProtectorIndividual, ProtectorCompany}
 import models.{NameType, PassportType}
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.{JsValue, Json}
@@ -39,7 +39,7 @@ class AmendProtectorTransformSpec extends FreeSpec with MustMatchers {
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-protector-transform-before.json")
           val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-protector-transform-after.json")
 
-          val amended = Protector(
+          val amended = ProtectorIndividual(
             lineNo = None,
             bpMatchStatus = None,
             NameType("First 2", None, "Last 2"),
@@ -95,7 +95,7 @@ class AmendProtectorTransformSpec extends FreeSpec with MustMatchers {
           val afterJson =
             JsonUtils.getJsonValueFromFile("transforms/trusts-individual-protector-transform-after-declaration.json")
 
-          val amended = Protector(
+          val amended = ProtectorIndividual(
             lineNo = None,
             bpMatchStatus = None,
             NameType("Updated First 2", None, "Updated Last 2"),
@@ -148,7 +148,7 @@ class AmendProtectorTransformSpec extends FreeSpec with MustMatchers {
           val afterJson =
             JsonUtils.getJsonValueFromFile("transforms/trusts-new-individual-protector-transform-after-declaration.json")
 
-          val amended = Protector(
+          val amended = ProtectorIndividual(
             lineNo = None,
             bpMatchStatus = None,
             NameType("Amended New First 3", None, "Amended New Last 3"),

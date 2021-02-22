@@ -16,11 +16,15 @@
 
 package transformers.mdtp.beneficiaries
 
+import models.variation.Beneficiary
 import play.api.libs.json._
+import transformers.mdtp.Entities
+
+trait Beneficiaries[T <: Beneficiary[T]] extends Entities[T]
 
 object Beneficiaries {
 
-  def transform(response : JsValue) : Reads[JsObject] = {
+  def transform(response: JsValue): Reads[JsObject] = {
     Individual.transform(response) andThen
     Company.transform(response) andThen
     Trust.transform(response) andThen

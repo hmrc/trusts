@@ -19,6 +19,7 @@ package transformers.settlors
 import play.api.libs.json._
 import transformers.AmendEntityTransform
 import utils.Constants._
+import utils.JsonOps.prunePathAndPutNewValue
 
 import java.time.LocalDate
 
@@ -46,10 +47,7 @@ case class AmendSettlorTransform(index: Option[Int],
 
   private def amendDeceasedAndPreserveData(input: JsValue): JsResult[JsObject] = {
     input.transform(
-      path.json.prune andThen
-        __.json.update {
-          path.json.put(preserveFields(etmpFields :+ ENTITY_START))
-        }
+      prunePathAndPutNewValue(path, preserveFields(etmpFields :+ ENTITY_START))
     )
   }
 

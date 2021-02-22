@@ -18,7 +18,7 @@ package controllers.transformations.settlors
 
 import controllers.actions.IdentifierAction
 import controllers.transformations.AddTransformationController
-import models.variation.{Settlor, SettlorCompany}
+import models.variation.{SettlorIndividual, SettlorCompany}
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc.{Action, ControllerComponents}
 import services.TransformationService
@@ -34,7 +34,7 @@ class AddSettlorController @Inject()(identify: IdentifierAction,
                                     (implicit ec: ExecutionContext, cc: ControllerComponents)
   extends AddTransformationController(identify, transformationService) {
 
-  def addIndividual(identifier: String): Action[JsValue] = addNewTransform[Settlor](identifier, INDIVIDUAL_SETTLOR)
+  def addIndividual(identifier: String): Action[JsValue] = addNewTransform[SettlorIndividual](identifier, INDIVIDUAL_SETTLOR)
 
   def addBusiness(identifier: String): Action[JsValue] = addNewTransform[SettlorCompany](identifier, BUSINESS_SETTLOR)
 
