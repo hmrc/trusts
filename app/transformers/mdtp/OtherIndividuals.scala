@@ -18,9 +18,10 @@ package transformers.mdtp
 
 import models.variation.NaturalPersonType
 import play.api.libs.json._
+import utils.Constants._
 
 object OtherIndividuals extends Entities[NaturalPersonType] {
 
-  override val path: JsPath = JsPath \ 'details \ 'trust \ 'entities \ 'naturalPerson
+  override val path: JsPath = ENTITIES \ OTHER_INDIVIDUALS
 
 }

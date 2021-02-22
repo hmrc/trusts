@@ -18,9 +18,10 @@ package transformers.mdtp.beneficiaries
 
 import models.variation.IndividualDetailsType
 import play.api.libs.json._
+import utils.Constants._
 
 object Individual extends Beneficiaries[IndividualDetailsType] {
 
-  override val path: JsPath = JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'individualDetails
+  override val path: JsPath = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
 
 }

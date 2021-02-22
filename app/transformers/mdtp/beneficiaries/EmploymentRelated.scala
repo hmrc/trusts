@@ -18,9 +18,10 @@ package transformers.mdtp.beneficiaries
 
 import models.variation.LargeType
 import play.api.libs.json._
+import utils.Constants._
 
 object EmploymentRelated extends Beneficiaries[LargeType] {
 
-  override val path: JsPath = JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'large
+  override val path: JsPath = ENTITIES \ BENEFICIARIES \ LARGE_BENEFICIARY
 
 }

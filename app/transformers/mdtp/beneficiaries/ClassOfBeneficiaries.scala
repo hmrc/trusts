@@ -18,9 +18,10 @@ package transformers.mdtp.beneficiaries
 
 import models.variation.UnidentifiedType
 import play.api.libs.json._
+import utils.Constants._
 
 object ClassOfBeneficiaries extends Beneficiaries[UnidentifiedType] {
 
-  override val path: JsPath = JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'unidentified
+  override val path: JsPath = ENTITIES \ BENEFICIARIES \ UNIDENTIFIED_BENEFICIARY
 
 }

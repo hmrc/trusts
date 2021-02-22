@@ -18,9 +18,10 @@ package transformers.mdtp.protectors
 
 import models.variation.ProtectorCompany
 import play.api.libs.json._
+import utils.Constants._
 
 object Business extends Protectors[ProtectorCompany] {
 
-  override val path: JsPath = JsPath \ 'details \ 'trust \ 'entities \ 'protectors \ 'protectorCompany
+  override val path: JsPath = ENTITIES \ PROTECTORS \ BUSINESS_PROTECTOR
 
 }

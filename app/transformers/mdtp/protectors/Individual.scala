@@ -18,9 +18,10 @@ package transformers.mdtp.protectors
 
 import models.variation.ProtectorIndividual
 import play.api.libs.json._
+import utils.Constants._
 
 object Individual extends Protectors[ProtectorIndividual] {
 
-  override val path: JsPath = JsPath \ 'details \ 'trust \ 'entities \ 'protectors \ 'protector
+  override val path: JsPath = ENTITIES \ PROTECTORS \ INDIVIDUAL_PROTECTOR
 
 }

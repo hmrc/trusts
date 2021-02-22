@@ -18,9 +18,10 @@ package transformers.mdtp.beneficiaries
 
 import models.variation.OtherType
 import play.api.libs.json._
+import utils.Constants._
 
 object Other extends Beneficiaries[OtherType] {
 
-  override val path: JsPath = JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary \ 'other
+  override val path: JsPath = ENTITIES \ BENEFICIARIES \ OTHER_BENEFICIARY
 
 }

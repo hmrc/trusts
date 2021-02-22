@@ -18,9 +18,10 @@ package transformers.mdtp.settlors
 
 import models.variation.SettlorCompany
 import play.api.libs.json._
+import utils.Constants._
 
 object Business extends Settlors[SettlorCompany] {
 
-  override val path: JsPath = JsPath \ 'details \ 'trust \ 'entities \ 'settlors \ 'settlorCompany
+  override val path: JsPath = ENTITIES \ SETTLORS \ BUSINESS_SETTLOR
 
 }

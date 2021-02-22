@@ -18,20 +18,21 @@ package transformers.mdtp
 
 import models.variation.{TrusteeIndividualType, TrusteeOrgType, TrusteeType}
 import play.api.libs.json._
+import utils.Constants._
 
 object Trustees extends Entities[TrusteeType] {
 
-  override val path: JsPath = JsPath \ 'details \ 'trust \ 'entities \ 'trustees
+  override val path: JsPath = ENTITIES \ TRUSTEES
 
   override def updateEntity(trustee: TrusteeType): JsValue = {
     trustee match {
       case TrusteeType(Some(trusteeInd), None) =>
         Json.obj(
-          "trusteeInd" -> Json.toJson(trusteeInd)(TrusteeIndividualType.writeToMaintain)
+          INDIVIDUAL_TRUSTEE -> Json.toJson(trusteeInd)(TrusteeIndividualType.writeToMaintain)
         )
       case TrusteeType(None, Some(trusteeOrg)) =>
         Json.obj(
-          "trusteeOrg" -> Json.toJson(trusteeOrg)(TrusteeOrgType.writeToMaintain)
+          BUSINESS_TRUSTEE -> Json.toJson(trusteeOrg)(TrusteeOrgType.writeToMaintain)
         )
       case _ =>
         Json.obj()
