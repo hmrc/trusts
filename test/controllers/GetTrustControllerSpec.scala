@@ -21,7 +21,7 @@ import controllers.actions.{FakeIdentifierAction, ValidateIdentifierActionProvid
 import models.get_trust.GetTrustResponse.CLOSED_REQUEST_STATUS
 import models.get_trust._
 import org.mockito.Matchers.{any, eq => mockEq}
-import org.mockito.Mockito.{reset, times, verify, when}
+import org.mockito.Mockito.{never, reset, times, verify, when}
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Span}
@@ -1260,6 +1260,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
           verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"))
+          verify(transformationService, never()).getTransformedData(any(), any())(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe expected
@@ -1282,6 +1283,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
           verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"))
+          verify(transformationService, never()).getTransformedData(any(), any())(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe expected
