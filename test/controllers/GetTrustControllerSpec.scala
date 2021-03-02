@@ -1241,6 +1241,53 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         }
       }
     }
+
+    ".isTrust5mld" should {
+
+      "return 200 - Ok with true when 5mld" in {
+
+        val trustWith5mldData = getTransformedTrustResponse5mld
+
+        val processedResponse = TrustProcessedResponse(trustWith5mldData, ResponseHeader("Processed", "1"))
+
+        when(trustsService.getTrustInfo(any[String], any[String]))
+          .thenReturn(Future.successful(processedResponse))
+
+        val result = getTrustController.isTrust5mld(utr)(FakeRequest())
+
+        val expected = Json.parse("true")
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"))
+          status(result) mustBe OK
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe expected
+        }
+      }
+
+      "return 200 - Ok with false when 4mld" in {
+
+        val trustWith4mldData = getTransformedTrustResponse
+
+        val processedResponse = TrustProcessedResponse(trustWith4mldData, ResponseHeader("Processed", "1"))
+
+        when(trustsService.getTrustInfo(any[String], any[String]))
+          .thenReturn(Future.successful(processedResponse))
+
+        val result = getTrustController.isTrust5mld(utr)(FakeRequest())
+
+        val expected = Json.parse("false")
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"))
+          status(result) mustBe OK
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe expected
+        }
+      }
+    }
   }
 }
 

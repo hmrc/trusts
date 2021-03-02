@@ -143,6 +143,13 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   def getOtherIndividuals(identifier: String) : Action[AnyContent] =
     getArrayAtPath(identifier, otherIndividualsPath, OTHER_INDIVIDUALS)
 
+  def isTrust5mld(identifier: String): Action[AnyContent] = {
+    val expressTrustPath = TRUST \ DETAILS \ EXPRESS
+    processEtmpData(identifier, applyTransformations = false) { untransformedData =>
+      JsBoolean(untransformedData.transform(expressTrustPath.json.pick).isSuccess)
+    }
+  }
+
   private def getArrayAtPath(identifier: String, path: JsPath, fieldName: String): Action[AnyContent] = {
     getElementAtPath(identifier,
       path,
