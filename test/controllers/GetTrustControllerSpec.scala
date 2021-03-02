@@ -21,7 +21,7 @@ import controllers.actions.{FakeIdentifierAction, ValidateIdentifierActionProvid
 import models.get_trust.GetTrustResponse.CLOSED_REQUEST_STATUS
 import models.get_trust._
 import org.mockito.Matchers.{any, eq => mockEq}
-import org.mockito.Mockito.{reset, times, verify, when}
+import org.mockito.Mockito.{never, reset, times, verify, when}
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Span}
@@ -1236,6 +1236,55 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           status(result) mustBe OK
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
           verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe expected
+        }
+      }
+    }
+
+    ".isTrust5mld" should {
+
+      "return 200 - Ok with true when 5mld" in {
+
+        val trustWith5mldData = getTransformedTrustResponse5mld
+
+        val processedResponse = TrustProcessedResponse(trustWith5mldData, ResponseHeader("Processed", "1"))
+
+        when(trustsService.getTrustInfo(any[String], any[String]))
+          .thenReturn(Future.successful(processedResponse))
+
+        val result = getTrustController.isTrust5mld(utr)(FakeRequest())
+
+        val expected = Json.parse("true")
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"))
+          verify(transformationService, never()).getTransformedData(any(), any())(any())
+          status(result) mustBe OK
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe expected
+        }
+      }
+
+      "return 200 - Ok with false when 4mld" in {
+
+        val trustWith4mldData = getTransformedTrustResponse
+
+        val processedResponse = TrustProcessedResponse(trustWith4mldData, ResponseHeader("Processed", "1"))
+
+        when(trustsService.getTrustInfo(any[String], any[String]))
+          .thenReturn(Future.successful(processedResponse))
+
+        val result = getTrustController.isTrust5mld(utr)(FakeRequest())
+
+        val expected = Json.parse("false")
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"))
+          verify(transformationService, never()).getTransformedData(any(), any())(any())
+          status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe expected
         }

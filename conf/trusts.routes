@@ -50,3 +50,5 @@ DELETE      /:identifier/transforms/migrate-to-taxable                 controlle
 
 GET         /:identifier/years-returns                                 controllers.GetTrustController.getYearsReturns(identifier: String)
 PUT         /:identifier/years-returns                                 controllers.transformations.taxliability.TaxLiabilityTransformationController.setYearsReturns(identifier: String)
+
+GET         /:identifier/is-trust-5mld                                 controllers.GetTrustController.isTrust5mld(identifier: String)
