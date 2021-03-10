@@ -111,7 +111,7 @@ class PromoteTrusteeTransformSpec extends FreeSpec with MustMatchers {
 
       }
 
-      "re-add the removed trustee with an end date at declaration time if it existed before" in {
+      "re-add the removed trustee with an end date at declaration time if it existed before (i.e. has a line no.)" in {
         val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind.json")
         val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind-declare.json")
 
@@ -168,9 +168,9 @@ class PromoteTrusteeTransformSpec extends FreeSpec with MustMatchers {
         }
       }
 
-      "not re-add the removed trustee with an end date if it didn't exist before" ignore {
+      "not re-add the removed trustee if it didn't exist before (i.e. doesn't have a line no.)" in {
         val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-org.json")
-        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-org-declare.json")
+        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-org.json")
 
         val result = transformToTest(trusteeBeforePromotionTaxable, isTaxable = true).applyDeclarationTransform(beforeJson).get
         result mustBe afterJson
