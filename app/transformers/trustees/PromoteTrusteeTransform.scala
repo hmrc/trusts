@@ -27,7 +27,8 @@ case class PromoteTrusteeTransform(index: Option[Int],
                                    amended: JsValue,
                                    original: JsValue,
                                    endDate: LocalDate,
-                                   `type`: String) extends TrusteeTransform with AmendEntityTransform {
+                                   `type`: String,
+                                   isTaxable: Boolean) extends TrusteeTransform with AmendEntityTransform {
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     transform(input)
@@ -69,7 +70,7 @@ case class PromoteTrusteeTransform(index: Option[Int],
           name = leadTrustee.name,
           dateOfBirth = Some(leadTrustee.dateOfBirth),
           phoneNumber = Some(leadTrustee.phoneNumber),
-          identification = Some(adjustIdentification(leadTrustee.identification)),
+          identification = adjustIdentification(leadTrustee.identification),
           countryOfResidence = leadTrustee.countryOfResidence,
           legallyIncapable = leadTrustee.legallyIncapable,
           nationality = leadTrustee.nationality,
@@ -85,7 +86,7 @@ case class PromoteTrusteeTransform(index: Option[Int],
           name = leadTrustee.name,
           phoneNumber = Some(leadTrustee.phoneNumber),
           email = leadTrustee.email,
-          identification = Some(adjustIdentification(leadTrustee.identification)),
+          identification = adjustIdentification(leadTrustee.identification),
           countryOfResidence = leadTrustee.countryOfResidence,
           entityStart = leadTrustee.entityStart,
           entityEnd = leadTrustee.entityEnd
@@ -96,22 +97,20 @@ case class PromoteTrusteeTransform(index: Option[Int],
     }
   }
 
-  private def adjustIdentification(identification: IdentificationType): IdentificationType = {
-    if (identification.nino.isDefined) {
-      IdentificationType(identification.nino, identification.passport, None, identification.safeId)
-    }
-    else {
-      identification
-    }
+  private def adjustIdentification(identification: IdentificationType): Option[IdentificationType] = {
+    ((isTaxable, identification.nino.isDefined) match {
+      case (true, true) => identification.copy(address = None)
+      case (false, _) => identification.copy(nino = None, passport = None, address = None)
+      case _ => identification
+    }).noneIfEmpty
   }
 
-  private def adjustIdentification(identification: IdentificationOrgType): IdentificationOrgType = {
-    if (identification.utr.isDefined) {
-      IdentificationOrgType(identification.utr, None, identification.safeId)
-    }
-    else {
-      identification
-    }
+  private def adjustIdentification(identification: IdentificationOrgType): Option[IdentificationOrgType] = {
+    ((isTaxable, identification.utr.isDefined) match {
+      case (true, true) => identification.copy(address = None)
+      case (false, _) => identification.copy(utr = None, address = None)
+      case _ => identification
+    }).noneIfEmpty
   }
 }
 

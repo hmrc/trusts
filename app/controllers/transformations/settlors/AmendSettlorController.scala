@@ -44,7 +44,7 @@ class AmendSettlorController @Inject()(identify: IdentifierAction,
   def amendDeceased(identifier: String): Action[JsValue] =
     addNewTransform[AmendDeceasedSettlor](identifier, None, DECEASED_SETTLOR)
 
-  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
     AmendSettlorTransform(index, Json.toJson(amended), original, localDateService.now, `type`)
   }
 }

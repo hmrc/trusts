@@ -36,7 +36,7 @@ class AmendOtherIndividualController @Inject()(identify: IdentifierAction,
 
   def amend(identifier: String, index: Int): Action[JsValue] = addNewTransform[NaturalPersonType](identifier, Some(index))
 
-  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
     AmendOtherIndividualTransform(index, Json.toJson(amended), original, localDateService.now)
   }
 }

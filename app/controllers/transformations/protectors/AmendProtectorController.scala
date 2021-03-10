@@ -39,7 +39,7 @@ class AmendProtectorController @Inject()(identify: IdentifierAction,
 
   def amendBusiness(identifier: String, index: Int): Action[JsValue] = addNewTransform[ProtectorCompany](identifier, Some(index), BUSINESS_PROTECTOR)
 
-  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
     AmendProtectorTransform(index, Json.toJson(amended), original, localDateService.now, `type`)
   }
 }

@@ -80,7 +80,7 @@ class AmendTrusteeController @Inject()(identify: IdentifierAction,
   def amendBusiness(identifier: String, index: Int)(implicit request: IdentifierRequest[JsValue]): Future[Result] =
     addNewTransform[TrusteeOrgType](identifier, Some(index), BUSINESS_TRUSTEE).apply(request)
 
-  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
     AmendTrusteeTransform(index, Json.toJson(amended), original, localDateService.now, `type`)
   }
 
