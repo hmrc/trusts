@@ -63,7 +63,7 @@ abstract class AmendTransformationController @Inject()(identify: IdentifierActio
   private def isTrustTaxable(json: JsObject): Try[Boolean] = {
     Success(
       json.transform((TRUST \ DETAILS \ TAXABLE).json.pick[JsBoolean]) match {
-        case JsSuccess(value, _) => value.value
+        case JsSuccess(JsBoolean(value), _) => value
         case _ => true
       }
     )
