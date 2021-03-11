@@ -16,23 +16,25 @@
 
 package controllers.transformations
 
-import controllers.actions.IdentifierAction
 import controllers.TrustsBaseController
+import controllers.actions.IdentifierAction
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents}
 import services.TransformationService
 import transformers.DeltaTransform
+import utils.Constants._
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Success, Try}
 
 abstract class AmendTransformationController @Inject()(identify: IdentifierAction,
                                                        transformationService: TransformationService)
                                                       (implicit ec: ExecutionContext, cc: ControllerComponents)
   extends TrustsBaseController(cc) with TransformationController with Logging {
 
-  def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String)(implicit wts: Writes[T]): DeltaTransform
+  def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform
 
   def addNewTransform[T](identifier: String, index: Option[Int], `type`: String = "")(implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = {
     identify.async(parse.json) {
@@ -42,8 +44,9 @@ abstract class AmendTransformationController @Inject()(identify: IdentifierActio
           case JsSuccess(amendedEntity, _) =>
             for {
               json <- transformationService.getTransformedTrustJson(identifier, request.internalId)
+              isTaxable <- Future.fromTry(isTrustTaxable(json))
               originalEntity <- Future.fromTry(findJson(json, `type`, index))
-              _ <- transformationService.addNewTransform(identifier, request.internalId, transform(originalEntity, amendedEntity, index, `type`))
+              _ <- transformationService.addNewTransform(identifier, request.internalId, transform(originalEntity, amendedEntity, index, `type`, isTaxable))
             } yield {
               Ok
             }
@@ -55,6 +58,15 @@ abstract class AmendTransformationController @Inject()(identify: IdentifierActio
         }
       }
     }
+  }
+
+  private def isTrustTaxable(json: JsObject): Try[Boolean] = {
+    Success(
+      json.transform((TRUST \ DETAILS \ TAXABLE).json.pick[JsBoolean]) match {
+        case JsSuccess(JsBoolean(value), _) => value
+        case _ => true
+      }
+    )
   }
 
 }

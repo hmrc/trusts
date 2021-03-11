@@ -51,12 +51,17 @@ class PromoteTrusteeControllerSpec extends FreeSpec with MockitoSugar with Scala
 
   private val invalidBody: JsValue = Json.parse("{}")
 
-  private def buildInputJson(trusteeData: Seq[JsValue]): JsObject = {
+  private def buildInputJson(trusteeData: Seq[JsValue], isTaxable: Option[Boolean]): JsObject = {
     val baseJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-    val adder = (__ \ "details" \ "trust" \ "entities" \ "trustees").json.put(JsArray(trusteeData))
+    val addTrustees = (__ \ "details" \ "trust" \ "entities" \ "trustees").json.put(JsArray(trusteeData))
 
-    baseJson.as[JsObject](__.json.update(adder))
+    val addTrustTaxable = isTaxable match {
+      case Some(value) => (__ \ "details" \ "trust" \ "details" \ "trustTaxable").json.put(JsBoolean(value))
+      case None => __.json.pick[JsObject]
+    }
+
+    baseJson.as[JsObject](__.json.update(addTrustees) andThen __.json.update(addTrustTaxable))
   }
   
   "Promote trustee controller" - {
@@ -90,38 +95,118 @@ class PromoteTrusteeControllerSpec extends FreeSpec with MockitoSugar with Scala
 
       val trusteeType: String = "trusteeInd"
 
-      "must add a new amend transform" in {
+      "must add a new promote transform" - {
 
-        val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        "4mld" in {
 
-        val controller = new PromoteTrusteeController(
-          identifierAction,
-          mockTransformationService,
-          mockLocalDateService
-        )(Implicits.global, Helpers.stubControllerComponents())
+          val mockTransformationService = mock[TransformationService]
+          val mockLocalDateService = mock[LocalDateService]
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(Seq(Json.toJson(originalTrustee)))))
+          val controller = new PromoteTrusteeController(
+            identifierAction,
+            mockTransformationService,
+            mockLocalDateService
+          )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
+          when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+            .thenReturn(Future.successful(buildInputJson(
+              Seq(Json.toJson(originalTrustee)),
+              isTaxable = None
+            )))
 
-        when(mockLocalDateService.now).thenReturn(endDate)
+          when(mockTransformationService.addNewTransform(any(), any(), any()))
+            .thenReturn(Future.successful(true))
 
-        val request = FakeRequest(POST, "path")
-          .withBody(Json.toJson(promotedTrustee))
-          .withHeaders(CONTENT_TYPE -> "application/json")
+          when(mockLocalDateService.now).thenReturn(endDate)
 
-        val result = controller.promote(utr, index).apply(request)
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(promotedTrustee))
+            .withHeaders(CONTENT_TYPE -> "application/json")
 
-        status(result) mustBe OK
+          val result = controller.promote(utr, index).apply(request)
 
-        val transform = PromoteTrusteeTransform(Some(index), Json.toJson(promotedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
+          status(result) mustBe OK
 
-        verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          val transform = PromoteTrusteeTransform(Some(index), Json.toJson(promotedTrustee), Json.toJson(originalTrustee), endDate, trusteeType, isTaxable = true)
 
+          verify(mockTransformationService)
+            .addNewTransform(equalTo(utr), any(), equalTo(transform))
+        }
+
+        "5mld" - {
+
+          "taxable" in {
+
+            val mockTransformationService = mock[TransformationService]
+            val mockLocalDateService = mock[LocalDateService]
+
+            val controller = new PromoteTrusteeController(
+              identifierAction,
+              mockTransformationService,
+              mockLocalDateService
+            )(Implicits.global, Helpers.stubControllerComponents())
+
+            when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+              .thenReturn(Future.successful(buildInputJson(
+                Seq(Json.toJson(originalTrustee)),
+                isTaxable = Some(true)
+              )))
+
+            when(mockTransformationService.addNewTransform(any(), any(), any()))
+              .thenReturn(Future.successful(true))
+
+            when(mockLocalDateService.now).thenReturn(endDate)
+
+            val request = FakeRequest(POST, "path")
+              .withBody(Json.toJson(promotedTrustee))
+              .withHeaders(CONTENT_TYPE -> "application/json")
+
+            val result = controller.promote(utr, index).apply(request)
+
+            status(result) mustBe OK
+
+            val transform = PromoteTrusteeTransform(Some(index), Json.toJson(promotedTrustee), Json.toJson(originalTrustee), endDate, trusteeType, isTaxable = true)
+
+            verify(mockTransformationService)
+              .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          }
+
+          "non-taxable" in {
+
+            val mockTransformationService = mock[TransformationService]
+            val mockLocalDateService = mock[LocalDateService]
+
+            val controller = new PromoteTrusteeController(
+              identifierAction,
+              mockTransformationService,
+              mockLocalDateService
+            )(Implicits.global, Helpers.stubControllerComponents())
+
+            when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+              .thenReturn(Future.successful(buildInputJson(
+                Seq(Json.toJson(originalTrustee)),
+                isTaxable = Some(false)
+              )))
+
+            when(mockTransformationService.addNewTransform(any(), any(), any()))
+              .thenReturn(Future.successful(true))
+
+            when(mockLocalDateService.now).thenReturn(endDate)
+
+            val request = FakeRequest(POST, "path")
+              .withBody(Json.toJson(promotedTrustee))
+              .withHeaders(CONTENT_TYPE -> "application/json")
+
+            val result = controller.promote(utr, index).apply(request)
+
+            status(result) mustBe OK
+
+            val transform = PromoteTrusteeTransform(Some(index), Json.toJson(promotedTrustee), Json.toJson(originalTrustee), endDate, trusteeType, isTaxable = false)
+
+            verify(mockTransformationService)
+              .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          }
+        }
       }
 
       "must return an error for invalid json" in {
@@ -170,38 +255,118 @@ class PromoteTrusteeControllerSpec extends FreeSpec with MockitoSugar with Scala
 
       val trusteeType: String = "trusteeOrg"
 
-      "must add a new amend transform" in {
+      "must add a new promote transform" - {
 
-        val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        "4mld" in {
 
-        val controller = new PromoteTrusteeController(
-          identifierAction,
-          mockTransformationService,
-          mockLocalDateService
-        )(Implicits.global, Helpers.stubControllerComponents())
+          val mockTransformationService = mock[TransformationService]
+          val mockLocalDateService = mock[LocalDateService]
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(Seq(Json.toJson(originalTrustee)))))
+          val controller = new PromoteTrusteeController(
+            identifierAction,
+            mockTransformationService,
+            mockLocalDateService
+          )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
+          when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+            .thenReturn(Future.successful(buildInputJson(
+              Seq(Json.toJson(originalTrustee)),
+              isTaxable = None
+            )))
 
-        when(mockLocalDateService.now).thenReturn(endDate)
+          when(mockTransformationService.addNewTransform(any(), any(), any()))
+            .thenReturn(Future.successful(true))
 
-        val request = FakeRequest(POST, "path")
-          .withBody(Json.toJson(promotedTrustee))
-          .withHeaders(CONTENT_TYPE -> "application/json")
+          when(mockLocalDateService.now).thenReturn(endDate)
 
-        val result = controller.promote(utr, index).apply(request)
+          val request = FakeRequest(POST, "path")
+            .withBody(Json.toJson(promotedTrustee))
+            .withHeaders(CONTENT_TYPE -> "application/json")
 
-        status(result) mustBe OK
+          val result = controller.promote(utr, index).apply(request)
 
-        val transform = PromoteTrusteeTransform(Some(index), Json.toJson(promotedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
+          status(result) mustBe OK
 
-        verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          val transform = PromoteTrusteeTransform(Some(index), Json.toJson(promotedTrustee), Json.toJson(originalTrustee), endDate, trusteeType, isTaxable = true)
 
+          verify(mockTransformationService)
+            .addNewTransform(equalTo(utr), any(), equalTo(transform))
+        }
+
+        "5mld" - {
+
+          "taxable" in {
+
+            val mockTransformationService = mock[TransformationService]
+            val mockLocalDateService = mock[LocalDateService]
+
+            val controller = new PromoteTrusteeController(
+              identifierAction,
+              mockTransformationService,
+              mockLocalDateService
+            )(Implicits.global, Helpers.stubControllerComponents())
+
+            when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+              .thenReturn(Future.successful(buildInputJson(
+                Seq(Json.toJson(originalTrustee)),
+                isTaxable = Some(true)
+              )))
+
+            when(mockTransformationService.addNewTransform(any(), any(), any()))
+              .thenReturn(Future.successful(true))
+
+            when(mockLocalDateService.now).thenReturn(endDate)
+
+            val request = FakeRequest(POST, "path")
+              .withBody(Json.toJson(promotedTrustee))
+              .withHeaders(CONTENT_TYPE -> "application/json")
+
+            val result = controller.promote(utr, index).apply(request)
+
+            status(result) mustBe OK
+
+            val transform = PromoteTrusteeTransform(Some(index), Json.toJson(promotedTrustee), Json.toJson(originalTrustee), endDate, trusteeType, isTaxable = true)
+
+            verify(mockTransformationService)
+              .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          }
+
+          "non-taxable" in {
+
+            val mockTransformationService = mock[TransformationService]
+            val mockLocalDateService = mock[LocalDateService]
+
+            val controller = new PromoteTrusteeController(
+              identifierAction,
+              mockTransformationService,
+              mockLocalDateService
+            )(Implicits.global, Helpers.stubControllerComponents())
+
+            when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+              .thenReturn(Future.successful(buildInputJson(
+                Seq(Json.toJson(originalTrustee)),
+                isTaxable = Some(false)
+              )))
+
+            when(mockTransformationService.addNewTransform(any(), any(), any()))
+              .thenReturn(Future.successful(true))
+
+            when(mockLocalDateService.now).thenReturn(endDate)
+
+            val request = FakeRequest(POST, "path")
+              .withBody(Json.toJson(promotedTrustee))
+              .withHeaders(CONTENT_TYPE -> "application/json")
+
+            val result = controller.promote(utr, index).apply(request)
+
+            status(result) mustBe OK
+
+            val transform = PromoteTrusteeTransform(Some(index), Json.toJson(promotedTrustee), Json.toJson(originalTrustee), endDate, trusteeType, isTaxable = false)
+
+            verify(mockTransformationService)
+              .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          }
+        }
       }
 
       "must return an error for invalid json" in {

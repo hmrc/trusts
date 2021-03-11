@@ -3,13 +3,20 @@
     "trust": {
       "entities": {
         "leadTrustees": {
-          "name": "Trustee Org 1",
-          "phoneNumber": "0121546546",
-          "identification": {
-            "utr": "5465416546"
+          "lineNo": "1",
+          "bpMatchStatus": "01",
+          "name": {
+            "firstName": "FirstName",
+            "middleName": "MiddleName",
+            "lastName": "LastName"
           },
-          "countryOfResidence": "DE",
-          "entityStart": "1999-01-01"
+          "dateOfBirth": "1965-02-10",
+          "phoneNumber": "Phone",
+          "email": "Email",
+          "identification": {
+            "nino": "AA000000A"
+          },
+          "entityStart": "1998-02-12"
         },
         "trustees":[
           {
@@ -22,9 +29,6 @@
                 "lastName": "O'Connor"
               },
               "dateOfBirth": "1956-02-12",
-              "identification": {
-                "nino": "ST123456"
-              },
               "legallyIncapable": false,
               "nationality": "FR",
               "countryOfResidence": "FR",
@@ -33,25 +37,19 @@
           },
           {
             "trusteeOrg": {
-              "lineNo": "3",
+              "lineNo": "2",
               "bpMatchStatus": "01",
-              "name": "Trustee Org 2",
-              "phoneNumber": "0121546546",
-              "identification": {
-                "utr": "5465416546"
-              },
-              "entityStart": "2000-01-01"
+              "name": "Trustee Org 1",
+              "countryOfResidence": "DE",
+              "entityStart": "1999-01-01"
             }
           },
           {
             "trusteeOrg": {
-              "name": "Amazon",
-              "phoneNumber": "Phone",
-              "email": "Email",
-              "identification": {
-                "utr": "1234567890"
-              },
-              "entityStart": "1998-02-12"
+              "lineNo": "3",
+              "bpMatchStatus": "01",
+              "name": "Trustee Org 2",
+              "entityStart": "2000-01-01"
             }
           }
         ]

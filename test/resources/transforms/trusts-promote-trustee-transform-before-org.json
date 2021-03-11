@@ -3,13 +3,15 @@
     "trust": {
       "entities": {
         "leadTrustees": {
-          "name": "Trustee Org 1",
-          "phoneNumber": "0121546546",
+          "lineNo": "1",
+          "bpMatchStatus": "01",
+          "name": "Amazon",
+          "phoneNumber": "Phone",
+          "email": "Email",
           "identification": {
-            "utr": "5465416546"
+            "utr": "1234567890"
           },
-          "countryOfResidence": "DE",
-          "entityStart": "1999-01-01"
+          "entityStart": "1998-02-12"
         },
         "trustees":[
           {
@@ -33,6 +35,19 @@
           },
           {
             "trusteeOrg": {
+              "lineNo": "2",
+              "bpMatchStatus": "01",
+              "name": "Trustee Org 1",
+              "phoneNumber": "0121546546",
+              "identification": {
+                "utr": "5465416546"
+              },
+              "countryOfResidence": "DE",
+              "entityStart": "1999-01-01"
+            }
+          },
+          {
+            "trusteeOrg": {
               "lineNo": "3",
               "bpMatchStatus": "01",
               "name": "Trustee Org 2",
@@ -41,17 +56,6 @@
                 "utr": "5465416546"
               },
               "entityStart": "2000-01-01"
-            }
-          },
-          {
-            "trusteeOrg": {
-              "name": "Amazon",
-              "phoneNumber": "Phone",
-              "email": "Email",
-              "identification": {
-                "utr": "1234567890"
-              },
-              "entityStart": "1998-02-12"
             }
           }
         ]

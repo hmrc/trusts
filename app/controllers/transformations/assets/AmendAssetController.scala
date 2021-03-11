@@ -56,7 +56,7 @@ class AmendAssetController @Inject()(identify: IdentifierAction,
   def amendNonEeaBusiness(identifier: String, index: Int): Action[JsValue] =
     addNewTransform[NonEEABusinessType](identifier, Some(index), NON_EEA_BUSINESS_ASSET)
 
-  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
     AmendAssetTransform(index, Json.toJson(amended), original, localDateService.now, `type`)
   }
 }

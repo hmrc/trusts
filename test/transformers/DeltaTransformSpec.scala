@@ -216,9 +216,9 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
       val removeTrusteeTransform = RemoveTrusteeTransform(index = Some(0), Json.obj(), endDate = LocalDate.parse("2010-01-01"), "trusteeInd")
 
-      val promoteTrusteeIndTransform = PromoteTrusteeTransform(Some(2), Json.toJson(newLeadTrustee), Json.obj(), LocalDate.parse("2012-02-06"), "trusteeInd")
+      val promoteTrusteeIndTransform = PromoteTrusteeTransform(Some(2), Json.toJson(newLeadTrustee), Json.obj(), LocalDate.parse("2012-02-06"), "trusteeInd", isTaxable = true)
 
-      val promoteTrusteeOrgTransform = PromoteTrusteeTransform(Some(2), Json.toJson(newLeadTrusteeOrg), Json.obj(), LocalDate.parse("2012-02-06"), "trusteeOrg")
+      val promoteTrusteeOrgTransform = PromoteTrusteeTransform(Some(2), Json.toJson(newLeadTrusteeOrg), Json.obj(), LocalDate.parse("2012-02-06"), "trusteeOrg", isTaxable = true)
 
       val amendTrusteeIndTransform = AmendTrusteeTransform(Some(0), Json.toJson(newTrusteeInd), Json.obj(), currentDate, "trusteeInd")
       val amendTrusteeOrgTransform = AmendTrusteeTransform(Some(0), Json.toJson(newTrusteeOrg), Json.obj(), currentDate, "trusteeOrg")

@@ -49,7 +49,7 @@ class AmendBeneficiaryController @Inject()(identify: IdentifierAction,
 
   def amendLarge(identifier: String, index: Int): Action[JsValue] = addNewTransform[LargeType](identifier, Some(index), LARGE_BENEFICIARY)
 
-  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
     AmendBeneficiaryTransform(index, Json.toJson(amended), original, localDateService.now, `type`)
   }
 }
