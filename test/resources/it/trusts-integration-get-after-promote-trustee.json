@@ -205,8 +205,6 @@
           {
             "trusteeOrg": {
               "name": "Trust Services LTD",
-              "phoneNumber": "0754545454",
-              "email": "me@you.com",
               "identification": {
                 "utr": "5465416546"
               },

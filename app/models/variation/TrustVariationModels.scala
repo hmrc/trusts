@@ -99,18 +99,10 @@ object TrustEntitiesType {
   implicit val trustEntitiesTypeFormat: Format[TrustEntitiesType] = Json.format[TrustEntitiesType]
 }
 
-sealed trait Identification[T] {
-  val isEmpty: Boolean
-  def noneIfEmpty: Option[T] = if (isEmpty) None else Some(this.asInstanceOf[T])
-}
-
 case class IdentificationType(nino: Option[String],
                               passport: Option[PassportType],
                               address: Option[AddressType],
-                              safeId: Option[String]) extends Identification[IdentificationType] {
-
-  override val isEmpty: Boolean = nino.isEmpty && passport.isEmpty && address.isEmpty && safeId.isEmpty
-}
+                              safeId: Option[String])
 
 object IdentificationType {
   implicit val identificationTypeFormat: Format[IdentificationType] = Json.format[IdentificationType]
@@ -118,10 +110,7 @@ object IdentificationType {
 
 case class IdentificationOrgType(utr: Option[String],
                                  address: Option[AddressType],
-                                 safeId: Option[String]) extends Identification[IdentificationOrgType] {
-
-  override val isEmpty: Boolean = utr.isEmpty && address.isEmpty && safeId.isEmpty
-}
+                                 safeId: Option[String])
 
 object IdentificationOrgType {
   implicit val trustBeneficiaryIdentificationFormat: Format[IdentificationOrgType] = Json.format[IdentificationOrgType]

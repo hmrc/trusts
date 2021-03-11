@@ -20,6 +20,7 @@ import models.variation._
 import play.api.libs.json._
 import transformers.{AmendEntityTransform, DeltaTransform}
 import utils.Constants._
+import utils.JsonOps.doNothing
 
 import java.time.LocalDate
 
@@ -54,7 +55,8 @@ case class PromoteTrusteeTransform(index: Option[Int],
       __.json.update(leadTrusteePath.json.put(amended)) andThen
       __.json.update((leadTrusteePath \ ENTITY_START).json.put(entityStart)) andThen
       (leadTrusteePath \ LINE_NUMBER).json.prune andThen
-      (leadTrusteePath \ BP_MATCH_STATUS).json.prune
+      (leadTrusteePath \ BP_MATCH_STATUS).json.prune andThen
+      (if (isIndividualTrustee) (leadTrusteePath \ LEGALLY_INCAPABLE).json.prune else doNothing())
   }
 
   private def demoteLeadTrusteeTransform(input: JsValue): DeltaTransform = {
@@ -69,7 +71,7 @@ case class PromoteTrusteeTransform(index: Option[Int],
           bpMatchStatus = None,
           name = leadTrustee.name,
           dateOfBirth = Some(leadTrustee.dateOfBirth),
-          phoneNumber = Some(leadTrustee.phoneNumber),
+          phoneNumber = None,
           identification = adjustIdentification(leadTrustee.identification),
           countryOfResidence = leadTrustee.countryOfResidence,
           legallyIncapable = leadTrustee.legallyIncapable,
@@ -84,8 +86,8 @@ case class PromoteTrusteeTransform(index: Option[Int],
           lineNo = None,
           bpMatchStatus = None,
           name = leadTrustee.name,
-          phoneNumber = Some(leadTrustee.phoneNumber),
-          email = leadTrustee.email,
+          phoneNumber = None,
+          email = None,
           identification = adjustIdentification(leadTrustee.identification),
           countryOfResidence = leadTrustee.countryOfResidence,
           entityStart = leadTrustee.entityStart,
@@ -98,19 +100,19 @@ case class PromoteTrusteeTransform(index: Option[Int],
   }
 
   private def adjustIdentification(identification: IdentificationType): Option[IdentificationType] = {
-    ((isTaxable, identification.nino.isDefined) match {
-      case (true, true) => identification.copy(address = None)
-      case (false, _) => identification.copy(nino = None, passport = None, address = None)
-      case _ => identification
-    }).noneIfEmpty
+    (isTaxable, identification.nino.isDefined) match {
+      case (true, true) => Some(identification.copy(address = None))
+      case (false, _) => None
+      case _ => Some(identification)
+    }
   }
 
   private def adjustIdentification(identification: IdentificationOrgType): Option[IdentificationOrgType] = {
-    ((isTaxable, identification.utr.isDefined) match {
-      case (true, true) => identification.copy(address = None)
-      case (false, _) => identification.copy(utr = None, address = None)
-      case _ => identification
-    }).noneIfEmpty
+    (isTaxable, identification.utr.isDefined) match {
+      case (true, true) => Some(identification.copy(address = None))
+      case (false, _) => None
+      case _ => Some(identification)
+    }
   }
 }
 

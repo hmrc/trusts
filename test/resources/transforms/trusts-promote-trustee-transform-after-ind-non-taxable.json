@@ -14,7 +14,6 @@
           "identification": {
             "nino": "ST123456"
           },
-          "legallyIncapable": false,
           "nationality": "FR",
           "countryOfResidence": "FR",
           "entityStart": "2000-01-01"
@@ -44,7 +43,6 @@
                 "middleName": "MiddleName",
                 "lastName": "LastName"
               },
-              "phoneNumber": "Phone",
               "dateOfBirth": "1965-02-10",
               "entityStart": "1998-02-12"
             }
