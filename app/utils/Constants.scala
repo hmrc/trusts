@@ -107,6 +107,7 @@ object Constants {
   val ENTITY_START = "entityStart"
   val ENTITY_END = "entityEnd"
   val DATE_OF_DEATH = "dateOfDeath"
+  val LEGALLY_INCAPABLE = "legallyIncapable"
 
   val TRUST_OR_ESTATE_DISPLAY = "trustOrEstateDisplay"
   val GET_TRUST = "getTrust"

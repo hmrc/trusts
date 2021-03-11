@@ -20,6 +20,7 @@ import models.variation._
 import play.api.libs.json._
 import transformers.{AmendEntityTransform, DeltaTransform}
 import utils.Constants._
+import utils.JsonOps.doNothing
 
 import java.time.LocalDate
 
@@ -54,7 +55,8 @@ case class PromoteTrusteeTransform(index: Option[Int],
       __.json.update(leadTrusteePath.json.put(amended)) andThen
       __.json.update((leadTrusteePath \ ENTITY_START).json.put(entityStart)) andThen
       (leadTrusteePath \ LINE_NUMBER).json.prune andThen
-      (leadTrusteePath \ BP_MATCH_STATUS).json.prune
+      (leadTrusteePath \ BP_MATCH_STATUS).json.prune andThen
+      (if (isIndividualTrustee) (leadTrusteePath \ LEGALLY_INCAPABLE).json.prune else doNothing())
   }
 
   private def demoteLeadTrusteeTransform(input: JsValue): DeltaTransform = {
