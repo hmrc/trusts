@@ -98,19 +98,19 @@ case class PromoteTrusteeTransform(index: Option[Int],
   }
 
   private def adjustIdentification(identification: IdentificationType): Option[IdentificationType] = {
-    ((isTaxable, identification.nino.isDefined) match {
-      case (true, true) => identification.copy(address = None)
-      case (false, _) => identification.copy(nino = None, passport = None, address = None)
-      case _ => identification
-    }).noneIfEmpty
+    (isTaxable, identification.nino.isDefined) match {
+      case (true, true) => Some(identification.copy(address = None))
+      case (false, _) => None
+      case _ => Some(identification)
+    }
   }
 
   private def adjustIdentification(identification: IdentificationOrgType): Option[IdentificationOrgType] = {
-    ((isTaxable, identification.utr.isDefined) match {
-      case (true, true) => identification.copy(address = None)
-      case (false, _) => identification.copy(utr = None, address = None)
-      case _ => identification
-    }).noneIfEmpty
+    (isTaxable, identification.utr.isDefined) match {
+      case (true, true) => Some(identification.copy(address = None))
+      case (false, _) => None
+      case _ => Some(identification)
+    }
   }
 }
 
