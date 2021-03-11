@@ -40,8 +40,6 @@
           {
             "trusteeOrg": {
               "name": "Amazon",
-              "phoneNumber": "Phone",
-              "email": "Email",
               "entityStart": "1998-02-12"
             }
           }

@@ -53,7 +53,6 @@
                 "lastName":"LastName"
               },
               "dateOfBirth":"1965-02-10",
-              "phoneNumber":"Phone",
               "identification":{
                 "nino":"Nino"
               },

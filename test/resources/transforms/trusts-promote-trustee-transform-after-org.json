@@ -46,8 +46,6 @@
           {
             "trusteeOrg": {
               "name": "Amazon",
-              "phoneNumber": "Phone",
-              "email": "Email",
               "identification": {
                 "utr": "1234567890"
               },
