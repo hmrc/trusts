@@ -37,7 +37,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
                                    auditService: AuditService,
                                    trustsService: TrustsService,
                                    transformationService: TransformationService,
-                                   validateIdentifier : ValidateIdentifierActionProvider,
+                                   validateIdentifier: ValidateIdentifierActionProvider,
                                    cc: ControllerComponents) extends BackendController(cc) with Logging {
 
   val errorAuditMessages: Map[GetTrustResponse, String] = Map(
@@ -92,13 +92,13 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   def getYearsReturns(identifier: String): Action[AnyContent] =
     getItemAtPath(identifier, YEARS_RETURNS)
 
-  def getTrustees(identifier: String) : Action[AnyContent] =
+  def getTrustees(identifier: String): Action[AnyContent] =
     getArrayAtPath(identifier, ENTITIES \ TRUSTEES, TRUSTEES)
 
-  def getBeneficiaries(identifier: String) : Action[AnyContent] =
+  def getBeneficiaries(identifier: String): Action[AnyContent] =
     getArrayAtPath(identifier, ENTITIES \ BENEFICIARIES, BENEFICIARIES)
 
-  def getSettlors(identifier: String) : Action[AnyContent] =
+  def getSettlors(identifier: String): Action[AnyContent] =
     processEtmpData(identifier) {
       transformed =>
         val settlorsPath = ENTITIES \ SETTLORS
@@ -113,7 +113,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
         Json.obj(SETTLORS -> amendedSettlors)
     }
 
-  def getDeceasedSettlorDeathRecorded(identifier: String) : Action[AnyContent] =
+  def getDeceasedSettlorDeathRecorded(identifier: String): Action[AnyContent] =
     processEtmpData(identifier, applyTransformations = false) {
       etmpData =>
         val deceasedDeathDatePath = ENTITIES \ DECEASED_SETTLOR \ DATE_OF_DEATH
@@ -122,7 +122,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
 
   private val protectorsPath = ENTITIES \ PROTECTORS
 
-  def getProtectorsAlreadyExist(identifier: String) : Action[AnyContent] =
+  def getProtectorsAlreadyExist(identifier: String): Action[AnyContent] =
     processEtmpData(identifier) {
       trustData =>
         JsBoolean(!trustData.transform(protectorsPath.json.pick).asOpt.contains(
@@ -130,7 +130,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
         )
     }
 
-  def getProtectors(identifier: String) : Action[AnyContent] =
+  def getProtectors(identifier: String): Action[AnyContent] =
     getArrayAtPath(identifier, protectorsPath, PROTECTORS)
 
   private val otherIndividualsPath = ENTITIES \ OTHER_INDIVIDUALS
@@ -140,8 +140,15 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       trustData => JsBoolean(trustData.transform((otherIndividualsPath \ 0).json.pick).isSuccess)
     }
 
-  def getOtherIndividuals(identifier: String) : Action[AnyContent] =
+  def getOtherIndividuals(identifier: String): Action[AnyContent] =
     getArrayAtPath(identifier, otherIndividualsPath, OTHER_INDIVIDUALS)
+
+  def getNonEeaCompaniesAlreadyExist(identifier: String): Action[AnyContent] = {
+    val path: JsPath = TRUST \ ASSETS \ NON_EEA_BUSINESS_ASSET
+    processEtmpData(identifier) {
+      trustData => JsBoolean(trustData.transform((path \ 0).json.pick).isSuccess)
+    }
+  }
 
   def isTrust5mld(identifier: String): Action[AnyContent] = {
     val expressTrustPath = TRUST \ DETAILS \ EXPRESS
