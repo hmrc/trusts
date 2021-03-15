@@ -34,6 +34,7 @@ import play.api.test.{FakeRequest, Helpers}
 import services.{AuditService, TransformationService, TrustsService}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import utils.NonTaxable5MLDFixtures.Cache.getTransformedNonTaxableTrustResponse
 import utils.{JsonFixtures, NonTaxable5MLDFixtures, Taxable5MLDFixtures}
 
 import scala.concurrent.Future
@@ -1236,6 +1237,49 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           status(result) mustBe OK
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
           verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe expected
+        }
+      }
+    }
+
+    ".getNonEeaCompaniesAlreadyExist" must {
+
+      "return true when exists" in {
+
+        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedNonTaxableTrustResponse, ResponseHeader("Processed", "1"))
+
+        when(transformationService.getTransformedData(any[String], any[String])(any()))
+          .thenReturn(Future.successful(processedResponse))
+
+        val result = getTrustController.getNonEeaCompaniesAlreadyExist(utr)(FakeRequest())
+
+        val expected = Json.parse("true")
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          status(result) mustBe OK
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe expected
+        }
+      }
+
+      "return false when does not exist" in {
+
+        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+
+        when(transformationService.getTransformedData(any[String], any[String])(any()))
+          .thenReturn(Future.successful(processedResponse))
+
+        val result = getTrustController.getNonEeaCompaniesAlreadyExist(utr)(FakeRequest())
+
+        val expected = Json.parse("false")
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe expected
         }

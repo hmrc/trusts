@@ -25,8 +25,8 @@ GET         /:identifier/trust-details                                 controlle
 GET         /:identifier/transformed/other-individuals                 controllers.GetTrustController.getOtherIndividuals(identifier: String)
 
 GET         /:identifier/transformed/protectors-already-exist          controllers.GetTrustController.getProtectorsAlreadyExist(identifier: String)
-
 GET         /:identifier/transformed/other-individuals-already-exist   controllers.GetTrustController.getOtherIndividualsAlreadyExist(identifier: String)
+GET         /:identifier/transformed/non-eea-companies-already-exist   controllers.GetTrustController.getNonEeaCompaniesAlreadyExist(identifier: String)
 
 POST        /variation                                                 controllers.testOnly.TrustVariationsTestController.trustVariation
 
