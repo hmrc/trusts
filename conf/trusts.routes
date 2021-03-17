@@ -13,6 +13,7 @@ POST        /check                                                     controlle
 
 POST        /tax-enrolment/registration/taxable/hmrc-ters-org/:trn/subscriptions            controllers.TaxEnrolmentCallbackController.taxableSubscriptionCallback(trn: String)
 POST        /tax-enrolment/registration/non-taxable/hmrc-tersnt-org/:trn/subscriptions      controllers.TaxEnrolmentCallbackController.nonTaxableSubscriptionCallback(trn: String)
+POST        /tax-enrolment/migration-to-taxable/urn/:urn/subscriptionId/:subscriptionId     controllers.TaxEnrolmentCallbackController.migrationSubscriptionCallback(urn: String, subscriptionId: String)
 
 GET         /:identifier/refresh                                       controllers.GetTrustController.getFromEtmp(identifier: String)
 

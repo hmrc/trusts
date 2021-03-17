@@ -18,7 +18,8 @@ package controllers
 
 import javax.inject.Inject
 import play.api.Logging
-import play.api.mvc.ControllerComponents
+import play.api.libs.json.JsValue
+import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -32,7 +33,7 @@ class TaxEnrolmentCallbackController @Inject()(
                                                 cc: ControllerComponents
                                                ) extends BackendController(cc) with Logging {
 
-  def taxableSubscriptionCallback(trn: String) = Action.async(parse.json) {
+  def taxableSubscriptionCallback(trn: String): Action[JsValue] = Action.async(parse.json) {
     implicit request =>
       val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
@@ -41,7 +42,7 @@ class TaxEnrolmentCallbackController @Inject()(
       Future(Ok(""))
   }
 
-  def nonTaxableSubscriptionCallback(trn: String) = Action.async(parse.json) {
+  def nonTaxableSubscriptionCallback(trn: String): Action[JsValue] = Action.async(parse.json) {
     implicit request =>
       val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
@@ -50,4 +51,12 @@ class TaxEnrolmentCallbackController @Inject()(
       Future(Ok(""))
   }
 
+  def migrationSubscriptionCallback(urn: String, subscriptionId: String): Action[JsValue] = Action.async(parse.json) {
+    implicit request =>
+      val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+
+      logger.info(s"[migrationSubscriptionCallback][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn]" +
+        s" Tax-enrolment: migration subscription callback message was: ${request.body}")
+      Future(Ok(""))
+  }
 }

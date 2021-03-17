@@ -52,4 +52,16 @@ class TaxEnrolmentCallbackControllerSpec extends BaseSpec with GuiceOneServerPer
     }
   }
 
+  ".migrationSubscriptionCallback" should {
+    val urn = "NTTRUST00000001"
+    val subscriberId = "testSubId"
+    "return 200 " when {
+      "tax enrolment callback for subscription id enrolment  " in {
+        val SUT = new TaxEnrolmentCallbackController(Helpers.stubControllerComponents())
+
+        val result = SUT.migrationSubscriptionCallback(urn, subscriberId).apply(postRequestWithPayload(Json.parse({"""{ "url" : "http//","state" : "SUCCESS"}"""})))
+        status(result) mustBe OK
+      }
+    }
+  }
 }
