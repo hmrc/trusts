@@ -99,4 +99,47 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
     }
   }
 
+  ".migrateSubscriberToTaxable" should {
+
+    val urn = "NTTRUST00000001"
+
+    "return Success" when {
+      "tax enrolments successfully subscribed to provided subscription id" in {
+
+        stubForPut(server, "/tax-enrolments/subscriptions/123456789/subscriber", 204)
+
+        val futureResult = connector.migrateSubscriberToTaxable("123456789", urn)
+
+        whenReady(futureResult) {
+          result => result mustBe TaxEnrolmentSuccess
+        }
+      }
+    }
+
+    "return BadRequestException " when {
+      "tax enrolments returns bad request " in {
+
+        stubForPut(server, "/tax-enrolments/subscriptions/987654321/subscriber", 400)
+
+        val futureResult = connector.migrateSubscriberToTaxable("987654321", urn)
+
+        whenReady(futureResult.failed) {
+          result => result mustBe BadRequestException
+        }
+      }
+    }
+
+    "return InternalServerErrorException " when {
+      "tax enrolments returns internal server error " in {
+
+        stubForPut(server, "/tax-enrolments/subscriptions/987654321/subscriber", 500)
+
+        val futureResult = connector.migrateSubscriberToTaxable("987654321", urn)
+
+        whenReady(futureResult.failed) {
+          result => result mustBe an[InternalServerErrorException]
+        }
+      }
+    }
+  }
 }

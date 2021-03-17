@@ -37,6 +37,7 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
           "microservice.services.playback.port" -> server.port(),
           "microservice.services.variation.port" -> server.port(),
           "microservice.services.tax-enrolments.port" -> server.port(),
+          "microservice.services.tax-enrolments-migration.port" -> server.port(),
           "microservice.services.trusts-store.port" -> server.port(),
 
           "microservice.services.tax-enrolments.non-taxable.serviceName" -> "serviceNameNonTaxable",
@@ -46,6 +47,10 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
           "microservice.services.tax-enrolments.taxable.serviceName" -> "serviceNameTaxable",
           "microservice.services.tax-enrolments.taxable.callback" ->
             "http://localhost:9782/trusts/tax-enrolment/registration/taxable/hmrc-ters-org/:trn/subscriptions",
+
+          "microservice.services.tax-enrolments-migration.to-taxable.serviceName" -> "HMRC-TERS-ORG",
+          "microservice.services.tax-enrolments-migration.to-taxable.callback" ->
+            "http://localhost:9782/trusts/tax-enrolment/migration-to-taxable/urn/:urn/subscriptionId/:subscriptionId",
         ): _*)
   }
 

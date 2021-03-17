@@ -26,6 +26,7 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
   val registrationBaseUrl : String = servicesConfig.baseUrl("registration")
   val subscriptionBaseUrl : String = servicesConfig.baseUrl("subscription")
   val taxEnrolmentsUrl : String = servicesConfig.baseUrl("tax-enrolments")
+  val taxEnrolmentsMigrationUrl : String = servicesConfig.baseUrl("tax-enrolments-migration")
   val getTrustOrEstateUrl : String = servicesConfig.baseUrl("playback")
   val varyTrustOrEstateUrl : String = servicesConfig.baseUrl("variation")
   val trustsStoreUrl : String = servicesConfig.baseUrl("trusts-store")
@@ -43,6 +44,8 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
 
   private def insertTRN(url: String, trn: String) = url.replace(":trn", trn)
 
+
+
   val taxEnrolmentsPayloadBodyServiceNameTaxable : String =
     configuration.get[String]("microservice.services.tax-enrolments.taxable.serviceName")
 
@@ -58,6 +61,18 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
     configuration.get[String]("microservice.services.tax-enrolments.non-taxable.callback")
 
   def taxEnrolmentsPayloadBodyCallbackNonTaxable(trn: String): String = insertTRN(taxEnrolmentsPayloadBodyCallbackNonTaxableTemplate, trn)
+
+  val taxEnrolmentsMigrationPayloadServiceName : String =
+    configuration.get[String]("microservice.services.tax-enrolments-migration.to-taxable.serviceName")
+
+  private val taxEnrolmentsMigrationPayloadCallbackTemplate : String =
+    configuration.get[String]("microservice.services.tax-enrolments-migration.to-taxable.callback")
+
+  def taxEnrolmentsMigrationPayloadBodyCallback(subscriptionId: String, urn: String): String = {
+    taxEnrolmentsMigrationPayloadCallbackTemplate
+      .replace(":urn", urn)
+      .replace(":subscriptionId", subscriptionId)
+  }
 
   val delayToConnectTaxEnrolment : Int =
     configuration.get[String]("microservice.services.trusts.delayToConnectTaxEnrolment").toInt

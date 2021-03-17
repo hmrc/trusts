@@ -48,14 +48,18 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
     }
   }
 
-  override def getResponse(subscriptionId: String,
-                           taxable: Boolean,
-                           trn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
+  override def getTaxEnrolmentMigration(subscriptionId: String, urn: String): TaxEnrolmentSubscription = {
+    TaxEnrolmentSubscription(
+      serviceName = config.taxEnrolmentsMigrationPayloadServiceName,
+      callback = config.taxEnrolmentsMigrationPayloadBodyCallback(subscriptionId, urn),
+      etmpId = subscriptionId)
 
-    val taxEnrolmentsEndpoint = s"${config.taxEnrolmentsUrl}/tax-enrolments/subscriptions/$subscriptionId/subscriber"
+  }
+
+  def getResponse(taxEnrolmentsEndpoint: String,
+                  taxEnrolmentSubscriptionRequest: TaxEnrolmentSubscription)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
+
     val taxEnrolmentHeaders = hc.withExtraHeaders(headers: _*)
-
-    val taxEnrolmentSubscriptionRequest: TaxEnrolmentSubscription = getTaxEnrolmentSubscription(subscriptionId, taxable, trn)
 
     http.PUT[JsValue, TaxEnrolmentSubscriberResponse](
       taxEnrolmentsEndpoint,
@@ -65,14 +69,23 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
 
 
   override def enrolSubscriber(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
-    getResponse(subscriptionId, taxable, trn)
+    val taxEnrolmentsEndpoint = s"${config.taxEnrolmentsUrl}/tax-enrolments/subscriptions/$subscriptionId/subscriber"
+    val taxEnrolmentSubscriptionRequest: TaxEnrolmentSubscription = getTaxEnrolmentSubscription(subscriptionId, taxable, trn)
+    getResponse(taxEnrolmentsEndpoint, taxEnrolmentSubscriptionRequest)
   }
 
+  override def migrateSubscriberToTaxable(subscriptionId: String, urn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
+    val taxEnrolmentsEndpoint = s"${config.taxEnrolmentsMigrationUrl}/tax-enrolments/subscriptions/$subscriptionId/subscriber"
+    val taxEnrolmentSubscriptionRequest: TaxEnrolmentSubscription = getTaxEnrolmentMigration(subscriptionId, urn)
+    getResponse(taxEnrolmentsEndpoint, taxEnrolmentSubscriptionRequest)
+  }
 }
 
 @ImplementedBy(classOf[TaxEnrolmentConnectorImpl])
 trait TaxEnrolmentConnector {
   def getTaxEnrolmentSubscription(subscriptionId: String, taxable: Boolean, trn: String): TaxEnrolmentSubscription
+  def getTaxEnrolmentMigration(subscriptionId: String, urn: String): TaxEnrolmentSubscription
   def enrolSubscriber(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse]
-  def getResponse(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse]
+  def migrateSubscriberToTaxable(subscriptionId: String, urn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse]
+
 }
