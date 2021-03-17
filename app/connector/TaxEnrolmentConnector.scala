@@ -19,7 +19,7 @@ package connector
 import com.google.inject.ImplementedBy
 import config.AppConfig
 import javax.inject.Inject
-import models.tax_enrolments.{TaxEnrolmentSubscription, TaxEnrolmentSubscriberResponse}
+import models.tax_enrolments.{TaxEnrolmentsSubscriptionsResponse, TaxEnrolmentSubscriberResponse, TaxEnrolmentSubscription}
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
@@ -79,13 +79,20 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
     val taxEnrolmentSubscriptionRequest: TaxEnrolmentSubscription = getTaxEnrolmentMigration(subscriptionId, urn)
     getResponse(taxEnrolmentsEndpoint, taxEnrolmentSubscriptionRequest)
   }
+
+  override def subscriptions(subscriptionId: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentsSubscriptionsResponse] = {
+    val getSubscriptionsEndpoint = s"${config.taxEnrolmentsMigrationUrl}/tax-enrolments/subscriptions/$subscriptionId"
+    http.GET[TaxEnrolmentsSubscriptionsResponse](getSubscriptionsEndpoint)
+  }
 }
 
 @ImplementedBy(classOf[TaxEnrolmentConnectorImpl])
 trait TaxEnrolmentConnector {
+
   def getTaxEnrolmentSubscription(subscriptionId: String, taxable: Boolean, trn: String): TaxEnrolmentSubscription
-  def getTaxEnrolmentMigration(subscriptionId: String, urn: String): TaxEnrolmentSubscription
+  def getTaxEnrolmentMigration(subscriptionId: String,  urn: String): TaxEnrolmentSubscription
   def enrolSubscriber(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse]
   def migrateSubscriberToTaxable(subscriptionId: String, urn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse]
+  def subscriptions(subscriptionId: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentsSubscriptionsResponse]
 
 }

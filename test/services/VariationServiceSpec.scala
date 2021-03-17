@@ -17,7 +17,7 @@
 package services
 
 import exceptions.EtmpCacheDataStaleException
-import models.get_trust.{GetTrustSuccessResponse, ResponseHeader, TrustProcessedResponse}
+import models.get_trust.{ResponseHeader, TrustProcessedResponse}
 import models.variation.VariationResponse
 import models.{DeclarationForApi, DeclarationName, NameType}
 import org.mockito.ArgumentCaptor
