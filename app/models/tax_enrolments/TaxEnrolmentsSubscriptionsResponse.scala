@@ -18,7 +18,21 @@ package models.tax_enrolments
 
 import play.api.libs.json.{Format, Json}
 
-case class TaxEnrolmentsSubscriptionsResponse(identifiers: List[SubscriptionIdentifier], callback: String, state: String)
+case class TaxEnrolmentsSubscriptionsResponse(identifiers: List[SubscriptionIdentifier], callback: String, state: String) {
+  val urn:Option[String] = {
+    val urnStart = callback.indexOf("/urn/")
+    if (urnStart > 0) {
+      val strippedCallback = callback.substring(urnStart + 5)
+      val urnEnd = strippedCallback.indexOf("/")
+      val urn = if (urnEnd > 0) strippedCallback.substring(0, urnEnd) else strippedCallback
+      if (urn.trim.isEmpty) None else Some(urn)
+    } else {
+      None
+    }
+  }
+
+  val utr:Option[String] = identifiers.find(_.key == "SAUTR").map(_.value)
+}
 
 object TaxEnrolmentsSubscriptionsResponse {
   implicit val formats: Format[TaxEnrolmentsSubscriptionsResponse] = Json.format[TaxEnrolmentsSubscriptionsResponse]

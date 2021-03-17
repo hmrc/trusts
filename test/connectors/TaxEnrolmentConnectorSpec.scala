@@ -19,6 +19,8 @@ package connectors
 import connector.TaxEnrolmentConnector
 import exceptions.{BadRequestException, InternalServerErrorException}
 import models.tax_enrolments.{TaxEnrolmentSubscription, TaxEnrolmentSuccess}
+import play.api.http.Status._
+import play.api.libs.json.Json
 
 class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
@@ -138,6 +140,47 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
         whenReady(futureResult.failed) {
           result => result mustBe an[InternalServerErrorException]
+        }
+      }
+    }
+  }
+
+  ".subscriptions" should {
+
+    val urn = "NTTRUST00000001"
+    val utr = "123456789"
+    val subscriptionId = "987654321"
+
+    "return Success" when {
+      val response = Json.parse(
+        s"""
+           |{
+           |   "created": 1482329348256,
+           |    "lastModified": 1482329348256,
+           |    "credId": "d8474a25-71b6-45ed-859e-77dd5f087be6",
+           |    "serviceName": "HMRC-TERS-ORG",
+           |    "identifiers": [{
+           |        "key": "SAUTR",
+           |        "value": "$utr"
+           |    }],
+           |    "callback": "http://trusts.protected.mdtp/tax-enrolments/migration-to-taxable/urn/$urn/subscriptionId/$subscriptionId",
+           |    "state": "PROCESSED",
+           |    "etmpId": "da4053bf-2ea3-4cb8-bb9c-65b70252b656",
+           |    "groupIdentifier": "c808798d-0d81-4a34-82c2-bbf13b3ac2fa"
+           |}
+           |""".stripMargin)
+      "tax enrolments successfully returned for provided subscription id" in {
+
+        stubForHeaderlessGet(server, s"/tax-enrolments/subscriptions/$subscriptionId", OK, response.toString())
+
+        val futureResult = connector.subscriptions(subscriptionId)
+
+        whenReady(futureResult) {
+          result => {
+            result.state mustBe "PROCESSED"
+            result.urn mustBe Some(urn)
+            result.utr mustBe Some(utr)
+          }
         }
       }
     }

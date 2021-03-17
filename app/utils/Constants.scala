@@ -119,5 +119,4 @@ object Constants {
   val DRAFT_ID = "draftId"
   val REFERENCE = "reference"
   val DATA = "data"
-
 }
