@@ -20,36 +20,19 @@ import base.BaseSpec
 
 class TaxEnrolmentsSubscriptionsResponseSpec extends BaseSpec {
 
-  val testUrn = "testUrn"
   val testSubscriptionId = "testSubscriptionId"
-  val callbackUrl = s"http://trusts.protected.mdtp/tax-enrolments/migration-to-taxable/urn/$testUrn/subscriptionId/$testSubscriptionId"
 
   ".utr" should {
     "be None if the identifiers are empty" in {
-      TaxEnrolmentsSubscriptionsResponse(identifiers = Nil, "", "").utr mustBe None
+      TaxEnrolmentsSubscriptionsResponse(identifiers = Nil, "").utr mustBe None
     }
 
     "be None if the identifiers doesn't have a SAUTR key" in {
-      TaxEnrolmentsSubscriptionsResponse(identifiers = List(SubscriptionIdentifier("testKey", "testValue")), "", "").utr mustBe None
+      TaxEnrolmentsSubscriptionsResponse(identifiers = List(SubscriptionIdentifier("testKey", "testValue")), "").utr mustBe None
     }
 
     "be the correct value if the identifiers does have a SAUTR key" in {
-      TaxEnrolmentsSubscriptionsResponse(identifiers = List(SubscriptionIdentifier("SAUTR", "testValue")), "", "").utr mustBe Some("testValue")
-    }
-  }
-
-  ".urn" should {
-    "be None if we have no callback value" in {
-      TaxEnrolmentsSubscriptionsResponse(identifiers = Nil, "", "").urn mustBe None
-    }
-
-    "be the correct value if we have the full callback url" in {
-      TaxEnrolmentsSubscriptionsResponse(identifiers = Nil, callbackUrl, "").urn mustBe Some(testUrn)
-    }
-
-    "be the correct value if we have the full callback url without anything after urn" in {
-      val callbackUrl = s"http://trusts.protected.mdtp/tax-enrolments/migration-to-taxable/urn/$testUrn"
-      TaxEnrolmentsSubscriptionsResponse(identifiers = Nil, callbackUrl, "").urn mustBe Some(testUrn)
+      TaxEnrolmentsSubscriptionsResponse(identifiers = List(SubscriptionIdentifier("SAUTR", "testValue")), "").utr mustBe Some("testValue")
     }
   }
 }

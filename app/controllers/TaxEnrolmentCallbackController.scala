@@ -20,6 +20,7 @@ import javax.inject.Inject
 import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, ControllerComponents}
+import services.MigrationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -29,7 +30,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
-class TaxEnrolmentCallbackController @Inject()(
+class TaxEnrolmentCallbackController @Inject()( migrationService: MigrationService,
                                                 cc: ControllerComponents
                                                ) extends BackendController(cc) with Logging {
 
@@ -51,12 +52,13 @@ class TaxEnrolmentCallbackController @Inject()(
       Future(Ok(""))
   }
 
-  def migrationSubscriptionCallback(urn: String, subscriptionId: String): Action[JsValue] = Action.async(parse.json) {
+  def migrationSubscriptionCallback(subscriptionId: String, urn: String): Action[JsValue] = Action.async(parse.json) {
     implicit request =>
-      val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+      implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
       logger.info(s"[migrationSubscriptionCallback][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn]" +
         s" Tax-enrolment: migration subscription callback message was: ${request.body}")
+      migrationService.completeMigration(subscriptionId, urn)
       Future(Ok(""))
   }
 }

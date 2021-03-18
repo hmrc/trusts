@@ -109,6 +109,7 @@ class RegisterTrustController @Inject()(
   private def auditResponseAndEnrol(response: RegistrationTrnResponse, registration: Registration, draftId: String)
                                    (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
 
+    super.hc
     auditService.audit(
       event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
       registration = registration,

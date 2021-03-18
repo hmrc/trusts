@@ -178,7 +178,6 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
         whenReady(futureResult) {
           result => {
             result.state mustBe "PROCESSED"
-            result.urn mustBe Some(urn)
             result.utr mustBe Some(utr)
           }
         }

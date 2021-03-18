@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-package models.tax_enrolments
+package models.orchestrator
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.Json
 
-case class TaxEnrolmentsSubscriptionsResponse(identifiers: List[SubscriptionIdentifier], state: String) {
-  val utr: Option[String] = identifiers.find(_.key == "SAUTR").map(_.value)
-}
+case class OrchestratorMigrationRequest(urn: String, utr: String)
 
-object TaxEnrolmentsSubscriptionsResponse {
-  implicit val formats: Format[TaxEnrolmentsSubscriptionsResponse] = Json.format[TaxEnrolmentsSubscriptionsResponse]
-}
-
-case class SubscriptionIdentifier(key: String, value: String)
-
-object SubscriptionIdentifier {
-  implicit val formats: Format[SubscriptionIdentifier] = Json.format[SubscriptionIdentifier]
+object OrchestratorMigrationRequest {
+  implicit val format = Json.format[OrchestratorMigrationRequest]
 }
 
 

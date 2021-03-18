@@ -22,17 +22,19 @@ import play.api.libs.json.Json
 import play.api.test.Helpers
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import play.api.test.Helpers.{status, _}
+import services.MigrationService
 
 class TaxEnrolmentCallbackControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
   val auditConnector = mock[AuditConnector]
+  val mockMigrationService = mock[MigrationService]
   val trn = "XTRN1234567"
 
   ".taxableSubscriptionCallback" should {
 
     "return 200 " when {
       "tax enrolment callback for subscription id enrolment  " in {
-        val SUT = new TaxEnrolmentCallbackController(Helpers.stubControllerComponents())
+        val SUT = new TaxEnrolmentCallbackController(mockMigrationService, Helpers.stubControllerComponents())
 
         val result = SUT.taxableSubscriptionCallback(trn).apply(postRequestWithPayload(Json.parse({"""{ "url" : "http//","state" : "SUCCESS"}"""})))
         status(result) mustBe OK
@@ -44,7 +46,7 @@ class TaxEnrolmentCallbackControllerSpec extends BaseSpec with GuiceOneServerPer
 
     "return 200 " when {
       "tax enrolment callback for subscription id enrolment  " in {
-        val SUT = new TaxEnrolmentCallbackController(Helpers.stubControllerComponents())
+        val SUT = new TaxEnrolmentCallbackController(mockMigrationService, Helpers.stubControllerComponents())
 
         val result = SUT.nonTaxableSubscriptionCallback(trn).apply(postRequestWithPayload(Json.parse({"""{ "url" : "http//","state" : "SUCCESS"}"""})))
         status(result) mustBe OK
@@ -57,7 +59,7 @@ class TaxEnrolmentCallbackControllerSpec extends BaseSpec with GuiceOneServerPer
     val subscriberId = "testSubId"
     "return 200 " when {
       "tax enrolment callback for subscription id enrolment  " in {
-        val SUT = new TaxEnrolmentCallbackController(Helpers.stubControllerComponents())
+        val SUT = new TaxEnrolmentCallbackController(mockMigrationService, Helpers.stubControllerComponents())
 
         val result = SUT.migrationSubscriptionCallback(urn, subscriberId).apply(postRequestWithPayload(Json.parse({"""{ "url" : "http//","state" : "SUCCESS"}"""})))
         status(result) mustBe OK

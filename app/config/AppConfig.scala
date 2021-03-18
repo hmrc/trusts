@@ -30,6 +30,7 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
   val getTrustOrEstateUrl : String = servicesConfig.baseUrl("playback")
   val varyTrustOrEstateUrl : String = servicesConfig.baseUrl("variation")
   val trustsStoreUrl : String = servicesConfig.baseUrl("trusts-store")
+  val orchestratorUrl : String = servicesConfig.baseUrl("orchestrator")
 
   val registrationEnvironment : String = configuration.get[String]("microservice.services.registration.environment")
   val registrationToken : String = configuration.get[String]("microservice.services.registration.token")
