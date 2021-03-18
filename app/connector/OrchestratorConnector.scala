@@ -23,13 +23,14 @@ import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 
-import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
 
 
 class OrchestratorConnector @Inject()(http: HttpClient, config: AppConfig) extends Logging {
 
   def migrateToTaxable(urn: String, utr: String)(implicit hc: HeaderCarrier): Future[OrchestratorMigrationResponse] = {
+    implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+
     val taxEnrolmentsEndpoint = s"${config.orchestratorUrl}/trusts-enrolment-orchestrator/orchestration-process"
     val migrationRequest = OrchestratorMigrationRequest(urn, utr)
     http.POST[JsValue, OrchestratorMigrationResponse](
