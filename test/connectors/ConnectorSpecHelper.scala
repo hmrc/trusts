@@ -38,6 +38,7 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
           "microservice.services.variation.port" -> server.port(),
           "microservice.services.tax-enrolments.port" -> server.port(),
           "microservice.services.tax-enrolments-migration.port" -> server.port(),
+          "microservice.services.orchestrator.port" -> server.port(),
           "microservice.services.trusts-store.port" -> server.port(),
 
           "microservice.services.tax-enrolments.non-taxable.serviceName" -> "serviceNameNonTaxable",
@@ -178,6 +179,20 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
           .withBody(responseBody).withFixedDelay(delayResponse)))
   }
 
+  def stubForHeaderlessPost(server: WireMockServer,
+                  url: String,
+                  requestBody: String,
+                  returnStatus: Int,
+                  responseBody: String,
+                  delayResponse: Int = 0) = {
+
+    server.stubFor(post(urlEqualTo(url))
+      .withRequestBody(equalTo(requestBody))
+      .willReturn(
+        aResponse()
+          .withStatus(returnStatus)
+          .withBody(responseBody).withFixedDelay(delayResponse)))
+  }
 
   def stubForGet(server: WireMockServer,
                  url: String, returnStatus: Int,

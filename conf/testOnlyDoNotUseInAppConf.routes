@@ -11,3 +11,6 @@
 
 # Add all the application routes to the prod.routes file
 ->         /                          prod.Routes
+
++ nocsrf
+GET       /trusts/test-only/migrate/urn/:urn/subscriberId/:subscriberId   controllers.testOnly.TrustMigrationTestController.migrateToTaxable(subscriberId, urn)
