@@ -29,14 +29,14 @@ class OrchestratorCallbackControllerSpec extends BaseSpec with GuiceOneServerPer
   val urn = "NTTRUST00000001"
   val utr = "123456789"
 
-  ".migrateToTaxableCallback(urn: String, utr: String)" should {
+  ".migrationToTaxableCallback)" should {
 
     "return 200 " when {
       "orchestrator callback for subscription id migration " in {
         val SUT = new OrchestratorCallbackController(Helpers.stubControllerComponents())
 
         val payloadBody = s"""{ "success" : true, "urn": "$urn", "utr": "$utr"}"""
-        val result = SUT.migrateToTaxableCallback(urn, utr).apply(postRequestWithPayload(Json.parse(payloadBody)))
+        val result = SUT.migrationToTaxableCallback(urn, utr).apply(postRequestWithPayload(Json.parse(payloadBody)))
         status(result) mustBe OK
       }
     }
