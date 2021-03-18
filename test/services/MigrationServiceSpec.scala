@@ -32,7 +32,7 @@ class MigrationServiceSpec extends BaseSpec {
   val urn = "NTTRUST00000001"
   val utr = "123456789"
 
-  "MigratiomService" when {
+  "MigrationService" when {
 
     ".migrateSubscriberToTaxable" should {
       val mockTaxEnrolmentConnector = mock[TaxEnrolmentConnector]
