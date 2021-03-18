@@ -1,0 +1,40 @@
+{
+  "details": {
+    "trust": {
+      "entities": {
+        "leadTrustees": {
+          "name": {
+            "firstName": "Johnny",
+            "middleName": "Jonathan",
+            "lastName": "Doe"
+          },
+          "dateOfBirth": "1996-02-03",
+          "phoneNumber": "0987654321",
+          "email": "johnny.doe@example.com",
+          "identification": {
+            "nino": "AB000000A"
+          },
+          "nationality": "FR",
+          "countryOfResidence": "FR",
+          "entityStart": "2016-02-23"
+        },
+        "trustees": [
+          {
+            "trusteeInd": {
+              "name": {
+                "firstName": "Joe",
+                "middleName": "Joseph",
+                "lastName": "Bloggs"
+              },
+              "dateOfBirth": "1965-02-10",
+              "nationality": "GB",
+              "countryOfResidence": "GB",
+              "entityStart": "1998-02-12"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "otherfields": "exist"
+}

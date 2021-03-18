@@ -1,0 +1,27 @@
+{
+  "details": {
+    "trust": {
+      "entities": {
+        "leadTrustees": {
+          "lineNo": "1",
+          "bpMatchStatus": "01",
+          "name": {
+            "firstName": "Joe",
+            "middleName": "Joseph",
+            "lastName": "Bloggs"
+          },
+          "dateOfBirth": "1965-02-10",
+          "identification": {
+            "nino": "AA000000A"
+          },
+          "nationality": "GB",
+          "countryOfResidence": "GB",
+          "email": "joe.bloggs@example.com",
+          "phoneNumber": "1234567890",
+          "entityStart": "1998-02-12"
+        }
+      }
+    }
+  },
+  "otherfields": "exist"
+}
