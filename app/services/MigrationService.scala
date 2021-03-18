@@ -18,12 +18,12 @@ package services
 
 import connector.{OrchestratorConnector, TaxEnrolmentConnector}
 import javax.inject.Inject
-import models.orchestrator.OrchestratorMigrationResponse
 import models.tax_enrolments.TaxEnrolmentSubscriberResponse
 import play.api.Logging
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class MigrationService @Inject()(taxEnrolmentConnector: TaxEnrolmentConnector,
                                  orchestratorConnector: OrchestratorConnector) extends Logging {
@@ -32,12 +32,19 @@ class MigrationService @Inject()(taxEnrolmentConnector: TaxEnrolmentConnector,
     taxEnrolmentConnector.migrateSubscriberToTaxable(subscriptionId, urn)
   }
 
-  def completeMigration(subscriptionId: String, urn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[OrchestratorMigrationResponse] = {
+  def completeMigration(subscriptionId: String, urn: String)(implicit hc: HeaderCarrier): Future[String] = {
     for {
       subscriptionsResponse <- taxEnrolmentConnector.subscriptions(subscriptionId)
-      orchestratorResponse <- orchestratorConnector.migrateToTaxable(urn, subscriptionsResponse.utr.get)
+      utr <- subscriptionsResponse.utr match {
+        case Some(utr) => Future.successful(utr)
+        case None => {
+          logger.error(s"Unable to parse utr from cache as OrchestratorMigrationResponse")
+          Future.failed(new BadRequestException("Unable to parse utr from cache as OrchestratorMigrationResponse"))
+        }
+      }
+      _ <- orchestratorConnector.migrateToTaxable(urn, utr)
     } yield {
-      orchestratorResponse
+      utr
     }
   }
 }
