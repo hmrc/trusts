@@ -29,7 +29,7 @@ class OrchestratorCallbackControllerSpec extends BaseSpec with GuiceOneServerPer
   val urn = "NTTRUST00000001"
   val utr = "123456789"
 
-  ".migrationToTaxableCallback)" should {
+  ".migrationToTaxableCallback" should {
 
     "return 200 " when {
       "orchestrator callback for subscription id migration " in {
@@ -41,5 +41,4 @@ class OrchestratorCallbackControllerSpec extends BaseSpec with GuiceOneServerPer
       }
     }
   }
-
 }

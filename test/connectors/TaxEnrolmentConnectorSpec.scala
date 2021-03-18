@@ -21,6 +21,7 @@ import exceptions.{BadRequestException, InternalServerErrorException}
 import models.tax_enrolments.{TaxEnrolmentSubscription, TaxEnrolmentSuccess}
 import play.api.http.Status._
 import play.api.libs.json.Json
+import uk.gov.hmrc.http.UpstreamErrorResponse
 
 class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
@@ -152,6 +153,7 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
     val subscriptionId = "987654321"
 
     "return Success" when {
+
       val response = Json.parse(
         s"""
            |{
@@ -169,6 +171,7 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
            |    "groupIdentifier": "c808798d-0d81-4a34-82c2-bbf13b3ac2fa"
            |}
            |""".stripMargin)
+
       "tax enrolments successfully returned for provided subscription id" in {
 
         stubForHeaderlessGet(server, s"/tax-enrolments/subscriptions/$subscriptionId", OK, response.toString())
@@ -179,6 +182,19 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
           result => {
             result.state mustBe "PROCESSED"
             result.utr mustBe Some(utr)
+          }
+        }
+      }
+
+      "return InternalServerErrorException " when {
+        "tax enrolments returns internal server error " in {
+
+          stubForHeaderlessGet(server, s"/tax-enrolments/subscriptions/$subscriptionId", SERVICE_UNAVAILABLE, response.toString())
+
+          val futureResult = connector.subscriptions(subscriptionId)
+
+          whenReady(futureResult.failed) {
+            result => result mustBe a[UpstreamErrorResponse]
           }
         }
       }
