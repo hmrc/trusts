@@ -19,8 +19,7 @@ package controllers.testOnly
 import controllers._
 import javax.inject.Inject
 import play.api.Logging
-import play.api.libs.json.JsValue
-import play.api.mvc.{Action, ControllerComponents}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import services._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
@@ -33,13 +32,13 @@ class TrustMigrationTestController @Inject()(  migrationService: MigrationServic
                                                cc: ControllerComponents
                                              ) extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
-  def migrateToTaxable(subscriptionId: String, urn: String): Action[JsValue] = Action.async(parse.json) {
+  def migrateToTaxable(subscriptionId: String, urn: String): Action[AnyContent] = Action.async {
     implicit request =>
       implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
       logger.info(s"[migrateToTaxable][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn]" +
         s" Tax-enrolment: migration subscription callback message was: ${request.body}")
       migrationService.migrateSubscriberToTaxable(subscriptionId, urn)
-      Future(Ok(""))
+      Future(Ok("Done"))
   }
 }
