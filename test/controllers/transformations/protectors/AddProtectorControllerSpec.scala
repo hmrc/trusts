@@ -76,6 +76,9 @@ class AddProtectorControllerSpec extends FreeSpec with MockitoSugar with ScalaFu
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
+        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
+
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
@@ -136,6 +139,9 @@ class AddProtectorControllerSpec extends FreeSpec with MockitoSugar with ScalaFu
           identifierAction,
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
+
+        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
 
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))

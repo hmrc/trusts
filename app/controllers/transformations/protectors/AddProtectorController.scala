@@ -38,7 +38,7 @@ class AddProtectorController @Inject()(identify: IdentifierAction,
 
   def addBusiness(identifier: String): Action[JsValue] = addNewTransform[ProtectorCompany](identifier, BUSINESS_PROTECTOR)
 
-  override def transform[T](value: T, `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](value: T, `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
     AddProtectorTransform(Json.toJson(value), `type`)
   }
 

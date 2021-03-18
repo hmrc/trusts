@@ -22,43 +22,44 @@ import models.requests.IdentifierRequest
 import models.variation._
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc.{Action, ControllerComponents, Result}
-import services.TransformationService
+import services.{LocalDateService, TransformationService}
 import transformers.DeltaTransform
-import transformers.trustees.AddTrusteeTransform
+import transformers.trustees.PromoteTrusteeTransform
 import utils.Constants._
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class AddTrusteeController @Inject()(identify: IdentifierAction,
-                                     transformationService: TransformationService)
-                                    (implicit ec: ExecutionContext, cc: ControllerComponents)
+class DemoteLeadTrusteeController @Inject()(identify: IdentifierAction,
+                                            transformationService: TransformationService,
+                                            localDateService: LocalDateService)
+                                           (implicit ec: ExecutionContext, cc: ControllerComponents)
   extends AddTransformationController(identify, transformationService) with TrusteeController {
 
-  def add(identifier: String): Action[JsValue] = identify.async(parse.json) {
+  def demote(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
 
-      (validate[TrusteeIndividualType], validate[TrusteeOrgType]) match {
+      (validate[LeadTrusteeIndType], validate[LeadTrusteeOrgType]) match {
         case (Some(_), _) =>
-          addIndividual(identifier)
+          demoteIndividual(identifier)
         case (_, Some(_)) =>
-          addBusiness(identifier)
+          demoteBusiness(identifier)
         case _ =>
           logger.error(s"[add][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
-            s" Supplied json could not be read as a trustee")
+            s" Supplied json could not be read as a lead trustee")
           Future.successful(BadRequest)
       }
     }
   }
 
-  def addIndividual(identifier: String)(implicit request: IdentifierRequest[JsValue]): Future[Result] =
-    addNewTransform[TrusteeIndividualType](identifier, INDIVIDUAL_TRUSTEE).apply(request)
+  def demoteIndividual(identifier: String)(implicit request: IdentifierRequest[JsValue]): Future[Result] =
+    addNewTransform[LeadTrusteeIndType](identifier, INDIVIDUAL_LEAD_TRUSTEE).apply(request)
 
-  def addBusiness(identifier: String)(implicit request: IdentifierRequest[JsValue]): Future[Result] =
-    addNewTransform[TrusteeOrgType](identifier, BUSINESS_TRUSTEE).apply(request)
+  def demoteBusiness(identifier: String)(implicit request: IdentifierRequest[JsValue]): Future[Result] =
+    addNewTransform[LeadTrusteeOrgType](identifier, BUSINESS_LEAD_TRUSTEE).apply(request)
 
   override def transform[T](value: T, `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
-    AddTrusteeTransform(Json.toJson(value), `type`)
+    PromoteTrusteeTransform(None, Json.toJson(value), Json.obj(), localDateService.now, `type`, isTaxable)
   }
 
 }

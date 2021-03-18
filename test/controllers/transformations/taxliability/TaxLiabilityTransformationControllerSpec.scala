@@ -57,6 +57,9 @@ class TaxLiabilityTransformationControllerSpec extends FreeSpec
 
         val controller = new TaxLiabilityTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
+        when(service.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
+
         when(service.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
@@ -82,9 +85,6 @@ class TaxLiabilityTransformationControllerSpec extends FreeSpec
         val service = mock[TransformationService]
 
         val controller = new TaxLiabilityTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
-
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.parse(

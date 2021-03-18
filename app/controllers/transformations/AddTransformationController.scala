@@ -18,6 +18,7 @@ package controllers.transformations
 
 import controllers.TrustsBaseController
 import controllers.actions.IdentifierAction
+import controllers.transformations.TransformationController.isTrustTaxable
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents}
@@ -32,7 +33,7 @@ abstract class AddTransformationController @Inject()(identify: IdentifierAction,
                                                     (implicit ec: ExecutionContext, cc: ControllerComponents)
   extends TrustsBaseController(cc) with Logging {
 
-  def transform[T](value: T, `type`: String)(implicit wts: Writes[T]): DeltaTransform
+  def transform[T](value: T, `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform
 
   def addNewTransform[T](identifier: String, `type`: String = "")(implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = {
     identify.async(parse.json) {
@@ -40,11 +41,11 @@ abstract class AddTransformationController @Inject()(identify: IdentifierAction,
         request.body.validate[T] match {
 
           case JsSuccess(entityToAdd, _) =>
-            transformationService.addNewTransform(
-              identifier,
-              request.internalId,
-              transform(entityToAdd, `type`)
-            ) map { _ =>
+            for {
+              trust <- transformationService.getTransformedTrustJson(identifier, request.internalId)
+              isTaxable <- Future.fromTry(isTrustTaxable(trust))
+              _ <- transformationService.addNewTransform(identifier, request.internalId, transform(entityToAdd, `type`, isTaxable))
+            } yield {
               Ok
             }
 

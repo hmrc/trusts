@@ -72,6 +72,9 @@ class AddOtherIndividualControllerSpec extends FreeSpec with MockitoSugar with S
         mockTransformationService
       )(Implicits.global, Helpers.stubControllerComponents())
 
+      when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        .thenReturn(Future.successful(Json.obj()))
+
       when(mockTransformationService.addNewTransform(any(), any(), any()))
         .thenReturn(Future.successful(true))
 
