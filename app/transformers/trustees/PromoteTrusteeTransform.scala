@@ -36,24 +36,35 @@ case class PromoteTrusteeTransform(index: Option[Int],
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    removeTrusteeTransform.applyDeclarationTransform(input)
+    if (index.isDefined) {
+      removeTrusteeTransform.applyDeclarationTransform(input)
+    } else {
+      JsSuccess(input)
+    }
   }
 
   private val removeTrusteeTransform = RemoveTrusteeTransform(index, original, endDate, `type`)
 
   private def transform(input: JsValue): JsResult[JsValue] = {
-    for {
-      entityStart <- original.transform((__ \ `type` \ ENTITY_START).json.pick)
-      trusteePromotedJson <- input.transform(promoteTrustee(entityStart))
-      trusteeRemovedJson <- removeTrusteeTransform.applyTransform(trusteePromotedJson)
-      leadTrusteeDemotedJson <- demoteLeadTrusteeTransform(input).applyTransform(trusteeRemovedJson)
-    } yield leadTrusteeDemotedJson
+    val jsonWithNewLeadTrustee: JsResult[JsValue] = if (index.isDefined) {
+      for {
+        entityStart <- original.transform((__ \ `type` \ ENTITY_START).json.pick)
+        trusteePromotedJson <- input.transform(promoteTrustee(entityStart = Some(entityStart)))
+        trusteeRemovedJson <- removeTrusteeTransform.applyTransform(trusteePromotedJson)
+      } yield trusteeRemovedJson
+    } else {
+      input.transform(promoteTrustee(entityStart = None))
+    }
+
+    jsonWithNewLeadTrustee.flatMap { json =>
+      demoteLeadTrusteeTransform(input).applyTransform(json)
+    }
   }
 
-  private def promoteTrustee(entityStart: JsValue): Reads[JsObject] = {
+  private def promoteTrustee(entityStart: Option[JsValue]): Reads[JsObject] = {
     leadTrusteePath.json.prune andThen
       __.json.update(leadTrusteePath.json.put(amended)) andThen
-      __.json.update((leadTrusteePath \ ENTITY_START).json.put(entityStart)) andThen
+      entityStart.fold(doNothing())(x => __.json.update((leadTrusteePath \ ENTITY_START).json.put(x))) andThen
       (leadTrusteePath \ LINE_NUMBER).json.prune andThen
       (leadTrusteePath \ BP_MATCH_STATUS).json.prune andThen
       (if (isIndividualTrustee) (leadTrusteePath \ LEGALLY_INCAPABLE).json.prune else doNothing())

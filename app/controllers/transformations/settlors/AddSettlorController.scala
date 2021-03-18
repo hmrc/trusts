@@ -38,7 +38,7 @@ class AddSettlorController @Inject()(identify: IdentifierAction,
 
   def addBusiness(identifier: String): Action[JsValue] = addNewTransform[SettlorCompany](identifier, BUSINESS_SETTLOR)
 
-  override def transform[T](value: T, `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](value: T, `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
     AddSettlorTransform(Json.toJson(value), `type`)
   }
 

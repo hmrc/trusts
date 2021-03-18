@@ -50,7 +50,7 @@ class TrustDetailsTransformationController @Inject()(identify: IdentifierAction,
   def setEfrbsStartDate(identifier: String): Action[JsValue] = addNewTransform[LocalDate](identifier, EFRBS_START_DATE)
   def setResidentialStatus(identifier: String): Action[JsValue] = addNewTransform[ResidentialStatusType](identifier, RESIDENTIAL_STATUS)
 
-  override def transform[T](value: T, `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](value: T, `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
     SetTrustDetailTransform(Json.toJson(value), `type`)
   }
 }

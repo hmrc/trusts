@@ -35,7 +35,7 @@ class TaxLiabilityTransformationController @Inject()(identify: IdentifierAction,
 
   def setYearsReturns(identifier: String): Action[JsValue] = addNewTransform[YearsReturns](identifier)
 
-  override def transform[T](value: T, `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](value: T, `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
     SetTaxLiabilityTransform(Json.toJson(value))
   }
 }

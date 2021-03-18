@@ -17,9 +17,10 @@
 package controllers.transformations
 
 import exceptions.InternalServerErrorException
-import play.api.libs.json.{JsObject, JsPath, JsValue}
+import play.api.libs.json._
+import utils.Constants._
 
-import scala.util.{Failure, Try}
+import scala.util.{Failure, Success, Try}
 
 trait TransformationController {
 
@@ -30,6 +31,19 @@ trait TransformationController {
     json.transform(p.json.pick).fold(
       _ => Failure(InternalServerErrorException(s"Could not locate json at $p")),
       value => scala.util.Success(value.as[JsObject])
+    )
+  }
+
+}
+
+object TransformationController {
+
+  def isTrustTaxable(json: JsObject): Try[Boolean] = {
+    Success(
+      json.transform((TRUST \ DETAILS \ TAXABLE).json.pick[JsBoolean]) match {
+        case JsSuccess(JsBoolean(value), _) => value
+        case _ => true
+      }
     )
   }
 

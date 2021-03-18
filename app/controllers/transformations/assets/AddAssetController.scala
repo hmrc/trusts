@@ -48,7 +48,7 @@ class AddAssetController @Inject()(identify: IdentifierAction,
 
   def addNonEeaBusiness(identifier: String): Action[JsValue] = addNewTransform[NonEEABusinessType](identifier, NON_EEA_BUSINESS_ASSET)
 
-  override def transform[T](value: T, `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](value: T, `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
     AddAssetTransform(Json.toJson(value), `type`)
   }
 }
