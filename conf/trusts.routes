@@ -1,57 +1,57 @@
 # microservice specific routes
 
-->          /trustees                                                  trusts.trustees.Routes
-->          /beneficiaries                                             trusts.beneficiaries.Routes
-->          /settlors                                                  trusts.settlors.Routes
-->          /protectors                                                trusts.protectors.Routes
-->          /other-individuals                                         trusts.otherIndividuals.Routes
-->          /assets                                                    trusts.assets.Routes
+->          /trustees                                                                       trusts.trustees.Routes
+->          /beneficiaries                                                                  trusts.beneficiaries.Routes
+->          /settlors                                                                       trusts.settlors.Routes
+->          /protectors                                                                     trusts.protectors.Routes
+->          /other-individuals                                                              trusts.otherIndividuals.Routes
+->          /assets                                                                         trusts.assets.Routes
 
-->          /register                                                  register.Routes
+->          /register                                                                       register.Routes
 
-POST        /check                                                     controllers.CheckTrustController.checkExistingTrust
+POST        /check                                                                          controllers.CheckTrustController.checkExistingTrust
 
 POST        /tax-enrolment/registration/taxable/hmrc-ters-org/:trn/subscriptions            controllers.TaxEnrolmentCallbackController.taxableSubscriptionCallback(trn: String)
 POST        /tax-enrolment/registration/non-taxable/hmrc-tersnt-org/:trn/subscriptions      controllers.TaxEnrolmentCallbackController.nonTaxableSubscriptionCallback(trn: String)
 POST        /tax-enrolment/migration-to-taxable/urn/:urn/subscriptionId/:subscriptionId     controllers.TaxEnrolmentCallbackController.migrationSubscriptionCallback(subscriptionId: String, urn: String)
 
-POST        /orchestrator/migration-to-taxable/urn/:urn/utr/:utr/      controllers.OrchestratorCallbackController.migrationToTaxableCallback(urn: String, utr: String)
+POST        /orchestrator/migration-to-taxable/urn/:urn/utr/:utr                            controllers.OrchestratorCallbackController.migrationToTaxableCallback(urn: String, utr: String)
 
-GET         /:identifier/refresh                                       controllers.GetTrustController.getFromEtmp(identifier: String)
+GET         /:identifier/refresh                                                            controllers.GetTrustController.getFromEtmp(identifier: String)
 
-GET         /:identifier                                               controllers.GetTrustController.get(identifier: String, applyTransforms: Boolean = false)
+GET         /:identifier                                                                    controllers.GetTrustController.get(identifier: String, applyTransforms: Boolean = false)
 
-GET         /:identifier/transformed                                   controllers.GetTrustController.get(identifier: String, applyTransforms: Boolean = true)
+GET         /:identifier/transformed                                                        controllers.GetTrustController.get(identifier: String, applyTransforms: Boolean = true)
 
-GET         /:identifier/trust-details                                 controllers.GetTrustController.getTrustDetails(identifier: String)
+GET         /:identifier/trust-details                                                      controllers.GetTrustController.getTrustDetails(identifier: String)
 
-GET         /:identifier/transformed/other-individuals                 controllers.GetTrustController.getOtherIndividuals(identifier: String)
+GET         /:identifier/transformed/other-individuals                                      controllers.GetTrustController.getOtherIndividuals(identifier: String)
 
-GET         /:identifier/transformed/protectors-already-exist          controllers.GetTrustController.getProtectorsAlreadyExist(identifier: String)
-GET         /:identifier/transformed/other-individuals-already-exist   controllers.GetTrustController.getOtherIndividualsAlreadyExist(identifier: String)
-GET         /:identifier/transformed/non-eea-companies-already-exist   controllers.GetTrustController.getNonEeaCompaniesAlreadyExist(identifier: String)
+GET         /:identifier/transformed/protectors-already-exist                               controllers.GetTrustController.getProtectorsAlreadyExist(identifier: String)
+GET         /:identifier/transformed/other-individuals-already-exist                        controllers.GetTrustController.getOtherIndividualsAlreadyExist(identifier: String)
+GET         /:identifier/transformed/non-eea-companies-already-exist                        controllers.GetTrustController.getNonEeaCompaniesAlreadyExist(identifier: String)
 
-POST        /variation                                                 controllers.testOnly.TrustVariationsTestController.trustVariation
+POST        /variation                                                                      controllers.testOnly.TrustVariationsTestController.trustVariation
 
-POST        /declare/:identifier                                       controllers.TrustVariationsController.declare(identifier: String)
+POST        /declare/:identifier                                                            controllers.TrustVariationsController.declare(identifier: String)
 
-PUT         /:identifier/trust-details/express                         controllers.transformations.trustdetails.TrustDetailsTransformationController.setExpress(identifier: String)
-PUT         /:identifier/trust-details/uk-resident                     controllers.transformations.trustdetails.TrustDetailsTransformationController.setResident(identifier: String)
-PUT         /:identifier/trust-details/taxable                         controllers.transformations.trustdetails.TrustDetailsTransformationController.setTaxable(identifier: String)
-PUT         /:identifier/trust-details/uk-property                     controllers.transformations.trustdetails.TrustDetailsTransformationController.setProperty(identifier: String)
-PUT         /:identifier/trust-details/recorded                        controllers.transformations.trustdetails.TrustDetailsTransformationController.setRecorded(identifier: String)
-PUT         /:identifier/trust-details/uk-relation                     controllers.transformations.trustdetails.TrustDetailsTransformationController.setUKRelation(identifier: String)
-PUT         /:identifier/trust-details/law-country                     controllers.transformations.trustdetails.TrustDetailsTransformationController.setLawCountry(identifier: String)
-PUT         /:identifier/trust-details/administration-country          controllers.transformations.trustdetails.TrustDetailsTransformationController.setAdministrationCountry(identifier: String)
-PUT         /:identifier/trust-details/type-of-trust                   controllers.transformations.trustdetails.TrustDetailsTransformationController.setTypeOfTrust(identifier: String)
-PUT         /:identifier/trust-details/deed-of-variation               controllers.transformations.trustdetails.TrustDetailsTransformationController.setDeedOfVariation(identifier: String)
-PUT         /:identifier/trust-details/inter-vivos                     controllers.transformations.trustdetails.TrustDetailsTransformationController.setInterVivos(identifier: String)
-PUT         /:identifier/trust-details/efrbs-start-date                controllers.transformations.trustdetails.TrustDetailsTransformationController.setEfrbsStartDate(identifier: String)
-PUT         /:identifier/trust-details/residential-status              controllers.transformations.trustdetails.TrustDetailsTransformationController.setResidentialStatus(identifier: String)
+PUT         /:identifier/trust-details/express                                              controllers.transformations.trustdetails.TrustDetailsTransformationController.setExpress(identifier: String)
+PUT         /:identifier/trust-details/uk-resident                                          controllers.transformations.trustdetails.TrustDetailsTransformationController.setResident(identifier: String)
+PUT         /:identifier/trust-details/taxable                                              controllers.transformations.trustdetails.TrustDetailsTransformationController.setTaxable(identifier: String)
+PUT         /:identifier/trust-details/uk-property                                          controllers.transformations.trustdetails.TrustDetailsTransformationController.setProperty(identifier: String)
+PUT         /:identifier/trust-details/recorded                                             controllers.transformations.trustdetails.TrustDetailsTransformationController.setRecorded(identifier: String)
+PUT         /:identifier/trust-details/uk-relation                                          controllers.transformations.trustdetails.TrustDetailsTransformationController.setUKRelation(identifier: String)
+PUT         /:identifier/trust-details/law-country                                          controllers.transformations.trustdetails.TrustDetailsTransformationController.setLawCountry(identifier: String)
+PUT         /:identifier/trust-details/administration-country                               controllers.transformations.trustdetails.TrustDetailsTransformationController.setAdministrationCountry(identifier: String)
+PUT         /:identifier/trust-details/type-of-trust                                        controllers.transformations.trustdetails.TrustDetailsTransformationController.setTypeOfTrust(identifier: String)
+PUT         /:identifier/trust-details/deed-of-variation                                    controllers.transformations.trustdetails.TrustDetailsTransformationController.setDeedOfVariation(identifier: String)
+PUT         /:identifier/trust-details/inter-vivos                                          controllers.transformations.trustdetails.TrustDetailsTransformationController.setInterVivos(identifier: String)
+PUT         /:identifier/trust-details/efrbs-start-date                                     controllers.transformations.trustdetails.TrustDetailsTransformationController.setEfrbsStartDate(identifier: String)
+PUT         /:identifier/trust-details/residential-status                                   controllers.transformations.trustdetails.TrustDetailsTransformationController.setResidentialStatus(identifier: String)
 
-DELETE      /:identifier/transforms/migrate-to-taxable                 controllers.TrustVariationsController.removeTaxableMigrationTransforms(identifier: String)
+DELETE      /:identifier/transforms/migrate-to-taxable                                      controllers.TrustVariationsController.removeTaxableMigrationTransforms(identifier: String)
 
-GET         /:identifier/years-returns                                 controllers.GetTrustController.getYearsReturns(identifier: String)
-PUT         /:identifier/years-returns                                 controllers.transformations.taxliability.TaxLiabilityTransformationController.setYearsReturns(identifier: String)
+GET         /:identifier/years-returns                                                      controllers.GetTrustController.getYearsReturns(identifier: String)
+PUT         /:identifier/years-returns                                                      controllers.transformations.taxliability.TaxLiabilityTransformationController.setYearsReturns(identifier: String)
 
-GET         /:identifier/is-trust-5mld                                 controllers.GetTrustController.isTrust5mld(identifier: String)
+GET         /:identifier/is-trust-5mld                                                      controllers.GetTrustController.isTrust5mld(identifier: String)
