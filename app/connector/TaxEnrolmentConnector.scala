@@ -19,11 +19,13 @@ package connector
 import com.google.inject.ImplementedBy
 import config.AppConfig
 import javax.inject.Inject
-import models.tax_enrolments.{TaxEnrolmentsSubscriptionsResponse, TaxEnrolmentSubscriberResponse, TaxEnrolmentSubscription}
+import models.tax_enrolments.{TaxEnrolmentSubscriberResponse, TaxEnrolmentSubscription, TaxEnrolmentsSubscriptionsResponse}
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utils.Constants._
+import utils.Session
+import uk.gov.hmrc.http.HttpReads.Implicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -81,6 +83,7 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
   }
 
   override def subscriptions(subscriptionId: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentsSubscriptionsResponse] = {
+    logger.info(s"[TaxEnrolmentConnectorImpl][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId] subscriptions")
     val getSubscriptionsEndpoint = s"${config.taxEnrolmentsMigrationUrl}/tax-enrolments/subscriptions/$subscriptionId"
     http.GET[TaxEnrolmentsSubscriptionsResponse](getSubscriptionsEndpoint)
   }

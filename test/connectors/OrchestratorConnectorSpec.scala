@@ -16,9 +16,9 @@
 
 package connectors
 
+import com.github.tomakehurst.wiremock.client.WireMock.{badRequest, post, urlEqualTo}
 import connector.OrchestratorConnector
-import exceptions.{BadRequestException, InternalServerErrorException}
-import models.orchestrator.{OrchestratorMigrationRequest, OrchestratorMigrationResponse}
+import models.orchestrator.OrchestratorMigrationRequest
 import play.api.http.Status._
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.UpstreamErrorResponse
@@ -43,13 +43,13 @@ class OrchestratorConnectorSpec extends ConnectorSpecHelper {
         val futureResult = connector.migrateToTaxable(urn, utr)
 
         whenReady(futureResult) {
-          result => result mustBe OrchestratorMigrationResponse("true", None)
+          result => result.status mustBe OK
         }
       }
     }
 
-    "return UpstreamErrorResponse " when {
-      "tax enrolments returns internal server error " in {
+    "return BadRequest " when {
+      "tax enrolments returns BadRequest " in {
         val responseBody = Json.stringify(Json.parse(
           s"""
              |{
@@ -58,12 +58,15 @@ class OrchestratorConnectorSpec extends ConnectorSpecHelper {
              |}
              |""".stripMargin))
 
-        stubForHeaderlessPost(server, "/trusts-enrolment-orchestrator/orchestration-process", requestBody, SERVICE_UNAVAILABLE, responseBody)
+        server.stubFor(
+          post(urlEqualTo("/trusts-enrolment-orchestrator/orchestration-process"))
+            .willReturn(badRequest)
+        )
 
         val futureResult = connector.migrateToTaxable(urn, utr)
 
-        whenReady(futureResult.failed) {
-          result => result mustBe a[UpstreamErrorResponse]
+        whenReady(futureResult) {
+          result => result.status mustBe BAD_REQUEST
         }
       }
     }

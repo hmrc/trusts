@@ -19,7 +19,7 @@ package controllers
 import javax.inject.Inject
 import play.api.Logging
 import play.api.libs.json.JsValue
-import play.api.mvc.{Action, ControllerComponents}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import services.MigrationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
@@ -52,13 +52,17 @@ class TaxEnrolmentCallbackController @Inject()( migrationService: MigrationServi
       Future(Ok(""))
   }
 
-  def migrationSubscriptionCallback(subscriptionId: String, urn: String): Action[JsValue] = Action.async(parse.json) {
+  def migrationSubscriptionCallback(subscriptionId: String, urn: String): Action[AnyContent] = Action.async {
     implicit request =>
       implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
       logger.info(s"[migrationSubscriptionCallback][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn]" +
-        s" Tax-enrolment: migration subscription callback message was: ${request.body}")
-      migrationService.completeMigration(subscriptionId, urn)
-      Future(Ok(""))
+        s" Tax-enrolment: migration subscription callback triggered ")
+      for {
+        utr <- migrationService.completeMigration(subscriptionId, urn)
+      } yield {
+        logger.info(s"[migrationSubscriptionCallback] callback complete utr $utr")
+        Ok("")
+      }
   }
 }

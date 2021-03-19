@@ -13,4 +13,4 @@
 ->         /                          prod.Routes
 
 + nocsrf
-GET         /test-only/migrate/urn/:urn/subscriberId/:subscriberId     controllers.testOnly.TrustMigrationTestController.migrateToTaxable(subscriberId, urn)
+GET         /trusts/test-only/migrate/urn/:urn/subscriberId/:subscriberId     controllers.testOnly.TrustMigrationTestController.migrateToTaxable(subscriberId, urn)

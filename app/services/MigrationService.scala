@@ -33,6 +33,7 @@ class MigrationService @Inject()(taxEnrolmentConnector: TaxEnrolmentConnector,
   }
 
   def completeMigration(subscriptionId: String, urn: String)(implicit hc: HeaderCarrier): Future[String] = {
+    logger.info(s"[MigrationService][SubscriptionId: $subscriptionId, URN: $urn].completeMigration")
     for {
       subscriptionsResponse <- taxEnrolmentConnector.subscriptions(subscriptionId)
       utr <- subscriptionsResponse.utr match {

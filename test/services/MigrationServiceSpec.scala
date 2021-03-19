@@ -19,10 +19,9 @@ package services
 import base.BaseSpec
 import connector.{OrchestratorConnector, TaxEnrolmentConnector}
 import exceptions.InternalServerErrorException
-import models.orchestrator.OrchestratorMigrationResponse
 import models.tax_enrolments.{SubscriptionIdentifier, TaxEnrolmentSuccess, TaxEnrolmentsSubscriptionsResponse}
 import org.mockito.Mockito.when
-import uk.gov.hmrc.http.BadRequestException
+import uk.gov.hmrc.http.{BadRequestException, HttpResponse}
 
 import scala.concurrent.Future
 
@@ -57,7 +56,7 @@ class MigrationServiceSpec extends BaseSpec {
 
       "return utr when we have a valid response" in {
         val subscriptionsResponse = TaxEnrolmentsSubscriptionsResponse(List(SubscriptionIdentifier("SAUTR", utr)), "")
-        val orchestratorResponse = OrchestratorMigrationResponse("SUCCESS", None)
+        val orchestratorResponse = mock[HttpResponse]
 
         when(mockTaxEnrolmentConnector.subscriptions(subscriptionId)).thenReturn(Future.successful(subscriptionsResponse))
         when(mockOrchestratorConnector.migrateToTaxable(urn, utr)).thenReturn(Future.successful(orchestratorResponse))
