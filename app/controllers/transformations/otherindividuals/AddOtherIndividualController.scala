@@ -35,7 +35,7 @@ class AddOtherIndividualController @Inject()(identify: IdentifierAction,
 
   def add(identifier: String): Action[JsValue] = addNewTransform[NaturalPersonType](identifier)
 
-  override def transform[T](value: T, `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](value: T, `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
     AddOtherIndividualTransform(Json.toJson(value))
   }
 

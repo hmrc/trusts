@@ -27,7 +27,7 @@ trait TrusteeTransform {
   private def isIndividualLeadTrustee: Boolean = `type` == INDIVIDUAL_LEAD_TRUSTEE
   private def isBusinessLeadTrustee: Boolean = `type` == BUSINESS_LEAD_TRUSTEE
 
-  def isIndividualTrustee: Boolean = `type` == INDIVIDUAL_TRUSTEE
+  def isIndividualTrustee: Boolean = `type` == INDIVIDUAL_TRUSTEE || isIndividualLeadTrustee
 
   val leadTrusteePath: JsPath = ENTITIES \ LEAD_TRUSTEE
 }

@@ -17,7 +17,7 @@
 package transformers.trustees
 
 import models.NameType
-import models.variation.{AmendedLeadTrusteeIndType, AmendedLeadTrusteeOrgType, IdentificationOrgType, IdentificationType}
+import models.variation._
 import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.libs.json.{JsValue, Json}
 import utils.JsonUtils
@@ -30,7 +30,7 @@ class PromoteTrusteeTransformSpec extends FreeSpec with MustMatchers {
 
     val endDate: LocalDate = LocalDate.parse("2020-02-28")
 
-    "individual trustee should" - {
+    "promoting individual trustee should" - {
 
       val trusteeBeforePromotionTaxable = Json.parse(
         """
@@ -120,7 +120,7 @@ class PromoteTrusteeTransformSpec extends FreeSpec with MustMatchers {
       }
     }
 
-    "business trustee should" - {
+    "promoting business trustee should" - {
 
       val trusteeBeforePromotionTaxable = Json.parse(
         """
@@ -174,6 +174,123 @@ class PromoteTrusteeTransformSpec extends FreeSpec with MustMatchers {
 
         val result = transformToTest(trusteeBeforePromotionTaxable, isTaxable = true).applyDeclarationTransform(beforeJson).get
         result mustBe afterJson
+      }
+    }
+
+    "demoting individual lead trustee should" - {
+
+      val newLeadTrustee = LeadTrusteeIndType(
+        lineNo = None,
+        bpMatchStatus = None,
+        name = NameType("Johnny", Some("Jonathan"), "Doe"),
+        dateOfBirth = LocalDate.parse("1996-02-03"),
+        phoneNumber = "0987654321",
+        email = Some("johnny.doe@example.com"),
+        identification = IdentificationType(Some("AB000000A"), None, None, None),
+        countryOfResidence = Some("FR"),
+        legallyIncapable = Some(false),
+        nationality = Some("FR"),
+        entityStart = LocalDate.parse("2016-02-23"),
+        entityEnd = None
+      )
+
+      "successfully add a new lead trustee and demote the existing lead trustee" - {
+
+        "taxable" in {
+
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-add-new-lead-trustee-transform-before-ind.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-add-new-lead-trustee-transform-after-ind.json")
+          val transform = PromoteTrusteeTransform(None, Json.toJson(newLeadTrustee), Json.obj(), endDate, "leadTrusteeInd", isTaxable = true)
+          val result = transform.applyTransform(beforeJson).get
+          result mustBe afterJson
+        }
+
+        "non-taxable" in {
+
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-add-new-lead-trustee-transform-before-ind.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-add-new-lead-trustee-transform-after-ind-non-taxable.json")
+          val transform = PromoteTrusteeTransform(None, Json.toJson(newLeadTrustee), Json.obj(), endDate, "leadTrusteeInd", isTaxable = false)
+          val result = transform.applyTransform(beforeJson).get
+          result mustBe afterJson
+        }
+      }
+
+      "do nothing extra at declaration time" - {
+
+        "taxable" in {
+
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-add-new-lead-trustee-transform-after-ind.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-add-new-lead-trustee-transform-after-ind.json")
+          val transform = PromoteTrusteeTransform(None, Json.toJson(newLeadTrustee), Json.obj(), endDate, "leadTrusteeInd", isTaxable = true)
+          val result = transform.applyDeclarationTransform(beforeJson).get
+          result mustBe afterJson
+        }
+
+        "non-taxable" in {
+
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-add-new-lead-trustee-transform-after-ind-non-taxable.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-add-new-lead-trustee-transform-after-ind-non-taxable.json")
+          val transform = PromoteTrusteeTransform(None, Json.toJson(newLeadTrustee), Json.obj(), endDate, "leadTrusteeInd", isTaxable = false)
+          val result = transform.applyDeclarationTransform(beforeJson).get
+          result mustBe afterJson
+        }
+      }
+    }
+
+    "demoting business lead trustee should" - {
+
+      val newLeadTrustee = LeadTrusteeOrgType(
+        lineNo = None,
+        bpMatchStatus = None,
+        name = "Amazon",
+        phoneNumber = "0987654321",
+        email = Some("amazon@example.com"),
+        identification = IdentificationOrgType(Some("5432109876"), None, None),
+        countryOfResidence = Some("FR"),
+        entityStart = LocalDate.parse("2016-02-23"),
+        entityEnd = None
+      )
+
+      "successfully add a new lead trustee and demote the existing lead trustee" - {
+
+        "taxable" in {
+
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-add-new-lead-trustee-transform-before-org.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-add-new-lead-trustee-transform-after-org.json")
+          val transform = PromoteTrusteeTransform(None, Json.toJson(newLeadTrustee), Json.obj(), endDate, "leadTrusteeOrg", isTaxable = true)
+          val result = transform.applyTransform(beforeJson).get
+          result mustBe afterJson
+        }
+
+        "non-taxable" in {
+
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-add-new-lead-trustee-transform-before-org.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-add-new-lead-trustee-transform-after-org-non-taxable.json")
+          val transform = PromoteTrusteeTransform(None, Json.toJson(newLeadTrustee), Json.obj(), endDate, "leadTrusteeOrg", isTaxable = false)
+          val result = transform.applyTransform(beforeJson).get
+          result mustBe afterJson
+        }
+      }
+
+      "do nothing extra at declaration time" - {
+
+        "taxable" in {
+
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-add-new-lead-trustee-transform-after-org.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-add-new-lead-trustee-transform-after-org.json")
+          val transform = PromoteTrusteeTransform(None, Json.toJson(newLeadTrustee), Json.obj(), endDate, "leadTrusteeOrg", isTaxable = true)
+          val result = transform.applyDeclarationTransform(beforeJson).get
+          result mustBe afterJson
+        }
+
+        "non-taxable" in {
+
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-add-new-lead-trustee-transform-after-org-non-taxable.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-add-new-lead-trustee-transform-after-org-non-taxable.json")
+          val transform = PromoteTrusteeTransform(None, Json.toJson(newLeadTrustee), Json.obj(), endDate, "leadTrusteeOrg", isTaxable = false)
+          val result = transform.applyDeclarationTransform(beforeJson).get
+          result mustBe afterJson
+        }
       }
     }
   }

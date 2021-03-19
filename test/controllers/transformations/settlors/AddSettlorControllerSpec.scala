@@ -76,6 +76,9 @@ class AddSettlorControllerSpec extends FreeSpec with MockitoSugar with ScalaFutu
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
+        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
+
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
@@ -138,6 +141,9 @@ class AddSettlorControllerSpec extends FreeSpec with MockitoSugar with ScalaFutu
           identifierAction,
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
+
+        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
 
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))

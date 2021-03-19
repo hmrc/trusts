@@ -74,6 +74,9 @@ class AddBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Scala
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
+        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
+
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
@@ -142,6 +145,9 @@ class AddBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Scala
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
+        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
+
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
@@ -204,6 +210,9 @@ class AddBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Scala
           identifierAction,
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
+
+        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
 
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
@@ -268,6 +277,9 @@ class AddBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Scala
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
+        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
+
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
@@ -331,6 +343,9 @@ class AddBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Scala
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
+        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
+
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
@@ -393,6 +408,9 @@ class AddBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Scala
           identifierAction,
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
+
+        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
 
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
@@ -462,6 +480,9 @@ class AddBeneficiaryControllerSpec extends FreeSpec with MockitoSugar with Scala
           identifierAction,
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
+
+        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
 
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))

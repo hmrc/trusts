@@ -57,6 +57,9 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
+        when(service.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
+
         when(service.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
@@ -80,9 +83,6 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
         val request = FakeRequest(POST, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
@@ -100,6 +100,9 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
         val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+
+        when(service.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
 
         when(service.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
@@ -124,9 +127,6 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
         val request = FakeRequest(POST, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
@@ -144,6 +144,9 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
         val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+
+        when(service.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
 
         when(service.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
@@ -168,9 +171,6 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
         val request = FakeRequest(POST, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
@@ -188,6 +188,9 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
         val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+
+        when(service.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
 
         when(service.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
@@ -212,9 +215,6 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
         val request = FakeRequest(POST, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
@@ -232,6 +232,9 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
         val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+
+        when(service.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
 
         when(service.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
@@ -256,9 +259,6 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
         val request = FakeRequest(POST, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
@@ -276,6 +276,9 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
         val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+
+        when(service.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
 
         when(service.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
@@ -300,9 +303,6 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
         val request = FakeRequest(POST, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
@@ -320,6 +320,9 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
         val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+
+        when(service.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
 
         when(service.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
@@ -346,9 +349,6 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
         val request = FakeRequest(POST, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
@@ -366,6 +366,9 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
         val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+
+        when(service.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
 
         when(service.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
@@ -392,9 +395,6 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
         val request = FakeRequest(POST, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
@@ -412,6 +412,9 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
         val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+
+        when(service.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
 
         when(service.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
@@ -438,9 +441,6 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
         val request = FakeRequest(POST, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
@@ -458,6 +458,9 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
         val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+
+        when(service.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
 
         when(service.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
@@ -484,9 +487,6 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
         val request = FakeRequest(POST, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
@@ -504,6 +504,9 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
         val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+
+        when(service.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
 
         when(service.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
@@ -530,9 +533,6 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
         val request = FakeRequest(POST, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
@@ -550,6 +550,9 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
         val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+
+        when(service.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
 
         when(service.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
@@ -576,9 +579,6 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
         val request = FakeRequest(POST, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
@@ -596,6 +596,9 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
         val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+
+        when(service.getTransformedTrustJson(any(), any())(any()))
+          .thenReturn(Future.successful(Json.obj()))
 
         when(service.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
@@ -621,9 +624,6 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
         val service = mock[TransformationService]
 
         val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
-
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.parse(

@@ -1,0 +1,31 @@
+{
+  "details": {
+    "trust": {
+      "entities": {
+        "leadTrustees": {
+          "name": "Amazon",
+          "phoneNumber": "0987654321",
+          "email": "amazon@example.com",
+          "identification": {
+            "utr": "5432109876"
+          },
+          "countryOfResidence": "FR",
+          "entityStart": "2016-02-23"
+        },
+        "trustees": [
+          {
+            "trusteeOrg": {
+              "name": "Google",
+              "identification": {
+                "utr": "6789012345"
+              },
+              "countryOfResidence": "GB",
+              "entityStart": "1998-02-12"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "otherfields": "exist"
+}

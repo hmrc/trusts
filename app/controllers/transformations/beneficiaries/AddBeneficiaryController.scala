@@ -48,7 +48,7 @@ class AddBeneficiaryController @Inject()(identify: IdentifierAction,
 
   def addLarge(identifier: String): Action[JsValue] = addNewTransform[LargeType](identifier, LARGE_BENEFICIARY)
 
-  override def transform[T](value: T, `type`: String)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](value: T, `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
     AddBeneficiaryTransform(Json.toJson(value), `type`)
   }
 }
