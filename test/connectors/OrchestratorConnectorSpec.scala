@@ -21,7 +21,6 @@ import connector.OrchestratorConnector
 import models.orchestrator.OrchestratorMigrationRequest
 import play.api.http.Status._
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.UpstreamErrorResponse
 
 class OrchestratorConnectorSpec extends ConnectorSpecHelper {
 
@@ -50,14 +49,6 @@ class OrchestratorConnectorSpec extends ConnectorSpecHelper {
 
     "return BadRequest " when {
       "tax enrolments returns BadRequest " in {
-        val responseBody = Json.stringify(Json.parse(
-          s"""
-             |{
-             | "code": "SERVICE_UNAVAILABLE",
-             | "reason": "Dependent systems are currently not responding"
-             |}
-             |""".stripMargin))
-
         server.stubFor(
           post(urlEqualTo("/trusts-enrolment-orchestrator/orchestration-process"))
             .willReturn(badRequest)
