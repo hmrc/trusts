@@ -28,8 +28,8 @@ import scala.concurrent.Future
 class MigrationService @Inject()(taxEnrolmentConnector: TaxEnrolmentConnector,
                                  orchestratorConnector: OrchestratorConnector) extends Logging {
 
-  def migrateSubscriberToTaxable(subscriptionId: String, urn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
-    taxEnrolmentConnector.migrateSubscriberToTaxable(subscriptionId, urn)
+  def migrateSubscriberToTaxable(subscriptionId: String, identifier: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
+    taxEnrolmentConnector.migrateSubscriberToTaxable(subscriptionId, identifier)
   }
 
   def completeMigration(subscriptionId: String, urn: String)(implicit hc: HeaderCarrier): Future[String] = {
