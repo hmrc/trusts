@@ -18,7 +18,9 @@ package controllers
 
 import javax.inject.Inject
 import play.api.Logging
-import play.api.mvc.ControllerComponents
+import play.api.libs.json.JsValue
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import services.MigrationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -28,11 +30,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
-class TaxEnrolmentCallbackController @Inject()(
+class TaxEnrolmentCallbackController @Inject()( migrationService: MigrationService,
                                                 cc: ControllerComponents
                                                ) extends BackendController(cc) with Logging {
 
-  def taxableSubscriptionCallback(trn: String) = Action.async(parse.json) {
+  def taxableSubscriptionCallback(trn: String): Action[JsValue] = Action.async(parse.json) {
     implicit request =>
       val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
@@ -41,7 +43,7 @@ class TaxEnrolmentCallbackController @Inject()(
       Future(Ok(""))
   }
 
-  def nonTaxableSubscriptionCallback(trn: String) = Action.async(parse.json) {
+  def nonTaxableSubscriptionCallback(trn: String): Action[JsValue] = Action.async(parse.json) {
     implicit request =>
       val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
@@ -50,4 +52,17 @@ class TaxEnrolmentCallbackController @Inject()(
       Future(Ok(""))
   }
 
+  def migrationSubscriptionCallback(subscriptionId: String, urn: String): Action[AnyContent] = Action.async {
+    implicit request =>
+      implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+
+      logger.info(s"[migrationSubscriptionCallback][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn]" +
+        s" Tax-enrolment: migration subscription callback triggered ")
+      for {
+        utr <- migrationService.completeMigration(subscriptionId, urn)
+      } yield {
+        logger.info(s"[migrationSubscriptionCallback] callback complete utr $utr")
+        Ok("")
+      }
+  }
 }

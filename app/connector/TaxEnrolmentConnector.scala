@@ -19,11 +19,13 @@ package connector
 import com.google.inject.ImplementedBy
 import config.AppConfig
 import javax.inject.Inject
-import models.tax_enrolments.{TaxEnrolmentSubscription, TaxEnrolmentSubscriberResponse}
+import models.tax_enrolments.{TaxEnrolmentSubscriberResponse, TaxEnrolmentSubscription, TaxEnrolmentsSubscriptionsResponse}
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utils.Constants._
+import utils.Session
+import uk.gov.hmrc.http.HttpReads.Implicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -48,14 +50,18 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
     }
   }
 
-  override def getResponse(subscriptionId: String,
-                           taxable: Boolean,
-                           trn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
+  override def getTaxEnrolmentMigration(subscriptionId: String, urn: String): TaxEnrolmentSubscription = {
+    TaxEnrolmentSubscription(
+      serviceName = config.taxEnrolmentsMigrationPayloadServiceName,
+      callback = config.taxEnrolmentsMigrationPayloadBodyCallback(subscriptionId, urn),
+      etmpId = subscriptionId)
 
-    val taxEnrolmentsEndpoint = s"${config.taxEnrolmentsUrl}/tax-enrolments/subscriptions/$subscriptionId/subscriber"
+  }
+
+  def getResponse(taxEnrolmentsEndpoint: String,
+                  taxEnrolmentSubscriptionRequest: TaxEnrolmentSubscription)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
+
     val taxEnrolmentHeaders = hc.withExtraHeaders(headers: _*)
-
-    val taxEnrolmentSubscriptionRequest: TaxEnrolmentSubscription = getTaxEnrolmentSubscription(subscriptionId, taxable, trn)
 
     http.PUT[JsValue, TaxEnrolmentSubscriberResponse](
       taxEnrolmentsEndpoint,
@@ -65,14 +71,31 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
 
 
   override def enrolSubscriber(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
-    getResponse(subscriptionId, taxable, trn)
+    val taxEnrolmentsEndpoint = s"${config.taxEnrolmentsUrl}/tax-enrolments/subscriptions/$subscriptionId/subscriber"
+    val taxEnrolmentSubscriptionRequest: TaxEnrolmentSubscription = getTaxEnrolmentSubscription(subscriptionId, taxable, trn)
+    getResponse(taxEnrolmentsEndpoint, taxEnrolmentSubscriptionRequest)
   }
 
+  override def migrateSubscriberToTaxable(subscriptionId: String, urn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
+    val taxEnrolmentsEndpoint = s"${config.taxEnrolmentsMigrationUrl}/tax-enrolments/subscriptions/$subscriptionId/subscriber"
+    val taxEnrolmentSubscriptionRequest: TaxEnrolmentSubscription = getTaxEnrolmentMigration(subscriptionId, urn)
+    getResponse(taxEnrolmentsEndpoint, taxEnrolmentSubscriptionRequest)
+  }
+
+  override def subscriptions(subscriptionId: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentsSubscriptionsResponse] = {
+    logger.info(s"[TaxEnrolmentConnectorImpl][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId] subscriptions")
+    val getSubscriptionsEndpoint = s"${config.taxEnrolmentsMigrationUrl}/tax-enrolments/subscriptions/$subscriptionId"
+    http.GET[TaxEnrolmentsSubscriptionsResponse](getSubscriptionsEndpoint)
+  }
 }
 
 @ImplementedBy(classOf[TaxEnrolmentConnectorImpl])
 trait TaxEnrolmentConnector {
+
   def getTaxEnrolmentSubscription(subscriptionId: String, taxable: Boolean, trn: String): TaxEnrolmentSubscription
+  def getTaxEnrolmentMigration(subscriptionId: String,  urn: String): TaxEnrolmentSubscription
   def enrolSubscriber(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse]
-  def getResponse(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse]
+  def migrateSubscriberToTaxable(subscriptionId: String, urn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse]
+  def subscriptions(subscriptionId: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentsSubscriptionsResponse]
+
 }

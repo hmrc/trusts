@@ -13,6 +13,7 @@ POST        /check                                                              
 
 POST        /tax-enrolment/registration/taxable/hmrc-ters-org/:trn/subscriptions            controllers.TaxEnrolmentCallbackController.taxableSubscriptionCallback(trn: String)
 POST        /tax-enrolment/registration/non-taxable/hmrc-tersnt-org/:trn/subscriptions      controllers.TaxEnrolmentCallbackController.nonTaxableSubscriptionCallback(trn: String)
+POST        /tax-enrolment/migration-to-taxable/urn/:urn/subscriptionId/:subscriptionId     controllers.TaxEnrolmentCallbackController.migrationSubscriptionCallback(subscriptionId: String, urn: String)
 
 POST        /orchestrator/migration-to-taxable/urn/:urn/utr/:utr                            controllers.OrchestratorCallbackController.migrationToTaxableCallback(urn: String, utr: String)
 

@@ -27,8 +27,9 @@ import transformers.DeclarationTransformer
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.JsonOps._
 import utils.Session
-
 import javax.inject.Inject
+import models.tax_enrolments.{TaxEnrolmentNotProcessed, TaxEnrolmentSubscriberResponse}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -37,7 +38,8 @@ class VariationService @Inject()(trustsService: TrustsService,
                                  declarationTransformer: DeclarationTransformer,
                                  auditService: AuditService,
                                  localDateService: LocalDateService,
-                                 trustsStoreService: TrustsStoreService) extends Logging {
+                                 trustsStoreService: TrustsStoreService,
+                                 migrationService: MigrationService) extends Logging {
 
   private case class LoggingContext(identifier: String)(implicit hc: HeaderCarrier) {
     def info(content: String): Unit = logger.info(format(content))
@@ -105,7 +107,7 @@ class VariationService @Inject()(trustsService: TrustsService,
         declarationTransformer.transform(response, originalJson, declaration, localDateService.now, is5mld) match {
           case JsSuccess(value, _) =>
             logging.info("successfully transformed json for declaration")
-            doSubmit(value, internalId)
+            submitVariationAndCheckForMigration(identifier, value, internalId)
           case JsError(errors) =>
 
             auditService.auditVariationTransformationError(
@@ -144,7 +146,27 @@ class VariationService @Inject()(trustsService: TrustsService,
     }
   }
 
-  private def doSubmit(value: JsValue, internalId: String)
+  private def submitVariationAndCheckForMigration(identifier: String, value: JsValue, internalId: String)
+                                                 (implicit hc: HeaderCarrier, logging: LoggingContext): Future[VariationResponse] = {
+
+    def migrateToTaxable(migrate: Boolean, subscriptionId: String, identifier: String): Future[TaxEnrolmentSubscriberResponse] = {
+      if (migrate) {
+        migrationService.migrateSubscriberToTaxable(subscriptionId, identifier)
+      } else {
+        Future.successful(TaxEnrolmentNotProcessed)
+      }
+    }
+
+    for {
+      variationResponse <- submitVariation(value, internalId)
+      migrate <- transformationService.migratingFromNonTaxableToTaxable(identifier, internalId)
+      _ <- migrateToTaxable(migrate, variationResponse.tvn, identifier)
+    } yield {
+      variationResponse
+    }
+  }
+
+  private def submitVariation(value: JsValue, internalId: String)
                       (implicit hc: HeaderCarrier, logging: LoggingContext): Future[VariationResponse] = {
 
     val payload = value.applyRules
