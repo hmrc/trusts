@@ -38,6 +38,19 @@ class OrchestratorCallbackController @Inject()(
 
       logger.info(s"[migrationToTaxableCallback][Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr]" +
         s" Orchestrator: migrate subscription callback message was: ${request.body}")
-      Future(Ok(""))
+
+      val success = (request.body \ "success").asOpt[Boolean]
+      success match {
+        case Some(false) => {
+          val errorMessage = (request.body \ "errorMessage").asOpt[String]
+          logger.error(s"[migrationToTaxableCallback][Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr]" +
+            s" Orchestrator: migrate subscription failed, error message was: ${errorMessage.getOrElse(request.body)}")
+          Future(NoContent)
+        }
+        case _ => {
+          Future(NoContent)
+        }
+      }
+
   }
 }

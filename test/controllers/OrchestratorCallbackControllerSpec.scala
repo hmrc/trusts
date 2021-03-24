@@ -31,14 +31,23 @@ class OrchestratorCallbackControllerSpec extends BaseSpec with GuiceOneServerPer
 
   ".migrationToTaxableCallback" should {
 
-    "return 200 " when {
+    "return NoContent when sent an success message" when {
       "orchestrator callback for subscription id migration " in {
         val SUT = new OrchestratorCallbackController(Helpers.stubControllerComponents())
 
         val payloadBody = s"""{ "success" : true, "urn": "$urn", "utr": "$utr"}"""
         val result = SUT.migrationToTaxableCallback(urn, utr).apply(postRequestWithPayload(Json.parse(payloadBody)))
-        status(result) mustBe OK
+        status(result) mustBe NO_CONTENT
+      }
+
+      "orchestrator callback for subscription id migration with error message" in {
+        val SUT = new OrchestratorCallbackController(Helpers.stubControllerComponents())
+
+        val payloadBody = s"""{ "success" : false, "urn": "$urn", "utr": "$utr", "errorMessage": "An error message"}"""
+        val result = SUT.migrationToTaxableCallback(urn, utr).apply(postRequestWithPayload(Json.parse(payloadBody)))
+        status(result) mustBe NO_CONTENT
       }
     }
+
   }
 }
