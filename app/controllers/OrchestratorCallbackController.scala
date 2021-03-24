@@ -20,7 +20,6 @@ import javax.inject.Inject
 import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, ControllerComponents}
-import reactivemongo.play.json.readOpt.optionReads
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -43,7 +42,7 @@ class OrchestratorCallbackController @Inject()(
       val success = (request.body \ "success").asOpt[Boolean]
       success match {
         case Some(false) => {
-          val errorMessage = (request.body \ "errorMessage").as[Option[String]]
+          val errorMessage = (request.body \ "errorMessage").asOpt[String]
           logger.error(s"[migrationToTaxableCallback][Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr]" +
             s" Orchestrator: migrate subscription failed, error message was: ${errorMessage.getOrElse(request.body)}")
           Future(NoContent)
