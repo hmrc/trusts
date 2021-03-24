@@ -40,7 +40,7 @@ class OrchestratorCallbackController @Inject()(
       logger.info(s"[migrationToTaxableCallback][Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr]" +
         s" Orchestrator: migrate subscription callback message was: ${request.body}")
 
-      val success = (request.body \ "success").as[Option[Boolean]]
+      val success = (request.body \ "success").asOpt[Boolean]
       success match {
         case Some(false) => {
           val errorMessage = (request.body \ "errorMessage").as[Option[String]]
