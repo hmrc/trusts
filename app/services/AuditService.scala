@@ -17,14 +17,13 @@
 package services
 
 import models.Registration
-import models.auditing.{GetTrustOrEstateAuditEvent, TrustAuditing, TrustRegistrationFailureAuditEvent, TrustRegistrationSubmissionAuditEvent}
+import models.auditing.{GetTrustOrEstateAuditEvent, OrchestratorAuditEvent, TrustAuditing, TrustRegistrationFailureAuditEvent, TrustRegistrationSubmissionAuditEvent}
 import models.registration.{RegistrationFailureResponse, RegistrationTrnResponse}
 import models.variation.VariationResponse
-import play.api.libs.json.{JsBoolean, JsPath, JsSuccess, JsValue, Json, Reads}
+import play.api.libs.json.{JsBoolean, JsPath, JsString, JsSuccess, JsValue, Json, Reads}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import utils.Constants._
-
 import javax.inject.Inject
 
 class AuditService @Inject()(auditConnector: AuditConnector){
@@ -157,4 +156,46 @@ class AuditService @Inject()(auditConnector: AuditConnector){
     )
   }
 
+  def auditOrchestrator(event: String,
+            request: JsValue,
+            response: JsValue)(implicit hc: HeaderCarrier): Unit = {
+
+    val auditPayload = OrchestratorAuditEvent(
+      request = request,
+      response = response
+    )
+
+    auditConnector.sendExplicitAudit(
+      event,
+      auditPayload
+    )
+  }
+
+  def auditOrchestratorTransformationToTaxableSuccess(urn: String, utr: String)(implicit hc: HeaderCarrier): Unit = {
+    val request = Json.obj(
+      "urn" -> urn,
+      "utr" -> utr,
+      "transformations" -> JsString("None Taxable to Taxable")
+    )
+
+    auditOrchestrator(
+      event = TrustAuditing.ORCHESTRATOR_TO_TAXABLE_SUCCESS,
+      request = request,
+      response = Json.obj("success" -> true)
+    )
+  }
+
+  def auditOrchestratorTransformationToTaxableError(urn: String, utr: String, errorReason: String)(implicit hc: HeaderCarrier): Unit = {
+    val request = Json.obj(
+      "urn" -> urn,
+      "utr" -> utr,
+      "transformations" -> JsString("None Taxable to Taxable")
+    )
+
+    auditOrchestrator(
+      event = TrustAuditing.ORCHESTRATOR_TO_TAXABLE_FAILED,
+      request = request,
+      response = Json.obj("errorReason" -> errorReason)
+    )
+  }
 }

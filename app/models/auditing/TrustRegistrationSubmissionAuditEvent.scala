@@ -45,3 +45,10 @@ case class GetTrustOrEstateAuditEvent(request: JsValue,
 object GetTrustOrEstateAuditEvent {
   implicit val formats: Format[GetTrustOrEstateAuditEvent] = Json.format[GetTrustOrEstateAuditEvent]
 }
+
+case class OrchestratorAuditEvent(request: JsValue,
+                                  response: JsValue)
+
+object OrchestratorAuditEvent {
+  implicit val formats: Format[OrchestratorAuditEvent] = Json.format[OrchestratorAuditEvent]
+}

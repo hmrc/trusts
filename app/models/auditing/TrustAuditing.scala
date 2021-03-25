@@ -33,4 +33,6 @@ object TrustAuditing {
   val CLOSURE_SUBMITTED_BY_ORGANISATION = "ClosureSubmittedByOrganisation"
   val CLOSURE_SUBMITTED_BY_AGENT = "ClosureSubmittedByAgent"
 
+  val ORCHESTRATOR_TO_TAXABLE_SUCCESS = "OrchestratorNTTtoTaxableSuccess"
+  val ORCHESTRATOR_TO_TAXABLE_FAILED = "OrchestratorNTTtoTaxableFailed"
 }

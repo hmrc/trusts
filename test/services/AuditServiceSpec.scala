@@ -17,7 +17,7 @@
 package services
 
 import base.BaseSpec
-import models.auditing.GetTrustOrEstateAuditEvent
+import models.auditing.{GetTrustOrEstateAuditEvent, OrchestratorAuditEvent}
 import models.variation.VariationResponse
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito.verify
@@ -142,6 +142,59 @@ class AuditServiceSpec extends BaseSpec {
           equalTo("ClosureSubmittedByAgent"),
           equalTo(expectedAuditData))(any(), any(), any())
       }
+    }
+  }
+
+  "auditOrchestratorResponse" should {
+
+    "send Success message" when {
+
+      val connector = mock[AuditConnector]
+      val service = new AuditService(connector)
+
+      val urn = "NTTRUST00000001"
+      val utr = "123456789"
+
+      val request = Json.obj(
+        "urn" -> urn,
+        "utr" -> utr,
+        "transformations" -> "None Taxable to Taxable"
+      )
+      service.auditOrchestratorTransformationToTaxableSuccess(urn, utr)
+
+      val expectedAuditData = OrchestratorAuditEvent(
+        request,
+        Json.obj("success" -> true)
+      )
+
+      verify(connector).sendExplicitAudit[OrchestratorAuditEvent](
+        equalTo("OrchestratorNTTtoTaxableSuccess"),
+        equalTo(expectedAuditData))(any(), any(), any())
+    }
+
+    "send Failure message" when {
+      val connector = mock[AuditConnector]
+      val service = new AuditService(connector)
+
+      val urn = "NTTRUST00000001"
+      val utr = "123456789"
+
+      val request = Json.obj(
+        "urn" -> urn,
+        "utr" -> utr,
+        "transformations" -> "None Taxable to Taxable"
+      )
+
+      service.auditOrchestratorTransformationToTaxableError(urn, utr, "Error happened")
+
+      val expectedAuditData = OrchestratorAuditEvent(
+        request,
+        response = Json.obj("errorReason" -> "Error happened")
+      )
+
+      verify(connector).sendExplicitAudit[OrchestratorAuditEvent](
+        equalTo("OrchestratorNTTtoTaxableFailed"),
+        equalTo(expectedAuditData))(any(), any(), any())
     }
   }
 }
