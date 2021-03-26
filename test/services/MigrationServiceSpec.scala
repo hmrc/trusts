@@ -18,11 +18,11 @@ package services
 
 import base.BaseSpec
 import connector.{OrchestratorConnector, TaxEnrolmentConnector}
-import exceptions.InternalServerErrorException
+import exceptions.{InternalServerErrorException, InvalidDataException}
 import models.tax_enrolments._
 import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito.{verify, when}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
@@ -58,7 +58,7 @@ class MigrationServiceSpec extends BaseSpec {
       val SUT = new MigrationService(mockAuditService, mockTaxEnrolmentConnector, mockOrchestratorConnector)
 
       "return utr when we have a valid response" in {
-        val subscriptionsResponse = TaxEnrolmentsSubscriptionsResponse(List(SubscriptionIdentifier("SAUTR", utr)), "")
+        val subscriptionsResponse = TaxEnrolmentsSubscriptionsResponse(subscriptionId, utr, "PROCESSED")
 
         when(mockTaxEnrolmentConnector.subscriptions(subscriptionId)).thenReturn(Future.successful(subscriptionsResponse))
         when(mockOrchestratorConnector.migrateToTaxable(urn, utr)).thenReturn(Future.successful(OrchestratorToTaxableSuccess))
@@ -69,13 +69,13 @@ class MigrationServiceSpec extends BaseSpec {
         }
       }
 
-      "return BadRequestException if we don't supply a UTR" in {
+      "return InvalidDataException if we don't supply a UTR" in {
         when(mockTaxEnrolmentConnector.subscriptions(subscriptionId)).
-          thenReturn(Future.successful(TaxEnrolmentsSubscriptionsResponse(Nil, "")))
+          thenReturn(Future.failed(InvalidDataException(s"No UTR supplied")))
 
         val futureResult = SUT.completeMigration(subscriptionId, urn)
         whenReady(futureResult.failed) {
-          result => result mustBe a[BadRequestException]
+          result => result mustBe a[InvalidDataException]
         }
 
         verify(mockAuditService).auditTaxEnrolmentTransformationToTaxableError(eqTo(subscriptionId), eqTo(urn), any[String])(any[HeaderCarrier])
@@ -92,7 +92,7 @@ class MigrationServiceSpec extends BaseSpec {
       }
 
       "return OrchestratorToTaxableFailure when migrateToTaxable returns an Exception" in {
-        val subscriptionsResponse = TaxEnrolmentsSubscriptionsResponse(List(SubscriptionIdentifier("SAUTR", utr)), "")
+        val subscriptionsResponse = TaxEnrolmentsSubscriptionsResponse(subscriptionId, utr, "PROCESSED")
 
         when(mockTaxEnrolmentConnector.subscriptions(subscriptionId)).
           thenReturn(Future.successful(subscriptionsResponse))

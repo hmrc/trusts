@@ -85,7 +85,9 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
   override def subscriptions(subscriptionId: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentsSubscriptionsResponse] = {
     logger.info(s"[TaxEnrolmentConnectorImpl][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId] subscriptions")
     val getSubscriptionsEndpoint = s"${config.taxEnrolmentsMigrationUrl}/tax-enrolments/subscriptions/$subscriptionId"
-    http.GET[TaxEnrolmentsSubscriptionsResponse](getSubscriptionsEndpoint)
+    http.GET[TaxEnrolmentsSubscriptionsResponse](
+      getSubscriptionsEndpoint
+    )(TaxEnrolmentsSubscriptionsResponse.httpReads(subscriptionId), implicitly[HeaderCarrier](hc), global)
   }
 }
 

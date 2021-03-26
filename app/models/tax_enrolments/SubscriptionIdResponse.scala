@@ -43,7 +43,7 @@ object SubscriptionIdResponse extends Logging {
             throw  NotFoundException
           case SERVICE_UNAVAILABLE =>
             logger.error("Service unavailable response from des.")
-            throw new ServiceNotAvailableException("Des depdedent service is down.")
+            throw new ServiceNotAvailableException("Des dependent service is down.")
           case status =>
             logger.error(s"Error response from des : ${status}")
             throw new InternalServerErrorException(s"Error response from des $status")

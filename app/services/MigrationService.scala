@@ -18,9 +18,9 @@ package services
 
 import connector.{OrchestratorConnector, TaxEnrolmentConnector}
 import javax.inject.Inject
-import models.tax_enrolments.{OrchestratorToTaxableFailure, OrchestratorToTaxableResponse, TaxEnrolmentFailure, TaxEnrolmentSubscriberResponse}
+import models.tax_enrolments._
 import play.api.Logging
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -29,7 +29,8 @@ class MigrationService @Inject()(auditService: AuditService,
                                  taxEnrolmentConnector: TaxEnrolmentConnector,
                                  orchestratorConnector: OrchestratorConnector) extends Logging {
 
-  def migrateSubscriberToTaxable(subscriptionId: String, urn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
+  def migrateSubscriberToTaxable(subscriptionId: String, urn: String)
+                                (implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
     taxEnrolmentConnector.migrateSubscriberToTaxable(subscriptionId, urn) recover {
       case e: Exception =>
         auditService.auditTaxEnrolmentTransformationToTaxableError(subscriptionId, urn, e.getMessage)
@@ -37,25 +38,29 @@ class MigrationService @Inject()(auditService: AuditService,
     }
   }
 
-  def completeMigration(subscriptionId: String, urn: String)(implicit hc: HeaderCarrier): Future[OrchestratorToTaxableResponse] = {
+  def completeMigration(subscriptionId: String, urn: String)
+                       (implicit hc: HeaderCarrier): Future[OrchestratorToTaxableResponse] = {
     logger.info(s"[MigrationService][SubscriptionId: $subscriptionId, URN: $urn].completeMigration")
     for {
-      subscriptionsResponse <- taxEnrolmentConnector.subscriptions(subscriptionId)
-      utr <- subscriptionsResponse.utr match {
-        case Some(utr) => Future.successful(utr)
-        case None => {
-          auditService.auditTaxEnrolmentTransformationToTaxableError(subscriptionId, urn, "Unable to parse utr as TaxEnrolmentsSubscriptionsResponse")
-          Future.failed(new BadRequestException("Unable to parse utr from TaxEnrolmentsSubscriptionsResponse"))
-        }
-      }
-      orchestratorResponse <- updateOrchestratorToTaxable(urn, utr)
+      subscriptionResponse <- getUtrFromSubscriptions(subscriptionId, urn)
+      orchestratorResponse <- updateOrchestratorToTaxable(subscriptionId, urn, subscriptionResponse.utr)
     } yield {
       orchestratorResponse
     }
   }
 
-  private def updateOrchestratorToTaxable(urn: String, utr: String)(implicit hc: HeaderCarrier): Future[OrchestratorToTaxableResponse] = {
-    orchestratorConnector.migrateToTaxable(urn, utr )recover {
+  private def getUtrFromSubscriptions(subscriptionId: String, urn: String)
+                                     (implicit hc: HeaderCarrier): Future[TaxEnrolmentsSubscriptionsResponse] = {
+    taxEnrolmentConnector.subscriptions(subscriptionId) recover {
+      case e: Exception =>
+        auditService.auditTaxEnrolmentTransformationToTaxableError(subscriptionId, urn, e.getMessage)
+        throw e
+    }
+  }
+
+  private def updateOrchestratorToTaxable(subscriptionId: String, urn: String, utr: String)
+                                         (implicit hc: HeaderCarrier): Future[OrchestratorToTaxableResponse] = {
+    orchestratorConnector.migrateToTaxable(urn, utr) recover {
       case e: Exception =>
         auditService.auditOrchestratorTransformationToTaxableError(urn, utr, e.getMessage)
         OrchestratorToTaxableFailure
