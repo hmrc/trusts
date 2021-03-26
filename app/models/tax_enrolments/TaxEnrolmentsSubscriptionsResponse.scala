@@ -51,9 +51,9 @@ object TaxEnrolmentsSubscriptionsResponse extends Logging {
     val optUtr = identifiers.find(_.key == "SAUTR").map(_.value)
     (optState, optUtr) match {
       case (Some(state), Some(utr)) => TaxEnrolmentsSubscriptionsResponse(subscriptionId, utr, state)
-      case (None, Some(utr)) => throw InvalidDataException(s"[TaxEnrolmentsSubscriptions] [SubscriptionId: $subscriptionId, UTR: $utr] No State supplied")
-      case (Some(_), None) => throw InvalidDataException(s"[TaxEnrolmentsSubscriptions] [SubscriptionId: $subscriptionId] No UTR supplied")
-      case _ =>  throw InvalidDataException(s"[TaxEnrolmentsSubscriptions] [SubscriptionId: $subscriptionId] No State or UTR supplied")
+      case (None, Some(utr)) => throw InvalidDataException(s"[SubscriptionId: $subscriptionId, UTR: $utr] No State supplied")
+      case (Some(_), None) => throw InvalidDataException(s"[SubscriptionId: $subscriptionId] No UTR supplied")
+      case _ =>  throw InvalidDataException(s"[SubscriptionId: $subscriptionId] No State or UTR supplied")
     }
   }
 
