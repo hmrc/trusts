@@ -43,7 +43,7 @@ class MigrationService @Inject()(auditService: AuditService,
     logger.info(s"[MigrationService][SubscriptionId: $subscriptionId, URN: $urn].completeMigration")
     for {
       subscriptionResponse <- getUtrFromSubscriptions(subscriptionId, urn)
-      orchestratorResponse <- updateOrchestratorToTaxable(subscriptionId, urn, subscriptionResponse.utr)
+      orchestratorResponse <- updateOrchestratorToTaxable(urn, subscriptionResponse.utr)
     } yield {
       orchestratorResponse
     }
@@ -58,7 +58,7 @@ class MigrationService @Inject()(auditService: AuditService,
     }
   }
 
-  private def updateOrchestratorToTaxable(subscriptionId: String, urn: String, utr: String)
+  private def updateOrchestratorToTaxable(urn: String, utr: String)
                                          (implicit hc: HeaderCarrier): Future[OrchestratorToTaxableResponse] = {
     orchestratorConnector.migrateToTaxable(urn, utr) recover {
       case e: Exception =>

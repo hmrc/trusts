@@ -46,6 +46,15 @@ object GetTrustOrEstateAuditEvent {
   implicit val formats: Format[GetTrustOrEstateAuditEvent] = Json.format[GetTrustOrEstateAuditEvent]
 }
 
+case class VariationAuditEvent(request: JsValue,
+                               internalAuthId: String,
+                               migrateToTaxable: Boolean,
+                               response: JsValue)
+
+object VariationAuditEvent {
+  implicit val formats: Format[VariationAuditEvent] = Json.format[VariationAuditEvent]
+}
+
 case class OrchestratorAuditEvent(request: JsValue,
                                   response: JsValue)
 

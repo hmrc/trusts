@@ -17,7 +17,7 @@
 package services
 
 import models.Registration
-import models.auditing.{GetTrustOrEstateAuditEvent, OrchestratorAuditEvent, TrustAuditing, TrustRegistrationFailureAuditEvent, TrustRegistrationSubmissionAuditEvent}
+import models.auditing.{GetTrustOrEstateAuditEvent, OrchestratorAuditEvent, TrustAuditing, TrustRegistrationFailureAuditEvent, TrustRegistrationSubmissionAuditEvent, VariationAuditEvent}
 import models.registration.{RegistrationFailureResponse, RegistrationTrnResponse}
 import models.variation.VariationResponse
 import play.api.libs.json.{JsBoolean, JsPath, JsSuccess, JsValue, Json, Reads}
@@ -85,6 +85,25 @@ class AuditService @Inject()(auditConnector: AuditConnector){
     )
   }
 
+  def auditVariation(event: String,
+            request: JsValue,
+            internalId: String,
+            migrateToTaxable: Boolean,
+            response: JsValue)(implicit hc: HeaderCarrier): Unit = {
+
+    val auditPayload = VariationAuditEvent(
+      request = request,
+      internalAuthId = internalId,
+      migrateToTaxable = migrateToTaxable,
+      response = response
+    )
+
+    auditConnector.sendExplicitAudit(
+      event,
+      auditPayload
+    )
+  }
+
   def auditErrorResponse(eventName: String, request: JsValue, internalId: String, errorReason: String)(implicit hc: HeaderCarrier): Unit = {
 
     audit(
@@ -96,6 +115,7 @@ class AuditService @Inject()(auditConnector: AuditConnector){
   }
 
   def auditVariationSubmitted(internalId: String,
+                              migrateToTaxable: Boolean,
                               payload: JsValue,
                               variationResponse: VariationResponse
                              )(implicit hc: HeaderCarrier): Unit = {
@@ -122,10 +142,11 @@ class AuditService @Inject()(auditConnector: AuditConnector){
       case _ => Json.toJson(variationResponse)
     }
 
-    audit(
+    auditVariation(
       event = event,
       request = payload,
       internalId = internalId,
+      migrateToTaxable = migrateToTaxable,
       response = response
     )
   }

@@ -17,7 +17,7 @@
 package services
 
 import base.BaseSpec
-import models.auditing.{GetTrustOrEstateAuditEvent, OrchestratorAuditEvent}
+import models.auditing.{OrchestratorAuditEvent, VariationAuditEvent}
 import models.variation.VariationResponse
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito.verify
@@ -35,15 +35,16 @@ class AuditServiceSpec extends BaseSpec {
         val request = Json.obj()
 
         val response = VariationResponse("TRN123456")
-        service.auditVariationSubmitted("internalId", request, response)
+        service.auditVariationSubmitted("internalId", false, request, response)
 
-        val expectedAuditData = GetTrustOrEstateAuditEvent(
+        val expectedAuditData = VariationAuditEvent(
           request,
           "internalId",
+          false,
           Json.toJson(response)
         )
 
-        verify(connector).sendExplicitAudit[GetTrustOrEstateAuditEvent](
+        verify(connector).sendExplicitAudit[VariationAuditEvent](
           equalTo("VariationSubmittedByOrganisation"),
           equalTo(expectedAuditData))(any(), any(), any())
       }
@@ -59,15 +60,16 @@ class AuditServiceSpec extends BaseSpec {
         )
 
         val response = VariationResponse("TRN123456")
-        service.auditVariationSubmitted("internalId", request, response)
+        service.auditVariationSubmitted("internalId", false, request, response)
 
-        val expectedAuditData = GetTrustOrEstateAuditEvent(
+        val expectedAuditData = VariationAuditEvent(
           request,
           "internalId",
+          false,
           Json.toJson(response)
         )
 
-        verify(connector).sendExplicitAudit[GetTrustOrEstateAuditEvent](
+        verify(connector).sendExplicitAudit[VariationAuditEvent](
           equalTo("VariationSubmittedByAgent"),
           equalTo(expectedAuditData))(any(), any(), any())
       }
@@ -94,15 +96,16 @@ class AuditServiceSpec extends BaseSpec {
           "trustTaxable" -> true
         )
 
-        service.auditVariationSubmitted("internalId", request, VariationResponse("TRN123456"))
+        service.auditVariationSubmitted("internalId", false, request, VariationResponse("TRN123456"))
 
-        val expectedAuditData = GetTrustOrEstateAuditEvent(
+        val expectedAuditData = VariationAuditEvent(
           request,
           "internalId",
+          false,
           Json.toJson(response)
         )
 
-        verify(connector).sendExplicitAudit[GetTrustOrEstateAuditEvent](
+        verify(connector).sendExplicitAudit[VariationAuditEvent](
           equalTo("ClosureSubmittedByOrganisation"),
           equalTo(expectedAuditData))(any(), any(), any())
       }
@@ -130,15 +133,16 @@ class AuditServiceSpec extends BaseSpec {
           "trustTaxable" -> false
         )
 
-        service.auditVariationSubmitted("internalId", request, VariationResponse("TRN123456"))
+        service.auditVariationSubmitted("internalId", false, request, VariationResponse("TRN123456"))
 
-        val expectedAuditData = GetTrustOrEstateAuditEvent(
+        val expectedAuditData = VariationAuditEvent(
           request,
           "internalId",
+          false,
           Json.toJson(response)
         )
 
-        verify(connector).sendExplicitAudit[GetTrustOrEstateAuditEvent](
+        verify(connector).sendExplicitAudit[VariationAuditEvent](
           equalTo("ClosureSubmittedByAgent"),
           equalTo(expectedAuditData))(any(), any(), any())
       }
