@@ -20,7 +20,7 @@ import models.Registration
 import models.auditing.{GetTrustOrEstateAuditEvent, OrchestratorAuditEvent, TrustAuditing, TrustRegistrationFailureAuditEvent, TrustRegistrationSubmissionAuditEvent}
 import models.registration.{RegistrationFailureResponse, RegistrationTrnResponse}
 import models.variation.VariationResponse
-import play.api.libs.json.{JsBoolean, JsPath, JsString, JsSuccess, JsValue, Json, Reads}
+import play.api.libs.json.{JsBoolean, JsPath, JsSuccess, JsValue, Json, Reads}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import utils.Constants._
@@ -174,8 +174,7 @@ class AuditService @Inject()(auditConnector: AuditConnector){
   def auditOrchestratorTransformationToTaxableSuccess(urn: String, utr: String)(implicit hc: HeaderCarrier): Unit = {
     val request = Json.obj(
       "urn" -> urn,
-      "utr" -> utr,
-      "transformations" -> JsString("None Taxable to Taxable")
+      "utr" -> utr
     )
 
     auditOrchestrator(
@@ -188,14 +187,22 @@ class AuditService @Inject()(auditConnector: AuditConnector){
   def auditOrchestratorTransformationToTaxableError(urn: String, utr: String, errorReason: String)(implicit hc: HeaderCarrier): Unit = {
     val request = Json.obj(
       "urn" -> urn,
-      "utr" -> utr,
-      "transformations" -> JsString("None Taxable to Taxable")
+      "utr" -> utr
     )
 
     auditOrchestrator(
       event = TrustAuditing.ORCHESTRATOR_TO_TAXABLE_FAILED,
       request = request,
       response = Json.obj("errorReason" -> errorReason)
+    )
+  }
+
+  def auditTaxEnrolmentTransformationToTaxableError(subscriptionId: String, urn: String, errorMessage: String)(implicit hc: HeaderCarrier) : Unit = {
+    auditErrorResponse(
+      TrustAuditing.TAX_ENROLMENT_TO_TAXABLE_FAILED,
+      Json.obj("urn" -> urn),
+      subscriptionId,
+      errorMessage
     )
   }
 }

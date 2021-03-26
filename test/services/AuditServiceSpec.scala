@@ -157,8 +157,7 @@ class AuditServiceSpec extends BaseSpec {
 
       val request = Json.obj(
         "urn" -> urn,
-        "utr" -> utr,
-        "transformations" -> "None Taxable to Taxable"
+        "utr" -> utr
       )
       service.auditOrchestratorTransformationToTaxableSuccess(urn, utr)
 
@@ -181,8 +180,7 @@ class AuditServiceSpec extends BaseSpec {
 
       val request = Json.obj(
         "urn" -> urn,
-        "utr" -> utr,
-        "transformations" -> "None Taxable to Taxable"
+        "utr" -> utr
       )
 
       service.auditOrchestratorTransformationToTaxableError(urn, utr, "Error happened")

@@ -19,9 +19,10 @@ package services
 import base.BaseSpec
 import connector.{OrchestratorConnector, TaxEnrolmentConnector}
 import exceptions.InternalServerErrorException
-import models.tax_enrolments.{SubscriptionIdentifier, TaxEnrolmentSuccess, TaxEnrolmentsSubscriptionsResponse}
-import org.mockito.Mockito.when
-import uk.gov.hmrc.http.{BadRequestException, HttpResponse}
+import models.tax_enrolments._
+import org.mockito.Matchers.{any, eq => eqTo}
+import org.mockito.Mockito.{verify, when}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 
 import scala.concurrent.Future
 
@@ -34,9 +35,10 @@ class MigrationServiceSpec extends BaseSpec {
   "MigrationService" when {
 
     ".migrateSubscriberToTaxable" should {
+      val mockAuditService = mock[AuditService]
       val mockTaxEnrolmentConnector = mock[TaxEnrolmentConnector]
       val mockOrchestratorConnector = mock[OrchestratorConnector]
-      val SUT = new MigrationService(mockTaxEnrolmentConnector, mockOrchestratorConnector)
+      val SUT = new MigrationService(mockAuditService, mockTaxEnrolmentConnector, mockOrchestratorConnector)
 
       "return TaxEnrolmentSuccess" in {
         when(mockTaxEnrolmentConnector.migrateSubscriberToTaxable(subscriptionId, urn)).
@@ -50,20 +52,20 @@ class MigrationServiceSpec extends BaseSpec {
     }
 
     ".completeMigration" should {
+      val mockAuditService = mock[AuditService]
       val mockTaxEnrolmentConnector = mock[TaxEnrolmentConnector]
       val mockOrchestratorConnector = mock[OrchestratorConnector]
-      val SUT = new MigrationService(mockTaxEnrolmentConnector, mockOrchestratorConnector)
+      val SUT = new MigrationService(mockAuditService, mockTaxEnrolmentConnector, mockOrchestratorConnector)
 
       "return utr when we have a valid response" in {
         val subscriptionsResponse = TaxEnrolmentsSubscriptionsResponse(List(SubscriptionIdentifier("SAUTR", utr)), "")
-        val orchestratorResponse = mock[HttpResponse]
 
         when(mockTaxEnrolmentConnector.subscriptions(subscriptionId)).thenReturn(Future.successful(subscriptionsResponse))
-        when(mockOrchestratorConnector.migrateToTaxable(urn, utr)).thenReturn(Future.successful(orchestratorResponse))
+        when(mockOrchestratorConnector.migrateToTaxable(urn, utr)).thenReturn(Future.successful(OrchestratorToTaxableSuccess))
 
         val futureResult = SUT.completeMigration(subscriptionId, urn)
         whenReady(futureResult) {
-          result => result mustBe utr
+          result => result mustBe OrchestratorToTaxableSuccess
         }
       }
 
@@ -75,6 +77,8 @@ class MigrationServiceSpec extends BaseSpec {
         whenReady(futureResult.failed) {
           result => result mustBe a[BadRequestException]
         }
+
+        verify(mockAuditService).auditTaxEnrolmentTransformationToTaxableError(eqTo(subscriptionId), eqTo(urn), any[String])(any[HeaderCarrier])
       }
 
       "return Exception when subscriptions returns an Exception" in {
@@ -87,7 +91,7 @@ class MigrationServiceSpec extends BaseSpec {
         }
       }
 
-      "return Exception when migrateToTaxable returns an Exception" in {
+      "return OrchestratorToTaxableFailure when migrateToTaxable returns an Exception" in {
         val subscriptionsResponse = TaxEnrolmentsSubscriptionsResponse(List(SubscriptionIdentifier("SAUTR", utr)), "")
 
         when(mockTaxEnrolmentConnector.subscriptions(subscriptionId)).
@@ -96,9 +100,11 @@ class MigrationServiceSpec extends BaseSpec {
           thenReturn(Future.failed(InternalServerErrorException("There was a problem")))
 
         val futureResult = SUT.completeMigration(subscriptionId, urn)
-        whenReady(futureResult.failed) {
-          result => result mustBe a[InternalServerErrorException]
+        whenReady(futureResult) {
+          result => result mustBe OrchestratorToTaxableFailure
         }
+
+        verify(mockAuditService).auditOrchestratorTransformationToTaxableError(eqTo(urn), eqTo(utr), eqTo("There was a problem"))(any[HeaderCarrier])
       }
     }
   }
