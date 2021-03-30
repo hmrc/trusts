@@ -30,6 +30,12 @@ class TaxableMigrationController @Inject()(
                                             cc: ControllerComponents
                                           ) extends TrustsBaseController(cc) {
 
+  def getTaxableMigrationFlag(identifier: String): Action[AnyContent] = identify.async { request =>
+    taxableMigrationService.getTaxableMigrationFlag(identifier, request.internalId) map { _ =>
+      Ok
+    }
+  }
+
   def setTaxableMigrationFlag(identifier: String): Action[AnyContent] = identify.async { request =>
     taxableMigrationService.setTaxableMigrationFlag(identifier, request.internalId, migratingToTaxable = true) map { _ =>
       Ok
@@ -44,5 +50,5 @@ class TaxableMigrationController @Inject()(
       Ok
     }
   }
-  
+
 }

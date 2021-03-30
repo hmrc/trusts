@@ -82,6 +82,10 @@ class TaxableMigrationService @Inject()(
     }
   }
 
+  def getTaxableMigrationFlag(identifier: String, internalId: String): Future[Boolean] = {
+    taxableMigrationRepository.get(identifier, internalId).map(_.contains(true))
+  }
+
   def setTaxableMigrationFlag(identifier: String, internalId: String, migratingToTaxable: Boolean): Future[Boolean] = {
     taxableMigrationRepository.set(identifier, internalId, migratingToTaxable)
   }

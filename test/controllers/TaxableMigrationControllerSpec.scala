@@ -53,13 +53,28 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
     reset(mockTaxableMigrationService)
   }
 
+  ".getTaxableMigrationFlag" should {
+    "get taxable migration flag" in {
+
+      when(mockTaxableMigrationService.getTaxableMigrationFlag(any(), any()))
+        .thenReturn(Future.successful(true))
+
+      val request = FakeRequest(GET, "path")
+
+      val result = taxableMigrationController.getTaxableMigrationFlag(identifier).apply(request)
+      status(result) mustBe OK
+
+      verify(mockTaxableMigrationService).getTaxableMigrationFlag(identifier, "id")
+    }
+  }
+
   ".setTaxableMigrationFlag" should {
     "set taxable migration flag" in {
 
       when(mockTaxableMigrationService.setTaxableMigrationFlag(any(), any(), any()))
         .thenReturn(Future.successful(true))
 
-      val request = FakeRequest(GET, "path")
+      val request = FakeRequest(POST, "path")
 
       val result = taxableMigrationController.setTaxableMigrationFlag(identifier).apply(request)
       status(result) mustBe OK
@@ -77,7 +92,7 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
       when(mockTaxableMigrationService.setTaxableMigrationFlag(any(), any(), any()))
         .thenReturn(Future.successful(true))
 
-      val request = FakeRequest(GET, "path")
+      val request = FakeRequest(DELETE, "path")
 
       val result = taxableMigrationController.removeTaxableMigrationTransforms(identifier).apply(request)
       status(result) mustBe OK

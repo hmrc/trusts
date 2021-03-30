@@ -49,6 +49,7 @@ PUT         /:identifier/trust-details/inter-vivos                              
 PUT         /:identifier/trust-details/efrbs-start-date                                     controllers.transformations.trustdetails.TrustDetailsTransformationController.setEfrbsStartDate(identifier: String)
 PUT         /:identifier/trust-details/residential-status                                   controllers.transformations.trustdetails.TrustDetailsTransformationController.setResidentialStatus(identifier: String)
 
+GET         /:identifier/transforms/migrate-to-taxable                                      controllers.TaxableMigrationController.getTaxableMigrationFlag(identifier: String)
 POST        /:identifier/transforms/migrate-to-taxable                                      controllers.TaxableMigrationController.setTaxableMigrationFlag(identifier: String)
 DELETE      /:identifier/transforms/migrate-to-taxable                                      controllers.TaxableMigrationController.removeTaxableMigrationTransforms(identifier: String)
 

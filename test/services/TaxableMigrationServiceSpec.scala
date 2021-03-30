@@ -185,6 +185,65 @@ class TaxableMigrationServiceSpec extends BaseSpec {
       }
     }
 
+    ".getTaxableMigrationFlag" should {
+
+      "return true" when {
+        "the flag is true" in {
+          val auditService = injector.instanceOf[AuditService]
+          val taxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
+          val orchestratorConnector = injector.instanceOf[OrchestratorConnector]
+          val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
+          val SUT = new TaxableMigrationService(auditService, taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
+
+          when(mockTaxableMigrationRepository.get(any(), any())).thenReturn(Future.successful(Some(true)))
+
+          val result = SUT.getTaxableMigrationFlag(urn, "id")
+
+          whenReady(result) { r =>
+            r mustBe true
+            verify(mockTaxableMigrationRepository).get(urn, "id")
+          }
+        }
+      }
+
+      "return false" when {
+
+        "the flag is false" in {
+          val auditService = injector.instanceOf[AuditService]
+          val taxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
+          val orchestratorConnector = injector.instanceOf[OrchestratorConnector]
+          val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
+          val SUT = new TaxableMigrationService(auditService, taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
+
+          when(mockTaxableMigrationRepository.get(any(), any())).thenReturn(Future.successful(Some(false)))
+
+          val result = SUT.getTaxableMigrationFlag(urn, "id")
+
+          whenReady(result) { r =>
+            r mustBe false
+            verify(mockTaxableMigrationRepository).get(urn, "id")
+          }
+        }
+
+        "the flag is undefined" in {
+          val auditService = injector.instanceOf[AuditService]
+          val taxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
+          val orchestratorConnector = injector.instanceOf[OrchestratorConnector]
+          val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
+          val SUT = new TaxableMigrationService(auditService, taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
+
+          when(mockTaxableMigrationRepository.get(any(), any())).thenReturn(Future.successful(None))
+
+          val result = SUT.getTaxableMigrationFlag(urn, "id")
+
+          whenReady(result) { r =>
+            r mustBe false
+            verify(mockTaxableMigrationRepository).get(urn, "id")
+          }
+        }
+      }
+    }
+
     ".setTaxableMigrationFlag" should {
       "call repository set method" in {
         val auditService = injector.instanceOf[AuditService]
