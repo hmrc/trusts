@@ -17,7 +17,7 @@
 package services
 
 import exceptions.{EtmpCacheDataStaleException, InternalServerErrorException}
-import models.DeclarationForApi
+import models.variation.DeclarationForApi
 import models.auditing.TrustAuditing
 import models.get_trust.TrustProcessedResponse
 import models.variation.VariationResponse

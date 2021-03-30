@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.IdentifierAction
-import models.DeclarationForApi
+import models.variation.DeclarationForApi
 import models.auditing.TrustAuditing
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}

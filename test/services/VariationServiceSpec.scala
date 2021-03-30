@@ -20,7 +20,8 @@ import exceptions.EtmpCacheDataStaleException
 import models.get_trust.{ResponseHeader, TrustProcessedResponse}
 import models.tax_enrolments.TaxEnrolmentSuccess
 import models.variation.VariationResponse
-import models.{DeclarationForApi, DeclarationName, NameType}
+import models.{DeclarationName, NameType}
+import models.variation.DeclarationForApi
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito.{reset, times, verify, when}

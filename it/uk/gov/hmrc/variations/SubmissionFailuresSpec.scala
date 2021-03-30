@@ -4,7 +4,8 @@ import connector.TrustsStoreConnector
 import connectors.ConnectorSpecHelper
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.auditing.TrustAuditing
-import models.{DeclarationForApi, DeclarationName, FeatureResponse, NameType}
+import models.{DeclarationName, FeatureResponse, NameType}
+import models.variation.DeclarationForApi
 import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.MustMatchers

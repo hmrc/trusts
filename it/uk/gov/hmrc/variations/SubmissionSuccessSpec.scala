@@ -4,7 +4,8 @@ import connector.{TrustsConnector, TrustsStoreConnector}
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.{GetTrustSuccessResponse, ResponseHeader}
 import models.variation.VariationResponse
-import models.{DeclarationForApi, DeclarationName, FeatureResponse, NameType}
+import models.{DeclarationName, FeatureResponse, NameType}
+import models.variation.DeclarationForApi
 import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.Mockito._
