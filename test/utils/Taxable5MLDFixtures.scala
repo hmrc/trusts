@@ -68,6 +68,11 @@ object Taxable5MLDFixtures extends JsonFixtures {
         getJsonValueFromFile("5MLD/Taxable/trusts/beneficiaries/2134514321-taxable-beneficiaries.json")
     }
 
+    object Assets {
+      lazy val taxable5mld2134514321Assets: JsValue =
+        getJsonValueFromFile("5MLD/Taxable/trusts/assets/2134514321-taxable-assets.json")
+    }
+
     object Settlors {
       lazy val taxable5mld2134514321Settlors: JsValue =
         getJsonValueFromFile("5MLD/Taxable/trusts/settlors/2134514321-taxable-settlors.json")
