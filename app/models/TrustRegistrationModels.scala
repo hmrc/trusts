@@ -111,14 +111,6 @@ object DeclarationName {
   implicit val declarationFormat: Format[DeclarationName] = Json.format[DeclarationName]
 }
 
-case class DeclarationForApi(declaration: DeclarationName,
-                             agentDetails: Option[AgentDetails],
-                             endDate: Option[LocalDate])
-
-object DeclarationForApi {
-  implicit val declarationForApiFormat: Format[DeclarationForApi] = Json.format[DeclarationForApi]
-}
-
 case class Trust(details: TrustDetailsType,
                  entities: TrustEntitiesType,
                  assets: Option[Assets])   // now optional with 5MLD
