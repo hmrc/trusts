@@ -17,6 +17,7 @@
 package utils
 
 import play.api.libs.json.JsValue
+import utils.Taxable5MLDFixtures.getJsonValueFromFile
 
 object NonTaxable5MLDFixtures extends JsonFixtures {
 
@@ -52,6 +53,9 @@ object NonTaxable5MLDFixtures extends JsonFixtures {
      * These fixtures are used to test the response from the trusts microservice at the:
      * /trusts/$identifier and /trusts/$identifier/transformed endpoints
      */
+    object Assets {
+      lazy val nonTaxable5mldAssets: JsValue = getJsonValueFromFile("5MLD/NonTaxable/trusts/assets/non-taxable-assets.json")
+    }
 
     lazy val getTransformedNonTaxableTrustResponse: JsValue = getJsonValueFromFile("5MLD/NonTaxable/trusts/get-trust-transformed-non-taxable-response.json")
     lazy val newGetTransformedNonTaxableTrustResponse: JsValue = getJsonValueFromFile("5MLD/NonTaxable/trusts/new-get-trust-transformed-non-taxable-response.json")
