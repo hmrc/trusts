@@ -18,6 +18,7 @@ package exceptions
 
 case class ServiceNotAvailableException(message: String ) extends Exception(message)
 case class InternalServerErrorException(message: String ) extends Exception(message)
+case class InvalidDataException(message: String ) extends Exception(message)
 case object AlreadyRegisteredException extends Exception("Already registered")
 case object DuplicateSubmissionException extends Exception("Duplicate submission")
 case object InvalidCorrelationIdException extends Exception("Invalid correlation ID")

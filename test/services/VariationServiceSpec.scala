@@ -226,7 +226,7 @@ class VariationServiceSpec extends WordSpec
       migrationService
     )
 
-    "capture variation success" in {
+    "capture variation success when not migrating" in {
 
       val trustsService = mock[TrustsService]
       val transformationService = mock[TransformationService]
@@ -267,6 +267,58 @@ class VariationServiceSpec extends WordSpec
 
         verify(auditService).auditVariationSubmitted(
           equalTo(internalId),
+          equalTo(false),
+          equalTo(transformedJson),
+          equalTo(VariationResponse(subscriberId))
+        )(any())
+
+      }}
+    }
+
+    "capture variation success when migrating" in {
+
+      val trustsService = mock[TrustsService]
+      val transformationService = mock[TransformationService]
+      val transformer = mock[DeclarationTransformer]
+      val taxableMigrationService = mock[TaxableMigrationService]
+
+      val response = TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
+
+      when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
+
+      when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any()))
+        .thenReturn(JsSuccess(trustInfoJson))
+
+      when(trustsService.getTrustInfoFormBundleNo(utr))
+        .thenReturn(Future.successful(formBundleNo))
+
+      when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId)))
+        .thenReturn(Future.successful(response))
+
+      when(trustsService.trustVariation(any()))
+        .thenReturn(Future.successful(VariationResponse(subscriberId)))
+
+      when(taxableMigrationService.migratingFromNonTaxableToTaxable(utr, internalId)).thenReturn(Future.successful(true))
+      when(taxableMigrationService.migrateSubscriberToTaxable(equalTo(subscriberId), equalTo(utr))(any[HeaderCarrier]))
+        .thenReturn(Future.successful(TaxEnrolmentSuccess))
+
+      when(transformer.transform(any(),any(),any(),any(),any()))
+        .thenReturn(JsSuccess(transformedJson))
+
+      val OUT = new VariationService(trustsService,
+        transformationService,
+        transformer,
+        auditService,
+        LocalDateServiceStub,
+        trustsStoreServiceFor5mld,
+        taxableMigrationService)
+
+      whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { _ => {
+
+        verify(auditService).auditVariationSubmitted(
+          equalTo(internalId),
+          equalTo(true),
           equalTo(transformedJson),
           equalTo(VariationResponse(subscriberId))
         )(any())
@@ -339,8 +391,8 @@ class VariationServiceSpec extends WordSpec
       val taxableMigrationService = mock[TaxableMigrationService]
 
       when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any())).thenReturn(JsSuccess(trustInfoJson5MLD))
-      when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).
-        thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
+      when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
       when(trustsService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
 
       val response = TrustProcessedResponse(trustInfoJson5MLD, ResponseHeader("Processed", formBundleNo))

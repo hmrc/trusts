@@ -18,13 +18,13 @@ package services
 
 import base.BaseSpec
 import connector.{OrchestratorConnector, TaxEnrolmentConnector}
-import exceptions.InternalServerErrorException
-import models.tax_enrolments.{SubscriptionIdentifier, TaxEnrolmentSuccess, TaxEnrolmentsSubscriptionsResponse}
-import org.mockito.Matchers.any
+import exceptions.{InternalServerErrorException, InvalidDataException}
+import models.tax_enrolments._
+import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.RecoverMethods.recoverToSucceededIf
 import repositories.TaxableMigrationRepository
-import uk.gov.hmrc.http.{BadRequestException, HttpResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -35,13 +35,14 @@ class TaxableMigrationServiceSpec extends BaseSpec {
   val urn = "NTTRUST00000001"
   val utr = "123456789"
 
-  "MigrationService" when {
+  "TaxableMigrationService" when {
 
     ".migrateSubscriberToTaxable" should {
+      val mockAuditService = mock[AuditService]
       val mockTaxEnrolmentConnector = mock[TaxEnrolmentConnector]
       val mockOrchestratorConnector = mock[OrchestratorConnector]
       val taxableMigrationRepository = injector.instanceOf[TaxableMigrationRepository]
-      val SUT = new TaxableMigrationService(mockTaxEnrolmentConnector, mockOrchestratorConnector, taxableMigrationRepository)
+      val SUT = new TaxableMigrationService(mockAuditService, mockTaxEnrolmentConnector, mockOrchestratorConnector, taxableMigrationRepository)
 
       "return TaxEnrolmentSuccess" in {
         when(mockTaxEnrolmentConnector.migrateSubscriberToTaxable(subscriptionId, urn)).
@@ -55,32 +56,34 @@ class TaxableMigrationServiceSpec extends BaseSpec {
     }
 
     ".completeMigration" should {
+      val mockAuditService = mock[AuditService]
       val mockTaxEnrolmentConnector = mock[TaxEnrolmentConnector]
       val mockOrchestratorConnector = mock[OrchestratorConnector]
       val taxableMigrationRepository = injector.instanceOf[TaxableMigrationRepository]
-      val SUT = new TaxableMigrationService(mockTaxEnrolmentConnector, mockOrchestratorConnector, taxableMigrationRepository)
+      val SUT = new TaxableMigrationService(mockAuditService, mockTaxEnrolmentConnector, mockOrchestratorConnector, taxableMigrationRepository)
 
       "return utr when we have a valid response" in {
-        val subscriptionsResponse = TaxEnrolmentsSubscriptionsResponse(List(SubscriptionIdentifier("SAUTR", utr)), "")
-        val orchestratorResponse = mock[HttpResponse]
+        val subscriptionsResponse = TaxEnrolmentsSubscriptionsResponse(subscriptionId, utr, "PROCESSED")
 
         when(mockTaxEnrolmentConnector.subscriptions(subscriptionId)).thenReturn(Future.successful(subscriptionsResponse))
-        when(mockOrchestratorConnector.migrateToTaxable(urn, utr)).thenReturn(Future.successful(orchestratorResponse))
+        when(mockOrchestratorConnector.migrateToTaxable(urn, utr)).thenReturn(Future.successful(OrchestratorToTaxableSuccess))
 
         val futureResult = SUT.completeMigration(subscriptionId, urn)
         whenReady(futureResult) {
-          result => result mustBe utr
+          result => result mustBe OrchestratorToTaxableSuccess
         }
       }
 
-      "return BadRequestException if we don't supply a UTR" in {
+      "return InvalidDataException if we don't supply a UTR" in {
         when(mockTaxEnrolmentConnector.subscriptions(subscriptionId)).
-          thenReturn(Future.successful(TaxEnrolmentsSubscriptionsResponse(Nil, "")))
+          thenReturn(Future.failed(InvalidDataException(s"No UTR supplied")))
 
         val futureResult = SUT.completeMigration(subscriptionId, urn)
         whenReady(futureResult.failed) {
-          result => result mustBe a[BadRequestException]
+          result => result mustBe a[InvalidDataException]
         }
+
+        verify(mockAuditService).auditTaxEnrolmentTransformationToTaxableError(eqTo(subscriptionId), eqTo(urn), any[String])(any[HeaderCarrier])
       }
 
       "return Exception when subscriptions returns an Exception" in {
@@ -93,8 +96,8 @@ class TaxableMigrationServiceSpec extends BaseSpec {
         }
       }
 
-      "return Exception when migrateToTaxable returns an Exception" in {
-        val subscriptionsResponse = TaxEnrolmentsSubscriptionsResponse(List(SubscriptionIdentifier("SAUTR", utr)), "")
+      "return OrchestratorToTaxableFailure when migrateToTaxable returns an Exception" in {
+        val subscriptionsResponse = TaxEnrolmentsSubscriptionsResponse(subscriptionId, utr, "PROCESSED")
 
         when(mockTaxEnrolmentConnector.subscriptions(subscriptionId)).
           thenReturn(Future.successful(subscriptionsResponse))
@@ -102,9 +105,11 @@ class TaxableMigrationServiceSpec extends BaseSpec {
           thenReturn(Future.failed(InternalServerErrorException("There was a problem")))
 
         val futureResult = SUT.completeMigration(subscriptionId, urn)
-        whenReady(futureResult.failed) {
-          result => result mustBe a[InternalServerErrorException]
+        whenReady(futureResult) {
+          result => result mustBe OrchestratorToTaxableFailure
         }
+
+        verify(mockAuditService).auditOrchestratorTransformationToTaxableError(eqTo(urn), eqTo(utr), eqTo("There was a problem"))(any[HeaderCarrier])
       }
     }
 
@@ -112,10 +117,11 @@ class TaxableMigrationServiceSpec extends BaseSpec {
 
       "return true" when {
         "Some(true) returned from repository" in {
+          val auditService = injector.instanceOf[AuditService]
           val taxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
           val orchestratorConnector = injector.instanceOf[OrchestratorConnector]
           val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
-          val SUT = new TaxableMigrationService(taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
+          val SUT = new TaxableMigrationService(auditService, taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
 
           when(mockTaxableMigrationRepository.get(any(), any())).thenReturn(Future.successful(Some(true)))
 
@@ -130,10 +136,11 @@ class TaxableMigrationServiceSpec extends BaseSpec {
       "return false" when {
 
         "Some(false) returned from repository" in {
+          val auditService = injector.instanceOf[AuditService]
           val taxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
           val orchestratorConnector = injector.instanceOf[OrchestratorConnector]
           val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
-          val SUT = new TaxableMigrationService(taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
+          val SUT = new TaxableMigrationService(auditService, taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
 
           when(mockTaxableMigrationRepository.get(any(), any())).thenReturn(Future.successful(Some(false)))
 
@@ -145,10 +152,11 @@ class TaxableMigrationServiceSpec extends BaseSpec {
         }
 
         "None returned from repository" in {
+          val auditService = injector.instanceOf[AuditService]
           val taxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
           val orchestratorConnector = injector.instanceOf[OrchestratorConnector]
           val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
-          val SUT = new TaxableMigrationService(taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
+          val SUT = new TaxableMigrationService(auditService, taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
 
           when(mockTaxableMigrationRepository.get(any(), any())).thenReturn(Future.successful(None))
 
@@ -162,10 +170,11 @@ class TaxableMigrationServiceSpec extends BaseSpec {
 
       "return error" when {
         "failed to get the taxable migration flag from the repository" in {
+          val auditService = injector.instanceOf[AuditService]
           val taxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
           val orchestratorConnector = injector.instanceOf[OrchestratorConnector]
           val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
-          val SUT = new TaxableMigrationService(taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
+          val SUT = new TaxableMigrationService(auditService, taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
 
           when(mockTaxableMigrationRepository.get(any(), any())).thenReturn(Future.failed(new Throwable("repository get failed")))
 
@@ -178,10 +187,11 @@ class TaxableMigrationServiceSpec extends BaseSpec {
 
     ".setTaxableMigrationFlag" should {
       "call repository set method" in {
+        val auditService = injector.instanceOf[AuditService]
         val taxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
         val orchestratorConnector = injector.instanceOf[OrchestratorConnector]
         val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
-        val SUT = new TaxableMigrationService(taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
+        val SUT = new TaxableMigrationService(auditService, taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
 
         when(mockTaxableMigrationRepository.set(any(), any(), any())).thenReturn(Future.successful(true))
 

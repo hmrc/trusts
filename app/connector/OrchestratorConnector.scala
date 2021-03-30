@@ -19,23 +19,31 @@ package connector
 import config.AppConfig
 import javax.inject.Inject
 import models.orchestrator.OrchestratorMigrationRequest
+import models.tax_enrolments.OrchestratorToTaxableResponse
 import play.api.Logging
-import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import play.api.libs.json.{JsValue, Json, Writes}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import utils.Constants.{CONTENT_TYPE, CONTENT_TYPE_JSON}
 import utils.Session
-import uk.gov.hmrc.http.HttpReads.Implicits._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class OrchestratorConnector @Inject()(http: HttpClient, config: AppConfig) extends Logging {
 
-  def migrateToTaxable(urn: String, utr: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+  private def headers = Seq(CONTENT_TYPE -> CONTENT_TYPE_JSON)
 
+  def migrateToTaxable(urn: String, utr: String)(implicit hc: HeaderCarrier): Future[OrchestratorToTaxableResponse] = {
     logger.info(s"[OrchestratorConnector][Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr] migrateToTaxable")
-    val taxEnrolmentsEndpoint = s"${config.orchestratorUrl}/trusts-enrolment-orchestrator/orchestration-process"
+
+    val orchestratorHeaders = hc.withExtraHeaders(headers: _*)
+
+    val orchestratorEndpoint = s"${config.orchestratorUrl}/trusts-enrolment-orchestrator/orchestration-process"
     val migrationRequest = OrchestratorMigrationRequest(urn, utr)
-    http.POST[JsValue, HttpResponse](taxEnrolmentsEndpoint, Json.toJson(migrationRequest))
+    http.POST[JsValue, OrchestratorToTaxableResponse](
+      orchestratorEndpoint,
+      Json.toJson(migrationRequest)
+    )(Writes.JsValueWrites, OrchestratorToTaxableResponse.httpReads, orchestratorHeaders, global)
   }
 }
 

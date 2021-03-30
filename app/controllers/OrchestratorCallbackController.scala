@@ -20,6 +20,7 @@ import javax.inject.Inject
 import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, ControllerComponents}
+import services.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -28,13 +29,12 @@ import utils.Session
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class OrchestratorCallbackController @Inject()(
-                                                cc: ControllerComponents
-                                               ) extends BackendController(cc) with Logging {
+class OrchestratorCallbackController @Inject()(auditService: AuditService, cc: ControllerComponents)
+  extends BackendController(cc) with Logging {
 
   def migrationToTaxableCallback(urn: String, utr: String): Action[JsValue] = Action.async(parse.json) {
     implicit request =>
-      val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+      implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
       logger.info(s"[migrationToTaxableCallback][Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr]" +
         s" Orchestrator: migrate subscription callback message was: ${request.body}")
@@ -45,9 +45,12 @@ class OrchestratorCallbackController @Inject()(
           val errorMessage = (request.body \ "errorMessage").asOpt[String]
           logger.error(s"[migrationToTaxableCallback][Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr]" +
             s" Orchestrator: migrate subscription failed, error message was: ${errorMessage.getOrElse(request.body)}")
+
+          auditService.auditOrchestratorTransformationToTaxableError(urn, utr, errorMessage.getOrElse("Error"))
           Future(NoContent)
         }
         case _ => {
+          auditService.auditOrchestratorTransformationToTaxableSuccess(urn, utr)
           Future(NoContent)
         }
       }

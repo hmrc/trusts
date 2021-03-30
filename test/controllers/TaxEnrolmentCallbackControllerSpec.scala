@@ -17,6 +17,7 @@
 package controllers
 
 import base.BaseSpec
+import models.tax_enrolments.OrchestratorToTaxableSuccess
 import org.mockito.Mockito.when
 import org.mockito.Matchers.{any, eq => eqTo}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
@@ -60,11 +61,10 @@ class TaxEnrolmentCallbackControllerSpec extends BaseSpec with GuiceOneServerPer
 
   ".migrationSubscriptionCallback" should {
     val urn = "NTTRUST00000001"
-    val utr = "123456789"
     val subscriptionId = "testSubId"
     "return 200 " when {
       "tax enrolment callback for subscription id enrolment " in {
-        when(mockMigrationService.completeMigration(eqTo(subscriptionId), eqTo(urn))(any())).thenReturn(Future.successful(utr))
+        when(mockMigrationService.completeMigration(eqTo(subscriptionId), eqTo(urn))(any())).thenReturn(Future.successful(OrchestratorToTaxableSuccess))
 
         val SUT = new TaxEnrolmentCallbackController(mockMigrationService, Helpers.stubControllerComponents())
 

@@ -1,0 +1,19 @@
+{
+  "assets": {
+    "nonEEABusiness": [
+      {
+        "lineNo": "1",
+        "orgName": "Panda care Ltd",
+        "address": {
+          "line1": "1010 EASY ST",
+          "line2": "OTTAWA",
+          "line3": "ONTARIO",
+          "line4": "ONTARIO",
+          "country": "CA"
+        },
+        "govLawCountry": "CA",
+        "startDate": "2020-01-05"
+      }
+    ]
+  }
+}

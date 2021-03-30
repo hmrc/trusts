@@ -1,0 +1,63 @@
+{
+  "assets": {
+    "monetary": [
+      {
+        "assetMonetaryAmount": 0
+      }
+    ],
+    "propertyOrLand": [
+      {
+        "buildingLandName": "Tokyo Campus",
+        "address": {
+          "line1": "10 Enderson Road ",
+          "line2": "Cheapside",
+          "line3": "Riverside ",
+          "line4": "Boston ",
+          "postCode": "SN8 4DD",
+          "country": "GB"
+        },
+        "valueFull": 1892090,
+        "valuePrevious": 1699000
+      }
+    ],
+    "shares": [
+      {
+        "numberOfShares": "0",
+        "orgName": "Smart Estates",
+        "utr": "2134514321",
+        "shareClass": "Ordinary shares",
+        "typeOfShare": "Quoted",
+        "value": 9891828
+      }
+    ],
+    "business": [
+      {
+        "orgName": "Lone Wolf Ltd",
+        "utr": "2134514322",
+        "businessDescription": "Travel Business",
+        "address": {
+          "line1": "Suite 10",
+          "line2": "Wealthy Arena",
+          "line3": "Trafagar Square ",
+          "line4": "London",
+          "postCode": "SE2 2HB",
+          "country": "GB"
+        },
+        "businessValue": 0
+      }
+    ],
+    "partnerShip": [
+      {
+        "utr": "2134514321",
+        "description": "Real Estates partnership",
+        "partnershipStart": "2010-02-28"
+      }
+    ],
+    "other": [
+      {
+        "description": "Jewelries",
+        "value": 781720
+      }
+    ]
+  }
+}
