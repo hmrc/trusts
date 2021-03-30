@@ -16,14 +16,41 @@
 
 package services
 
-import play.api.Logging
-import repositories.TaxableMigrationRepository
+import connector.{OrchestratorConnector, TaxEnrolmentConnector}
 
 import javax.inject.Inject
+import models.tax_enrolments.TaxEnrolmentSubscriberResponse
+import play.api.Logging
+import repositories.TaxableMigrationRepository
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TaxableMigrationService @Inject()(taxableMigrationRepository: TaxableMigrationRepository) extends Logging {
+class TaxableMigrationService @Inject()(
+                                         taxEnrolmentConnector: TaxEnrolmentConnector,
+                                         orchestratorConnector: OrchestratorConnector,
+                                         taxableMigrationRepository: TaxableMigrationRepository) extends Logging {
+
+  def migrateSubscriberToTaxable(subscriptionId: String, identifier: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
+    taxEnrolmentConnector.migrateSubscriberToTaxable(subscriptionId, identifier)
+  }
+
+  def completeMigration(subscriptionId: String, urn: String)(implicit hc: HeaderCarrier): Future[String] = {
+    logger.info(s"[MigrationService][SubscriptionId: $subscriptionId, URN: $urn].completeMigration")
+    for {
+      subscriptionsResponse <- taxEnrolmentConnector.subscriptions(subscriptionId)
+      utr <- subscriptionsResponse.utr match {
+        case Some(utr) => Future.successful(utr)
+        case None =>
+          logger.error(s"Unable to parse utr from cache as OrchestratorMigrationResponse")
+          Future.failed(new BadRequestException("Unable to parse utr from cache as OrchestratorMigrationResponse"))
+      }
+      _ <- orchestratorConnector.migrateToTaxable(urn, utr)
+    } yield {
+      utr
+    }
+  }
 
   def migratingFromNonTaxableToTaxable(identifier: String, internalId: String): Future[Boolean] = {
     taxableMigrationRepository.get(identifier, internalId).map {
@@ -36,7 +63,8 @@ class TaxableMigrationService @Inject()(taxableMigrationRepository: TaxableMigra
     }
   }
 
-  def setTaxableMigrationFlag(identifier: String, internalId: String, migrationToTaxable: Boolean): Future[Boolean] = {
-    taxableMigrationRepository.set(identifier, internalId, migrationToTaxable)
+  def setTaxableMigrationFlag(identifier: String, internalId: String, migratingToTaxable: Boolean): Future[Boolean] = {
+    taxableMigrationRepository.set(identifier, internalId, migratingToTaxable)
   }
+
 }

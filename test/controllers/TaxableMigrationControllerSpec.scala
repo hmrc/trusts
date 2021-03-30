@@ -64,7 +64,7 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
       val result = taxableMigrationController.setTaxableMigrationFlag(identifier).apply(request)
       status(result) mustBe OK
 
-      verify(mockTaxableMigrationService).setTaxableMigrationFlag(identifier, "id", migrationToTaxable = true)
+      verify(mockTaxableMigrationService).setTaxableMigrationFlag(identifier, "id", migratingToTaxable = true)
     }
   }
 
@@ -83,7 +83,7 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
       status(result) mustBe OK
 
       verify(mockTransformationService).removeAllTransformations(identifier, "id")
-      verify(mockTaxableMigrationService).setTaxableMigrationFlag(identifier, "id", migrationToTaxable = false)
+      verify(mockTaxableMigrationService).setTaxableMigrationFlag(identifier, "id", migratingToTaxable = false)
     }
   }
 }

@@ -17,29 +17,29 @@
 package controllers
 
 import controllers.actions.IdentifierAction
-import play.api.Logging
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import services.{TaxableMigrationService, TransformationService}
-import utils.ValidationUtil
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class TaxableMigrationController @Inject()(
-                                           identify: IdentifierAction,
-                                           taxableMigrationService: TaxableMigrationService,
-                                           transformationService: TransformationService,
-                                           cc: ControllerComponents
-                                         ) extends TrustsBaseController(cc) with ValidationUtil with Logging {
+                                            identify: IdentifierAction,
+                                            taxableMigrationService: TaxableMigrationService,
+                                            transformationService: TransformationService,
+                                            cc: ControllerComponents
+                                          ) extends TrustsBaseController(cc) {
 
   def setTaxableMigrationFlag(identifier: String): Action[AnyContent] = identify.async { request =>
-    taxableMigrationService.setTaxableMigrationFlag(identifier, request.internalId, migrationToTaxable = true).map { _ => Ok }
+    taxableMigrationService.setTaxableMigrationFlag(identifier, request.internalId, migratingToTaxable = true) map { _ =>
+      Ok
+    }
   }
 
   def removeTaxableMigrationTransforms(identifier: String): Action[AnyContent] = identify.async { request =>
     for {
       _ <- transformationService.removeAllTransformations(identifier, request.internalId)
-      _ <- taxableMigrationService.setTaxableMigrationFlag(identifier, request.internalId, migrationToTaxable = false)
+      _ <- taxableMigrationService.setTaxableMigrationFlag(identifier, request.internalId, migratingToTaxable = false)
     } yield {
       Ok
     }

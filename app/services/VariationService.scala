@@ -39,7 +39,7 @@ class VariationService @Inject()(trustsService: TrustsService,
                                  auditService: AuditService,
                                  localDateService: LocalDateService,
                                  trustsStoreService: TrustsStoreService,
-                                 migrationService: MigrationService) extends Logging {
+                                 migrationService: TaxableMigrationService) extends Logging {
 
   private case class LoggingContext(identifier: String)(implicit hc: HeaderCarrier) {
     def info(content: String): Unit = logger.info(format(content))

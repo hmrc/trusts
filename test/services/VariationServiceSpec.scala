@@ -87,7 +87,7 @@ class VariationServiceSpec extends WordSpec
       val transformationService = mock[TransformationService]
       val auditService = app.injector.instanceOf[FakeAuditService]
       val transformer = mock[DeclarationTransformer]
-      val migrationService = mock[MigrationService]
+      val migrationService = mock[TaxableMigrationService]
 
       when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any())).thenReturn(JsSuccess(trustInfoJson))
       when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
@@ -134,7 +134,7 @@ class VariationServiceSpec extends WordSpec
     val transformationService = mock[TransformationService]
     val auditService = app.injector.instanceOf[FakeAuditService]
     val transformer = mock[DeclarationTransformer]
-    val migrationService = mock[MigrationService]
+    val migrationService = mock[TaxableMigrationService]
 
     when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any())).thenReturn(JsSuccess(trustInfoJson5MLD))
     when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).
@@ -180,7 +180,7 @@ class VariationServiceSpec extends WordSpec
     val trustsService = mock[TrustsService]
     val transformationService = mock[TransformationService]
     val transformer = mock[DeclarationTransformer]
-    val migrationService = mock[MigrationService]
+    val migrationService = mock[TaxableMigrationService]
 
     when(trustsService.getTrustInfoFormBundleNo(utr))
       .thenReturn(Future.successful("31415900000"))
@@ -217,7 +217,7 @@ class VariationServiceSpec extends WordSpec
     val trustsService = mock[TrustsService]
     val transformationService = mock[TransformationService]
     val transformer = mock[DeclarationTransformer]
-    val migrationService = mock[MigrationService]
+    val migrationService = mock[TaxableMigrationService]
 
     when(trustsService.getTrustInfoFormBundleNo(utr))
       .thenReturn(Future.successful(formBundleNo))
@@ -237,7 +237,7 @@ class VariationServiceSpec extends WordSpec
       val trustsService = mock[TrustsService]
       val transformationService = mock[TransformationService]
       val transformer = mock[DeclarationTransformer]
-      val migrationService = mock[MigrationService]
+      val migrationService = mock[TaxableMigrationService]
 
       val response = TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
 
@@ -344,7 +344,7 @@ class VariationServiceSpec extends WordSpec
       val transformationService = mock[TransformationService]
       val auditService = app.injector.instanceOf[FakeAuditService]
       val transformer = mock[DeclarationTransformer]
-      val migrationService = mock[MigrationService]
+      val migrationService = mock[TaxableMigrationService]
 
       when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any())).thenReturn(JsSuccess(trustInfoJson5MLD))
       when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).

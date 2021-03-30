@@ -28,8 +28,8 @@ import utils.{Session, ValidationUtil}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TrustMigrationTestController @Inject()(  migrationService: MigrationService,
-                                               cc: ControllerComponents
+class TrustMigrationTestController @Inject()(migrationService: TaxableMigrationService,
+                                             cc: ControllerComponents
                                              ) extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
   def migrateToTaxable(subscriptionId: String, urn: String): Action[AnyContent] = Action.async {
