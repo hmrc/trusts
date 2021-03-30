@@ -55,8 +55,7 @@ class TaxableMigrationService @Inject()(
 
   def migratingFromNonTaxableToTaxable(identifier: String, internalId: String): Future[Boolean] = {
     taxableMigrationRepository.get(identifier, internalId).map {
-      case Some(value) => value
-      case None => false
+      _.contains(true)
     }.recoverWith {
       case e =>
         logger.error(s"Error getting taxable migration flag from repository: ${e.getMessage}")

@@ -111,7 +111,7 @@ class TaxableMigrationServiceSpec extends BaseSpec {
     ".migratingFromNonTaxableToTaxable" should {
 
       "return true" when {
-        "true returned from repository" in {
+        "Some(true) returned from repository" in {
           val taxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
           val orchestratorConnector = injector.instanceOf[OrchestratorConnector]
           val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
@@ -128,13 +128,29 @@ class TaxableMigrationServiceSpec extends BaseSpec {
       }
 
       "return false" when {
-        "false returned from repository" in {
+
+        "Some(false) returned from repository" in {
           val taxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
           val orchestratorConnector = injector.instanceOf[OrchestratorConnector]
           val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
           val SUT = new TaxableMigrationService(taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
 
           when(mockTaxableMigrationRepository.get(any(), any())).thenReturn(Future.successful(Some(false)))
+
+          val result = SUT.migratingFromNonTaxableToTaxable(urn, "id")
+
+          whenReady(result) { r =>
+            r mustBe false
+          }
+        }
+
+        "None returned from repository" in {
+          val taxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
+          val orchestratorConnector = injector.instanceOf[OrchestratorConnector]
+          val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
+          val SUT = new TaxableMigrationService(taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
+
+          when(mockTaxableMigrationRepository.get(any(), any())).thenReturn(Future.successful(None))
 
           val result = SUT.migratingFromNonTaxableToTaxable(urn, "id")
 
