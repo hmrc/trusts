@@ -1,4 +1,6 @@
 
+GET        /:identifier/transformed                               controllers.GetTrustController.getAssets(identifier: String)
+
 POST       /add-money/:identifier                                 controllers.transformations.assets.AddAssetController.addMoney(identifier: String)
 POST       /amend-money/:identifier/:index                        controllers.transformations.assets.AmendAssetController.amendMoney(identifier: String, index: Int)
 

@@ -98,6 +98,9 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   def getBeneficiaries(identifier: String): Action[AnyContent] =
     getArrayAtPath(identifier, ENTITIES \ BENEFICIARIES, BENEFICIARIES)
 
+  def getAssets(identifier: String): Action[AnyContent] =
+    getArrayAtPath(identifier, TRUST \ ASSETS, ASSETS)
+
   def getSettlors(identifier: String): Action[AnyContent] =
     processEtmpData(identifier) {
       transformed =>

@@ -63,6 +63,7 @@ trait JsonFixtures extends JsonUtils {
 
   lazy val getTransformedBeneficiariesResponse: JsValue = getJsonValueFromFile("trust-transformed-get-beneficiary-result.json")
   lazy val getTransformedSettlorsResponse: JsValue = getJsonValueFromFile("trust-transformed-get-settlor-result.json")
+  lazy val getTransformedAssetsResponse: JsValue = getJsonValueFromFile("trust-transformed-get-assets-result.json")
 
   lazy val getTransformedTrustDeceasedSettlorWithoutDeathResponse: JsValue =
     getJsonValueFromFile("transformed-get-trust-response-deceased-settlor-without-date-of-death.json")
