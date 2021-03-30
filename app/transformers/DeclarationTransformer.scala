@@ -21,8 +21,9 @@ import models.get_trust.TrustProcessedResponse
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import utils.JsonOps.{doNothing, putNewValue}
-
 import java.time.LocalDate
+
+import models.variation.DeclarationForApi
 
 class DeclarationTransformer {
 

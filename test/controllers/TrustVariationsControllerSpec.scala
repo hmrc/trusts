@@ -16,11 +16,15 @@
 
 package controllers
 
+import java.time.LocalDate
+
 import base.BaseSpec
 import controllers.actions.FakeIdentifierAction
 import exceptions._
 import models.auditing.TrustAuditing
-import models.{DeclarationForApi, DeclarationName, NameType}
+import models.variation.VariationResponse
+import models.{DeclarationName, NameType}
+import models.variation.DeclarationForApi
 import org.mockito.Matchers.{eq => Meq, _}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.IntegrationPatience
@@ -61,7 +65,30 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
   }
 
   ".declare" should {
-    "Return bad request when declaring No change and there is a form bundle number mismatch" in {
+
+    "submit a trust closure" in {
+      val SUT = trustVariationsController
+      val declaration = DeclarationName(
+        NameType("firstname", None, "Surname")
+      )
+
+      val declarationForApi =
+        DeclarationForApi(declaration, None, endDate = Some(LocalDate.of(2021, 2, 5)))
+
+      when(mockVariationService.submitDeclaration(any(), any(), any())(any()))
+        .thenReturn(Future.successful(VariationResponse("TVN123")))
+
+      val result = SUT.declare("aUTR")(
+        FakeRequest("POST", "/no-change/aUTR").withBody(Json.toJson(declarationForApi))
+      )
+
+      status(result) mustBe OK
+      contentAsJson(result) mustBe Json.obj(
+        "tvn" -> "TVN123"
+      )
+    }
+
+    "return bad request when declaring no change and there is a form bundle number mismatch" in {
       val SUT = trustVariationsController
       val declaration = DeclarationName(
         NameType("firstname", None, "Surname")

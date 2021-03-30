@@ -115,3 +115,11 @@ case class IdentificationOrgType(utr: Option[String],
 object IdentificationOrgType {
   implicit val trustBeneficiaryIdentificationFormat: Format[IdentificationOrgType] = Json.format[IdentificationOrgType]
 }
+
+case class DeclarationForApi(declaration: DeclarationName,
+                             agentDetails: Option[AgentDetails],
+                             endDate: Option[LocalDate])
+
+object DeclarationForApi {
+  implicit val declarationForApiFormat: Format[DeclarationForApi] = Json.format[DeclarationForApi]
+}

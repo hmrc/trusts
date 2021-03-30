@@ -20,6 +20,7 @@ import java.time.LocalDate
 
 import models._
 import models.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
+import models.variation.DeclarationForApi
 import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
 import utils.JsonUtils
 
