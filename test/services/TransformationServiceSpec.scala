@@ -21,7 +21,6 @@ import models.variation.{AmendedLeadTrusteeIndType, IdentificationType}
 import models.{AddressType, NameType}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.RecoverMethods.recoverToSucceededIf
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FreeSpec, MustMatchers}
@@ -29,15 +28,11 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.{JsResult, JsValue, Json}
 import repositories.TransformationRepositoryImpl
 import transformers._
-import transformers.assets._
-import transformers.trustdetails.SetTrustDetailTransform
 import transformers.trustees._
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.Constants._
 import utils.{JsonFixtures, JsonUtils}
 
 import java.time.LocalDate
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonFixtures {
@@ -65,22 +60,22 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
   private val originalTrusteeIndJson = Json.parse(
     """
       |{
-      |            "trusteeInd": {
-      |              "lineNo": "1",
-      |              "bpMatchStatus": "01",
-      |              "name": {
-      |                "firstName": "Tamara",
-      |                "middleName": "Hingis",
-      |                "lastName": "Jones"
-      |              },
-      |              "dateOfBirth": "1965-02-28",
-      |              "identification": {
-      |                "safeId": "2222200000000"
-      |              },
-      |              "phoneNumber": "+447456788112",
-      |              "entityStart": "2017-02-28"
-      |            }
-      |          }
+      |  "trusteeInd": {
+      |    "lineNo": "1",
+      |    "bpMatchStatus": "01",
+      |    "name": {
+      |      "firstName": "Tamara",
+      |      "middleName": "Hingis",
+      |      "lastName": "Jones"
+      |    },
+      |    "dateOfBirth": "1965-02-28",
+      |    "identification": {
+      |      "safeId": "2222200000000"
+      |    },
+      |    "phoneNumber": "+447456788112",
+      |    "entityStart": "2017-02-28"
+      |  }
+      |}
       |""".stripMargin)
 
   private val existingLeadTrusteeInfo = AmendedLeadTrusteeIndType(
@@ -260,99 +255,6 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
             AmendTrusteeTransform(None, Json.toJson(newLeadTrusteeIndInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
           ))
         )
-      }
-    }
-  }
-
-  // TODO - delete
-  ".migratingFromNonTaxableToTaxable" - {
-
-    "return true" - {
-      "when there are taxable migration transforms present" in {
-        val repository = mock[TransformationRepositoryImpl]
-        val service = new TransformationService(repository, mock[TrustsService], auditService)
-
-        val transforms = ComposedDeltaTransform(Seq(
-          AmendTrusteeTransform(None, Json.toJson(existingLeadTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd"),
-
-          AddAssetTransform(Json.obj(), OTHER_ASSET),
-          AmendAssetTransform(Some(0), Json.obj(), Json.obj(), LocalDate.parse("2021-01-01"), OTHER_ASSET),
-          RemoveAssetTransform(Some(0), Json.obj(), LocalDate.parse("2021-01-01"), OTHER_ASSET),
-
-          AddAssetTransform(Json.obj(), NON_EEA_BUSINESS_ASSET),
-          AmendAssetTransform(Some(0), Json.obj(), Json.obj(), LocalDate.parse("2021-01-01"), NON_EEA_BUSINESS_ASSET),
-          RemoveAssetTransform(Some(0), Json.obj(), LocalDate.parse("2021-01-01"), NON_EEA_BUSINESS_ASSET),
-
-          SetTrustDetailTransform(Json.obj(), "expressTrust"),
-          SetTrustDetailTransform(Json.obj(), "trustUKResident"),
-          SetTrustDetailTransform(Json.obj(), "trustTaxable"),
-          SetTrustDetailTransform(Json.obj(), "trustUKProperty"),
-          SetTrustDetailTransform(Json.obj(), "trustRecorded"),
-          SetTrustDetailTransform(Json.obj(), "trustUKRelation"),
-
-          SetTrustDetailTransform(Json.obj(), "lawCountry"),
-          SetTrustDetailTransform(Json.obj(), "administrationCountry"),
-          SetTrustDetailTransform(Json.obj(), "typeOfTrust"),
-          SetTrustDetailTransform(Json.obj(), "deedOfVariation"),
-          SetTrustDetailTransform(Json.obj(), "interVivos"),
-          SetTrustDetailTransform(Json.obj(), "efrbsStartDate"),
-          SetTrustDetailTransform(Json.obj(), "residentialStatus")
-        ))
-
-        when(repository.get(any(), any())).thenReturn(Future.successful(Some(transforms)))
-
-        val result = service.migratingFromNonTaxableToTaxable(utr, internalId)
-
-        whenReady(result) { r =>
-          r mustBe true
-        }
-      }
-    }
-
-    "return false" - {
-      "when there are no transforms" in {
-        val repository = mock[TransformationRepositoryImpl]
-        val service = new TransformationService(repository, mock[TrustsService], auditService)
-
-        val transforms = ComposedDeltaTransform(Nil)
-
-        when(repository.get(any(), any())).thenReturn(Future.successful(Some(transforms)))
-
-        val result = service.migratingFromNonTaxableToTaxable(utr, internalId)
-
-        whenReady(result) { r =>
-          r mustBe false
-        }
-      }
-
-      "where there are transforms but none of them are taxable migration transforms" in {
-        val repository = mock[TransformationRepositoryImpl]
-        val service = new TransformationService(repository, mock[TrustsService], auditService)
-
-        val transforms = ComposedDeltaTransform(Seq(
-          AmendTrusteeTransform(None, Json.toJson(existingLeadTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
-        ))
-
-        when(repository.get(any(), any())).thenReturn(Future.successful(Some(transforms)))
-
-        val result = service.migratingFromNonTaxableToTaxable(utr, internalId)
-
-        whenReady(result) { r =>
-          r mustBe false
-        }
-      }
-    }
-
-    "return error" - {
-      "failed to get the transforms from the repository" in {
-        val repository = mock[TransformationRepositoryImpl]
-        val service = new TransformationService(repository, mock[TrustsService], auditService)
-
-        when(repository.get(any(), any())).thenReturn(Future.failed(new Throwable("repository get failed")))
-
-        val result = service.migratingFromNonTaxableToTaxable(utr, internalId)
-
-        recoverToSucceededIf[Exception](result)
       }
     }
   }

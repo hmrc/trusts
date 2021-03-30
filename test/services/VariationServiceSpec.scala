@@ -18,6 +18,7 @@ package services
 
 import exceptions.EtmpCacheDataStaleException
 import models.get_trust.{ResponseHeader, TrustProcessedResponse}
+import models.tax_enrolments.TaxEnrolmentSuccess
 import models.variation.VariationResponse
 import models.{DeclarationForApi, DeclarationName, NameType}
 import org.mockito.ArgumentCaptor
@@ -31,10 +32,8 @@ import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import transformers.DeclarationTransformer
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{JsonFixtures, JsonUtils, NonTaxable5MLDFixtures}
+
 import java.time.LocalDate
-
-import models.tax_enrolments.TaxEnrolmentSuccess
-
 import scala.concurrent.Future
 
 class VariationServiceSpec extends WordSpec
@@ -71,12 +70,11 @@ class VariationServiceSpec extends WordSpec
     override def now: LocalDate = LocalDate.of(1999, 3, 14)
   }
 
-  val declarationForApi = DeclarationForApi(declaration, None, None)
+  val declarationForApi: DeclarationForApi = DeclarationForApi(declaration, None, None)
 
   override def beforeEach(): Unit = {
     reset(auditService)
   }
-
 
   "Declare no change" should {
 
@@ -87,22 +85,20 @@ class VariationServiceSpec extends WordSpec
       val transformationService = mock[TransformationService]
       val auditService = app.injector.instanceOf[FakeAuditService]
       val transformer = mock[DeclarationTransformer]
-      val migrationService = mock[TaxableMigrationService]
+      val taxableMigrationService = mock[TaxableMigrationService]
 
       when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any())).thenReturn(JsSuccess(trustInfoJson))
-      when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
+      when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
       when(trustsService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
 
       val response = TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
 
-      when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId))).thenReturn(Future.successful(
-        response
-      ))
+      when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId))).thenReturn(Future.successful(response))
 
-      when(trustsService.trustVariation(any())).thenReturn(Future.successful(
-        VariationResponse(subscriberId)
-      ))
-      when(transformationService.migratingFromNonTaxableToTaxable(utr, internalId)).thenReturn(Future.successful(false))
+      when(trustsService.trustVariation(any())).thenReturn(Future.successful(VariationResponse(subscriberId)))
+
+      when(taxableMigrationService.migratingFromNonTaxableToTaxable(utr, internalId)).thenReturn(Future.successful(false))
 
       when(transformer.transform(any(),any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
 
@@ -112,7 +108,8 @@ class VariationServiceSpec extends WordSpec
         auditService,
         LocalDateServiceStub,
         trustsStoreServiceFor4mld,
-        migrationService)
+        taxableMigrationService
+      )
 
       val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
 
@@ -134,23 +131,20 @@ class VariationServiceSpec extends WordSpec
     val transformationService = mock[TransformationService]
     val auditService = app.injector.instanceOf[FakeAuditService]
     val transformer = mock[DeclarationTransformer]
-    val migrationService = mock[TaxableMigrationService]
+    val taxableMigrationService = mock[TaxableMigrationService]
 
     when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any())).thenReturn(JsSuccess(trustInfoJson5MLD))
-    when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).
-      thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
+    when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
+      .thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
     when(trustsService.getTrustInfoFormBundleNo(utr)).thenReturn(Future.successful(formBundleNo))
 
     val response = TrustProcessedResponse(trustInfoJson5MLD, ResponseHeader("Processed", formBundleNo))
 
-    when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId))).thenReturn(Future.successful(
-      response
-    ))
+    when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId))).thenReturn(Future.successful(response))
 
-    when(trustsService.trustVariation(any())).thenReturn(Future.successful(
-      VariationResponse(subscriberId)
-    ))
-    when(transformationService.migratingFromNonTaxableToTaxable(utr, internalId)).thenReturn(Future.successful(false))
+    when(trustsService.trustVariation(any())).thenReturn(Future.successful(VariationResponse(subscriberId)))
+
+    when(taxableMigrationService.migratingFromNonTaxableToTaxable(utr, internalId)).thenReturn(Future.successful(false))
 
     when(transformer.transform(any(),any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
 
@@ -160,7 +154,7 @@ class VariationServiceSpec extends WordSpec
       auditService,
       LocalDateServiceStub,
       trustsStoreServiceFor5mld,
-      migrationService
+      taxableMigrationService
     )
 
     val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
@@ -237,7 +231,7 @@ class VariationServiceSpec extends WordSpec
       val trustsService = mock[TrustsService]
       val transformationService = mock[TransformationService]
       val transformer = mock[DeclarationTransformer]
-      val migrationService = mock[TaxableMigrationService]
+      val taxableMigrationService = mock[TaxableMigrationService]
 
       val response = TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", formBundleNo))
 
@@ -254,11 +248,9 @@ class VariationServiceSpec extends WordSpec
         .thenReturn(Future.successful(response))
 
       when(trustsService.trustVariation(any()))
-        .thenReturn(Future.successful(
-        VariationResponse(subscriberId)
-      ))
+        .thenReturn(Future.successful(VariationResponse(subscriberId)))
 
-      when(transformationService.migratingFromNonTaxableToTaxable(utr, internalId)).thenReturn(Future.successful(false))
+      when(taxableMigrationService.migratingFromNonTaxableToTaxable(utr, internalId)).thenReturn(Future.successful(false))
 
       when(transformer.transform(any(),any(),any(),any(),any()))
         .thenReturn(JsSuccess(transformedJson))
@@ -269,7 +261,7 @@ class VariationServiceSpec extends WordSpec
         auditService,
         LocalDateServiceStub,
         trustsStoreServiceFor5mld,
-        migrationService)
+        taxableMigrationService)
 
       whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { _ => {
 
@@ -344,7 +336,7 @@ class VariationServiceSpec extends WordSpec
       val transformationService = mock[TransformationService]
       val auditService = app.injector.instanceOf[FakeAuditService]
       val transformer = mock[DeclarationTransformer]
-      val migrationService = mock[TaxableMigrationService]
+      val taxableMigrationService = mock[TaxableMigrationService]
 
       when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any())).thenReturn(JsSuccess(trustInfoJson5MLD))
       when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier])).
@@ -353,16 +345,12 @@ class VariationServiceSpec extends WordSpec
 
       val response = TrustProcessedResponse(trustInfoJson5MLD, ResponseHeader("Processed", formBundleNo))
 
-      when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId))).thenReturn(Future.successful(
-        response
-      ))
+      when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId))).thenReturn(Future.successful(response))
 
-      when(trustsService.trustVariation(any())).thenReturn(Future.successful(
-        VariationResponse(subscriberId)
-      ))
-      when(transformationService.migratingFromNonTaxableToTaxable(utr, internalId)).thenReturn(Future.successful(true))
-      when(migrationService.migrateSubscriberToTaxable(equalTo(subscriberId), equalTo(utr))(any[HeaderCarrier])).
-        thenReturn(Future.successful(TaxEnrolmentSuccess))
+      when(trustsService.trustVariation(any())).thenReturn(Future.successful(VariationResponse(subscriberId)))
+      when(taxableMigrationService.migratingFromNonTaxableToTaxable(utr, internalId)).thenReturn(Future.successful(true))
+      when(taxableMigrationService.migrateSubscriberToTaxable(equalTo(subscriberId), equalTo(utr))(any[HeaderCarrier]))
+        .thenReturn(Future.successful(TaxEnrolmentSuccess))
 
       when(transformer.transform(any(),any(),any(),any(),any())).thenReturn(JsSuccess(transformedJson))
 
@@ -372,7 +360,7 @@ class VariationServiceSpec extends WordSpec
         auditService,
         LocalDateServiceStub,
         trustsStoreServiceFor5mld,
-        migrationService
+        taxableMigrationService
       )
 
       val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))

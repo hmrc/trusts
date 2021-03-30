@@ -39,7 +39,7 @@ class VariationService @Inject()(trustsService: TrustsService,
                                  auditService: AuditService,
                                  localDateService: LocalDateService,
                                  trustsStoreService: TrustsStoreService,
-                                 migrationService: TaxableMigrationService) extends Logging {
+                                 taxableMigrationService: TaxableMigrationService) extends Logging {
 
   private case class LoggingContext(identifier: String)(implicit hc: HeaderCarrier) {
     def info(content: String): Unit = logger.info(format(content))
@@ -151,7 +151,7 @@ class VariationService @Inject()(trustsService: TrustsService,
 
     def migrateToTaxable(migrate: Boolean, subscriptionId: String, identifier: String): Future[TaxEnrolmentSubscriberResponse] = {
       if (migrate) {
-        migrationService.migrateSubscriberToTaxable(subscriptionId, identifier)
+        taxableMigrationService.migrateSubscriberToTaxable(subscriptionId, identifier)
       } else {
         Future.successful(TaxEnrolmentNotProcessed)
       }
@@ -159,7 +159,7 @@ class VariationService @Inject()(trustsService: TrustsService,
 
     for {
       variationResponse <- submitVariation(value, internalId)
-      migrate <- transformationService.migratingFromNonTaxableToTaxable(identifier, internalId)
+      migrate <- taxableMigrationService.migratingFromNonTaxableToTaxable(identifier, internalId)
       _ <- migrateToTaxable(migrate, variationResponse.tvn, identifier)
     } yield {
       variationResponse

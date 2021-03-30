@@ -136,20 +136,6 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
-  //TODO - delete
-  def migratingFromNonTaxableToTaxable(identifier: String, internalId: String): Future[Boolean] = {
-    repository.get(identifier, internalId).map {
-      case Some(composedTransform) =>
-        composedTransform.deltaTransforms.exists(_.isTaxableMigrationTransform)
-      case None =>
-        false
-    }.recoverWith {
-      case e =>
-        logger.error(s"Exception getting transforms: ${e.getMessage}")
-        Future.failed(e)
-    }
-  }
-
   def removeAllTransformations(identifier: String, internalId: String): Future[Option[JsObject]] = {
     repository.resetCache(identifier, internalId)
   }
