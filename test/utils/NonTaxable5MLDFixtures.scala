@@ -17,7 +17,6 @@
 package utils
 
 import play.api.libs.json.JsValue
-import utils.Taxable5MLDFixtures.getJsonValueFromFile
 
 object NonTaxable5MLDFixtures extends JsonFixtures {
 
