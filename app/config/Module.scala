@@ -31,5 +31,6 @@ class Module extends AbstractModule {
     bind(classOf[TransformationRepository]).to(classOf[TransformationRepositoryImpl])
     bind(classOf[CacheRepository]).to(classOf[CacheRepositoryImpl])
     bind(classOf[RegistrationSubmissionRepository]).to(classOf[RegistrationSubmissionRepositoryImpl])
+    bind(classOf[TaxableMigrationRepository]).to(classOf[TaxableMigrationRepositoryImpl])
   }
 }

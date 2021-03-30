@@ -19,7 +19,7 @@ package services
 import base.BaseSpec
 import connector.{OrchestratorConnector, TaxEnrolmentConnector}
 import exceptions.InternalServerErrorException
-import models.tax_enrolments.{SubscriptionIdentifier, TaxEnrolmentNotProcessed, TaxEnrolmentSuccess, TaxEnrolmentsSubscriptionsResponse}
+import models.tax_enrolments.{SubscriptionIdentifier, TaxEnrolmentSuccess, TaxEnrolmentsSubscriptionsResponse}
 import org.mockito.Mockito.when
 import uk.gov.hmrc.http.{BadRequestException, HttpResponse}
 
