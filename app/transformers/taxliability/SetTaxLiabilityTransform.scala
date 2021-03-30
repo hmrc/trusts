@@ -23,8 +23,6 @@ import utils.Constants._
 case class SetTaxLiabilityTransform(value: JsValue) extends SetValueTransform {
 
   override val path: JsPath = YEARS_RETURNS
-
-  override val isTaxableMigrationTransform: Boolean = true
 }
 
 object SetTaxLiabilityTransform {

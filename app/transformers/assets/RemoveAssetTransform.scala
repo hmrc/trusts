@@ -35,8 +35,6 @@ case class RemoveAssetTransform(index: Option[Int],
       JsSuccess(input)
     }
   }
-
-  override val isTaxableMigrationTransform: Boolean = !isNonEeaBusiness
 }
 
 object RemoveAssetTransform {

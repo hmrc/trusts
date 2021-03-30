@@ -23,21 +23,6 @@ import utils.Constants._
 case class SetTrustDetailTransform(value: JsValue, `type`: String) extends SetValueTransform {
 
   override val path: JsPath = TRUST \ DETAILS \ `type`
-
-  override val isTaxableMigrationTransform: Boolean = {
-
-    val taxableMigrationDetailTypes: Seq[String] = Seq(
-      LAW_COUNTRY,
-      ADMINISTRATION_COUNTRY,
-      TYPE_OF_TRUST,
-      DEED_OF_VARIATION,
-      INTER_VIVOS,
-      EFRBS_START_DATE,
-      RESIDENTIAL_STATUS
-    )
-
-    taxableMigrationDetailTypes.contains(`type`)
-  }
 }
 
 object SetTrustDetailTransform {
