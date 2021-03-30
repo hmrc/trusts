@@ -51,7 +51,7 @@ PUT         /:identifier/trust-details/residential-status                       
 
 GET         /:identifier/transforms/migrate-to-taxable                                      controllers.TaxableMigrationController.getTaxableMigrationFlag(identifier: String)
 POST        /:identifier/transforms/migrate-to-taxable                                      controllers.TaxableMigrationController.setTaxableMigrationFlag(identifier: String)
-DELETE      /:identifier/transforms/migrate-to-taxable                                      controllers.TaxableMigrationController.removeTaxableMigrationTransforms(identifier: String)
+DELETE      /:identifier/transforms/migrate-to-taxable                                      controllers.TaxableMigrationController.removeTransforms(identifier: String)
 
 GET         /:identifier/years-returns                                                      controllers.GetTrustController.getYearsReturns(identifier: String)
 PUT         /:identifier/years-returns                                                      controllers.transformations.taxliability.TaxLiabilityTransformationController.setYearsReturns(identifier: String)

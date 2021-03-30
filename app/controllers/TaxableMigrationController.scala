@@ -17,18 +17,21 @@
 package controllers
 
 import controllers.actions.IdentifierAction
+import play.api.Logging
+import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import services.{TaxableMigrationService, TransformationService}
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class TaxableMigrationController @Inject()(
                                             identify: IdentifierAction,
                                             taxableMigrationService: TaxableMigrationService,
                                             transformationService: TransformationService,
                                             cc: ControllerComponents
-                                          ) extends TrustsBaseController(cc) {
+                                          ) extends TrustsBaseController(cc) with Logging {
 
   def getTaxableMigrationFlag(identifier: String): Action[AnyContent] = identify.async { request =>
     taxableMigrationService.getTaxableMigrationFlag(identifier, request.internalId) map { _ =>
@@ -36,17 +39,21 @@ class TaxableMigrationController @Inject()(
     }
   }
 
-  def setTaxableMigrationFlag(identifier: String): Action[AnyContent] = identify.async { request =>
-    taxableMigrationService.setTaxableMigrationFlag(identifier, request.internalId, migratingToTaxable = true) map { _ =>
-      Ok
-    }
+  def setTaxableMigrationFlag(identifier: String): Action[JsValue] = identify.async(parse.json) {
+    implicit request =>
+      request.body.validate[Boolean] match {
+        case JsSuccess(migratingToTaxable, _) =>
+          taxableMigrationService.setTaxableMigrationFlag(identifier, request.internalId, migratingToTaxable) map { _ =>
+            Ok
+          }
+        case JsError(errors) =>
+          logger.error(s"[setTaxableMigrationFlag] failed to validate request body: $errors")
+          Future.successful(InternalServerError)
+      }
   }
 
-  def removeTaxableMigrationTransforms(identifier: String): Action[AnyContent] = identify.async { request =>
-    for {
-      _ <- transformationService.removeAllTransformations(identifier, request.internalId)
-      _ <- taxableMigrationService.setTaxableMigrationFlag(identifier, request.internalId, migratingToTaxable = false)
-    } yield {
+  def removeTransforms(identifier: String): Action[AnyContent] = identify.async { request =>
+    transformationService.removeAllTransformations(identifier, request.internalId) map { _ =>
       Ok
     }
   }

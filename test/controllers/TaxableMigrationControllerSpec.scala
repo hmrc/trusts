@@ -22,6 +22,7 @@ import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
+import play.api.libs.json.{JsBoolean, JsNull}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import services._
@@ -69,36 +70,55 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
   }
 
   ".setTaxableMigrationFlag" should {
-    "set taxable migration flag" in {
+    "return OK" when {
 
-      when(mockTaxableMigrationService.setTaxableMigrationFlag(any(), any(), any()))
-        .thenReturn(Future.successful(true))
+      "setting to true" in {
+        when(mockTaxableMigrationService.setTaxableMigrationFlag(any(), any(), any()))
+          .thenReturn(Future.successful(true))
 
-      val request = FakeRequest(POST, "path")
+        val result = taxableMigrationController.setTaxableMigrationFlag(identifier)
+          .apply(postRequestWithPayload(JsBoolean(true)))
 
-      val result = taxableMigrationController.setTaxableMigrationFlag(identifier).apply(request)
-      status(result) mustBe OK
+        status(result) mustBe OK
 
-      verify(mockTaxableMigrationService).setTaxableMigrationFlag(identifier, "id", migratingToTaxable = true)
+        verify(mockTaxableMigrationService).setTaxableMigrationFlag(identifier, "id", migratingToTaxable = true)
+      }
+
+      "setting to false" in {
+        when(mockTaxableMigrationService.setTaxableMigrationFlag(any(), any(), any()))
+          .thenReturn(Future.successful(true))
+
+        val result = taxableMigrationController.setTaxableMigrationFlag(identifier)
+          .apply(postRequestWithPayload(JsBoolean(false)))
+
+        status(result) mustBe OK
+
+        verify(mockTaxableMigrationService).setTaxableMigrationFlag(identifier, "id", migratingToTaxable = false)
+      }
+    }
+
+    "return INTERNAL_SERVER_ERROR" when {
+      "request body cannot be validated" in {
+        val result = taxableMigrationController.setTaxableMigrationFlag(identifier)
+          .apply(postRequestWithPayload(JsNull))
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
     }
   }
 
-  ".removeTaxableMigrationTransforms" should {
-    "remove all transforms and set taxable migration flag to false" in {
+  ".removeTransforms" should {
+    "remove all transforms" in {
 
       when(mockTransformationService.removeAllTransformations(any(), any()))
         .thenReturn(Future.successful(None))
 
-      when(mockTaxableMigrationService.setTaxableMigrationFlag(any(), any(), any()))
-        .thenReturn(Future.successful(true))
-
       val request = FakeRequest(DELETE, "path")
 
-      val result = taxableMigrationController.removeTaxableMigrationTransforms(identifier).apply(request)
+      val result = taxableMigrationController.removeTransforms(identifier).apply(request)
       status(result) mustBe OK
 
       verify(mockTransformationService).removeAllTransformations(identifier, "id")
-      verify(mockTaxableMigrationService).setTaxableMigrationFlag(identifier, "id", migratingToTaxable = false)
     }
   }
 }
