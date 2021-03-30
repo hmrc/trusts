@@ -16,9 +16,11 @@
 
 package connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock.{badRequest, post, urlEqualTo}
+import com.github.tomakehurst.wiremock.client.WireMock.{badRequest, post, serverError, urlEqualTo}
 import connector.OrchestratorConnector
+import exceptions.{InternalServerErrorException, BadRequestException}
 import models.orchestrator.OrchestratorMigrationRequest
+import models.tax_enrolments.OrchestratorToTaxableSuccess
 import play.api.http.Status._
 import play.api.libs.json.Json
 
@@ -42,12 +44,12 @@ class OrchestratorConnectorSpec extends ConnectorSpecHelper {
         val futureResult = connector.migrateToTaxable(urn, utr)
 
         whenReady(futureResult) {
-          result => result.status mustBe OK
+          result => result mustBe OrchestratorToTaxableSuccess
         }
       }
     }
 
-    "return BadRequest " when {
+    "return BadRequestException " when {
       "tax enrolments returns BadRequest " in {
         server.stubFor(
           post(urlEqualTo("/trusts-enrolment-orchestrator/orchestration-process"))
@@ -56,8 +58,23 @@ class OrchestratorConnectorSpec extends ConnectorSpecHelper {
 
         val futureResult = connector.migrateToTaxable(urn, utr)
 
-        whenReady(futureResult) {
-          result => result.status mustBe BAD_REQUEST
+        whenReady(futureResult.failed) {
+          result => result mustBe BadRequestException
+        }
+      }
+    }
+
+    "return InternalServerErrorException " when {
+      "tax enrolments returns internal server error " in {
+        server.stubFor(
+          post(urlEqualTo("/trusts-enrolment-orchestrator/orchestration-process"))
+            .willReturn(serverError)
+        )
+
+        val futureResult = connector.migrateToTaxable(urn, utr)
+
+        whenReady(futureResult.failed) {
+          result => result mustBe an[InternalServerErrorException]
         }
       }
     }

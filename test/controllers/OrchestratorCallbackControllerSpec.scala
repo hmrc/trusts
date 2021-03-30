@@ -17,10 +17,14 @@
 package controllers
 
 import base.BaseSpec
+import org.mockito.Matchers.{any, eq => eqTo}
+import org.mockito.Mockito.verify
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.Json
 import play.api.test.Helpers
 import play.api.test.Helpers.{status, _}
+import services.AuditService
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 class OrchestratorCallbackControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
@@ -33,19 +37,25 @@ class OrchestratorCallbackControllerSpec extends BaseSpec with GuiceOneServerPer
 
     "return NoContent when sent an success message" when {
       "orchestrator callback for subscription id migration " in {
-        val SUT = new OrchestratorCallbackController(Helpers.stubControllerComponents())
+        val auditService = mock[AuditService]
+        val SUT = new OrchestratorCallbackController(auditService, Helpers.stubControllerComponents())
 
         val payloadBody = s"""{ "success" : true, "urn": "$urn", "utr": "$utr"}"""
         val result = SUT.migrationToTaxableCallback(urn, utr).apply(postRequestWithPayload(Json.parse(payloadBody)))
         status(result) mustBe NO_CONTENT
+
+        verify(auditService).auditOrchestratorTransformationToTaxableSuccess(eqTo(urn), eqTo(utr))(any[HeaderCarrier])
       }
 
       "orchestrator callback for subscription id migration with error message" in {
-        val SUT = new OrchestratorCallbackController(Helpers.stubControllerComponents())
+        val auditService = mock[AuditService]
+        val SUT = new OrchestratorCallbackController(auditService, Helpers.stubControllerComponents())
 
         val payloadBody = s"""{ "success" : false, "urn": "$urn", "utr": "$utr", "errorMessage": "An error message"}"""
         val result = SUT.migrationToTaxableCallback(urn, utr).apply(postRequestWithPayload(Json.parse(payloadBody)))
         status(result) mustBe NO_CONTENT
+
+        verify(auditService).auditOrchestratorTransformationToTaxableError(eqTo(urn), eqTo(utr), eqTo("An error message"))(any[HeaderCarrier])
       }
     }
 

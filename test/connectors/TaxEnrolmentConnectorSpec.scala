@@ -17,11 +17,10 @@
 package connectors
 
 import connector.TaxEnrolmentConnector
-import exceptions.{BadRequestException, InternalServerErrorException}
-import models.tax_enrolments.{TaxEnrolmentSubscription, TaxEnrolmentSuccess}
+import exceptions.{BadRequestException, InternalServerErrorException, ServiceNotAvailableException}
+import models.tax_enrolments.{TaxEnrolmentSubscription, TaxEnrolmentSuccess, TaxEnrolmentsSubscriptionsResponse}
 import play.api.http.Status._
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.UpstreamErrorResponse
 
 class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
@@ -180,21 +179,20 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
         whenReady(futureResult) {
           result => {
-            result.state mustBe "PROCESSED"
-            result.utr mustBe Some(utr)
+            result mustBe TaxEnrolmentsSubscriptionsResponse(subscriptionId, utr, "PROCESSED")
           }
         }
       }
 
-      "return InternalServerErrorException " when {
-        "tax enrolments returns internal server error " in {
+      "return ServiceNotAvailableException " when {
+        "tax enrolments returns service not available error " in {
 
           stubForHeaderlessGet(server, s"/tax-enrolments/subscriptions/$subscriptionId", SERVICE_UNAVAILABLE, response.toString())
 
           val futureResult = connector.subscriptions(subscriptionId)
 
           whenReady(futureResult.failed) {
-            result => result mustBe a[UpstreamErrorResponse]
+            result => result mustBe an[ServiceNotAvailableException]
           }
         }
       }
