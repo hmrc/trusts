@@ -812,7 +812,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
-        val result = getTrustController.getBeneficiaries(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/beneficiaries"))
+        val result = getTrustController.getAssets(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/assets"))
 
         whenReady(result) { _ =>
           status(result) mustBe INTERNAL_SERVER_ERROR
