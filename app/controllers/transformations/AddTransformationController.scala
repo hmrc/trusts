@@ -18,7 +18,7 @@ package controllers.transformations
 
 import controllers.TrustsBaseController
 import controllers.actions.IdentifierAction
-import controllers.transformations.TransformationController.isTrustTaxable
+import controllers.transformations.TransformationHelper.isTrustTaxable
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents}

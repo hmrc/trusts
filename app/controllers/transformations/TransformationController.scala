@@ -16,35 +16,28 @@
 
 package controllers.transformations
 
-import exceptions.InternalServerErrorException
-import play.api.libs.json._
-import utils.Constants._
+import controllers.TrustsBaseController
+import controllers.actions.IdentifierAction
+import play.api.Logging
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import services.TransformationService
 
-import scala.util.{Failure, Success, Try}
+import javax.inject.Inject
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-trait TransformationController {
+class TransformationController @Inject()(
+                                          identify: IdentifierAction,
+                                          transformationService: TransformationService,
+                                          cc: ControllerComponents
+                                        ) extends TrustsBaseController(cc) with Logging {
 
-  def path(`type`: String, index: Option[Int]): JsPath
-
-  def findJson(json: JsValue, `type`: String, index: Option[Int]): Try[JsObject] = {
-    val p = path(`type`, index)
-    json.transform(p.json.pick).fold(
-      _ => Failure(InternalServerErrorException(s"Could not locate json at $p")),
-      value => scala.util.Success(value.as[JsObject])
-    )
-  }
-
-}
-
-object TransformationController {
-
-  def isTrustTaxable(json: JsObject): Try[Boolean] = {
-    Success(
-      json.transform((TRUST \ DETAILS \ TAXABLE).json.pick[JsBoolean]) match {
-        case JsSuccess(JsBoolean(value), _) => value
-        case _ => true
-      }
-    )
+  def removeTransforms(identifier: String): Action[AnyContent] = identify.async { request =>
+    transformationService.removeAllTransformations(identifier, request.internalId) map { _ =>
+      Ok
+    } recoverWith {
+      case _ => Future.successful(InternalServerError)
+    }
   }
 
 }

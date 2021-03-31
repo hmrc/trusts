@@ -37,21 +37,17 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
 
   private val mockTaxableMigrationService = mock[TaxableMigrationService]
 
-  private val mockTransformationService = mock[TransformationService]
-
   private val identifier: String = "utr"
 
   private def taxableMigrationController = {
     new TaxableMigrationController(
       new FakeIdentifierAction(bodyParsers, Organisation),
       mockTaxableMigrationService,
-      mockTransformationService,
       Helpers.stubControllerComponents()
     )
   }
 
   override def beforeEach(): Unit = {
-    reset(mockTransformationService)
     reset(mockTaxableMigrationService)
   }
 
@@ -148,37 +144,6 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
         status(result) mustBe INTERNAL_SERVER_ERROR
 
         verify(mockTaxableMigrationService).setTaxableMigrationFlag(identifier, "id", migratingToTaxable = true)
-      }
-    }
-  }
-
-  ".removeTransforms" should {
-
-    "return OK" when {
-      "successfully removed transforms" in {
-        when(mockTransformationService.removeAllTransformations(any(), any()))
-          .thenReturn(Future.successful(None))
-
-        val request = FakeRequest(DELETE, "path")
-
-        val result = taxableMigrationController.removeTransforms(identifier).apply(request)
-        status(result) mustBe OK
-
-        verify(mockTransformationService).removeAllTransformations(identifier, "id")
-      }
-    }
-
-    "return INTERNAL_SERVER_ERROR" when {
-      "failed to remove transforms" in {
-        when(mockTransformationService.removeAllTransformations(any(), any()))
-          .thenReturn(Future.failed(new Throwable("repository reset failed")))
-
-        val request = FakeRequest(DELETE, "path")
-
-        val result = taxableMigrationController.removeTransforms(identifier).apply(request)
-        status(result) mustBe INTERNAL_SERVER_ERROR
-
-        verify(mockTransformationService).removeAllTransformations(identifier, "id")
       }
     }
   }

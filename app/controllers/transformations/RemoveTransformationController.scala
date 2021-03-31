@@ -31,7 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
 abstract class RemoveTransformationController @Inject()(identify: IdentifierAction,
                                                         transformationService: TransformationService)
                                                        (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends TrustsBaseController(cc) with TransformationController with Logging {
+  extends TrustsBaseController(cc) with TransformationHelper with Logging {
 
   def transform[T <: Remove](remove: T, entity: JsValue): DeltaTransform
 

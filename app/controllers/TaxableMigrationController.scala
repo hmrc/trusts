@@ -21,7 +21,7 @@ import models.taxable_migration.TaxableMigrationFlag
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import services.{TaxableMigrationService, TransformationService}
+import services.TaxableMigrationService
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -30,7 +30,6 @@ import scala.concurrent.Future
 class TaxableMigrationController @Inject()(
                                             identify: IdentifierAction,
                                             taxableMigrationService: TaxableMigrationService,
-                                            transformationService: TransformationService,
                                             cc: ControllerComponents
                                           ) extends TrustsBaseController(cc) with Logging {
 
@@ -55,14 +54,6 @@ class TaxableMigrationController @Inject()(
           logger.error(s"[setTaxableMigrationFlag] failed to validate request body: $errors")
           Future.successful(BadRequest)
       }
-  }
-
-  def removeTransforms(identifier: String): Action[AnyContent] = identify.async { request =>
-    transformationService.removeAllTransformations(identifier, request.internalId) map { _ =>
-      Ok
-    } recoverWith {
-      case _ => Future.successful(InternalServerError)
-    }
   }
 
 }
