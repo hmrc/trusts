@@ -25,14 +25,14 @@ import play.api.libs.json.Json
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import play.api.test.Helpers.{status, _}
-import services.MigrationService
+import services.TaxableMigrationService
 
 import scala.concurrent.Future
 
 class TaxEnrolmentCallbackControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
   val auditConnector = mock[AuditConnector]
-  val mockMigrationService = mock[MigrationService]
+  val mockMigrationService = mock[TaxableMigrationService]
   val trn = "XTRN1234567"
 
   ".taxableSubscriptionCallback" should {

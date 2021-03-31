@@ -21,8 +21,8 @@ import models.variation.DeclarationForApi
 import models.auditing.TrustAuditing
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import services.{AuditService, TransformationService, VariationService}
+import play.api.mvc.{Action, ControllerComponents}
+import services.{AuditService, VariationService}
 import utils.ValidationUtil
 
 import javax.inject.Inject
@@ -33,7 +33,6 @@ class TrustVariationsController @Inject()(
                                            identify: IdentifierAction,
                                            auditService: AuditService,
                                            variationService: VariationService,
-                                           transformationService: TransformationService,
                                            responseHandler: VariationsResponseHandler,
                                            cc: ControllerComponents
                                          ) extends TrustsBaseController(cc) with ValidationUtil with Logging {
@@ -61,9 +60,5 @@ class TrustVariationsController @Inject()(
         } recover responseHandler.recoverFromException(TrustAuditing.TRUST_VARIATION_SUBMISSION_FAILED)
       )
     }
-  }
-
-  def removeTaxableMigrationTransforms(identifier: String): Action[AnyContent] = identify.async { request =>
-    transformationService.removeTaxableMigrationTransforms(identifier, request.internalId).map { _ => Ok }
   }
 }

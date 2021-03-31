@@ -33,13 +33,15 @@ import models.tax_enrolments.{TaxEnrolmentNotProcessed, TaxEnrolmentSubscriberRe
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class VariationService @Inject()(trustsService: TrustsService,
-                                 transformationService: TransformationService,
-                                 declarationTransformer: DeclarationTransformer,
-                                 auditService: AuditService,
-                                 localDateService: LocalDateService,
-                                 trustsStoreService: TrustsStoreService,
-                                 migrationService: MigrationService) extends Logging {
+class VariationService @Inject()(
+                                  trustsService: TrustsService,
+                                  transformationService: TransformationService,
+                                  declarationTransformer: DeclarationTransformer,
+                                  auditService: AuditService,
+                                  localDateService: LocalDateService,
+                                  trustsStoreService: TrustsStoreService,
+                                  taxableMigrationService: TaxableMigrationService
+                                ) extends Logging {
 
   private case class LoggingContext(identifier: String)(implicit hc: HeaderCarrier) {
     def info(content: String): Unit = logger.info(format(content))
@@ -89,7 +91,7 @@ class VariationService @Inject()(trustsService: TrustsService,
           logging.error(s"Failed to populate lead trustee address ${JsError.toJson(errors)}")
           Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
       }
-   }
+    }
   }
 
   private def transformAndSubmit(identifier: String,
@@ -149,25 +151,25 @@ class VariationService @Inject()(trustsService: TrustsService,
   private def submitVariationAndCheckForMigration(identifier: String, value: JsValue, internalId: String)
                                                  (implicit hc: HeaderCarrier, logging: LoggingContext): Future[VariationResponse] = {
 
-    def migrateNTTToTaxable(migrateToTaxable: Boolean, subscriptionId: String, identifier: String): Future[TaxEnrolmentSubscriberResponse] = {
+    def migrateNonTaxableToTaxable(migrateToTaxable: Boolean, subscriptionId: String, identifier: String): Future[TaxEnrolmentSubscriberResponse] = {
       if (migrateToTaxable) {
-        migrationService.migrateSubscriberToTaxable(subscriptionId, identifier)
+        taxableMigrationService.migrateSubscriberToTaxable(subscriptionId, identifier)
       } else {
         Future.successful(TaxEnrolmentNotProcessed)
       }
     }
 
     for {
-      migrateToTaxable <- transformationService.migratingFromNonTaxableToTaxable(identifier, internalId)
+      migrateToTaxable <- taxableMigrationService.migratingFromNonTaxableToTaxable(identifier, internalId)
       variationResponse <- submitVariation(value, internalId, migrateToTaxable)
-      _ <- migrateNTTToTaxable(migrateToTaxable, variationResponse.tvn, identifier)
+      _ <- migrateNonTaxableToTaxable(migrateToTaxable, variationResponse.tvn, identifier)
     } yield {
       variationResponse
     }
   }
 
   private def submitVariation(value: JsValue, internalId: String, migrateToTaxable: Boolean)
-                      (implicit hc: HeaderCarrier, logging: LoggingContext): Future[VariationResponse] = {
+                             (implicit hc: HeaderCarrier, logging: LoggingContext): Future[VariationResponse] = {
 
     val payload = value.applyRules
 

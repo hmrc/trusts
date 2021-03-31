@@ -17,17 +17,21 @@
 package services
 
 import connector.{OrchestratorConnector, TaxEnrolmentConnector}
-import javax.inject.Inject
 import models.tax_enrolments._
 import play.api.Logging
+import repositories.TaxableMigrationRepository
 import uk.gov.hmrc.http.HeaderCarrier
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class MigrationService @Inject()(auditService: AuditService,
-                                 taxEnrolmentConnector: TaxEnrolmentConnector,
-                                 orchestratorConnector: OrchestratorConnector) extends Logging {
+class TaxableMigrationService @Inject()(
+                                         auditService: AuditService,
+                                         taxEnrolmentConnector: TaxEnrolmentConnector,
+                                         orchestratorConnector: OrchestratorConnector,
+                                         taxableMigrationRepository: TaxableMigrationRepository
+                                       ) extends Logging {
 
   def migrateSubscriberToTaxable(subscriptionId: String, urn: String)
                                 (implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
@@ -66,4 +70,25 @@ class MigrationService @Inject()(auditService: AuditService,
         OrchestratorToTaxableFailure
     }
   }
+
+  def migratingFromNonTaxableToTaxable(identifier: String, internalId: String): Future[Boolean] = {
+    getTaxableMigrationFlag(identifier, internalId).map(_.contains(true))
+  }
+
+  def getTaxableMigrationFlag(identifier: String, internalId: String): Future[Option[Boolean]] = {
+    taxableMigrationRepository.get(identifier, internalId).recoverWith {
+      case e =>
+        logger.error(s"Error getting taxable migration flag from repository: ${e.getMessage}")
+        Future.failed(e)
+    }
+  }
+
+  def setTaxableMigrationFlag(identifier: String, internalId: String, migratingToTaxable: Boolean): Future[Boolean] = {
+    taxableMigrationRepository.set(identifier, internalId, migratingToTaxable).recoverWith {
+      case e =>
+        logger.error(s"Error setting taxable migration flag in repository: ${e.getMessage}")
+        Future.failed(e)
+    }
+  }
+
 }

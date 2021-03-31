@@ -20,10 +20,7 @@ import play.api.libs.json._
 import transformers.AddEntityTransform
 
 case class AddAssetTransform(entity: JsValue,
-                             `type`: String) extends AssetTransform with AddEntityTransform {
-
-  override val isTaxableMigrationTransform: Boolean = !isNonEeaBusiness
-}
+                             `type`: String) extends AssetTransform with AddEntityTransform
 
 object AddAssetTransform {
 

@@ -18,7 +18,7 @@ package controllers.transformations
 
 import controllers.TrustsBaseController
 import controllers.actions.IdentifierAction
-import controllers.transformations.TransformationController.isTrustTaxable
+import controllers.transformations.TransformationHelper.isTrustTaxable
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents}
@@ -31,7 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
 abstract class AmendTransformationController @Inject()(identify: IdentifierAction,
                                                        transformationService: TransformationService)
                                                       (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends TrustsBaseController(cc) with TransformationController with Logging {
+  extends TrustsBaseController(cc) with TransformationHelper with Logging {
 
   def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform
 

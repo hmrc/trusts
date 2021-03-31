@@ -20,7 +20,7 @@ import javax.inject.Inject
 import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import services.MigrationService
+import services.TaxableMigrationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -30,8 +30,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
-class TaxEnrolmentCallbackController @Inject()( migrationService: MigrationService,
-                                                cc: ControllerComponents
+class TaxEnrolmentCallbackController @Inject()(migrationService: TaxableMigrationService,
+                                               cc: ControllerComponents
                                                ) extends BackendController(cc) with Logging {
 
   def taxableSubscriptionCallback(trn: String): Action[JsValue] = Action.async(parse.json) {

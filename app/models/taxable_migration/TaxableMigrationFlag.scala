@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-package transformers.taxliability
+package models.taxable_migration
 
 import play.api.libs.json._
-import transformers.SetValueTransform
-import utils.Constants._
 
-case class SetTaxLiabilityTransform(value: JsValue) extends SetValueTransform {
+case class TaxableMigrationFlag(value: Option[Boolean])
 
-  override val path: JsPath = YEARS_RETURNS
-}
+object TaxableMigrationFlag {
 
-object SetTaxLiabilityTransform {
-
-  val key = "SetTaxLiabilityTransform"
-
-  implicit val format: Format[SetTaxLiabilityTransform] = Json.format[SetTaxLiabilityTransform]
+  implicit val formats: Format[TaxableMigrationFlag] = Json.format[TaxableMigrationFlag]
 }

@@ -788,7 +788,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         }
       }
 
-      "return 200 - Ok with processed content with 5mld data for a none taxable trust" in {
+      "return 200 - Ok with processed content with 5mld data for a non-taxable trust" in {
 
         val cached = NonTaxable5MLDFixtures.Cache.getTransformedNonTaxableTrustResponse
 

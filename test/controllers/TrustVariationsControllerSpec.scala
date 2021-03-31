@@ -45,8 +45,6 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
   private val mockVariationService = mock[VariationService]
 
-  private val mockTransformationService = mock[TransformationService]
-
   private val responseHandler = new VariationsResponseHandler(mockAuditService)
 
   override def beforeEach(): Unit = {
@@ -58,7 +56,6 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       new FakeIdentifierAction(bodyParsers, Organisation),
       mockAuditService,
       mockVariationService,
-      mockTransformationService,
       responseHandler,
       Helpers.stubControllerComponents()
     )
@@ -115,22 +112,6 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
         Meq("id"),
         Meq("Cached ETMP data stale.")
       )(any())
-    }
-  }
-
-  ".removeTaxableMigrationTransforms" should {
-
-    "remove all taxable migration transforms" in {
-
-      when(mockTransformationService.removeTaxableMigrationTransforms(any(), any()))
-        .thenReturn(Future.successful(true))
-
-      val request = FakeRequest(GET, "path")
-
-      val result = trustVariationsController.removeTaxableMigrationTransforms("DRAFTID").apply(request)
-      status(result) mustBe OK
-
-      verify(mockTransformationService).removeTaxableMigrationTransforms("DRAFTID", "id")
     }
   }
 }
