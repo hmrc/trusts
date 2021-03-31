@@ -153,22 +153,24 @@ class VariationService @Inject()(
 
     def migrateNonTaxableToTaxable(migrateToTaxable: Boolean, subscriptionId: String, identifier: String): Future[TaxEnrolmentSubscriberResponse] = {
       if (migrateToTaxable) {
+        logger.info(s"[Session ID: ${Session.id(hc)}][UTR/URN: $identifier] trust has migrated to taxable, preparing tax-enrolments to be allocated the UTR")
         taxableMigrationService.migrateSubscriberToTaxable(subscriptionId, identifier)
       } else {
+        logger.info(s"[Session ID: ${Session.id(hc)}][UTR/URN: $identifier] trust did not require a migration to taxable")
         Future.successful(TaxEnrolmentNotProcessed)
       }
     }
 
     for {
       migrateToTaxable <- taxableMigrationService.migratingFromNonTaxableToTaxable(identifier, internalId)
-      variationResponse <- submitVariation(value, internalId, migrateToTaxable)
+      variationResponse <- submitVariation(identifier, value, internalId, migrateToTaxable)
       _ <- migrateNonTaxableToTaxable(migrateToTaxable, variationResponse.tvn, identifier)
     } yield {
       variationResponse
     }
   }
 
-  private def submitVariation(value: JsValue, internalId: String, migrateToTaxable: Boolean)
+  private def submitVariation(identifier: String, value: JsValue, internalId: String, migrateToTaxable: Boolean)
                              (implicit hc: HeaderCarrier, logging: LoggingContext): Future[VariationResponse] = {
 
     val payload = value.applyRules
@@ -182,7 +184,7 @@ class VariationService @Inject()(
 
     trustsService.trustVariation(payload) map { response =>
 
-      logging.info("variation submitted")
+      logger.info(s"[Session ID: ${Session.id(hc)}][UTR/URN: $identifier] trust submitted a variation")
 
       auditService.auditVariationSubmitted(
         internalId,
