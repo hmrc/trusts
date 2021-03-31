@@ -116,7 +116,7 @@ class TaxableMigrationServiceSpec extends BaseSpec {
     ".migratingFromNonTaxableToTaxable" should {
 
       "return true" when {
-        "Some(true) returned from repository" in {
+        "taxable migration flag is set to true" in {
           val auditService = injector.instanceOf[AuditService]
           val taxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
           val orchestratorConnector = injector.instanceOf[OrchestratorConnector]
@@ -135,7 +135,7 @@ class TaxableMigrationServiceSpec extends BaseSpec {
 
       "return false" when {
 
-        "Some(false) returned from repository" in {
+        "taxable migration flag is set to false" in {
           val auditService = injector.instanceOf[AuditService]
           val taxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
           val orchestratorConnector = injector.instanceOf[OrchestratorConnector]
@@ -151,7 +151,7 @@ class TaxableMigrationServiceSpec extends BaseSpec {
           }
         }
 
-        "None returned from repository" in {
+        "taxable migration flag is undefined" in {
           val auditService = injector.instanceOf[AuditService]
           val taxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
           val orchestratorConnector = injector.instanceOf[OrchestratorConnector]
@@ -169,7 +169,7 @@ class TaxableMigrationServiceSpec extends BaseSpec {
       }
 
       "return error" when {
-        "failed to get the taxable migration flag from the repository" in {
+        "fails to get the taxable migration flag from the repository" in {
           val auditService = injector.instanceOf[AuditService]
           val taxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
           val orchestratorConnector = injector.instanceOf[OrchestratorConnector]
@@ -187,8 +187,8 @@ class TaxableMigrationServiceSpec extends BaseSpec {
 
     ".getTaxableMigrationFlag" should {
 
-      "return true" when {
-        "the flag is true" in {
+      "return Some(true)" when {
+        "the taxable migration flag is set to true" in {
           val auditService = injector.instanceOf[AuditService]
           val taxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
           val orchestratorConnector = injector.instanceOf[OrchestratorConnector]
@@ -200,15 +200,14 @@ class TaxableMigrationServiceSpec extends BaseSpec {
           val result = SUT.getTaxableMigrationFlag(urn, "id")
 
           whenReady(result) { r =>
-            r mustBe true
+            r mustBe Some(true)
             verify(mockTaxableMigrationRepository).get(urn, "id")
           }
         }
       }
 
-      "return false" when {
-
-        "the flag is false" in {
+      "return Some(false)" when {
+        "the taxable migration flag is set to false" in {
           val auditService = injector.instanceOf[AuditService]
           val taxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
           val orchestratorConnector = injector.instanceOf[OrchestratorConnector]
@@ -220,12 +219,14 @@ class TaxableMigrationServiceSpec extends BaseSpec {
           val result = SUT.getTaxableMigrationFlag(urn, "id")
 
           whenReady(result) { r =>
-            r mustBe false
+            r mustBe Some(false)
             verify(mockTaxableMigrationRepository).get(urn, "id")
           }
         }
+      }
 
-        "the flag is undefined" in {
+      "return None" when {
+        "the taxable migration flag is undefined" in {
           val auditService = injector.instanceOf[AuditService]
           val taxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
           val orchestratorConnector = injector.instanceOf[OrchestratorConnector]
@@ -237,9 +238,25 @@ class TaxableMigrationServiceSpec extends BaseSpec {
           val result = SUT.getTaxableMigrationFlag(urn, "id")
 
           whenReady(result) { r =>
-            r mustBe false
+            r mustBe None
             verify(mockTaxableMigrationRepository).get(urn, "id")
           }
+        }
+      }
+
+      "return error" when {
+        "fails to get the taxable migration flag from the repository" in {
+          val auditService = injector.instanceOf[AuditService]
+          val taxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
+          val orchestratorConnector = injector.instanceOf[OrchestratorConnector]
+          val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
+          val SUT = new TaxableMigrationService(auditService, taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
+
+          when(mockTaxableMigrationRepository.get(any(), any())).thenReturn(Future.failed(new Throwable("repository get failed")))
+
+          val result = SUT.getTaxableMigrationFlag(urn, "id")
+
+          recoverToSucceededIf[Exception](result)
         }
       }
     }
@@ -259,6 +276,22 @@ class TaxableMigrationServiceSpec extends BaseSpec {
         whenReady(result) { r =>
           r mustBe true
           verify(mockTaxableMigrationRepository).set(urn, "id", migratingToTaxable = true)
+        }
+      }
+
+      "return error" when {
+        "fails to set the taxable migration flag in the repository" in {
+          val auditService = injector.instanceOf[AuditService]
+          val taxEnrolmentConnector = injector.instanceOf[TaxEnrolmentConnector]
+          val orchestratorConnector = injector.instanceOf[OrchestratorConnector]
+          val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
+          val SUT = new TaxableMigrationService(auditService, taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
+
+          when(mockTaxableMigrationRepository.set(any(), any(), any())).thenReturn(Future.failed(new Throwable("repository set failed")))
+
+          val result = SUT.setTaxableMigrationFlag(urn, "id", migratingToTaxable = true)
+
+          recoverToSucceededIf[Exception](result)
         }
       }
     }

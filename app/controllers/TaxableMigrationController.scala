@@ -17,8 +17,9 @@
 package controllers
 
 import controllers.actions.IdentifierAction
+import models.taxable_migration.TaxableMigrationFlag
 import play.api.Logging
-import play.api.libs.json.{JsError, JsSuccess, JsValue}
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import services.{TaxableMigrationService, TransformationService}
 
@@ -34,8 +35,10 @@ class TaxableMigrationController @Inject()(
                                           ) extends TrustsBaseController(cc) with Logging {
 
   def getTaxableMigrationFlag(identifier: String): Action[AnyContent] = identify.async { request =>
-    taxableMigrationService.getTaxableMigrationFlag(identifier, request.internalId) map { _ =>
-      Ok
+    taxableMigrationService.getTaxableMigrationFlag(identifier, request.internalId) map { x =>
+      Ok(Json.toJson(TaxableMigrationFlag(x)))
+    } recoverWith {
+      case _ => Future.successful(InternalServerError)
     }
   }
 
@@ -45,16 +48,20 @@ class TaxableMigrationController @Inject()(
         case JsSuccess(migratingToTaxable, _) =>
           taxableMigrationService.setTaxableMigrationFlag(identifier, request.internalId, migratingToTaxable) map { _ =>
             Ok
+          } recoverWith {
+            case _ => Future.successful(InternalServerError)
           }
         case JsError(errors) =>
           logger.error(s"[setTaxableMigrationFlag] failed to validate request body: $errors")
-          Future.successful(InternalServerError)
+          Future.successful(BadRequest)
       }
   }
 
   def removeTransforms(identifier: String): Action[AnyContent] = identify.async { request =>
     transformationService.removeAllTransformations(identifier, request.internalId) map { _ =>
       Ok
+    } recoverWith {
+      case _ => Future.successful(InternalServerError)
     }
   }
 

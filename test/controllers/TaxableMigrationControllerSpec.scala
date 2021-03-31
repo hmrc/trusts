@@ -18,11 +18,12 @@ package controllers
 
 import base.BaseSpec
 import controllers.actions.FakeIdentifierAction
+import models.taxable_migration.TaxableMigrationFlag
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
-import play.api.libs.json.{JsBoolean, JsNull}
+import play.api.libs.json.{JsBoolean, JsNull, Json}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import services._
@@ -55,17 +56,47 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
   }
 
   ".getTaxableMigrationFlag" should {
-    "get taxable migration flag" in {
 
-      when(mockTaxableMigrationService.getTaxableMigrationFlag(any(), any()))
-        .thenReturn(Future.successful(true))
+    "return OK" when {
+      "taxable migration defined" in {
+        when(mockTaxableMigrationService.getTaxableMigrationFlag(any(), any()))
+          .thenReturn(Future.successful(Some(true)))
 
-      val request = FakeRequest(GET, "path")
+        val request = FakeRequest(GET, "path")
 
-      val result = taxableMigrationController.getTaxableMigrationFlag(identifier).apply(request)
-      status(result) mustBe OK
+        val result = taxableMigrationController.getTaxableMigrationFlag(identifier).apply(request)
+        status(result) mustBe OK
+        contentAsJson(result) mustBe Json.toJson(TaxableMigrationFlag(Some(true)))
 
-      verify(mockTaxableMigrationService).getTaxableMigrationFlag(identifier, "id")
+        verify(mockTaxableMigrationService).getTaxableMigrationFlag(identifier, "id")
+      }
+
+      "taxable migration flag undefined" in {
+        when(mockTaxableMigrationService.getTaxableMigrationFlag(any(), any()))
+          .thenReturn(Future.successful(None))
+
+        val request = FakeRequest(GET, "path")
+
+        val result = taxableMigrationController.getTaxableMigrationFlag(identifier).apply(request)
+        status(result) mustBe OK
+        contentAsJson(result) mustBe Json.toJson(TaxableMigrationFlag(None))
+
+        verify(mockTaxableMigrationService).getTaxableMigrationFlag(identifier, "id")
+      }
+    }
+
+    "return INTERNAL_SERVER_ERROR" when {
+      "repository get fails" in {
+        when(mockTaxableMigrationService.getTaxableMigrationFlag(any(), any()))
+          .thenReturn(Future.failed(new Throwable("repository get failed")))
+
+        val request = FakeRequest(GET, "path")
+
+        val result = taxableMigrationController.getTaxableMigrationFlag(identifier).apply(request)
+        status(result) mustBe INTERNAL_SERVER_ERROR
+
+        verify(mockTaxableMigrationService).getTaxableMigrationFlag(identifier, "id")
+      }
     }
   }
 
@@ -97,28 +128,58 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
       }
     }
 
-    "return INTERNAL_SERVER_ERROR" when {
+    "return BAD_REQUEST" when {
       "request body cannot be validated" in {
         val result = taxableMigrationController.setTaxableMigrationFlag(identifier)
           .apply(postRequestWithPayload(JsNull))
 
+        status(result) mustBe BAD_REQUEST
+      }
+    }
+
+    "return INTERNAL_SERVER_ERROR" when {
+      "repository set fails" in {
+        when(mockTaxableMigrationService.setTaxableMigrationFlag(any(), any(), any()))
+          .thenReturn(Future.failed(new Throwable("repository set failed")))
+
+        val result = taxableMigrationController.setTaxableMigrationFlag(identifier)
+          .apply(postRequestWithPayload(JsBoolean(true)))
+
         status(result) mustBe INTERNAL_SERVER_ERROR
+
+        verify(mockTaxableMigrationService).setTaxableMigrationFlag(identifier, "id", migratingToTaxable = true)
       }
     }
   }
 
   ".removeTransforms" should {
-    "remove all transforms" in {
 
-      when(mockTransformationService.removeAllTransformations(any(), any()))
-        .thenReturn(Future.successful(None))
+    "return OK" when {
+      "successfully removed transforms" in {
+        when(mockTransformationService.removeAllTransformations(any(), any()))
+          .thenReturn(Future.successful(None))
 
-      val request = FakeRequest(DELETE, "path")
+        val request = FakeRequest(DELETE, "path")
 
-      val result = taxableMigrationController.removeTransforms(identifier).apply(request)
-      status(result) mustBe OK
+        val result = taxableMigrationController.removeTransforms(identifier).apply(request)
+        status(result) mustBe OK
 
-      verify(mockTransformationService).removeAllTransformations(identifier, "id")
+        verify(mockTransformationService).removeAllTransformations(identifier, "id")
+      }
+    }
+
+    "return INTERNAL_SERVER_ERROR" when {
+      "failed to remove transforms" in {
+        when(mockTransformationService.removeAllTransformations(any(), any()))
+          .thenReturn(Future.failed(new Throwable("repository reset failed")))
+
+        val request = FakeRequest(DELETE, "path")
+
+        val result = taxableMigrationController.removeTransforms(identifier).apply(request)
+        status(result) mustBe INTERNAL_SERVER_ERROR
+
+        verify(mockTransformationService).removeAllTransformations(identifier, "id")
+      }
     }
   }
 }
