@@ -151,7 +151,7 @@ class VariationService @Inject()(
   private def submitVariationAndCheckForMigration(identifier: String, value: JsValue, internalId: String)
                                                  (implicit hc: HeaderCarrier, logging: LoggingContext): Future[VariationResponse] = {
 
-    def migrateNTTToTaxable(migrateToTaxable: Boolean, subscriptionId: String, identifier: String): Future[TaxEnrolmentSubscriberResponse] = {
+    def migrateNonTaxableToTaxable(migrateToTaxable: Boolean, subscriptionId: String, identifier: String): Future[TaxEnrolmentSubscriberResponse] = {
       if (migrateToTaxable) {
         taxableMigrationService.migrateSubscriberToTaxable(subscriptionId, identifier)
       } else {
@@ -162,7 +162,7 @@ class VariationService @Inject()(
     for {
       migrateToTaxable <- taxableMigrationService.migratingFromNonTaxableToTaxable(identifier, internalId)
       variationResponse <- submitVariation(value, internalId, migrateToTaxable)
-      _ <- migrateNTTToTaxable(migrateToTaxable, variationResponse.tvn, identifier)
+      _ <- migrateNonTaxableToTaxable(migrateToTaxable, variationResponse.tvn, identifier)
     } yield {
       variationResponse
     }
