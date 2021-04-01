@@ -57,7 +57,7 @@ class TaxEnrolmentCallbackController @Inject()(migrationService: TaxableMigratio
       implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
       logger.info(s"[migrationSubscriptionCallback][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn]" +
-        s" Tax-enrolment: migration subscription callback triggered ")
+        s" Tax-enrolment: migration subscription callback triggered")
       for {
         utr <- migrationService.completeMigration(subscriptionId, urn)
       } yield {
