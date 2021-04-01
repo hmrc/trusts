@@ -84,7 +84,7 @@ object OtherAssetType {
   implicit val otherAssetTypeFormat: Format[OtherAssetType] = Json.format[OtherAssetType]
 }
 
-case class NonEEABusinessType(lineNo: String,
+case class NonEEABusinessType(lineNo: Option[String],
                               orgName: String,
                               address: AddressType,
                               govLawCountry: String,

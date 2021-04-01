@@ -333,7 +333,7 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
     "non-EEA business asset" - {
 
       val asset = NonEEABusinessType(
-        lineNo = "1",
+        lineNo = None,
         orgName = "Name",
         address = AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK"),
         govLawCountry = "UK",

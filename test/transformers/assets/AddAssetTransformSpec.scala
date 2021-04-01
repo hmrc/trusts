@@ -27,7 +27,7 @@ import java.time.LocalDate
 class AddAssetTransformSpec extends FreeSpec with MustMatchers {
 
   val asset: NonEEABusinessType = NonEEABusinessType(
-    "1",
+    Some("1"),
     "TestOrg",
     AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK"),
     "UK",
