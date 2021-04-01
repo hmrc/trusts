@@ -59,7 +59,7 @@ class TaxableMigrationService @Inject()(
                                      (implicit hc: HeaderCarrier): Future[TaxEnrolmentsSubscriptionsResponse] = {
     taxEnrolmentConnector.subscriptions(subscriptionId) recover {
       case e: Exception =>
-        logger.error(s"[Session ID: ${Session.id(hc)}][UTR/URN: $urn] unable to get UTR from subscription to complete migration to taxable")
+        logger.error(s"[Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn] unable to get UTR from subscription to complete migration to taxable")
         auditService.auditTaxEnrolmentTransformationToTaxableError(subscriptionId, urn, e.getMessage)
         throw e
     }
