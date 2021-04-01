@@ -488,7 +488,7 @@ class AmendAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFutu
     "non-EEA business asset" - {
 
       val originalAsset = NonEEABusinessType(
-        lineNo = "1",
+        lineNo = None,
         orgName = "Name",
         address = AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK"),
         govLawCountry = "UK",

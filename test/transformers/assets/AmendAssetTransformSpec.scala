@@ -29,7 +29,7 @@ class AmendAssetTransformSpec extends FreeSpec with MustMatchers {
   private val address =  AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "GB")
 
   private val originalAsset: NonEEABusinessType = NonEEABusinessType(
-    lineNo = "2",
+    lineNo = Some("2"),
     orgName = "Original Name",
     address = address,
     govLawCountry = "GB",

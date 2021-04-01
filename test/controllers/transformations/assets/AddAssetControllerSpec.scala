@@ -417,7 +417,7 @@ class AddAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFuture
     "non-EEA business asset" - {
 
       val asset = NonEEABusinessType(
-        lineNo = "1",
+        lineNo = Some("1"),
         orgName = "Name",
         address = AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK"),
         govLawCountry = "UK",

@@ -181,7 +181,7 @@ class RemoveAssetTransformSpec extends FreeSpec with MustMatchers with ScalaFutu
       val trustsService = mock[TrustsService]
       val auditService = mock[AuditService]
       val transforms = Seq(
-        AddAssetTransform(Json.toJson(NonEEABusinessType("01", "TestOrg", AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK"), "UK", LocalDate.parse("1967-12-30"), None)), "nonEEABusiness"),
+        AddAssetTransform(Json.toJson(NonEEABusinessType(None, "TestOrg", AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "UK"), "UK", LocalDate.parse("1967-12-30"), None)), "nonEEABusiness"),
         RemoveAssetTransform(Some(3), assetJson("Two", None, withLineNo = false), LocalDate.of(2018, 4, 21), "nonEEABusiness")
       )
 
