@@ -551,7 +551,7 @@ object DisplayOtherAssetType {
 }
 
 // new 5MLD type
-case class DisplayNonEEABusinessType(lineNo: String,
+case class DisplayNonEEABusinessType(lineNo: Option[String],
                                      orgName: String,
                                      address: AddressType,
                                      govLawCountry: String,
