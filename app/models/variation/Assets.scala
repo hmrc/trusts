@@ -17,9 +17,11 @@
 package models.variation
 
 import models.AddressType
-import play.api.libs.json.{Format, Json}
-
+import models.JsonWithoutNulls.JsonWithoutNullValues
+import play.api.libs.json.{Format, Json, Writes}
 import java.time.LocalDate
+
+trait Asset[T] extends Entity[T]
 
 case class Assets(monetary: Option[List[AssetMonetaryAmount]],
                   propertyOrLand: Option[List[PropertyLandType]],
@@ -33,7 +35,9 @@ object Assets {
   implicit val assetsFormat: Format[Assets] = Json.format[Assets]
 }
 
-case class AssetMonetaryAmount(assetMonetaryAmount: Long)
+case class AssetMonetaryAmount(assetMonetaryAmount: Long) extends Asset[AssetMonetaryAmount] {
+  override val writeToMaintain: Writes[AssetMonetaryAmount] = AssetMonetaryAmount.assetMonetaryAmountFormat
+}
 
 object AssetMonetaryAmount {
   implicit val assetMonetaryAmountFormat: Format[AssetMonetaryAmount] = Json.format[AssetMonetaryAmount]
@@ -42,7 +46,10 @@ object AssetMonetaryAmount {
 case class PropertyLandType(buildingLandName: Option[String],
                             address: Option[AddressType],
                             valueFull: Long,
-                            valuePrevious: Option[Long])
+                            valuePrevious: Option[Long]) extends Asset[PropertyLandType] {
+
+  override val writeToMaintain: Writes[PropertyLandType] = PropertyLandType.propertyLandTypeFormat
+}
 
 object PropertyLandType {
   implicit val propertyLandTypeFormat: Format[PropertyLandType] = Json.format[PropertyLandType]
@@ -53,7 +60,10 @@ case class SharesType(numberOfShares: Option[String],
                       utr: Option[String],
                       shareClass: Option[String],
                       typeOfShare: Option[String],
-                      value: Option[Long])
+                      value: Option[Long]) extends Asset[SharesType] {
+
+  override val writeToMaintain: Writes[SharesType] = SharesType.sharesTypeFormat
+}
 
 object SharesType {
   implicit val sharesTypeFormat: Format[SharesType] = Json.format[SharesType]
@@ -63,7 +73,10 @@ case class BusinessAssetType(utr: Option[String],
                              orgName: String,
                              businessDescription: String,
                              address: Option[AddressType],
-                             businessValue: Option[Long])
+                             businessValue: Option[Long]) extends Asset[BusinessAssetType]{
+
+  override val writeToMaintain: Writes[BusinessAssetType] = BusinessAssetType.businessAssetTypeFormat
+}
 
 object BusinessAssetType {
   implicit val businessAssetTypeFormat: Format[BusinessAssetType] = Json.format[BusinessAssetType]
@@ -71,14 +84,20 @@ object BusinessAssetType {
 
 case class PartnershipType(utr: Option[String],
                            description: String,
-                           partnershipStart: Option[LocalDate])
+                           partnershipStart: Option[LocalDate]) extends Asset[PartnershipType] {
+
+  override val writeToMaintain: Writes[PartnershipType] = PartnershipType.partnershipTypeFormat
+}
 
 object PartnershipType {
   implicit val partnershipTypeFormat: Format[PartnershipType] = Json.format[PartnershipType]
 }
 
 case class OtherAssetType(description: String,
-                          value: Option[Long])
+                          value: Option[Long]) extends Asset[OtherAssetType] {
+
+  override val writeToMaintain: Writes[OtherAssetType] = OtherAssetType.otherAssetTypeFormat
+}
 
 object OtherAssetType {
   implicit val otherAssetTypeFormat: Format[OtherAssetType] = Json.format[OtherAssetType]
@@ -89,8 +108,22 @@ case class NonEEABusinessType(lineNo: Option[String],
                               address: AddressType,
                               govLawCountry: String,
                               startDate: LocalDate,
-                              endDate: Option[LocalDate])
+                              endDate: Option[LocalDate]) extends Asset[NonEEABusinessType] {
+
+  override val writeToMaintain: Writes[NonEEABusinessType] = NonEEABusinessType.writeToMaintain
+}
 
 object NonEEABusinessType {
-  implicit val format: Format[NonEEABusinessType] = Json.format[NonEEABusinessType]
+  implicit val nonEEABusinessTypeFormat: Format[NonEEABusinessType] = Json.format[NonEEABusinessType]
+
+  val writeToMaintain: Writes[NonEEABusinessType] = (o: NonEEABusinessType) => Json.obj(
+    "lineNo" -> o.lineNo,
+    "orgName" -> o.orgName,
+    "address" -> o.address,
+    "govLawCountry" -> o.govLawCountry,
+    "startDate" -> o.startDate,
+    "endDate" -> o.endDate,
+    "provisional" -> o.lineNo.isEmpty
+  ).withoutNulls
 }
+
