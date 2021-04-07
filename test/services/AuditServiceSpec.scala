@@ -195,7 +195,7 @@ class AuditServiceSpec extends BaseSpec {
       )
 
       verify(connector).sendExplicitAudit[OrchestratorAuditEvent](
-        equalTo("OrchestratorNonTaxableTrustTooTaxableFailed"),
+        equalTo("OrchestratorNonTaxableTrustToTaxableFailed"),
         equalTo(expectedAuditData))(any(), any(), any())
     }
   }
