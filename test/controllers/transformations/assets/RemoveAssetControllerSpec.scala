@@ -71,7 +71,7 @@ class RemoveAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFut
 
     "money asset" - {
 
-      val asset = AssetMonetaryAmount(
+      val asset = AssetMonetaryAmountType(
         assetMonetaryAmount = amount
       )
 

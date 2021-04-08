@@ -36,7 +36,7 @@ class AmendAssetController @Inject()(identify: IdentifierAction,
   extends AmendTransformationController(identify, transformationService) with AssetController {
 
   def amendMoney(identifier: String, index: Int): Action[JsValue] =
-    addNewTransform[AssetMonetaryAmount](identifier, Some(index), MONEY_ASSET)
+    addNewTransform[AssetMonetaryAmountType](identifier, Some(index), MONEY_ASSET)
 
   def amendPropertyOrLand(identifier: String, index: Int): Action[JsValue] =
     addNewTransform[PropertyLandType](identifier, Some(index), PROPERTY_OR_LAND_ASSET)

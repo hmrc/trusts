@@ -64,7 +64,7 @@ class AmendAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFutu
 
     "money asset" - {
 
-      val originalAsset = AssetMonetaryAmount(
+      val originalAsset = AssetMonetaryAmountType(
         assetMonetaryAmount = amount
       )
 

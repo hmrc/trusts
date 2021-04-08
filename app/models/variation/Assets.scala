@@ -23,7 +23,7 @@ import java.time.LocalDate
 
 trait Asset[T] extends Entity[T]
 
-case class Assets(monetary: Option[List[AssetMonetaryAmount]],
+case class Assets(monetary: Option[List[AssetMonetaryAmountType]],
                   propertyOrLand: Option[List[PropertyLandType]],
                   shares: Option[List[SharesType]],
                   business: Option[List[BusinessAssetType]],
@@ -35,12 +35,12 @@ object Assets {
   implicit val assetsFormat: Format[Assets] = Json.format[Assets]
 }
 
-case class AssetMonetaryAmount(assetMonetaryAmount: Long) extends Asset[AssetMonetaryAmount] {
-  override val writeToMaintain: Writes[AssetMonetaryAmount] = AssetMonetaryAmount.assetMonetaryAmountFormat
+case class AssetMonetaryAmountType(assetMonetaryAmount: Long) extends Asset[AssetMonetaryAmountType] {
+  override val writeToMaintain: Writes[AssetMonetaryAmountType] = AssetMonetaryAmountType.assetMonetaryAmountFormat
 }
 
-object AssetMonetaryAmount {
-  implicit val assetMonetaryAmountFormat: Format[AssetMonetaryAmount] = Json.format[AssetMonetaryAmount]
+object AssetMonetaryAmountType {
+  implicit val assetMonetaryAmountFormat: Format[AssetMonetaryAmountType] = Json.format[AssetMonetaryAmountType]
 }
 
 case class PropertyLandType(buildingLandName: Option[String],
