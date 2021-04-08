@@ -1,5 +1,10 @@
 {
   "assets": {
+    "business":[],
+    "monetary":[],
+    "partnerShip":[],
+    "propertyOrLand":[],
+    "shares":[],
     "nonEEABusiness": [
       {
         "lineNo": "1",
@@ -15,6 +20,7 @@
         "startDate": "2020-01-05",
         "provisional": false
       }
-    ]
+    ],
+    "other":[]
   }
 }
