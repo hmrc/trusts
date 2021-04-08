@@ -52,6 +52,7 @@ trait JsonFixtures extends JsonUtils {
   lazy val getTrustPropertyLandNoPreviousValueJson: JsValue = getJsonValueFromFile("valid-get-trust-response-property-or-land-no-previous-value.json")
 
   lazy val getTransformedTrustResponse: JsValue = getJsonValueFromFile("transformed-get-trust-response.json")
+  lazy val getTransformedTrustAllAssetsResponse: JsValue = getJsonValueFromFile("transformed-get-trust-all-assets-response.json")
   lazy val getTransformedTrustResponse5mld: JsValue = getJsonValueFromFile("5MLD/Taxable/cached/2134514321-taxable.json")
   lazy val getTransformedTrustResponseWithYearsReturns: JsValue = getJsonValueFromFile("transformed-get-trust-response-with-years-returns.json")
 
@@ -63,7 +64,7 @@ trait JsonFixtures extends JsonUtils {
 
   lazy val getTransformedBeneficiariesResponse: JsValue = getJsonValueFromFile("trust-transformed-get-beneficiary-result.json")
   lazy val getTransformedSettlorsResponse: JsValue = getJsonValueFromFile("trust-transformed-get-settlor-result.json")
-  lazy val getTransformedAssetsResponse: JsValue = getJsonValueFromFile("trust-transformed-get-assets-result.json")
+  lazy val getTransformedAllAssetsResponse: JsValue = getJsonValueFromFile("trust-transformed-get-all-assets-result.json")
 
   lazy val getTransformedTrustDeceasedSettlorWithoutDeathResponse: JsValue =
     getJsonValueFromFile("transformed-get-trust-response-deceased-settlor-without-date-of-death.json")

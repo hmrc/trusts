@@ -1,5 +1,10 @@
 {
   "assets": {
+    "business":[],
+    "monetary":[],
+    "partnerShip":[],
+    "propertyOrLand":[],
+    "shares":[],
     "nonEEABusiness": [
       {
         "lineNo": "1",
@@ -12,8 +17,10 @@
           "country": "CA"
         },
         "govLawCountry": "CA",
-        "startDate": "2020-01-05"
+        "startDate": "2020-01-05",
+        "provisional": false
       }
-    ]
+    ],
+    "other":[]
   }
 }

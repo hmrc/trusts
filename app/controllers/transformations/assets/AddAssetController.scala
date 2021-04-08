@@ -34,7 +34,7 @@ class AddAssetController @Inject()(identify: IdentifierAction,
                                   (implicit ec: ExecutionContext, cc: ControllerComponents)
   extends AddTransformationController(identify, transformationService) {
 
-  def addMoney(identifier: String): Action[JsValue] = addNewTransform[AssetMonetaryAmount](identifier, MONEY_ASSET)
+  def addMoney(identifier: String): Action[JsValue] = addNewTransform[AssetMonetaryAmountType](identifier, MONEY_ASSET)
 
   def addPropertyOrLand(identifier: String): Action[JsValue] = addNewTransform[PropertyLandType](identifier, PROPERTY_OR_LAND_ASSET)
 

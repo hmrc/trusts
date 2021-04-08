@@ -53,7 +53,7 @@ class AddAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFuture
 
     "money asset" - {
 
-      val asset = AssetMonetaryAmount(
+      val asset = AssetMonetaryAmountType(
         assetMonetaryAmount = amount
       )
 
