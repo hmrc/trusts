@@ -752,7 +752,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
       "return 200 - Ok with processed content" in {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustAllAssetsResponse, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -764,7 +764,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
-          contentAsJson(result) mustBe getTransformedAssetsResponse
+          contentAsJson(result) mustBe getTransformedAllAssetsResponse
         }
       }
 

@@ -53,6 +53,21 @@
         "partnershipStart": "2010-02-28"
       }
     ],
+    "nonEEABusiness": [
+      {
+        "address": {
+          "line1": "1234567890 QwErTyUiOp ,.(/)&'- name",
+          "line2": "1234567890 QwErTyUiOp ,.(/)&'- name",
+          "postCode": "Z99 2YY",
+          "country": "GB"
+        },
+        "lineNo": "1",
+        "orgName": "1234567890 QwErTyUiOp ,.(/)&'- name",
+        "govLawCountry": "DE",
+        "startDate": "2020-09-02",
+        "provisional":false
+      }
+    ],
     "other": [
       {
         "description": "Jewelries",
