@@ -1,7 +1,8 @@
 
+GET         /:identifier/transformed/                       controllers.GetTrustController.getOtherIndividuals(identifier: String)
+
 POST        /add/:identifier                                controllers.transformations.otherindividuals.AddOtherIndividualController.add(identifier: String)
 
 POST        /amend/:identifier/:index                       controllers.transformations.otherindividuals.AmendOtherIndividualController.amend(identifier: String, index: Int)
 
 PUT         /:identifier/remove                             controllers.transformations.otherindividuals.RemoveOtherIndividualController.remove(identifier: String)
-

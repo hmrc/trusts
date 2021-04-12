@@ -65,14 +65,14 @@ class SetRecordedSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar 
 
       val setRecordedProperty = JsBoolean(true)
 
-      val amendRequest = FakeRequest(PUT, s"/trusts/$identifier/trust-details/recorded")
+      val amendRequest = FakeRequest(PUT, s"/trusts/trust-details/$identifier/recorded")
         .withBody(setRecordedProperty)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val addedResponse = route(application, amendRequest).get
       status(addedResponse) mustBe OK
 
-      val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/trust-details")).get
+      val newResult = route(application, FakeRequest(GET, s"/trusts/trust-details/$identifier/transformed")).get
       status(newResult) mustBe OK
 
       val trustees = (contentAsJson(newResult) \ "trustRecorded").as[JsBoolean]

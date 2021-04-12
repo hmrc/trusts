@@ -62,14 +62,14 @@ class SetTypeOfTrustSpec extends AsyncFreeSpec with MustMatchers with MockitoSug
 
       val body = JsString("Employment Related")
 
-      val setValueRequest = FakeRequest(PUT, s"/trusts/$identifier/trust-details/type-of-trust")
+      val setValueRequest = FakeRequest(PUT, s"/trusts/trust-details/$identifier/type-of-trust")
         .withBody(body)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val setValueResponse = route(application, setValueRequest).get
       status(setValueResponse) mustBe OK
 
-      val subsequentGetResult = route(application, FakeRequest(GET, s"/trusts/$identifier/trust-details")).get
+      val subsequentGetResult = route(application, FakeRequest(GET, s"/trusts/trust-details/$identifier/transformed")).get
       status(subsequentGetResult) mustBe OK
 
       val detail = (contentAsJson(subsequentGetResult) \ "typeOfTrust").as[JsString]

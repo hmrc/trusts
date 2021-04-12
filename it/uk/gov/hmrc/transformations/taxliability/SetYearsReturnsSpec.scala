@@ -58,7 +58,7 @@ class SetYearsReturnsSpec extends AsyncFreeSpec with MustMatchers with MockitoSu
     }
 
     def runTest(identifier: String, application: Application): Assertion = {
-      val initialGetResult = route(application, FakeRequest(GET, s"/trusts/$identifier/years-returns")).get
+      val initialGetResult = route(application, FakeRequest(GET, s"/trusts/tax-liability/$identifier/transformed")).get
       status(initialGetResult) mustBe OK
 
       val initialYearsReturns = contentAsJson(initialGetResult).as[JsValue]
@@ -71,14 +71,14 @@ class SetYearsReturnsSpec extends AsyncFreeSpec with MustMatchers with MockitoSu
         ))
       ))
 
-      val setYearsReturnsRequest = FakeRequest(PUT, s"/trusts/$identifier/years-returns")
+      val setYearsReturnsRequest = FakeRequest(PUT, s"/trusts/tax-liability/$identifier/years-returns")
         .withBody(body)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val setYearsReturnsResponse = route(application, setYearsReturnsRequest).get
       status(setYearsReturnsResponse) mustBe OK
 
-      val subsequentGetResult = route(application, FakeRequest(GET, s"/trusts/$identifier/years-returns")).get
+      val subsequentGetResult = route(application, FakeRequest(GET, s"/trusts/tax-liability/$identifier/transformed")).get
       status(subsequentGetResult) mustBe OK
 
       val subsequentYearsReturns = contentAsJson(subsequentGetResult).as[JsValue]

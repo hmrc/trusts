@@ -63,14 +63,14 @@ class SetEfrbsStartDateSpec extends AsyncFreeSpec with MustMatchers with Mockito
 
       val body = Json.toJson(LocalDate.parse("2021-01-01"))
 
-      val setValueRequest = FakeRequest(PUT, s"/trusts/$identifier/trust-details/efrbs-start-date")
+      val setValueRequest = FakeRequest(PUT, s"/trusts/trust-details/$identifier/efrbs-start-date")
         .withBody(body)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val setValueResponse = route(application, setValueRequest).get
       status(setValueResponse) mustBe OK
 
-      val subsequentGetResult = route(application, FakeRequest(GET, s"/trusts/$identifier/trust-details")).get
+      val subsequentGetResult = route(application, FakeRequest(GET, s"/trusts/trust-details/$identifier/transformed")).get
       status(subsequentGetResult) mustBe OK
 
       val detail = (contentAsJson(subsequentGetResult) \ "efrbsStartDate").as[JsValue]
