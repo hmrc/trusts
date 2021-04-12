@@ -1,5 +1,5 @@
 
-GET         /:identifier/transformed/                       controllers.GetTrustController.getOtherIndividuals(identifier: String)
+GET         /:identifier/transformed                        controllers.GetTrustController.getOtherIndividuals(identifier: String)
 
 POST        /add/:identifier                                controllers.transformations.otherindividuals.AddOtherIndividualController.add(identifier: String)
 
