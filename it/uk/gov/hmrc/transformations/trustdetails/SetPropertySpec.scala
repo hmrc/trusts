@@ -65,14 +65,14 @@ class SetPropertySpec extends AsyncFreeSpec with MustMatchers with MockitoSugar 
 
       val setProperty = JsBoolean(true)
 
-      val amendRequest = FakeRequest(PUT, s"/trusts/$identifier/trust-details/uk-property")
+      val amendRequest = FakeRequest(PUT, s"/trusts/trust-details/$identifier/uk-property")
         .withBody(setProperty)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val addedResponse = route(application, amendRequest).get
       status(addedResponse) mustBe OK
 
-      val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/trust-details")).get
+      val newResult = route(application, FakeRequest(GET, s"/trusts/trust-details/$identifier/transformed")).get
       status(newResult) mustBe OK
 
       val trustees = (contentAsJson(newResult) \ "trustUKProperty").as[JsBoolean]

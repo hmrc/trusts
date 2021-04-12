@@ -63,14 +63,14 @@ class SetResidentialStatusSpec extends AsyncFreeSpec with MustMatchers with Mock
 
       val body = Json.toJson(ResidentialStatusType(None, Some(NonUKType(sch5atcgga92 = true, None, None, None))))
 
-      val setValueRequest = FakeRequest(PUT, s"/trusts/$identifier/trust-details/residential-status")
+      val setValueRequest = FakeRequest(PUT, s"/trusts/trust-details/$identifier/residential-status")
         .withBody(body)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val setValueResponse = route(application, setValueRequest).get
       status(setValueResponse) mustBe OK
 
-      val subsequentGetResult = route(application, FakeRequest(GET, s"/trusts/$identifier/trust-details")).get
+      val subsequentGetResult = route(application, FakeRequest(GET, s"/trusts/trust-details/$identifier/transformed")).get
       status(subsequentGetResult) mustBe OK
 
       val detail = (contentAsJson(subsequentGetResult) \ "residentialStatus").as[JsValue]

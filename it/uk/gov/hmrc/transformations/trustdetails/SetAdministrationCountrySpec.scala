@@ -62,14 +62,14 @@ class SetAdministrationCountrySpec extends AsyncFreeSpec with MustMatchers with 
 
       val body = JsString("FR")
 
-      val setValueRequest = FakeRequest(PUT, s"/trusts/$identifier/trust-details/administration-country")
+      val setValueRequest = FakeRequest(PUT, s"/trusts/trust-details/$identifier/administration-country")
         .withBody(body)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val setValueResponse = route(application, setValueRequest).get
       status(setValueResponse) mustBe OK
 
-      val subsequentGetResult = route(application, FakeRequest(GET, s"/trusts/$identifier/trust-details")).get
+      val subsequentGetResult = route(application, FakeRequest(GET, s"/trusts/trust-details/$identifier/transformed")).get
       status(subsequentGetResult) mustBe OK
 
       val detail = (contentAsJson(subsequentGetResult) \ "administrationCountry").as[JsString]

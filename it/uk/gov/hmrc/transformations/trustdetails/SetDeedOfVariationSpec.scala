@@ -62,14 +62,14 @@ class SetDeedOfVariationSpec extends AsyncFreeSpec with MustMatchers with Mockit
 
       val body = JsString("Replaced the will trust")
 
-      val setValueRequest = FakeRequest(PUT, s"/trusts/$identifier/trust-details/deed-of-variation")
+      val setValueRequest = FakeRequest(PUT, s"/trusts/trust-details/$identifier/deed-of-variation")
         .withBody(body)
         .withHeaders(CONTENT_TYPE -> "application/json")
 
       val setValueResponse = route(application, setValueRequest).get
       status(setValueResponse) mustBe OK
 
-      val subsequentGetResult = route(application, FakeRequest(GET, s"/trusts/$identifier/trust-details")).get
+      val subsequentGetResult = route(application, FakeRequest(GET, s"/trusts/trust-details/$identifier/transformed")).get
       status(subsequentGetResult) mustBe OK
 
       val detail = (contentAsJson(subsequentGetResult) \ "deedOfVariation").as[JsString]

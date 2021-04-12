@@ -1,11 +1,13 @@
 # microservice specific routes
 
+->          /trust-details                                                                  trusts.trustDetails.Routes
 ->          /trustees                                                                       trusts.trustees.Routes
 ->          /beneficiaries                                                                  trusts.beneficiaries.Routes
 ->          /settlors                                                                       trusts.settlors.Routes
 ->          /protectors                                                                     trusts.protectors.Routes
 ->          /other-individuals                                                              trusts.otherIndividuals.Routes
 ->          /assets                                                                         trusts.assets.Routes
+->          /tax-liability                                                                  trusts.taxLiability.Routes
 
 ->          /register                                                                       register.Routes
 
@@ -23,8 +25,10 @@ GET         /:identifier                                                        
 
 GET         /:identifier/transformed                                                        controllers.GetTrustController.get(identifier: String, applyTransforms: Boolean = true)
 
+# TODO - point all frontends at new route inside trusts.trustDetails.Routes and delete this route
 GET         /:identifier/trust-details                                                      controllers.GetTrustController.getTrustDetails(identifier: String)
 
+# TODO - delete once maintain-other-individuals-frontend deployed pointing to new route inside trusts.otherIndividuals.Routes
 GET         /:identifier/transformed/other-individuals                                      controllers.GetTrustController.getOtherIndividuals(identifier: String)
 
 GET         /:identifier/transformed/protectors-already-exist                               controllers.GetTrustController.getProtectorsAlreadyExist(identifier: String)
@@ -35,26 +39,9 @@ POST        /variation                                                          
 
 POST        /declare/:identifier                                                            controllers.TrustVariationsController.declare(identifier: String)
 
-PUT         /:identifier/trust-details/express                                              controllers.transformations.trustdetails.TrustDetailsTransformationController.setExpress(identifier: String)
-PUT         /:identifier/trust-details/uk-resident                                          controllers.transformations.trustdetails.TrustDetailsTransformationController.setResident(identifier: String)
-PUT         /:identifier/trust-details/taxable                                              controllers.transformations.trustdetails.TrustDetailsTransformationController.setTaxable(identifier: String)
-PUT         /:identifier/trust-details/uk-property                                          controllers.transformations.trustdetails.TrustDetailsTransformationController.setProperty(identifier: String)
-PUT         /:identifier/trust-details/recorded                                             controllers.transformations.trustdetails.TrustDetailsTransformationController.setRecorded(identifier: String)
-PUT         /:identifier/trust-details/uk-relation                                          controllers.transformations.trustdetails.TrustDetailsTransformationController.setUKRelation(identifier: String)
-PUT         /:identifier/trust-details/law-country                                          controllers.transformations.trustdetails.TrustDetailsTransformationController.setLawCountry(identifier: String)
-PUT         /:identifier/trust-details/administration-country                               controllers.transformations.trustdetails.TrustDetailsTransformationController.setAdministrationCountry(identifier: String)
-PUT         /:identifier/trust-details/type-of-trust                                        controllers.transformations.trustdetails.TrustDetailsTransformationController.setTypeOfTrust(identifier: String)
-PUT         /:identifier/trust-details/deed-of-variation                                    controllers.transformations.trustdetails.TrustDetailsTransformationController.setDeedOfVariation(identifier: String)
-PUT         /:identifier/trust-details/inter-vivos                                          controllers.transformations.trustdetails.TrustDetailsTransformationController.setInterVivos(identifier: String)
-PUT         /:identifier/trust-details/efrbs-start-date                                     controllers.transformations.trustdetails.TrustDetailsTransformationController.setEfrbsStartDate(identifier: String)
-PUT         /:identifier/trust-details/residential-status                                   controllers.transformations.trustdetails.TrustDetailsTransformationController.setResidentialStatus(identifier: String)
-
 GET         /:identifier/taxable-migration/migrating-to-taxable                             controllers.TaxableMigrationController.getTaxableMigrationFlag(identifier: String)
 POST        /:identifier/taxable-migration/migrating-to-taxable                             controllers.TaxableMigrationController.setTaxableMigrationFlag(identifier: String)
 
 DELETE      /:identifier/transforms                                                         controllers.transformations.TransformationController.removeTransforms(identifier: String)
-
-GET         /:identifier/years-returns                                                      controllers.GetTrustController.getYearsReturns(identifier: String)
-PUT         /:identifier/years-returns                                                      controllers.transformations.taxliability.TaxLiabilityTransformationController.setYearsReturns(identifier: String)
 
 GET         /:identifier/is-trust-5mld                                                      controllers.GetTrustController.isTrust5mld(identifier: String)
