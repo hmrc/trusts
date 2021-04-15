@@ -1,5 +1,6 @@
 
-GET         /:identifier/transformed                    controllers.GetTrustController.getTrustDetails(identifier: String)
+GET         /:identifier/transformed                    controllers.GetTrustController.getTrustDetails(identifier: String, applyTransformations: Boolean = true)
+GET         /:identifier/untransformed                  controllers.GetTrustController.getTrustDetails(identifier: String, applyTransformations: Boolean = false)
 
 PUT         /:identifier/express                        controllers.transformations.trustdetails.TrustDetailsTransformationController.setExpress(identifier: String)
 PUT         /:identifier/uk-resident                    controllers.transformations.trustdetails.TrustDetailsTransformationController.setResident(identifier: String)
