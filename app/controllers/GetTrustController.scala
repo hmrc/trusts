@@ -182,7 +182,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
   }
 
-  private def getElementAtPath(identifier: String, path: JsPath, defaultValue: JsValue, applyTransformations: Boolean = true)
+  private def getElementAtPath(identifier: String, path: JsPath, defaultValue: JsValue, applyTransformations: Boolean)
                               (insertIntoObject: JsValue => JsValue): Action[AnyContent] = {
     processEtmpData(identifier, applyTransformations) {
       transformed => transformed
