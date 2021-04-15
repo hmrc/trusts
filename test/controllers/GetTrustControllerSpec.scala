@@ -468,105 +468,215 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       }
     }
 
-    ".getTrustDetails" should {
+    ".getTrustDetails" when {
 
-      "return 403 - Forbidden with parked content" in {
+      "applying transformations" should {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
+        val applyTransformations = true
 
-        val result = getTrustController.getTrustDetails(utr).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
+        "return 403 - Forbidden with parked content" in {
 
-        whenReady(result) { _ =>
-          status(result) mustBe FORBIDDEN
+          when(transformationService.getTransformedData(any(), any())(any()))
+            .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
+
+          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
+
+          whenReady(result) { _ =>
+            status(result) mustBe FORBIDDEN
+          }
+        }
+
+        "return 200 - Ok with processed content" in {
+
+          val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+
+          when(transformationService.getTransformedData(any[String], any[String])(any()))
+            .thenReturn(Future.successful(processedResponse))
+
+          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
+
+          whenReady(result) { _ =>
+            verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+            status(result) mustBe OK
+            contentType(result) mustBe Some(JSON)
+            contentAsJson(result) mustBe Json.parse(
+              """
+                |{
+                | "startDate":"1920-03-28",
+                | "lawCountry":"AD",
+                | "administrationCountry":"GB",
+                | "residentialStatus": {
+                |   "uk":{
+                |     "scottishLaw":false,
+                |     "preOffShore":"GB"
+                |   }
+                | },
+                | "typeOfTrust":"Will Trust or Intestacy Trust",
+                | "deedOfVariation":"Previously there was only an absolute interest under the will",
+                | "interVivos":true,
+                | "efrbsStartDate": "1920-02-28"
+                |}""".stripMargin)
+          }
+        }
+
+        "return 200 - Ok with trust details with 5mld data" in {
+
+          val cached = Taxable5MLDFixtures.Cache.taxable5mld2134514321
+
+          val processedResponse = models.get_trust.TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
+
+          when(transformationService.getTransformedData(any[String], any[String])(any()))
+            .thenReturn(Future.successful(processedResponse))
+
+          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
+
+          whenReady(result) { _ =>
+            verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+            status(result) mustBe OK
+            contentType(result) mustBe Some(JSON)
+            contentAsJson(result) mustBe Json.parse(
+              """
+                |{
+                |"startDate": "1920-03-28",
+                |"lawCountry": "AD",
+                |"administrationCountry": "GB",
+                |"residentialStatus": {
+                |  "uk": {
+                |    "scottishLaw": false,
+                |    "preOffShore": "GB"
+                |  }
+                |},
+                |"typeOfTrust": "Will Trust or Intestacy Trust",
+                |"deedOfVariation": "Previously there was only an absolute interest under the will",
+                |"interVivos": true,
+                |"efrbsStartDate": "1920-02-28",
+                |"trustTaxable": true,
+                |"expressTrust": true,
+                |"trustUKResident": true,
+                |"trustUKProperty": true,
+                |"trustRecorded": false,
+                |"trustUKRelation": false
+                |}""".stripMargin)
+          }
+        }
+
+        "return 500 - Internal server error for invalid content" in {
+
+          when(transformationService.getTransformedData(any(), any())(any()))
+            .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+
+          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
+
+          whenReady(result) { _ =>
+            status(result) mustBe INTERNAL_SERVER_ERROR
+          }
         }
       }
 
-      "return 200 - Ok with processed content" in {
+      "not applying transformations" should {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+        val applyTransformations = false
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
-          .thenReturn(Future.successful(processedResponse))
+        "return 403 - Forbidden with parked content" in {
 
-        val result = getTrustController.getTrustDetails(utr).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
+          when(trustsService.getTrustInfo(any(), any()))
+            .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
-        whenReady(result) { _ =>
-          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
-          status(result) mustBe OK
-          contentType(result) mustBe Some(JSON)
-          contentAsJson(result) mustBe Json.parse(
-            """
-              |{
-              | "startDate":"1920-03-28",
-              | "lawCountry":"AD",
-              | "administrationCountry":"GB",
-              | "residentialStatus": {
-              |   "uk":{
-              |     "scottishLaw":false,
-              |     "preOffShore":"GB"
-              |   }
-              | },
-              | "typeOfTrust":"Will Trust or Intestacy Trust",
-              | "deedOfVariation":"Previously there was only an absolute interest under the will",
-              | "interVivos":true,
-              | "efrbsStartDate": "1920-02-28"
-              |}""".stripMargin)
+          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
+
+          whenReady(result) { _ =>
+            status(result) mustBe FORBIDDEN
+          }
         }
-      }
 
-      "return 200 - Ok with trust details with 5mld data" in {
+        "return 200 - Ok with processed content" in {
 
-        val cached = Taxable5MLDFixtures.Cache.taxable5mld2134514321
+          val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
+          when(trustsService.getTrustInfo(any[String], any[String]))
+            .thenReturn(Future.successful(processedResponse))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
-          .thenReturn(Future.successful(processedResponse))
+          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
 
-        val result = getTrustController.getTrustDetails(utr).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
-
-        whenReady(result) { _ =>
-          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
-          status(result) mustBe OK
-          contentType(result) mustBe Some(JSON)
-          contentAsJson(result) mustBe Json.parse(
-            """
-              |{
-              |"startDate": "1920-03-28",
-              |"lawCountry": "AD",
-              |"administrationCountry": "GB",
-              |"residentialStatus": {
-              |  "uk": {
-              |    "scottishLaw": false,
-              |    "preOffShore": "GB"
-              |  }
-              |},
-              |"typeOfTrust": "Will Trust or Intestacy Trust",
-              |"deedOfVariation": "Previously there was only an absolute interest under the will",
-              |"interVivos": true,
-              |"efrbsStartDate": "1920-02-28",
-              |"trustTaxable": true,
-              |"expressTrust": true,
-              |"trustUKResident": true,
-              |"trustUKProperty": true,
-              |"trustRecorded": false,
-              |"trustUKRelation": false
-              |}""".stripMargin)
+          whenReady(result) { _ =>
+            verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+            verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"))
+            status(result) mustBe OK
+            contentType(result) mustBe Some(JSON)
+            contentAsJson(result) mustBe Json.parse(
+              """
+                |{
+                | "startDate":"1920-03-28",
+                | "lawCountry":"AD",
+                | "administrationCountry":"GB",
+                | "residentialStatus": {
+                |   "uk":{
+                |     "scottishLaw":false,
+                |     "preOffShore":"GB"
+                |   }
+                | },
+                | "typeOfTrust":"Will Trust or Intestacy Trust",
+                | "deedOfVariation":"Previously there was only an absolute interest under the will",
+                | "interVivos":true,
+                | "efrbsStartDate": "1920-02-28"
+                |}""".stripMargin)
+          }
         }
-      }
 
-      "return 500 - Internal server error for invalid content" in {
+        "return 200 - Ok with trust details with 5mld data" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+          val cached = Taxable5MLDFixtures.Cache.taxable5mld2134514321
 
-        val result = getTrustController.getTrustDetails(utr).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
+          val processedResponse = models.get_trust.TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
-        whenReady(result) { _ =>
-          status(result) mustBe INTERNAL_SERVER_ERROR
+          when(trustsService.getTrustInfo(any[String], any[String]))
+            .thenReturn(Future.successful(processedResponse))
+
+          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
+
+          whenReady(result) { _ =>
+            verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+            verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"))
+            status(result) mustBe OK
+            contentType(result) mustBe Some(JSON)
+            contentAsJson(result) mustBe Json.parse(
+              """
+                |{
+                |"startDate": "1920-03-28",
+                |"lawCountry": "AD",
+                |"administrationCountry": "GB",
+                |"residentialStatus": {
+                |  "uk": {
+                |    "scottishLaw": false,
+                |    "preOffShore": "GB"
+                |  }
+                |},
+                |"typeOfTrust": "Will Trust or Intestacy Trust",
+                |"deedOfVariation": "Previously there was only an absolute interest under the will",
+                |"interVivos": true,
+                |"efrbsStartDate": "1920-02-28",
+                |"trustTaxable": true,
+                |"expressTrust": true,
+                |"trustUKResident": true,
+                |"trustUKProperty": true,
+                |"trustRecorded": false,
+                |"trustUKRelation": false
+                |}""".stripMargin)
+          }
+        }
+
+        "return 500 - Internal server error for invalid content" in {
+
+          when(trustsService.getTrustInfo(any(), any()))
+            .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+
+          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
+
+          whenReady(result) { _ =>
+            status(result) mustBe INTERNAL_SERVER_ERROR
+          }
         }
       }
     }

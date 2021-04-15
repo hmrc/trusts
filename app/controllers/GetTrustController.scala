@@ -86,8 +86,8 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       case _ => Forbidden
     }
 
-  def getTrustDetails(identifier: String): Action[AnyContent] =
-    getItemAtPath(identifier, TRUST \ DETAILS)
+  def getTrustDetails(identifier: String, applyTransformations: Boolean): Action[AnyContent] =
+    getItemAtPath(identifier, TRUST \ DETAILS, applyTransformations)
 
   def getYearsReturns(identifier: String): Action[AnyContent] =
     getItemAtPath(identifier, YEARS_RETURNS)
@@ -160,29 +160,31 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
   }
 
-  private def getArrayAtPath(identifier: String, path: JsPath, fieldName: String): Action[AnyContent] = {
-    getElementAtPath(identifier,
+  private def getArrayAtPath(identifier: String, path: JsPath, fieldName: String, applyTransformations: Boolean = true): Action[AnyContent] = {
+    getElementAtPath(
+      identifier,
       path,
-      Json.obj(fieldName -> JsArray())) {
+      Json.obj(fieldName -> JsArray()),
+      applyTransformations
+    ) {
       json => Json.obj(fieldName -> json)
     }
   }
 
-  private def getItemAtPath(identifier: String, path: JsPath): Action[AnyContent] = {
+  private def getItemAtPath(identifier: String, path: JsPath, applyTransformations: Boolean = true): Action[AnyContent] = {
     getElementAtPath(
       identifier,
       path,
-      Json.obj()
+      Json.obj(),
+      applyTransformations
     ) {
       json => json
     }
   }
 
-  private def getElementAtPath(identifier: String,
-                               path: JsPath,
-                               defaultValue: JsValue)
+  private def getElementAtPath(identifier: String, path: JsPath, defaultValue: JsValue, applyTransformations: Boolean = true)
                               (insertIntoObject: JsValue => JsValue): Action[AnyContent] = {
-    processEtmpData(identifier) {
+    processEtmpData(identifier, applyTransformations) {
       transformed => transformed
         .transform(path.json.pick)
         .map(insertIntoObject)
