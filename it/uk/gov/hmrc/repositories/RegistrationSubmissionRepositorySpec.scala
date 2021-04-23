@@ -155,7 +155,7 @@ class RegistrationSubmissionRepositorySpec extends AsyncFreeSpec with MustMatche
     }
 
     "must remove all documents from registration-submissions when feature enabled" in assertMongoTest(
-      applicationBuilder.configure(Seq("features.removedSavedRegistrations" -> true): _*).build()
+      applicationBuilder.configure(Seq("features.removeSavedRegistrations" -> true): _*).build()
     ) { app =>
       val repository = app.injector.instanceOf[RegistrationSubmissionRepository]
 
@@ -180,7 +180,7 @@ class RegistrationSubmissionRepositorySpec extends AsyncFreeSpec with MustMatche
   }
 
   "must not remove all documents from registration-submissions when feature disabled" in assertMongoTest(
-    applicationBuilder.configure(Seq("features.removedSavedRegistrations" -> false): _*).build()
+    applicationBuilder.configure(Seq("features.removeSavedRegistrations" -> false): _*).build()
   ) { app =>
     val repository = app.injector.instanceOf[RegistrationSubmissionRepository]
 
