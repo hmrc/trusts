@@ -17,7 +17,6 @@
 package uk.gov.hmrc.repositories
 
 import java.time.LocalDateTime
-
 import models.MongoDateTimeFormats
 import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import play.api.libs.json._
@@ -25,6 +24,9 @@ import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.itbase.IntegrationTestBase
 import models.registration.RegistrationSubmissionDraft
 import repositories.RegistrationSubmissionRepository
+
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 class RegistrationSubmissionRepositorySpec extends AsyncFreeSpec with MustMatchers with IntegrationTestBase with MongoDateTimeFormats {
 
@@ -151,5 +153,54 @@ class RegistrationSubmissionRepositorySpec extends AsyncFreeSpec with MustMatche
       repository.getRecentDrafts("InternalId", Agent).futureValue.size mustBe 50
       repository.getRecentDrafts("InternalId", Organisation).futureValue.size mustBe 1
     }
+
+    "must remove all documents from registration-submissions when feature enabled" in assertMongoTest(
+      applicationBuilder.configure(Seq("features.removeSavedRegistrations" -> true): _*).build()
+    ) { app =>
+      val repository = app.injector.instanceOf[RegistrationSubmissionRepository]
+
+      for (i <- 0 until 50) {
+        val draft = RegistrationSubmissionDraft(
+          s"draftId$i",
+          "InternalId",
+          testDateTime,
+          data1,
+          Some("reference1"),
+          Some(true)
+        )
+        Await.result(repository.setDraft(draft), Duration.Inf)
+      }
+
+      repository.getRecentDrafts("InternalId", Agent).futureValue.size mustBe 50
+
+      Await.result(repository.removeAllDrafts(), Duration.Inf)
+
+      repository.getRecentDrafts("InternalId", Agent).futureValue.size mustBe 0
+    }
   }
+
+  "must not remove all documents from registration-submissions when feature disabled" in assertMongoTest(
+    applicationBuilder.configure(Seq("features.removeSavedRegistrations" -> false): _*).build()
+  ) { app =>
+    val repository = app.injector.instanceOf[RegistrationSubmissionRepository]
+
+    for (i <- 0 until 50) {
+      val draft = RegistrationSubmissionDraft(
+        s"draftId$i",
+        "InternalId",
+        testDateTime,
+        data1,
+        Some("reference1"),
+        Some(true)
+      )
+      Await.result(repository.setDraft(draft), Duration.Inf)
+    }
+
+    repository.getRecentDrafts("InternalId", Agent).futureValue.size mustBe 50
+
+    Await.result(repository.removeAllDrafts(), Duration.Inf)
+
+    repository.getRecentDrafts("InternalId", Agent).futureValue.size mustBe 50
+  }
+
 }

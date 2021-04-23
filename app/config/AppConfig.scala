@@ -45,8 +45,6 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
 
   private def insertTRN(url: String, trn: String) = url.replace(":trn", trn)
 
-
-
   val taxEnrolmentsPayloadBodyServiceNameTaxable : String =
     configuration.get[String]("microservice.services.tax-enrolments.taxable.serviceName")
 
@@ -87,5 +85,7 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
   val registrationTtlInSeconds: Int = configuration.get[Int]("mongodb.registration.ttlSeconds")
 
   val stubMissingJourneysFor5MLD: Boolean = configuration.get[Boolean]("features.stubMissingJourneysFor5MLD")
+
+  val removeSavedRegistrations: Boolean = configuration.get[Boolean]("features.removeSavedRegistrations")
 }
 
