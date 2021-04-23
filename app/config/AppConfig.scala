@@ -86,6 +86,6 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
 
   val stubMissingJourneysFor5MLD: Boolean = configuration.get[Boolean]("features.stubMissingJourneysFor5MLD")
 
-  val removeSavedRegistrations: Boolean = configuration.get[Boolean]("features.removedSavedRegistrations")
+  val removeSavedRegistrations: Boolean = configuration.get[Boolean]("features.removeSavedRegistrations")
 }
 
