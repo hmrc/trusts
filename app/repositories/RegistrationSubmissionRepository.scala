@@ -40,12 +40,14 @@ trait RegistrationSubmissionRepository {
   def getRecentDrafts(internalId: String, affinityGroup: AffinityGroup): Future[List[RegistrationSubmissionDraft]]
 
   def removeDraft(draftId: String, internalId: String): Future[Boolean]
+
+  def removeAllDrafts(): Future[Boolean]
 }
 
 class RegistrationSubmissionRepositoryImpl @Inject()(
-                                          mongo: MongoDriver,
-                                          config: AppConfig
-                                        )(implicit ec: ExecutionContext) extends RegistrationSubmissionRepository with Logging {
+                                                      mongo: MongoDriver,
+                                                      config: AppConfig
+                                                    )(implicit ec: ExecutionContext) extends RegistrationSubmissionRepository with Logging {
 
   private val collectionName: String = "registration-submissions"
 
@@ -76,10 +78,10 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
   private lazy val ensureIndexes = {
     logger.info("Ensuring collection indexes")
     for {
-      collection              <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
+      collection <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
       createdCreatedIndex <- collection.indexesManager.ensure(createdAtIndex)
-      createdIdIndex          <- collection.indexesManager.ensure(draftIdIndex)
-      createdInternalIdIndex  <- collection.indexesManager.ensure(internalIdIndex)
+      createdIdIndex <- collection.indexesManager.ensure(draftIdIndex)
+      createdInternalIdIndex <- collection.indexesManager.ensure(internalIdIndex)
     } yield createdCreatedIndex && createdIdIndex && createdInternalIdIndex
   }
 
@@ -122,9 +124,9 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
 
     collection.flatMap(_.find(
       selector = selector, projection = None)
-            .sort(Json.obj("createdAt" -> -1))
-            .cursor[RegistrationSubmissionDraft]()
-            .collect[List](maxDocs, Cursor.FailOnError[List[RegistrationSubmissionDraft]]()))
+      .sort(Json.obj("createdAt" -> -1))
+      .cursor[RegistrationSubmissionDraft]()
+      .collect[List](maxDocs, Cursor.FailOnError[List[RegistrationSubmissionDraft]]()))
   }
 
   override def removeDraft(draftId: String, internalId: String): Future[Boolean] = {
@@ -135,5 +137,21 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
 
     collection.flatMap(_.delete().one(selector)).map(_.ok)
   }
+
+  /**
+   * All registration submissions will be deleted from mongo on the 30th April
+   * This is so that we don't have any lingering 4MLD draft registrations when we switch on 5MLD
+   */
+  def removeAllDrafts(): Future[Boolean] = for {
+    collection <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
+    result <- if (config.removeSavedRegistrations) {
+      logger.info("Removing all registration submissions.")
+      collection.delete().one(Json.obj(), None).map(_.ok)
+    } else {
+      Future.successful(true)
+    }
+  } yield result
+
+  final val removeRegistrationSubmissions = removeAllDrafts()
 
 }
