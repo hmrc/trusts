@@ -42,7 +42,6 @@ class RegisterTrustController @Inject()(
                                          validationService: ValidationService,
                                          identify: IdentifierAction,
                                          rosmPatternService: RosmPatternService,
-                                         auditService: AuditService,
                                          cc: ControllerComponents,
                                          trustsStoreService: TrustsStoreService,
                                          amendSubmissionDataService: AmendSubmissionDataService
@@ -52,21 +51,20 @@ class RegisterTrustController @Inject()(
     implicit request =>
       request.headers.get(Headers.DRAFT_REGISTRATION_ID) match {
         case Some(draftId) =>
-          determineMldVersion(draftId)
+          determineMldVersion
         case _ =>
           logger.error(s"[Session ID: ${request.sessionId}] no draft id provided in headers")
           Future.successful(BadRequest(Json.toJson(noDraftIdProvided)))
       }
   }
 
-  private def determineMldVersion(draftId: String)
-                                 (implicit request: IdentifierRequest[JsValue], hc: HeaderCarrier): Future[Result] = {
+  private def determineMldVersion()(implicit request: IdentifierRequest[JsValue], hc: HeaderCarrier): Future[Result] = {
     trustsStoreService.is5mldEnabled.flatMap { is5mldEnabled =>
-      amendRegistration(draftId, is5mldEnabled)
+      amendRegistration(is5mldEnabled)
     }
   }
 
-  private def amendRegistration(draftId: String, is5mldEnabled: Boolean)
+  private def amendRegistration(is5mldEnabled: Boolean)
                                (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
     val payload: JsValue = amendSubmissionDataService.applyRulesAndAddSubmissionDate(is5mldEnabled, request.body)
     val schema: String = if (is5mldEnabled) {
@@ -74,48 +72,40 @@ class RegisterTrustController @Inject()(
     } else {
       config.trustsApiRegistrationSchema4MLD
     }
-    validateRegistration(draftId, schema, payload)
+    validateRegistration(schema, payload)
   }
 
-  private def validateRegistration(draftId: String, schema: String, data: JsValue)
+  private def validateRegistration(schema: String, data: JsValue)
                                   (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
     validationService.get(schema).validate[Registration](data.toString()) match {
       case Right(registration) =>
-        register(registration, draftId)
+        register(registration)
       case Left(validationErrors) =>
         logger.error(s"[Session ID: ${request.sessionId}] problem validating submission: $validationErrors")
         Future.successful(invalidRequestErrorResponse)
     }
   }
 
-  private def register(registration: Registration, draftId: String)
+  private def register(registration: Registration)
                       (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
     trustsService.registerTrust(registration).flatMap {
       case response: RegistrationTrnResponse =>
-        auditResponseAndEnrol(response, registration, draftId)
+        enrol(response, registration)
       case AlreadyRegisteredResponse =>
-        handleAlreadyRegisteredResponse(registration, draftId)
+        handleAlreadyRegisteredResponse
       case NoMatchResponse =>
-        handleNoMatchResponse(registration, draftId)
+        handleNoMatchResponse
       case BadRequestResponse =>
-        handleBadRequestResponse(registration, draftId)
+        handleBadRequestResponse
       case ServiceUnavailableResponse =>
-        handleServiceUnavailableResponse(registration, draftId)
+        handleServiceUnavailableResponse
       case _ =>
         handleInternalServerErrorResponse()
     }
   }
 
-  private def auditResponseAndEnrol(response: RegistrationTrnResponse, registration: Registration, draftId: String)
+  private def enrol(response: RegistrationTrnResponse, registration: Registration)
                                    (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
-
-    auditService.audit(
-      event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
-      registration = registration,
-      draftId = draftId,
-      internalId = request.internalId,
-      response = response
-    )
 
     rosmPatternService.enrolAndLogResult(
       trn = response.trn,
@@ -126,54 +116,26 @@ class RegisterTrustController @Inject()(
     }
   }
 
-  private def handleAlreadyRegisteredResponse(registration: Registration, draftId: String)
-                                             (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
-    auditService.audit(
-      event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
-      registration = registration,
-      draftId = draftId,
-      internalId = request.internalId,
-      response = RegistrationFailureResponse(FORBIDDEN, "ALREADY_REGISTERED", "Trust is already registered.")
-    )
+  private def handleAlreadyRegisteredResponse()(implicit request: IdentifierRequest[JsValue]): Future[Result] = {
+
     logger.info(s"[registration][Session ID: ${request.sessionId}] Returning already registered response.")
     Future.successful(Conflict(Json.toJson(alreadyRegisteredTrustsResponse)))
   }
 
-  private def handleNoMatchResponse(registration: Registration, draftId: String)
-                                   (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
-    auditService.audit(
-      event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
-      registration = registration,
-      draftId = draftId,
-      internalId = request.internalId,
-      response = RegistrationFailureResponse(FORBIDDEN, "NO_MATCH", "There is no match in HMRC records.")
-    )
+  private def handleNoMatchResponse()(implicit request: IdentifierRequest[JsValue]): Future[Result] = {
+
     logger.info(s"[registration][Session ID: ${request.sessionId}] Returning no match response.")
     Future.successful(Forbidden(Json.toJson(noMatchRegistrationResponse)))
   }
 
-  private def handleBadRequestResponse(registration: Registration, draftId: String)
-                                      (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
-    auditService.audit(
-      event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
-      registration = registration,
-      draftId = draftId,
-      internalId = request.internalId,
-      response = RegistrationFailureResponse(BAD_REQUEST, "INVALID_PAYLOAD", "Submission has not passed validation. Invalid payload.")
-    )
+  private def handleBadRequestResponse()(implicit request: IdentifierRequest[JsValue]): Future[Result] = {
+
     logger.error(s"[registration][Session ID: ${request.sessionId}] bad request response from DES")
     Future.successful(InternalServerError(Json.toJson(internalServerErrorResponse)))
   }
 
-  private def handleServiceUnavailableResponse(registration: Registration, draftId: String)
-                                              (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
-    auditService.audit(
-      event = TrustAuditing.TRUST_REGISTRATION_SUBMITTED,
-      registration = registration,
-      draftId = draftId,
-      internalId = request.internalId,
-      response = RegistrationFailureResponse(SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", "Dependent systems are currently not responding.")
-    )
+  private def handleServiceUnavailableResponse()(implicit request: IdentifierRequest[JsValue]): Future[Result] = {
+
     logger.error(s"[registration][Session ID: ${request.sessionId}] Service unavailable response from DES")
     Future.successful(InternalServerError(Json.toJson(internalServerErrorResponse)))
   }

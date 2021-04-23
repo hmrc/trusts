@@ -44,8 +44,6 @@ class RegisterTrustControllerSpec extends BaseSpec {
   private val fakeOrganisationAuthAction = new FakeIdentifierAction(bodyParsers, Organisation)
   private val fakeAgentAuthAction = new FakeIdentifierAction(bodyParsers, Agent)
 
-  private lazy val mockedAuditService: FakeAuditService = injector.instanceOf[FakeAuditService]
-
   private lazy val validationService: ValidationService = new ValidationService()
 
   private val trnResponse = "XTRN123456"
@@ -72,7 +70,6 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
-          mockedAuditService,
           Helpers.stubControllerComponents(),
           mockTrustsStoreService,
           default5mldDataService
@@ -100,7 +97,6 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
-          mockedAuditService,
           Helpers.stubControllerComponents(),
           mockTrustsStoreService,
           default5mldDataService
@@ -128,7 +124,6 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
-          mockedAuditService,
           Helpers.stubControllerComponents(),
           mockTrustsStoreService,
           default5mldDataService
@@ -156,7 +151,6 @@ class RegisterTrustControllerSpec extends BaseSpec {
             validationService,
             fakeOrganisationAuthAction,
             rosmPatternService,
-            mockedAuditService,
             Helpers.stubControllerComponents(),
             mockTrustsStoreService,
             default5mldDataService
@@ -180,7 +174,6 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeAgentAuthAction,
           rosmPatternService,
-          mockedAuditService,
           Helpers.stubControllerComponents(),
           mockTrustsStoreService,
           default5mldDataService
@@ -205,7 +198,6 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
-          mockedAuditService,
           Helpers.stubControllerComponents(),
           mockTrustsStoreService,
           default5mldDataService
@@ -238,7 +230,6 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
-          mockedAuditService,
           Helpers.stubControllerComponents(),
           mockTrustsStoreService,
           default5mldDataService
@@ -263,7 +254,6 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
-          mockedAuditService,
           Helpers.stubControllerComponents(),
           mockTrustsStoreService,
           default5mldDataService
@@ -288,7 +278,6 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
-          mockedAuditService,
           Helpers.stubControllerComponents(),
           mockTrustsStoreService,
           default5mldDataService
@@ -313,7 +302,6 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
-          mockedAuditService,
           Helpers.stubControllerComponents(),
           mockTrustsStoreService,
           default5mldDataService
@@ -346,7 +334,6 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
-          mockedAuditService,
           Helpers.stubControllerComponents(),
           mockTrustsStoreService,
           default5mldDataService
@@ -372,7 +359,6 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
-          mockedAuditService,
           Helpers.stubControllerComponents(),
           mockTrustsStoreService,
           default5mldDataService
@@ -401,7 +387,6 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
-          mockedAuditService,
           Helpers.stubControllerComponents(),
           mockTrustsStoreService,
           default5mldDataService

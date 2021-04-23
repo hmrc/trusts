@@ -18,8 +18,6 @@ package models.auditing
 
 object TrustAuditing {
 
-  val TRUST_REGISTRATION_SUBMITTED = "TrustRegistrationSubmitted"
-
   val GET_TRUST = "GetTrust"
 
   val TRUST_VARIATION = "TrustVariation"
