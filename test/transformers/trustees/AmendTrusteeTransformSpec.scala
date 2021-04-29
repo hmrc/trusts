@@ -128,6 +128,7 @@ class AmendTrusteeTransformSpec extends FreeSpec with MustMatchers  {
         val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-ind.json")
 
         val newTrusteeInfo = AmendedLeadTrusteeIndType(
+          bpMatchStatus = None,
           name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
           dateOfBirth = LocalDate.of(1965, 2, 10),
           phoneNumber = "newPhone",

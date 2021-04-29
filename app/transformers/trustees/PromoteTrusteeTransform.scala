@@ -67,7 +67,15 @@ case class PromoteTrusteeTransform(index: Option[Int],
       entityStart.fold(doNothing())(x => __.json.update((leadTrusteePath \ ENTITY_START).json.put(x))) andThen
       (leadTrusteePath \ LINE_NUMBER).json.prune andThen
       (leadTrusteePath \ BP_MATCH_STATUS).json.prune andThen
+      putAmendedBpMatchStatus() andThen
       (if (isIndividualTrustee) (leadTrusteePath \ LEGALLY_INCAPABLE).json.prune else doNothing())
+  }
+
+  private def putAmendedBpMatchStatus(): Reads[JsObject] = {
+    amended.transform((__ \ BP_MATCH_STATUS).json.pick) match {
+      case JsSuccess(value, _) => __.json.update((leadTrusteePath \ BP_MATCH_STATUS).json.put(value))
+      case _ => doNothing()
+    }
   }
 
   private def demoteLeadTrusteeTransform(input: JsValue): DeltaTransform = {

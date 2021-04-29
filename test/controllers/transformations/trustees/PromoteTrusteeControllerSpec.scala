@@ -83,6 +83,7 @@ class PromoteTrusteeControllerSpec extends FreeSpec with MockitoSugar with Scala
       )
 
       val promotedTrustee = AmendedLeadTrusteeIndType(
+        bpMatchStatus = None,
         name = NameType("Joe", None, "Bloggs"),
         dateOfBirth = LocalDate.parse("1980-03-30"),
         phoneNumber = "tel",

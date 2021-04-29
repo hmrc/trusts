@@ -19,7 +19,6 @@ package controllers
 import config.AppConfig
 import controllers.actions.IdentifierAction
 import models._
-import models.auditing.TrustAuditing
 import models.registration.ApiResponse._
 import models.registration.RegistrationTrnResponse._
 import models.registration._

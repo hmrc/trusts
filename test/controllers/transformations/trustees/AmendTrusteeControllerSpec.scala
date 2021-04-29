@@ -233,6 +233,7 @@ class AmendTrusteeControllerSpec extends FreeSpec with MockitoSugar with ScalaFu
           |""".stripMargin)
 
       val amendedTrustee = AmendedLeadTrusteeIndType(
+        bpMatchStatus = None,
         name = NameType("Joe", None, "Bloggs"),
         dateOfBirth = LocalDate.parse("1980-03-30"),
         phoneNumber = "tel",
