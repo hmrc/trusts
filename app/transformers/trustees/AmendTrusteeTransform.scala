@@ -58,7 +58,8 @@ case class AmendTrusteeTransform(index: Option[Int],
             __.json.update(leadTrusteePath.json.put(amended)) andThen
             __.json.update(entityStartPath.json.put(entityStart)) andThen
             (leadTrusteePath \ LINE_NUMBER).json.prune andThen
-            (leadTrusteePath \ BP_MATCH_STATUS).json.prune
+            (leadTrusteePath \ BP_MATCH_STATUS).json.prune andThen
+            putAmendedBpMatchStatus(amended)
         )
       case e: JsError => e
     }
