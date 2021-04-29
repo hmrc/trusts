@@ -38,7 +38,7 @@ case class AmendTrusteeTransform(index: Option[Int],
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
     if (isLeadTrustee) {
-      JsSuccess(input)
+      input.transform((leadTrusteePath \ BP_MATCH_STATUS).json.prune)
     } else {
       removeTrusteeTransform.applyDeclarationTransform(input)
     }

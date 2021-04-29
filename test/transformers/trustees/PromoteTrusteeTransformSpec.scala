@@ -142,7 +142,7 @@ class PromoteTrusteeTransformSpec extends FreeSpec with MustMatchers {
           PromoteTrusteeTransform(Some(0), Json.toJson(trusteeAfterPromotion), trusteeBeforePromotion, endDate, "trusteeInd", isTaxable)
         }
 
-        "successfully promote a trustee to lead and demote the existing lead trustee" - {
+        "successfully promote a trustee to lead (persisting the match status) and demote the existing lead trustee" - {
 
           "taxable" in {
             val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-before-ind.json")
@@ -163,7 +163,7 @@ class PromoteTrusteeTransformSpec extends FreeSpec with MustMatchers {
         }
 
         "re-add the removed trustee with an end date at declaration time if it existed before (i.e. has a line no.)" in {
-          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind.json")
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind-fully-matched.json")
           val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind-declare.json")
 
           val result = transformToTest(trusteeBeforePromotionTaxable, isTaxable = true).applyDeclarationTransform(beforeJson).get

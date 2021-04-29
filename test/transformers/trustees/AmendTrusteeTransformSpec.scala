@@ -148,26 +148,36 @@ class AmendTrusteeTransformSpec extends FreeSpec with MustMatchers  {
       }
 
       "fully matched should" - {
+
+        val newTrusteeInfo = AmendedLeadTrusteeIndType(
+          bpMatchStatus = Some("01"),
+          name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
+          dateOfBirth = LocalDate.of(1965, 2, 10),
+          phoneNumber = "newPhone",
+          email = Some("newEmail"),
+          identification = IdentificationType(Some("newNino"), None, None, None),
+          countryOfResidence = None,
+          legallyIncapable = None,
+          nationality = None
+        )
+
+        val transformer = AmendTrusteeTransform(None, Json.toJson(newTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
+
         "successfully set a new ind lead trustee's details" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-before.json")
           val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-ind-fully-matched.json")
 
-          val newTrusteeInfo = AmendedLeadTrusteeIndType(
-            bpMatchStatus = Some("01"),
-            name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-            dateOfBirth = LocalDate.of(1965, 2, 10),
-            phoneNumber = "newPhone",
-            email = Some("newEmail"),
-            identification = IdentificationType(Some("newNino"), None, None, None),
-            countryOfResidence = None,
-            legallyIncapable = None,
-            nationality = None
-          )
-
-          val transformer = AmendTrusteeTransform(None, Json.toJson(newTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
-
           val result = transformer.applyTransform(beforeJson).get
+          result mustBe afterJson
+        }
+
+        "remove the bp match status at declare time" in {
+
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-ind-fully-matched.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-ind-fully-matched-declare.json")
+
+          val result = transformer.applyDeclarationTransform(beforeJson).get
           result mustBe afterJson
         }
       }

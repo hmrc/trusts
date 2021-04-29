@@ -37,7 +37,10 @@ case class PromoteTrusteeTransform(index: Option[Int],
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
     if (index.isDefined) {
-      removeTrusteeTransform.applyDeclarationTransform(input)
+      for {
+        endDateAddedJson <- removeTrusteeTransform.applyDeclarationTransform(input)
+        bpMatchStatusRemovedJson <- endDateAddedJson.transform((leadTrusteePath \ BP_MATCH_STATUS).json.prune)
+      } yield bpMatchStatusRemovedJson
     } else {
       JsSuccess(input)
     }
