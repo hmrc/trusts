@@ -32,50 +32,50 @@ class PromoteTrusteeTransformSpec extends FreeSpec with MustMatchers {
 
     "promoting individual trustee when" - {
 
+      val trusteeBeforePromotionTaxable = Json.parse(
+        """
+          |{
+          |  "trusteeInd": {
+          |    "lineNo": "1",
+          |    "name": {
+          |      "firstName": "John",
+          |      "middleName": "William",
+          |      "lastName": "O'Connor"
+          |    },
+          |    "dateOfBirth": "1956-02-12",
+          |    "identification": {
+          |      "nino": "ST123456"
+          |    },
+          |    "legallyIncapable": false,
+          |    "nationality": "FR",
+          |    "countryOfResidence": "FR",
+          |    "entityStart": "2000-01-01"
+          |  }
+          |}
+          |""".stripMargin
+      )
+
+      val trusteeBeforePromotionNonTaxable = Json.parse(
+        """
+          |{
+          |  "trusteeInd": {
+          |    "lineNo": "1",
+          |    "name": {
+          |      "firstName": "John",
+          |      "middleName": "William",
+          |      "lastName": "O'Connor"
+          |    },
+          |    "dateOfBirth": "1956-02-12",
+          |    "legallyIncapable": false,
+          |    "nationality": "FR",
+          |    "countryOfResidence": "FR",
+          |    "entityStart": "2000-01-01"
+          |  }
+          |}
+          |""".stripMargin
+      )
+
       "not fully matched should" - {
-
-        val trusteeBeforePromotionTaxable = Json.parse(
-          """
-            |{
-            |  "trusteeInd": {
-            |    "lineNo": "1",
-            |    "name": {
-            |      "firstName": "John",
-            |      "middleName": "William",
-            |      "lastName": "O'Connor"
-            |    },
-            |    "dateOfBirth": "1956-02-12",
-            |    "identification": {
-            |      "nino": "ST123456"
-            |    },
-            |    "legallyIncapable": false,
-            |    "nationality": "FR",
-            |    "countryOfResidence": "FR",
-            |    "entityStart": "2000-01-01"
-            |  }
-            |}
-            |""".stripMargin
-        )
-
-        val trusteeBeforePromotionNonTaxable = Json.parse(
-          """
-            |{
-            |  "trusteeInd": {
-            |    "lineNo": "1",
-            |    "name": {
-            |      "firstName": "John",
-            |      "middleName": "William",
-            |      "lastName": "O'Connor"
-            |    },
-            |    "dateOfBirth": "1956-02-12",
-            |    "legallyIncapable": false,
-            |    "nationality": "FR",
-            |    "countryOfResidence": "FR",
-            |    "entityStart": "2000-01-01"
-            |  }
-            |}
-            |""".stripMargin
-        )
 
         def transformToTest(trusteeBeforePromotion: JsValue, isTaxable: Boolean): PromoteTrusteeTransform = {
 
@@ -124,49 +124,6 @@ class PromoteTrusteeTransformSpec extends FreeSpec with MustMatchers {
       }
 
       "fully matched should" - {
-
-        val trusteeBeforePromotionTaxable = Json.parse(
-          """
-            |{
-            |  "trusteeInd": {
-            |    "lineNo": "1",
-            |    "name": {
-            |      "firstName": "John",
-            |      "middleName": "William",
-            |      "lastName": "O'Connor"
-            |    },
-            |    "dateOfBirth": "1956-02-12",
-            |    "identification": {
-            |      "nino": "ST123456"
-            |    },
-            |    "legallyIncapable": false,
-            |    "nationality": "FR",
-            |    "countryOfResidence": "FR",
-            |    "entityStart": "2000-01-01"
-            |  }
-            |}
-            |""".stripMargin
-        )
-
-        val trusteeBeforePromotionNonTaxable = Json.parse(
-          """
-            |{
-            |  "trusteeInd": {
-            |    "lineNo": "1",
-            |    "name": {
-            |      "firstName": "John",
-            |      "middleName": "William",
-            |      "lastName": "O'Connor"
-            |    },
-            |    "dateOfBirth": "1956-02-12",
-            |    "legallyIncapable": false,
-            |    "nationality": "FR",
-            |    "countryOfResidence": "FR",
-            |    "entityStart": "2000-01-01"
-            |  }
-            |}
-            |""".stripMargin
-        )
 
         def transformToTest(trusteeBeforePromotion: JsValue, isTaxable: Boolean): PromoteTrusteeTransform = {
 

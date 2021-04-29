@@ -49,6 +49,7 @@ class TransformRepositorySpec extends AsyncFreeSpec with MustMatchers with Integ
       AmendTrusteeTransform(
         None,
         Json.toJson(AmendedLeadTrusteeIndType(
+          None,
           NameType("New", Some("lead"), "Trustee"),
           LocalDate.parse("2000-01-01"),
           "",

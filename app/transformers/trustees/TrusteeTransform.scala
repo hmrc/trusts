@@ -34,7 +34,7 @@ trait TrusteeTransform {
 
   def putAmendedBpMatchStatus(amended: JsValue): Reads[JsObject] = {
     amended.transform((__ \ BP_MATCH_STATUS).json.pick) match {
-      case JsSuccess(value, _) => __.json.update((leadTrusteePath \ BP_MATCH_STATUS).json.put(value))
+      case JsSuccess(bpMatchStatus, _) => __.json.update((leadTrusteePath \ BP_MATCH_STATUS).json.put(bpMatchStatus))
       case _ => doNothing()
     }
   }
