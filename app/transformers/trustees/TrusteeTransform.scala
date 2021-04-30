@@ -16,8 +16,9 @@
 
 package transformers.trustees
 
-import play.api.libs.json.JsPath
+import play.api.libs.json.{JsObject, JsPath, JsSuccess, JsValue, Reads, __}
 import utils.Constants._
+import utils.JsonOps.doNothing
 
 trait TrusteeTransform {
   val `type`: String
@@ -30,4 +31,11 @@ trait TrusteeTransform {
   def isIndividualTrustee: Boolean = `type` == INDIVIDUAL_TRUSTEE || isIndividualLeadTrustee
 
   val leadTrusteePath: JsPath = ENTITIES \ LEAD_TRUSTEE
+
+  def putAmendedBpMatchStatus(amended: JsValue): Reads[JsObject] = {
+    amended.transform((__ \ BP_MATCH_STATUS).json.pick) match {
+      case JsSuccess(bpMatchStatus, _) => __.json.update((leadTrusteePath \ BP_MATCH_STATUS).json.put(bpMatchStatus))
+      case _ => doNothing()
+    }
+  }
 }

@@ -120,14 +120,37 @@ class AmendTrusteeTransformSpec extends FreeSpec with MustMatchers  {
       }
     }
 
-    "individual lead trustee should" - {
+    "individual lead trustee when" - {
 
-      "successfully set a new ind lead trustee's details" in {
+      "not fully matched should" - {
+        "successfully set a new ind lead trustee's details" in {
 
-        val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-before.json")
-        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-ind.json")
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-before.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-ind.json")
+
+          val newTrusteeInfo = AmendedLeadTrusteeIndType(
+            bpMatchStatus = None,
+            name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
+            dateOfBirth = LocalDate.of(1965, 2, 10),
+            phoneNumber = "newPhone",
+            email = Some("newEmail"),
+            identification = IdentificationType(Some("newNino"), None, None, None),
+            countryOfResidence = None,
+            legallyIncapable = None,
+            nationality = None
+          )
+
+          val transformer = AmendTrusteeTransform(None, Json.toJson(newTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
+
+          val result = transformer.applyTransform(beforeJson).get
+          result mustBe afterJson
+        }
+      }
+
+      "fully matched should" - {
 
         val newTrusteeInfo = AmendedLeadTrusteeIndType(
+          bpMatchStatus = Some("01"),
           name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
           dateOfBirth = LocalDate.of(1965, 2, 10),
           phoneNumber = "newPhone",
@@ -140,8 +163,23 @@ class AmendTrusteeTransformSpec extends FreeSpec with MustMatchers  {
 
         val transformer = AmendTrusteeTransform(None, Json.toJson(newTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
 
-        val result = transformer.applyTransform(beforeJson).get
-        result mustBe afterJson
+        "successfully set a new ind lead trustee's details" in {
+
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-before.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-ind-fully-matched.json")
+
+          val result = transformer.applyTransform(beforeJson).get
+          result mustBe afterJson
+        }
+
+        "remove the bp match status at declare time" in {
+
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-ind-fully-matched.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-ind-fully-matched-declare.json")
+
+          val result = transformer.applyDeclarationTransform(beforeJson).get
+          result mustBe afterJson
+        }
       }
     }
 

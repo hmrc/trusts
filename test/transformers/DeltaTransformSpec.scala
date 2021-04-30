@@ -40,6 +40,7 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
       val currentDate = LocalDate.of(2020, 4, 1)
 
       val newLeadTrustee = AmendedLeadTrusteeIndType(
+        None,
         NameType("New", Some("lead"), "Trustee"),
         LocalDate.parse("2000-01-01"),
         "",

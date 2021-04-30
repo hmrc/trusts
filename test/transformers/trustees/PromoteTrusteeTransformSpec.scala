@@ -30,7 +30,7 @@ class PromoteTrusteeTransformSpec extends FreeSpec with MustMatchers {
 
     val endDate: LocalDate = LocalDate.parse("2020-02-28")
 
-    "promoting individual trustee should" - {
+    "promoting individual trustee when" - {
 
       val trusteeBeforePromotionTaxable = Json.parse(
         """
@@ -75,48 +75,100 @@ class PromoteTrusteeTransformSpec extends FreeSpec with MustMatchers {
           |""".stripMargin
       )
 
-      def transformToTest(trusteeBeforePromotion: JsValue, isTaxable: Boolean): PromoteTrusteeTransform = {
+      "not fully matched should" - {
 
-        val trusteeAfterPromotion = AmendedLeadTrusteeIndType(
-          name = NameType("John", Some("William"), "O'Connor"),
-          dateOfBirth = LocalDate.of(1956, 2, 12),
-          phoneNumber = "Phone",
-          email = Some("Email"),
-          identification = IdentificationType(Some("ST123456"), None, None, None),
-          countryOfResidence = Some("FR"),
-          legallyIncapable = Some(false),
-          nationality = Some("FR")
-        )
+        def transformToTest(trusteeBeforePromotion: JsValue, isTaxable: Boolean): PromoteTrusteeTransform = {
 
-        PromoteTrusteeTransform(Some(0), Json.toJson(trusteeAfterPromotion), trusteeBeforePromotion, endDate, "trusteeInd", isTaxable)
-      }
+          val trusteeAfterPromotion = AmendedLeadTrusteeIndType(
+            bpMatchStatus = None,
+            name = NameType("John", Some("William"), "O'Connor"),
+            dateOfBirth = LocalDate.of(1956, 2, 12),
+            phoneNumber = "Phone",
+            email = Some("Email"),
+            identification = IdentificationType(Some("ST123456"), None, None, None),
+            countryOfResidence = Some("FR"),
+            legallyIncapable = Some(false),
+            nationality = Some("FR")
+          )
 
-      "successfully promote a trustee to lead and demote the existing lead trustee" - {
-
-        "taxable" in {
-          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-before-ind.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind.json")
-
-          val result = transformToTest(trusteeBeforePromotionTaxable, isTaxable = true).applyTransform(beforeJson).get
-          result mustBe afterJson
+          PromoteTrusteeTransform(Some(0), Json.toJson(trusteeAfterPromotion), trusteeBeforePromotion, endDate, "trusteeInd", isTaxable)
         }
 
-        "non-taxable" in {
-          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-before-ind-non-taxable.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind-non-taxable.json")
+        "successfully promote a trustee to lead and demote the existing lead trustee" - {
 
-          val result = transformToTest(trusteeBeforePromotionNonTaxable, isTaxable = false).applyTransform(beforeJson).get
-          result mustBe afterJson
+          "taxable" in {
+            val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-before-ind.json")
+            val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind.json")
+
+            val result = transformToTest(trusteeBeforePromotionTaxable, isTaxable = true).applyTransform(beforeJson).get
+            result mustBe afterJson
+          }
+
+          "non-taxable" in {
+            val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-before-ind-non-taxable.json")
+            val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind-non-taxable.json")
+
+            val result = transformToTest(trusteeBeforePromotionNonTaxable, isTaxable = false).applyTransform(beforeJson).get
+            result mustBe afterJson
+          }
+
         }
 
+        "re-add the removed trustee with an end date at declaration time if it existed before (i.e. has a line no.)" in {
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind-declare.json")
+
+          val result = transformToTest(trusteeBeforePromotionTaxable, isTaxable = true).applyDeclarationTransform(beforeJson).get
+          result mustBe afterJson
+        }
       }
 
-      "re-add the removed trustee with an end date at declaration time if it existed before (i.e. has a line no.)" in {
-        val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind.json")
-        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind-declare.json")
+      "fully matched should" - {
 
-        val result = transformToTest(trusteeBeforePromotionTaxable, isTaxable = true).applyDeclarationTransform(beforeJson).get
-        result mustBe afterJson
+        def transformToTest(trusteeBeforePromotion: JsValue, isTaxable: Boolean): PromoteTrusteeTransform = {
+
+          val trusteeAfterPromotion = AmendedLeadTrusteeIndType(
+            bpMatchStatus = Some("01"),
+            name = NameType("John", Some("William"), "O'Connor"),
+            dateOfBirth = LocalDate.of(1956, 2, 12),
+            phoneNumber = "Phone",
+            email = Some("Email"),
+            identification = IdentificationType(Some("ST123456"), None, None, None),
+            countryOfResidence = Some("FR"),
+            legallyIncapable = Some(false),
+            nationality = Some("FR")
+          )
+
+          PromoteTrusteeTransform(Some(0), Json.toJson(trusteeAfterPromotion), trusteeBeforePromotion, endDate, "trusteeInd", isTaxable)
+        }
+
+        "successfully promote a trustee to lead (persisting the match status) and demote the existing lead trustee" - {
+
+          "taxable" in {
+            val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-before-ind.json")
+            val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind-fully-matched.json")
+
+            val result = transformToTest(trusteeBeforePromotionTaxable, isTaxable = true).applyTransform(beforeJson).get
+            result mustBe afterJson
+          }
+
+          "non-taxable" in {
+            val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-before-ind-non-taxable.json")
+            val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind-non-taxable-fully-matched.json")
+
+            val result = transformToTest(trusteeBeforePromotionNonTaxable, isTaxable = false).applyTransform(beforeJson).get
+            result mustBe afterJson
+          }
+
+        }
+
+        "re-add the removed trustee with an end date at declaration time if it existed before (i.e. has a line no.)" in {
+          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind-fully-matched.json")
+          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-promote-trustee-transform-after-ind-declare.json")
+
+          val result = transformToTest(trusteeBeforePromotionTaxable, isTaxable = true).applyDeclarationTransform(beforeJson).get
+          result mustBe afterJson
+        }
       }
     }
 

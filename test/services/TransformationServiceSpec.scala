@@ -41,8 +41,9 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
 
   private val utr: String = "utr"
   private val internalId = "internalId"
-  
+
   private val unitTestLeadTrusteeInfo = AmendedLeadTrusteeIndType(
+    bpMatchStatus = None,
     name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
     dateOfBirth = LocalDate.of(1965, 2, 10),
     phoneNumber = "newPhone",
@@ -79,6 +80,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
       |""".stripMargin)
 
   private val existingLeadTrusteeInfo = AmendedLeadTrusteeIndType(
+    bpMatchStatus = None,
     name = NameType("existingFirstName", Some("existingMiddleName"), "existingLastName"),
     dateOfBirth = LocalDate.of(1965, 2, 10),
     phoneNumber = "newPhone",
@@ -90,6 +92,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
   )
 
   private val newLeadTrusteeIndInfo = AmendedLeadTrusteeIndType(
+    bpMatchStatus = None,
     name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
     dateOfBirth = LocalDate.of(1965, 2, 10),
     phoneNumber = "newPhone",
@@ -174,6 +177,7 @@ class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFut
     when(trustsService.getTrustInfo(any(), any())).thenReturn(Future.successful(response))
 
     val newLeadTrusteeIndInfo = AmendedLeadTrusteeIndType(
+      bpMatchStatus = None,
       name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
       dateOfBirth = LocalDate.of(1965, 2, 10),
       phoneNumber = "newPhone",

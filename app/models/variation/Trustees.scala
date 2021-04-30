@@ -60,7 +60,8 @@ object LeadTrusteeOrgType {
   implicit val leadTrusteeOrgTypeFormat: Format[LeadTrusteeOrgType] = Json.format[LeadTrusteeOrgType]
 }
 
-case class AmendedLeadTrusteeIndType(name: NameType,
+case class AmendedLeadTrusteeIndType(bpMatchStatus: Option[String],
+                                     name: NameType,
                                      dateOfBirth: LocalDate,
                                      phoneNumber: String,
                                      email: Option[String] = None,

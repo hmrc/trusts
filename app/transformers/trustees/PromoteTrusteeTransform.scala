@@ -37,7 +37,10 @@ case class PromoteTrusteeTransform(index: Option[Int],
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
     if (index.isDefined) {
-      removeTrusteeTransform.applyDeclarationTransform(input)
+      for {
+        endDateAddedJson <- removeTrusteeTransform.applyDeclarationTransform(input)
+        bpMatchStatusRemovedJson <- endDateAddedJson.transform((leadTrusteePath \ BP_MATCH_STATUS).json.prune)
+      } yield bpMatchStatusRemovedJson
     } else {
       JsSuccess(input)
     }
@@ -67,6 +70,7 @@ case class PromoteTrusteeTransform(index: Option[Int],
       entityStart.fold(doNothing())(x => __.json.update((leadTrusteePath \ ENTITY_START).json.put(x))) andThen
       (leadTrusteePath \ LINE_NUMBER).json.prune andThen
       (leadTrusteePath \ BP_MATCH_STATUS).json.prune andThen
+      putAmendedBpMatchStatus(amended) andThen
       (if (isIndividualTrustee) (leadTrusteePath \ LEGALLY_INCAPABLE).json.prune else doNothing())
   }
 
