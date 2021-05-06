@@ -32,7 +32,7 @@ object NonMigratingTrustDetails {
 
 case class MigratingTrustDetails(lawCountry: Option[String],
                                  administrationCountry: String,
-                                 residentialStatus: Option[ResidentialStatusType],
+                                 residentialStatus: ResidentialStatusType,
                                  trustUKRelation: Option[Boolean],
                                  trustUKResident: Boolean,
                                  typeOfTrust: String,

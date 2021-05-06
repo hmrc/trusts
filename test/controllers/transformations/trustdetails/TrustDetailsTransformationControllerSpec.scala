@@ -18,7 +18,7 @@ package controllers.transformations.trustdetails
 
 import controllers.actions.FakeIdentifierAction
 import models.variation.{MigratingTrustDetails, NonMigratingTrustDetails}
-import models.{NonUKType, ResidentialStatusType}
+import models.{NonUKType, ResidentialStatusType, UkType}
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.concurrent.ScalaFutures
@@ -679,7 +679,23 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
             mockTaxableMigrationService
           )(Implicits.global, Helpers.stubControllerComponents())
 
-          val body = Json.toJson(MigratingTrustDetails(None, "GB", None, None, trustUKResident = true, "Will Trust or Intestacy Trust", None, None, None))
+          val body = Json.toJson(MigratingTrustDetails(
+            lawCountry = None,
+            administrationCountry = "GB",
+            residentialStatus = ResidentialStatusType(
+              uk = Some(UkType(
+                scottishLaw = true,
+                preOffShore = None
+              )),
+              nonUK = None
+            ),
+            trustUKRelation = None,
+            trustUKResident = true,
+            typeOfTrust = "Will Trust or Intestacy Trust",
+            deedOfVariation = None,
+            interVivos = None,
+            efrbsStartDate = None
+          ))
 
           val request = FakeRequest(PUT, "path")
             .withBody(body)

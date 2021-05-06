@@ -27,6 +27,10 @@ case class SetTrustDetailsTransform(value: JsValue,
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
 
+    /**
+     * Prunes the optional trust details fields so that the new details take precedence (i.e. so a None overwrites a Some)
+     * Also prunes residentialStatus to ensure we don't end up with ResidentialStatusType(Some, Some)
+     */
     def pruneOptionalFields(existingTrustDetails: JsValue): JsValue = {
       val fields = if (migratingFromNonTaxableToTaxable) {
         Seq(LAW_COUNTRY, RESIDENTIAL_STATUS, UK_RELATION, DEED_OF_VARIATION, INTER_VIVOS, EFRBS_START_DATE)
