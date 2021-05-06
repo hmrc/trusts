@@ -300,184 +300,194 @@ class DeltaTransformSpec extends FreeSpec with MustMatchers {
 
       val setUKRelationTransform = SetTrustDetailTransform(JsBoolean(true), "trustUKRelation")
 
+      val setMigratingTrustDetailsTransform = SetTrustDetailsTransform(Json.obj(), migratingFromNonTaxableToTaxable = true)
+      val setNonMigratingTrustDetailsTransform = SetTrustDetailsTransform(Json.obj(), migratingFromNonTaxableToTaxable = false)
+
       val json = Json.parse(
         s"""{
-          |        "deltaTransforms" : [
-          |            {
-          |               "AmendTrusteeTransform": ${Json.toJson(amendLeadTrusteeIndTransform)}
-          |            },
-          |            {
-          |               "AmendTrusteeTransform": ${Json.toJson(amendLeadTrusteeOrgTransform)}
-          |            },
-          |            {
-          |               "AddTrusteeTransform": ${Json.toJson(addTrusteeIndTransform)}
-          |            },
-          |            {
-          |               "AddTrusteeTransform": ${Json.toJson(addTrusteeOrgTransform)}
-          |            },
-          |            {
-          |               "RemoveTrusteeTransform": ${Json.toJson(removeTrusteeTransform)}
-          |            },
-          |            {
-          |               "PromoteTrusteeTransform": ${Json.toJson(promoteTrusteeIndTransform)}
-          |            },
-          |            {
-          |               "PromoteTrusteeTransform": ${Json.toJson(promoteTrusteeOrgTransform)}
-          |            },
-          |            {
-          |               "AmendTrusteeTransform": ${Json.toJson(amendTrusteeIndTransform)}
-          |            },
-          |            {
-          |               "AmendTrusteeTransform": ${Json.toJson(amendTrusteeOrgTransform)}
-          |            },
-          |            {
-          |               "AmendBeneficiaryTransform": ${Json.toJson(amendIndividualBenTransform)}
-          |            },
-          |            {
-          |               "AddBeneficiaryTransform": ${Json.toJson(addTrustBeneficiaryTransform)}
-          |            },
-          |            {
-          |               "AddBeneficiaryTransform": ${Json.toJson(addUnidentifiedBeneficiaryTransform)}
-          |            },
-          |            {
-          |               "AddBeneficiaryTransform": ${Json.toJson(addIndividualBeneficiaryTransform)}
-          |            },
-          |            {
-          |               "AmendBeneficiaryTransform": ${Json.toJson(amendCharityBeneficiaryTransform)}
-          |            },
-          |            {
-          |               "AmendBeneficiaryTransform": ${Json.toJson(amendCompanyBeneficiaryTransform)}
-          |            },
-          |            {
-          |               "AmendBeneficiaryTransform": ${Json.toJson(amendOtherBeneficiaryTransform)}
-          |            },
-          |            {
-          |               "AmendBeneficiaryTransform": ${Json.toJson(amendTrustBeneficiaryTransform)}
-          |            },
-          |            {
-          |               "AmendBeneficiaryTransform": ${Json.toJson(amendUnidentifiedBeneficiaryTransform)}
-          |            },
-          |            {
-          |               "AddBeneficiaryTransform": ${Json.toJson(addCharityBeneficiaryTransform)}
-          |            },
-          |            {
-          |               "AddBeneficiaryTransform": ${Json.toJson(addOtherBeneficiaryTransform)}
-          |            },
-          |            {
-          |               "AddBeneficiaryTransform": ${Json.toJson(addCompanyBeneficiaryTransform)}
-          |            },
-          |            {
-          |               "AddBeneficiaryTransform": ${Json.toJson(addLargeBeneficiaryTransform)}
-          |            },
-          |            {
-          |               "AmendBeneficiaryTransform": ${Json.toJson(amendLargeBeneficiaryTransform)}
-          |            },
-          |            {
-          |               "RemoveBeneficiaryTransform": ${Json.toJson(removeBeneficiariesTransform)}
-          |            },
-          |            {
-          |               "AmendSettlorTransform": ${Json.toJson(amendIndividualSettlorTransform)}
-          |            },
-          |            {
-          |               "AmendSettlorTransform": ${Json.toJson(amendBusinessSettlorTransform)}
-          |            },
-          |            {
-          |               "RemoveSettlorTransform": ${Json.toJson(removeSettlorsTransform)}
-          |            },
-          |            {
-          |               "AmendSettlorTransform": ${Json.toJson(amendDeceasedSettlorTransform)}
-          |            },
-          |            {
-          |               "AddSettlorTransform": ${Json.toJson(addIndividualSettlorTransform)}
-          |            },
-          |            {
-          |               "AddProtectorTransform": ${Json.toJson(addIndividualProtectorTransform)}
-          |            },
-          |            {
-          |               "RemoveProtectorTransform": ${Json.toJson(removeProtectorsTransform)}
-          |            },
-          |            {
-          |               "AddProtectorTransform": ${Json.toJson(addCompanyProtectorTransform)}
-          |            },
-          |            {
-          |               "AmendProtectorTransform": ${Json.toJson(amendBusinessProtectorTransform)}
-          |            },
-          |            {
-          |               "RemoveOtherIndividualTransform": ${Json.toJson(removeOtherIndividualsTransform)}
-          |            },
-          |            {
-          |               "AmendOtherIndividualTransform": ${Json.toJson(amendOtherIndividualTransform)}
-          |            },
-          |            {
-          |               "AddOtherIndividualTransform": ${Json.toJson(addOtherIndividualTransform)}
-          |            },
-          |            {
-          |               "SetTrustDetailTransform": ${Json.toJson(setExpressTransform)}
-          |            },
-          |            {
-          |               "SetTrustDetailTransform": ${Json.toJson(setPropertyTransform)}
-          |            },
-          |            {
-          |               "SetTrustDetailTransform": ${Json.toJson(setRecordedTransform)}
-          |            },
-          |            {
-          |               "SetTrustDetailTransform": ${Json.toJson(setResidentTransform)}
-          |            },
-          |            {
-          |               "SetTrustDetailTransform": ${Json.toJson(setTaxableTransform)}
-          |            },
-          |            {
-          |               "SetTrustDetailTransform": ${Json.toJson(setUKRelationTransform)}
-          |            }
-          |        ]
-          |    }
-          |""".stripMargin)
+           |        "deltaTransforms" : [
+           |            {
+           |               "AmendTrusteeTransform": ${Json.toJson(amendLeadTrusteeIndTransform)}
+           |            },
+           |            {
+           |               "AmendTrusteeTransform": ${Json.toJson(amendLeadTrusteeOrgTransform)}
+           |            },
+           |            {
+           |               "AddTrusteeTransform": ${Json.toJson(addTrusteeIndTransform)}
+           |            },
+           |            {
+           |               "AddTrusteeTransform": ${Json.toJson(addTrusteeOrgTransform)}
+           |            },
+           |            {
+           |               "RemoveTrusteeTransform": ${Json.toJson(removeTrusteeTransform)}
+           |            },
+           |            {
+           |               "PromoteTrusteeTransform": ${Json.toJson(promoteTrusteeIndTransform)}
+           |            },
+           |            {
+           |               "PromoteTrusteeTransform": ${Json.toJson(promoteTrusteeOrgTransform)}
+           |            },
+           |            {
+           |               "AmendTrusteeTransform": ${Json.toJson(amendTrusteeIndTransform)}
+           |            },
+           |            {
+           |               "AmendTrusteeTransform": ${Json.toJson(amendTrusteeOrgTransform)}
+           |            },
+           |            {
+           |               "AmendBeneficiaryTransform": ${Json.toJson(amendIndividualBenTransform)}
+           |            },
+           |            {
+           |               "AddBeneficiaryTransform": ${Json.toJson(addTrustBeneficiaryTransform)}
+           |            },
+           |            {
+           |               "AddBeneficiaryTransform": ${Json.toJson(addUnidentifiedBeneficiaryTransform)}
+           |            },
+           |            {
+           |               "AddBeneficiaryTransform": ${Json.toJson(addIndividualBeneficiaryTransform)}
+           |            },
+           |            {
+           |               "AmendBeneficiaryTransform": ${Json.toJson(amendCharityBeneficiaryTransform)}
+           |            },
+           |            {
+           |               "AmendBeneficiaryTransform": ${Json.toJson(amendCompanyBeneficiaryTransform)}
+           |            },
+           |            {
+           |               "AmendBeneficiaryTransform": ${Json.toJson(amendOtherBeneficiaryTransform)}
+           |            },
+           |            {
+           |               "AmendBeneficiaryTransform": ${Json.toJson(amendTrustBeneficiaryTransform)}
+           |            },
+           |            {
+           |               "AmendBeneficiaryTransform": ${Json.toJson(amendUnidentifiedBeneficiaryTransform)}
+           |            },
+           |            {
+           |               "AddBeneficiaryTransform": ${Json.toJson(addCharityBeneficiaryTransform)}
+           |            },
+           |            {
+           |               "AddBeneficiaryTransform": ${Json.toJson(addOtherBeneficiaryTransform)}
+           |            },
+           |            {
+           |               "AddBeneficiaryTransform": ${Json.toJson(addCompanyBeneficiaryTransform)}
+           |            },
+           |            {
+           |               "AddBeneficiaryTransform": ${Json.toJson(addLargeBeneficiaryTransform)}
+           |            },
+           |            {
+           |               "AmendBeneficiaryTransform": ${Json.toJson(amendLargeBeneficiaryTransform)}
+           |            },
+           |            {
+           |               "RemoveBeneficiaryTransform": ${Json.toJson(removeBeneficiariesTransform)}
+           |            },
+           |            {
+           |               "AmendSettlorTransform": ${Json.toJson(amendIndividualSettlorTransform)}
+           |            },
+           |            {
+           |               "AmendSettlorTransform": ${Json.toJson(amendBusinessSettlorTransform)}
+           |            },
+           |            {
+           |               "RemoveSettlorTransform": ${Json.toJson(removeSettlorsTransform)}
+           |            },
+           |            {
+           |               "AmendSettlorTransform": ${Json.toJson(amendDeceasedSettlorTransform)}
+           |            },
+           |            {
+           |               "AddSettlorTransform": ${Json.toJson(addIndividualSettlorTransform)}
+           |            },
+           |            {
+           |               "AddProtectorTransform": ${Json.toJson(addIndividualProtectorTransform)}
+           |            },
+           |            {
+           |               "RemoveProtectorTransform": ${Json.toJson(removeProtectorsTransform)}
+           |            },
+           |            {
+           |               "AddProtectorTransform": ${Json.toJson(addCompanyProtectorTransform)}
+           |            },
+           |            {
+           |               "AmendProtectorTransform": ${Json.toJson(amendBusinessProtectorTransform)}
+           |            },
+           |            {
+           |               "RemoveOtherIndividualTransform": ${Json.toJson(removeOtherIndividualsTransform)}
+           |            },
+           |            {
+           |               "AmendOtherIndividualTransform": ${Json.toJson(amendOtherIndividualTransform)}
+           |            },
+           |            {
+           |               "AddOtherIndividualTransform": ${Json.toJson(addOtherIndividualTransform)}
+           |            },
+           |            {
+           |               "SetTrustDetailTransform": ${Json.toJson(setExpressTransform)}
+           |            },
+           |            {
+           |               "SetTrustDetailTransform": ${Json.toJson(setPropertyTransform)}
+           |            },
+           |            {
+           |               "SetTrustDetailTransform": ${Json.toJson(setRecordedTransform)}
+           |            },
+           |            {
+           |               "SetTrustDetailTransform": ${Json.toJson(setResidentTransform)}
+           |            },
+           |            {
+           |               "SetTrustDetailTransform": ${Json.toJson(setTaxableTransform)}
+           |            },
+           |            {
+           |               "SetTrustDetailTransform": ${Json.toJson(setUKRelationTransform)}
+           |            },
+           |            {
+           |               "SetTrustDetailsTransform": ${Json.toJson(setMigratingTrustDetailsTransform)}
+           |            },
+           |            {
+           |               "SetTrustDetailsTransform": ${Json.toJson(setNonMigratingTrustDetailsTransform)}
+           |            }
+           |        ]
+           |    }
+           |""".stripMargin)
 
       val data = ComposedDeltaTransform(Seq(
-          amendLeadTrusteeIndTransform,
-          amendLeadTrusteeOrgTransform,
-          addTrusteeIndTransform,
-          addTrusteeOrgTransform,
-          removeTrusteeTransform,
-          promoteTrusteeIndTransform,
-          promoteTrusteeOrgTransform,
-          amendTrusteeIndTransform,
-          amendTrusteeOrgTransform,
-          amendIndividualBenTransform,
-          addTrustBeneficiaryTransform,
-          addUnidentifiedBeneficiaryTransform,
-          addIndividualBeneficiaryTransform,
-          amendCharityBeneficiaryTransform,
-          amendCompanyBeneficiaryTransform,
-          amendOtherBeneficiaryTransform,
-          amendTrustBeneficiaryTransform,
-          amendUnidentifiedBeneficiaryTransform,
-          addCharityBeneficiaryTransform,
-          addOtherBeneficiaryTransform,
-          addCompanyBeneficiaryTransform,
-          addLargeBeneficiaryTransform,
-          amendLargeBeneficiaryTransform,
-          removeBeneficiariesTransform,
-          amendIndividualSettlorTransform,
-          amendBusinessSettlorTransform,
-          removeSettlorsTransform,
-          amendDeceasedSettlorTransform,
-          addIndividualSettlorTransform,
-          addIndividualProtectorTransform,
-          removeProtectorsTransform,
-          addCompanyProtectorTransform,
-          amendBusinessProtectorTransform,
-          removeOtherIndividualsTransform,
-          amendOtherIndividualTransform,
-          addOtherIndividualTransform,
-          setExpressTransform,
-          setPropertyTransform,
-          setRecordedTransform,
-          setResidentTransform,
-          setTaxableTransform,
-          setUKRelationTransform
-        )
-      )
+        amendLeadTrusteeIndTransform,
+        amendLeadTrusteeOrgTransform,
+        addTrusteeIndTransform,
+        addTrusteeOrgTransform,
+        removeTrusteeTransform,
+        promoteTrusteeIndTransform,
+        promoteTrusteeOrgTransform,
+        amendTrusteeIndTransform,
+        amendTrusteeOrgTransform,
+        amendIndividualBenTransform,
+        addTrustBeneficiaryTransform,
+        addUnidentifiedBeneficiaryTransform,
+        addIndividualBeneficiaryTransform,
+        amendCharityBeneficiaryTransform,
+        amendCompanyBeneficiaryTransform,
+        amendOtherBeneficiaryTransform,
+        amendTrustBeneficiaryTransform,
+        amendUnidentifiedBeneficiaryTransform,
+        addCharityBeneficiaryTransform,
+        addOtherBeneficiaryTransform,
+        addCompanyBeneficiaryTransform,
+        addLargeBeneficiaryTransform,
+        amendLargeBeneficiaryTransform,
+        removeBeneficiariesTransform,
+        amendIndividualSettlorTransform,
+        amendBusinessSettlorTransform,
+        removeSettlorsTransform,
+        amendDeceasedSettlorTransform,
+        addIndividualSettlorTransform,
+        addIndividualProtectorTransform,
+        removeProtectorsTransform,
+        addCompanyProtectorTransform,
+        amendBusinessProtectorTransform,
+        removeOtherIndividualsTransform,
+        amendOtherIndividualTransform,
+        addOtherIndividualTransform,
+        setExpressTransform,
+        setPropertyTransform,
+        setRecordedTransform,
+        setResidentTransform,
+        setTaxableTransform,
+        setUKRelationTransform,
+        setMigratingTrustDetailsTransform,
+        setNonMigratingTrustDetailsTransform
+      ))
 
       Json.toJson(data) mustEqual json
       json.as[ComposedDeltaTransform] mustEqual data
