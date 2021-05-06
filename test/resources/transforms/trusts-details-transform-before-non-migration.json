@@ -1,0 +1,16 @@
+{
+  "details": {
+    "trust": {
+      "details": {
+        "startDate": "2001-01-01",
+        "trustTaxable": false,
+        "expressTrust": true,
+        "trustUKProperty": true,
+        "trustRecorded": true,
+        "trustUKResident": true
+      },
+      "entities": {
+      }
+    }
+  }
+}

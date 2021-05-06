@@ -1,0 +1,21 @@
+{
+  "details": {
+    "trust": {
+      "details": {
+        "startDate": "2001-01-01",
+        "administrationCountry": "FR",
+        "residentialStatus": {
+          "uk": {
+            "scottishLaw": false,
+            "preOffShore": "AD"
+          }
+        },
+        "typeOfTrust": "Will Trust or Intestacy Trust",
+        "deedOfVariation": "Previously there was only an absolute interest under the will",
+        "trustUKProperty": true
+      },
+      "entities": {
+      }
+    }
+  }
+}

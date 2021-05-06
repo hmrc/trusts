@@ -1,0 +1,23 @@
+{
+  "details": {
+    "trust": {
+      "details": {
+        "startDate": "2001-01-01",
+        "lawCountry": "FR",
+        "administrationCountry": "GB",
+        "residentialStatus": {
+          "nonUK": {
+            "sch5atcgga92": true
+          }
+        },
+        "typeOfTrust": "Inter vivos Settlement",
+        "interVivos": true,
+        "trustUKRelation": false,
+        "trustUKResident": false,
+        "trustUKProperty": true
+      },
+      "entities": {
+      }
+    }
+  }
+}
