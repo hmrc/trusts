@@ -34,10 +34,9 @@ class SetTrustDetailsTransformSpec extends FreeSpec with MustMatchers {
           val newTrustDetails = Json.parse(
             """
               |{
-              |  "trustUKProperty": false,
-              |  "trustRecorded": false,
-              |  "trustUKRelation": false,
-              |  "trustUKResident": false
+              |  "trustUKProperty": true,
+              |  "trustRecorded": true,
+              |  "trustUKResident": true
               |}
               |""".stripMargin
           )

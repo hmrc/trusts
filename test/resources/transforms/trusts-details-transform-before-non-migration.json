@@ -5,9 +5,10 @@
         "startDate": "2001-01-01",
         "trustTaxable": false,
         "expressTrust": true,
-        "trustUKProperty": true,
-        "trustRecorded": true,
-        "trustUKResident": true
+        "trustUKProperty": false,
+        "trustRecorded": false,
+        "trustUKResident": false,
+        "trustUKRelation": false
       },
       "entities": {
       }

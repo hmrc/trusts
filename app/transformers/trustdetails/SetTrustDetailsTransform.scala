@@ -28,13 +28,17 @@ case class SetTrustDetailsTransform(value: JsValue,
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
 
     def pruneOptionalFields(existingTrustDetails: JsValue): JsValue = {
-      val fields = Seq(LAW_COUNTRY, RESIDENTIAL_STATUS, UK_RELATION, DEED_OF_VARIATION, INTER_VIVOS, EFRBS_START_DATE)
+      val fields = if (migratingFromNonTaxableToTaxable) {
+        Seq(LAW_COUNTRY, RESIDENTIAL_STATUS, UK_RELATION, DEED_OF_VARIATION, INTER_VIVOS, EFRBS_START_DATE)
+      } else {
+        Seq(UK_RELATION)
+      }
       removeJsValueFields(existingTrustDetails, fields)
     }
 
     for {
       existingTrustDetails <- input.transform(path.json.pick)
-      optionalFieldsRemoved = if (migratingFromNonTaxableToTaxable) pruneOptionalFields(existingTrustDetails) else existingTrustDetails
+      optionalFieldsRemoved = pruneOptionalFields(existingTrustDetails)
       mergedTrustDetails = merge(optionalFieldsRemoved, value)
       updatedInput <- pruneThenAddTo(input, path, mergedTrustDetails)
     } yield updatedInput
