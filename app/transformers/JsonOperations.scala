@@ -91,9 +91,18 @@ trait JsonOperations {
     }
   }
 
-  def removeFields(value: JsObject, fields: Seq[String]): JsObject = {
+  def removeJsObjectFields(value: JsObject, fields: Seq[String]): JsObject = {
     fields.foldLeft[JsObject](value)((updated, field) => {
       updated - field
+    })
+  }
+
+  def removeJsValueFields(value: JsValue, fields: Seq[String]): JsValue = {
+    fields.foldLeft(value)((acc, field) => {
+      acc.transform((__ \ field).json.prune) match {
+        case JsSuccess(value, _) => value
+        case _ => acc
+      }
     })
   }
 
@@ -108,6 +117,10 @@ trait JsonOperations {
       _ => amended,
       value => objectPlusField(amended, field, value)
     )
+  }
+
+  def merge(value1: JsValue, value2: JsValue): JsObject = {
+    value1.as[JsObject].deepMerge(value2.as[JsObject])
   }
 
 }

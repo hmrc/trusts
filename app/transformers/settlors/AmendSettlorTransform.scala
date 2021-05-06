@@ -73,7 +73,7 @@ case class AmendSettlorTransform(index: Option[Int],
     input.transform(path.json.pick).map {
       value =>
         value.as[Seq[JsObject]].collect {
-          case x: JsObject if x \ LINE_NUMBER == JsDefined(lineNo) => removeFields(x, etmpFields)
+          case x: JsObject if x \ LINE_NUMBER == JsDefined(lineNo) => removeJsObjectFields(x, etmpFields)
           case x => x
         }
     }

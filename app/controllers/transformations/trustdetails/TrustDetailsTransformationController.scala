@@ -19,11 +19,12 @@ package controllers.transformations.trustdetails
 import controllers.actions.IdentifierAction
 import controllers.transformations.AddTransformationController
 import models.ResidentialStatusType
+import models.variation.{MigratingTrustDetails, NonMigratingTrustDetails}
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents}
-import services.TransformationService
+import services.{TaxableMigrationService, TransformationService}
 import transformers.DeltaTransform
-import transformers.trustdetails.SetTrustDetailTransform
+import transformers.trustdetails.{SetTrustDetailTransform, SetTrustDetailsTransform}
 import utils.Constants._
 
 import java.time.LocalDate
@@ -31,9 +32,10 @@ import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class TrustDetailsTransformationController @Inject()(identify: IdentifierAction,
-                                                     transformationService: TransformationService)
+                                                     transformationService: TransformationService,
+                                                     taxableMigrationService: TaxableMigrationService)
                                                     (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AddTransformationController(identify, transformationService) {
+  extends AddTransformationController(identify, transformationService, taxableMigrationService) {
 
   def setExpress(identifier: String): Action[JsValue] = addNewTransform[Boolean](identifier, EXPRESS)
   def setResident(identifier: String): Action[JsValue] = addNewTransform[Boolean](identifier, UK_RESIDENT)
@@ -50,7 +52,15 @@ class TrustDetailsTransformationController @Inject()(identify: IdentifierAction,
   def setEfrbsStartDate(identifier: String): Action[JsValue] = addNewTransform[LocalDate](identifier, EFRBS_START_DATE)
   def setResidentialStatus(identifier: String): Action[JsValue] = addNewTransform[ResidentialStatusType](identifier, RESIDENTIAL_STATUS)
 
-  override def transform[T](value: T, `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
-    SetTrustDetailTransform(Json.toJson(value), `type`)
+  def setMigratingTrustDetails(identifier: String): Action[JsValue] = addNewTransform[MigratingTrustDetails](identifier)
+  def setNonMigratingTrustDetails(identifier: String): Action[JsValue] = addNewTransform[NonMigratingTrustDetails](identifier)
+
+  override def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)
+                           (implicit wts: Writes[T]): DeltaTransform = {
+    if (`type`.isEmpty) {
+      SetTrustDetailsTransform(Json.toJson(value), migratingFromNonTaxableToTaxable)
+    } else {
+      SetTrustDetailTransform(Json.toJson(value), `type`)
+    }
   }
 }

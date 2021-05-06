@@ -22,14 +22,14 @@ import models.variation._
 import org.mockito.Matchers.{any, eq => equalTo}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatest.{BeforeAndAfterEach, FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
-import services.TransformationService
+import services.{TaxableMigrationService, TransformationService}
 import transformers.assets.AddAssetTransform
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 
@@ -38,7 +38,7 @@ import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
 class AddAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers
- with GuiceOneAppPerSuite {
+ with GuiceOneAppPerSuite with BeforeAndAfterEach {
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
@@ -48,6 +48,24 @@ class AddAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFuture
   private val amount: Long = 1000L
 
   private val invalidBody: JsValue = Json.parse("{}")
+
+  private val mockTransformationService = mock[TransformationService]
+  private val mockTaxableMigrationService = mock[TaxableMigrationService]
+
+  override def beforeEach(): Unit = {
+    reset(mockTransformationService)
+
+    when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+      .thenReturn(Future.successful(Json.obj()))
+
+    when(mockTransformationService.addNewTransform(any(), any(), any()))
+      .thenReturn(Future.successful(true))
+
+    reset(mockTaxableMigrationService)
+
+    when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any()))
+      .thenReturn(Future.successful(false))
+  }
   
   "Add asset controller" - {
 
@@ -61,18 +79,11 @@ class AddAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFuture
 
       "must add a new add transform" in {
 
-        val mockTransformationService = mock[TransformationService]
-
         val controller = new AddAssetController(
           identifierAction,
-          mockTransformationService
+          mockTransformationService,
+          mockTaxableMigrationService
         )(Implicits.global, Helpers.stubControllerComponents())
-
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(asset))
@@ -91,11 +102,10 @@ class AddAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFuture
 
       "must return an error for invalid json" in {
 
-        val mockTransformationService = mock[TransformationService]
-
         val controller = new AddAssetController(
           identifierAction,
-          mockTransformationService
+          mockTransformationService,
+          mockTaxableMigrationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
         val request = FakeRequest(POST, "path")
@@ -122,18 +132,11 @@ class AddAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFuture
 
       "must add a new add transform" in {
 
-        val mockTransformationService = mock[TransformationService]
-
         val controller = new AddAssetController(
           identifierAction,
-          mockTransformationService
+          mockTransformationService,
+          mockTaxableMigrationService
         )(Implicits.global, Helpers.stubControllerComponents())
-
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(asset))
@@ -152,11 +155,10 @@ class AddAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFuture
 
       "must return an error for invalid json" in {
 
-        val mockTransformationService = mock[TransformationService]
-
         val controller = new AddAssetController(
           identifierAction,
-          mockTransformationService
+          mockTransformationService,
+          mockTaxableMigrationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
         val request = FakeRequest(POST, "path")
@@ -185,18 +187,11 @@ class AddAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFuture
 
       "must add a new add transform" in {
 
-        val mockTransformationService = mock[TransformationService]
-
         val controller = new AddAssetController(
           identifierAction,
-          mockTransformationService
+          mockTransformationService,
+          mockTaxableMigrationService
         )(Implicits.global, Helpers.stubControllerComponents())
-
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(asset))
@@ -215,11 +210,10 @@ class AddAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFuture
 
       "must return an error for invalid json" in {
 
-        val mockTransformationService = mock[TransformationService]
-
         val controller = new AddAssetController(
           identifierAction,
-          mockTransformationService
+          mockTransformationService,
+          mockTaxableMigrationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
         val request = FakeRequest(POST, "path")
@@ -247,18 +241,11 @@ class AddAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFuture
 
       "must add a new add transform" in {
 
-        val mockTransformationService = mock[TransformationService]
-
         val controller = new AddAssetController(
           identifierAction,
-          mockTransformationService
+          mockTransformationService,
+          mockTaxableMigrationService
         )(Implicits.global, Helpers.stubControllerComponents())
-
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(asset))
@@ -277,11 +264,10 @@ class AddAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFuture
 
       "must return an error for invalid json" in {
 
-        val mockTransformationService = mock[TransformationService]
-
         val controller = new AddAssetController(
           identifierAction,
-          mockTransformationService
+          mockTransformationService,
+          mockTaxableMigrationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
         val request = FakeRequest(POST, "path")
@@ -307,18 +293,11 @@ class AddAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFuture
 
       "must add a new add transform" in {
 
-        val mockTransformationService = mock[TransformationService]
-
         val controller = new AddAssetController(
           identifierAction,
-          mockTransformationService
+          mockTransformationService,
+          mockTaxableMigrationService
         )(Implicits.global, Helpers.stubControllerComponents())
-
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(asset))
@@ -337,11 +316,10 @@ class AddAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFuture
 
       "must return an error for invalid json" in {
 
-        val mockTransformationService = mock[TransformationService]
-
         val controller = new AddAssetController(
           identifierAction,
-          mockTransformationService
+          mockTransformationService,
+          mockTaxableMigrationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
         val request = FakeRequest(POST, "path")
@@ -366,18 +344,11 @@ class AddAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFuture
 
       "must add a new add transform" in {
 
-        val mockTransformationService = mock[TransformationService]
-
         val controller = new AddAssetController(
           identifierAction,
-          mockTransformationService
+          mockTransformationService,
+          mockTaxableMigrationService
         )(Implicits.global, Helpers.stubControllerComponents())
-
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(asset))
@@ -396,11 +367,10 @@ class AddAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFuture
 
       "must return an error for invalid json" in {
 
-        val mockTransformationService = mock[TransformationService]
-
         val controller = new AddAssetController(
           identifierAction,
-          mockTransformationService
+          mockTransformationService,
+          mockTaxableMigrationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
         val request = FakeRequest(POST, "path")
@@ -429,18 +399,11 @@ class AddAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFuture
 
       "must add a new add transform" in {
 
-        val mockTransformationService = mock[TransformationService]
-
         val controller = new AddAssetController(
           identifierAction,
-          mockTransformationService
+          mockTransformationService,
+          mockTaxableMigrationService
         )(Implicits.global, Helpers.stubControllerComponents())
-
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(asset))
@@ -459,11 +422,10 @@ class AddAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFuture
 
       "must return an error for invalid json" in {
 
-        val mockTransformationService = mock[TransformationService]
-
         val controller = new AddAssetController(
           identifierAction,
-          mockTransformationService
+          mockTransformationService,
+          mockTaxableMigrationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
         val request = FakeRequest(POST, "path")

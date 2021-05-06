@@ -20,16 +20,16 @@ import controllers.actions.FakeIdentifierAction
 import models.NameType
 import models.variation._
 import org.mockito.Matchers.{any, eq => equalTo}
-import org.mockito.Mockito.{verify, when}
+import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatest.{BeforeAndAfterEach, FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
-import services.{LocalDateService, TransformationService}
+import services.{LocalDateService, TaxableMigrationService, TransformationService}
 import transformers.trustees.PromoteTrusteeTransform
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 
@@ -38,7 +38,7 @@ import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
 class DemoteLeadTrusteeControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers
- with GuiceOneAppPerSuite {
+ with GuiceOneAppPerSuite with BeforeAndAfterEach {
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
@@ -48,6 +48,29 @@ class DemoteLeadTrusteeControllerSpec extends FreeSpec with MockitoSugar with Sc
   private val endDate: LocalDate = LocalDate.parse("2021-01-01")
 
   private val invalidBody: JsValue = Json.parse("{}")
+
+  private val mockTransformationService = mock[TransformationService]
+  private val mockTaxableMigrationService = mock[TaxableMigrationService]
+  private val mockLocalDateService = mock[LocalDateService]
+
+  override def beforeEach(): Unit = {
+    reset(mockTransformationService)
+
+    when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+      .thenReturn(Future.successful(Json.obj()))
+
+    when(mockTransformationService.addNewTransform(any(), any(), any()))
+      .thenReturn(Future.successful(true))
+
+    reset(mockTaxableMigrationService)
+
+    when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any()))
+      .thenReturn(Future.successful(false))
+
+    reset(mockLocalDateService)
+
+    when(mockLocalDateService.now).thenReturn(endDate)
+  }
   
   "Demote lead trustee controller" - {
 
@@ -71,22 +94,12 @@ class DemoteLeadTrusteeControllerSpec extends FreeSpec with MockitoSugar with Sc
 
       "must add a new transform" in {
 
-        val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
-
         val controller = new DemoteLeadTrusteeController(
           identifierAction,
           mockTransformationService,
+          mockTaxableMigrationService,
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
-
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
-        when(mockLocalDateService.now).thenReturn(endDate)
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(trustee))
@@ -105,12 +118,10 @@ class DemoteLeadTrusteeControllerSpec extends FreeSpec with MockitoSugar with Sc
 
       "must return an error for invalid json" in {
 
-        val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
-
         val controller = new DemoteLeadTrusteeController(
           identifierAction,
           mockTransformationService,
+          mockTaxableMigrationService,
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
@@ -143,22 +154,12 @@ class DemoteLeadTrusteeControllerSpec extends FreeSpec with MockitoSugar with Sc
 
       "must add a new add transform" in {
 
-        val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
-
         val controller = new DemoteLeadTrusteeController(
           identifierAction,
           mockTransformationService,
+          mockTaxableMigrationService,
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
-
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
-        when(mockLocalDateService.now).thenReturn(endDate)
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(trustee))
@@ -177,12 +178,10 @@ class DemoteLeadTrusteeControllerSpec extends FreeSpec with MockitoSugar with Sc
 
       "must return an error for invalid json" in {
 
-        val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
-
         val controller = new DemoteLeadTrusteeController(
           identifierAction,
           mockTransformationService,
+          mockTaxableMigrationService,
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
