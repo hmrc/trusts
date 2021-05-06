@@ -22,20 +22,23 @@ import controllers.transformations.TransformationHelper.isTrustTaxable
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents}
-import services.TransformationService
+import services.{TaxableMigrationService, TransformationService}
 import transformers.DeltaTransform
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 abstract class AddTransformationController @Inject()(identify: IdentifierAction,
-                                                     transformationService: TransformationService)
+                                                     transformationService: TransformationService,
+                                                     taxableMigrationService: TaxableMigrationService)
                                                     (implicit ec: ExecutionContext, cc: ControllerComponents)
   extends TrustsBaseController(cc) with Logging {
 
-  def transform[T](value: T, `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform
+  def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)
+                  (implicit wts: Writes[T]): DeltaTransform
 
-  def addNewTransform[T](identifier: String, `type`: String = "")(implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = {
+  def addNewTransform[T](identifier: String, `type`: String = "")
+                        (implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = {
     identify.async(parse.json) {
       implicit request => {
         request.body.validate[T] match {
@@ -44,7 +47,12 @@ abstract class AddTransformationController @Inject()(identify: IdentifierAction,
             for {
               trust <- transformationService.getTransformedTrustJson(identifier, request.internalId)
               isTaxable <- Future.fromTry(isTrustTaxable(trust))
-              _ <- transformationService.addNewTransform(identifier, request.internalId, transform(entityToAdd, `type`, isTaxable))
+              migratingFromNonTaxableToTaxable <- taxableMigrationService.migratingFromNonTaxableToTaxable(identifier, request.internalId)
+              _ <- transformationService.addNewTransform(
+                identifier = identifier,
+                internalId = request.internalId,
+                newTransform = transform(entityToAdd, `type`, isTaxable, migratingFromNonTaxableToTaxable)
+              )
             } yield {
               Ok
             }

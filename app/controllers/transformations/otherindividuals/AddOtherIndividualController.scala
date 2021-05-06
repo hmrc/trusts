@@ -21,7 +21,7 @@ import controllers.transformations.AddTransformationController
 import models.variation.NaturalPersonType
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc.{Action, ControllerComponents}
-import services.TransformationService
+import services.{TaxableMigrationService, TransformationService}
 import transformers.DeltaTransform
 import transformers.otherindividuals.AddOtherIndividualTransform
 
@@ -29,13 +29,15 @@ import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class AddOtherIndividualController @Inject()(identify: IdentifierAction,
-                                             transformationService: TransformationService)
+                                             transformationService: TransformationService,
+                                             taxableMigrationService: TaxableMigrationService)
                                             (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AddTransformationController(identify, transformationService) {
+  extends AddTransformationController(identify, transformationService, taxableMigrationService) {
 
   def add(identifier: String): Action[JsValue] = addNewTransform[NaturalPersonType](identifier)
 
-  override def transform[T](value: T, `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)
+                           (implicit wts: Writes[T]): DeltaTransform = {
     AddOtherIndividualTransform(Json.toJson(value))
   }
 

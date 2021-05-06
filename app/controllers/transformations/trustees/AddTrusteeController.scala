@@ -22,7 +22,7 @@ import models.requests.IdentifierRequest
 import models.variation._
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc.{Action, ControllerComponents, Result}
-import services.TransformationService
+import services.{TaxableMigrationService, TransformationService}
 import transformers.DeltaTransform
 import transformers.trustees.AddTrusteeTransform
 import utils.Constants._
@@ -31,9 +31,10 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class AddTrusteeController @Inject()(identify: IdentifierAction,
-                                     transformationService: TransformationService)
+                                     transformationService: TransformationService,
+                                     taxableMigrationService: TaxableMigrationService)
                                     (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AddTransformationController(identify, transformationService) with TrusteeController {
+  extends AddTransformationController(identify, transformationService, taxableMigrationService) with TrusteeController {
 
   def add(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
@@ -57,7 +58,8 @@ class AddTrusteeController @Inject()(identify: IdentifierAction,
   def addBusiness(identifier: String)(implicit request: IdentifierRequest[JsValue]): Future[Result] =
     addNewTransform[TrusteeOrgType](identifier, BUSINESS_TRUSTEE).apply(request)
 
-  override def transform[T](value: T, `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)
+                           (implicit wts: Writes[T]): DeltaTransform = {
     AddTrusteeTransform(Json.toJson(value), `type`)
   }
 

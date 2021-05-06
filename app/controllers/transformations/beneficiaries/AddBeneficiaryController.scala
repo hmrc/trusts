@@ -21,7 +21,7 @@ import controllers.transformations.AddTransformationController
 import models.variation._
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc.{Action, ControllerComponents}
-import services.TransformationService
+import services.{TaxableMigrationService, TransformationService}
 import transformers.DeltaTransform
 import transformers.beneficiaries.AddBeneficiaryTransform
 import utils.Constants._
@@ -30,9 +30,10 @@ import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class AddBeneficiaryController @Inject()(identify: IdentifierAction,
-                                         transformationService: TransformationService
-                                        )(implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AddTransformationController(identify, transformationService) {
+                                         transformationService: TransformationService,
+                                         taxableMigrationService: TaxableMigrationService)
+                                        (implicit ec: ExecutionContext, cc: ControllerComponents)
+  extends AddTransformationController(identify, transformationService, taxableMigrationService) {
 
   def addUnidentified(identifier: String): Action[JsValue] = addNewTransform[UnidentifiedType](identifier, UNIDENTIFIED_BENEFICIARY)
 
@@ -48,7 +49,8 @@ class AddBeneficiaryController @Inject()(identify: IdentifierAction,
 
   def addLarge(identifier: String): Action[JsValue] = addNewTransform[LargeType](identifier, LARGE_BENEFICIARY)
 
-  override def transform[T](value: T, `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)
+                           (implicit wts: Writes[T]): DeltaTransform = {
     AddBeneficiaryTransform(Json.toJson(value), `type`)
   }
 }

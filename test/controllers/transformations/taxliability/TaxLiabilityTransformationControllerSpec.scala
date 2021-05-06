@@ -19,16 +19,16 @@ package controllers.transformations.taxliability
 import controllers.actions.FakeIdentifierAction
 import models.YearsReturns
 import org.mockito.Matchers.{any, eq => equalTo}
-import org.mockito.Mockito.{verify, when}
+import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatest.{BeforeAndAfterEach, FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.Json
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
-import services.TransformationService
+import services.{TaxableMigrationService, TransformationService}
 import transformers.taxliability.SetTaxLiabilityTransform
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 
@@ -39,7 +39,8 @@ class TaxLiabilityTransformationControllerSpec extends FreeSpec
   with MockitoSugar
   with ScalaFutures
   with MustMatchers
-  with GuiceOneAppPerSuite {
+  with GuiceOneAppPerSuite
+  with BeforeAndAfterEach {
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
@@ -47,20 +48,40 @@ class TaxLiabilityTransformationControllerSpec extends FreeSpec
 
   private val utr: String = "utr"
 
+  private val mockTransformationService = mock[TransformationService]
+  private val mockTaxableMigrationService = mock[TaxableMigrationService]
+
+  override def beforeEach(): Unit = {
+    reset(mockTransformationService)
+
+    when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+      .thenReturn(Future.successful(Json.obj()))
+
+    when(mockTransformationService.addNewTransform(any(), any(), any()))
+      .thenReturn(Future.successful(true))
+
+    reset(mockTaxableMigrationService)
+
+    when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any()))
+      .thenReturn(Future.successful(false))
+  }
+
   "Trust details transforms" - {
 
     "when setting years returns" - {
 
       "must return an OK" in {
 
-        val service = mock[TransformationService]
+        val controller = new TaxLiabilityTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
-        val controller = new TaxLiabilityTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
-
-        when(service.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
           .thenReturn(Future.successful(Json.obj()))
 
-        when(service.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
         val body = Json.toJson(YearsReturns(None))
@@ -73,18 +94,20 @@ class TaxLiabilityTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).addNewTransform(
+        verify(mockTransformationService).addNewTransform(
           equalTo(utr),
           any(),
           equalTo(SetTaxLiabilityTransform(Json.toJson(body)))
         )
       }
 
-      "return an BadRequest for malformed json" in {
+      "return a BadRequest for malformed json" in {
 
-        val service = mock[TransformationService]
-
-        val controller = new TaxLiabilityTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+        val controller = new TaxLiabilityTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.parse(

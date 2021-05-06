@@ -17,19 +17,20 @@
 package controllers.transformations.trustdetails
 
 import controllers.actions.FakeIdentifierAction
+import models.variation.{MigratingTrustDetails, NonMigratingTrustDetails}
 import models.{NonUKType, ResidentialStatusType}
 import org.mockito.Matchers.{any, eq => equalTo}
-import org.mockito.Mockito.{verify, when}
+import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatest.{BeforeAndAfterEach, FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsBoolean, JsString, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
-import services.TransformationService
-import transformers.trustdetails.SetTrustDetailTransform
+import services.{TaxableMigrationService, TransformationService}
+import transformers.trustdetails.{SetTrustDetailTransform, SetTrustDetailsTransform}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 
 import java.time.LocalDate
@@ -40,7 +41,8 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
   with MockitoSugar
   with ScalaFutures
   with MustMatchers
-  with GuiceOneAppPerSuite {
+  with GuiceOneAppPerSuite
+  with BeforeAndAfterEach {
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
@@ -48,22 +50,37 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
   private val utr: String = "utr"
 
+  private val mockTransformationService = mock[TransformationService]
+  private val mockTaxableMigrationService = mock[TaxableMigrationService]
+
+  override def beforeEach(): Unit = {
+    reset(mockTransformationService)
+
+    when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+      .thenReturn(Future.successful(Json.obj()))
+
+    when(mockTransformationService.addNewTransform(any(), any(), any()))
+      .thenReturn(Future.successful(true))
+
+    reset(mockTaxableMigrationService)
+
+    when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any()))
+      .thenReturn(Future.successful(false))
+  }
+
   "Trust details transforms" - {
 
     "when setting express question" - {
 
       "must return an OK" in {
-        val service = mock[TransformationService]
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(JsBoolean(true))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -71,19 +88,22 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).addNewTransform(
+        verify(mockTransformationService).addNewTransform(
           equalTo(utr),
           equalTo("id"),
           equalTo(SetTrustDetailTransform(JsBoolean(true), "expressTrust"))
         )
       }
 
-      "return an BadRequest for malformed json" in {
-        val service = mock[TransformationService]
+      "return a BadRequest for malformed json" in {
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -97,17 +117,14 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting property question" - {
 
       "must return an OK" in {
-        val service = mock[TransformationService]
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(JsBoolean(true))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -115,19 +132,22 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).addNewTransform(
+        verify(mockTransformationService).addNewTransform(
           equalTo(utr),
           equalTo("id"),
           equalTo(SetTrustDetailTransform(JsBoolean(true), "trustUKProperty"))
         )
       }
 
-      "return an BadRequest for malformed json" in {
-        val service = mock[TransformationService]
+      "return a BadRequest for malformed json" in {
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -141,17 +161,14 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting recorded question" - {
 
       "must return an OK" in {
-        val service = mock[TransformationService]
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(JsBoolean(true))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -159,19 +176,22 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).addNewTransform(
+        verify(mockTransformationService).addNewTransform(
           equalTo(utr),
           equalTo("id"),
           equalTo(SetTrustDetailTransform(JsBoolean(true), "trustRecorded"))
         )
       }
 
-      "return an BadRequest for malformed json" in {
-        val service = mock[TransformationService]
+      "return a BadRequest for malformed json" in {
+        
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
-
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -185,17 +205,14 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting resident question" - {
 
       "must return an OK" in {
-        val service = mock[TransformationService]
+        
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
-
-        when(service.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(JsBoolean(true))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -203,19 +220,22 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).addNewTransform(
+        verify(mockTransformationService).addNewTransform(
           equalTo(utr),
           equalTo("id"),
           equalTo(SetTrustDetailTransform(JsBoolean(true), "trustUKResident"))
         )
       }
 
-      "return an BadRequest for malformed json" in {
-        val service = mock[TransformationService]
+      "return a BadRequest for malformed json" in {
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -229,17 +249,14 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting taxable question" - {
 
       "must return an OK" in {
-        val service = mock[TransformationService]
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(JsBoolean(true))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -247,19 +264,22 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).addNewTransform(
+        verify(mockTransformationService).addNewTransform(
           equalTo(utr),
           equalTo("id"),
           equalTo(SetTrustDetailTransform(JsBoolean(true), "trustTaxable"))
         )
       }
 
-      "return an BadRequest for malformed json" in {
-        val service = mock[TransformationService]
+      "return a BadRequest for malformed json" in {
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -273,17 +293,14 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting uk relation question" - {
 
       "must return an OK" in {
-        val service = mock[TransformationService]
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(service.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
-
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(JsBoolean(true))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -291,19 +308,22 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).addNewTransform(
+        verify(mockTransformationService).addNewTransform(
           equalTo(utr),
           equalTo("id"),
           equalTo(SetTrustDetailTransform(JsBoolean(true), "trustUKRelation"))
         )
       }
 
-      "return an BadRequest for malformed json" in {
-        val service = mock[TransformationService]
+      "return a BadRequest for malformed json" in {
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -317,19 +337,16 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting law country question" - {
 
       "must return an OK" in {
-        val service = mock[TransformationService]
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
-
-        when(service.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
         val body = JsString("FR")
 
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(body)
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -337,19 +354,22 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).addNewTransform(
+        verify(mockTransformationService).addNewTransform(
           equalTo(utr),
           any(),
           equalTo(SetTrustDetailTransform(body, "lawCountry"))
         )
       }
 
-      "return an BadRequest for malformed json" in {
-        val service = mock[TransformationService]
+      "return a BadRequest for malformed json" in {
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -363,19 +383,16 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting administration country question" - {
 
       "must return an OK" in {
-        val service = mock[TransformationService]
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
-
-        when(service.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
         val body = JsString("FR")
 
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(body)
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -383,19 +400,22 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).addNewTransform(
+        verify(mockTransformationService).addNewTransform(
           equalTo(utr),
           any(),
           equalTo(SetTrustDetailTransform(body, "administrationCountry"))
         )
       }
 
-      "return an BadRequest for malformed json" in {
-        val service = mock[TransformationService]
+      "return a BadRequest for malformed json" in {
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -409,19 +429,16 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting type of trust question" - {
 
       "must return an OK" in {
-        val service = mock[TransformationService]
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
-
-        when(service.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
         val body = JsString("Employment Related")
 
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(body)
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -429,19 +446,22 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).addNewTransform(
+        verify(mockTransformationService).addNewTransform(
           equalTo(utr),
           any(),
           equalTo(SetTrustDetailTransform(body, "typeOfTrust"))
         )
       }
 
-      "return an BadRequest for malformed json" in {
-        val service = mock[TransformationService]
+      "return a BadRequest for malformed json" in {
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -455,19 +475,16 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting deed of variation question" - {
 
       "must return an OK" in {
-        val service = mock[TransformationService]
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
-
-        when(service.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
         val body = JsString("Replaced the will trust")
 
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(body)
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -475,19 +492,22 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).addNewTransform(
+        verify(mockTransformationService).addNewTransform(
           equalTo(utr),
           any(),
           equalTo(SetTrustDetailTransform(body, "deedOfVariation"))
         )
       }
 
-      "return an BadRequest for malformed json" in {
-        val service = mock[TransformationService]
+      "return a BadRequest for malformed json" in {
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -501,19 +521,16 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting inter vivos question" - {
 
       "must return an OK" in {
-        val service = mock[TransformationService]
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
-
-        when(service.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
         val body = JsBoolean(true)
 
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(body)
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -521,19 +538,22 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).addNewTransform(
+        verify(mockTransformationService).addNewTransform(
           equalTo(utr),
           any(),
           equalTo(SetTrustDetailTransform(body, "interVivos"))
         )
       }
 
-      "return an BadRequest for malformed json" in {
-        val service = mock[TransformationService]
+      "return a BadRequest for malformed json" in {
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -547,19 +567,16 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting EFRBS start date question" - {
 
       "must return an OK" in {
-        val service = mock[TransformationService]
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
-
-        when(service.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
         val body = Json.toJson(LocalDate.parse("2021-01-01"))
 
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(body)
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -567,19 +584,22 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).addNewTransform(
+        verify(mockTransformationService).addNewTransform(
           equalTo(utr),
           any(),
           equalTo(SetTrustDetailTransform(body, "efrbsStartDate"))
         )
       }
 
-      "return an BadRequest for malformed json" in {
-        val service = mock[TransformationService]
+      "return a BadRequest for malformed json" in {
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(Json.parse("{}"))
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -593,19 +613,16 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
     "when setting residential status question" - {
 
       "must return an OK" in {
-        val service = mock[TransformationService]
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
-
-        when(service.getTransformedTrustJson(any(), any())(any()))
-          .thenReturn(Future.successful(Json.obj()))
-
-        when(service.addNewTransform(any(), any(), any()))
-          .thenReturn(Future.successful(true))
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
         val body = Json.toJson(ResidentialStatusType(None, Some(NonUKType(sch5atcgga92 = true, None, None, None))))
 
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(body)
           .withHeaders(CONTENT_TYPE -> "application/json")
 
@@ -613,19 +630,22 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
 
         status(result) mustBe OK
 
-        verify(service).addNewTransform(
+        verify(mockTransformationService).addNewTransform(
           equalTo(utr),
           any(),
           equalTo(SetTrustDetailTransform(body, "residentialStatus"))
         )
       }
 
-      "return an BadRequest for malformed json" in {
-        val service = mock[TransformationService]
+      "return a BadRequest for malformed json" in {
 
-        val controller = new TrustDetailsTransformationController(identifierAction, service)(Implicits.global, Helpers.stubControllerComponents())
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
 
-        val request = FakeRequest(POST, "path")
+        val request = FakeRequest(PUT, "path")
           .withBody(Json.parse(
             """
               |{
@@ -642,6 +662,107 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
         status(result) mustBe BAD_REQUEST
       }
 
+    }
+    
+    "when setting trust details" - {
+      
+      "when migrating from non-taxable to taxable" - {
+
+        "must return an OK" in {
+
+          when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any()))
+            .thenReturn(Future.successful(true))
+
+          val controller = new TrustDetailsTransformationController(
+            identifierAction,
+            mockTransformationService,
+            mockTaxableMigrationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val body = Json.toJson(MigratingTrustDetails(None, "GB", None, None, trustUKResident = true, "Will Trust or Intestacy Trust", None, None, None))
+
+          val request = FakeRequest(PUT, "path")
+            .withBody(body)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.setMigratingTrustDetails(utr).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockTransformationService).addNewTransform(
+            equalTo(utr),
+            any(),
+            equalTo(SetTrustDetailsTransform(body, migratingFromNonTaxableToTaxable = true))
+          )
+        }
+
+        "must return a BadRequest for malformed json" in {
+
+          val controller = new TrustDetailsTransformationController(
+            identifierAction,
+            mockTransformationService,
+            mockTaxableMigrationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(PUT, "path")
+            .withBody(Json.parse("{}"))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.setMigratingTrustDetails(utr).apply(request)
+
+          status(result) mustBe BAD_REQUEST
+        }
+        
+      }
+      
+      "when not migrating" - {
+
+        "must return an OK" in {
+
+          when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any()))
+            .thenReturn(Future.successful(false))
+
+          val controller = new TrustDetailsTransformationController(
+            identifierAction,
+            mockTransformationService,
+            mockTaxableMigrationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val body = Json.toJson(NonMigratingTrustDetails(trustUKProperty = true, trustRecorded = true, None, trustUKResident = true))
+
+          val request = FakeRequest(PUT, "path")
+            .withBody(body)
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.setNonMigratingTrustDetails(utr).apply(request)
+
+          status(result) mustBe OK
+
+          verify(mockTransformationService).addNewTransform(
+            equalTo(utr),
+            any(),
+            equalTo(SetTrustDetailsTransform(body, migratingFromNonTaxableToTaxable = false))
+          )
+        }
+
+        "must return a BadRequest for malformed json" in {
+
+          val controller = new TrustDetailsTransformationController(
+            identifierAction,
+            mockTransformationService,
+            mockTaxableMigrationService
+          )(Implicits.global, Helpers.stubControllerComponents())
+
+          val request = FakeRequest(PUT, "path")
+            .withBody(Json.parse("{}"))
+            .withHeaders(CONTENT_TYPE -> "application/json")
+
+          val result = controller.setNonMigratingTrustDetails(utr).apply(request)
+
+          status(result) mustBe BAD_REQUEST
+        }
+        
+      }
     }
   }
 }
