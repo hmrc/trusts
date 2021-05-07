@@ -28,9 +28,6 @@ GET         /:identifier/transformed                                            
 # TODO - point all frontends at new route inside trusts.trustDetails.Routes and delete this route
 GET         /:identifier/trust-details                                                      controllers.GetTrustController.getTrustDetails(identifier: String, applyTransformations: Boolean = true)
 
-# TODO - delete once maintain-other-individuals-frontend deployed pointing to new route inside trusts.otherIndividuals.Routes
-GET         /:identifier/transformed/other-individuals                                      controllers.GetTrustController.getOtherIndividuals(identifier: String)
-
 GET         /:identifier/transformed/protectors-already-exist                               controllers.GetTrustController.getProtectorsAlreadyExist(identifier: String)
 GET         /:identifier/transformed/other-individuals-already-exist                        controllers.GetTrustController.getOtherIndividualsAlreadyExist(identifier: String)
 GET         /:identifier/transformed/non-eea-companies-already-exist                        controllers.GetTrustController.getNonEeaCompaniesAlreadyExist(identifier: String)
