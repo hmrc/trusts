@@ -76,7 +76,7 @@ class RemoveOtherIndividualSpec extends AsyncFreeSpec with MustMatchers with Moc
       val removeOtherIndividualResult = route(application, removeOtherIndividualRequest).get
       status(removeOtherIndividualResult) mustBe OK
 
-      val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed/other-individuals")).get
+      val newResult = route(application, FakeRequest(GET, s"/trusts/other-individuals/$identifier/transformed")).get
       status(newResult) mustBe OK
 
       val otherIndividuals = (contentAsJson(newResult) \ "naturalPerson").as[JsArray]
