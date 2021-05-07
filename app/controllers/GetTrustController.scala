@@ -86,6 +86,9 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       case _ => Forbidden
     }
 
+  def wasTrustRegisteredWithDeceasedSettlor(identifier: String): Action[AnyContent] =
+    isPickSuccessfulAtPath(identifier, ENTITIES \ DECEASED_SETTLOR)
+
   def getTrustDetails(identifier: String, applyTransformations: Boolean): Action[AnyContent] =
     getItemAtPath(identifier, TRUST \ DETAILS, applyTransformations)
 
@@ -117,11 +120,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
 
   def getDeceasedSettlorDeathRecorded(identifier: String): Action[AnyContent] =
-    processEtmpData(identifier, applyTransformations = false) {
-      etmpData =>
-        val deceasedDeathDatePath = ENTITIES \ DECEASED_SETTLOR \ DATE_OF_DEATH
-        JsBoolean(etmpData.transform(deceasedDeathDatePath.json.pick).isSuccess)
-    }
+    isPickSuccessfulAtPath(identifier, ENTITIES \ DECEASED_SETTLOR \ DATE_OF_DEATH)
 
   private val protectorsPath = ENTITIES \ PROTECTORS
 
@@ -153,10 +152,13 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
   }
 
-  def isTrust5mld(identifier: String): Action[AnyContent] = {
-    val expressTrustPath = TRUST \ DETAILS \ EXPRESS
-    processEtmpData(identifier, applyTransformations = false) { untransformedData =>
-      JsBoolean(untransformedData.transform(expressTrustPath.json.pick).isSuccess)
+  def isTrust5mld(identifier: String): Action[AnyContent] =
+    isPickSuccessfulAtPath(identifier, TRUST \ DETAILS \ EXPRESS)
+
+  private def isPickSuccessfulAtPath(identifier: String, path: JsPath): Action[AnyContent] = {
+    processEtmpData(identifier, applyTransformations = false) {
+      etmpData =>
+        JsBoolean(etmpData.transform(path.json.pick).isSuccess)
     }
   }
 

@@ -1529,6 +1529,55 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         }
       }
     }
+
+    ".wasTrustRegisteredWithDeceasedSettlor" should {
+
+      "return 200 - Ok with true when deceased settlor present in trust data" in {
+
+        val trustWithDeceasedSettlor = getTransformedTrustResponse
+
+        val processedResponse = TrustProcessedResponse(trustWithDeceasedSettlor, ResponseHeader("Processed", "1"))
+
+        when(trustsService.getTrustInfo(any[String], any[String]))
+          .thenReturn(Future.successful(processedResponse))
+
+        val result = getTrustController.wasTrustRegisteredWithDeceasedSettlor(utr)(FakeRequest())
+
+        val expected = Json.parse("true")
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"))
+          verify(transformationService, never()).getTransformedData(any(), any())(any())
+          status(result) mustBe OK
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe expected
+        }
+      }
+
+      "return 200 - Ok with false when deceased settlor not present in trust data" in {
+
+        val trustWithoutDeceasedSettlor = getEmptyTransformedTrustResponse
+
+        val processedResponse = TrustProcessedResponse(trustWithoutDeceasedSettlor, ResponseHeader("Processed", "1"))
+
+        when(trustsService.getTrustInfo(any[String], any[String]))
+          .thenReturn(Future.successful(processedResponse))
+
+        val result = getTrustController.wasTrustRegisteredWithDeceasedSettlor(utr)(FakeRequest())
+
+        val expected = Json.parse("false")
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"))
+          verify(transformationService, never()).getTransformedData(any(), any())(any())
+          status(result) mustBe OK
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe expected
+        }
+      }
+    }
   }
 }
 
