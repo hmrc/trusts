@@ -66,6 +66,8 @@ class SetTrustDetailsTransformSpec extends FreeSpec with MustMatchers {
               |      "sch5atcgga92": true
               |    }
               |  },
+              |  "trustUKProperty": true,
+              |  "trustRecorded": true,
               |  "trustUKRelation": false,
               |  "trustUKResident": false,
               |  "typeOfTrust": "Inter vivos Settlement",

@@ -10,9 +10,10 @@
             "preOffShore": "AD"
           }
         },
+        "trustUKProperty": false,
+        "trustRecorded": false,
         "typeOfTrust": "Will Trust or Intestacy Trust",
-        "deedOfVariation": "Previously there was only an absolute interest under the will",
-        "trustUKProperty": true
+        "deedOfVariation": "Previously there was only an absolute interest under the will"
       },
       "entities": {
       }

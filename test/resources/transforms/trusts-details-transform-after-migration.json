@@ -10,11 +10,12 @@
             "sch5atcgga92": true
           }
         },
-        "typeOfTrust": "Inter vivos Settlement",
-        "interVivos": true,
+        "trustUKProperty": true,
+        "trustRecorded": true,
         "trustUKRelation": false,
         "trustUKResident": false,
-        "trustUKProperty": true
+        "typeOfTrust": "Inter vivos Settlement",
+        "interVivos": true
       },
       "entities": {
       }

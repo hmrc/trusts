@@ -689,6 +689,8 @@ class TrustDetailsTransformationControllerSpec extends FreeSpec
               )),
               nonUK = None
             ),
+            trustUKProperty = true,
+            trustRecorded = true,
             trustUKRelation = None,
             trustUKResident = true,
             typeOfTrust = "Will Trust or Intestacy Trust",
