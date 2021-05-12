@@ -155,6 +155,9 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   def isTrust5mld(identifier: String): Action[AnyContent] =
     isPickSuccessfulAtPath(identifier, TRUST \ DETAILS \ EXPRESS)
 
+  def getTrustName(identifier: String): Action[AnyContent] =
+    getItemAtPath(identifier, TRUST_NAME)
+
   private def isPickSuccessfulAtPath(identifier: String, path: JsPath): Action[AnyContent] = {
     processEtmpData(identifier, applyTransformations = false) {
       etmpData =>
