@@ -410,7 +410,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
-        val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/lead-trustee"))
+        val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/trustees/$utr/transformed/lead-trustee"))
 
         whenReady(result) { _ =>
           status(result) mustBe FORBIDDEN
@@ -423,7 +423,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
         when(transformationService.getTransformedData(any[String], any[String])(any())).thenReturn(Future.successful(processedResponse))
 
-        val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/lead-trustee"))
+        val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/trustees/$utr/transformed/lead-trustee"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
@@ -442,7 +442,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
         when(transformationService.getTransformedData(any[String], any[String])(any())).thenReturn(Future.successful(processedResponse))
 
-        val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/lead-trustee"))
+        val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/trustees/$utr/transformed/lead-trustee"))
 
         val expectedResponseFromTrusts = Taxable5MLDFixtures.Trusts.LeadTrustee.taxable5mld2134514321LeadTrustee
 
@@ -460,7 +460,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
-        val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/lead-trustee"))
+        val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/trustees/$utr/transformed/lead-trustee"))
 
         whenReady(result) { _ =>
           status(result) mustBe INTERNAL_SERVER_ERROR
@@ -479,7 +479,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           when(transformationService.getTransformedData(any(), any())(any()))
             .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
-          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
+          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/trust-details/$utr/transformed"))
 
           whenReady(result) { _ =>
             status(result) mustBe FORBIDDEN
@@ -493,7 +493,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           when(transformationService.getTransformedData(any[String], any[String])(any()))
             .thenReturn(Future.successful(processedResponse))
 
-          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
+          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/trust-details/$utr/transformed"))
 
           whenReady(result) { _ =>
             verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
@@ -529,7 +529,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           when(transformationService.getTransformedData(any[String], any[String])(any()))
             .thenReturn(Future.successful(processedResponse))
 
-          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
+          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/trust-details/$utr/transformed"))
 
           whenReady(result) { _ =>
             verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
@@ -567,7 +567,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           when(transformationService.getTransformedData(any(), any())(any()))
             .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
-          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
+          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/trust-details/$utr/transformed"))
 
           whenReady(result) { _ =>
             status(result) mustBe INTERNAL_SERVER_ERROR
@@ -584,7 +584,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           when(trustsService.getTrustInfo(any(), any()))
             .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
-          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
+          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/trust-details/$utr/transformed"))
 
           whenReady(result) { _ =>
             status(result) mustBe FORBIDDEN
@@ -598,7 +598,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           when(trustsService.getTrustInfo(any[String], any[String]))
             .thenReturn(Future.successful(processedResponse))
 
-          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
+          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/trust-details/$utr/transformed"))
 
           whenReady(result) { _ =>
             verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
@@ -634,7 +634,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           when(trustsService.getTrustInfo(any[String], any[String]))
             .thenReturn(Future.successful(processedResponse))
 
-          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
+          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/trust-details/$utr/transformed"))
 
           whenReady(result) { _ =>
             verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
@@ -672,7 +672,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           when(trustsService.getTrustInfo(any(), any()))
             .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
-          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/$utr/trust-details"))
+          val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/trust-details/$utr/transformed"))
 
           whenReady(result) { _ =>
             status(result) mustBe INTERNAL_SERVER_ERROR
@@ -688,7 +688,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
-        val result = getTrustController.getYearsReturns(utr).apply(FakeRequest(GET, s"/trusts/$utr/years-returns"))
+        val result = getTrustController.getYearsReturns(utr).apply(FakeRequest(GET, s"/trusts/tax-liability/$utr/transformed"))
 
         whenReady(result) { _ =>
           status(result) mustBe FORBIDDEN
@@ -702,7 +702,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
-        val result = getTrustController.getYearsReturns(utr).apply(FakeRequest(GET, s"/trusts/$utr/years-returns"))
+        val result = getTrustController.getYearsReturns(utr).apply(FakeRequest(GET, s"/trusts/tax-liability/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
@@ -739,7 +739,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
-        val result = getTrustController.getYearsReturns(utr).apply(FakeRequest(GET, s"/trusts/$utr/years-returns"))
+        val result = getTrustController.getYearsReturns(utr).apply(FakeRequest(GET, s"/trusts/tax-liability/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
@@ -772,7 +772,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
-        val result = getTrustController.getYearsReturns(utr).apply(FakeRequest(GET, s"/trusts/$utr/years-returns"))
+        val result = getTrustController.getYearsReturns(utr).apply(FakeRequest(GET, s"/trusts/tax-liability/$utr/transformed"))
 
         whenReady(result) { _ =>
           status(result) mustBe INTERNAL_SERVER_ERROR
@@ -787,7 +787,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
-        val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/trustees"))
+        val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/trustees/$utr/transformed"))
 
         whenReady(result) { _ =>
           status(result) mustBe FORBIDDEN
@@ -801,7 +801,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
-        val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/trustees"))
+        val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/trustees/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
@@ -821,7 +821,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
-        val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/trustees"))
+        val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/trustees/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
@@ -837,7 +837,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
-        val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/$utr/transformed/trustees"))
+        val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/trustees/$utr/transformed"))
 
         whenReady(result) { _ =>
           status(result) mustBe INTERNAL_SERVER_ERROR
@@ -853,7 +853,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
-        val result = getTrustController.getAssets(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/assets"))
+        val result = getTrustController.getAssets(utr)(FakeRequest(GET, s"/trusts/assets/$utr/transformed"))
 
         whenReady(result) { _ =>
           status(result) mustBe FORBIDDEN
@@ -867,7 +867,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
-        val result = getTrustController.getAssets(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/assets"))
+        val result = getTrustController.getAssets(utr)(FakeRequest(GET, s"/trusts/assets/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
@@ -887,7 +887,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
-        val result = getTrustController.getAssets(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/assets"))
+        val result = getTrustController.getAssets(utr)(FakeRequest(GET, s"/trusts/assets/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
@@ -907,7 +907,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
-        val result = getTrustController.getAssets(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/assets"))
+        val result = getTrustController.getAssets(utr)(FakeRequest(GET, s"/trusts/assets/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
@@ -922,7 +922,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
-        val result = getTrustController.getAssets(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/assets"))
+        val result = getTrustController.getAssets(utr)(FakeRequest(GET, s"/trusts/assets/$utr/transformed"))
 
         whenReady(result) { _ =>
           status(result) mustBe INTERNAL_SERVER_ERROR
@@ -938,7 +938,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
-        val result = getTrustController.getBeneficiaries(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/beneficiaries"))
+        val result = getTrustController.getBeneficiaries(utr)(FakeRequest(GET, s"/trusts/beneficiaries/$utr/transformed"))
 
         whenReady(result) { _ =>
           status(result) mustBe FORBIDDEN
@@ -952,7 +952,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
-        val result = getTrustController.getBeneficiaries(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/beneficiaries"))
+        val result = getTrustController.getBeneficiaries(utr)(FakeRequest(GET, s"/trusts/beneficiaries/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
@@ -972,7 +972,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
-        val result = getTrustController.getBeneficiaries(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/beneficiaries"))
+        val result = getTrustController.getBeneficiaries(utr)(FakeRequest(GET, s"/trusts/beneficiaries/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
@@ -988,7 +988,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
-        val result = getTrustController.getBeneficiaries(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/beneficiaries"))
+        val result = getTrustController.getBeneficiaries(utr)(FakeRequest(GET, s"/trusts/beneficiaries/$utr/transformed"))
 
         whenReady(result) { _ =>
           status(result) mustBe INTERNAL_SERVER_ERROR
@@ -1004,7 +1004,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
-        val result = getTrustController.getSettlors(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/settlors"))
+        val result = getTrustController.getSettlors(utr)(FakeRequest(GET, s"/trusts/settlors/$utr/transformed"))
 
         whenReady(result) { _ =>
           status(result) mustBe FORBIDDEN
@@ -1018,7 +1018,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
-        val result = getTrustController.getSettlors(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/settlors"))
+        val result = getTrustController.getSettlors(utr)(FakeRequest(GET, s"/trusts/settlors/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
@@ -1038,7 +1038,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
-        val result = getTrustController.getSettlors(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/settlors"))
+        val result = getTrustController.getSettlors(utr)(FakeRequest(GET, s"/trusts/settlors/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
@@ -1054,7 +1054,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
-        val result = getTrustController.getSettlors(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/settlors"))
+        val result = getTrustController.getSettlors(utr)(FakeRequest(GET, s"/trusts/settlors/$utr/transformed"))
 
         whenReady(result) { _ =>
           status(result) mustBe INTERNAL_SERVER_ERROR
@@ -1247,7 +1247,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
-        val result = getTrustController.getBeneficiaries(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/protectors"))
+        val result = getTrustController.getBeneficiaries(utr)(FakeRequest())
 
         whenReady(result) { _ =>
           status(result) mustBe FORBIDDEN
@@ -1261,7 +1261,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
-        val result = getTrustController.getProtectors(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/protectors"))
+        val result = getTrustController.getProtectors(utr)(FakeRequest())
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
@@ -1281,7 +1281,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
-        val result = getTrustController.getProtectors(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/protectors"))
+        val result = getTrustController.getProtectors(utr)(FakeRequest(GET, s"/trusts/protectors/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
@@ -1297,7 +1297,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
-        val result = getTrustController.getProtectors(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/protectors"))
+        val result = getTrustController.getProtectors(utr)(FakeRequest(GET, s"/trusts/protectors/$utr/transformed"))
 
         whenReady(result) { _ =>
           status(result) mustBe INTERNAL_SERVER_ERROR
@@ -1313,7 +1313,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
-        val result = getTrustController.getOtherIndividuals(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/other-individuals"))
+        val result = getTrustController.getOtherIndividuals(utr)(FakeRequest(GET, s"/trusts/other-individuals/$utr/transformed"))
 
         whenReady(result) { _ =>
           status(result) mustBe FORBIDDEN
@@ -1327,7 +1327,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
-        val result = getTrustController.getOtherIndividuals(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/other-individuals"))
+        val result = getTrustController.getOtherIndividuals(utr)(FakeRequest(GET, s"/trusts/other-individuals/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
@@ -1347,7 +1347,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
-        val result = getTrustController.getOtherIndividuals(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/other-individuals"))
+        val result = getTrustController.getOtherIndividuals(utr)(FakeRequest(GET, s"/trusts/other-individuals/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
@@ -1363,7 +1363,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.getTransformedData(any(), any())(any()))
           .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
-        val result = getTrustController.getOtherIndividuals(utr)(FakeRequest(GET, s"/trusts/$utr/transformed/other-individuals"))
+        val result = getTrustController.getOtherIndividuals(utr)(FakeRequest(GET, s"/trusts/other-individuals/$utr/transformed"))
 
         whenReady(result) { _ =>
           status(result) mustBe INTERNAL_SERVER_ERROR
@@ -1577,6 +1577,52 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           contentAsJson(result) mustBe expected
         }
       }
+    }
+
+    ".getTrustName" should {
+
+      "return 403 - Forbidden with parked content" in {
+
+        when(transformationService.getTransformedData(any(), any())(any()))
+          .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
+
+        val result = getTrustController.getTrustName(utr)(FakeRequest())
+
+        whenReady(result) { _ =>
+          status(result) mustBe FORBIDDEN
+        }
+      }
+
+      "return 200 - Ok with processed content" in {
+
+        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+
+        when(transformationService.getTransformedData(any[String], any[String])(any()))
+          .thenReturn(Future.successful(processedResponse))
+
+        val result = getTrustController.getTrustName(utr)(FakeRequest())
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          status(result) mustBe OK
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe Json.toJson("Nelson James")
+        }
+      }
+
+      "return 500 - Internal server error for invalid content" in {
+
+        when(transformationService.getTransformedData(any(), any())(any()))
+          .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+
+        val result = getTrustController.getTrustName(utr)(FakeRequest())
+
+        whenReady(result) { _ =>
+          status(result) mustBe INTERNAL_SERVER_ERROR
+        }
+      }
+
     }
   }
 }

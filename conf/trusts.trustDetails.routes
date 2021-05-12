@@ -4,6 +4,8 @@ GET         /:identifier/untransformed                  controllers.GetTrustCont
 
 GET         /:identifier/has-deceased-settlor           controllers.GetTrustController.wasTrustRegisteredWithDeceasedSettlor(identifier: String)
 
+GET         /:identifier/trust-name                     controllers.GetTrustController.getTrustName(identifier: String)
+
 PUT         /:identifier/express                        controllers.transformations.trustdetails.TrustDetailsTransformationController.setExpress(identifier: String)
 PUT         /:identifier/uk-resident                    controllers.transformations.trustdetails.TrustDetailsTransformationController.setResident(identifier: String)
 PUT         /:identifier/taxable                        controllers.transformations.trustdetails.TrustDetailsTransformationController.setTaxable(identifier: String)
