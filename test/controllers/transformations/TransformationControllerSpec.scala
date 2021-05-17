@@ -49,33 +49,67 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
     reset(mockTransformationService)
   }
 
-  ".removeTransforms" should {
+  "TransformationController" when {
 
-    "return OK" when {
-      "successfully removed transforms" in {
-        when(mockTransformationService.removeAllTransformations(any(), any()))
-          .thenReturn(Future.successful(None))
+    ".removeTransforms" should {
 
-        val request = FakeRequest(DELETE, "path")
+      "return OK" when {
+        "successfully removed transforms" in {
+          when(mockTransformationService.removeAllTransformations(any(), any()))
+            .thenReturn(Future.successful(None))
 
-        val result = transformationController.removeTransforms(identifier).apply(request)
-        status(result) mustBe OK
+          val request = FakeRequest(DELETE, "path")
 
-        verify(mockTransformationService).removeAllTransformations(identifier, "id")
+          val result = transformationController.removeTransforms(identifier).apply(request)
+          status(result) mustBe OK
+
+          verify(mockTransformationService).removeAllTransformations(identifier, "id")
+        }
+      }
+
+      "return INTERNAL_SERVER_ERROR" when {
+        "failed to remove transforms" in {
+          when(mockTransformationService.removeAllTransformations(any(), any()))
+            .thenReturn(Future.failed(new Throwable("repository reset failed")))
+
+          val request = FakeRequest(DELETE, "path")
+
+          val result = transformationController.removeTransforms(identifier).apply(request)
+          status(result) mustBe INTERNAL_SERVER_ERROR
+
+          verify(mockTransformationService).removeAllTransformations(identifier, "id")
+        }
       }
     }
 
-    "return INTERNAL_SERVER_ERROR" when {
-      "failed to remove transforms" in {
-        when(mockTransformationService.removeAllTransformations(any(), any()))
-          .thenReturn(Future.failed(new Throwable("repository reset failed")))
+    ".removeTrustTypeDependentMigrationTransforms" should {
 
-        val request = FakeRequest(DELETE, "path")
+      "return OK" when {
+        "successfully removed transforms" in {
+          when(mockTransformationService.removeTrustTypeDependentMigrationTransforms(any(), any()))
+            .thenReturn(Future.successful(true))
 
-        val result = transformationController.removeTransforms(identifier).apply(request)
-        status(result) mustBe INTERNAL_SERVER_ERROR
+          val request = FakeRequest(DELETE, "path")
 
-        verify(mockTransformationService).removeAllTransformations(identifier, "id")
+          val result = transformationController.removeTrustTypeDependentMigrationTransforms(identifier).apply(request)
+          status(result) mustBe OK
+
+          verify(mockTransformationService).removeTrustTypeDependentMigrationTransforms(identifier, "id")
+        }
+      }
+
+      "return INTERNAL_SERVER_ERROR" when {
+        "failed to remove transforms" in {
+          when(mockTransformationService.removeTrustTypeDependentMigrationTransforms(any(), any()))
+            .thenReturn(Future.failed(new Throwable()))
+
+          val request = FakeRequest(DELETE, "path")
+
+          val result = transformationController.removeTrustTypeDependentMigrationTransforms(identifier).apply(request)
+          status(result) mustBe INTERNAL_SERVER_ERROR
+
+          verify(mockTransformationService).removeTrustTypeDependentMigrationTransforms(identifier, "id")
+        }
       }
     }
   }

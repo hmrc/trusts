@@ -40,4 +40,12 @@ class TransformationController @Inject()(
     }
   }
 
+  def removeTrustTypeDependentMigrationTransforms(identifier: String): Action[AnyContent] = identify.async { request =>
+    transformationService.removeTrustTypeDependentMigrationTransforms(identifier, request.internalId) map { _ =>
+      Ok
+    } recoverWith {
+      case _ => Future.successful(InternalServerError)
+    }
+  }
+
 }
