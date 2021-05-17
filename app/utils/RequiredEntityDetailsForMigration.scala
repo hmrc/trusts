@@ -23,7 +23,7 @@ class RequiredEntityDetailsForMigration {
 
   def areBeneficiariesCompleteForMigration(trust: JsValue): JsResult[Boolean] = {
 
-    def pickAtPath(`type`: String): JsResult[JsArray] = JsonOps.pickAtPath[JsArray](ENTITIES \ BENEFICIARIES \ `type`, trust)
+    def pickAtPath(`type`: String): JsResult[JsArray] = pickAtPathForEntityType(BENEFICIARIES, `type`, trust)
 
     for {
       individuals <- pickAtPath(INDIVIDUAL_BENEFICIARY)
@@ -32,39 +32,69 @@ class RequiredEntityDetailsForMigration {
       trusts <- pickAtPath(TRUST_BENEFICIARY)
       charities <- pickAtPath(CHARITY_BENEFICIARY)
       others <- pickAtPath(OTHER_BENEFICIARY)
-      trustType = trust.transform((TRUST \ DETAILS \ TYPE_OF_TRUST).json.pick[JsString])
+      trustType = trustTypePick(trust)
     } yield {
 
-      implicit class RequiredInfo(beneficiary: JsValue) {
-        def hasRequiredInfo(obeysAdditionalRules: Boolean = true): Boolean = hasEndDate || (hasDiscretionOrShareOfIncome && obeysAdditionalRules)
-
-        private def hasEndDate: Boolean = beneficiary.transform((__ \ ENTITY_END).json.pick).isSuccess
-
-        private def hasDiscretionOrShareOfIncome: Boolean = {
-          beneficiary.transform((__ \ HAS_DISCRETION).json.pick[JsBoolean]) match {
-            case JsSuccess(JsBoolean(true), _) => true
-            case JsSuccess(JsBoolean(false), _) => beneficiary.transform((__ \ SHARE_OF_INCOME).json.pick).isSuccess
-            case _ => false
-          }
-        }
-      }
-
-      val individualsHaveRequiredInfo = individuals.value.foldLeft(true)((acc, individual) => {
+      val individualsHaveRequiredInfo = individuals.value.forall(individual => {
         lazy val hasVulnerableBeneficiaryField = individual.transform((__ \ VULNERABLE_BENEFICIARY).json.pick).isSuccess
-        lazy val hasRoleInCompanyForEmploymentRelatedTrust = trustType match {
-          case JsSuccess(JsString(EMPLOYMENT_RELATED_TRUST), _) => individual.transform((__ \ ROLE_IN_COMPANY).json.pick).isSuccess
-          case JsSuccess(JsString(_), _) => true
-          case _ => false
-        }
-        acc && individual.hasRequiredInfo(hasVulnerableBeneficiaryField && hasRoleInCompanyForEmploymentRelatedTrust)
+        lazy val hasRoleInCompanyForEmploymentRelatedTrust =
+          individual.hasRequiredInfoForEmploymentRelatedTrust(trustType, ROLE_IN_COMPANY)
+
+        individual.hasRequiredBeneficiaryInfo(hasVulnerableBeneficiaryField && hasRoleInCompanyForEmploymentRelatedTrust)
       })
 
       individualsHaveRequiredInfo &&
-        companies.value.forall(_.hasRequiredInfo()) &&
-        larges.value.forall(_.hasRequiredInfo()) &&
-        trusts.value.forall(_.hasRequiredInfo()) &&
-        charities.value.forall(_.hasRequiredInfo()) &&
-        others.value.forall(_.hasRequiredInfo())
+        companies.value.forall(_.hasRequiredBeneficiaryInfo()) &&
+        larges.value.forall(_.hasRequiredBeneficiaryInfo()) &&
+        trusts.value.forall(_.hasRequiredBeneficiaryInfo()) &&
+        charities.value.forall(_.hasRequiredBeneficiaryInfo()) &&
+        others.value.forall(_.hasRequiredBeneficiaryInfo())
+    }
+  }
+
+  def areSettlorsCompleteForMigration(trust: JsValue): JsResult[Boolean] = {
+
+    for {
+      businesses <- pickAtPathForEntityType(SETTLORS, BUSINESS_SETTLOR, trust)
+      trustType = trustTypePick(trust)
+    } yield {
+      businesses.value.forall(business => {
+        lazy val hasCompanyTypeAndTimeForEmploymentRelatedTrust =
+          business.hasRequiredInfoForEmploymentRelatedTrust(trustType, COMPANY_TYPE, COMPANY_TIME)
+
+        business.hasRequiredSettlorInfo(hasCompanyTypeAndTimeForEmploymentRelatedTrust)
+      })
+    }
+  }
+
+  private def pickAtPathForEntityType(entity: String, `type`: String, trust: JsValue): JsResult[JsArray] =
+    JsonOps.pickAtPath[JsArray](ENTITIES \ entity \ `type`, trust)
+
+  private def trustTypePick(trust: JsValue): JsResult[JsString] = trust.transform((TRUST \ DETAILS \ TYPE_OF_TRUST).json.pick[JsString])
+
+  implicit class RequiredInfo(entity: JsValue) {
+    def hasRequiredBeneficiaryInfo(obeysAdditionalRules: Boolean = true): Boolean =
+      hasEndDate || (hasDiscretionOrShareOfIncome && obeysAdditionalRules)
+
+    def hasRequiredSettlorInfo(obeysAdditionalRules: Boolean): Boolean =
+      hasEndDate || obeysAdditionalRules
+
+    def hasEndDate: Boolean = entity.transform((__ \ ENTITY_END).json.pick).isSuccess
+
+    def hasRequiredInfoForEmploymentRelatedTrust(trustType: JsResult[JsString], fields: String*): Boolean = {
+      trustType match {
+        case JsSuccess(JsString(EMPLOYMENT_RELATED_TRUST), _) => fields.forall(field => entity.transform((__ \ field).json.pick).isSuccess)
+        case JsSuccess(JsString(_), _) => true
+        case _ => false
+      }
+    }
+
+    private def hasDiscretionOrShareOfIncome: Boolean = {
+      entity.transform((__ \ HAS_DISCRETION).json.pick[JsBoolean]) match {
+        case JsSuccess(JsBoolean(true), _) => true
+        case JsSuccess(JsBoolean(false), _) => entity.transform((__ \ SHARE_OF_INCOME).json.pick).isSuccess
+        case _ => false
+      }
     }
   }
 }

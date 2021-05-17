@@ -159,13 +159,16 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
   }
 
-  def doAnySettlorsNeedAdditionalInfo(identifier: String): Action[AnyContent] = {
-    processEtmpData(identifier) {
-      etmpData =>
-        // get trust type
-        // get business settlors
-        // if employment related trust type, check for any that are missing companyType, companyTime
-        ???
+  def areSettlorsCompleteForMigration(identifier: String): Action[AnyContent] = {
+    doGet(identifier, applyTransformations = true) {
+      case processed: TrustProcessedResponse =>
+        requiredDetailsUtil.areSettlorsCompleteForMigration(processed.getTrust) match {
+          case JsSuccess(value, _) => Ok(JsBoolean(value))
+          case JsError(errors) =>
+            logger.error(s"[Identifier: $identifier] Failed to check settlors: $errors")
+            InternalServerError
+        }
+      case _ => Forbidden
     }
   }
 

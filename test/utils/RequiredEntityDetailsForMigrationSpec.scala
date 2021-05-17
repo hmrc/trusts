@@ -26,21 +26,24 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
 
   val util: RequiredEntityDetailsForMigration = injector.instanceOf[RequiredEntityDetailsForMigration]
 
+  def runTest(path: JsPath, newValue: JsValue, expectedResult: Boolean, typeOfTrust: String = "Will Trust or Intestacy Trust")
+             (f: JsValue => JsResult[Boolean]): Assertion = {
+    val trust = getTransformedTrustResponse
+      .transform(
+        prunePathAndPutNewValue(path, newValue) andThen
+          prunePathAndPutNewValue(TRUST \ DETAILS \ TYPE_OF_TRUST, JsString(typeOfTrust))
+      ).get
+
+    val result = f(trust)
+
+    result.get mustEqual expectedResult
+  }
+
   "RequiredEntityDetailsForMigration" when {
 
     "areBeneficiariesCompleteForMigration" must {
-
-      def runTest(path: JsPath, newValue: JsValue, expectedResult: Boolean, typeOfTrust: String = "Will Trust or Intestacy Trust"): Assertion = {
-        val trust = getTransformedTrustResponse
-          .transform(
-            prunePathAndPutNewValue(path, newValue) andThen
-              prunePathAndPutNewValue(TRUST \ DETAILS \ TYPE_OF_TRUST, JsString(typeOfTrust))
-          ).get
-
-        val result = util.areBeneficiariesCompleteForMigration(trust)
-
-        result.get mustEqual expectedResult
-      }
+      
+      lazy val f: JsValue => JsResult[Boolean] = util.areBeneficiariesCompleteForMigration
 
       "return false" when {
 
@@ -66,7 +69,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = false)
+            runTest(path, beneficiary, expectedResult = false)(f)
           }
 
           "missing beneficiaryDiscretion" in {
@@ -87,7 +90,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = false)
+            runTest(path, beneficiary, expectedResult = false)(f)
           }
 
           "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
@@ -109,7 +112,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = false)
+            runTest(path, beneficiary, expectedResult = false)(f)
           }
 
           "missing beneficiaryType when typeOfTrust is Employment Related" in {
@@ -131,7 +134,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = false, typeOfTrust = "Employment Related")
+            runTest(path, beneficiary, expectedResult = false, typeOfTrust = "Employment Related")(f)
           }
         }
 
@@ -152,7 +155,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = false)
+            runTest(path, beneficiary, expectedResult = false)(f)
           }
 
           "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
@@ -169,7 +172,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = false)
+            runTest(path, beneficiary, expectedResult = false)(f)
           }
         }
 
@@ -192,7 +195,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = false)
+            runTest(path, beneficiary, expectedResult = false)(f)
           }
 
           "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
@@ -211,7 +214,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = false)
+            runTest(path, beneficiary, expectedResult = false)(f)
           }
         }
 
@@ -232,7 +235,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = false)
+            runTest(path, beneficiary, expectedResult = false)(f)
           }
 
           "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
@@ -249,7 +252,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = false)
+            runTest(path, beneficiary, expectedResult = false)(f)
           }
         }
 
@@ -270,7 +273,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = false)
+            runTest(path, beneficiary, expectedResult = false)(f)
           }
 
           "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
@@ -287,7 +290,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = false)
+            runTest(path, beneficiary, expectedResult = false)(f)
           }
         }
 
@@ -308,7 +311,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = false)
+            runTest(path, beneficiary, expectedResult = false)(f)
           }
 
           "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
@@ -325,7 +328,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = false)
+            runTest(path, beneficiary, expectedResult = false)(f)
           }
         }
       }
@@ -355,7 +358,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = true)
+            runTest(path, beneficiary, expectedResult = true)(f)
           }
 
           "has no discretion and has share of income" in {
@@ -378,7 +381,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = true)
+            runTest(path, beneficiary, expectedResult = true)(f)
           }
 
           "has beneficiaryType for employment related trust" in {
@@ -401,7 +404,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = true, typeOfTrust = "Employment Related")
+            runTest(path, beneficiary, expectedResult = true, typeOfTrust = "Employment Related")(f)
           }
 
           "has an end date" in {
@@ -422,7 +425,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = true)
+            runTest(path, beneficiary, expectedResult = true)(f)
           }
         }
 
@@ -444,7 +447,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = true)
+            runTest(path, beneficiary, expectedResult = true)(f)
           }
 
           "has no discretion and has share of income" in {
@@ -462,7 +465,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = true)
+            runTest(path, beneficiary, expectedResult = true)(f)
           }
 
           "has an end date" in {
@@ -479,7 +482,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = true)
+            runTest(path, beneficiary, expectedResult = true)(f)
           }
         }
 
@@ -503,7 +506,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = true)
+            runTest(path, beneficiary, expectedResult = true)(f)
           }
 
           "has no discretion and has share of income" in {
@@ -523,7 +526,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = true)
+            runTest(path, beneficiary, expectedResult = true)(f)
           }
 
           "has an end date" in {
@@ -542,7 +545,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = true)
+            runTest(path, beneficiary, expectedResult = true)(f)
           }
         }
 
@@ -564,7 +567,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = true)
+            runTest(path, beneficiary, expectedResult = true)(f)
           }
 
           "has no discretion and has share of income" in {
@@ -582,7 +585,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = true)
+            runTest(path, beneficiary, expectedResult = true)(f)
           }
 
           "has an end date" in {
@@ -599,7 +602,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = true)
+            runTest(path, beneficiary, expectedResult = true)(f)
           }
         }
 
@@ -621,7 +624,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = true)
+            runTest(path, beneficiary, expectedResult = true)(f)
           }
 
           "has no discretion and has share of income" in {
@@ -639,7 +642,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = true)
+            runTest(path, beneficiary, expectedResult = true)(f)
           }
 
           "has an end date" in {
@@ -656,7 +659,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = true)
+            runTest(path, beneficiary, expectedResult = true)(f)
           }
         }
 
@@ -678,7 +681,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = true)
+            runTest(path, beneficiary, expectedResult = true)(f)
           }
 
           "has no discretion and has share of income" in {
@@ -696,7 +699,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = true)
+            runTest(path, beneficiary, expectedResult = true)(f)
           }
 
           "has an end date" in {
@@ -713,7 +716,128 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(path, beneficiary, expectedResult = true)
+            runTest(path, beneficiary, expectedResult = true)(f)
+          }
+        }
+      }
+    }
+
+    "areSettlorsCompleteForMigration" must {
+
+      lazy val f: JsValue => JsResult[Boolean] = util.areSettlorsCompleteForMigration
+
+      val path = ENTITIES \ SETTLORS \ BUSINESS_SETTLOR
+      
+      "return false" when {
+        "business settlor doesn't have required data" when {
+          "typeOfTrust is Employment Related" when {
+
+            "missing companyType" in {
+
+              val settlor = Json.parse(
+                """
+                  |[
+                  |  {
+                  |    "name": {
+                  |      "firstName": "Joe",
+                  |      "lastName": "Bloggs"
+                  |    },
+                  |    "companyTime": true,
+                  |    "entityStart": "2020-01-01"
+                  |  }
+                  |]
+                  |""".stripMargin
+              )
+
+              runTest(path, settlor, expectedResult = false, typeOfTrust = "Employment Related")(f)
+            }
+
+            "missing companyTime" in {
+
+              val settlor = Json.parse(
+                """
+                  |[
+                  |  {
+                  |    "name": {
+                  |      "firstName": "Joe",
+                  |      "lastName": "Bloggs"
+                  |    },
+                  |    "companyType": "Trading",
+                  |    "entityStart": "2020-01-01"
+                  |  }
+                  |]
+                  |""".stripMargin
+              )
+
+              runTest(path, settlor, expectedResult = false, typeOfTrust = "Employment Related")(f)
+            }
+          }
+        }
+      }
+
+      "return true" when {
+        "business settlor has required data" when {
+
+          "not an employment related trust" in {
+
+            val settlor = Json.parse(
+              """
+                |[
+                |  {
+                |    "name": {
+                |      "firstName": "Joe",
+                |      "lastName": "Bloggs"
+                |    },
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, settlor, expectedResult = true)(f)
+          }
+
+          "an employment related trust" when {
+            "has companyType and companyTime" in {
+
+              val settlor = Json.parse(
+                """
+                  |[
+                  |  {
+                  |    "name": {
+                  |      "firstName": "Joe",
+                  |      "lastName": "Bloggs"
+                  |    },
+                  |    "companyType": "Trading",
+                  |    "companyTime": true,
+                  |    "entityStart": "2020-01-01"
+                  |  }
+                  |]
+                  |""".stripMargin
+              )
+
+              runTest(path, settlor, expectedResult = true, typeOfTrust = "Employment Related")(f)
+            }
+          }
+
+          "has an end date" in {
+
+            val settlor = Json.parse(
+              """
+                |[
+                |  {
+                |    "name": {
+                |      "firstName": "Joe",
+                |      "lastName": "Bloggs"
+                |    },
+                |    "entityStart": "2020-01-01",
+                |    "entityEnd": "2021-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, settlor, expectedResult = true)(f)
           }
         }
       }

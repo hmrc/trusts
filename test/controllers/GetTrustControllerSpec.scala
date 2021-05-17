@@ -1696,5 +1696,82 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         }
       }
     }
+
+    ".areSettlorsCompleteForMigration" should {
+
+      "return Ok with true" when {
+        "settlors are complete for migration" in {
+
+          when(mockRequiredDetailsUtil.areSettlorsCompleteForMigration(any())).thenReturn(JsSuccess(true))
+
+          val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+
+          when(transformationService.getTransformedData(any[String], any[String])(any()))
+            .thenReturn(Future.successful(processedResponse))
+
+          val result = getTrustController.areSettlorsCompleteForMigration(utr)(FakeRequest())
+
+          whenReady(result) { _ =>
+            verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+            status(result) mustBe OK
+            contentType(result) mustBe Some(JSON)
+            contentAsJson(result) mustBe Json.toJson(true)
+          }
+        }
+      }
+
+      "return Ok with false" when {
+        "settlors are not complete for migration" in {
+
+          when(mockRequiredDetailsUtil.areSettlorsCompleteForMigration(any())).thenReturn(JsSuccess(false))
+
+          val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+
+          when(transformationService.getTransformedData(any[String], any[String])(any()))
+            .thenReturn(Future.successful(processedResponse))
+
+          val result = getTrustController.areSettlorsCompleteForMigration(utr)(FakeRequest())
+
+          whenReady(result) { _ =>
+            verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+            status(result) mustBe OK
+            contentType(result) mustBe Some(JSON)
+            contentAsJson(result) mustBe Json.toJson(false)
+          }
+        }
+      }
+
+      "return 403 (FORBIDDEN)" when {
+        "parked content" in {
+
+          when(transformationService.getTransformedData(any(), any())(any()))
+            .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
+
+          val result = getTrustController.areSettlorsCompleteForMigration(utr)(FakeRequest())
+
+          whenReady(result) { _ =>
+            status(result) mustBe FORBIDDEN
+          }
+        }
+      }
+
+      "return 500 (INTERNAL_SERVER_ERROR)" when {
+        "required details util returns error" in {
+
+          when(mockRequiredDetailsUtil.areBeneficiariesCompleteForMigration(any())).thenReturn(JsError())
+
+          when(transformationService.getTransformedData(any(), any())(any()))
+            .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+
+          val result = getTrustController.areSettlorsCompleteForMigration(utr)(FakeRequest())
+
+          whenReady(result) { _ =>
+            status(result) mustBe INTERNAL_SERVER_ERROR
+          }
+        }
+      }
+    }
   }
 }
