@@ -21,19 +21,21 @@ import controllers.actions.{FakeIdentifierAction, ValidateIdentifierActionProvid
 import models.get_trust.GetTrustResponse.CLOSED_REQUEST_STATUS
 import models.get_trust._
 import org.mockito.Matchers.{any, eq => mockEq}
-import org.mockito.Mockito.{never, reset, times, verify, when}
+import org.mockito.Mockito._
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Span}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsPath, JsString, JsValue, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import services.{AuditService, TransformationService, TrustsService}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import utils.Constants.{BENEFICIARIES, COMPANY_BENEFICIARY, DETAILS, ENTITIES, INDIVIDUAL_BENEFICIARY, TRUST, TYPE_OF_TRUST}
+import utils.JsonOps.prunePathAndPutNewValue
 import utils.NonTaxable5MLDFixtures.Cache.getTransformedNonTaxableTrustResponse
 import utils.{JsonFixtures, NonTaxable5MLDFixtures, Taxable5MLDFixtures}
 
@@ -58,17 +60,15 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
   private val validateIdentifierAction = app.injector.instanceOf[ValidateIdentifierActionProvider]
 
-  lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+  lazy val bodyParsers: BodyParsers.Default = app.injector.instanceOf[BodyParsers.Default]
 
   override def afterEach(): Unit =  {
     reset(mockedAuditService, trustsService, mockAuditConnector, mockConfig, transformationService)
   }
 
   private def getTrustController = {
-    val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation),
+    new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation),
       mockedAuditService, trustsService, transformationService, validateIdentifierAction, Helpers.stubControllerComponents())
-
-    SUT
   }
 
   val invalidUTR = "1234567"
@@ -92,8 +92,8 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(transformationService.removeAllTransformations(any(), any()))
           .thenReturn(Future.successful(None))
 
-      when(trustsService.getTrustInfo(any(), any()))
-        .thenReturn(Future.successful(response))
+        when(trustsService.getTrustInfo(any(), any()))
+          .thenReturn(Future.successful(response))
 
         val result = SUT.getFromEtmp(utr).apply(FakeRequest(GET, s"/trusts/$utr/refresh"))
 
@@ -137,23 +137,23 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
     "perform auditing" in {
 
-        val SUT = new GetTrustController(
-          new FakeIdentifierAction(bodyParsers, Organisation),
-          auditService,
-          trustsService,
-          transformationService,
-          validateIdentifierAction,
-          Helpers.stubControllerComponents()
-        )
+      val SUT = new GetTrustController(
+        new FakeIdentifierAction(bodyParsers, Organisation),
+        auditService,
+        trustsService,
+        transformationService,
+        validateIdentifierAction,
+        Helpers.stubControllerComponents()
+      )
 
-        when(trustsService.getTrustInfo(any(), any()))
-          .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
+      when(trustsService.getTrustInfo(any(), any()))
+        .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
-        val result = SUT.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
+      val result = SUT.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 
-        whenReady(result) { _ =>
-          verify(mockAuditConnector, times(1)).sendExplicitAudit[Any](any(), any())(any(), any(), any())
-        }
+      whenReady(result) { _ =>
+        verify(mockAuditConnector, times(1)).sendExplicitAudit[Any](any(), any())(any(), any(), any())
+      }
     }
 
     "return 200 - Ok with parked content" in {
@@ -419,7 +419,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
       "return 200 - Ok with lead trustee with 4MLD data" in {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any())).thenReturn(Future.successful(processedResponse))
 
@@ -438,7 +438,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
         val cached = Taxable5MLDFixtures.Cache.taxable5mld2134514321
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any())).thenReturn(Future.successful(processedResponse))
 
@@ -458,7 +458,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       "return 500 - Internal server error for invalid content" in {
 
         when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+          .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/trustees/$utr/transformed/lead-trustee"))
 
@@ -488,7 +488,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
         "return 200 - Ok with processed content" in {
 
-          val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+          val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
           when(transformationService.getTransformedData(any[String], any[String])(any()))
             .thenReturn(Future.successful(processedResponse))
@@ -503,19 +503,19 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
             contentAsJson(result) mustBe Json.parse(
               """
                 |{
-                | "startDate":"1920-03-28",
-                | "lawCountry":"AD",
-                | "administrationCountry":"GB",
-                | "residentialStatus": {
-                |   "uk":{
-                |     "scottishLaw":false,
-                |     "preOffShore":"GB"
-                |   }
-                | },
-                | "typeOfTrust":"Will Trust or Intestacy Trust",
-                | "deedOfVariation":"Previously there was only an absolute interest under the will",
-                | "interVivos":true,
-                | "efrbsStartDate": "1920-02-28"
+                |  "startDate":"1920-03-28",
+                |  "lawCountry":"AD",
+                |  "administrationCountry":"GB",
+                |  "residentialStatus": {
+                |    "uk":{
+                |      "scottishLaw":false,
+                |      "preOffShore":"GB"
+                |    }
+                |  },
+                |  "typeOfTrust":"Will Trust or Intestacy Trust",
+                |  "deedOfVariation":"Previously there was only an absolute interest under the will",
+                |  "interVivos":true,
+                |  "efrbsStartDate": "1920-02-28"
                 |}""".stripMargin)
           }
         }
@@ -524,7 +524,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
           val cached = Taxable5MLDFixtures.Cache.taxable5mld2134514321
 
-          val processedResponse = models.get_trust.TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
+          val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
           when(transformationService.getTransformedData(any[String], any[String])(any()))
             .thenReturn(Future.successful(processedResponse))
@@ -539,25 +539,25 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
             contentAsJson(result) mustBe Json.parse(
               """
                 |{
-                |"startDate": "1920-03-28",
-                |"lawCountry": "AD",
-                |"administrationCountry": "GB",
-                |"residentialStatus": {
-                |  "uk": {
-                |    "scottishLaw": false,
-                |    "preOffShore": "GB"
-                |  }
-                |},
-                |"typeOfTrust": "Will Trust or Intestacy Trust",
-                |"deedOfVariation": "Previously there was only an absolute interest under the will",
-                |"interVivos": true,
-                |"efrbsStartDate": "1920-02-28",
-                |"trustTaxable": true,
-                |"expressTrust": true,
-                |"trustUKResident": true,
-                |"trustUKProperty": true,
-                |"trustRecorded": false,
-                |"trustUKRelation": false
+                |  "startDate": "1920-03-28",
+                |  "lawCountry": "AD",
+                |  "administrationCountry": "GB",
+                |  "residentialStatus": {
+                |    "uk": {
+                |      "scottishLaw": false,
+                |      "preOffShore": "GB"
+                |    }
+                |  },
+                |  "typeOfTrust": "Will Trust or Intestacy Trust",
+                |  "deedOfVariation": "Previously there was only an absolute interest under the will",
+                |  "interVivos": true,
+                |  "efrbsStartDate": "1920-02-28",
+                |  "trustTaxable": true,
+                |  "expressTrust": true,
+                |  "trustUKResident": true,
+                |  "trustUKProperty": true,
+                |  "trustRecorded": false,
+                |  "trustUKRelation": false
                 |}""".stripMargin)
           }
         }
@@ -565,7 +565,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         "return 500 - Internal server error for invalid content" in {
 
           when(transformationService.getTransformedData(any(), any())(any()))
-            .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+            .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
           val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/trust-details/$utr/transformed"))
 
@@ -593,7 +593,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
         "return 200 - Ok with processed content" in {
 
-          val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+          val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
           when(trustsService.getTrustInfo(any[String], any[String]))
             .thenReturn(Future.successful(processedResponse))
@@ -608,19 +608,19 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
             contentAsJson(result) mustBe Json.parse(
               """
                 |{
-                | "startDate":"1920-03-28",
-                | "lawCountry":"AD",
-                | "administrationCountry":"GB",
-                | "residentialStatus": {
-                |   "uk":{
-                |     "scottishLaw":false,
-                |     "preOffShore":"GB"
-                |   }
-                | },
-                | "typeOfTrust":"Will Trust or Intestacy Trust",
-                | "deedOfVariation":"Previously there was only an absolute interest under the will",
-                | "interVivos":true,
-                | "efrbsStartDate": "1920-02-28"
+                |  "startDate":"1920-03-28",
+                |  "lawCountry":"AD",
+                |  "administrationCountry":"GB",
+                |  "residentialStatus": {
+                |    "uk":{
+                |      "scottishLaw":false,
+                |      "preOffShore":"GB"
+                |    }
+                |  },
+                |  "typeOfTrust":"Will Trust or Intestacy Trust",
+                |  "deedOfVariation":"Previously there was only an absolute interest under the will",
+                |  "interVivos":true,
+                |  "efrbsStartDate": "1920-02-28"
                 |}""".stripMargin)
           }
         }
@@ -629,7 +629,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
           val cached = Taxable5MLDFixtures.Cache.taxable5mld2134514321
 
-          val processedResponse = models.get_trust.TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
+          val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
           when(trustsService.getTrustInfo(any[String], any[String]))
             .thenReturn(Future.successful(processedResponse))
@@ -644,25 +644,25 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
             contentAsJson(result) mustBe Json.parse(
               """
                 |{
-                |"startDate": "1920-03-28",
-                |"lawCountry": "AD",
-                |"administrationCountry": "GB",
-                |"residentialStatus": {
-                |  "uk": {
-                |    "scottishLaw": false,
-                |    "preOffShore": "GB"
-                |  }
-                |},
-                |"typeOfTrust": "Will Trust or Intestacy Trust",
-                |"deedOfVariation": "Previously there was only an absolute interest under the will",
-                |"interVivos": true,
-                |"efrbsStartDate": "1920-02-28",
-                |"trustTaxable": true,
-                |"expressTrust": true,
-                |"trustUKResident": true,
-                |"trustUKProperty": true,
-                |"trustRecorded": false,
-                |"trustUKRelation": false
+                |  "startDate": "1920-03-28",
+                |  "lawCountry": "AD",
+                |  "administrationCountry": "GB",
+                |  "residentialStatus": {
+                |    "uk": {
+                |      "scottishLaw": false,
+                |      "preOffShore": "GB"
+                |    }
+                |  },
+                |  "typeOfTrust": "Will Trust or Intestacy Trust",
+                |  "deedOfVariation": "Previously there was only an absolute interest under the will",
+                |  "interVivos": true,
+                |  "efrbsStartDate": "1920-02-28",
+                |  "trustTaxable": true,
+                |  "expressTrust": true,
+                |  "trustUKResident": true,
+                |  "trustUKProperty": true,
+                |  "trustRecorded": false,
+                |  "trustUKRelation": false
                 |}""".stripMargin)
           }
         }
@@ -670,7 +670,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         "return 500 - Internal server error for invalid content" in {
 
           when(trustsService.getTrustInfo(any(), any()))
-            .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+            .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
           val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/trust-details/$utr/transformed"))
 
@@ -697,7 +697,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
       "return 200 - Ok with processed content" in {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponseWithYearsReturns, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(getTransformedTrustResponseWithYearsReturns, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -734,7 +734,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
         val cached = Taxable5MLDFixtures.Cache.taxable5mld2134514321
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -770,7 +770,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       "return 500 - Internal server error for invalid content" in {
 
         when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+          .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getYearsReturns(utr).apply(FakeRequest(GET, s"/trusts/tax-liability/$utr/transformed"))
 
@@ -796,7 +796,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
       "return 200 - Ok with processed content" in {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -816,7 +816,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
         val cached = Taxable5MLDFixtures.Cache.taxable5mld2134514321
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -835,7 +835,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       "return 500 - Internal server error for invalid content" in {
 
         when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+          .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/trustees/$utr/transformed"))
 
@@ -862,7 +862,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
       "return 200 - Ok with processed content" in {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustAllAssetsResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(getTransformedTrustAllAssetsResponse, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -882,7 +882,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
         val cached = Taxable5MLDFixtures.Cache.taxable5mld2134514321
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -902,7 +902,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
         val cached = NonTaxable5MLDFixtures.Cache.getTransformedNonTaxableTrustResponse
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -920,7 +920,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       "return 500 - Internal server error for invalid content" in {
 
         when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+          .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getAssets(utr)(FakeRequest(GET, s"/trusts/assets/$utr/transformed"))
 
@@ -947,7 +947,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
       "return 200 - Ok with processed content" in {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -967,7 +967,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
         val cached = Taxable5MLDFixtures.Cache.taxable5mld2134514321
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -986,7 +986,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       "return 500 - Internal server error for invalid content" in {
 
         when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+          .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getBeneficiaries(utr)(FakeRequest(GET, s"/trusts/beneficiaries/$utr/transformed"))
 
@@ -1013,7 +1013,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
       "return 200 - Ok with processed content" in {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -1033,7 +1033,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
         val cached = Taxable5MLDFixtures.Cache.taxable5mld2134514321
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -1052,7 +1052,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       "return 500 - Internal server error for invalid content" in {
 
         when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+          .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getSettlors(utr)(FakeRequest(GET, s"/trusts/settlors/$utr/transformed"))
 
@@ -1062,7 +1062,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       }
       "return 200 - Ok but empty when doesn't exist" in {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getEmptyTransformedTrustResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(getEmptyTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -1072,10 +1072,10 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         val expected = Json.parse(
           """
             |{
-            | "settlors":{
-            |   "settlor":[],
-            |   "settlorCompany":[]
-            | }
+            |  "settlors":{
+            |    "settlor":[],
+            |    "settlorCompany":[]
+            |  }
             |}
             |""".stripMargin)
 
@@ -1105,7 +1105,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
       "return 200 - Ok with true when exists" in {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
         when(trustsService.getTrustInfo(any[String], any[String]))
           .thenReturn(Future.successful(processedResponse))
@@ -1126,7 +1126,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       "return 500 - Internal server error for invalid content" in {
 
         when(trustsService.getTrustInfo(any(), any()))
-          .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+          .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getDeceasedSettlorDeathRecorded(utr)(FakeRequest())
 
@@ -1136,7 +1136,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       }
       "return 200 - Ok but false when doesn't exist" in {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getEmptyTransformedTrustResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(getEmptyTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
         when(trustsService.getTrustInfo(any[String], any[String]))
           .thenReturn(Future.successful(processedResponse))
@@ -1155,7 +1155,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       }
       "return 200 - Ok but false when exists without date" in {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustDeceasedSettlorWithoutDeathResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(getTransformedTrustDeceasedSettlorWithoutDeathResponse, ResponseHeader("Processed", "1"))
 
         when(trustsService.getTrustInfo(any[String], any[String]))
           .thenReturn(Future.successful(processedResponse))
@@ -1190,7 +1190,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
       "return 200 - Ok with true when exists" in {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -1211,7 +1211,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       "return 500 - Internal server error for invalid content" in {
 
         when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+          .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getProtectorsAlreadyExist(utr)(FakeRequest())
 
@@ -1221,7 +1221,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       }
       "return 200 - Ok but false when doesn't exist" in {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getEmptyTransformedTrustResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(getEmptyTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -1256,7 +1256,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
       "return 200 - Ok with processed content" in {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -1276,7 +1276,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
         val cached = Taxable5MLDFixtures.Cache.taxable5mld2134514321
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -1295,7 +1295,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       "return 500 - Internal server error for invalid content" in {
 
         when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+          .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getProtectors(utr)(FakeRequest(GET, s"/trusts/protectors/$utr/transformed"))
 
@@ -1322,7 +1322,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
       "return 200 - Ok with processed content" in {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -1342,7 +1342,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
         val cached = Taxable5MLDFixtures.Cache.taxable5mld2134514321
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -1361,7 +1361,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       "return 500 - Internal server error for invalid content" in {
 
         when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+          .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getOtherIndividuals(utr)(FakeRequest(GET, s"/trusts/other-individuals/$utr/transformed"))
 
@@ -1388,7 +1388,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
       "return 200 - Ok with true when exists" in {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -1409,7 +1409,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       "return 500 - Internal server error for invalid content" in {
 
         when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+          .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getOtherIndividualsAlreadyExist(utr)(FakeRequest())
 
@@ -1419,7 +1419,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       }
       "return 200 - Ok but false when doesn't exist" in {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getEmptyTransformedTrustResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(getEmptyTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -1442,7 +1442,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
       "return true when exists" in {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedNonTaxableTrustResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(getTransformedNonTaxableTrustResponse, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -1462,7 +1462,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
       "return false when does not exist" in {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -1595,7 +1595,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
       "return 200 - Ok with processed content" in {
 
-        val processedResponse = models.get_trust.TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+        val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
@@ -1614,7 +1614,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       "return 500 - Internal server error for invalid content" in {
 
         when(transformationService.getTransformedData(any(), any())(any()))
-          .thenReturn(Future.successful(models.get_trust.TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+          .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getTrustName(utr)(FakeRequest())
 
@@ -1624,6 +1624,335 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       }
 
     }
+
+    ".areBeneficiariesCompleteForMigration" should {
+
+      def runTest(path: JsPath, newValue: JsValue, expectedResult: Boolean, typeOfTrust: String = "Will Trust or Intestacy Trust"): Assertion = {
+        val trust = getTransformedTrustResponse
+          .transform(
+            prunePathAndPutNewValue(path, newValue) andThen
+              prunePathAndPutNewValue(TRUST \ DETAILS \ TYPE_OF_TRUST, JsString(typeOfTrust))
+          ).get
+
+        val processedResponse = TrustProcessedResponse(trust, ResponseHeader("Processed", "1"))
+
+        when(transformationService.getTransformedData(any[String], any[String])(any()))
+          .thenReturn(Future.successful(processedResponse))
+
+        val result = getTrustController.areBeneficiariesCompleteForMigration(utr)(FakeRequest())
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          status(result) mustBe OK
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe Json.toJson(expectedResult)
+        }
+      }
+
+      "return false" when {
+
+        "individual beneficiary doesn't have required data" when {
+
+          "missing vulnerableBeneficiary" in {
+
+            val path = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "name": {
+                |      "firstName": "Joe",
+                |      "lastName": "Bloggs"
+                |    },
+                |    "beneficiaryDiscretion": true,
+                |    "legallyIncapable": false,
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = false)
+          }
+
+          "missing beneficiaryDiscretion" in {
+
+            val path = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "name": {
+                |      "firstName": "Joe",
+                |      "lastName": "Bloggs"
+                |    },
+                |    "vulnerableBeneficiary": true,
+                |    "legallyIncapable": false,
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = false)
+          }
+
+          "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
+
+            val path = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "name": {
+                |      "firstName": "Joe",
+                |      "lastName": "Bloggs"
+                |    },
+                |    "beneficiaryDiscretion": false,
+                |    "vulnerableBeneficiary": true,
+                |    "legallyIncapable": false,
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = false)
+          }
+
+          "missing beneficiaryType when typeOfTrust is Employment Related" in {
+
+            val path = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "name": {
+                |      "firstName": "Joe",
+                |      "lastName": "Bloggs"
+                |    },
+                |    "beneficiaryDiscretion": true,
+                |    "vulnerableBeneficiary": true,
+                |    "legallyIncapable": false,
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = false, typeOfTrust = "Employment Related")
+          }
+        }
+
+        "company beneficiary doesn't have required data" when {
+
+          "missing beneficiaryDiscretion" in {
+
+            val path = ENTITIES \ BENEFICIARIES \ COMPANY_BENEFICIARY
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = false)
+          }
+
+          "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
+
+            val path = ENTITIES \ BENEFICIARIES \ COMPANY_BENEFICIARY
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "beneficiaryDiscretion": false,
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = false)
+          }
+        }
+      }
+
+      "return true" when {
+
+        "individual beneficiary has required data" when {
+
+          "has discretion" in {
+
+            val path = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "name": {
+                |      "firstName": "Joe",
+                |      "lastName": "Bloggs"
+                |    },
+                |    "beneficiaryDiscretion": true,
+                |    "vulnerableBeneficiary": true,
+                |    "legallyIncapable": false,
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = true)
+          }
+
+          "has no discretion and has share of income" in {
+
+            val path = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "name": {
+                |      "firstName": "Joe",
+                |      "lastName": "Bloggs"
+                |    },
+                |    "beneficiaryDiscretion": false,
+                |    "beneficiaryShareOfIncome": "50",
+                |    "vulnerableBeneficiary": true,
+                |    "legallyIncapable": false,
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = true)
+          }
+
+          "has beneficiaryType for employment related trust" in {
+
+            val path = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "name": {
+                |      "firstName": "Joe",
+                |      "lastName": "Bloggs"
+                |    },
+                |    "beneficiaryDiscretion": true,
+                |    "beneficiaryType": "Director",
+                |    "vulnerableBeneficiary": true,
+                |    "legallyIncapable": false,
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = true, typeOfTrust = "Employment Related")
+          }
+
+          "has an end date" in {
+
+            val path = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "name": {
+                |      "firstName": "Joe",
+                |      "lastName": "Bloggs"
+                |    },
+                |    "legallyIncapable": false,
+                |    "entityStart": "2020-01-01",
+                |    "entityEnd": "2021-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = true)
+          }
+        }
+
+        "company beneficiary has required data" when {
+
+          "has discretion" in {
+
+            val path = ENTITIES \ BENEFICIARIES \ COMPANY_BENEFICIARY
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "beneficiaryDiscretion": true,
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = true)
+          }
+
+          "has no discretion and has share of income" in {
+
+            val path = ENTITIES \ BENEFICIARIES \ COMPANY_BENEFICIARY
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "beneficiaryDiscretion": false,
+                |    "beneficiaryShareOfIncome": "50",
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = true)
+          }
+
+          "has an end date" in {
+
+            val path = ENTITIES \ BENEFICIARIES \ COMPANY_BENEFICIARY
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "entityStart": "2020-01-01",
+                |    "entityEnd": "2021-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = true)
+          }
+        }
+      }
+    }
   }
 }
-

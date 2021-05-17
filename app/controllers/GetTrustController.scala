@@ -87,7 +87,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
 
   def wasTrustRegisteredWithDeceasedSettlor(identifier: String): Action[AnyContent] =
-    isPickSuccessfulAtPath(identifier, ENTITIES \ DECEASED_SETTLOR)
+    isPickSuccessfulAtPath(identifier, ENTITIES \ DECEASED_SETTLOR, applyTransformations = false)
 
   def getTrustDetails(identifier: String, applyTransformations: Boolean): Action[AnyContent] =
     getItemAtPath(identifier, TRUST \ DETAILS, applyTransformations)
@@ -120,46 +120,103 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
 
   def getDeceasedSettlorDeathRecorded(identifier: String): Action[AnyContent] =
-    isPickSuccessfulAtPath(identifier, ENTITIES \ DECEASED_SETTLOR \ DATE_OF_DEATH)
-
-  private val protectorsPath = ENTITIES \ PROTECTORS
+    isPickSuccessfulAtPath(identifier, ENTITIES \ DECEASED_SETTLOR \ DATE_OF_DEATH, applyTransformations = false)
 
   def getProtectorsAlreadyExist(identifier: String): Action[AnyContent] =
     processEtmpData(identifier) {
       trustData =>
-        JsBoolean(!trustData.transform(protectorsPath.json.pick).asOpt.contains(
+        JsBoolean(!trustData.transform((ENTITIES \ PROTECTORS).json.pick).asOpt.contains(
           Json.obj(INDIVIDUAL_PROTECTOR -> JsArray(), BUSINESS_PROTECTOR -> JsArray()))
         )
     }
 
   def getProtectors(identifier: String): Action[AnyContent] =
-    getArrayAtPath(identifier, protectorsPath, PROTECTORS)
+    getArrayAtPath(identifier, ENTITIES \ PROTECTORS, PROTECTORS)
 
-  private val otherIndividualsPath = ENTITIES \ OTHER_INDIVIDUALS
-
-  def getOtherIndividualsAlreadyExist(identifier: String): Action[AnyContent] =
-    processEtmpData(identifier) {
-      trustData => JsBoolean(trustData.transform((otherIndividualsPath \ 0).json.pick).isSuccess)
-    }
+  def getOtherIndividualsAlreadyExist(identifier: String): Action[AnyContent] = {
+    isPickSuccessfulAtPath(identifier, ENTITIES \ OTHER_INDIVIDUALS \ 0)
+  }
 
   def getOtherIndividuals(identifier: String): Action[AnyContent] =
-    getArrayAtPath(identifier, otherIndividualsPath, OTHER_INDIVIDUALS)
+    getArrayAtPath(identifier, ENTITIES \ OTHER_INDIVIDUALS, OTHER_INDIVIDUALS)
 
   def getNonEeaCompaniesAlreadyExist(identifier: String): Action[AnyContent] = {
-    val path: JsPath = TRUST \ ASSETS \ NON_EEA_BUSINESS_ASSET
+    isPickSuccessfulAtPath(identifier, TRUST \ ASSETS \ NON_EEA_BUSINESS_ASSET \ 0)
+  }
+
+  def areBeneficiariesCompleteForMigration(identifier: String): Action[AnyContent] = {
+    doGet(identifier, applyTransformations = true) {
+      case processed: TrustProcessedResponse =>
+        val trust = processed.getTrust
+        val haveRequiredInfo = for {
+          individuals <- trust.transform((ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY).json.pick[JsArray])
+          companies <- trust.transform((ENTITIES \ BENEFICIARIES \ COMPANY_BENEFICIARY).json.pick[JsArray])
+          trusts <- trust.transform((ENTITIES \ BENEFICIARIES \ TRUST_BENEFICIARY).json.pick[JsArray])
+          charities <- trust.transform((ENTITIES \ BENEFICIARIES \ CHARITY_BENEFICIARY).json.pick[JsArray])
+          others <- trust.transform((ENTITIES \ BENEFICIARIES \ OTHER_BENEFICIARY).json.pick[JsArray])
+          trustType = trust.transform((TRUST \ DETAILS \ TYPE_OF_TRUST).json.pick[JsString])
+        } yield {
+          individuals.value.foldLeft(true)((acc, individual) => {
+            acc &&
+              individual.transform((__ \ ENTITY_END).json.pick).isSuccess ||
+              (
+                (
+                  individual.transform((__ \ HAS_DISCRETION).json.pick[JsBoolean]).exists(_.value) ||
+                    (
+                      individual.transform((__ \ HAS_DISCRETION).json.pick[JsBoolean]).exists(!_.value) &&
+                        individual.transform((__ \ SHARE_OF_INCOME).json.pick).isSuccess
+                      )
+                  ) &&
+                  individual.transform((__ \ VULNERABLE_BENEFICIARY).json.pick).isSuccess &&
+                  (
+                    trustType.exists(_.value != EMPLOYMENT_RELATED_TRUST) ||
+                      (
+                        trustType.exists(_.value == EMPLOYMENT_RELATED_TRUST) &&
+                          individual.transform((__ \ TYPE_OF_INDIVIDUAL_BENEFICIARY).json.pick).isSuccess
+                        )
+                    )
+                )
+          }) &&
+            companies.value.forall(company =>
+              company.transform((__ \ ENTITY_END).json.pick).isSuccess ||
+                (
+                  company.transform((__ \ HAS_DISCRETION).json.pick[JsBoolean]).exists(_.value) ||
+                    (
+                      company.transform((__ \ HAS_DISCRETION).json.pick[JsBoolean]).exists(!_.value) &&
+                        company.transform((__ \ SHARE_OF_INCOME).json.pick).isSuccess
+                      )
+                  )
+            )
+        }
+
+        haveRequiredInfo match {
+          case JsSuccess(value, _) => Ok(JsBoolean(value))
+          case JsError(errors) =>
+            logger.error(s"[Identifier: $identifier] Failed to check beneficiaries: $errors")
+            InternalServerError
+        }
+      case _ => Forbidden
+    }
+  }
+
+  def doAnySettlorsNeedAdditionalInfo(identifier: String): Action[AnyContent] = {
     processEtmpData(identifier) {
-      trustData => JsBoolean(trustData.transform((path \ 0).json.pick).isSuccess)
+      etmpData =>
+        // get trust type
+        // get business settlors
+        // if employment related trust type, check for any that are missing companyType, companyTime
+        ???
     }
   }
 
   def isTrust5mld(identifier: String): Action[AnyContent] =
-    isPickSuccessfulAtPath(identifier, TRUST \ DETAILS \ EXPRESS)
+    isPickSuccessfulAtPath(identifier, TRUST \ DETAILS \ EXPRESS, applyTransformations = false)
 
   def getTrustName(identifier: String): Action[AnyContent] =
     getItemAtPath(identifier, TRUST_NAME)
 
-  private def isPickSuccessfulAtPath(identifier: String, path: JsPath): Action[AnyContent] = {
-    processEtmpData(identifier, applyTransformations = false) {
+  private def isPickSuccessfulAtPath(identifier: String, path: JsPath, applyTransformations: Boolean = true): Action[AnyContent] = {
+    processEtmpData(identifier, applyTransformations) {
       etmpData =>
         JsBoolean(etmpData.transform(path.json.pick).isSuccess)
     }
