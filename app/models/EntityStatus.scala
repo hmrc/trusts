@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json.{Format, Json}
 
-case class EntityStatus(tag: Option[Boolean])
+case class EntityStatus(completed: Option[Boolean])
 
 object EntityStatus {
   implicit val format: Format[EntityStatus] = Json.format[EntityStatus]
