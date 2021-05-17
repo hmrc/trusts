@@ -146,26 +146,19 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     isPickSuccessfulAtPath(identifier, TRUST \ ASSETS \ NON_EEA_BUSINESS_ASSET \ 0)
   }
 
-  def areBeneficiariesCompleteForMigration(identifier: String): Action[AnyContent] = {
-    doGet(identifier, applyTransformations = true) {
-      case processed: TrustProcessedResponse =>
-        requiredDetailsUtil.areBeneficiariesCompleteForMigration(processed.getTrust) match {
-          case JsSuccess(value, _) => Ok(JsBoolean(value))
-          case JsError(errors) =>
-            logger.error(s"[Identifier: $identifier] Failed to check beneficiaries: $errors")
-            InternalServerError
-        }
-      case _ => Forbidden
-    }
-  }
+  def areBeneficiariesCompleteForMigration(identifier: String): Action[AnyContent] =
+    areEntitiesCompleteForMigration(identifier)(requiredDetailsUtil.areBeneficiariesCompleteForMigration)
 
-  def areSettlorsCompleteForMigration(identifier: String): Action[AnyContent] = {
+  def areSettlorsCompleteForMigration(identifier: String): Action[AnyContent] =
+    areEntitiesCompleteForMigration(identifier)(requiredDetailsUtil.areSettlorsCompleteForMigration)
+
+  private def areEntitiesCompleteForMigration(identifier: String)(f: JsValue => JsResult[Boolean]): Action[AnyContent] = {
     doGet(identifier, applyTransformations = true) {
       case processed: TrustProcessedResponse =>
-        requiredDetailsUtil.areSettlorsCompleteForMigration(processed.getTrust) match {
+        f(processed.getTrust) match {
           case JsSuccess(value, _) => Ok(JsBoolean(value))
           case JsError(errors) =>
-            logger.error(s"[Identifier: $identifier] Failed to check settlors: $errors")
+            logger.error(s"[Identifier: $identifier] Failed to check entities: $errors")
             InternalServerError
         }
       case _ => Forbidden

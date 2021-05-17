@@ -23,15 +23,15 @@ class RequiredEntityDetailsForMigration {
 
   def areBeneficiariesCompleteForMigration(trust: JsValue): JsResult[Boolean] = {
 
-    def pickAtPath(`type`: String): JsResult[JsArray] = pickAtPathForEntityType(BENEFICIARIES, `type`, trust)
+    def pickAtPathForType(`type`: String): JsResult[JsArray] = pickAtPathForEntityType(BENEFICIARIES, `type`, trust)
 
     for {
-      individuals <- pickAtPath(INDIVIDUAL_BENEFICIARY)
-      companies <- pickAtPath(COMPANY_BENEFICIARY)
-      larges <- pickAtPath(LARGE_BENEFICIARY)
-      trusts <- pickAtPath(TRUST_BENEFICIARY)
-      charities <- pickAtPath(CHARITY_BENEFICIARY)
-      others <- pickAtPath(OTHER_BENEFICIARY)
+      individuals <- pickAtPathForType(INDIVIDUAL_BENEFICIARY)
+      companies <- pickAtPathForType(COMPANY_BENEFICIARY)
+      larges <- pickAtPathForType(LARGE_BENEFICIARY)
+      trusts <- pickAtPathForType(TRUST_BENEFICIARY)
+      charities <- pickAtPathForType(CHARITY_BENEFICIARY)
+      others <- pickAtPathForType(OTHER_BENEFICIARY)
       trustType = trustTypePick(trust)
     } yield {
 

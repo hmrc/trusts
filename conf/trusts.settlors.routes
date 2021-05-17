@@ -1,6 +1,8 @@
 
 GET         /:identifier/transformed                                    controllers.GetTrustController.getSettlors(identifier: String)
 
+GET         /:identifier/complete-for-migrtion                          controllers.GetTrustController.areSettlorsCompleteForMigration(identifier: String)
+
 GET         /:identifier/transformed/deceased-settlor-death-recorded    controllers.GetTrustController.getDeceasedSettlorDeathRecorded(identifier: String)
 
 POST        /add-individual/:identifier                                 controllers.transformations.settlors.AddSettlorController.addIndividual(identifier: String)
