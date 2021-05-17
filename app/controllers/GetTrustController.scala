@@ -29,6 +29,7 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import services.{AuditService, TransformationService, TrustsService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.Constants._
+import utils.RequiredEntityDetailsForMigration
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -38,6 +39,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
                                    trustsService: TrustsService,
                                    transformationService: TransformationService,
                                    validateIdentifier: ValidateIdentifierActionProvider,
+                                   requiredDetailsUtil: RequiredEntityDetailsForMigration,
                                    cc: ControllerComponents) extends BackendController(cc) with Logging {
 
   val errorAuditMessages: Map[GetTrustResponse, String] = Map(
@@ -147,50 +149,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   def areBeneficiariesCompleteForMigration(identifier: String): Action[AnyContent] = {
     doGet(identifier, applyTransformations = true) {
       case processed: TrustProcessedResponse =>
-        val trust = processed.getTrust
-        val haveRequiredInfo = for {
-          individuals <- trust.transform((ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY).json.pick[JsArray])
-          companies <- trust.transform((ENTITIES \ BENEFICIARIES \ COMPANY_BENEFICIARY).json.pick[JsArray])
-          larges <- trust.transform((ENTITIES \ BENEFICIARIES \ LARGE_BENEFICIARY).json.pick[JsArray])
-          trusts <- trust.transform((ENTITIES \ BENEFICIARIES \ TRUST_BENEFICIARY).json.pick[JsArray])
-          charities <- trust.transform((ENTITIES \ BENEFICIARIES \ CHARITY_BENEFICIARY).json.pick[JsArray])
-          others <- trust.transform((ENTITIES \ BENEFICIARIES \ OTHER_BENEFICIARY).json.pick[JsArray])
-          trustType = trust.transform((TRUST \ DETAILS \ TYPE_OF_TRUST).json.pick[JsString])
-        } yield {
-
-          implicit class RequiredInfo(beneficiary: JsValue) {
-            def hasRequiredInfo(obeysAdditionalRules: Boolean = true): Boolean = hasEndDate || (hasDiscretionOrShareOfIncome && obeysAdditionalRules)
-
-            private def hasEndDate: Boolean = beneficiary.transform((__ \ ENTITY_END).json.pick).isSuccess
-
-            private def hasDiscretionOrShareOfIncome: Boolean = {
-              beneficiary.transform((__ \ HAS_DISCRETION).json.pick[JsBoolean]) match {
-                case JsSuccess(JsBoolean(true), _) => true
-                case JsSuccess(JsBoolean(false), _) => beneficiary.transform((__ \ SHARE_OF_INCOME).json.pick).isSuccess
-                case _ => false
-              }
-            }
-          }
-
-          val individualsHaveRequiredInfo = individuals.value.foldLeft(true)((acc, individual) => {
-            lazy val hasVulnerableBeneficiaryField = individual.transform((__ \ VULNERABLE_BENEFICIARY).json.pick).isSuccess
-            lazy val hasRoleInCompanyForEmploymentRelatedTrust = trustType match {
-              case JsSuccess(JsString(EMPLOYMENT_RELATED_TRUST), _) => individual.transform((__ \ ROLE_IN_COMPANY).json.pick).isSuccess
-              case JsSuccess(JsString(_), _) => true
-              case _ => false
-            }
-            acc && individual.hasRequiredInfo(hasVulnerableBeneficiaryField && hasRoleInCompanyForEmploymentRelatedTrust)
-          })
-
-          individualsHaveRequiredInfo &&
-            companies.value.forall(_.hasRequiredInfo()) &&
-            larges.value.forall(_.hasRequiredInfo()) &&
-            trusts.value.forall(_.hasRequiredInfo()) &&
-            charities.value.forall(_.hasRequiredInfo()) &&
-            others.value.forall(_.hasRequiredInfo())
-        }
-
-        haveRequiredInfo match {
+        requiredDetailsUtil.areBeneficiariesCompleteForMigration(processed.getTrust) match {
           case JsSuccess(value, _) => Ok(JsBoolean(value))
           case JsError(errors) =>
             logger.error(s"[Identifier: $identifier] Failed to check beneficiaries: $errors")

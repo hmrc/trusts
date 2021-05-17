@@ -43,6 +43,10 @@ object JsonOps {
     prunePath(path) andThen putNewValue(path, value)
   }
 
+  def pickAtPath[A <: JsValue](path: JsPath, value: JsValue)(implicit rds: Reads[A]): JsResult[A] = {
+    value.transform(path.json.pick[A])
+  }
+
   type JsPathNodes = Seq[Either[Int, String]]
   type JsEntry = (JsPathNodes, JsValue)
   type JsTraverse = PartialFunction[JsEntry, JsValue]

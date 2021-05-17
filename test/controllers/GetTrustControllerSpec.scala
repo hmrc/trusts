@@ -27,17 +27,15 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Span}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.{JsPath, JsString, JsValue, Json}
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import services.{AuditService, TransformationService, TrustsService}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import utils.Constants.{BENEFICIARIES, CHARITY_BENEFICIARY, COMPANY_BENEFICIARY, DETAILS, ENTITIES, INDIVIDUAL_BENEFICIARY, LARGE_BENEFICIARY, OTHER_BENEFICIARY, TRUST, TRUST_BENEFICIARY, TYPE_OF_TRUST}
-import utils.JsonOps.prunePathAndPutNewValue
 import utils.NonTaxable5MLDFixtures.Cache.getTransformedNonTaxableTrustResponse
-import utils.{JsonFixtures, NonTaxable5MLDFixtures, Taxable5MLDFixtures}
+import utils.{JsonFixtures, NonTaxable5MLDFixtures, RequiredEntityDetailsForMigration, Taxable5MLDFixtures}
 
 import scala.concurrent.Future
 
@@ -62,13 +60,15 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
   lazy val bodyParsers: BodyParsers.Default = app.injector.instanceOf[BodyParsers.Default]
 
+  private val mockRequiredDetailsUtil: RequiredEntityDetailsForMigration = mock[RequiredEntityDetailsForMigration]
+
   override def afterEach(): Unit =  {
-    reset(mockedAuditService, trustsService, mockAuditConnector, mockConfig, transformationService)
+    reset(mockedAuditService, trustsService, mockAuditConnector, mockConfig, transformationService, mockRequiredDetailsUtil)
   }
 
   private def getTrustController = {
     new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation),
-      mockedAuditService, trustsService, transformationService, validateIdentifierAction, Helpers.stubControllerComponents())
+      mockedAuditService, trustsService, transformationService, validateIdentifierAction, mockRequiredDetailsUtil, Helpers.stubControllerComponents())
   }
 
   val invalidUTR = "1234567"
@@ -82,9 +82,6 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
       "reset the cache and clear transforms before calling get" in {
 
-        val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation),
-          auditService, trustsService, transformationService,validateIdentifierAction, Helpers.stubControllerComponents())
-
         val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
         when(trustsService.resetCache(any(), any()))
           .thenReturn(Future.successful(()))
@@ -95,7 +92,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(trustsService.getTrustInfo(any(), any()))
           .thenReturn(Future.successful(response))
 
-        val result = SUT.getFromEtmp(utr).apply(FakeRequest(GET, s"/trusts/$utr/refresh"))
+        val result = getTrustController.getFromEtmp(utr).apply(FakeRequest(GET, s"/trusts/$utr/refresh"))
 
         whenReady(result) { _ =>
           verify(trustsService).resetCache(utr, "id")
@@ -108,9 +105,6 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
       "reset the cache and clear transforms before calling get" in {
 
-        val SUT = new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation),
-          auditService, trustsService, transformationService,validateIdentifierAction, Helpers.stubControllerComponents())
-
         val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
         when(trustsService.resetCache(any(), any()))
           .thenReturn(Future.successful(()))
@@ -121,7 +115,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         when(trustsService.getTrustInfo(any(), any()))
           .thenReturn(Future.successful(response))
 
-        val result = SUT.getFromEtmp(urn).apply(FakeRequest(GET, s"/trusts/$urn/refresh"))
+        val result = getTrustController.getFromEtmp(urn).apply(FakeRequest(GET, s"/trusts/$urn/refresh"))
 
         whenReady(result) { _ =>
           verify(trustsService).resetCache(urn, "id")
@@ -143,6 +137,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         trustsService,
         transformationService,
         validateIdentifierAction,
+        mockRequiredDetailsUtil,
         Helpers.stubControllerComponents()
       )
 
@@ -1627,701 +1622,76 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
     ".areBeneficiariesCompleteForMigration" should {
 
-      def runTest(path: JsPath, newValue: JsValue, expectedResult: Boolean, typeOfTrust: String = "Will Trust or Intestacy Trust"): Assertion = {
-        val trust = getTransformedTrustResponse
-          .transform(
-            prunePathAndPutNewValue(path, newValue) andThen
-              prunePathAndPutNewValue(TRUST \ DETAILS \ TYPE_OF_TRUST, JsString(typeOfTrust))
-          ).get
+      "return Ok with true" when {
+        "beneficiaries are complete for migration" in {
 
-        val processedResponse = TrustProcessedResponse(trust, ResponseHeader("Processed", "1"))
+          when(mockRequiredDetailsUtil.areBeneficiariesCompleteForMigration(any())).thenReturn(JsSuccess(true))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
-          .thenReturn(Future.successful(processedResponse))
+          val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-        val result = getTrustController.areBeneficiariesCompleteForMigration(utr)(FakeRequest())
+          when(transformationService.getTransformedData(any[String], any[String])(any()))
+            .thenReturn(Future.successful(processedResponse))
 
-        whenReady(result) { _ =>
-          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
-          status(result) mustBe OK
-          contentType(result) mustBe Some(JSON)
-          contentAsJson(result) mustBe Json.toJson(expectedResult)
-        }
-      }
+          val result = getTrustController.areBeneficiariesCompleteForMigration(utr)(FakeRequest())
 
-      "return false" when {
-
-        "individual beneficiary doesn't have required data" when {
-
-          val path = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
-
-          "missing vulnerableBeneficiary" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "name": {
-                |      "firstName": "Joe",
-                |      "lastName": "Bloggs"
-                |    },
-                |    "beneficiaryDiscretion": true,
-                |    "legallyIncapable": false,
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = false)
-          }
-
-          "missing beneficiaryDiscretion" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "name": {
-                |      "firstName": "Joe",
-                |      "lastName": "Bloggs"
-                |    },
-                |    "vulnerableBeneficiary": true,
-                |    "legallyIncapable": false,
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = false)
-          }
-
-          "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "name": {
-                |      "firstName": "Joe",
-                |      "lastName": "Bloggs"
-                |    },
-                |    "beneficiaryDiscretion": false,
-                |    "vulnerableBeneficiary": true,
-                |    "legallyIncapable": false,
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = false)
-          }
-
-          "missing beneficiaryType when typeOfTrust is Employment Related" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "name": {
-                |      "firstName": "Joe",
-                |      "lastName": "Bloggs"
-                |    },
-                |    "beneficiaryDiscretion": true,
-                |    "vulnerableBeneficiary": true,
-                |    "legallyIncapable": false,
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = false, typeOfTrust = "Employment Related")
-          }
-        }
-
-        "company beneficiary doesn't have required data" when {
-
-          val path = ENTITIES \ BENEFICIARIES \ COMPANY_BENEFICIARY
-
-          "missing beneficiaryDiscretion" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = false)
-          }
-
-          "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "beneficiaryDiscretion": false,
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = false)
-          }
-        }
-
-        "large beneficiary doesn't have required data" when {
-
-          val path = ENTITIES \ BENEFICIARIES \ LARGE_BENEFICIARY
-
-          "missing beneficiaryDiscretion" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "description": "Org Description",
-                |    "numberOfBeneficiary": "201",
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = false)
-          }
-
-          "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "beneficiaryDiscretion": false,
-                |    "description": "Org Description",
-                |    "numberOfBeneficiary": "201",
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = false)
-          }
-        }
-
-        "trust beneficiary doesn't have required data" when {
-
-          val path = ENTITIES \ BENEFICIARIES \ TRUST_BENEFICIARY
-
-          "missing beneficiaryDiscretion" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = false)
-          }
-
-          "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "beneficiaryDiscretion": false,
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = false)
-          }
-        }
-
-        "charity beneficiary doesn't have required data" when {
-
-          val path = ENTITIES \ BENEFICIARIES \ CHARITY_BENEFICIARY
-
-          "missing beneficiaryDiscretion" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = false)
-          }
-
-          "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "beneficiaryDiscretion": false,
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = false)
-          }
-        }
-
-        "other beneficiary doesn't have required data" when {
-
-          val path = ENTITIES \ BENEFICIARIES \ OTHER_BENEFICIARY
-
-          "missing beneficiaryDiscretion" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "description": "Org Description",
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = false)
-          }
-
-          "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "description": "Org Description",
-                |    "beneficiaryDiscretion": false,
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = false)
+          whenReady(result) { _ =>
+            verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+            status(result) mustBe OK
+            contentType(result) mustBe Some(JSON)
+            contentAsJson(result) mustBe Json.toJson(true)
           }
         }
       }
 
-      "return true" when {
+      "return Ok with false" when {
+        "beneficiaries are not complete for migration" in {
 
-        "individual beneficiary has required data" when {
+          when(mockRequiredDetailsUtil.areBeneficiariesCompleteForMigration(any())).thenReturn(JsSuccess(false))
 
-          val path = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
+          val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-          "has discretion" in {
+          when(transformationService.getTransformedData(any[String], any[String])(any()))
+            .thenReturn(Future.successful(processedResponse))
 
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "name": {
-                |      "firstName": "Joe",
-                |      "lastName": "Bloggs"
-                |    },
-                |    "beneficiaryDiscretion": true,
-                |    "vulnerableBeneficiary": true,
-                |    "legallyIncapable": false,
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
+          val result = getTrustController.areBeneficiariesCompleteForMigration(utr)(FakeRequest())
 
-            runTest(path, beneficiary, expectedResult = true)
-          }
-
-          "has no discretion and has share of income" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "name": {
-                |      "firstName": "Joe",
-                |      "lastName": "Bloggs"
-                |    },
-                |    "beneficiaryDiscretion": false,
-                |    "beneficiaryShareOfIncome": "50",
-                |    "vulnerableBeneficiary": true,
-                |    "legallyIncapable": false,
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = true)
-          }
-
-          "has beneficiaryType for employment related trust" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "name": {
-                |      "firstName": "Joe",
-                |      "lastName": "Bloggs"
-                |    },
-                |    "beneficiaryDiscretion": true,
-                |    "beneficiaryType": "Director",
-                |    "vulnerableBeneficiary": true,
-                |    "legallyIncapable": false,
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = true, typeOfTrust = "Employment Related")
-          }
-
-          "has an end date" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "name": {
-                |      "firstName": "Joe",
-                |      "lastName": "Bloggs"
-                |    },
-                |    "legallyIncapable": false,
-                |    "entityStart": "2020-01-01",
-                |    "entityEnd": "2021-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = true)
+          whenReady(result) { _ =>
+            verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+            status(result) mustBe OK
+            contentType(result) mustBe Some(JSON)
+            contentAsJson(result) mustBe Json.toJson(false)
           }
         }
+      }
 
-        "company beneficiary has required data" when {
+      "return 403 (FORBIDDEN)" when {
+        "parked content" in {
 
-          val path = ENTITIES \ BENEFICIARIES \ COMPANY_BENEFICIARY
+          when(transformationService.getTransformedData(any(), any())(any()))
+            .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
-          "has discretion" in {
+          val result = getTrustController.areBeneficiariesCompleteForMigration(utr)(FakeRequest())
 
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "beneficiaryDiscretion": true,
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = true)
-          }
-
-          "has no discretion and has share of income" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "beneficiaryDiscretion": false,
-                |    "beneficiaryShareOfIncome": "50",
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = true)
-          }
-
-          "has an end date" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "entityStart": "2020-01-01",
-                |    "entityEnd": "2021-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = true)
+          whenReady(result) { _ =>
+            status(result) mustBe FORBIDDEN
           }
         }
+      }
 
-        "large beneficiary has required data" when {
+      "return 500 (INTERNAL_SERVER_ERROR)" when {
+        "required details util returns error" in {
 
-          val path = ENTITIES \ BENEFICIARIES \ LARGE_BENEFICIARY
+          when(mockRequiredDetailsUtil.areBeneficiariesCompleteForMigration(any())).thenReturn(JsError())
 
-          "has discretion" in {
+          when(transformationService.getTransformedData(any(), any())(any()))
+            .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "beneficiaryDiscretion": true,
-                |    "description": "Org Description",
-                |    "numberOfBeneficiary": "201",
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
+          val result = getTrustController.areBeneficiariesCompleteForMigration(utr)(FakeRequest())
 
-            runTest(path, beneficiary, expectedResult = true)
-          }
-
-          "has no discretion and has share of income" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "beneficiaryDiscretion": false,
-                |    "beneficiaryShareOfIncome": "50",
-                |    "description": "Org Description",
-                |    "numberOfBeneficiary": "201",
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = true)
-          }
-
-          "has an end date" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "description": "Org Description",
-                |    "numberOfBeneficiary": "201",
-                |    "entityStart": "2020-01-01",
-                |    "entityEnd": "2021-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = true)
-          }
-        }
-
-        "trust beneficiary has required data" when {
-
-          val path = ENTITIES \ BENEFICIARIES \ TRUST_BENEFICIARY
-
-          "has discretion" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "beneficiaryDiscretion": true,
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = true)
-          }
-
-          "has no discretion and has share of income" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "beneficiaryDiscretion": false,
-                |    "beneficiaryShareOfIncome": "50",
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = true)
-          }
-
-          "has an end date" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "entityStart": "2020-01-01",
-                |    "entityEnd": "2021-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = true)
-          }
-        }
-
-        "charity beneficiary has required data" when {
-
-          val path = ENTITIES \ BENEFICIARIES \ CHARITY_BENEFICIARY
-
-          "has discretion" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "beneficiaryDiscretion": true,
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = true)
-          }
-
-          "has no discretion and has share of income" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "beneficiaryDiscretion": false,
-                |    "beneficiaryShareOfIncome": "50",
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = true)
-          }
-
-          "has an end date" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "entityStart": "2020-01-01",
-                |    "entityEnd": "2021-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = true)
-          }
-        }
-
-        "other beneficiary has required data" when {
-
-          val path = ENTITIES \ BENEFICIARIES \ OTHER_BENEFICIARY
-
-          "has discretion" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "description": "Org Description",
-                |    "beneficiaryDiscretion": true,
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = true)
-          }
-
-          "has no discretion and has share of income" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "description": "Org Description",
-                |    "beneficiaryDiscretion": false,
-                |    "beneficiaryShareOfIncome": "50",
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = true)
-          }
-
-          "has an end date" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "description": "Org Description",
-                |    "entityStart": "2020-01-01",
-                |    "entityEnd": "2021-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(path, beneficiary, expectedResult = true)
+          whenReady(result) { _ =>
+            status(result) mustBe INTERNAL_SERVER_ERROR
           }
         }
       }
