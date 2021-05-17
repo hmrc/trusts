@@ -151,42 +151,43 @@ class GetTrustController @Inject()(identify: IdentifierAction,
         val haveRequiredInfo = for {
           individuals <- trust.transform((ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY).json.pick[JsArray])
           companies <- trust.transform((ENTITIES \ BENEFICIARIES \ COMPANY_BENEFICIARY).json.pick[JsArray])
+          larges <- trust.transform((ENTITIES \ BENEFICIARIES \ LARGE_BENEFICIARY).json.pick[JsArray])
           trusts <- trust.transform((ENTITIES \ BENEFICIARIES \ TRUST_BENEFICIARY).json.pick[JsArray])
           charities <- trust.transform((ENTITIES \ BENEFICIARIES \ CHARITY_BENEFICIARY).json.pick[JsArray])
           others <- trust.transform((ENTITIES \ BENEFICIARIES \ OTHER_BENEFICIARY).json.pick[JsArray])
           trustType = trust.transform((TRUST \ DETAILS \ TYPE_OF_TRUST).json.pick[JsString])
         } yield {
-          individuals.value.foldLeft(true)((acc, individual) => {
-            acc &&
-              individual.transform((__ \ ENTITY_END).json.pick).isSuccess ||
-              (
-                (
-                  individual.transform((__ \ HAS_DISCRETION).json.pick[JsBoolean]).exists(_.value) ||
-                    (
-                      individual.transform((__ \ HAS_DISCRETION).json.pick[JsBoolean]).exists(!_.value) &&
-                        individual.transform((__ \ SHARE_OF_INCOME).json.pick).isSuccess
-                      )
-                  ) &&
-                  individual.transform((__ \ VULNERABLE_BENEFICIARY).json.pick).isSuccess &&
-                  (
-                    trustType.exists(_.value != EMPLOYMENT_RELATED_TRUST) ||
-                      (
-                        trustType.exists(_.value == EMPLOYMENT_RELATED_TRUST) &&
-                          individual.transform((__ \ TYPE_OF_INDIVIDUAL_BENEFICIARY).json.pick).isSuccess
-                        )
-                    )
-                )
-          }) &&
-            companies.value.forall(company =>
-              company.transform((__ \ ENTITY_END).json.pick).isSuccess ||
-                (
-                  company.transform((__ \ HAS_DISCRETION).json.pick[JsBoolean]).exists(_.value) ||
-                    (
-                      company.transform((__ \ HAS_DISCRETION).json.pick[JsBoolean]).exists(!_.value) &&
-                        company.transform((__ \ SHARE_OF_INCOME).json.pick).isSuccess
-                      )
-                  )
-            )
+
+          implicit class RequiredInfo(beneficiary: JsValue) {
+            def hasRequiredInfo(obeysAdditionalRules: Boolean = true): Boolean = hasEndDate || (hasDiscretionOrShareOfIncome && obeysAdditionalRules)
+
+            private def hasEndDate: Boolean = beneficiary.transform((__ \ ENTITY_END).json.pick).isSuccess
+
+            private def hasDiscretionOrShareOfIncome: Boolean = {
+              beneficiary.transform((__ \ HAS_DISCRETION).json.pick[JsBoolean]) match {
+                case JsSuccess(JsBoolean(true), _) => true
+                case JsSuccess(JsBoolean(false), _) => beneficiary.transform((__ \ SHARE_OF_INCOME).json.pick).isSuccess
+                case _ => false
+              }
+            }
+          }
+
+          val individualsHaveRequiredInfo = individuals.value.foldLeft(true)((acc, individual) => {
+            lazy val hasVulnerableBeneficiaryField = individual.transform((__ \ VULNERABLE_BENEFICIARY).json.pick).isSuccess
+            lazy val hasRoleInCompanyForEmploymentRelatedTrust = trustType match {
+              case JsSuccess(JsString(EMPLOYMENT_RELATED_TRUST), _) => individual.transform((__ \ ROLE_IN_COMPANY).json.pick).isSuccess
+              case JsSuccess(JsString(_), _) => true
+              case _ => false
+            }
+            acc && individual.hasRequiredInfo(hasVulnerableBeneficiaryField && hasRoleInCompanyForEmploymentRelatedTrust)
+          })
+
+          individualsHaveRequiredInfo &&
+            companies.value.forall(_.hasRequiredInfo()) &&
+            larges.value.forall(_.hasRequiredInfo()) &&
+            trusts.value.forall(_.hasRequiredInfo()) &&
+            charities.value.forall(_.hasRequiredInfo()) &&
+            others.value.forall(_.hasRequiredInfo())
         }
 
         haveRequiredInfo match {

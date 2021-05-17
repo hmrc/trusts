@@ -34,7 +34,7 @@ import play.api.test.{FakeRequest, Helpers}
 import services.{AuditService, TransformationService, TrustsService}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import utils.Constants.{BENEFICIARIES, COMPANY_BENEFICIARY, DETAILS, ENTITIES, INDIVIDUAL_BENEFICIARY, TRUST, TYPE_OF_TRUST}
+import utils.Constants.{BENEFICIARIES, CHARITY_BENEFICIARY, COMPANY_BENEFICIARY, DETAILS, ENTITIES, INDIVIDUAL_BENEFICIARY, LARGE_BENEFICIARY, OTHER_BENEFICIARY, TRUST, TRUST_BENEFICIARY, TYPE_OF_TRUST}
 import utils.JsonOps.prunePathAndPutNewValue
 import utils.NonTaxable5MLDFixtures.Cache.getTransformedNonTaxableTrustResponse
 import utils.{JsonFixtures, NonTaxable5MLDFixtures, Taxable5MLDFixtures}
@@ -1654,9 +1654,9 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
         "individual beneficiary doesn't have required data" when {
 
-          "missing vulnerableBeneficiary" in {
+          val path = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
 
-            val path = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
+          "missing vulnerableBeneficiary" in {
 
             val beneficiary = Json.parse(
               """
@@ -1679,8 +1679,6 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
           "missing beneficiaryDiscretion" in {
 
-            val path = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
-
             val beneficiary = Json.parse(
               """
                 |[
@@ -1701,8 +1699,6 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           }
 
           "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
-
-            val path = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
 
             val beneficiary = Json.parse(
               """
@@ -1725,8 +1721,6 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           }
 
           "missing beneficiaryType when typeOfTrust is Employment Related" in {
-
-            val path = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
 
             val beneficiary = Json.parse(
               """
@@ -1751,9 +1745,9 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
         "company beneficiary doesn't have required data" when {
 
-          "missing beneficiaryDiscretion" in {
+          val path = ENTITIES \ BENEFICIARIES \ COMPANY_BENEFICIARY
 
-            val path = ENTITIES \ BENEFICIARIES \ COMPANY_BENEFICIARY
+          "missing beneficiaryDiscretion" in {
 
             val beneficiary = Json.parse(
               """
@@ -1771,7 +1765,85 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
           "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
 
-            val path = ENTITIES \ BENEFICIARIES \ COMPANY_BENEFICIARY
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "beneficiaryDiscretion": false,
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = false)
+          }
+        }
+
+        "large beneficiary doesn't have required data" when {
+
+          val path = ENTITIES \ BENEFICIARIES \ LARGE_BENEFICIARY
+
+          "missing beneficiaryDiscretion" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "description": "Org Description",
+                |    "numberOfBeneficiary": "201",
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = false)
+          }
+
+          "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "beneficiaryDiscretion": false,
+                |    "description": "Org Description",
+                |    "numberOfBeneficiary": "201",
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = false)
+          }
+        }
+
+        "trust beneficiary doesn't have required data" when {
+
+          val path = ENTITIES \ BENEFICIARIES \ TRUST_BENEFICIARY
+
+          "missing beneficiaryDiscretion" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = false)
+          }
+
+          "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
 
             val beneficiary = Json.parse(
               """
@@ -1788,15 +1860,91 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
             runTest(path, beneficiary, expectedResult = false)
           }
         }
+
+        "charity beneficiary doesn't have required data" when {
+
+          val path = ENTITIES \ BENEFICIARIES \ CHARITY_BENEFICIARY
+
+          "missing beneficiaryDiscretion" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = false)
+          }
+
+          "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "beneficiaryDiscretion": false,
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = false)
+          }
+        }
+
+        "other beneficiary doesn't have required data" when {
+
+          val path = ENTITIES \ BENEFICIARIES \ OTHER_BENEFICIARY
+
+          "missing beneficiaryDiscretion" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "description": "Org Description",
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = false)
+          }
+
+          "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "description": "Org Description",
+                |    "beneficiaryDiscretion": false,
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = false)
+          }
+        }
       }
 
       "return true" when {
 
         "individual beneficiary has required data" when {
 
-          "has discretion" in {
+          val path = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
 
-            val path = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
+          "has discretion" in {
 
             val beneficiary = Json.parse(
               """
@@ -1819,8 +1967,6 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           }
 
           "has no discretion and has share of income" in {
-
-            val path = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
 
             val beneficiary = Json.parse(
               """
@@ -1845,8 +1991,6 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
           "has beneficiaryType for employment related trust" in {
 
-            val path = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
-
             val beneficiary = Json.parse(
               """
                 |[
@@ -1870,8 +2014,6 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
           "has an end date" in {
 
-            val path = ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY
-
             val beneficiary = Json.parse(
               """
                 |[
@@ -1894,9 +2036,9 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
         "company beneficiary has required data" when {
 
-          "has discretion" in {
+          val path = ENTITIES \ BENEFICIARIES \ COMPANY_BENEFICIARY
 
-            val path = ENTITIES \ BENEFICIARIES \ COMPANY_BENEFICIARY
+          "has discretion" in {
 
             val beneficiary = Json.parse(
               """
@@ -1914,8 +2056,6 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
           }
 
           "has no discretion and has share of income" in {
-
-            val path = ENTITIES \ BENEFICIARIES \ COMPANY_BENEFICIARY
 
             val beneficiary = Json.parse(
               """
@@ -1935,13 +2075,245 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
           "has an end date" in {
 
-            val path = ENTITIES \ BENEFICIARIES \ COMPANY_BENEFICIARY
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "entityStart": "2020-01-01",
+                |    "entityEnd": "2021-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = true)
+          }
+        }
+
+        "large beneficiary has required data" when {
+
+          val path = ENTITIES \ BENEFICIARIES \ LARGE_BENEFICIARY
+
+          "has discretion" in {
 
             val beneficiary = Json.parse(
               """
                 |[
                 |  {
                 |    "organisationName": "Org Name",
+                |    "beneficiaryDiscretion": true,
+                |    "description": "Org Description",
+                |    "numberOfBeneficiary": "201",
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = true)
+          }
+
+          "has no discretion and has share of income" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "beneficiaryDiscretion": false,
+                |    "beneficiaryShareOfIncome": "50",
+                |    "description": "Org Description",
+                |    "numberOfBeneficiary": "201",
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = true)
+          }
+
+          "has an end date" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "description": "Org Description",
+                |    "numberOfBeneficiary": "201",
+                |    "entityStart": "2020-01-01",
+                |    "entityEnd": "2021-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = true)
+          }
+        }
+
+        "trust beneficiary has required data" when {
+
+          val path = ENTITIES \ BENEFICIARIES \ TRUST_BENEFICIARY
+
+          "has discretion" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "beneficiaryDiscretion": true,
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = true)
+          }
+
+          "has no discretion and has share of income" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "beneficiaryDiscretion": false,
+                |    "beneficiaryShareOfIncome": "50",
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = true)
+          }
+
+          "has an end date" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "entityStart": "2020-01-01",
+                |    "entityEnd": "2021-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = true)
+          }
+        }
+
+        "charity beneficiary has required data" when {
+
+          val path = ENTITIES \ BENEFICIARIES \ CHARITY_BENEFICIARY
+
+          "has discretion" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "beneficiaryDiscretion": true,
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = true)
+          }
+
+          "has no discretion and has share of income" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "beneficiaryDiscretion": false,
+                |    "beneficiaryShareOfIncome": "50",
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = true)
+          }
+
+          "has an end date" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "entityStart": "2020-01-01",
+                |    "entityEnd": "2021-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = true)
+          }
+        }
+
+        "other beneficiary has required data" when {
+
+          val path = ENTITIES \ BENEFICIARIES \ OTHER_BENEFICIARY
+
+          "has discretion" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "description": "Org Description",
+                |    "beneficiaryDiscretion": true,
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = true)
+          }
+
+          "has no discretion and has share of income" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "description": "Org Description",
+                |    "beneficiaryDiscretion": false,
+                |    "beneficiaryShareOfIncome": "50",
+                |    "entityStart": "2020-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(path, beneficiary, expectedResult = true)
+          }
+
+          "has an end date" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "description": "Org Description",
                 |    "entityStart": "2020-01-01",
                 |    "entityEnd": "2021-01-01"
                 |  }

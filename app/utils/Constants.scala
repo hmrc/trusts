@@ -125,7 +125,7 @@ object Constants {
   val VULNERABLE_BENEFICIARY = "vulnerableBeneficiary"
   val HAS_DISCRETION = "beneficiaryDiscretion"
   val SHARE_OF_INCOME = "beneficiaryShareOfIncome"
-  val TYPE_OF_INDIVIDUAL_BENEFICIARY = "beneficiaryType"
+  val ROLE_IN_COMPANY = "beneficiaryType"
 
   val EMPLOYMENT_RELATED_TRUST = "Employment Related"
 }
