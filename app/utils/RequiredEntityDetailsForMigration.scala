@@ -21,7 +21,7 @@ import utils.Constants._
 
 class RequiredEntityDetailsForMigration {
 
-  def areBeneficiariesCompleteForMigration(trust: JsValue): JsResult[Boolean] = {
+  def areBeneficiariesCompleteForMigration(trust: JsValue): JsResult[Option[Boolean]] = {
 
     def pickAtPathForType(`type`: String): JsResult[JsArray] = pickAtPathForEntityType(BENEFICIARIES, `type`, trust)
 
@@ -34,41 +34,56 @@ class RequiredEntityDetailsForMigration {
       others <- pickAtPathForType(OTHER_BENEFICIARY)
       trustType = trustTypePick(trust)
     } yield {
+      if (individuals.isEmpty && companies.isEmpty && larges.isEmpty && trusts.isEmpty && charities.isEmpty && others.isEmpty) {
+        None
+      } else {
 
-      val individualsHaveRequiredInfo = individuals.value.forall(individual => {
-        lazy val hasVulnerableBeneficiaryField = individual.transform((__ \ VULNERABLE_BENEFICIARY).json.pick).isSuccess
-        lazy val hasRoleInCompanyForEmploymentRelatedTrust =
-          individual.hasRequiredInfoForEmploymentRelatedTrust(trustType, ROLE_IN_COMPANY)
+        val individualsHaveRequiredInfo = individuals.value.forall(individual => {
+          lazy val hasVulnerableBeneficiaryField = individual.transform((__ \ VULNERABLE_BENEFICIARY).json.pick).isSuccess
+          lazy val hasRoleInCompanyForEmploymentRelatedTrust =
+            individual.hasRequiredInfoForEmploymentRelatedTrust(trustType, ROLE_IN_COMPANY)
 
-        individual.hasRequiredBeneficiaryInfo(hasVulnerableBeneficiaryField && hasRoleInCompanyForEmploymentRelatedTrust)
-      })
+          individual.hasRequiredBeneficiaryInfo(hasVulnerableBeneficiaryField && hasRoleInCompanyForEmploymentRelatedTrust)
+        })
 
-      individualsHaveRequiredInfo &&
-        companies.value.forall(_.hasRequiredBeneficiaryInfo()) &&
-        larges.value.forall(_.hasRequiredBeneficiaryInfo()) &&
-        trusts.value.forall(_.hasRequiredBeneficiaryInfo()) &&
-        charities.value.forall(_.hasRequiredBeneficiaryInfo()) &&
-        others.value.forall(_.hasRequiredBeneficiaryInfo())
+        val haveRequiredInfo = individualsHaveRequiredInfo &&
+          companies.value.forall(_.hasRequiredBeneficiaryInfo()) &&
+          larges.value.forall(_.hasRequiredBeneficiaryInfo()) &&
+          trusts.value.forall(_.hasRequiredBeneficiaryInfo()) &&
+          charities.value.forall(_.hasRequiredBeneficiaryInfo()) &&
+          others.value.forall(_.hasRequiredBeneficiaryInfo())
+
+        Some(haveRequiredInfo)
+      }
     }
   }
 
-  def areSettlorsCompleteForMigration(trust: JsValue): JsResult[Boolean] = {
+  def areSettlorsCompleteForMigration(trust: JsValue): JsResult[Option[Boolean]] = {
 
     for {
       businesses <- pickAtPathForEntityType(SETTLORS, BUSINESS_SETTLOR, trust)
       trustType = trustTypePick(trust)
     } yield {
-      businesses.value.forall(business => {
-        lazy val hasCompanyTypeAndTimeForEmploymentRelatedTrust =
-          business.hasRequiredInfoForEmploymentRelatedTrust(trustType, COMPANY_TYPE, COMPANY_TIME)
+      if (businesses.isEmpty) {
+        None
+      } else {
+        val haveRequiredInfo = businesses.value.forall(business => {
+          lazy val hasCompanyTypeAndTimeForEmploymentRelatedTrust =
+            business.hasRequiredInfoForEmploymentRelatedTrust(trustType, COMPANY_TYPE, COMPANY_TIME)
 
-        business.hasRequiredSettlorInfo(hasCompanyTypeAndTimeForEmploymentRelatedTrust)
-      })
+          business.hasRequiredSettlorInfo(hasCompanyTypeAndTimeForEmploymentRelatedTrust)
+        })
+
+        Some(haveRequiredInfo)
+      }
     }
   }
 
   private def pickAtPathForEntityType(entity: String, `type`: String, trust: JsValue): JsResult[JsArray] =
-    JsonOps.pickAtPath[JsArray](ENTITIES \ entity \ `type`, trust)
+    JsonOps.pickAtPath[JsArray](ENTITIES \ entity \ `type`, trust) match {
+      case x @ JsSuccess(_, _) => x
+      case _ => JsSuccess(JsArray())
+    }
 
   private def trustTypePick(trust: JsValue): JsResult[JsString] = trust.transform((TRUST \ DETAILS \ TYPE_OF_TRUST).json.pick[JsString])
 
@@ -97,4 +112,9 @@ class RequiredEntityDetailsForMigration {
       }
     }
   }
+
+  implicit class EntityArray(array: JsArray) {
+    def isEmpty: Boolean = array.value.isEmpty || array.value.forall(_.hasEndDate)
+  }
+
 }

@@ -18,6 +18,7 @@ package controllers
 
 import config.AppConfig
 import controllers.actions.{FakeIdentifierAction, ValidateIdentifierActionProvider}
+import models.EntityStatus
 import models.get_trust.GetTrustResponse.CLOSED_REQUEST_STATUS
 import models.get_trust._
 import org.mockito.Matchers.{any, eq => mockEq}
@@ -1625,7 +1626,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       "return Ok with true" when {
         "beneficiaries are complete for migration" in {
 
-          when(mockRequiredDetailsUtil.areBeneficiariesCompleteForMigration(any())).thenReturn(JsSuccess(true))
+          when(mockRequiredDetailsUtil.areBeneficiariesCompleteForMigration(any())).thenReturn(JsSuccess(Some(true)))
 
           val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
@@ -1639,7 +1640,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
             verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
             status(result) mustBe OK
             contentType(result) mustBe Some(JSON)
-            contentAsJson(result) mustBe Json.toJson(true)
+            contentAsJson(result) mustBe Json.toJson(EntityStatus(Some(true)))
           }
         }
       }
@@ -1647,7 +1648,7 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       "return Ok with false" when {
         "beneficiaries are not complete for migration" in {
 
-          when(mockRequiredDetailsUtil.areBeneficiariesCompleteForMigration(any())).thenReturn(JsSuccess(false))
+          when(mockRequiredDetailsUtil.areBeneficiariesCompleteForMigration(any())).thenReturn(JsSuccess(Some(false)))
 
           val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
@@ -1661,7 +1662,29 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
             verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
             status(result) mustBe OK
             contentType(result) mustBe Some(JSON)
-            contentAsJson(result) mustBe Json.toJson(false)
+            contentAsJson(result) mustBe Json.toJson(EntityStatus(Some(false)))
+          }
+        }
+      }
+
+      "return Ok with None" when {
+        "settlors are not complete for migration" in {
+
+          when(mockRequiredDetailsUtil.areBeneficiariesCompleteForMigration(any())).thenReturn(JsSuccess(None))
+
+          val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+
+          when(transformationService.getTransformedData(any[String], any[String])(any()))
+            .thenReturn(Future.successful(processedResponse))
+
+          val result = getTrustController.areBeneficiariesCompleteForMigration(utr)(FakeRequest())
+
+          whenReady(result) { _ =>
+            verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+            status(result) mustBe OK
+            contentType(result) mustBe Some(JSON)
+            contentAsJson(result) mustBe Json.toJson(EntityStatus(None))
           }
         }
       }
@@ -1699,10 +1722,10 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
     ".areSettlorsCompleteForMigration" should {
 
-      "return Ok with true" when {
+      "return Ok with Some(true)" when {
         "settlors are complete for migration" in {
 
-          when(mockRequiredDetailsUtil.areSettlorsCompleteForMigration(any())).thenReturn(JsSuccess(true))
+          when(mockRequiredDetailsUtil.areSettlorsCompleteForMigration(any())).thenReturn(JsSuccess(Some(true)))
 
           val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
@@ -1716,15 +1739,15 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
             verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
             status(result) mustBe OK
             contentType(result) mustBe Some(JSON)
-            contentAsJson(result) mustBe Json.toJson(true)
+            contentAsJson(result) mustBe Json.toJson(EntityStatus(Some(true)))
           }
         }
       }
 
-      "return Ok with false" when {
+      "return Ok with Some(false)" when {
         "settlors are not complete for migration" in {
 
-          when(mockRequiredDetailsUtil.areSettlorsCompleteForMigration(any())).thenReturn(JsSuccess(false))
+          when(mockRequiredDetailsUtil.areSettlorsCompleteForMigration(any())).thenReturn(JsSuccess(Some(false)))
 
           val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
@@ -1738,7 +1761,29 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
             verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
             status(result) mustBe OK
             contentType(result) mustBe Some(JSON)
-            contentAsJson(result) mustBe Json.toJson(false)
+            contentAsJson(result) mustBe Json.toJson(EntityStatus(Some(false)))
+          }
+        }
+      }
+
+      "return Ok with None" when {
+        "settlors are not complete for migration" in {
+
+          when(mockRequiredDetailsUtil.areSettlorsCompleteForMigration(any())).thenReturn(JsSuccess(None))
+
+          val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+
+          when(transformationService.getTransformedData(any[String], any[String])(any()))
+            .thenReturn(Future.successful(processedResponse))
+
+          val result = getTrustController.areSettlorsCompleteForMigration(utr)(FakeRequest())
+
+          whenReady(result) { _ =>
+            verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+            status(result) mustBe OK
+            contentType(result) mustBe Some(JSON)
+            contentAsJson(result) mustBe Json.toJson(EntityStatus(None))
           }
         }
       }

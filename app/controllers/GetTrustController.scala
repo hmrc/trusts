@@ -17,8 +17,7 @@
 package controllers
 
 import controllers.actions.{IdentifierAction, ValidateIdentifierActionProvider}
-
-import javax.inject.Inject
+import models.EntityStatus
 import models.auditing.TrustAuditing
 import models.get_trust.GetTrustResponse.CLOSED_REQUEST_STATUS
 import models.get_trust.{BadRequestResponse, ResourceNotFoundResponse, _}
@@ -31,6 +30,7 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.Constants._
 import utils.RequiredEntityDetailsForMigration
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -152,11 +152,11 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   def areSettlorsCompleteForMigration(identifier: String): Action[AnyContent] =
     areEntitiesCompleteForMigration(identifier)(requiredDetailsUtil.areSettlorsCompleteForMigration)
 
-  private def areEntitiesCompleteForMigration(identifier: String)(f: JsValue => JsResult[Boolean]): Action[AnyContent] = {
+  private def areEntitiesCompleteForMigration(identifier: String)(f: JsValue => JsResult[Option[Boolean]]): Action[AnyContent] = {
     doGet(identifier, applyTransformations = true) {
       case processed: TrustProcessedResponse =>
         f(processed.getTrust) match {
-          case JsSuccess(value, _) => Ok(JsBoolean(value))
+          case JsSuccess(value, _) => Ok(Json.toJson(EntityStatus(value)))
           case JsError(errors) =>
             logger.error(s"[Identifier: $identifier] Failed to check entities: $errors")
             InternalServerError
