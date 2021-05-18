@@ -1,6 +1,8 @@
 
 GET         /:identifier/transformed                       controllers.GetTrustController.getBeneficiaries(identifier: String)
 
+GET         /:identifier/complete-for-migration            controllers.GetTrustController.areBeneficiariesCompleteForMigration(identifier: String)
+
 POST        /add-unidentified/:identifier                  controllers.transformations.beneficiaries.AddBeneficiaryController.addUnidentified(identifier: String)
 POST        /amend-unidentified/:identifier/:index         controllers.transformations.beneficiaries.AmendBeneficiaryController.amendUnidentified(identifier: String, index: Int)
 

@@ -120,5 +120,15 @@ object Constants {
   val REFERENCE = "reference"
   val DATA = "data"
 
-  val TRUST_NAME = CORRESPONDENCE \ "name"
+  val TRUST_NAME: JsPath = CORRESPONDENCE \ "name"
+
+  val VULNERABLE_BENEFICIARY = "vulnerableBeneficiary"
+  val HAS_DISCRETION = "beneficiaryDiscretion"
+  val SHARE_OF_INCOME = "beneficiaryShareOfIncome"
+  val ROLE_IN_COMPANY = "beneficiaryType"
+
+  val COMPANY_TYPE = "companyType"
+  val COMPANY_TIME = "companyTime"
+
+  val EMPLOYMENT_RELATED_TRUST = "Employment Related"
 }

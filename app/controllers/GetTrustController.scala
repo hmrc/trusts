@@ -17,8 +17,7 @@
 package controllers
 
 import controllers.actions.{IdentifierAction, ValidateIdentifierActionProvider}
-
-import javax.inject.Inject
+import models.EntityStatus
 import models.auditing.TrustAuditing
 import models.get_trust.GetTrustResponse.CLOSED_REQUEST_STATUS
 import models.get_trust.{BadRequestResponse, ResourceNotFoundResponse, _}
@@ -29,7 +28,9 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import services.{AuditService, TransformationService, TrustsService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.Constants._
+import utils.RequiredEntityDetailsForMigration
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -38,6 +39,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
                                    trustsService: TrustsService,
                                    transformationService: TransformationService,
                                    validateIdentifier: ValidateIdentifierActionProvider,
+                                   requiredDetailsUtil: RequiredEntityDetailsForMigration,
                                    cc: ControllerComponents) extends BackendController(cc) with Logging {
 
   val errorAuditMessages: Map[GetTrustResponse, String] = Map(
@@ -87,7 +89,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
 
   def wasTrustRegisteredWithDeceasedSettlor(identifier: String): Action[AnyContent] =
-    isPickSuccessfulAtPath(identifier, ENTITIES \ DECEASED_SETTLOR)
+    isPickSuccessfulAtPath(identifier, ENTITIES \ DECEASED_SETTLOR, applyTransformations = false)
 
   def getTrustDetails(identifier: String, applyTransformations: Boolean): Action[AnyContent] =
     getItemAtPath(identifier, TRUST \ DETAILS, applyTransformations)
@@ -120,46 +122,57 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
 
   def getDeceasedSettlorDeathRecorded(identifier: String): Action[AnyContent] =
-    isPickSuccessfulAtPath(identifier, ENTITIES \ DECEASED_SETTLOR \ DATE_OF_DEATH)
-
-  private val protectorsPath = ENTITIES \ PROTECTORS
+    isPickSuccessfulAtPath(identifier, ENTITIES \ DECEASED_SETTLOR \ DATE_OF_DEATH, applyTransformations = false)
 
   def getProtectorsAlreadyExist(identifier: String): Action[AnyContent] =
     processEtmpData(identifier) {
       trustData =>
-        JsBoolean(!trustData.transform(protectorsPath.json.pick).asOpt.contains(
+        JsBoolean(!trustData.transform((ENTITIES \ PROTECTORS).json.pick).asOpt.contains(
           Json.obj(INDIVIDUAL_PROTECTOR -> JsArray(), BUSINESS_PROTECTOR -> JsArray()))
         )
     }
 
   def getProtectors(identifier: String): Action[AnyContent] =
-    getArrayAtPath(identifier, protectorsPath, PROTECTORS)
+    getArrayAtPath(identifier, ENTITIES \ PROTECTORS, PROTECTORS)
 
-  private val otherIndividualsPath = ENTITIES \ OTHER_INDIVIDUALS
-
-  def getOtherIndividualsAlreadyExist(identifier: String): Action[AnyContent] =
-    processEtmpData(identifier) {
-      trustData => JsBoolean(trustData.transform((otherIndividualsPath \ 0).json.pick).isSuccess)
-    }
+  def getOtherIndividualsAlreadyExist(identifier: String): Action[AnyContent] = {
+    isPickSuccessfulAtPath(identifier, ENTITIES \ OTHER_INDIVIDUALS \ 0)
+  }
 
   def getOtherIndividuals(identifier: String): Action[AnyContent] =
-    getArrayAtPath(identifier, otherIndividualsPath, OTHER_INDIVIDUALS)
+    getArrayAtPath(identifier, ENTITIES \ OTHER_INDIVIDUALS, OTHER_INDIVIDUALS)
 
   def getNonEeaCompaniesAlreadyExist(identifier: String): Action[AnyContent] = {
-    val path: JsPath = TRUST \ ASSETS \ NON_EEA_BUSINESS_ASSET
-    processEtmpData(identifier) {
-      trustData => JsBoolean(trustData.transform((path \ 0).json.pick).isSuccess)
+    isPickSuccessfulAtPath(identifier, TRUST \ ASSETS \ NON_EEA_BUSINESS_ASSET \ 0)
+  }
+
+  def areBeneficiariesCompleteForMigration(identifier: String): Action[AnyContent] =
+    areEntitiesCompleteForMigration(identifier)(requiredDetailsUtil.areBeneficiariesCompleteForMigration)
+
+  def areSettlorsCompleteForMigration(identifier: String): Action[AnyContent] =
+    areEntitiesCompleteForMigration(identifier)(requiredDetailsUtil.areSettlorsCompleteForMigration)
+
+  private def areEntitiesCompleteForMigration(identifier: String)(f: JsValue => JsResult[Option[Boolean]]): Action[AnyContent] = {
+    doGet(identifier, applyTransformations = true) {
+      case processed: TrustProcessedResponse =>
+        f(processed.getTrust) match {
+          case JsSuccess(value, _) => Ok(Json.toJson(EntityStatus(value)))
+          case JsError(errors) =>
+            logger.error(s"[Identifier: $identifier] Failed to check entities: $errors")
+            InternalServerError
+        }
+      case _ => Forbidden
     }
   }
 
   def isTrust5mld(identifier: String): Action[AnyContent] =
-    isPickSuccessfulAtPath(identifier, TRUST \ DETAILS \ EXPRESS)
+    isPickSuccessfulAtPath(identifier, TRUST \ DETAILS \ EXPRESS, applyTransformations = false)
 
   def getTrustName(identifier: String): Action[AnyContent] =
     getItemAtPath(identifier, TRUST_NAME)
 
-  private def isPickSuccessfulAtPath(identifier: String, path: JsPath): Action[AnyContent] = {
-    processEtmpData(identifier, applyTransformations = false) {
+  private def isPickSuccessfulAtPath(identifier: String, path: JsPath, applyTransformations: Boolean = true): Action[AnyContent] = {
+    processEtmpData(identifier, applyTransformations) {
       etmpData =>
         JsBoolean(etmpData.transform(path.json.pick).isSuccess)
     }

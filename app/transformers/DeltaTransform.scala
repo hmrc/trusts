@@ -191,7 +191,7 @@ object DeltaTransform {
 
 }
 
-case class ComposedDeltaTransform(deltaTransforms: Seq[DeltaTransform]) extends DeltaTransform {
+case class ComposedDeltaTransform(deltaTransforms: Seq[DeltaTransform] = Nil) extends DeltaTransform {
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     deltaTransforms.foldLeft[JsResult[JsValue]](JsSuccess(input))((cur, xform) => cur.flatMap(xform.applyTransform))
   }

@@ -23,7 +23,10 @@ import play.api.Logging
 import play.api.libs.json.{JsObject, JsResult, JsSuccess, JsValue, Json, __, _}
 import repositories.TransformationRepository
 import transformers._
+import transformers.beneficiaries.AmendBeneficiaryTransform
+import transformers.settlors.AmendSettlorTransform
 import uk.gov.hmrc.http.HeaderCarrier
+import utils.Constants.{BUSINESS_SETTLOR, INDIVIDUAL_BENEFICIARY}
 import utils.Session
 
 import javax.inject.Inject
@@ -138,5 +141,22 @@ class TransformationService @Inject()(repository: TransformationRepository,
 
   def removeAllTransformations(identifier: String, internalId: String): Future[Option[JsObject]] = {
     repository.resetCache(identifier, internalId)
+  }
+
+  def removeTrustTypeDependentMigrationTransforms(identifier: String, internalId: String): Future[Boolean] = {
+    for {
+      transforms <- repository.get(identifier, internalId)
+      updatedTransforms = transforms match {
+        case Some(value) => ComposedDeltaTransform(value.deltaTransforms.filter {
+          case AmendBeneficiaryTransform(_, _, _, _, INDIVIDUAL_BENEFICIARY) => false
+          case AmendSettlorTransform(_, _, _, _, BUSINESS_SETTLOR) => false
+          case _ => true
+        })
+        case None => ComposedDeltaTransform()
+      }
+      result <- repository.set(identifier, internalId, updatedTransforms)
+    } yield {
+      result
+    }
   }
 }
