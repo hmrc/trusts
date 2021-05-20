@@ -74,7 +74,7 @@ class VariationService @Inject()(
                 JsError.toJson(e)
               )
 
-              logging.error(s"Failed to transform trust info ${JsError.toJson(errors)}")
+              println(s"Failed to transform trust info ${JsError.toJson(errors)}")
               Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
           }
         case e@JsError(errors) =>
@@ -88,7 +88,7 @@ class VariationService @Inject()(
             JsError.toJson(e)
           )
 
-          logging.error(s"Failed to populate lead trustee address ${JsError.toJson(errors)}")
+          println(s"Failed to populate lead trustee address ${JsError.toJson(errors)}")
           Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
       }
     }
@@ -104,7 +104,7 @@ class VariationService @Inject()(
     trustsStoreService.is5mldEnabled() flatMap {
       is5mld =>
 
-        logger.debug(s"[Session ID: ${Session.id(hc)}] transformation to final submission, applying declaration transform to shape data into variations payload")
+        println(s"[Session ID: ${Session.id(hc)}] transformation to final submission, applying declaration transform to shape data into variations payload")
 
         declarationTransformer.transform(response, originalJson, declaration, localDateService.now, is5mld) match {
           case JsSuccess(value, _) =>
@@ -149,7 +149,7 @@ class VariationService @Inject()(
   }
 
   private def submitVariationAndCheckForMigration(identifier: String, value: JsValue, internalId: String)
-                                                 (implicit hc: HeaderCarrier, logging: LoggingContext): Future[VariationResponse] = {
+                                                 (implicit hc: HeaderCarrier): Future[VariationResponse] = {
 
     def migrateNonTaxableToTaxable(migrateToTaxable: Boolean, subscriptionId: String, identifier: String): Future[TaxEnrolmentSubscriberResponse] = {
       if (migrateToTaxable) {
@@ -171,7 +171,7 @@ class VariationService @Inject()(
   }
 
   private def submitVariation(identifier: String, value: JsValue, internalId: String, migrateToTaxable: Boolean)
-                             (implicit hc: HeaderCarrier, logging: LoggingContext): Future[VariationResponse] = {
+                             (implicit hc: HeaderCarrier): Future[VariationResponse] = {
 
     val payload = value.applyRules
 
