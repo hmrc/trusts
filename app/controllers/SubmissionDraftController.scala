@@ -43,6 +43,7 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
 
   def setSection(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
+      println("***")
       request.body.validate[RegistrationSubmissionDraftData] match {
         case JsSuccess(draftData, _) =>
           submissionRepository.getDraft(draftId, request.internalId).flatMap(
