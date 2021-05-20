@@ -149,7 +149,7 @@ class VariationService @Inject()(
   }
 
   private def submitVariationAndCheckForMigration(identifier: String, value: JsValue, internalId: String)
-                                                 (implicit hc: HeaderCarrier, logging: LoggingContext): Future[VariationResponse] = {
+                                                 (implicit hc: HeaderCarrier): Future[VariationResponse] = {
 
     def migrateNonTaxableToTaxable(migrateToTaxable: Boolean, subscriptionId: String, identifier: String): Future[TaxEnrolmentSubscriberResponse] = {
       if (migrateToTaxable) {
@@ -171,7 +171,7 @@ class VariationService @Inject()(
   }
 
   private def submitVariation(identifier: String, value: JsValue, internalId: String, migrateToTaxable: Boolean)
-                             (implicit hc: HeaderCarrier, logging: LoggingContext): Future[VariationResponse] = {
+                             (implicit hc: HeaderCarrier): Future[VariationResponse] = {
 
     val payload = value.applyRules
 
