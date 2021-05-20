@@ -74,7 +74,7 @@ class VariationService @Inject()(
                 JsError.toJson(e)
               )
 
-              println(s"Failed to transform trust info ${JsError.toJson(errors)}")
+              logging.error(s"Failed to transform trust info ${JsError.toJson(errors)}")
               Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
           }
         case e@JsError(errors) =>
@@ -88,7 +88,7 @@ class VariationService @Inject()(
             JsError.toJson(e)
           )
 
-          println(s"Failed to populate lead trustee address ${JsError.toJson(errors)}")
+          logging.error(s"Failed to populate lead trustee address ${JsError.toJson(errors)}")
           Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
       }
     }
@@ -104,7 +104,7 @@ class VariationService @Inject()(
     trustsStoreService.is5mldEnabled() flatMap {
       is5mld =>
 
-        println(s"[Session ID: ${Session.id(hc)}] transformation to final submission, applying declaration transform to shape data into variations payload")
+        logger.debug(s"[Session ID: ${Session.id(hc)}] transformation to final submission, applying declaration transform to shape data into variations payload")
 
         declarationTransformer.transform(response, originalJson, declaration, localDateService.now, is5mld) match {
           case JsSuccess(value, _) =>
