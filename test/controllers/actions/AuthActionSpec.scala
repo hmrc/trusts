@@ -17,6 +17,7 @@
 package controllers.actions
 
 import base.BaseSpec
+import org.scalatest.matchers.must.Matchers._
 import com.google.inject.Inject
 import play.api.mvc.{BodyParsers, Results}
 import play.api.test.Helpers._

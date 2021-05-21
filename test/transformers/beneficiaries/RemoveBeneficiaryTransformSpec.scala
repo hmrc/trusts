@@ -17,10 +17,11 @@
 package transformers.beneficiaries
 
 import models.variation.UnidentifiedType
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
 import repositories.TransformationRepository
@@ -32,7 +33,7 @@ import utils.JsonUtils
 import java.time.LocalDate
 import scala.concurrent.Future
 
-class RemoveBeneficiaryTransformSpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar {
+class RemoveBeneficiaryTransformSpec extends AnyFreeSpec with ScalaFutures with MockitoSugar {
 
   private def beneficiaryJson(value1 : String, endDate: Option[LocalDate] = None, withLineNo: Boolean = true) = {
     val a = Json.obj("field1" -> value1, "field2" -> "value20")

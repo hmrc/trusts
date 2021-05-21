@@ -18,13 +18,14 @@ package transformers.beneficiaries
 
 import models.variation._
 import models.{AddressType, NameType, PassportType}
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.{JsString, JsValue, Json}
 import utils.JsonUtils
 
 import java.time.LocalDate
 
-class AmendBeneficiaryTransformSpec extends FreeSpec with MustMatchers {
+class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
 
   "the amend beneficiary transformer" - {
 

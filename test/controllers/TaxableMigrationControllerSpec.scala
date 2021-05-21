@@ -19,8 +19,9 @@ package controllers
 import base.BaseSpec
 import controllers.actions.FakeIdentifierAction
 import models.taxable_migration.TaxableMigrationFlag
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.scalatest.matchers.must.Matchers._
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
 import play.api.libs.json.{JsBoolean, JsNull, Json}

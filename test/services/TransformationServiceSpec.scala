@@ -19,11 +19,12 @@ package services
 import models.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
 import models.variation.{AmendedLeadTrusteeIndType, IdentificationType}
 import models.{AddressType, NameType}
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.scalatest.matchers.must.Matchers._
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.time.{Millis, Span}
-import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.{JsResult, JsValue, Json}
 import repositories.TransformationRepositoryImpl
@@ -38,7 +39,7 @@ import utils.{JsonFixtures, JsonUtils}
 import java.time.LocalDate
 import scala.concurrent.Future
 
-class TransformationServiceSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers with JsonFixtures {
+class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with ScalaFutures with JsonFixtures {
 
   private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
 

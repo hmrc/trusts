@@ -19,10 +19,12 @@ package controllers.transformations.trustdetails
 import controllers.actions.FakeIdentifierAction
 import models.variation.{MigratingTrustDetails, NonMigratingTrustDetails}
 import models.{NonUKType, ResidentialStatusType, UkType}
-import org.mockito.Matchers.{any, eq => equalTo}
+import org.mockito.ArgumentMatchers.{any, eq => equalTo}
 import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{BeforeAndAfterEach, FreeSpec, MustMatchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsBoolean, JsString, Json}
@@ -37,10 +39,9 @@ import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
-class TrustDetailsTransformationControllerSpec extends FreeSpec
+class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
   with MockitoSugar
   with ScalaFutures
-  with MustMatchers
   with GuiceOneAppPerSuite
   with BeforeAndAfterEach {
 

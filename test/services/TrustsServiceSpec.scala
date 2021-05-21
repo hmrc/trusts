@@ -25,8 +25,9 @@ import models.get_trust._
 import models.registration.RegistrationTrnResponse
 import models.tax_enrolments.SubscriptionIdResponse
 import models.variation.VariationResponse
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.JsValue
 import repositories.CacheRepositoryImpl
 import utils.JsonUtils

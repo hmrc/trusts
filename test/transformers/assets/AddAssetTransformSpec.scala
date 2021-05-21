@@ -18,13 +18,14 @@ package transformers.assets
 
 import models.AddressType
 import models.variation.NonEEABusinessType
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
 import utils.JsonUtils
 
 import java.time.LocalDate
 
-class AddAssetTransformSpec extends FreeSpec with MustMatchers {
+class AddAssetTransformSpec extends AnyFreeSpec {
 
   val asset: NonEEABusinessType = NonEEABusinessType(
     Some("1"),

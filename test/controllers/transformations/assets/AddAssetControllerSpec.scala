@@ -19,10 +19,12 @@ package controllers.transformations.assets
 import controllers.actions.FakeIdentifierAction
 import models.AddressType
 import models.variation._
-import org.mockito.Matchers.{any, eq => equalTo}
+import org.mockito.ArgumentMatchers.{any, eq => equalTo}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{BeforeAndAfterEach, FreeSpec, MustMatchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsValue, Json}
@@ -37,8 +39,7 @@ import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
-class AddAssetControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers
- with GuiceOneAppPerSuite with BeforeAndAfterEach {
+class AddAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite with BeforeAndAfterEach {
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 

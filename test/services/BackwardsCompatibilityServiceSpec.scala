@@ -18,6 +18,7 @@ package services
 
 import base.BaseSpec
 import models.registration.RegistrationSubmissionDraft
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.JsValue
 import utils.JsonUtils
 

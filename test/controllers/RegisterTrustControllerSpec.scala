@@ -21,8 +21,9 @@ import controllers.actions.FakeIdentifierAction
 import models._
 import models.registration._
 import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSuccess}
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{when, _}
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers

@@ -18,13 +18,14 @@ package transformers.trustees
 
 import models.NameType
 import models.variation._
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
 import utils.JsonUtils
 
 import java.time.LocalDate
 
-class AmendTrusteeTransformSpec extends FreeSpec with MustMatchers  {
+class AmendTrusteeTransformSpec extends AnyFreeSpec {
 
   "the amend trustee transformer when" - {
 

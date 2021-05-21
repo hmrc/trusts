@@ -16,13 +16,14 @@
 
 package models
 
-import java.time.LocalDate
+import org.scalatest.wordspec.AnyWordSpec
 
-import org.scalatest.{MustMatchers, WordSpec}
+import java.time.LocalDate
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.{JsError, JsSuccess, Json}
 import transformers.remove.RemoveBeneficiary
 
-class RemoveBeneficiarySpecs extends WordSpec with MustMatchers {
+class RemoveBeneficiarySpecs extends AnyWordSpec {
   "Can round trip throuh Json" in {
     val OUT = RemoveBeneficiary(LocalDate.of(1478, 12, 31), 67, "unidentified")
 

@@ -17,14 +17,15 @@
 package transformers
 
 import java.time.LocalDate
-
 import models._
 import models.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
 import models.variation.DeclarationForApi
-import org.scalatest.{FreeSpec, MustMatchers, OptionValues}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.OptionValues
+import org.scalatest.matchers.must.Matchers._
 import utils.JsonUtils
 
-class DeclarationTransformerSpec extends FreeSpec with MustMatchers with OptionValues {
+class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
 
   private val submissionDate = LocalDate.of(2020, 1, 30)
 

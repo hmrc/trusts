@@ -18,6 +18,7 @@ package models.mapping.variations
 
 import base.BaseSpec
 import org.scalatest.enablers.Definition
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.{JsError, JsLookupResult, JsSuccess, Json}
 import models.variation.TrustVariation
 

@@ -17,11 +17,12 @@
 package transformers.mdtp
 
 import models.get_trust.{ResponseHeader, TrustProcessedResponse}
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.JsPath
 import utils.JsonUtils
 
-class MDTPTransformationSpec extends FreeSpec with MustMatchers {
+class MDTPTransformationSpec extends AnyFreeSpec {
 
   "transforming response to mdtp" - {
 

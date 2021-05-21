@@ -22,9 +22,10 @@ import controllers._
 import controllers.actions.FakeIdentifierAction
 import exceptions._
 import models.variation.VariationResponse
-import org.mockito.Matchers.{eq => Meq, _}
+import org.mockito.ArgumentMatchers.{eq => Meq, _}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.IntegrationPatience
+import org.scalatest.matchers.must.Matchers._
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.BodyParsers

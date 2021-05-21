@@ -20,7 +20,7 @@ import base.BaseSpec
 import play.api.libs.json.{JsValue, Json}
 import models.Trust
 import utils.DataExamples
-
+import org.scalatest.matchers.must.Matchers._
 
 class RegistrationMapperSpec extends BaseSpec with DataExamples {
 

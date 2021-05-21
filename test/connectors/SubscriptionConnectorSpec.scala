@@ -20,6 +20,7 @@ import connector.SubscriptionConnector
 import exceptions.{BadRequestException, InternalServerErrorException, NotFoundException, ServiceNotAvailableException}
 import models.tax_enrolments.SubscriptionIdResponse
 import play.api.http.Status._
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
 
 class SubscriptionConnectorSpec extends ConnectorSpecHelper {

@@ -19,6 +19,7 @@ package models.mapping.registration
 import java.time.LocalDate
 
 import base.BaseSpec
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.{JsValue, Json}
 import utils.DataExamples
 

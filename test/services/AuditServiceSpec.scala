@@ -19,8 +19,9 @@ package services
 import base.BaseSpec
 import models.auditing.{OrchestratorAuditEvent, VariationAuditEvent}
 import models.variation.VariationResponse
-import org.mockito.Matchers.{any, eq => equalTo}
+import org.mockito.ArgumentMatchers.{any, eq => equalTo}
 import org.mockito.Mockito.verify
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 

@@ -26,6 +26,7 @@ import models.variation.{TrustVariation, VariationResponse}
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json, Reads}
 import utils.NonTaxable5MLDFixtures
+import org.scalatest.matchers.must.Matchers._
 
 import scala.concurrent.Future
 

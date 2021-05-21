@@ -19,6 +19,7 @@ package services
 import base.BaseSpec
 import org.mockito.Mockito.when
 import play.api.libs.json.Json
+import org.scalatest.matchers.must.Matchers._
 
 import java.time.LocalDate
 

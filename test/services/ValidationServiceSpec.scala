@@ -20,10 +20,10 @@ import base.BaseSpec
 import models.existing_trust.ExistingCheckRequest
 import models.{Assets, Registration}
 import org.scalatest.{Assertion, EitherValues}
+import org.scalatest.matchers.must.Matchers._
 import utils.{DataExamples, JsonUtils}
 
-class ValidationServiceSpec extends BaseSpec
-  with DataExamples with EitherValues {
+class ValidationServiceSpec extends BaseSpec with DataExamples with EitherValues {
 
   private lazy val validationService: ValidationService = new ValidationService()
   private lazy val trustValidator : Validator = validationService.get("/resources/schemas/4MLD/trusts-api-registration-schema-5.0.0.json")

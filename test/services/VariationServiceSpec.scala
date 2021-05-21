@@ -23,10 +23,12 @@ import models.variation.VariationResponse
 import models.{DeclarationName, NameType}
 import models.variation.DeclarationForApi
 import org.mockito.ArgumentCaptor
-import org.mockito.Matchers.{any, eq => equalTo}
+import org.mockito.ArgumentMatchers.{any, eq => equalTo}
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{BeforeAndAfterEach, MustMatchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.must.Matchers._
+import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -39,9 +41,9 @@ import play.api.inject.bind
 import java.time.LocalDate
 import scala.concurrent.Future
 
-class VariationServiceSpec extends WordSpec
+class VariationServiceSpec extends AnyWordSpec
   with JsonFixtures with MockitoSugar
-  with ScalaFutures with MustMatchers with BeforeAndAfterEach {
+  with ScalaFutures with BeforeAndAfterEach {
 
   private implicit val hc: HeaderCarrier = new HeaderCarrier
   private val formBundleNo = "001234567890"

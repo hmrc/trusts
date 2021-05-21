@@ -21,11 +21,13 @@ import controllers.actions.{FakeIdentifierAction, ValidateIdentifierActionProvid
 import models.EntityStatus
 import models.get_trust.GetTrustResponse.CLOSED_REQUEST_STATUS
 import models.get_trust._
-import org.mockito.Matchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.Mockito._
 import org.scalatest._
+import org.scalatest.matchers.must.Matchers._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Span}
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
@@ -40,8 +42,7 @@ import utils.{JsonFixtures, NonTaxable5MLDFixtures, RequiredEntityDetailsForMigr
 
 import scala.concurrent.Future
 
-class GetTrustControllerSpec extends WordSpec with MockitoSugar
-  with MustMatchers with BeforeAndAfter
+class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAndAfter
   with BeforeAndAfterEach with JsonFixtures
   with Inside with ScalaFutures with GuiceOneAppPerSuite {
 
@@ -49,27 +50,38 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
   private val trustsService: TrustsService = mock[TrustsService]
   private val mockedAuditService: AuditService = mock[AuditService]
-
   private val mockAuditConnector = mock[AuditConnector]
   private val mockConfig = mock[AppConfig]
-
   private val transformationService = mock[TransformationService]
 
   private val auditService = new AuditService(mockAuditConnector)
 
   private val validateIdentifierAction = app.injector.instanceOf[ValidateIdentifierActionProvider]
-
   lazy val bodyParsers: BodyParsers.Default = app.injector.instanceOf[BodyParsers.Default]
 
   private val mockRequiredDetailsUtil: RequiredEntityDetailsForMigration = mock[RequiredEntityDetailsForMigration]
 
   override def afterEach(): Unit =  {
-    reset(mockedAuditService, trustsService, mockAuditConnector, mockConfig, transformationService, mockRequiredDetailsUtil)
+    reset(
+      mockedAuditService,
+      trustsService,
+      mockAuditConnector,
+      mockConfig,
+      transformationService,
+      mockRequiredDetailsUtil
+    )
   }
 
   private def getTrustController = {
-    new GetTrustController(new FakeIdentifierAction(bodyParsers, Organisation),
-      mockedAuditService, trustsService, transformationService, validateIdentifierAction, mockRequiredDetailsUtil, Helpers.stubControllerComponents())
+    new GetTrustController(
+      new FakeIdentifierAction(bodyParsers, Organisation),
+      mockedAuditService,
+      trustsService,
+      transformationService,
+      validateIdentifierAction,
+      mockRequiredDetailsUtil,
+      Helpers.stubControllerComponents()
+    )
   }
 
   val invalidUTR = "1234567"
@@ -84,12 +96,11 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       "reset the cache and clear transforms before calling get" in {
 
         val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
+
         when(trustsService.resetCache(any(), any()))
           .thenReturn(Future.successful(()))
-
         when(transformationService.removeAllTransformations(any(), any()))
           .thenReturn(Future.successful(None))
-
         when(trustsService.getTrustInfo(any(), any()))
           .thenReturn(Future.successful(response))
 
@@ -107,12 +118,11 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
       "reset the cache and clear transforms before calling get" in {
 
         val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
+
         when(trustsService.resetCache(any(), any()))
           .thenReturn(Future.successful(()))
-
         when(transformationService.removeAllTransformations(any(), any()))
           .thenReturn(Future.successful(None))
-
         when(trustsService.getTrustInfo(any(), any()))
           .thenReturn(Future.successful(response))
 
@@ -154,7 +164,8 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
     "return 200 - Ok with parked content" in {
 
-      when(trustsService.getTrustInfo(any(), any())).thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
+      when(trustsService.getTrustInfo(any(), any()))
+        .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
       val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
 
@@ -179,7 +190,9 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
           verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+
           status(result) mustBe OK
+
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe getTransformedApiResponse
         }
@@ -295,7 +308,9 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
           verify(transformationService).getTransformedData(mockEq(urn), mockEq("id"))(any())
+
           status(result) mustBe OK
+
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe NonTaxable5MLDFixtures.Trusts.getTransformedNonTaxableTrustResponse
         }
@@ -417,14 +432,17 @@ class GetTrustControllerSpec extends WordSpec with MockitoSugar
 
         val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any())).thenReturn(Future.successful(processedResponse))
+        when(transformationService.getTransformedData(any[String], any[String])(any()))
+          .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/trustees/$utr/transformed/lead-trustee"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
           verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+
           status(result) mustBe OK
+
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe getTransformedLeadTrusteeResponse
         }

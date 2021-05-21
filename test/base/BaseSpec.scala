@@ -17,10 +17,10 @@
 package base
 
 import java.util.UUID
-
 import config.AppConfig
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{BeforeAndAfter, Inside, MustMatchers, WordSpec}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.{BeforeAndAfter, Inside}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -30,8 +30,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import utils._
 
-class BaseSpec extends WordSpec
-  with MustMatchers
+class BaseSpec extends AnyWordSpec
   with ScalaFutures
   with MockitoSugar
   with JsonFixtures
