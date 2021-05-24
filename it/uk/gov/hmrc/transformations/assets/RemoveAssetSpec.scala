@@ -19,9 +19,11 @@ package uk.gov.hmrc.transformations.assets
 import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.{Assertion, AsyncFreeSpec, MustMatchers}
+import org.scalatest.Assertion
+import org.scalatest.freespec.AsyncFreeSpec
+import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
@@ -35,7 +37,7 @@ import utils.{JsonUtils, NonTaxable5MLDFixtures}
 
 import scala.concurrent.Future
 
-class RemoveAssetSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
+class RemoveAssetSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTestBase {
 
   private val utr: String = "0123456789"
   private val urn: String = "0123456789ABCDE"

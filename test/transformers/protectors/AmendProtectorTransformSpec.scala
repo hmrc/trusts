@@ -16,15 +16,16 @@
 
 package transformers.protectors
 
-import models.variation.{IdentificationOrgType, IdentificationType, ProtectorIndividual, ProtectorCompany}
+import models.variation.{IdentificationOrgType, IdentificationType, ProtectorCompany, ProtectorIndividual}
 import models.{NameType, PassportType}
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.{JsValue, Json}
 import utils.JsonUtils
 
 import java.time.LocalDate
 
-class AmendProtectorTransformSpec extends FreeSpec with MustMatchers {
+class AmendProtectorTransformSpec extends AnyFreeSpec {
 
   "the amend protector transformer" - {
 

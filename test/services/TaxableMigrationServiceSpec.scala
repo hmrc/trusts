@@ -20,8 +20,9 @@ import base.BaseSpec
 import connector.{OrchestratorConnector, TaxEnrolmentConnector}
 import exceptions.{InternalServerErrorException, InvalidDataException}
 import models.tax_enrolments._
-import org.mockito.Matchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{verify, when}
+import org.scalatest.matchers.must.Matchers._
 import org.scalatest.RecoverMethods.recoverToSucceededIf
 import repositories.TaxableMigrationRepository
 import uk.gov.hmrc.http.HeaderCarrier

@@ -19,10 +19,11 @@ package controllers.transformations.otherindividuals
 import controllers.actions.FakeIdentifierAction
 import models.NameType
 import models.variation.NaturalPersonType
-import org.mockito.Matchers.{any, eq => equalTo}
+import org.mockito.ArgumentMatchers.{any, eq => equalTo}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json._
@@ -38,8 +39,7 @@ import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
-class AmendOtherIndividualControllerSpec extends FreeSpec with MockitoSugar with ScalaFutures with MustMatchers
- with GuiceOneAppPerSuite {
+class AmendOtherIndividualControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite {
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 

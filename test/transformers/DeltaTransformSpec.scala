@@ -18,7 +18,8 @@ package transformers
 
 import models.variation._
 import models.{AddressType, NameType}
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.{JsBoolean, JsString, Json}
 import transformers.beneficiaries._
 import transformers.otherindividuals._
@@ -29,7 +30,7 @@ import transformers.trustees._
 
 import java.time.LocalDate
 
-class DeltaTransformSpec extends FreeSpec with MustMatchers {
+class DeltaTransformSpec extends AnyFreeSpec {
 
   "DeltaTransform" - {
 

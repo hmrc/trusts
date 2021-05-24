@@ -18,6 +18,7 @@ package services
 
 import base.BaseSpec
 import exceptions._
+import org.scalatest.matchers.must.Matchers._
 import models.tax_enrolments.{SubscriptionIdResponse, TaxEnrolmentFailure, TaxEnrolmentSuccess}
 import org.mockito.Mockito.when
 

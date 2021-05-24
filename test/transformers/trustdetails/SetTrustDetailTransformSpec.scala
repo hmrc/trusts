@@ -16,11 +16,12 @@
 
 package transformers.trustdetails
 
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.JsBoolean
 import utils.JsonUtils
 
-class SetTrustDetailTransformSpec extends FreeSpec with MustMatchers {
+class SetTrustDetailTransformSpec extends AnyFreeSpec {
 
   "the set trust detail transformer" - {
 

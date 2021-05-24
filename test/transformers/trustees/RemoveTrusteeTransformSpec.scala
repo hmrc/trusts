@@ -16,13 +16,14 @@
 
 package transformers.trustees
 
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json._
 import utils.JsonUtils
 
 import java.time.LocalDate
 
-class RemoveTrusteeTransformSpec extends FreeSpec with MustMatchers  {
+class RemoveTrusteeTransformSpec extends AnyFreeSpec {
 
   private val originalTrusteeJson = Json.obj("field1" -> "value1", "field2" -> "value2")
 

@@ -19,15 +19,17 @@ package controllers
 import controllers.actions.FakeIdentifierAction
 import models._
 import models.registration.{RegistrationSubmission, RegistrationSubmissionDraft}
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatest._
+import org.scalatest.matchers.must.Matchers._
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsBoolean, JsNull, JsString, JsValue, Json}
 import play.api.mvc.BodyParsers
-import play.api.test.Helpers.{CONTENT_TYPE, _}
+import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import repositories.RegistrationSubmissionRepository
 import services.{BackwardsCompatibilityService, LocalDateTimeService}
@@ -37,8 +39,7 @@ import utils.{JsonFixtures, JsonUtils}
 import java.time.LocalDateTime
 import scala.concurrent.Future
 
-class SubmissionDraftControllerSpec extends WordSpec with MockitoSugar
-  with MustMatchers with JsonFixtures with Inside with ScalaFutures
+class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with JsonFixtures with Inside with ScalaFutures
   with GuiceOneAppPerSuite {
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]

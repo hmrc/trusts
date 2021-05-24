@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.repositories
 
-import org.scalatest.{AsyncFreeSpec, MustMatchers}
+import org.scalatest.freespec.AsyncFreeSpec
+import org.scalatest.matchers.must.Matchers._
 import repositories.TaxableMigrationRepository
 import uk.gov.hmrc.itbase.IntegrationTestBase
 
-class TaxableMigrationRepositorySpec extends AsyncFreeSpec with MustMatchers with IntegrationTestBase {
+class TaxableMigrationRepositorySpec extends AsyncFreeSpec with IntegrationTestBase {
 
   "TaxableMigrationRepository" - {
 

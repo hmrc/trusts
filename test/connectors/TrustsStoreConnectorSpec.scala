@@ -18,6 +18,7 @@ package connectors
 
 import connector.TrustsStoreConnector
 import org.scalatest.RecoverMethods
+import org.scalatest.matchers.must.Matchers._
 import play.api.http.Status
 import uk.gov.hmrc.http.UpstreamErrorResponse
 

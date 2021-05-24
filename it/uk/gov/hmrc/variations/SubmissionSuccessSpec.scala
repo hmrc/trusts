@@ -6,10 +6,11 @@ import models.get_trust.{GetTrustSuccessResponse, ResponseHeader}
 import models.variation.VariationResponse
 import models.{DeclarationName, FeatureResponse, NameType}
 import models.variation.DeclarationForApi
-import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.Mockito._
-import org.mockito.Matchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.scalatest.wordspec.AsyncWordSpec
+import org.scalatest.matchers.must.Matchers._
 import play.api.inject.bind
 import play.api.libs.json.Json
 import play.api.test.{FakeRequest, Helpers}
@@ -21,7 +22,7 @@ import utils.NonTaxable5MLDFixtures.getJsonFromFile
 
 import scala.concurrent.Future
 
-class SubmissionSuccessSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
+class SubmissionSuccessSpec extends AsyncWordSpec with MockitoSugar with IntegrationTestBase {
 
   val utr = "5174384721"
   val internalId = "internalId"

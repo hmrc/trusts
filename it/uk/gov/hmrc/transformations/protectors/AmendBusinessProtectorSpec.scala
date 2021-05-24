@@ -19,10 +19,12 @@ package uk.gov.hmrc.transformations.protectors
 import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{Assertion, AsyncFreeSpec, MustMatchers}
+import org.scalatest.freespec.AsyncFreeSpec
+import org.scalatest.Assertion
+import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
@@ -35,7 +37,7 @@ import utils.JsonUtils
 
 import scala.concurrent.Future
 
-class AmendBusinessProtectorSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase with ScalaFutures {
+class AmendBusinessProtectorSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTestBase with ScalaFutures {
 
   val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]

@@ -19,9 +19,11 @@ package uk.gov.hmrc.transformations.trustees
 import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.{Assertion, AsyncFreeSpec, MustMatchers}
+import org.scalatest.Assertion
+import org.scalatest.matchers.must.Matchers._
+import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
@@ -34,7 +36,7 @@ import utils.JsonUtils
 
 import scala.concurrent.Future
 
-class AddTrusteeSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
+class AddTrusteeSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTestBase {
 
   "an add trustee call" - {
 

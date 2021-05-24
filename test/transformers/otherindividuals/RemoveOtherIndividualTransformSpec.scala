@@ -17,7 +17,8 @@
 package transformers.otherindividuals
 
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
 import transformers.ComposedDeltaTransform
@@ -25,7 +26,7 @@ import utils.JsonUtils
 
 import java.time.LocalDate
 
-class RemoveOtherIndividualTransformSpec extends FreeSpec with MustMatchers with ScalaFutures with MockitoSugar {
+class RemoveOtherIndividualTransformSpec extends AnyFreeSpec with ScalaFutures with MockitoSugar {
 
   private def otherIndividualJson(endDate: Option[LocalDate] = None, withLineNo: Boolean = true) = {
     val a = Json.obj("field1" -> "value20")

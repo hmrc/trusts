@@ -18,12 +18,10 @@ package utils
 
 import base.BaseSpec
 import models.Registration
-
+import org.scalatest.matchers.must.Matchers._
 
 class AssetsDomainValidationSpec  extends BaseSpec with DataExamples {
   def SUT(registration: Registration) = new AssetsDomainValidation(registration)
-
-
 
   "valueFullIsNotMoreThanValueValuePrevious" should {
     "return validation error when value full is more than value previous in property and land asset " in {

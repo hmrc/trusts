@@ -25,7 +25,8 @@ import models.auditing.TrustAuditing
 import models.variation.VariationResponse
 import models.{DeclarationName, NameType}
 import models.variation.DeclarationForApi
-import org.mockito.Matchers.{eq => Meq, _}
+import org.mockito.ArgumentMatchers.{eq => Meq, _}
+import org.scalatest.matchers.must.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}

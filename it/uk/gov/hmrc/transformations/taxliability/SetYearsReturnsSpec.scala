@@ -20,9 +20,11 @@ import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import models.{YearReturnType, YearsReturns}
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.{Assertion, AsyncFreeSpec, MustMatchers}
+import org.scalatest.freespec.AsyncFreeSpec
+import org.scalatest.Assertion
+import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
@@ -35,7 +37,7 @@ import utils.JsonUtils
 
 import scala.concurrent.Future
 
-class SetYearsReturnsSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
+class SetYearsReturnsSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTestBase {
 
   "a set years return call" - {
 

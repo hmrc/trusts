@@ -18,10 +18,12 @@ package controllers.transformations.taxliability
 
 import controllers.actions.FakeIdentifierAction
 import models.YearsReturns
-import org.mockito.Matchers.{any, eq => equalTo}
+import org.mockito.ArgumentMatchers.{any, eq => equalTo}
 import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{BeforeAndAfterEach, FreeSpec, MustMatchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.Json
@@ -35,10 +37,9 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
-class TaxLiabilityTransformationControllerSpec extends FreeSpec
+class TaxLiabilityTransformationControllerSpec extends AnyFreeSpec
   with MockitoSugar
   with ScalaFutures
-  with MustMatchers
   with GuiceOneAppPerSuite
   with BeforeAndAfterEach {
 

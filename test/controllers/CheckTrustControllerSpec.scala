@@ -17,8 +17,9 @@
 package controllers
 
 import base.BaseSpec
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
+import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.Json
 import play.api.mvc.BodyParsers

@@ -19,8 +19,9 @@ package services
 import base.BaseSpec
 import connector.TrustsStoreConnector
 import models.FeatureResponse
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
+import org.scalatest.matchers.must.Matchers._
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future

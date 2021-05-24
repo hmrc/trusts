@@ -17,14 +17,15 @@
 package transformers.settlors
 
 import models.NameType
-import models.variation.{AmendDeceasedSettlor, SettlorIndividual, SettlorCompany}
-import org.scalatest.{FreeSpec, MustMatchers}
+import models.variation.{AmendDeceasedSettlor, SettlorCompany, SettlorIndividual}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.{JsValue, Json}
 import utils.JsonUtils
 
 import java.time.LocalDate
 
-class AmendSettlorTransformSpec extends FreeSpec with MustMatchers {
+class AmendSettlorTransformSpec extends AnyFreeSpec {
 
   "the amend settlor transformer" - {
 

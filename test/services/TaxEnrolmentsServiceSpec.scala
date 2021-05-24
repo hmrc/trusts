@@ -20,7 +20,8 @@ import base.BaseSpec
 import connector.TaxEnrolmentConnector
 import exceptions.{BadRequestException, InternalServerErrorException}
 import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentSuccess}
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
+import org.scalatest.matchers.must.Matchers._
 import org.mockito.Mockito.{times, verify, when, _}
 import uk.gov.hmrc.http.HeaderCarrier
 

@@ -18,6 +18,7 @@ package utils
 
 import base.BaseSpec
 import org.scalatest.Assertion
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json._
 import utils.Constants._
 import utils.JsonOps.{prunePathAndPutNewValue, putNewValue}
