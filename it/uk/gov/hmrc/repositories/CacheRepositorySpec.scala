@@ -16,12 +16,13 @@
 
 package uk.gov.hmrc.repositories
 
-import org.scalatest.{AsyncFreeSpec, MustMatchers}
+import org.scalatest.freespec.AsyncFreeSpec
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
 import uk.gov.hmrc.itbase.IntegrationTestBase
 import repositories.CacheRepository
 
-class CacheRepositorySpec extends AsyncFreeSpec with MustMatchers with IntegrationTestBase {
+class CacheRepositorySpec extends AsyncFreeSpec with IntegrationTestBase {
 
   "a playback repository" - {
     "must be able to store and retrieve a payload"  in assertMongoTest(createApplication) { app =>

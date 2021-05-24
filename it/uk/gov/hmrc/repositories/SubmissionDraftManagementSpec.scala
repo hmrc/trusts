@@ -16,15 +16,16 @@
 
 package uk.gov.hmrc.repositories
 
-import org.scalatest.{AsyncFreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.itbase.IntegrationTestBase
 import models.registration.RegistrationSubmissionDraftData
+import org.scalatest.freespec.AsyncFreeSpec
+import org.scalatest.matchers.must.Matchers._
 
-class SubmissionDraftManagementSpec extends AsyncFreeSpec with MustMatchers with MockitoSugar with IntegrationTestBase {
+class SubmissionDraftManagementSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTestBase {
 
   private val draftData = Json.obj(
     "field1" -> "value1",

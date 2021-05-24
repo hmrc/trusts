@@ -18,7 +18,8 @@ package uk.gov.hmrc.repositories
 
 import models.NameType
 import models.variation.{AmendedLeadTrusteeIndType, IdentificationType, TrusteeIndividualType}
-import org.scalatest.{AsyncFreeSpec, MustMatchers}
+import org.scalatest.freespec.AsyncFreeSpec
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
 import repositories.TransformationRepository
 import transformers.ComposedDeltaTransform
@@ -27,7 +28,7 @@ import uk.gov.hmrc.itbase.IntegrationTestBase
 
 import java.time.LocalDate
 
-class TransformRepositorySpec extends AsyncFreeSpec with MustMatchers with IntegrationTestBase {
+class TransformRepositorySpec extends AsyncFreeSpec with IntegrationTestBase {
 
   "a transform repository" - {
 
