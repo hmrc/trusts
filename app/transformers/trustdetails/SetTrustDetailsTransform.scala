@@ -17,13 +17,13 @@
 package transformers.trustdetails
 
 import play.api.libs.json._
-import transformers.{DeltaTransform, JsonOperations}
+import transformers.SetValueTransform
 import utils.Constants._
 
 case class SetTrustDetailsTransform(value: JsValue,
-                                    migratingFromNonTaxableToTaxable: Boolean) extends DeltaTransform with JsonOperations {
+                                    migratingFromNonTaxableToTaxable: Boolean) extends SetValueTransform {
 
-  val path: JsPath = TRUST \ DETAILS
+  override val path: JsPath = TRUST \ DETAILS
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
 
