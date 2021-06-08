@@ -60,7 +60,8 @@ case class SharesType(numberOfShares: Option[String],
                       utr: Option[String],
                       shareClass: Option[String],
                       typeOfShare: Option[String],
-                      value: Option[Long]) extends Asset[SharesType] {
+                      value: Option[Long],
+                      isPortfolio: Option[Boolean] = None) extends Asset[SharesType] {
 
   override val writeToMaintain: Writes[SharesType] = SharesType.sharesTypeFormat
 }
