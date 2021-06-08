@@ -18,14 +18,12 @@ package controllers.transformations.trustees
 
 import controllers.actions.IdentifierAction
 import controllers.transformations.RemoveTransformationController
-import models.variation.TrusteeType
-import play.api.libs.json.{JsError, JsSuccess, JsValue}
+import play.api.libs.json.JsValue
 import play.api.mvc.{Action, ControllerComponents}
 import services.TransformationService
 import transformers.DeltaTransform
 import transformers.remove.{Remove, RemoveTrustee}
 import transformers.trustees.RemoveTrusteeTransform
-import utils.Constants._
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -38,15 +36,6 @@ class RemoveTrusteeController @Inject()(identify: IdentifierAction,
   def remove(identifier: String): Action[JsValue] = addNewTransform[RemoveTrustee](identifier)
 
   override def transform[T <: Remove](remove: T, entity: JsValue): DeltaTransform = {
-    val `type`: String = entity.validate[TrusteeType] match {
-      case JsSuccess(TrusteeType(Some(_), _), _) =>
-        INDIVIDUAL_TRUSTEE
-      case JsSuccess(TrusteeType(_, Some(_)), _) =>
-        BUSINESS_TRUSTEE
-      case JsError(errors) =>
-        logger.warn(s"Unable to validate json as TrusteeType - $errors")
-        UNKNOWN
-    }
-    RemoveTrusteeTransform(Some(remove.index), entity, remove.endDate, `type`)
+    RemoveTrusteeTransform(Some(remove.index), entity, remove.endDate, remove.`type`)
   }
 }

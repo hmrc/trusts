@@ -86,7 +86,6 @@ object Constants {
   val BUSINESS_LEAD_TRUSTEE = "leadTrusteeOrg"
   val INDIVIDUAL_TRUSTEE = "trusteeInd"
   val BUSINESS_TRUSTEE = "trusteeOrg"
-  val UNKNOWN = "unknown"
 
   val EXPRESS = "expressTrust"
   val UK_RESIDENT = "trustUKResident"

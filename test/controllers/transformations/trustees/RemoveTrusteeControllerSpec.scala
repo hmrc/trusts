@@ -34,6 +34,7 @@ import services.TransformationService
 import transformers.remove.RemoveTrustee
 import transformers.trustees.RemoveTrusteeTransform
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
+import utils.Constants.{BUSINESS_TRUSTEE, INDIVIDUAL_TRUSTEE}
 import utils.JsonUtils
 
 import java.time.LocalDate
@@ -49,11 +50,6 @@ class RemoveTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
   private val utr: String = "utr"
   private val index: Int = 0
   private val endDate: LocalDate = LocalDate.parse("2018-02-24")
-
-  private val removeTrustee: RemoveTrustee = RemoveTrustee(
-    endDate = endDate,
-    index = index
-  )
 
   private val invalidBody: JsValue = Json.parse("{}")
 
@@ -101,7 +97,11 @@ class RemoveTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
-        val body = removeTrustee
+        val body = RemoveTrustee(
+          endDate = endDate,
+          index = index,
+          `type` = INDIVIDUAL_TRUSTEE
+        )
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(body))
@@ -151,7 +151,11 @@ class RemoveTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
-        val body = removeTrustee
+        val body = RemoveTrustee(
+          endDate = endDate,
+          index = index,
+          `type` = BUSINESS_TRUSTEE
+        )
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(body))

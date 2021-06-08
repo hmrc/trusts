@@ -21,7 +21,8 @@ import play.api.libs.json.{Format, Json}
 import java.time.LocalDate
 
 case class RemoveTrustee(endDate: LocalDate,
-                         index: Int) extends Remove
+                         index: Int,
+                         override val `type`: String) extends Remove
 
 object RemoveTrustee {
   implicit val formats : Format[RemoveTrustee] = Json.format[RemoveTrustee]
