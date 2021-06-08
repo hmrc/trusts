@@ -69,18 +69,21 @@ class RemoveTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
 
     "individual trustee" - {
 
-      val trustee = TrusteeIndividualType(
-        lineNo = None,
-        bpMatchStatus = None,
-        name = NameType("Joe", None, "Bloggs"),
-        dateOfBirth = None,
-        phoneNumber = None,
-        identification = None,
-        countryOfResidence = None,
-        legallyIncapable = None,
-        nationality = None,
-        entityStart = LocalDate.parse("2012-03-14"),
-        entityEnd = None
+      val trustee = TrusteeType(
+        trusteeInd = Some(TrusteeIndividualType(
+          lineNo = None,
+          bpMatchStatus = None,
+          name = NameType("Joe", None, "Bloggs"),
+          dateOfBirth = None,
+          phoneNumber = None,
+          identification = None,
+          countryOfResidence = None,
+          legallyIncapable = None,
+          nationality = None,
+          entityStart = LocalDate.parse("2012-03-14"),
+          entityEnd = None
+        )),
+        trusteeOrg = None
       )
 
       "add a new remove transform" in {
@@ -118,16 +121,19 @@ class RemoveTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
 
     "business trustee" - {
 
-      val trustee = TrusteeOrgType(
-        lineNo = None,
-        bpMatchStatus = None,
-        name = "Name",
-        phoneNumber = None,
-        email = None,
-        identification = None,
-        countryOfResidence = None,
-        entityStart = LocalDate.parse("2012-03-14"),
-        entityEnd = None
+      val trustee = TrusteeType(
+        trusteeInd = None,
+        trusteeOrg = Some(TrusteeOrgType(
+          lineNo = None,
+          bpMatchStatus = None,
+          name = "Name",
+          phoneNumber = None,
+          email = None,
+          identification = None,
+          countryOfResidence = None,
+          entityStart = LocalDate.parse("2012-03-14"),
+          entityEnd = None
+        ))
       )
 
       "add a new remove transform" in {
