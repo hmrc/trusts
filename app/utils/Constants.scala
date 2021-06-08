@@ -131,4 +131,6 @@ object Constants {
   val COMPANY_TIME = "companyTime"
 
   val EMPLOYMENT_RELATED_TRUST = "Employment Related"
+
+  val IS_PORTFOLIO = "isPortfolio"
 }

@@ -138,5 +138,16 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
       val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = true)
       result.asOpt.value mustBe afterJson
     }
+
+    "transform json successfully to remove isPortfolio from the share assets" in {
+      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-with-share-assets.json")
+      val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-with-share-assets.json")
+      val transformer = new DeclarationTransformer
+
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
+      result.asOpt.value \\ "shares" mustBe afterJson \\ "shares"
+      result.asOpt.value mustBe afterJson
+    }
   }
 }

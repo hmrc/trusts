@@ -20,10 +20,11 @@ import models._
 import models.get_trust.TrustProcessedResponse
 import play.api.libs.json.Reads._
 import play.api.libs.json._
-import utils.JsonOps.{doNothing, putNewValue}
+import utils.JsonOps.{doNothing, prunePathAndPutNewValue, putNewValue}
 import java.time.LocalDate
 
 import models.variation.DeclarationForApi
+import utils.Constants.{ASSETS, IS_PORTFOLIO, SHARES_ASSET}
 
 class DeclarationTransformer {
 
@@ -49,7 +50,8 @@ class DeclarationTransformer {
         addDeclaration(declarationForApi, responseJson) andThen
         addAgentIfDefined(declarationForApi.agentDetails) andThen
         addEndDateIfDefined(declarationForApi.endDate) andThen
-        addSubmissionDateIf5mld(submissionDate, is5mld)
+        addSubmissionDateIf5mld(submissionDate, is5mld) andThen
+        removeAdditionalShareAssetField(responseJson)
     )
   }
 
@@ -61,6 +63,7 @@ class DeclarationTransformer {
   private val pathToLeadTrusteeCountry = pathToLeadTrusteeAddress \ 'country
   private val pathToCorrespondenceAddress = __ \ 'correspondence \ 'address
   private val pathToCorrespondencePhoneNumber = __ \ 'correspondence \ 'phoneNumber
+  private val pathToShareAssets: JsPath = __ \ 'details \ 'trust \ ASSETS \ SHARES_ASSET
   private val pickLeadTrustee = pathToLeadTrustees.json.pick
 
   private def trusteeField(json: JsValue): String = determineTrusteeField(pathToLeadTrustees, json)
@@ -141,6 +144,15 @@ class DeclarationTransformer {
       case _ =>
         doNothing()
     }
+  }
+
+  private def removeAdditionalShareAssetField(json: JsValue): Reads[JsObject] = {
+    val updatedArray: JsArray = json.transform(pathToShareAssets.json.pick[JsArray]) match {
+      case JsSuccess(array, _) => JsArray(array.value.map(x => x.as[JsObject] - IS_PORTFOLIO))
+      case _ => JsArray()
+    }
+
+    prunePathAndPutNewValue(pathToShareAssets, updatedArray)
   }
 
   private def addDeclaration(declarationForApi: DeclarationForApi, responseJson: JsValue): Reads[JsObject] = {
