@@ -18,14 +18,12 @@ package controllers.transformations.trustees
 
 import controllers.actions.IdentifierAction
 import controllers.transformations.RemoveTransformationController
-import models.variation.TrusteeIndividualType
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, ControllerComponents}
 import services.TransformationService
 import transformers.DeltaTransform
 import transformers.remove.{Remove, RemoveTrustee}
 import transformers.trustees.RemoveTrusteeTransform
-import utils.Constants._
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -38,11 +36,6 @@ class RemoveTrusteeController @Inject()(identify: IdentifierAction,
   def remove(identifier: String): Action[JsValue] = addNewTransform[RemoveTrustee](identifier)
 
   override def transform[T <: Remove](remove: T, entity: JsValue): DeltaTransform = {
-    val `type`: String = if (entity.validate[TrusteeIndividualType].isSuccess) {
-      INDIVIDUAL_TRUSTEE
-    } else {
-      BUSINESS_TRUSTEE
-    }
-    RemoveTrusteeTransform(Some(remove.index), entity, remove.endDate, `type`)
+    RemoveTrusteeTransform(Some(remove.index), entity, remove.endDate, remove.`type`)
   }
 }

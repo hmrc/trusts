@@ -34,6 +34,7 @@ import services.TransformationService
 import transformers.remove.RemoveTrustee
 import transformers.trustees.RemoveTrusteeTransform
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
+import utils.Constants.{BUSINESS_TRUSTEE, INDIVIDUAL_TRUSTEE}
 import utils.JsonUtils
 
 import java.time.LocalDate
@@ -50,11 +51,6 @@ class RemoveTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
   private val index: Int = 0
   private val endDate: LocalDate = LocalDate.parse("2018-02-24")
 
-  private val removeTrustee: RemoveTrustee = RemoveTrustee(
-    endDate = endDate,
-    index = index
-  )
-
   private val invalidBody: JsValue = Json.parse("{}")
 
   private def buildInputJson(trusteeData: Seq[JsValue]): JsObject = {
@@ -69,18 +65,21 @@ class RemoveTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
 
     "individual trustee" - {
 
-      val trustee = TrusteeIndividualType(
-        lineNo = None,
-        bpMatchStatus = None,
-        name = NameType("Joe", None, "Bloggs"),
-        dateOfBirth = None,
-        phoneNumber = None,
-        identification = None,
-        countryOfResidence = None,
-        legallyIncapable = None,
-        nationality = None,
-        entityStart = LocalDate.parse("2012-03-14"),
-        entityEnd = None
+      val trustee = TrusteeType(
+        trusteeInd = Some(TrusteeIndividualType(
+          lineNo = None,
+          bpMatchStatus = None,
+          name = NameType("Joe", None, "Bloggs"),
+          dateOfBirth = None,
+          phoneNumber = None,
+          identification = None,
+          countryOfResidence = None,
+          legallyIncapable = None,
+          nationality = None,
+          entityStart = LocalDate.parse("2012-03-14"),
+          entityEnd = None
+        )),
+        trusteeOrg = None
       )
 
       "add a new remove transform" in {
@@ -98,7 +97,11 @@ class RemoveTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
-        val body = removeTrustee
+        val body = RemoveTrustee(
+          endDate = endDate,
+          index = index,
+          `type` = INDIVIDUAL_TRUSTEE
+        )
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(body))
@@ -118,16 +121,19 @@ class RemoveTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
 
     "business trustee" - {
 
-      val trustee = TrusteeOrgType(
-        lineNo = None,
-        bpMatchStatus = None,
-        name = "Name",
-        phoneNumber = None,
-        email = None,
-        identification = None,
-        countryOfResidence = None,
-        entityStart = LocalDate.parse("2012-03-14"),
-        entityEnd = None
+      val trustee = TrusteeType(
+        trusteeInd = None,
+        trusteeOrg = Some(TrusteeOrgType(
+          lineNo = None,
+          bpMatchStatus = None,
+          name = "Name",
+          phoneNumber = None,
+          email = None,
+          identification = None,
+          countryOfResidence = None,
+          entityStart = LocalDate.parse("2012-03-14"),
+          entityEnd = None
+        ))
       )
 
       "add a new remove transform" in {
@@ -145,7 +151,11 @@ class RemoveTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
         when(mockTransformationService.addNewTransform(any(), any(), any()))
           .thenReturn(Future.successful(true))
 
-        val body = removeTrustee
+        val body = RemoveTrustee(
+          endDate = endDate,
+          index = index,
+          `type` = BUSINESS_TRUSTEE
+        )
 
         val request = FakeRequest(POST, "path")
           .withBody(Json.toJson(body))

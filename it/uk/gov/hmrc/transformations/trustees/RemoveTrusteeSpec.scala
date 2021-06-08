@@ -66,8 +66,9 @@ class RemoveTrusteeSpec extends AsyncFreeSpec with MockitoSugar with Integration
       val removeAtIndex = Json.parse(
         """
           |{
-          |	"index": 0,
-          |	"endDate": "2010-10-10"
+          |	 "index": 0,
+          |	 "endDate": "2010-10-10",
+          |  "type": "trusteeInd"
           |}
           |""".stripMargin)
 
@@ -88,17 +89,17 @@ class RemoveTrusteeSpec extends AsyncFreeSpec with MockitoSugar with Integration
       trustees mustBe Json.parse(
         """
           |[
-          |            {
-          |              "trusteeOrg": {
-          |                "name": "Trustee Org 2",
-          |                "phoneNumber": "0121546546",
-          |                "identification": {
-          |                  "utr": "5465416546"
-          |                },
-          |                "entityStart": "1998-02-12",
-          |                "provisional": true
-          |              }
-          |            }
+          |  {
+          |    "trusteeOrg": {
+          |      "name": "Trustee Org 2",
+          |      "phoneNumber": "0121546546",
+          |      "identification": {
+          |        "utr": "5465416546"
+          |      },
+          |      "entityStart": "1998-02-12",
+          |      "provisional": true
+          |    }
+          |  }
           |]
           |""".stripMargin)
 
