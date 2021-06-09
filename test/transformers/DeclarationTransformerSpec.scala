@@ -140,7 +140,7 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
     }
 
     "share assets" - {
-      "transform json successfully to remove isPortfolio from the share assets" in {
+      "transform json successfully to remove the extra fields from the share assets" in {
         val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-received-with-share-assets.json")
         val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
         val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-with-share-assets.json")

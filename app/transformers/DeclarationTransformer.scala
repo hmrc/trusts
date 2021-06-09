@@ -24,7 +24,7 @@ import utils.JsonOps.{doNothing, prunePathAndPutNewValue, putNewValue}
 import java.time.LocalDate
 
 import models.variation.DeclarationForApi
-import utils.Constants.{ASSETS, IS_PORTFOLIO, SHARES_ASSET}
+import utils.Constants.{ASSETS, IS_PORTFOLIO, SHARES_ASSET, SHARE_CLASS_DISPLAY}
 
 class DeclarationTransformer {
 
@@ -149,7 +149,7 @@ class DeclarationTransformer {
   private def removeAdditionalShareAssetField(json: JsValue): Reads[JsObject] = {
     json.transform(pathToShareAssets.json.pick[JsArray]) match {
       case JsSuccess(array, _) =>
-        val updatedArray: JsArray = JsArray(array.value.map(x => x.as[JsObject] - IS_PORTFOLIO))
+        val updatedArray: JsArray = JsArray(array.value.map(x => x.as[JsObject] - IS_PORTFOLIO - SHARE_CLASS_DISPLAY))
         prunePathAndPutNewValue(pathToShareAssets, updatedArray)
       case _ =>
         doNothing()
