@@ -90,8 +90,7 @@ object DeltaTransform {
   }
 
   def trustDetailsReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
-    readsForTransform[SetTrustDetailTransform](SetTrustDetailTransform.key) orElse
-      readsForTransform[SetTrustDetailsTransform](SetTrustDetailsTransform.key)
+    readsForTransform[SetTrustDetailTransform](SetTrustDetailTransform.key)
   }
 
   def assetReads: PartialFunction[JsObject, JsResult[DeltaTransform]] = {
@@ -163,8 +162,6 @@ object DeltaTransform {
   def trustDetailsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
     case transform: SetTrustDetailTransform =>
       Json.obj(SetTrustDetailTransform.key -> Json.toJson(transform)(SetTrustDetailTransform.format))
-    case transform: SetTrustDetailsTransform =>
-      Json.obj(SetTrustDetailsTransform.key -> Json.toJson(transform)(SetTrustDetailsTransform.format))
   }
 
   def taxLiabilityWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
