@@ -56,8 +56,8 @@ abstract class AddTransformationController @Inject()(identify: IdentifierAction,
               }
 
               if (addMultipleTransforms) {
-                Json.toJson(entityToAdd).as[JsObject].fields.foldLeft(Future.successful(true))((_, field) => {
-                  addTransform(field._2, field._1)
+                Json.toJson(entityToAdd).as[JsObject].fields.foldLeft(Future.successful(true))((x, field) => {
+                  x.flatMap(_ => addTransform(field._2, field._1))
                 })
               } else {
                 addTransform(entityToAdd, `type`)
