@@ -66,4 +66,37 @@ abstract class AddTransformationController @Inject()(identify: IdentifierAction,
     }
   }
 
+  def addNewTransforms[T](identifier: String)
+                         (implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = {
+    identify.async(parse.json) {
+      implicit request => {
+        request.body.validate[T] match {
+
+          case JsSuccess(entityToAdd, _) =>
+            val fields = Json.toJson(entityToAdd).as[JsObject].fields
+
+            for {
+              trust <- transformationService.getTransformedTrustJson(identifier, request.internalId)
+              isTaxable <- Future.fromTry(isTrustTaxable(trust))
+              migratingFromNonTaxableToTaxable <- taxableMigrationService.migratingFromNonTaxableToTaxable(identifier, request.internalId)
+              _ = fields.foreach { field =>
+                transformationService.addNewTransform(
+                  identifier = identifier,
+                  internalId = request.internalId,
+                  newTransform = transform(field._2, field._1, isTaxable, migratingFromNonTaxableToTaxable)
+                )
+              }
+            } yield {
+              Ok
+            }
+
+          case JsError(errors) =>
+            logger.warn(s"[addNewTransforms][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
+              s"Supplied json did not pass validation - $errors")
+            Future.successful(BadRequest)
+        }
+      }
+    }
+  }
+
 }

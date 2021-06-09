@@ -21,9 +21,9 @@ import models.variation.{MigratingTrustDetails, NonMigratingTrustDetails}
 import models.{NonUKType, ResidentialStatusType, UkType}
 import org.mockito.ArgumentMatchers.{any, eq => equalTo}
 import org.mockito.Mockito.{reset, verify, when}
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -32,8 +32,9 @@ import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
 import services.{TaxableMigrationService, TransformationService}
-import transformers.trustdetails.{SetTrustDetailTransform, SetTrustDetailsTransform}
+import transformers.trustdetails.SetTrustDetailTransform
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
+import utils.Constants._
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits
@@ -711,7 +712,44 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
           verify(mockTransformationService).addNewTransform(
             equalTo(utr),
             any(),
-            equalTo(SetTrustDetailsTransform(body, migratingFromNonTaxableToTaxable = true))
+            equalTo(SetTrustDetailTransform(JsString("GB"), ADMINISTRATION_COUNTRY))
+          )
+
+          verify(mockTransformationService).addNewTransform(
+            equalTo(utr),
+            any(),
+            equalTo(SetTrustDetailTransform(Json.parse(
+              """
+                |{
+                |  "uk": {
+                |    "scottishLaw": true
+                |  }
+                |}
+                |""".stripMargin), RESIDENTIAL_STATUS))
+          )
+
+          verify(mockTransformationService).addNewTransform(
+            equalTo(utr),
+            any(),
+            equalTo(SetTrustDetailTransform(JsBoolean(true), UK_PROPERTY))
+          )
+
+          verify(mockTransformationService).addNewTransform(
+            equalTo(utr),
+            any(),
+            equalTo(SetTrustDetailTransform(JsBoolean(true), RECORDED))
+          )
+
+          verify(mockTransformationService).addNewTransform(
+            equalTo(utr),
+            any(),
+            equalTo(SetTrustDetailTransform(JsBoolean(true), UK_RESIDENT))
+          )
+
+          verify(mockTransformationService).addNewTransform(
+            equalTo(utr),
+            any(),
+            equalTo(SetTrustDetailTransform(JsString("Will Trust or Intestacy Trust"), TYPE_OF_TRUST))
           )
         }
 
@@ -760,7 +798,19 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
           verify(mockTransformationService).addNewTransform(
             equalTo(utr),
             any(),
-            equalTo(SetTrustDetailsTransform(body, migratingFromNonTaxableToTaxable = false))
+            equalTo(SetTrustDetailTransform(JsBoolean(true), UK_PROPERTY))
+          )
+
+          verify(mockTransformationService).addNewTransform(
+            equalTo(utr),
+            any(),
+            equalTo(SetTrustDetailTransform(JsBoolean(true), RECORDED))
+          )
+
+          verify(mockTransformationService).addNewTransform(
+            equalTo(utr),
+            any(),
+            equalTo(SetTrustDetailTransform(JsBoolean(true), UK_RESIDENT))
           )
         }
 
