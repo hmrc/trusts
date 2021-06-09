@@ -301,6 +301,9 @@ class DeltaTransformSpec extends AnyFreeSpec {
 
       val setUKRelationTransform = SetTrustDetailTransform(JsBoolean(true), "trustUKRelation")
 
+      val setMigratingTrustDetailsTransform = SetTrustDetailsTransform(Json.obj(), migratingFromNonTaxableToTaxable = true)
+      val setNonMigratingTrustDetailsTransform = SetTrustDetailsTransform(Json.obj(), migratingFromNonTaxableToTaxable = false)
+
       val json = Json.parse(
         s"""{
            |        "deltaTransforms" : [
@@ -429,6 +432,12 @@ class DeltaTransformSpec extends AnyFreeSpec {
            |            },
            |            {
            |               "SetTrustDetailTransform": ${Json.toJson(setUKRelationTransform)}
+           |            },
+           |            {
+           |               "SetTrustDetailsTransform": ${Json.toJson(setMigratingTrustDetailsTransform)}
+           |            },
+           |            {
+           |               "SetTrustDetailsTransform": ${Json.toJson(setNonMigratingTrustDetailsTransform)}
            |            }
            |        ]
            |    }
@@ -476,7 +485,9 @@ class DeltaTransformSpec extends AnyFreeSpec {
         setRecordedTransform,
         setResidentTransform,
         setTaxableTransform,
-        setUKRelationTransform
+        setUKRelationTransform,
+        setMigratingTrustDetailsTransform,
+        setNonMigratingTrustDetailsTransform
       ))
 
       Json.toJson(data) mustEqual json
