@@ -37,22 +37,38 @@ abstract class AddTransformationController @Inject()(identify: IdentifierAction,
   def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)
                   (implicit wts: Writes[T]): DeltaTransform
 
-  def addNewTransform[T](identifier: String, `type`: String = "")
+  def addNewTransform[T](identifier: String, `type`: String = "", addMultipleTransforms: Boolean = false)
                         (implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = {
     identify.async(parse.json) {
       implicit request => {
         request.body.validate[T] match {
 
           case JsSuccess(entityToAdd, _) =>
+
+            def addTransformOrTransforms(isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean): Future[Boolean] = {
+
+              def addTransform[A](value: A, `type`: String)(implicit wts: Writes[A]): Future[Boolean] = {
+                transformationService.addNewTransform(
+                  identifier = identifier,
+                  internalId = request.internalId,
+                  newTransform = transform(value, `type`, isTaxable, migratingFromNonTaxableToTaxable)
+                )
+              }
+
+              if (addMultipleTransforms) {
+                Json.toJson(entityToAdd).as[JsObject].fields.foldLeft(Future.successful(true))((_, field) => {
+                  addTransform(field._2, field._1)
+                })
+              } else {
+                addTransform(entityToAdd, `type`)
+              }
+            }
+
             for {
               trust <- transformationService.getTransformedTrustJson(identifier, request.internalId)
               isTaxable <- Future.fromTry(isTrustTaxable(trust))
               migratingFromNonTaxableToTaxable <- taxableMigrationService.migratingFromNonTaxableToTaxable(identifier, request.internalId)
-              _ <- transformationService.addNewTransform(
-                identifier = identifier,
-                internalId = request.internalId,
-                newTransform = transform(entityToAdd, `type`, isTaxable, migratingFromNonTaxableToTaxable)
-              )
+              _ <- addTransformOrTransforms(isTaxable, migratingFromNonTaxableToTaxable)
             } yield {
               Ok
             }
