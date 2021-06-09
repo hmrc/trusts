@@ -23,7 +23,25 @@ import utils.Constants._
 case class SetTrustDetailTransform(value: JsValue,
                                    `type`: String) extends SetValueTransform {
 
-  override val path: JsPath = TRUST \ DETAILS \ `type`
+  private val trustDetailsPath: JsPath = TRUST \ DETAILS
+
+  override val path: JsPath = trustDetailsPath \ `type`
+
+  override def applyTransform(input: JsValue): JsResult[JsValue] = {
+
+    val mutuallyExclusiveFields = Seq(DEED_OF_VARIATION, INTER_VIVOS, EFRBS_START_DATE)
+
+    if (mutuallyExclusiveFields.contains(`type`)) {
+      for {
+        trustDetails <- input.transform(trustDetailsPath.json.pick)
+        updatedTrustDetails = removeJsValueFields(trustDetails, mutuallyExclusiveFields.filterNot(_ == `type`))
+        updatedInput <- pruneThenAddTo(input, trustDetailsPath, updatedTrustDetails)
+        result <- super.applyTransform(updatedInput)
+      } yield result
+    } else {
+      super.applyTransform(input)
+    }
+  }
 }
 
 object SetTrustDetailTransform {

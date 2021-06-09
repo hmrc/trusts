@@ -18,8 +18,10 @@ package transformers.trustdetails
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers._
-import play.api.libs.json.JsBoolean
+import play.api.libs.json.{JsBoolean, JsString, Json}
 import utils.JsonUtils
+
+import java.time.LocalDate
 
 class SetTrustDetailTransformSpec extends AnyFreeSpec {
 
@@ -181,6 +183,138 @@ class SetTrustDetailTransformSpec extends AnyFreeSpec {
             val result = transformer.applyTransform(beforeJson).get
             result mustBe afterJson
           }
+        }
+      }
+    }
+
+    "when deedOfVariation" - {
+
+      val deedOfVariation = "Previously there was only an absolute interest under the will"
+
+      "before declaration" - {
+        "set the field and remove interVivos and efrbsStartDate" in {
+
+          val beforeJson = Json.parse(
+            """
+              |{
+              |  "details": {
+              |    "trust": {
+              |      "details": {
+              |        "interVivos": false,
+              |        "efrbsStartDate": "2001-01-01"
+              |      }
+              |    }
+              |  }
+              |}
+              |""".stripMargin
+          )
+
+          val afterJson = Json.parse(
+            s"""
+              |{
+              |  "details": {
+              |    "trust": {
+              |      "details": {
+              |        "deedOfVariation": "$deedOfVariation"
+              |      }
+              |    }
+              |  }
+              |}
+              |""".stripMargin
+          )
+
+          val transformer = SetTrustDetailTransform(JsString(deedOfVariation), "deedOfVariation")
+
+          val result = transformer.applyTransform(beforeJson).get
+          result mustBe afterJson
+        }
+      }
+    }
+
+    "when interVivos" - {
+
+      val interVivos = false
+
+      "before declaration" - {
+        "set the field and remove deedOfVariation and efrbsStartDate" in {
+
+          val beforeJson = Json.parse(
+            """
+              |{
+              |  "details": {
+              |    "trust": {
+              |      "details": {
+              |        "deedOfVariation": "Previously there was only an absolute interest under the will",
+              |        "efrbsStartDate": "2001-01-01"
+              |      }
+              |    }
+              |  }
+              |}
+              |""".stripMargin
+          )
+
+          val afterJson = Json.parse(
+            s"""
+              |{
+              |  "details": {
+              |    "trust": {
+              |      "details": {
+              |        "interVivos": $interVivos
+              |      }
+              |    }
+              |  }
+              |}
+              |""".stripMargin
+          )
+
+          val transformer = SetTrustDetailTransform(JsBoolean(interVivos), "interVivos")
+
+          val result = transformer.applyTransform(beforeJson).get
+          result mustBe afterJson
+        }
+      }
+    }
+
+    "when efrbsStartDate" - {
+
+      val efrbsStartDate = "2001-01-01"
+
+      "before declaration" - {
+        "set the field and remove deedOfVariation and efrbsStartDate" in {
+
+          val beforeJson = Json.parse(
+            """
+              |{
+              |  "details": {
+              |    "trust": {
+              |      "details": {
+              |        "deedOfVariation": "Previously there was only an absolute interest under the will",
+              |        "interVivos": false
+              |      }
+              |    }
+              |  }
+              |}
+              |""".stripMargin
+          )
+
+          val afterJson = Json.parse(
+            s"""
+               |{
+               |  "details": {
+               |    "trust": {
+               |      "details": {
+               |        "efrbsStartDate": "$efrbsStartDate"
+               |      }
+               |    }
+               |  }
+               |}
+               |""".stripMargin
+          )
+
+          val transformer = SetTrustDetailTransform(Json.toJson(LocalDate.parse(efrbsStartDate)), "efrbsStartDate")
+
+          val result = transformer.applyTransform(beforeJson).get
+          result mustBe afterJson
         }
       }
     }
