@@ -37,61 +37,44 @@ abstract class AddTransformationController @Inject()(identify: IdentifierAction,
   def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)
                   (implicit wts: Writes[T]): DeltaTransform
 
-  def addNewTransform[T](identifier: String, `type`: String = "")
+  def addNewTransform[T](identifier: String, `type`: String = "", addMultipleTransforms: Boolean = false)
                         (implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = {
     identify.async(parse.json) {
       implicit request => {
         request.body.validate[T] match {
 
           case JsSuccess(entityToAdd, _) =>
+
+            def addTransformOrTransforms(isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean): Future[Boolean] = {
+
+              def addTransform[A](value: A, `type`: String)(implicit wts: Writes[A]): Future[Boolean] = {
+                transformationService.addNewTransform(
+                  identifier = identifier,
+                  internalId = request.internalId,
+                  newTransform = transform(value, `type`, isTaxable, migratingFromNonTaxableToTaxable)
+                )
+              }
+
+              if (addMultipleTransforms) {
+                Json.toJson(entityToAdd).as[JsObject].fields.foldLeft(Future.successful(true))((_, field) => {
+                  addTransform(field._2, field._1)
+                })
+              } else {
+                addTransform(entityToAdd, `type`)
+              }
+            }
+
             for {
               trust <- transformationService.getTransformedTrustJson(identifier, request.internalId)
               isTaxable <- Future.fromTry(isTrustTaxable(trust))
               migratingFromNonTaxableToTaxable <- taxableMigrationService.migratingFromNonTaxableToTaxable(identifier, request.internalId)
-              _ <- transformationService.addNewTransform(
-                identifier = identifier,
-                internalId = request.internalId,
-                newTransform = transform(entityToAdd, `type`, isTaxable, migratingFromNonTaxableToTaxable)
-              )
+              _ <- addTransformOrTransforms(isTaxable, migratingFromNonTaxableToTaxable)
             } yield {
               Ok
             }
 
           case JsError(errors) =>
             logger.warn(s"[addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
-              s"Supplied json did not pass validation - $errors")
-            Future.successful(BadRequest)
-        }
-      }
-    }
-  }
-
-  def addNewTransforms[T](identifier: String)
-                         (implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = {
-    identify.async(parse.json) {
-      implicit request => {
-        request.body.validate[T] match {
-
-          case JsSuccess(entityToAdd, _) =>
-            val fields = Json.toJson(entityToAdd).as[JsObject].fields
-
-            for {
-              trust <- transformationService.getTransformedTrustJson(identifier, request.internalId)
-              isTaxable <- Future.fromTry(isTrustTaxable(trust))
-              migratingFromNonTaxableToTaxable <- taxableMigrationService.migratingFromNonTaxableToTaxable(identifier, request.internalId)
-              _ = fields.foreach { field =>
-                transformationService.addNewTransform(
-                  identifier = identifier,
-                  internalId = request.internalId,
-                  newTransform = transform(field._2, field._1, isTaxable, migratingFromNonTaxableToTaxable)
-                )
-              }
-            } yield {
-              Ok
-            }
-
-          case JsError(errors) =>
-            logger.warn(s"[addNewTransforms][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
               s"Supplied json did not pass validation - $errors")
             Future.successful(BadRequest)
         }

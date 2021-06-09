@@ -52,8 +52,8 @@ class TrustDetailsTransformationController @Inject()(identify: IdentifierAction,
   def setEfrbsStartDate(identifier: String): Action[JsValue] = addNewTransform[LocalDate](identifier, EFRBS_START_DATE)
   def setResidentialStatus(identifier: String): Action[JsValue] = addNewTransform[ResidentialStatusType](identifier, RESIDENTIAL_STATUS)
 
-  def setMigratingTrustDetails(identifier: String): Action[JsValue] = addNewTransforms[MigratingTrustDetails](identifier)
-  def setNonMigratingTrustDetails(identifier: String): Action[JsValue] = addNewTransforms[NonMigratingTrustDetails](identifier)
+  def setMigratingTrustDetails(identifier: String): Action[JsValue] = addNewTransform[MigratingTrustDetails](identifier, addMultipleTransforms = true)
+  def setNonMigratingTrustDetails(identifier: String): Action[JsValue] = addNewTransform[NonMigratingTrustDetails](identifier, addMultipleTransforms = true)
 
   override def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)
                            (implicit wts: Writes[T]): DeltaTransform = {
