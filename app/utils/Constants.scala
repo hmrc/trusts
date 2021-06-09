@@ -133,4 +133,5 @@ object Constants {
   val EMPLOYMENT_RELATED_TRUST = "Employment Related"
 
   val IS_PORTFOLIO = "isPortfolio"
+  val SHARE_CLASS_DISPLAY = "shareClassDisplay"
 }
