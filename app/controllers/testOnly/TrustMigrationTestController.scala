@@ -22,7 +22,7 @@ import play.api.Logging
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import services._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.{Session, ValidationUtil}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,7 +34,7 @@ class TrustMigrationTestController @Inject()(migrationService: TaxableMigrationS
 
   def migrateToTaxable(subscriptionId: String, urn: String): Action[AnyContent] = Action.async {
     implicit request =>
-      implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+      implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
       logger.info(s"[migrateToTaxable][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn]" +
         s" Tax-enrolment: migration subscription callback message was: ${request.body}")

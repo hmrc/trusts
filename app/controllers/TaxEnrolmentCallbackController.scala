@@ -22,7 +22,7 @@ import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import services.TaxableMigrationService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.Session
 
@@ -36,7 +36,7 @@ class TaxEnrolmentCallbackController @Inject()(migrationService: TaxableMigratio
 
   def taxableSubscriptionCallback(trn: String): Action[JsValue] = Action.async(parse.json) {
     implicit request =>
-      val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+      val hc : HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
       logger.info(s"[taxableSubscriptionCallback][Session ID: ${Session.id(hc)}][TRN: $trn]" +
         s" Tax-enrolment: taxable subscription callback message was: ${request.body}")
@@ -45,7 +45,7 @@ class TaxEnrolmentCallbackController @Inject()(migrationService: TaxableMigratio
 
   def nonTaxableSubscriptionCallback(trn: String): Action[JsValue] = Action.async(parse.json) {
     implicit request =>
-      val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+      val hc : HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
       logger.info(s"[nonTaxableSubscriptionCallback][Session ID: ${Session.id(hc)}][TRN: $trn]" +
         s" Tax-enrolment: non-taxable subscription callback message was: ${request.body}")
@@ -54,7 +54,7 @@ class TaxEnrolmentCallbackController @Inject()(migrationService: TaxableMigratio
 
   def migrationSubscriptionCallback(subscriptionId: String, urn: String): Action[AnyContent] = Action.async {
     implicit request =>
-      implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+      implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
       logger.info(s"[migrationSubscriptionCallback][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn]" +
         s" Tax-enrolment: migration subscription callback triggered")
