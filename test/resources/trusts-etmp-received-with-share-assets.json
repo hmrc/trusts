@@ -310,16 +310,18 @@
               "shareClass": "Ordinary shares",
               "typeOfShare": "Quoted",
               "value": 4584545,
-              "isPortfolio": true
+              "isPortfolio": true,
+              "shareClassDisplay": "ordinary"
             },
             {
               "numberOfShares": "300",
               "orgName": "Mock Third Org LTD",
               "utr": "5465416549",
-              "shareClass": "Ordinary shares",
+              "shareClass": "Other",
               "typeOfShare": "Quoted",
               "value": 4584545,
-              "isPortfolio": false
+              "isPortfolio": false,
+              "shareClassDisplay": "growth"
             }
           ],
           "partnerShip": [
