@@ -147,12 +147,13 @@ class DeclarationTransformer {
   }
 
   private def removeAdditionalShareAssetField(json: JsValue): Reads[JsObject] = {
-    val updatedArray: JsArray = json.transform(pathToShareAssets.json.pick[JsArray]) match {
-      case JsSuccess(array, _) => JsArray(array.value.map(x => x.as[JsObject] - IS_PORTFOLIO))
-      case _ => JsArray()
+    json.transform(pathToShareAssets.json.pick[JsArray]) match {
+      case JsSuccess(array, _) =>
+        val updatedArray: JsArray = JsArray(array.value.map(x => x.as[JsObject] - IS_PORTFOLIO))
+        prunePathAndPutNewValue(pathToShareAssets, updatedArray)
+      case _ =>
+        doNothing()
     }
-
-    prunePathAndPutNewValue(pathToShareAssets, updatedArray)
   }
 
   private def addDeclaration(declarationForApi: DeclarationForApi, responseJson: JsValue): Reads[JsObject] = {
