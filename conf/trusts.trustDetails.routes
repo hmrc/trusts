@@ -22,3 +22,5 @@ PUT         /:identifier/residential-status             controllers.transformati
 
 PUT         /:identifier/migrating-trust-details        controllers.transformations.trustdetails.TrustDetailsTransformationController.setMigratingTrustDetails(identifier: String)
 PUT         /:identifier/non-migrating-trust-details    controllers.transformations.trustdetails.TrustDetailsTransformationController.setNonMigratingTrustDetails(identifier: String)
+
+DELETE      /:identifier/optional-trust-details         controllers.transformations.TransformationController.removeOptionalTrustDetailTransforms(identifier: String)

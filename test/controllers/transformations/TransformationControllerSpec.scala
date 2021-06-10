@@ -113,5 +113,36 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
         }
       }
     }
+
+    ".removeOptionalTrustDetailTransforms" should {
+
+      "return OK" when {
+        "successfully removed transforms" in {
+          when(mockTransformationService.removeOptionalTrustDetailTransforms(any(), any()))
+            .thenReturn(Future.successful(true))
+
+          val request = FakeRequest(DELETE, "path")
+
+          val result = transformationController.removeOptionalTrustDetailTransforms(identifier).apply(request)
+          status(result) mustBe OK
+
+          verify(mockTransformationService).removeOptionalTrustDetailTransforms(identifier, "id")
+        }
+      }
+
+      "return INTERNAL_SERVER_ERROR" when {
+        "failed to remove transforms" in {
+          when(mockTransformationService.removeOptionalTrustDetailTransforms(any(), any()))
+            .thenReturn(Future.failed(new Throwable()))
+
+          val request = FakeRequest(DELETE, "path")
+
+          val result = transformationController.removeOptionalTrustDetailTransforms(identifier).apply(request)
+          status(result) mustBe INTERNAL_SERVER_ERROR
+
+          verify(mockTransformationService).removeOptionalTrustDetailTransforms(identifier, "id")
+        }
+      }
+    }
   }
 }

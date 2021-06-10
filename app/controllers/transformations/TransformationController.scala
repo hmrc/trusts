@@ -48,4 +48,12 @@ class TransformationController @Inject()(
     }
   }
 
+  def removeOptionalTrustDetailTransforms(identifier: String): Action[AnyContent] = identify.async { request =>
+    transformationService.removeOptionalTrustDetailTransforms(identifier, request.internalId) map { _ =>
+      Ok
+    } recoverWith {
+      case _ => Future.successful(InternalServerError)
+    }
+  }
+
 }

@@ -25,8 +25,9 @@ import repositories.TransformationRepository
 import transformers._
 import transformers.beneficiaries.AmendBeneficiaryTransform
 import transformers.settlors.AmendSettlorTransform
+import transformers.trustdetails.SetTrustDetailTransform
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.Constants.{BUSINESS_SETTLOR, INDIVIDUAL_BENEFICIARY}
+import utils.Constants._
 import utils.Session
 
 import javax.inject.Inject
@@ -150,6 +151,37 @@ class TransformationService @Inject()(repository: TransformationRepository,
         case Some(value) => ComposedDeltaTransform(value.deltaTransforms.filter {
           case AmendBeneficiaryTransform(_, _, _, _, INDIVIDUAL_BENEFICIARY) => false
           case AmendSettlorTransform(_, _, _, _, BUSINESS_SETTLOR) => false
+          case _ => true
+        })
+        case None => ComposedDeltaTransform()
+      }
+      result <- repository.set(identifier, internalId, updatedTransforms)
+    } yield {
+      result
+    }
+  }
+
+  /**
+   * Need to remove any <i>SetTrustDetailTransform</i> transforms corresponding to optional trust detail fields
+   * before we call <i>setMigratingTrustDetails</i> from the frontend. This is done to avoid a few scenarios:
+   * <ol>
+   *   <li>so we don't end up with transforms for setting more than one of <i>deedOfVariation</i>, <i>interVivos</i>, and
+   *  <i>efrbsStartDate</i>, as these fields are mutually exclusive</li>
+   *  <li>so we don't end up with a transform for <i>lawCountry</i> if the user changes their answer to the 'governed by UK law'
+   *  question from 'No' to 'Yes'</li>
+   *  <li>so we don't end up with a transform for <i>trustUKRelation</i> if the user changes their answers from being that of a
+   *  non-UK-resident trust to that of a UK-resident trust</li>
+   * </ol>
+   */
+  def removeOptionalTrustDetailTransforms(identifier: String, internalId: String): Future[Boolean] = {
+
+    val optionalTrustDetails = Seq(LAW_COUNTRY, UK_RELATION, DEED_OF_VARIATION, INTER_VIVOS, EFRBS_START_DATE)
+
+    for {
+      transforms <- repository.get(identifier, internalId)
+      updatedTransforms = transforms match {
+        case Some(value) => ComposedDeltaTransform(value.deltaTransforms.filter {
+          case x: SetTrustDetailTransform if optionalTrustDetails.contains(x.`type`) => false
           case _ => true
         })
         case None => ComposedDeltaTransform()
