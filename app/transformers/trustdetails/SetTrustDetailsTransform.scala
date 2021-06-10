@@ -20,9 +20,6 @@ import play.api.libs.json._
 import transformers.SetValueTransform
 import utils.Constants._
 
-// TODO - This transform is no longer used.
-//  Delete this and all relevant code and json test files once sure no instances in mongo in production.
-
 case class SetTrustDetailsTransform(value: JsValue,
                                     migratingFromNonTaxableToTaxable: Boolean) extends SetValueTransform {
 
