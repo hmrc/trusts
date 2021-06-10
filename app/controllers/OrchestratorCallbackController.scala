@@ -22,7 +22,7 @@ import play.api.libs.json.JsValue
 import play.api.mvc.{Action, ControllerComponents}
 import services.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.Session
 
@@ -34,7 +34,7 @@ class OrchestratorCallbackController @Inject()(auditService: AuditService, cc: C
 
   def migrationToTaxableCallback(urn: String, utr: String): Action[JsValue] = Action.async(parse.json) {
     implicit request =>
-      implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+      implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
       logger.info(s"[migrationToTaxableCallback][Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr]" +
         s" Orchestrator: migrate subscription callback message was: ${request.body}")

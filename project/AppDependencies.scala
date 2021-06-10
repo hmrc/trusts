@@ -9,7 +9,7 @@ object AppDependencies {
   val compile: Seq[ModuleID] = Seq(
     ws,
     "org.reactivemongo"         %% "play2-reactivemongo"        % "0.18.8-play27",
-    "uk.gov.hmrc"               %% "bootstrap-backend-play-27"  % "4.0.0",
+    "uk.gov.hmrc"               %% "bootstrap-backend-play-27"  % "5.3.0",
     "com.github.java-json-tools" % "json-schema-validator"      % "2.2.14"
   )
 
@@ -17,7 +17,7 @@ object AppDependencies {
     "org.scalatest"          %% "scalatest"           % "3.2.8",
     "org.mockito"             % "mockito-core"        % "3.10.0",
     "org.pegdown"            % "pegdown"              % "1.6.0",
-    "com.github.tomakehurst" % "wiremock-standalone"  % "2.25.1",
+    "com.github.tomakehurst" % "wiremock-standalone"  % "2.27.2",
     "org.mockito"            % "mockito-all"          % "1.10.19",
     "org.scalatestplus.play"  %% "scalatestplus-play" % "4.0.3",
     "org.scalatestplus"      %% "scalatestplus-mockito"    % "1.0.0-M2",

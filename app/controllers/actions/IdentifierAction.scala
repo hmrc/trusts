@@ -26,7 +26,7 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import models.registration.ApiResponse._
 import models.requests.IdentifierRequest
 import utils.Session
@@ -44,7 +44,7 @@ class AuthenticatedIdentifierAction @Inject()(override val authConnector: AuthCo
     val retrievals = Retrievals.internalId and
                      Retrievals.affinityGroup
 
-    implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+    implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
     authorised().retrieve(retrievals) {
       case Some(internalId) ~ Some(Agent) =>
