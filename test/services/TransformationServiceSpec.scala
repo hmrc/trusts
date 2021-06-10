@@ -26,11 +26,12 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.time.{Millis, Span}
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.libs.json.{JsResult, JsValue, Json}
+import play.api.libs.json.{JsBoolean, JsResult, JsString, JsValue, Json}
 import repositories.TransformationRepositoryImpl
 import transformers._
 import transformers.beneficiaries.AmendBeneficiaryTransform
 import transformers.settlors.AmendSettlorTransform
+import transformers.trustdetails.SetTrustDetailTransform
 import transformers.trustees._
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.Constants._
@@ -316,6 +317,46 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
               AmendTrusteeTransform(None, Json.obj(), Json.obj(), LocalDate.now(), INDIVIDUAL_LEAD_TRUSTEE),
               AmendSettlorTransform(None, Json.obj(), Json.obj(), LocalDate.now(), INDIVIDUAL_SETTLOR),
               AmendBeneficiaryTransform(None, Json.obj(), Json.obj(), LocalDate.now(), COMPANY_BENEFICIARY)
+            ))
+          )
+        }
+      }
+    }
+
+    "when .removeOptionalTrustDetailTransforms" - {
+      "must remove all SetTrustDetailTransform transforms that correspond to optional fields" in {
+        val repository = mock[TransformationRepositoryImpl]
+        val service = new TransformationService(repository, mock[TrustsService], auditService)
+
+        val existingTransforms = Seq(
+          SetTrustDetailTransform(JsString("FR"), "lawCountry"),
+          SetTrustDetailTransform(JsString("GB"), "administrationCountry"),
+          SetTrustDetailTransform(Json.parse("""{"nonUK":{"sch5atcgga92":true}}"""), "residentialStatus"),
+          SetTrustDetailTransform(JsBoolean(true), "trustUKProperty"),
+          SetTrustDetailTransform(JsBoolean(true), "trustRecorded"),
+          SetTrustDetailTransform(JsBoolean(false), "trustUKRelation"),
+          SetTrustDetailTransform(JsBoolean(false), "trustUKResident"),
+          SetTrustDetailTransform(JsString("Inter vivos Settlement"), "typeOfTrust"),
+          SetTrustDetailTransform(JsBoolean(true), "interVivos"),
+          SetTrustDetailTransform(Json.toJson(LocalDate.parse("2000-01-01")), "efrbsStartDate"),
+          SetTrustDetailTransform(JsString("Replaced the will trust"), "deedOfVariation")
+        )
+        when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
+        when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
+
+        val result = service.removeOptionalTrustDetailTransforms(utr, internalId)
+
+        whenReady(result) { _ =>
+          verify(repository).set(
+            utr,
+            internalId,
+            ComposedDeltaTransform(Seq(
+              SetTrustDetailTransform(JsString("GB"), "administrationCountry"),
+              SetTrustDetailTransform(Json.parse("""{"nonUK":{"sch5atcgga92":true}}"""), "residentialStatus"),
+              SetTrustDetailTransform(JsBoolean(true), "trustUKProperty"),
+              SetTrustDetailTransform(JsBoolean(true), "trustRecorded"),
+              SetTrustDetailTransform(JsBoolean(false), "trustUKResident"),
+              SetTrustDetailTransform(JsString("Inter vivos Settlement"), "typeOfTrust")
             ))
           )
         }
