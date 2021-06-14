@@ -588,6 +588,25 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
 
             runTest(entities, `type`, beneficiary, expectedResult = None)(f)
           }
+
+          "has a UTR" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "entityStart": "2020-01-01",
+                |    "identification": {
+                |      "utr": "1234567890"
+                |    }
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(entities, `type`, beneficiary, expectedResult = None)(f)
+          }
         }
 
         "trust" when {
@@ -615,6 +634,25 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
 
             runTest(entities, `type`, beneficiary, expectedResult = None)(f)
           }
+
+          "has a UTR" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "entityStart": "2020-01-01",
+                |    "identification": {
+                |      "utr": "1234567890"
+                |    }
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(entities, `type`, beneficiary, expectedResult = None)(f)
+          }
         }
 
         "charity" when {
@@ -635,6 +673,25 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |    "organisationName": "Org Name",
                 |    "entityStart": "2020-01-01",
                 |    "entityEnd": "2021-01-01"
+                |  }
+                |]
+                |""".stripMargin
+            )
+
+            runTest(entities, `type`, beneficiary, expectedResult = None)(f)
+          }
+
+          "has a UTR" in {
+
+            val beneficiary = Json.parse(
+              """
+                |[
+                |  {
+                |    "organisationName": "Org Name",
+                |    "entityStart": "2020-01-01",
+                |    "identification": {
+                |      "utr": "1234567890"
+                |    }
                 |  }
                 |]
                 |""".stripMargin

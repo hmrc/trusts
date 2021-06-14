@@ -23,6 +23,10 @@ class RequiredEntityDetailsForMigration {
 
   def areBeneficiariesCompleteForMigration(trust: JsValue): JsResult[Option[Boolean]] = {
 
+    implicit class EntityArray(array: JsArray) {
+      def isEmpty: Boolean = array.value.isEmpty || array.value.forall(_.canIgnoreBeneficiary)
+    }
+
     def pickAtPathForType(`type`: String): JsResult[JsArray] = pickAtPathForEntityType(BENEFICIARIES, `type`, trust)
 
     for {
@@ -58,6 +62,10 @@ class RequiredEntityDetailsForMigration {
 
   def areSettlorsCompleteForMigration(trust: JsValue): JsResult[Option[Boolean]] = {
 
+    implicit class EntityArray(array: JsArray) {
+      def isEmpty: Boolean = array.value.isEmpty || array.value.forall(_.canIgnoreSettlor)
+    }
+
     for {
       businesses <- pickAtPathForEntityType(SETTLORS, BUSINESS_SETTLOR, trust)
       trustType = trustTypePick(trust)
@@ -86,13 +94,20 @@ class RequiredEntityDetailsForMigration {
   private def trustTypePick(trust: JsValue): JsResult[JsString] = trust.transform((TRUST \ DETAILS \ TYPE_OF_TRUST).json.pick[JsString])
 
   implicit class RequiredInfo(entity: JsValue) {
+
+    def canIgnoreBeneficiary: Boolean = hasEndDate || hasUtr
+
     def hasRequiredBeneficiaryInfo(obeysAdditionalRules: Boolean = true): Boolean =
-      hasEndDate || (hasDiscretionOrShareOfIncome && obeysAdditionalRules)
+      canIgnoreBeneficiary || (hasDiscretionOrShareOfIncome && obeysAdditionalRules)
+
+    def canIgnoreSettlor: Boolean = hasEndDate
 
     def hasRequiredSettlorInfo(obeysAdditionalRules: Boolean): Boolean =
-      hasEndDate || obeysAdditionalRules
+      canIgnoreSettlor || obeysAdditionalRules
 
-    def hasEndDate: Boolean = entity.transform((__ \ ENTITY_END).json.pick).isSuccess
+    private def hasEndDate: Boolean = entity.transform((__ \ ENTITY_END).json.pick).isSuccess
+
+    private def hasUtr: Boolean = entity.transform((__ \ IDENTIFICATION \ UTR).json.pick).isSuccess
 
     def hasRequiredInfoForEmploymentRelatedTrust(trustType: JsResult[JsString], fields: String*): Boolean = {
       trustType match {
@@ -109,10 +124,6 @@ class RequiredEntityDetailsForMigration {
         case _ => false
       }
     }
-  }
-
-  implicit class EntityArray(array: JsArray) {
-    def isEmpty: Boolean = array.value.isEmpty || array.value.forall(_.hasEndDate)
   }
 
 }
