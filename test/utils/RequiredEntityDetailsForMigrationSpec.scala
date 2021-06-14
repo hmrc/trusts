@@ -179,48 +179,6 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
           }
         }
 
-        "large beneficiary doesn't have required data" when {
-
-          val `type` = LARGE_BENEFICIARY
-
-          "missing beneficiaryDiscretion" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "description": "Org Description",
-                |    "numberOfBeneficiary": "201",
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(entities, `type`, beneficiary, expectedResult = Some(false))(f)
-          }
-
-          "missing beneficiaryShareOfIncome when beneficiaryDiscretion is false" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "beneficiaryDiscretion": false,
-                |    "description": "Org Description",
-                |    "numberOfBeneficiary": "201",
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(entities, `type`, beneficiary, expectedResult = Some(false))(f)
-          }
-        }
-
         "trust beneficiary doesn't have required data" when {
 
           val `type` = TRUST_BENEFICIARY
@@ -451,50 +409,6 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
           }
         }
 
-        "large beneficiary has required data" when {
-
-          val `type` = LARGE_BENEFICIARY
-
-          "has discretion" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "beneficiaryDiscretion": true,
-                |    "description": "Org Description",
-                |    "numberOfBeneficiary": "201",
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(entities, `type`, beneficiary, expectedResult = Some(true))(f)
-          }
-
-          "has no discretion and has share of income" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "beneficiaryDiscretion": false,
-                |    "beneficiaryShareOfIncome": "50",
-                |    "description": "Org Description",
-                |    "numberOfBeneficiary": "201",
-                |    "entityStart": "2020-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(entities, `type`, beneficiary, expectedResult = Some(true))(f)
-          }
-        }
-
         "trust beneficiary has required data" when {
 
           val `type` = TRUST_BENEFICIARY
@@ -665,35 +579,6 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |[
                 |  {
                 |    "organisationName": "Org Name",
-                |    "entityStart": "2020-01-01",
-                |    "entityEnd": "2021-01-01"
-                |  }
-                |]
-                |""".stripMargin
-            )
-
-            runTest(entities, `type`, beneficiary, expectedResult = None)(f)
-          }
-        }
-
-        "large" when {
-
-          val `type` = LARGE_BENEFICIARY
-
-          "no larges" in {
-
-            runTest(entities, `type`, JsArray(), expectedResult = None)(f)
-          }
-
-          "has an end date" in {
-
-            val beneficiary = Json.parse(
-              """
-                |[
-                |  {
-                |    "organisationName": "Org Name",
-                |    "description": "Org Description",
-                |    "numberOfBeneficiary": "201",
                 |    "entityStart": "2020-01-01",
                 |    "entityEnd": "2021-01-01"
                 |  }

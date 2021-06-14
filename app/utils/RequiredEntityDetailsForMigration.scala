@@ -28,13 +28,12 @@ class RequiredEntityDetailsForMigration {
     for {
       individuals <- pickAtPathForType(INDIVIDUAL_BENEFICIARY)
       companies <- pickAtPathForType(COMPANY_BENEFICIARY)
-      larges <- pickAtPathForType(LARGE_BENEFICIARY)
       trusts <- pickAtPathForType(TRUST_BENEFICIARY)
       charities <- pickAtPathForType(CHARITY_BENEFICIARY)
       others <- pickAtPathForType(OTHER_BENEFICIARY)
       trustType = trustTypePick(trust)
     } yield {
-      if (individuals.isEmpty && companies.isEmpty && larges.isEmpty && trusts.isEmpty && charities.isEmpty && others.isEmpty) {
+      if (individuals.isEmpty && companies.isEmpty && trusts.isEmpty && charities.isEmpty && others.isEmpty) {
         None
       } else {
 
@@ -48,7 +47,6 @@ class RequiredEntityDetailsForMigration {
 
         val haveRequiredInfo = individualsHaveRequiredInfo &&
           companies.value.forall(_.hasRequiredBeneficiaryInfo()) &&
-          larges.value.forall(_.hasRequiredBeneficiaryInfo()) &&
           trusts.value.forall(_.hasRequiredBeneficiaryInfo()) &&
           charities.value.forall(_.hasRequiredBeneficiaryInfo()) &&
           others.value.forall(_.hasRequiredBeneficiaryInfo())
