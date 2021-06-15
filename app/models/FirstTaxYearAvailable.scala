@@ -16,4 +16,10 @@
 
 package models
 
+import play.api.libs.json.{Format, Json}
+
 case class FirstTaxYearAvailable(yearsAgo: Int, earlierYearsToDeclare: Boolean)
+
+object FirstTaxYearAvailable {
+  implicit val format: Format[FirstTaxYearAvailable] = Json.format[FirstTaxYearAvailable]
+}

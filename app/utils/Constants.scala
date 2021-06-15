@@ -93,6 +93,7 @@ object Constants {
   val UK_PROPERTY = "trustUKProperty"
   val RECORDED = "trustRecorded"
   val UK_RELATION = "trustUKRelation"
+  val START_DATE = "startDate"
 
   val LAW_COUNTRY = "lawCountry"
   val ADMINISTRATION_COUNTRY = "administrationCountry"
