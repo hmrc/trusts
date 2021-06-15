@@ -112,8 +112,7 @@ class RequiredEntityDetailsForMigration {
     def hasRequiredInfoForEmploymentRelatedTrust(trustType: JsResult[JsString], fields: String*): Boolean = {
       trustType match {
         case JsSuccess(JsString(EMPLOYMENT_RELATED_TRUST), _) => fields.forall(field => entity.transform((__ \ field).json.pick).isSuccess)
-        case JsSuccess(JsString(_), _) => true
-        case _ => false
+        case _ => true
       }
     }
 
