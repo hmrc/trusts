@@ -18,14 +18,14 @@ package controllers
 
 import config.AppConfig
 import controllers.actions.{FakeIdentifierAction, ValidateIdentifierActionProvider}
-import models.EntityStatus
+import models.{EntityStatus, FirstTaxYearAvailable}
 import models.get_trust.GetTrustResponse.CLOSED_REQUEST_STATUS
 import models.get_trust._
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.Mockito._
 import org.scalatest._
-import org.scalatest.matchers.must.Matchers._
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.must.Matchers._
 import org.scalatest.time.{Millis, Span}
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
@@ -34,12 +34,13 @@ import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
-import services.{AuditService, TransformationService, TrustsService}
+import services.{AuditService, TaxYearService, TransformationService, TrustsService}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import utils.NonTaxable5MLDFixtures.Cache.getTransformedNonTaxableTrustResponse
 import utils.{JsonFixtures, NonTaxable5MLDFixtures, RequiredEntityDetailsForMigration, Taxable5MLDFixtures}
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAndAfter
@@ -53,6 +54,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
   private val mockAuditConnector = mock[AuditConnector]
   private val mockConfig = mock[AppConfig]
   private val transformationService = mock[TransformationService]
+  private val taxYearService = mock[TaxYearService]
 
   private val auditService = new AuditService(mockAuditConnector)
 
@@ -78,6 +80,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
       mockedAuditService,
       trustsService,
       transformationService,
+      taxYearService,
       validateIdentifierAction,
       mockRequiredDetailsUtil,
       Helpers.stubControllerComponents()
@@ -147,6 +150,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
         auditService,
         trustsService,
         transformationService,
+        taxYearService,
         validateIdentifierAction,
         mockRequiredDetailsUtil,
         Helpers.stubControllerComponents()
@@ -1835,6 +1839,57 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
           }
         }
       }
+    }
+
+    ".getFirstTaxYearAvailable" should {
+
+      "return 403 - Forbidden with parked content" in {
+
+        when(transformationService.getTransformedData(any(), any())(any()))
+          .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
+
+        val result = getTrustController.getFirstTaxYearAvailable(utr)(FakeRequest())
+
+        whenReady(result) { _ =>
+          status(result) mustBe FORBIDDEN
+        }
+      }
+
+      "return 200 - Ok with processed content" in {
+
+        val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
+
+        when(transformationService.getTransformedData(any[String], any[String])(any()))
+          .thenReturn(Future.successful(processedResponse))
+
+        val fakeResult = FirstTaxYearAvailable(1, earlierYearsToDeclare = false)
+
+        when(taxYearService.firstTaxYearAvailable(any())).thenReturn(fakeResult)
+
+        val result = getTrustController.getFirstTaxYearAvailable(utr)(FakeRequest())
+
+        whenReady(result) { _ =>
+          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(taxYearService).firstTaxYearAvailable(LocalDate.parse("1920-03-28"))
+          status(result) mustBe OK
+          contentType(result) mustBe Some(JSON)
+          contentAsJson(result) mustBe Json.toJson(fakeResult)
+        }
+      }
+
+      "return 500 - Internal server error for invalid content" in {
+
+        when(transformationService.getTransformedData(any(), any())(any()))
+          .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
+
+        val result = getTrustController.getFirstTaxYearAvailable(utr)(FakeRequest())
+
+        whenReady(result) { _ =>
+          status(result) mustBe INTERNAL_SERVER_ERROR
+        }
+      }
+
     }
   }
 }

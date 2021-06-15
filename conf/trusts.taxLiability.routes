@@ -2,3 +2,5 @@
 GET         /:identifier/transformed                controllers.GetTrustController.getYearsReturns(identifier: String)
 
 PUT         /:identifier/years-returns              controllers.transformations.taxliability.TaxLiabilityTransformationController.setYearsReturns(identifier: String)
+
+GET         /:identifier/first-year-to-ask-for      controllers.GetTrustController.getFirstTaxYearAvailable(identifier: String)

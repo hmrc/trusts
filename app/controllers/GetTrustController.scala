@@ -25,11 +25,12 @@ import models.requests.IdentifierRequest
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
-import services.{AuditService, TransformationService, TrustsService}
+import services.{AuditService, TaxYearService, TransformationService, TrustsService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.Constants._
 import utils.RequiredEntityDetailsForMigration
 
+import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -38,6 +39,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
                                    auditService: AuditService,
                                    trustsService: TrustsService,
                                    transformationService: TransformationService,
+                                   taxYearService: TaxYearService,
                                    validateIdentifier: ValidateIdentifierActionProvider,
                                    requiredDetailsUtil: RequiredEntityDetailsForMigration,
                                    cc: ControllerComponents) extends BackendController(cc) with Logging {
@@ -66,27 +68,26 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       result: GetTrustSuccessResponse => Ok(Json.toJson(result))
     }
 
-  def getLeadTrustee(identifier: String): Action[AnyContent] =
-    doGet(identifier, applyTransformations = true) {
-      case processed: TrustProcessedResponse =>
-        val pick = (ENTITIES \ LEAD_TRUSTEE).json.pick
-        processed.getTrust.transform(pick).fold(
-          _ => InternalServerError,
-          json => {
-            json.validate[DisplayTrustLeadTrusteeType] match {
-              case JsSuccess(DisplayTrustLeadTrusteeType(Some(leadTrusteeInd), None), _) =>
-                Ok(Json.toJson(leadTrusteeInd))
-              case JsSuccess(DisplayTrustLeadTrusteeType(None, Some(leadTrusteeOrg)), _) =>
-                Ok(Json.toJson(leadTrusteeOrg))
-              case _ =>
-                logger.error(s"[getLeadTrustee][UTR/URN: $identifier] something unexpected has happened. " +
-                  s"doGet has succeeded but picked lead trustee json has failed validation.")
-                InternalServerError
-            }
+  def getLeadTrustee(identifier: String): Action[AnyContent] = {
+    getEtmpData(identifier) { processed =>
+      val pick = (ENTITIES \ LEAD_TRUSTEE).json.pick
+      processed.getTrust.transform(pick).fold(
+        _ => InternalServerError,
+        json => {
+          json.validate[DisplayTrustLeadTrusteeType] match {
+            case JsSuccess(DisplayTrustLeadTrusteeType(Some(leadTrusteeInd), None), _) =>
+              Ok(Json.toJson(leadTrusteeInd))
+            case JsSuccess(DisplayTrustLeadTrusteeType(None, Some(leadTrusteeOrg)), _) =>
+              Ok(Json.toJson(leadTrusteeOrg))
+            case _ =>
+              logger.error(s"[getLeadTrustee][UTR/URN: $identifier] something unexpected has happened. " +
+                s"doGet has succeeded but picked lead trustee json has failed validation.")
+              InternalServerError
           }
-        )
-      case _ => Forbidden
+        }
+      )
     }
+  }
 
   def wasTrustRegisteredWithDeceasedSettlor(identifier: String): Action[AnyContent] =
     isPickSuccessfulAtPath(identifier, ENTITIES \ DECEASED_SETTLOR, applyTransformations = false)
@@ -153,15 +154,14 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     areEntitiesCompleteForMigration(identifier)(requiredDetailsUtil.areSettlorsCompleteForMigration)
 
   private def areEntitiesCompleteForMigration(identifier: String)(f: JsValue => JsResult[Option[Boolean]]): Action[AnyContent] = {
-    doGet(identifier, applyTransformations = true) {
-      case processed: TrustProcessedResponse =>
+    getEtmpData(identifier) {
+      processed =>
         f(processed.getTrust) match {
           case JsSuccess(value, _) => Ok(Json.toJson(EntityStatus(value)))
           case JsError(errors) =>
             logger.error(s"[Identifier: $identifier] Failed to check entities: $errors")
             InternalServerError
         }
-      case _ => Forbidden
     }
   }
 
@@ -170,6 +170,18 @@ class GetTrustController @Inject()(identify: IdentifierAction,
 
   def getTrustName(identifier: String): Action[AnyContent] =
     getItemAtPath(identifier, TRUST_NAME)
+
+  def getFirstTaxYearAvailable(identifier: String): Action[AnyContent] = {
+    getEtmpData(identifier) { processed =>
+      processed.getTrust.transform((TRUST \ DETAILS \ START_DATE).json.pick) match {
+        case JsSuccess(value, _) =>
+          Ok(Json.toJson(taxYearService.firstTaxYearAvailable(value.as[LocalDate])))
+        case JsError(errors) =>
+          logger.error(s"[Identifier: $identifier] Failed to pick trust start date: $errors")
+          InternalServerError
+      }
+    }
+  }
 
   private def isPickSuccessfulAtPath(identifier: String, path: JsPath, applyTransformations: Boolean = true): Action[AnyContent] = {
     processEtmpData(identifier, applyTransformations) {
@@ -212,14 +224,22 @@ class GetTrustController @Inject()(identify: IdentifierAction,
 
   private def processEtmpData(identifier: String, applyTransformations: Boolean = true)
                              (processObject: JsValue => JsValue): Action[AnyContent] = {
+
+    getEtmpData(identifier, applyTransformations) { processed =>
+      processed.transform.map {
+        case transformed: TrustProcessedResponse =>
+          Ok(processObject(transformed.getTrust))
+        case _ =>
+          InternalServerError
+      }.getOrElse(InternalServerError)
+    }
+  }
+
+  private def getEtmpData(identifier: String, applyTransformations: Boolean = true)
+                         (processObject: TrustProcessedResponse => Result): Action[AnyContent] = {
     doGet(identifier, applyTransformations) {
       case processed: TrustProcessedResponse =>
-        processed.transform.map {
-          case transformed: TrustProcessedResponse =>
-            Ok(processObject(transformed.getTrust))
-          case _ =>
-            InternalServerError
-        }.getOrElse(InternalServerError)
+        processObject(processed)
       case _ =>
         Forbidden
     }
