@@ -19,10 +19,11 @@ package models.variation
 import models.JsonWithoutNulls._
 import models.NameType
 import play.api.libs.json.{Format, Json, Writes}
+import utils.TypeOfTrust.{Employment, TypeOfTrust}
 
 import java.time.LocalDate
 
-trait Settlor[T] extends Entity[T]
+trait Settlor[T] extends MigrationEntity[T]
 
 case class Settlors(settlor: Option[List[SettlorIndividual]],
                     settlorCompany: Option[List[SettlorCompany]])
@@ -74,6 +75,13 @@ case class SettlorCompany(lineNo: Option[String],
                           entityEnd: Option[LocalDate]) extends Settlor[SettlorCompany] {
 
   override val writeToMaintain: Writes[SettlorCompany] = SettlorCompany.writeToMaintain
+
+  override def hasRequiredDataForMigration(trustType: Option[TypeOfTrust]): Boolean = {
+    trustType match {
+      case Some(Employment) => companyType.isDefined && companyTime.isDefined
+      case _ => true
+    }
+  }
 }
 
 object SettlorCompany {

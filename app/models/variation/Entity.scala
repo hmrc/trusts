@@ -17,7 +17,22 @@
 package models.variation
 
 import play.api.libs.json.Writes
+import utils.TypeOfTrust.TypeOfTrust
+
+import java.time.LocalDate
 
 trait Entity[T] {
   val writeToMaintain: Writes[T]
+}
+
+/**
+ * Entities that need updating as part of migration from non-taxable to taxable
+ */
+trait MigrationEntity[T] extends Entity[T] {
+
+  val entityEnd: Option[LocalDate]
+  def hasEndDate: Boolean = entityEnd.isDefined
+
+  def canBeIgnored: Boolean = hasEndDate
+  def hasRequiredDataForMigration(trustType: Option[TypeOfTrust]): Boolean = true
 }
