@@ -26,8 +26,9 @@ class RequiredEntityDetailsForMigration {
   def areBeneficiariesCompleteForMigration(trust: JsValue): JsResult[Option[Boolean]] = {
 
     def pickAtPathForBeneficiaryType[T <: Beneficiary[T]](`type`: String)
-                                                         (implicit rds: Reads[T]): JsResult[List[T]] =
+                                                         (implicit rds: Reads[T]): JsResult[List[T]] = {
       pickAtPathForEntityType[T](BENEFICIARIES, `type`, trust)
+    }
 
     for {
       individuals <- pickAtPathForBeneficiaryType[IndividualDetailsType](INDIVIDUAL_BENEFICIARY)
@@ -40,14 +41,13 @@ class RequiredEntityDetailsForMigration {
       if (individuals.isEmpty && companies.isEmpty && trusts.isEmpty && charities.isEmpty && others.isEmpty) {
         None
       } else {
-        val haveRequiredDataForMigration =
+        Some(
           individuals.forall(_.hasRequiredDataForMigration(trustType)) &&
             companies.forall(_.hasRequiredDataForMigration(trustType)) &&
             trusts.forall(_.hasRequiredDataForMigration(trustType)) &&
             charities.forall(_.hasRequiredDataForMigration(trustType)) &&
             others.forall(_.hasRequiredDataForMigration(trustType))
-
-        Some(haveRequiredDataForMigration)
+        )
       }
     }
   }
@@ -61,11 +61,7 @@ class RequiredEntityDetailsForMigration {
       if (businesses.isEmpty) {
         None
       } else {
-        val haveRequiredDataForMigration = businesses.forall { business =>
-          business.hasRequiredDataForMigration(trustType)
-        }
-
-        Some(haveRequiredDataForMigration)
+        Some(businesses.forall(_.hasRequiredDataForMigration(trustType)))
       }
     }
   }
