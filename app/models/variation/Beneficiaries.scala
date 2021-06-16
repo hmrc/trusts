@@ -19,10 +19,32 @@ package models.variation
 import models.JsonWithoutNulls._
 import models.{AddressType, NameType}
 import play.api.libs.json.{Format, Json, Writes}
+import utils.TypeOfTrust.{Employment, TypeOfTrust}
 
 import java.time.LocalDate
 
-trait Beneficiary[T] extends Entity[T]
+trait Beneficiary[T] extends MigrationEntity[T]
+
+trait IncomeBeneficiary[T] extends Beneficiary[T] {
+  val beneficiaryDiscretion: Option[Boolean]
+  val beneficiaryShareOfIncome: Option[String]
+
+  override def hasRequiredDataForMigration(trustType: Option[TypeOfTrust]): Boolean = {
+    (beneficiaryDiscretion, beneficiaryShareOfIncome) match {
+      case (None, None) => false
+      case (Some(false), None) => false
+      case _ => true
+    }
+  }
+}
+
+trait OrgBeneficiary[T] extends IncomeBeneficiary[T] {
+  val identification: Option[IdentificationOrgType]
+
+  override def canBeIgnored: Boolean = super.canBeIgnored || hasUtr
+
+  def hasUtr: Boolean = identification.exists(_.utr.isDefined)
+}
 
 case class BeneficiaryType(individualDetails: Option[List[IndividualDetailsType]],
                            company: Option[List[BeneficiaryCompanyType]],
@@ -49,9 +71,18 @@ case class IndividualDetailsType(lineNo: Option[String],
                                  legallyIncapable: Option[Boolean],
                                  nationality: Option[String],
                                  entityStart: LocalDate,
-                                 entityEnd: Option[LocalDate]) extends Beneficiary[IndividualDetailsType] {
+                                 entityEnd: Option[LocalDate]) extends IncomeBeneficiary[IndividualDetailsType] {
 
   override val writeToMaintain: Writes[IndividualDetailsType] = IndividualDetailsType.writeToMaintain
+
+  override def hasRequiredDataForMigration(trustType: Option[TypeOfTrust]): Boolean = {
+    super.hasRequiredDataForMigration(trustType) &&
+      vulnerableBeneficiary.isDefined &&
+      (trustType match {
+        case Some(Employment) => beneficiaryType.isDefined
+        case _ => true
+      })
+  }
 }
 
 object IndividualDetailsType {
@@ -84,7 +115,7 @@ case class BeneficiaryCompanyType(lineNo: Option[String],
                                   identification: Option[IdentificationOrgType],
                                   countryOfResidence: Option[String],
                                   entityStart: LocalDate,
-                                  entityEnd: Option[LocalDate]) extends Beneficiary[BeneficiaryCompanyType] {
+                                  entityEnd: Option[LocalDate]) extends OrgBeneficiary[BeneficiaryCompanyType] {
 
   override val writeToMaintain: Writes[BeneficiaryCompanyType] = BeneficiaryCompanyType.writeToMaintain
 }
@@ -114,7 +145,7 @@ case class BeneficiaryTrustType(lineNo: Option[String],
                                 identification: Option[IdentificationOrgType],
                                 countryOfResidence: Option[String],
                                 entityStart: LocalDate,
-                                entityEnd: Option[LocalDate]) extends Beneficiary[BeneficiaryTrustType] {
+                                entityEnd: Option[LocalDate]) extends OrgBeneficiary[BeneficiaryTrustType] {
 
   override val writeToMaintain: Writes[BeneficiaryTrustType] = BeneficiaryTrustType.writeToMaintain
 }
@@ -144,7 +175,7 @@ case class BeneficiaryCharityType(lineNo: Option[String],
                                   identification: Option[IdentificationOrgType],
                                   countryOfResidence: Option[String],
                                   entityStart: LocalDate,
-                                  entityEnd: Option[LocalDate]) extends Beneficiary[BeneficiaryCharityType] {
+                                  entityEnd: Option[LocalDate]) extends OrgBeneficiary[BeneficiaryCharityType] {
 
   override val writeToMaintain: Writes[BeneficiaryCharityType] = BeneficiaryCharityType.writeToMaintain
 }
@@ -242,7 +273,7 @@ case class OtherType(lineNo: Option[String],
                      beneficiaryShareOfIncome: Option[String],
                      countryOfResidence: Option[String],
                      entityStart: LocalDate,
-                     entityEnd: Option[LocalDate]) extends Beneficiary[OtherType] {
+                     entityEnd: Option[LocalDate]) extends IncomeBeneficiary[OtherType] {
 
   override val writeToMaintain: Writes[OtherType] = OtherType.writeToMaintain
 }

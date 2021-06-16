@@ -16,113 +16,66 @@
 
 package utils
 
+import models.variation._
 import play.api.libs.json._
 import utils.Constants._
+import utils.TypeOfTrust.TypeOfTrust
 
 class RequiredEntityDetailsForMigration {
 
   def areBeneficiariesCompleteForMigration(trust: JsValue): JsResult[Option[Boolean]] = {
 
-    implicit class EntityArray(array: JsArray) {
-      def isEmpty: Boolean = array.value.isEmpty || array.value.forall(_.canIgnoreBeneficiary)
+    def pickAtPathForBeneficiaryType[T <: Beneficiary[T]](`type`: String)
+                                                         (implicit rds: Reads[T]): JsResult[List[T]] = {
+      pickAtPathForEntityType[T](BENEFICIARIES, `type`, trust)
     }
 
-    def pickAtPathForType(`type`: String): JsResult[JsArray] = pickAtPathForEntityType(BENEFICIARIES, `type`, trust)
-
     for {
-      individuals <- pickAtPathForType(INDIVIDUAL_BENEFICIARY)
-      companies <- pickAtPathForType(COMPANY_BENEFICIARY)
-      trusts <- pickAtPathForType(TRUST_BENEFICIARY)
-      charities <- pickAtPathForType(CHARITY_BENEFICIARY)
-      others <- pickAtPathForType(OTHER_BENEFICIARY)
-      trustType = trustTypePick(trust)
+      individuals <- pickAtPathForBeneficiaryType[IndividualDetailsType](INDIVIDUAL_BENEFICIARY)
+      companies <- pickAtPathForBeneficiaryType[BeneficiaryCompanyType](COMPANY_BENEFICIARY)
+      trusts <- pickAtPathForBeneficiaryType[BeneficiaryTrustType](TRUST_BENEFICIARY)
+      charities <- pickAtPathForBeneficiaryType[BeneficiaryCharityType](CHARITY_BENEFICIARY)
+      others <- pickAtPathForBeneficiaryType[OtherType](OTHER_BENEFICIARY)
+      trustType = trustTypePick(trust).asOpt
     } yield {
       if (individuals.isEmpty && companies.isEmpty && trusts.isEmpty && charities.isEmpty && others.isEmpty) {
         None
       } else {
-
-        val individualsHaveRequiredInfo = individuals.value.forall(individual => {
-          lazy val hasVulnerableBeneficiaryField = individual.transform((__ \ VULNERABLE_BENEFICIARY).json.pick).isSuccess
-          lazy val hasRoleInCompanyForEmploymentRelatedTrust =
-            individual.hasRequiredInfoForEmploymentRelatedTrust(trustType, ROLE_IN_COMPANY)
-
-          individual.hasRequiredBeneficiaryInfo(hasVulnerableBeneficiaryField && hasRoleInCompanyForEmploymentRelatedTrust)
-        })
-
-        val haveRequiredInfo = individualsHaveRequiredInfo &&
-          companies.value.forall(_.hasRequiredBeneficiaryInfo()) &&
-          trusts.value.forall(_.hasRequiredBeneficiaryInfo()) &&
-          charities.value.forall(_.hasRequiredBeneficiaryInfo()) &&
-          others.value.forall(_.hasRequiredBeneficiaryInfo())
-
-        Some(haveRequiredInfo)
+        Some(
+          individuals.forall(_.hasRequiredDataForMigration(trustType)) &&
+            companies.forall(_.hasRequiredDataForMigration(trustType)) &&
+            trusts.forall(_.hasRequiredDataForMigration(trustType)) &&
+            charities.forall(_.hasRequiredDataForMigration(trustType)) &&
+            others.forall(_.hasRequiredDataForMigration(trustType))
+        )
       }
     }
   }
 
   def areSettlorsCompleteForMigration(trust: JsValue): JsResult[Option[Boolean]] = {
 
-    implicit class EntityArray(array: JsArray) {
-      def isEmpty: Boolean = array.value.isEmpty || array.value.forall(_.canIgnoreSettlor)
-    }
-
     for {
-      businesses <- pickAtPathForEntityType(SETTLORS, BUSINESS_SETTLOR, trust)
-      trustType = trustTypePick(trust)
+      businesses <- pickAtPathForEntityType[SettlorCompany](SETTLORS, BUSINESS_SETTLOR, trust)
+      trustType = trustTypePick(trust).asOpt
     } yield {
       if (businesses.isEmpty) {
         None
       } else {
-        val haveRequiredInfo = businesses.value.forall(business => {
-          lazy val hasCompanyTypeAndTimeForEmploymentRelatedTrust =
-            business.hasRequiredInfoForEmploymentRelatedTrust(trustType, COMPANY_TYPE, COMPANY_TIME)
-
-          business.hasRequiredSettlorInfo(hasCompanyTypeAndTimeForEmploymentRelatedTrust)
-        })
-
-        Some(haveRequiredInfo)
+        Some(businesses.forall(_.hasRequiredDataForMigration(trustType)))
       }
     }
   }
 
-  private def pickAtPathForEntityType(entity: String, `type`: String, trust: JsValue): JsResult[JsArray] =
+  private def pickAtPathForEntityType[T <: MigrationEntity[T]](entity: String, `type`: String, trust: JsValue)
+                                                              (implicit rds: Reads[T]): JsResult[List[T]] = {
     JsonOps.pickAtPath[JsArray](ENTITIES \ entity \ `type`, trust) match {
-      case x @ JsSuccess(_, _) => x
-      case _ => JsSuccess(JsArray())
-    }
-
-  private def trustTypePick(trust: JsValue): JsResult[JsString] = trust.transform((TRUST \ DETAILS \ TYPE_OF_TRUST).json.pick[JsString])
-
-  implicit class RequiredInfo(entity: JsValue) {
-
-    def canIgnoreBeneficiary: Boolean = hasEndDate || hasUtr
-
-    def hasRequiredBeneficiaryInfo(obeysAdditionalRules: Boolean = true): Boolean =
-      canIgnoreBeneficiary || (hasDiscretionOrShareOfIncome && obeysAdditionalRules)
-
-    def canIgnoreSettlor: Boolean = hasEndDate
-
-    def hasRequiredSettlorInfo(obeysAdditionalRules: Boolean): Boolean =
-      canIgnoreSettlor || obeysAdditionalRules
-
-    private def hasEndDate: Boolean = entity.transform((__ \ ENTITY_END).json.pick).isSuccess
-
-    private def hasUtr: Boolean = entity.transform((__ \ IDENTIFICATION \ UTR).json.pick).isSuccess
-
-    def hasRequiredInfoForEmploymentRelatedTrust(trustType: JsResult[JsString], fields: String*): Boolean = {
-      trustType match {
-        case JsSuccess(JsString(EMPLOYMENT_RELATED_TRUST), _) => fields.forall(field => entity.transform((__ \ field).json.pick).isSuccess)
-        case _ => true
-      }
-    }
-
-    private def hasDiscretionOrShareOfIncome: Boolean = {
-      entity.transform((__ \ HAS_DISCRETION).json.pick[JsBoolean]) match {
-        case JsSuccess(JsBoolean(true), _) => true
-        case JsSuccess(JsBoolean(false), _) => entity.transform((__ \ SHARE_OF_INCOME).json.pick).isSuccess
-        case _ => false
-      }
+      case JsSuccess(x, _) => JsSuccess(x.value.map(_.as[T]).filterNot(_.canBeIgnored).toList)
+      case _ => JsSuccess(Nil)
     }
   }
+
+  private def trustTypePick(trust: JsValue): JsResult[TypeOfTrust] = trust
+    .transform((TRUST \ DETAILS \ TYPE_OF_TRUST).json.pick[JsString])
+    .map(_.as[TypeOfTrust])
 
 }

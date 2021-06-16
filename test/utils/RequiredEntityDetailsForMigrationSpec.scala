@@ -21,19 +21,22 @@ import org.scalatest.Assertion
 import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json._
 import utils.Constants._
-import utils.JsonOps.{prunePathAndPutNewValue, putNewValue}
+import utils.JsonOps.{prunePath, prunePathAndPutNewValue, putNewValue}
 
 class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
 
   val util: RequiredEntityDetailsForMigration = injector.instanceOf[RequiredEntityDetailsForMigration]
 
-  def runTest(entities: JsPath, `type`: String, newValue: JsValue, expectedResult: Option[Boolean], typeOfTrust: String = "Will Trust or Intestacy Trust")
+  def runTest(entities: JsPath, `type`: String, newValue: JsValue, expectedResult: Option[Boolean], typeOfTrust: Option[String] = None)
              (f: JsValue => JsResult[Option[Boolean]]): Assertion = {
     val trust = getTransformedTrustResponse
       .transform(
         prunePathAndPutNewValue(entities, Json.obj()) andThen
           putNewValue(entities \ `type`, newValue) andThen
-          prunePathAndPutNewValue(TRUST \ DETAILS \ TYPE_OF_TRUST, JsString(typeOfTrust))
+          (typeOfTrust match {
+            case Some(value) => prunePathAndPutNewValue(TRUST \ DETAILS \ TYPE_OF_TRUST, JsString(value))
+            case None => prunePath(TRUST \ DETAILS \ TYPE_OF_TRUST)
+          })
       ).get
 
     val result = f(trust)
@@ -137,7 +140,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(entities, `type`, beneficiary, expectedResult = Some(false), typeOfTrust = "Employment Related")(f)
+            runTest(entities, `type`, beneficiary, expectedResult = Some(false), typeOfTrust = Some("Employment Related"))(f)
           }
         }
 
@@ -365,7 +368,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(entities, `type`, beneficiary, expectedResult = Some(true), typeOfTrust = "Employment Related")(f)
+            runTest(entities, `type`, beneficiary, expectedResult = Some(true), typeOfTrust = Some("Employment Related"))(f)
           }
         }
 
@@ -747,10 +750,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 """
                   |[
                   |  {
-                  |    "name": {
-                  |      "firstName": "Joe",
-                  |      "lastName": "Bloggs"
-                  |    },
+                  |    "name": "Org Name",
                   |    "companyTime": true,
                   |    "entityStart": "2020-01-01"
                   |  }
@@ -758,7 +758,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                   |""".stripMargin
               )
 
-              runTest(entities, `type`, settlor, expectedResult = Some(false), typeOfTrust = "Employment Related")(f)
+              runTest(entities, `type`, settlor, expectedResult = Some(false), typeOfTrust = Some("Employment Related"))(f)
             }
 
             "missing companyTime" in {
@@ -767,10 +767,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 """
                   |[
                   |  {
-                  |    "name": {
-                  |      "firstName": "Joe",
-                  |      "lastName": "Bloggs"
-                  |    },
+                  |    "name": "Org Name",
                   |    "companyType": "Trading",
                   |    "entityStart": "2020-01-01"
                   |  }
@@ -778,7 +775,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                   |""".stripMargin
               )
 
-              runTest(entities, `type`, settlor, expectedResult = Some(false), typeOfTrust = "Employment Related")(f)
+              runTest(entities, `type`, settlor, expectedResult = Some(false), typeOfTrust = Some("Employment Related"))(f)
             }
           }
         }
@@ -793,10 +790,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
               """
                 |[
                 |  {
-                |    "name": {
-                |      "firstName": "Joe",
-                |      "lastName": "Bloggs"
-                |    },
+                |    "name": "Org Name",
                 |    "entityStart": "2020-01-01"
                 |  }
                 |]
@@ -813,10 +807,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 """
                   |[
                   |  {
-                  |    "name": {
-                  |      "firstName": "Joe",
-                  |      "lastName": "Bloggs"
-                  |    },
+                  |    "name": "Org Name",
                   |    "companyType": "Trading",
                   |    "companyTime": true,
                   |    "entityStart": "2020-01-01"
@@ -825,7 +816,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                   |""".stripMargin
               )
 
-              runTest(entities, `type`, settlor, expectedResult = Some(true), typeOfTrust = "Employment Related")(f)
+              runTest(entities, `type`, settlor, expectedResult = Some(true), typeOfTrust = Some("Employment Related"))(f)
             }
           }
         }
@@ -844,10 +835,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
             """
               |[
               |  {
-              |    "name": {
-              |      "firstName": "Joe",
-              |      "lastName": "Bloggs"
-              |    },
+              |    "name": "Org Name",
               |    "entityStart": "2020-01-01",
               |    "entityEnd": "2021-01-01"
               |  }
