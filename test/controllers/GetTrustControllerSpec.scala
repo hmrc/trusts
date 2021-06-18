@@ -18,9 +18,10 @@ package controllers
 
 import config.AppConfig
 import controllers.actions.{FakeIdentifierAction, ValidateIdentifierActionProvider}
-import models.{EntityStatus, FirstTaxYearAvailable}
+import models.FirstTaxYearAvailable
 import models.get_trust.GetTrustResponse.CLOSED_REQUEST_STATUS
 import models.get_trust._
+import models.taxable_migration.MigrationStatus._
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.Mockito._
 import org.scalatest._
@@ -1648,7 +1649,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
       "return Ok with true" when {
         "beneficiaries are complete for migration" in {
 
-          when(mockRequiredDetailsUtil.areBeneficiariesCompleteForMigration(any())).thenReturn(JsSuccess(Some(true)))
+          when(mockRequiredDetailsUtil.areBeneficiariesCompleteForMigration(any())).thenReturn(JsSuccess(Updated))
 
           val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
@@ -1662,7 +1663,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
             verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
             status(result) mustBe OK
             contentType(result) mustBe Some(JSON)
-            contentAsJson(result) mustBe Json.toJson(EntityStatus(Some(true)))
+            contentAsJson(result) mustBe Json.toJson(Updated)
           }
         }
       }
@@ -1670,7 +1671,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
       "return Ok with false" when {
         "beneficiaries are not complete for migration" in {
 
-          when(mockRequiredDetailsUtil.areBeneficiariesCompleteForMigration(any())).thenReturn(JsSuccess(Some(false)))
+          when(mockRequiredDetailsUtil.areBeneficiariesCompleteForMigration(any())).thenReturn(JsSuccess(NeedsUpdating))
 
           val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
@@ -1684,7 +1685,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
             verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
             status(result) mustBe OK
             contentType(result) mustBe Some(JSON)
-            contentAsJson(result) mustBe Json.toJson(EntityStatus(Some(false)))
+            contentAsJson(result) mustBe Json.toJson(NeedsUpdating)
           }
         }
       }
@@ -1692,7 +1693,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
       "return Ok with None" when {
         "settlors are not complete for migration" in {
 
-          when(mockRequiredDetailsUtil.areBeneficiariesCompleteForMigration(any())).thenReturn(JsSuccess(None))
+          when(mockRequiredDetailsUtil.areBeneficiariesCompleteForMigration(any())).thenReturn(JsSuccess(NothingToUpdate))
 
           val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
@@ -1706,7 +1707,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
             verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
             status(result) mustBe OK
             contentType(result) mustBe Some(JSON)
-            contentAsJson(result) mustBe Json.toJson(EntityStatus(None))
+            contentAsJson(result) mustBe Json.toJson(NothingToUpdate)
           }
         }
       }
@@ -1747,7 +1748,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
       "return Ok with Some(true)" when {
         "settlors are complete for migration" in {
 
-          when(mockRequiredDetailsUtil.areSettlorsCompleteForMigration(any())).thenReturn(JsSuccess(Some(true)))
+          when(mockRequiredDetailsUtil.areSettlorsCompleteForMigration(any())).thenReturn(JsSuccess(Updated))
 
           val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
@@ -1761,7 +1762,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
             verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
             status(result) mustBe OK
             contentType(result) mustBe Some(JSON)
-            contentAsJson(result) mustBe Json.toJson(EntityStatus(Some(true)))
+            contentAsJson(result) mustBe Json.toJson(Updated)
           }
         }
       }
@@ -1769,7 +1770,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
       "return Ok with Some(false)" when {
         "settlors are not complete for migration" in {
 
-          when(mockRequiredDetailsUtil.areSettlorsCompleteForMigration(any())).thenReturn(JsSuccess(Some(false)))
+          when(mockRequiredDetailsUtil.areSettlorsCompleteForMigration(any())).thenReturn(JsSuccess(NeedsUpdating))
 
           val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
@@ -1783,7 +1784,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
             verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
             status(result) mustBe OK
             contentType(result) mustBe Some(JSON)
-            contentAsJson(result) mustBe Json.toJson(EntityStatus(Some(false)))
+            contentAsJson(result) mustBe Json.toJson(NeedsUpdating)
           }
         }
       }
@@ -1791,7 +1792,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
       "return Ok with None" when {
         "settlors are not complete for migration" in {
 
-          when(mockRequiredDetailsUtil.areSettlorsCompleteForMigration(any())).thenReturn(JsSuccess(None))
+          when(mockRequiredDetailsUtil.areSettlorsCompleteForMigration(any())).thenReturn(JsSuccess(NothingToUpdate))
 
           val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
@@ -1805,7 +1806,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
             verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
             status(result) mustBe OK
             contentType(result) mustBe Some(JSON)
-            contentAsJson(result) mustBe Json.toJson(EntityStatus(None))
+            contentAsJson(result) mustBe Json.toJson(NothingToUpdate)
           }
         }
       }

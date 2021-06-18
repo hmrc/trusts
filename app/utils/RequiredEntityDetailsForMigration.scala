@@ -16,6 +16,8 @@
 
 package utils
 
+import models.taxable_migration.MigrationStatus
+import models.taxable_migration.MigrationStatus._
 import models.variation._
 import play.api.libs.json._
 import utils.Constants._
@@ -23,7 +25,7 @@ import utils.TypeOfTrust.TypeOfTrust
 
 class RequiredEntityDetailsForMigration {
 
-  def areBeneficiariesCompleteForMigration(trust: JsValue): JsResult[Option[Boolean]] = {
+  def areBeneficiariesCompleteForMigration(trust: JsValue): JsResult[MigrationStatus] = {
 
     def pickAtPathForBeneficiaryType[T <: Beneficiary[T]](`type`: String)
                                                          (implicit rds: Reads[T]): JsResult[List[T]] = {
@@ -39,29 +41,29 @@ class RequiredEntityDetailsForMigration {
       trustType = trustTypePick(trust).asOpt
     } yield {
       if (individuals.isEmpty && companies.isEmpty && trusts.isEmpty && charities.isEmpty && others.isEmpty) {
-        None
+        NothingToUpdate
       } else {
-        Some(
+        MigrationStatus.of {
           individuals.forall(_.hasRequiredDataForMigration(trustType)) &&
             companies.forall(_.hasRequiredDataForMigration(trustType)) &&
             trusts.forall(_.hasRequiredDataForMigration(trustType)) &&
             charities.forall(_.hasRequiredDataForMigration(trustType)) &&
             others.forall(_.hasRequiredDataForMigration(trustType))
-        )
+        }
       }
     }
   }
 
-  def areSettlorsCompleteForMigration(trust: JsValue): JsResult[Option[Boolean]] = {
+  def areSettlorsCompleteForMigration(trust: JsValue): JsResult[MigrationStatus] = {
 
     for {
       businesses <- pickAtPathForEntityType[SettlorCompany](SETTLORS, BUSINESS_SETTLOR, trust)
       trustType = trustTypePick(trust).asOpt
     } yield {
       if (businesses.isEmpty) {
-        None
+        NothingToUpdate
       } else {
-        Some(businesses.forall(_.hasRequiredDataForMigration(trustType)))
+        MigrationStatus.of(businesses.forall(_.hasRequiredDataForMigration(trustType)))
       }
     }
   }
