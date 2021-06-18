@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
-package models
+package models.taxable_migration
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Format, Reads, Writes}
 
-case class EntityStatus(completed: Option[Boolean])
+object MigrationStatus extends Enumeration {
 
-object EntityStatus {
-  implicit val format: Format[EntityStatus] = Json.format[EntityStatus]
+  type MigrationStatus = Value
+
+  def of(updated: Boolean): MigrationStatus = if (updated) Updated else NeedsUpdating
+
+  val NothingToUpdate: Value = Value("nothing-to-update")
+  val NeedsUpdating: Value = Value("needs-updating")
+  val Updated: Value = Value("updated")
+
+  implicit val reads: Reads[Value] = Reads.enumNameReads(MigrationStatus)
+  implicit val writes: Writes[Value] = Writes.enumNameWrites
+  implicit val formats: Format[Value] = Format.apply(reads, writes)
 }

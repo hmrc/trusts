@@ -17,11 +17,11 @@
 package controllers
 
 import controllers.actions.{IdentifierAction, ValidateIdentifierActionProvider}
-import models.EntityStatus
 import models.auditing.TrustAuditing
 import models.get_trust.GetTrustResponse.CLOSED_REQUEST_STATUS
 import models.get_trust.{BadRequestResponse, ResourceNotFoundResponse, _}
 import models.requests.IdentifierRequest
+import models.taxable_migration.MigrationStatus.MigrationStatus
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
@@ -153,11 +153,11 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   def areSettlorsCompleteForMigration(identifier: String): Action[AnyContent] =
     areEntitiesCompleteForMigration(identifier)(requiredDetailsUtil.areSettlorsCompleteForMigration)
 
-  private def areEntitiesCompleteForMigration(identifier: String)(f: JsValue => JsResult[Option[Boolean]]): Action[AnyContent] = {
+  private def areEntitiesCompleteForMigration(identifier: String)(f: JsValue => JsResult[MigrationStatus]): Action[AnyContent] = {
     getEtmpData(identifier) {
       processed =>
         f(processed.getTrust) match {
-          case JsSuccess(value, _) => Ok(Json.toJson(EntityStatus(value)))
+          case JsSuccess(value, _) => Ok(Json.toJson(value))
           case JsError(errors) =>
             logger.error(s"[Identifier: $identifier] Failed to check entities: $errors")
             InternalServerError
