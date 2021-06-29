@@ -16,10 +16,11 @@
 
 package models.registration
 
-import java.time.LocalDateTime
-
-import play.api.libs.json._
 import models.MongoDateTimeFormats
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
+
+import java.time.LocalDateTime
 
 object RegistrationSubmission {
   // Piece to be inserted into final registration data. data == JsNull means remove value.
@@ -27,7 +28,7 @@ object RegistrationSubmission {
 
   object MappedPiece {
 
-    val path = JsPath \ "registration"
+    val path: JsPath = JsPath \ "registration"
 
     implicit lazy val format: OFormat[MappedPiece] = Json.format[MappedPiece]
   }
@@ -40,12 +41,13 @@ object RegistrationSubmission {
   }
 
   case class AnswerSection(headingKey: Option[String],
-                                                 rows: Seq[AnswerRow],
-                                                 sectionKey: Option[String])
+                           rows: Seq[AnswerRow],
+                           sectionKey: Option[String],
+                           headingArg: Option[String])
 
   object AnswerSection {
 
-    val path = JsPath \ "answerSections"
+    val path: JsPath = JsPath \ "answerSections"
 
     implicit lazy val format: OFormat[AnswerSection] = Json.format[AnswerSection]
   }
@@ -62,48 +64,39 @@ object RegistrationSubmission {
 }
 
 // Primary front end draft data (e.g, trusts-frontend), including reference and in-progress.
-case class RegistrationSubmissionDraftData(data: JsValue, reference: Option[String], inProgress: Option[Boolean])
+case class RegistrationSubmissionDraftData(data: JsValue,
+                                           reference: Option[String],
+                                           inProgress: Option[Boolean])
 
 object RegistrationSubmissionDraftData {
   implicit lazy val format: OFormat[RegistrationSubmissionDraftData] = Json.format[RegistrationSubmissionDraftData]
 }
 
 // Full draft data as stored in database.
-case class RegistrationSubmissionDraft(
-                                        draftId: String,
-                                        internalId: String,
-                                        createdAt: LocalDateTime,
-                                        draftData: JsValue,
-                                        reference: Option[String],
-                                        inProgress: Option[Boolean])
+case class RegistrationSubmissionDraft(draftId: String,
+                                       internalId: String,
+                                       createdAt: LocalDateTime,
+                                       draftData: JsValue,
+                                       reference: Option[String],
+                                       inProgress: Option[Boolean])
 
 object RegistrationSubmissionDraft {
 
-  implicit lazy val reads: Reads[RegistrationSubmissionDraft] = {
+  implicit lazy val reads: Reads[RegistrationSubmissionDraft] = (
+    (__ \ "draftId").read[String] and
+      (__ \ "internalId").read[String] and
+      (__ \ "createdAt").read(MongoDateTimeFormats.localDateTimeRead) and
+      (__ \ "draftData").read[JsValue] and
+      (__ \ "reference").readNullable[String] and
+      (__ \ "inProgress").readNullable[Boolean]
+    ) (RegistrationSubmissionDraft.apply _)
 
-    import play.api.libs.functional.syntax._
-
-    (
-      (__ \ "draftId").read[String] and
-        (__ \ "internalId").read[String] and
-        (__ \ "createdAt").read(MongoDateTimeFormats.localDateTimeRead) and
-        (__ \ "draftData").read[JsValue] and
-        (__ \ "reference").readNullable[String] and
-        (__ \ "inProgress").readNullable[Boolean]
-      ) (RegistrationSubmissionDraft.apply _)
-  }
-
-  implicit lazy val writes: OWrites[RegistrationSubmissionDraft] = {
-
-    import play.api.libs.functional.syntax._
-
-    (
-      (__ \ "draftId").write[String] and
-        (__ \ "internalId").write[String] and
-        (__ \ "createdAt").write(MongoDateTimeFormats.localDateTimeWrite) and
-        (__ \ "draftData").write[JsValue] and
-        (__ \ "reference").writeNullable[String] and
-        (__ \ "inProgress").writeNullable[Boolean]
-      ) (unlift(RegistrationSubmissionDraft.unapply))
-  }
+  implicit lazy val writes: OWrites[RegistrationSubmissionDraft] = (
+    (__ \ "draftId").write[String] and
+      (__ \ "internalId").write[String] and
+      (__ \ "createdAt").write(MongoDateTimeFormats.localDateTimeWrite) and
+      (__ \ "draftData").write[JsValue] and
+      (__ \ "reference").writeNullable[String] and
+      (__ \ "inProgress").writeNullable[Boolean]
+    ) (unlift(RegistrationSubmissionDraft.unapply))
 }

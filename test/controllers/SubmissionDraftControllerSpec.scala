@@ -22,12 +22,12 @@ import models.registration.{RegistrationSubmission, RegistrationSubmissionDraft}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatest._
-import org.scalatest.matchers.must.Matchers._
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.must.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.{JsBoolean, JsNull, JsString, JsValue, Json}
+import play.api.libs.json._
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
@@ -410,7 +410,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         backwardsCompatibilityService
       )
 
-
       when(submissionRepository.getDraft(any(), any()))
         .thenReturn(Future.successful(Some(existingDraft)))
 
@@ -440,18 +439,20 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
 
       val answerSections = List(
         RegistrationSubmission.AnswerSection(
-          Some("section1.heading"),
-          List(
+          headingKey = Some("section1.heading"),
+          rows = List(
             RegistrationSubmission.AnswerRow("label1", "answer1", "labelArg1")
           ),
-          Some("section1.key")
+          sectionKey = Some("section1.key"),
+          headingArg = None
         ),
         RegistrationSubmission.AnswerSection(
-          Some("section2.heading"),
-          List(
+          headingKey = Some("section2.heading"),
+          rows = List(
             RegistrationSubmission.AnswerRow("label2", "answer2", "labelArg2")
           ),
-          Some("section2.key")
+          sectionKey = Some("section2.key"),
+          headingArg = None
         )
       )
 
@@ -566,18 +567,20 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
 
       val answerSections = List(
         RegistrationSubmission.AnswerSection(
-          Some("section1.heading"),
-          List(
+          headingKey = Some("section1.heading"),
+          rows = List(
             RegistrationSubmission.AnswerRow("label1", "answer1", "labelArg1")
           ),
-          Some("section1.key")
+          sectionKey = Some("section1.key"),
+          headingArg = None
         ),
         RegistrationSubmission.AnswerSection(
-          Some("section2.heading"),
-          List(
+          headingKey = Some("section2.heading"),
+          rows = List(
             RegistrationSubmission.AnswerRow("label2", "answer2", "labelArg2")
           ),
-          Some("section2.key")
+          sectionKey = Some("section2.key"),
+          headingArg = None
         )
       )
 
