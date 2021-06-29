@@ -444,7 +444,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
             RegistrationSubmission.AnswerRow("label1", "answer1", "labelArg1")
           ),
           sectionKey = Some("section1.key"),
-          headingArg = None
+          headingArgs = Nil
         ),
         RegistrationSubmission.AnswerSection(
           headingKey = Some("section2.heading"),
@@ -452,7 +452,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
             RegistrationSubmission.AnswerRow("label2", "answer2", "labelArg2")
           ),
           sectionKey = Some("section2.key"),
-          headingArg = None
+          headingArgs = Nil
         )
       )
 
@@ -500,7 +500,8 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           |           "labelArg": "labelArg1"
           |         }
           |       ],
-          |       "sectionKey": "section1.key"
+          |       "sectionKey": "section1.key",
+          |       "headingArgs": []
           |     },
           |     {
           |       "headingKey": "section2.heading",
@@ -511,7 +512,8 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           |           "labelArg": "labelArg2"
           |         }
           |       ],
-          |       "sectionKey": "section2.key"
+          |       "sectionKey": "section2.key",
+          |       "headingArgs": []
           |     }
           |   ]
           | }
@@ -572,7 +574,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
             RegistrationSubmission.AnswerRow("label1", "answer1", "labelArg1")
           ),
           sectionKey = Some("section1.key"),
-          headingArg = None
+          headingArgs = Nil
         ),
         RegistrationSubmission.AnswerSection(
           headingKey = Some("section2.heading"),
@@ -580,7 +582,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
             RegistrationSubmission.AnswerRow("label2", "answer2", "labelArg2")
           ),
           sectionKey = Some("section2.key"),
-          headingArg = None
+          headingArgs = Nil
         )
       )
 
@@ -622,7 +624,8 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           |           "labelArg": "labelArg1"
           |         }
           |       ],
-          |       "sectionKey": "section1.key"
+          |       "sectionKey": "section1.key",
+          |       "headingArgs": []
           |     },
           |     {
           |       "headingKey": "section2.heading",
@@ -633,7 +636,8 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           |           "labelArg": "labelArg2"
           |         }
           |       ],
-          |       "sectionKey": "section2.key"
+          |       "sectionKey": "section2.key",
+          |       "headingArgs": []
           |     }
           |   ]
           | }

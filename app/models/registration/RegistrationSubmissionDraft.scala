@@ -30,26 +30,35 @@ object RegistrationSubmission {
 
     val path: JsPath = JsPath \ "registration"
 
-    implicit lazy val format: OFormat[MappedPiece] = Json.format[MappedPiece]
+    implicit lazy val format: Format[MappedPiece] = Json.format[MappedPiece]
   }
 
   // Answer row and section, for display in print summary.
   case class AnswerRow(label: String, answer: String, labelArg: String)
 
   object AnswerRow {
-    implicit lazy val format: OFormat[AnswerRow] = Json.format[AnswerRow]
+    implicit lazy val format: Format[AnswerRow] = Json.format[AnswerRow]
   }
 
   case class AnswerSection(headingKey: Option[String],
                            rows: Seq[AnswerRow],
                            sectionKey: Option[String],
-                           headingArg: Option[String])
+                           headingArgs: Seq[String])
 
   object AnswerSection {
 
     val path: JsPath = JsPath \ "answerSections"
 
-    implicit lazy val format: OFormat[AnswerSection] = Json.format[AnswerSection]
+    implicit val reads: Reads[AnswerSection] = (
+      (JsPath \ "headingKey").readNullable[String] and
+        (JsPath \ "rows").read[Seq[AnswerRow]] and
+        (JsPath \ "sectionKey").readNullable[String] and
+        (JsPath \ "headingArgs").readWithDefault[Seq[String]](Nil)
+      )(AnswerSection.apply _)
+    
+    implicit lazy val writes: Writes[AnswerSection] = Json.writes[AnswerSection]
+
+    implicit lazy val format: Format[AnswerSection] = Format(reads, writes)
   }
 
   // Set of data sent by sub-frontend, with user answers, status, any mapped pieces and answer sections.
@@ -59,7 +68,7 @@ object RegistrationSubmission {
                      answerSections: List[AnswerSection])
 
   object DataSet {
-    implicit lazy val format: OFormat[DataSet] = Json.format[DataSet]
+    implicit lazy val format: Format[DataSet] = Json.format[DataSet]
   }
 }
 
@@ -69,7 +78,7 @@ case class RegistrationSubmissionDraftData(data: JsValue,
                                            inProgress: Option[Boolean])
 
 object RegistrationSubmissionDraftData {
-  implicit lazy val format: OFormat[RegistrationSubmissionDraftData] = Json.format[RegistrationSubmissionDraftData]
+  implicit lazy val format: Format[RegistrationSubmissionDraftData] = Json.format[RegistrationSubmissionDraftData]
 }
 
 // Full draft data as stored in database.
