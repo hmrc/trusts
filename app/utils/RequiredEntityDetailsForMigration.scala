@@ -38,18 +38,23 @@ class RequiredEntityDetailsForMigration {
       trusts <- pickAtPathForBeneficiaryType[BeneficiaryTrustType](TRUST_BENEFICIARY)
       charities <- pickAtPathForBeneficiaryType[BeneficiaryCharityType](CHARITY_BENEFICIARY)
       others <- pickAtPathForBeneficiaryType[OtherType](OTHER_BENEFICIARY)
+      classesOfBeneficiary <- pickAtPathForBeneficiaryType[OtherType](UNIDENTIFIED_BENEFICIARY)
+      larges <- pickAtPathForBeneficiaryType[OtherType](LARGE_BENEFICIARY)
       trustType = trustTypePick(trust).asOpt
     } yield {
-      if (individuals.isEmpty && companies.isEmpty && trusts.isEmpty && charities.isEmpty && others.isEmpty) {
-        NothingToUpdate
-      } else {
-        MigrationStatus.of {
-          individuals.forall(_.hasRequiredDataForMigration(trustType)) &&
-            companies.forall(_.hasRequiredDataForMigration(trustType)) &&
-            trusts.forall(_.hasRequiredDataForMigration(trustType)) &&
-            charities.forall(_.hasRequiredDataForMigration(trustType)) &&
-            others.forall(_.hasRequiredDataForMigration(trustType))
-        }
+      (individuals, companies, trusts, charities, others, classesOfBeneficiary, larges) match {
+        case (Nil, Nil, Nil, Nil, Nil, Nil, Nil) =>
+          NeedsUpdating
+        case (Nil, Nil, Nil, Nil, Nil, _, _) =>
+          NothingToUpdate
+        case _ =>
+          MigrationStatus.of {
+            individuals.forall(_.hasRequiredDataForMigration(trustType)) &&
+              companies.forall(_.hasRequiredDataForMigration(trustType)) &&
+              trusts.forall(_.hasRequiredDataForMigration(trustType)) &&
+              charities.forall(_.hasRequiredDataForMigration(trustType)) &&
+              others.forall(_.hasRequiredDataForMigration(trustType))
+          }
       }
     }
   }
