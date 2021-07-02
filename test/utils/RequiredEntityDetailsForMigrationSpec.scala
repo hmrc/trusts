@@ -32,7 +32,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
              (f: JsValue => JsResult[MigrationStatus]): Assertion = {
 
     def removeAndAdd(): Reads[JsObject] = `type` match {
-      case None => prunePathAndPutNewValue(entities, Json.obj())
+      case None => prunePathAndPutNewValue(entities, newValue)
       case Some(t) => prunePathAndPutNewValue(entities \ INDIVIDUAL_BENEFICIARY, JsArray()) andThen
         prunePathAndPutNewValue(entities \ COMPANY_BENEFICIARY, JsArray()) andThen
         prunePathAndPutNewValue(entities \ TRUST_BENEFICIARY, JsArray()) andThen
