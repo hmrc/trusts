@@ -18,13 +18,13 @@ package transformers
 
 import models._
 import models.get_trust.TrustProcessedResponse
+import models.variation.DeclarationForApi
 import play.api.libs.json.Reads._
 import play.api.libs.json._
+import utils.Constants._
 import utils.JsonOps.{doNothing, prunePathAndPutNewValue, putNewValue}
-import java.time.LocalDate
 
-import models.variation.DeclarationForApi
-import utils.Constants.{ASSETS, IS_PORTFOLIO, SHARES_ASSET, SHARE_CLASS_DISPLAY}
+import java.time.LocalDate
 
 class DeclarationTransformer {
 
@@ -39,49 +39,50 @@ class DeclarationTransformer {
 
     responseJson.transform(
       (__ \ 'applicationType).json.prune andThen
-        (__ \ 'declaration).json.prune andThen
+        DECLARATION.json.prune andThen
         keepYearsReturnsIf5mld(is5mld) andThen
         updateCorrespondence(responseJson) andThen
         fixLeadTrusteeAddress(responseJson, pathToLeadTrustees) andThen
         convertLeadTrustee(responseJson) andThen
         addPreviousLeadTrustee(responseJson, originalJson, submissionDate) andThen
         pruneEmptyTrustees(responseJson) andThen
-        putNewValue(__ \ 'reqHeader \ 'formBundleNo, JsString(responseHeader.formBundleNo)) andThen
+        putNewValue(__ \ 'reqHeader \ FORM_BUNDLE_NUMBER, JsString(responseHeader.formBundleNo)) andThen
         addDeclaration(declarationForApi, responseJson) andThen
         addAgentIfDefined(declarationForApi.agentDetails) andThen
         addEndDateIfDefined(declarationForApi.endDate) andThen
         addSubmissionDateIf5mld(submissionDate, is5mld) andThen
-        removeAdditionalShareAssetField(responseJson)
+        removeAdditionalShareAssetFields(responseJson) andThen
+        removeAdditionalTrustDetailsField(responseJson)
     )
   }
 
-  private val pathToEntities: JsPath = __ \ 'details \ 'trust \ 'entities
-  private val pathToLeadTrustees: JsPath =  pathToEntities \ 'leadTrustees
-  private val pathToTrustees: JsPath = pathToEntities \ 'trustees
-  private val pathToLeadTrusteeAddress = pathToLeadTrustees \ 'identification \ 'address
+  private val pathToLeadTrustees: JsPath =  ENTITIES \ LEAD_TRUSTEE
+  private val pathToTrustees: JsPath = ENTITIES \ TRUSTEES
+  private val pathToLeadTrusteeAddress = pathToLeadTrustees \ IDENTIFICATION \ 'address
   private val pathToLeadTrusteePhoneNumber = pathToLeadTrustees \ 'phoneNumber
   private val pathToLeadTrusteeCountry = pathToLeadTrusteeAddress \ 'country
-  private val pathToCorrespondenceAddress = __ \ 'correspondence \ 'address
-  private val pathToCorrespondencePhoneNumber = __ \ 'correspondence \ 'phoneNumber
-  private val pathToShareAssets: JsPath = __ \ 'details \ 'trust \ ASSETS \ SHARES_ASSET
+  private val pathToCorrespondenceAddress = CORRESPONDENCE \ 'address
+  private val pathToCorrespondencePhoneNumber = CORRESPONDENCE \ 'phoneNumber
+  private val pathToShareAssets: JsPath = TRUST \ ASSETS \ SHARES_ASSET
+  private val pathToTrustDetails: JsPath = TRUST \ DETAILS
   private val pickLeadTrustee = pathToLeadTrustees.json.pick
 
   private def trusteeField(json: JsValue): String = determineTrusteeField(pathToLeadTrustees, json)
 
   private def updateCorrespondence(responseJson: JsValue): Reads[JsObject] = {
     val leadTrusteeCountry = responseJson.transform(pathToLeadTrusteeCountry.json.pick)
-    val inUk = leadTrusteeCountry.isError || leadTrusteeCountry.get == JsString("GB")
+    val inUk = leadTrusteeCountry.isError || leadTrusteeCountry.get == JsString(GB)
     pathToCorrespondenceAddress.json.prune andThen
       pathToCorrespondencePhoneNumber.json.prune andThen
-      putNewValue(__ \ 'correspondence \ 'abroadIndicator, JsBoolean(!inUk)) andThen
+      putNewValue(CORRESPONDENCE \ 'abroadIndicator, JsBoolean(!inUk)) andThen
       __.json.update(pathToCorrespondenceAddress.json.copyFrom(pathToLeadTrusteeAddress.json.pick)) andThen
       __.json.update(pathToCorrespondencePhoneNumber.json.copyFrom(pathToLeadTrusteePhoneNumber.json.pick))
   }
 
   private def fixLeadTrusteeAddress(leadTrusteeJson: JsValue, leadTrusteePath: JsPath): Reads[JsObject] = {
-    if (leadTrusteeJson.transform((leadTrusteePath \ 'identification \ 'utr).json.pick).isSuccess ||
-        leadTrusteeJson.transform((leadTrusteePath \ 'identification \ 'nino).json.pick).isSuccess) {
-      (leadTrusteePath \ 'identification \ 'address).json.prune
+    if (leadTrusteeJson.transform((leadTrusteePath \ IDENTIFICATION \ 'utr).json.pick).isSuccess ||
+        leadTrusteeJson.transform((leadTrusteePath \ IDENTIFICATION \ 'nino).json.pick).isSuccess) {
+      (leadTrusteePath \ IDENTIFICATION \ 'address).json.prune
     } else {
       doNothing()
     }
@@ -91,15 +92,15 @@ class DeclarationTransformer {
     val namePath = (rootPath \ 'name).json.pick[JsObject]
 
     json.transform(namePath).flatMap(_.validate[NameType]) match {
-      case JsSuccess(_, _) => "leadTrusteeInd"
-      case _ => "leadTrusteeOrg"
+      case JsSuccess(_, _) => INDIVIDUAL_LEAD_TRUSTEE
+      case _ => BUSINESS_LEAD_TRUSTEE
     }
   }
 
   private def addPreviousLeadTrusteeAsExpiredStep(previousLeadTrusteeJson: JsValue, date: LocalDate): Reads[JsObject] = {
     val trusteeField = determineTrusteeField(__, previousLeadTrusteeJson)
     previousLeadTrusteeJson.transform(__.json.update(
-      (__ \ 'entityEnd).json.put(Json.toJson(date))
+      (__ \ ENTITY_END).json.put(Json.toJson(date))
     )).fold(
       errors => Reads(_ => JsError(errors)),
       endedJson => {
@@ -131,7 +132,7 @@ class DeclarationTransformer {
     if (agentDetails.isDefined) {
       JsSuccess.apply(agentDetails.get.agentAddress)
     } else {
-      responseJson.transform((pathToLeadTrustees \ 'identification \ 'address).json.pick).map(_.as[AddressType])
+      responseJson.transform((pathToLeadTrustees \ IDENTIFICATION \ 'address).json.pick).map(_.as[AddressType])
     }
   }
 
@@ -146,7 +147,7 @@ class DeclarationTransformer {
     }
   }
 
-  private def removeAdditionalShareAssetField(json: JsValue): Reads[JsObject] = {
+  private def removeAdditionalShareAssetFields(json: JsValue): Reads[JsObject] = {
     json.transform(pathToShareAssets.json.pick[JsArray]) match {
       case JsSuccess(array, _) =>
         val updatedArray: JsArray = JsArray(array.value.map(x => x.as[JsObject] - IS_PORTFOLIO - SHARE_CLASS_DISPLAY))
@@ -156,11 +157,20 @@ class DeclarationTransformer {
     }
   }
 
+  private def removeAdditionalTrustDetailsField(json: JsValue): Reads[JsObject] = {
+    json.transform(pathToTrustDetails.json.pick) match {
+      case JsSuccess(value, _) =>
+        prunePathAndPutNewValue(pathToTrustDetails, value.as[JsObject] - "settlorsUkBased")
+      case _ =>
+        doNothing()
+    }
+  }
+
   private def addDeclaration(declarationForApi: DeclarationForApi, responseJson: JsValue): Reads[JsObject] = {
     declarationAddress(declarationForApi.agentDetails, responseJson) match {
       case JsSuccess(address, _) =>
         val declarationToSend = Declaration(declarationForApi.declaration.name, address)
-        putNewValue(__ \ 'declaration, Json.toJson(declarationToSend))
+        putNewValue(DECLARATION, Json.toJson(declarationToSend))
       case JsError(errors) =>
         Reads.failed(s"Unable to transform declaration due to ${JsError.toJson(errors)}")
     }
@@ -190,7 +200,7 @@ class DeclarationTransformer {
   private def addSubmissionDateIf5mld(submissionDate: LocalDate, is5mld: Boolean): Reads[JsObject] = {
     if (is5mld) {
       __.json.update(
-        (__ \ 'submissionDate).json.put(Json.toJson(submissionDate))
+        SUBMISSION_DATE.json.put(Json.toJson(submissionDate))
       )
     } else {
       doNothing()
@@ -199,7 +209,7 @@ class DeclarationTransformer {
 
   private def keepYearsReturnsIf5mld(is5mld: Boolean): Reads[JsObject] = {
     if (!is5mld) {
-      (__ \ 'yearsReturns).json.prune
+      YEARS_RETURNS.json.prune
     } else {
       doNothing()
     }

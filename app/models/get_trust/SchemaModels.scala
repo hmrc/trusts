@@ -16,13 +16,14 @@
 
 package models.get_trust
 
-import java.time.LocalDate
 import models._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import utils.Constants._
 import utils.DeedOfVariation.DeedOfVariation
 import utils.TypeOfTrust.TypeOfTrust
+
+import java.time.LocalDate
 
 case class GetTrustDesResponse(getTrust: Option[GetTrust],
                                responseHeader: ResponseHeader)
@@ -107,20 +108,22 @@ object DisplayTrust {
   implicit val trustFormat: Format[DisplayTrust] = Json.format[DisplayTrust]
 }
 
-case class TrustDetailsType(startDate: LocalDate,
-                            lawCountry: Option[String],
-                            administrationCountry: Option[String],
-                            residentialStatus: Option[ResidentialStatusType],
-                            typeOfTrust: Option[TypeOfTrust],     // now optional with 5MLD
-                            deedOfVariation: Option[DeedOfVariation],
-                            interVivos: Option[Boolean],
-                            efrbsStartDate: Option[LocalDate],
-                            trustTaxable: Option[Boolean],        // new 5MLD required
-                            expressTrust: Option[Boolean],        // new 5MLD required
-                            trustUKResident: Option[Boolean],     // new 5MLD required
-                            trustUKProperty: Option[Boolean],      // new 5MLD optional
-                            trustRecorded: Option[Boolean],       // new 5MLD required
-                            trustUKRelation: Option[Boolean]      // new 5MLD required
+case class TrustDetailsType(
+                             startDate: LocalDate,
+                             lawCountry: Option[String],
+                             administrationCountry: Option[String],
+                             residentialStatus: Option[ResidentialStatusType],
+                             typeOfTrust: Option[TypeOfTrust], // now optional with 5MLD
+                             deedOfVariation: Option[DeedOfVariation],
+                             interVivos: Option[Boolean],
+                             efrbsStartDate: Option[LocalDate],
+                             trustTaxable: Option[Boolean], // new 5MLD required
+                             expressTrust: Option[Boolean], // new 5MLD required
+                             trustUKResident: Option[Boolean], // new 5MLD required
+                             trustUKProperty: Option[Boolean], // new 5MLD optional
+                             trustRecorded: Option[Boolean], // new 5MLD required
+                             trustUKRelation: Option[Boolean], // new 5MLD required
+                             settlorsUkBased: Option[Boolean] // requires pruning before submission
                            )
 
 object TrustDetailsType {
@@ -146,13 +149,13 @@ object DisplayTrustEntitiesType {
 
   implicit val displayTrustEntitiesTypeReads : Reads[DisplayTrustEntitiesType] = (
     (__ \ OTHER_INDIVIDUALS).readNullable[List[DisplayTrustNaturalPersonType]] and
-    (__ \ BENEFICIARIES).read[DisplayTrustBeneficiaryType] and
-    (__ \ DECEASED_SETTLOR).readNullable[DisplayTrustWillType] and
-    (__ \ LEAD_TRUSTEE).read[DisplayTrustLeadTrusteeType] and
-    (__ \ TRUSTEES).readNullable[List[DisplayTrustTrusteeType]] and
-    (__ \ PROTECTORS).readNullable[DisplayTrustProtectorsType] and
-    (__ \ SETTLORS).readNullable[DisplayTrustSettlors]
-  )(
+      (__ \ BENEFICIARIES).read[DisplayTrustBeneficiaryType] and
+      (__ \ DECEASED_SETTLOR).readNullable[DisplayTrustWillType] and
+      (__ \ LEAD_TRUSTEE).read[DisplayTrustLeadTrusteeType] and
+      (__ \ TRUSTEES).readNullable[List[DisplayTrustTrusteeType]] and
+      (__ \ PROTECTORS).readNullable[DisplayTrustProtectorsType] and
+      (__ \ SETTLORS).readNullable[DisplayTrustSettlors]
+    )(
     (natural, beneficiary, deceased, leadTrustee, trustees, protectors, settlors) =>
       DisplayTrustEntitiesType(
         natural,
@@ -182,43 +185,37 @@ object DisplayTrustNaturalPersonType {
   implicit val naturalPersonTypeFormat: Format[DisplayTrustNaturalPersonType] = Json.format[DisplayTrustNaturalPersonType]
 }
 
-case class DisplayTrustLeadTrusteeIndType(
-                                           lineNo: Option[String],
-                                           bpMatchStatus: Option[String],
-                                           name: NameType,
-                                           dateOfBirth: LocalDate,
-                                           phoneNumber: String,
-                                           email: Option[String] = None,
-                                           identification: DisplayTrustIdentificationType,
-                                           countryOfResidence: Option[String],    // new 5MLD optional
-                                           legallyIncapable: Option[Boolean],     // new 5MLD optional
-                                           nationality: Option[String],           // new 5MLD optional
-                                           entityStart: Option[LocalDate]
-                                         )
+case class DisplayTrustLeadTrusteeIndType(lineNo: Option[String],
+                                          bpMatchStatus: Option[String],
+                                          name: NameType,
+                                          dateOfBirth: LocalDate,
+                                          phoneNumber: String,
+                                          email: Option[String] = None,
+                                          identification: DisplayTrustIdentificationType,
+                                          countryOfResidence: Option[String],    // new 5MLD optional
+                                          legallyIncapable: Option[Boolean],     // new 5MLD optional
+                                          nationality: Option[String],           // new 5MLD optional
+                                          entityStart: Option[LocalDate])
 
 object DisplayTrustLeadTrusteeIndType {
   implicit val leadTrusteeIndTypeFormat: Format[DisplayTrustLeadTrusteeIndType] = Json.format[DisplayTrustLeadTrusteeIndType]
 }
 
-case class DisplayTrustLeadTrusteeOrgType(
-                                           lineNo: Option[String],
-                                           bpMatchStatus: Option[String],
-                                           name: String,
-                                           phoneNumber: String,
-                                           email: Option[String] = None,
-                                           identification: DisplayTrustIdentificationOrgType,
-                                           countryOfResidence: Option[String],    // new 5MLD optional
-                                           entityStart: Option[LocalDate]
-                                         )
+case class DisplayTrustLeadTrusteeOrgType(lineNo: Option[String],
+                                          bpMatchStatus: Option[String],
+                                          name: String,
+                                          phoneNumber: String,
+                                          email: Option[String] = None,
+                                          identification: DisplayTrustIdentificationOrgType,
+                                          countryOfResidence: Option[String],    // new 5MLD optional
+                                          entityStart: Option[LocalDate])
 
 object DisplayTrustLeadTrusteeOrgType {
   implicit val leadTrusteeOrgTypeFormat: Format[DisplayTrustLeadTrusteeOrgType] = Json.format[DisplayTrustLeadTrusteeOrgType]
 }
 
-case class DisplayTrustLeadTrusteeType(
-                                        leadTrusteeInd: Option[DisplayTrustLeadTrusteeIndType] = None,
-                                        leadTrusteeOrg: Option[DisplayTrustLeadTrusteeOrgType] = None
-                                      )
+case class DisplayTrustLeadTrusteeType(leadTrusteeInd: Option[DisplayTrustLeadTrusteeIndType] = None,
+                                       leadTrusteeOrg: Option[DisplayTrustLeadTrusteeOrgType] = None)
 
 object DisplayTrustLeadTrusteeType {
 
@@ -401,8 +398,7 @@ case class DisplayTrustTrusteeIndividualType(lineNo: Option[String],
                                              countryOfResidence: Option[String],    // new 5MLD optional
                                              legallyIncapable: Option[Boolean],     // new 5MLD optional
                                              nationality: Option[String],           // new 5MLD optional
-                                             entityStart: LocalDate
-                                            )
+                                             entityStart: LocalDate)
 
 object DisplayTrustTrusteeIndividualType {
   implicit val trusteeIndividualTypeFormat: Format[DisplayTrustTrusteeIndividualType] = Json.format[DisplayTrustTrusteeIndividualType]
@@ -522,12 +518,16 @@ object PropertyLandType {
   implicit val propertyLandTypeFormat: Format[PropertyLandType] = Json.format[PropertyLandType]
 }
 
-case class DisplaySharesType(numberOfShares: Option[String],
-                             orgName: String,
-                             utr: Option[String],
-                             shareClass: Option[String],
-                             typeOfShare: Option[String],
-                             value: Option[Long])
+case class DisplaySharesType(
+                              numberOfShares: Option[String],
+                              orgName: String,
+                              utr: Option[String],
+                              shareClass: Option[String],
+                              typeOfShare: Option[String],
+                              value: Option[Long],
+                              isPortfolio: Option[Boolean], // requires pruning before submission
+                              shareClassDisplay: Option[String] // requires pruning before submission
+                            )
 
 object DisplaySharesType {
   implicit val sharesTypeFormat: Format[DisplaySharesType] = Json.format[DisplaySharesType]
@@ -561,4 +561,3 @@ case class DisplayNonEEABusinessType(lineNo: Option[String],
 object DisplayNonEEABusinessType {
   implicit val format: Format[DisplayNonEEABusinessType] = Json.format[DisplayNonEEABusinessType]
 }
-

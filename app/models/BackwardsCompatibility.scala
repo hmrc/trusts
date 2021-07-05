@@ -18,6 +18,7 @@ package models
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import utils.Constants.GB
 
 import java.time.LocalDate
 import scala.language.implicitConversions
@@ -42,7 +43,7 @@ object AgentDetailsBC {
           (__ \ "line4").readNullable[String] and
           (__ \ "postcode").readNullable[String]).tupled.map {
         case (line1, line2, line3, line4, postCode) =>
-          AddressType(line1, line2, line3, line4, postCode, "GB")
+          AddressType(line1, line2, line3, line4, postCode, GB)
       }
     }
 
