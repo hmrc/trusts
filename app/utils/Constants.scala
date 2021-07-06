@@ -20,6 +20,8 @@ import play.api.libs.json.{JsPath, __}
 
 object Constants {
 
+  val GB = "GB"
+
   val ALREADY_REGISTERED_CODE = "ALREADY_REGISTERED"
   val ALREADY_REGISTERED_TRUSTS_MESSAGE = "The trust is already registered."
   val ALREADY_REGISTERED_ESTATE_MESSAGE = "The estate is already registered."
