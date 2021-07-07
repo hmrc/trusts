@@ -25,7 +25,7 @@ import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.RegistrationSubmissionRepository
-import services.{BackwardsCompatibilityService, LocalDateTimeService}
+import services.{BackwardsCompatibilityService, LocalDateTimeService, TaxYearService}
 import utils.Constants._
 import utils.JsonOps.prunePath
 
@@ -34,11 +34,13 @@ import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubmissionRepository,
-                                          identify: IdentifierAction,
-                                          localDateTimeService: LocalDateTimeService,
-                                          cc: ControllerComponents,
-                                          backwardsCompatibilityService: BackwardsCompatibilityService
+class SubmissionDraftController @Inject()(
+                                           submissionRepository: RegistrationSubmissionRepository,
+                                           identify: IdentifierAction,
+                                           localDateTimeService: LocalDateTimeService,
+                                           cc: ControllerComponents,
+                                           backwardsCompatibilityService: BackwardsCompatibilityService,
+                                           taxYearService: TaxYearService
                                          ) extends TrustsBaseController(cc) with Logging {
 
   def setSection(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
@@ -466,4 +468,15 @@ class SubmissionDraftController @Inject()(submissionRepository: RegistrationSubm
       case _ => Future.successful(NotFound)
     }
   }
+
+  def getFirstTaxYearAvailable: Action[JsValue] = identify(parse.json) {
+    implicit request =>
+
+      request.body.validate[LocalDate] match {
+        case JsSuccess(startDate, _) =>
+          Ok(Json.toJson(taxYearService.firstTaxYearAvailable(startDate)))
+        case _ => BadRequest
+      }
+  }
+
 }

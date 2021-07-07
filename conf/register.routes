@@ -69,3 +69,5 @@ GET         /submission-drafts/:draftId/correspondence-address controllers.Submi
 #Used by all register-trust frontends to determine taxable / non taxable journey
 
 GET         /submission-drafts/:draftId/is-trust-taxable       controllers.SubmissionDraftController.getTrustTaxable(draftId: String)
+
+GET         /first-tax-year-available                          controllers.SubmissionDraftController.getFirstTaxYearAvailable
