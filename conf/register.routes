@@ -70,4 +70,4 @@ GET         /submission-drafts/:draftId/correspondence-address controllers.Submi
 
 GET         /submission-drafts/:draftId/is-trust-taxable       controllers.SubmissionDraftController.getTrustTaxable(draftId: String)
 
-GET         /first-tax-year-available                          controllers.SubmissionDraftController.getFirstTaxYearAvailable
+GET         /submission-drafts/:draftId/first-tax-year-available        controllers.SubmissionDraftController.getFirstTaxYearAvailable(draftId: String)

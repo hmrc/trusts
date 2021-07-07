@@ -17,15 +17,16 @@
 package controllers
 
 import controllers.actions.IdentifierAction
-import models._
 import models.registration.RegistrationSubmission.{AnswerSection, MappedPiece}
-import models.registration.{RegistrationSubmission, RegistrationSubmissionDraft, RegistrationSubmissionDraftData}
+import models.registration.{RegistrationSubmission, RegistrationSubmissionDraft, RegistrationSubmissionDraftData, Status => EntityStatus}
 import models.requests.IdentifierRequest
+import models.{AddressType, FirstTaxYearAvailable, LeadTrusteeType}
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.RegistrationSubmissionRepository
 import services.{BackwardsCompatibilityService, LocalDateTimeService, TaxYearService}
+import uk.gov.hmrc.http.NotFoundException
 import utils.Constants._
 import utils.JsonOps.prunePath
 
@@ -33,6 +34,7 @@ import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 
 class SubmissionDraftController @Inject()(
                                            submissionRepository: RegistrationSubmissionRepository,
@@ -102,8 +104,8 @@ class SubmissionDraftController @Inject()(
     }
   }
 
-  private def setStatus(key: String, statusOpt: Option[registration.Status] = None): Reads[JsObject] = {
-    val sectionPath = registration.Status.path \ key
+  private def setStatus(key: String, statusOpt: Option[EntityStatus] = None): Reads[JsObject] = {
+    val sectionPath = EntityStatus.path \ key
 
     statusOpt match {
       case Some(status) =>
@@ -188,16 +190,13 @@ class SubmissionDraftController @Inject()(
   def getDrafts: Action[AnyContent] = identify.async { request =>
     submissionRepository.getRecentDrafts(request.internalId, request.affinityGroup).map {
       drafts =>
-        implicit val draftWrites: Writes[RegistrationSubmissionDraft] = new Writes[RegistrationSubmissionDraft] {
-          override def writes(draft: RegistrationSubmissionDraft): JsValue = {
+        implicit val draftWrites: Writes[RegistrationSubmissionDraft] = (draft: RegistrationSubmissionDraft) => {
+          val obj = Json.obj(
+            CREATED_AT -> draft.createdAt,
+            DRAFT_ID -> draft.draftId
+          )
 
-            val obj = Json.obj(
-              CREATED_AT -> draft.createdAt,
-              DRAFT_ID -> draft.draftId
-            )
-
-            addReferenceIfDefined(obj, draft.reference)
-          }
+          addReferenceIfDefined(obj, draft.reference)
         }
 
         Ok(Json.toJson(drafts))
@@ -237,21 +236,25 @@ class SubmissionDraftController @Inject()(
     }
   }
 
+  private val whenTrustSetupPath: JsPath = JsPath \ "trustDetails" \ "data" \ "trustDetails" \ "whenTrustSetup"
+
   def getWhenTrustSetup(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
 
-      val reads: Reads[LocalDate] = Reads.DefaultLocalDateReads
-      val writes: Writes[LocalDate] = (date: LocalDate) => Json.obj("startDate" -> date)
+      getResult[LocalDate, JsValue](draftId, whenTrustSetupPath)(x => Json.obj("startDate" -> x))
+  }
 
-      val path = JsPath \ "trustDetails" \ "data" \ "trustDetails" \ "whenTrustSetup"
-      getAtPath[LocalDate](draftId, path)(request, reads, writes)
+  def getFirstTaxYearAvailable(draftId: String): Action[AnyContent] = identify.async {
+    implicit request =>
+
+      getResult[LocalDate, FirstTaxYearAvailable](draftId, whenTrustSetupPath)(taxYearService.firstTaxYearAvailable)
   }
 
   def getTrustTaxable(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
 
       val path = JsPath \ "main" \ "data" \ "trustTaxable"
-      getAtPath[Boolean](draftId, path)
+      getResult[Boolean](draftId, path)
   }
 
   def getTrustName(draftId: String): Action[AnyContent] = identify.async {
@@ -292,14 +295,16 @@ class SubmissionDraftController @Inject()(
   def getLeadTrustee(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
       val path = JsPath \ "registration" \ "trust/entities/leadTrustees"
-      getAtPath[LeadTrusteeType](draftId, path)(request, LeadTrusteeType.leadTrusteeTypeReads, LeadTrusteeType.writes)
+      implicit val writes: Writes[LeadTrusteeType] = LeadTrusteeType.writes
+
+      getResult[LeadTrusteeType](draftId, path)
   }
 
   def reset(draftId: String, section: String, mappedDataKey: String): Action[AnyContent] = identify.async {
     implicit request =>
       submissionRepository.getDraft(draftId, request.internalId).flatMap {
         case Some(draft) =>
-          val statusPath = registration.Status.path \ section
+          val statusPath = EntityStatus.path \ section
           val userAnswersPath = __ \ section
           val rowsPath = AnswerSection.path \ section
           val mappedDataPath = MappedPiece.path \ mappedDataKey
@@ -377,36 +382,51 @@ class SubmissionDraftController @Inject()(
   def getCorrespondenceAddress(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
       val path: JsPath = JsPath \ "registration" \ "correspondence/address"
-      getAtPath[AddressType](draftId, path)
+      getResult[AddressType](draftId, path)
   }
 
   def getAgentAddress(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
       val path: JsPath = JsPath \ "registration" \ "agentDetails" \ "agentAddress"
-      getAtPath[AddressType](draftId, path)
+      getResult[AddressType](draftId, path)
   }
 
   def getClientReference(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
       val path: JsPath = JsPath \ "registration" \ "agentDetails" \ "clientReference"
-      getAtPath[String](draftId, path)
+      getResult[String](draftId, path)
+  }
+
+  private def getResult[T](draftId: String, path: JsPath)
+                          (implicit request: IdentifierRequest[AnyContent], rds: Reads[T], wts: Writes[T]): Future[Result] = {
+    getResult[T, T](draftId, path)(x => x)
+  }
+
+  private def getResult[A, B](draftId: String, path: JsPath)
+                             (f: A => B)
+                             (implicit request: IdentifierRequest[AnyContent], rds: Reads[A], wts: Writes[B]): Future[Result] = {
+    getAtPath[A](draftId, path) map {
+      case Success(value) =>
+        logger.info(s"[Session ID: ${request.sessionId}] value found at $path")
+        Ok(Json.toJson(f(value)))
+      case Failure(exception) =>
+        logger.warn(exception.getMessage)
+        NotFound
+    }
   }
 
   private def getAtPath[T](draftId: String, path: JsPath)
-                          (implicit request: IdentifierRequest[AnyContent], rds: Reads[T], wts: Writes[T]): Future[Result] = {
+                          (implicit request: IdentifierRequest[AnyContent], rds: Reads[T]): Future[Try[T]] = {
     submissionRepository.getDraft(draftId, request.internalId).map {
       case Some(draft) =>
         draft.draftData.transform(path.json.pick).map(_.as[T]) match {
           case JsSuccess(value, _) =>
-            logger.info(s"[Session ID: ${request.sessionId}] value found at $path")
-            Ok(Json.toJson(value))
+            Success(value)
           case _: JsError =>
-            logger.info(s"[Session ID: ${request.sessionId}] value not found at $path")
-            NotFound
+            Failure(new NotFoundException(s"[Session ID: ${request.sessionId}] value not found at $path"))
         }
       case None =>
-        logger.info(s"[Session ID: ${request.sessionId}] no draft, cannot return value at $path")
-        NotFound
+        Failure(new NotFoundException(s"[Session ID: ${request.sessionId}] no draft, cannot return value at $path"))
     }
   }
 
@@ -467,16 +487,6 @@ class SubmissionDraftController @Inject()(
 
       case _ => Future.successful(NotFound)
     }
-  }
-
-  def getFirstTaxYearAvailable: Action[JsValue] = identify(parse.json) {
-    implicit request =>
-
-      request.body.validate[LocalDate] match {
-        case JsSuccess(startDate, _) =>
-          Ok(Json.toJson(taxYearService.firstTaxYearAvailable(startDate)))
-        case _ => BadRequest
-      }
   }
 
 }

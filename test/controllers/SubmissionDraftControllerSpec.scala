@@ -2369,9 +2369,8 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       when(taxYearService.firstTaxYearAvailable(any())).thenReturn(firstTaxYearAvailable)
 
       val request = FakeRequest("GET", "path")
-        .withBody(Json.toJson(date))
 
-      val result = controller.getFirstTaxYearAvailable.apply(request)
+      val result = controller.getFirstTaxYearAvailable(draftId).apply(request)
 
       status(result) mustBe OK
 
@@ -2381,7 +2380,30 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       verify(taxYearService).firstTaxYearAvailable(date)
     }
 
-    "respond with BadRequest when request body cannot be validated as LocalDate" in {
+    "respond with NotFound when no draft" in {
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService,
+        taxYearService
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getFirstTaxYearAvailable(draftId).apply(request)
+
+      status(result) mustBe NOT_FOUND
+    }
+
+    "respond with NotFound when no start date in draft" in {
       val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
@@ -2398,11 +2420,10 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         .thenReturn(Future.successful(Some(mockSubmissionDraftNoData)))
 
       val request = FakeRequest("GET", "path")
-        .withBody(Json.toJson("not a date"))
 
-      val result = controller.getFirstTaxYearAvailable.apply(request)
+      val result = controller.getFirstTaxYearAvailable(draftId).apply(request)
 
-      status(result) mustBe BAD_REQUEST
+      status(result) mustBe NOT_FOUND
     }
 
   }
