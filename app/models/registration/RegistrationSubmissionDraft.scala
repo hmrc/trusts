@@ -34,10 +34,28 @@ object RegistrationSubmission {
   }
 
   // Answer row and section, for display in print summary.
-  case class AnswerRow(label: String, answer: String, labelArg: String)
+  case class AnswerRow(label: String,
+                       answer: String,
+                       labelArgs: Seq[String])
 
   object AnswerRow {
-    implicit lazy val format: Format[AnswerRow] = Json.format[AnswerRow]
+
+    lazy val labelArgReads: Reads[Seq[String]] =
+      (JsPath \ "labelArg").read[String].map[Seq[String]] {
+        case x if x.isEmpty => Nil
+        case x => x :: Nil
+      } orElse
+        (JsPath \ "labelArgs").readWithDefault[Seq[String]](Nil)
+
+    implicit lazy val reads: Reads[AnswerRow] = (
+      (JsPath \ "label").read[String] and
+        (JsPath \ "answer").read[String] and
+        labelArgReads
+      )(AnswerRow.apply _)
+
+    implicit lazy val writes: Writes[AnswerRow] = Json.writes[AnswerRow]
+
+    implicit lazy val format: Format[AnswerRow] = Format(reads, writes)
   }
 
   case class AnswerSection(headingKey: Option[String],
@@ -55,7 +73,7 @@ object RegistrationSubmission {
         (JsPath \ "sectionKey").readNullable[String] and
         (JsPath \ "headingArgs").readWithDefault[Seq[String]](Nil)
       )(AnswerSection.apply _)
-    
+
     implicit lazy val writes: Writes[AnswerSection] = Json.writes[AnswerSection]
 
     implicit lazy val format: Format[AnswerSection] = Format(reads, writes)
