@@ -502,7 +502,9 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           |         {
           |           "label": "label1",
           |           "answer": "answer1",
-          |           "labelArg": "labelArg1"
+          |           "labelArgs": [
+          |             "labelArg1"
+          |           ]
           |         }
           |       ],
           |       "sectionKey": "section1.key",
@@ -514,7 +516,9 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           |         {
           |           "label": "label2",
           |           "answer": "answer2",
-          |           "labelArg": "labelArg2"
+          |           "labelArgs": [
+          |             "labelArg2"
+          |           ]
           |         }
           |       ],
           |       "sectionKey": "section2.key",
@@ -627,7 +631,9 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           |         {
           |           "label": "label1",
           |           "answer": "answer1",
-          |           "labelArg": "labelArg1"
+          |           "labelArgs": [
+          |             "labelArg1"
+          |           ]
           |         }
           |       ],
           |       "sectionKey": "section1.key",
@@ -639,7 +645,9 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           |         {
           |           "label": "label2",
           |           "answer": "answer2",
-          |           "labelArg": "labelArg2"
+          |           "labelArgs": [
+          |             "labelArg2"
+          |           ]
           |         }
           |       ],
           |       "sectionKey": "section2.key",
