@@ -410,7 +410,7 @@ class SubmissionDraftController @Inject()(
         logger.info(s"[Session ID: ${request.sessionId}] value found at $path")
         Ok(Json.toJson(f(value)))
       case Failure(exception) =>
-        logger.warn(exception.getMessage)
+        logger.info(exception.getMessage)
         NotFound
     }
   }
