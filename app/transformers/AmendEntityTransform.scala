@@ -16,11 +16,12 @@
 
 package transformers
 
-import java.time.LocalDate
 import play.api.libs.json.{JsPath, JsResult, JsValue, Json}
 import utils.Constants._
 
-trait AmendEntityTransform extends DeltaTransform with JsonOperations {
+import java.time.LocalDate
+
+trait AmendEntityTransform extends DeltaTransform with AmendableTransform {
 
   val index: Option[Int]
   val amended: JsValue

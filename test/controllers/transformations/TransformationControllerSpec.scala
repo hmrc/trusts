@@ -87,29 +87,29 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
 
       "return OK" when {
         "successfully removed transforms" in {
-          when(mockTransformationService.removeTrustTypeDependentMigrationTransforms(any(), any()))
+          when(mockTransformationService.amendTrustTypeDependentMigrationTransforms(any(), any()))
             .thenReturn(Future.successful(true))
 
           val request = FakeRequest(DELETE, "path")
 
-          val result = transformationController.removeTrustTypeDependentMigrationTransforms(identifier).apply(request)
+          val result = transformationController.amendTrustTypeDependentMigrationTransforms(identifier).apply(request)
           status(result) mustBe OK
 
-          verify(mockTransformationService).removeTrustTypeDependentMigrationTransforms(identifier, "id")
+          verify(mockTransformationService).amendTrustTypeDependentMigrationTransforms(identifier, "id")
         }
       }
 
       "return INTERNAL_SERVER_ERROR" when {
         "failed to remove transforms" in {
-          when(mockTransformationService.removeTrustTypeDependentMigrationTransforms(any(), any()))
+          when(mockTransformationService.amendTrustTypeDependentMigrationTransforms(any(), any()))
             .thenReturn(Future.failed(new Throwable()))
 
           val request = FakeRequest(DELETE, "path")
 
-          val result = transformationController.removeTrustTypeDependentMigrationTransforms(identifier).apply(request)
+          val result = transformationController.amendTrustTypeDependentMigrationTransforms(identifier).apply(request)
           status(result) mustBe INTERNAL_SERVER_ERROR
 
-          verify(mockTransformationService).removeTrustTypeDependentMigrationTransforms(identifier, "id")
+          verify(mockTransformationService).amendTrustTypeDependentMigrationTransforms(identifier, "id")
         }
       }
     }

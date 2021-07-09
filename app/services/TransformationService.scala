@@ -134,7 +134,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
 
     }.flatMap(newTransforms =>
       repository.set(identifier, internalId, newTransforms)).recoverWith {
-        case e =>
+      case e =>
         logger.error(s"Exception adding new transform: ${e.getMessage}")
         Future.failed(e)
     }
@@ -144,16 +144,16 @@ class TransformationService @Inject()(repository: TransformationRepository,
     repository.resetCache(identifier, internalId)
   }
 
-  def removeTrustTypeDependentMigrationTransforms(identifier: String, internalId: String): Future[Boolean] = {
+  def amendTrustTypeDependentMigrationTransforms(identifier: String, internalId: String): Future[Boolean] = {
     for {
       transforms <- repository.get(identifier, internalId)
       updatedTransforms = transforms match {
-        case Some(value) => ComposedDeltaTransform(value.deltaTransforms.filter {
-          case AddBeneficiaryTransform(_, INDIVIDUAL_BENEFICIARY) => false
-          case AmendBeneficiaryTransform(_, _, _, _, INDIVIDUAL_BENEFICIARY) => false
-          case AddSettlorTransform(_, BUSINESS_SETTLOR) => false
-          case AmendSettlorTransform(_, _, _, _, BUSINESS_SETTLOR) => false
-          case _ => true
+        case Some(value) => ComposedDeltaTransform(value.deltaTransforms.map {
+          case x: AddBeneficiaryTransform => x.copy(entity = x.removeTrustTypeDependentFields(x.entity))
+          case x: AmendBeneficiaryTransform => x.copy(amended = x.removeTrustTypeDependentFields(x.amended))
+          case x: AddSettlorTransform => x.copy(entity = x.removeTrustTypeDependentFields(x.entity))
+          case x: AmendSettlorTransform => x.copy(amended = x.removeTrustTypeDependentFields(x.amended))
+          case x => x
         })
         case None => ComposedDeltaTransform()
       }

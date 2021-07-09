@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-package transformers.beneficiaries
+package transformers
 
-import play.api.libs.json._
-import transformers.AddEntityTransform
-import utils.Constants.ROLE_IN_COMPANY
+import play.api.libs.json.JsValue
 
-case class AddBeneficiaryTransform(entity: JsValue,
-                                   `type`: String) extends BeneficiaryTransform with AddEntityTransform {
+trait AmendableTransform extends JsonOperations {
 
-  override val trustTypeDependentFields: Seq[String] = Seq(ROLE_IN_COMPANY)
-}
+  val trustTypeDependentFields: Seq[String] = Nil
 
-object AddBeneficiaryTransform {
+  def removeTrustTypeDependentFields(value: JsValue): JsValue = removeJsValueFields(value, trustTypeDependentFields)
 
-  val key = "AddBeneficiaryTransform"
-
-  implicit val format: Format[AddBeneficiaryTransform] = Json.format[AddBeneficiaryTransform]
 }

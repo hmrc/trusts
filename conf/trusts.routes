@@ -40,6 +40,6 @@ GET         /:identifier/taxable-migration/migrating-to-taxable                 
 POST        /:identifier/taxable-migration/migrating-to-taxable                             controllers.TaxableMigrationController.setTaxableMigrationFlag(identifier: String)
 
 DELETE      /:identifier/transforms                                                         controllers.transformations.TransformationController.removeTransforms(identifier: String)
-DELETE      /:identifier/trust-type-dependent-transforms                                    controllers.transformations.TransformationController.removeTrustTypeDependentMigrationTransforms(identifier: String)
+PUT         /:identifier/amend-trust-type-dependent-transforms                              controllers.transformations.TransformationController.amendTrustTypeDependentMigrationTransforms(identifier: String)
 
 GET         /:identifier/is-trust-5mld                                                      controllers.GetTrustController.isTrust5mld(identifier: String)

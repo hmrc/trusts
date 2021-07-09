@@ -18,7 +18,7 @@ package transformers
 
 import play.api.libs.json.{JsPath, JsResult, JsValue}
 
-trait AddEntityTransform extends DeltaTransform with JsonOperations {
+trait AddEntityTransform extends DeltaTransform with AmendableTransform {
 
   val path: JsPath
   val entity: JsValue
