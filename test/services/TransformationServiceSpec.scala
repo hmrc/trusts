@@ -329,7 +329,7 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
         when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
         when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
-        val result = service.amendTrustTypeDependentMigrationTransforms(utr, internalId)
+        val result = service.removeTrustTypeDependentTransformFields(utr, internalId)
 
         whenReady(result) { _ =>
           verify(repository).set(

@@ -144,7 +144,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
     repository.resetCache(identifier, internalId)
   }
 
-  def amendTrustTypeDependentMigrationTransforms(identifier: String, internalId: String): Future[Boolean] = {
+  def removeTrustTypeDependentTransformFields(identifier: String, internalId: String): Future[Boolean] = {
     for {
       transforms <- repository.get(identifier, internalId)
       updatedTransforms = transforms match {
