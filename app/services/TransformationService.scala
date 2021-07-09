@@ -23,8 +23,8 @@ import play.api.Logging
 import play.api.libs.json.{JsObject, JsResult, JsSuccess, JsValue, Json, __, _}
 import repositories.TransformationRepository
 import transformers._
-import transformers.beneficiaries.AmendBeneficiaryTransform
-import transformers.settlors.AmendSettlorTransform
+import transformers.beneficiaries.{AddBeneficiaryTransform, AmendBeneficiaryTransform}
+import transformers.settlors.{AddSettlorTransform, AmendSettlorTransform}
 import transformers.trustdetails.SetTrustDetailTransform
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.Constants._
@@ -149,7 +149,9 @@ class TransformationService @Inject()(repository: TransformationRepository,
       transforms <- repository.get(identifier, internalId)
       updatedTransforms = transforms match {
         case Some(value) => ComposedDeltaTransform(value.deltaTransforms.filter {
+          case AddBeneficiaryTransform(_, INDIVIDUAL_BENEFICIARY) => false
           case AmendBeneficiaryTransform(_, _, _, _, INDIVIDUAL_BENEFICIARY) => false
+          case AddSettlorTransform(_, BUSINESS_SETTLOR) => false
           case AmendSettlorTransform(_, _, _, _, BUSINESS_SETTLOR) => false
           case _ => true
         })
