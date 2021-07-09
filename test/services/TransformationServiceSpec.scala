@@ -21,16 +21,16 @@ import models.variation.{AmendedLeadTrusteeIndType, IdentificationType}
 import models.{AddressType, NameType}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.matchers.must.Matchers._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers._
 import org.scalatest.time.{Millis, Span}
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.libs.json.{JsBoolean, JsResult, JsString, JsValue, Json}
+import play.api.libs.json._
 import repositories.TransformationRepositoryImpl
 import transformers._
-import transformers.beneficiaries.AmendBeneficiaryTransform
-import transformers.settlors.AmendSettlorTransform
+import transformers.beneficiaries.{AddBeneficiaryTransform, AmendBeneficiaryTransform}
+import transformers.settlors.{AddSettlorTransform, AmendSettlorTransform}
 import transformers.trustdetails.SetTrustDetailTransform
 import transformers.trustees._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -292,22 +292,44 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
       }
     }
 
-    "when .removeTrustTypeDependentMigrationTransforms" - {
-      "must remove all amend individual beneficiary and business settlor transforms" in {
+    "when .amendTrustTypeDependentMigrationTransforms" - {
+      "must amend individual beneficiary and business settlor transforms that contain trust-type-dependent fields" in {
+
+        val trustTypeDependentBeneficiaryFields = Json.parse(
+          """
+            |{
+            |  "beneficiaryType": "Director"
+            |}
+            |""".stripMargin)
+
+        val trustTypeDependentSettlorFields = Json.parse(
+          """
+            |{
+            |  "companyType": "Trading",
+            |  "companyTime": true
+            |}
+            |""".stripMargin)
+
         val repository = mock[TransformationRepositoryImpl]
         val service = new TransformationService(repository, mock[TrustsService], auditService)
 
         val existingTransforms = Seq(
           AmendTrusteeTransform(None, Json.obj(), Json.obj(), LocalDate.now(), INDIVIDUAL_LEAD_TRUSTEE),
+          AddSettlorTransform(trustTypeDependentSettlorFields, BUSINESS_SETTLOR),
+          AddSettlorTransform(Json.obj(), BUSINESS_SETTLOR),
+          AmendSettlorTransform(None, trustTypeDependentSettlorFields, Json.obj(), LocalDate.now(), BUSINESS_SETTLOR),
           AmendSettlorTransform(None, Json.obj(), Json.obj(), LocalDate.now(), BUSINESS_SETTLOR),
           AmendSettlorTransform(None, Json.obj(), Json.obj(), LocalDate.now(), INDIVIDUAL_SETTLOR),
+          AddBeneficiaryTransform(trustTypeDependentBeneficiaryFields, INDIVIDUAL_BENEFICIARY),
+          AddBeneficiaryTransform(Json.obj(), INDIVIDUAL_BENEFICIARY),
+          AmendBeneficiaryTransform(None, trustTypeDependentBeneficiaryFields, Json.obj(), LocalDate.now(), INDIVIDUAL_BENEFICIARY),
           AmendBeneficiaryTransform(None, Json.obj(), Json.obj(), LocalDate.now(), INDIVIDUAL_BENEFICIARY),
           AmendBeneficiaryTransform(None, Json.obj(), Json.obj(), LocalDate.now(), COMPANY_BENEFICIARY)
         )
         when(repository.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
         when(repository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
-        val result = service.removeTrustTypeDependentMigrationTransforms(utr, internalId)
+        val result = service.removeTrustTypeDependentTransformFields(utr, internalId)
 
         whenReady(result) { _ =>
           verify(repository).set(
@@ -315,7 +337,15 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
             internalId,
             ComposedDeltaTransform(Seq(
               AmendTrusteeTransform(None, Json.obj(), Json.obj(), LocalDate.now(), INDIVIDUAL_LEAD_TRUSTEE),
+              AddSettlorTransform(Json.obj(), BUSINESS_SETTLOR),
+              AddSettlorTransform(Json.obj(), BUSINESS_SETTLOR),
+              AmendSettlorTransform(None, Json.obj(), Json.obj(), LocalDate.now(), BUSINESS_SETTLOR),
+              AmendSettlorTransform(None, Json.obj(), Json.obj(), LocalDate.now(), BUSINESS_SETTLOR),
               AmendSettlorTransform(None, Json.obj(), Json.obj(), LocalDate.now(), INDIVIDUAL_SETTLOR),
+              AddBeneficiaryTransform(Json.obj(), INDIVIDUAL_BENEFICIARY),
+              AddBeneficiaryTransform(Json.obj(), INDIVIDUAL_BENEFICIARY),
+              AmendBeneficiaryTransform(None, Json.obj(), Json.obj(), LocalDate.now(), INDIVIDUAL_BENEFICIARY),
+              AmendBeneficiaryTransform(None, Json.obj(), Json.obj(), LocalDate.now(), INDIVIDUAL_BENEFICIARY),
               AmendBeneficiaryTransform(None, Json.obj(), Json.obj(), LocalDate.now(), COMPANY_BENEFICIARY)
             ))
           )

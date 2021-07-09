@@ -28,6 +28,8 @@ case class AmendBeneficiaryTransform(index: Option[Int],
                                      endDate: LocalDate,
                                      `type`: String) extends BeneficiaryTransform with AmendEntityTransform {
 
+  override val trustTypeDependentFields: Seq[String] = Seq(ROLE_IN_COMPANY)
+
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     if (`type` == UNIDENTIFIED_BENEFICIARY) {
       val description: String = amended.as[JsString].value

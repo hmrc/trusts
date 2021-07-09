@@ -23,8 +23,8 @@ import play.api.Logging
 import play.api.libs.json.{JsObject, JsResult, JsSuccess, JsValue, Json, __, _}
 import repositories.TransformationRepository
 import transformers._
-import transformers.beneficiaries.AmendBeneficiaryTransform
-import transformers.settlors.AmendSettlorTransform
+import transformers.beneficiaries.{AddBeneficiaryTransform, AmendBeneficiaryTransform}
+import transformers.settlors.{AddSettlorTransform, AmendSettlorTransform}
 import transformers.trustdetails.SetTrustDetailTransform
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.Constants._
@@ -134,7 +134,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
 
     }.flatMap(newTransforms =>
       repository.set(identifier, internalId, newTransforms)).recoverWith {
-        case e =>
+      case e =>
         logger.error(s"Exception adding new transform: ${e.getMessage}")
         Future.failed(e)
     }
@@ -144,14 +144,16 @@ class TransformationService @Inject()(repository: TransformationRepository,
     repository.resetCache(identifier, internalId)
   }
 
-  def removeTrustTypeDependentMigrationTransforms(identifier: String, internalId: String): Future[Boolean] = {
+  def removeTrustTypeDependentTransformFields(identifier: String, internalId: String): Future[Boolean] = {
     for {
       transforms <- repository.get(identifier, internalId)
       updatedTransforms = transforms match {
-        case Some(value) => ComposedDeltaTransform(value.deltaTransforms.filter {
-          case AmendBeneficiaryTransform(_, _, _, _, INDIVIDUAL_BENEFICIARY) => false
-          case AmendSettlorTransform(_, _, _, _, BUSINESS_SETTLOR) => false
-          case _ => true
+        case Some(value) => ComposedDeltaTransform(value.deltaTransforms.map {
+          case x: AddBeneficiaryTransform => x.copy(entity = x.removeTrustTypeDependentFields(x.entity))
+          case x: AmendBeneficiaryTransform => x.copy(amended = x.removeTrustTypeDependentFields(x.amended))
+          case x: AddSettlorTransform => x.copy(entity = x.removeTrustTypeDependentFields(x.entity))
+          case x: AmendSettlorTransform => x.copy(amended = x.removeTrustTypeDependentFields(x.amended))
+          case x => x
         })
         case None => ComposedDeltaTransform()
       }

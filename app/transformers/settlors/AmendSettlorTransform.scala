@@ -29,6 +29,8 @@ case class AmendSettlorTransform(index: Option[Int],
                                  endDate: LocalDate,
                                  `type`: String) extends SettlorTransform with AmendEntityTransform {
 
+  override val trustTypeDependentFields: Seq[String] = Seq(COMPANY_TYPE, COMPANY_TIME)
+
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     if (isDeceasedSettlor) {
       amendDeceasedAndPreserveData(input)
