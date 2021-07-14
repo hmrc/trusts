@@ -1180,6 +1180,107 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
 
   }
 
+  ".getTrustUtr" should {
+
+    "respond with OK and trust utr when answered as part of trust matching" in {
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService,
+        taxYearService
+      )
+
+      val cache = Json.parse(
+        """
+          |{
+          |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+          |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
+          |    "createdAt" : { "$date" : 1597323808000 },
+          |    "draftData" : {
+          |       "main" : {
+          |            "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+          |            "data" : {
+          |                "matching" : {
+          |                    "whatIsTheUTR" : "1234567890"
+          |                }
+          |            },
+          |            "progress" : "InProgress",
+          |            "createdAt" : "2020-08-13T13:37:53.787Z",
+          |            "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54"
+          |        }
+          |    },
+          |    "inProgress" : true
+          |}
+          |""".stripMargin).as[RegistrationSubmissionDraft]
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(cache)))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getTrustUtr(draftId).apply(request)
+
+      status(result) mustBe OK
+
+      val expectedDraftJson = JsString("1234567890")
+
+      contentType(result) mustBe Some(JSON)
+      contentAsJson(result) mustBe expectedDraftJson
+    }
+
+    "respond with NotFound when no draft" in {
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService,
+        taxYearService
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getTrustUtr(draftId).apply(request)
+
+      status(result) mustBe NOT_FOUND
+    }
+
+    "respond with NotFound when no trust utr in draft" in {
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents(),
+        backwardsCompatibilityService,
+        taxYearService
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(mockSubmissionDraftNoData)))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getTrustUtr(draftId).apply(request)
+
+      status(result) mustBe NOT_FOUND
+    }
+
+  }
+
   ".getWhenTrustSetup" should {
 
     "respond with OK with the start date at the new path" in {

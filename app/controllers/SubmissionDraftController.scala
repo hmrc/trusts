@@ -288,6 +288,13 @@ class SubmissionDraftController @Inject()(
       }
   }
 
+  def getTrustUtr(draftId: String): Action[AnyContent] = identify.async {
+    implicit request =>
+
+      val path = JsPath \ "main" \ "data" \ "matching" \ "whatIsTheUTR"
+      getResult[String](draftId, path)
+  }
+
   private def get[T](draftData: JsValue, path: JsPath)(implicit rds: Reads[T]): JsResult[T] = {
     draftData.transform(path.json.pick).map(_.as[T])
   }
