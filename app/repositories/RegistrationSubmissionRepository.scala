@@ -21,7 +21,6 @@ import play.api.Logging
 import play.api.libs.json._
 import reactivemongo.api.Cursor
 import reactivemongo.api.indexes.IndexType
-import reactivemongo.bson.BSONDocument
 import reactivemongo.play.json.compat._
 import reactivemongo.play.json.collection.JSONCollection
 import uk.gov.hmrc.auth.core.AffinityGroup
@@ -62,7 +61,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
   private val createdAtIndex = MongoIndex(
     key = Seq("createdAt" -> IndexType.Ascending),
     name = "ui-state-created-at-index",
-    options = BSONDocument("expireAfterSeconds" -> cacheTtl)
+    expireAfterSeconds = Some(cacheTtl)
   )
 
   private val draftIdIndex = MongoIndex(
