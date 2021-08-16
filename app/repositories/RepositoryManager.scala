@@ -21,8 +21,7 @@ import play.api.Logging
 import play.api.libs.json.{JsObject, Json, Reads, Writes}
 import reactivemongo.api.WriteConcern
 import reactivemongo.api.indexes.IndexType
-import reactivemongo.bson.BSONDocument
-import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
+import reactivemongo.play.json.compat._
 import reactivemongo.play.json.collection.JSONCollection
 
 import java.sql.Timestamp
@@ -89,7 +88,7 @@ abstract class RepositoryManager @Inject()(
     lazy val lastUpdatedIndex = MongoIndex(
       key = Seq("updatedAt" -> IndexType.Ascending),
       name = lastUpdatedIndexName,
-      options = BSONDocument("expireAfterSeconds" -> cacheTtl)
+      expireAfterSeconds = Some(cacheTtl)
     )
 
     lazy val idIndex = MongoIndex(
