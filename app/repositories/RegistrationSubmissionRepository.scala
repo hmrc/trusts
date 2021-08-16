@@ -22,7 +22,7 @@ import play.api.libs.json._
 import reactivemongo.api.Cursor
 import reactivemongo.api.indexes.IndexType
 import reactivemongo.bson.BSONDocument
-import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
+import reactivemongo.play.json.compat._
 import reactivemongo.play.json.collection.JSONCollection
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
