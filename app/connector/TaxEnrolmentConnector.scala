@@ -65,7 +65,7 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
     http.PUT[JsValue, TaxEnrolmentSubscriberResponse](
       taxEnrolmentsEndpoint,
       Json.toJson(taxEnrolmentSubscriptionRequest)
-    )(Writes.jsValueWrites, TaxEnrolmentSubscriberResponse.httpReads, taxEnrolmentHeaders, global)
+    )(Writes.JsValueWrites, TaxEnrolmentSubscriberResponse.httpReads, taxEnrolmentHeaders, global)
   }
 
 
