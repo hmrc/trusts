@@ -26,8 +26,8 @@ object DeedOfVariation extends Enumeration {
   val ReplacedWill = Value("Replaced the will trust")
   val AdditionToWill = Value("Addition to the will trust")
 
-  implicit val reads: Reads[DeedOfVariation] = Reads.enumNameReads(DeedOfVariation)
-  implicit val writes: Writes[DeedOfVariation] = Writes.enumNameWrites
-  implicit val formats: Format[DeedOfVariation]  = Format(reads, writes)
+  implicit val reads = Reads.enumNameReads(DeedOfVariation)
+  implicit val writes = Writes.enumNameWrites
+  implicit val formats = Format.apply(reads, writes)
 
 }

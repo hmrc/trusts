@@ -20,8 +20,9 @@ import javax.inject.Inject
 import play.api.Logging
 import play.api.libs.json._
 import reactivemongo.api.Cursor
-import reactivemongo.api.indexes.IndexType
-import reactivemongo.play.json.compat._
+import reactivemongo.api.indexes.{Index, IndexType}
+import reactivemongo.bson.BSONDocument
+import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
 import reactivemongo.play.json.collection.JSONCollection
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
@@ -58,20 +59,20 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
       res <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
     } yield res
 
-  private val createdAtIndex = MongoIndex(
+  private val createdAtIndex = Index(
     key = Seq("createdAt" -> IndexType.Ascending),
-    name = "ui-state-created-at-index",
-    expireAfterSeconds = Some(cacheTtl)
+    name = Some("ui-state-created-at-index"),
+    options = BSONDocument("expireAfterSeconds" -> cacheTtl)
   )
 
-  private val draftIdIndex = MongoIndex(
+  private val draftIdIndex = Index(
     key = Seq("draftId" -> IndexType.Ascending),
-    name = "draft-id-index"
+    name = Some("draft-id-index")
   )
 
-  private val internalIdIndex = MongoIndex(
+  private val internalIdIndex = Index(
     key = Seq("internalId" -> IndexType.Ascending),
-    name = "internal-id-index"
+    name = Some("internal-id-index")
   )
 
   private lazy val ensureIndexes = {
@@ -121,11 +122,11 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
       "inProgress" -> Json.obj("$eq" -> true)
     )
 
-    collection.flatMap(_.find(selector = selector, projection = None)
+    collection.flatMap(_.find(
+      selector = selector, projection = None)
       .sort(Json.obj("createdAt" -> -1))
       .cursor[RegistrationSubmissionDraft]()
-      .collect[List](maxDocs, Cursor.FailOnError[List[RegistrationSubmissionDraft]]())
-    )
+      .collect[List](maxDocs, Cursor.FailOnError[List[RegistrationSubmissionDraft]]()))
   }
 
   override def removeDraft(draftId: String, internalId: String): Future[Boolean] = {

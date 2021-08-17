@@ -4,40 +4,38 @@ import sbt._
 
 object AppDependencies {
 
+  private val testScope = "test"
+
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "org.reactivemongo"             %% "play2-reactivemongo"            % "0.20.13-play28",
-    "org.reactivemongo"             %% "reactivemongo-play-json-compat" % "1.0.6-play28",
-    "uk.gov.hmrc"                   %% "bootstrap-backend-play-28"      % "5.8.0",
-    "uk.gov.hmrc"                   %% "tax-year"                       % "1.4.0",
-    "com.github.java-json-tools"    % "json-schema-validator"           % "2.2.14",
-    "com.fasterxml.jackson.module"  %% "jackson-module-scala"           % "2.12.4"
+    "org.reactivemongo"         %% "play2-reactivemongo"        % "0.18.8-play27",
+    "uk.gov.hmrc"               %% "bootstrap-backend-play-27"  % "5.8.0",
+    "com.github.java-json-tools" % "json-schema-validator"      % "2.2.14",
+    "uk.gov.hmrc"               %% "tax-year"                   % "1.3.0"
   )
 
   val test: Seq[ModuleID] = Seq(
-    "uk.gov.hmrc"                   %% "bootstrap-test-play-28"     % "5.3.0",
-    "org.scalatest"                 %% "scalatest"                  % "3.2.9",
-    "org.mockito"                   % "mockito-core"                % "3.11.2",
-    "org.mockito"                   % "mockito-all"                 % "1.10.19",
-    "org.pegdown"                   % "pegdown"                     % "1.6.0",
-    "org.scalatestplus.play"        %% "scalatestplus-play"         % "5.1.0",
-    "org.scalatestplus"             %% "scalacheck-1-15"            % "3.2.9.0",
-    "org.scalatestplus"             %% "scalatestplus-mockito"      % "1.0.0-M2",
-    "com.github.tomakehurst"        % "wiremock-standalone"         % "2.26.3",
-    "com.vladsch.flexmark"          % "flexmark-all"                % "0.35.10",
-    "com.typesafe.play"             %% "play-test"                  % PlayVersion.current
+    "org.scalatest"          %% "scalatest"             % "3.2.8",
+    "org.mockito"             % "mockito-core"          % "3.10.0",
+    "org.pegdown"             % "pegdown"               % "1.6.0",
+    "com.github.tomakehurst"  % "wiremock-standalone"   % "2.27.2",
+    "org.mockito"             % "mockito-all"           % "1.10.19",
+    "org.scalatestplus.play" %% "scalatestplus-play"    % "4.0.3",
+    "org.scalatestplus"      %% "scalatestplus-mockito" % "1.0.0-M2",
+    "com.typesafe.play"      %% "play-test"             % PlayVersion.current,
+    "com.vladsch.flexmark"    % "flexmark-all"          % "0.35.10",
+    "org.scalatestplus"      %% "scalacheck-1-15"       % "3.2.9.0"
   ).map(_ % Test)
 
   val akkaVersion = "2.6.7"
   val akkaHttpVersion = "10.1.12"
 
   val overrides = Seq(
-    "com.typesafe.akka" %% "akka-stream_2.12" % akkaVersion,
-    "com.typesafe.akka" %% "akka-protobuf_2.12" % akkaVersion,
-    "com.typesafe.akka" %% "akka-slf4j_2.12" % akkaVersion,
-    "com.typesafe.akka" %% "akka-actor_2.12" % akkaVersion,
-    "com.typesafe.akka" %% "akka-http-core_2.12" % akkaHttpVersion,
-    "commons-codec" % "commons-codec" % "1.15"
+    "com.typesafe.akka" %% "akka-stream"    % akkaVersion,
+    "com.typesafe.akka" %% "akka-protobuf"  % akkaVersion,
+    "com.typesafe.akka" %% "akka-slf4j"     % akkaVersion,
+    "com.typesafe.akka" %% "akka-actor"     % akkaVersion,
+    "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion
   )
 
 }

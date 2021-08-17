@@ -20,7 +20,8 @@ import config.AppConfig
 import play.api.Logging
 import play.api.libs.json.{JsObject, Json, Reads, Writes}
 import reactivemongo.api.WriteConcern
-import reactivemongo.api.indexes.IndexType
+import reactivemongo.api.indexes.{Index, IndexType}
+import reactivemongo.bson.BSONDocument
 import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
 import reactivemongo.play.json.collection.JSONCollection
 
@@ -85,15 +86,15 @@ abstract class RepositoryManager @Inject()(
   private def ensureIndexes: Future[Boolean] = {
     logger.info("Ensuring collection indexes")
 
-    lazy val lastUpdatedIndex = MongoIndex(
+    lazy val lastUpdatedIndex: Index = Index(
       key = Seq("updatedAt" -> IndexType.Ascending),
-      name = lastUpdatedIndexName,
-      expireAfterSeconds = Some(cacheTtl)
+      name = Some(lastUpdatedIndexName),
+      options = BSONDocument("expireAfterSeconds" -> cacheTtl)
     )
 
-    lazy val idIndex = MongoIndex(
+    lazy val idIndex: Index = Index(
       key = Seq("id" -> IndexType.Ascending),
-      name = "id-index"
+      name = Some("id-index")
     )
 
     for {

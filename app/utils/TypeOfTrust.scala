@@ -29,8 +29,8 @@ object TypeOfTrust extends Enumeration {
   val HeritageMaintenance = Value("Heritage Maintenance Fund")
   val FlatManagement = Value("Flat Management Company or Sinking Fund")
 
-  implicit val reads: Reads[TypeOfTrust] = Reads.enumNameReads(TypeOfTrust)
-  implicit val writes: Writes[TypeOfTrust] = Writes.enumNameWrites
-  implicit val formats: Format[TypeOfTrust] = Format(reads, writes)
+  implicit val reads = Reads.enumNameReads(TypeOfTrust)
+  implicit val writes = Writes.enumNameWrites
+  implicit val formats = Format.apply(reads, writes)
 
 }

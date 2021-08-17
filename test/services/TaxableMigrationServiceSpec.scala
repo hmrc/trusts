@@ -26,7 +26,6 @@ import org.scalatest.matchers.must.Matchers._
 import org.scalatest.RecoverMethods.recoverToSucceededIf
 import repositories.TaxableMigrationRepository
 import uk.gov.hmrc.http.HeaderCarrier
-import play.api.inject.bind
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -44,16 +43,7 @@ class TaxableMigrationServiceSpec extends BaseSpec {
       val mockTaxEnrolmentConnector = mock[TaxEnrolmentConnector]
       val mockOrchestratorConnector = mock[OrchestratorConnector]
       val taxableMigrationRepository = injector.instanceOf[TaxableMigrationRepository]
-
-      val app = applicationBuilder()
-        .overrides(
-          bind[AuditService].toInstance(mockAuditService),
-          bind[TaxEnrolmentConnector].toInstance(mockTaxEnrolmentConnector),
-          bind[OrchestratorConnector].toInstance(mockOrchestratorConnector),
-          bind[TaxableMigrationRepository].toInstance(taxableMigrationRepository)
-        ).build()
-
-      val SUT = app.injector.instanceOf[TaxableMigrationService]
+      val SUT = new TaxableMigrationService(mockAuditService, mockTaxEnrolmentConnector, mockOrchestratorConnector, taxableMigrationRepository)
 
       "return TaxEnrolmentSuccess" in {
         when(mockTaxEnrolmentConnector.migrateSubscriberToTaxable(subscriptionId, urn)).
