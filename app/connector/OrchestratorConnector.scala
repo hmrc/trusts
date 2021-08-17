@@ -43,7 +43,7 @@ class OrchestratorConnector @Inject()(http: HttpClient, config: AppConfig) exten
     http.POST[JsValue, OrchestratorToTaxableResponse](
       orchestratorEndpoint,
       Json.toJson(migrationRequest)
-    )(Writes.JsValueWrites, OrchestratorToTaxableResponse.httpReads, orchestratorHeaders, global)
+    )(Writes.jsValueWrites, OrchestratorToTaxableResponse.httpReads, orchestratorHeaders, global)
   }
 }
 

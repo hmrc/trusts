@@ -34,14 +34,14 @@ class ValidationServiceSpec extends BaseSpec with DataExamples with EitherValues
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
 
         trustValidator.validate[Registration](jsonString) must not be 'left
-        trustValidator.validate[Registration](jsonString).right.value mustBe a[Registration]
+        trustValidator.validate[Registration](jsonString).value mustBe a[Registration]
       }
 
       "Json having trust with organisation trustees" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-org-trustees.json")
 
         trustValidator.validate[Registration](jsonString) must not be 'left
-        trustValidator.validate[Registration](jsonString).right.value mustBe a[Registration]
+        trustValidator.validate[Registration](jsonString).value mustBe a[Registration]
       }
     }
 
