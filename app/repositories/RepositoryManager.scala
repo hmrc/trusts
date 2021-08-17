@@ -21,7 +21,7 @@ import play.api.Logging
 import play.api.libs.json.{JsObject, Json, Reads, Writes}
 import reactivemongo.api.WriteConcern
 import reactivemongo.api.indexes.IndexType
-import reactivemongo.play.json.compat._
+import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
 import reactivemongo.play.json.collection.JSONCollection
 
 import java.sql.Timestamp
