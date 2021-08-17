@@ -29,7 +29,17 @@ import java.time.LocalDateTime
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-import bson2json._
+import _root_.play.api.libs.json._
+
+import _root_.reactivemongo.api.bson._
+
+// Global compatibility import:
+import reactivemongo.play.json.compat._
+
+// Import BSON to JSON extended syntax (default)
+import bson2json._ // Required import
+
+// Import lax overrides
 import lax._
 
 abstract class RepositoryManager @Inject()(
