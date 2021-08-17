@@ -20,15 +20,17 @@ import config.AppConfig
 import play.api.Logging
 import play.api.libs.json.{JsObject, Json, Reads, Writes}
 import reactivemongo.api.WriteConcern
-import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.BSONDocument
-import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
+import reactivemongo.api.indexes.IndexType
+import reactivemongo.play.json.compat._
 import reactivemongo.play.json.collection.JSONCollection
 
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+
+import bson2json._
+import lax._
 
 abstract class RepositoryManager @Inject()(
                                          mongo: MongoDriver,
@@ -86,15 +88,15 @@ abstract class RepositoryManager @Inject()(
   private def ensureIndexes: Future[Boolean] = {
     logger.info("Ensuring collection indexes")
 
-    lazy val lastUpdatedIndex: Index = Index(
+    lazy val lastUpdatedIndex = MongoIndex(
       key = Seq("updatedAt" -> IndexType.Ascending),
-      name = Some(lastUpdatedIndexName),
-      options = BSONDocument("expireAfterSeconds" -> cacheTtl)
+      name = lastUpdatedIndexName,
+      expireAfterSeconds = Some(cacheTtl)
     )
 
-    lazy val idIndex: Index = Index(
+    lazy val idIndex = MongoIndex(
       key = Seq("id" -> IndexType.Ascending),
-      name = Some("id-index")
+      name = "id-index"
     )
 
     for {
