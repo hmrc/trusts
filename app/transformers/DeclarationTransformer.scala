@@ -54,7 +54,7 @@ class DeclarationTransformer {
         addSubmissionDateIf5mld(submissionDate, is5mld) andThen
         removeAdditionalShareAssetFields(responseJson) andThen
         removeAdditionalTrustDetailsField(responseJson) andThen
-        amendInvalidTrustDetails(responseJson)
+        fixInvalidTrustDetails(responseJson)
     )
   }
 
@@ -116,8 +116,7 @@ class DeclarationTransformer {
     val originalLeadTrustee = originalJson.transform(pickLeadTrustee)
 
     (newLeadTrustee, originalLeadTrustee) match {
-      case (JsSuccess(newLeadTrusteeJson, _), JsSuccess(originalLeadTrusteeJson, _))
-        if newLeadTrusteeJson != originalLeadTrusteeJson =>
+      case (JsSuccess(newLeadTrusteeJson, _), JsSuccess(originalLeadTrusteeJson, _)) if newLeadTrusteeJson != originalLeadTrusteeJson =>
         val reads = fixLeadTrusteeAddress(originalLeadTrusteeJson, __)
         originalLeadTrusteeJson.transform(reads) match {
           case JsSuccess(value, _) => addPreviousLeadTrusteeAsExpiredStep(value, date)
@@ -168,7 +167,7 @@ class DeclarationTransformer {
     }
   }
 
-  private def amendInvalidTrustDetails(json: JsValue): Reads[JsObject] = {
+  private def fixInvalidTrustDetails(json: JsValue): Reads[JsObject] = {
     val typeOfTrustPath = pathToTrustDetails \ "typeOfTrust"
     (for {
       typeOfTrust <- json.transform(typeOfTrustPath.json.pick[JsString])
