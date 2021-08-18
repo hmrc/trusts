@@ -23,6 +23,7 @@ import play.api.libs.json.Reads._
 import play.api.libs.json._
 import utils.Constants._
 import utils.JsonOps.{doNothing, prunePathAndPutNewValue, putNewValue}
+import utils.{DeedOfVariation, TypeOfTrust}
 
 import java.time.LocalDate
 
@@ -52,7 +53,8 @@ class DeclarationTransformer {
         addEndDateIfDefined(declarationForApi.endDate) andThen
         addSubmissionDateIf5mld(submissionDate, is5mld) andThen
         removeAdditionalShareAssetFields(responseJson) andThen
-        removeAdditionalTrustDetailsField(responseJson)
+        removeAdditionalTrustDetailsField(responseJson) andThen
+        amendInvalidTrustDetails(responseJson)
     )
   }
 
@@ -81,7 +83,7 @@ class DeclarationTransformer {
 
   private def fixLeadTrusteeAddress(leadTrusteeJson: JsValue, leadTrusteePath: JsPath): Reads[JsObject] = {
     if (leadTrusteeJson.transform((leadTrusteePath \ IDENTIFICATION \ 'utr).json.pick).isSuccess ||
-        leadTrusteeJson.transform((leadTrusteePath \ IDENTIFICATION \ 'nino).json.pick).isSuccess) {
+      leadTrusteeJson.transform((leadTrusteePath \ IDENTIFICATION \ 'nino).json.pick).isSuccess) {
       (leadTrusteePath \ IDENTIFICATION \ 'address).json.prune
     } else {
       doNothing()
@@ -116,11 +118,11 @@ class DeclarationTransformer {
     (newLeadTrustee, originalLeadTrustee) match {
       case (JsSuccess(newLeadTrusteeJson, _), JsSuccess(originalLeadTrusteeJson, _))
         if newLeadTrusteeJson != originalLeadTrusteeJson =>
-          val reads = fixLeadTrusteeAddress(originalLeadTrusteeJson, __)
-          originalLeadTrusteeJson.transform(reads) match {
-            case JsSuccess(value, _) => addPreviousLeadTrusteeAsExpiredStep(value, date)
-            case e: JsError => Reads(_ => e)
-          }
+        val reads = fixLeadTrusteeAddress(originalLeadTrusteeJson, __)
+        originalLeadTrusteeJson.transform(reads) match {
+          case JsSuccess(value, _) => addPreviousLeadTrusteeAsExpiredStep(value, date)
+          case e: JsError => Reads(_ => e)
+        }
       case _ => doNothing()
     }
   }
@@ -163,6 +165,23 @@ class DeclarationTransformer {
         prunePathAndPutNewValue(pathToTrustDetails, value.as[JsObject] - "settlorsUkBased")
       case _ =>
         doNothing()
+    }
+  }
+
+  private def amendInvalidTrustDetails(json: JsValue): Reads[JsObject] = {
+    val typeOfTrustPath = pathToTrustDetails \ "typeOfTrust"
+    (for {
+      typeOfTrust <- json.transform(typeOfTrustPath.json.pick[JsString])
+      deedOfVariation <- json.transform((pathToTrustDetails \ "deedOfVariation").json.pick[JsString])
+    } yield {
+      (typeOfTrust.value, deedOfVariation.value) match {
+        case (a, b) if a == TypeOfTrust.Will.toString && b == DeedOfVariation.AdditionToWill.toString =>
+          putNewValue(typeOfTrustPath, JsString(TypeOfTrust.DeedOfVariationOrFamilyAgreement.toString))
+        case _ =>
+          doNothing()
+      }
+    }) getOrElse {
+      doNothing()
     }
   }
 

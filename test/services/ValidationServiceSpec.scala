@@ -19,8 +19,8 @@ package services
 import base.BaseSpec
 import models.existing_trust.ExistingCheckRequest
 import models.{Assets, Registration}
-import org.scalatest.{Assertion, EitherValues}
 import org.scalatest.matchers.must.Matchers._
+import org.scalatest.{Assertion, EitherValues}
 import utils.{DataExamples, JsonUtils}
 
 class ValidationServiceSpec extends BaseSpec with DataExamples with EitherValues {
@@ -34,14 +34,14 @@ class ValidationServiceSpec extends BaseSpec with DataExamples with EitherValues
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
 
         trustValidator.validate[Registration](jsonString) must not be 'left
-        trustValidator.validate[Registration](jsonString).right.value mustBe a[Registration]
+        trustValidator.validate[Registration](jsonString).value mustBe a[Registration]
       }
 
       "Json having trust with organisation trustees" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-org-trustees.json")
 
         trustValidator.validate[Registration](jsonString) must not be 'left
-        trustValidator.validate[Registration](jsonString).right.value mustBe a[Registration]
+        trustValidator.validate[Registration](jsonString).value mustBe a[Registration]
       }
     }
 
