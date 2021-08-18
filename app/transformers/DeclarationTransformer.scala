@@ -173,11 +173,10 @@ class DeclarationTransformer {
       typeOfTrust <- json.transform(typeOfTrustPath.json.pick[JsString])
       deedOfVariation <- json.transform((pathToTrustDetails \ "deedOfVariation").json.pick[JsString])
     } yield {
-      (typeOfTrust.value, deedOfVariation.value) match {
-        case (a, b) if a == TypeOfTrust.Will.toString && b == DeedOfVariation.AdditionToWill.toString =>
-          putNewValue(typeOfTrustPath, JsString(TypeOfTrust.DeedOfVariationOrFamilyAgreement.toString))
-        case _ =>
-          doNothing()
+      if (typeOfTrust.value == TypeOfTrust.Will.toString && deedOfVariation.value == DeedOfVariation.AdditionToWill.toString) {
+        putNewValue(typeOfTrustPath, JsString(TypeOfTrust.DeedOfVariationOrFamilyAgreement.toString))
+      } else {
+        doNothing()
       }
     }) getOrElse {
       doNothing()
