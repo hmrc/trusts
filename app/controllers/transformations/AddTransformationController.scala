@@ -48,6 +48,9 @@ abstract class AddTransformationController @Inject()(identify: IdentifierAction,
             def addTransformOrTransforms(isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean): Future[Boolean] = {
 
               def addTransform[A](value: A, `type`: String)(implicit wts: Writes[A]): Future[Boolean] = {
+
+                println("\t\t !!DEBUG!!: ADD ASSET TRANSFORM " + value)
+
                 transformationService.addNewTransform(
                   identifier = identifier,
                   internalId = request.internalId,
@@ -56,9 +59,12 @@ abstract class AddTransformationController @Inject()(identify: IdentifierAction,
               }
 
               if (addMultipleTransforms) {
-                Json.toJson(entityToAdd).as[JsObject].fields.foldLeft(Future.successful(true))((x, field) => {
-                  x.flatMap(_ => addTransform(field._2, field._1))
-                })
+                Json.toJson(entityToAdd)
+                  .as[JsObject]
+                  .fields
+                  .foldLeft(Future.successful(true))((x, field) => {
+                    x.flatMap(_ => addTransform(field._2, field._1))
+                  })
               } else {
                 addTransform(entityToAdd, `type`)
               }

@@ -18,10 +18,8 @@ package repositories
 
 import config.AppConfig
 import play.api.Logging
-import play.api.libs.json.{JsObject, Json, Reads, Writes}
 import reactivemongo.api.WriteConcern
 import reactivemongo.api.indexes.IndexType
-import reactivemongo.play.json.compat._
 import reactivemongo.play.json.collection.JSONCollection
 
 import java.sql.Timestamp
@@ -34,13 +32,12 @@ import _root_.play.api.libs.json._
 import _root_.reactivemongo.api.bson._
 
 // Global compatibility import:
-import reactivemongo.play.json.compat._
+import reactivemongo.play.json.compat.lax._
 
 // Import BSON to JSON extended syntax (default)
-import bson2json._ // Required import
+import reactivemongo.play.json.compat.bson2json._ // Required import
 
-// Import lax overrides
-import lax._
+//import reactivemongo.play.json.compat.jsObjectWrites
 
 abstract class RepositoryManager @Inject()(
                                          mongo: MongoDriver,
@@ -56,13 +53,23 @@ abstract class RepositoryManager @Inject()(
   val key: String
 
   def get[T](identifier: String, internalId: String)(implicit rds: Reads[T]): Future[Option[T]] = {
+
+    println("\t\t !!DEBUG!!: REPO MANAGER GET ")
+
     collection.flatMap { collection =>
-      collection.find(selector(identifier, internalId), None).one[JsObject].map(opt =>
-        for  {
-          document <- opt
-          data <- (document \ key).asOpt[T]
-        } yield data
-      )
+      collection
+        .find(selector(identifier, internalId), None)
+        .one[JsObject]
+        .map { opt =>
+
+          println("\t\t !!DEBUG!!: REPO MANAGER GET JSON " + opt)
+
+          for {
+            document <- opt
+            data <- (document \ key).asOpt[T]
+          } yield data
+
+        }
     }
   }
 
@@ -76,8 +83,12 @@ abstract class RepositoryManager @Inject()(
       )
     )
 
+    println("\t\t !!DEBUG!!: REPO MANAGER SET DATA " + data)
+    println("\t\t !!DEBUG!!: REPO MANAGER SET MODIFIER " + modifier)
+
     collection.flatMap {
-      _.update(ordered = false).one(selector(identifier, internalId), modifier, upsert = true, multi = false).map {
+      _.update(ordered = false).one(selector(identifier, internalId), modifier, upsert = true, multi = false)
+        .map {
         result => result.ok
       }
     }

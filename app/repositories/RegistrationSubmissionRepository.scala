@@ -39,6 +39,8 @@ import bson2json._ // Required import
 // Import lax overrides
 import lax._
 
+import reactivemongo.play.json.compat.jsObjectWrites
+
 import scala.concurrent.{ExecutionContext, Future}
 
 trait RegistrationSubmissionRepository {

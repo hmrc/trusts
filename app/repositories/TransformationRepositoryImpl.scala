@@ -17,8 +17,9 @@
 package repositories
 
 import config.AppConfig
-import play.api.libs.json._
 import transformers.ComposedDeltaTransform
+
+import _root_.play.api.libs.json._
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,17 +36,25 @@ class TransformationRepositoryImpl @Inject()(
   override val key: String = "transforms"
 
   override def get(identifier: String, internalId: String): Future[Option[ComposedDeltaTransform]] = {
-    get[ComposedDeltaTransform](identifier, internalId)
+
+    val x = get[ComposedDeltaTransform](identifier, internalId)
+
+    println("\t\t !!DEBUG!!: TRANSFORMATION REPO GET " + x)
+
+    x
   }
 
   override def set(identifier: String, internalId: String, transforms: ComposedDeltaTransform): Future[Boolean] = {
+
+    println("\t\t !!DEBUG!!: TRANSFORMATION REPO SET " + transforms)
+
     set[ComposedDeltaTransform](identifier, internalId, transforms)
   }
 }
 
 trait TransformationRepository {
 
-  def get(identifier: String, internalId: String): Future[Option[ComposedDeltaTransform]]
+  def  get(identifier: String, internalId: String): Future[Option[ComposedDeltaTransform]]
 
   def set(identifier: String, internalId: String, transforms: ComposedDeltaTransform): Future[Boolean]
 

@@ -77,6 +77,11 @@ class TrustsService @Inject()(val trustsConnector: TrustsConnector,
   def getTrustInfo(identifier: String, internalId: String): Future[GetTrustResponse] = {
     repository.get(identifier, internalId).flatMap {
       case Some(x) =>
+
+        println("\t\t !!DEBUG!!: GET TRUST IDENTIFIER  " + identifier)
+        println("\t\t !!DEBUG!!: GET TRUST IDENTIFIER " + internalId)
+        println("\t\t !!DEBUG!!: GET TRUST INFO " + x)
+
         x.validate[GetTrustSuccessResponse].fold(
           errs => {
             logger.error(s"Unable to parse json from cache as GetTrustSuccessResponse - $errs")
