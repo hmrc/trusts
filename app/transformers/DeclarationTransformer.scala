@@ -167,6 +167,26 @@ class DeclarationTransformer {
     }
   }
 
+  /**
+   *
+   * @param json Trust JSON with delta transforms applied to it
+   * @return a Reads to fix the trust details if they are invalid. This is due to a bug (TRUS-4539) spotted in trusts registration
+   *         where trust details was being mapped incorrectly for a deed of variation in addition to a will. This method
+   *         checks to see if the trust details contains these two key-value pairs:
+   *{{{
+   *{
+   *  "typeOfTrust": "Will Trust or Intestacy Trust",
+   *  "deedOfVariation": "Addition to the will trust"
+   *}
+   *}}}
+   * and if so applies an update such that it becomes:
+   * {{{
+   *{
+   *  "typeOfTrust": "Deed of Variation Trust or Family Arrangement",
+   *  "deedOfVariation": "Addition to the will trust"
+   *}
+   *}}}
+   */
   private def fixInvalidTrustDetails(json: JsValue): Reads[JsObject] = {
     val typeOfTrustPath = pathToTrustDetails \ "typeOfTrust"
     (for {
