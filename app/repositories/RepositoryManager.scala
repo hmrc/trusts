@@ -18,7 +18,6 @@ package repositories
 
 import _root_.play.api.libs.json._
 import config.AppConfig
-import models.MongoDateTimeFormats
 import play.api.Logging
 import reactivemongo.api.WriteConcern
 import reactivemongo.api.bson.collection.BSONCollection
@@ -28,8 +27,6 @@ import reactivemongo.play.json.compat.jsObjectWrites
 import reactivemongo.play.json.compat.json2bson.{toDocumentReader, toDocumentWriter}
 import reactivemongo.play.json.compat.lax._
 
-import java.sql.Timestamp
-import java.time.LocalDateTime
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
