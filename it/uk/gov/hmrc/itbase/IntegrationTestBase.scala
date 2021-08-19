@@ -1,20 +1,20 @@
 package uk.gov.hmrc.itbase
 
+import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
-import play.api.{Application, Play}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import reactivemongo.api.{DefaultDB, MongoConnection}
-import uk.gov.hmrc.auth.core.AffinityGroup.Agent
-import controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import repositories.TrustsMongoDriver
 import play.api.test.Helpers.stubControllerComponents
+import play.api.{Application, Play}
+import reactivemongo.api.{DB, MongoConnection}
+import repositories.TrustsMongoDriver
+import uk.gov.hmrc.auth.core.AffinityGroup.Agent
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
-import scala.util.Try
 
 trait IntegrationTestBase extends ScalaFutures {
 
@@ -22,15 +22,14 @@ trait IntegrationTestBase extends ScalaFutures {
 
   val connectionString = "mongodb://localhost:27017/trusts-integration"
 
-  def getDatabase(connection: MongoConnection): DefaultDB = {
+  def getDatabase(connection: MongoConnection): DB = {
     Await.result(connection.database("trusts-integration"), Duration.Inf)
   }
 
-  def getConnection(application: Application): Try[MongoConnection] = {
+  def getConnection(application: Application): Future[MongoConnection] = {
     val mongoDriver = application.injector.instanceOf[TrustsMongoDriver]
     for {
-      uri <- MongoConnection.parseURI(connectionString)
-      connection: MongoConnection <- mongoDriver.api.driver.connection(uri, strictUri = true)
+      connection: MongoConnection <- mongoDriver.api.asyncDriver.connect(connectionString)
     } yield connection
   }
 
@@ -62,7 +61,7 @@ trait IntegrationTestBase extends ScalaFutures {
     try {
 
       val f: Future[Assertion] = for {
-          connection <- Future.fromTry(getConnection(application))
+          connection <- getConnection(application)
           _ = dropTheDatabase(connection)
         } yield {
           block(application)

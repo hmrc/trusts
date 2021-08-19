@@ -16,28 +16,22 @@
 
 package repositories
 
+import _root_.play.api.libs.json._
 import config.AppConfig
+import models.MongoDateTimeFormats
 import play.api.Logging
 import reactivemongo.api.WriteConcern
+import reactivemongo.api.bson.collection.BSONCollection
 import reactivemongo.api.indexes.IndexType
-import reactivemongo.play.json.collection.JSONCollection
+import reactivemongo.play.json.compat.bson2json.{fromDocumentWriter, fromWriter}
+import reactivemongo.play.json.compat.jsObjectWrites
+import reactivemongo.play.json.compat.json2bson.{toDocumentReader, toDocumentWriter}
+import reactivemongo.play.json.compat.lax._
 
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-
-import _root_.play.api.libs.json._
-
-import _root_.reactivemongo.api.bson._
-
-// Global compatibility import:
-import reactivemongo.play.json.compat.lax._
-
-// Import BSON to JSON extended syntax (default)
-import reactivemongo.play.json.compat.bson2json._ // Required import
-
-//import reactivemongo.play.json.compat.jsObjectWrites
 
 abstract class RepositoryManager @Inject()(
                                          mongo: MongoDriver,
@@ -54,60 +48,52 @@ abstract class RepositoryManager @Inject()(
 
   def get[T](identifier: String, internalId: String)(implicit rds: Reads[T]): Future[Option[T]] = {
 
-    println("\t\t !!DEBUG!!: REPO MANAGER GET ")
 
     collection.flatMap { collection =>
       collection
         .find(selector(identifier, internalId), None)
         .one[JsObject]
         .map { opt =>
-
-          println("\t\t !!DEBUG!!: REPO MANAGER GET JSON " + opt)
-
           for {
             document <- opt
             data <- (document \ key).asOpt[T]
           } yield data
-
         }
     }
   }
 
   def set[T](identifier: String, internalId: String, data: T)(implicit wts: Writes[T]): Future[Boolean] = {
 
+    val dataToWrite = Json.toJson(data)
+
     val modifier = Json.obj(
-      "$set" -> Json.obj(
-        "id" -> createKey(identifier, internalId),
-        "updatedAt" -> Json.obj("$date" -> Timestamp.valueOf(LocalDateTime.now())),
-        key -> Json.toJson(data)
-      )
+      "$set" -> Json.obj("id" -> createKey(identifier, internalId), key -> dataToWrite),
+      "$currentDate" -> Json.obj("updatedAt" -> true)
     )
 
-    println("\t\t !!DEBUG!!: REPO MANAGER SET DATA " + data)
-    println("\t\t !!DEBUG!!: REPO MANAGER SET MODIFIER " + modifier)
-
     collection.flatMap {
-      _.update(ordered = false).one(selector(identifier, internalId), modifier, upsert = true, multi = false)
-        .map {
-        result => result.ok
-      }
+      _.update(ordered = false)
+        .one(selector(identifier, internalId), modifier, upsert = true, multi = false)
+        .map { x => x.writeErrors.isEmpty }
     }
   }
 
   def resetCache(identifier: String, internalId: String): Future[Option[JsObject]] = {
-    collection.flatMap(_.findAndRemove(selector(identifier, internalId), None, None, WriteConcern.Default, None, None, Seq.empty).map(
-      _.value
-    ))
+    collection.flatMap {
+      _.findAndRemove(selector(identifier, internalId), None, None, WriteConcern.Default, None, None, Seq.empty)
+        .map { x =>
+          x.value.map(y => Json.toJson(y).as[JsObject])
+        }
+    }
   }
 
-  private def collection: Future[JSONCollection] =
+  private def collection: Future[BSONCollection] =
     for {
       _ <- ensureIndexes
-      res <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
+      res <- mongo.api.database.map(_.collection[BSONCollection](collectionName))
     } yield res
 
   private def ensureIndexes: Future[Boolean] = {
-    logger.info("Ensuring collection indexes")
 
     lazy val lastUpdatedIndex = MongoIndex(
       key = Seq("updatedAt" -> IndexType.Ascending),
@@ -121,7 +107,7 @@ abstract class RepositoryManager @Inject()(
     )
 
     for {
-      collection              <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
+      collection              <- mongo.api.database.map(_.collection[BSONCollection](collectionName))
       createdLastUpdatedIndex <- collection.indexesManager.ensure(lastUpdatedIndex)
       createdIdIndex          <- collection.indexesManager.ensure(idIndex)
     } yield createdLastUpdatedIndex && createdIdIndex
@@ -139,7 +125,7 @@ abstract class RepositoryManager @Inject()(
 
     def logIndexes: Future[Unit] = {
       for {
-        collection <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
+        collection <- mongo.api.database.map(_.collection[BSONCollection](collectionName))
         indexes <- collection.indexesManager.list()
       } yield {
         logger.info(s"[IndexesManager] indexes found on mongo collection $collectionName: $indexes")
@@ -151,7 +137,7 @@ abstract class RepositoryManager @Inject()(
       _ <- logIndexes
       _ <- if (dropIndexesFeatureEnabled) {
         for {
-          collection <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
+          collection <- mongo.api.database.map(_.collection[BSONCollection](collectionName))
           _ <- collection.indexesManager.dropAll()
           _ <- Future.successful(logger.info(s"[IndexesManager] dropped indexes on collection $collectionName"))
           _ <- logIndexes

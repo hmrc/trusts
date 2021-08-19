@@ -19,6 +19,7 @@ package controllers.transformations
 import controllers.TrustsBaseController
 import controllers.actions.IdentifierAction
 import controllers.transformations.TransformationHelper.isTrustTaxable
+import models.requests.IdentifierRequest
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents}
@@ -34,7 +35,40 @@ abstract class AddTransformationController @Inject()(identify: IdentifierAction,
                                                     (implicit ec: ExecutionContext, cc: ControllerComponents)
   extends TrustsBaseController(cc) with Logging {
 
-  def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)
+  private def addTransformOrTransforms[T](identifier: String,
+                                       entityToAdd: T,
+                                      `type`: String,
+                                       isTaxable: Boolean,
+                                       migratingFromNonTaxableToTaxable: Boolean,
+                                       addMultipleTransforms: Boolean)
+                                      (implicit request: IdentifierRequest[JsValue], writes: Writes[T]): Future[Boolean] = {
+
+    def addTransform[A](value: A, `type`: String)(implicit wts: Writes[A]): Future[Boolean] = {
+
+      transformationService.addNewTransform(
+        identifier = identifier,
+        internalId = request.internalId,
+        newTransform = transform(value, `type`, isTaxable, migratingFromNonTaxableToTaxable)
+      )
+    }
+
+    if (addMultipleTransforms) {
+      Json.toJson(entityToAdd)
+        .as[JsObject]
+        .fields
+        .foldLeft(Future.successful(true))((x, field) => {
+          x.flatMap(_ => addTransform(field._2, field._1))
+        })
+    } else {
+      addTransform(entityToAdd, `type`)
+    }
+  }
+
+  def transform[T](value: T,
+                   `type`: String,
+                   isTaxable: Boolean,
+                   migratingFromNonTaxableToTaxable: Boolean
+                  )
                   (implicit wts: Writes[T]): DeltaTransform
 
   def addNewTransform[T](identifier: String, `type`: String = "", addMultipleTransforms: Boolean = false)
@@ -42,42 +76,13 @@ abstract class AddTransformationController @Inject()(identify: IdentifierAction,
     identify.async(parse.json) {
       implicit request => {
         request.body.validate[T] match {
-
           case JsSuccess(entityToAdd, _) =>
-
-            def addTransformOrTransforms(isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean): Future[Boolean] = {
-
-              def addTransform[A](value: A, `type`: String)(implicit wts: Writes[A]): Future[Boolean] = {
-
-                println("\t\t !!DEBUG!!: ADD ASSET TRANSFORM " + value)
-
-                transformationService.addNewTransform(
-                  identifier = identifier,
-                  internalId = request.internalId,
-                  newTransform = transform(value, `type`, isTaxable, migratingFromNonTaxableToTaxable)
-                )
-              }
-
-              if (addMultipleTransforms) {
-                Json.toJson(entityToAdd)
-                  .as[JsObject]
-                  .fields
-                  .foldLeft(Future.successful(true))((x, field) => {
-                    x.flatMap(_ => addTransform(field._2, field._1))
-                  })
-              } else {
-                addTransform(entityToAdd, `type`)
-              }
-            }
-
             for {
               trust <- transformationService.getTransformedTrustJson(identifier, request.internalId)
               isTaxable <- Future.fromTry(isTrustTaxable(trust))
               migratingFromNonTaxableToTaxable <- taxableMigrationService.migratingFromNonTaxableToTaxable(identifier, request.internalId)
-              _ <- addTransformOrTransforms(isTaxable, migratingFromNonTaxableToTaxable)
-            } yield {
-              Ok
-            }
+              _ <- addTransformOrTransforms(identifier, entityToAdd, `type`, isTaxable, migratingFromNonTaxableToTaxable, addMultipleTransforms)
+            } yield Ok
 
           case JsError(errors) =>
             logger.warn(s"[addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +

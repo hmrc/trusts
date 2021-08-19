@@ -16,7 +16,7 @@
 
 package transformers.assets
 
-import play.api.libs.json._
+import play.api.libs.json.{Format, JsValue, Json}
 import transformers.AddEntityTransform
 
 case class AddAssetTransform(entity: JsValue,
@@ -27,4 +27,27 @@ object AddAssetTransform {
   val key = "AddAssetTransform"
 
   implicit val format: Format[AddAssetTransform] = Json.format[AddAssetTransform]
+
+//  import reactivemongo.api.bson._
+//
+//  // Overrides BSONReaders for OID/Timestamp/DateTime
+//  // so that the BSON representation matches the JSON lax one
+//  implicit val laxBsonReader: BSONDocumentReader[AddAssetTransform] = {
+//    Macros.reader[AddAssetTransform]
+//  }
+//  implicit val laxBsonWriter: BSONDocumentWriter[AddAssetTransform] = {
+//    Macros.writer[AddAssetTransform]
+//  }
+//
+//  implicit val laxJsonWrites: Writes[AddAssetTransform] = {
+//    import reactivemongo.play.json.compat._, bson2json._, lax._
+//    laxBsonWriter
+//  }
+//
+//  implicit val laxJsonReads: Reads[AddAssetTransform] = {
+//    import reactivemongo.play.json.compat._, bson2json._, lax._
+//    laxBsonReader
+//  }
+
+//  implicit val format: Format[AddAssetTransform] = Format.apply(laxJsonReads, laxJsonWrites)
 }

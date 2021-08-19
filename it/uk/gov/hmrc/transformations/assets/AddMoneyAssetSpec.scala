@@ -50,7 +50,7 @@ class AddMoneyAssetSpec extends AsyncFreeSpec with MockitoSugar with Integration
     val payload = Json.parse(
       """
         |{
-        |  "assetMonetaryAmount": 1000
+        |  "assetMonetaryAmount": 999999999999
         |}
         |""".stripMargin)
 

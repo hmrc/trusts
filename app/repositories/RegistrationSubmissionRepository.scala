@@ -16,31 +16,22 @@
 
 package repositories
 
-import javax.inject.Inject
-import play.api.Logging
-import reactivemongo.api.Cursor
-import reactivemongo.api.indexes.IndexType
-import reactivemongo.play.json.collection.JSONCollection
-import uk.gov.hmrc.auth.core.AffinityGroup
-import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
+import _root_.play.api.libs.json._
 import config.AppConfig
 import models.registration.RegistrationSubmissionDraft
-
-import _root_.play.api.libs.json._
-
-import _root_.reactivemongo.api.bson._
-
-// Global compatibility import:
-import reactivemongo.play.json.compat._
-
-// Import BSON to JSON extended syntax (default)
-import bson2json._ // Required import
-
-// Import lax overrides
-import lax._
-
+import play.api.Logging
+import reactivemongo.api.Cursor
+import reactivemongo.api.bson.BSONDocument
+import reactivemongo.api.bson.collection.BSONCollection
+import reactivemongo.api.indexes.IndexType
+import reactivemongo.play.json.compat.bson2json.fromWriter
 import reactivemongo.play.json.compat.jsObjectWrites
+import reactivemongo.play.json.compat.json2bson.{toDocumentReader, toDocumentWriter}
+import reactivemongo.play.json.compat.lax._
+import uk.gov.hmrc.auth.core.AffinityGroup
+import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 trait RegistrationSubmissionRepository {
@@ -65,10 +56,10 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
 
   private val cacheTtl = config.registrationTtlInSeconds
 
-  private def collection: Future[JSONCollection] =
+  private def collection: Future[BSONCollection] =
     for {
       _ <- ensureIndexes
-      res <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
+      res <- mongo.api.database.map(_.collection[BSONCollection](collectionName))
     } yield res
 
   private val createdAtIndex = MongoIndex(
@@ -90,7 +81,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
   private lazy val ensureIndexes = {
     logger.info("Ensuring collection indexes")
     for {
-      collection <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
+      collection <- mongo.api.database.map(_.collection[BSONCollection](collectionName))
       createdCreatedIndex <- collection.indexesManager.ensure(createdAtIndex)
       createdIdIndex <- collection.indexesManager.ensure(draftIdIndex)
       createdInternalIdIndex <- collection.indexesManager.ensure(internalIdIndex)
@@ -111,7 +102,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
     collection.flatMap {
       _.update(ordered = false).one(selector, modifier, upsert = true).map {
         lastError =>
-          lastError.ok
+          lastError.errmsg.isEmpty
       }
     }
   }
@@ -123,7 +114,8 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
     )
 
     collection.flatMap(_.find(
-      selector = selector, None).one[RegistrationSubmissionDraft])
+      selector = selector, None).one[RegistrationSubmissionDraft]
+    )
   }
 
   override def getRecentDrafts(internalId: String, affinityGroup: AffinityGroup): Future[List[RegistrationSubmissionDraft]] = {
@@ -136,7 +128,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
 
     collection.flatMap(
       _.find(selector = selector, projection = None)
-        .sort(Json.obj("createdAt" -> -1))
+        .sort(BSONDocument("createdAt" -> -1))
         .cursor[RegistrationSubmissionDraft]()
         .collect[List](maxDocs, Cursor.FailOnError[List[RegistrationSubmissionDraft]]())
     )
@@ -148,7 +140,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
       "internalId" -> internalId
     )
 
-    collection.flatMap(_.delete().one(selector)).map(_.ok)
+    collection.flatMap(_.delete().one(selector)).map(x => x.writeErrors.isEmpty)
   }
 
   /**
@@ -156,10 +148,10 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
    * This is so that we don't have any lingering 4MLD draft registrations when we switch on 5MLD
    */
   def removeAllDrafts(): Future[Boolean] = for {
-    collection <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
+    collection <- mongo.api.database.map(_.collection[BSONCollection](collectionName))
     result <- if (config.removeSavedRegistrations) {
       logger.info("Removing all registration submissions.")
-      collection.delete().one(Json.obj(), None).map(_.ok)
+      collection.delete().one(Json.obj(), None).map(_.writeErrors.isEmpty)
     } else {
       Future.successful(true)
     }

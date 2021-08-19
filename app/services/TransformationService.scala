@@ -54,8 +54,6 @@ class TransformationService @Inject()(repository: TransformationRepository,
             applyTransformations(identifier, internalId, fixed).map {
               case JsSuccess(transformed, _) =>
 
-                println("!!DEBUG!!: TRANSFORMATION SERVICE GET TRANSFORMED DATA" + transformed)
-
                 TrustProcessedResponse(transformed, response.responseHeader)
               case JsError(errors) => TransformationErrorResponse(errors.toString)
             }
@@ -136,8 +134,6 @@ class TransformationService @Inject()(repository: TransformationRepository,
         composedTransform :+ newTransform
 
     }.flatMap { newTransforms =>
-
-      println("\t\t !!DEBUG!!: TRANSFORMATION SERVICE NEW TRANSFORMS AFTER GET " + newTransforms)
 
       repository.set(identifier, internalId, newTransforms)
 

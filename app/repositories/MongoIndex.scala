@@ -48,7 +48,6 @@ object MongoIndex {
     wildcardProjection = None,
     version = None,
     partialFilter = None,
-    options = options,
-    dropDups = false
+    options = options
   )
 }

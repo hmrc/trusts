@@ -104,7 +104,7 @@ object DeltaTransform {
     readsForTransform[SetTaxLiabilityTransform](SetTaxLiabilityTransform.key)
   }
 
-  def trusteeWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+  def trusteeWrites: PartialFunction[DeltaTransform, JsValue] = {
     case transform: AddTrusteeTransform =>
       Json.obj(AddTrusteeTransform.key -> Json.toJson(transform)(AddTrusteeTransform.format))
     case transform: AmendTrusteeTransform =>
@@ -115,7 +115,7 @@ object DeltaTransform {
       Json.obj(RemoveTrusteeTransform.key -> Json.toJson(transform)(RemoveTrusteeTransform.format))
   }
 
-  def beneficiariesWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+  def beneficiariesWrites: PartialFunction[DeltaTransform, JsValue] = {
     case transform: AddBeneficiaryTransform =>
       Json.obj(AddBeneficiaryTransform.key -> Json.toJson(transform)(AddBeneficiaryTransform.format))
     case transform: AmendBeneficiaryTransform =>
@@ -124,7 +124,7 @@ object DeltaTransform {
       Json.obj(RemoveBeneficiaryTransform.key -> Json.toJson(transform)(RemoveBeneficiaryTransform.format))
   }
 
-  def settlorsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+  def settlorsWrites: PartialFunction[DeltaTransform, JsValue] = {
     case transform: AddSettlorTransform =>
       Json.obj(AddSettlorTransform.key -> Json.toJson(transform)(AddSettlorTransform.format))
     case transform: AmendSettlorTransform =>
@@ -133,7 +133,7 @@ object DeltaTransform {
       Json.obj(RemoveSettlorTransform.key -> Json.toJson(transform)(RemoveSettlorTransform.format))
   }
 
-  def protectorsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+  def protectorsWrites: PartialFunction[DeltaTransform, JsValue] = {
     case transform: AddProtectorTransform =>
       Json.obj(AddProtectorTransform.key -> Json.toJson(transform)(AddProtectorTransform.format))
     case transform: AmendProtectorTransform =>
@@ -142,7 +142,7 @@ object DeltaTransform {
       Json.obj(RemoveProtectorTransform.key -> Json.toJson(transform)(RemoveProtectorTransform.format))
   }
 
-  def otherIndividualsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+  def otherIndividualsWrites: PartialFunction[DeltaTransform, JsValue] = {
     case transform: AddOtherIndividualTransform =>
       Json.obj(AddOtherIndividualTransform.key -> Json.toJson(transform)(AddOtherIndividualTransform.format))
     case transform: AmendOtherIndividualTransform =>
@@ -151,7 +151,7 @@ object DeltaTransform {
       Json.obj(RemoveOtherIndividualTransform.key -> Json.toJson(transform)(RemoveOtherIndividualTransform.format))
   }
 
-  def assetsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+  def assetsWrites: PartialFunction[DeltaTransform, JsValue] = {
     case transform: AddAssetTransform =>
       Json.obj(AddAssetTransform.key -> Json.toJson(transform)(AddAssetTransform.format))
     case transform: AmendAssetTransform =>
@@ -160,19 +160,19 @@ object DeltaTransform {
       Json.obj(RemoveAssetTransform.key -> Json.toJson(transform)(RemoveAssetTransform.format))
   }
 
-  def trustDetailsWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+  def trustDetailsWrites: PartialFunction[DeltaTransform, JsValue] = {
     case transform: SetTrustDetailTransform =>
       Json.obj(SetTrustDetailTransform.key -> Json.toJson(transform)(SetTrustDetailTransform.format))
     case transform: SetTrustDetailsTransform =>
       Json.obj(SetTrustDetailsTransform.key -> Json.toJson(transform)(SetTrustDetailsTransform.format))
   }
 
-  def taxLiabilityWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+  def taxLiabilityWrites: PartialFunction[DeltaTransform, JsValue] = {
     case transform: SetTaxLiabilityTransform =>
       Json.obj(SetTaxLiabilityTransform.key -> Json.toJson(transform)(SetTaxLiabilityTransform.format))
   }
 
-  def defaultWrites[T <: DeltaTransform]: PartialFunction[T, JsValue] = {
+  def defaultWrites: PartialFunction[DeltaTransform, JsValue] = {
     case transform => throw new Exception(s"Don't know how to serialise transform - $transform")
   }
 
@@ -204,5 +204,23 @@ case class ComposedDeltaTransform(deltaTransforms: Seq[DeltaTransform] = Nil) ex
 }
 
 object ComposedDeltaTransform {
+//  import reactivemongo.api.bson._
+
+//  // Overrides BSONReaders for OID/Timestamp/DateTime
+//  // so that the BSON representation matches the JSON lax one
+//  implicit val laxBsonReader: BSONDocumentReader[ComposedDeltaTransform] = Macros.reader[ComposedDeltaTransform]
+//  implicit val laxBsonWriter: BSONDocumentWriter[ComposedDeltaTransform] = Macros.writer[ComposedDeltaTransform]
+//
+//  implicit val laxJsonWrites: Writes[ComposedDeltaTransform] = {
+//    import reactivemongo.play.json.compat._, bson2json._, lax._
+//    laxBsonWriter
+//  }
+//
+//  implicit val laxJsonReads: Reads[ComposedDeltaTransform] = {
+//    import reactivemongo.play.json.compat._, bson2json._, lax._
+//    laxBsonReader
+//  }
+
+  // Old way of writing with play-json
   implicit val format: Format[ComposedDeltaTransform] = Json.format[ComposedDeltaTransform]
 }

@@ -266,18 +266,12 @@ class GetTrustController @Inject()(identify: IdentifierAction,
           _ <- resetCacheIfRequested(identifier, request.internalId, refreshEtmpData)
           data <- if (applyTransformations) {
 
-            println("\t\t !!DEBUG!!: GET TRUST APPLY TRANSFORMATIONS")
-
             transformationService.getTransformedData(identifier, request.internalId)
           } else {
-
-            println("\t\t !!DEBUG!!: GET TRUST GET INFO")
 
             trustsService.getTrustInfo(identifier, request.internalId)
           }
         } yield {
-
-          println("\t\t !!DEBUG!!: GET TRUST DOGET " + data)
 
           successResponse(f, identifier) orElse
             notEnoughDataResponse(identifier) orElse
@@ -294,7 +288,6 @@ class GetTrustController @Inject()(identify: IdentifierAction,
                               identifier: String)
                              (implicit request: IdentifierRequest[AnyContent]): PartialFunction[GetTrustResponse, Result] = {
     case response: GetTrustSuccessResponse =>
-      println("\t\t !!DEBEUG!!: GET TRUST SUCCESSRESPONSE")
       auditService.audit(
         event = TrustAuditing.GET_TRUST,
         request = Json.obj("utr" -> identifier),
@@ -313,7 +306,6 @@ class GetTrustController @Inject()(identify: IdentifierAction,
         "reason" -> "Missing mandatory fields in response received from DES",
         "errors" -> errors
       )
-      println("98766789******************")
 
       auditService.audit(
         event = TrustAuditing.GET_TRUST,
@@ -328,7 +320,6 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   private def errorResponse(identifier: String)
                            (implicit request: IdentifierRequest[AnyContent]): PartialFunction[GetTrustResponse, Result] = {
     case err =>
-      println("££££££££££££££££££££££££££££££3")
       auditService.auditErrorResponse(
         TrustAuditing.GET_TRUST,
         Json.obj("utr" -> identifier),

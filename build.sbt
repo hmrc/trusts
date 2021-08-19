@@ -37,7 +37,6 @@ lazy val microservice = Project(appName, file("."))
     resolvers += Resolver.jcenterRepo
   )
 
-
 lazy val itSettings = Defaults.itSettings ++ Seq(
   unmanagedSourceDirectories   := Seq(
     baseDirectory.value / "it"

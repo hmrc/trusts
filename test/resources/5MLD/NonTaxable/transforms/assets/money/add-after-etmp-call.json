@@ -334,7 +334,7 @@
       "assets": {
         "monetary": [
           {
-            "assetMonetaryAmount": 1000
+            "assetMonetaryAmount": 999999999999
           }
         ],
         "nonEEABusiness": [
