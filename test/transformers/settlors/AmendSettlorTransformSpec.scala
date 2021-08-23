@@ -16,8 +16,8 @@
 
 package transformers.settlors
 
-import models.NameType
-import models.variation.{AmendDeceasedSettlor, SettlorCompany, SettlorIndividual}
+import models.{NameType, PassportType}
+import models.variation.{AmendDeceasedSettlor, IdentificationType, SettlorCompany, SettlorIndividual}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.{JsValue, Json}
@@ -76,7 +76,7 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
 
       "at declaration time" - {
 
-        "set an end date for the original settlor, adding in the amendment as a new settlor for a settlor known by etmp" in {
+        "set an end date for the original settlor, adding in the amendment as a new settlor for a settlor known by etmp and remove isPassport field" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-settlor-transform-before.json")
           val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-settlor-transform-after-declaration.json")
@@ -86,7 +86,7 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
             bpMatchStatus = None,
             NameType("First updated", None, "Last updated"),
             None,
-            identification = None,
+            identification = Some(IdentificationType(None, Some(PassportType("1234567890", LocalDate.parse("2001-01-01"), "GB", Some(true))), None, None)),
             countryOfResidence = None,
             legallyIncapable = None,
             nationality = None,

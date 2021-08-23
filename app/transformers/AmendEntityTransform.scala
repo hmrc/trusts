@@ -21,7 +21,7 @@ import utils.Constants._
 
 import java.time.LocalDate
 
-trait AmendEntityTransform extends DeltaTransform with AmendableTransform {
+trait AmendEntityTransform extends DeltaTransform with AddOrAmendTransform {
 
   val index: Option[Int]
   val amended: JsValue
@@ -35,7 +35,10 @@ trait AmendEntityTransform extends DeltaTransform with AmendableTransform {
   }
 
   override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
-    endEntity(input, path, original, endDate, endDateField)
+    for {
+      inputWithEntityEnded <- endEntity(input, path, original, endDate, endDateField)
+      inputWithAmendedDataForDeclaration <- prepareInputForDeclaration(inputWithEntityEnded, amended, path)
+    } yield inputWithAmendedDataForDeclaration
   }
 
   val etmpFields: Seq[String] = Seq(LINE_NUMBER, BP_MATCH_STATUS)

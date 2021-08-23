@@ -16,14 +16,18 @@
 
 package transformers
 
-import play.api.libs.json.{JsPath, JsResult, JsValue}
+import play.api.libs.json._
 
-trait AddEntityTransform extends DeltaTransform with AmendableTransform {
+trait AddEntityTransform extends DeltaTransform with AddOrAmendTransform {
 
   val path: JsPath
   val entity: JsValue
 
   override def applyTransform(input: JsValue): JsResult[JsValue] = {
     addToList(input, path, entity)
+  }
+
+  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
+    prepareInputForDeclaration(input, entity, path)
   }
 }

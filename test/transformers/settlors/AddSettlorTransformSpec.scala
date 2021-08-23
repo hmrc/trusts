@@ -16,7 +16,7 @@
 
 package transformers.settlors
 
-import models.NameType
+import models.{NameType, PassportType}
 import models.variation.{IdentificationOrgType, IdentificationType, SettlorCompany, SettlorIndividual}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers._
@@ -68,6 +68,31 @@ class AddSettlorTransformSpec extends AnyFreeSpec {
           val transformer = new AddSettlorTransform(Json.toJson(newSettlor), `type`)
 
           val result = transformer.applyTransform(trustJson).get
+
+          result mustBe afterJson
+        }
+
+        "must remove isPassport field at declaration time" in {
+          val newSettlor = SettlorIndividual(
+            lineNo = Some("1"),
+            bpMatchStatus = None,
+            name = NameType("Joe", None, "Bloggs"),
+            dateOfBirth = None,
+            identification = Some(IdentificationType(None, Some(PassportType("1234567890", LocalDate.parse("2001-01-01"), "GB", Some(true))), None, None)),
+            countryOfResidence = None,
+            legallyIncapable = None,
+            nationality = None,
+            entityStart = LocalDate.parse("2018-02-12"),
+            entityEnd = None
+          )
+
+          val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-with-is-passport.json")
+
+          val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-is-passport-removed.json")
+
+          val transformer = new AddSettlorTransform(Json.toJson(newSettlor), `type`)
+
+          val result = transformer.applyDeclarationTransform(trustJson).get
 
           result mustBe afterJson
         }

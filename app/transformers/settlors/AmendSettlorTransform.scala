@@ -43,7 +43,7 @@ case class AmendSettlorTransform(index: Option[Int],
     if (isDeceasedSettlor) {
       JsSuccess(input)
     } else {
-      endSettlorIfKnownToEtmp(input)
+      super.applyDeclarationTransform(input)
     }
   }
 
@@ -59,12 +59,12 @@ case class AmendSettlorTransform(index: Option[Int],
     })
   }
 
-  private def endSettlorIfKnownToEtmp(input:JsValue): JsResult[JsValue] = {
+  override def endEntity(input: JsValue, path: JsPath, entityJson: JsValue, endDate: LocalDate, endDateField: String): JsResult[JsValue] = {
     original.transform(lineNoPick).fold(
       _ => JsSuccess(input),
       lineNo => {
         stripEtmpStatusForMatching(input, lineNo).fold(
-          _ => endEntity(input, path, original, endDate, endDateField),
+          _ => super.endEntity(input, path, original, endDate, endDateField),
           newEntities => addEndedEntity(input, newEntities)
         )
       }
