@@ -40,7 +40,7 @@ class DeclarationTransformer {
     responseJson.transform(
       (__ \ 'applicationType).json.prune andThen
         DECLARATION.json.prune andThen
-        pruneIsPassportFields(responseJson) andThen
+        removeDetailsTypeFields(responseJson) andThen
         keepYearsReturnsIf5mld(is5mld) andThen
         updateCorrespondence(responseJson) andThen
         fixLeadTrusteeAddress(responseJson, pathToLeadTrustees) andThen
@@ -193,7 +193,7 @@ class DeclarationTransformer {
     }
   }
 
-  private def pruneIsPassportFields(json: JsValue): Reads[JsObject] = {
+  private def removeDetailsTypeFields(json: JsValue): Reads[JsObject] = {
     case class EntityPath(mainPath: JsPath, subPath: JsPath = __)
 
     val paths = Seq(
@@ -208,8 +208,8 @@ class DeclarationTransformer {
     paths.foldLeft(doNothing())((acc, path) => {
 
       def transformEntity(entity: JsValue): JsValue = {
-        entity.transform((path.subPath \ IDENTIFICATION \ PASSPORT \ IS_PASSPORT).json.prune) match {
-          case JsSuccess(entityWithIsPassportRemoved, _) => entityWithIsPassportRemoved
+        entity.transform((path.subPath \ IDENTIFICATION \ PASSPORT \ DETAILS_TYPE).json.prune) match {
+          case JsSuccess(entityWithDetailsTypeRemoved, _) => entityWithDetailsTypeRemoved
           case _ => entity
         }
       }

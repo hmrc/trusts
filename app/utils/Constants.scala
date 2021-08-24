@@ -141,5 +141,5 @@ object Constants {
 
   val IS_PORTFOLIO = "isPortfolio"
   val SHARE_CLASS_DISPLAY = "shareClassDisplay"
-  val IS_PASSPORT = "isPassport"
+  val DETAILS_TYPE = "detailsType"
 }

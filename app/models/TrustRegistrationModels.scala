@@ -16,12 +16,13 @@
 
 package models
 
-import java.time.LocalDate
-
+import models.DetailsType.DetailsType
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import utils.DeedOfVariation.DeedOfVariation
 import utils.TypeOfTrust.{Employment, TypeOfTrust}
+
+import java.time.LocalDate
 /**
   * DES API Schema - definitions models below
   */
@@ -480,7 +481,7 @@ object YearReturnType {
 case class PassportType(number: String,
                         expirationDate: LocalDate,
                         countryOfIssue: String,
-                        isPassport: Option[Boolean] = None)
+                        detailsType: Option[DetailsType] = None)
 
 object PassportType {
   implicit val passportTypeFormat: Format[PassportType] = Json.format[PassportType]

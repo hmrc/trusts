@@ -67,7 +67,7 @@
                   "number": "abcdefgh",
                   "expirationDate": "2001-01-01",
                   "countryOfIssue": "GB",
-                  "isPassport": true
+                  "detailsType": "passport"
                 }
               },
               "entityStart": "1998-02-12"
@@ -116,7 +116,7 @@
                     "number": "abcdefgh",
                     "expirationDate": "2001-01-01",
                     "countryOfIssue": "GB",
-                    "isPassport": true
+                    "detailsType": "passport"
                   },
                   "address": {
                     "line1": "1344 Army Road",
@@ -201,7 +201,7 @@
                 "number": "abcdefgh",
                 "expirationDate": "2001-01-01",
                 "countryOfIssue": "GB",
-                "isPassport": true
+                "detailsType": "passport"
               },
               "address": {
                 "line1": "1344 Army Road",
@@ -229,7 +229,7 @@
                     "number": "abcdefgh",
                     "expirationDate": "2001-01-01",
                     "countryOfIssue": "GB",
-                    "isPassport": true
+                    "detailsType": "passport"
                   }
                 },
                 "phoneNumber": "0121546546",
@@ -252,7 +252,7 @@
                     "number": "abcdefgh",
                     "expirationDate": "2001-01-01",
                     "countryOfIssue": "GB",
-                    "isPassport": true
+                    "detailsType": "passport"
                   }
                 },
                 "entityStart": "1998-02-12"
@@ -286,7 +286,7 @@
                     "number": "abcdefgh",
                     "expirationDate": "2001-01-01",
                     "countryOfIssue": "GB",
-                    "isPassport": true
+                    "detailsType": "passport"
                   }
                 },
                 "entityStart": "1998-02-12"
