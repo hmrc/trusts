@@ -32,7 +32,7 @@ import scala.concurrent.duration.Duration
 class RegistrationSubmissionRepositorySpec extends AsyncFreeSpec with IntegrationTestBase with MongoDateTimeFormats {
 
   // Make sure we use value of LocalDateTime that survives JSON round trip - and isn't expired.
-  private val testDateTime: LocalDateTime = Json.toJson(LocalDateTime.now()).as[LocalDateTime]
+  private val testDateTime: LocalDateTime = LocalDateTime.now
 
   private val data1 = Json.obj(
     "field1" -> "value1",

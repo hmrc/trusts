@@ -18,7 +18,6 @@ package models
 
 import play.api.libs.json._
 
-import java.sql.Timestamp
 import java.time.{Instant, LocalDateTime, ZoneOffset}
 
 trait MongoDateTimeFormats {

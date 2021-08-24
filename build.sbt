@@ -41,7 +41,8 @@ lazy val microservice = Project(appName, file("."))
 lazy val testSettings: Seq[Def.Setting[_]] = Seq(
   fork        := true,
   javaOptions ++= Seq(
-    "-Dconfig.resource=test.application.conf"
+    "-Dconfig.resource=test.application.conf",
+    "-Dlogger.resource=logback-test.xml"
   )
 )
 
@@ -50,5 +51,8 @@ lazy val itSettings = Defaults.itSettings ++ Seq(
     baseDirectory.value / "it"
   ),
   parallelExecution            := false,
-  fork                         := true
+  fork                         := true,
+  javaOptions ++= Seq(
+    "-Dlogger.resource=logback-test.xml"
+  )
 )
