@@ -32,10 +32,18 @@ lazy val microservice = Project(appName, file("."))
     unmanagedSourceDirectories in Compile += baseDirectory.value / "resources"
   )
   .configs(IntegrationTest)
+  .settings(inConfig(Test)(testSettings))
   .settings(inConfig(IntegrationTest)(itSettings): _*)
   .settings(
     resolvers += Resolver.jcenterRepo
   )
+
+lazy val testSettings: Seq[Def.Setting[_]] = Seq(
+  fork        := true,
+  javaOptions ++= Seq(
+    "-Dconfig.resource=test.application.conf"
+  )
+)
 
 lazy val itSettings = Defaults.itSettings ++ Seq(
   unmanagedSourceDirectories   := Seq(
