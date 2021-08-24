@@ -479,7 +479,8 @@ object YearReturnType {
 
 case class PassportType(number: String,
                         expirationDate: LocalDate,
-                        countryOfIssue: String)
+                        countryOfIssue: String,
+                        isPassport: Option[Boolean] = None)
 
 object PassportType {
   implicit val passportTypeFormat: Format[PassportType] = Json.format[PassportType]
