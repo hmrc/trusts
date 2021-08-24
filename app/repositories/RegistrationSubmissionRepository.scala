@@ -56,7 +56,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
   private def collection: Future[JSONCollection] =
     for {
       _ <- ensureIndexes
-      res <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
+      res <- Future.successful(mongo.api.collection[JSONCollection](collectionName))
     } yield res
 
   private val createdAtIndex = Index(
@@ -78,7 +78,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
   private lazy val ensureIndexes = {
     logger.info("Ensuring collection indexes")
     for {
-      collection <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
+      collection <- Future.successful(mongo.api.collection[JSONCollection](collectionName))
       createdCreatedIndex <- collection.indexesManager.ensure(createdAtIndex)
       createdIdIndex <- collection.indexesManager.ensure(draftIdIndex)
       createdInternalIdIndex <- collection.indexesManager.ensure(internalIdIndex)
@@ -143,7 +143,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
    * This is so that we don't have any lingering 4MLD draft registrations when we switch on 5MLD
    */
   def removeAllDrafts(): Future[Boolean] = for {
-    collection <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
+    collection <- Future.successful(mongo.api.collection[JSONCollection](collectionName))
     result <- if (config.removeSavedRegistrations) {
       logger.info("Removing all registration submissions.")
       collection.delete().one(Json.obj(), None).map(_.ok)

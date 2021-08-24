@@ -80,7 +80,7 @@ abstract class RepositoryManager @Inject()(
   private def collection: Future[JSONCollection] =
     for {
       _ <- ensureIndexes
-      res <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
+      res <- Future.successful(mongo.api.collection[JSONCollection](collectionName))
     } yield res
 
   private def ensureIndexes: Future[Boolean] = {
@@ -98,7 +98,7 @@ abstract class RepositoryManager @Inject()(
     )
 
     for {
-      collection              <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
+      collection              <- Future.successful(mongo.api.collection[JSONCollection](collectionName))
       createdLastUpdatedIndex <- collection.indexesManager.ensure(lastUpdatedIndex)
       createdIdIndex          <- collection.indexesManager.ensure(idIndex)
     } yield createdLastUpdatedIndex && createdIdIndex
@@ -116,7 +116,7 @@ abstract class RepositoryManager @Inject()(
 
     def logIndexes: Future[Unit] = {
       for {
-        collection <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
+        collection <- Future.successful(mongo.api.collection[JSONCollection](collectionName))
         indexes <- collection.indexesManager.list()
       } yield {
         logger.info(s"[IndexesManager] indexes found on mongo collection $collectionName: $indexes")
@@ -128,7 +128,7 @@ abstract class RepositoryManager @Inject()(
       _ <- logIndexes
       _ <- if (dropIndexesFeatureEnabled) {
         for {
-          collection <- mongo.api.database.map(_.collection[JSONCollection](collectionName))
+          collection <- Future.successful(mongo.api.collection[JSONCollection](collectionName))
           _ <- collection.indexesManager.dropAll()
           _ <- Future.successful(logger.info(s"[IndexesManager] dropped indexes on collection $collectionName"))
           _ <- logIndexes
