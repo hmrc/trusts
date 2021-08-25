@@ -176,5 +176,15 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
       }
     }
 
+    "remove detailsType fields" in {
+      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-transformed-with-details-type.json")
+      val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-with-details-type-removed.json")
+      val transformer = new DeclarationTransformer
+
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
+      result.asOpt.value mustBe afterJson
+    }
+
   }
 }
