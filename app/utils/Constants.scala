@@ -135,9 +135,11 @@ object Constants {
 
   val IDENTIFICATION = "identification"
   val UTR = "utr"
+  val PASSPORT = "passport"
 
   val EMPLOYMENT_RELATED_TRUST = "Employment Related"
 
   val IS_PORTFOLIO = "isPortfolio"
   val SHARE_CLASS_DISPLAY = "shareClassDisplay"
+  val DETAILS_TYPE = "detailsType"
 }

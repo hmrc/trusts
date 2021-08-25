@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package utils
+package models
 
 import play.api.libs.json.{Format, Reads, Writes}
 
-object DeedOfVariation extends Enumeration {
+object DetailsType extends Enumeration {
 
-  type DeedOfVariation = Value
+  type DetailsType = Value
 
-  val AbsoluteInterestUnderWill = Value("Previously there was only an absolute interest under the will")
-  val ReplacedWill = Value("Replaced the will trust")
-  val AdditionToWill = Value("Addition to the will trust")
+  val Passport: Value = Value("passport")
+  val IdCard: Value = Value("id-card")
+  val Combined: Value = Value("combined")
 
-  implicit val reads: Reads[DeedOfVariation] = Reads.enumNameReads(DeedOfVariation)
-  implicit val writes: Writes[DeedOfVariation] = Writes.enumNameWrites
-  implicit val formats: Format[DeedOfVariation]  = Format(reads, writes)
-
+  implicit val reads: Reads[Value] = Reads.enumNameReads(DetailsType)
+  implicit val writes: Writes[Value] = Writes.enumNameWrites
+  implicit val formats: Format[Value] = Format.apply(reads, writes)
 }

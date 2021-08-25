@@ -1,0 +1,356 @@
+{
+  "responseHeader": {
+    "dfmcaReturnUserStatus": "Processed",
+    "formBundleNo": "000012387218"
+  },
+  "trustOrEstateDisplay": {
+    "applicationType": "01",
+    "matchData": {
+      "utr": "5465416546"
+    },
+    "correspondence": {
+      "abroadIndicator": false,
+      "name": "Abram James",
+      "address": {
+        "line1": "1344 Army Road",
+        "line2": "Suite 111",
+        "line3": "Telford",
+        "line4": "Shropshire",
+        "postCode": "TF1 5DR",
+        "country": "GB"
+      },
+      "phoneNumber": "+4423400342"
+    },
+    "declaration": {
+      "name": {
+        "firstName": "Abram",
+        "middleName": "Joe",
+        "lastName": "James"
+      },
+      "address": {
+        "line1": "1344 Army Road",
+        "line2": "Suite 111",
+        "line3": "Telford",
+        "line4": "Shropshire",
+        "postCode": "TF1 5DR",
+        "country": "GB"
+      }
+    },
+    "details": {
+      "trust": {
+        "details": {
+          "startDate": "2001-01-01",
+          "administrationCountry": "GB",
+          "residentialStatus": {
+            "uk": {
+              "scottishLaw": false,
+              "preOffShore": "AD"
+            }
+          },
+          "typeOfTrust": "Will Trust or Intestacy Trust",
+          "deedOfVariation": "Previously there was only an absolute interest under the will",
+          "interVivos": false,
+          "efrbsStartDate": "2001-01-01"
+        },
+        "entities": {
+          "naturalPerson": [
+            {
+              "lineNo": "1",
+              "name": {
+                "firstName": "John",
+                "middleName": "William",
+                "lastName": "O'Connor"
+              },
+              "dateOfBirth": "1956-02-12",
+              "identification": {
+                "passport": {
+                  "number": "abcdefgh",
+                  "expirationDate": "2001-01-01",
+                  "countryOfIssue": "GB",
+                  "detailsType": "passport"
+                }
+              },
+              "entityStart": "1998-02-12"
+            }
+          ],
+          "beneficiary": {
+            "company": [
+              {
+                "lineNo": "1",
+                "bpMatchStatus": "01",
+                "organisationName": "Company 1",
+                "entityStart": "2001-01-01"
+              }
+            ],
+            "charity": [
+              {
+                "lineNo": "1",
+                "bpMatchStatus": "01",
+                "organisationName": "Charity 1",
+                "entityStart": "2001-01-01"
+              }
+            ],
+            "trust": [
+              {
+                "lineNo": "1",
+                "bpMatchStatus": "01",
+                "organisationName": "Trust 1",
+                "entityStart": "2001-01-01"
+              }
+            ],
+            "individualDetails": [
+              {
+                "lineNo": "1",
+                "name": {
+                  "firstName": "John",
+                  "middleName": "William",
+                  "lastName": "O'Connor"
+                },
+                "dateOfBirth": "2001-01-01",
+                "vulnerableBeneficiary": true,
+                "beneficiaryType": "Director",
+                "beneficiaryDiscretion": true,
+                "beneficiaryShareOfIncome": "100",
+                "identification": {
+                  "passport": {
+                    "number": "abcdefgh",
+                    "expirationDate": "2001-01-01",
+                    "countryOfIssue": "GB",
+                    "detailsType": "passport"
+                  },
+                  "address": {
+                    "line1": "1344 Army Road",
+                    "line2": "Suite 111",
+                    "line4": "Telford",
+                    "postCode": "TF1 5DR",
+                    "country": "GB"
+                  }
+                },
+                "entityStart": "1998-02-12"
+              }
+            ],
+            "other": [
+              {
+                "lineNo": "1",
+                "address": {
+                  "line1": "1344 Army Road",
+                  "line2": "Suite 111",
+                  "line4": "Telford",
+                  "postCode": "TF1 5DR",
+                  "country": "GB"
+                },
+                "description": "Lorem ipsum",
+                "entityStart": "1998-02-12"
+              }
+            ],
+            "unidentified": [
+              {
+                "lineNo":"1",
+                "bpMatchStatus": "01",
+                "description": "Some Description",
+                "beneficiaryShareOfIncome": "25",
+                "entityStart": "2017-02-28"
+              }
+            ],
+            "large": [
+              {
+                "lineNo":"1",
+                "bpMatchStatus": "01",
+                "organisationName": "Organisation Name",
+                "identification": {
+                  "address": {
+                    "line1": "Line 1",
+                    "line2": "Line 2",
+                    "postCode": "NE1 1NE",
+                    "country": "GB"
+                  }
+                },
+                "description": "Description",
+                "numberOfBeneficiary": "501",
+                "entityStart": "1990-10-10"
+              }
+            ]
+          },
+          "deceased": {
+            "bpMatchStatus": "01",
+            "lineNo": "1",
+            "name": {
+              "firstName": "John",
+              "middleName": "William",
+              "lastName": "O'Connor"
+            },
+            "dateOfBirth": "1956-02-12",
+            "dateOfDeath": "2016-01-01",
+            "identification": {
+              "nino": "KC456736"
+            },
+            "entityStart": "1998-02-12"
+          },
+          "leadTrustees": {
+            "lineNo": "1",
+            "bpMatchStatus": "01",
+            "name": {
+              "firstName": "Joe",
+              "lastName": "Bloggs"
+            },
+            "dateOfBirth": "1950-01-01",
+            "phoneNumber": "0754545454",
+            "email": "me@you.com",
+            "identification": {
+              "passport": {
+                "number": "abcdefgh",
+                "expirationDate": "2001-01-01",
+                "countryOfIssue": "GB",
+                "detailsType": "passport"
+              },
+              "address": {
+                "line1": "1344 Army Road",
+                "line2": "Suite 111",
+                "line3": "Telford",
+                "line4": "Shropshire",
+                "postCode": "TF1 5DR",
+                "country": "GB"
+              }
+            },
+            "entityStart": "1998-02-12"
+          },
+          "trustees": [
+            {
+              "trusteeInd": {
+                "lineNo": "1",
+                "name": {
+                  "firstName": "John",
+                  "middleName": "William",
+                  "lastName": "O'Connor"
+                },
+                "dateOfBirth": "1956-02-12",
+                "identification": {
+                  "passport": {
+                    "number": "abcdefgh",
+                    "expirationDate": "2001-01-01",
+                    "countryOfIssue": "GB",
+                    "detailsType": "passport"
+                  }
+                },
+                "phoneNumber": "0121546546",
+                "entityStart": "1998-02-12"
+              }
+            }
+          ],
+          "settlors": {
+            "settlor": [
+              {
+                "lineNo": "1",
+                "name": {
+                  "firstName": "abcdefghijkl",
+                  "middleName": "abcdefghijklmn",
+                  "lastName": "abcde"
+                },
+                "dateOfBirth": "2001-01-01",
+                "identification": {
+                  "passport": {
+                    "number": "abcdefgh",
+                    "expirationDate": "2001-01-01",
+                    "countryOfIssue": "GB",
+                    "detailsType": "passport"
+                  }
+                },
+                "entityStart": "1998-02-12"
+              }
+            ],
+            "settlorCompany": [
+              {
+                "lineNo": "1",
+                "name": "abcdefghijklmnopqr",
+                "companyType": "Trading",
+                "companyTime": false,
+                "identification": {
+                  "utr": "5465416546"
+                },
+                "entityStart": "1998-02-12"
+              }
+            ]
+          },
+          "protectors": {
+            "protector": [
+              {
+                "lineNo": "1",
+                "name": {
+                  "firstName": "abcdefghijkl",
+                  "middleName": "abcdefghijklmn",
+                  "lastName": "abcde"
+                },
+                "dateOfBirth": "2001-01-01",
+                "identification": {
+                  "passport": {
+                    "number": "abcdefgh",
+                    "expirationDate": "2001-01-01",
+                    "countryOfIssue": "GB",
+                    "detailsType": "passport"
+                  }
+                },
+                "entityStart": "1998-02-12"
+              }
+            ],
+            "protectorCompany": [
+              {
+                "lineNo": "1",
+                "name": "abcdefghijklmnopqr",
+                "identification": {
+                  "utr": "5465416546"
+                },
+                "entityStart": "1998-02-12"
+              }
+            ]
+          }
+        },
+        "assets": {
+          "monetary": [
+            {
+              "assetMonetaryAmount": 100000
+            }
+          ],
+          "propertyOrLand": [
+            {
+              "buildingLandName": "ACB House",
+              "address": {
+                "line1": "1344 Army Road",
+                "line2": "Suite 111",
+                "line4": "Telford",
+                "postCode": "TF1 5DR",
+                "country": "GB"
+              },
+              "valueFull": 1000000,
+              "valuePrevious": 200000
+            }
+          ],
+          "partnerShip": [
+            {
+              "utr": "5456456221",
+              "description": "Partnership Trade",
+              "partnershipStart": "2001-01-01"
+            }
+          ],
+          "other": [
+            {
+              "description": "Lorem ipsum anum",
+              "value": 1982372
+            }
+          ]
+        }
+      }
+    }
+  },
+  "agentDetails": {
+    "arn": "AARN1234567",
+    "agentName": "Mr. xys abcde",
+    "agentAddress": {
+      "line1": "line1",
+      "line2": "line2",
+      "postCode": "TF3 2BX",
+      "country": "GB"
+    },
+    "agentTelephoneNumber": "07912180120",
+    "clientReference": "clientReference"
+  }
+}

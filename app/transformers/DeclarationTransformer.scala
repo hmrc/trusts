@@ -41,6 +41,7 @@ class DeclarationTransformer {
     responseJson.transform(
       (__ \ 'applicationType).json.prune andThen
         DECLARATION.json.prune andThen
+        removeDetailsTypeFields(responseJson) andThen
         keepYearsReturnsIf5mld(is5mld) andThen
         updateCorrespondence(responseJson) andThen
         fixLeadTrusteeAddress(responseJson, pathToLeadTrustees) andThen
@@ -106,9 +107,9 @@ class DeclarationTransformer {
     )).fold(
       errors => Reads(_ => JsError(errors)),
       endedJson => {
-        pathToLeadTrustees.json.update(of[JsArray]
-          .map { a => a :+ Json.obj(trusteeField -> endedJson) })
-      })
+        pathToLeadTrustees.json.update(of[JsArray].map(_ :+ Json.obj(trusteeField -> endedJson)))
+      }
+    )
   }
 
   private def addPreviousLeadTrustee(newJson: JsValue, originalJson: JsValue, date: LocalDate): Reads[JsObject] = {
@@ -116,7 +117,8 @@ class DeclarationTransformer {
     val originalLeadTrustee = originalJson.transform(pickLeadTrustee)
 
     (newLeadTrustee, originalLeadTrustee) match {
-      case (JsSuccess(newLeadTrusteeJson, _), JsSuccess(originalLeadTrusteeJson, _)) if newLeadTrusteeJson != originalLeadTrusteeJson =>
+      case (JsSuccess(newLeadTrusteeJson, _), JsSuccess(originalLeadTrusteeJson, _))
+        if newLeadTrusteeJson != originalLeadTrusteeJson =>
         val reads = fixLeadTrusteeAddress(originalLeadTrusteeJson, __)
         originalLeadTrusteeJson.transform(reads) match {
           case JsSuccess(value, _) => addPreviousLeadTrusteeAsExpiredStep(value, date)
@@ -151,7 +153,7 @@ class DeclarationTransformer {
   private def removeAdditionalShareAssetFields(json: JsValue): Reads[JsObject] = {
     json.transform(pathToShareAssets.json.pick[JsArray]) match {
       case JsSuccess(array, _) =>
-        val updatedArray: JsArray = JsArray(array.value.map(x => x.as[JsObject] - IS_PORTFOLIO - SHARE_CLASS_DISPLAY))
+        val updatedArray: JsArray = JsArray(array.value.map(_.as[JsObject] - IS_PORTFOLIO - SHARE_CLASS_DISPLAY))
         prunePathAndPutNewValue(pathToShareAssets, updatedArray)
       case _ =>
         doNothing()
@@ -214,31 +216,58 @@ class DeclarationTransformer {
   }
 
   private def addAgentIfDefined(agentDetails: Option[AgentDetails]): Reads[JsObject] = {
-    if (agentDetails.isDefined) {
-      __.json.update(
-        (__ \ 'agentDetails).json.put(Json.toJson(agentDetails.get))
-      )
-    } else {
-      doNothing()
+    agentDetails match {
+      case Some(value) => putNewValue(__ \ 'agentDetails, Json.toJson(value))
+      case None => doNothing()
     }
   }
 
   private def addEndDateIfDefined(endDate: Option[LocalDate]): Reads[JsObject] = {
     endDate match {
       case Some(date) =>
-        __.json.update(
-          (__ \ 'trustEndDate).json.put(Json.toJson(date))
-        )
+        putNewValue(__ \ 'trustEndDate, Json.toJson(date))
       case _ =>
         doNothing()
     }
   }
 
+  private def removeDetailsTypeFields(json: JsValue): Reads[JsObject] = {
+    case class EntityPath(mainPath: JsPath, subPath: JsPath = __)
+
+    val paths = Seq(
+      EntityPath(ENTITIES \ SETTLORS \ INDIVIDUAL_SETTLOR),
+      EntityPath(ENTITIES \ BENEFICIARIES \ INDIVIDUAL_BENEFICIARY),
+      EntityPath(ENTITIES \ PROTECTORS \ INDIVIDUAL_PROTECTOR),
+      EntityPath(ENTITIES \ OTHER_INDIVIDUALS),
+      EntityPath(ENTITIES \ TRUSTEES, __ \ INDIVIDUAL_TRUSTEE),
+      EntityPath(ENTITIES \ LEAD_TRUSTEE)
+    )
+
+    paths.foldLeft(doNothing())((acc, path) => {
+
+      def transformEntity(entity: JsValue): JsValue = {
+        entity.transform((path.subPath \ IDENTIFICATION \ PASSPORT \ DETAILS_TYPE).json.prune) match {
+          case JsSuccess(entityWithDetailsTypeRemoved, _) => entityWithDetailsTypeRemoved
+          case _ => entity
+        }
+      }
+
+      val reads = json.transform(path.mainPath.json.pick) match {
+        case JsSuccess(entities: JsArray, _) =>
+          prunePathAndPutNewValue(path.mainPath, JsArray(entities.value.map(transformEntity)))
+        case JsSuccess(entity: JsObject, _) =>
+          prunePathAndPutNewValue(path.mainPath, transformEntity(entity))
+        case _ =>
+          doNothing()
+      }
+
+      acc andThen reads
+    })
+  }
+
   private def addSubmissionDateIf5mld(submissionDate: LocalDate, is5mld: Boolean): Reads[JsObject] = {
     if (is5mld) {
-      __.json.update(
-        SUBMISSION_DATE.json.put(Json.toJson(submissionDate))
-      )
+      putNewValue(SUBMISSION_DATE, Json.toJson(submissionDate))
     } else {
       doNothing()
     }

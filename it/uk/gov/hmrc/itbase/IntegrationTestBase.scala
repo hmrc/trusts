@@ -1,20 +1,19 @@
 package uk.gov.hmrc.itbase
 
+import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
-import play.api.{Application, Play}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.test.Helpers.stubControllerComponents
+import play.api.{Application, Play}
 import reactivemongo.api.{DefaultDB, MongoConnection}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
-import controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import repositories.TrustsMongoDriver
-import play.api.test.Helpers.stubControllerComponents
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
-import scala.util.Try
 
 trait IntegrationTestBase extends ScalaFutures {
 
@@ -22,19 +21,20 @@ trait IntegrationTestBase extends ScalaFutures {
 
   val connectionString = "mongodb://localhost:27017/trusts-integration"
 
-  def getDatabase(connection: MongoConnection): DefaultDB = {
+  private def getDatabase(connection: MongoConnection): DefaultDB = {
     Await.result(connection.database("trusts-integration"), Duration.Inf)
   }
 
-  def getConnection(application: Application): Try[MongoConnection] = {
-    val mongoDriver = application.injector.instanceOf[TrustsMongoDriver]
+  import reactivemongo.api._
+
+  private def getConnection(): Future[MongoConnection] = {
     for {
-      uri <- MongoConnection.parseURI(connectionString)
-      connection: MongoConnection <- mongoDriver.api.driver.connection(uri, strictUri = true)
+      uri <- Future.fromTry(MongoConnection.parseURI(connectionString))
+      connection <- AsyncDriver().connect(uri)
     } yield connection
   }
 
-  def dropTheDatabase(connection: MongoConnection): Unit = {
+  private def dropTheDatabase(connection: MongoConnection): Unit = {
     Await.result(getDatabase(connection).drop(), Duration.Inf)
   }
 
@@ -60,9 +60,8 @@ trait IntegrationTestBase extends ScalaFutures {
     Play.start(application)
 
     try {
-
       val f: Future[Assertion] = for {
-          connection <- Future.fromTry(getConnection(application))
+          connection <- getConnection()
           _ = dropTheDatabase(connection)
         } yield {
           block(application)
