@@ -16,12 +16,16 @@
 
 package repositories
 
+import play.modules.reactivemongo.ReactiveMongoComponent
+import reactivemongo.api.DB
+
 import javax.inject.{Inject, Singleton}
-import play.modules.reactivemongo.ReactiveMongoApi
 
 @Singleton
-class TrustsMongoDriver @Inject()(val api : ReactiveMongoApi) extends MongoDriver
+class TrustsMongoDriver @Inject()(val component: ReactiveMongoComponent) extends MongoDriver
 
 sealed trait MongoDriver {
-  val api : ReactiveMongoApi
+  protected val component: ReactiveMongoComponent
+
+  lazy val api: DB = component.mongoConnector.db()
 }
