@@ -33,7 +33,7 @@ class TrustsStoreServiceSpec extends BaseSpec {
 
   "Trusts Store Service" when {
 
-    ".isFeatureEnabled" must {
+    ".is5mldEnabled" must {
 
       val feature: String = "5mld"
 
@@ -41,10 +41,10 @@ class TrustsStoreServiceSpec extends BaseSpec {
 
         when(mockTrustsStoreConnector.getFeature(any())(any(), any())).thenReturn(Future.successful(FeatureResponse(feature, isEnabled = true)))
 
-        val resultF = service.isFeatureEnabled(feature)
+        val resultF = service.is5mldEnabled()
 
         whenReady(resultF) {
-          result => result mustBe true
+          _ mustBe true
         }
       }
 
@@ -52,10 +52,10 @@ class TrustsStoreServiceSpec extends BaseSpec {
 
         when(mockTrustsStoreConnector.getFeature(any())(any(), any())).thenReturn(Future.successful(FeatureResponse(feature, isEnabled = false)))
 
-        val resultF = service.isFeatureEnabled(feature)
+        val resultF = service.is5mldEnabled()
 
         whenReady(resultF) {
-          result => result mustBe false
+          _ mustBe false
         }
       }
     }

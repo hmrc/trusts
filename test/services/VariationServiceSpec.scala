@@ -80,8 +80,6 @@ class VariationServiceSpec extends AnyWordSpec
 
   when(trustsStoreService.is5mldEnabled()(any(), any()))
     .thenReturn(Future.successful(true))
-  when(trustsStoreService.isFeatureEnabled(equalTo("5mld"))(any(), any()))
-    .thenReturn(Future.successful(true))
 
   val application: Application = new GuiceApplicationBuilder()
     .overrides(bind[AuditService].toInstance(auditService))
@@ -93,7 +91,6 @@ class VariationServiceSpec extends AnyWordSpec
     .build
 
   "Declare no change" should {
-
     "submit data correctly when the version matches, and then reset the cache" in {
 
       when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any()))
@@ -118,7 +115,7 @@ class VariationServiceSpec extends AnyWordSpec
 
       val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
 
-      whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { variationResponse => {
+      whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { variationResponse =>
         variationResponse mustBe VariationResponse(subscriberId)
 
         verify(transformationService, times(1))
@@ -130,7 +127,6 @@ class VariationServiceSpec extends AnyWordSpec
 
         verify(trustsService, times(1)).trustVariation(arg.capture())
         arg.getValue mustBe transformedJson
-      }
       }
     }
   }
@@ -159,7 +155,7 @@ class VariationServiceSpec extends AnyWordSpec
 
     val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
 
-    whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { variationResponse => {
+    whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { variationResponse =>
       variationResponse mustBe VariationResponse(subscriberId)
 
       verify(transformationService, times(1)).
@@ -170,7 +166,6 @@ class VariationServiceSpec extends AnyWordSpec
 
       verify(trustsService, times(1)).trustVariation(arg.capture())
       arg.getValue mustBe transformedJson
-    }
     }
   }
 
@@ -189,12 +184,10 @@ class VariationServiceSpec extends AnyWordSpec
 
     val OUT = application.injector.instanceOf[VariationService]
 
-    whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { exception => {
+    whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { exception =>
       exception mustBe an[EtmpCacheDataStaleException.type]
 
       verify(trustsService, times(0)).trustVariation(any())
-
-    }
     }
   }
 
@@ -222,7 +215,7 @@ class VariationServiceSpec extends AnyWordSpec
 
         val OUT = application.injector.instanceOf[VariationService]
 
-        whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { _ => {
+        whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { _ =>
 
           verify(auditService).auditVariationSubmitted(
             equalTo(internalId),
@@ -230,8 +223,6 @@ class VariationServiceSpec extends AnyWordSpec
             equalTo(transformedJson),
             equalTo(VariationResponse(subscriberId))
           )(any())
-
-        }
         }
       }
 
@@ -258,7 +249,7 @@ class VariationServiceSpec extends AnyWordSpec
 
         val OUT = application.injector.instanceOf[VariationService]
 
-        whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { _ => {
+        whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { _ =>
 
           verify(auditService).auditVariationSubmitted(
             equalTo(internalId),
@@ -266,8 +257,6 @@ class VariationServiceSpec extends AnyWordSpec
             equalTo(transformedJson),
             equalTo(VariationResponse(subscriberId))
           )(any())
-
-        }
         }
       }
     }
@@ -288,7 +277,7 @@ class VariationServiceSpec extends AnyWordSpec
 
         val OUT = application.injector.instanceOf[VariationService]
 
-        whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { _ => {
+        whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { _ =>
 
           verify(auditService).auditVariationTransformationError(
             equalTo(internalId),
@@ -298,8 +287,6 @@ class VariationServiceSpec extends AnyWordSpec
             equalTo("Failed to apply declaration transformations."),
             any()
           )(any())
-
-        }
         }
       }
 
@@ -316,7 +303,7 @@ class VariationServiceSpec extends AnyWordSpec
 
         val OUT = application.injector.instanceOf[VariationService]
 
-        whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { _ => {
+        whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { _ =>
 
           verify(auditService).auditVariationTransformationError(
             equalTo(internalId),
@@ -326,13 +313,9 @@ class VariationServiceSpec extends AnyWordSpec
             equalTo("Failed to populate lead trustee address"),
             any()
           )(any())
-
-        }
         }
       }
-
     }
-
   }
 
   "migrateToTaxable" should {
@@ -363,7 +346,7 @@ class VariationServiceSpec extends AnyWordSpec
 
       val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
 
-      whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { variationResponse => {
+      whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { variationResponse =>
         variationResponse mustBe VariationResponse(subscriberId)
 
         verify(transformationService, times(1)).
@@ -374,7 +357,6 @@ class VariationServiceSpec extends AnyWordSpec
 
         verify(trustsService, times(1)).trustVariation(arg.capture())
         arg.getValue mustBe transformedJson
-      }
       }
     }
   }

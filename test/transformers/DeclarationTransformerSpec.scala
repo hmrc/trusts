@@ -186,5 +186,15 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
       result.asOpt.value mustBe afterJson
     }
 
+    "transform json successfully when invalid trust details" in {
+      val beforeJson = JsonUtils.getJsonValueFromFile("trusts-etmp-invalid-trust-details.json")
+      val trustResponse = beforeJson.as[GetTrustSuccessResponse].asInstanceOf[TrustProcessedResponse]
+      val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-valid-trust-details.json")
+      val transformer = new DeclarationTransformer
+
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
+      result.asOpt.value mustBe afterJson
+    }
+
   }
 }

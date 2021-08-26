@@ -23,6 +23,7 @@ import play.api.libs.json.Reads._
 import play.api.libs.json._
 import utils.Constants._
 import utils.JsonOps.{doNothing, prunePathAndPutNewValue, putNewValue}
+import utils.{DeedOfVariation, TypeOfTrust}
 
 import java.time.LocalDate
 
@@ -53,7 +54,8 @@ class DeclarationTransformer {
         addEndDateIfDefined(declarationForApi.endDate) andThen
         addSubmissionDateIf5mld(submissionDate, is5mld) andThen
         removeAdditionalShareAssetFields(responseJson) andThen
-        removeAdditionalTrustDetailsField(responseJson)
+        removeAdditionalTrustDetailsField(responseJson) andThen
+        fixInvalidTrustDetails(responseJson)
     )
   }
 
@@ -164,6 +166,42 @@ class DeclarationTransformer {
         prunePathAndPutNewValue(pathToTrustDetails, value.as[JsObject] - "settlorsUkBased")
       case _ =>
         doNothing()
+    }
+  }
+
+  /**
+   *
+   * @param json Trust JSON with delta transforms applied to it
+   * @return a Reads to fix the trust details if they are invalid. This is due to a bug (TRUS-4539) spotted in trusts registration
+   *         where trust details was being mapped incorrectly for a deed of variation in addition to a will. This method
+   *         checks to see if the trust details contains these two key-value pairs:
+   *{{{
+   *{
+   *  "typeOfTrust": "Will Trust or Intestacy Trust",
+   *  "deedOfVariation": "Addition to the will trust"
+   *}
+   *}}}
+   * and if so applies an update such that it becomes:
+   * {{{
+   *{
+   *  "typeOfTrust": "Deed of Variation Trust or Family Arrangement",
+   *  "deedOfVariation": "Addition to the will trust"
+   *}
+   *}}}
+   */
+  private def fixInvalidTrustDetails(json: JsValue): Reads[JsObject] = {
+    val typeOfTrustPath = pathToTrustDetails \ "typeOfTrust"
+    (for {
+      typeOfTrust <- json.transform(typeOfTrustPath.json.pick[JsString])
+      deedOfVariation <- json.transform((pathToTrustDetails \ "deedOfVariation").json.pick[JsString])
+    } yield {
+      if (typeOfTrust.value == TypeOfTrust.Will.toString && deedOfVariation.value == DeedOfVariation.AdditionToWill.toString) {
+        putNewValue(typeOfTrustPath, JsString(TypeOfTrust.DeedOfVariationOrFamilyAgreement.toString))
+      } else {
+        doNothing()
+      }
+    }) getOrElse {
+      doNothing()
     }
   }
 
