@@ -8,11 +8,31 @@ val appName = "trusts"
 
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
+
+  val excludedPackages = Seq(
+    "<empty>",
+    ".*Reverse.*",
+    ".*Routes.*",
+    ".*standardError*.*",
+    ".*main_template*.*",
+    "uk.gov.hmrc.BuildInfo",
+    "app.*",
+    "prod.*",
+    "config.*",
+    "testOnlyDoNotUseInAppConf.*",
+    "views.html.*",
+    "testOnly.*",
+    "com.kenshoo.play.metrics*.*",
+    ".*LocalDateService.*",
+    ".*LocalDateTimeService.*",
+    ".*RichJsValue.*",
+    ".*Repository.*"
+  )
+
   Seq(
-    ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;trusts.Routes.*;estates.Routes.*;prod.*;testOnlyDoNotUseInAppConf.*;views.html.*;" +
-      "uk.gov.hmrc.BuildInfo;app.*;prod.*;config.*",
-    ScoverageKeys.coverageMinimum := 97,
-    ScoverageKeys.coverageFailOnMinimum := false,
+    ScoverageKeys.coverageExcludedPackages := excludedPackages.mkString(";"),
+    ScoverageKeys.coverageMinimum := 80,
+    ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true
   )
 }
@@ -28,9 +48,10 @@ lazy val microservice = Project(appName, file("."))
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     dependencyOverrides ++= AppDependencies.overrides,
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
-    publishingSettings ++ scoverageSettings,
+    publishingSettings,
     unmanagedSourceDirectories in Compile += baseDirectory.value / "resources"
   )
+  .settings(scoverageSettings)
   .configs(IntegrationTest)
   .settings(inConfig(Test)(testSettings))
   .settings(inConfig(IntegrationTest)(itSettings): _*)
