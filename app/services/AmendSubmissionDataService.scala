@@ -18,20 +18,16 @@ package services
 
 import play.api.Logging
 import play.api.libs.json._
-import utils.JsonOps.{JsValueOps, doNothing, putNewValue}
+import utils.JsonOps.{JsValueOps, putNewValue}
 
 import javax.inject.Inject
 
 class AmendSubmissionDataService @Inject()(localDateService: LocalDateService) extends Logging {
 
-  def applyRulesAndAddSubmissionDate(is5mldEnabled: Boolean, json: JsValue): JsValue = {
+  def applyRulesAndAddSubmissionDate(json: JsValue): JsValue = {
     val amendedJson = json.applyRules
     amendedJson.transform {
-      if (is5mldEnabled) {
-        putNewValue(__ \ 'submissionDate, Json.toJson(localDateService.now))
-      } else {
-        doNothing()
-      }
+      putNewValue(__ \ 'submissionDate, Json.toJson(localDateService.now))
     } match {
       case JsSuccess(value, _) =>
         value

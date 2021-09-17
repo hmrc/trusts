@@ -38,22 +38,23 @@ case object InternalServerErrorResponse extends RegistrationResponse
 
 object RegistrationResponse extends Logging {
 
-  implicit lazy val httpReads: HttpReads[RegistrationResponse] = (_: String, _: String, response: HttpResponse) => {
-    logger.info(s"response status received from des: ${response.status}")
-    response.status match {
-      case OK =>
-        response.json.as[RegistrationTrnResponse]
-      case FORBIDDEN =>
-        parseForbiddenResponse(response.json)
-      case BAD_REQUEST =>
-        BadRequestResponse
-      case SERVICE_UNAVAILABLE =>
-        logger.error("Service unavailable response from des.")
-        ServiceUnavailableResponse
-      case status =>
-        logger.error(s"Error response from des with status $status and body: ${response.body}")
-        InternalServerErrorResponse
-    }
+  implicit lazy val httpReads: HttpReads[RegistrationResponse] =
+    (_: String, _: String, response: HttpResponse) => {
+      logger.info(s"response status received from des: ${response.status}")
+      response.status match {
+        case OK =>
+          response.json.as[RegistrationTrnResponse]
+        case FORBIDDEN =>
+          parseForbiddenResponse(response.json)
+        case BAD_REQUEST =>
+          BadRequestResponse
+        case SERVICE_UNAVAILABLE =>
+          logger.error("Service unavailable response from des.")
+          ServiceUnavailableResponse
+        case status =>
+          logger.error(s"Error response from des with status $status and body: ${response.body}")
+          InternalServerErrorResponse
+      }
   }
 
   private def parseForbiddenResponse(json: JsValue): RegistrationResponse = {
@@ -75,5 +76,8 @@ object RegistrationResponse extends Logging {
 case class RegistrationFailureResponse(status: Int, code: String, message: String)
 
 object RegistrationFailureResponse {
-  implicit val formats: OFormat[RegistrationFailureResponse] = Json.format[RegistrationFailureResponse]
+
+  implicit val formats: OFormat[RegistrationFailureResponse] =
+    Json.format[RegistrationFailureResponse]
+
 }

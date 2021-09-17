@@ -166,7 +166,7 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
 
     "when .getTransformedData" - {
       "must fix lead trustee address of ETMP json read from DES service" in {
-        val response = get4MLDTrustResponse.as[GetTrustSuccessResponse]
+        val response = get5MLDTrustResponse.as[GetTrustSuccessResponse]
         val processedResponse = response.asInstanceOf[TrustProcessedResponse]
         val trustsService = mock[TrustsService]
         when(trustsService.getTrustInfo(any(), any())).thenReturn(Future.successful(response))
@@ -184,7 +184,7 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
       }
 
       "must apply transformations to ETMP json read from DES service" in {
-        val response = get4MLDTrustResponse.as[GetTrustSuccessResponse]
+        val response = get5MLDTrustResponse.as[GetTrustSuccessResponse]
         val processedResponse = response.asInstanceOf[TrustProcessedResponse]
         val trustsService = mock[TrustsService]
         when(trustsService.getTrustInfo(any(), any())).thenReturn(Future.successful(response))

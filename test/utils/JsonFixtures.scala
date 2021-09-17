@@ -24,8 +24,10 @@ object JsonFixtures extends JsonFixtures
 trait JsonFixtures extends JsonUtils {
 
   lazy val validRegistrationRequestJson: String =  getJsonFromFile("valid-trusts-registration-api.json")
+
   lazy val validRegistration5MldRequestJson: String =  getJsonFromFile("valid-trusts-registration-api-5mld.json")
   lazy val validRegistration5MldNontaxableRequestJson: String =  getJsonFromFile("valid-trusts-registration-api-5mld-nontaxable.json")
+
   lazy val invalidRegistrationRequestJson: String =  getJsonFromFile("invalid-payload-trusts-registration.json")
   lazy val invalidTrustBusinessValidation: String =  getJsonFromFile("trust-business-validation-fail.json")
 
@@ -45,8 +47,9 @@ trait JsonFixtures extends JsonUtils {
   lazy val registrationRequest: Registration = getJsonValueFromFile("valid-trusts-registration-api.json").validate[Registration].get
   lazy val invalidRegistrationRequest: Registration = getJsonValueFromFile("invalid-payload-trusts-registration.json").validate[Registration].get
 
-  lazy val get4MLDTrustResponseJson: String = getJsonFromFile("valid-get-trust-response.json")
-  lazy val get4MLDTrustResponse: JsValue = getJsonValueFromFile("valid-get-trust-response.json")
+  lazy val get5MLDTrustResponseJson: String = getJsonFromFile("valid-get-trust-response.json")
+
+  lazy val get5MLDTrustResponse: JsValue = getJsonValueFromFile("valid-get-trust-response.json")
 
   lazy val getTrustPropertyLandNoPreviousValue: String = getJsonFromFile("valid-get-trust-response-property-or-land-no-previous-value.json")
   lazy val getTrustPropertyLandNoPreviousValueJson: JsValue = getJsonValueFromFile("valid-get-trust-response-property-or-land-no-previous-value.json")

@@ -1,6 +1,5 @@
 package uk.gov.hmrc.variations
 
-import connector.TrustsStoreConnector
 import connectors.ConnectorSpecHelper
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.auditing.TrustAuditing
@@ -29,7 +28,6 @@ class SubmissionFailuresSpec extends ConnectorSpecHelper with MockitoSugar {
   "submit a successful variation" in {
 
     val stubbedCacheRepository = mock[CacheRepository]
-    val stubbedTrustStoreConnector = mock[TrustsStoreConnector]
     val stubbedAuditService = mock[AuditService]
 
     val declaration = DeclarationForApi(
@@ -43,15 +41,11 @@ class SubmissionFailuresSpec extends ConnectorSpecHelper with MockitoSugar {
     when(stubbedCacheRepository.get(eqTo(utr), any()))
       .thenReturn(Future.successful(Some(Json.parse(get5MLDTrustNonTaxableResponse))))
 
-    when(stubbedTrustStoreConnector.getFeature(any())(any(), any()))
-      .thenReturn(Future.successful(FeatureResponse("5mld", true)))
-
     stubForGet(server, s"/trusts/registration/UTR/$utr", INTERNAL_SERVER_ERROR, "")
 
     lazy val application = applicationBuilder()
       .overrides(
         bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-        bind[TrustsStoreConnector].toInstance(stubbedTrustStoreConnector),
         bind[AuditService].toInstance(stubbedAuditService),
         bind[CacheRepository].toInstance(stubbedCacheRepository)
       )

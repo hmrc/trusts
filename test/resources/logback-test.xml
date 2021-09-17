@@ -5,18 +5,18 @@
         </encoder>
     </appender>
 
-    <logger name="transformers" level="DEBUG"/>
-    <logger name="controllers" level="WARN"/>
-    <logger name="services" level="WARN"/>
-    <logger name="models" level="WARN"/>
-    <logger name="repositories" level="WARN"/>
-    <logger name="connector" level="WARN"/>
-    <logger name="transformers" level="DEBUG"/>
-    <logger name="utils" level="WARN"/>
+    <logger name="transformers" level="OFF"/>
+    <logger name="controllers" level="OFF"/>
+    <logger name="services" level="OFF"/>
+    <logger name="models" level="OFF"/>
+    <logger name="repositories" level="OFF"/>
+    <logger name="connector" level="OFF"/>
+    <logger name="transformers" level="OFF"/>
+    <logger name="utils" level="OFF"/>
     <logger name="reactivemongo.core.protocol.MongoHandler" level="OFF"/>
     <logger name="reactivemongo.api.MongoConnection" level="OFF"/>
 
-    <root level="WARN">
+    <root level="OFF">
         <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>

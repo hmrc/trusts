@@ -27,7 +27,6 @@ import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents, Result}
 import services._
-import uk.gov.hmrc.http.HeaderCarrier
 import utils.ErrorResponses._
 import utils.Headers
 
@@ -42,47 +41,38 @@ class RegisterTrustController @Inject()(
                                          identify: IdentifierAction,
                                          rosmPatternService: RosmPatternService,
                                          cc: ControllerComponents,
-                                         trustsStoreService: TrustsStoreService,
                                          amendSubmissionDataService: AmendSubmissionDataService
                                        ) extends TrustsBaseController(cc) with Logging {
 
   def registration(): Action[JsValue] = identify.async(parse.json) {
     implicit request =>
       request.headers.get(Headers.DRAFT_REGISTRATION_ID) match {
-        case Some(draftId) =>
-          determineMldVersion
+        case Some(_) =>
+          amendRegistration
         case _ =>
           logger.error(s"[Session ID: ${request.sessionId}] no draft id provided in headers")
           Future.successful(BadRequest(Json.toJson(noDraftIdProvided)))
       }
   }
 
-  private def determineMldVersion()(implicit request: IdentifierRequest[JsValue], hc: HeaderCarrier): Future[Result] = {
-    trustsStoreService.is5mldEnabled.flatMap { is5mldEnabled =>
-      amendRegistration(is5mldEnabled)
-    }
-  }
+  private def amendRegistration(implicit request: IdentifierRequest[JsValue]): Future[Result] = {
+    val payload: JsValue = amendSubmissionDataService
+      .applyRulesAndAddSubmissionDate(request.body)
 
-  private def amendRegistration(is5mldEnabled: Boolean)
-                               (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
-    val payload: JsValue = amendSubmissionDataService.applyRulesAndAddSubmissionDate(is5mldEnabled, request.body)
-    val schema: String = if (is5mldEnabled) {
-      config.trustsApiRegistrationSchema5MLD
-    } else {
-      config.trustsApiRegistrationSchema4MLD
-    }
+    val schema: String = config.trustsApiRegistrationSchema5MLD
     validateRegistration(schema, payload)
   }
 
   private def validateRegistration(schema: String, data: JsValue)
                                   (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
-    validationService.get(schema).validate[Registration](data.toString()) match {
-      case Right(registration) =>
-        register(registration)
-      case Left(validationErrors) =>
-        logger.error(s"[Session ID: ${request.sessionId}] problem validating submission: $validationErrors")
-        Future.successful(invalidRequestErrorResponse)
-    }
+    validationService.get(schema)
+      .validate[Registration](data.toString()) match {
+        case Right(registration) =>
+          register(registration)
+        case Left(validationErrors) =>
+          logger.error(s"[Session ID: ${request.sessionId}] problem validating submission: $validationErrors")
+          Future.successful(invalidRequestErrorResponse)
+      }
   }
 
   private def register(registration: Registration)
