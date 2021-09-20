@@ -3,12 +3,11 @@ package uk.gov.hmrc.variations
 import connectors.ConnectorSpecHelper
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.auditing.TrustAuditing
-import models.{DeclarationName, FeatureResponse, NameType}
 import models.variation.DeclarationForApi
+import models.{DeclarationName, NameType}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.matchers.must.Matchers._
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status.INTERNAL_SERVER_ERROR
 import play.api.inject.bind
 import play.api.libs.json.Json
@@ -20,7 +19,7 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 
 import scala.concurrent.Future
 
-class SubmissionFailuresSpec extends ConnectorSpecHelper with MockitoSugar {
+class SubmissionFailuresSpec extends ConnectorSpecHelper  {
 
   val utr = "5174384721"
   val internalId = "internalId"
