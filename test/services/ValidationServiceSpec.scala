@@ -26,7 +26,7 @@ import utils.{DataExamples, JsonUtils}
 class ValidationServiceSpec extends BaseSpec with DataExamples with EitherValues {
 
   private lazy val validationService: ValidationService = new ValidationService()
-  private lazy val trustValidator : Validator = validationService.get("/resources/schemas/4MLD/trusts-api-registration-schema-5.0.0.json")
+  private lazy val trustValidator : Validator = validationService.get("/resources/schemas/5MLD/trusts-api-registration-schema-1.3.0.json")
 
   "a validator " should {
     "return an empty list of errors when " when {
@@ -116,8 +116,9 @@ class ValidationServiceSpec extends BaseSpec with DataExamples with EitherValues
 
       "date of birth of trustee is before 1500/01/01" in {
         val jsonString = JsonUtils.getJsonFromFile("trustees-invalid-dob.json")
-        val errorList =trustValidator.validate[Registration](jsonString).left.get.
-          filter(_.location=="/trust/entities/trustees/0/trusteeInd/dateOfBirth")
+        val errorList = trustValidator.validate[Registration](jsonString)
+          .left.get.filter(_.location=="/trust/entities/trustees/0/trusteeInd/dateOfBirth")
+
         errorList.size mustBe 1
       }
 
@@ -135,20 +136,21 @@ class ValidationServiceSpec extends BaseSpec with DataExamples with EitherValues
       }
 
       "no description provided for large type beneficiary" in {
-        val jsonString =JsonUtils.getJsonFromFile("trust-without-large-ben-description.json")
+        val jsonString = JsonUtils.getJsonFromFile("trust-without-large-ben-description.json")
         val errorList = trustValidator.validate[Registration](jsonString).left.get.
           filter(_.location=="/trust/entities/beneficiary/large/0")
         errorList.size mustBe 1
       }
 
-      "no asset type is provided" in {
-        val errorList = trustValidator.validate[Registration](trustWithoutAssets).left.get.
-          filter(_.location=="/trust/assets")
-        errorList.size mustBe 1
-      }
     }
 
-    "return a list of validaton errors for trusts " when {
+    "allow a submission with no assets for non-taxable" in {
+      val errorList = trustValidator.validate[Registration](trustWithoutAssets)
+
+      errorList must be ('right)
+    }
+
+    "return a list of validation errors for trusts " when {
 
       "json request is valid but failed in business rules for trust start date, efrbs start date " in {
         val jsonString = JsonUtils.getJsonFromFile("trust-business-validation-fail.json")

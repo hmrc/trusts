@@ -433,26 +433,6 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
         }
       }
 
-      "return 200 - Ok with lead trustee with 4MLD data" in {
-
-        val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
-
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
-          .thenReturn(Future.successful(processedResponse))
-
-        val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/trustees/$utr/transformed/lead-trustee"))
-
-        whenReady(result) { _ =>
-          verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
-
-          status(result) mustBe OK
-
-          contentType(result) mustBe Some(JSON)
-          contentAsJson(result) mustBe getTransformedLeadTrusteeResponse
-        }
-      }
-
       "return 200 - Ok with lead trustee with 5MLD data" in {
 
         val cached = Taxable5MLDFixtures.Cache.taxable5mld2134514321

@@ -197,7 +197,8 @@ object BusinessValidation {
       domainValidator.trustEfrbsDateIsNotFutureDate
     ).flatten
 
-    errorsList ++ domainValidator.indTrusteesDuplicateNino.flatten ++
+      errorsList ++
+      domainValidator.indTrusteesDuplicateNino.flatten ++
       domainValidator.indTrusteesDobIsNotFutureDate.flatten ++
       domainValidator.businessTrusteesDuplicateUtr.flatten ++
       domainValidator.businessTrusteeUtrIsNotTrustUtr.flatten ++

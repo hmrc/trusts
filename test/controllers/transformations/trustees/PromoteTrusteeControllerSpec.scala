@@ -258,42 +258,6 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
 
       "must add a new promote transform" - {
 
-        "4mld" in {
-
-          val mockTransformationService = mock[TransformationService]
-          val mockLocalDateService = mock[LocalDateService]
-
-          val controller = new PromoteTrusteeController(
-            identifierAction,
-            mockTransformationService,
-            mockLocalDateService
-          )(Implicits.global, Helpers.stubControllerComponents())
-
-          when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
-            .thenReturn(Future.successful(buildInputJson(
-              Seq(Json.toJson(originalTrustee)),
-              isTaxable = None
-            )))
-
-          when(mockTransformationService.addNewTransform(any(), any(), any()))
-            .thenReturn(Future.successful(true))
-
-          when(mockLocalDateService.now).thenReturn(endDate)
-
-          val request = FakeRequest(POST, "path")
-            .withBody(Json.toJson(promotedTrustee))
-            .withHeaders(CONTENT_TYPE -> "application/json")
-
-          val result = controller.promote(utr, index).apply(request)
-
-          status(result) mustBe OK
-
-          val transform = PromoteTrusteeTransform(Some(index), Json.toJson(promotedTrustee), Json.toJson(originalTrustee), endDate, trusteeType, isTaxable = true)
-
-          verify(mockTransformationService)
-            .addNewTransform(equalTo(utr), any(), equalTo(transform))
-        }
-
         "5mld" - {
 
           "taxable" in {
