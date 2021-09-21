@@ -94,7 +94,7 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MockitoSugar with Integrat
       contentAsJson(newResult) mustBe expectedGetAfterAddBeneficiaryJson
 
       lazy val variationResponse = VariationResponse("TVN12345678")
-      val payloadCaptor = ArgumentCaptor.forClass(classOf[JsValue])
+      lazy val payloadCaptor = ArgumentCaptor.forClass(classOf[JsValue])
 
       when(stubbedTrustsConnector.trustVariation(payloadCaptor.capture())).thenReturn(Future.successful(variationResponse))
 
@@ -114,7 +114,7 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MockitoSugar with Integrat
       val declareResult = route(application, declareRequest).get
       status(declareResult) mustBe OK
 
-      payloadCaptor.getValue mustBe expectedDeclaredBeneficiaryJson
+      expectedDeclaredBeneficiaryJson mustBe payloadCaptor.getValue
     }
   }
 

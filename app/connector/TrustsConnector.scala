@@ -122,7 +122,7 @@ class TrustsConnector @Inject()(http: HttpClient, config: AppConfig) extends Log
     logger.info(s"[Session ID: ${Session.id(hc)}]" +
       s" submitting trust variation for correlationId: $correlationId")
 
-    http.POST[JsValue, VariationResponse](trustVariationsEndpoint, Json.toJson(trustVariations))(
+    http.POST[JsValue, VariationResponse](trustVariationsEndpoint, trustVariations)(
       implicitly[Writes[JsValue]],
       VariationResponse.httpReads,
       implicitly[HeaderCarrier](hc),

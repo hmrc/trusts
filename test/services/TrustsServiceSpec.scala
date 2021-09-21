@@ -207,9 +207,12 @@ class TrustsServiceSpec extends BaseSpec {
         val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
 
         when(mockRepository.get(any[String], any[String])).thenReturn(Future.successful(None))
+
         when(mockRepository.resetCache(any[String], any[String])).thenReturn(Future.successful(None))
+
         when(mockSubscriptionConnector.getTrustInfo(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))))
+
         when(mockRepository.set(any(), any(), any())).thenReturn(Future.successful(true))
 
         val futureResult = SUT.getTrustInfo(utr, myId)
