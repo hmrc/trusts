@@ -27,7 +27,6 @@
       }
     ]
   },
-  "submissionDate": "2020-01-30",
   "declaration": {
     "name": {
       "firstName": "First",
@@ -325,5 +324,6 @@
   },
   "reqHeader": {
     "formBundleNo": "000012387218"
-  }
+  },
+  "submissionDate": "2020-01-30"
 }

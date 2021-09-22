@@ -32,8 +32,7 @@ class DeclarationTransformer {
   def transform(response: TrustProcessedResponse,
                 originalJson: JsValue,
                 declarationForApi: DeclarationForApi,
-                submissionDate: LocalDate,
-                is5mld: Boolean): JsResult[JsValue] = {
+                submissionDate: LocalDate): JsResult[JsValue] = {
 
     val responseJson = response.getTrust
     val responseHeader = response.responseHeader
@@ -42,7 +41,6 @@ class DeclarationTransformer {
       (__ \ 'applicationType).json.prune andThen
         DECLARATION.json.prune andThen
         removeDetailsTypeFields(responseJson) andThen
-        keepYearsReturnsIf5mld(is5mld) andThen
         updateCorrespondence(responseJson) andThen
         fixLeadTrusteeAddress(responseJson, pathToLeadTrustees) andThen
         convertLeadTrustee(responseJson) andThen
@@ -52,7 +50,7 @@ class DeclarationTransformer {
         addDeclaration(declarationForApi, responseJson) andThen
         addAgentIfDefined(declarationForApi.agentDetails) andThen
         addEndDateIfDefined(declarationForApi.endDate) andThen
-        addSubmissionDateIf5mld(submissionDate, is5mld) andThen
+        addSubmissionDate(submissionDate) andThen
         removeAdditionalShareAssetFields(responseJson) andThen
         removeAdditionalTrustDetailsField(responseJson) andThen
         fixInvalidTrustDetails(responseJson)
@@ -265,19 +263,7 @@ class DeclarationTransformer {
     })
   }
 
-  private def addSubmissionDateIf5mld(submissionDate: LocalDate, is5mld: Boolean): Reads[JsObject] = {
-    if (is5mld) {
-      putNewValue(SUBMISSION_DATE, Json.toJson(submissionDate))
-    } else {
-      doNothing()
-    }
-  }
+  private def addSubmissionDate(submissionDate: LocalDate): Reads[JsObject] =
+    putNewValue(SUBMISSION_DATE, Json.toJson(submissionDate))
 
-  private def keepYearsReturnsIf5mld(is5mld: Boolean): Reads[JsObject] = {
-    if (!is5mld) {
-      YEARS_RETURNS.json.prune
-    } else {
-      doNothing()
-    }
-  }
 }

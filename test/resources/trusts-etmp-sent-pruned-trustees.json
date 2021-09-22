@@ -29,6 +29,18 @@
       "country": "GB"
     }
   },
+  "yearsReturns": {
+    "returns": [
+      {
+        "taxReturnYear": "18",
+        "taxConsequence": true
+      },
+      {
+        "taxReturnYear": "19",
+        "taxConsequence": true
+      }
+    ]
+  },
   "details": {
     "trust": {
       "details": {
@@ -215,5 +227,6 @@
   },
   "reqHeader": {
     "formBundleNo": "000012387218"
-  }
+  },
+  "submissionDate": "2020-01-30"
 }

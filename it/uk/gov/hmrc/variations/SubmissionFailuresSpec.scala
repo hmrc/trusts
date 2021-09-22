@@ -1,15 +1,13 @@
 package uk.gov.hmrc.variations
 
-import connector.TrustsStoreConnector
 import connectors.ConnectorSpecHelper
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.auditing.TrustAuditing
-import models.{DeclarationName, FeatureResponse, NameType}
 import models.variation.DeclarationForApi
+import models.{DeclarationName, NameType}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.matchers.must.Matchers._
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status.INTERNAL_SERVER_ERROR
 import play.api.inject.bind
 import play.api.libs.json.Json
@@ -21,7 +19,7 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 
 import scala.concurrent.Future
 
-class SubmissionFailuresSpec extends ConnectorSpecHelper with MockitoSugar {
+class SubmissionFailuresSpec extends ConnectorSpecHelper  {
 
   val utr = "5174384721"
   val internalId = "internalId"
@@ -29,7 +27,6 @@ class SubmissionFailuresSpec extends ConnectorSpecHelper with MockitoSugar {
   "submit a successful variation" in {
 
     val stubbedCacheRepository = mock[CacheRepository]
-    val stubbedTrustStoreConnector = mock[TrustsStoreConnector]
     val stubbedAuditService = mock[AuditService]
 
     val declaration = DeclarationForApi(
@@ -43,15 +40,11 @@ class SubmissionFailuresSpec extends ConnectorSpecHelper with MockitoSugar {
     when(stubbedCacheRepository.get(eqTo(utr), any()))
       .thenReturn(Future.successful(Some(Json.parse(get5MLDTrustNonTaxableResponse))))
 
-    when(stubbedTrustStoreConnector.getFeature(any())(any(), any()))
-      .thenReturn(Future.successful(FeatureResponse("5mld", true)))
-
     stubForGet(server, s"/trusts/registration/UTR/$utr", INTERNAL_SERVER_ERROR, "")
 
     lazy val application = applicationBuilder()
       .overrides(
         bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-        bind[TrustsStoreConnector].toInstance(stubbedTrustStoreConnector),
         bind[AuditService].toInstance(stubbedAuditService),
         bind[CacheRepository].toInstance(stubbedCacheRepository)
       )

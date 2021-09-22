@@ -9,6 +9,7 @@
     },
     "phoneNumber": "96947479842"
   },
+  "submissionDate": "2020-10-10",
   "declaration": {
     "name": {
       "firstName": "NQy,EPLv7ySxnl/nfWoS7b-PBY",
@@ -24,7 +25,10 @@
     "trust": {
       "details": {
         "startDate": "1835-02-22",
-        "typeOfTrust": "Employment Related"
+        "typeOfTrust": "Employment Related",
+        "expressTrust": true,
+        "trustTaxable": true,
+        "trustUKResident": true
       },
       "entities": {
         "beneficiary": {
@@ -44,8 +48,36 @@
             "identification": {
               "nino": "KC287812"
             },
-            "phoneNumber": "99892262374"
+            "phoneNumber": "99892262374",
+            "countryOfResidence": "GB",
+            "nationality": "GB",
+            "legallyIncapable": false
           }
+        },
+        "settlors": {
+          "settlor": [
+            {
+              "name": {
+                "firstName": "abcdefghijkl",
+                "middleName": "abcdefghijklmn",
+                "lastName": "abcde"
+              },
+              "dateOfBirth": "2001-01-01",
+              "identification": {
+                "nino": "ST019091"
+              }
+            }
+          ],
+          "settlorCompany": [
+            {
+              "name": "abcdefghijklmnopqr",
+              "companyType": "Trading",
+              "companyTime": false,
+              "identification": {
+                "utr": "1234561234"
+              }
+            }
+          ]
         }
       },
       "assets": {

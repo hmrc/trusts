@@ -25,7 +25,6 @@ import models.variation.VariationResponse
 import play.api.Logging
 import play.api.http.HeaderNames
 import play.api.libs.json._
-import services.TrustsStoreService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utils.Constants._
 import utils.Session
@@ -35,14 +34,19 @@ import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
-class TrustsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStoreService: TrustsStoreService) extends Logging {
+class TrustsConnector @Inject()(http: HttpClient, config: AppConfig) extends Logging {
 
-  private lazy val trustsServiceUrl: String = s"${config.registrationBaseUrl}/trusts"
-  private lazy val matchTrustsEndpoint: String = s"$trustsServiceUrl/match"
-  private lazy val trustRegistrationEndpoint: String = s"$trustsServiceUrl/registration"
-  private lazy val getTrustOrEstateUrl: String =  s"${config.getTrustOrEstateUrl}/trusts"
+  private lazy val trustsServiceUrl: String =
+    s"${config.registrationBaseUrl}/trusts"
 
-  def get4MLDTrustOrEstateEndpoint(utr: String): String = s"$getTrustOrEstateUrl/registration/$utr"
+  private lazy val matchTrustsEndpoint: String =
+    s"$trustsServiceUrl/match"
+
+  private lazy val trustRegistrationEndpoint: String =
+    s"$trustsServiceUrl/registration"
+
+  private lazy val getTrustOrEstateUrl: String =
+    s"${config.getTrustOrEstateUrl}/trusts"
 
   def get5MLDTrustOrEstateEndpoint(identifier: String): String = {
     if (identifier.length == 10) {
@@ -52,7 +56,8 @@ class TrustsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStore
     }
   }
 
-  private lazy val trustVariationsEndpoint: String = s"${config.varyTrustOrEstateUrl}/trusts/variation"
+  private lazy val trustVariationsEndpoint: String =
+    s"${config.varyTrustOrEstateUrl}/trusts/variation"
 
   val ENVIRONMENT_HEADER = "Environment"
   val CORRELATION_HEADER = "CorrelationId"
@@ -101,13 +106,12 @@ class TrustsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStore
     logger.info(s"[Session ID: ${Session.id(hc)}][UTR/URN: $identifier]" +
       s" getting playback for trust for correlationId: $correlationId")
 
-    trustsStoreService.is5mldEnabled.flatMap { is5MLD =>
-      if (is5MLD) {
-        http.GET[GetTrustResponse](get5MLDTrustOrEstateEndpoint(identifier))(GetTrustResponse.httpReads(identifier), implicitly[HeaderCarrier](hc), global)
-      } else {
-        http.GET[GetTrustResponse](get4MLDTrustOrEstateEndpoint(identifier))(GetTrustResponse.httpReads(identifier), implicitly[HeaderCarrier](hc), global)
-      }
-    }
+        http.GET[GetTrustResponse](
+          get5MLDTrustOrEstateEndpoint(identifier)
+        )(
+          GetTrustResponse.httpReads(identifier),
+          implicitly[HeaderCarrier](hc), global
+        )
   }
 
   def trustVariation(trustVariations: JsValue): Future[VariationResponse] = {
@@ -118,7 +122,7 @@ class TrustsConnector @Inject()(http: HttpClient, config: AppConfig, trustsStore
     logger.info(s"[Session ID: ${Session.id(hc)}]" +
       s" submitting trust variation for correlationId: $correlationId")
 
-    http.POST[JsValue, VariationResponse](trustVariationsEndpoint, Json.toJson(trustVariations))(
+    http.POST[JsValue, VariationResponse](trustVariationsEndpoint, trustVariations)(
       implicitly[Writes[JsValue]],
       VariationResponse.httpReads,
       implicitly[HeaderCarrier](hc),

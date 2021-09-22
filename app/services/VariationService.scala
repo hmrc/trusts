@@ -39,7 +39,6 @@ class VariationService @Inject()(
                                   declarationTransformer: DeclarationTransformer,
                                   auditService: AuditService,
                                   localDateService: LocalDateService,
-                                  trustsStoreService: TrustsStoreService,
                                   taxableMigrationService: TaxableMigrationService
                                 ) extends Logging {
 
@@ -99,14 +98,16 @@ class VariationService @Inject()(
                                  declaration: DeclarationForApi,
                                  originalJson: JsValue,
                                  response: TrustProcessedResponse)
-                                (implicit hc: HeaderCarrier, logging: LoggingContext)= {
+                                (implicit hc: HeaderCarrier, logging: LoggingContext): Future[VariationResponse] = {
+        logger.debug(s"[Session ID: ${Session.id(hc)}]" +
+          s" transformation to final submission, applying declaration transform to shape data into variations payload")
 
-    trustsStoreService.is5mldEnabled() flatMap {
-      is5mld =>
-
-        logger.debug(s"[Session ID: ${Session.id(hc)}] transformation to final submission, applying declaration transform to shape data into variations payload")
-
-        declarationTransformer.transform(response, originalJson, declaration, localDateService.now, is5mld) match {
+        declarationTransformer.transform(
+          response,
+          originalJson,
+          declaration,
+          localDateService.now
+        ) match {
           case JsSuccess(value, _) =>
             logging.info("successfully transformed json for declaration")
             submitVariationAndCheckForMigration(identifier, value, internalId)
@@ -122,12 +123,6 @@ class VariationService @Inject()(
 
             logging.error(s"Problem transforming data for ETMP submission: ${JsError.toJson(errors)}")
             Future.failed(InternalServerErrorException(s"There was a problem transforming data for submission to ETMP: ${JsError.toJson(errors)}"))
-        }
-
-    } recoverWith {
-      case e =>
-        logging.error(s"Exception transforming and submitting ${e.getMessage} ${e.getCause}")
-        Future.failed(InternalServerErrorException(s"Exception transforming and submitting ${e.getMessage}"))
     }
   }
 

@@ -12,6 +12,7 @@
     },
     "phoneNumber": "+123456789012345678"
   },
+  "submissionDate": "2020-10-10",
   "yearsReturns": {
     "returns": [
       {
@@ -49,7 +50,10 @@
         }
       },
       "typeOfTrust": "Deed of Variation Trust or Family Arrangement",
-      "deedOfVariation": "Replaced the will trust"
+      "deedOfVariation": "Replaced the will trust",
+      "expressTrust": true,
+      "trustTaxable": true,
+      "trustUKResident": true
     },
     "entities": {
       "naturalPerson": [
@@ -92,7 +96,8 @@
               "postCode": "SR2 7UY",
               "country": "GB"
             }
-          }
+          },
+          "countryOfResidence": "GB"
         }
       },
       "trustees": [

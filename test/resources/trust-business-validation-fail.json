@@ -15,6 +15,7 @@
     },
     "phoneNumber": "0121822983"
   },
+  "submissionDate": "2020-10-10",
   "yearsReturns": {
     "taxReturnsNoDues": true,
     "returns": [
@@ -63,7 +64,10 @@
         "typeOfTrust": "Will Trust or Intestacy Trust",
         "deedOfVariation": "Previously there was only an absolute interest under the will",
         "interVivos": false,
-        "efrbsStartDate": "2099-01-01"
+        "efrbsStartDate": "2099-01-01",
+        "expressTrust": true,
+        "trustTaxable": true,
+        "trustUKResident": true
       },
       "entities": {
         "naturalPerson": [
@@ -140,7 +144,8 @@
             "email": "me@you.com",
             "identification": {
               "utr": "5465416546"
-            }
+            },
+            "countryOfResidence": "GB"
           }
         },
         "trustees": [

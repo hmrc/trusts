@@ -41,7 +41,7 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent.json")
       val transformer = new DeclarationTransformer
 
-      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
     }
 
@@ -51,7 +51,7 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual.json")
       val transformer = new DeclarationTransformer
 
-      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
     }
 
@@ -65,7 +65,7 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual-with-prev-org.json")
       val transformer = new DeclarationTransformer
 
-      val result = transformer.transform(trustResponse, originalResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
+      val result = transformer.transform(trustResponse, originalResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
     }
 
@@ -84,7 +84,7 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-individual-with-agent-details.json")
       val transformer = new DeclarationTransformer
 
-      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
     }
 
@@ -94,7 +94,7 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-pruned-trustees.json")
       val transformer = new DeclarationTransformer
 
-      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
     }
 
@@ -104,7 +104,7 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-pruned-trustees.json")
       val transformer = new DeclarationTransformer
 
-      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
     }
 
@@ -116,7 +116,7 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-end-date.json")
       val transformer = new DeclarationTransformer
 
-      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
     }
 
@@ -126,7 +126,7 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-5mld.json")
       val transformer = new DeclarationTransformer
 
-      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = true)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
     }
 
@@ -136,7 +136,7 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-5mld.json")
       val transformer = new DeclarationTransformer
 
-      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = true)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
     }
 
@@ -147,7 +147,7 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
         val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-with-share-assets-extra-fields-removed.json")
         val transformer = new DeclarationTransformer
 
-        val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
+        val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
         result.asOpt.value \\ "shares" mustBe afterJson \\ "shares"
         result.asOpt.value mustBe afterJson
       }
@@ -158,7 +158,7 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
         val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-with-no-share-assets.json")
         val transformer = new DeclarationTransformer
 
-        val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
+        val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
         result.asOpt.value \\ "shares" mustBe afterJson \\ "shares"
         result.asOpt.value mustBe afterJson
       }
@@ -171,7 +171,7 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
         val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-with-settlors-uk-based-removed.json")
         val transformer = new DeclarationTransformer
 
-        val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
+        val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
         result.asOpt.value mustBe afterJson
       }
     }
@@ -182,7 +182,7 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-with-details-type-removed.json")
       val transformer = new DeclarationTransformer
 
-      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
     }
 
@@ -192,7 +192,7 @@ class DeclarationTransformerSpec extends AnyFreeSpec with OptionValues {
       val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-sent-valid-trust-details.json")
       val transformer = new DeclarationTransformer
 
-      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate, is5mld = false)
+      val result = transformer.transform(trustResponse, trustResponse.getTrust, declarationForApi, submissionDate)
       result.asOpt.value mustBe afterJson
     }
 

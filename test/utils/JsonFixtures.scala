@@ -24,12 +24,13 @@ object JsonFixtures extends JsonFixtures
 trait JsonFixtures extends JsonUtils {
 
   lazy val validRegistrationRequestJson: String =  getJsonFromFile("valid-trusts-registration-api.json")
+
   lazy val validRegistration5MldRequestJson: String =  getJsonFromFile("valid-trusts-registration-api-5mld.json")
   lazy val validRegistration5MldNontaxableRequestJson: String =  getJsonFromFile("valid-trusts-registration-api-5mld-nontaxable.json")
+
   lazy val invalidRegistrationRequestJson: String =  getJsonFromFile("invalid-payload-trusts-registration.json")
   lazy val invalidTrustBusinessValidation: String =  getJsonFromFile("trust-business-validation-fail.json")
 
-  lazy val validTrustVariations4mldRequestJson: String =  getJsonFromFile("valid-trusts-variations-api.json")
   lazy val validTrustVariations5mldRequestJson: String =  getJsonFromFile("valid-trusts-variations-api-5mld-taxable.json")
   lazy val validTrustVariationsTaxYears5mldRequestJson: String =
     getJsonFromFile("valid-trusts-variations-api-5mld-taxable-tax-years.json")
@@ -45,8 +46,9 @@ trait JsonFixtures extends JsonUtils {
   lazy val registrationRequest: Registration = getJsonValueFromFile("valid-trusts-registration-api.json").validate[Registration].get
   lazy val invalidRegistrationRequest: Registration = getJsonValueFromFile("invalid-payload-trusts-registration.json").validate[Registration].get
 
-  lazy val get4MLDTrustResponseJson: String = getJsonFromFile("valid-get-trust-response.json")
-  lazy val get4MLDTrustResponse: JsValue = getJsonValueFromFile("valid-get-trust-response.json")
+  lazy val get5MLDTrustResponseJson: String = getJsonFromFile("valid-get-trust-response.json")
+
+  lazy val get5MLDTrustResponse: JsValue = getJsonValueFromFile("valid-get-trust-response.json")
 
   lazy val getTrustPropertyLandNoPreviousValue: String = getJsonFromFile("valid-get-trust-response-property-or-land-no-previous-value.json")
   lazy val getTrustPropertyLandNoPreviousValueJson: JsValue = getJsonValueFromFile("valid-get-trust-response-property-or-land-no-previous-value.json")
@@ -76,23 +78,6 @@ trait JsonFixtures extends JsonUtils {
   lazy val getTrustOrEstateProcessingResponseJson: String = getJsonFromFile("valid-get-trust-or-estate-in-processing-response.json")
 
   lazy val getTrustMalformedJsonResponse: String = getJsonFromFile("get-trust-malformed-json-response.json")
-
-  lazy val getTrustOrEstateProcessingResponse: JsValue = getJsonValueFromFile("valid-get-trust-or-estate-in-processing-response.json")
-
-  lazy val getTrustOrEstatePendingClosureResponseJson: String = getJsonFromFile("valid-get-trust-or-estate-pending-closure-response.json")
-  lazy val getTrustOrEstatePendingClosureResponse: JsValue = getJsonValueFromFile("valid-get-trust-or-estate-pending-closure-response.json")
-
-  lazy val getTrustOrEstateClosedResponseJson: String = getJsonFromFile("valid-get-trust-or-estate-closed-response.json")
-  lazy val getTrustOrEstateClosedResponse: JsValue = getJsonValueFromFile("valid-get-trust-or-estate-closed-response.json")
-
-  lazy val getTrustOrEstateSuspendedResponseJson: String = getJsonFromFile("valid-get-trust-or-estate-suspended-response.json")
-  lazy val getTrustOrEstateSuspendedResponse: JsValue = getJsonValueFromFile("valid-get-trust-or-estate-suspended-response.json")
-
-  lazy val getTrustOrEstateParkedResponseJson: String = getJsonFromFile("valid-get-trust-or-estate-parked-response.json")
-  lazy val getTrustOrEstateParkedResponse: JsValue = getJsonValueFromFile("valid-get-trust-or-estate-parked-response.json")
-
-  lazy val getTrustOrEstateObsoletedResponseJson: String = getJsonFromFile("valid-get-trust-or-estate-obsoleted-response.json")
-  lazy val getTrustOrEstateObsoletedResponse: JsValue = getJsonValueFromFile("valid-get-trust-or-estate-obsoleted-response.json")
 
   lazy val expectedParsedJson: JsValue = getJsonValueFromFile("expected-parsed-trust-response.json")
 }

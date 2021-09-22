@@ -32,8 +32,6 @@ GET         /:identifier/transformed/protectors-already-exist                   
 GET         /:identifier/transformed/other-individuals-already-exist                        controllers.GetTrustController.getOtherIndividualsAlreadyExist(identifier: String)
 GET         /:identifier/transformed/non-eea-companies-already-exist                        controllers.GetTrustController.getNonEeaCompaniesAlreadyExist(identifier: String)
 
-POST        /variation                                                                      controllers.testOnly.TrustVariationsTestController.trustVariation
-
 POST        /declare/:identifier                                                            controllers.TrustVariationsController.declare(identifier: String)
 
 GET         /:identifier/taxable-migration/migrating-to-taxable                             controllers.TaxableMigrationController.getTaxableMigrationFlag(identifier: String)

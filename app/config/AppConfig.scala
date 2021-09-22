@@ -29,7 +29,6 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
   val taxEnrolmentsMigrationUrl : String = servicesConfig.baseUrl("tax-enrolments-migration")
   val getTrustOrEstateUrl : String = servicesConfig.baseUrl("playback")
   val varyTrustOrEstateUrl : String = servicesConfig.baseUrl("variation")
-  val trustsStoreUrl : String = servicesConfig.baseUrl("trusts-store")
   val orchestratorUrl : String = servicesConfig.baseUrl("orchestrator")
 
   val registrationEnvironment : String = configuration.get[String]("microservice.services.registration.environment")
@@ -38,10 +37,11 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
   val subscriptionEnvironment : String = configuration.get[String]("microservice.services.subscription.environment")
   val subscriptionToken : String = configuration.get[String]("microservice.services.subscription.token")
 
-  val trustsApiRegistrationSchema4MLD : String  = "/resources/schemas/4MLD/trusts-api-registration-schema-5.0.0.json"
-  val trustsApiRegistrationSchema5MLD : String  = "/resources/schemas/5MLD/trusts-api-registration-schema-1.3.0.json"
-  val variationsApiSchema4MLD: String = "/resources/schemas/4MLD/variations-api-schema-4.0.json"
-  val variationsApiSchema5MLD: String = "/resources/schemas/5MLD/variations-api-schema-4.8.0.json"
+  val trustsApiRegistrationSchema5MLD : String =
+    "/resources/schemas/5MLD/trusts-api-registration-schema-1.3.0.json"
+
+  val variationsApiSchema5MLD: String =
+    "/resources/schemas/5MLD/variations-api-schema-4.8.0.json"
 
   private def insertTRN(url: String, trn: String) = url.replace(":trn", trn)
 
@@ -83,8 +83,6 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
   val dropIndexesEnabled: Boolean = configuration.get[Boolean]("features.mongo.dropIndexes")
 
   val registrationTtlInSeconds: Int = configuration.get[Int]("mongodb.registration.ttlSeconds")
-
-  val stubMissingJourneysFor5MLD: Boolean = configuration.get[Boolean]("features.stubMissingJourneysFor5MLD")
 
   val removeSavedRegistrations: Boolean = configuration.get[Boolean]("features.removeSavedRegistrations")
 }

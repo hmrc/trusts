@@ -1,6 +1,6 @@
 package uk.gov.hmrc.variations
 
-import connector.{TrustsConnector, TrustsStoreConnector}
+import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.{GetTrustSuccessResponse, ResponseHeader}
 import models.variation.VariationResponse
@@ -31,7 +31,6 @@ class SubmissionSuccessSpec extends AsyncWordSpec with MockitoSugar with Integra
 
     val stubbedTrustsConnector = mock[TrustsConnector]
     val stubbedCacheRepository = mock[CacheRepository]
-    val stubbedTrustStoreConnector = mock[TrustsStoreConnector]
 
     val declaration = DeclarationForApi(
       DeclarationName(NameType("First", None, "Last")),
@@ -48,9 +47,6 @@ class SubmissionSuccessSpec extends AsyncWordSpec with MockitoSugar with Integra
     when(stubbedCacheRepository.get(eqTo(utr), any()))
       .thenReturn(Future.successful(Some(Json.parse(get5MLDTrustNonTaxableResponse))))
 
-    when(stubbedTrustStoreConnector.getFeature(any())(any(), any()))
-      .thenReturn(Future.successful(FeatureResponse("5mld", true)))
-
     when(stubbedTrustsConnector.getTrustInfo(eqTo(utr)))
       .thenReturn(Future.successful(trustResponse))
 
@@ -61,7 +57,6 @@ class SubmissionSuccessSpec extends AsyncWordSpec with MockitoSugar with Integra
       .overrides(
         bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(stubbedTrustsConnector),
-        bind[TrustsStoreConnector].toInstance(stubbedTrustStoreConnector),
         bind[CacheRepository].toInstance(stubbedCacheRepository)
       )
       .build()

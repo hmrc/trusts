@@ -32,7 +32,7 @@ import play.api.inject.bind
 import play.api.libs.json.{JsString, JsValue, Json}
 import play.api.test.Helpers.{CONTENT_TYPE, GET, POST, contentAsJson, route, status, _}
 import play.api.test.{FakeRequest, Helpers}
-import services.{LocalDateService, TrustsStoreService}
+import services.LocalDateService
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
 import utils.JsonUtils
@@ -59,9 +59,6 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MockitoSugar with Integrat
       lazy val expectedDeclaredBeneficiaryJson: JsValue =
         JsonUtils.getJsonValueFromFile("it/trusts-integration-declared-combo-beneficiary.json")
 
-      val trustsStoreServiceMock = mock[TrustsStoreService]
-      when(trustsStoreServiceMock.is5mldEnabled()(any(), any())).thenReturn(Future.successful(false))
-
       val stubbedTrustsConnector = mock[TrustsConnector]
       when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
 
@@ -70,7 +67,6 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MockitoSugar with Integrat
           bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
           bind[TrustsConnector].toInstance(stubbedTrustsConnector),
           bind[LocalDateService].toInstance(TestLocalDateService),
-          bind[TrustsStoreService].toInstance(trustsStoreServiceMock)
         )
         .build()
 
@@ -98,7 +94,7 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MockitoSugar with Integrat
       contentAsJson(newResult) mustBe expectedGetAfterAddBeneficiaryJson
 
       lazy val variationResponse = VariationResponse("TVN12345678")
-      val payloadCaptor = ArgumentCaptor.forClass(classOf[JsValue])
+      lazy val payloadCaptor = ArgumentCaptor.forClass(classOf[JsValue])
 
       when(stubbedTrustsConnector.trustVariation(payloadCaptor.capture())).thenReturn(Future.successful(variationResponse))
 
@@ -118,7 +114,7 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MockitoSugar with Integrat
       val declareResult = route(application, declareRequest).get
       status(declareResult) mustBe OK
 
-      payloadCaptor.getValue mustBe expectedDeclaredBeneficiaryJson
+      expectedDeclaredBeneficiaryJson mustBe payloadCaptor.getValue
     }
   }
 

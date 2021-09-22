@@ -30,18 +30,17 @@ class AmendSubmissionDataServiceSpec extends BaseSpec {
 
   "AmendSubmissionDataService" when {
 
-    ".applyRulesAndAddSubmissionDate" when {
+    ".applyRulesAndAddSubmissionDate" must {
 
       val inputJson = Json.obj()
 
-      "5mld enabled" must {
         "add submission date" in {
 
           val date = "2000-01-01"
 
           when(mockLocalDateService.now).thenReturn(LocalDate.parse(date))
 
-          val result = service.applyRulesAndAddSubmissionDate(is5mldEnabled = true, inputJson)
+          val result = service.applyRulesAndAddSubmissionDate(inputJson)
 
           result mustBe Json.parse(
             s"""
@@ -50,16 +49,6 @@ class AmendSubmissionDataServiceSpec extends BaseSpec {
               |}
               |""".stripMargin
           )
-        }
-      }
-
-      "5mld not enabled" must {
-        "not add submission date" in {
-
-          val result = service.applyRulesAndAddSubmissionDate(is5mldEnabled = false, inputJson)
-
-          result mustBe inputJson
-        }
       }
     }
   }
