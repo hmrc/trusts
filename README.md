@@ -1,4 +1,4 @@
-# Estates
+# Trusts
 
 This service is responsible for registering, playing back and varying a Trust registration.
 
