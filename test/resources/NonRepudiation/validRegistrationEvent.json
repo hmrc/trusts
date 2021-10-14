@@ -1,0 +1,22 @@
+{
+  "payload": "Zm9vYmFyMTIzCg==",
+  "metadata": {
+    "businessId": "trusts",
+    "notableEvent": "register",
+    "payloadContentType": "application/json",
+    "payloadSha256Checksum": "426a1c28<snip>d6d363",
+    "userSubmissionTimestamp": "2018-04-07T12:13:25.156Z",
+    "identityData": {
+      "internalId": "some-id"
+    },
+    "userAuthToken": "AbCdEf123456",
+    "headerData": {
+      "Gov-Client-Public-IP": "198.51.100.0",
+      "Gov-Client-Public-Port": "12345"
+    },
+    "searchKeys": {
+      "trn": "ABTRUST123456789",
+      "periodKey": "A20"
+    }
+  }
+}
