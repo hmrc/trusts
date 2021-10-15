@@ -262,6 +262,13 @@ class GetTrustController @Inject()(identify: IdentifierAction,
                    (f: GetTrustSuccessResponse => Result): Action[AnyContent] = (validateIdentifier(identifier) andThen identify).async {
     implicit request =>
       {
+
+        val headerData = new JsObject(request.headers.toMap.map { x =>
+            x._1 -> JsString(x._2 mkString ",")
+        })
+
+        logger.debug(s"HEADERS collected in spike $headerData")
+
         for {
           _ <- resetCacheIfRequested(identifier, request.internalId, refreshEtmpData)
           data <- if (applyTransformations) {
