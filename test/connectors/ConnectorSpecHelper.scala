@@ -40,6 +40,7 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
           "microservice.services.tax-enrolments-migration.port" -> server.port(),
           "microservice.services.orchestrator.port" -> server.port(),
           "microservice.services.trusts-store.port" -> server.port(),
+          "microservice.services.non-repudiation.port" -> server.port(),
 
           "microservice.services.tax-enrolments.non-taxable.serviceName" -> "serviceNameNonTaxable",
           "microservice.services.tax-enrolments.non-taxable.callback" ->

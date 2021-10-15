@@ -90,4 +90,9 @@ object Taxable5MLDFixtures extends JsonFixtures {
 
   }
 
+  object NRS {
+
+    val validRegistrationEvent: JsValue = getJsonValueFromFile("/validRegistrationEvent.json")
+  }
+
 }
