@@ -17,15 +17,15 @@
 package services
 
 import java.time.LocalDateTime
-
 import base.BaseSpec
 import connector.NonRepudiationConnector
-import models.nonRepudiation.{NRSSubmission, SuccessfulNrsResponse}
+import models.nonRepudiation.{NRSSubmission, SearchKeys, SuccessfulNrsResponse}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.when
 import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
+import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
 import utils.JsonFixtures
 
 import scala.concurrent.Future
@@ -36,10 +36,11 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures {
   private val mockConnector = mock[NonRepudiationConnector]
   private val mockLocalDateTimeService = mock[LocalDateTimeService]
   private val SUT = new NonRepudiationService(mockConnector, mockLocalDateTimeService)
+  override implicit lazy val hc = HeaderCarrier(authorization = Some(Authorization("Bearer 12345")))
 
   ".register" should {
 
-    "return SuccessfulNrsResponse" in {
+    "return a SuccessfulNrsResponse" in {
 
       lazy val payloadCaptor = ArgumentCaptor.forClass(classOf[NRSSubmission])
 
@@ -53,11 +54,12 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures {
         val fResult = SUT.register(payLoad)
         whenReady(fResult) { result =>
           result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
-          payloadCaptor.getValue.payload mustBe ""
+          payloadCaptor.getValue.payload mustBe Json.stringify(payLoad)
           payloadCaptor.getValue.metadata.businessId mustBe "trs"
+          payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
           payloadCaptor.getValue.metadata.notableEvent mustBe "trs-registration"
           payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json; charset=utf-8"
-          payloadCaptor.getValue.metadata.searchKeys mustBe "trn"
+          payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys("trn")
         }
       }
     }
