@@ -21,7 +21,7 @@ import config.AppConfig
 import javax.inject.Inject
 import models.nonRepudiation.{NRSSubmission, NrsResponse}
 import play.api.Logging
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utils.Constants.{CONTENT_TYPE, CONTENT_TYPE_JSON, X_API_KEY}
 
 import scala.concurrent.ExecutionContext.Implicits._
