@@ -58,7 +58,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
           ACCEPTED,
           Some("""{"nrsSubscriptionId": "2880d8aa-4691-49a4-aa6a-99191a51b9ef"}"""))
 
-        val futureResult = connector.NonRepudiate(payLoad)
+        val futureResult = connector.nonRepudiate(payLoad)
 
         whenReady(futureResult) {
           result =>
@@ -77,7 +77,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
           Json.toJson(payLoad).toString,
           SERVICE_UNAVAILABLE)
 
-        val futureResult = connector.NonRepudiate(payLoad)
+        val futureResult = connector.nonRepudiate(payLoad)
 
         whenReady(futureResult) {
           result =>
@@ -93,7 +93,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
           Json.toJson(payLoad).toString,
           BAD_REQUEST)
 
-        val futureResult = connector.NonRepudiate(payLoad)
+        val futureResult = connector.nonRepudiate(payLoad)
 
         whenReady(futureResult) {
           result =>
@@ -109,7 +109,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
           Json.toJson(payLoad).toString,
           BAD_GATEWAY)
 
-        val futureResult = connector.NonRepudiate(payLoad)
+        val futureResult = connector.nonRepudiate(payLoad)
 
         whenReady(futureResult) {
           result =>
@@ -124,7 +124,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
           Json.toJson(payLoad).toString,
           UNAUTHORIZED)
 
-        val futureResult = connector.NonRepudiate(payLoad)
+        val futureResult = connector.nonRepudiate(payLoad)
 
         whenReady(futureResult) {
           result =>
@@ -139,7 +139,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
           Json.toJson(payLoad).toString,
           GATEWAY_TIMEOUT)
 
-        val futureResult = connector.NonRepudiate(payLoad)
+        val futureResult = connector.nonRepudiate(payLoad)
 
         whenReady(futureResult) {
           result =>
@@ -154,7 +154,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
           Json.toJson(payLoad).toString,
           INTERNAL_SERVER_ERROR)
 
-        val futureResult = connector.NonRepudiate(payLoad)
+        val futureResult = connector.nonRepudiate(payLoad)
 
         whenReady(futureResult) {
           result =>
@@ -170,7 +170,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
           Json.toJson(payLoad).toString,
           CHECKSUM_FAILED)
 
-        val futureResult = connector.NonRepudiate(payLoad)
+        val futureResult = connector.nonRepudiate(payLoad)
 
         whenReady(futureResult) {
           result =>
