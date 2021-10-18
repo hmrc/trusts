@@ -21,13 +21,14 @@ import java.time.LocalDateTime
 import connector.NonRepudiationConnector
 import models.nonRepudiation._
 import org.scalatest.matchers.must.Matchers
-import play.api.http.Status.{ACCEPTED, SERVICE_UNAVAILABLE}
+import play.api.http.Status.{ACCEPTED, SERVICE_UNAVAILABLE, BAD_REQUEST, BAD_GATEWAY, UNAUTHORIZED, GATEWAY_TIMEOUT, INTERNAL_SERVER_ERROR}
 import play.api.libs.json.Json
 import utils.JsonUtils
 
 class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with JsonUtils {
 
   lazy val connector: NonRepudiationConnector = injector.instanceOf[NonRepudiationConnector]
+  final val CHECKSUM_FAILED = 419
 
   ".nonRepudiationConnector" should {
 
@@ -66,9 +67,9 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
       }
     }
 
-    "return NRS down" when {
+    "return NRS failure responses" when {
 
-      "submitting a taxable or non-taxable registration event" in {
+      "return ServiceUnavailableResponse when NRS returns service unavailable" in {
 
         val nonRepudiationEndpointUrl = s"/submission"
         stubNRSPost(server,
@@ -83,6 +84,100 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
             result mustBe ServiceUnavailableResponse
         }
       }
+
+      "return BadRequestResponse when NRS returns bad request" in {
+
+        val nonRepudiationEndpointUrl = s"/submission"
+        stubNRSPost(server,
+          nonRepudiationEndpointUrl,
+          Json.toJson(payLoad).toString,
+          BAD_REQUEST)
+
+        val futureResult = connector.NonRepudiate(payLoad)
+
+        whenReady(futureResult) {
+          result =>
+            result mustBe BadRequestResponse
+        }
+      }
+
+      "return BadGatewayResponse when NRS returns bad gateway" in {
+
+        val nonRepudiationEndpointUrl = s"/submission"
+        stubNRSPost(server,
+          nonRepudiationEndpointUrl,
+          Json.toJson(payLoad).toString,
+          BAD_GATEWAY)
+
+        val futureResult = connector.NonRepudiate(payLoad)
+
+        whenReady(futureResult) {
+          result =>
+            result mustBe BadGatewayResponse
+        }
+      }
+      "return UnauthorisedResponse when NRS returns unauthorised response" in {
+
+        val nonRepudiationEndpointUrl = s"/submission"
+        stubNRSPost(server,
+          nonRepudiationEndpointUrl,
+          Json.toJson(payLoad).toString,
+          UNAUTHORIZED)
+
+        val futureResult = connector.NonRepudiate(payLoad)
+
+        whenReady(futureResult) {
+          result =>
+            result mustBe UnauthorisedResponse
+        }
+      }
+      "return GatewayTimeoutResponse when NRS returns gateway timeout response" in {
+
+        val nonRepudiationEndpointUrl = s"/submission"
+        stubNRSPost(server,
+          nonRepudiationEndpointUrl,
+          Json.toJson(payLoad).toString,
+          GATEWAY_TIMEOUT)
+
+        val futureResult = connector.NonRepudiate(payLoad)
+
+        whenReady(futureResult) {
+          result =>
+            result mustBe GatewayTimeoutResponse
+        }
+      }
+      "return InternalServerErrorResponse when NRS returns internal server error response" in {
+
+        val nonRepudiationEndpointUrl = s"/submission"
+        stubNRSPost(server,
+          nonRepudiationEndpointUrl,
+          Json.toJson(payLoad).toString,
+          INTERNAL_SERVER_ERROR)
+
+        val futureResult = connector.NonRepudiate(payLoad)
+
+        whenReady(futureResult) {
+          result =>
+            result mustBe InternalServerErrorResponse
+        }
+      }
+
+      "return ChecksumFailedResponse when NRS returns checksum failed error response" in {
+
+        val nonRepudiationEndpointUrl = s"/submission"
+        stubNRSPost(server,
+          nonRepudiationEndpointUrl,
+          Json.toJson(payLoad).toString,
+          CHECKSUM_FAILED)
+
+        val futureResult = connector.NonRepudiate(payLoad)
+
+        whenReady(futureResult) {
+          result =>
+            result mustBe ChecksumFailedResponse
+        }
+      }
+
     }
   }
 }

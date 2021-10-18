@@ -24,6 +24,7 @@ import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 sealed trait NrsResponse
 
 object NrsResponse extends Logging {
+  final val CHECKSUM_FAILED = 419
   implicit lazy val httpReads: HttpReads[NrsResponse] =
     (_: String, _: String, response: HttpResponse) => {
       logger.info(s"response status received from NRS: ${response.status}")
@@ -42,6 +43,8 @@ object NrsResponse extends Logging {
           ServiceUnavailableResponse
         case GATEWAY_TIMEOUT =>
           GatewayTimeoutResponse
+        case CHECKSUM_FAILED =>
+          ChecksumFailedResponse
         case status =>
           logger.error(s"Error response from NRS with status $status and body: ${response.body}")
           InternalServerErrorResponse
@@ -61,4 +64,5 @@ case object UnauthorisedResponse extends NrsResponse
 case object ServiceUnavailableResponse extends NrsResponse
 case object GatewayTimeoutResponse extends NrsResponse
 case object InternalServerErrorResponse extends NrsResponse
+case object ChecksumFailedResponse extends NrsResponse
 
