@@ -17,19 +17,23 @@
 package connector
 
 import config.AppConfig
+
 import javax.inject.Inject
-import models.nonRepudiation.NRSSubmission
+import models.nonRepudiation.{NRSSubmission, NrsResponse}
 import play.api.Logging
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import utils.Constants.{CONTENT_TYPE, CONTENT_TYPE_JSON, X_API_KEY}
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
 
 class NonRepudiationConnector @Inject()(http: HttpClient, config: AppConfig) extends Logging {
 
-   def NonRepudiat(json: NRSSubmission)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  private def headers = Seq(CONTENT_TYPE -> CONTENT_TYPE_JSON, X_API_KEY -> config.xApiKey)
 
-  http.POST(config.nonRepudiationUrl, json, Seq(("Content-Type", "application/json"),("X-API-Key", "")))
+   def NonRepudiate(json: NRSSubmission)(implicit hc: HeaderCarrier): Future[NrsResponse] = {
+
+  http.POST[NRSSubmission, NrsResponse](config.nonRepudiationUrl, json, headers)
 
   }
 

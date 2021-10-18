@@ -86,5 +86,7 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
   val registrationTtlInSeconds: Int = configuration.get[Int]("mongodb.registration.ttlSeconds")
 
   val removeSavedRegistrations: Boolean = configuration.get[Boolean]("features.removeSavedRegistrations")
+
+  val xApiKey = configuration.get[String]("nrs.api-key")
 }
 

@@ -57,13 +57,11 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
           ACCEPTED,
           """{"nrsSubscriptionId": "2880d8aa-4691-49a4-aa6a-99191a51b9ef"}""")
 
-        val futureResult = connector.NonRepudiat(payLoad)
+        val futureResult = connector.NonRepudiate(payLoad)
 
         whenReady(futureResult) {
           result =>
-            result.status mustBe ACCEPTED
-            (Json.parse(result.body) \ "nrsSubscriptionId").as[String] mustBe "2880d8aa-4691-49a4-aa6a-99191a51b9ef"
-
+            result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
         }
       }
     }

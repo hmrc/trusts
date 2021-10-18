@@ -40,6 +40,8 @@ object Constants {
   val CONTENT_TYPE = "Content-Type"
   val CONTENT_TYPE_JSON = "application/json; charset=utf-8"
 
+  val X_API_KEY = "X-API-Key"
+
   val INVALID_UTR_CODE = "INVALID_UTR"
   val INVALID_UTR_MESSAGE = "The UTR provided is invalid."
 
