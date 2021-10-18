@@ -1,3 +1,4 @@
+project/metals.sbt
 .*
 */test.json
 !.gitignore

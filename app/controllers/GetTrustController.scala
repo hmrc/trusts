@@ -262,6 +262,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
                    (f: GetTrustSuccessResponse => Result): Action[AnyContent] = (validateIdentifier(identifier) andThen identify).async {
     implicit request =>
       {
+
         for {
           _ <- resetCacheIfRequested(identifier, request.internalId, refreshEtmpData)
           data <- if (applyTransformations) {
