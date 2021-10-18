@@ -21,6 +21,7 @@ import models.nonRepudiation.{MetaData, NRSSubmission, NrsResponse, SearchKey, S
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.ZoneOffset
 import javax.inject.Inject
 import scala.concurrent.Future
 
@@ -43,7 +44,7 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector, localD
         notableEvent,
         "application/json; charset=utf-8",
         checksum,
-        localDateTimeService.now,
+        localDateTimeService.now(ZoneOffset.UTC),
         Json.obj(),
         bearerToken,
         Json.obj(),

@@ -17,7 +17,6 @@
 package models.nonRepudiation
 
 import java.time.LocalDateTime
-
 import play.api.libs.json._
 
 case class NRSSubmission(payload: String,
@@ -40,6 +39,9 @@ case class MetaData(businessId: String,
                    )
 
 object MetaData {
+
+  import utils.DateTimeFormatter._
+
   implicit val formats: OFormat[MetaData] = Json.format[MetaData]
 }
 

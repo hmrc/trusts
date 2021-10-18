@@ -14,12 +14,25 @@
  * limitations under the License.
  */
 
-package services
+package utils
 
-import java.time.{LocalDateTime, ZoneId}
+import play.api.libs.json.{JsSuccess, Reads, Writes}
 
-class LocalDateTimeService {
-  def now: LocalDateTime = LocalDateTime.now
+import java.time.LocalDateTime
+import java.time.format.{DateTimeFormatter => JDateTimeFormatter}
 
-  def now(zone: ZoneId): LocalDateTime = LocalDateTime.now(zone)
+object DateTimeFormatter {
+
+  private val dateTimePattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+
+  private val formatter = JDateTimeFormatter.ofPattern(dateTimePattern)
+
+  implicit val dateTimeReads: Reads[LocalDateTime] = Reads {
+    json =>
+      JsSuccess(LocalDateTime.parse(json.as[String], formatter))
+  }
+
+  implicit val dateTimeWrites: Writes[LocalDateTime] =
+    Writes.temporalWrites[LocalDateTime, JDateTimeFormatter](formatter)
+
 }
