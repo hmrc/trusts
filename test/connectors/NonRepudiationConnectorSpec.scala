@@ -44,7 +44,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
           "Gov-Client-Public-IP" -> "198.51.100.0",
           "Gov-Client-Public-Port" -> "12345"
         ),
-        searchKeys = SearchKeys("ABTRUST123456789")
+        searchKeys = SearchKeys(SearchKey.TRN, "ABTRUST123456789")
       ))
 
     "return NRS subscription Id" when {

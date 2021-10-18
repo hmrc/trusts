@@ -20,28 +20,42 @@ import java.time.LocalDateTime
 
 import play.api.libs.json._
 
-case class NRSSubmission(payload: String, metadata: MetaData)
+case class NRSSubmission(payload: String,
+                         metadata: MetaData)
 
 object NRSSubmission {
   implicit val formats: OFormat[NRSSubmission] = Json.format[NRSSubmission]
 }
 
 
-case class MetaData(businessId: String, notableEvent: String, payloadContentType: String, payloadSha256Checksum: String, userSubmissionTimestamp: LocalDateTime, identityData: JsObject, userAuthToken: String, headerData: JsObject, searchKeys: SearchKeys)
+case class MetaData(businessId: String,
+                    notableEvent: String,
+                    payloadContentType: String,
+                    payloadSha256Checksum: String,
+                    userSubmissionTimestamp: LocalDateTime,
+                    identityData: JsObject,
+                    userAuthToken: String,
+                    headerData: JsObject,
+                    searchKeys: SearchKeys
+                   )
 
 object MetaData {
   implicit val formats: OFormat[MetaData] = Json.format[MetaData]
 }
 
 
-case class SearchKeys(searchKey: String)
+case class SearchKeys(searchKey: SearchKey, value: String)
 
 object SearchKeys {
-  implicit val reads: Reads[SearchKeys] =
-    ((__ \ 'trn).read[String] orElse
-      (__ \ 'utr).read[String] orElse
-      (__ \ 'urn).read[String])
-      .map(SearchKeys(_))
 
-  implicit val writes: OWrites[SearchKeys] = Json.writes[SearchKeys]
+  implicit val reads: Reads[SearchKeys] = Json.reads[SearchKeys]
+
+  implicit val writes: OWrites[SearchKeys] = OWrites {
+    terms: SearchKeys =>
+      terms.searchKey match {
+        case SearchKey.TRN => Json.obj("trn" -> terms.value)
+        case SearchKey.UTR => Json.obj("utr" -> terms.value)
+        case SearchKey.URN => Json.obj("urn" -> terms.value)
+      }
+  }
 }

@@ -16,10 +16,9 @@
 
 package services
 
-import java.time.LocalDateTime
 import base.BaseSpec
 import connector.NonRepudiationConnector
-import models.nonRepudiation.{NRSSubmission, SearchKeys, SuccessfulNrsResponse}
+import models.nonRepudiation.{NRSSubmission, SearchKey, SearchKeys, SuccessfulNrsResponse}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.when
@@ -28,10 +27,10 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
 import utils.JsonFixtures
 
+import java.time.LocalDateTime
 import scala.concurrent.Future
 
 class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures {
-
 
   private val mockConnector = mock[NonRepudiationConnector]
   private val mockLocalDateTimeService = mock[LocalDateTimeService]
@@ -44,24 +43,91 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures {
 
       lazy val payloadCaptor = ArgumentCaptor.forClass(classOf[NRSSubmission])
 
-        when(mockConnector.nonRepudiate(payloadCaptor.capture())(any())).
-          thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+      when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
+        .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
-      when(mockLocalDateTimeService.now).thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
+      when(mockLocalDateTimeService.now)
+        .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
 
       val payLoad = Json.toJson(registrationRequest)
 
-        val fResult = SUT.register(payLoad)
+      val trn = "ABTRUST12345678"
+
+      val fResult = SUT.register(trn, payLoad)
+      whenReady(fResult) { result =>
+        result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+        payloadCaptor.getValue.payload mustBe Json.stringify(payLoad)
+        payloadCaptor.getValue.metadata.businessId mustBe "trs"
+        payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
+        payloadCaptor.getValue.metadata.notableEvent mustBe "trs-registration"
+        payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json; charset=utf-8"
+        payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
+      }
+    }
+  }
+
+  ".maintain" when {
+
+    "taxable" must {
+
+      "return a SuccessfulNrsResponse" in {
+
+        lazy val payloadCaptor = ArgumentCaptor.forClass(classOf[NRSSubmission])
+
+        when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
+          .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+
+        when(mockLocalDateTimeService.now)
+          .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
+
+        val payLoad = trustVariationsRequest
+
+        val utr = "1234567890"
+
+        val fResult = SUT.maintain(utr, payLoad)
+
         whenReady(fResult) { result =>
           result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
           payloadCaptor.getValue.payload mustBe Json.stringify(payLoad)
           payloadCaptor.getValue.metadata.businessId mustBe "trs"
           payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
-          payloadCaptor.getValue.metadata.notableEvent mustBe "trs-registration"
+          payloadCaptor.getValue.metadata.notableEvent mustBe "trs-update-taxable"
           payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json; charset=utf-8"
-          payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys("trn")
+          payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.UTR, utr)
         }
       }
     }
+
+    "nonTaxable" must {
+
+      "return a SuccessfulNrsResponse" in {
+
+        lazy val payloadCaptor = ArgumentCaptor.forClass(classOf[NRSSubmission])
+
+        when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
+          .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+
+        when(mockLocalDateTimeService.now)
+          .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
+
+        val payLoad = trustVariationsRequest
+
+        val urn = "NTTRUST12345678"
+
+        val fResult = SUT.maintain(urn, payLoad)
+
+        whenReady(fResult) { result =>
+          result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+          payloadCaptor.getValue.payload mustBe Json.stringify(payLoad)
+          payloadCaptor.getValue.metadata.businessId mustBe "trs"
+          payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
+          payloadCaptor.getValue.metadata.notableEvent mustBe "trs-update-non-taxable"
+          payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json; charset=utf-8"
+          payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.URN, urn)
+        }
+      }
+    }
+
+  }
 }
 

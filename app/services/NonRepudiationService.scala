@@ -17,34 +17,53 @@
 package services
 
 import connector.NonRepudiationConnector
-import javax.inject.Inject
-import models.nonRepudiation.{MetaData, NRSSubmission, NrsResponse, SearchKeys}
+import models.nonRepudiation.{MetaData, NRSSubmission, NrsResponse, SearchKey, SearchKeys}
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import javax.inject.Inject
 import scala.concurrent.Future
 
 class NonRepudiationService @Inject()(connector: NonRepudiationConnector, localDateTimeService: LocalDateTimeService) {
 
-  def register(payload: JsValue)(implicit hc: HeaderCarrier): Future[NrsResponse] = {
+  private final def sendEvent(payload: JsValue,
+                        notableEvent: String,
+                        checksum: String,
+                        searchKey: SearchKey,
+                        searchValue: String
+                       )(implicit hc: HeaderCarrier): Future[NrsResponse] = {
 
     val bearerToken = hc.authorization.get.value
     val encodedPayload = Json.stringify(payload)
 
-   val event = NRSSubmission(
+    val event = NRSSubmission(
       encodedPayload,
-        MetaData("trs",
-        "trs-registration",
+      MetaData(
+        "trs",
+        notableEvent,
         "application/json; charset=utf-8",
-        "checkSum",
+        checksum,
         localDateTimeService.now,
         Json.obj(),
         bearerToken,
         Json.obj(),
-        SearchKeys("trn")
+        SearchKeys(searchKey, searchValue)
       ))
 
     connector.nonRepudiate(event)
+  }
 
+  def register(trn: String, payload: JsValue)(implicit hc: HeaderCarrier): Future[NrsResponse] =
+    sendEvent(payload, "trs-registration", "checkSum", SearchKey.TRN, trn)
+
+  def maintain(identifier: String, payload: JsValue)(implicit hc: HeaderCarrier): Future[NrsResponse] = {
+
+    val isUtr = (x: String) => x.length != 15
+
+    if (isUtr(identifier)) {
+      sendEvent(payload, "trs-update-taxable", "checkSum", SearchKey.UTR, identifier)
+    } else {
+      sendEvent(payload, "trs-update-non-taxable", "checkSum", SearchKey.URN, identifier)
+    }
   }
 }
