@@ -44,20 +44,24 @@ class BaseSpec extends AnyWordSpec
 
   def injector = application.injector
 
-  def appConfig : AppConfig = injector.instanceOf[AppConfig]
+  def appConfig: AppConfig = injector.instanceOf[AppConfig]
 
   def applicationBuilder(): GuiceApplicationBuilder = {
     new GuiceApplicationBuilder()
       .configure(
         Seq(
           "metrics.enabled" -> false,
-          "auditing.enabled" -> false): _*
+          "auditing.enabled" -> false,
+          "nrs.retryWaitMs" -> 10,
+          "nrs.retryWaitFactor" -> 1,
+          "nrs.retryAttempts" -> 10,
+        ): _*,
       )
   }
 
   val parsers = stubControllerComponents().parsers.defaultBodyParser
 
-  def fakeRequest : FakeRequest[JsValue] = FakeRequest("POST", "")
+  def fakeRequest: FakeRequest[JsValue] = FakeRequest("POST", "")
     .withHeaders(CONTENT_TYPE -> "application/json")
     .withHeaders(Headers.DRAFT_REGISTRATION_ID -> UUID.randomUUID().toString)
     .withBody(Json.parse("{}"))

@@ -17,26 +17,35 @@
 package services
 
 import base.BaseSpec
+import config.AppConfig
 import connector.NonRepudiationConnector
-import models.nonRepudiation.{NRSSubmission, SearchKey, SearchKeys, SuccessfulNrsResponse}
+import models.nonRepudiation._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => mEq, _}
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{reset, times, verify, when}
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.must.Matchers._
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
 import utils.JsonFixtures
 
 import java.time.{LocalDateTime, ZoneOffset}
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.duration.DurationInt
 
-class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures {
+class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAndAfterEach {
+
+  override def beforeEach() = {
+    reset(mockConnector, mockLocalDateTimeService, mockPayloadEncodingService)
+  }
 
   private val mockConnector = mock[NonRepudiationConnector]
   private val mockLocalDateTimeService = mock[LocalDateTimeService]
-  private val mockPayloadEncodingService = mock[PayloadEncodingService
-  ]
-  private val SUT = new NonRepudiationService(mockConnector, mockLocalDateTimeService, mockPayloadEncodingService)
+  private val mockPayloadEncodingService = mock[PayloadEncodingService]
+
+  private val SUT = new NonRepudiationService(mockConnector, mockLocalDateTimeService, mockPayloadEncodingService, appConfig)
   override implicit lazy val hc = HeaderCarrier(authorization = Some(Authorization("Bearer 12345")))
 
   ".register" should {
@@ -151,6 +160,57 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures {
       }
     }
 
+    ".sendEvent" should {
+      "not attempt a retry when error response indicates retry is unnecessary" in {
+
+        val payLoad = trustVariationsRequest
+
+        val urn = "NTTRUST12345678"
+
+        when(mockConnector.nonRepudiate(any())(any()))
+          .thenReturn(Future.successful(BadRequestResponse))
+
+        when(mockLocalDateTimeService.now(ZoneOffset.UTC))
+          .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
+
+        when(mockPayloadEncodingService.encode(mEq(payLoad)))
+          .thenReturn("encodedPayload")
+
+        when(mockPayloadEncodingService.generateChecksum(mEq(payLoad)))
+          .thenReturn("payloadChecksum")
+
+        val fResult = SUT.maintain(urn, payLoad)
+
+        whenReady(fResult) { _ =>
+          verify(mockConnector, times(1)).nonRepudiate(any())(any())
+        }
+      }
+
+      "attempt a retry when error response indicates retry is necessary" in {
+
+        val payLoad = trustVariationsRequest
+
+        val urn = "NTTRUST12345678"
+
+        when(mockConnector.nonRepudiate(any())(any()))
+          .thenReturn(Future.successful(BadGatewayResponse))
+
+        when(mockLocalDateTimeService.now(ZoneOffset.UTC))
+          .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
+
+        when(mockPayloadEncodingService.encode(mEq(payLoad)))
+          .thenReturn("encodedPayload")
+
+        when(mockPayloadEncodingService.generateChecksum(mEq(payLoad)))
+          .thenReturn("payloadChecksum")
+
+        val fResult = SUT.maintain(urn, payLoad)
+
+        whenReady(fResult, timeout(5.seconds)) { _ =>
+          verify(mockConnector, times(10)).nonRepudiate(any())(any())
+        }
+      }
+    }
   }
 }
 

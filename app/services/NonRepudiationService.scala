@@ -16,44 +16,53 @@
 
 package services
 
+import config.AppConfig
 import connector.NonRepudiationConnector
-import models.nonRepudiation.{MetaData, NRSSubmission, NrsResponse, SearchKey, SearchKeys}
+import models.nonRepudiation.{MetaData, NRSSubmission, NoActiveSessionResponse, NrsResponse, SearchKey, SearchKeys}
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
+import utils.RetryHelper
 
 import java.time.ZoneOffset
 import javax.inject.Inject
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
                                       localDateTimeService: LocalDateTimeService,
-                                      payloadEncodingService: PayloadEncodingService) {
+                                      payloadEncodingService: PayloadEncodingService,
+                                      config: AppConfig)(implicit val ec: ExecutionContext) extends RetryHelper {
 
   private final def sendEvent(payload: JsValue,
-                        notableEvent: String,
-                        searchKey: SearchKey,
-                        searchValue: String
-                       )(implicit hc: HeaderCarrier): Future[NrsResponse] = {
+                              notableEvent: String,
+                              searchKey: SearchKey,
+                              searchValue: String
+                             )(implicit hc: HeaderCarrier): Future[NrsResponse] = {
 
-    val bearerToken = hc.authorization.get.value
-    val encodedPayload = payloadEncodingService.encode(payload)
-    val payloadChecksum = payloadEncodingService.generateChecksum(payload)
+    hc.authorization match {
+      case Some(token) =>
+        val encodedPayload = payloadEncodingService.encode(payload)
+        val payloadChecksum = payloadEncodingService.generateChecksum(payload)
 
-    val event = NRSSubmission(
-      encodedPayload,
-      MetaData(
-        "trs",
-        notableEvent,
-        "application/json; charset=utf-8",
-        payloadChecksum,
-        localDateTimeService.now(ZoneOffset.UTC),
-        Json.obj(),
-        bearerToken,
-        Json.obj(),
-        SearchKeys(searchKey, searchValue)
-      ))
+        val event = NRSSubmission(
+          encodedPayload,
+          MetaData(
+            "trs",
+            notableEvent,
+            "application/json; charset=utf-8",
+            payloadChecksum,
+            localDateTimeService.now(ZoneOffset.UTC),
+            Json.obj(),
+            token.value,
+            Json.obj(),
+            SearchKeys(searchKey, searchValue)
+          ))
 
-    connector.nonRepudiate(event)
+        val f: () => Future[NrsResponse] = () => connector.nonRepudiate(event)
+
+        retryOnFailure(f, config)
+
+      case None => Future.successful(NoActiveSessionResponse)
+    }
   }
 
   def register(trn: String, payload: JsValue)(implicit hc: HeaderCarrier): Future[NrsResponse] =

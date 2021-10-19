@@ -20,8 +20,6 @@ import akka.actor.ActorSystem
 import akka.pattern.Patterns.after
 import config.AppConfig
 import play.api.Logging
-import uk.gov.hmrc.http.HttpErrorFunctions.is5xx
-import uk.gov.hmrc.http.UpstreamErrorResponse
 
 import java.util.concurrent.Callable
 import scala.concurrent.duration._
@@ -31,15 +29,15 @@ trait RetryHelper extends Logging {
 
   val as: ActorSystem = ActorSystem()
 
-  def retryOnFailure[T](f: () => Future[T], config: AppConfig)(implicit ec: ExecutionContext): Future[T] = {
+  def retryOnFailure[T <: RetryPolicy](f: () => Future[T], config: AppConfig)(implicit ec: ExecutionContext): Future[T] = {
     retryWithBackOff(1, config.nrsRetryWaitMs, f, config)
   }
 
-  private def retryWithBackOff[T](currentAttempt: Int,
+  private def retryWithBackOff[T <: RetryPolicy](currentAttempt: Int,
                                   currentWait: Int,
                                   f: () => Future[T], config: AppConfig)(implicit ec: ExecutionContext): Future[T] = {
-    f.apply().recoverWith {
-      case e: UpstreamErrorResponse if is5xx(e.statusCode) =>
+    f.apply().flatMap {
+      case e: RetryPolicy if e.retry =>
         if (currentAttempt < config.nrsRetryAttempts) {
           val wait = Math.ceil(currentWait * config.nrsRetryWaitFactor).toInt
           logger.warn(s"Failure, retrying after $wait ms, attempt $currentAttempt")
@@ -51,13 +49,17 @@ trait RetryHelper extends Logging {
               override def call(): Future[Int] = Future.successful(1)
             }
           ).flatMap { _ =>
-            retryWithBackOff(currentAttempt + 1, wait.toInt, f, config)
+            retryWithBackOff(currentAttempt + 1, wait, f, config)
           }
         } else {
-          Future.failed(e)
+          Future.successful(e.asInstanceOf[T])
         }
       case e =>
-        Future.failed(e)
+        Future.successful(e)
     }
   }
+}
+
+trait RetryPolicy {
+  val retry : Boolean
 }
