@@ -19,7 +19,9 @@ package services
 import config.AppConfig
 import connector.NonRepudiationConnector
 import models.nonRepudiation.{MetaData, NRSSubmission, NoActiveSessionResponse, NrsResponse, SearchKey, SearchKeys}
-import play.api.libs.json.{JsValue, Json}
+import models.requests.IdentifierRequest
+import play.api.libs.json.{JsString, JsValue, Json, __}
+import play.api.mvc.AnyContent
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.RetryHelper
 
@@ -36,7 +38,7 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
                               notableEvent: String,
                               searchKey: SearchKey,
                               searchValue: String
-                             )(implicit hc: HeaderCarrier): Future[NrsResponse] = {
+                             )(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): Future[NrsResponse] = {
 
     hc.authorization match {
       case Some(token) =>
@@ -51,7 +53,14 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
             "application/json; charset=utf-8",
             payloadChecksum,
             localDateTimeService.now(ZoneOffset.UTC),
-            Json.obj(),
+            Json.obj(
+              "internalId" -> request.internalId,
+              "affinityGroup" -> request.affinityGroup,
+              "deviceId" -> s"${hc.deviceID.getOrElse("No Device ID")}",
+              "clientIP" -> s"${hc.trueClientIp.getOrElse("No Client IP")}",
+              "clientPort" -> s"${hc.trueClientPort.getOrElse("No Client Port")}",
+              "declaration" -> getDeclaration(payload)
+            ),
             token.value,
             Json.obj(),
             SearchKeys(searchKey, searchValue)
@@ -65,10 +74,16 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
     }
   }
 
-  def register(trn: String, payload: JsValue)(implicit hc: HeaderCarrier): Future[NrsResponse] =
+  def getDeclaration(payload: JsValue): JsValue = {
+    payload.transform(
+      (__ \ "declaration" \ "name").json.pick
+    ).getOrElse(JsString("No Declaration Name"))
+  }
+
+  def register(trn: String, payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): Future[NrsResponse] =
     sendEvent(payload, "trs-registration", SearchKey.TRN, trn)
 
-  def maintain(identifier: String, payload: JsValue)(implicit hc: HeaderCarrier): Future[NrsResponse] = {
+  def maintain(identifier: String, payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): Future[NrsResponse] = {
 
     val isUtr = (x: String) => x.length != 15
 
