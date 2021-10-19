@@ -27,7 +27,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
 import utils.JsonFixtures
 
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.Future
 
 class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures {
@@ -46,7 +46,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures {
       when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
         .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
-      when(mockLocalDateTimeService.now)
+      when(mockLocalDateTimeService.now(ZoneOffset.UTC))
         .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
 
       val payLoad = Json.toJson(registrationRequest)
@@ -77,7 +77,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures {
         when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
           .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
-        when(mockLocalDateTimeService.now)
+        when(mockLocalDateTimeService.now(ZoneOffset.UTC))
           .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
 
         val payLoad = trustVariationsRequest
@@ -107,7 +107,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures {
         when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
           .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
-        when(mockLocalDateTimeService.now)
+        when(mockLocalDateTimeService.now(ZoneOffset.UTC))
           .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
 
         val payLoad = trustVariationsRequest
