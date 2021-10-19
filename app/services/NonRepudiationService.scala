@@ -25,17 +25,19 @@ import java.time.ZoneOffset
 import javax.inject.Inject
 import scala.concurrent.Future
 
-class NonRepudiationService @Inject()(connector: NonRepudiationConnector, localDateTimeService: LocalDateTimeService) {
+class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
+                                      localDateTimeService: LocalDateTimeService,
+                                      payloadEncodingService: PayloadEncodingService) {
 
   private final def sendEvent(payload: JsValue,
                         notableEvent: String,
-                        checksum: String,
                         searchKey: SearchKey,
                         searchValue: String
                        )(implicit hc: HeaderCarrier): Future[NrsResponse] = {
 
     val bearerToken = hc.authorization.get.value
-    val encodedPayload = Json.stringify(payload)
+    val encodedPayload = payloadEncodingService.encode(payload)
+    val payloadChecksum = payloadEncodingService.generateChecksum(payload)
 
     val event = NRSSubmission(
       encodedPayload,
@@ -43,7 +45,7 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector, localD
         "trs",
         notableEvent,
         "application/json; charset=utf-8",
-        checksum,
+        payloadChecksum,
         localDateTimeService.now(ZoneOffset.UTC),
         Json.obj(),
         bearerToken,
@@ -55,16 +57,16 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector, localD
   }
 
   def register(trn: String, payload: JsValue)(implicit hc: HeaderCarrier): Future[NrsResponse] =
-    sendEvent(payload, "trs-registration", "checkSum", SearchKey.TRN, trn)
+    sendEvent(payload, "trs-registration", SearchKey.TRN, trn)
 
   def maintain(identifier: String, payload: JsValue)(implicit hc: HeaderCarrier): Future[NrsResponse] = {
 
     val isUtr = (x: String) => x.length != 15
 
     if (isUtr(identifier)) {
-      sendEvent(payload, "trs-update-taxable", "checkSum", SearchKey.UTR, identifier)
+      sendEvent(payload, "trs-update-taxable", SearchKey.UTR, identifier)
     } else {
-      sendEvent(payload, "trs-update-non-taxable", "checkSum", SearchKey.URN, identifier)
+      sendEvent(payload, "trs-update-non-taxable", SearchKey.URN, identifier)
     }
   }
 }
