@@ -308,22 +308,17 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           val payLoad = trustVariationsRequest
           val result = SUT.getAgentDetails(payLoad)
 
-          result mustBe Some(
-            AgentDetails(
-              "AARN1234567",
-              "Mr. xys abcde",
-              AddressType(
-                "line1",
-                "line2",
-                None,
-                None,
-                Some("TF3 2BX"),
-                "GB"
-              ),
-              "07912180120",
-              "clientReference"
-            )
-          )
+          result mustBe Some(Json.parse(
+          """{"arn":"AARN1234567",
+              |"agentName":"Mr. xys abcde",
+              |"agentAddress":{
+              |"line1":"line1",
+              |"line2":"line2",
+              |"postCode":"TF3 2BX",
+              |"country":"GB"
+              |},
+              |"agentTelephoneNumber":"07912180120",
+              |"clientReference":"clientReference"}""".stripMargin))
         }
 
         "return a None when no Agent Details exist for a registration" in {

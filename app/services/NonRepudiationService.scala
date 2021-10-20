@@ -83,11 +83,8 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
     ).getOrElse(JsString("No Declaration Name"))
   }
 
-  def getAgentDetails(payload: JsValue): Option[AgentDetails] =
-    payload.transform((__ \ "agentDetails").json.pick).fold(
-      _ => None,
-      value => Some(value.validate[AgentDetails].get)
-    )
+  def getAgentDetails(payload: JsValue): Option[JsValue] =
+    payload.transform((__ \ "agentDetails").json.pick).asOpt
 
   def register(trn: String, payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): Future[NrsResponse] =
     sendEvent(payload, "trs-registration", SearchKey.TRN, trn)
