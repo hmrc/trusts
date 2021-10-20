@@ -91,6 +91,6 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
 
   val nrsRetryWaitMs = configuration.get[Int]("nrs.retryWaitMs")
   val nrsRetryWaitFactor = configuration.get[Int]("nrs.retryWaitFactor")
-  val nrsRetryAttempts = configuration.get[Int]("nrs.retryAttempts")
+  val nrsTotalAttempts = configuration.get[Int]("nrs.totalAttempts")
 }
 

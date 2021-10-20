@@ -17,12 +17,14 @@
 package retry
 
 import base.BaseSpec
+import config.AppConfig
 import models.nonRepudiation.{BadGatewayResponse, InternalServerErrorResponse, SuccessfulNrsResponse}
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.inject.guice.GuiceApplicationBuilder
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -38,7 +40,12 @@ class RetryHelperSpec extends BaseSpec with MockitoSugar with ScalaFutures with 
     "return a successful Future" in {
       val successfulFunction = () => Future.successful(SuccessfulNrsResponse("1234567890"))
 
-      whenReady(retryHelper.retryOnFailure(successfulFunction, appConfig)) {
+      whenReady(retryHelper.retryOnFailure(
+        successfulFunction,
+        appConfig.nrsRetryWaitMs,
+        appConfig.nrsTotalAttempts,
+        appConfig.nrsRetryWaitFactor
+      )) {
         e =>
           e.totalTime mustBe 0
           e.ticks mustBe Seq(0)
@@ -48,7 +55,12 @@ class RetryHelperSpec extends BaseSpec with MockitoSugar with ScalaFutures with 
 
     "retry when retry policy is true" in {
       val failedFunction = () => Future.successful(BadGatewayResponse)
-      whenReady(retryHelper.retryOnFailure(failedFunction, appConfig), timeout(Span(TIMEOUT, Seconds))) {
+      whenReady(retryHelper.retryOnFailure(
+        failedFunction,
+        appConfig.nrsRetryWaitMs,
+        appConfig.nrsTotalAttempts,
+        appConfig.nrsRetryWaitFactor
+      ), timeout(Span(TIMEOUT, Seconds))) {
         e =>
           e.totalTime mustBe 90
           e.ticks.size mustBe 10
@@ -60,7 +72,12 @@ class RetryHelperSpec extends BaseSpec with MockitoSugar with ScalaFutures with 
 
       val failedFunction = () => Future.successful(InternalServerErrorResponse)
 
-      whenReady(retryHelper.retryOnFailure(failedFunction, appConfig), timeout(Span(TIMEOUT, Seconds))) {
+      whenReady(retryHelper.retryOnFailure(
+        failedFunction,
+        appConfig.nrsRetryWaitMs,
+        appConfig.nrsTotalAttempts,
+        appConfig.nrsRetryWaitFactor
+      ), timeout(Span(TIMEOUT, Seconds))) {
         e =>
           e.totalTime mustBe 90
           e.ticks.size mustBe 10
@@ -82,7 +99,12 @@ class RetryHelperSpec extends BaseSpec with MockitoSugar with ScalaFutures with 
         }
       }
 
-      whenReady(retryHelper.retryOnFailure(failThenSuccessFunc, appConfig), timeout(Span(TIMEOUT, Seconds))) {
+      whenReady(retryHelper.retryOnFailure(
+        failThenSuccessFunc,
+        appConfig.nrsRetryWaitMs,
+        appConfig.nrsTotalAttempts,
+        appConfig.nrsRetryWaitFactor
+      ), timeout(Span(TIMEOUT, Seconds))) {
         e => {
           e.totalTime mustBe 40
           e.ticks.size mustBe 5
@@ -91,18 +113,24 @@ class RetryHelperSpec extends BaseSpec with MockitoSugar with ScalaFutures with 
       }
     }
 
-//    "when using real config values take less than 20 seconds" ignore {
-//      val app = new GuiceApplicationBuilder().build()
-//      val config = app.injector.instanceOf[AppConfig]
-//
-//      val attempts = config.nrsRetryAttempts
-//      val retryMs = config.nrsRetryWaitMs
-//      val retryWaitFactor = config.nrsRetryWaitFactor
-//
-//      val expectedTime = calculateDuration(1, attempts, retryWaitFactor, retryMs)
-//
-//      expectedTime must be < 20.seconds.toMillis
-//    }
+    "when using real config values take less than 20 seconds" in {
+      val app = new GuiceApplicationBuilder().build()
+      val appConfig = app.injector.instanceOf[AppConfig]
+
+      val failedFunction = () => Future.successful(BadGatewayResponse)
+      whenReady(retryHelper.retryOnFailure(
+        failedFunction,
+        appConfig.nrsRetryWaitMs,
+        appConfig.nrsTotalAttempts,
+        appConfig.nrsRetryWaitFactor
+      ), timeout(Span(TIMEOUT, Seconds))) {
+        e =>
+          println(e.timeOfEachTick)
+          e.totalTime mustBe 0
+          e.ticks.size mustBe 10000
+          e.result.value mustBe BadGatewayResponse
+      }
+    }
   }
 }
 

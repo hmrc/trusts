@@ -18,7 +18,6 @@ package retry
 
 import akka.actor.ActorSystem
 import akka.pattern.Patterns.after
-import config.AppConfig
 import play.api.Logging
 
 import java.util.concurrent.Callable
@@ -37,18 +36,20 @@ trait RetryHelper extends Logging {
       else ticks.drop(1).scanLeft(ticks.head)((acc, x) => acc + x)
   }
 
-  def retryOnFailure(f: () => Future[RetryPolicy], config: AppConfig)(implicit ec: ExecutionContext): Future[RetryExecution] =
+  def retryOnFailure(f: () => Future[RetryPolicy], wait: Int, maxAttempts: Int, factor: Int)(implicit ec: ExecutionContext): Future[RetryExecution] =
     retryWithBackOff(
       currentAttempt = 1,
-      currentWait = config.nrsRetryWaitMs,
-      config = config,
+      currentWait = wait,
+      maxAttempts,
+      factor,
       f = f,
       lastExecution = RetryExecution(Seq(0), None)
     )
 
   private def retryWithBackOff(currentAttempt: Int,
                                currentWait: Int,
-                               config: AppConfig,
+                               maxAttempts: Int,
+                               factor: Int,
                                f: () => Future[RetryPolicy],
                               lastExecution: RetryExecution
                               )(implicit ec: ExecutionContext): Future[RetryExecution] = {
@@ -56,23 +57,23 @@ trait RetryHelper extends Logging {
       case result: RetryPolicy if result.retry =>
 
           RetryHelper.calculateWaitTime(
-            config.nrsRetryAttempts,
-            config.nrsRetryWaitFactor,
+            maxAttempts,
+            factor,
             currentWait,
             currentAttempt
           )(
-            next = { wait =>
-              logger.warn(s"Failure, retrying after $wait ms, attempt $currentAttempt")
+            next = { nextWait =>
+              logger.warn(s"Failure, retrying after $nextWait ms, attempt $currentAttempt")
               after(
-                duration = wait.milliseconds,
+                duration = nextWait.milliseconds,
                 scheduler = as.scheduler,
                 context = ec,
                 value = new Callable[Future[Int]] {
                   override def call(): Future[Int] = Future.successful(1)
                 }
               ).flatMap { _ =>
-                val nextExecution = lastExecution.copy(ticks = lastExecution.ticks :+ wait, Some(result))
-                retryWithBackOff(currentAttempt + 1, wait, config, f, nextExecution)
+                val nextExecution = lastExecution.copy(ticks = lastExecution.ticks :+ nextWait, Some(result))
+                retryWithBackOff(currentAttempt + 1, nextWait, maxAttempts, factor, f, nextExecution)
               }
           },
             last = { () =>

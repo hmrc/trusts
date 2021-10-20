@@ -71,7 +71,7 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
 
         val f: () => Future[NrsResponse] = () => connector.nonRepudiate(event)
 
-        retryOnFailure(f, config).map {
+        retryOnFailure(f, config.nrsRetryWaitMs, config.nrsTotalAttempts, config.nrsRetryWaitFactor).map {
           p =>
             p.result match {
               case Some(value) => value.asInstanceOf[NrsResponse]
