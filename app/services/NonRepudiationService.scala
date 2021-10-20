@@ -18,10 +18,12 @@ package services
 
 import config.AppConfig
 import connector.NonRepudiationConnector
+import models.AgentDetails
 import models.nonRepudiation.{MetaData, NRSSubmission, NoActiveSessionResponse, NrsResponse, SearchKey, SearchKeys}
 import models.requests.IdentifierRequest
-import play.api.libs.json.{JsString, JsValue, Json, __}
+import play.api.libs.json.{JsObject, JsString, JsValue, Json, __}
 import play.api.mvc.AnyContent
+import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.RetryHelper
 
@@ -59,7 +61,8 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
               "deviceId" -> s"${hc.deviceID.getOrElse("No Device ID")}",
               "clientIP" -> s"${hc.trueClientIp.getOrElse("No Client IP")}",
               "clientPort" -> s"${hc.trueClientPort.getOrElse("No Client Port")}",
-              "declaration" -> getDeclaration(payload)
+              "declaration" -> getDeclaration(payload),
+              "agentDetails" -> getAgentDetails(payload)
             ),
             token.value,
             Json.obj(),
@@ -79,6 +82,12 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
       (__ \ "declaration" \ "name").json.pick
     ).getOrElse(JsString("No Declaration Name"))
   }
+
+  def getAgentDetails(payload: JsValue): Option[AgentDetails] =
+    payload.transform((__ \ "agentDetails").json.pick).fold(
+      _ => None,
+      value => Some(value.validate[AgentDetails].get)
+    )
 
   def register(trn: String, payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): Future[NrsResponse] =
     sendEvent(payload, "trs-registration", SearchKey.TRN, trn)

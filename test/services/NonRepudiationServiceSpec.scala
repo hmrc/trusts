@@ -18,6 +18,7 @@ package services
 
 import base.BaseSpec
 import connector.NonRepudiationConnector
+import models.{AddressType, AgentDetails}
 import models.nonRepudiation._
 import models.requests.IdentifierRequest
 import org.mockito.ArgumentCaptor
@@ -73,7 +74,17 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         "declaration" -> Json.obj(
           "firstName" ->"John",
           "middleName" -> "William",
-          "lastName" -> "O'Connor")
+          "lastName" -> "O'Connor"),
+        "agentDetails" -> Json.obj(
+          "arn" -> "AARN1234567",
+          "agentName" -> "Mr . xys abcde",
+          "agentAddress" -> Json.obj(
+            "line1" -> "line1",
+            "line2" -> "line2",
+            "postCode" -> "TF3 2BX",
+            "country" -> "GB"),
+          "agentTelephoneNumber" -> "07912180120",
+          "clientReference" -> "clientReference")
       )
 
       val trn = "ABTRUST12345678"
@@ -124,7 +135,17 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           "declaration" -> Json.obj(
             "firstName" ->"Abram",
             "middleName" -> "Joe",
-            "lastName" -> "James")
+            "lastName" -> "James"),
+          "agentDetails" -> Json.obj(
+            "arn" -> "AARN1234567",
+            "agentName" -> "Mr. xys abcde",
+            "agentAddress" -> Json.obj(
+              "line1" -> "line1",
+              "line2" -> "line2",
+              "postCode" -> "TF3 2BX",
+              "country" -> "GB"),
+            "agentTelephoneNumber" -> "07912180120",
+            "clientReference" -> "clientReference")
         )
 
         val utr = "1234567890"
@@ -174,7 +195,17 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           "declaration" -> Json.obj(
             "firstName" ->"Abram",
             "middleName" -> "Joe",
-            "lastName" -> "James")
+            "lastName" -> "James"),
+          "agentDetails" -> Json.obj(
+            "arn" -> "AARN1234567",
+            "agentName" -> "Mr. xys abcde",
+            "agentAddress" -> Json.obj(
+              "line1" -> "line1",
+              "line2" -> "line2",
+              "postCode" -> "TF3 2BX",
+              "country" -> "GB"),
+            "agentTelephoneNumber" -> "07912180120",
+            "clientReference" -> "clientReference")
         )
         val urn = "NTTRUST12345678"
 
@@ -263,12 +294,44 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         val payLoad = trustVariationsRequest
         val result = SUT.getDeclaration(payLoad)
 
-        result mustBe Json.parse("""{
-                                   |          "firstName": "Abram",
-                                   |          "middleName": "Joe",
-                                   |          "lastName": "James"
-                                   |        }""".stripMargin)
+        result mustBe Json.parse(
+          """{
+            |          "firstName": "Abram",
+            |          "middleName": "Joe",
+            |          "lastName": "James"
+            |        }""".stripMargin)
       }
+    }
+
+      ".getAgentDetails" must {
+        "successfully get Agent Details for a registration when they exist" in {
+          val payLoad = trustVariationsRequest
+          val result = SUT.getAgentDetails(payLoad)
+
+          result mustBe Some(
+            AgentDetails(
+              "AARN1234567",
+              "Mr. xys abcde",
+              AddressType(
+                "line1",
+                "line2",
+                None,
+                None,
+                Some("TF3 2BX"),
+                "GB"
+              ),
+              "07912180120",
+              "clientReference"
+            )
+          )
+        }
+
+        "return a None when no Agent Details exist for a registration" in {
+          val payLoad = Json.obj()
+          val result = SUT.getAgentDetails(payLoad)
+
+          result mustBe None
+        }
     }
   }
 }
