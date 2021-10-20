@@ -19,13 +19,13 @@ package services
 import config.AppConfig
 import connector.NonRepudiationConnector
 import models.AgentDetails
-import models.nonRepudiation.{MetaData, NRSSubmission, NoActiveSessionResponse, NrsResponse, SearchKey, SearchKeys}
+import models.nonRepudiation.{InternalServerErrorResponse, MetaData, NRSSubmission, NoActiveSessionResponse, NrsResponse, SearchKey, SearchKeys}
 import models.requests.IdentifierRequest
 import play.api.libs.json.{JsObject, JsString, JsValue, Json, __}
 import play.api.mvc.AnyContent
+import retry.RetryHelper
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.RetryHelper
 
 import java.time.ZoneOffset
 import javax.inject.Inject
@@ -71,8 +71,13 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
 
         val f: () => Future[NrsResponse] = () => connector.nonRepudiate(event)
 
-        retryOnFailure(f, config)
-
+        retryOnFailure(f, config).map {
+          p =>
+            p.result match {
+              case Some(value) => value.asInstanceOf[NrsResponse]
+              case None => InternalServerErrorResponse
+            }
+        }
       case None => Future.successful(NoActiveSessionResponse)
     }
   }

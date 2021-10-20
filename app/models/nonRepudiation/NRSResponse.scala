@@ -19,8 +19,8 @@ package models.nonRepudiation
 import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json._
+import retry.RetryPolicy
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
-import utils.RetryPolicy
 
 sealed trait NrsResponse extends RetryPolicy
 

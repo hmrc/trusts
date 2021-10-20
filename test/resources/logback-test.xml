@@ -12,6 +12,7 @@
     <logger name="connector" level="WARN"/>
     <logger name="transformers" level="WARN"/>
     <logger name="utils" level="OFF"/>
+    <logger name="retry" level="INFO"/>
     <logger name="reactivemongo.core.protocol.MongoHandler" level="OFF"/>
     <logger name="reactivemongo.api.MongoConnection" level="OFF"/>
 

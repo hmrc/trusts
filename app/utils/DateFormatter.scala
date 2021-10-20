@@ -17,7 +17,6 @@
 package utils
 
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 import com.google.inject.Inject
 import config.AppConfig
@@ -28,7 +27,7 @@ class DateFormatter @Inject()(config: AppConfig) {
   private val format = "d MMMM yyyy"
 
   def formatDate(dateTime: LocalDateTime): String = {
-    val dateFormatter = DateTimeFormatter.ofPattern(format)
+    val dateFormatter = java.time.format.DateTimeFormatter.ofPattern(format)
     dateTime.format(dateFormatter)
   }
 

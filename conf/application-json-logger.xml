@@ -14,6 +14,7 @@
     <logger name="connector" level="${logger.application:-INFO}"/>
     <logger name="transformers" level="${logger.application:-INFO}"/>
     <logger name="utils" level="${logger.application:-INFO}"/>
+    <logger name="retry" level="${logger.application:-INFO}"/>
 
     <root level="${logger.application:-ERROR}">
         <appender-ref ref="STDOUT"/>
