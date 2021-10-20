@@ -18,15 +18,15 @@ package services
 
 import base.BaseSpec
 import connector.NonRepudiationConnector
-import models.{AddressType, AgentDetails}
 import models.nonRepudiation._
 import models.requests.IdentifierRequest
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => mEq, _}
-import org.mockito.Mockito.{reset, times, verify, when}
+import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.{JsValue, Json}
+import retry.RetryHelper
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
 import utils.JsonFixtures
@@ -34,19 +34,19 @@ import utils.JsonFixtures
 import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.duration.DurationInt
 
 class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAndAfterEach with Matchers {
+
+  private val mockConnector = mock[NonRepudiationConnector]
+  private val mockLocalDateTimeService = mock[LocalDateTimeService]
+  private val mockPayloadEncodingService = mock[PayloadEncodingService]
+  private val retryHelper = injector.instanceOf[RetryHelper]
 
   override def beforeEach() = {
     reset(mockConnector, mockLocalDateTimeService, mockPayloadEncodingService)
   }
 
-  private val mockConnector = mock[NonRepudiationConnector]
-  private val mockLocalDateTimeService = mock[LocalDateTimeService]
-  private val mockPayloadEncodingService = mock[PayloadEncodingService]
-
-  private val SUT = new NonRepudiationService(mockConnector, mockLocalDateTimeService, mockPayloadEncodingService, appConfig)
+  private val SUT = new NonRepudiationService(mockConnector, mockLocalDateTimeService, mockPayloadEncodingService, retryHelper)
   override implicit lazy val hc = HeaderCarrier(
     authorization = Some(Authorization("Bearer 12345")),
     deviceID = Some("deviceId"),
@@ -233,58 +233,6 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json; charset=utf-8"
           payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.URN, urn)
           payloadCaptor.getValue.metadata.identityData mustBe identityData
-        }
-      }
-    }
-
-    ".sendEvent" should {
-      "not attempt a retry when error response indicates retry is unnecessary" in {
-
-        val payLoad = trustVariationsRequest
-
-        val urn = "NTTRUST12345678"
-
-        when(mockConnector.nonRepudiate(any())(any()))
-          .thenReturn(Future.successful(BadRequestResponse))
-
-        when(mockLocalDateTimeService.now(ZoneOffset.UTC))
-          .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
-
-        when(mockPayloadEncodingService.encode(mEq(payLoad)))
-          .thenReturn("encodedPayload")
-
-        when(mockPayloadEncodingService.generateChecksum(mEq(payLoad)))
-          .thenReturn("payloadChecksum")
-
-        val fResult = SUT.maintain(urn, payLoad)
-
-        whenReady(fResult) { _ =>
-          verify(mockConnector, times(1)).nonRepudiate(any())(any())
-        }
-      }
-
-      "attempt a retry when error response indicates retry is necessary" in {
-
-        val payLoad = trustVariationsRequest
-
-        val urn = "NTTRUST12345678"
-
-        when(mockConnector.nonRepudiate(any())(any()))
-          .thenReturn(Future.successful(BadGatewayResponse))
-
-        when(mockLocalDateTimeService.now(ZoneOffset.UTC))
-          .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
-
-        when(mockPayloadEncodingService.encode(mEq(payLoad)))
-          .thenReturn("encodedPayload")
-
-        when(mockPayloadEncodingService.generateChecksum(mEq(payLoad)))
-          .thenReturn("payloadChecksum")
-
-        val fResult = SUT.maintain(urn, payLoad)
-
-        whenReady(fResult, timeout(5.seconds)) { _ =>
-          verify(mockConnector, times(10)).nonRepudiate(any())(any())
         }
       }
     }

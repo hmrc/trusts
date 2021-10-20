@@ -18,38 +18,33 @@ package retry
 
 import akka.actor.ActorSystem
 import akka.pattern.Patterns.after
+import com.google.inject.ImplementedBy
 import play.api.Logging
+import retry.RetryHelper.RetryExecution
 
 import java.util.concurrent.Callable
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
+@ImplementedBy(classOf[NrsRetryHelper])
 trait RetryHelper extends Logging {
 
   val as: ActorSystem = ActorSystem()
 
-  case class RetryExecution(ticks: Seq[Int], result: Option[RetryPolicy]) {
-    val totalTime: Int = ticks.sum
+  val maxAttempts: Int
+  val factor: Int
+  val initialWait: Int
 
-    def timeOfEachTick: Seq[Int] =
-      if (ticks.isEmpty) Nil
-      else ticks.drop(1).scanLeft(ticks.head)((acc, x) => acc + x)
-  }
-
-  def retryOnFailure(f: () => Future[RetryPolicy], wait: Int, maxAttempts: Int, factor: Int)(implicit ec: ExecutionContext): Future[RetryExecution] =
+  def retryOnFailure(f: () => Future[RetryPolicy])(implicit ec: ExecutionContext): Future[RetryExecution] =
     retryWithBackOff(
       currentAttempt = 1,
-      currentWait = wait,
-      maxAttempts,
-      factor,
+      currentWait = initialWait,
       f = f,
       lastExecution = RetryExecution(Seq(0), None)
     )
 
   private def retryWithBackOff(currentAttempt: Int,
                                currentWait: Int,
-                               maxAttempts: Int,
-                               factor: Int,
                                f: () => Future[RetryPolicy],
                               lastExecution: RetryExecution
                               )(implicit ec: ExecutionContext): Future[RetryExecution] = {
@@ -73,7 +68,7 @@ trait RetryHelper extends Logging {
                 }
               ).flatMap { _ =>
                 val nextExecution = lastExecution.copy(ticks = lastExecution.ticks :+ nextWait, Some(result))
-                retryWithBackOff(currentAttempt + 1, nextWait, maxAttempts, factor, f, nextExecution)
+                retryWithBackOff(currentAttempt + 1, nextWait, f, nextExecution)
               }
           },
             last = { () =>
@@ -87,6 +82,14 @@ trait RetryHelper extends Logging {
 }
 
 object RetryHelper extends Logging {
+
+  case class RetryExecution(ticks: Seq[Int], result: Option[RetryPolicy]) {
+    val totalTime: Int = ticks.sum
+
+    def timeOfEachTick: Seq[Int] =
+      if (ticks.isEmpty) Nil
+      else ticks.drop(1).scanLeft(ticks.head)((acc, x) => acc + x)
+  }
 
   def calculateWaitTime[T](maxAttempts: Int, waitFactor: Int, currentWait: Int, currentAttempt: Int)
                           (next: Int => Future[T], last: () => Future[T]): Future[T] = {

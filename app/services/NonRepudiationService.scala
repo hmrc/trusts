@@ -16,7 +16,6 @@
 
 package services
 
-import config.AppConfig
 import connector.NonRepudiationConnector
 import models.nonRepudiation._
 import models.requests.IdentifierRequest
@@ -31,7 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
                                       localDateTimeService: LocalDateTimeService,
                                       payloadEncodingService: PayloadEncodingService,
-                                      config: AppConfig)(implicit val ec: ExecutionContext) extends RetryHelper {
+                                      retryHelper: RetryHelper)(implicit val ec: ExecutionContext) {
 
   private final def sendEvent(payload: JsValue,
                               notableEvent: String,
@@ -68,7 +67,7 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
 
         val f: () => Future[NrsResponse] = () => connector.nonRepudiate(event)
 
-        retryOnFailure(f, config.nrsRetryWaitMs, config.nrsTotalAttempts, config.nrsRetryWaitFactor).map {
+        retryHelper.retryOnFailure(f).map {
           p =>
             p.result match {
               case Some(value) => value.asInstanceOf[NrsResponse]
