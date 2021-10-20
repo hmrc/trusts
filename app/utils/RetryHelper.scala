@@ -38,8 +38,8 @@ trait RetryHelper extends Logging {
                                   f: () => Future[T], config: AppConfig)(implicit ec: ExecutionContext): Future[T] = {
     f.apply().flatMap {
       case e: RetryPolicy if e.retry =>
-        if (currentAttempt < config.nrsRetryAttempts) {
-          val wait = Math.ceil(currentWait * config.nrsRetryWaitFactor).toInt
+
+          RetryHelper.calculateWaitTime(config.nrsRetryAttempts, config.nrsRetryWaitFactor, currentWait, currentAttempt){ wait =>
           logger.warn(s"Failure, retrying after $wait ms, attempt $currentAttempt")
           after(
             duration = wait.milliseconds,
@@ -51,11 +51,24 @@ trait RetryHelper extends Logging {
           ).flatMap { _ =>
             retryWithBackOff(currentAttempt + 1, wait, f, config)
           }
-        } else {
+          }, x =>
           Future.successful(e.asInstanceOf[T])
         }
       case e =>
         Future.successful(e)
+    }
+  }
+}
+
+object RetryHelper {
+
+  def calculateWaitTime[T](maxAttempts: Int, waitFactor: Int, currentWait: Int, currentAttempt: Int)
+                          (next: Int => Future[T], last: () => Future[T]): Future[T] = {
+    if (currentAttempt < maxAttempts) {
+      val wait = Math.ceil(currentWait * waitFactor).toInt
+      next(wait)
+    } else {
+      last()
     }
   }
 }

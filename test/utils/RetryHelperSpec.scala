@@ -27,7 +27,6 @@ import play.api.inject.guice.GuiceApplicationBuilder
 
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
@@ -40,21 +39,6 @@ class RetryHelperSpec extends BaseSpec with MockitoSugar with ScalaFutures with 
 
   val retryHelper = new RetryHelperClass()
   val TIMEOUT = 5
-
-  def calculateDuration(iteration: Int, maxAttempts: Int, waitFactor: Int, initialWait: Int): Long = {
-
-    @tailrec
-    def getMinimumExpectedDuration(iteration: Int, expectedTime: Long, currentWait: Int): Long = {
-      if (iteration >= maxAttempts) {
-        expectedTime + currentWait
-      } else {
-        val nextWait: Int = Math.ceil(currentWait * waitFactor).toInt
-        getMinimumExpectedDuration(iteration + 1, expectedTime + currentWait, nextWait)
-      }
-    }
-
-    getMinimumExpectedDuration(iteration, initialWait, initialWait)
-  }
 
   "RetryHelper" must {
 
