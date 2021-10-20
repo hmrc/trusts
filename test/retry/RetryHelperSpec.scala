@@ -113,7 +113,7 @@ class RetryHelperSpec extends BaseSpec with MockitoSugar with ScalaFutures with 
       }
     }
 
-    "when using real config values take less than 20 seconds" in {
+    "when using real config values take less than 20 seconds" ignore {
       val app = new GuiceApplicationBuilder().build()
       val appConfig = app.injector.instanceOf[AppConfig]
 
@@ -125,9 +125,8 @@ class RetryHelperSpec extends BaseSpec with MockitoSugar with ScalaFutures with 
         appConfig.nrsRetryWaitFactor
       ), timeout(Span(TIMEOUT, Seconds))) {
         e =>
-          println(e.timeOfEachTick)
-          e.totalTime mustBe 0
-          e.ticks.size mustBe 10000
+          e.totalTime mustBe 15600
+          e.timeOfEachTick mustBe Seq(0, 1200, 4800, 15600)
           e.result.value mustBe BadGatewayResponse
       }
     }

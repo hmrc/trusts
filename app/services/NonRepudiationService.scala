@@ -18,13 +18,10 @@ package services
 
 import config.AppConfig
 import connector.NonRepudiationConnector
-import models.AgentDetails
-import models.nonRepudiation.{InternalServerErrorResponse, MetaData, NRSSubmission, NoActiveSessionResponse, NrsResponse, SearchKey, SearchKeys}
+import models.nonRepudiation._
 import models.requests.IdentifierRequest
-import play.api.libs.json.{JsObject, JsString, JsValue, Json, __}
-import play.api.mvc.AnyContent
+import play.api.libs.json.{JsString, JsValue, Json, __}
 import retry.RetryHelper
-import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.ZoneOffset
