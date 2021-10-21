@@ -17,7 +17,6 @@
 package retry
 
 import base.BaseSpec
-import config.AppConfig
 import models.nonRepudiation.{BadGatewayResponse, InternalServerErrorResponse, SuccessfulNrsResponse}
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
