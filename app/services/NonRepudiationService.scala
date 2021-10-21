@@ -19,6 +19,7 @@ package services
 import connector.NonRepudiationConnector
 import models.nonRepudiation._
 import models.requests.IdentifierRequest
+import play.api.Logging
 import play.api.libs.json.{JsObject, JsString, JsValue, Json, __}
 import retry.RetryHelper
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
@@ -27,11 +28,12 @@ import uk.gov.hmrc.http.HeaderCarrier
 import java.time.ZoneOffset
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
                                       localDateTimeService: LocalDateTimeService,
                                       payloadEncodingService: PayloadEncodingService,
-                                      retryHelper: RetryHelper)(implicit val ec: ExecutionContext) {
+                                      retryHelper: RetryHelper)(implicit val ec: ExecutionContext) extends Logging {
 
   private def authorityData(payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): JsValue = {
     val commonAuthorityData = Json.obj(
@@ -83,7 +85,11 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
   }
 
   private def scheduleNrsSubmission(event: NRSSubmission)(implicit hc: HeaderCarrier): Future[NrsResponse] = {
-    val f: () => Future[NrsResponse] = () => connector.nonRepudiate(event)
+    def connection: Future[NrsResponse] = connector.nonRepudiate(event)
+
+    def f: () => Future[NrsResponse] = () => connection
+
+    handleCallback(connection)
 
     retryHelper.retryOnFailure(f).map {
       p =>
@@ -91,6 +97,19 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
           case Some(value) => value.asInstanceOf[NrsResponse]
           case None => InternalServerErrorResponse
         }
+    }
+  }
+
+  private def handleCallback(f: Future[NrsResponse]): Unit = {
+    f onComplete {
+      case Success(value) =>
+        // TXM success
+        logger.info(s"[NonRepudiationService] NRS submission completed, result was $value")
+        ()
+      case Failure(exception) =>
+        // Txm failure event
+        logger.info(s"[NonRepudiationService] NRS submission failed due to ${exception.getMessage}")
+        ()
     }
   }
 
