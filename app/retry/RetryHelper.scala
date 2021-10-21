@@ -58,7 +58,7 @@ trait RetryHelper extends Logging {
             currentAttempt
           )(
             next = { nextWait =>
-              logger.warn(s"Failure, retrying after $nextWait ms, attempt $currentAttempt")
+              logger.warn(s"[RetryHelper] failed, retrying after $nextWait ms, attempt $currentAttempt")
               after(
                 duration = nextWait.milliseconds,
                 scheduler = as.scheduler,
