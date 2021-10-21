@@ -53,7 +53,7 @@ object NrsResponse extends Logging {
     }
 }
 
-case class SuccessfulNrsResponse(nrsSubscriptionId: String) extends NrsResponse with RetryPolicy { override val retry = false}
+case class SuccessfulNrsResponse(nrSubmissionId: String) extends NrsResponse with RetryPolicy { override val retry = false}
 
 object SuccessfulNrsResponse {
   implicit val formats: Format[SuccessfulNrsResponse] = Json.format[SuccessfulNrsResponse]

@@ -47,7 +47,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
         searchKeys = SearchKeys(SearchKey.TRN, "ABTRUST123456789")
       ))
 
-    "return NRS subscription Id" when {
+    "return NRS submission Id" when {
 
       "submitting a taxable registration event" in {
 
@@ -56,7 +56,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
           nonRepudiationEndpointUrl,
           Json.toJson(payLoad).toString,
           ACCEPTED,
-          Some("""{"nrsSubscriptionId": "2880d8aa-4691-49a4-aa6a-99191a51b9ef"}"""))
+          Some("""{"nrSubmissionId": "2880d8aa-4691-49a4-aa6a-99191a51b9ef"}"""))
 
         val futureResult = connector.nonRepudiate(payLoad)
 
