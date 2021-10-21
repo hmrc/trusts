@@ -100,7 +100,7 @@ object RetryHelper extends Logging {
       logger.info(s"[RetryHelper] waiting for $wait milliseconds")
       next(wait)
     } else {
-      logger.info(s"[RetryHelper] waited a total of $currentWait milliseconds")
+      logger.info(s"[RetryHelper] no more attempts left")
       last()
     }
   }
