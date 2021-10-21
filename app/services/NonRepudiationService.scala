@@ -20,10 +20,11 @@ import connector.NonRepudiationConnector
 import models.nonRepudiation._
 import models.requests.IdentifierRequest
 import play.api.Logging
-import play.api.libs.json.{JsObject, JsString, JsValue, Json, __}
+import play.api.libs.json._
 import retry.RetryHelper
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.http.HeaderCarrier
+import utils.Session
 
 import java.time.ZoneOffset
 import javax.inject.Inject
@@ -42,6 +43,8 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
       "deviceId" -> s"${hc.deviceID.getOrElse("No Device ID")}",
       "clientIP" -> s"${hc.trueClientIp.getOrElse("No Client IP")}",
       "clientPort" -> s"${hc.trueClientPort.getOrElse("No Client Port")}",
+      "sessionId" -> s"${hc.sessionId.map(_.value).getOrElse("No Session ID")}",
+      "requestId" -> s"${hc.requestId.map(_.value).getOrElse("No Request ID")}",
       "declaration" -> getDeclaration(payload)
     )
 

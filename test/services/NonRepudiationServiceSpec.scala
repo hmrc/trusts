@@ -29,7 +29,7 @@ import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.test.FakeRequest
 import retry.RetryHelper
 import uk.gov.hmrc.auth.core.AffinityGroup
-import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
+import uk.gov.hmrc.http.{Authorization, HeaderCarrier, RequestId, SessionId}
 import utils.JsonFixtures
 
 import java.time.{LocalDateTime, ZoneOffset}
@@ -55,7 +55,9 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
     authorization = Some(Authorization("Bearer 12345")),
     deviceID = Some("deviceId"),
     trueClientPort = Some("ClientPort"),
-    trueClientIp = Some("ClientIP")
+    trueClientIp = Some("ClientIP"),
+    sessionId = Some(SessionId("SessionID")),
+    requestId = Some(RequestId("RequestID"))
   )
 
   implicit val request: IdentifierRequest[JsValue] =
@@ -85,7 +87,9 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         "deviceId" -> "deviceId",
         "clientIP" -> "ClientIP",
         "clientPort" -> "ClientPort",
-        "declaration" -> Json.obj(
+        "sessionId" -> "SessionID",
+          "requestId" -> "RequestID",
+          "declaration" -> Json.obj(
           "firstName" ->"John",
           "middleName" -> "William",
           "lastName" -> "O'Connor"),
@@ -145,6 +149,8 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         "deviceId" -> "deviceId",
         "clientIP" -> "ClientIP",
         "clientPort" -> "ClientPort",
+        "sessionId" -> "SessionID",
+        "requestId" -> "RequestID",
         "declaration" -> Json.obj(
           "firstName" ->"John",
           "middleName" -> "William",
@@ -198,6 +204,8 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           "deviceId" -> "deviceId",
           "clientIP" -> "ClientIP",
           "clientPort" -> "ClientPort",
+          "sessionId" -> "SessionID",
+          "requestId" -> "RequestID",
           "declaration" -> Json.obj(
             "firstName" ->"Abram",
             "middleName" -> "Joe",
@@ -259,6 +267,8 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           "deviceId" -> "deviceId",
           "clientIP" -> "ClientIP",
           "clientPort" -> "ClientPort",
+          "sessionId" -> "SessionID",
+          "requestId" -> "RequestID",
           "declaration" -> Json.obj(
             "firstName" ->"Abram",
             "middleName" -> "Joe",
