@@ -21,6 +21,7 @@ import models.nonRepudiation._
 import models.requests.IdentifierRequest
 import play.api.libs.json.{JsObject, JsString, JsValue, Json, __}
 import retry.RetryHelper
+import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.ZoneOffset
@@ -36,12 +37,28 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
                               notableEvent: String,
                               searchKey: SearchKey,
                               searchValue: String
-                             )(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): Future[NrsResponse] = {
+                             )(implicit hc: HeaderCarrier,
+                               request: IdentifierRequest[_]): Future[NrsResponse] = {
 
     hc.authorization match {
       case Some(token) =>
         val encodedPayload = payloadEncodingService.encode(payload)
         val payloadChecksum = payloadEncodingService.generateChecksum(payload)
+
+        val commonAuthorityData = Json.obj(
+          "internalId" -> request.internalId,
+          "affinityGroup" -> request.affinityGroup,
+          "deviceId" -> s"${hc.deviceID.getOrElse("No Device ID")}",
+          "clientIP" -> s"${hc.trueClientIp.getOrElse("No Client IP")}",
+          "clientPort" -> s"${hc.trueClientPort.getOrElse("No Client Port")}",
+          "declaration" -> getDeclaration(payload)
+        )
+
+        val authorityData = if (request.affinityGroup == Agent) {
+          commonAuthorityData ++ Json.obj("agentDetails" -> getAgentDetails(payload))
+        } else {
+          commonAuthorityData
+        }
 
         val event = NRSSubmission(
           encodedPayload,
@@ -51,31 +68,27 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
             "application/json; charset=utf-8",
             payloadChecksum,
             localDateTimeService.now(ZoneOffset.UTC),
-            Json.obj(
-              "internalId" -> request.internalId,
-              "affinityGroup" -> request.affinityGroup,
-              "deviceId" -> s"${hc.deviceID.getOrElse("No Device ID")}",
-              "clientIP" -> s"${hc.trueClientIp.getOrElse("No Client IP")}",
-              "clientPort" -> s"${hc.trueClientPort.getOrElse("No Client Port")}",
-              "declaration" -> getDeclaration(payload),
-              "agentDetails" -> getAgentDetails(payload)
-            ),
+            authorityData,
             token.value,
             JsObject(request.headers.toMap.map(header => header._1 -> JsString(header._2 mkString ","))),
             SearchKeys(searchKey, searchValue)
-          ))
+          )
+        )
 
-
-        val f: () => Future[NrsResponse] = () => connector.nonRepudiate(event)
-
-        retryHelper.retryOnFailure(f).map {
-          p =>
-            p.result match {
-              case Some(value) => value.asInstanceOf[NrsResponse]
-              case None => InternalServerErrorResponse
-            }
-        }
+        scheduleNrsSubmission(event)
       case None => Future.successful(NoActiveSessionResponse)
+    }
+  }
+
+  private def scheduleNrsSubmission(event: NRSSubmission)(implicit hc: HeaderCarrier): Future[NrsResponse] = {
+    val f: () => Future[NrsResponse] = () => connector.nonRepudiate(event)
+
+    retryHelper.retryOnFailure(f).map {
+      p =>
+        p.result match {
+          case Some(value) => value.asInstanceOf[NrsResponse]
+          case None => InternalServerErrorResponse
+        }
     }
   }
 
