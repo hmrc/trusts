@@ -33,32 +33,33 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
                                       payloadEncodingService: PayloadEncodingService,
                                       retryHelper: RetryHelper)(implicit val ec: ExecutionContext) {
 
+  private def authorityData(payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): JsValue = {
+    val commonAuthorityData = Json.obj(
+      "internalId" -> request.internalId,
+      "affinityGroup" -> request.affinityGroup,
+      "deviceId" -> s"${hc.deviceID.getOrElse("No Device ID")}",
+      "clientIP" -> s"${hc.trueClientIp.getOrElse("No Client IP")}",
+      "clientPort" -> s"${hc.trueClientPort.getOrElse("No Client Port")}",
+      "declaration" -> getDeclaration(payload)
+    )
+
+    if (request.affinityGroup == Agent) {
+      commonAuthorityData ++ Json.obj("agentDetails" -> getAgentDetails(payload))
+    } else {
+      commonAuthorityData
+    }
+  }
+
   private final def sendEvent(payload: JsValue,
                               notableEvent: String,
                               searchKey: SearchKey,
                               searchValue: String
                              )(implicit hc: HeaderCarrier,
                                request: IdentifierRequest[_]): Future[NrsResponse] = {
-
     hc.authorization match {
       case Some(token) =>
         val encodedPayload = payloadEncodingService.encode(payload)
         val payloadChecksum = payloadEncodingService.generateChecksum(payload)
-
-        val commonAuthorityData = Json.obj(
-          "internalId" -> request.internalId,
-          "affinityGroup" -> request.affinityGroup,
-          "deviceId" -> s"${hc.deviceID.getOrElse("No Device ID")}",
-          "clientIP" -> s"${hc.trueClientIp.getOrElse("No Client IP")}",
-          "clientPort" -> s"${hc.trueClientPort.getOrElse("No Client Port")}",
-          "declaration" -> getDeclaration(payload)
-        )
-
-        val authorityData = if (request.affinityGroup == Agent) {
-          commonAuthorityData ++ Json.obj("agentDetails" -> getAgentDetails(payload))
-        } else {
-          commonAuthorityData
-        }
 
         val event = NRSSubmission(
           encodedPayload,
@@ -68,7 +69,7 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
             "application/json; charset=utf-8",
             payloadChecksum,
             localDateTimeService.now(ZoneOffset.UTC),
-            authorityData,
+            authorityData(payload),
             token.value,
             JsObject(request.headers.toMap.map(header => header._1 -> JsString(header._2 mkString ","))),
             SearchKeys(searchKey, searchValue)
@@ -76,7 +77,8 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
         )
 
         scheduleNrsSubmission(event)
-      case None => Future.successful(NoActiveSessionResponse)
+      case None =>
+        Future.successful(NoActiveSessionResponse)
     }
   }
 

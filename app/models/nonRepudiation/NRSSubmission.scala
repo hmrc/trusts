@@ -32,9 +32,9 @@ case class MetaData(businessId: String,
                     payloadContentType: String,
                     payloadSha256Checksum: String,
                     userSubmissionTimestamp: LocalDateTime,
-                    identityData: JsObject,
+                    identityData: JsValue,
                     userAuthToken: String,
-                    headerData: JsObject,
+                    headerData: JsValue,
                     searchKeys: SearchKeys
                    )
 
