@@ -85,11 +85,8 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
   }
 
   private def scheduleNrsSubmission(event: NRSSubmission)(implicit hc: HeaderCarrier): Future[NrsResponse] = {
-    def connection: Future[NrsResponse] = connector.nonRepudiate(event)
 
-    def f: () => Future[NrsResponse] = () => connection
-
-    handleCallback(connection)
+    def f: () => Future[NrsResponse] = () => connector.nonRepudiate(event)
 
     retryHelper.retryOnFailure(f).map {
       p =>

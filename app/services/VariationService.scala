@@ -17,16 +17,16 @@
 package services
 
 import exceptions.{EtmpCacheDataStaleException, InternalServerErrorException}
-import models.variation.DeclarationForApi
+import models.variation.{DeclarationForApi, VariationContext, VariationResponse}
 import models.auditing.TrustAuditing
 import models.get_trust.TrustProcessedResponse
-import models.variation.VariationResponse
 import play.api.Logging
 import play.api.libs.json._
 import transformers.DeclarationTransformer
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.JsonOps._
 import utils.Session
+
 import javax.inject.Inject
 import models.tax_enrolments.{TaxEnrolmentNotProcessed, TaxEnrolmentSubscriberResponse}
 
@@ -51,7 +51,7 @@ class VariationService @Inject()(
   }
 
   def submitDeclaration(identifier: String, internalId: String, declaration: DeclarationForApi)
-                       (implicit hc: HeaderCarrier): Future[VariationResponse] = {
+                       (implicit hc: HeaderCarrier): Future[VariationContext] = {
 
     implicit val logging: LoggingContext = LoggingContext(identifier)
 
@@ -98,7 +98,7 @@ class VariationService @Inject()(
                                  declaration: DeclarationForApi,
                                  originalJson: JsValue,
                                  response: TrustProcessedResponse)
-                                (implicit hc: HeaderCarrier, logging: LoggingContext): Future[VariationResponse] = {
+                                (implicit hc: HeaderCarrier, logging: LoggingContext): Future[VariationContext] = {
         logger.debug(s"[Session ID: ${Session.id(hc)}]" +
           s" transformation to final submission, applying declaration transform to shape data into variations payload")
 
@@ -144,7 +144,7 @@ class VariationService @Inject()(
   }
 
   private def submitVariationAndCheckForMigration(identifier: String, value: JsValue, internalId: String)
-                                                 (implicit hc: HeaderCarrier): Future[VariationResponse] = {
+                                                 (implicit hc: HeaderCarrier): Future[VariationContext] = {
 
     def migrateNonTaxableToTaxable(migrateToTaxable: Boolean, subscriptionId: String, identifier: String): Future[TaxEnrolmentSubscriberResponse] = {
       if (migrateToTaxable) {
@@ -159,14 +159,14 @@ class VariationService @Inject()(
     for {
       migrateToTaxable <- taxableMigrationService.migratingFromNonTaxableToTaxable(identifier, internalId)
       variationResponse <- submitVariation(identifier, value, internalId, migrateToTaxable)
-      _ <- migrateNonTaxableToTaxable(migrateToTaxable, variationResponse.tvn, identifier)
+      _ <- migrateNonTaxableToTaxable(migrateToTaxable, variationResponse.result.tvn, identifier)
     } yield {
       variationResponse
     }
   }
 
   private def submitVariation(identifier: String, value: JsValue, internalId: String, migrateToTaxable: Boolean)
-                             (implicit hc: HeaderCarrier): Future[VariationResponse] = {
+                             (implicit hc: HeaderCarrier): Future[VariationContext] = {
 
     val payload = value.applyRules
 
@@ -188,7 +188,7 @@ class VariationService @Inject()(
         response
       )
 
-      response
+      VariationContext(payload, response)
     }
   }
 

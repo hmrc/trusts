@@ -111,7 +111,7 @@ class VariationServiceSpec extends AnyWordSpec
       val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
 
       whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { variationResponse =>
-        variationResponse mustBe VariationResponse(subscriberId)
+        variationResponse.result mustBe VariationResponse(subscriberId)
 
         verify(transformationService, times(1)).
           applyDeclarationTransformations(equalTo(utr), equalTo(internalId), equalTo(trustInfoJson5MLD))(any[HeaderCarrier])
@@ -303,7 +303,7 @@ class VariationServiceSpec extends AnyWordSpec
       val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
 
       whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { variationResponse =>
-        variationResponse mustBe VariationResponse(subscriberId)
+        variationResponse.result mustBe VariationResponse(subscriberId)
 
         verify(transformationService, times(1)).
           applyDeclarationTransformations(equalTo(utr), equalTo(internalId), equalTo(trustInfoJson5MLD))(any[HeaderCarrier])
