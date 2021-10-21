@@ -72,12 +72,12 @@ trait RetryHelper extends Logging {
               }
           },
             last = { () =>
-              logger.info(s"[RetryHelper] last retry completed, attempt $currentAttempt, result: $lastExecution")
+              logger.info(s"[RetryHelper] last retry completed, attempt $currentAttempt, result: $lastExecution, time of each attempt: ${lastExecution.timeOfEachTick}")
               Future.successful(RetryExecution(lastExecution.ticks, Some(result)))
             }
           )
       case success =>
-        logger.info(s"[RetryHelper] attempt completed, result did not require retry. $success")
+        logger.info(s"[RetryHelper] attempt completed, result did not require retry. $success, time of each attempt: ${lastExecution.timeOfEachTick}")
         Future.successful(RetryExecution(lastExecution.ticks, Some(success)))
     }
   }
