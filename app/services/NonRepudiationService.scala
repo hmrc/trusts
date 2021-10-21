@@ -19,7 +19,7 @@ package services
 import connector.NonRepudiationConnector
 import models.nonRepudiation._
 import models.requests.IdentifierRequest
-import play.api.libs.json.{JsString, JsValue, Json, __}
+import play.api.libs.json.{JsObject, JsString, JsValue, Json, __}
 import retry.RetryHelper
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -61,9 +61,10 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
               "agentDetails" -> getAgentDetails(payload)
             ),
             token.value,
-            Json.obj(),
+            JsObject(request.headers.toMap.map(header => header._1 -> JsString(header._2 mkString ","))),
             SearchKeys(searchKey, searchValue)
           ))
+
 
         val f: () => Future[NrsResponse] = () => connector.nonRepudiate(event)
 

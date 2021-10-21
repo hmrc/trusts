@@ -24,8 +24,9 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => mEq, _}
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.matchers.must.Matchers
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.{JsValue, Json}
+import play.api.test.FakeRequest
 import retry.RetryHelper
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
@@ -34,13 +35,16 @@ import utils.JsonFixtures
 import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.matching.Regex
 
-class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAndAfterEach with Matchers {
+class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAndAfterEach {
 
   private val mockConnector = mock[NonRepudiationConnector]
   private val mockLocalDateTimeService = mock[LocalDateTimeService]
   private val mockPayloadEncodingService = mock[PayloadEncodingService]
   private val retryHelper = injector.instanceOf[RetryHelper]
+
+  val v4UuidRegex: Regex = "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[4][0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$".r
 
   override def beforeEach() = {
     reset(mockConnector, mockLocalDateTimeService, mockPayloadEncodingService)
@@ -55,7 +59,14 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
   )
 
   implicit val request: IdentifierRequest[JsValue] =
-    IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Agent)
+    IdentifierRequest(
+      FakeRequest()
+      .withHeaders("test" -> "value")
+      .withBody(Json.parse("{}")),
+      internalId = "internalId",
+      sessionId = "sessionId",
+      affinityGroup = AffinityGroup.Agent
+    )
 
   ".register" should {
 
@@ -64,6 +75,9 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
       lazy val payloadCaptor = ArgumentCaptor.forClass(classOf[NRSSubmission])
 
       val payLoad = Json.toJson(registrationRequest)
+
+      implicit val request: IdentifierRequest[JsValue] =
+        IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Agent)
 
       val identityData = Json.obj(
         "internalId" -> "internalId",
@@ -112,6 +126,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json; charset=utf-8"
         payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
         payloadCaptor.getValue.metadata.identityData mustBe identityData
+        (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
       }
     }
   }
@@ -174,6 +189,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json; charset=utf-8"
           payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.UTR, utr)
           payloadCaptor.getValue.metadata.identityData mustBe identityData
+          (payloadCaptor.getValue.metadata.headerData \ "test").as[String] mustBe "value"
         }
       }
     }
@@ -233,6 +249,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json; charset=utf-8"
           payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.URN, urn)
           payloadCaptor.getValue.metadata.identityData mustBe identityData
+          (payloadCaptor.getValue.metadata.headerData \ "test").as[String] mustBe "value"
         }
       }
     }
