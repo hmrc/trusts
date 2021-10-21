@@ -25,7 +25,7 @@ import org.mockito.ArgumentMatchers.{eq => mEq, _}
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.must.Matchers._
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.test.FakeRequest
 import retry.RetryHelper
 import uk.gov.hmrc.auth.core.AffinityGroup
@@ -70,7 +70,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
 
   ".register" should {
 
-    "return a SuccessfulNrsResponse" in {
+    "send a registration event for an Agent" in {
 
       lazy val payloadCaptor = ArgumentCaptor.forClass(classOf[NRSSubmission])
 
@@ -116,6 +116,57 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         .thenReturn("payloadChecksum")
 
       val fResult = SUT.register(trn, payLoad)
+      whenReady(fResult) { result =>
+        result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+        payloadCaptor.getValue.payload mustBe "encodedPayload"
+        payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
+        payloadCaptor.getValue.metadata.businessId mustBe "trs"
+        payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
+        payloadCaptor.getValue.metadata.notableEvent mustBe "trs-registration"
+        payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json; charset=utf-8"
+        payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
+        payloadCaptor.getValue.metadata.identityData mustBe identityData
+        (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
+      }
+    }
+
+    "send a registration event for an Organisation" in {
+
+      lazy val payloadCaptor = ArgumentCaptor.forClass(classOf[NRSSubmission])
+
+      val payLoadWithoutAgentDetails = Json.toJson(registrationRequest).as[JsObject] - "agentDetails"
+
+      implicit val request: IdentifierRequest[JsValue] =
+        IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Organisation)
+
+      val identityData = Json.obj(
+        "internalId" -> "internalId",
+        "affinityGroup" -> "Organisation",
+        "deviceId" -> "deviceId",
+        "clientIP" -> "ClientIP",
+        "clientPort" -> "ClientPort",
+        "declaration" -> Json.obj(
+          "firstName" ->"John",
+          "middleName" -> "William",
+          "lastName" -> "O'Connor"
+        )
+      )
+
+      val trn = "ABTRUST12345678"
+
+      when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
+        .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+
+      when(mockLocalDateTimeService.now(ZoneOffset.UTC))
+        .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
+
+      when(mockPayloadEncodingService.encode(mEq(payLoadWithoutAgentDetails)))
+        .thenReturn("encodedPayload")
+
+      when(mockPayloadEncodingService.generateChecksum(mEq(payLoadWithoutAgentDetails)))
+        .thenReturn("payloadChecksum")
+
+      val fResult = SUT.register(trn, payLoadWithoutAgentDetails)
       whenReady(fResult) { result =>
         result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
         payloadCaptor.getValue.payload mustBe "encodedPayload"
