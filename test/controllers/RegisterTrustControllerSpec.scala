@@ -19,6 +19,7 @@ package controllers
 import base.BaseSpec
 import controllers.actions.FakeIdentifierAction
 import models._
+import models.nonRepudiation.SuccessfulNrsResponse
 import models.registration._
 import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSuccess}
 import org.mockito.ArgumentMatchers.any
@@ -37,6 +38,7 @@ import scala.concurrent.Future
 class RegisterTrustControllerSpec extends BaseSpec {
 
   private val mockTrustsService: TrustsService = mock[TrustsService]
+  private val mockNonRepudiationService: NonRepudiationService = mock[NonRepudiationService]
   private val rosmPatternService: RosmPatternService = mock[RosmPatternService]
   private val default5mldDataService: AmendSubmissionDataService = injector.instanceOf[AmendSubmissionDataService]
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
@@ -61,6 +63,9 @@ class RegisterTrustControllerSpec extends BaseSpec {
         when(mockTrustsService.registerTrust(any[Registration]))
           .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
+        when(mockNonRepudiationService.register(any(), any())(any(), any()))
+          .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+
         when(rosmPatternService.enrolAndLogResult(any(), any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentSuccess))
 
         val SUT = new RegisterTrustController(
@@ -69,6 +74,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
+          mockNonRepudiationService,
           Helpers.stubControllerComponents(),
           default5mldDataService
         )
@@ -85,6 +91,9 @@ class RegisterTrustControllerSpec extends BaseSpec {
         when(mockTrustsService.registerTrust(any[Registration]))
           .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
+        when(mockNonRepudiationService.register(any(), any())(any(), any()))
+          .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+
         when(rosmPatternService.enrolAndLogResult(any(), any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentSuccess))
 
         val SUT = new RegisterTrustController(
@@ -93,6 +102,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
+          mockNonRepudiationService,
           Helpers.stubControllerComponents(),
           default5mldDataService
         )
@@ -111,6 +121,9 @@ class RegisterTrustControllerSpec extends BaseSpec {
           when(mockTrustsService.registerTrust(any[Registration]))
             .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
+          when(mockNonRepudiationService.register(any(), any())(any(), any()))
+            .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+
           when(rosmPatternService.enrolAndLogResult(any(), any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentFailure))
 
           val SUT = new RegisterTrustController(
@@ -119,6 +132,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
             validationService,
             fakeOrganisationAuthAction,
             rosmPatternService,
+            mockNonRepudiationService,
             Helpers.stubControllerComponents(),
             default5mldDataService
           )
@@ -133,6 +147,9 @@ class RegisterTrustControllerSpec extends BaseSpec {
 
       "agent user submits trusts payload" in {
 
+        when(mockNonRepudiationService.register(any(), any())(any(), any()))
+          .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+
         when(rosmPatternService.enrolAndLogResult(any(), any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentNotProcessed))
 
         val SUT = new RegisterTrustController(
@@ -141,6 +158,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeAgentAuthAction,
           rosmPatternService,
+          mockNonRepudiationService,
           Helpers.stubControllerComponents(),
           default5mldDataService
         )
@@ -164,6 +182,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
+          mockNonRepudiationService,
           Helpers.stubControllerComponents(),
           default5mldDataService
         )
@@ -195,6 +214,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
+          mockNonRepudiationService,
           Helpers.stubControllerComponents(),
           default5mldDataService
         )
@@ -218,6 +238,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
+          mockNonRepudiationService,
           Helpers.stubControllerComponents(),
           default5mldDataService
         )
@@ -241,6 +262,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
+          mockNonRepudiationService,
           Helpers.stubControllerComponents(),
           default5mldDataService
         )
@@ -264,6 +286,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
+          mockNonRepudiationService,
           Helpers.stubControllerComponents(),
           default5mldDataService
         )
@@ -295,6 +318,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
+          mockNonRepudiationService,
           Helpers.stubControllerComponents(),
           default5mldDataService
         )
@@ -319,6 +343,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
+          mockNonRepudiationService,
           Helpers.stubControllerComponents(),
           default5mldDataService
         )
@@ -346,6 +371,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           validationService,
           fakeOrganisationAuthAction,
           rosmPatternService,
+          mockNonRepudiationService,
           Helpers.stubControllerComponents(),
           default5mldDataService
         )

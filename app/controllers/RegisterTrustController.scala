@@ -40,6 +40,7 @@ class RegisterTrustController @Inject()(
                                          validationService: ValidationService,
                                          identify: IdentifierAction,
                                          rosmPatternService: RosmPatternService,
+                                         nonRepudiationService: NonRepudiationService,
                                          cc: ControllerComponents,
                                          amendSubmissionDataService: AmendSubmissionDataService
                                        ) extends TrustsBaseController(cc) with Logging {
@@ -79,6 +80,7 @@ class RegisterTrustController @Inject()(
                       (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
     trustsService.registerTrust(registration).flatMap {
       case response: RegistrationTrnResponse =>
+        nonRepudiationService.register(response.trn, Json.toJson(registration))
         enrol(response, registration)
       case AlreadyRegisteredResponse =>
         handleAlreadyRegisteredResponse
