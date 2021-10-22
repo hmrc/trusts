@@ -60,7 +60,8 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       mockVariationService,
       responseHandler,
       mockNonRepudiationService,
-      Helpers.stubControllerComponents()
+      Helpers.stubControllerComponents(),
+      appConfig
     )
   }
 

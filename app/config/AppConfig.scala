@@ -89,6 +89,8 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
 
   val xApiKey = configuration.get[String]("nrs.api-key")
 
+  val nonRepudiate: Boolean = configuration.get[Boolean]("features.nonRepudiate")
+
   val nrsRetryWaitMs = configuration.get[Int]("nrs.retryWaitMs")
   val nrsRetryWaitFactor = configuration.get[Int]("nrs.retryWaitFactor")
   val nrsTotalAttempts = configuration.get[Int]("nrs.totalAttempts")

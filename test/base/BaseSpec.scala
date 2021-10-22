@@ -55,6 +55,7 @@ class BaseSpec extends AnyWordSpec
           "nrs.retryWaitMs" -> 10,
           "nrs.retryWaitFactor" -> 1,
           "nrs.totalAttempts" -> 10,
+          "features.nonRepudiate" -> true
         ): _*,
       )
   }

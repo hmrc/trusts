@@ -80,7 +80,9 @@ class RegisterTrustController @Inject()(
                       (implicit request: IdentifierRequest[JsValue]): Future[Result] = {
     trustsService.registerTrust(registration).flatMap {
       case response: RegistrationTrnResponse =>
-        nonRepudiationService.register(response.trn, Json.toJson(registration))
+        if (config.nonRepudiate){
+          nonRepudiationService.register(response.trn, Json.toJson(registration))
+        }
         enrol(response, registration)
       case AlreadyRegisteredResponse =>
         handleAlreadyRegisteredResponse

@@ -28,6 +28,7 @@ import utils.ValidationUtil
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import config.AppConfig
 
 class TrustVariationsController @Inject()(
                                            identify: IdentifierAction,
@@ -35,7 +36,8 @@ class TrustVariationsController @Inject()(
                                            variationService: VariationService,
                                            responseHandler: VariationsResponseHandler,
                                            nonRepudiationService: NonRepudiationService,
-                                           cc: ControllerComponents
+                                           cc: ControllerComponents,
+                                           appConfig: AppConfig
                                          ) extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
   def declare(identifier: String): Action[JsValue] = identify.async(parse.json) {
@@ -58,7 +60,9 @@ class TrustVariationsController @Inject()(
           variationService
             .submitDeclaration(identifier, request.internalId, declarationForApi)
             .map { context =>
-              nonRepudiationService.maintain(identifier, context.payload)
+              if (appConfig.nonRepudiate){
+                nonRepudiationService.maintain(identifier, context.payload)
+              }
               Ok(Json.toJson(context.result))
             }
         } recover responseHandler.recoverFromException(TrustAuditing.TRUST_VARIATION_SUBMISSION_FAILED)
