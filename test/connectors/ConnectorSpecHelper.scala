@@ -24,6 +24,7 @@ import org.scalatest.concurrent.IntegrationPatience
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers.CONTENT_TYPE
+import utils.Constants.X_API_KEY
 import utils.WireMockHelper
 
 class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationPatience {
@@ -40,6 +41,7 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
           "microservice.services.tax-enrolments-migration.port" -> server.port(),
           "microservice.services.orchestrator.port" -> server.port(),
           "microservice.services.trusts-store.port" -> server.port(),
+          "microservice.services.non-repudiation.port" -> server.port(),
 
           "microservice.services.tax-enrolments.non-taxable.serviceName" -> "serviceNameNonTaxable",
           "microservice.services.tax-enrolments.non-taxable.callback" ->
@@ -179,6 +181,36 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
           .withBody(responseBody).withFixedDelay(delayResponse)))
   }
 
+  def stubNRSPost(server: WireMockServer,
+                  url: String,
+                  requestBody: String,
+                  returnStatus: Int,
+                  responseBody: Option[String] = None,
+                  delayResponse: Int = 0) = {
+
+    responseBody match {
+      case Some(value) =>
+        server.stubFor(post(urlEqualTo(url))
+        .withHeader(CONTENT_TYPE, containing("application/json"))
+        .withHeader(X_API_KEY, containing(appConfig.xApiKey))
+        .withRequestBody(equalTo(requestBody))
+        .willReturn(
+          aResponse()
+            .withStatus(returnStatus)
+            .withBody(value)
+            .withFixedDelay(delayResponse)))
+      case _ =>
+        server.stubFor(post(urlEqualTo(url))
+        .withHeader(CONTENT_TYPE, containing("application/json"))
+        .withHeader(X_API_KEY, containing(appConfig.xApiKey))
+        .withRequestBody(equalTo(requestBody))
+        .willReturn(
+          aResponse()
+            .withStatus(returnStatus)
+            .withFixedDelay(delayResponse)))
+    }
+  }
+
   def stubForHeaderlessPost(server: WireMockServer,
                   url: String,
                   requestBody: String,
@@ -193,6 +225,8 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
           .withStatus(returnStatus)
           .withBody(responseBody).withFixedDelay(delayResponse)))
   }
+
+
 
   def stubForGet(server: WireMockServer,
                  url: String, returnStatus: Int,

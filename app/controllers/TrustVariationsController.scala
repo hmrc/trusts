@@ -22,19 +22,22 @@ import models.auditing.TrustAuditing
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents}
-import services.{AuditService, VariationService}
+import services.{AuditService, NonRepudiationService, VariationService}
 import utils.ValidationUtil
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import config.AppConfig
 
 class TrustVariationsController @Inject()(
                                            identify: IdentifierAction,
                                            auditService: AuditService,
                                            variationService: VariationService,
                                            responseHandler: VariationsResponseHandler,
-                                           cc: ControllerComponents
+                                           nonRepudiationService: NonRepudiationService,
+                                           cc: ControllerComponents,
+                                           appConfig: AppConfig
                                          ) extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
   def declare(identifier: String): Action[JsValue] = identify.async(parse.json) {
@@ -56,7 +59,12 @@ class TrustVariationsController @Inject()(
         declarationForApi => {
           variationService
             .submitDeclaration(identifier, request.internalId, declarationForApi)
-            .map(response => Ok(Json.toJson(response)))
+            .map { context =>
+              if (appConfig.nonRepudiate){
+                nonRepudiationService.maintain(identifier, context.payload)
+              }
+              Ok(Json.toJson(context.result))
+            }
         } recover responseHandler.recoverFromException(TrustAuditing.TRUST_VARIATION_SUBMISSION_FAILED)
       )
     }

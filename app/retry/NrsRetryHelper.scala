@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-package utils
+package retry
 
-import java.time.LocalDateTime
-
-import com.google.inject.Inject
 import config.AppConfig
 
+import javax.inject.Inject
 
-class DateFormatter @Inject()(config: AppConfig) {
-
-  private val format = "d MMMM yyyy"
-
-  def formatDate(dateTime: LocalDateTime): String = {
-    val dateFormatter = java.time.format.DateTimeFormatter.ofPattern(format)
-    dateTime.format(dateFormatter)
-  }
-
+class NrsRetryHelper @Inject()(appConfig: AppConfig) extends RetryHelper {
+  val maxAttempts: Int = appConfig.nrsTotalAttempts
+  val factor: Int = appConfig.nrsRetryWaitFactor
+  val initialWait: Int = appConfig.nrsRetryWaitMs
 }

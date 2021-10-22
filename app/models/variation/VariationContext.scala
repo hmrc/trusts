@@ -14,21 +14,8 @@
  * limitations under the License.
  */
 
-package utils
+package models.variation
 
-import java.time.LocalDateTime
+import play.api.libs.json.JsValue
 
-import com.google.inject.Inject
-import config.AppConfig
-
-
-class DateFormatter @Inject()(config: AppConfig) {
-
-  private val format = "d MMMM yyyy"
-
-  def formatDate(dateTime: LocalDateTime): String = {
-    val dateFormatter = java.time.format.DateTimeFormatter.ofPattern(format)
-    dateTime.format(dateFormatter)
-  }
-
-}
+case class VariationContext(payload: JsValue, result: VariationResponse)

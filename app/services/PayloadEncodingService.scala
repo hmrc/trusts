@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-package utils
+package services
 
-import java.time.LocalDateTime
+import org.apache.commons.codec.binary.Base64
+import org.apache.commons.codec.digest.DigestUtils
+import play.api.libs.json.{JsValue, Json}
 
-import com.google.inject.Inject
-import config.AppConfig
+class PayloadEncodingService {
 
+  def encode(payload: JsValue): String =
+    Base64.encodeBase64URLSafeString(Json.toBytes(payload))
 
-class DateFormatter @Inject()(config: AppConfig) {
-
-  private val format = "d MMMM yyyy"
-
-  def formatDate(dateTime: LocalDateTime): String = {
-    val dateFormatter = java.time.format.DateTimeFormatter.ofPattern(format)
-    dateTime.format(dateFormatter)
-  }
-
+  def generateChecksum(payload: JsValue): String =
+    DigestUtils.sha256Hex(Json.stringify(payload))
 }

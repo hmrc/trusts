@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package utils
+package models.nonRepudiation
 
-import java.time.LocalDateTime
+import models.{Enumerable, WithName}
 
-import com.google.inject.Inject
-import config.AppConfig
+sealed trait SearchKey
 
+object SearchKey extends Enumerable.Implicits {
 
-class DateFormatter @Inject()(config: AppConfig) {
+  case object TRN extends WithName("trn") with SearchKey
+  case object UTR extends WithName("utr") with SearchKey
+  case object URN extends WithName("urn") with SearchKey
 
-  private val format = "d MMMM yyyy"
+  val values: Set[SearchKey] = Set(
+    TRN, UTR, URN
+  )
 
-  def formatDate(dateTime: LocalDateTime): String = {
-    val dateFormatter = java.time.format.DateTimeFormatter.ofPattern(format)
-    dateTime.format(dateFormatter)
-  }
-
+  implicit val enumerable: Enumerable[SearchKey] =
+    Enumerable(values.toSeq.map(v => v.toString -> v): _*)
 }

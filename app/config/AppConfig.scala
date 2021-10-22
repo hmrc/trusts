@@ -30,6 +30,7 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
   val getTrustOrEstateUrl : String = servicesConfig.baseUrl("playback")
   val varyTrustOrEstateUrl : String = servicesConfig.baseUrl("variation")
   val orchestratorUrl : String = servicesConfig.baseUrl("orchestrator")
+  val nonRepudiationUrl : String = s"${servicesConfig.baseUrl("non-repudiation")}/submission"
 
   val registrationEnvironment : String = configuration.get[String]("microservice.services.registration.environment")
   val registrationToken : String = configuration.get[String]("microservice.services.registration.token")
@@ -85,5 +86,13 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
   val registrationTtlInSeconds: Int = configuration.get[Int]("mongodb.registration.ttlSeconds")
 
   val removeSavedRegistrations: Boolean = configuration.get[Boolean]("features.removeSavedRegistrations")
+
+  val xApiKey = configuration.get[String]("nrs.api-key")
+
+  val nonRepudiate: Boolean = configuration.get[Boolean]("features.nonRepudiate")
+
+  val nrsRetryWaitMs = configuration.get[Int]("nrs.retryWaitMs")
+  val nrsRetryWaitFactor = configuration.get[Int]("nrs.retryWaitFactor")
+  val nrsTotalAttempts = configuration.get[Int]("nrs.totalAttempts")
 }
 

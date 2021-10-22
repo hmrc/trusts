@@ -16,8 +16,10 @@
 
 package services
 
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, ZoneId}
 
 class LocalDateTimeService {
   def now: LocalDateTime = LocalDateTime.now
+
+  def now(zone: ZoneId): LocalDateTime = LocalDateTime.now(zone)
 }

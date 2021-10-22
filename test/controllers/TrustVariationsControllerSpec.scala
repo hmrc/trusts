@@ -17,14 +17,13 @@
 package controllers
 
 import java.time.LocalDate
-
 import base.BaseSpec
 import controllers.actions.FakeIdentifierAction
 import exceptions._
 import models.auditing.TrustAuditing
-import models.variation.VariationResponse
+import models.nonRepudiation.SuccessfulNrsResponse
+import models.variation.{DeclarationForApi, VariationContext, VariationResponse}
 import models.{DeclarationName, NameType}
-import models.variation.DeclarationForApi
 import org.mockito.ArgumentMatchers.{eq => Meq, _}
 import org.scalatest.matchers.must.Matchers._
 import org.mockito.Mockito._
@@ -46,6 +45,8 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
   private val mockVariationService = mock[VariationService]
 
+  private val mockNonRepudiationService = mock[NonRepudiationService]
+
   private val responseHandler = new VariationsResponseHandler(mockAuditService)
 
   override def beforeEach(): Unit = {
@@ -58,7 +59,9 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       mockAuditService,
       mockVariationService,
       responseHandler,
-      Helpers.stubControllerComponents()
+      mockNonRepudiationService,
+      Helpers.stubControllerComponents(),
+      appConfig
     )
   }
 
@@ -73,8 +76,10 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       val declarationForApi =
         DeclarationForApi(declaration, None, endDate = Some(LocalDate.of(2021, 2, 5)))
 
+      when(mockNonRepudiationService.maintain(any(), any())(any(), any())).thenReturn(Future.successful(SuccessfulNrsResponse("uuid")))
+
       when(mockVariationService.submitDeclaration(any(), any(), any())(any()))
-        .thenReturn(Future.successful(VariationResponse("TVN123")))
+        .thenReturn(Future.successful(VariationContext(Json.obj(), VariationResponse("TVN123"))))
 
       val result = SUT.declare("aUTR")(
         FakeRequest("POST", "/no-change/aUTR").withBody(Json.toJson(declarationForApi))
