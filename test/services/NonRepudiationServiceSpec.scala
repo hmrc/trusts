@@ -29,7 +29,7 @@ import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.test.FakeRequest
 import retry.RetryHelper
 import uk.gov.hmrc.auth.core.AffinityGroup
-import uk.gov.hmrc.http.{Authorization, HeaderCarrier, RequestId, SessionId}
+import uk.gov.hmrc.http.{Authorization, ForwardedFor, HeaderCarrier, RequestId, SessionId}
 import utils.JsonFixtures
 
 import java.time.{LocalDateTime, ZoneOffset}
@@ -313,6 +313,150 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           (payloadCaptor.getValue.metadata.headerData \ "test").as[String] mustBe "value"
         }
       }
+    }
+
+    ".sendEvent" must {
+
+      "parse X-Forwarded-For header when there is no True-Client-IP or True-Client-Port" in {
+
+          lazy val payloadCaptor = ArgumentCaptor.forClass(classOf[NRSSubmission])
+
+          val payLoad = Json.toJson(registrationRequest)
+
+          implicit val headerCarrierWithXForwardedFor: HeaderCarrier = HeaderCarrier(
+            authorization = Some(Authorization("Bearer 12345")),
+            deviceID = Some("deviceId"),
+            sessionId = Some(SessionId("SessionID")),
+            requestId = Some(RequestId("RequestID")),
+            forwarded = Some(ForwardedFor("xForwardedForIpAddress"))
+          )
+
+          implicit val request: IdentifierRequest[JsValue] =
+            IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Agent)
+
+          val identityData = Json.obj(
+            "internalId" -> "internalId",
+            "affinityGroup" -> "Agent",
+            "deviceId" -> "deviceId",
+            "clientIP" -> "xForwardedForIpAddress",
+            "clientPort" -> "No Client Port",
+            "sessionId" -> "SessionID",
+            "requestId" -> "RequestID",
+            "declaration" -> Json.obj(
+              "firstName" ->"John",
+              "middleName" -> "William",
+              "lastName" -> "O'Connor"),
+            "agentDetails" -> Json.obj(
+              "arn" -> "AARN1234567",
+              "agentName" -> "Mr . xys abcde",
+              "agentAddress" -> Json.obj(
+                "line1" -> "line1",
+                "line2" -> "line2",
+                "postCode" -> "TF3 2BX",
+                "country" -> "GB"),
+              "agentTelephoneNumber" -> "07912180120",
+              "clientReference" -> "clientReference")
+          )
+
+          val trn = "ABTRUST12345678"
+
+          when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
+            .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+
+          when(mockLocalDateTimeService.now(ZoneOffset.UTC))
+            .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
+
+          when(mockPayloadEncodingService.encode(mEq(payLoad)))
+            .thenReturn("encodedPayload")
+
+          when(mockPayloadEncodingService.generateChecksum(mEq(payLoad)))
+            .thenReturn("payloadChecksum")
+
+          val fResult = SUT.register(trn, payLoad)(headerCarrierWithXForwardedFor, request)
+          whenReady(fResult) { result =>
+            result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+            payloadCaptor.getValue.payload mustBe "encodedPayload"
+            payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
+            payloadCaptor.getValue.metadata.businessId mustBe "trs"
+            payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
+            payloadCaptor.getValue.metadata.notableEvent mustBe "trs-registration"
+            payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json; charset=utf-8"
+            payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
+            payloadCaptor.getValue.metadata.identityData mustBe identityData
+            (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
+          }
+      }
+
+      "parse the first X-Forwarded-For header when there is no True-Client-IP or True-Client-Port" in {
+
+        lazy val payloadCaptor = ArgumentCaptor.forClass(classOf[NRSSubmission])
+
+        val payLoad = Json.toJson(registrationRequest)
+
+        implicit val headerCarrierWithXForwardedFor: HeaderCarrier = HeaderCarrier(
+          authorization = Some(Authorization("Bearer 12345")),
+          deviceID = Some("deviceId"),
+          sessionId = Some(SessionId("SessionID")),
+          requestId = Some(RequestId("RequestID")),
+          forwarded = Some(ForwardedFor("xForwardedForIpAddress, secondXForwardedIpAddress"))
+        )
+
+        implicit val request: IdentifierRequest[JsValue] =
+          IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Agent)
+
+        val identityData = Json.obj(
+          "internalId" -> "internalId",
+          "affinityGroup" -> "Agent",
+          "deviceId" -> "deviceId",
+          "clientIP" -> "xForwardedForIpAddress",
+          "clientPort" -> "No Client Port",
+          "sessionId" -> "SessionID",
+          "requestId" -> "RequestID",
+          "declaration" -> Json.obj(
+            "firstName" ->"John",
+            "middleName" -> "William",
+            "lastName" -> "O'Connor"),
+          "agentDetails" -> Json.obj(
+            "arn" -> "AARN1234567",
+            "agentName" -> "Mr . xys abcde",
+            "agentAddress" -> Json.obj(
+              "line1" -> "line1",
+              "line2" -> "line2",
+              "postCode" -> "TF3 2BX",
+              "country" -> "GB"),
+            "agentTelephoneNumber" -> "07912180120",
+            "clientReference" -> "clientReference")
+        )
+
+        val trn = "ABTRUST12345678"
+
+        when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
+          .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+
+        when(mockLocalDateTimeService.now(ZoneOffset.UTC))
+          .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
+
+        when(mockPayloadEncodingService.encode(mEq(payLoad)))
+          .thenReturn("encodedPayload")
+
+        when(mockPayloadEncodingService.generateChecksum(mEq(payLoad)))
+          .thenReturn("payloadChecksum")
+
+        val fResult = SUT.register(trn, payLoad)(headerCarrierWithXForwardedFor, request)
+        whenReady(fResult) { result =>
+          result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+          payloadCaptor.getValue.payload mustBe "encodedPayload"
+          payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
+          payloadCaptor.getValue.metadata.businessId mustBe "trs"
+          payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
+          payloadCaptor.getValue.metadata.notableEvent mustBe "trs-registration"
+          payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json; charset=utf-8"
+          payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
+          payloadCaptor.getValue.metadata.identityData mustBe identityData
+          (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
+        }
+      }
+
     }
 
     ".getDeclaration" must {
