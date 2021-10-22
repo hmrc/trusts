@@ -24,12 +24,11 @@ import play.api.libs.json._
 import retry.RetryHelper
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.Session
 
 import java.time.ZoneOffset
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
                                       localDateTimeService: LocalDateTimeService,
@@ -37,11 +36,17 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
                                       retryHelper: RetryHelper)(implicit val ec: ExecutionContext) extends Logging {
 
   private def authorityData(payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): JsValue = {
+
+    val takeFirstForwardedFor: Option[String] = hc.forwarded.map { forwardedFor =>
+      Try(forwardedFor.value.split(",").head)
+        .getOrElse(forwardedFor.value)
+    }
+
     val commonAuthorityData = Json.obj(
       "internalId" -> request.internalId,
       "affinityGroup" -> request.affinityGroup,
       "deviceId" -> s"${hc.deviceID.getOrElse("No Device ID")}",
-      "clientIP" -> s"${hc.trueClientIp.getOrElse("No Client IP")}",
+      "clientIP" -> s"${hc.trueClientIp.getOrElse(takeFirstForwardedFor.getOrElse("No Client IP"))}",
       "clientPort" -> s"${hc.trueClientPort.getOrElse("No Client Port")}",
       "sessionId" -> s"${hc.sessionId.map(_.value).getOrElse("No Session ID")}",
       "requestId" -> s"${hc.requestId.map(_.value).getOrElse("No Request ID")}",
