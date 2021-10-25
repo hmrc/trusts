@@ -127,7 +127,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         payloadCaptor.getValue.metadata.businessId mustBe "trs"
         payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
         payloadCaptor.getValue.metadata.notableEvent mustBe "trs-registration"
-        payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json; charset=utf-8"
+        payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
         payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
         payloadCaptor.getValue.metadata.identityData mustBe identityData
         (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
@@ -180,7 +180,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         payloadCaptor.getValue.metadata.businessId mustBe "trs"
         payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
         payloadCaptor.getValue.metadata.notableEvent mustBe "trs-registration"
-        payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json; charset=utf-8"
+        payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
         payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
         payloadCaptor.getValue.metadata.identityData mustBe identityData
         (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
@@ -245,7 +245,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           payloadCaptor.getValue.metadata.businessId mustBe "trs"
           payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
           payloadCaptor.getValue.metadata.notableEvent mustBe "trs-update-taxable"
-          payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json; charset=utf-8"
+          payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
           payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.UTR, utr)
           payloadCaptor.getValue.metadata.identityData mustBe identityData
           (payloadCaptor.getValue.metadata.headerData \ "test").as[String] mustBe "value"
@@ -307,7 +307,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           payloadCaptor.getValue.metadata.businessId mustBe "trs"
           payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
           payloadCaptor.getValue.metadata.notableEvent mustBe "trs-update-non-taxable"
-          payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json; charset=utf-8"
+          payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
           payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.URN, urn)
           payloadCaptor.getValue.metadata.identityData mustBe identityData
           (payloadCaptor.getValue.metadata.headerData \ "test").as[String] mustBe "value"
