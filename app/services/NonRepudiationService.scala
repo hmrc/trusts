@@ -20,11 +20,11 @@ import connector.NonRepudiationConnector
 import models.nonRepudiation._
 import models.requests.IdentifierRequest
 import play.api.Logging
+import play.api.http.ContentTypes.JSON
 import play.api.libs.json._
 import retry.RetryHelper
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.Session
 
 import java.time.ZoneOffset
 import javax.inject.Inject
@@ -71,7 +71,7 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
           MetaData(
             "trs",
             notableEvent,
-            "application/json",
+            JSON,
             payloadChecksum,
             localDateTimeService.now(ZoneOffset.UTC),
             authorityData(payload),
