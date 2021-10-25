@@ -87,7 +87,7 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
 
   val removeSavedRegistrations: Boolean = configuration.get[Boolean]("features.removeSavedRegistrations")
 
-  val xApiKey = configuration.get[String]("nrs.api-key")
+  val xApiKey = configuration.get[String]("microservice.services.non-repudiation.token")
 
   val nrsRetryWaitMs = configuration.get[Int]("nrs.retryWaitMs")
   val nrsRetryWaitFactor = configuration.get[Int]("nrs.retryWaitFactor")
