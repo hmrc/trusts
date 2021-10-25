@@ -39,6 +39,7 @@ object Constants {
 
   val CONTENT_TYPE = "Content-Type"
   val CONTENT_TYPE_JSON = "application/json; charset=utf-8"
+  val CONTENT_TYPE_JSON_NO_CHARSET = "application/json"
 
   val X_API_KEY = "X-API-Key"
 

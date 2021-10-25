@@ -71,7 +71,7 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
           MetaData(
             "trs",
             notableEvent,
-            "application/json; charset=utf-8",
+            "application/json",
             payloadChecksum,
             localDateTimeService.now(ZoneOffset.UTC),
             authorityData(payload),

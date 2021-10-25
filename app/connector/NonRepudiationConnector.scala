@@ -22,14 +22,14 @@ import javax.inject.Inject
 import models.nonRepudiation.{NRSSubmission, NrsResponse}
 import play.api.Logging
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
-import utils.Constants.{CONTENT_TYPE, CONTENT_TYPE_JSON, X_API_KEY}
+import utils.Constants.{CONTENT_TYPE, CONTENT_TYPE_JSON_NO_CHARSET, X_API_KEY}
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
 
 class NonRepudiationConnector @Inject()(http: HttpClient, config: AppConfig) extends Logging {
 
-  private def headers = Seq(CONTENT_TYPE -> CONTENT_TYPE_JSON, X_API_KEY -> config.xApiKey)
+  private def headers = Seq(CONTENT_TYPE -> CONTENT_TYPE_JSON_NO_CHARSET, X_API_KEY -> config.xApiKey)
 
    def nonRepudiate(json: NRSSubmission)(implicit hc: HeaderCarrier): Future[NrsResponse] = {
 
