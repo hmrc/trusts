@@ -30,6 +30,7 @@ import java.time.ZoneOffset
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
+import utils.Session
 
 class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
                                       localDateTimeService: LocalDateTimeService,
@@ -100,21 +101,25 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
     retryHelper.retryOnFailure(f).map {
       p =>
         p.result match {
-          case Some(value) => value.asInstanceOf[NrsResponse]
-          case None => InternalServerErrorResponse
+          case Some(value) =>
+            logger.info(s"[Session ID: ${Session.id(hc)}] Successfully non-repudiated submission")
+            value.asInstanceOf[NrsResponse]
+          case None =>
+            logger.info(s"[Session ID: ${Session.id(hc)}] Unable to non-repudiate submission, internal server error")
+            InternalServerErrorResponse
         }
     }
   }
 
-  private def handleCallback(f: Future[NrsResponse]): Unit = {
+  private def handleCallback(f: Future[NrsResponse])(hc: HeaderCarrier): Unit = {
     f onComplete {
       case Success(value) =>
         // TXM success
-        logger.info(s"[NonRepudiationService] NRS submission completed, result was $value")
+        logger.info(s"[Session ID: ${Session.id(hc)}] NRS submission completed, result was $value")
         ()
       case Failure(exception) =>
         // Txm failure event
-        logger.info(s"[NonRepudiationService] NRS submission failed due to ${exception.getMessage}")
+        logger.info(s"[Session ID: ${Session.id(hc)}] NRS submission failed due to ${exception.getMessage}")
         ()
     }
   }
