@@ -25,6 +25,8 @@ import retry.RetryHelper.RetryExecution
 import java.util.concurrent.Callable
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
+import utils.Session
+import uk.gov.hmrc.http.HeaderCarrier
 
 @ImplementedBy(classOf[NrsRetryHelper])
 trait RetryHelper extends Logging {
@@ -35,7 +37,7 @@ trait RetryHelper extends Logging {
   val factor: Int
   val initialWait: Int
 
-  def retryOnFailure(f: () => Future[RetryPolicy])(implicit ec: ExecutionContext): Future[RetryExecution] =
+  def retryOnFailure(f: () => Future[RetryPolicy])(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[RetryExecution] =
     retryWithBackOff(
       currentAttempt = 1,
       currentWait = initialWait,
@@ -47,7 +49,7 @@ trait RetryHelper extends Logging {
                                currentWait: Int,
                                f: () => Future[RetryPolicy],
                               lastExecution: RetryExecution
-                              )(implicit ec: ExecutionContext): Future[RetryExecution] = {
+                              )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[RetryExecution] = {
     f.apply().flatMap {
       case result: RetryPolicy if result.retry =>
 
@@ -58,7 +60,7 @@ trait RetryHelper extends Logging {
             currentAttempt
           )(
             next = { nextWait =>
-              logger.warn(s"[RetryHelper] failed, retrying after $nextWait ms, attempt $currentAttempt")
+              logger.warn(s"[Session ID: ${Session.id(hc)}] failed, retrying after $nextWait ms, attempt $currentAttempt")
               after(
                 duration = nextWait.milliseconds,
                 scheduler = as.scheduler,
@@ -72,12 +74,12 @@ trait RetryHelper extends Logging {
               }
           },
             last = { () =>
-              logger.info(s"[RetryHelper] last retry completed, attempt $currentAttempt, result: $lastExecution, time of each attempt: ${lastExecution.timeOfEachTick}")
+              logger.info(s"[Session ID: ${Session.id(hc)}] last retry completed, attempt $currentAttempt, result: $lastExecution, time of each attempt: ${lastExecution.timeOfEachTick}")
               Future.successful(RetryExecution(lastExecution.ticks, Some(result)))
             }
           )
       case success =>
-        logger.info(s"[RetryHelper] attempt completed, result did not require retry. $success, time of each attempt: ${lastExecution.timeOfEachTick}")
+        logger.info(s"[Session ID: ${Session.id(hc)}] attempt completed, result did not require retry. $success, time of each attempt: ${lastExecution.timeOfEachTick}")
         Future.successful(RetryExecution(lastExecution.ticks, Some(success)))
     }
   }
