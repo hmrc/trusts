@@ -16,23 +16,22 @@
 
 package utils
 
-import play.api.libs.json.{Reads, Writes}
+import play.api.libs.json.{JsPath, JsString, Reads, Writes}
 
 import java.time.LocalDateTime
-import java.time.format.{DateTimeFormatter => JDateTimeFormatter}
-import play.api.libs.json.JsPath
+import java.time.format.DateTimeFormatter
 
-object DateTimeFormatter {
+object LocalDateTimeFormatter {
 
   private val dateTimePattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
 
-  private val formatter = JDateTimeFormatter.ofPattern(dateTimePattern)
+  private val formatter = DateTimeFormatter.ofPattern(dateTimePattern)
 
   implicit val dateTimeReads: Reads[LocalDateTime] =
-    (JsPath).read[String]
+    JsPath.read[String]
       .map(date => LocalDateTime.parse(date, formatter))
 
   implicit val dateTimeWrites: Writes[LocalDateTime] =
-    Writes.temporalWrites[LocalDateTime, JDateTimeFormatter](formatter)
+    (d: LocalDateTime) => JsString(d.format(formatter))
 
 }

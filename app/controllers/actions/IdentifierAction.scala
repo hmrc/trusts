@@ -28,7 +28,7 @@ import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import models.registration.ApiResponse._
-import models.requests.IdentifierRequest
+import models.requests.{CredentialData, IdentifierRequest}
 import utils.Session
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -42,15 +42,21 @@ class AuthenticatedIdentifierAction @Inject()(override val authConnector: AuthCo
                      block: IdentifierRequest[A] => Future[Result]) : Future[Result] = {
 
     val retrievals = Retrievals.internalId and
-                     Retrievals.affinityGroup
+                     Retrievals.affinityGroup and
+                     Retrievals.groupIdentifier and
+                     Retrievals.loginTimes and
+                     Retrievals.credentials and
+                     Retrievals.email
 
     implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
     authorised().retrieve(retrievals) {
-      case Some(internalId) ~ Some(Agent) =>
-        block(IdentifierRequest(request, internalId, Session.id(hc), Agent))
-      case Some(internalId) ~ Some(Organisation) =>
-        block(IdentifierRequest(request, internalId, Session.id(hc), Organisation))
+      case Some(internalId) ~ Some(Agent) ~ groupIdentifier ~ loginTimes ~ credentials ~ email =>
+        val credential = CredentialData(groupIdentifier, loginTimes, credentials, email)
+        block(IdentifierRequest(request, internalId, Session.id(hc), Agent, credential))
+      case Some(internalId) ~ Some(Organisation) ~ groupIdentifier ~ loginTimes ~ credentials ~ email =>
+        val credential = CredentialData(groupIdentifier, loginTimes, credentials, email)
+        block(IdentifierRequest(request, internalId, Session.id(hc), Organisation, credential))
       case _ =>
         logger.info(s"[Session ID: ${Session.id(hc)}] Insufficient enrolment")
         Future.successful(Unauthorized(Json.toJson(insufficientEnrolmentErrorResponse)))

@@ -16,19 +16,20 @@
 
 package utils
 
-import java.time.LocalDateTime
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
+import play.api.libs.json.{JsPath, JsString, Reads, Writes}
 
-import com.google.inject.Inject
-import config.AppConfig
+object JodaDateTimeFormatter {
 
+  private val dateTimePattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
 
-class DateFormatter @Inject()(config: AppConfig) {
+  private val formatter = DateTimeFormat.forPattern(dateTimePattern)
 
-  private val format = "d MMMM yyyy"
+  implicit val dateTimeReads: Reads[DateTime] =
+    JsPath.read[String]
+      .map(date => DateTime.parse(date, formatter))
 
-  def formatDate(dateTime: LocalDateTime): String = {
-    val dateFormatter = java.time.format.DateTimeFormatter.ofPattern(format)
-    dateTime.format(dateFormatter)
-  }
+  implicit val dateTimeWrites: Writes[DateTime] = (d: DateTime) => JsString(d.toString(formatter))
 
 }
