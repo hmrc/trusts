@@ -24,6 +24,7 @@ import play.api.http.ContentTypes.JSON
 import play.api.libs.json._
 import retry.RetryHelper
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
+import uk.gov.hmrc.auth.core.retrieve.{Credentials, LoginTimes}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.ZoneOffset
@@ -44,6 +45,8 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
         .getOrElse(forwardedFor.value)
     }
 
+    val credential = Json.toJsObject(request.credentialData)
+
     val commonAuthorityData = Json.obj(
       "internalId" -> request.internalId,
       "affinityGroup" -> request.affinityGroup,
@@ -56,9 +59,9 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
     )
 
     if (request.affinityGroup == Agent) {
-      commonAuthorityData ++ Json.obj("agentDetails" -> getAgentDetails(payload))
+      commonAuthorityData ++ credential ++ Json.obj("agentDetails" -> getAgentDetails(payload))
     } else {
-      commonAuthorityData
+      commonAuthorityData ++ credential
     }
   }
 

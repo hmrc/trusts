@@ -40,7 +40,7 @@ case class MetaData(businessId: String,
 
 object MetaData {
 
-  import utils.DateTimeFormatter._
+  import utils.LocalDateTimeFormatter._
 
   implicit val formats: OFormat[MetaData] = Json.format[MetaData]
 }

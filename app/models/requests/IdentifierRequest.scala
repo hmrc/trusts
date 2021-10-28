@@ -16,8 +16,51 @@
 
 package models.requests
 
+import play.api.libs.json._
 import play.api.mvc.{Request, WrappedRequest}
 import uk.gov.hmrc.auth.core.AffinityGroup
+import uk.gov.hmrc.auth.core.retrieve.{Credentials, LoginTimes}
 
-case class IdentifierRequest[A](request: Request[A], internalId: String, sessionId: String, affinityGroup: AffinityGroup)
+case class CredentialData(
+                         groupIdentifier: Option[String],
+                         loginTimes: LoginTimes,
+                         credentials: Option[Credentials],
+                         email: Option[String]
+                         )
+
+object CredentialData {
+
+  import utils.JodaDateTimeFormatter._
+
+  implicit val loginTimesFormats: OFormat[LoginTimes] = Json.format[LoginTimes]
+
+  implicit val credentialsWrites: Writes[Credentials] = Json.writes[Credentials]
+
+  implicit val optionCredentialsWrites: Writes[Option[Credentials]] = {
+    case Some(value) =>
+      Json.toJson(value)
+    case None =>
+      Json.obj(
+        "providerId" -> JsString("No provider id"),
+        "providerType" -> JsString("No provider type")
+      )
+  }
+
+  implicit val credentialWrites : OWrites[CredentialData] = { o =>
+    Json.obj(
+      "groupIdentifier" -> JsString(o.groupIdentifier.getOrElse("No group identifier")),
+      "loginTimes" -> Json.toJson(o.loginTimes),
+      "credentials" -> Json.toJson(o.credentials),
+      "email" -> JsString(o.email.getOrElse("No email"))
+    )
+  }
+
+}
+
+case class IdentifierRequest[A](request: Request[A],
+                                internalId: String,
+                                sessionId: String,
+                                affinityGroup: AffinityGroup,
+                                credentialData: CredentialData
+                               )
   extends WrappedRequest[A](request)
