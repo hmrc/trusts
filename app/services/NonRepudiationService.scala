@@ -105,8 +105,17 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
       p =>
         p.result match {
           case Some(value) =>
-            logger.info(s"[Session ID: ${Session.id(hc)}] Successfully non-repudiated submission")
-            value.asInstanceOf[NrsResponse]
+
+            val r = value.asInstanceOf[NrsResponse]
+
+            r match {
+              case SuccessfulNrsResponse(_) =>
+                logger.info(s"[Session ID: ${Session.id(hc)}] Successfully non-repudiated submission")
+                r
+              case _ =>
+                logger.info(s"[Session ID: ${Session.id(hc)}] Unable to non-repudiated submission")
+                r
+            }
           case None =>
             logger.info(s"[Session ID: ${Session.id(hc)}] Unable to non-repudiate submission, internal server error")
             InternalServerErrorResponse
