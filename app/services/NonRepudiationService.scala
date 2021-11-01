@@ -23,14 +23,13 @@ import play.api.Logging
 import play.api.http.ContentTypes.JSON
 import play.api.libs.json._
 import retry.RetryHelper
-import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.http.HeaderCarrier
+import utils.Session
 
 import java.time.ZoneOffset
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
-import utils.Session
 
 class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
                                       localDateTimeService: LocalDateTimeService,
@@ -44,22 +43,19 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
         .getOrElse(forwardedFor.value)
     }
 
-    val commonAuthorityData = Json.obj(
-      "internalId" -> request.internalId,
-      "affinityGroup" -> request.affinityGroup,
-      "deviceId" -> s"${hc.deviceID.getOrElse("No Device ID")}",
-      "clientIP" -> s"${hc.trueClientIp.getOrElse(takeFirstForwardedFor.getOrElse("No Client IP"))}",
-      "clientPort" -> s"${hc.trueClientPort.getOrElse("No Client Port")}",
-      "sessionId" -> s"${hc.sessionId.map(_.value).getOrElse("No Session ID")}",
-      "requestId" -> s"${hc.requestId.map(_.value).getOrElse("No Request ID")}",
-      "declaration" -> getDeclaration(payload)
+    val identityData = IdentityData(
+      internalId = request.internalId,
+      affinityGroup = request.affinityGroup,
+      deviceId = hc.deviceID.getOrElse("No Device ID"),
+      clientIP = hc.trueClientIp.getOrElse(takeFirstForwardedFor.getOrElse("No Client IP")),
+      clientPort = hc.trueClientPort.getOrElse("No Client Port"),
+      sessionId = hc.sessionId.map(_.value).getOrElse("No Session ID"),
+      requestId = hc.requestId.map(_.value).getOrElse("No Request ID"),
+      declaration = getDeclaration(payload),
+      agentDetails = getAgentDetails(payload)
     )
 
-    if (request.affinityGroup == Agent) {
-      commonAuthorityData ++ Json.obj("agentDetails" -> getAgentDetails(payload))
-    } else {
-      commonAuthorityData
-    }
+    Json.toJson(identityData)
   }
 
   private final def sendEvent(payload: JsValue,
