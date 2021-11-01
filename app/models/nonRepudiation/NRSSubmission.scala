@@ -41,6 +41,13 @@ case class IdentityData(
 
 object IdentityData {
   implicit val formats: OFormat[IdentityData] = Json.format[IdentityData]
+
+  val txmWrites : Writes[IdentityData] = Writes { identity =>
+    Json.toJsObject(identity).
+      -("deviceId").
+      -("clientIP").
+      -("clientPort")
+  }
 }
 
 case class MetaData(businessId: String,
@@ -48,7 +55,7 @@ case class MetaData(businessId: String,
                     payloadContentType: String,
                     payloadSha256Checksum: String,
                     userSubmissionTimestamp: LocalDateTime,
-                    identityData: JsValue,
+                    identityData: IdentityData,
                     userAuthToken: String,
                     headerData: JsValue,
                     searchKeys: SearchKeys
@@ -59,6 +66,17 @@ object MetaData {
   import utils.DateTimeFormatter._
 
   implicit val formats: OFormat[MetaData] = Json.format[MetaData]
+
+  val txmWrites: Writes[MetaData] = Writes { metaData =>
+    Json.obj(
+      "businessId" -> metaData.businessId,
+      "notableEvent" -> metaData.notableEvent,
+      "payloadSha256Checksum" -> metaData.payloadSha256Checksum,
+      "userSubmissionTimestamp" -> Json.toJson(metaData.userSubmissionTimestamp),
+      "identityData" -> Json.toJson(metaData.identityData)(IdentityData.txmWrites),
+      "searchKeys" -> Json.toJson(metaData.searchKeys)
+    )
+  }
 }
 
 

@@ -18,11 +18,12 @@ package services
 
 import base.BaseSpec
 import models.auditing.{NrsAuditEvent, OrchestratorAuditEvent, VariationAuditEvent}
-import models.nonRepudiation.{MetaData, SearchKey, SearchKeys, SuccessfulNrsResponse}
+import models.nonRepudiation.{IdentityData, MetaData, SearchKey, SearchKeys, SuccessfulNrsResponse}
 import models.variation.VariationResponse
 import org.mockito.ArgumentMatchers.{any, eq => equalTo}
 import org.mockito.Mockito.verify
 import play.api.libs.json.Json
+import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import java.time.LocalDateTime
@@ -204,16 +205,30 @@ class AuditServiceSpec extends BaseSpec {
   }
 
   "auditNrsResponse" should {
-    "audit a successful NRS submission" ignore {
+
+    "audit a successful NRS submission" in {
       val connector = mock[AuditConnector]
       val service = new AuditService(connector)
 
-      val metaData = MetaData(businessId = "trs",
+      val identityData = IdentityData(
+        internalId = "internalId",
+        affinityGroup = Agent,
+        deviceId = "deviceId",
+        clientIP = "clientIp",
+        clientPort = "clientPort",
+        sessionId = "sessionId",
+        requestId = "requestId",
+        declaration = Json.obj("example" -> "name"),
+        agentDetails = Some(Json.obj("example" -> "agent details"))
+      )
+
+      val metaData = MetaData(
+        businessId = "trs",
         notableEvent = "trs-registration",
         payloadContentType = "application/json",
         payloadSha256Checksum = "1cbdeb2d2b003b4d4d639af4bd2e1913f591f74c33940d97fd6a626161c20b67",
-        userSubmissionTimestamp = LocalDateTime.parse("2021-10-10"),
-        identityData = Json.obj("internalId" -> "some-id"),
+        userSubmissionTimestamp = LocalDateTime.of(2021, 10, 5, 10, 4, 3),
+        identityData = identityData,
         userAuthToken = "AbCdEf123456",
         headerData = Json.obj(
           "Gov-Client-Public-IP" -> "198.51.100.0",
@@ -222,30 +237,42 @@ class AuditServiceSpec extends BaseSpec {
         searchKeys = SearchKeys(SearchKey.TRN, "ABTRUST123456789")
       )
 
-      val request = NrsAuditEvent(auditType = "trs-registration", metaData = metaData, SuccessfulNrsResponse("1234567890"))
+      val event = NrsAuditEvent(auditType = "NrsTrsRegistration", metaData = metaData, SuccessfulNrsResponse("1234567890"))
 
-      service.auditNrsResponse(request)
+      service.auditNrsResponse(event)
 
       val expectedAuditData = Json.parse(
         """{
-          |"businessId": "trs",
-          |"notableEvent": "trs-registration",
-          |"payloadSha256Checksum": "1cbdeb2d2b003b4d4d639af4bd2e1913f591f74c33940d97fd6a626161c20b67",
-          |"userSubmissionTimestamp": "2021-10-10",
-          |"identityData": "",
-          |"userAuthToken": "AbCdEf123456",
-          |"searchKeys": {
-          |"trn": "ABTRUST123456789"
-          |},
-          |"result": {
-          |"nrSubmissionId": "1234567890",
-          |"code": 200
-          |}
+          | "payload": {
+          |   "businessId": "trs",
+          |   "notableEvent": "trs-registration",
+          |   "payloadSha256Checksum": "1cbdeb2d2b003b4d4d639af4bd2e1913f591f74c33940d97fd6a626161c20b67",
+          |   "userSubmissionTimestamp": "2021-10-05T10:04:03.000Z",
+          |   "identityData": {
+          |     "internalId": "internalId",
+          |     "affinityGroup": "Agent",
+          |     "sessionId": "sessionId",
+          |     "requestId": "requestId",
+          |     "declaration": {
+          |       "example": "name"
+          |     },
+          |     "agentDetails": {
+          |       "example": "agent details"
+          |     }
+          |   },
+          |   "searchKeys": {
+          |     "trn": "ABTRUST123456789"
+          |   }
+          | },
+          | "result": {
+          |   "nrSubmissionId": "1234567890",
+          |   "code": 202
+          | }
           |}
           |""".stripMargin)
 
       verify(connector).sendExplicitAudit(
-        equalTo("OrchestratorNonTaxableTrustToTaxableSuccess"),
+        equalTo("NrsTrsRegistration"),
         equalTo(expectedAuditData))(any(), any(), any())
     }
   }

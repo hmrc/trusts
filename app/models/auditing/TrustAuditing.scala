@@ -35,4 +35,8 @@ object TrustAuditing {
 
   val ORCHESTRATOR_TO_TAXABLE_SUCCESS = "OrchestratorNonTaxableTrustToTaxableSuccess"
   val ORCHESTRATOR_TO_TAXABLE_FAILED = "OrchestratorNonTaxableTrustToTaxableFailed"
+
+  val NRS_TRS_REGISTRATION = "NrsTrsRegistration"
+  val NRS_TRS_TAXABLE_UPDATE = "NrsTrsTaxableUpdate"
+  val NRS_TRS_NON_TAXABLE_UPDATE = "NrsTrsNonTaxableUpdate"
 }

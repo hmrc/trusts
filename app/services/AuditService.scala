@@ -228,7 +228,7 @@ class AuditService @Inject()(auditConnector: AuditConnector){
     )
   }
 
-  def auditNrsResponse(event: NrsAuditEvent): Unit = {
-    ()
+  def auditNrsResponse(event: NrsAuditEvent)(implicit hc: HeaderCarrier): Unit = {
+    auditConnector.sendExplicitAudit(event.auditType, Json.toJson(event)(NrsAuditEvent.txmWrites))
   }
 }

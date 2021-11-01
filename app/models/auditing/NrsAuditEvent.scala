@@ -17,13 +17,18 @@
 package models.auditing
 
 import models.nonRepudiation.{MetaData, NrsResponse}
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Json, Writes}
 
 case class NrsAuditEvent(auditType: String,
-                          metaData: MetaData,
-                          result: NrsResponse
-                         )
+                         metaData: MetaData,
+                         result: NrsResponse)
 
 object NrsAuditEvent {
-  implicit val formats: Format[NrsAuditEvent] = Json.format[NrsAuditEvent]
+
+  val txmWrites: Writes[NrsAuditEvent] = Writes { event =>
+    Json.obj(
+      "payload" -> Json.toJson(event.metaData)(MetaData.txmWrites),
+      "result" -> Json.toJson(event.result)
+    )
+  }
 }

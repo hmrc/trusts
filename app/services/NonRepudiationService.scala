@@ -36,14 +36,14 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
                                       payloadEncodingService: PayloadEncodingService,
                                       retryHelper: RetryHelper)(implicit val ec: ExecutionContext) extends Logging {
 
-  private def identityData(payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): JsValue = {
+  private def identityData(payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): IdentityData = {
 
     val takeFirstForwardedFor: Option[String] = hc.forwarded.map { forwardedFor =>
       Try(forwardedFor.value.split(",").head)
         .getOrElse(forwardedFor.value)
     }
 
-    val identityData = IdentityData(
+    IdentityData(
       internalId = request.internalId,
       affinityGroup = request.affinityGroup,
       deviceId = hc.deviceID.getOrElse("No Device ID"),
@@ -54,8 +54,6 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
       declaration = getDeclaration(payload),
       agentDetails = getAgentDetails(payload)
     )
-
-    Json.toJson(identityData)
   }
 
   private final def sendEvent(payload: JsValue,
