@@ -20,7 +20,9 @@ import connector.{OrchestratorConnector, TaxEnrolmentConnector}
 import models.tax_enrolments._
 import play.api.Logging
 import repositories.TaxableMigrationRepository
+import services.auditing.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
+
 import javax.inject.Inject
 import utils.Session
 

@@ -22,6 +22,7 @@ import models.get_trust.{GetTrustResponse, TransformationErrorResponse, TrustPro
 import play.api.Logging
 import play.api.libs.json.{JsObject, JsResult, JsSuccess, JsValue, Json, __, _}
 import repositories.TransformationRepository
+import services.auditing.AuditService
 import transformers._
 import transformers.beneficiaries.{AddBeneficiaryTransform, AmendBeneficiaryTransform}
 import transformers.settlors.{AddSettlorTransform, AmendSettlorTransform}

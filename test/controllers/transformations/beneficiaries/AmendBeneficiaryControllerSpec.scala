@@ -30,7 +30,8 @@ import play.api.libs.json._
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
-import services.{LocalDateService, TransformationService}
+import services.TransformationService
+import services.dates.LocalDateService
 import transformers.beneficiaries.AmendBeneficiaryTransform
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import utils.JsonUtils

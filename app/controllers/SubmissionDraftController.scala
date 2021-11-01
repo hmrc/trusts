@@ -25,7 +25,8 @@ import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.RegistrationSubmissionRepository
-import services.{BackwardsCompatibilityService, LocalDateTimeService, TaxYearService}
+import services.dates.LocalDateTimeService
+import services.{BackwardsCompatibilityService, TaxYearService}
 import uk.gov.hmrc.http.NotFoundException
 import utils.Constants._
 import utils.JsonOps.prunePath

@@ -32,7 +32,8 @@ import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import repositories.RegistrationSubmissionRepository
-import services.{BackwardsCompatibilityService, LocalDateTimeService, TaxYearService}
+import services.dates.LocalDateTimeService
+import services.{BackwardsCompatibilityService, TaxYearService}
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import utils.{JsonFixtures, JsonUtils}
 

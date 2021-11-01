@@ -14,7 +14,7 @@ import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import repositories.CacheRepository
-import services.AuditService
+import services.auditing.AuditService
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 
 import scala.concurrent.Future

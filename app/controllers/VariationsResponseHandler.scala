@@ -23,7 +23,7 @@ import play.api.mvc.Result
 import uk.gov.hmrc.http.HeaderCarrier
 import exceptions.{DuplicateSubmissionException, EtmpCacheDataStaleException, InvalidCorrelationIdException, ServiceNotAvailableException}
 import models.requests.IdentifierRequest
-import services.AuditService
+import services.auditing.AuditService
 import utils.ErrorResponses._
 
 class VariationsResponseHandler @Inject()(auditService: AuditService) extends Logging {

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package services
+package services.auditing
 
 import models.Registration
-import models.auditing.{GetTrustOrEstateAuditEvent, NrsAuditEvent, OrchestratorAuditEvent, TrustAuditing, TrustRegistrationFailureAuditEvent, TrustRegistrationSubmissionAuditEvent, VariationAuditEvent}
+import models.auditing._
 import models.registration.{RegistrationFailureResponse, RegistrationTrnResponse}
 import models.variation.VariationResponse
-import play.api.libs.json.{JsBoolean, JsPath, JsSuccess, JsValue, Json, Reads}
+import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import utils.Constants._
@@ -226,9 +226,5 @@ class AuditService @Inject()(auditConnector: AuditConnector){
       subscriptionId,
       errorMessage
     )
-  }
-
-  def auditNrsResponse(event: NrsAuditEvent)(implicit hc: HeaderCarrier): Unit = {
-    auditConnector.sendExplicitAudit(event.auditType, Json.toJson(event)(NrsAuditEvent.txmWrites))
   }
 }

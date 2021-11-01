@@ -37,6 +37,8 @@ import transformers.DeclarationTransformer
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{JsonFixtures, JsonUtils, NonTaxable5MLDFixtures}
 import play.api.inject.bind
+import services.auditing.AuditService
+import services.dates.LocalDateService
 
 import java.time.LocalDate
 import scala.concurrent.Future

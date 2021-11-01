@@ -33,6 +33,8 @@ import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import services._
+import services.auditing.AuditService
+import services.nonRepudiation.NonRepudiationService
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 
 import scala.concurrent.Future

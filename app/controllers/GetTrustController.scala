@@ -25,7 +25,8 @@ import models.taxable_migration.MigrationStatus.MigrationStatus
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
-import services.{AuditService, TaxYearService, TransformationService, TrustsService}
+import services.auditing.AuditService
+import services.{TaxYearService, TransformationService, TrustsService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.Constants._
 import utils.RequiredEntityDetailsForMigration

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package services
+package services.rosm
 
 import com.google.inject.ImplementedBy
-import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSuccess, TaxEnrolmentSubscriberResponse}
+import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSubscriberResponse, TaxEnrolmentSuccess}
 import play.api.Logging
+import services.TrustsService
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.Session

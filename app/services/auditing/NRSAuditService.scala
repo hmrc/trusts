@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
-package services
+package services.auditing
 
-import java.time.{LocalDateTime, ZoneId}
+import models.auditing.NrsAuditEvent
+import play.api.libs.json.Json
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
-class LocalDateTimeService {
-  def now: LocalDateTime = LocalDateTime.now
+import javax.inject.Inject
 
-  def now(zone: ZoneId): LocalDateTime = LocalDateTime.now(zone)
+class NRSAuditService @Inject()(auditConnector: AuditConnector){
+
+  import scala.concurrent.ExecutionContext.Implicits._
+
+  def audit(event: NrsAuditEvent)(implicit hc: HeaderCarrier): Unit = {
+    auditConnector.sendExplicitAudit(event.auditType, Json.toJson(event)(NrsAuditEvent.txmWrites))
+  }
+
 }

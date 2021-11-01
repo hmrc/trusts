@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package services
+package services.auditing
 
 import base.BaseSpec
 import models.auditing.{NrsAuditEvent, OrchestratorAuditEvent, VariationAuditEvent}
-import models.nonRepudiation.{IdentityData, MetaData, SearchKey, SearchKeys, SuccessfulNrsResponse}
+import models.nonRepudiation._
 import models.variation.VariationResponse
 import org.mockito.ArgumentMatchers.{any, eq => equalTo}
 import org.mockito.Mockito.verify
@@ -31,6 +31,7 @@ import java.time.LocalDateTime
 class AuditServiceSpec extends BaseSpec {
 
   "auditVariationSubmitted" should {
+
     "send Variation Submitted by Organisation" when {
       "there are no special JSON fields" in {
         val connector = mock[AuditConnector]
@@ -200,79 +201,6 @@ class AuditServiceSpec extends BaseSpec {
 
       verify(connector).sendExplicitAudit[OrchestratorAuditEvent](
         equalTo("OrchestratorNonTaxableTrustToTaxableFailed"),
-        equalTo(expectedAuditData))(any(), any(), any())
-    }
-  }
-
-  "auditNrsResponse" should {
-
-    "audit a successful NRS submission" in {
-      val connector = mock[AuditConnector]
-      val service = new AuditService(connector)
-
-      val identityData = IdentityData(
-        internalId = "internalId",
-        affinityGroup = Agent,
-        deviceId = "deviceId",
-        clientIP = "clientIp",
-        clientPort = "clientPort",
-        sessionId = "sessionId",
-        requestId = "requestId",
-        declaration = Json.obj("example" -> "name"),
-        agentDetails = Some(Json.obj("example" -> "agent details"))
-      )
-
-      val metaData = MetaData(
-        businessId = "trs",
-        notableEvent = "trs-registration",
-        payloadContentType = "application/json",
-        payloadSha256Checksum = "1cbdeb2d2b003b4d4d639af4bd2e1913f591f74c33940d97fd6a626161c20b67",
-        userSubmissionTimestamp = LocalDateTime.of(2021, 10, 5, 10, 4, 3),
-        identityData = identityData,
-        userAuthToken = "AbCdEf123456",
-        headerData = Json.obj(
-          "Gov-Client-Public-IP" -> "198.51.100.0",
-          "Gov-Client-Public-Port" -> "12345"
-        ),
-        searchKeys = SearchKeys(SearchKey.TRN, "ABTRUST123456789")
-      )
-
-      val event = NrsAuditEvent(auditType = "NrsTrsRegistration", metaData = metaData, SuccessfulNrsResponse("1234567890"))
-
-      service.auditNrsResponse(event)
-
-      val expectedAuditData = Json.parse(
-        """{
-          | "payload": {
-          |   "businessId": "trs",
-          |   "notableEvent": "trs-registration",
-          |   "payloadSha256Checksum": "1cbdeb2d2b003b4d4d639af4bd2e1913f591f74c33940d97fd6a626161c20b67",
-          |   "userSubmissionTimestamp": "2021-10-05T10:04:03.000Z",
-          |   "identityData": {
-          |     "internalId": "internalId",
-          |     "affinityGroup": "Agent",
-          |     "sessionId": "sessionId",
-          |     "requestId": "requestId",
-          |     "declaration": {
-          |       "example": "name"
-          |     },
-          |     "agentDetails": {
-          |       "example": "agent details"
-          |     }
-          |   },
-          |   "searchKeys": {
-          |     "trn": "ABTRUST123456789"
-          |   }
-          | },
-          | "result": {
-          |   "nrSubmissionId": "1234567890",
-          |   "code": 202
-          | }
-          |}
-          |""".stripMargin)
-
-      verify(connector).sendExplicitAudit(
-        equalTo("NrsTrsRegistration"),
         equalTo(expectedAuditData))(any(), any(), any())
     }
   }

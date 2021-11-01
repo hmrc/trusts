@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-package services
+package services.dates
 
-import org.apache.commons.codec.binary.Base64
-import org.apache.commons.codec.digest.DigestUtils
-import play.api.libs.json.{JsValue, Json}
+import java.time.LocalDate
 
-class PayloadEncodingService {
-
-  def encode(payload: JsValue): String =
-    Base64.encodeBase64URLSafeString(Json.toBytes(payload))
-
-  def generateChecksum(payload: JsValue): String =
-    DigestUtils.sha256Hex(Json.stringify(payload))
+class LocalDateService {
+  def now: LocalDate = LocalDate.now
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package services
+package services.nonRepudiation
 
 import base.BaseSpec
 import connector.NonRepudiationConnector
@@ -28,6 +28,8 @@ import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.test.FakeRequest
 import retry.RetryHelper
+import services.dates.LocalDateTimeService
+import services.encoding.PayloadEncodingService
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.http.{Authorization, ForwardedFor, HeaderCarrier, RequestId, SessionId}
 import utils.JsonFixtures

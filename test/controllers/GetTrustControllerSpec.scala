@@ -35,7 +35,8 @@ import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
-import services.{AuditService, TaxYearService, TransformationService, TrustsService}
+import services.auditing.AuditService
+import services.{TaxYearService, TransformationService, TrustsService}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import utils.NonTaxable5MLDFixtures.Cache.getTransformedNonTaxableTrustResponse

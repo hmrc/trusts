@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package services
+package services.dates
 
-import java.time.LocalDate
+import java.time.{LocalDateTime, ZoneId}
 
-class LocalDateService {
-  def now: LocalDate = LocalDate.now
+class LocalDateTimeService {
+  def now: LocalDateTime = LocalDateTime.now
+
+  def now(zone: ZoneId): LocalDateTime = LocalDateTime.now(zone)
 }

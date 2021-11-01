@@ -25,7 +25,8 @@ import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
 import repositories.TransformationRepository
-import services.{AuditService, TransformationService, TrustsService}
+import services.auditing.AuditService
+import services.{TransformationService, TrustsService}
 import transformers.ComposedDeltaTransform
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.JsonUtils

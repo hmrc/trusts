@@ -30,6 +30,8 @@ import play.api.mvc.BodyParsers
 import play.api.test.Helpers
 import play.api.test.Helpers.{status, _}
 import services._
+import services.nonRepudiation.NonRepudiationService
+import services.rosm.RosmPatternService
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.http.HeaderCarrier
 

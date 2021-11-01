@@ -32,7 +32,7 @@ import play.api.inject.bind
 import play.api.libs.json.{JsString, JsValue, Json}
 import play.api.test.Helpers.{CONTENT_TYPE, GET, POST, contentAsJson, route, status, _}
 import play.api.test.{FakeRequest, Helpers}
-import services.LocalDateService
+import services.dates.LocalDateService
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
 import utils.JsonUtils

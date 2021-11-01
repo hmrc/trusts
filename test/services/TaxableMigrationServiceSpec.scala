@@ -25,6 +25,7 @@ import org.mockito.Mockito.{verify, when}
 import org.scalatest.matchers.must.Matchers._
 import org.scalatest.RecoverMethods.recoverToSucceededIf
 import repositories.TaxableMigrationRepository
+import services.auditing.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global

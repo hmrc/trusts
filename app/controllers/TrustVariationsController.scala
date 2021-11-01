@@ -22,13 +22,15 @@ import models.auditing.TrustAuditing
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents}
-import services.{AuditService, NonRepudiationService, VariationService}
+import services.VariationService
 import utils.ValidationUtil
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import config.AppConfig
+import services.auditing.AuditService
+import services.nonRepudiation.NonRepudiationService
 
 class TrustVariationsController @Inject()(
                                            identify: IdentifierAction,
