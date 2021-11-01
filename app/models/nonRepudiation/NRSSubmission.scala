@@ -18,6 +18,7 @@ package models.nonRepudiation
 
 import java.time.LocalDateTime
 import play.api.libs.json._
+import uk.gov.hmrc.auth.core.AffinityGroup
 
 case class NRSSubmission(payload: String,
                          metadata: MetaData)
@@ -26,6 +27,21 @@ object NRSSubmission {
   implicit val formats: OFormat[NRSSubmission] = Json.format[NRSSubmission]
 }
 
+case class IdentityData(
+                         internalId: String,
+                         affinityGroup: AffinityGroup,
+                         deviceId: String,
+                         clientIP: String,
+                         clientPort: String,
+                         sessionId: String,
+                         requestId: String,
+                         declaration: JsValue,
+                         agentDetails: Option[JsValue]
+                       )
+
+object IdentityData {
+  implicit val formats: OFormat[IdentityData] = Json.format[IdentityData]
+}
 
 case class MetaData(businessId: String,
                     notableEvent: String,

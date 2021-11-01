@@ -17,13 +17,14 @@
 package services
 
 import models.Registration
-import models.auditing.{GetTrustOrEstateAuditEvent, OrchestratorAuditEvent, TrustAuditing, TrustRegistrationFailureAuditEvent, TrustRegistrationSubmissionAuditEvent, VariationAuditEvent}
+import models.auditing.{GetTrustOrEstateAuditEvent, NrsAuditEvent, OrchestratorAuditEvent, TrustAuditing, TrustRegistrationFailureAuditEvent, TrustRegistrationSubmissionAuditEvent, VariationAuditEvent}
 import models.registration.{RegistrationFailureResponse, RegistrationTrnResponse}
 import models.variation.VariationResponse
 import play.api.libs.json.{JsBoolean, JsPath, JsSuccess, JsValue, Json, Reads}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import utils.Constants._
+
 import javax.inject.Inject
 
 class AuditService @Inject()(auditConnector: AuditConnector){
@@ -225,5 +226,9 @@ class AuditService @Inject()(auditConnector: AuditConnector){
       subscriptionId,
       errorMessage
     )
+  }
+
+  def auditNrsResponse(event: NrsAuditEvent): Unit = {
+    ()
   }
 }
