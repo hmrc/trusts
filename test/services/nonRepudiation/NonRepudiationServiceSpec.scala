@@ -22,12 +22,13 @@ import models.nonRepudiation._
 import models.requests.IdentifierRequest
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => mEq, _}
-import org.mockito.Mockito.{reset, when}
+import org.mockito.Mockito.{doNothing, reset, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.test.FakeRequest
 import retry.RetryHelper
+import services.auditing.NRSAuditService
 import services.dates.LocalDateTimeService
 import services.encoding.PayloadEncodingService
 import uk.gov.hmrc.auth.core.AffinityGroup
@@ -45,6 +46,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
   private val mockLocalDateTimeService = mock[LocalDateTimeService]
   private val mockPayloadEncodingService = mock[PayloadEncodingService]
   private val retryHelper = injector.instanceOf[RetryHelper]
+  private val mockNrsAuditService = mock[NRSAuditService]
 
   val v4UuidRegex: Regex = "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[4][0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$".r
 
@@ -52,9 +54,11 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
     reset(mockConnector, mockLocalDateTimeService, mockPayloadEncodingService)
   }
 
-  private val SUT = new NonRepudiationService(mockConnector, mockLocalDateTimeService, mockPayloadEncodingService, retryHelper)
+  private val SUT = new NonRepudiationService(mockConnector, mockLocalDateTimeService, mockPayloadEncodingService, retryHelper, mockNrsAuditService)
 
-  override implicit lazy val hc = HeaderCarrier(
+  doNothing().when(mockNrsAuditService).audit(any())(any())
+
+  override implicit lazy val hc: HeaderCarrier = HeaderCarrier(
     authorization = Some(Authorization("Bearer 12345")),
     deviceID = Some("deviceId"),
     trueClientPort = Some("ClientPort"),

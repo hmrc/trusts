@@ -30,9 +30,9 @@ import scala.concurrent.Future
 
 class RetryHelperSpec extends BaseSpec with MockitoSugar with ScalaFutures with Matchers with OptionValues {
 
-  val retryHelper = injector.instanceOf[NrsRetryHelper]
+  private val retryHelper: NrsRetryHelper = injector.instanceOf[NrsRetryHelper]
 
-  val TIMEOUT = 20
+  private val TIMEOUT: Int = 20
 
   "RetryHelper" must {
 
@@ -72,6 +72,20 @@ class RetryHelperSpec extends BaseSpec with MockitoSugar with ScalaFutures with 
           e.totalTime mustBe 90
           e.ticks.size mustBe 10
           e.result.value mustBe NRSResponse.InternalServerError
+      }
+    }
+
+    "recover from a throwable" in {
+
+      val failedFunction = () => Future.failed(new RuntimeException("ran out of memory"))
+
+      whenReady(retryHelper.retryOnFailure(
+        failedFunction
+      ), timeout(Span(TIMEOUT, Seconds))) {
+        e =>
+          e.totalTime mustBe 0
+          e.ticks.size mustBe 1
+          e.result must not be defined
       }
     }
 

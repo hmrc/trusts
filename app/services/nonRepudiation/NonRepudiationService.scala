@@ -17,12 +17,14 @@
 package services.nonRepudiation
 
 import connector.NonRepudiationConnector
+import models.auditing.NrsAuditEvent
 import models.nonRepudiation._
 import models.requests.IdentifierRequest
 import play.api.Logging
 import play.api.http.ContentTypes.JSON
 import play.api.libs.json._
 import retry.RetryHelper
+import services.auditing.NRSAuditService
 import services.dates.LocalDateTimeService
 import services.encoding.PayloadEncodingService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -36,7 +38,10 @@ import scala.util.{Failure, Success, Try}
 class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
                                       localDateTimeService: LocalDateTimeService,
                                       payloadEncodingService: PayloadEncodingService,
-                                      retryHelper: RetryHelper)(implicit val ec: ExecutionContext) extends Logging {
+                                      retryHelper: RetryHelper,
+                                      nrsAuditService: NRSAuditService
+                                     )
+                                     (implicit val ec: ExecutionContext) extends Logging {
 
   private def identityData(payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): IdentityData = {
 
@@ -86,7 +91,6 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
 
         scheduleNrsSubmission(event)
       case None =>
-        // TODO TXM
         Future.successful(NRSResponse.NoActiveSession)
     }
   }
@@ -96,28 +100,29 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
     def f: () => Future[NRSResponse] = () => connector.nonRepudiate(event)
 
     retryHelper.retryOnFailure(f).map {
-      p =>
-        p.result match {
-          case Some(value) =>
-            logger.info(s"[Session ID: ${Session.id(hc)}] Successfully non-repudiated submission")
-            value.asInstanceOf[NRSResponse]
-          case None =>
-            logger.info(s"[Session ID: ${Session.id(hc)}] Unable to non-repudiate submission, internal server error")
-            NRSResponse.InternalServerError
-        }
+      finalResult =>
+        auditEvent(event, finalResult)
     }
   }
 
-  private def handleCallback(f: Future[NRSResponse])(hc: HeaderCarrier): Unit = {
-    f onComplete {
-      case Success(value) =>
-        // TXM success
-        logger.info(s"[Session ID: ${Session.id(hc)}] NRS submission completed, result was $value")
-        ()
-      case Failure(exception) =>
-        // Txm failure event
-        logger.info(s"[Session ID: ${Session.id(hc)}] NRS submission failed due to ${exception.getMessage}")
-        ()
+  private def auditEvent(event: NRSSubmission, execution: RetryHelper.RetryExecution)(implicit hc: HeaderCarrier): NRSResponse = {
+    execution.result match {
+      case Some(success @ NRSResponse.Success(_)) =>
+        logger.info(s"[Session ID: ${Session.id(hc)}] Successfully non-repudiated submission")
+        val auditEvent = NrsAuditEvent(event.metadata, success)
+        nrsAuditService.audit(auditEvent)
+        success
+      case Some(error: NRSResponse) =>
+        logger.info(s"[Session ID: ${Session.id(hc)}] Unable to non-repudiated submission due to $error")
+        val auditEvent = NrsAuditEvent(event.metadata, error)
+        nrsAuditService.audit(auditEvent)
+        error
+      case _ =>
+        logger.info(s"[Session ID: ${Session.id(hc)}] Unable to non-repudiate submission, internal server error")
+        val response = NRSResponse.InternalServerError
+        val auditEvent = NrsAuditEvent(event.metadata, response)
+        nrsAuditService.audit(auditEvent)
+        response
     }
   }
 

@@ -81,6 +81,10 @@ trait RetryHelper extends Logging {
       case success =>
         logger.info(s"[Session ID: ${Session.id(hc)}] attempt completed, result did not require retry. $success, time of each attempt: ${lastExecution.timeOfEachTick}")
         Future.successful(RetryExecution(lastExecution.ticks, Some(success)))
+    } recoverWith {
+      case _ =>
+        logger.error(s"[Session ID: ${Session.id(hc)}] attempt failed due to Future throwing a throwable")
+        Future.successful(RetryExecution(lastExecution.ticks, None))
     }
   }
 }
