@@ -19,8 +19,7 @@ package models.auditing
 import models.nonRepudiation.{MetaData, NrsResponse}
 import play.api.libs.json.{Json, Writes}
 
-case class NrsAuditEvent(auditType: String,
-                         metaData: MetaData,
+case class NrsAuditEvent(metaData: MetaData,
                          result: NrsResponse)
 
 object NrsAuditEvent {

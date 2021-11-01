@@ -53,6 +53,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
   }
 
   private val SUT = new NonRepudiationService(mockConnector, mockLocalDateTimeService, mockPayloadEncodingService, retryHelper)
+
   override implicit lazy val hc = HeaderCarrier(
     authorization = Some(Authorization("Bearer 12345")),
     deviceID = Some("deviceId"),
@@ -128,7 +129,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
         payloadCaptor.getValue.metadata.businessId mustBe "trs"
         payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
-        payloadCaptor.getValue.metadata.notableEvent mustBe "trs-registration"
+        payloadCaptor.getValue.metadata.notableEvent mustBe NotableEvent.TrsRegistration
         payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
         payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
         Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityDataJson
@@ -181,7 +182,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
         payloadCaptor.getValue.metadata.businessId mustBe "trs"
         payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
-        payloadCaptor.getValue.metadata.notableEvent mustBe "trs-registration"
+        payloadCaptor.getValue.metadata.notableEvent mustBe NotableEvent.TrsRegistration
         payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
         payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
         Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
@@ -246,7 +247,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
           payloadCaptor.getValue.metadata.businessId mustBe "trs"
           payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
-          payloadCaptor.getValue.metadata.notableEvent mustBe "trs-update-taxable"
+          payloadCaptor.getValue.metadata.notableEvent mustBe NotableEvent.TrsUpdateTaxable
           payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
           payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.UTR, utr)
           Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
@@ -308,7 +309,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
           payloadCaptor.getValue.metadata.businessId mustBe "trs"
           payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
-          payloadCaptor.getValue.metadata.notableEvent mustBe "trs-update-non-taxable"
+          payloadCaptor.getValue.metadata.notableEvent mustBe NotableEvent.TrsUpdateNonTaxable
           payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
           payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.URN, urn)
           Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
@@ -381,7 +382,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
           payloadCaptor.getValue.metadata.businessId mustBe "trs"
           payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
-          payloadCaptor.getValue.metadata.notableEvent mustBe "trs-registration"
+          payloadCaptor.getValue.metadata.notableEvent mustBe NotableEvent.TrsRegistration
           payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
           payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
           Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
@@ -451,7 +452,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
           payloadCaptor.getValue.metadata.businessId mustBe "trs"
           payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
-          payloadCaptor.getValue.metadata.notableEvent mustBe "trs-registration"
+          payloadCaptor.getValue.metadata.notableEvent mustBe NotableEvent.TrsRegistration
           payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
           payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
           Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData

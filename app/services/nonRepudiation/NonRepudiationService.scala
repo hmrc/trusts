@@ -59,7 +59,7 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
   }
 
   private final def sendEvent(payload: JsValue,
-                              notableEvent: String,
+                              notableEvent: NotableEvent,
                               searchKey: SearchKey,
                               searchValue: String
                              )(implicit hc: HeaderCarrier,
@@ -130,16 +130,16 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
     payload.transform((__ \ "agentDetails").json.pick).asOpt
 
   def register(trn: String, payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): Future[NrsResponse] =
-    sendEvent(payload, "trs-registration", SearchKey.TRN, trn)
+    sendEvent(payload, NotableEvent.TrsRegistration, SearchKey.TRN, trn)
 
   def maintain(identifier: String, payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): Future[NrsResponse] = {
 
     val isUtr = (x: String) => x.length != 15
 
     if (isUtr(identifier)) {
-      sendEvent(payload, "trs-update-taxable", SearchKey.UTR, identifier)
+      sendEvent(payload, NotableEvent.TrsUpdateTaxable, SearchKey.UTR, identifier)
     } else {
-      sendEvent(payload, "trs-update-non-taxable", SearchKey.URN, identifier)
+      sendEvent(payload, NotableEvent.TrsUpdateNonTaxable, SearchKey.URN, identifier)
     }
   }
 }

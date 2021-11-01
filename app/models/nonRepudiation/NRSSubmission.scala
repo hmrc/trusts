@@ -51,7 +51,7 @@ object IdentityData {
 }
 
 case class MetaData(businessId: String,
-                    notableEvent: String,
+                    notableEvent: NotableEvent,
                     payloadContentType: String,
                     payloadSha256Checksum: String,
                     userSubmissionTimestamp: LocalDateTime,

@@ -16,7 +16,8 @@
 
 package services.auditing
 
-import models.auditing.NrsAuditEvent
+import models.auditing.{NrsAuditEvent, TrustAuditing}
+import models.nonRepudiation.NotableEvent
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -28,7 +29,12 @@ class NRSAuditService @Inject()(auditConnector: AuditConnector){
   import scala.concurrent.ExecutionContext.Implicits._
 
   def audit(event: NrsAuditEvent)(implicit hc: HeaderCarrier): Unit = {
-    auditConnector.sendExplicitAudit(event.auditType, Json.toJson(event)(NrsAuditEvent.txmWrites))
+    val auditType = event.metaData.notableEvent match {
+      case NotableEvent.TrsRegistration => TrustAuditing.NRS_TRS_REGISTRATION
+      case NotableEvent.TrsUpdateTaxable => TrustAuditing.NRS_TRS_TAXABLE_UPDATE
+      case NotableEvent.TrsUpdateNonTaxable => TrustAuditing.NRS_TRS_NON_TAXABLE_UPDATE
+    }
+    auditConnector.sendExplicitAudit(auditType, Json.toJson(event)(NrsAuditEvent.txmWrites))
   }
 
 }
