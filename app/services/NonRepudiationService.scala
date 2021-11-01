@@ -36,7 +36,7 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
                                       payloadEncodingService: PayloadEncodingService,
                                       retryHelper: RetryHelper)(implicit val ec: ExecutionContext) extends Logging {
 
-  private def authorityData(payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): JsValue = {
+  private def identityData(payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): JsValue = {
 
     val takeFirstForwardedFor: Option[String] = hc.forwarded.map { forwardedFor =>
       Try(forwardedFor.value.split(",").head)
@@ -77,7 +77,7 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
             JSON,
             payloadChecksum,
             localDateTimeService.now(ZoneOffset.UTC),
-            authorityData(payload),
+            identityData(payload),
             token.value,
             JsObject(request.headers.toMap.map(header => header._1 -> JsString(header._2 mkString ","))),
             SearchKeys(searchKey, searchValue)
