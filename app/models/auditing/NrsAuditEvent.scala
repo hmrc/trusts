@@ -16,11 +16,11 @@
 
 package models.auditing
 
-import models.nonRepudiation.{MetaData, NrsResponse}
+import models.nonRepudiation.{MetaData, NRSResponse}
 import play.api.libs.json.{Json, Writes}
 
 case class NrsAuditEvent(metaData: MetaData,
-                         result: NrsResponse)
+                         result: NRSResponse)
 
 object NrsAuditEvent {
 

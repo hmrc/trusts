@@ -19,7 +19,7 @@ package connector
 import config.AppConfig
 
 import javax.inject.Inject
-import models.nonRepudiation.{NRSSubmission, NrsResponse}
+import models.nonRepudiation.{NRSSubmission, NRSResponse}
 import play.api.Logging
 import play.api.http.ContentTypes.JSON
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
@@ -32,9 +32,9 @@ class NonRepudiationConnector @Inject()(http: HttpClient, config: AppConfig) ext
 
   private def headers = Seq(CONTENT_TYPE -> JSON, X_API_KEY -> config.xApiKey)
 
-   def nonRepudiate(json: NRSSubmission)(implicit hc: HeaderCarrier): Future[NrsResponse] = {
+   def nonRepudiate(json: NRSSubmission)(implicit hc: HeaderCarrier): Future[NRSResponse] = {
 
-  http.POST[NRSSubmission, NrsResponse](config.nonRepudiationUrl, json, headers)
+  http.POST[NRSSubmission, NRSResponse](config.nonRepudiationUrl, json, headers)
 
   }
 

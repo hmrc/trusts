@@ -74,7 +74,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
 
         whenReady(futureResult) {
           result =>
-            result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+            result mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
         }
       }
     }
@@ -93,7 +93,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
 
         whenReady(futureResult) {
           result =>
-            result mustBe ServiceUnavailableResponse
+            result mustBe NRSResponse.ServiceUnavailable
         }
       }
 
@@ -109,7 +109,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
 
         whenReady(futureResult) {
           result =>
-            result mustBe BadRequestResponse
+            result mustBe NRSResponse.BadRequest
         }
       }
 
@@ -125,7 +125,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
 
         whenReady(futureResult) {
           result =>
-            result mustBe BadGatewayResponse
+            result mustBe NRSResponse.BadGateway
         }
       }
       "return UnauthorisedResponse when NRS returns unauthorised response" in {
@@ -140,7 +140,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
 
         whenReady(futureResult) {
           result =>
-            result mustBe UnauthorisedResponse
+            result mustBe NRSResponse.Unauthorised
         }
       }
       "return GatewayTimeoutResponse when NRS returns gateway timeout response" in {
@@ -155,7 +155,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
 
         whenReady(futureResult) {
           result =>
-            result mustBe GatewayTimeoutResponse
+            result mustBe NRSResponse.GatewayTimeout
         }
       }
       "return InternalServerErrorResponse when NRS returns internal server error response" in {
@@ -170,7 +170,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
 
         whenReady(futureResult) {
           result =>
-            result mustBe InternalServerErrorResponse
+            result mustBe NRSResponse.InternalServerError
         }
       }
 
@@ -186,7 +186,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
 
         whenReady(futureResult) {
           result =>
-            result mustBe ChecksumFailedResponse
+            result mustBe NRSResponse.ChecksumFailed
         }
       }
 

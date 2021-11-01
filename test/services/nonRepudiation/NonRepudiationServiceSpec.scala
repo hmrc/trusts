@@ -111,7 +111,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
       val trn = "ABTRUST12345678"
 
       when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
-        .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+        .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
       when(mockLocalDateTimeService.now(ZoneOffset.UTC))
         .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
@@ -124,7 +124,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
 
       val fResult = SUT.register(trn, payLoad)
       whenReady(fResult) { result =>
-        result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+        result mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
         payloadCaptor.getValue.payload mustBe "encodedPayload"
         payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
         payloadCaptor.getValue.metadata.businessId mustBe "trs"
@@ -164,7 +164,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
       val trn = "ABTRUST12345678"
 
       when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
-        .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+        .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
       when(mockLocalDateTimeService.now(ZoneOffset.UTC))
         .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
@@ -177,7 +177,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
 
       val fResult = SUT.register(trn, payLoadWithoutAgentDetails)
       whenReady(fResult) { result =>
-        result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+        result mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
         payloadCaptor.getValue.payload mustBe "encodedPayload"
         payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
         payloadCaptor.getValue.metadata.businessId mustBe "trs"
@@ -228,7 +228,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         val utr = "1234567890"
 
         when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
-          .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+          .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
         when(mockLocalDateTimeService.now(ZoneOffset.UTC))
           .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
@@ -242,7 +242,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         val fResult = SUT.maintain(utr, payLoad)
 
         whenReady(fResult) { result =>
-          result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+          result mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
           payloadCaptor.getValue.payload mustBe "encodedPayload"
           payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
           payloadCaptor.getValue.metadata.businessId mustBe "trs"
@@ -290,7 +290,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         val urn = "NTTRUST12345678"
 
         when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
-          .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+          .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
         when(mockLocalDateTimeService.now(ZoneOffset.UTC))
           .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
@@ -304,7 +304,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         val fResult = SUT.maintain(urn, payLoad)
 
         whenReady(fResult) { result =>
-          result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+          result mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
           payloadCaptor.getValue.payload mustBe "encodedPayload"
           payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
           payloadCaptor.getValue.metadata.businessId mustBe "trs"
@@ -364,7 +364,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         val trn = "ABTRUST12345678"
 
         when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
-          .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+          .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
         when(mockLocalDateTimeService.now(ZoneOffset.UTC))
           .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
@@ -377,7 +377,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
 
         val fResult = SUT.register(trn, payLoad)(headerCarrierWithXForwardedFor, request)
         whenReady(fResult) { result =>
-          result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+          result mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
           payloadCaptor.getValue.payload mustBe "encodedPayload"
           payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
           payloadCaptor.getValue.metadata.businessId mustBe "trs"
@@ -434,7 +434,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         val trn = "ABTRUST12345678"
 
         when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
-          .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+          .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
         when(mockLocalDateTimeService.now(ZoneOffset.UTC))
           .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
@@ -447,7 +447,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
 
         val fResult = SUT.register(trn, payLoad)(headerCarrierWithXForwardedFor, request)
         whenReady(fResult) { result =>
-          result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+          result mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
           payloadCaptor.getValue.payload mustBe "encodedPayload"
           payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
           payloadCaptor.getValue.metadata.businessId mustBe "trs"

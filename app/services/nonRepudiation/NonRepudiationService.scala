@@ -63,7 +63,7 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
                               searchKey: SearchKey,
                               searchValue: String
                              )(implicit hc: HeaderCarrier,
-                               request: IdentifierRequest[_]): Future[NrsResponse] = {
+                               request: IdentifierRequest[_]): Future[NRSResponse] = {
     hc.authorization match {
       case Some(token) =>
         val encodedPayload = payloadEncodingService.encode(payload)
@@ -86,28 +86,29 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
 
         scheduleNrsSubmission(event)
       case None =>
-        Future.successful(NoActiveSessionResponse)
+        // TODO TXM
+        Future.successful(NRSResponse.NoActiveSession)
     }
   }
 
-  private def scheduleNrsSubmission(event: NRSSubmission)(implicit hc: HeaderCarrier): Future[NrsResponse] = {
+  private def scheduleNrsSubmission(event: NRSSubmission)(implicit hc: HeaderCarrier): Future[NRSResponse] = {
 
-    def f: () => Future[NrsResponse] = () => connector.nonRepudiate(event)
+    def f: () => Future[NRSResponse] = () => connector.nonRepudiate(event)
 
     retryHelper.retryOnFailure(f).map {
       p =>
         p.result match {
           case Some(value) =>
             logger.info(s"[Session ID: ${Session.id(hc)}] Successfully non-repudiated submission")
-            value.asInstanceOf[NrsResponse]
+            value.asInstanceOf[NRSResponse]
           case None =>
             logger.info(s"[Session ID: ${Session.id(hc)}] Unable to non-repudiate submission, internal server error")
-            InternalServerErrorResponse
+            NRSResponse.InternalServerError
         }
     }
   }
 
-  private def handleCallback(f: Future[NrsResponse])(hc: HeaderCarrier): Unit = {
+  private def handleCallback(f: Future[NRSResponse])(hc: HeaderCarrier): Unit = {
     f onComplete {
       case Success(value) =>
         // TXM success
@@ -129,10 +130,10 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
   def getAgentDetails(payload: JsValue): Option[JsValue] =
     payload.transform((__ \ "agentDetails").json.pick).asOpt
 
-  def register(trn: String, payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): Future[NrsResponse] =
+  def register(trn: String, payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): Future[NRSResponse] =
     sendEvent(payload, NotableEvent.TrsRegistration, SearchKey.TRN, trn)
 
-  def maintain(identifier: String, payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): Future[NrsResponse] = {
+  def maintain(identifier: String, payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): Future[NRSResponse] = {
 
     val isUtr = (x: String) => x.length != 15
 
