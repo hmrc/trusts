@@ -113,11 +113,11 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
                 logger.info(s"[Session ID: ${Session.id(hc)}] Successfully non-repudiated submission")
                 r
               case _ =>
-                logger.info(s"[Session ID: ${Session.id(hc)}] Unable to non-repudiated submission")
+                logger.warn(s"[Session ID: ${Session.id(hc)}] Unable to non-repudiated submission")
                 r
             }
           case None =>
-            logger.info(s"[Session ID: ${Session.id(hc)}] Unable to non-repudiate submission, internal server error")
+            logger.warn(s"[Session ID: ${Session.id(hc)}] Unable to non-repudiate submission, internal server error")
             InternalServerErrorResponse
         }
     }
@@ -131,7 +131,7 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
         ()
       case Failure(exception) =>
         // Txm failure event
-        logger.info(s"[Session ID: ${Session.id(hc)}] NRS submission failed due to ${exception.getMessage}")
+        logger.warn(s"[Session ID: ${Session.id(hc)}] NRS submission failed due to ${exception.getMessage}")
         ()
     }
   }
