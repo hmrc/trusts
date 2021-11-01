@@ -33,7 +33,7 @@ import utils.Session
 import java.time.ZoneOffset
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
                                       localDateTimeService: LocalDateTimeService,
@@ -58,6 +58,7 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
       clientPort = hc.trueClientPort.getOrElse("No Client Port"),
       sessionId = hc.sessionId.map(_.value).getOrElse("No Session ID"),
       requestId = hc.requestId.map(_.value).getOrElse("No Request ID"),
+      credential = request.credentialData,
       declaration = getDeclaration(payload),
       agentDetails = getAgentDetails(payload)
     )

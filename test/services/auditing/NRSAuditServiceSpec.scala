@@ -19,10 +19,13 @@ package services.auditing
 import base.BaseSpec
 import models.auditing.NrsAuditEvent
 import models.nonRepudiation._
+import models.requests.CredentialData
+import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers.{any, eq => equalTo}
 import org.mockito.Mockito.verify
 import play.api.libs.json.Json
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
+import uk.gov.hmrc.auth.core.retrieve.LoginTimes
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import java.time.LocalDateTime
@@ -44,7 +47,8 @@ class NRSAuditServiceSpec extends BaseSpec {
         sessionId = "sessionId",
         requestId = "requestId",
         declaration = Json.obj("example" -> "name"),
-        agentDetails = Some(Json.obj("example" -> "agent details"))
+        agentDetails = Some(Json.obj("example" -> "agent details")),
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), credentials = None, email = None)
       )
 
       val metaData = MetaData(
@@ -114,7 +118,8 @@ class NRSAuditServiceSpec extends BaseSpec {
         sessionId = "sessionId",
         requestId = "requestId",
         declaration = Json.obj("example" -> "name"),
-        agentDetails = None
+        agentDetails = None,
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), credentials = None, email = None)
       )
 
       val metaData = MetaData(
@@ -181,7 +186,8 @@ class NRSAuditServiceSpec extends BaseSpec {
         sessionId = "sessionId",
         requestId = "requestId",
         declaration = Json.obj("example" -> "name"),
-        agentDetails = None
+        agentDetails = None,
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), credentials = None, email = None)
       )
 
       val metaData = MetaData(
@@ -248,7 +254,8 @@ class NRSAuditServiceSpec extends BaseSpec {
         sessionId = "sessionId",
         requestId = "requestId",
         declaration = Json.obj("example" -> "name"),
-        agentDetails = None
+        agentDetails = None,
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), credentials = None, email = None)
       )
 
       val metaData = MetaData(

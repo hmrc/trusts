@@ -19,7 +19,8 @@ package services.nonRepudiation
 import base.BaseSpec
 import connector.NonRepudiationConnector
 import models.nonRepudiation._
-import models.requests.IdentifierRequest
+import models.requests.{CredentialData, IdentifierRequest}
+import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => mEq, _}
 import org.mockito.Mockito.{doNothing, reset, when}
@@ -32,6 +33,7 @@ import services.auditing.NRSAuditService
 import services.dates.LocalDateTimeService
 import services.encoding.PayloadEncodingService
 import uk.gov.hmrc.auth.core.AffinityGroup
+import uk.gov.hmrc.auth.core.retrieve.{Credentials, LoginTimes}
 import uk.gov.hmrc.http.{Authorization, ForwardedFor, HeaderCarrier, RequestId, SessionId}
 import utils.JsonFixtures
 
@@ -58,6 +60,20 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
 
   doNothing().when(mockNrsAuditService).audit(any())(any())
 
+  private val credential: CredentialData = CredentialData(
+    Some("groupIdentifier"),
+    LoginTimes(DateTime.parse("2020-10-10"),Some(DateTime.parse("2020-10-05"))),
+    Some(Credentials("12345", "governmentGateway")),
+    Some("client@email.com")
+  )
+
+  private val credentialNotPopulated: CredentialData = CredentialData(
+    None,
+    LoginTimes(DateTime.parse("2020-10-10"), None),
+    None,
+    None
+  )
+
   override implicit lazy val hc: HeaderCarrier = HeaderCarrier(
     authorization = Some(Authorization("Bearer 12345")),
     deviceID = Some("deviceId"),
@@ -74,7 +90,8 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         .withBody(Json.parse("{}")),
       internalId = "internalId",
       sessionId = "sessionId",
-      affinityGroup = AffinityGroup.Agent
+      affinityGroup = AffinityGroup.Agent,
+      credentialData = credential
     )
 
   ".register" should {
@@ -86,7 +103,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
       val payLoad = Json.toJson(registrationRequest)
 
       implicit val request: IdentifierRequest[JsValue] =
-        IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Agent)
+        IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Agent, credentialData = credential)
 
       val identityDataJson = Json.obj(
         "internalId" -> "internalId",
@@ -99,7 +116,18 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         "declaration" -> Json.obj(
           "firstName" -> "John",
           "middleName" -> "William",
-          "lastName" -> "O'Connor"),
+          "lastName" -> "O'Connor"
+        ),
+        "email" -> "client@email.com",
+        "loginTimes" -> Json.obj(
+          "currentLogin" -> "2020-10-10T00:00:00.000Z",
+          "previousLogin" -> "2020-10-05T00:00:00.000Z"
+        ),
+        "groupIdentifier" -> "groupIdentifier",
+        "credentials" -> Json.obj(
+          "providerId" -> "12345",
+          "providerType" -> "governmentGateway"
+        ),
         "agentDetails" -> Json.obj(
           "arn" -> "AARN1234567",
           "agentName" -> "Mr . xys abcde",
@@ -107,9 +135,11 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
             "line1" -> "line1",
             "line2" -> "line2",
             "postCode" -> "TF3 2BX",
-            "country" -> "GB"),
+            "country" -> "GB"
+          ),
           "agentTelephoneNumber" -> "07912180120",
-          "clientReference" -> "clientReference")
+          "clientReference" -> "clientReference"
+        )
       )
 
       val trn = "ABTRUST12345678"
@@ -148,7 +178,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
       val payLoadWithoutAgentDetails = Json.toJson(registrationRequest).as[JsObject] - "agentDetails"
 
       implicit val request: IdentifierRequest[JsValue] =
-        IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Organisation)
+        IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Organisation, credentialData = credentialNotPopulated)
 
       val identityData = Json.obj(
         "internalId" -> "internalId",
@@ -158,6 +188,15 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         "clientPort" -> "ClientPort",
         "sessionId" -> "SessionID",
         "requestId" -> "RequestID",
+        "email" -> "No email",
+        "loginTimes" -> Json.obj(
+          "currentLogin" -> "2020-10-10T00:00:00.000Z"
+        ),
+        "groupIdentifier" -> "No group identifier",
+        "credentials" -> Json.obj(
+          "providerId" -> "No provider id",
+          "providerType" -> "No provider type"
+        ),
         "declaration" -> Json.obj(
           "firstName" -> "John",
           "middleName" -> "William",
@@ -213,6 +252,16 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           "clientPort" -> "ClientPort",
           "sessionId" -> "SessionID",
           "requestId" -> "RequestID",
+          "email" -> "client@email.com",
+          "loginTimes" -> Json.obj(
+            "currentLogin" -> "2020-10-10T00:00:00.000Z",
+            "previousLogin" -> "2020-10-05T00:00:00.000Z"
+          ),
+          "groupIdentifier" -> "groupIdentifier",
+          "credentials" -> Json.obj(
+            "providerId" -> "12345",
+            "providerType" -> "governmentGateway"
+          ),
           "declaration" -> Json.obj(
             "firstName" -> "Abram",
             "middleName" -> "Joe",
@@ -276,6 +325,16 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           "clientPort" -> "ClientPort",
           "sessionId" -> "SessionID",
           "requestId" -> "RequestID",
+          "email" -> "client@email.com",
+          "loginTimes" -> Json.obj(
+            "currentLogin" -> "2020-10-10T00:00:00.000Z",
+            "previousLogin" -> "2020-10-05T00:00:00.000Z"
+          ),
+          "groupIdentifier" -> "groupIdentifier",
+          "credentials" -> Json.obj(
+            "providerId" -> "12345",
+            "providerType" -> "governmentGateway"
+          ),
           "declaration" -> Json.obj(
             "firstName" -> "Abram",
             "middleName" -> "Joe",
@@ -325,7 +384,6 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
     ".sendEvent" must {
 
       "parse X-Forwarded-For header when there is no True-Client-IP or True-Client-Port" in {
-
         lazy val payloadCaptor = ArgumentCaptor.forClass(classOf[NRSSubmission])
 
         val payLoad = Json.toJson(registrationRequest)
@@ -339,7 +397,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         )
 
         implicit val request: IdentifierRequest[JsValue] =
-          IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Agent)
+          IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Agent, credentialData = credential)
 
         val identityData = Json.obj(
           "internalId" -> "internalId",
@@ -349,6 +407,16 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           "clientPort" -> "No Client Port",
           "sessionId" -> "SessionID",
           "requestId" -> "RequestID",
+          "email" -> "client@email.com",
+          "loginTimes" -> Json.obj(
+            "currentLogin" -> "2020-10-10T00:00:00.000Z",
+            "previousLogin" -> "2020-10-05T00:00:00.000Z"
+          ),
+          "groupIdentifier" -> "groupIdentifier",
+          "credentials" -> Json.obj(
+            "providerId" -> "12345",
+            "providerType" -> "governmentGateway"
+          ),
           "declaration" -> Json.obj(
             "firstName" -> "John",
             "middleName" -> "William",
@@ -409,7 +477,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         )
 
         implicit val request: IdentifierRequest[JsValue] =
-          IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Agent)
+          IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Agent, credentialData = credential)
 
         val identityData = Json.obj(
           "internalId" -> "internalId",
@@ -419,6 +487,16 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           "clientPort" -> "No Client Port",
           "sessionId" -> "SessionID",
           "requestId" -> "RequestID",
+          "email" -> "client@email.com",
+          "loginTimes" -> Json.obj(
+            "currentLogin" -> "2020-10-10T00:00:00.000Z",
+            "previousLogin" -> "2020-10-05T00:00:00.000Z"
+          ),
+          "groupIdentifier" -> "groupIdentifier",
+          "credentials" -> Json.obj(
+            "providerId" -> "12345",
+            "providerType" -> "governmentGateway"
+          ),
           "declaration" -> Json.obj(
             "firstName" -> "John",
             "middleName" -> "William",

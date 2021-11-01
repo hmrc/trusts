@@ -16,6 +16,8 @@
 
 package models.nonRepudiation
 
+import models.requests.CredentialData
+
 import java.time.LocalDateTime
 import play.api.libs.json._
 import uk.gov.hmrc.auth.core.AffinityGroup
@@ -35,6 +37,7 @@ case class IdentityData(
                          clientPort: String,
                          sessionId: String,
                          requestId: String,
+                         credential: CredentialData,
                          declaration: JsValue,
                          agentDetails: Option[JsValue]
                        )
@@ -63,7 +66,7 @@ case class MetaData(businessId: String,
 
 object MetaData {
 
-  import utils.DateTimeFormatter._
+  import utils.LocalDateTimeFormatter._
 
   implicit val formats: OFormat[MetaData] = Json.format[MetaData]
 

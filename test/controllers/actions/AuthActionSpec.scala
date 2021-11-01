@@ -17,19 +17,24 @@
 package controllers.actions
 
 import base.BaseSpec
-import org.scalatest.matchers.must.Matchers._
 import com.google.inject.Inject
+import org.joda.time.DateTime
+import org.scalatest.matchers.must.Matchers._
 import play.api.mvc.{BodyParsers, Results}
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AffinityGroup.Individual
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.{Retrieval, ~}
+import uk.gov.hmrc.auth.core.retrieve.{Credentials, LoginTimes, Retrieval, ~}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthActionSpec extends BaseSpec {
+
+  private implicit class HelperOps[A](a: A) {
+    def ~[B](b: B) = new ~(a, b)
+  }
 
   private val cc = stubControllerComponents()
 
@@ -37,8 +42,13 @@ class AuthActionSpec extends BaseSpec {
     def onSubmit() = authAction.apply(cc.parsers.json) { _ => Results.Ok }
   }
 
-  private def authRetrievals(affinityGroup: AffinityGroup) =
-    Future.successful(new ~(Some("id"), Some(affinityGroup)))
+  private type AllRetrievals = Future[Some[String] ~ Some[AffinityGroup] ~ Option[String] ~ LoginTimes ~ Option[Credentials] ~ Option[String]]
+
+  private def minimumAuthRetrievals(affinityGroup: AffinityGroup): AllRetrievals =
+    Future.successful(Some("id") ~ Some(affinityGroup) ~ None ~ LoginTimes(DateTime.parse("2020-10-10"), None) ~ None ~ None)
+
+  private def allRetrievals(affinityGroup: AffinityGroup): AllRetrievals  =
+    Future.successful(Some("id") ~ Some(affinityGroup) ~ Some("groupIdentifier") ~ LoginTimes(DateTime.parse("2020-10-10"), None) ~ Some(Credentials("12345", "governmentGateway")) ~ Some("org@email.com"))
 
   private def actionToTest(authConnector: AuthConnector) = {
     new AuthenticatedIdentifierAction(authConnector, injector.instanceOf[BodyParsers.Default])(ExecutionContext.Implicits.global)
@@ -49,17 +59,26 @@ class AuthActionSpec extends BaseSpec {
 
   "Auth Action" when {
 
-    "Agent user" must {
+    "retrieving data" must {
 
-      "allow user to continue" in {
-
-        val authAction = actionToTest(new FakeAuthConnector(authRetrievals(agentAffinityGroup)))
+      "return email, login times, groupIdentifier and provider information" in {
+        val authAction = actionToTest(new FakeAuthConnector(allRetrievals(agentAffinityGroup)))
         val controller = new Harness(authAction)
         val result = controller.onSubmit()(fakeRequest)
 
         status(result) mustBe OK
+      }
+    }
 
+    "Agent user" must {
 
+      "allow user to continue" in {
+
+        val authAction = actionToTest(new FakeAuthConnector(minimumAuthRetrievals(agentAffinityGroup)))
+        val controller = new Harness(authAction)
+        val result = controller.onSubmit()(fakeRequest)
+
+        status(result) mustBe OK
       }
 
     }
@@ -68,13 +87,11 @@ class AuthActionSpec extends BaseSpec {
 
       "allow user to continue" in {
 
-        val authAction = actionToTest(new FakeAuthConnector(authRetrievals(orgAffinityGroup)))
+        val authAction = actionToTest(new FakeAuthConnector(minimumAuthRetrievals(orgAffinityGroup)))
         val controller = new Harness(authAction)
         val result = controller.onSubmit()(fakeRequest)
 
         status(result) mustBe OK
-
-
       }
 
     }
@@ -83,12 +100,10 @@ class AuthActionSpec extends BaseSpec {
 
       "redirect the user to the unauthorised page" in {
         
-        val authAction = actionToTest(new FakeAuthConnector(authRetrievals(Individual)))
+        val authAction = actionToTest(new FakeAuthConnector(minimumAuthRetrievals(Individual)))
         val controller = new Harness(authAction)
         val result = controller.onSubmit()(fakeRequest)
         status(result) mustBe UNAUTHORIZED
-
-
       }
 
     }
@@ -102,8 +117,6 @@ class AuthActionSpec extends BaseSpec {
         val result = controller.onSubmit()(fakeRequest)
 
         status(result) mustBe UNAUTHORIZED
-
-
       }
     }
 
@@ -116,8 +129,6 @@ class AuthActionSpec extends BaseSpec {
         val result = controller.onSubmit()(fakeRequest)
 
         status(result) mustBe UNAUTHORIZED
-
-
       }
     }
   }

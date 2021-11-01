@@ -19,14 +19,18 @@ package controllers.actions
 import javax.inject.Inject
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.AffinityGroup
-import models.requests.IdentifierRequest
+import models.requests.{CredentialData, IdentifierRequest}
+import org.joda.time.DateTime
+import uk.gov.hmrc.auth.core.retrieve.LoginTimes
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class FakeIdentifierAction @Inject()(bodyParsers: BodyParser[AnyContent], affinityGroup: AffinityGroup) extends IdentifierAction {
 
+  private val credential = CredentialData(None, LoginTimes(DateTime.parse("2020-10-10"), None), None, None)
+
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] =
-    block(IdentifierRequest(request, "id", "sessionID", affinityGroup))
+    block(IdentifierRequest(request, "id", "sessionID", affinityGroup, credential))
 
   override def parser: BodyParser[AnyContent] =
     bodyParsers
