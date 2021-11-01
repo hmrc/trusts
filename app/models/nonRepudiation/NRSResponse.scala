@@ -22,7 +22,9 @@ import play.api.libs.json._
 import retry.RetryPolicy
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
-sealed trait NrsResponse extends RetryPolicy
+sealed trait NrsResponse extends RetryPolicy {
+  val statusCode: Int
+}
 
 object NrsResponse extends Logging {
   final val CHECKSUM_FAILED = 419
@@ -51,20 +53,63 @@ object NrsResponse extends Logging {
           InternalServerErrorResponse
       }
     }
+
+  implicit val writes: Writes[NrsResponse] = Writes {
+    case SuccessfulNrsResponse(nrSubmissionId) => Json.obj("nrSubmissionId" -> nrSubmissionId, "code" -> ACCEPTED)
+    case e => Json.obj("code" -> e.statusCode, "reason" -> e.toString)
+  }
+
+  implicit val reads: Reads[NrsResponse] = (json: JsValue) => {
+    json.validate[SuccessfulNrsResponse]
+  }
 }
 
-case class SuccessfulNrsResponse(nrSubmissionId: String) extends NrsResponse with RetryPolicy { override val retry = false}
+case class SuccessfulNrsResponse(nrSubmissionId: String) extends NrsResponse with RetryPolicy {
+  override val retry = false
+  override val statusCode: Int = ACCEPTED
+}
 
 object SuccessfulNrsResponse {
   implicit val formats: Format[SuccessfulNrsResponse] = Json.format[SuccessfulNrsResponse]
 }
 
-case object BadRequestResponse extends NrsResponse with RetryPolicy { override val retry = false}
-case object BadGatewayResponse extends NrsResponse with RetryPolicy { override val retry = true}
-case object UnauthorisedResponse extends NrsResponse with RetryPolicy { override val retry = false}
-case object ServiceUnavailableResponse extends NrsResponse with RetryPolicy { override val retry = true}
-case object GatewayTimeoutResponse extends NrsResponse with RetryPolicy { override val retry = true}
-case object InternalServerErrorResponse extends NrsResponse with RetryPolicy { override val retry = true}
-case object ChecksumFailedResponse extends NrsResponse with RetryPolicy { override val retry = false}
-case object NoActiveSessionResponse extends NrsResponse with RetryPolicy { override val retry = false}
+case object BadRequestResponse extends NrsResponse with RetryPolicy {
+  override val retry = false
+  override val statusCode: Int = BAD_REQUEST
+}
+
+case object BadGatewayResponse extends NrsResponse with RetryPolicy {
+  override val retry = true
+  override val statusCode: Int = BAD_GATEWAY
+}
+
+case object UnauthorisedResponse extends NrsResponse with RetryPolicy {
+  override val retry = false
+  override val statusCode: Int = UNAUTHORIZED
+}
+
+case object ServiceUnavailableResponse extends NrsResponse with RetryPolicy {
+  override val retry = true
+  override val statusCode: Int = SERVICE_UNAVAILABLE
+}
+
+case object GatewayTimeoutResponse extends NrsResponse with RetryPolicy {
+  override val retry = true
+  override val statusCode: Int = GATEWAY_TIMEOUT
+}
+
+case object InternalServerErrorResponse extends NrsResponse with RetryPolicy {
+  override val retry = true
+  override val statusCode: Int = INTERNAL_SERVER_ERROR
+}
+
+case object ChecksumFailedResponse extends NrsResponse with RetryPolicy {
+  override val retry = false
+  override val statusCode: Int = NrsResponse.CHECKSUM_FAILED
+}
+
+case object NoActiveSessionResponse extends NrsResponse with RetryPolicy {
+  override val retry = false
+  override val statusCode: Int = INTERNAL_SERVER_ERROR
+}
 
