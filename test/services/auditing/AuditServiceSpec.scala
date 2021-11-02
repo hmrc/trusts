@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-package services
+package services.auditing
 
 import base.BaseSpec
-import models.auditing.{OrchestratorAuditEvent, VariationAuditEvent}
+import models.auditing.{NrsAuditEvent, OrchestratorAuditEvent, VariationAuditEvent}
+import models.nonRepudiation._
 import models.variation.VariationResponse
 import org.mockito.ArgumentMatchers.{any, eq => equalTo}
 import org.mockito.Mockito.verify
 import play.api.libs.json.Json
+import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+
+import java.time.LocalDateTime
 
 class AuditServiceSpec extends BaseSpec {
 
   "auditVariationSubmitted" should {
+
     "send Variation Submitted by Organisation" when {
       "there are no special JSON fields" in {
         val connector = mock[AuditConnector]

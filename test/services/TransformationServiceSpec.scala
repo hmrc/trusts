@@ -28,6 +28,7 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
 import repositories.TransformationRepositoryImpl
+import services.auditing.AuditService
 import transformers._
 import transformers.beneficiaries.{AddBeneficiaryTransform, AmendBeneficiaryTransform}
 import transformers.settlors.{AddSettlorTransform, AmendSettlorTransform}

@@ -17,7 +17,7 @@
 package retry
 
 import base.BaseSpec
-import models.nonRepudiation.{BadGatewayResponse, InternalServerErrorResponse, SuccessfulNrsResponse}
+import models.nonRepudiation.NRSResponse
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.must.Matchers
@@ -30,14 +30,14 @@ import scala.concurrent.Future
 
 class RetryHelperSpec extends BaseSpec with MockitoSugar with ScalaFutures with Matchers with OptionValues {
 
-  val retryHelper = injector.instanceOf[NrsRetryHelper]
+  private val retryHelper: NrsRetryHelper = injector.instanceOf[NrsRetryHelper]
 
-  val TIMEOUT = 20
+  private val TIMEOUT: Int = 20
 
   "RetryHelper" must {
 
     "return a successful Future" in {
-      val successfulFunction = () => Future.successful(SuccessfulNrsResponse("1234567890"))
+      val successfulFunction = () => Future.successful(NRSResponse.Success("1234567890"))
 
       whenReady(retryHelper.retryOnFailure(
         successfulFunction
@@ -45,25 +45,25 @@ class RetryHelperSpec extends BaseSpec with MockitoSugar with ScalaFutures with 
         e =>
           e.totalTime mustBe 0
           e.ticks mustBe Seq(0)
-          e.result.value mustBe SuccessfulNrsResponse("1234567890")
+          e.result.value mustBe NRSResponse.Success("1234567890")
       }
     }
 
     "retry when retry policy is true" in {
-      val failedFunction = () => Future.successful(BadGatewayResponse)
+      val failedFunction = () => Future.successful(NRSResponse.BadGateway)
       whenReady(retryHelper.retryOnFailure(
         failedFunction
       ), timeout(Span(TIMEOUT, Seconds))) {
         e =>
           e.totalTime mustBe 90
           e.ticks.size mustBe 10
-          e.result.value mustBe BadGatewayResponse
+          e.result.value mustBe NRSResponse.BadGateway
       }
     }
 
     "back off exponentially" in {
 
-      val failedFunction = () => Future.successful(InternalServerErrorResponse)
+      val failedFunction = () => Future.successful(NRSResponse.InternalServerError)
 
       whenReady(retryHelper.retryOnFailure(
         failedFunction
@@ -71,7 +71,21 @@ class RetryHelperSpec extends BaseSpec with MockitoSugar with ScalaFutures with 
         e =>
           e.totalTime mustBe 90
           e.ticks.size mustBe 10
-          e.result.value mustBe InternalServerErrorResponse
+          e.result.value mustBe NRSResponse.InternalServerError
+      }
+    }
+
+    "recover from a throwable" in {
+
+      val failedFunction = () => Future.failed(new RuntimeException("ran out of memory"))
+
+      whenReady(retryHelper.retryOnFailure(
+        failedFunction
+      ), timeout(Span(TIMEOUT, Seconds))) {
+        e =>
+          e.totalTime mustBe 0
+          e.ticks.size mustBe 1
+          e.result must not be defined
       }
     }
 
@@ -83,9 +97,9 @@ class RetryHelperSpec extends BaseSpec with MockitoSugar with ScalaFutures with 
       val failThenSuccessFunc = () => {
         if (counter < NUMBER_OF_RETRIES) {
           counter = counter + 1
-          Future.successful(InternalServerErrorResponse)
+          Future.successful(NRSResponse.InternalServerError)
         } else {
-          Future.successful(SuccessfulNrsResponse("1234567890"))
+          Future.successful(NRSResponse.Success("1234567890"))
         }
       }
 
@@ -95,7 +109,7 @@ class RetryHelperSpec extends BaseSpec with MockitoSugar with ScalaFutures with 
         e => {
           e.totalTime mustBe 40
           e.ticks.size mustBe 5
-          e.result.value mustBe SuccessfulNrsResponse("1234567890")
+          e.result.value mustBe NRSResponse.Success("1234567890")
         }
       }
     }
@@ -104,14 +118,14 @@ class RetryHelperSpec extends BaseSpec with MockitoSugar with ScalaFutures with 
       val app = new GuiceApplicationBuilder().build()
       val helper = app.injector.instanceOf[NrsRetryHelper]
 
-      val failedFunction = () => Future.successful(BadGatewayResponse)
+      val failedFunction = () => Future.successful(NRSResponse.BadGateway)
       whenReady(helper.retryOnFailure(
         failedFunction
       ), timeout(Span(TIMEOUT, Seconds))) {
         e =>
           e.totalTime mustBe 15600
           e.timeOfEachTick mustBe Seq(0, 1200, 4800, 15600)
-          e.result.value mustBe BadGatewayResponse
+          e.result.value mustBe NRSResponse.BadGateway
       }
     }
   }

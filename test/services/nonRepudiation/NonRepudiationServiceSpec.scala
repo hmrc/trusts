@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package services
+package services.nonRepudiation
 
 import base.BaseSpec
 import connector.NonRepudiationConnector
@@ -23,12 +23,15 @@ import models.requests.{CredentialData, IdentifierRequest}
 import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => mEq, _}
-import org.mockito.Mockito.{reset, when}
+import org.mockito.Mockito.{doNothing, reset, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.test.FakeRequest
 import retry.RetryHelper
+import services.auditing.NRSAuditService
+import services.dates.LocalDateTimeService
+import services.encoding.PayloadEncodingService
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, LoginTimes}
 import uk.gov.hmrc.http.{Authorization, ForwardedFor, HeaderCarrier, RequestId, SessionId}
@@ -45,6 +48,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
   private val mockLocalDateTimeService = mock[LocalDateTimeService]
   private val mockPayloadEncodingService = mock[PayloadEncodingService]
   private val retryHelper = injector.instanceOf[RetryHelper]
+  private val mockNrsAuditService = mock[NRSAuditService]
 
   val v4UuidRegex: Regex = "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[4][0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$".r
 
@@ -52,11 +56,13 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
     reset(mockConnector, mockLocalDateTimeService, mockPayloadEncodingService)
   }
 
-  private val SUT = new NonRepudiationService(mockConnector, mockLocalDateTimeService, mockPayloadEncodingService, retryHelper)
+  private val SUT = new NonRepudiationService(mockConnector, mockLocalDateTimeService, mockPayloadEncodingService, retryHelper, mockNrsAuditService)
+
+  doNothing().when(mockNrsAuditService).audit(any())(any())
 
   private val credential: CredentialData = CredentialData(
     Some("groupIdentifier"),
-    LoginTimes(DateTime.parse("2020-10-10"),Some(DateTime.parse("2020-10-05"))),
+    LoginTimes(DateTime.parse("2020-10-10"), Some(DateTime.parse("2020-10-05"))),
     Some(Credentials("12345", "governmentGateway")),
     Some("client@email.com")
   )
@@ -80,8 +86,8 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
   implicit val request: IdentifierRequest[JsValue] =
     IdentifierRequest(
       FakeRequest()
-      .withHeaders("test" -> "value")
-      .withBody(Json.parse("{}")),
+        .withHeaders("test" -> "value")
+        .withBody(Json.parse("{}")),
       internalId = "internalId",
       sessionId = "sessionId",
       affinityGroup = AffinityGroup.Agent,
@@ -99,7 +105,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
       implicit val request: IdentifierRequest[JsValue] =
         IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Agent, credentialData = credential)
 
-      val identityData = Json.obj(
+      val identityDataJson = Json.obj(
         "internalId" -> "internalId",
         "affinityGroup" -> "Agent",
         "deviceId" -> "deviceId",
@@ -107,20 +113,22 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         "clientPort" -> "ClientPort",
         "sessionId" -> "SessionID",
         "requestId" -> "RequestID",
-        "email" -> "client@email.com",
-        "loginTimes" -> Json.obj(
-          "currentLogin" -> "2020-10-10T00:00:00.000Z",
-          "previousLogin" -> "2020-10-05T00:00:00.000Z"
-        ),
-        "groupIdentifier" -> "groupIdentifier",
-        "credentials" -> Json.obj(
-          "providerId" -> "12345",
-          "providerType" -> "governmentGateway"
-        ),
         "declaration" -> Json.obj(
-          "firstName" ->"John",
+          "firstName" -> "John",
           "middleName" -> "William",
           "lastName" -> "O'Connor"
+        ),
+        "credential" -> Json.obj(
+          "email" -> "client@email.com",
+          "loginTimes" -> Json.obj(
+            "currentLogin" -> "2020-10-10T00:00:00.000Z",
+            "previousLogin" -> "2020-10-05T00:00:00.000Z"
+          ),
+          "groupIdentifier" -> "groupIdentifier",
+          "provider" -> Json.obj(
+            "providerId" -> "12345",
+            "providerType" -> "governmentGateway"
+          )
         ),
         "agentDetails" -> Json.obj(
           "arn" -> "AARN1234567",
@@ -139,7 +147,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
       val trn = "ABTRUST12345678"
 
       when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
-        .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+        .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
       when(mockLocalDateTimeService.now(ZoneOffset.UTC))
         .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
@@ -151,16 +159,17 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         .thenReturn("payloadChecksum")
 
       val fResult = SUT.register(trn, payLoad)
+
       whenReady(fResult) { result =>
-        result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+        result mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
         payloadCaptor.getValue.payload mustBe "encodedPayload"
         payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
         payloadCaptor.getValue.metadata.businessId mustBe "trs"
         payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
-        payloadCaptor.getValue.metadata.notableEvent mustBe "trs-registration"
+        payloadCaptor.getValue.metadata.notableEvent mustBe NotableEvent.TrsRegistration
         payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
         payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
-        payloadCaptor.getValue.metadata.identityData mustBe identityData
+        Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityDataJson
         (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
       }
     }
@@ -182,17 +191,19 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         "clientPort" -> "ClientPort",
         "sessionId" -> "SessionID",
         "requestId" -> "RequestID",
-        "email" -> "No email",
-        "loginTimes" -> Json.obj(
-          "currentLogin" -> "2020-10-10T00:00:00.000Z"
-        ),
-        "groupIdentifier" -> "No group identifier",
-        "credentials" -> Json.obj(
-          "providerId" -> "No provider id",
-          "providerType" -> "No provider type"
+        "credential" -> Json.obj(
+          "email" -> "No email",
+          "loginTimes" -> Json.obj(
+            "currentLogin" -> "2020-10-10T00:00:00.000Z"
+          ),
+          "groupIdentifier" -> "No group identifier",
+          "provider" -> Json.obj(
+            "providerId" -> "No provider id",
+            "providerType" -> "No provider type"
+          )
         ),
         "declaration" -> Json.obj(
-          "firstName" ->"John",
+          "firstName" -> "John",
           "middleName" -> "William",
           "lastName" -> "O'Connor"
         )
@@ -201,7 +212,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
       val trn = "ABTRUST12345678"
 
       when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
-        .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+        .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
       when(mockLocalDateTimeService.now(ZoneOffset.UTC))
         .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
@@ -214,15 +225,15 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
 
       val fResult = SUT.register(trn, payLoadWithoutAgentDetails)
       whenReady(fResult) { result =>
-        result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+        result mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
         payloadCaptor.getValue.payload mustBe "encodedPayload"
         payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
         payloadCaptor.getValue.metadata.businessId mustBe "trs"
         payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
-        payloadCaptor.getValue.metadata.notableEvent mustBe "trs-registration"
+        payloadCaptor.getValue.metadata.notableEvent mustBe NotableEvent.TrsRegistration
         payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
         payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
-        payloadCaptor.getValue.metadata.identityData mustBe identityData
+        Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
         (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
       }
     }
@@ -246,18 +257,20 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           "clientPort" -> "ClientPort",
           "sessionId" -> "SessionID",
           "requestId" -> "RequestID",
-          "email" -> "client@email.com",
-          "loginTimes" -> Json.obj(
-            "currentLogin" -> "2020-10-10T00:00:00.000Z",
-            "previousLogin" -> "2020-10-05T00:00:00.000Z"
-          ),
-          "groupIdentifier" -> "groupIdentifier",
-          "credentials" -> Json.obj(
-            "providerId" -> "12345",
-            "providerType" -> "governmentGateway"
+          "credential" -> Json.obj(
+            "email" -> "client@email.com",
+            "loginTimes" -> Json.obj(
+              "currentLogin" -> "2020-10-10T00:00:00.000Z",
+              "previousLogin" -> "2020-10-05T00:00:00.000Z"
+            ),
+            "groupIdentifier" -> "groupIdentifier",
+            "provider" -> Json.obj(
+              "providerId" -> "12345",
+              "providerType" -> "governmentGateway"
+            )
           ),
           "declaration" -> Json.obj(
-            "firstName" ->"Abram",
+            "firstName" -> "Abram",
             "middleName" -> "Joe",
             "lastName" -> "James"),
           "agentDetails" -> Json.obj(
@@ -275,7 +288,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         val utr = "1234567890"
 
         when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
-          .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+          .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
         when(mockLocalDateTimeService.now(ZoneOffset.UTC))
           .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
@@ -289,15 +302,15 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         val fResult = SUT.maintain(utr, payLoad)
 
         whenReady(fResult) { result =>
-          result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+          result mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
           payloadCaptor.getValue.payload mustBe "encodedPayload"
           payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
           payloadCaptor.getValue.metadata.businessId mustBe "trs"
           payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
-          payloadCaptor.getValue.metadata.notableEvent mustBe "trs-update-taxable"
+          payloadCaptor.getValue.metadata.notableEvent mustBe NotableEvent.TrsUpdateTaxable
           payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
           payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.UTR, utr)
-          payloadCaptor.getValue.metadata.identityData mustBe identityData
+          Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
           (payloadCaptor.getValue.metadata.headerData \ "test").as[String] mustBe "value"
         }
       }
@@ -319,18 +332,20 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           "clientPort" -> "ClientPort",
           "sessionId" -> "SessionID",
           "requestId" -> "RequestID",
-          "email" -> "client@email.com",
-          "loginTimes" -> Json.obj(
-            "currentLogin" -> "2020-10-10T00:00:00.000Z",
-            "previousLogin" -> "2020-10-05T00:00:00.000Z"
-          ),
-          "groupIdentifier" -> "groupIdentifier",
-          "credentials" -> Json.obj(
-            "providerId" -> "12345",
-            "providerType" -> "governmentGateway"
+          "credential" -> Json.obj(
+            "email" -> "client@email.com",
+            "loginTimes" -> Json.obj(
+              "currentLogin" -> "2020-10-10T00:00:00.000Z",
+              "previousLogin" -> "2020-10-05T00:00:00.000Z"
+            ),
+            "groupIdentifier" -> "groupIdentifier",
+            "provider" -> Json.obj(
+              "providerId" -> "12345",
+              "providerType" -> "governmentGateway"
+            )
           ),
           "declaration" -> Json.obj(
-            "firstName" ->"Abram",
+            "firstName" -> "Abram",
             "middleName" -> "Joe",
             "lastName" -> "James"),
           "agentDetails" -> Json.obj(
@@ -347,7 +362,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         val urn = "NTTRUST12345678"
 
         when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
-          .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+          .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
         when(mockLocalDateTimeService.now(ZoneOffset.UTC))
           .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
@@ -361,15 +376,15 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         val fResult = SUT.maintain(urn, payLoad)
 
         whenReady(fResult) { result =>
-          result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+          result mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
           payloadCaptor.getValue.payload mustBe "encodedPayload"
           payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
           payloadCaptor.getValue.metadata.businessId mustBe "trs"
           payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
-          payloadCaptor.getValue.metadata.notableEvent mustBe "trs-update-non-taxable"
+          payloadCaptor.getValue.metadata.notableEvent mustBe NotableEvent.TrsUpdateNonTaxable
           payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
           payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.URN, urn)
-          payloadCaptor.getValue.metadata.identityData mustBe identityData
+          Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
           (payloadCaptor.getValue.metadata.headerData \ "test").as[String] mustBe "value"
         }
       }
@@ -378,83 +393,84 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
     ".sendEvent" must {
 
       "parse X-Forwarded-For header when there is no True-Client-IP or True-Client-Port" in {
+        lazy val payloadCaptor = ArgumentCaptor.forClass(classOf[NRSSubmission])
 
-          lazy val payloadCaptor = ArgumentCaptor.forClass(classOf[NRSSubmission])
+        val payLoad = Json.toJson(registrationRequest)
 
-          val payLoad = Json.toJson(registrationRequest)
+        implicit val headerCarrierWithXForwardedFor: HeaderCarrier = HeaderCarrier(
+          authorization = Some(Authorization("Bearer 12345")),
+          deviceID = Some("deviceId"),
+          sessionId = Some(SessionId("SessionID")),
+          requestId = Some(RequestId("RequestID")),
+          forwarded = Some(ForwardedFor("xForwardedForIpAddress"))
+        )
 
-          implicit val headerCarrierWithXForwardedFor: HeaderCarrier = HeaderCarrier(
-            authorization = Some(Authorization("Bearer 12345")),
-            deviceID = Some("deviceId"),
-            sessionId = Some(SessionId("SessionID")),
-            requestId = Some(RequestId("RequestID")),
-            forwarded = Some(ForwardedFor("xForwardedForIpAddress"))
-          )
+        implicit val request: IdentifierRequest[JsValue] =
+          IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Agent, credentialData = credential)
 
-          implicit val request: IdentifierRequest[JsValue] =
-            IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Agent, credentialData = credential)
-
-          val identityData = Json.obj(
-            "internalId" -> "internalId",
-            "affinityGroup" -> "Agent",
-            "deviceId" -> "deviceId",
-            "clientIP" -> "xForwardedForIpAddress",
-            "clientPort" -> "No Client Port",
-            "sessionId" -> "SessionID",
-            "requestId" -> "RequestID",
+        val identityData = Json.obj(
+          "internalId" -> "internalId",
+          "affinityGroup" -> "Agent",
+          "deviceId" -> "deviceId",
+          "clientIP" -> "xForwardedForIpAddress",
+          "clientPort" -> "No Client Port",
+          "sessionId" -> "SessionID",
+          "requestId" -> "RequestID",
+          "credential" -> Json.obj(
             "email" -> "client@email.com",
             "loginTimes" -> Json.obj(
               "currentLogin" -> "2020-10-10T00:00:00.000Z",
               "previousLogin" -> "2020-10-05T00:00:00.000Z"
             ),
             "groupIdentifier" -> "groupIdentifier",
-            "credentials" -> Json.obj(
+            "provider" -> Json.obj(
               "providerId" -> "12345",
               "providerType" -> "governmentGateway"
-            ),
-            "declaration" -> Json.obj(
-              "firstName" ->"John",
-              "middleName" -> "William",
-              "lastName" -> "O'Connor"),
-            "agentDetails" -> Json.obj(
-              "arn" -> "AARN1234567",
-              "agentName" -> "Mr . xys abcde",
-              "agentAddress" -> Json.obj(
-                "line1" -> "line1",
-                "line2" -> "line2",
-                "postCode" -> "TF3 2BX",
-                "country" -> "GB"),
-              "agentTelephoneNumber" -> "07912180120",
-              "clientReference" -> "clientReference")
-          )
+            )
+          ),
+          "declaration" -> Json.obj(
+            "firstName" -> "John",
+            "middleName" -> "William",
+            "lastName" -> "O'Connor"),
+          "agentDetails" -> Json.obj(
+            "arn" -> "AARN1234567",
+            "agentName" -> "Mr . xys abcde",
+            "agentAddress" -> Json.obj(
+              "line1" -> "line1",
+              "line2" -> "line2",
+              "postCode" -> "TF3 2BX",
+              "country" -> "GB"),
+            "agentTelephoneNumber" -> "07912180120",
+            "clientReference" -> "clientReference")
+        )
 
-          val trn = "ABTRUST12345678"
+        val trn = "ABTRUST12345678"
 
-          when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
-            .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+        when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
+          .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
-          when(mockLocalDateTimeService.now(ZoneOffset.UTC))
-            .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
+        when(mockLocalDateTimeService.now(ZoneOffset.UTC))
+          .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
 
-          when(mockPayloadEncodingService.encode(mEq(payLoad)))
-            .thenReturn("encodedPayload")
+        when(mockPayloadEncodingService.encode(mEq(payLoad)))
+          .thenReturn("encodedPayload")
 
-          when(mockPayloadEncodingService.generateChecksum(mEq(payLoad)))
-            .thenReturn("payloadChecksum")
+        when(mockPayloadEncodingService.generateChecksum(mEq(payLoad)))
+          .thenReturn("payloadChecksum")
 
-          val fResult = SUT.register(trn, payLoad)(headerCarrierWithXForwardedFor, request)
-          whenReady(fResult) { result =>
-            result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
-            payloadCaptor.getValue.payload mustBe "encodedPayload"
-            payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
-            payloadCaptor.getValue.metadata.businessId mustBe "trs"
-            payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
-            payloadCaptor.getValue.metadata.notableEvent mustBe "trs-registration"
-            payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
-            payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
-            payloadCaptor.getValue.metadata.identityData mustBe identityData
-            (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
-          }
+        val fResult = SUT.register(trn, payLoad)(headerCarrierWithXForwardedFor, request)
+        whenReady(fResult) { result =>
+          result mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+          payloadCaptor.getValue.payload mustBe "encodedPayload"
+          payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
+          payloadCaptor.getValue.metadata.businessId mustBe "trs"
+          payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
+          payloadCaptor.getValue.metadata.notableEvent mustBe NotableEvent.TrsRegistration
+          payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
+          payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
+          Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
+          (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
+        }
       }
 
       "parse the first X-Forwarded-For header when there is no True-Client-IP or True-Client-Port" in {
@@ -482,18 +498,20 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           "clientPort" -> "No Client Port",
           "sessionId" -> "SessionID",
           "requestId" -> "RequestID",
-          "email" -> "client@email.com",
-          "loginTimes" -> Json.obj(
-            "currentLogin" -> "2020-10-10T00:00:00.000Z",
-            "previousLogin" -> "2020-10-05T00:00:00.000Z"
-          ),
-          "groupIdentifier" -> "groupIdentifier",
-          "credentials" -> Json.obj(
-            "providerId" -> "12345",
-            "providerType" -> "governmentGateway"
+          "credential" -> Json.obj(
+            "email" -> "client@email.com",
+            "loginTimes" -> Json.obj(
+              "currentLogin" -> "2020-10-10T00:00:00.000Z",
+              "previousLogin" -> "2020-10-05T00:00:00.000Z"
+            ),
+            "groupIdentifier" -> "groupIdentifier",
+            "provider" -> Json.obj(
+              "providerId" -> "12345",
+              "providerType" -> "governmentGateway"
+            )
           ),
           "declaration" -> Json.obj(
-            "firstName" ->"John",
+            "firstName" -> "John",
             "middleName" -> "William",
             "lastName" -> "O'Connor"),
           "agentDetails" -> Json.obj(
@@ -511,7 +529,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         val trn = "ABTRUST12345678"
 
         when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
-          .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+          .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
         when(mockLocalDateTimeService.now(ZoneOffset.UTC))
           .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
@@ -524,15 +542,15 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
 
         val fResult = SUT.register(trn, payLoad)(headerCarrierWithXForwardedFor, request)
         whenReady(fResult) { result =>
-          result mustBe SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
+          result mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
           payloadCaptor.getValue.payload mustBe "encodedPayload"
           payloadCaptor.getValue.metadata.payloadSha256Checksum mustBe "payloadChecksum"
           payloadCaptor.getValue.metadata.businessId mustBe "trs"
           payloadCaptor.getValue.metadata.userAuthToken mustBe "Bearer 12345"
-          payloadCaptor.getValue.metadata.notableEvent mustBe "trs-registration"
+          payloadCaptor.getValue.metadata.notableEvent mustBe NotableEvent.TrsRegistration
           payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
           payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
-          payloadCaptor.getValue.metadata.identityData mustBe identityData
+          Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
           (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
         }
       }
@@ -553,30 +571,30 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
       }
     }
 
-      ".getAgentDetails" must {
-        "successfully get Agent Details for a registration when they exist" in {
-          val payLoad = trustVariationsRequest
-          val result = SUT.getAgentDetails(payLoad)
+    ".getAgentDetails" must {
+      "successfully get Agent Details for a registration when they exist" in {
+        val payLoad = trustVariationsRequest
+        val result = SUT.getAgentDetails(payLoad)
 
-          result mustBe Some(Json.parse(
+        result mustBe Some(Json.parse(
           """{"arn":"AARN1234567",
-              |"agentName":"Mr. xys abcde",
-              |"agentAddress":{
-              |"line1":"line1",
-              |"line2":"line2",
-              |"postCode":"TF3 2BX",
-              |"country":"GB"
-              |},
-              |"agentTelephoneNumber":"07912180120",
-              |"clientReference":"clientReference"}""".stripMargin))
-        }
+            |"agentName":"Mr. xys abcde",
+            |"agentAddress":{
+            |"line1":"line1",
+            |"line2":"line2",
+            |"postCode":"TF3 2BX",
+            |"country":"GB"
+            |},
+            |"agentTelephoneNumber":"07912180120",
+            |"clientReference":"clientReference"}""".stripMargin))
+      }
 
-        "return a None when no Agent Details exist for a registration" in {
-          val payLoad = Json.obj()
-          val result = SUT.getAgentDetails(payLoad)
+      "return a None when no Agent Details exist for a registration" in {
+        val payLoad = Json.obj()
+        val result = SUT.getAgentDetails(payLoad)
 
-          result mustBe None
-        }
+        result mustBe None
+      }
     }
   }
 }

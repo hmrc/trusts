@@ -19,7 +19,7 @@ package controllers
 import base.BaseSpec
 import controllers.actions.FakeIdentifierAction
 import models._
-import models.nonRepudiation.SuccessfulNrsResponse
+import models.nonRepudiation.NRSResponse
 import models.registration._
 import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSuccess}
 import org.mockito.ArgumentMatchers.any
@@ -30,6 +30,8 @@ import play.api.mvc.BodyParsers
 import play.api.test.Helpers
 import play.api.test.Helpers.{status, _}
 import services._
+import services.nonRepudiation.NonRepudiationService
+import services.rosm.RosmPatternService
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -64,7 +66,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
         when(mockNonRepudiationService.register(any(), any())(any(), any()))
-          .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+          .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
         when(rosmPatternService.enrolAndLogResult(any(), any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentSuccess))
 
@@ -92,7 +94,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
           .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
         when(mockNonRepudiationService.register(any(), any())(any(), any()))
-          .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+          .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
         when(rosmPatternService.enrolAndLogResult(any(), any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentSuccess))
 
@@ -122,7 +124,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
             .thenReturn(Future.successful(RegistrationTrnResponse(trnResponse)))
 
           when(mockNonRepudiationService.register(any(), any())(any(), any()))
-            .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+            .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
           when(rosmPatternService.enrolAndLogResult(any(), any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentFailure))
 
@@ -148,7 +150,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
       "agent user submits trusts payload" in {
 
         when(mockNonRepudiationService.register(any(), any())(any(), any()))
-          .thenReturn(Future.successful(SuccessfulNrsResponse("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+          .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
         when(rosmPatternService.enrolAndLogResult(any(), any(), any())(any())).thenReturn(Future.successful(TaxEnrolmentNotProcessed))
 

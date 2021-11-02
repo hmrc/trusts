@@ -22,49 +22,98 @@ import play.api.libs.json._
 import retry.RetryPolicy
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
-sealed trait NrsResponse extends RetryPolicy
+sealed trait NRSResponse extends RetryPolicy {
+  val statusCode: Int
+}
 
-object NrsResponse extends Logging {
-  final val CHECKSUM_FAILED = 419
-  implicit lazy val httpReads: HttpReads[NrsResponse] =
+object NRSResponse extends Logging {
+
+  final private val CHECKSUM_FAILED = 419
+
+  implicit lazy val httpReads: HttpReads[NRSResponse] =
     (_: String, _: String, response: HttpResponse) => {
       logger.info(s"response status received from NRS: ${response.status}")
       response.status match {
         case ACCEPTED =>
-          response.json.as[SuccessfulNrsResponse]
+          response.json.as[Success]
         case BAD_REQUEST =>
-          BadRequestResponse
+          BadRequest
         case UNAUTHORIZED =>
           logger.error("No X-API-Key provided or it is invalid.")
-          UnauthorisedResponse
+          Unauthorised
         case BAD_GATEWAY =>
-          BadGatewayResponse
+          BadGateway
         case SERVICE_UNAVAILABLE =>
           logger.error("Service unavailable response from NRS.")
-          ServiceUnavailableResponse
+          ServiceUnavailable
         case GATEWAY_TIMEOUT =>
-          GatewayTimeoutResponse
+          GatewayTimeout
         case CHECKSUM_FAILED =>
-          ChecksumFailedResponse
+          ChecksumFailed
         case status =>
           logger.error(s"Error response from NRS with status $status and body: ${response.body}")
-          InternalServerErrorResponse
+          InternalServerError
       }
     }
+
+  implicit val writes: Writes[NRSResponse] = Writes {
+    case Success(nrSubmissionId) => Json.obj("nrSubmissionId" -> nrSubmissionId, "code" -> ACCEPTED)
+    case e => Json.obj("code" -> e.statusCode, "reason" -> e.toString)
+  }
+
+  implicit val reads: Reads[NRSResponse] = (json: JsValue) => {
+    json.validate[Success]
+  }
+
+  case class Success(nrSubmissionId: String) extends NRSResponse with RetryPolicy {
+    override val retry = false
+    override val statusCode: Int = ACCEPTED
+  }
+
+  object Success {
+    implicit val formats: Format[Success] = Json.format[Success]
+  }
+
+  case object BadRequest extends NRSResponse with RetryPolicy {
+    override val retry = false
+    override val statusCode: Int = BAD_REQUEST
+  }
+
+  case object BadGateway extends NRSResponse with RetryPolicy {
+    override val retry = true
+    override val statusCode: Int = BAD_GATEWAY
+  }
+
+  case object Unauthorised extends NRSResponse with RetryPolicy {
+    override val retry = false
+    override val statusCode: Int = UNAUTHORIZED
+  }
+
+  case object ServiceUnavailable extends NRSResponse with RetryPolicy {
+    override val retry = true
+    override val statusCode: Int = SERVICE_UNAVAILABLE
+  }
+
+  case object GatewayTimeout extends NRSResponse with RetryPolicy {
+    override val retry = true
+    override val statusCode: Int = GATEWAY_TIMEOUT
+  }
+
+  case object InternalServerError extends NRSResponse with RetryPolicy {
+    override val retry = true
+    override val statusCode: Int = INTERNAL_SERVER_ERROR
+  }
+
+  case object ChecksumFailed extends NRSResponse with RetryPolicy {
+    override val retry = false
+    override val statusCode: Int = CHECKSUM_FAILED
+  }
+
+  case object NoActiveSession extends NRSResponse with RetryPolicy {
+    override val retry = false
+    override val statusCode: Int = INTERNAL_SERVER_ERROR
+  }
 }
 
-case class SuccessfulNrsResponse(nrSubmissionId: String) extends NrsResponse with RetryPolicy { override val retry = false}
 
-object SuccessfulNrsResponse {
-  implicit val formats: Format[SuccessfulNrsResponse] = Json.format[SuccessfulNrsResponse]
-}
-
-case object BadRequestResponse extends NrsResponse with RetryPolicy { override val retry = false}
-case object BadGatewayResponse extends NrsResponse with RetryPolicy { override val retry = true}
-case object UnauthorisedResponse extends NrsResponse with RetryPolicy { override val retry = false}
-case object ServiceUnavailableResponse extends NrsResponse with RetryPolicy { override val retry = true}
-case object GatewayTimeoutResponse extends NrsResponse with RetryPolicy { override val retry = true}
-case object InternalServerErrorResponse extends NrsResponse with RetryPolicy { override val retry = true}
-case object ChecksumFailedResponse extends NrsResponse with RetryPolicy { override val retry = false}
-case object NoActiveSessionResponse extends NrsResponse with RetryPolicy { override val retry = false}
 

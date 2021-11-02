@@ -16,8 +16,11 @@
 
 package models.nonRepudiation
 
+import models.requests.CredentialData
+
 import java.time.LocalDateTime
 import play.api.libs.json._
+import uk.gov.hmrc.auth.core.AffinityGroup
 
 case class NRSSubmission(payload: String,
                          metadata: MetaData)
@@ -26,13 +29,36 @@ object NRSSubmission {
   implicit val formats: OFormat[NRSSubmission] = Json.format[NRSSubmission]
 }
 
+case class IdentityData(
+                         internalId: String,
+                         affinityGroup: AffinityGroup,
+                         deviceId: String,
+                         clientIP: String,
+                         clientPort: String,
+                         sessionId: String,
+                         requestId: String,
+                         credential: CredentialData,
+                         declaration: JsValue,
+                         agentDetails: Option[JsValue]
+                       )
+
+object IdentityData {
+  implicit val formats: OFormat[IdentityData] = Json.format[IdentityData]
+
+  val txmWrites : Writes[IdentityData] = Writes { identity =>
+    Json.toJsObject(identity).
+      -("deviceId").
+      -("clientIP").
+      -("clientPort")
+  }
+}
 
 case class MetaData(businessId: String,
-                    notableEvent: String,
+                    notableEvent: NotableEvent,
                     payloadContentType: String,
                     payloadSha256Checksum: String,
                     userSubmissionTimestamp: LocalDateTime,
-                    identityData: JsValue,
+                    identityData: IdentityData,
                     userAuthToken: String,
                     headerData: JsValue,
                     searchKeys: SearchKeys
@@ -43,6 +69,17 @@ object MetaData {
   import utils.LocalDateTimeFormatter._
 
   implicit val formats: OFormat[MetaData] = Json.format[MetaData]
+
+  val txmWrites: Writes[MetaData] = Writes { metaData =>
+    Json.obj(
+      "businessId" -> metaData.businessId,
+      "notableEvent" -> metaData.notableEvent,
+      "payloadSha256Checksum" -> metaData.payloadSha256Checksum,
+      "userSubmissionTimestamp" -> Json.toJson(metaData.userSubmissionTimestamp),
+      "identityData" -> Json.toJson(metaData.identityData)(IdentityData.txmWrites),
+      "searchKeys" -> Json.toJson(metaData.searchKeys)
+    )
+  }
 }
 
 

@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package services
+package models.auditing
 
-import org.apache.commons.codec.binary.Base64
-import org.apache.commons.codec.digest.DigestUtils
-import play.api.libs.json.{JsValue, Json}
+import models.nonRepudiation.{MetaData, NRSResponse}
+import play.api.libs.json.{Json, Writes}
 
-class PayloadEncodingService {
+case class NrsAuditEvent(metaData: MetaData,
+                         result: NRSResponse)
 
-  def encode(payload: JsValue): String =
-    Base64.encodeBase64URLSafeString(Json.toBytes(payload))
+object NrsAuditEvent {
 
-  def generateChecksum(payload: JsValue): String =
-    DigestUtils.sha256Hex(Json.stringify(payload))
+  val txmWrites: Writes[NrsAuditEvent] = Writes { event =>
+    Json.obj(
+      "payload" -> Json.toJson(event.metaData)(MetaData.txmWrites),
+      "result" -> Json.toJson(event.result)
+    )
+  }
 }

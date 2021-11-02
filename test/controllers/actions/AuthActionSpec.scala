@@ -17,12 +17,11 @@
 package controllers.actions
 
 import base.BaseSpec
-import org.scalatest.matchers.must.Matchers._
 import com.google.inject.Inject
 import org.joda.time.DateTime
+import org.scalatest.matchers.must.Matchers._
 import play.api.mvc.{BodyParsers, Results}
 import play.api.test.Helpers._
-import services.LocalDateTimeService
 import uk.gov.hmrc.auth.core.AffinityGroup.Individual
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate

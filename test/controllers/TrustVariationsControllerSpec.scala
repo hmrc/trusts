@@ -16,25 +16,27 @@
 
 package controllers
 
-import java.time.LocalDate
 import base.BaseSpec
 import controllers.actions.FakeIdentifierAction
 import exceptions._
 import models.auditing.TrustAuditing
-import models.nonRepudiation.SuccessfulNrsResponse
+import models.nonRepudiation.NRSResponse
 import models.variation.{DeclarationForApi, VariationContext, VariationResponse}
 import models.{DeclarationName, NameType}
 import org.mockito.ArgumentMatchers.{eq => Meq, _}
-import org.scalatest.matchers.must.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.IntegrationPatience
+import org.scalatest.matchers.must.Matchers._
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import services._
+import services.auditing.AuditService
+import services.nonRepudiation.NonRepudiationService
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach  with IntegrationPatience {
@@ -76,7 +78,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       val declarationForApi =
         DeclarationForApi(declaration, None, endDate = Some(LocalDate.of(2021, 2, 5)))
 
-      when(mockNonRepudiationService.maintain(any(), any())(any(), any())).thenReturn(Future.successful(SuccessfulNrsResponse("uuid")))
+      when(mockNonRepudiationService.maintain(any(), any())(any(), any())).thenReturn(Future.successful(NRSResponse.Success("uuid")))
 
       when(mockVariationService.submitDeclaration(any(), any(), any())(any()))
         .thenReturn(Future.successful(VariationContext(Json.obj(), VariationResponse("TVN123"))))

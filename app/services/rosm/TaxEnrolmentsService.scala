@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package services
+package services.rosm
 
 import akka.actor.ActorSystem
 import akka.pattern.after

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package services
+package services.rosm
 
 import base.BaseSpec
 import exceptions._
-import org.scalatest.matchers.must.Matchers._
 import models.tax_enrolments.{SubscriptionIdResponse, TaxEnrolmentFailure, TaxEnrolmentSuccess}
 import org.mockito.Mockito.when
+import org.scalatest.matchers.must.Matchers._
+import services.TrustsService
 
 import scala.concurrent.Future
 

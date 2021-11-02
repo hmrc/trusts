@@ -20,7 +20,7 @@ import javax.inject.Inject
 import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, ControllerComponents}
-import services.AuditService
+import services.auditing.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController

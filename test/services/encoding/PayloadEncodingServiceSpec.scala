@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package services
+package services.encoding
 
 import base.BaseSpec
 import org.scalatest.matchers.must.Matchers
