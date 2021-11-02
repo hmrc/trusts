@@ -16,20 +16,20 @@
 
 package controllers
 
-import javax.inject.Inject
 import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, ControllerComponents}
-import services.auditing.AuditService
+import services.auditing.MigrationAuditService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.Session
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class OrchestratorCallbackController @Inject()(auditService: AuditService, cc: ControllerComponents)
+class OrchestratorCallbackController @Inject()(auditService: MigrationAuditService, cc: ControllerComponents)
   extends BackendController(cc) with Logging {
 
   def migrationToTaxableCallback(urn: String, utr: String): Action[JsValue] = Action.async(parse.json) {
@@ -40,19 +40,25 @@ class OrchestratorCallbackController @Inject()(auditService: AuditService, cc: C
         s" Orchestrator: migrate subscription callback message was: ${request.body}")
 
       val success = (request.body \ "success").asOpt[Boolean]
-      success match {
-        case Some(false) => {
-          val errorMessage = (request.body \ "errorMessage").asOpt[String]
-          logger.error(s"[migrationToTaxableCallback][Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr]" +
-            s" Orchestrator: migrate subscription failed, error message was: ${errorMessage.getOrElse(request.body)}")
 
-          auditService.auditOrchestratorTransformationToTaxableError(urn, utr, errorMessage.getOrElse("Error"))
+      success match {
+        case Some(false) =>
+          val errorMessage = (request.body \ "errorMessage").asOpt[String]
+
+          logger.error(
+            s"[migrationToTaxableCallback]" +
+            s"[Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr]" +
+            s" Orchestrator: migrate subscription failed," +
+            s" error message was: ${errorMessage.getOrElse(request.body)}"
+          )
+
+          auditService
+            .auditOrchestratorFailure(urn, utr, errorMessage.getOrElse("Error"))
+
           Future(NoContent)
-        }
-        case _ => {
-          auditService.auditOrchestratorTransformationToTaxableSuccess(urn, utr)
+        case _ =>
+          auditService.auditOrchestratorSuccess(urn, utr)
           Future(NoContent)
-        }
       }
 
   }

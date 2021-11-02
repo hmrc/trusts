@@ -16,14 +16,10 @@
 
 package services.auditing
 
-import models.Registration
 import models.auditing._
-import models.registration.{RegistrationFailureResponse, RegistrationTrnResponse}
-import models.variation.VariationResponse
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import utils.Constants._
 
 import javax.inject.Inject
 
@@ -32,49 +28,13 @@ class AuditService @Inject()(auditConnector: AuditConnector){
   import scala.concurrent.ExecutionContext.Implicits._
 
   def audit(event: String,
-            registration: Registration,
-            draftId: String,
-            internalId: String,
-            response: RegistrationTrnResponse)(implicit hc: HeaderCarrier): Unit = {
-
-    val auditPayload = TrustRegistrationSubmissionAuditEvent(
-      registration = registration,
-      draftId = draftId,
-      internalAuthId = internalId,
-      response = response
-    )
-
-    auditConnector.sendExplicitAudit(
-      event,
-      auditPayload
-    )
-  }
-
-  def audit(event: String,
-            registration: Registration,
-            draftId: String,
-            internalId: String,
-            response: RegistrationFailureResponse)(implicit hc: HeaderCarrier): Unit = {
-
-    val auditPayload = TrustRegistrationFailureAuditEvent(
-      registration = registration,
-      draftId = draftId,
-      internalAuthId = internalId,
-      response = response
-    )
-
-    auditConnector.sendExplicitAudit(
-      event,
-      auditPayload
-    )
-  }
-
-  def audit(event: String,
             request: JsValue,
             internalId: String,
-            response: JsValue)(implicit hc: HeaderCarrier): Unit = {
+            response: JsValue
+           )
+           (implicit hc: HeaderCarrier): Unit = {
 
-    val auditPayload = GetTrustOrEstateAuditEvent(
+    val auditPayload = RequestAndResponseAuditEvent(
       request = request,
       internalAuthId = internalId,
       response = response
@@ -86,26 +46,12 @@ class AuditService @Inject()(auditConnector: AuditConnector){
     )
   }
 
-  def auditVariation(event: String,
-            request: JsValue,
-            internalId: String,
-            migrateToTaxable: Boolean,
-            response: JsValue)(implicit hc: HeaderCarrier): Unit = {
-
-    val auditPayload = VariationAuditEvent(
-      request = request,
-      internalAuthId = internalId,
-      migrateToTaxable = migrateToTaxable,
-      response = response
-    )
-
-    auditConnector.sendExplicitAudit(
-      event,
-      auditPayload
-    )
-  }
-
-  def auditErrorResponse(eventName: String, request: JsValue, internalId: String, errorReason: String)(implicit hc: HeaderCarrier): Unit = {
+  def auditErrorResponse(eventName: String,
+                         request: JsValue,
+                         internalId: String,
+                         errorReason: String
+                        )
+                        (implicit hc: HeaderCarrier): Unit = {
 
     audit(
       event = eventName,
@@ -115,116 +61,5 @@ class AuditService @Inject()(auditConnector: AuditConnector){
     )
   }
 
-  def auditVariationSubmitted(internalId: String,
-                              migrateToTaxable: Boolean,
-                              payload: JsValue,
-                              variationResponse: VariationResponse
-                             )(implicit hc: HeaderCarrier): Unit = {
-    val hasField = (field: String) =>
-      payload.transform((JsPath \ field).json.pick).isSuccess
 
-    val isAgent = hasField("agentDetails")
-    val isClose = hasField("trustEndDate")
-
-    val event = (isAgent, isClose) match {
-      case (false, false) => TrustAuditing.VARIATION_SUBMITTED_BY_ORGANISATION
-      case (false, true) => TrustAuditing.CLOSURE_SUBMITTED_BY_ORGANISATION
-      case (true, false) => TrustAuditing.VARIATION_SUBMITTED_BY_AGENT
-      case _ => TrustAuditing.CLOSURE_SUBMITTED_BY_AGENT
-    }
-
-    val trustTaxablePick: Reads[JsBoolean] = (TRUST \ DETAILS \ TAXABLE).json.pick[JsBoolean]
-    val response = payload.transform(trustTaxablePick) match {
-      case JsSuccess(JsBoolean(trustTaxable), _) =>
-        Json.obj(
-          "tvn" -> variationResponse.tvn,
-          "trustTaxable" -> trustTaxable
-        )
-      case _ => Json.toJson(variationResponse)
-    }
-
-    auditVariation(
-      event = event,
-      request = payload,
-      internalId = internalId,
-      migrateToTaxable = migrateToTaxable,
-      response = response
-    )
-  }
-
-  def auditVariationTransformationError(internalId: String,
-                                        utr: String,
-                                        data: JsValue = Json.obj(),
-                                        transforms: JsValue,
-                                        errorReason: String = "",
-                                        jsErrors: JsValue = Json.obj()
-                                       )(implicit hc: HeaderCarrier): Unit = {
-    val request = Json.obj(
-      "utr" -> utr,
-      "data" -> data,
-      "transformations" -> transforms
-    )
-
-    val response = Json.obj(
-      "errorReason" -> errorReason,
-      "jsErrors" -> jsErrors
-    )
-
-    audit(
-      event = TrustAuditing.TRUST_VARIATION_PREPARATION_FAILED,
-      request = request,
-      internalId = internalId,
-      response = response
-    )
-  }
-
-  def auditOrchestrator(event: String,
-            request: JsValue,
-            response: JsValue)(implicit hc: HeaderCarrier): Unit = {
-
-    val auditPayload = OrchestratorAuditEvent(
-      request = request,
-      response = response
-    )
-
-    auditConnector.sendExplicitAudit(
-      event,
-      auditPayload
-    )
-  }
-
-  def auditOrchestratorTransformationToTaxableSuccess(urn: String, utr: String)(implicit hc: HeaderCarrier): Unit = {
-    val request = Json.obj(
-      "urn" -> urn,
-      "utr" -> utr
-    )
-
-    auditOrchestrator(
-      event = TrustAuditing.ORCHESTRATOR_TO_TAXABLE_SUCCESS,
-      request = request,
-      response = Json.obj("success" -> true)
-    )
-  }
-
-  def auditOrchestratorTransformationToTaxableError(urn: String, utr: String, errorReason: String)(implicit hc: HeaderCarrier): Unit = {
-    val request = Json.obj(
-      "urn" -> urn,
-      "utr" -> utr
-    )
-
-    auditOrchestrator(
-      event = TrustAuditing.ORCHESTRATOR_TO_TAXABLE_FAILED,
-      request = request,
-      response = Json.obj("errorReason" -> errorReason)
-    )
-  }
-
-  def auditTaxEnrolmentTransformationToTaxableError(subscriptionId: String, urn: String, errorMessage: String)(implicit hc: HeaderCarrier) : Unit = {
-    auditErrorResponse(
-      TrustAuditing.TAX_ENROLMENT_TO_TAXABLE_FAILED,
-      Json.obj("urn" -> urn),
-      subscriptionId,
-      errorMessage
-    )
-  }
 }

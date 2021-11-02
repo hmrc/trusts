@@ -16,34 +16,14 @@
 
 package models.auditing
 
-import models.Registration
-import models.registration.{RegistrationFailureResponse, RegistrationTrnResponse}
 import play.api.libs.json.{Format, JsValue, Json}
 
-case class TrustRegistrationSubmissionAuditEvent(registration: Registration,
-                                                 draftId: String,
-                                                 internalAuthId: String,
-                                                 response: RegistrationTrnResponse)
+case class RequestAndResponseAuditEvent(request: JsValue,
+                                        internalAuthId: String,
+                                        response: JsValue)
 
-object TrustRegistrationSubmissionAuditEvent {
-  implicit val formats: Format[TrustRegistrationSubmissionAuditEvent] = Json.format[TrustRegistrationSubmissionAuditEvent]
-}
-
-case class TrustRegistrationFailureAuditEvent(registration: Registration,
-                                              draftId: String,
-                                              internalAuthId: String,
-                                              response: RegistrationFailureResponse)
-
-object TrustRegistrationFailureAuditEvent {
-  implicit val formats: Format[TrustRegistrationFailureAuditEvent] = Json.format[TrustRegistrationFailureAuditEvent]
-}
-
-case class GetTrustOrEstateAuditEvent(request: JsValue,
-                                      internalAuthId: String,
-                                      response: JsValue)
-
-object GetTrustOrEstateAuditEvent {
-  implicit val formats: Format[GetTrustOrEstateAuditEvent] = Json.format[GetTrustOrEstateAuditEvent]
+object RequestAndResponseAuditEvent {
+  implicit val formats: Format[RequestAndResponseAuditEvent] = Json.format[RequestAndResponseAuditEvent]
 }
 
 case class VariationAuditEvent(request: JsValue,

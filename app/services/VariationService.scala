@@ -17,7 +17,7 @@
 package services
 
 import exceptions.{EtmpCacheDataStaleException, InternalServerErrorException}
-import models.variation.{DeclarationForApi, VariationContext, VariationResponse}
+import models.variation.{DeclarationForApi, VariationContext}
 import models.auditing.TrustAuditing
 import models.get_trust.TrustProcessedResponse
 import play.api.Logging
@@ -29,7 +29,7 @@ import utils.Session
 
 import javax.inject.Inject
 import models.tax_enrolments.{TaxEnrolmentNotProcessed, TaxEnrolmentSubscriberResponse}
-import services.auditing.AuditService
+import services.auditing.VariationAuditService
 import services.dates.LocalDateService
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -39,7 +39,7 @@ class VariationService @Inject()(
                                   trustsService: TrustsService,
                                   transformationService: TransformationService,
                                   declarationTransformer: DeclarationTransformer,
-                                  auditService: AuditService,
+                                  auditService: VariationAuditService,
                                   localDateService: LocalDateService,
                                   taxableMigrationService: TaxableMigrationService
                                 ) extends Logging {
@@ -66,7 +66,7 @@ class VariationService @Inject()(
               transformAndSubmit(identifier, internalId, declaration, originalJson, response)
             case e@JsError(errors) =>
 
-              auditService.auditVariationTransformationError(
+              auditService.auditTransformationError(
                 internalId,
                 identifier,
                 originalJson,
@@ -80,7 +80,7 @@ class VariationService @Inject()(
           }
         case e@JsError(errors) =>
 
-          auditService.auditVariationTransformationError(
+          auditService.auditTransformationError(
             internalId,
             identifier,
             originalResponse.getTrust,
@@ -115,7 +115,7 @@ class VariationService @Inject()(
             submitVariationAndCheckForMigration(identifier, value, internalId)
           case JsError(errors) =>
 
-            auditService.auditVariationTransformationError(
+            auditService.auditTransformationError(
               internalId = internalId,
               utr = identifier,
               transforms = JsString("Declaration transforms"),
@@ -167,7 +167,12 @@ class VariationService @Inject()(
     }
   }
 
-  private def submitVariation(identifier: String, value: JsValue, internalId: String, migrateToTaxable: Boolean)
+  private def submitVariation(
+                               identifier: String,
+                               value: JsValue,
+                               internalId: String,
+                               migrateToTaxable: Boolean
+                             )
                              (implicit hc: HeaderCarrier): Future[VariationContext] = {
 
     val payload = value.applyRules
@@ -183,7 +188,7 @@ class VariationService @Inject()(
 
       logger.info(s"[Session ID: ${Session.id(hc)}][UTR/URN: $identifier] trust submitted a variation")
 
-      auditService.auditVariationSubmitted(
+      auditService.auditVariationSuccess(
         internalId,
         migrateToTaxable,
         payload,

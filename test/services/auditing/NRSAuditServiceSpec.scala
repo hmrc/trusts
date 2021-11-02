@@ -112,7 +112,7 @@ class NRSAuditServiceSpec extends BaseSpec {
           |""".stripMargin)
 
       verify(connector).sendExplicitAudit(
-        equalTo("NrsTrsRegistration"),
+        equalTo("NonRepudiationTrustRegistration"),
         equalTo(expectedAuditData))(any(), any(), any())
     }
 
@@ -191,7 +191,7 @@ class NRSAuditServiceSpec extends BaseSpec {
           |""".stripMargin)
 
       verify(connector).sendExplicitAudit(
-        equalTo("NrsTrsTaxableUpdate"),
+        equalTo("NonRepudiationTrustTaxableUpdate"),
         equalTo(expectedAuditData))(any(), any(), any())
     }
 
@@ -270,7 +270,7 @@ class NRSAuditServiceSpec extends BaseSpec {
           |""".stripMargin)
 
       verify(connector).sendExplicitAudit(
-        equalTo("NrsTrsNonTaxableUpdate"),
+        equalTo("NonRepudiationTrustNonTaxableUpdate"),
         equalTo(expectedAuditData))(any(), any(), any())
     }
 
@@ -349,7 +349,7 @@ class NRSAuditServiceSpec extends BaseSpec {
           |""".stripMargin)
 
       verify(connector).sendExplicitAudit(
-        equalTo("NrsTrsNonTaxableUpdate"),
+        equalTo("NonRepudiationTrustNonTaxableUpdate"),
         equalTo(expectedAuditData))(any(), any(), any())
     }
   }
