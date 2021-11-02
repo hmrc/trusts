@@ -19,10 +19,10 @@ package services.auditing
 import base.BaseSpec
 import models.auditing.VariationAuditEvent
 import models.variation.VariationResponse
+import org.mockito.ArgumentMatchers.{any, eq => equalTo}
+import org.mockito.Mockito.verify
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import org.mockito.Mockito.verify
-import org.mockito.ArgumentMatchers.{any, eq => equalTo}
 
 class VariationAuditServiceSpec  extends BaseSpec {
 

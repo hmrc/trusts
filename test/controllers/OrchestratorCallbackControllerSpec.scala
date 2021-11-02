@@ -24,7 +24,7 @@ import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.Json
 import play.api.test.Helpers
 import play.api.test.Helpers.{status, _}
-import services.auditing.{AuditService, MigrationAuditService}
+import services.auditing.MigrationAuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
