@@ -87,6 +87,17 @@ class NRSAuditServiceSpec extends BaseSpec {
           |     },
           |     "agentDetails": {
           |       "example": "agent details"
+          |     },
+          |     "credential": {
+          |       "credentials": {
+          |           "providerId": "No provider id",
+          |           "providerType": "No provider type"
+          |       },
+          |       "email": "No email",
+          |       "groupIdentifier": "No group identifier",
+          |       "loginTimes": {
+          |           "currentLogin": "2020-10-10T00:00:00.000Z"
+          |        }
           |     }
           |   },
           |   "searchKeys": {
@@ -155,6 +166,17 @@ class NRSAuditServiceSpec extends BaseSpec {
           |     "requestId": "requestId",
           |     "declaration": {
           |       "example": "name"
+          |     },
+          |     "credential": {
+          |       "credentials": {
+          |           "providerId": "No provider id",
+          |           "providerType": "No provider type"
+          |       },
+          |       "email": "No email",
+          |       "groupIdentifier": "No group identifier",
+          |       "loginTimes": {
+          |           "currentLogin": "2020-10-10T00:00:00.000Z"
+          |        }
           |     }
           |   },
           |   "searchKeys": {
@@ -223,6 +245,17 @@ class NRSAuditServiceSpec extends BaseSpec {
           |     "requestId": "requestId",
           |     "declaration": {
           |       "example": "name"
+          |     },
+          |     "credential": {
+          |       "credentials": {
+          |           "providerId": "No provider id",
+          |           "providerType": "No provider type"
+          |       },
+          |       "email": "No email",
+          |       "groupIdentifier": "No group identifier",
+          |       "loginTimes": {
+          |           "currentLogin": "2020-10-10T00:00:00.000Z"
+          |        }
           |     }
           |   },
           |   "searchKeys": {
@@ -291,6 +324,17 @@ class NRSAuditServiceSpec extends BaseSpec {
           |     "requestId": "requestId",
           |     "declaration": {
           |       "example": "name"
+          |     },
+          |     "credential": {
+          |       "credentials": {
+          |           "providerId": "No provider id",
+          |           "providerType": "No provider type"
+          |       },
+          |       "email": "No email",
+          |       "groupIdentifier": "No group identifier",
+          |       "loginTimes": {
+          |           "currentLogin": "2020-10-10T00:00:00.000Z"
+          |        }
           |     }
           |   },
           |   "searchKeys": {

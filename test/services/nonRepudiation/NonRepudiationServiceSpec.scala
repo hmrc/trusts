@@ -62,7 +62,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
 
   private val credential: CredentialData = CredentialData(
     Some("groupIdentifier"),
-    LoginTimes(DateTime.parse("2020-10-10"),Some(DateTime.parse("2020-10-05"))),
+    LoginTimes(DateTime.parse("2020-10-10"), Some(DateTime.parse("2020-10-05"))),
     Some(Credentials("12345", "governmentGateway")),
     Some("client@email.com")
   )
@@ -118,15 +118,17 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           "middleName" -> "William",
           "lastName" -> "O'Connor"
         ),
-        "email" -> "client@email.com",
-        "loginTimes" -> Json.obj(
-          "currentLogin" -> "2020-10-10T00:00:00.000Z",
-          "previousLogin" -> "2020-10-05T00:00:00.000Z"
-        ),
-        "groupIdentifier" -> "groupIdentifier",
-        "credentials" -> Json.obj(
-          "providerId" -> "12345",
-          "providerType" -> "governmentGateway"
+        "credential" -> Json.obj(
+          "email" -> "client@email.com",
+          "loginTimes" -> Json.obj(
+            "currentLogin" -> "2020-10-10T00:00:00.000Z",
+            "previousLogin" -> "2020-10-05T00:00:00.000Z"
+          ),
+          "groupIdentifier" -> "groupIdentifier",
+          "credentials" -> Json.obj(
+            "providerId" -> "12345",
+            "providerType" -> "governmentGateway"
+          )
         ),
         "agentDetails" -> Json.obj(
           "arn" -> "AARN1234567",
@@ -188,14 +190,16 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         "clientPort" -> "ClientPort",
         "sessionId" -> "SessionID",
         "requestId" -> "RequestID",
-        "email" -> "No email",
-        "loginTimes" -> Json.obj(
-          "currentLogin" -> "2020-10-10T00:00:00.000Z"
-        ),
-        "groupIdentifier" -> "No group identifier",
-        "credentials" -> Json.obj(
-          "providerId" -> "No provider id",
-          "providerType" -> "No provider type"
+        "credential" -> Json.obj(
+          "email" -> "No email",
+          "loginTimes" -> Json.obj(
+            "currentLogin" -> "2020-10-10T00:00:00.000Z"
+          ),
+          "groupIdentifier" -> "No group identifier",
+          "credentials" -> Json.obj(
+            "providerId" -> "No provider id",
+            "providerType" -> "No provider type"
+          )
         ),
         "declaration" -> Json.obj(
           "firstName" -> "John",
@@ -252,15 +256,17 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           "clientPort" -> "ClientPort",
           "sessionId" -> "SessionID",
           "requestId" -> "RequestID",
-          "email" -> "client@email.com",
-          "loginTimes" -> Json.obj(
-            "currentLogin" -> "2020-10-10T00:00:00.000Z",
-            "previousLogin" -> "2020-10-05T00:00:00.000Z"
-          ),
-          "groupIdentifier" -> "groupIdentifier",
-          "credentials" -> Json.obj(
-            "providerId" -> "12345",
-            "providerType" -> "governmentGateway"
+          "credential" -> Json.obj(
+            "email" -> "client@email.com",
+            "loginTimes" -> Json.obj(
+              "currentLogin" -> "2020-10-10T00:00:00.000Z",
+              "previousLogin" -> "2020-10-05T00:00:00.000Z"
+            ),
+            "groupIdentifier" -> "groupIdentifier",
+            "credentials" -> Json.obj(
+              "providerId" -> "12345",
+              "providerType" -> "governmentGateway"
+            )
           ),
           "declaration" -> Json.obj(
             "firstName" -> "Abram",
@@ -325,15 +331,17 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           "clientPort" -> "ClientPort",
           "sessionId" -> "SessionID",
           "requestId" -> "RequestID",
-          "email" -> "client@email.com",
-          "loginTimes" -> Json.obj(
-            "currentLogin" -> "2020-10-10T00:00:00.000Z",
-            "previousLogin" -> "2020-10-05T00:00:00.000Z"
-          ),
-          "groupIdentifier" -> "groupIdentifier",
-          "credentials" -> Json.obj(
-            "providerId" -> "12345",
-            "providerType" -> "governmentGateway"
+          "credential" -> Json.obj(
+            "email" -> "client@email.com",
+            "loginTimes" -> Json.obj(
+              "currentLogin" -> "2020-10-10T00:00:00.000Z",
+              "previousLogin" -> "2020-10-05T00:00:00.000Z"
+            ),
+            "groupIdentifier" -> "groupIdentifier",
+            "credentials" -> Json.obj(
+              "providerId" -> "12345",
+              "providerType" -> "governmentGateway"
+            )
           ),
           "declaration" -> Json.obj(
             "firstName" -> "Abram",
@@ -407,15 +415,17 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           "clientPort" -> "No Client Port",
           "sessionId" -> "SessionID",
           "requestId" -> "RequestID",
-          "email" -> "client@email.com",
-          "loginTimes" -> Json.obj(
-            "currentLogin" -> "2020-10-10T00:00:00.000Z",
-            "previousLogin" -> "2020-10-05T00:00:00.000Z"
-          ),
-          "groupIdentifier" -> "groupIdentifier",
-          "credentials" -> Json.obj(
-            "providerId" -> "12345",
-            "providerType" -> "governmentGateway"
+          "credential" -> Json.obj(
+            "email" -> "client@email.com",
+            "loginTimes" -> Json.obj(
+              "currentLogin" -> "2020-10-10T00:00:00.000Z",
+              "previousLogin" -> "2020-10-05T00:00:00.000Z"
+            ),
+            "groupIdentifier" -> "groupIdentifier",
+            "credentials" -> Json.obj(
+              "providerId" -> "12345",
+              "providerType" -> "governmentGateway"
+            )
           ),
           "declaration" -> Json.obj(
             "firstName" -> "John",
@@ -487,15 +497,17 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           "clientPort" -> "No Client Port",
           "sessionId" -> "SessionID",
           "requestId" -> "RequestID",
-          "email" -> "client@email.com",
-          "loginTimes" -> Json.obj(
-            "currentLogin" -> "2020-10-10T00:00:00.000Z",
-            "previousLogin" -> "2020-10-05T00:00:00.000Z"
-          ),
-          "groupIdentifier" -> "groupIdentifier",
-          "credentials" -> Json.obj(
-            "providerId" -> "12345",
-            "providerType" -> "governmentGateway"
+          "credential" -> Json.obj(
+            "email" -> "client@email.com",
+            "loginTimes" -> Json.obj(
+              "currentLogin" -> "2020-10-10T00:00:00.000Z",
+              "previousLogin" -> "2020-10-05T00:00:00.000Z"
+            ),
+            "groupIdentifier" -> "groupIdentifier",
+            "credentials" -> Json.obj(
+              "providerId" -> "12345",
+              "providerType" -> "governmentGateway"
+            )
           ),
           "declaration" -> Json.obj(
             "firstName" -> "John",
