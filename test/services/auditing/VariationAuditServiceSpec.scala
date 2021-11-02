@@ -17,36 +17,33 @@
 package services.auditing
 
 import base.BaseSpec
-import models.auditing.{NrsAuditEvent, OrchestratorAuditEvent, VariationAuditEvent}
-import models.nonRepudiation._
+import models.auditing.VariationAuditEvent
 import models.variation.VariationResponse
-import org.mockito.ArgumentMatchers.{any, eq => equalTo}
-import org.mockito.Mockito.verify
 import play.api.libs.json.Json
-import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import org.mockito.Mockito.verify
+import org.mockito.ArgumentMatchers.{any, eq => equalTo}
 
-import java.time.LocalDateTime
-
-class AuditServiceSpec extends BaseSpec {
+class VariationAuditServiceSpec  extends BaseSpec {
 
   "auditVariationSubmitted" should {
 
     "send Variation Submitted by Organisation" when {
       "there are no special JSON fields" in {
         val connector = mock[AuditConnector]
-        val service = new AuditService(connector)
+        val service = new VariationAuditService(connector)
 
         val request = Json.obj()
 
         val response = VariationResponse("TRN123456")
-        service.auditVariationSubmitted("internalId", false, request, response)
+
+        service.auditVariationSuccess("internalId", false, request, response)
 
         val expectedAuditData = VariationAuditEvent(
-          request,
-          "internalId",
-          false,
-          Json.toJson(response)
+          request = request,
+          internalAuthId = "internalId",
+          migrateToTaxable = false,
+          response = Json.toJson(response)
         )
 
         verify(connector).sendExplicitAudit[VariationAuditEvent](
@@ -58,20 +55,20 @@ class AuditServiceSpec extends BaseSpec {
     "send Variation Submitted by Agent" when {
       "there is an AgentDetails JSON field" in {
         val connector = mock[AuditConnector]
-        val service = new AuditService(connector)
+        val service = new VariationAuditService(connector)
 
         val request = Json.obj(
           "agentDetails" -> Json.obj() // Doesn't care about contents of object
         )
 
         val response = VariationResponse("TRN123456")
-        service.auditVariationSubmitted("internalId", false, request, response)
+        service.auditVariationSuccess("internalId", false, request, response)
 
         val expectedAuditData = VariationAuditEvent(
-          request,
-          "internalId",
-          false,
-          Json.toJson(response)
+          request = request,
+          internalAuthId = "internalId",
+          migrateToTaxable = false,
+          response = Json.toJson(response)
         )
 
         verify(connector).sendExplicitAudit[VariationAuditEvent](
@@ -83,7 +80,7 @@ class AuditServiceSpec extends BaseSpec {
     "send Closure Submitted by Organisation" when {
       "there is an endTrustDate field" in {
         val connector = mock[AuditConnector]
-        val service = new AuditService(connector)
+        val service = new VariationAuditService(connector)
 
         val request = Json.obj(
           "trustEndDate" -> "2012-02-12",
@@ -101,13 +98,13 @@ class AuditServiceSpec extends BaseSpec {
           "trustTaxable" -> true
         )
 
-        service.auditVariationSubmitted("internalId", false, request, VariationResponse("TRN123456"))
+        service.auditVariationSuccess("internalId", false, request, VariationResponse("TRN123456"))
 
         val expectedAuditData = VariationAuditEvent(
-          request,
-          "internalId",
-          false,
-          Json.toJson(response)
+          request = request,
+          internalAuthId = "internalId",
+          migrateToTaxable = false,
+          response = Json.toJson(response)
         )
 
         verify(connector).sendExplicitAudit[VariationAuditEvent](
@@ -119,7 +116,7 @@ class AuditServiceSpec extends BaseSpec {
     "send Closure Submitted by Agent" when {
       "there are agentDetails and endTrustDate JSON fields" in {
         val connector = mock[AuditConnector]
-        val service = new AuditService(connector)
+        val service = new VariationAuditService(connector)
 
         val request = Json.obj(
           "trustEndDate" -> "2012-02-12",
@@ -138,13 +135,13 @@ class AuditServiceSpec extends BaseSpec {
           "trustTaxable" -> false
         )
 
-        service.auditVariationSubmitted("internalId", false, request, VariationResponse("TRN123456"))
+        service.auditVariationSuccess("internalId", false, request, VariationResponse("TRN123456"))
 
         val expectedAuditData = VariationAuditEvent(
-          request,
-          "internalId",
-          false,
-          Json.toJson(response)
+          request = request,
+          internalAuthId = "internalId",
+          migrateToTaxable = false,
+          response = Json.toJson(response)
         )
 
         verify(connector).sendExplicitAudit[VariationAuditEvent](
@@ -154,54 +151,4 @@ class AuditServiceSpec extends BaseSpec {
     }
   }
 
-  "auditOrchestratorResponse" should {
-
-    "send Success message" when {
-
-      val connector = mock[AuditConnector]
-      val service = new AuditService(connector)
-
-      val urn = "NTTRUST00000001"
-      val utr = "123456789"
-
-      val request = Json.obj(
-        "urn" -> urn,
-        "utr" -> utr
-      )
-      service.auditOrchestratorTransformationToTaxableSuccess(urn, utr)
-
-      val expectedAuditData = OrchestratorAuditEvent(
-        request,
-        Json.obj("success" -> true)
-      )
-
-      verify(connector).sendExplicitAudit[OrchestratorAuditEvent](
-        equalTo("OrchestratorNonTaxableTrustToTaxableSuccess"),
-        equalTo(expectedAuditData))(any(), any(), any())
-    }
-
-    "send Failure message" when {
-      val connector = mock[AuditConnector]
-      val service = new AuditService(connector)
-
-      val urn = "NTTRUST00000001"
-      val utr = "123456789"
-
-      val request = Json.obj(
-        "urn" -> urn,
-        "utr" -> utr
-      )
-
-      service.auditOrchestratorTransformationToTaxableError(urn, utr, "Error happened")
-
-      val expectedAuditData = OrchestratorAuditEvent(
-        request,
-        response = Json.obj("errorReason" -> "Error happened")
-      )
-
-      verify(connector).sendExplicitAudit[OrchestratorAuditEvent](
-        equalTo("OrchestratorNonTaxableTrustToTaxableFailed"),
-        equalTo(expectedAuditData))(any(), any(), any())
-    }
-  }
 }

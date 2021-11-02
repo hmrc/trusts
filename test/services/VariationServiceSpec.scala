@@ -19,26 +19,25 @@ package services
 import exceptions.EtmpCacheDataStaleException
 import models.get_trust.{ResponseHeader, TrustProcessedResponse}
 import models.tax_enrolments.TaxEnrolmentSuccess
-import models.variation.VariationResponse
+import models.variation.{DeclarationForApi, VariationResponse}
 import models.{DeclarationName, NameType}
-import models.variation.DeclarationForApi
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => equalTo}
 import org.mockito.Mockito.{reset, times, verify, when}
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest.matchers.must.Matchers._
 import org.scalatest.BeforeAndAfterEach
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.must.Matchers._
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
+import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
+import services.auditing.VariationAuditService
+import services.dates.LocalDateService
 import transformers.DeclarationTransformer
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{JsonFixtures, JsonUtils, NonTaxable5MLDFixtures}
-import play.api.inject.bind
-import services.auditing.AuditService
-import services.dates.LocalDateService
 
 import java.time.LocalDate
 import scala.concurrent.Future
@@ -65,7 +64,7 @@ class VariationServiceSpec extends AnyWordSpec
     override def now: LocalDate = LocalDate.of(1999, 3, 14)
   }
 
-  private val auditService = mock[AuditService]
+  private val auditService = mock[VariationAuditService]
   private val trustsService = mock[TrustsService]
   private val transformationService = mock[TransformationService]
   private val transformer = mock[DeclarationTransformer]
@@ -80,7 +79,7 @@ class VariationServiceSpec extends AnyWordSpec
   }
 
   val application: Application = new GuiceApplicationBuilder()
-    .overrides(bind[AuditService].toInstance(auditService))
+    .overrides(bind[VariationAuditService].toInstance(auditService))
     .overrides(bind[TrustsService].toInstance(trustsService))
     .overrides(bind[TransformationService].toInstance(transformationService))
     .overrides(bind[DeclarationTransformer].toInstance(transformer))
@@ -175,7 +174,7 @@ class VariationServiceSpec extends AnyWordSpec
 
         whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { _ =>
 
-          verify(auditService).auditVariationSubmitted(
+          verify(auditService).auditVariationSuccess(
             equalTo(internalId),
             equalTo(false),
             equalTo(transformedJson),
@@ -209,7 +208,7 @@ class VariationServiceSpec extends AnyWordSpec
 
         whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi)) { _ =>
 
-          verify(auditService).auditVariationSubmitted(
+          verify(auditService).auditVariationSuccess(
             equalTo(internalId),
             equalTo(true),
             equalTo(transformedJson),
@@ -237,7 +236,7 @@ class VariationServiceSpec extends AnyWordSpec
 
         whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { _ =>
 
-          verify(auditService).auditVariationTransformationError(
+          verify(auditService).auditTransformationError(
             equalTo(internalId),
             equalTo(utr),
             equalTo(trustInfoJson5MLD),
@@ -263,7 +262,7 @@ class VariationServiceSpec extends AnyWordSpec
 
         whenReady(OUT.submitDeclaration(utr, internalId, declarationForApi).failed) { _ =>
 
-          verify(auditService).auditVariationTransformationError(
+          verify(auditService).auditTransformationError(
             equalTo(internalId),
             equalTo(utr),
             any(),
