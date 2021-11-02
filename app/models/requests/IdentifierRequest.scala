@@ -22,14 +22,15 @@ import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, LoginTimes}
 
 case class CredentialData(
-                         groupIdentifier: Option[String],
-                         loginTimes: LoginTimes,
-                         credentials: Option[Credentials],
-                         email: Option[String]
+                           groupIdentifier: Option[String],
+                           loginTimes: LoginTimes,
+                           provider: Option[Credentials],
+                           email: Option[String]
                          )
 
 object CredentialData {
 
+  // Required by Format[LoginTimes]
   import utils.JodaDateTimeFormatter._
 
   import Credentials.{reads => credReads}
@@ -56,7 +57,7 @@ object CredentialData {
     Json.obj(
       "groupIdentifier" -> JsString(o.groupIdentifier.getOrElse("No group identifier")),
       "loginTimes" -> Json.toJson(o.loginTimes),
-      "credentials" -> Json.toJson(o.credentials),
+      "provider" -> Json.toJson(o.provider),
       "email" -> JsString(o.email.getOrElse("No email"))
     )
   }

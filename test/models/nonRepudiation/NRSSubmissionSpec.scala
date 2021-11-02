@@ -42,7 +42,7 @@ class NRSSubmissionSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "declaration"),
         agentDetails = Some(Json.obj("example" -> "agent")),
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), credentials = None, email = None)
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), provider = None, email = None)
       )
 
       val payLoad = NRSSubmission(
@@ -80,7 +80,7 @@ class NRSSubmissionSpec extends BaseSpec {
           |     "sessionId": "sessionId",
           |     "requestId": "requestId",
           |     "credential": {
-          |       "credentials": {
+          |       "provider": {
           |           "providerId": "No provider id",
           |           "providerType": "No provider type"
           |       },
@@ -121,7 +121,7 @@ class NRSSubmissionSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "declaration"),
         agentDetails = None,
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), credentials = None, email = None)
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), provider = None, email = None)
       )
 
       val payLoad = NRSSubmission(
@@ -159,7 +159,7 @@ class NRSSubmissionSpec extends BaseSpec {
           |     "sessionId": "sessionId",
           |     "requestId": "requestId",
           |     "credential": {
-          |       "credentials": {
+          |       "provider": {
           |           "providerId": "No provider id",
           |           "providerType": "No provider type"
           |       },
@@ -197,7 +197,7 @@ class NRSSubmissionSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "declaration"),
         agentDetails = Some(Json.obj("example" -> "agent")),
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), credentials = None, email = None)
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), provider = None, email = None)
       )
 
       val payLoad = NRSSubmission(
@@ -235,7 +235,7 @@ class NRSSubmissionSpec extends BaseSpec {
           |     "sessionId": "sessionId",
           |     "requestId": "requestId",
           |     "credential": {
-          |       "credentials": {
+          |       "provider": {
           |           "providerId": "No provider id",
           |           "providerType": "No provider type"
           |       },

@@ -125,7 +125,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
             "previousLogin" -> "2020-10-05T00:00:00.000Z"
           ),
           "groupIdentifier" -> "groupIdentifier",
-          "credentials" -> Json.obj(
+          "provider" -> Json.obj(
             "providerId" -> "12345",
             "providerType" -> "governmentGateway"
           )
@@ -159,6 +159,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         .thenReturn("payloadChecksum")
 
       val fResult = SUT.register(trn, payLoad)
+
       whenReady(fResult) { result =>
         result mustBe NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")
         payloadCaptor.getValue.payload mustBe "encodedPayload"
@@ -196,7 +197,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
             "currentLogin" -> "2020-10-10T00:00:00.000Z"
           ),
           "groupIdentifier" -> "No group identifier",
-          "credentials" -> Json.obj(
+          "provider" -> Json.obj(
             "providerId" -> "No provider id",
             "providerType" -> "No provider type"
           )
@@ -263,7 +264,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
               "previousLogin" -> "2020-10-05T00:00:00.000Z"
             ),
             "groupIdentifier" -> "groupIdentifier",
-            "credentials" -> Json.obj(
+            "provider" -> Json.obj(
               "providerId" -> "12345",
               "providerType" -> "governmentGateway"
             )
@@ -338,7 +339,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
               "previousLogin" -> "2020-10-05T00:00:00.000Z"
             ),
             "groupIdentifier" -> "groupIdentifier",
-            "credentials" -> Json.obj(
+            "provider" -> Json.obj(
               "providerId" -> "12345",
               "providerType" -> "governmentGateway"
             )
@@ -422,7 +423,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
               "previousLogin" -> "2020-10-05T00:00:00.000Z"
             ),
             "groupIdentifier" -> "groupIdentifier",
-            "credentials" -> Json.obj(
+            "provider" -> Json.obj(
               "providerId" -> "12345",
               "providerType" -> "governmentGateway"
             )
@@ -504,7 +505,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
               "previousLogin" -> "2020-10-05T00:00:00.000Z"
             ),
             "groupIdentifier" -> "groupIdentifier",
-            "credentials" -> Json.obj(
+            "provider" -> Json.obj(
               "providerId" -> "12345",
               "providerType" -> "governmentGateway"
             )

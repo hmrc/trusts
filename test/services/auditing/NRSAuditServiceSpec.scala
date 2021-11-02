@@ -48,7 +48,7 @@ class NRSAuditServiceSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "name"),
         agentDetails = Some(Json.obj("example" -> "agent details")),
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), credentials = None, email = None)
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), provider = None, email = None)
       )
 
       val metaData = MetaData(
@@ -89,7 +89,7 @@ class NRSAuditServiceSpec extends BaseSpec {
           |       "example": "agent details"
           |     },
           |     "credential": {
-          |       "credentials": {
+          |       "provider": {
           |           "providerId": "No provider id",
           |           "providerType": "No provider type"
           |       },
@@ -130,7 +130,7 @@ class NRSAuditServiceSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "name"),
         agentDetails = None,
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), credentials = None, email = None)
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), provider = None, email = None)
       )
 
       val metaData = MetaData(
@@ -168,7 +168,7 @@ class NRSAuditServiceSpec extends BaseSpec {
           |       "example": "name"
           |     },
           |     "credential": {
-          |       "credentials": {
+          |       "provider": {
           |           "providerId": "No provider id",
           |           "providerType": "No provider type"
           |       },
@@ -209,7 +209,7 @@ class NRSAuditServiceSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "name"),
         agentDetails = None,
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), credentials = None, email = None)
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), provider = None, email = None)
       )
 
       val metaData = MetaData(
@@ -247,7 +247,7 @@ class NRSAuditServiceSpec extends BaseSpec {
           |       "example": "name"
           |     },
           |     "credential": {
-          |       "credentials": {
+          |       "provider": {
           |           "providerId": "No provider id",
           |           "providerType": "No provider type"
           |       },
@@ -288,7 +288,7 @@ class NRSAuditServiceSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "name"),
         agentDetails = None,
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), credentials = None, email = None)
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), provider = None, email = None)
       )
 
       val metaData = MetaData(
@@ -326,7 +326,7 @@ class NRSAuditServiceSpec extends BaseSpec {
           |       "example": "name"
           |     },
           |     "credential": {
-          |       "credentials": {
+          |       "provider": {
           |           "providerId": "No provider id",
           |           "providerType": "No provider type"
           |       },
