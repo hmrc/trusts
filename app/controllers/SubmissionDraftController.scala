@@ -26,7 +26,7 @@ import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.RegistrationSubmissionRepository
 import services.dates.LocalDateTimeService
-import services.{BackwardsCompatibilityService, TaxYearService}
+import services.TaxYearService
 import uk.gov.hmrc.http.NotFoundException
 import utils.Constants._
 import utils.JsonOps.prunePath
@@ -42,7 +42,6 @@ class SubmissionDraftController @Inject()(
                                            identify: IdentifierAction,
                                            localDateTimeService: LocalDateTimeService,
                                            cc: ControllerComponents,
-                                           backwardsCompatibilityService: BackwardsCompatibilityService,
                                            taxYearService: TaxYearService
                                          ) extends TrustsBaseController(cc) with Logging {
 
@@ -201,18 +200,6 @@ class SubmissionDraftController @Inject()(
         }
 
         Ok(Json.toJson(drafts))
-    }
-  }
-
-  def adjustDraft(draftId: String): Action[AnyContent] = identify.async { request =>
-    submissionRepository.getDraft(draftId, request.internalId) flatMap {
-      case Some(draft) =>
-        val updatedDraftData = backwardsCompatibilityService.adjustDraftData(draft)
-        submissionRepository.setDraft(draft.copy(draftData = updatedDraftData)) map { _ =>
-          Ok
-        }
-      case _ =>
-        Future.successful(NotFound)
     }
   }
 
