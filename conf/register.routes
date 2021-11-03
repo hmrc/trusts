@@ -11,8 +11,6 @@ POST        /submission-drafts/:draftId/main                controllers.Submissi
 
 GET         /submission-drafts                              controllers.SubmissionDraftController.getDrafts()
 
-POST        /submission-drafts/adjust-draft/:draftId        controllers.SubmissionDraftController.adjustDraft(draftId: String)
-
 DELETE      /submission-drafts/:draftId                     controllers.SubmissionDraftController.removeDraft(draftId: String)
 
 # Used by register-trust-beneficiary-frontend

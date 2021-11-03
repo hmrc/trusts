@@ -32,10 +32,10 @@ import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import repositories.RegistrationSubmissionRepository
+import services.TaxYearService
 import services.dates.LocalDateTimeService
-import services.{BackwardsCompatibilityService, TaxYearService}
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
-import utils.{JsonFixtures, JsonUtils}
+import utils.JsonFixtures
 
 import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.Future
@@ -43,35 +43,15 @@ import scala.concurrent.Future
 class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with JsonFixtures with Inside with ScalaFutures
   with GuiceOneAppPerSuite {
 
-  private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
-
+  private val createdAt: LocalDateTime = LocalDateTime.of(1997, 3, 14, 14, 45)
   private val currentDateTime: LocalDateTime = LocalDateTime.of(1999, 3, 14, 13, 33)
-  private object LocalDateTimeServiceStub extends LocalDateTimeService {
-    override def now: LocalDateTime = currentDateTime
-  }
 
   private val draftId: String = "draftId"
   private val internalId: String = "id"
-  private val createdAt: LocalDateTime = LocalDateTime.of(1997, 3, 14, 14, 45)
 
-  private val backwardsCompatibilityService = mock[BackwardsCompatibilityService]
   private val taxYearService = mock[TaxYearService]
 
-  private val existingDraftData = Json.parse(
-    """
-      |{
-      | "anotherKey": {
-      |   "foo": "bar",
-      |   "fizzbinn": true
-      | },
-      | "sectionKey": {
-      |   "field1": "value1",
-      |   "field2": "value2",
-      |   "field3": 3
-      | }
-      |}
-      |""".stripMargin
-  )
+  private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   private lazy val whenTrustSetupAtNewPath = Json.parse(
     """
@@ -241,6 +221,21 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       |}
       |""".stripMargin).as[RegistrationSubmissionDraft]
 
+  private val existingDraftData = Json.parse(
+    """
+      |{
+      | "anotherKey": {
+      |   "foo": "bar",
+      |   "fizzbinn": true
+      | },
+      | "sectionKey": {
+      |   "field1": "value1",
+      |   "field2": "value2",
+      |   "field3": 3
+      | }
+      |}
+      |""".stripMargin
+  )
   private val existingDraft = RegistrationSubmissionDraft(
     draftId = draftId,
     internalId = internalId,
@@ -249,6 +244,10 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
     reference = Some("theRef"),
     inProgress = Some(true)
   )
+
+  private object LocalDateTimeServiceStub extends LocalDateTimeService {
+    override def now: LocalDateTime = currentDateTime
+  }
 
   ".setSection" should {
 
@@ -262,7 +261,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
       val body = Json.parse(
@@ -294,7 +292,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -349,10 +346,8 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
-
 
       when(submissionRepository.getDraft(any(), any()))
         .thenReturn(Future.successful(Some(existingDraft)))
@@ -412,7 +407,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -554,7 +548,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -687,7 +680,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -724,7 +716,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -758,7 +749,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -783,7 +773,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -830,7 +819,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -877,7 +865,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -909,7 +896,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -936,7 +922,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -983,7 +968,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1033,7 +1017,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1089,7 +1072,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1142,7 +1124,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1165,7 +1146,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1192,7 +1172,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1243,7 +1222,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1266,7 +1244,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1293,7 +1270,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1326,7 +1302,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1349,7 +1324,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1376,7 +1350,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1415,7 +1388,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1441,7 +1413,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1477,7 +1448,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1500,7 +1470,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1527,7 +1496,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1607,7 +1575,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1634,7 +1601,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           identifierAction,
           LocalDateTimeServiceStub,
           Helpers.stubControllerComponents(),
-          backwardsCompatibilityService,
+
           taxYearService
         )
 
@@ -1661,7 +1628,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           identifierAction,
           LocalDateTimeServiceStub,
           Helpers.stubControllerComponents(),
-          backwardsCompatibilityService,
+
           taxYearService
         )
 
@@ -1684,7 +1651,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           identifierAction,
           LocalDateTimeServiceStub,
           Helpers.stubControllerComponents(),
-          backwardsCompatibilityService,
+
           taxYearService
         )
 
@@ -1713,7 +1680,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1749,7 +1715,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1772,7 +1737,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1798,7 +1762,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1829,7 +1792,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1852,7 +1814,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -1913,7 +1874,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           identifierAction,
           LocalDateTimeServiceStub,
           Helpers.stubControllerComponents(),
-          backwardsCompatibilityService,
+
           taxYearService
         )
 
@@ -1942,7 +1903,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           identifierAction,
           LocalDateTimeServiceStub,
           Helpers.stubControllerComponents(),
-          backwardsCompatibilityService,
+
           taxYearService
         )
 
@@ -1967,7 +1928,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           identifierAction,
           LocalDateTimeServiceStub,
           Helpers.stubControllerComponents(),
-          backwardsCompatibilityService,
+
           taxYearService
         )
 
@@ -2030,7 +1991,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           identifierAction,
           LocalDateTimeServiceStub,
           Helpers.stubControllerComponents(),
-          backwardsCompatibilityService,
+
           taxYearService
         )
 
@@ -2059,7 +2020,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           identifierAction,
           LocalDateTimeServiceStub,
           Helpers.stubControllerComponents(),
-          backwardsCompatibilityService,
+
           taxYearService
         )
 
@@ -2084,7 +2045,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           identifierAction,
           LocalDateTimeServiceStub,
           Helpers.stubControllerComponents(),
-          backwardsCompatibilityService,
+
           taxYearService
         )
 
@@ -2097,100 +2058,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         val result = controller.removeLivingSettlorsMappedPiece(draftId).apply(request)
 
         status(result) mustBe INTERNAL_SERVER_ERROR
-      }
-    }
-  }
-
-  ".adjustDraft" must {
-
-    val draftId: String = "358df5dd-63e3-4cad-aa93-403c83af97cd"
-    val internalId: String = "Int-d387bcea-3ca2-48ab-b6bc-3919a050414d"
-    val createdAt: LocalDateTime = LocalDateTime.of(2021, 2, 3, 14, 0)
-    val reference: String = "234425525"
-
-    val oldData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/old_assets_and_agents_draft_data.json")
-    val newData: JsValue = JsonUtils.getJsonValueFromFile("backwardscompatibility/new_assets_and_agents_draft_data.json")
-
-    def buildDraft(data: JsValue) = RegistrationSubmissionDraft(draftId, internalId, createdAt, data, Some(reference), Some(true))
-
-    "return Ok" when {
-      "draft has old-style data" in {
-
-        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
-        val submissionRepository = mock[RegistrationSubmissionRepository]
-
-        val controller = new SubmissionDraftController(
-          submissionRepository,
-          identifierAction,
-          LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents(),
-          backwardsCompatibilityService,
-          taxYearService
-        )
-
-        when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(buildDraft(oldData))))
-        when(backwardsCompatibilityService.adjustDraftData(any())).thenReturn(newData)
-        when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
-
-        val request = FakeRequest("GET", "path")
-
-        val result = controller.adjustDraft(draftId).apply(request)
-
-        status(result) mustBe OK
-
-        verify(submissionRepository).setDraft(buildDraft(newData))
-      }
-
-      "draft has new-style data" in {
-
-        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
-        val submissionRepository = mock[RegistrationSubmissionRepository]
-
-        val controller = new SubmissionDraftController(
-          submissionRepository,
-          identifierAction,
-          LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents(),
-          backwardsCompatibilityService,
-          taxYearService
-        )
-
-        when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(buildDraft(newData))))
-        when(backwardsCompatibilityService.adjustDraftData(any())).thenReturn(newData)
-        when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
-
-        val request = FakeRequest("GET", "path")
-
-        val result = controller.adjustDraft(draftId).apply(request)
-
-        status(result) mustBe OK
-
-        verify(submissionRepository).setDraft(buildDraft(newData))
-      }
-    }
-
-    "return NotFound" when {
-      "draft not found" in {
-
-        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
-        val submissionRepository = mock[RegistrationSubmissionRepository]
-
-        val controller = new SubmissionDraftController(
-          submissionRepository,
-          identifierAction,
-          LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents(),
-          backwardsCompatibilityService,
-          taxYearService
-        )
-
-        when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(None))
-
-        val request = FakeRequest("GET", "path")
-
-        val result = controller.adjustDraft(draftId).apply(request)
-
-        status(result) mustBe NOT_FOUND
       }
     }
   }
@@ -2216,7 +2083,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -2246,7 +2112,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -2307,7 +2172,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -2392,7 +2256,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -2439,7 +2302,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -2467,7 +2329,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -2499,7 +2360,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
@@ -2522,7 +2382,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         identifierAction,
         LocalDateTimeServiceStub,
         Helpers.stubControllerComponents(),
-        backwardsCompatibilityService,
         taxYearService
       )
 
