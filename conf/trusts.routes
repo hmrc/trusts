@@ -26,6 +26,7 @@ GET         /:identifier                                                        
 GET         /:identifier/transformed                                                        controllers.GetTrustController.get(identifier: String, applyTransforms: Boolean = true)
 
 # TODO - point all frontends at new route inside trusts.trustDetails.Routes and delete this route
+# TRANSFORMED
 GET         /:identifier/trust-details                                                      controllers.GetTrustController.getTrustDetails(identifier: String, applyTransformations: Boolean = true)
 
 GET         /:identifier/transformed/protectors-already-exist                               controllers.GetTrustController.getProtectorsAlreadyExist(identifier: String)
