@@ -1,5 +1,6 @@
 # microservice specific routes
 
+# Maintain a trust
 ->          /trust-details                                                                  trusts.trustDetails.Routes
 ->          /trustees                                                                       trusts.trustees.Routes
 ->          /beneficiaries                                                                  trusts.beneficiaries.Routes
@@ -9,36 +10,38 @@
 ->          /assets                                                                         trusts.assets.Routes
 ->          /tax-liability                                                                  trusts.taxLiability.Routes
 
+# Register a trust
 ->          /register                                                                       register.Routes
 
+# Register a trust, existing UTR
 POST        /check                                                                          controllers.CheckTrustController.checkExistingTrust
 
-POST        /tax-enrolment/registration/taxable/hmrc-ters-org/:trn/subscriptions            controllers.TaxEnrolmentCallbackController.taxableSubscriptionCallback(trn: String)
-POST        /tax-enrolment/registration/non-taxable/hmrc-tersnt-org/:trn/subscriptions      controllers.TaxEnrolmentCallbackController.nonTaxableSubscriptionCallback(trn: String)
-POST        /tax-enrolment/migration-to-taxable/urn/:urn/subscriptionId/:subscriptionId     controllers.TaxEnrolmentCallbackController.migrationSubscriptionCallback(subscriptionId: String, urn: String)
-
-POST        /orchestrator/migration-to-taxable/urn/:urn/utr/:utr                            controllers.OrchestratorCallbackController.migrationToTaxableCallback(urn: String, utr: String)
-
+# Maintain playback
 GET         /:identifier/refresh                                                            controllers.GetTrustController.getFromEtmp(identifier: String)
 
 GET         /:identifier                                                                    controllers.GetTrustController.get(identifier: String, applyTransforms: Boolean = false)
 
 GET         /:identifier/transformed                                                        controllers.GetTrustController.get(identifier: String, applyTransforms: Boolean = true)
 
-# TODO - point all frontends at new route inside trusts.trustDetails.Routes and delete this route
-# TRANSFORMED
-GET         /:identifier/trust-details                                                      controllers.GetTrustController.getTrustDetails(identifier: String, applyTransformations: Boolean = true)
-
 GET         /:identifier/transformed/protectors-already-exist                               controllers.GetTrustController.getProtectorsAlreadyExist(identifier: String)
 GET         /:identifier/transformed/other-individuals-already-exist                        controllers.GetTrustController.getOtherIndividualsAlreadyExist(identifier: String)
 GET         /:identifier/transformed/non-eea-companies-already-exist                        controllers.GetTrustController.getNonEeaCompaniesAlreadyExist(identifier: String)
-
-POST        /declare/:identifier                                                            controllers.TrustVariationsController.declare(identifier: String)
-
-GET         /:identifier/taxable-migration/migrating-to-taxable                             controllers.TaxableMigrationController.getTaxableMigrationFlag(identifier: String)
-POST        /:identifier/taxable-migration/migrating-to-taxable                             controllers.TaxableMigrationController.setTaxableMigrationFlag(identifier: String)
 
 DELETE      /:identifier/transforms                                                         controllers.transformations.TransformationController.removeTransforms(identifier: String)
 DELETE      /:identifier/trust-type-dependent-transform-fields                              controllers.transformations.TransformationController.removeTrustTypeDependentTransformFields(identifier: String)
 
 GET         /:identifier/is-trust-5mld                                                      controllers.GetTrustController.isTrust5mld(identifier: String)
+
+# Variation
+POST        /declare/:identifier                                                            controllers.TrustVariationsController.declare(identifier: String)
+
+# Tax enrolments, ROSM callbacks
+POST        /tax-enrolment/registration/taxable/hmrc-ters-org/:trn/subscriptions            controllers.TaxEnrolmentCallbackController.taxableSubscriptionCallback(trn: String)
+POST        /tax-enrolment/registration/non-taxable/hmrc-tersnt-org/:trn/subscriptions      controllers.TaxEnrolmentCallbackController.nonTaxableSubscriptionCallback(trn: String)
+POST        /tax-enrolment/migration-to-taxable/urn/:urn/subscriptionId/:subscriptionId     controllers.TaxEnrolmentCallbackController.migrationSubscriptionCallback(subscriptionId: String, urn: String)
+
+# Non-taxable to taxable ROSM migration
+POST        /orchestrator/migration-to-taxable/urn/:urn/utr/:utr                            controllers.OrchestratorCallbackController.migrationToTaxableCallback(urn: String, utr: String)
+
+GET         /:identifier/taxable-migration/migrating-to-taxable                             controllers.TaxableMigrationController.getTaxableMigrationFlag(identifier: String)
+POST        /:identifier/taxable-migration/migrating-to-taxable                             controllers.TaxableMigrationController.setTaxableMigrationFlag(identifier: String)
