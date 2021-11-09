@@ -45,6 +45,8 @@ class SubmissionDraftController @Inject()(
                                            taxYearService: TaxYearService
                                          ) extends TrustsBaseController(cc) with Logging {
 
+  private val whenTrustSetupPath: JsPath = JsPath \ "trustDetails" \ "data" \ "trustDetails" \ "whenTrustSetup"
+
   def setSection(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[RegistrationSubmissionDraftData] match {
@@ -224,12 +226,15 @@ class SubmissionDraftController @Inject()(
     }
   }
 
-  private val whenTrustSetupPath: JsPath = JsPath \ "trustDetails" \ "data" \ "trustDetails" \ "whenTrustSetup"
-
   def getWhenTrustSetup(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
-
       getResult[LocalDate, JsValue](draftId, whenTrustSetupPath)(x => Json.obj("startDate" -> x))
+  }
+
+  def getTaxLiabilityStartDate(draftId: String): Action[AnyContent] = identify.async {
+    implicit request =>
+      val taxLiabilityStartDatePath = __ \ "taxLiability" \ "data" \ "trustStartDate"
+      getResult[LocalDate, JsValue](draftId, taxLiabilityStartDatePath)(x => Json.obj("startDate" -> x))
   }
 
   def getFirstTaxYearAvailable(draftId: String): Action[AnyContent] = identify.async {
@@ -304,11 +309,10 @@ class SubmissionDraftController @Inject()(
     implicit request =>
       submissionRepository.getDraft(draftId, request.internalId).flatMap {
         case Some(draft) =>
-          val trustDetailsStartDatePath = __ \ "trustDetails" \ "data" \ "trustDetails" \ "whenTrustSetup"
           val taxLiabilityStartDatePath = __ \ "taxLiability" \ "data" \ "trustStartDate"
 
           val areStartDatesEqual = for {
-            trustDetailsStartDate <- get[LocalDate](draft.draftData, trustDetailsStartDatePath)
+            trustDetailsStartDate <- get[LocalDate](draft.draftData, whenTrustSetupPath)
             taxLiabilityStartDate <- get[LocalDate](draft.draftData, taxLiabilityStartDatePath)
           } yield {
             trustDetailsStartDate == taxLiabilityStartDate
