@@ -300,6 +300,38 @@ class SubmissionDraftController @Inject()(
       getResult[LeadTrusteeType](draftId, path)
   }
 
+  def reset(draftId: String, section: String, mappedDataKey: String): Action[AnyContent] = identify.async {
+    implicit request =>
+      submissionRepository.getDraft(draftId, request.internalId).flatMap {
+        case Some(draft) =>
+          val statusPath = EntityStatus.path \ section
+          val userAnswersPath = __ \ section
+          val rowsPath = AnswerSection.path \ section
+          val mappedDataPath = MappedPiece.path \ mappedDataKey
+
+          draft.draftData.transform {
+            prunePath(statusPath) andThen
+              prunePath(userAnswersPath) andThen
+              prunePath(rowsPath) andThen
+              prunePath(mappedDataPath)
+          } match {
+            case JsSuccess(data, _) =>
+              val draftWithStatusRemoved = draft.copy(draftData = data)
+              logger.info(s"[reset][Session ID: ${request.sessionId}]" +
+                s" removed status, mapped data, answers and status for $section")
+              submissionRepository.setDraft(draftWithStatusRemoved).map(x => if (x) Ok else InternalServerError)
+            case _: JsError =>
+              logger.info(s"[reset][Session ID: ${request.sessionId}]" +
+                s" failed to reset for $section")
+              Future.successful(InternalServerError)
+          }
+        case None =>
+          logger.info(s"[reset][Session ID: ${request.sessionId}]" +
+            s" no draft, cannot reset status for $section")
+          Future.successful(InternalServerError)
+      }
+  }
+
   /**
    * If the user fills in trust details, then answers the tax liability questions, then changes the trust start date,
    * we need to set the tax liability status to in progress and remove the yearsReturns answers from the registration
