@@ -20,18 +20,16 @@ import controllers.actions.IdentifierAction
 import models.registration.RegistrationSubmission.{AnswerSection, MappedPiece}
 import models.registration.{RegistrationSubmission, RegistrationSubmissionDraft, RegistrationSubmissionDraftData}
 import models.requests.IdentifierRequest
-import models.{AddressType, FirstTaxYearAvailable, LeadTrusteeType}
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.RegistrationSubmissionRepository
-import services.dates.LocalDateTimeService
 import services.TaxYearService
+import services.dates.LocalDateTimeService
 import uk.gov.hmrc.http.NotFoundException
 import utils.Constants._
 import utils.JsonOps.prunePath
 
-import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -41,11 +39,8 @@ class SubmissionDraftController @Inject()(
                                            submissionRepository: RegistrationSubmissionRepository,
                                            identify: IdentifierAction,
                                            localDateTimeService: LocalDateTimeService,
-                                           cc: ControllerComponents,
-                                           taxYearService: TaxYearService
+                                           cc: ControllerComponents
                                          ) extends TrustsBaseController(cc) with Logging {
-
-  private val whenTrustSetupPath: JsPath = JsPath \ "trustDetails" \ "data" \ "trustDetails" \ "whenTrustSetup"
 
   def setSection(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
@@ -112,7 +107,7 @@ class SubmissionDraftController @Inject()(
     prunePath(sectionPath) andThen JsPath.json.update(sectionPath.json.put(Json.toJson(answerSections)))
   }
 
-  def setSectionSet(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
+  def setDataset(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {
       request.body.validate[RegistrationSubmission.DataSet] match {
         case JsSuccess(dataSet, _) =>
@@ -194,10 +189,6 @@ class SubmissionDraftController @Inject()(
     }
   }
 
-  def removeDraft(draftId: String): Action[AnyContent] = identify.async { request =>
-    submissionRepository.removeDraft(draftId, request.internalId).map { _ => Ok }
-  }
-
   private def buildResponseJson(draft: RegistrationSubmissionDraft, data: JsValue): JsObject = {
 
     val obj = Json.obj(
@@ -215,134 +206,16 @@ class SubmissionDraftController @Inject()(
     }
   }
 
-  def getWhenTrustSetup(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-      getResult[LocalDate, JsValue](draftId, whenTrustSetupPath)(x => Json.obj("startDate" -> x))
-  }
-
-  def getTaxLiabilityStartDate(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-      val taxLiabilityStartDatePath = __ \ "taxLiability" \ "data" \ "trustStartDate"
-      getResult[LocalDate, JsValue](draftId, taxLiabilityStartDatePath)(x => Json.obj("startDate" -> x))
-  }
-
-  def getFirstTaxYearAvailable(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-
-      getResult[LocalDate, FirstTaxYearAvailable](draftId, whenTrustSetupPath)(taxYearService.firstTaxYearAvailable)
-  }
-
-  def getTrustTaxable(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-
-      val path = JsPath \ "main" \ "data" \ "trustTaxable"
-      getResult[Boolean](draftId, path)
-  }
-
-  def getTrustName(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-      submissionRepository.getDraft(draftId, request.internalId).map {
-        case Some(draft) =>
-          val matchingPath = JsPath \ "main" \ "data" \ "matching" \ "trustName"
-          val detailsPath = JsPath \ "trustDetails" \ "data" \ "trustDetails" \ "trustName"
-
-          val matchingName = get[String](draft.draftData, matchingPath)
-          val detailsName = get[String](draft.draftData, detailsPath)
-
-          (matchingName, detailsName) match {
-            case (JsSuccess(date, _), JsError(_)) =>
-              logger.info(s"[Session ID: ${request.sessionId}]" +
-                s" found trust name in matching")
-              Ok(Json.obj("trustName" -> date))
-            case (JsError(_), JsSuccess(date, _)) =>
-              logger.info(s"[Session ID: ${request.sessionId}]" +
-                s" found trust name in trust details")
-              Ok(Json.obj("trustName" -> date))
-            case _ =>
-              logger.info(s"[Session ID: ${request.sessionId}]" +
-                s" no trust name found")
-              NotFound
-          }
-        case None =>
-          logger.info(s"[Session ID: ${request.sessionId}]" +
-            s" no draft, cannot return trust name")
-          NotFound
-      }
-  }
-
-  def getTrustUtr(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-
-      val path = JsPath \ "main" \ "data" \ "matching" \ "whatIsTheUTR"
-      getResult[String](draftId, path)
-  }
-
-  private def get[T](draftData: JsValue, path: JsPath)(implicit rds: Reads[T]): JsResult[T] = {
+  protected def get[T](draftData: JsValue, path: JsPath)(implicit rds: Reads[T]): JsResult[T] = {
     draftData.transform(path.json.pick).map(_.as[T])
   }
 
-  def getLeadTrustee(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-      val path = JsPath \ "registration" \ "trust/entities/leadTrustees"
-      implicit val writes: Writes[LeadTrusteeType] = LeadTrusteeType.writes
-
-      getResult[LeadTrusteeType](draftId, path)
-  }
-
-  def reset(draftId: String, section: String, mappedDataKey: String): Action[AnyContent] = identify.async {
-    implicit request =>
-      submissionRepository.getDraft(draftId, request.internalId).flatMap {
-        case Some(draft) =>
-          val userAnswersPath = __ \ section
-          val rowsPath = AnswerSection.path \ section
-          val mappedDataPath = MappedPiece.path \ mappedDataKey
-
-          draft.draftData.transform {
-              prunePath(userAnswersPath) andThen
-              prunePath(rowsPath) andThen
-              prunePath(mappedDataPath)
-          } match {
-            case JsSuccess(data, _) =>
-              val draftWithSectionReset = draft.copy(draftData = data)
-              logger.info(s"[reset][Session ID: ${request.sessionId}]" +
-                s" removed mapped data and answers$section")
-              submissionRepository.setDraft(draftWithSectionReset).map(x => if (x) Ok else InternalServerError)
-            case _: JsError =>
-              logger.info(s"[reset][Session ID: ${request.sessionId}]" +
-                s" failed to reset for $section")
-              Future.successful(InternalServerError)
-          }
-        case None =>
-          logger.info(s"[reset][Session ID: ${request.sessionId}]" +
-            s" no draft, cannot reset section $section")
-          Future.successful(InternalServerError)
-      }
-  }
-
-  def getCorrespondenceAddress(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-      val path: JsPath = JsPath \ "registration" \ "correspondence/address"
-      getResult[AddressType](draftId, path)
-  }
-
-  def getAgentAddress(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-      val path: JsPath = JsPath \ "registration" \ "agentDetails" \ "agentAddress"
-      getResult[AddressType](draftId, path)
-  }
-
-  def getClientReference(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-      val path: JsPath = JsPath \ "registration" \ "agentDetails" \ "clientReference"
-      getResult[String](draftId, path)
-  }
-
-  private def getResult[T](draftId: String, path: JsPath)
+  protected def getResult[T](draftId: String, path: JsPath)
                           (implicit request: IdentifierRequest[AnyContent], rds: Reads[T], wts: Writes[T]): Future[Result] = {
     getResult[T, T](draftId, path)(x => x)
   }
 
-  private def getResult[A, B](draftId: String, path: JsPath)
+  protected def getResult[A, B](draftId: String, path: JsPath)
                              (f: A => B)
                              (implicit request: IdentifierRequest[AnyContent], rds: Reads[A], wts: Writes[B]): Future[Result] = {
     getAtPath[A](draftId, path) map {
@@ -367,65 +240,6 @@ class SubmissionDraftController @Inject()(
         }
       case None =>
         Failure(new NotFoundException(s"[Session ID: ${request.sessionId}] no draft, cannot return value at $path"))
-    }
-  }
-
-  def removeRoleInCompany(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-
-      import utils.JsonOps.RemoveRoleInCompanyFields
-
-      submissionRepository.getDraft(draftId, request.internalId).flatMap {
-        case Some(draft) =>
-
-          val initialDraftData: JsValue = draft.draftData
-
-          val updatedDraftData = initialDraftData.removeRoleInCompanyFields()
-
-          val newDraft = draft.copy(draftData = updatedDraftData)
-
-          submissionRepository.setDraft(newDraft).map(
-            result => if (result) Ok else InternalServerError
-          )
-
-        case _ => Future.successful(InternalServerError)
-      }
-  }
-
-  def removeDeceasedSettlorMappedPiece(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-
-      val path: JsPath = JsPath \ "registration" \ "trust/entities/deceased"
-      removeAtPath(draftId, path)
-  }
-
-  def removeLivingSettlorsMappedPiece(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-
-      val path: JsPath = JsPath \ "registration" \ "trust/entities/settlors"
-      removeAtPath(draftId, path)
-  }
-
-  private def removeAtPath(draftId: String, path: JsPath)
-                          (implicit request: IdentifierRequest[AnyContent]): Future[Result] = {
-
-    submissionRepository.getDraft(draftId, request.internalId).flatMap {
-      case Some(draft) =>
-
-        val initialDraftData: JsValue = draft.draftData
-
-        val updatedDraftData: JsValue = initialDraftData.transform(path.json.prune) match {
-          case JsSuccess(value, _) => value
-          case _ => initialDraftData
-        }
-
-        val newDraft = draft.copy(draftData = updatedDraftData)
-
-        submissionRepository.setDraft(newDraft).map(
-          result => if (result) Ok else InternalServerError
-        )
-
-      case _ => Future.successful(NotFound)
     }
   }
 

@@ -1,87 +1,87 @@
-POST        /                                               controllers.RegisterTrustController.registration
+POST        /                                                                           controllers.RegisterTrustController.registration
 
 # Used by trusts-frontend
-GET         /submission-drafts/:draftId/registration        controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "registration")
-GET         /submission-drafts/:draftId/answerSections      controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "answerSections")
+GET         /submission-drafts/:draftId/registration                                    controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "registration")
+GET         /submission-drafts/:draftId/answerSections                                  controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "answerSections")
 
-GET         /submission-drafts/:draftId/main                controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "main")
-POST        /submission-drafts/:draftId/main                controllers.SubmissionDraftController.setSection(draftId: String, sectionKey: String = "main")
+GET         /submission-drafts/:draftId/main                                            controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "main")
+POST        /submission-drafts/:draftId/main                                            controllers.SubmissionDraftController.setSection(draftId: String, sectionKey: String = "main")
 
-GET         /submission-drafts                              controllers.SubmissionDraftController.getDrafts()
+GET         /submission-drafts                                                          controllers.SubmissionDraftController.getDrafts()
 
-DELETE      /submission-drafts/:draftId                     controllers.SubmissionDraftController.removeDraft(draftId: String)
+DELETE      /submission-drafts/:draftId                                                 controllers.CleanupSubmissionDraftController.removeDraft(draftId: String)
 
 # Used by register-trust-beneficiary-frontend
-GET         /submission-drafts/:draftId/beneficiaries       controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "beneficiaries")
+GET         /submission-drafts/:draftId/beneficiaries                                   controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "beneficiaries")
 
-POST        /submission-drafts/:draftId/set/beneficiaries   controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "beneficiaries")
+POST        /submission-drafts/:draftId/set/beneficiaries                               controllers.SubmissionDraftController.setDataset(draftId: String, sectionKey: String = "beneficiaries")
 
 # Used by register-trust-trustee-frontend
-GET         /submission-drafts/:draftId/trustees            controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "trustees")
+GET         /submission-drafts/:draftId/trustees                                        controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "trustees")
 
-POST        /submission-drafts/:draftId/set/trustees        controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "trustees")
+POST        /submission-drafts/:draftId/set/trustees                                    controllers.SubmissionDraftController.setDataset(draftId: String, sectionKey: String = "trustees")
 
 # Used by register-trust-protector-frontend
-GET         /submission-drafts/:draftId/protectors          controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "protectors")
+GET         /submission-drafts/:draftId/protectors                                      controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "protectors")
 
-POST        /submission-drafts/:draftId/set/protectors      controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "protectors")
+POST        /submission-drafts/:draftId/set/protectors                                  controllers.SubmissionDraftController.setDataset(draftId: String, sectionKey: String = "protectors")
 
 # Used by register-trust-other-individuals-frontend
-GET         /submission-drafts/:draftId/otherIndividuals          controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "otherIndividuals")
+GET         /submission-drafts/:draftId/otherIndividuals                                 controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "otherIndividuals")
 
-POST        /submission-drafts/:draftId/set/otherIndividuals      controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "otherIndividuals")
+POST        /submission-drafts/:draftId/set/otherIndividuals                             controllers.SubmissionDraftController.setDataset(draftId: String, sectionKey: String = "otherIndividuals")
 
 # Used by register-trust-tax-liability-frontend
-GET         /submission-drafts/:draftId/taxLiability          controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "taxLiability")
+GET         /submission-drafts/:draftId/taxLiability                                    controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "taxLiability")
 
-POST        /submission-drafts/:draftId/set/taxLiability      controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "taxLiability")
+POST        /submission-drafts/:draftId/set/taxLiability                                controllers.SubmissionDraftController.setDataset(draftId: String, sectionKey: String = "taxLiability")
 
 # Used by register-trust-details-frontend
-GET         /submission-drafts/:draftId/trustDetails          controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "trustDetails")
+GET         /submission-drafts/:draftId/trustDetails                                    controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "trustDetails")
 
-POST        /submission-drafts/:draftId/set/trustDetails      controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "trustDetails")
+POST        /submission-drafts/:draftId/set/trustDetails                                controllers.SubmissionDraftController.setDataset(draftId: String, sectionKey: String = "trustDetails")
 
 # Used by register-trust-asset-frontend
-GET         /submission-drafts/:draftId/assets              controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "assets")
+GET         /submission-drafts/:draftId/assets                                          controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "assets")
 
-POST        /submission-drafts/:draftId/set/assets          controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "assets")
+POST        /submission-drafts/:draftId/set/assets                                      controllers.SubmissionDraftController.setDataset(draftId: String, sectionKey: String = "assets")
 
 # Used by register-settlors-frontend
-GET         /submission-drafts/:draftId/settlors              controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "settlors")
+GET         /submission-drafts/:draftId/settlors                                        controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "settlors")
 
-POST        /submission-drafts/:draftId/set/settlors          controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "settlors")
+POST        /submission-drafts/:draftId/set/settlors                                    controllers.SubmissionDraftController.setDataset(draftId: String, sectionKey: String = "settlors")
 
-POST        /submission-drafts/:draftId/set/beneficiaries/remove-role-in-company        controllers.SubmissionDraftController.removeRoleInCompany(draftId: String)
+POST        /submission-drafts/:draftId/set/beneficiaries/remove-role-in-company        controllers.CleanupSubmissionDraftController.removeRoleInCompany(draftId: String)
 
-POST        /submission-drafts/:draftId/remove-mapped-piece/deceased-settlor            controllers.SubmissionDraftController.removeDeceasedSettlorMappedPiece(draftId: String)
+POST        /submission-drafts/:draftId/remove-mapped-piece/deceased-settlor            controllers.CleanupSubmissionDraftController.removeDeceasedSettlorMappedPiece(draftId: String)
 
-POST        /submission-drafts/:draftId/remove-mapped-piece/living-settlors             controllers.SubmissionDraftController.removeLivingSettlorsMappedPiece(draftId: String)
+POST        /submission-drafts/:draftId/remove-mapped-piece/living-settlors             controllers.CleanupSubmissionDraftController.removeLivingSettlorsMappedPiece(draftId: String)
 
 # Used by register-trust-agent-details-frontend
-GET         /submission-drafts/:draftId/agent-details              controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "agentDetails")
+GET         /submission-drafts/:draftId/agent-details                                   controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "agentDetails")
 
-POST        /submission-drafts/:draftId/set/agent-details          controllers.SubmissionDraftController.setSectionSet(draftId: String, sectionKey: String = "agentDetails")
+POST        /submission-drafts/:draftId/set/agent-details                               controllers.SubmissionDraftController.setDataset(draftId: String, sectionKey: String = "agentDetails")
 
-GET         /submission-drafts/:draftId/agent-address             controllers.SubmissionDraftController.getAgentAddress(draftId: String)
+GET         /submission-drafts/:draftId/agent-address                                   controllers.AgentSubmissionDraftController.getAgentAddress(draftId: String)
 
-GET         /submission-drafts/:draftId/client-reference           controllers.SubmissionDraftController.getClientReference(draftId: String)
+GET         /submission-drafts/:draftId/client-reference                                controllers.AgentSubmissionDraftController.getClientReference(draftId: String)
 
-GET         /submission-drafts/:draftId/when-trust-setup       controllers.SubmissionDraftController.getWhenTrustSetup(draftId: String)
+GET         /submission-drafts/:draftId/when-trust-setup                                controllers.TrustDetailsSubmissionDraftController.getWhenTrustSetup(draftId: String)
 
-GET         /submission-drafts/:draftId/tax-liability/when-trust-setup       controllers.SubmissionDraftController.getTaxLiabilityStartDate(draftId: String)
+GET         /submission-drafts/:draftId/tax-liability/when-trust-setup                  controllers.TaxLiabilitySubmissionDraftController.getTaxLiabilityStartDate(draftId: String)
 
-DELETE       /submission-drafts/:draftId/tax-liability   controllers.SubmissionDraftController.reset(draftId: String, section: String = "taxLiability", mappedDataKey: String = "yearsReturns")
+DELETE       /submission-drafts/:draftId/tax-liability                                  controllers.CleanupSubmissionDraftController.reset(draftId: String, section: String = "taxLiability", mappedDataKey: String = "yearsReturns")
 
-GET         /submission-drafts/:draftId/trust-name       controllers.SubmissionDraftController.getTrustName(draftId: String)
+GET         /submission-drafts/:draftId/trust-name                                      controllers.TrustDetailsSubmissionDraftController.getTrustName(draftId: String)
 
-GET         /submission-drafts/:draftId/trust-utr        controllers.SubmissionDraftController.getTrustUtr(draftId: String)
+GET         /submission-drafts/:draftId/trust-utr                                       controllers.TrustDetailsSubmissionDraftController.getTrustUtr(draftId: String)
 
-GET         /submission-drafts/:draftId/lead-trustee           controllers.SubmissionDraftController.getLeadTrustee(draftId: String)
+GET         /submission-drafts/:draftId/lead-trustee                                    controllers.TrusteeSubmissionDraftController.getLeadTrustee(draftId: String)
 
-GET         /submission-drafts/:draftId/correspondence-address controllers.SubmissionDraftController.getCorrespondenceAddress(draftId: String)
+GET         /submission-drafts/:draftId/correspondence-address                          controllers.TrustDetailsSubmissionDraftController.getCorrespondenceAddress(draftId: String)
 
 #Used by all register-trust frontends to determine taxable / non taxable journey
 
-GET         /submission-drafts/:draftId/is-trust-taxable       controllers.SubmissionDraftController.getTrustTaxable(draftId: String)
+GET         /submission-drafts/:draftId/is-trust-taxable                                controllers.TrustDetailsSubmissionDraftController.getTrustTaxable(draftId: String)
 
-GET         /submission-drafts/:draftId/first-tax-year-available        controllers.SubmissionDraftController.getFirstTaxYearAvailable(draftId: String)
+GET         /submission-drafts/:draftId/first-tax-year-available                        controllers.TaxLiabilitySubmissionDraftController.getFirstTaxYearAvailable(draftId: String)
