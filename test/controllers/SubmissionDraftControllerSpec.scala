@@ -31,7 +31,6 @@ import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import repositories.RegistrationSubmissionRepository
-import services.TaxYearService
 import services.dates.LocalDateTimeService
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import utils.JsonFixtures
@@ -47,8 +46,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
 
   private val draftId: String = "draftId"
   private val internalId: String = "id"
-
-  private val taxYearService = mock[TaxYearService]
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
@@ -91,8 +88,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
       val body = Json.parse(
         """
@@ -122,8 +118,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -176,8 +171,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -237,8 +231,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -375,8 +368,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -503,8 +495,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -539,8 +530,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
 
@@ -572,8 +562,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -596,8 +585,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
       val drafts = List(
@@ -642,8 +630,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
       val drafts = List(
@@ -688,8 +675,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
       when(submissionRepository.getRecentDrafts(any(), any()))

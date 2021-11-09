@@ -47,8 +47,6 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
   private val draftId: String = "draftId"
   private val internalId: String = "id"
 
-  private val taxYearService = mock[TaxYearService]
-
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   private lazy val mockSubmissionDraft = Json.parse(
@@ -153,8 +151,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
       when(submissionRepository.removeDraft(any(), any()))
@@ -179,8 +176,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
       lazy val expectedAfterCleanup = Json.parse(
@@ -257,8 +253,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -283,9 +278,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
           submissionRepository,
           identifierAction,
           LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents(),
-
-          taxYearService
+          Helpers.stubControllerComponents()
         )
 
         when(submissionRepository.getDraft(any(), any()))
@@ -310,9 +303,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
           submissionRepository,
           identifierAction,
           LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents(),
-
-          taxYearService
+          Helpers.stubControllerComponents()
         )
 
         when(submissionRepository.getDraft(any(), any()))
@@ -333,9 +324,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
           submissionRepository,
           identifierAction,
           LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents(),
-
-          taxYearService
+          Helpers.stubControllerComponents()
         )
 
         when(submissionRepository.getDraft(any(), any()))
@@ -397,9 +386,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
           submissionRepository,
           identifierAction,
           LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents(),
-
-          taxYearService
+          Helpers.stubControllerComponents()
         )
 
         when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(dataBefore)))
@@ -426,9 +413,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
           submissionRepository,
           identifierAction,
           LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents(),
-
-          taxYearService
+          Helpers.stubControllerComponents()
         )
 
         when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(None))
@@ -451,9 +436,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
           submissionRepository,
           identifierAction,
           LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents(),
-
-          taxYearService
+          Helpers.stubControllerComponents()
         )
 
         when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(mockSubmissionDraft)))
@@ -514,9 +497,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
           submissionRepository,
           identifierAction,
           LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents(),
-
-          taxYearService
+          Helpers.stubControllerComponents()
         )
 
         when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(dataBefore)))
@@ -543,9 +524,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
           submissionRepository,
           identifierAction,
           LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents(),
-
-          taxYearService
+          Helpers.stubControllerComponents()
         )
 
         when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(None))
@@ -568,9 +547,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
           submissionRepository,
           identifierAction,
           LocalDateTimeServiceStub,
-          Helpers.stubControllerComponents(),
-
-          taxYearService
+          Helpers.stubControllerComponents()
         )
 
         when(submissionRepository.getDraft(any(), any())).thenReturn(Future.successful(Some(mockSubmissionDraft)))

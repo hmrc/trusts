@@ -46,8 +46,6 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
 
   private val draftId: String = "draftId"
 
-  private val taxYearService = mock[TaxYearService]
-
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   private lazy val mockSubmissionDraftAgentDetails = Json.parse(
@@ -113,8 +111,7 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -148,8 +145,7 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -170,8 +166,7 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -195,8 +190,7 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -225,8 +219,7 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -247,8 +240,7 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
       when(submissionRepository.getDraft(any(), any()))

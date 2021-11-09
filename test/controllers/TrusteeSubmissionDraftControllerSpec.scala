@@ -31,7 +31,6 @@ import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import repositories.RegistrationSubmissionRepository
-import services.TaxYearService
 import services.dates.LocalDateTimeService
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import utils.JsonFixtures
@@ -45,8 +44,6 @@ class TrusteeSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
   private val currentDateTime: LocalDateTime = LocalDateTime.of(1999, 3, 14, 13, 33)
 
   private val draftId: String = "draftId"
-
-  private val taxYearService = mock[TaxYearService]
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
@@ -153,8 +150,7 @@ class TrusteeSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
       when(submissionRepository.getDraft(any(), any()))
@@ -191,8 +187,7 @@ class TrusteeSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         submissionRepository,
         identifierAction,
         LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
+        Helpers.stubControllerComponents()
       )
 
       when(submissionRepository.getDraft(any(), any()))
