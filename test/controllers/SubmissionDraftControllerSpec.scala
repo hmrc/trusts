@@ -1674,7 +1674,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
 
       when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
 
-      val request = FakeRequest("GET", "path")
+      val request = FakeRequest("DELETE", "path")
 
       val result = controller.reset(draftId, "taxLiability", "yearsReturns").apply(request)
 

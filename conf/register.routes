@@ -72,13 +72,13 @@ GET         /submission-drafts/:draftId/when-trust-setup       controllers.Submi
 
 GET         /submission-drafts/:draftId/tax-liability/when-trust-setup       controllers.SubmissionDraftController.getTaxLiabilityStartDate(draftId: String)
 
+DELETE       /submission-drafts/:draftId/tax-liability   controllers.SubmissionDraftController.reset(draftId: String, section: String = "taxLiability", mappedDataKey: String = "yearsReturns")
+
 GET         /submission-drafts/:draftId/trust-name       controllers.SubmissionDraftController.getTrustName(draftId: String)
 
 GET         /submission-drafts/:draftId/trust-utr        controllers.SubmissionDraftController.getTrustUtr(draftId: String)
 
 GET         /submission-drafts/:draftId/lead-trustee           controllers.SubmissionDraftController.getLeadTrustee(draftId: String)
-
-POST        /submission-drafts/:draftId/reset/taxLiability   controllers.SubmissionDraftController.reset(draftId: String, section: String = "taxLiability", mappedDataKey: String = "yearsReturns")
 
 GET         /submission-drafts/:draftId/correspondence-address controllers.SubmissionDraftController.getCorrespondenceAddress(draftId: String)
 
