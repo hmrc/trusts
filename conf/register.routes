@@ -1,8 +1,6 @@
 POST        /                                               controllers.RegisterTrustController.registration
 
 # Used by trusts-frontend
-GET         /submission-drafts/:draftId/status              controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "status")
-POST        /submission-drafts/:draftId/status              controllers.SubmissionDraftController.setSection(draftId: String, sectionKey: String = "status")
 GET         /submission-drafts/:draftId/registration        controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "registration")
 GET         /submission-drafts/:draftId/answerSections      controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "answerSections")
 

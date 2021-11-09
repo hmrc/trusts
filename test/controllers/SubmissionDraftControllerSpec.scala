@@ -60,9 +60,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
       |    "createdAt" : { "$date" : 1597323808000 },
       |    "draftData" : {
-      |        "status" : {
-      |           "taxLiability" : "completed"
-      |        },
       |        "trustDetails" : {
       |           "data": {
       |               "trustDetails": {
@@ -89,9 +86,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
       |    "createdAt" : { "$date" : 1597323808000 },
       |    "draftData" : {
-      |        "status" : {
-      |           "taxLiability" : "completed"
-      |        },
       |        "taxLiability" : {
       |            "_id" : "5027c148-d7b4-4e48-ac46-21cce366dfd7",
       |            "data" : {
@@ -127,9 +121,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
       |    "createdAt" : { "$date" : 1597323808000 },
       |    "draftData" : {
-      |        "status" : {
-      |           "taxLiability" : "completed"
-      |        },
       |        "taxLiability" : {
       |            "data" : {
       |                "cyMinusFourYesNo" : true,
@@ -496,9 +487,9 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
 
       val set = RegistrationSubmission.DataSet(
         data,
-        Some(registration.Status.Completed),
         mappedPieces,
-        answerSections)
+        answerSections
+      )
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(set))
@@ -515,9 +506,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           |   "field1": "value1",
           |   "field2": "value2",
           |   "field3": 3
-          | },
-          | "status": {
-          |   "sectionKey": "completed"
           | },
           | "registration": {
           |   "trust/assets" : {
@@ -630,7 +618,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
 
       val set = RegistrationSubmission.DataSet(
         data,
-        Some(registration.Status.Completed),
         mappedPieces,
         answerSections
       )
@@ -650,9 +637,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           |   "field1": "value1",
           |   "field2": "value2",
           |   "field3": 3
-          | },
-          | "status": {
-          |   "sectionKey": "completed"
           | },
           | "registration": {},
           | "answerSections": {
@@ -1624,7 +1608,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
           |    "createdAt" : { "$date" : 1597323808000 },
           |    "draftData" : {
-          |        "status" : {},
           |        "main" : {
           |            "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
           |            "data" : {
