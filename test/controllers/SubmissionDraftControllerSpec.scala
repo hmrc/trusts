@@ -60,9 +60,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
       |    "createdAt" : { "$date" : 1597323808000 },
       |    "draftData" : {
-      |        "status" : {
-      |           "taxLiability" : "completed"
-      |        },
       |        "trustDetails" : {
       |           "data": {
       |               "trustDetails": {
@@ -89,9 +86,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
       |    "createdAt" : { "$date" : 1597323808000 },
       |    "draftData" : {
-      |        "status" : {
-      |           "taxLiability" : "completed"
-      |        },
       |        "taxLiability" : {
       |            "_id" : "5027c148-d7b4-4e48-ac46-21cce366dfd7",
       |            "data" : {
@@ -127,9 +121,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
       |    "createdAt" : { "$date" : 1597323808000 },
       |    "draftData" : {
-      |        "status" : {
-      |           "taxLiability" : "completed"
-      |        },
       |        "taxLiability" : {
       |            "data" : {
       |                "cyMinusFourYesNo" : true,
@@ -496,9 +487,9 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
 
       val set = RegistrationSubmission.DataSet(
         data,
-        Some(registration.Status.Completed),
         mappedPieces,
-        answerSections)
+        answerSections
+      )
 
       val request = FakeRequest("POST", "path")
         .withBody(Json.toJson(set))
@@ -515,9 +506,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           |   "field1": "value1",
           |   "field2": "value2",
           |   "field3": 3
-          | },
-          | "status": {
-          |   "sectionKey": "completed"
           | },
           | "registration": {
           |   "trust/assets" : {
@@ -630,7 +618,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
 
       val set = RegistrationSubmission.DataSet(
         data,
-        Some(registration.Status.Completed),
         mappedPieces,
         answerSections
       )
@@ -650,9 +637,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           |   "field1": "value1",
           |   "field2": "value2",
           |   "field3": 3
-          | },
-          | "status": {
-          |   "sectionKey": "completed"
           | },
           | "registration": {},
           | "answerSections": {
@@ -1624,7 +1608,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
           |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
           |    "createdAt" : { "$date" : 1597323808000 },
           |    "draftData" : {
-          |        "status" : {},
           |        "main" : {
           |            "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
           |            "data" : {
@@ -1674,7 +1657,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
 
       when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
 
-      val request = FakeRequest("GET", "path")
+      val request = FakeRequest("DELETE", "path")
 
       val result = controller.reset(draftId, "taxLiability", "yearsReturns").apply(request)
 
@@ -2177,260 +2160,6 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
-    }
-  }
-
-  ".updateTaxLiabilityStatus" should {
-
-    def mockDraft(draftData: JsValue) = RegistrationSubmissionDraft(
-      draftId = draftId,
-      internalId = internalId,
-      createdAt = createdAt,
-      draftData = draftData,
-      reference = None,
-      inProgress = None
-    )
-
-    "response with Ok when the dates are not present" in {
-
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
-      val submissionRepository = mock[RegistrationSubmissionRepository]
-
-      val controller = new SubmissionDraftController(
-        submissionRepository,
-        identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
-      )
-
-      val initialDraftData = Json.obj()
-
-      val expectedDraftData = initialDraftData
-
-      when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(mockDraft(initialDraftData))))
-
-      val request = FakeRequest("GET", "path")
-
-      val result = controller.updateTaxLiability(draftId).apply(request)
-
-      status(result) mustBe OK
-
-      verify(submissionRepository, times(0)).setDraft(mockDraft(expectedDraftData))
-    }
-
-    "respond with Ok and not update the status when the dates are the same" in {
-
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
-      val submissionRepository = mock[RegistrationSubmissionRepository]
-
-      val controller = new SubmissionDraftController(
-        submissionRepository,
-        identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
-      )
-
-      val initialDraftData = Json.parse(
-        """
-          |{
-          |  "taxLiability": {
-          |    "data": {
-          |      "trustStartDate": "1996-02-03"
-          |    }
-          |  },
-          |  "trustDetails": {
-          |    "data": {
-          |      "trustDetails": {
-          |        "whenTrustSetup": "1996-02-03"
-          |      }
-          |    }
-          |  },
-          |  "status": {
-          |    "taxLiability": "completed"
-          |  },
-          |  "registration": {
-          |    "yearsReturns": {
-          |      "foo": "bar"
-          |    }
-          |  },
-          |  "answerSections": {
-          |    "taxLiability": [
-          |      {
-          |        "foo": "bar"
-          |      }
-          |    ]
-          |  }
-          |}
-          |""".stripMargin)
-
-      val expectedDraftData = initialDraftData
-
-      when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(mockDraft(initialDraftData))))
-
-      val request = FakeRequest("GET", "path")
-
-      val result = controller.updateTaxLiability(draftId).apply(request)
-
-      status(result) mustBe OK
-
-      verify(submissionRepository, times(0)).setDraft(mockDraft(expectedDraftData))
-    }
-
-    "respond with Ok and update the status when the dates are different" in {
-
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
-      val submissionRepository = mock[RegistrationSubmissionRepository]
-
-      val controller = new SubmissionDraftController(
-        submissionRepository,
-        identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
-      )
-
-      val initialDraftData = Json.parse(
-        """
-          |{
-          |  "taxLiability": {
-          |    "data": {
-          |      "trustStartDate": "1996-02-03"
-          |    }
-          |  },
-          |  "trustDetails": {
-          |    "data": {
-          |      "trustDetails": {
-          |        "whenTrustSetup": "1997-02-03"
-          |      }
-          |    }
-          |  },
-          |  "status": {
-          |    "taxLiability": "completed"
-          |  },
-          |  "registration": {
-          |    "yearsReturns": {
-          |      "foo": "bar"
-          |    }
-          |  },
-          |  "answerSections": {
-          |    "taxLiability": [
-          |      {
-          |        "foo": "bar"
-          |      }
-          |    ]
-          |  }
-          |}
-          |""".stripMargin)
-
-      val expectedDraftData = Json.parse(
-        """
-          |{
-          |  "taxLiability": {
-          |    "data": {
-          |      "trustStartDate": "1996-02-03"
-          |    }
-          |  },
-          |  "trustDetails": {
-          |    "data": {
-          |      "trustDetails": {
-          |        "whenTrustSetup": "1997-02-03"
-          |      }
-          |    }
-          |  },
-          |  "status": {
-          |  },
-          |  "registration": {
-          |  },
-          |  "answerSections": {
-          |  }
-          |}
-          |""".stripMargin)
-
-      when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(mockDraft(initialDraftData))))
-
-      when(submissionRepository.setDraft(any())).thenReturn(Future.successful(true))
-
-      val request = FakeRequest("GET", "path")
-
-      val result = controller.updateTaxLiability(draftId).apply(request)
-
-      status(result) mustBe OK
-
-      verify(submissionRepository, times(1)).setDraft(mockDraft(expectedDraftData))
-    }
-
-    "respond with InternalServerError when error setting the updated draft data" in {
-
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
-      val submissionRepository = mock[RegistrationSubmissionRepository]
-
-      val controller = new SubmissionDraftController(
-        submissionRepository,
-        identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
-      )
-
-      val initialDraftData = Json.parse(
-        """
-          |{
-          |  "taxLiability": {
-          |    "data": {
-          |      "trustStartDate": "1996-02-03"
-          |    }
-          |  },
-          |  "trustDetails": {
-          |    "data": {
-          |      "trustDetails": {
-          |        "whenTrustSetup": "1997-02-03"
-          |      }
-          |    }
-          |  },
-          |  "status": {
-          |    "taxLiability": "completed"
-          |  }
-          |}
-          |""".stripMargin)
-
-      when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(mockDraft(initialDraftData))))
-
-      when(submissionRepository.setDraft(any())).thenReturn(Future.successful(false))
-
-      val request = FakeRequest("GET", "path")
-
-      val result = controller.updateTaxLiability(draftId).apply(request)
-
-      status(result) mustBe INTERNAL_SERVER_ERROR
-    }
-
-    "respond with NotFound when no draft" in {
-
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
-      val submissionRepository = mock[RegistrationSubmissionRepository]
-
-      val controller = new SubmissionDraftController(
-        submissionRepository,
-        identifierAction,
-        LocalDateTimeServiceStub,
-        Helpers.stubControllerComponents(),
-        taxYearService
-      )
-
-      when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(None))
-
-      val request = FakeRequest("GET", "path")
-
-      val result = controller.updateTaxLiability(draftId).apply(request)
-
-      status(result) mustBe NOT_FOUND
     }
   }
 

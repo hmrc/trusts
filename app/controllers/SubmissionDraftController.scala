@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions.IdentifierAction
 import models.registration.RegistrationSubmission.{AnswerSection, MappedPiece}
-import models.registration.{RegistrationSubmission, RegistrationSubmissionDraft, RegistrationSubmissionDraftData, Status => EntityStatus}
+import models.registration.{RegistrationSubmission, RegistrationSubmissionDraft, RegistrationSubmissionDraftData}
 import models.requests.IdentifierRequest
 import models.{AddressType, FirstTaxYearAvailable, LeadTrusteeType}
 import play.api.Logging
@@ -106,16 +106,6 @@ class SubmissionDraftController @Inject()(
     }
   }
 
-  private def setStatus(key: String, statusOpt: Option[EntityStatus] = None): Reads[JsObject] = {
-    val sectionPath = EntityStatus.path \ key
-
-    statusOpt match {
-      case Some(status) =>
-        prunePath(sectionPath) andThen JsPath.json.update(sectionPath.json.put(Json.toJson(status.toString)))
-      case _ => prunePath(sectionPath)
-    }
-  }
-
   private def setAnswerSections(key: String, answerSections: List[RegistrationSubmission.AnswerSection]): Reads[JsObject] = {
     val sectionPath = AnswerSection.path \ key
 
@@ -149,7 +139,6 @@ class SubmissionDraftController @Inject()(
       JsPath.json.update {
         sectionPath.json.put(Json.toJson(incomingDraftData.data))
       },
-      setStatus(sectionKey, incomingDraftData.status),
       setAnswerSections(sectionKey, incomingDraftData.answerSections)
     ) ++ setRegistrationSections(incomingDraftData.registrationPieces)
   }
@@ -304,22 +293,20 @@ class SubmissionDraftController @Inject()(
     implicit request =>
       submissionRepository.getDraft(draftId, request.internalId).flatMap {
         case Some(draft) =>
-          val statusPath = EntityStatus.path \ section
           val userAnswersPath = __ \ section
           val rowsPath = AnswerSection.path \ section
           val mappedDataPath = MappedPiece.path \ mappedDataKey
 
           draft.draftData.transform {
-            prunePath(statusPath) andThen
               prunePath(userAnswersPath) andThen
               prunePath(rowsPath) andThen
               prunePath(mappedDataPath)
           } match {
             case JsSuccess(data, _) =>
-              val draftWithStatusRemoved = draft.copy(draftData = data)
+              val draftWithSectionReset = draft.copy(draftData = data)
               logger.info(s"[reset][Session ID: ${request.sessionId}]" +
-                s" removed status, mapped data, answers and status for $section")
-              submissionRepository.setDraft(draftWithStatusRemoved).map(x => if (x) Ok else InternalServerError)
+                s" removed mapped data and answers$section")
+              submissionRepository.setDraft(draftWithSectionReset).map(x => if (x) Ok else InternalServerError)
             case _: JsError =>
               logger.info(s"[reset][Session ID: ${request.sessionId}]" +
                 s" failed to reset for $section")
@@ -327,54 +314,8 @@ class SubmissionDraftController @Inject()(
           }
         case None =>
           logger.info(s"[reset][Session ID: ${request.sessionId}]" +
-            s" no draft, cannot reset status for $section")
+            s" no draft, cannot reset section $section")
           Future.successful(InternalServerError)
-      }
-  }
-
-  /**
-   * If the user fills in trust details, then answers the tax liability questions, then changes the trust start date,
-   * we need to set the tax liability status to in progress and remove the yearsReturns answers from the registration
-   * in case the answers no longer align with the updated date.
-   */
-  def updateTaxLiability(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-      submissionRepository.getDraft(draftId, request.internalId).flatMap {
-        case Some(draft) =>
-          val taxLiabilityStartDatePath = __ \ "taxLiability" \ "data" \ "trustStartDate"
-
-          val areStartDatesEqual = for {
-            trustDetailsStartDate <- get[LocalDate](draft.draftData, whenTrustSetupPath)
-            taxLiabilityStartDate <- get[LocalDate](draft.draftData, taxLiabilityStartDatePath)
-          } yield {
-            trustDetailsStartDate == taxLiabilityStartDate
-          }
-
-          areStartDatesEqual match {
-            case JsSuccess(false, _) =>
-
-              val updatedTaxLiabilityReads = setStatus("taxLiability") andThen
-                prunePath(__ \ "registration" \ "yearsReturns") andThen
-                prunePath(__ \ "answerSections" \ "taxLiability")
-
-              draft.draftData.transform(updatedTaxLiabilityReads) match {
-                case JsSuccess(data, _) =>
-                  val draftWithStatusUpdated = draft.copy(draftData = data)
-                  logger.info(s"[updateTaxLiabilityStatus][Session ID: ${request.sessionId}]" +
-                    s" successfully updated tax liability status")
-                  submissionRepository.setDraft(draftWithStatusUpdated).map(x => if (x) Ok else InternalServerError)
-                case JsError(errors) =>
-                  logger.error(s"[updateTaxLiabilityStatus][Session ID: ${request.sessionId}]" +
-                    s" failed to update tax liability status: $errors")
-                  Future.successful(InternalServerError)
-              }
-            case _ =>
-              Future.successful(Ok)
-          }
-        case None =>
-          logger.info(s"[reset][Session ID: ${request.sessionId}]" +
-            s" no draft, cannot update tax liability status")
-          Future.successful(NotFound)
       }
   }
 

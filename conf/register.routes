@@ -1,8 +1,6 @@
 POST        /                                               controllers.RegisterTrustController.registration
 
 # Used by trusts-frontend
-GET         /submission-drafts/:draftId/status              controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "status")
-POST        /submission-drafts/:draftId/status              controllers.SubmissionDraftController.setSection(draftId: String, sectionKey: String = "status")
 GET         /submission-drafts/:draftId/registration        controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "registration")
 GET         /submission-drafts/:draftId/answerSections      controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "answerSections")
 
@@ -72,15 +70,13 @@ GET         /submission-drafts/:draftId/when-trust-setup       controllers.Submi
 
 GET         /submission-drafts/:draftId/tax-liability/when-trust-setup       controllers.SubmissionDraftController.getTaxLiabilityStartDate(draftId: String)
 
+DELETE       /submission-drafts/:draftId/tax-liability   controllers.SubmissionDraftController.reset(draftId: String, section: String = "taxLiability", mappedDataKey: String = "yearsReturns")
+
 GET         /submission-drafts/:draftId/trust-name       controllers.SubmissionDraftController.getTrustName(draftId: String)
 
 GET         /submission-drafts/:draftId/trust-utr        controllers.SubmissionDraftController.getTrustUtr(draftId: String)
 
 GET         /submission-drafts/:draftId/lead-trustee           controllers.SubmissionDraftController.getLeadTrustee(draftId: String)
-
-POST        /submission-drafts/:draftId/reset/taxLiability   controllers.SubmissionDraftController.reset(draftId: String, section: String = "taxLiability", mappedDataKey: String = "yearsReturns")
-
-POST        /submission-drafts/:draftId/update/tax-liability  controllers.SubmissionDraftController.updateTaxLiability(draftId: String)
 
 GET         /submission-drafts/:draftId/correspondence-address controllers.SubmissionDraftController.getCorrespondenceAddress(draftId: String)
 
