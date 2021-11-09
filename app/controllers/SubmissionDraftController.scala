@@ -332,52 +332,6 @@ class SubmissionDraftController @Inject()(
       }
   }
 
-  /**
-   * If the user fills in trust details, then answers the tax liability questions, then changes the trust start date,
-   * we need to set the tax liability status to in progress and remove the yearsReturns answers from the registration
-   * in case the answers no longer align with the updated date.
-   */
-  def updateTaxLiability(draftId: String): Action[AnyContent] = identify.async {
-    implicit request =>
-      submissionRepository.getDraft(draftId, request.internalId).flatMap {
-        case Some(draft) =>
-          val taxLiabilityStartDatePath = __ \ "taxLiability" \ "data" \ "trustStartDate"
-
-          val areStartDatesEqual = for {
-            trustDetailsStartDate <- get[LocalDate](draft.draftData, whenTrustSetupPath)
-            taxLiabilityStartDate <- get[LocalDate](draft.draftData, taxLiabilityStartDatePath)
-          } yield {
-            trustDetailsStartDate == taxLiabilityStartDate
-          }
-
-          areStartDatesEqual match {
-            case JsSuccess(false, _) =>
-
-              val updatedTaxLiabilityReads = setStatus("taxLiability") andThen
-                prunePath(__ \ "registration" \ "yearsReturns") andThen
-                prunePath(__ \ "answerSections" \ "taxLiability")
-
-              draft.draftData.transform(updatedTaxLiabilityReads) match {
-                case JsSuccess(data, _) =>
-                  val draftWithStatusUpdated = draft.copy(draftData = data)
-                  logger.info(s"[updateTaxLiabilityStatus][Session ID: ${request.sessionId}]" +
-                    s" successfully updated tax liability status")
-                  submissionRepository.setDraft(draftWithStatusUpdated).map(x => if (x) Ok else InternalServerError)
-                case JsError(errors) =>
-                  logger.error(s"[updateTaxLiabilityStatus][Session ID: ${request.sessionId}]" +
-                    s" failed to update tax liability status: $errors")
-                  Future.successful(InternalServerError)
-              }
-            case _ =>
-              Future.successful(Ok)
-          }
-        case None =>
-          logger.info(s"[reset][Session ID: ${request.sessionId}]" +
-            s" no draft, cannot update tax liability status")
-          Future.successful(NotFound)
-      }
-  }
-
   def getCorrespondenceAddress(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
       val path: JsPath = JsPath \ "registration" \ "correspondence/address"
