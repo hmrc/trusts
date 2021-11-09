@@ -82,6 +82,44 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       |}
       |""".stripMargin).as[RegistrationSubmissionDraft]
 
+  private lazy val draftWithTaxLiabilityStartDate = Json.parse(
+    """
+      |{
+      |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+      |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
+      |    "createdAt" : { "$date" : 1597323808000 },
+      |    "draftData" : {
+      |        "status" : {
+      |           "taxLiability" : "completed"
+      |        },
+      |        "taxLiability" : {
+      |            "_id" : "5027c148-d7b4-4e48-ac46-21cce366dfd7",
+      |            "data" : {
+      |                "trustStartDate" : "2020-10-10",
+      |                "cyMinusOneYesNo" : true,
+      |                "didDeclareTaxToHMRCForYear1" : false
+      |            },
+      |            "internalId" : "Int-0e7d32ac-ccba-4f2c-a3b6-d71ede5a6dba"
+      |        },
+      |        "trustDetails" : {
+      |           "data": {
+      |               "trustDetails": {
+      |                  "whenTrustSetup" : "2015-04-06"
+      |               }
+      |           }
+      |        },
+      |        "main" : {
+      |            "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
+      |            "data" : {},
+      |            "progress" : "InProgress",
+      |            "createdAt" : "2020-08-13T13:37:53.787Z",
+      |            "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54"
+      |        }
+      |    },
+      |    "inProgress" : true
+      |}
+      |""".stripMargin).as[RegistrationSubmissionDraft]
+
   private lazy val mockSubmissionDraft = Json.parse(
     """
       |{
@@ -1286,6 +1324,86 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         """
           |{
           | "startDate": "2015-04-06"
+          |}
+          |""".stripMargin)
+
+      contentType(result) mustBe Some(JSON)
+      contentAsJson(result) mustBe expectedDraftJson
+    }
+
+    "respond with NotFound when no draft" in {
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents(),
+        taxYearService
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getWhenTrustSetup(draftId).apply(request)
+
+      status(result) mustBe NOT_FOUND
+    }
+
+    "respond with NotFound when no start date in draft" in {
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents(),
+        taxYearService
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(mockSubmissionDraftNoData)))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getWhenTrustSetup(draftId).apply(request)
+
+      status(result) mustBe NOT_FOUND
+    }
+
+  }
+
+  ".taxLiabilityStartDate" should {
+
+    "respond with OK with the start date" in {
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new SubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents(),
+        taxYearService
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(Future.successful(Some(draftWithTaxLiabilityStartDate)))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getTaxLiabilityStartDate(draftId).apply(request)
+
+      status(result) mustBe OK
+
+      val expectedDraftJson = Json.parse(
+        """
+          |{
+          | "startDate": "2020-10-10"
           |}
           |""".stripMargin)
 
