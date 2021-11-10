@@ -96,6 +96,50 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
 
   ".register" should {
 
+    "have the correct headerData" in {
+      lazy val payloadCaptor = ArgumentCaptor.forClass(classOf[NRSSubmission])
+
+      val payLoad = Json.toJson(registrationRequest)
+
+      val fakeRequestWithHeaders = fakeRequest
+        .withHeaders(play.api.mvc.Headers(
+          ("user-agent", "to be removed"),
+          ("User-Agent", "to be removed"),
+          ("True-User-Agent", "true agent to be kept"),
+          ("true-user-agent", "to be removed")
+        ))
+
+      implicit val request: IdentifierRequest[JsValue] =
+        IdentifierRequest(fakeRequestWithHeaders, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Agent, credentialData = credential)
+
+      val trn = "ABTRUST12345678"
+
+      when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
+        .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
+
+      when(mockLocalDateTimeService.now(ZoneOffset.UTC))
+        .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
+
+      when(mockPayloadEncodingService.encode(mEq(payLoad)))
+        .thenReturn("encodedPayload")
+
+      when(mockPayloadEncodingService.generateChecksum(mEq(payLoad)))
+        .thenReturn("payloadChecksum")
+
+      val fResult = SUT.register(trn, payLoad)
+
+      whenReady(fResult) { _ =>
+
+        payloadCaptor.getValue.metadata.headerData mustBe Json.parse(
+          """
+            |{
+            | "user-agent":"true agent to be kept"
+            |}
+            |""".stripMargin
+        )
+      }
+    }
+
     "send a registration event for an Agent" in {
 
       lazy val payloadCaptor = ArgumentCaptor.forClass(classOf[NRSSubmission])
@@ -170,7 +214,6 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
         payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
         Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityDataJson
-        (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
 
         payloadCaptor.getValue.metadata.headerData mustBe Json.parse(
           """
