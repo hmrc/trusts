@@ -79,7 +79,8 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
 
     JsObject(headers)
       .-(Headers.TRUE_USER_AGENT)
-      .+((HeaderNames.USER_AGENT, JsString(trueUserAgent)))
+      .-(HeaderNames.USER_AGENT.toLowerCase)
+      .+((HeaderNames.USER_AGENT.toLowerCase, JsString(trueUserAgent)))
   }
 
   private final def sendEvent(payload: JsValue,

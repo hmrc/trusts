@@ -64,7 +64,7 @@ class BaseSpec extends AnyWordSpec
 
   def fakeRequest: FakeRequest[JsValue] = FakeRequest("POST", "")
     .withHeaders(CONTENT_TYPE -> "application/json")
-    .withHeaders(Headers.DRAFT_REGISTRATION_ID -> UUID.randomUUID().toString)
+    .withHeaders(Headers.DRAFT_REGISTRATION_ID -> "bbe4c063-2b5a-4f29-bfa6-46c3c8906b0d")
     .withHeaders(Headers.TRUE_USER_AGENT -> "Mozilla")
     .withBody(Json.parse("{}"))
 
