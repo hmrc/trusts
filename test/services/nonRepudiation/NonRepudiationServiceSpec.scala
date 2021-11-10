@@ -171,8 +171,17 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
         Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityDataJson
         (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
-        (payloadCaptor.getValue.metadata.headerData \ "User-Agent").as[String] mustBe "Mozilla"
-        (payloadCaptor.getValue.metadata.headerData \ "True-User-Agent").asOpt[String] must not be defined
+
+        payloadCaptor.getValue.metadata.headerData mustBe Json.parse(
+          """
+            |{
+            | "Host":"localhost",
+            | "Content-Type":"application/json",
+            | "Draft-Registration-ID":"bbe4c063-2b5a-4f29-bfa6-46c3c8906b0d",
+            | "user-agent":"Mozilla"
+            |}
+            |""".stripMargin
+        )
       }
     }
 
@@ -236,9 +245,17 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
         payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
         Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
-        (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
-        (payloadCaptor.getValue.metadata.headerData \ "User-Agent").as[String] mustBe "Mozilla"
-        (payloadCaptor.getValue.metadata.headerData \ "True-User-Agent").asOpt[String] must not be defined
+
+        payloadCaptor.getValue.metadata.headerData mustBe Json.parse(
+          """
+            |{
+            | "Host":"localhost",
+            | "Content-Type":"application/json",
+            | "Draft-Registration-ID":"bbe4c063-2b5a-4f29-bfa6-46c3c8906b0d",
+            | "user-agent":"Mozilla"
+            |}
+            |""".stripMargin
+        )
       }
     }
   }
@@ -315,9 +332,18 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
           payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.UTR, utr)
           Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
-          (payloadCaptor.getValue.metadata.headerData \ "test").as[String] mustBe "value"
-          (payloadCaptor.getValue.metadata.headerData \ "User-Agent").as[String] mustBe "Mozilla"
-          (payloadCaptor.getValue.metadata.headerData \ "True-User-Agent").asOpt[String] must not be defined
+
+          payloadCaptor.getValue.metadata.headerData mustBe Json.parse(
+            """
+              |{
+              | "Host":"localhost",
+              | "Content-Type":"application/json",
+              | "Draft-Registration-ID":"bbe4c063-2b5a-4f29-bfa6-46c3c8906b0d",
+              | "user-agent":"Mozilla",
+              | "test": "value"
+              |}
+              |""".stripMargin
+          )
         }
       }
     }
@@ -391,9 +417,18 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
           payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.URN, urn)
           Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
-          (payloadCaptor.getValue.metadata.headerData \ "test").as[String] mustBe "value"
-          (payloadCaptor.getValue.metadata.headerData \ "User-Agent").as[String] mustBe "Mozilla"
-          (payloadCaptor.getValue.metadata.headerData \ "True-User-Agent").asOpt[String] must not be defined
+
+          payloadCaptor.getValue.metadata.headerData mustBe Json.parse(
+            """
+              |{
+              | "Host":"localhost",
+              | "Content-Type":"application/json",
+              | "Draft-Registration-ID":"bbe4c063-2b5a-4f29-bfa6-46c3c8906b0d",
+              | "user-agent":"Mozilla",
+              | "test": "value"
+              |}
+              |""".stripMargin
+          )
         }
       }
     }
@@ -477,9 +512,17 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
           payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
           Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
-          (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
-          (payloadCaptor.getValue.metadata.headerData \ "User-Agent").as[String] mustBe "Mozilla"
-          (payloadCaptor.getValue.metadata.headerData \ "True-User-Agent").asOpt[String] must not be defined
+
+          payloadCaptor.getValue.metadata.headerData mustBe Json.parse(
+            """
+              |{
+              | "Host":"localhost",
+              | "Content-Type":"application/json",
+              | "Draft-Registration-ID":"bbe4c063-2b5a-4f29-bfa6-46c3c8906b0d",
+              | "user-agent":"Mozilla"
+              |}
+              |""".stripMargin
+          )
         }
       }
 
@@ -561,9 +604,17 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           payloadCaptor.getValue.metadata.payloadContentType mustBe "application/json"
           payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
           Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
-          (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
-          (payloadCaptor.getValue.metadata.headerData \ "User-Agent").as[String] mustBe "Mozilla"
-          (payloadCaptor.getValue.metadata.headerData \ "True-User-Agent").asOpt[String] must not be defined
+
+          payloadCaptor.getValue.metadata.headerData mustBe Json.parse(
+            """
+              |{
+              | "Host":"localhost",
+              | "Content-Type":"application/json",
+              | "Draft-Registration-ID":"bbe4c063-2b5a-4f29-bfa6-46c3c8906b0d",
+              | "user-agent":"Mozilla"
+              |}
+              |""".stripMargin
+          )
 
         }
       }
