@@ -35,7 +35,7 @@ import services.encoding.PayloadEncodingService
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, LoginTimes}
 import uk.gov.hmrc.http.{Authorization, ForwardedFor, HeaderCarrier, RequestId, SessionId}
-import utils.JsonFixtures
+import utils.{Headers, JsonFixtures}
 
 import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -85,7 +85,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
 
   implicit val request: IdentifierRequest[JsValue] =
     IdentifierRequest(
-      FakeRequest()
+      fakeRequest
         .withHeaders("test" -> "value")
         .withBody(Json.parse("{}")),
       internalId = "internalId",
@@ -171,6 +171,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
         Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityDataJson
         (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
+        (payloadCaptor.getValue.metadata.headerData \ "User-Agent").as[String] mustBe "Mozilla"
       }
     }
 
@@ -235,6 +236,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
         Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
         (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
+        (payloadCaptor.getValue.metadata.headerData \ "User-Agent").as[String] mustBe "Mozilla"
       }
     }
   }
@@ -312,6 +314,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.UTR, utr)
           Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
           (payloadCaptor.getValue.metadata.headerData \ "test").as[String] mustBe "value"
+          (payloadCaptor.getValue.metadata.headerData \ "User-Agent").as[String] mustBe "Mozilla"
         }
       }
     }
@@ -386,6 +389,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.URN, urn)
           Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
           (payloadCaptor.getValue.metadata.headerData \ "test").as[String] mustBe "value"
+          (payloadCaptor.getValue.metadata.headerData \ "User-Agent").as[String] mustBe "Mozilla"
         }
       }
     }
@@ -470,6 +474,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
           Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
           (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
+          (payloadCaptor.getValue.metadata.headerData \ "User-Agent").as[String] mustBe "Mozilla"
         }
       }
 
@@ -552,6 +557,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           payloadCaptor.getValue.metadata.searchKeys mustBe SearchKeys(SearchKey.TRN, trn)
           Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
           (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
+          (payloadCaptor.getValue.metadata.headerData \ "User-Agent").as[String] mustBe "Mozilla"
         }
       }
 
