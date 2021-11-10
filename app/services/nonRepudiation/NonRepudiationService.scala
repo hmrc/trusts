@@ -65,7 +65,7 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
     )
   }
 
-  private def headers(implicit request: IdentifierRequest[_]): Map[String, JsString] = {
+  private def headers(implicit request: IdentifierRequest[_]): JsObject = {
     val headers: Map[String, JsString] = request.headers
       .toMap
       .map(header => header._1 -> JsString(header._2 mkString ","))
@@ -77,9 +77,9 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
           .getOrElse("No User Agent")
       )
 
-    headers
-    .-(HeaderNames.USER_AGENT)
-    .+((HeaderNames.USER_AGENT, JsString(trueUserAgent)))
+    JsObject(headers)
+      .-(Headers.TRUE_USER_AGENT)
+      .+((HeaderNames.USER_AGENT, JsString(trueUserAgent)))
   }
 
   private final def sendEvent(payload: JsValue,
@@ -103,7 +103,7 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
             localDateTimeService.now(ZoneOffset.UTC),
             identityData(payload),
             token.value,
-            JsObject(headers),
+            headers,
             SearchKeys(searchKey, searchValue)
           )
         )
