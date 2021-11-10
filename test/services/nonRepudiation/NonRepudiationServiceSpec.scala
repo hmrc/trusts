@@ -172,6 +172,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityDataJson
         (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
         (payloadCaptor.getValue.metadata.headerData \ "User-Agent").as[String] mustBe "Mozilla"
+        (payloadCaptor.getValue.metadata.headerData \ "True-User-Agent").asOpt[String] must not be defined
       }
     }
 
@@ -237,6 +238,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
         (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
         (payloadCaptor.getValue.metadata.headerData \ "User-Agent").as[String] mustBe "Mozilla"
+        (payloadCaptor.getValue.metadata.headerData \ "True-User-Agent").asOpt[String] must not be defined
       }
     }
   }
@@ -315,6 +317,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
           (payloadCaptor.getValue.metadata.headerData \ "test").as[String] mustBe "value"
           (payloadCaptor.getValue.metadata.headerData \ "User-Agent").as[String] mustBe "Mozilla"
+          (payloadCaptor.getValue.metadata.headerData \ "True-User-Agent").asOpt[String] must not be defined
         }
       }
     }
@@ -390,6 +393,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
           (payloadCaptor.getValue.metadata.headerData \ "test").as[String] mustBe "value"
           (payloadCaptor.getValue.metadata.headerData \ "User-Agent").as[String] mustBe "Mozilla"
+          (payloadCaptor.getValue.metadata.headerData \ "True-User-Agent").asOpt[String] must not be defined
         }
       }
     }
@@ -475,6 +479,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
           (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
           (payloadCaptor.getValue.metadata.headerData \ "User-Agent").as[String] mustBe "Mozilla"
+          (payloadCaptor.getValue.metadata.headerData \ "True-User-Agent").asOpt[String] must not be defined
         }
       }
 
@@ -558,6 +563,8 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           Json.toJson(payloadCaptor.getValue.metadata.identityData) mustBe identityData
           (payloadCaptor.getValue.metadata.headerData \ "Draft-Registration-ID").as[String] must fullyMatch regex v4UuidRegex
           (payloadCaptor.getValue.metadata.headerData \ "User-Agent").as[String] mustBe "Mozilla"
+          (payloadCaptor.getValue.metadata.headerData \ "True-User-Agent").asOpt[String] must not be defined
+
         }
       }
 

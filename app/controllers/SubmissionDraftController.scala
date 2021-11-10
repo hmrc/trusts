@@ -24,7 +24,6 @@ import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.RegistrationSubmissionRepository
-import services.TaxYearService
 import services.dates.LocalDateTimeService
 import uk.gov.hmrc.http.NotFoundException
 import utils.Constants._
