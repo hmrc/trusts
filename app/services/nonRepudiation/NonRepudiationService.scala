@@ -79,6 +79,7 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
 
     JsObject(headers)
       .-(Headers.TRUE_USER_AGENT)
+      .-(Headers.TRUE_USER_AGENT.toLowerCase)
       .-(HeaderNames.USER_AGENT.toLowerCase)
       .+((HeaderNames.USER_AGENT.toLowerCase, JsString(trueUserAgent)))
   }
