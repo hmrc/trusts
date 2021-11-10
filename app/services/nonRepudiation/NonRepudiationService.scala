@@ -22,13 +22,14 @@ import models.nonRepudiation._
 import models.requests.IdentifierRequest
 import play.api.Logging
 import play.api.http.ContentTypes.JSON
+import play.api.http.HeaderNames
 import play.api.libs.json._
 import retry.RetryHelper
 import services.auditing.NRSAuditService
 import services.dates.LocalDateTimeService
 import services.encoding.PayloadEncodingService
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.Session
+import utils.{Headers, Session}
 
 import java.time.ZoneOffset
 import javax.inject.Inject
@@ -64,6 +65,23 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
     )
   }
 
+  private def headers(implicit request: IdentifierRequest[_]): Map[String, JsString] = {
+    val headers: Map[String, JsString] = request.headers
+      .toMap
+      .map(header => header._1 -> JsString(header._2 mkString ","))
+
+    val trueUserAgent: String =
+      request.headers.get(Headers.TRUE_USER_AGENT)
+      .getOrElse(
+        request.headers.get(HeaderNames.USER_AGENT)
+          .getOrElse("No User Agent")
+      )
+
+    headers
+    .-(HeaderNames.USER_AGENT)
+    .+((HeaderNames.USER_AGENT, JsString(trueUserAgent)))
+  }
+
   private final def sendEvent(payload: JsValue,
                               notableEvent: NotableEvent,
                               searchKey: SearchKey,
@@ -85,7 +103,7 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
             localDateTimeService.now(ZoneOffset.UTC),
             identityData(payload),
             token.value,
-            JsObject(request.headers.toMap.map(header => header._1 -> JsString(header._2 mkString ","))),
+            JsObject(headers),
             SearchKeys(searchKey, searchValue)
           )
         )
