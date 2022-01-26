@@ -10,6 +10,7 @@ import play.api.test.Helpers.stubControllerComponents
 import play.api.{Application, Play}
 import reactivemongo.api.{DefaultDB, MongoConnection}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -20,6 +21,8 @@ trait IntegrationTestBase extends ScalaFutures {
   implicit val defaultPatience: PatienceConfig = PatienceConfig(timeout = Span(30, Seconds), interval = Span(15, Millis))
 
   val connectionString = "mongodb://localhost:27017/trusts-integration"
+
+  implicit lazy val hc: HeaderCarrier = HeaderCarrier()
 
   private def getDatabase(connection: MongoConnection): DefaultDB = {
     Await.result(connection.database("trusts-integration"), Duration.Inf)

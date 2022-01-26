@@ -44,7 +44,7 @@ class SubmissionSuccessSpec extends AsyncWordSpec with MockitoSugar with Integra
 
     lazy val get5MLDTrustNonTaxableResponse: String = getJsonFromFile("5MLD/NonTaxable/des/valid-get-trust-5mld-non-taxable-des-response.json")
 
-    when(stubbedCacheRepository.get(eqTo(utr), any()))
+    when(stubbedCacheRepository.get(eqTo(utr), any(), any()))
       .thenReturn(Future.successful(Some(Json.parse(get5MLDTrustNonTaxableResponse))))
 
     when(stubbedTrustsConnector.getTrustInfo(eqTo(utr)))
