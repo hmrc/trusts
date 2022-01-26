@@ -56,15 +56,15 @@ class AddBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
   override def beforeEach(): Unit = {
     reset(mockTransformationService)
 
-    when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+    when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
       .thenReturn(Future.successful(Json.obj()))
 
-    when(mockTransformationService.addNewTransform(any(), any(), any()))
+    when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
       .thenReturn(Future.successful(true))
 
     reset(mockTaxableMigrationService)
 
-    when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any()))
+    when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any(), any()))
       .thenReturn(Future.successful(false))
   }
 
@@ -103,7 +103,7 @@ class AddBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
         val transform = AddBeneficiaryTransform(Json.toJson(beneficiary), beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -166,7 +166,7 @@ class AddBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
         val transform = AddBeneficiaryTransform(Json.toJson(beneficiary), beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -224,7 +224,7 @@ class AddBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
         val transform = AddBeneficiaryTransform(Json.toJson(beneficiary), beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -282,7 +282,7 @@ class AddBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
         val transform = AddBeneficiaryTransform(Json.toJson(beneficiary), beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -340,7 +340,7 @@ class AddBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
         val transform = AddBeneficiaryTransform(Json.toJson(beneficiary), beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -398,7 +398,7 @@ class AddBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
         val transform = AddBeneficiaryTransform(Json.toJson(beneficiary), beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -462,7 +462,7 @@ class AddBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
         val transform = AddBeneficiaryTransform(Json.toJson(beneficiary), beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 

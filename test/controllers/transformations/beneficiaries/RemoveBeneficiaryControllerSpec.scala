@@ -92,10 +92,10 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         val body = removeBeneficiary(beneficiaryType)
@@ -111,7 +111,7 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
         val transform = RemoveBeneficiaryTransform(Some(index), Json.toJson(beneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
     }
@@ -146,10 +146,10 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         val body = removeBeneficiary(beneficiaryType)
@@ -165,7 +165,7 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
         val transform = RemoveBeneficiaryTransform(Some(index), Json.toJson(beneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
     }
@@ -195,10 +195,10 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         val body = removeBeneficiary(beneficiaryType)
@@ -214,7 +214,7 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
         val transform = RemoveBeneficiaryTransform(Some(index), Json.toJson(beneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
     }
@@ -244,10 +244,10 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         val body = removeBeneficiary(beneficiaryType)
@@ -263,7 +263,7 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
         val transform = RemoveBeneficiaryTransform(Some(index), Json.toJson(beneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
     }
@@ -293,10 +293,10 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         val body = removeBeneficiary(beneficiaryType)
@@ -312,7 +312,7 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
         val transform = RemoveBeneficiaryTransform(Some(index), Json.toJson(beneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
     }
@@ -342,10 +342,10 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         val body = removeBeneficiary(beneficiaryType)
@@ -361,7 +361,7 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
         val transform = RemoveBeneficiaryTransform(Some(index), Json.toJson(beneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
     }
@@ -397,10 +397,10 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         val body = removeBeneficiary(beneficiaryType)
@@ -416,7 +416,7 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
         val transform = RemoveBeneficiaryTransform(Some(index), Json.toJson(beneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
     }

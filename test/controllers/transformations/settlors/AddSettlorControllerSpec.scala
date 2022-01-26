@@ -55,15 +55,15 @@ class AddSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
   override def beforeEach(): Unit = {
     reset(mockTransformationService)
 
-    when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+    when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
       .thenReturn(Future.successful(Json.obj()))
 
-    when(mockTransformationService.addNewTransform(any(), any(), any()))
+    when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
       .thenReturn(Future.successful(true))
 
     reset(mockTaxableMigrationService)
 
-    when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any()))
+    when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any(), any()))
       .thenReturn(Future.successful(false))
   }
   
@@ -105,7 +105,7 @@ class AddSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
         val transform = AddSettlorTransform(Json.toJson(settlor), settlorType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -163,7 +163,7 @@ class AddSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
         val transform = AddSettlorTransform(Json.toJson(settlor), settlorType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 

@@ -56,15 +56,15 @@ class AddAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaFut
   override def beforeEach(): Unit = {
     reset(mockTransformationService)
 
-    when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+    when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
       .thenReturn(Future.successful(Json.obj()))
 
-    when(mockTransformationService.addNewTransform(any(), any(), any()))
+    when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
       .thenReturn(Future.successful(true))
 
     reset(mockTaxableMigrationService)
 
-    when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any()))
+    when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any(), any()))
       .thenReturn(Future.successful(false))
   }
   
@@ -97,7 +97,7 @@ class AddAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaFut
         val transform = AddAssetTransform(Json.toJson(asset), assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -150,7 +150,7 @@ class AddAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaFut
         val transform = AddAssetTransform(Json.toJson(asset), assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -205,7 +205,7 @@ class AddAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaFut
         val transform = AddAssetTransform(Json.toJson(asset), assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -259,7 +259,7 @@ class AddAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaFut
         val transform = AddAssetTransform(Json.toJson(asset), assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -311,7 +311,7 @@ class AddAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaFut
         val transform = AddAssetTransform(Json.toJson(asset), assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -362,7 +362,7 @@ class AddAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaFut
         val transform = AddAssetTransform(Json.toJson(asset), assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -417,7 +417,7 @@ class AddAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaFut
         val transform = AddAssetTransform(Json.toJson(asset), assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 

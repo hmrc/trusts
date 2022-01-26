@@ -36,6 +36,7 @@ class TaxableMigrationServiceSpec extends BaseSpec {
   val subscriptionId = "sub123456789"
   val urn = "NTTRUST00000001"
   val utr = "123456789"
+  private val sessionId: String = "sessionId"
 
   "TaxableMigrationService" when {
 
@@ -126,9 +127,9 @@ class TaxableMigrationServiceSpec extends BaseSpec {
 
           val SUT = new TaxableMigrationService(auditService, taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
 
-          when(mockTaxableMigrationRepository.get(any(), any())).thenReturn(Future.successful(Some(true)))
+          when(mockTaxableMigrationRepository.get(any(), any(), any())).thenReturn(Future.successful(Some(true)))
 
-          val result = SUT.migratingFromNonTaxableToTaxable(urn, "id")
+          val result = SUT.migratingFromNonTaxableToTaxable(urn, "id", sessionId)
 
           whenReady(result) { r =>
             r mustBe true
@@ -145,9 +146,9 @@ class TaxableMigrationServiceSpec extends BaseSpec {
           val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
           val SUT = new TaxableMigrationService(auditService, taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
 
-          when(mockTaxableMigrationRepository.get(any(), any())).thenReturn(Future.successful(Some(false)))
+          when(mockTaxableMigrationRepository.get(any(), any(), any())).thenReturn(Future.successful(Some(false)))
 
-          val result = SUT.migratingFromNonTaxableToTaxable(urn, "id")
+          val result = SUT.migratingFromNonTaxableToTaxable(urn, "id", sessionId)
 
           whenReady(result) { r =>
             r mustBe false
@@ -161,9 +162,9 @@ class TaxableMigrationServiceSpec extends BaseSpec {
           val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
           val SUT = new TaxableMigrationService(auditService, taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
 
-          when(mockTaxableMigrationRepository.get(any(), any())).thenReturn(Future.successful(None))
+          when(mockTaxableMigrationRepository.get(any(), any(), any())).thenReturn(Future.successful(None))
 
-          val result = SUT.migratingFromNonTaxableToTaxable(urn, "id")
+          val result = SUT.migratingFromNonTaxableToTaxable(urn, "id", sessionId)
 
           whenReady(result) { r =>
             r mustBe false
@@ -179,9 +180,9 @@ class TaxableMigrationServiceSpec extends BaseSpec {
           val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
           val SUT = new TaxableMigrationService(auditService, taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
 
-          when(mockTaxableMigrationRepository.get(any(), any())).thenReturn(Future.failed(new Throwable("repository get failed")))
+          when(mockTaxableMigrationRepository.get(any(), any(), any())).thenReturn(Future.failed(new Throwable("repository get failed")))
 
-          val result = SUT.migratingFromNonTaxableToTaxable(urn, "id")
+          val result = SUT.migratingFromNonTaxableToTaxable(urn, "id", sessionId)
 
           recoverToSucceededIf[Exception](result)
         }
@@ -198,13 +199,13 @@ class TaxableMigrationServiceSpec extends BaseSpec {
           val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
           val SUT = new TaxableMigrationService(auditService, taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
 
-          when(mockTaxableMigrationRepository.get(any(), any())).thenReturn(Future.successful(Some(true)))
+          when(mockTaxableMigrationRepository.get(any(), any(), any())).thenReturn(Future.successful(Some(true)))
 
-          val result = SUT.getTaxableMigrationFlag(urn, "id")
+          val result = SUT.getTaxableMigrationFlag(urn, "id", sessionId)
 
           whenReady(result) { r =>
             r mustBe Some(true)
-            verify(mockTaxableMigrationRepository).get(urn, "id")
+            verify(mockTaxableMigrationRepository).get(urn, "id", sessionId)
           }
         }
       }
@@ -217,13 +218,13 @@ class TaxableMigrationServiceSpec extends BaseSpec {
           val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
           val SUT = new TaxableMigrationService(auditService, taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
 
-          when(mockTaxableMigrationRepository.get(any(), any())).thenReturn(Future.successful(Some(false)))
+          when(mockTaxableMigrationRepository.get(any(), any(), any())).thenReturn(Future.successful(Some(false)))
 
-          val result = SUT.getTaxableMigrationFlag(urn, "id")
+          val result = SUT.getTaxableMigrationFlag(urn, "id", sessionId)
 
           whenReady(result) { r =>
             r mustBe Some(false)
-            verify(mockTaxableMigrationRepository).get(urn, "id")
+            verify(mockTaxableMigrationRepository).get(urn, "id", sessionId)
           }
         }
       }
@@ -236,13 +237,13 @@ class TaxableMigrationServiceSpec extends BaseSpec {
           val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
           val SUT = new TaxableMigrationService(auditService, taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
 
-          when(mockTaxableMigrationRepository.get(any(), any())).thenReturn(Future.successful(None))
+          when(mockTaxableMigrationRepository.get(any(), any(), any())).thenReturn(Future.successful(None))
 
-          val result = SUT.getTaxableMigrationFlag(urn, "id")
+          val result = SUT.getTaxableMigrationFlag(urn, "id", sessionId)
 
           whenReady(result) { r =>
             r mustBe None
-            verify(mockTaxableMigrationRepository).get(urn, "id")
+            verify(mockTaxableMigrationRepository).get(urn, "id", sessionId)
           }
         }
       }
@@ -255,9 +256,9 @@ class TaxableMigrationServiceSpec extends BaseSpec {
           val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
           val SUT = new TaxableMigrationService(auditService, taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
 
-          when(mockTaxableMigrationRepository.get(any(), any())).thenReturn(Future.failed(new Throwable("repository get failed")))
+          when(mockTaxableMigrationRepository.get(any(), any(), any())).thenReturn(Future.failed(new Throwable("repository get failed")))
 
-          val result = SUT.getTaxableMigrationFlag(urn, "id")
+          val result = SUT.getTaxableMigrationFlag(urn, "id", sessionId)
 
           recoverToSucceededIf[Exception](result)
         }
@@ -272,13 +273,13 @@ class TaxableMigrationServiceSpec extends BaseSpec {
         val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
         val SUT = new TaxableMigrationService(auditService, taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
 
-        when(mockTaxableMigrationRepository.set(any(), any(), any())).thenReturn(Future.successful(true))
+        when(mockTaxableMigrationRepository.set(any(), any(), any(), any())).thenReturn(Future.successful(true))
 
-        val result = SUT.setTaxableMigrationFlag(urn, "id", migratingToTaxable = true)
+        val result = SUT.setTaxableMigrationFlag(urn, "id", sessionId, migratingToTaxable = true)
 
         whenReady(result) { r =>
           r mustBe true
-          verify(mockTaxableMigrationRepository).set(urn, "id", migratingToTaxable = true)
+          verify(mockTaxableMigrationRepository).set(urn, "id", sessionId, migratingToTaxable = true)
         }
       }
 
@@ -290,9 +291,9 @@ class TaxableMigrationServiceSpec extends BaseSpec {
           val mockTaxableMigrationRepository = mock[TaxableMigrationRepository]
           val SUT = new TaxableMigrationService(auditService, taxEnrolmentConnector, orchestratorConnector, mockTaxableMigrationRepository)
 
-          when(mockTaxableMigrationRepository.set(any(), any(), any())).thenReturn(Future.failed(new Throwable("repository set failed")))
+          when(mockTaxableMigrationRepository.set(any(), any(), any(), any())).thenReturn(Future.failed(new Throwable("repository set failed")))
 
-          val result = SUT.setTaxableMigrationFlag(urn, "id", migratingToTaxable = true)
+          val result = SUT.setTaxableMigrationFlag(urn, "id", sessionId, migratingToTaxable = true)
 
           recoverToSucceededIf[Exception](result)
         }

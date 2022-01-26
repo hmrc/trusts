@@ -58,15 +58,15 @@ class DemoteLeadTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with
   override def beforeEach(): Unit = {
     reset(mockTransformationService)
 
-    when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+    when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
       .thenReturn(Future.successful(Json.obj()))
 
-    when(mockTransformationService.addNewTransform(any(), any(), any()))
+    when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
       .thenReturn(Future.successful(true))
 
     reset(mockTaxableMigrationService)
 
-    when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any()))
+    when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any(), any()))
       .thenReturn(Future.successful(false))
 
     reset(mockLocalDateService)
@@ -114,7 +114,7 @@ class DemoteLeadTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with
         val transform = PromoteTrusteeTransform(None, Json.toJson(trustee), Json.obj(), endDate, trusteeType, isTaxable = true)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -174,7 +174,7 @@ class DemoteLeadTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with
         val transform = PromoteTrusteeTransform(None, Json.toJson(trustee), Json.obj(), endDate, trusteeType, isTaxable = true)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 

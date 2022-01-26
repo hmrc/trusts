@@ -40,9 +40,11 @@ import services.{TaxYearService, TransformationService, TrustsService}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import utils.NonTaxable5MLDFixtures.Cache.getTransformedNonTaxableTrustResponse
-import utils.{JsonFixtures, NonTaxable5MLDFixtures, RequiredEntityDetailsForMigration, Taxable5MLDFixtures}
-
+import utils.{JsonFixtures, NonTaxable5MLDFixtures, RequiredEntityDetailsForMigration, Session, Taxable5MLDFixtures}
 import java.time.LocalDate
+
+import uk.gov.hmrc.http.HeaderCarrier
+
 import scala.concurrent.Future
 
 class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAndAfter
@@ -94,6 +96,9 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
   val urn = "1234567890ABCDE"
   val invalidURN = "1234567890%£$£$"
 
+  implicit val hc: HeaderCarrier = HeaderCarrier()
+  private val sessionId: String = Session.id(hc)
+
   ".getFromEtmp" when {
 
     "utr provided" should {
@@ -102,18 +107,18 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
 
-        when(trustsService.resetCache(any(), any()))
+        when(trustsService.resetCache(any(), any(), any()))
           .thenReturn(Future.successful(()))
-        when(transformationService.removeAllTransformations(any(), any()))
+        when(transformationService.removeAllTransformations(any(), any(), any()))
           .thenReturn(Future.successful(None))
-        when(trustsService.getTrustInfo(any(), any()))
+        when(trustsService.getTrustInfo(any(), any(), any()))
           .thenReturn(Future.successful(response))
 
         val result = getTrustController.getFromEtmp(utr).apply(FakeRequest(GET, s"/trusts/$utr/refresh"))
 
         whenReady(result) { _ =>
-          verify(trustsService).resetCache(utr, "id")
-          verify(transformationService).removeAllTransformations(utr, "id")
+          verify(trustsService).resetCache(utr, "id", sessionId)
+          verify(transformationService).removeAllTransformations(utr, "id", sessionId)
         }
       }
     }
@@ -124,18 +129,18 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val response = TrustFoundResponse(ResponseHeader("Parked", "1"))
 
-        when(trustsService.resetCache(any(), any()))
+        when(trustsService.resetCache(any(), any(), any()))
           .thenReturn(Future.successful(()))
-        when(transformationService.removeAllTransformations(any(), any()))
+        when(transformationService.removeAllTransformations(any(), any(), any()))
           .thenReturn(Future.successful(None))
-        when(trustsService.getTrustInfo(any(), any()))
+        when(trustsService.getTrustInfo(any(), any(), any()))
           .thenReturn(Future.successful(response))
 
         val result = getTrustController.getFromEtmp(urn).apply(FakeRequest(GET, s"/trusts/$urn/refresh"))
 
         whenReady(result) { _ =>
-          verify(trustsService).resetCache(urn, "id")
-          verify(transformationService).removeAllTransformations(urn, "id")
+          verify(trustsService).resetCache(urn, "id", sessionId)
+          verify(transformationService).removeAllTransformations(urn, "id", sessionId)
         }
       }
 
@@ -158,7 +163,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
         Helpers.stubControllerComponents()
       )
 
-      when(trustsService.getTrustInfo(any(), any()))
+      when(trustsService.getTrustInfo(any(), any(), any()))
         .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
       val result = SUT.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
@@ -170,7 +175,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
     "return 200 - Ok with parked content" in {
 
-      when(trustsService.getTrustInfo(any(), any()))
+      when(trustsService.getTrustInfo(any(), any(), any()))
         .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
       val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
@@ -188,14 +193,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(JsonFixtures.getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.get(utr, applyTransformations = true).apply(FakeRequest(GET, s"/trusts/$utr"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
 
           status(result) mustBe OK
 
@@ -219,7 +224,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         "the get endpoint returns a NotEnoughDataResponse" in {
 
-          when(trustsService.getTrustInfo(any(), any()))
+          when(trustsService.getTrustInfo(any(), any(), any()))
             .thenReturn(Future.successful(NotEnoughDataResponse(Json.obj(), Json.obj())))
 
           val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
@@ -235,7 +240,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         "the get endpoint returns a BadRequestResponse" in {
 
-          when(trustsService.getTrustInfo(any(), any()))
+          when(trustsService.getTrustInfo(any(), any(), any()))
             .thenReturn(Future.successful(BadRequestResponse))
 
           val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
@@ -248,7 +253,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         "the get endpoint returns a ResourceNotFoundResponse" in {
 
-          when(trustsService.getTrustInfo(any(), any()))
+          when(trustsService.getTrustInfo(any(), any(), any()))
             .thenReturn(Future.successful(ResourceNotFoundResponse))
 
           val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
@@ -261,7 +266,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         "the get endpoint returns a InternalServerErrorResponse" in {
 
-          when(trustsService.getTrustInfo(any(), any()))
+          when(trustsService.getTrustInfo(any(), any(), any()))
             .thenReturn(Future.successful(InternalServerErrorResponse))
 
           val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
@@ -274,7 +279,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         "the get endpoint returns a ServiceUnavailableResponse" in {
 
-          when(trustsService.getTrustInfo(any(), any()))
+          when(trustsService.getTrustInfo(any(), any(), any()))
             .thenReturn(Future.successful(ServiceUnavailableResponse))
 
           val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
@@ -287,7 +292,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         "the get endpoint returns a ClosedRequestResponse" in {
 
-          when(trustsService.getTrustInfo(any(), any()))
+          when(trustsService.getTrustInfo(any(), any(), any()))
             .thenReturn(Future.successful(ClosedRequestResponse))
 
           val result = getTrustController.get(utr).apply(FakeRequest(GET, s"/trusts/$utr"))
@@ -306,14 +311,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(NonTaxable5MLDFixtures.Cache.getTransformedNonTaxableTrustResponse, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.get(urn, applyTransformations = true).apply(FakeRequest(GET, s"/trusts/$urn"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(urn), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(urn), mockEq("id"), mockEq(sessionId))(any())
 
           status(result) mustBe OK
 
@@ -338,7 +343,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         "the get endpoint returns a NotEnoughDataResponse" in {
 
-          when(trustsService.getTrustInfo(any(), any()))
+          when(trustsService.getTrustInfo(any(), any(), any()))
             .thenReturn(Future.successful(NotEnoughDataResponse(Json.obj(), Json.obj())))
 
           val result = getTrustController.get(urn).apply(FakeRequest(GET, s"/trusts/$urn"))
@@ -354,7 +359,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         "the get endpoint returns a BadRequestResponse" in {
 
-          when(trustsService.getTrustInfo(any(), any()))
+          when(trustsService.getTrustInfo(any(), any(), any()))
             .thenReturn(Future.successful(BadRequestResponse))
 
           val result = getTrustController.get(urn).apply(FakeRequest(GET, s"/trusts/$urn"))
@@ -367,7 +372,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         "the get endpoint returns a ResourceNotFoundResponse" in {
 
-          when(trustsService.getTrustInfo(any(), any()))
+          when(trustsService.getTrustInfo(any(), any(), any()))
             .thenReturn(Future.successful(ResourceNotFoundResponse))
 
           val result = getTrustController.get(urn).apply(FakeRequest(GET, s"/trusts/$urn"))
@@ -380,7 +385,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         "the get endpoint returns a InternalServerErrorResponse" in {
 
-          when(trustsService.getTrustInfo(any(), any()))
+          when(trustsService.getTrustInfo(any(), any(), any()))
             .thenReturn(Future.successful(InternalServerErrorResponse))
 
           val result = getTrustController.get(urn).apply(FakeRequest(GET, s"/trusts/$urn"))
@@ -393,7 +398,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         "the get endpoint returns a ServiceUnavailableResponse" in {
 
-          when(trustsService.getTrustInfo(any(), any()))
+          when(trustsService.getTrustInfo(any(), any(), any()))
             .thenReturn(Future.successful(ServiceUnavailableResponse))
 
           val result = getTrustController.get(urn).apply(FakeRequest(GET, s"/trusts/$urn"))
@@ -406,7 +411,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         "the get endpoint returns a ClosedRequestResponse" in {
 
-          when(trustsService.getTrustInfo(any(), any()))
+          when(trustsService.getTrustInfo(any(), any(), any()))
             .thenReturn(Future.successful(ClosedRequestResponse))
 
           val result = getTrustController.get(urn).apply(FakeRequest(GET, s"/trusts/$urn"))
@@ -424,7 +429,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 403 - Forbidden with parked content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/trustees/$utr/transformed/lead-trustee"))
@@ -440,7 +445,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any())).thenReturn(Future.successful(processedResponse))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any())).thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/trustees/$utr/transformed/lead-trustee"))
 
@@ -448,7 +453,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe expectedResponseFromTrusts
@@ -457,7 +462,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 500 - Internal server error for invalid content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getLeadTrustee(utr).apply(FakeRequest(GET, s"/trusts/trustees/$utr/transformed/lead-trustee"))
@@ -476,7 +481,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         "return 403 - Forbidden with parked content" in {
 
-          when(transformationService.getTransformedData(any(), any())(any()))
+          when(transformationService.getTransformedData(any(), any(), any())(any()))
             .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
           val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/trust-details/$utr/transformed"))
@@ -490,14 +495,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
           val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-          when(transformationService.getTransformedData(any[String], any[String])(any()))
+          when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
             .thenReturn(Future.successful(processedResponse))
 
           val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/trust-details/$utr/transformed"))
 
           whenReady(result) { _ =>
             verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
             status(result) mustBe OK
             contentType(result) mustBe Some(JSON)
             contentAsJson(result) mustBe Json.parse(
@@ -526,14 +531,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
           val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
-          when(transformationService.getTransformedData(any[String], any[String])(any()))
+          when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
             .thenReturn(Future.successful(processedResponse))
 
           val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/trust-details/$utr/transformed"))
 
           whenReady(result) { _ =>
             verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
             status(result) mustBe OK
             contentType(result) mustBe Some(JSON)
             contentAsJson(result) mustBe Json.parse(
@@ -564,7 +569,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         "return 500 - Internal server error for invalid content" in {
 
-          when(transformationService.getTransformedData(any(), any())(any()))
+          when(transformationService.getTransformedData(any(), any(), any())(any()))
             .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
           val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/trust-details/$utr/transformed"))
@@ -581,7 +586,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         "return 403 - Forbidden with parked content" in {
 
-          when(trustsService.getTrustInfo(any(), any()))
+          when(trustsService.getTrustInfo(any(), any(), any()))
             .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
           val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/trust-details/$utr/transformed"))
@@ -595,14 +600,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
           val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-          when(trustsService.getTrustInfo(any[String], any[String]))
+          when(trustsService.getTrustInfo(any[String], any[String], any[String]))
             .thenReturn(Future.successful(processedResponse))
 
           val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/trust-details/$utr/transformed"))
 
           whenReady(result) { _ =>
             verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-            verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"))
+            verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"), mockEq(sessionId))
             status(result) mustBe OK
             contentType(result) mustBe Some(JSON)
             contentAsJson(result) mustBe Json.parse(
@@ -631,14 +636,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
           val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
-          when(trustsService.getTrustInfo(any[String], any[String]))
+          when(trustsService.getTrustInfo(any[String], any[String], any[String]))
             .thenReturn(Future.successful(processedResponse))
 
           val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/trust-details/$utr/transformed"))
 
           whenReady(result) { _ =>
             verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-            verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"))
+            verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"), mockEq(sessionId))
             status(result) mustBe OK
             contentType(result) mustBe Some(JSON)
             contentAsJson(result) mustBe Json.parse(
@@ -669,7 +674,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         "return 500 - Internal server error for invalid content" in {
 
-          when(trustsService.getTrustInfo(any(), any()))
+          when(trustsService.getTrustInfo(any(), any(), any()))
             .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
           val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/trust-details/$utr/transformed"))
@@ -685,7 +690,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 403 - Forbidden with parked content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getYearsReturns(utr).apply(FakeRequest(GET, s"/trusts/tax-liability/$utr/transformed"))
@@ -699,14 +704,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(getTransformedTrustResponseWithYearsReturns, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getYearsReturns(utr).apply(FakeRequest(GET, s"/trusts/tax-liability/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe Json.parse(
@@ -736,14 +741,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getYearsReturns(utr).apply(FakeRequest(GET, s"/trusts/tax-liability/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe Json.parse(
@@ -769,7 +774,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 500 - Internal server error for invalid content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getYearsReturns(utr).apply(FakeRequest(GET, s"/trusts/tax-liability/$utr/transformed"))
@@ -784,7 +789,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 403 - Forbidden with parked content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/trustees/$utr/transformed"))
@@ -798,14 +803,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/trustees/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe getTransformedTrusteesResponse
@@ -818,14 +823,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/trustees/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe Taxable5MLDFixtures.Trusts.Trustees.taxable5mld2134514321Trustees
@@ -834,7 +839,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 500 - Internal server error for invalid content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getTrustees(utr).apply(FakeRequest(GET, s"/trusts/trustees/$utr/transformed"))
@@ -850,7 +855,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 403 - Forbidden with parked content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getAssets(utr)(FakeRequest(GET, s"/trusts/assets/$utr/transformed"))
@@ -864,14 +869,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(getTransformedTrustAllAssetsResponse, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getAssets(utr)(FakeRequest(GET, s"/trusts/assets/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe getTransformedAllAssetsResponse
@@ -884,14 +889,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getAssets(utr)(FakeRequest(GET, s"/trusts/assets/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe Taxable5MLDFixtures.Trusts.Assets.taxable5mld2134514321Assets
@@ -904,14 +909,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getAssets(utr)(FakeRequest(GET, s"/trusts/assets/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe NonTaxable5MLDFixtures.Trusts.Assets.nonTaxable5mldAssets
@@ -919,7 +924,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
       }
       "return 500 - Internal server error for invalid content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getAssets(utr)(FakeRequest(GET, s"/trusts/assets/$utr/transformed"))
@@ -935,7 +940,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 403 - Forbidden with parked content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getBeneficiaries(utr)(FakeRequest(GET, s"/trusts/beneficiaries/$utr/transformed"))
@@ -949,14 +954,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getBeneficiaries(utr)(FakeRequest(GET, s"/trusts/beneficiaries/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe getTransformedBeneficiariesResponse
@@ -969,14 +974,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getBeneficiaries(utr)(FakeRequest(GET, s"/trusts/beneficiaries/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe Taxable5MLDFixtures.Trusts.Beneficiaries.taxable5mld2134514321Beneficiaries
@@ -985,7 +990,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 500 - Internal server error for invalid content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getBeneficiaries(utr)(FakeRequest(GET, s"/trusts/beneficiaries/$utr/transformed"))
@@ -1001,7 +1006,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 403 - Forbidden with parked content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getSettlors(utr)(FakeRequest(GET, s"/trusts/settlors/$utr/transformed"))
@@ -1015,14 +1020,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getSettlors(utr)(FakeRequest(GET, s"/trusts/settlors/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe getTransformedSettlorsResponse
@@ -1035,14 +1040,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getSettlors(utr)(FakeRequest(GET, s"/trusts/settlors/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe Taxable5MLDFixtures.Trusts.Settlors.taxable5mld2134514321Settlors
@@ -1051,7 +1056,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 500 - Internal server error for invalid content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getSettlors(utr)(FakeRequest(GET, s"/trusts/settlors/$utr/transformed"))
@@ -1064,7 +1069,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(getEmptyTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getSettlors(utr)(FakeRequest())
@@ -1082,7 +1087,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
         whenReady(result) { _ =>
           status(result) mustBe OK
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe expected
         }
@@ -1093,7 +1098,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 403 - Forbidden with parked content" in {
 
-        when(trustsService.getTrustInfo(any(), any()))
+        when(trustsService.getTrustInfo(any(), any(), any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getDeceasedSettlorDeathRecorded(utr)(FakeRequest())
@@ -1107,7 +1112,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-        when(trustsService.getTrustInfo(any[String], any[String]))
+        when(trustsService.getTrustInfo(any[String], any[String], any[String]))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getDeceasedSettlorDeathRecorded(utr)(FakeRequest())
@@ -1116,7 +1121,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"))
+          verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"), mockEq(sessionId))
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe expected
@@ -1125,7 +1130,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 500 - Internal server error for invalid content" in {
 
-        when(trustsService.getTrustInfo(any(), any()))
+        when(trustsService.getTrustInfo(any(), any(), any()))
           .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getDeceasedSettlorDeathRecorded(utr)(FakeRequest())
@@ -1138,7 +1143,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(getEmptyTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-        when(trustsService.getTrustInfo(any[String], any[String]))
+        when(trustsService.getTrustInfo(any[String], any[String], any[String]))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getDeceasedSettlorDeathRecorded(utr)(FakeRequest())
@@ -1148,7 +1153,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
         whenReady(result) { _ =>
           status(result) mustBe OK
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"))
+          verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"), mockEq(sessionId))
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe expected
         }
@@ -1157,7 +1162,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(getTransformedTrustDeceasedSettlorWithoutDeathResponse, ResponseHeader("Processed", "1"))
 
-        when(trustsService.getTrustInfo(any[String], any[String]))
+        when(trustsService.getTrustInfo(any[String], any[String], any[String]))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getDeceasedSettlorDeathRecorded(utr)(FakeRequest())
@@ -1167,7 +1172,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
         whenReady(result) { _ =>
           status(result) mustBe OK
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"))
+          verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"), mockEq(sessionId))
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe expected
         }
@@ -1178,7 +1183,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 403 - Forbidden with parked content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getProtectorsAlreadyExist(utr)(FakeRequest())
@@ -1192,7 +1197,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getProtectorsAlreadyExist(utr)(FakeRequest())
@@ -1201,7 +1206,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe expected
@@ -1210,7 +1215,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 500 - Internal server error for invalid content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getProtectorsAlreadyExist(utr)(FakeRequest())
@@ -1223,7 +1228,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(getEmptyTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getProtectorsAlreadyExist(utr)(FakeRequest())
@@ -1233,7 +1238,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
         whenReady(result) { _ =>
           status(result) mustBe OK
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe expected
         }
@@ -1244,7 +1249,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 403 - Forbidden with parked content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getBeneficiaries(utr)(FakeRequest())
@@ -1258,14 +1263,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getProtectors(utr)(FakeRequest())
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe getTransformedProtectorsResponse
@@ -1278,14 +1283,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getProtectors(utr)(FakeRequest(GET, s"/trusts/protectors/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe Taxable5MLDFixtures.Trusts.Protectors.taxable5mld2134514321Protectors
@@ -1294,7 +1299,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 500 - Internal server error for invalid content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getProtectors(utr)(FakeRequest(GET, s"/trusts/protectors/$utr/transformed"))
@@ -1310,7 +1315,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 403 - Forbidden with parked content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getOtherIndividuals(utr)(FakeRequest(GET, s"/trusts/other-individuals/$utr/transformed"))
@@ -1324,14 +1329,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getOtherIndividuals(utr)(FakeRequest(GET, s"/trusts/other-individuals/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe getTransformedOtherIndividualsResponse
@@ -1344,14 +1349,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getOtherIndividuals(utr)(FakeRequest(GET, s"/trusts/other-individuals/$utr/transformed"))
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe Taxable5MLDFixtures.Trusts.OtherIndividuals.taxable5mld2134514321OtherIndividuals
@@ -1360,7 +1365,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 500 - Internal server error for invalid content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getOtherIndividuals(utr)(FakeRequest(GET, s"/trusts/other-individuals/$utr/transformed"))
@@ -1376,7 +1381,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 403 - Forbidden with parked content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getOtherIndividualsAlreadyExist(utr)(FakeRequest())
@@ -1390,7 +1395,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getOtherIndividualsAlreadyExist(utr)(FakeRequest())
@@ -1399,7 +1404,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe expected
@@ -1408,7 +1413,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 500 - Internal server error for invalid content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getOtherIndividualsAlreadyExist(utr)(FakeRequest())
@@ -1421,7 +1426,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(getEmptyTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getOtherIndividualsAlreadyExist(utr)(FakeRequest())
@@ -1431,7 +1436,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
         whenReady(result) { _ =>
           status(result) mustBe OK
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe expected
         }
@@ -1444,7 +1449,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(getTransformedNonTaxableTrustResponse, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getNonEeaCompaniesAlreadyExist(utr)(FakeRequest())
@@ -1453,7 +1458,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe expected
@@ -1464,7 +1469,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getNonEeaCompaniesAlreadyExist(utr)(FakeRequest())
@@ -1473,7 +1478,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe expected
@@ -1489,7 +1494,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(trustWith5mldData, ResponseHeader("Processed", "1"))
 
-        when(trustsService.getTrustInfo(any[String], any[String]))
+        when(trustsService.getTrustInfo(any[String], any[String], any[String]))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.isTrust5mld(utr)(FakeRequest())
@@ -1498,8 +1503,8 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"))
-          verify(transformationService, never()).getTransformedData(any(), any())(any())
+          verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"), mockEq(sessionId))
+          verify(transformationService, never()).getTransformedData(any(), any(), any())(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe expected
@@ -1512,7 +1517,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(trustWith4mldData, ResponseHeader("Processed", "1"))
 
-        when(trustsService.getTrustInfo(any[String], any[String]))
+        when(trustsService.getTrustInfo(any[String], any[String], any[String]))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.isTrust5mld(utr)(FakeRequest())
@@ -1521,8 +1526,8 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"))
-          verify(transformationService, never()).getTransformedData(any(), any())(any())
+          verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"), mockEq(sessionId))
+          verify(transformationService, never()).getTransformedData(any(), any(), any())(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe expected
@@ -1538,7 +1543,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(trustWithDeceasedSettlor, ResponseHeader("Processed", "1"))
 
-        when(trustsService.getTrustInfo(any[String], any[String]))
+        when(trustsService.getTrustInfo(any[String], any[String], any[String]))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.wasTrustRegisteredWithDeceasedSettlor(utr)(FakeRequest())
@@ -1547,8 +1552,8 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"))
-          verify(transformationService, never()).getTransformedData(any(), any())(any())
+          verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"), mockEq(sessionId))
+          verify(transformationService, never()).getTransformedData(any(), any(), any())(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe expected
@@ -1561,7 +1566,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(trustWithoutDeceasedSettlor, ResponseHeader("Processed", "1"))
 
-        when(trustsService.getTrustInfo(any[String], any[String]))
+        when(trustsService.getTrustInfo(any[String], any[String], any[String]))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.wasTrustRegisteredWithDeceasedSettlor(utr)(FakeRequest())
@@ -1570,8 +1575,8 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"))
-          verify(transformationService, never()).getTransformedData(any(), any())(any())
+          verify(trustsService).getTrustInfo(mockEq(utr), mockEq("id"), mockEq(sessionId))
+          verify(transformationService, never()).getTransformedData(any(), any(), any())(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe expected
@@ -1583,7 +1588,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 403 - Forbidden with parked content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getTrustName(utr)(FakeRequest())
@@ -1597,14 +1602,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val result = getTrustController.getTrustName(utr)(FakeRequest())
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
           contentAsJson(result) mustBe Json.toJson("Nelson James")
@@ -1613,7 +1618,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 500 - Internal server error for invalid content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getTrustName(utr)(FakeRequest())
@@ -1634,14 +1639,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
           val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-          when(transformationService.getTransformedData(any[String], any[String])(any()))
+          when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
             .thenReturn(Future.successful(processedResponse))
 
           val result = getTrustController.areBeneficiariesCompleteForMigration(utr)(FakeRequest())
 
           whenReady(result) { _ =>
             verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
             status(result) mustBe OK
             contentType(result) mustBe Some(JSON)
             contentAsJson(result) mustBe Json.toJson(Updated)
@@ -1656,14 +1661,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
           val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-          when(transformationService.getTransformedData(any[String], any[String])(any()))
+          when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
             .thenReturn(Future.successful(processedResponse))
 
           val result = getTrustController.areBeneficiariesCompleteForMigration(utr)(FakeRequest())
 
           whenReady(result) { _ =>
             verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
             status(result) mustBe OK
             contentType(result) mustBe Some(JSON)
             contentAsJson(result) mustBe Json.toJson(NeedsUpdating)
@@ -1678,14 +1683,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
           val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-          when(transformationService.getTransformedData(any[String], any[String])(any()))
+          when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
             .thenReturn(Future.successful(processedResponse))
 
           val result = getTrustController.areBeneficiariesCompleteForMigration(utr)(FakeRequest())
 
           whenReady(result) { _ =>
             verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
             status(result) mustBe OK
             contentType(result) mustBe Some(JSON)
             contentAsJson(result) mustBe Json.toJson(NothingToUpdate)
@@ -1696,7 +1701,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
       "return 403 (FORBIDDEN)" when {
         "parked content" in {
 
-          when(transformationService.getTransformedData(any(), any())(any()))
+          when(transformationService.getTransformedData(any(), any(), any())(any()))
             .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
           val result = getTrustController.areBeneficiariesCompleteForMigration(utr)(FakeRequest())
@@ -1712,7 +1717,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
           when(mockRequiredDetailsUtil.areBeneficiariesCompleteForMigration(any())).thenReturn(JsError())
 
-          when(transformationService.getTransformedData(any(), any())(any()))
+          when(transformationService.getTransformedData(any(), any(), any())(any()))
             .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
           val result = getTrustController.areBeneficiariesCompleteForMigration(utr)(FakeRequest())
@@ -1733,14 +1738,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
           val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-          when(transformationService.getTransformedData(any[String], any[String])(any()))
+          when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
             .thenReturn(Future.successful(processedResponse))
 
           val result = getTrustController.areSettlorsCompleteForMigration(utr)(FakeRequest())
 
           whenReady(result) { _ =>
             verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
             status(result) mustBe OK
             contentType(result) mustBe Some(JSON)
             contentAsJson(result) mustBe Json.toJson(Updated)
@@ -1755,14 +1760,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
           val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-          when(transformationService.getTransformedData(any[String], any[String])(any()))
+          when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
             .thenReturn(Future.successful(processedResponse))
 
           val result = getTrustController.areSettlorsCompleteForMigration(utr)(FakeRequest())
 
           whenReady(result) { _ =>
             verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
             status(result) mustBe OK
             contentType(result) mustBe Some(JSON)
             contentAsJson(result) mustBe Json.toJson(NeedsUpdating)
@@ -1777,14 +1782,14 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
           val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-          when(transformationService.getTransformedData(any[String], any[String])(any()))
+          when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
             .thenReturn(Future.successful(processedResponse))
 
           val result = getTrustController.areSettlorsCompleteForMigration(utr)(FakeRequest())
 
           whenReady(result) { _ =>
             verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+            verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
             status(result) mustBe OK
             contentType(result) mustBe Some(JSON)
             contentAsJson(result) mustBe Json.toJson(NothingToUpdate)
@@ -1795,7 +1800,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
       "return 403 (FORBIDDEN)" when {
         "parked content" in {
 
-          when(transformationService.getTransformedData(any(), any())(any()))
+          when(transformationService.getTransformedData(any(), any(), any())(any()))
             .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
           val result = getTrustController.areSettlorsCompleteForMigration(utr)(FakeRequest())
@@ -1811,7 +1816,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
           when(mockRequiredDetailsUtil.areBeneficiariesCompleteForMigration(any())).thenReturn(JsError())
 
-          when(transformationService.getTransformedData(any(), any())(any()))
+          when(transformationService.getTransformedData(any(), any(), any())(any()))
             .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
           val result = getTrustController.areSettlorsCompleteForMigration(utr)(FakeRequest())
@@ -1827,7 +1832,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 403 - Forbidden with parked content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getFirstTaxYearAvailable(utr)(FakeRequest())
@@ -1841,7 +1846,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
-        when(transformationService.getTransformedData(any[String], any[String])(any()))
+        when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
           .thenReturn(Future.successful(processedResponse))
 
         val fakeResult = FirstTaxYearAvailable(1, earlierYearsToDeclare = false)
@@ -1852,7 +1857,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
         whenReady(result) { _ =>
           verify(mockedAuditService).audit(mockEq("GetTrust"), any[JsValue], any[String], any[JsValue])(any())
-          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"))(any())
+          verify(transformationService).getTransformedData(mockEq(utr), mockEq("id"), mockEq(sessionId))(any())
           verify(taxYearService).firstTaxYearAvailable(LocalDate.parse("1920-03-28"))
           status(result) mustBe OK
           contentType(result) mustBe Some(JSON)
@@ -1862,7 +1867,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
       "return 500 - Internal server error for invalid content" in {
 
-        when(transformationService.getTransformedData(any(), any())(any()))
+        when(transformationService.getTransformedData(any(), any(), any())(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(Json.obj(), ResponseHeader("Parked", "1"))))
 
         val result = getTrustController.getFirstTaxYearAvailable(utr)(FakeRequest())

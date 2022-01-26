@@ -32,18 +32,18 @@ class TaxableMigrationRepositoryImpl @Inject()(
 
   override val key: String = "migratingToTaxable"
 
-  override def get(identifier: String, internalId: String): Future[Option[Boolean]] = {
-    get[Boolean](identifier, internalId)
+  override def get(identifier: String, internalId: String, sessionId: String): Future[Option[Boolean]] = {
+    get[Boolean](identifier, internalId, sessionId)
   }
 
-  override def set(identifier: String, internalId: String, migratingToTaxable: Boolean): Future[Boolean] = {
-    set[Boolean](identifier, internalId, migratingToTaxable)
+  override def set(identifier: String, internalId: String, sessionId: String, migratingToTaxable: Boolean): Future[Boolean] = {
+    set[Boolean](identifier, internalId, sessionId, migratingToTaxable)
   }
 }
 
 trait TaxableMigrationRepository {
 
-  def get(identifier: String, internalId: String): Future[Option[Boolean]]
+  def get(identifier: String, internalId: String, sessionId: String): Future[Option[Boolean]]
 
-  def set(identifier: String, internalId: String, migratingToTaxable: Boolean): Future[Boolean]
+  def set(identifier: String, internalId: String, sessionId: String, migratingToTaxable: Boolean): Future[Boolean]
 }

@@ -55,15 +55,15 @@ class AddProtectorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
   override def beforeEach(): Unit = {
     reset(mockTransformationService)
 
-    when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+    when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
       .thenReturn(Future.successful(Json.obj()))
 
-    when(mockTransformationService.addNewTransform(any(), any(), any()))
+    when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
       .thenReturn(Future.successful(true))
 
     reset(mockTaxableMigrationService)
 
-    when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any()))
+    when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any(), any()))
       .thenReturn(Future.successful(false))
   }
   
@@ -105,7 +105,7 @@ class AddProtectorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
         val transform = AddProtectorTransform(Json.toJson(protector), protectorType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -161,7 +161,7 @@ class AddProtectorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
         val transform = AddProtectorTransform(Json.toJson(protector), protectorType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 

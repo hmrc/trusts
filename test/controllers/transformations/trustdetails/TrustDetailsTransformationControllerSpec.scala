@@ -58,15 +58,15 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
   override def beforeEach(): Unit = {
     reset(mockTransformationService)
 
-    when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+    when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
       .thenReturn(Future.successful(Json.obj()))
 
-    when(mockTransformationService.addNewTransform(any(), any(), any()))
+    when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
       .thenReturn(Future.successful(true))
 
     reset(mockTaxableMigrationService)
 
-    when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any()))
+    when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any(), any()))
       .thenReturn(Future.successful(false))
   }
 
@@ -94,7 +94,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
           equalTo(utr),
           equalTo("id"),
           equalTo(SetTrustDetailTransform(JsBoolean(true), "expressTrust"))
-        )
+        )(any())
       }
 
       "return a BadRequest for malformed json" in {
@@ -138,7 +138,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
           equalTo(utr),
           equalTo("id"),
           equalTo(SetTrustDetailTransform(JsBoolean(true), "trustUKProperty"))
-        )
+        )(any())
       }
 
       "return a BadRequest for malformed json" in {
@@ -182,7 +182,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
           equalTo(utr),
           equalTo("id"),
           equalTo(SetTrustDetailTransform(JsBoolean(true), "trustRecorded"))
-        )
+        )(any())
       }
 
       "return a BadRequest for malformed json" in {
@@ -226,7 +226,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
           equalTo(utr),
           equalTo("id"),
           equalTo(SetTrustDetailTransform(JsBoolean(true), "trustUKResident"))
-        )
+        )(any())
       }
 
       "return a BadRequest for malformed json" in {
@@ -270,7 +270,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
           equalTo(utr),
           equalTo("id"),
           equalTo(SetTrustDetailTransform(JsBoolean(true), "trustTaxable"))
-        )
+        )(any())
       }
 
       "return a BadRequest for malformed json" in {
@@ -314,7 +314,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
           equalTo(utr),
           equalTo("id"),
           equalTo(SetTrustDetailTransform(JsBoolean(true), "trustUKRelation"))
-        )
+        )(any())
       }
 
       "return a BadRequest for malformed json" in {
@@ -360,7 +360,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
           equalTo(utr),
           any(),
           equalTo(SetTrustDetailTransform(body, "lawCountry"))
-        )
+        )(any())
       }
 
       "return a BadRequest for malformed json" in {
@@ -406,7 +406,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
           equalTo(utr),
           any(),
           equalTo(SetTrustDetailTransform(body, "administrationCountry"))
-        )
+        )(any())
       }
 
       "return a BadRequest for malformed json" in {
@@ -452,7 +452,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
           equalTo(utr),
           any(),
           equalTo(SetTrustDetailTransform(body, "typeOfTrust"))
-        )
+        )(any())
       }
 
       "return a BadRequest for malformed json" in {
@@ -498,7 +498,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
           equalTo(utr),
           any(),
           equalTo(SetTrustDetailTransform(body, "deedOfVariation"))
-        )
+        )(any())
       }
 
       "return a BadRequest for malformed json" in {
@@ -544,7 +544,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
           equalTo(utr),
           any(),
           equalTo(SetTrustDetailTransform(body, "interVivos"))
-        )
+        )(any())
       }
 
       "return a BadRequest for malformed json" in {
@@ -590,7 +590,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
           equalTo(utr),
           any(),
           equalTo(SetTrustDetailTransform(body, "efrbsStartDate"))
-        )
+        )(any())
       }
 
       "return a BadRequest for malformed json" in {
@@ -636,7 +636,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
           equalTo(utr),
           any(),
           equalTo(SetTrustDetailTransform(body, "residentialStatus"))
-        )
+        )(any())
       }
 
       "return a BadRequest for malformed json" in {
@@ -672,7 +672,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
 
         "must return an OK" in {
 
-          when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any()))
+          when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any(), any()))
             .thenReturn(Future.successful(true))
 
           val controller = new TrustDetailsTransformationController(
@@ -713,7 +713,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
             equalTo(utr),
             any(),
             equalTo(SetTrustDetailTransform(JsString("GB"), ADMINISTRATION_COUNTRY))
-          )
+          )(any())
 
           verify(mockTransformationService).addNewTransform(
             equalTo(utr),
@@ -726,31 +726,31 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
                 |  }
                 |}
                 |""".stripMargin), RESIDENTIAL_STATUS))
-          )
+          )(any())
 
           verify(mockTransformationService).addNewTransform(
             equalTo(utr),
             any(),
             equalTo(SetTrustDetailTransform(JsBoolean(true), UK_PROPERTY))
-          )
+          )(any())
 
           verify(mockTransformationService).addNewTransform(
             equalTo(utr),
             any(),
             equalTo(SetTrustDetailTransform(JsBoolean(true), RECORDED))
-          )
+          )(any())
 
           verify(mockTransformationService).addNewTransform(
             equalTo(utr),
             any(),
             equalTo(SetTrustDetailTransform(JsBoolean(true), UK_RESIDENT))
-          )
+          )(any())
 
           verify(mockTransformationService).addNewTransform(
             equalTo(utr),
             any(),
             equalTo(SetTrustDetailTransform(JsString("Will Trust or Intestacy Trust"), TYPE_OF_TRUST))
-          )
+          )(any())
         }
 
         "must return a BadRequest for malformed json" in {
@@ -776,7 +776,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
 
         "must return an OK" in {
 
-          when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any()))
+          when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any(), any()))
             .thenReturn(Future.successful(false))
 
           val controller = new TrustDetailsTransformationController(
@@ -799,19 +799,19 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
             equalTo(utr),
             any(),
             equalTo(SetTrustDetailTransform(JsBoolean(true), UK_PROPERTY))
-          )
+          )(any())
 
           verify(mockTransformationService).addNewTransform(
             equalTo(utr),
             any(),
             equalTo(SetTrustDetailTransform(JsBoolean(true), RECORDED))
-          )
+          )(any())
 
           verify(mockTransformationService).addNewTransform(
             equalTo(utr),
             any(),
             equalTo(SetTrustDetailTransform(JsBoolean(true), UK_RESIDENT))
-          )
+          )(any())
         }
 
         "must return a BadRequest for malformed json" in {

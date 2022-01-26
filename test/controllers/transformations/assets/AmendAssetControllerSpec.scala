@@ -86,10 +86,10 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         when(mockLocalDateService.now).thenReturn(endDate)
@@ -105,7 +105,7 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
         val transform = AmendAssetTransform(Some(index), Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -157,10 +157,10 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         when(mockLocalDateService.now).thenReturn(endDate)
@@ -176,7 +176,7 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
         val transform = AmendAssetTransform(Some(index), Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -230,10 +230,10 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         when(mockLocalDateService.now).thenReturn(endDate)
@@ -249,7 +249,7 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
         val transform = AmendAssetTransform(Some(index), Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -302,10 +302,10 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         when(mockLocalDateService.now).thenReturn(endDate)
@@ -321,7 +321,7 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
         val transform = AmendAssetTransform(Some(index), Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -372,10 +372,10 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         when(mockLocalDateService.now).thenReturn(endDate)
@@ -391,7 +391,7 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
         val transform = AmendAssetTransform(Some(index), Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -441,10 +441,10 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         when(mockLocalDateService.now).thenReturn(endDate)
@@ -460,7 +460,7 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
         val transform = AmendAssetTransform(Some(index), Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -514,10 +514,10 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         when(mockLocalDateService.now).thenReturn(endDate)
@@ -533,7 +533,7 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
         val transform = AmendAssetTransform(Some(index), Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 

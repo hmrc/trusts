@@ -156,7 +156,7 @@ class RemoveBeneficiaryTransformSpec extends AnyFreeSpec with ScalaFutures with 
       val trustsService = mock[TrustsService]
       val auditService = mock[AuditService]
       val transforms = Seq(RemoveBeneficiaryTransform(Some(1), beneficiaryJson("Two"), LocalDate.of(2018, 4, 21), "unidentified"))
-      when(repo.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))
+      when(repo.get(any(), any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))
 
       val SUT = new TransformationService(repo, trustsService, auditService)
 
@@ -181,7 +181,7 @@ class RemoveBeneficiaryTransformSpec extends AnyFreeSpec with ScalaFutures with 
         RemoveBeneficiaryTransform(Some(3), beneficiaryJson("Two", None, withLineNo = false), LocalDate.of(2018, 4, 21), "unidentified")
       )
 
-      when(repo.get(any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))
+      when(repo.get(any(), any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))
 
       val SUT = new TransformationService(repo, trustsService, auditService)
 

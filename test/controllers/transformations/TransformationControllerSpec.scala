@@ -27,6 +27,7 @@ import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import services._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
+import utils.Session
 
 import scala.concurrent.Future
 
@@ -37,6 +38,7 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
   private val mockTransformationService = mock[TransformationService]
 
   private val identifier: String = "utr"
+  private val sessionId: String = Session.id(hc)
 
   private def transformationController = {
     new TransformationController(
@@ -56,7 +58,7 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
 
       "return OK" when {
         "successfully removed transforms" in {
-          when(mockTransformationService.removeAllTransformations(any(), any()))
+          when(mockTransformationService.removeAllTransformations(any(), any(), any()))
             .thenReturn(Future.successful(None))
 
           val request = FakeRequest(DELETE, "path")
@@ -64,13 +66,13 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
           val result = transformationController.removeTransforms(identifier).apply(request)
           status(result) mustBe OK
 
-          verify(mockTransformationService).removeAllTransformations(identifier, "id")
+          verify(mockTransformationService).removeAllTransformations(identifier, "id", sessionId)
         }
       }
 
       "return INTERNAL_SERVER_ERROR" when {
         "failed to remove transforms" in {
-          when(mockTransformationService.removeAllTransformations(any(), any()))
+          when(mockTransformationService.removeAllTransformations(any(), any(), any()))
             .thenReturn(Future.failed(new Throwable("repository reset failed")))
 
           val request = FakeRequest(DELETE, "path")
@@ -78,7 +80,7 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
           val result = transformationController.removeTransforms(identifier).apply(request)
           status(result) mustBe INTERNAL_SERVER_ERROR
 
-          verify(mockTransformationService).removeAllTransformations(identifier, "id")
+          verify(mockTransformationService).removeAllTransformations(identifier, "id", sessionId)
         }
       }
     }
@@ -87,7 +89,7 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
 
       "return OK" when {
         "successfully removed transforms" in {
-          when(mockTransformationService.removeTrustTypeDependentTransformFields(any(), any()))
+          when(mockTransformationService.removeTrustTypeDependentTransformFields(any(), any(), any()))
             .thenReturn(Future.successful(true))
 
           val request = FakeRequest(DELETE, "path")
@@ -95,13 +97,13 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
           val result = transformationController.removeTrustTypeDependentTransformFields(identifier).apply(request)
           status(result) mustBe OK
 
-          verify(mockTransformationService).removeTrustTypeDependentTransformFields(identifier, "id")
+          verify(mockTransformationService).removeTrustTypeDependentTransformFields(identifier, "id", sessionId)
         }
       }
 
       "return INTERNAL_SERVER_ERROR" when {
         "failed to remove transforms" in {
-          when(mockTransformationService.removeTrustTypeDependentTransformFields(any(), any()))
+          when(mockTransformationService.removeTrustTypeDependentTransformFields(any(), any(), any()))
             .thenReturn(Future.failed(new Throwable()))
 
           val request = FakeRequest(DELETE, "path")
@@ -109,7 +111,7 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
           val result = transformationController.removeTrustTypeDependentTransformFields(identifier).apply(request)
           status(result) mustBe INTERNAL_SERVER_ERROR
 
-          verify(mockTransformationService).removeTrustTypeDependentTransformFields(identifier, "id")
+          verify(mockTransformationService).removeTrustTypeDependentTransformFields(identifier, "id", sessionId)
         }
       }
     }
@@ -118,7 +120,7 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
 
       "return OK" when {
         "successfully removed transforms" in {
-          when(mockTransformationService.removeOptionalTrustDetailTransforms(any(), any()))
+          when(mockTransformationService.removeOptionalTrustDetailTransforms(any(), any(), any()))
             .thenReturn(Future.successful(true))
 
           val request = FakeRequest(DELETE, "path")
@@ -126,13 +128,13 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
           val result = transformationController.removeOptionalTrustDetailTransforms(identifier).apply(request)
           status(result) mustBe OK
 
-          verify(mockTransformationService).removeOptionalTrustDetailTransforms(identifier, "id")
+          verify(mockTransformationService).removeOptionalTrustDetailTransforms(identifier, "id", sessionId)
         }
       }
 
       "return INTERNAL_SERVER_ERROR" when {
         "failed to remove transforms" in {
-          when(mockTransformationService.removeOptionalTrustDetailTransforms(any(), any()))
+          when(mockTransformationService.removeOptionalTrustDetailTransforms(any(), any(), any()))
             .thenReturn(Future.failed(new Throwable()))
 
           val request = FakeRequest(DELETE, "path")
@@ -140,7 +142,7 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
           val result = transformationController.removeOptionalTrustDetailTransforms(identifier).apply(request)
           status(result) mustBe INTERNAL_SERVER_ERROR
 
-          verify(mockTransformationService).removeOptionalTrustDetailTransforms(identifier, "id")
+          verify(mockTransformationService).removeOptionalTrustDetailTransforms(identifier, "id", sessionId)
         }
       }
     }

@@ -29,6 +29,7 @@ import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import services._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
+import utils.Session
 
 import scala.concurrent.Future
 
@@ -39,6 +40,7 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
   private val mockTaxableMigrationService = mock[TaxableMigrationService]
 
   private val identifier: String = "utr"
+  private val sessionId: String = Session.id(hc)
 
   private def taxableMigrationController = {
     new TaxableMigrationController(
@@ -56,7 +58,7 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
 
     "return OK" when {
       "taxable migration defined" in {
-        when(mockTaxableMigrationService.getTaxableMigrationFlag(any(), any()))
+        when(mockTaxableMigrationService.getTaxableMigrationFlag(any(), any(), any()))
           .thenReturn(Future.successful(Some(true)))
 
         val request = FakeRequest(GET, "path")
@@ -65,11 +67,11 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
         status(result) mustBe OK
         contentAsJson(result) mustBe Json.toJson(TaxableMigrationFlag(Some(true)))
 
-        verify(mockTaxableMigrationService).getTaxableMigrationFlag(identifier, "id")
+        verify(mockTaxableMigrationService).getTaxableMigrationFlag(identifier, "id", sessionId)
       }
 
       "taxable migration flag undefined" in {
-        when(mockTaxableMigrationService.getTaxableMigrationFlag(any(), any()))
+        when(mockTaxableMigrationService.getTaxableMigrationFlag(any(), any(), any()))
           .thenReturn(Future.successful(None))
 
         val request = FakeRequest(GET, "path")
@@ -78,13 +80,13 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
         status(result) mustBe OK
         contentAsJson(result) mustBe Json.toJson(TaxableMigrationFlag(None))
 
-        verify(mockTaxableMigrationService).getTaxableMigrationFlag(identifier, "id")
+        verify(mockTaxableMigrationService).getTaxableMigrationFlag(identifier, "id", sessionId)
       }
     }
 
     "return INTERNAL_SERVER_ERROR" when {
       "repository get fails" in {
-        when(mockTaxableMigrationService.getTaxableMigrationFlag(any(), any()))
+        when(mockTaxableMigrationService.getTaxableMigrationFlag(any(), any(), any()))
           .thenReturn(Future.failed(new Throwable("repository get failed")))
 
         val request = FakeRequest(GET, "path")
@@ -92,7 +94,7 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
         val result = taxableMigrationController.getTaxableMigrationFlag(identifier).apply(request)
         status(result) mustBe INTERNAL_SERVER_ERROR
 
-        verify(mockTaxableMigrationService).getTaxableMigrationFlag(identifier, "id")
+        verify(mockTaxableMigrationService).getTaxableMigrationFlag(identifier, "id", sessionId)
       }
     }
   }
@@ -101,7 +103,7 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
     "return OK" when {
 
       "setting to true" in {
-        when(mockTaxableMigrationService.setTaxableMigrationFlag(any(), any(), any()))
+        when(mockTaxableMigrationService.setTaxableMigrationFlag(any(), any(), any(), any()))
           .thenReturn(Future.successful(true))
 
         val result = taxableMigrationController.setTaxableMigrationFlag(identifier)
@@ -109,11 +111,11 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
 
         status(result) mustBe OK
 
-        verify(mockTaxableMigrationService).setTaxableMigrationFlag(identifier, "id", migratingToTaxable = true)
+        verify(mockTaxableMigrationService).setTaxableMigrationFlag(identifier, "id", sessionId, migratingToTaxable = true)
       }
 
       "setting to false" in {
-        when(mockTaxableMigrationService.setTaxableMigrationFlag(any(), any(), any()))
+        when(mockTaxableMigrationService.setTaxableMigrationFlag(any(), any(), any(), any()))
           .thenReturn(Future.successful(true))
 
         val result = taxableMigrationController.setTaxableMigrationFlag(identifier)
@@ -121,7 +123,7 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
 
         status(result) mustBe OK
 
-        verify(mockTaxableMigrationService).setTaxableMigrationFlag(identifier, "id", migratingToTaxable = false)
+        verify(mockTaxableMigrationService).setTaxableMigrationFlag(identifier, "id", sessionId, migratingToTaxable = false)
       }
     }
 
@@ -136,7 +138,7 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
 
     "return INTERNAL_SERVER_ERROR" when {
       "repository set fails" in {
-        when(mockTaxableMigrationService.setTaxableMigrationFlag(any(), any(), any()))
+        when(mockTaxableMigrationService.setTaxableMigrationFlag(any(), any(), any(), any()))
           .thenReturn(Future.failed(new Throwable("repository set failed")))
 
         val result = taxableMigrationController.setTaxableMigrationFlag(identifier)
@@ -144,7 +146,7 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
 
         status(result) mustBe INTERNAL_SERVER_ERROR
 
-        verify(mockTaxableMigrationService).setTaxableMigrationFlag(identifier, "id", migratingToTaxable = true)
+        verify(mockTaxableMigrationService).setTaxableMigrationFlag(identifier, "id", sessionId, migratingToTaxable = true)
       }
     }
   }

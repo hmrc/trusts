@@ -55,15 +55,15 @@ class TaxLiabilityTransformationControllerSpec extends AnyFreeSpec
   override def beforeEach(): Unit = {
     reset(mockTransformationService)
 
-    when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+    when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
       .thenReturn(Future.successful(Json.obj()))
 
-    when(mockTransformationService.addNewTransform(any(), any(), any()))
+    when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
       .thenReturn(Future.successful(true))
 
     reset(mockTaxableMigrationService)
 
-    when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any()))
+    when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any(), any()))
       .thenReturn(Future.successful(false))
   }
 
@@ -79,10 +79,10 @@ class TaxLiabilityTransformationControllerSpec extends AnyFreeSpec
           mockTaxableMigrationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(Json.obj()))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         val body = Json.toJson(YearsReturns(None))
@@ -99,7 +99,7 @@ class TaxLiabilityTransformationControllerSpec extends AnyFreeSpec
           equalTo(utr),
           any(),
           equalTo(SetTaxLiabilityTransform(Json.toJson(body)))
-        )
+        )(any())
       }
 
       "return a BadRequest for malformed json" in {

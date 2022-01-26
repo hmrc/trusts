@@ -21,8 +21,9 @@ import controllers.actions.IdentifierAction
 import play.api.Logging
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import services.TransformationService
-
 import javax.inject.Inject
+import utils.Session
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -32,24 +33,24 @@ class TransformationController @Inject()(
                                           cc: ControllerComponents
                                         ) extends TrustsBaseController(cc) with Logging {
 
-  def removeTransforms(identifier: String): Action[AnyContent] = identify.async { request =>
-    transformationService.removeAllTransformations(identifier, request.internalId) map { _ =>
+  def removeTransforms(identifier: String): Action[AnyContent] = identify.async { implicit request =>
+    transformationService.removeAllTransformations(identifier, request.internalId, Session.id(hc)) map { _ =>
       Ok
     } recoverWith {
       case _ => Future.successful(InternalServerError)
     }
   }
 
-  def removeTrustTypeDependentTransformFields(identifier: String): Action[AnyContent] = identify.async { request =>
-    transformationService.removeTrustTypeDependentTransformFields(identifier, request.internalId) map { _ =>
+  def removeTrustTypeDependentTransformFields(identifier: String): Action[AnyContent] = identify.async { implicit request =>
+    transformationService.removeTrustTypeDependentTransformFields(identifier, request.internalId, Session.id(hc)) map { _ =>
       Ok
     } recoverWith {
       case _ => Future.successful(InternalServerError)
     }
   }
 
-  def removeOptionalTrustDetailTransforms(identifier: String): Action[AnyContent] = identify.async { request =>
-    transformationService.removeOptionalTrustDetailTransforms(identifier, request.internalId) map { _ =>
+  def removeOptionalTrustDetailTransforms(identifier: String): Action[AnyContent] = identify.async { implicit request =>
+    transformationService.removeOptionalTrustDetailTransforms(identifier, request.internalId, Session.id(hc)) map { _ =>
       Ok
     } recoverWith {
       case _ => Future.successful(InternalServerError)
