@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,10 +94,10 @@ class RemoveSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(settlorType, Seq(Json.toJson(settlor)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         val body = removeSettlor(settlorType)
@@ -113,7 +113,7 @@ class RemoveSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
         val transform = RemoveSettlorTransform(Some(index), Json.toJson(settlor), endDate, settlorType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
     }
@@ -143,10 +143,10 @@ class RemoveSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(settlorType, Seq(Json.toJson(settlor)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         val body = removeSettlor(settlorType)
@@ -162,7 +162,7 @@ class RemoveSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
         val transform = RemoveSettlorTransform(Some(index), Json.toJson(settlor), endDate, settlorType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
     }

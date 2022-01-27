@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +41,10 @@ class TrustsServiceSpec extends BaseSpec {
     val mockSubscriptionConnector: TrustsConnector = mock[TrustsConnector]
     val mockTrustsConnector: SubscriptionConnector = mock[SubscriptionConnector]
     val mockRepository: CacheRepositoryImpl = mock[CacheRepositoryImpl]
-    when(mockRepository.get(any[String], any[String])).thenReturn(Future.successful(None))
-    when(mockRepository.resetCache(any[String], any[String])).thenReturn(Future.successful(None))
+    when(mockRepository.get(any[String], any[String], any[String])).thenReturn(Future.successful(None))
+    when(mockRepository.resetCache(any[String], any[String], any[String])).thenReturn(Future.successful(None))
     val myId = "myId"
+    val sessionId: String = "sessionId"
 
     val SUT = new TrustsService(mockSubscriptionConnector, mockTrustsConnector, mockRepository)
   }
@@ -206,20 +207,20 @@ class TrustsServiceSpec extends BaseSpec {
         val fullEtmpResponseJson = get5MLDTrustResponse
         val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
 
-        when(mockRepository.get(any[String], any[String])).thenReturn(Future.successful(None))
+        when(mockRepository.get(any[String], any[String], any[String])).thenReturn(Future.successful(None))
 
-        when(mockRepository.resetCache(any[String], any[String])).thenReturn(Future.successful(None))
+        when(mockRepository.resetCache(any[String], any[String], any[String])).thenReturn(Future.successful(None))
 
         when(mockSubscriptionConnector.getTrustInfo(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))))
 
-        when(mockRepository.set(any(), any(), any())).thenReturn(Future.successful(true))
+        when(mockRepository.set(any(), any(), any(), any())).thenReturn(Future.successful(true))
 
-        val futureResult = SUT.getTrustInfo(utr, myId)
+        val futureResult = SUT.getTrustInfo(utr, myId, sessionId)
 
         whenReady(futureResult) { result =>
           result mustBe models.get_trust.TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))
-          verify(mockRepository, times(1)).set(utr, myId, fullEtmpResponseJson)
+          verify(mockRepository, times(1)).set(utr, myId, sessionId, fullEtmpResponseJson)
         }
       }
 
@@ -229,10 +230,10 @@ class TrustsServiceSpec extends BaseSpec {
         val fullEtmpResponseJson = get5MLDTrustResponse
         val trustInfoJson = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
 
-        when(mockRepository.get(any[String], any[String])).thenReturn(Future.successful(Some(fullEtmpResponseJson)))
+        when(mockRepository.get(any[String], any[String], any[String])).thenReturn(Future.successful(Some(fullEtmpResponseJson)))
         when(mockSubscriptionConnector.getTrustInfo(any())).thenReturn(Future.failed(new Exception("Connector should not have been called")))
 
-        val futureResult = SUT.getTrustInfo(utr, myId)
+        val futureResult = SUT.getTrustInfo(utr, myId, sessionId)
         whenReady(futureResult) { result =>
           result mustBe models.get_trust.TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))
           verifyZeroInteractions(mockSubscriptionConnector)
@@ -248,7 +249,7 @@ class TrustsServiceSpec extends BaseSpec {
 
         when(mockSubscriptionConnector.getTrustInfo(any())).thenReturn(Future.successful(TrustFoundResponse(ResponseHeader("In Processing", "1"))))
 
-        val futureResult = SUT.getTrustInfo(utr, myId)
+        val futureResult = SUT.getTrustInfo(utr, myId, sessionId)
 
         whenReady(futureResult) { result =>
           result mustBe TrustFoundResponse(ResponseHeader("In Processing", "1"))
@@ -263,7 +264,7 @@ class TrustsServiceSpec extends BaseSpec {
         when(mockSubscriptionConnector.getTrustInfo(any())).thenReturn(Future.successful(BadRequestResponse))
 
         val utr = "123456789"
-        val futureResult = SUT.getTrustInfo(utr, myId)
+        val futureResult = SUT.getTrustInfo(utr, myId, sessionId)
 
         whenReady(futureResult) { result =>
           result mustBe BadRequestResponse
@@ -278,7 +279,7 @@ class TrustsServiceSpec extends BaseSpec {
         when(mockSubscriptionConnector.getTrustInfo(any())).thenReturn(Future.successful(ResourceNotFoundResponse))
 
         val utr = "123456789"
-        val futureResult = SUT.getTrustInfo(utr, myId)
+        val futureResult = SUT.getTrustInfo(utr, myId, sessionId)
 
         whenReady(futureResult) { result =>
           result mustBe ResourceNotFoundResponse
@@ -293,7 +294,7 @@ class TrustsServiceSpec extends BaseSpec {
         when(mockSubscriptionConnector.getTrustInfo(any())).thenReturn(Future.successful(InternalServerErrorResponse))
 
         val utr = "123456789"
-        val futureResult = SUT.getTrustInfo(utr, myId)
+        val futureResult = SUT.getTrustInfo(utr, myId, sessionId)
 
         whenReady(futureResult) { result =>
           result mustBe InternalServerErrorResponse
@@ -308,7 +309,7 @@ class TrustsServiceSpec extends BaseSpec {
         when(mockSubscriptionConnector.getTrustInfo(any())).thenReturn(Future.successful(ServiceUnavailableResponse))
 
         val utr = "123456789"
-        val futureResult = SUT.getTrustInfo(utr, myId)
+        val futureResult = SUT.getTrustInfo(utr, myId, sessionId)
 
         whenReady(futureResult) { result =>
           result mustBe ServiceUnavailableResponse

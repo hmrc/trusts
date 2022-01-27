@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,25 +57,25 @@ class TrustsService @Inject()(val trustsConnector: TrustsConnector,
     subscriptionConnector.getSubscriptionId(trn)
   }
 
-  def resetCache(identifier: String, internalId: String): Future[Unit] = {
-    repository.resetCache(identifier, internalId).map { _ =>
+  def resetCache(identifier: String, internalId: String, sessionId: String): Future[Unit] = {
+    repository.resetCache(identifier, internalId, sessionId).map { _ =>
       Future.successful(())
     }
   }
 
-  def refreshCacheAndGetTrustInfo(identifier: String, internalId: String): Future[GetTrustResponse] = {
-    repository.resetCache(identifier, internalId).flatMap { _ =>
+  def refreshCacheAndGetTrustInfo(identifier: String, internalId: String, sessionId: String): Future[GetTrustResponse] = {
+    repository.resetCache(identifier, internalId, sessionId).flatMap { _ =>
       trustsConnector.getTrustInfo(identifier).flatMap {
         case response: TrustProcessedResponse =>
-          repository.set(identifier, internalId, Json.toJson(response)(TrustProcessedResponse.mongoWrites))
+          repository.set(identifier, internalId, sessionId, Json.toJson(response)(TrustProcessedResponse.mongoWrites))
             .map(_ => response)
         case x => Future.successful(x)
       }
     }
   }
 
-  def getTrustInfo(identifier: String, internalId: String): Future[GetTrustResponse] = {
-    repository.get(identifier, internalId).flatMap {
+  def getTrustInfo(identifier: String, internalId: String, sessionId: String): Future[GetTrustResponse] = {
+    repository.get(identifier, internalId, sessionId).flatMap {
       case Some(x) =>
         x.validate[GetTrustSuccessResponse].fold(
           errs => {
@@ -87,7 +87,7 @@ class TrustsService @Inject()(val trustsConnector: TrustsConnector,
           }
         )
       case None =>
-        refreshCacheAndGetTrustInfo(identifier, internalId)
+        refreshCacheAndGetTrustInfo(identifier, internalId, sessionId)
     }
   }
 

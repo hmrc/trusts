@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,18 +52,18 @@ class VariationService @Inject()(
     def format(content: String): String = s"[submitDeclaration][Session ID: ${Session.id(hc)}][UTR/URN: $identifier] $content"
   }
 
-  def submitDeclaration(identifier: String, internalId: String, declaration: DeclarationForApi)
+  def submitDeclaration(identifier: String, internalId: String, sessionId: String, declaration: DeclarationForApi)
                        (implicit hc: HeaderCarrier): Future[VariationContext] = {
 
     implicit val logging: LoggingContext = LoggingContext(identifier)
 
-    getCachedTrustData(identifier, internalId).flatMap { originalResponse: TrustProcessedResponse =>
+    getCachedTrustData(identifier, internalId, sessionId).flatMap { originalResponse: TrustProcessedResponse =>
       transformationService.populateLeadTrusteeAddress(originalResponse.getTrust) match {
         case JsSuccess(originalJson, _) =>
           transformationService.applyDeclarationTransformations(identifier, internalId, originalJson).flatMap {
             case JsSuccess(transformedJson, _) =>
               val response = TrustProcessedResponse(transformedJson, originalResponse.responseHeader)
-              transformAndSubmit(identifier, internalId, declaration, originalJson, response)
+              transformAndSubmit(identifier, internalId, sessionId, declaration, originalJson, response)
             case e@JsError(errors) =>
 
               auditService.auditTransformationError(
@@ -97,6 +97,7 @@ class VariationService @Inject()(
 
   private def transformAndSubmit(identifier: String,
                                  internalId: String,
+                                 sessionId: String,
                                  declaration: DeclarationForApi,
                                  originalJson: JsValue,
                                  response: TrustProcessedResponse)
@@ -112,7 +113,7 @@ class VariationService @Inject()(
         ) match {
           case JsSuccess(value, _) =>
             logging.info("successfully transformed json for declaration")
-            submitVariationAndCheckForMigration(identifier, value, internalId)
+            submitVariationAndCheckForMigration(identifier, value, internalId, sessionId)
           case JsError(errors) =>
 
             auditService.auditTransformationError(
@@ -128,9 +129,9 @@ class VariationService @Inject()(
     }
   }
 
-  private def getCachedTrustData(identifier: String, internalId: String)(implicit logging: LoggingContext): Future[TrustProcessedResponse] = {
+  private def getCachedTrustData(identifier: String, internalId: String, sessionId: String)(implicit logging: LoggingContext): Future[TrustProcessedResponse] = {
     for {
-      response <- trustsService.getTrustInfo(identifier, internalId)
+      response <- trustsService.getTrustInfo(identifier, internalId, sessionId)
       fbn <- trustsService.getTrustInfoFormBundleNo(identifier)
     } yield response match {
       case tpr: TrustProcessedResponse if tpr.responseHeader.formBundleNo == fbn =>
@@ -145,7 +146,7 @@ class VariationService @Inject()(
     }
   }
 
-  private def submitVariationAndCheckForMigration(identifier: String, value: JsValue, internalId: String)
+  private def submitVariationAndCheckForMigration(identifier: String, value: JsValue, internalId: String, sessionId: String)
                                                  (implicit hc: HeaderCarrier): Future[VariationContext] = {
 
     def migrateNonTaxableToTaxable(migrateToTaxable: Boolean, subscriptionId: String, identifier: String): Future[TaxEnrolmentSubscriberResponse] = {
@@ -159,7 +160,7 @@ class VariationService @Inject()(
     }
 
     for {
-      migrateToTaxable <- taxableMigrationService.migratingFromNonTaxableToTaxable(identifier, internalId)
+      migrateToTaxable <- taxableMigrationService.migratingFromNonTaxableToTaxable(identifier, internalId, sessionId)
       variationResponse <- submitVariation(identifier, value, internalId, migrateToTaxable)
       _ <- migrateNonTaxableToTaxable(migrateToTaxable, variationResponse.result.tvn, identifier)
     } yield {

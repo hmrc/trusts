@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,15 +39,15 @@ class TransformationService @Inject()(repository: TransformationRepository,
                                       trustsService: TrustsService,
                                       auditService: AuditService) extends Logging {
 
-  def getTransformedTrustJson(identifier: String, internalId: String)(implicit hc: HeaderCarrier): Future[JsObject] = {
-    getTransformedData(identifier, internalId).flatMap {
+  def getTransformedTrustJson(identifier: String, internalId: String, sessionId: String)(implicit hc: HeaderCarrier): Future[JsObject] = {
+    getTransformedData(identifier, internalId, sessionId).flatMap {
       case TrustProcessedResponse(json, _) => Future.successful(json.as[JsObject])
       case _ => Future.failed(InternalServerErrorException("Trust is not in a processed state."))
     }
   }
 
-  def getTransformedData(identifier: String, internalId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
-    trustsService.getTrustInfo(identifier, internalId).flatMap {
+  def getTransformedData(identifier: String, internalId: String, sessionId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
+    trustsService.getTrustInfo(identifier, internalId, sessionId).flatMap {
       case response: TrustProcessedResponse =>
         populateLeadTrusteeAddress(response.getTrust) match {
           case JsSuccess(fixed, _) =>
@@ -63,8 +63,8 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
-  private def applyTransformations(identifier: String, internalId: String, json: JsValue): Future[JsResult[JsValue]] = {
-    repository.get(identifier, internalId).map {
+  private def applyTransformations(identifier: String, internalId: String, json: JsValue)(implicit hc: HeaderCarrier): Future[JsResult[JsValue]] = {
+    repository.get(identifier, internalId, Session.id(hc)).map {
       case None =>
         JsSuccess(json)
       case Some(transformations) =>
@@ -73,7 +73,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
   }
 
   def applyDeclarationTransformations(identifier: String, internalId: String, json: JsValue)(implicit hc: HeaderCarrier): Future[JsResult[JsValue]] = {
-    repository.get(identifier, internalId).map {
+    repository.get(identifier, internalId, Session.id(hc)).map {
       case None =>
         logger.info(s"[Session ID: ${Session.id(hc)}]" +
           s" no transformations to apply")
@@ -125,8 +125,8 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
-  def addNewTransform(identifier: String, internalId: String, newTransform: DeltaTransform): Future[Boolean] = {
-    repository.get(identifier, internalId).map {
+  def addNewTransform(identifier: String, internalId: String, newTransform: DeltaTransform)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    repository.get(identifier, internalId, Session.id(hc)).map {
       case None =>
         ComposedDeltaTransform(Seq(newTransform))
 
@@ -134,20 +134,20 @@ class TransformationService @Inject()(repository: TransformationRepository,
         composedTransform :+ newTransform
 
     }.flatMap(newTransforms =>
-      repository.set(identifier, internalId, newTransforms)).recoverWith {
+      repository.set(identifier, internalId, Session.id(hc), newTransforms)).recoverWith {
       case e =>
         logger.error(s"Exception adding new transform: ${e.getMessage}")
         Future.failed(e)
     }
   }
 
-  def removeAllTransformations(identifier: String, internalId: String): Future[Option[JsObject]] = {
-    repository.resetCache(identifier, internalId)
+  def removeAllTransformations(identifier: String, internalId: String, sessionId: String): Future[Option[JsObject]] = {
+    repository.resetCache(identifier, internalId, sessionId)
   }
 
-  def removeTrustTypeDependentTransformFields(identifier: String, internalId: String): Future[Boolean] = {
+  def removeTrustTypeDependentTransformFields(identifier: String, internalId: String, sessionId: String): Future[Boolean] = {
     for {
-      transforms <- repository.get(identifier, internalId)
+      transforms <- repository.get(identifier, internalId, sessionId)
       updatedTransforms = transforms match {
         case Some(value) => ComposedDeltaTransform(value.deltaTransforms.map {
           case x: AddBeneficiaryTransform => x.copy(entity = x.removeTrustTypeDependentFields(x.entity))
@@ -158,7 +158,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
         })
         case None => ComposedDeltaTransform()
       }
-      result <- repository.set(identifier, internalId, updatedTransforms)
+      result <- repository.set(identifier, internalId, sessionId, updatedTransforms)
     } yield {
       result
     }
@@ -176,12 +176,12 @@ class TransformationService @Inject()(repository: TransformationRepository,
    *  non-UK-resident trust to that of a UK-resident trust</li>
    * </ol>
    */
-  def removeOptionalTrustDetailTransforms(identifier: String, internalId: String): Future[Boolean] = {
+  def removeOptionalTrustDetailTransforms(identifier: String, internalId: String, sessionId: String): Future[Boolean] = {
 
     val optionalTrustDetails = Seq(LAW_COUNTRY, UK_RELATION, DEED_OF_VARIATION, INTER_VIVOS, EFRBS_START_DATE)
 
     for {
-      transforms <- repository.get(identifier, internalId)
+      transforms <- repository.get(identifier, internalId, sessionId)
       updatedTransforms = transforms match {
         case Some(value) => ComposedDeltaTransform(value.deltaTransforms.filter {
           case x: SetTrustDetailTransform if optionalTrustDetails.contains(x.`type`) => false
@@ -189,7 +189,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
         })
         case None => ComposedDeltaTransform()
       }
-      result <- repository.set(identifier, internalId, updatedTransforms)
+      result <- repository.set(identifier, internalId, sessionId, updatedTransforms)
     } yield {
       result
     }

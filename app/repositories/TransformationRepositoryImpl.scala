@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,20 +34,20 @@ class TransformationRepositoryImpl @Inject()(
 
   override val key: String = "transforms"
 
-  override def get(identifier: String, internalId: String): Future[Option[ComposedDeltaTransform]] = {
-    get[ComposedDeltaTransform](identifier, internalId)
+  override def get(identifier: String, internalId: String, sessionId: String): Future[Option[ComposedDeltaTransform]] = {
+    get[ComposedDeltaTransform](identifier, internalId, sessionId)
   }
 
-  override def set(identifier: String, internalId: String, transforms: ComposedDeltaTransform): Future[Boolean] = {
-    set[ComposedDeltaTransform](identifier, internalId, transforms)
+  override def set(identifier: String, internalId: String, sessionId: String, transforms: ComposedDeltaTransform): Future[Boolean] = {
+    set[ComposedDeltaTransform](identifier, internalId, sessionId, transforms)
   }
 }
 
 trait TransformationRepository {
 
-  def get(identifier: String, internalId: String): Future[Option[ComposedDeltaTransform]]
+  def get(identifier: String, internalId: String, sessionId: String): Future[Option[ComposedDeltaTransform]]
 
-  def set(identifier: String, internalId: String, transforms: ComposedDeltaTransform): Future[Boolean]
+  def set(identifier: String, internalId: String, sessionId: String, transforms: ComposedDeltaTransform): Future[Boolean]
 
-  def resetCache(identifier: String, internalId: String): Future[Option[JsObject]]
+  def resetCache(identifier: String, internalId: String, sessionId: String): Future[Option[JsObject]]
 }

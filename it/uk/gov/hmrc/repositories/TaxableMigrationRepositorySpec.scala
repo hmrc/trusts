@@ -31,10 +31,10 @@ class TaxableMigrationRepositorySpec extends AsyncFreeSpec with IntegrationTestB
 
       val migratingToTaxable = true
 
-      val storedOk = repository.set("UTRUTRUTR", "InternalId", migratingToTaxable)
+      val storedOk = repository.set("UTRUTRUTR", "InternalId", "sessionId", migratingToTaxable)
       storedOk.futureValue mustBe true
 
-      val retrieved = repository.get("UTRUTRUTR", "InternalId")
+      val retrieved = repository.get("UTRUTRUTR", "InternalId", "sessionId")
 
       retrieved.futureValue mustBe Some(migratingToTaxable)
     }

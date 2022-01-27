@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,10 +89,10 @@ class RemoveOtherIndividualControllerSpec extends AnyFreeSpec with MockitoSugar 
         mockTransformationService
       )(Implicits.global, Helpers.stubControllerComponents())
 
-      when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+      when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
         .thenReturn(Future.successful(buildInputJson(Seq(Json.toJson(otherIndividual)))))
 
-      when(mockTransformationService.addNewTransform(any(), any(), any()))
+      when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
         .thenReturn(Future.successful(true))
 
       val body = removeOtherIndividual
@@ -108,7 +108,7 @@ class RemoveOtherIndividualControllerSpec extends AnyFreeSpec with MockitoSugar 
       val transform = RemoveOtherIndividualTransform(Some(index), Json.toJson(otherIndividual), endDate)
 
       verify(mockTransformationService)
-        .addNewTransform(equalTo(utr), any(), equalTo(transform))
+        .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
     }
 

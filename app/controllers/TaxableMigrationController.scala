@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@ import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import services.TaxableMigrationService
-
 import javax.inject.Inject
+import utils.Session
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -33,8 +34,8 @@ class TaxableMigrationController @Inject()(
                                             cc: ControllerComponents
                                           ) extends TrustsBaseController(cc) with Logging {
 
-  def getTaxableMigrationFlag(identifier: String): Action[AnyContent] = identify.async { request =>
-    taxableMigrationService.getTaxableMigrationFlag(identifier, request.internalId) map { x =>
+  def getTaxableMigrationFlag(identifier: String): Action[AnyContent] = identify.async { implicit request =>
+    taxableMigrationService.getTaxableMigrationFlag(identifier, request.internalId, Session.id(hc)) map { x =>
       Ok(Json.toJson(TaxableMigrationFlag(x)))
     } recoverWith {
       case _ => Future.successful(InternalServerError)
@@ -45,7 +46,7 @@ class TaxableMigrationController @Inject()(
     implicit request =>
       request.body.validate[Boolean] match {
         case JsSuccess(migratingToTaxable, _) =>
-          taxableMigrationService.setTaxableMigrationFlag(identifier, request.internalId, migratingToTaxable) map { _ =>
+          taxableMigrationService.setTaxableMigrationFlag(identifier, request.internalId, Session.id(hc), migratingToTaxable) map { _ =>
             Ok
           } recoverWith {
             case _ => Future.successful(InternalServerError)

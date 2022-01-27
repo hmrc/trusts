@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,9 @@ import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents}
 import services.TransformationService
 import transformers.DeltaTransform
-
 import javax.inject.Inject
+import utils.Session
+
 import scala.concurrent.{ExecutionContext, Future}
 
 abstract class AmendTransformationController @Inject()(identify: IdentifierAction,
@@ -42,7 +43,7 @@ abstract class AmendTransformationController @Inject()(identify: IdentifierActio
 
           case JsSuccess(amendedEntity, _) =>
             for {
-              trust <- transformationService.getTransformedTrustJson(identifier, request.internalId)
+              trust <- transformationService.getTransformedTrustJson(identifier, request.internalId, Session.id(hc))
               isTaxable <- Future.fromTry(isTrustTaxable(trust))
               originalEntity <- Future.fromTry(findJson(trust, `type`, index))
               _ <- transformationService.addNewTransform(identifier, request.internalId, transform(originalEntity, amendedEntity, index, `type`, isTaxable))

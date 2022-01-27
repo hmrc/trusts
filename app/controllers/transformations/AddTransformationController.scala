@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,9 @@ import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents}
 import services.{TaxableMigrationService, TransformationService}
 import transformers.DeltaTransform
-
 import javax.inject.Inject
+import utils.Session
+
 import scala.concurrent.{ExecutionContext, Future}
 
 abstract class AddTransformationController @Inject()(identify: IdentifierAction,
@@ -65,9 +66,9 @@ abstract class AddTransformationController @Inject()(identify: IdentifierAction,
             }
 
             for {
-              trust <- transformationService.getTransformedTrustJson(identifier, request.internalId)
+              trust <- transformationService.getTransformedTrustJson(identifier, request.internalId, Session.id(hc))
               isTaxable <- Future.fromTry(isTrustTaxable(trust))
-              migratingFromNonTaxableToTaxable <- taxableMigrationService.migratingFromNonTaxableToTaxable(identifier, request.internalId)
+              migratingFromNonTaxableToTaxable <- taxableMigrationService.migratingFromNonTaxableToTaxable(identifier, request.internalId, Session.id(hc))
               _ <- addTransformOrTransforms(isTaxable, migratingFromNonTaxableToTaxable)
             } yield {
               Ok

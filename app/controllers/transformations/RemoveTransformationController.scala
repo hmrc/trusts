@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,9 @@ import play.api.mvc.{Action, ControllerComponents}
 import services.TransformationService
 import transformers.DeltaTransform
 import transformers.remove.Remove
-
 import javax.inject.Inject
+import utils.Session
+
 import scala.concurrent.{ExecutionContext, Future}
 
 abstract class RemoveTransformationController @Inject()(identify: IdentifierAction,
@@ -42,7 +43,7 @@ abstract class RemoveTransformationController @Inject()(identify: IdentifierActi
 
           case JsSuccess(remove, _) =>
             for {
-              json <- transformationService.getTransformedTrustJson(identifier, request.internalId)
+              json <- transformationService.getTransformedTrustJson(identifier, request.internalId, Session.id(hc))
               entity <- Future.fromTry(findJson(json, remove.`type`, Some(remove.index)))
               _ <- transformationService.addNewTransform(identifier, request.internalId, transform(remove, entity))
             } yield {

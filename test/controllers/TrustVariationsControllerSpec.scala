@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
       when(mockNonRepudiationService.maintain(any(), any())(any(), any())).thenReturn(Future.successful(NRSResponse.Success("uuid")))
 
-      when(mockVariationService.submitDeclaration(any(), any(), any())(any()))
+      when(mockVariationService.submitDeclaration(any(), any(), any(), any())(any()))
         .thenReturn(Future.successful(VariationContext(Json.obj(), VariationResponse("TVN123"))))
 
       val result = SUT.declare("aUTR")(
@@ -101,7 +101,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
 
       val declarationForApi = DeclarationForApi(declaration, None, None)
 
-      when(mockVariationService.submitDeclaration(any(), any(), any())(any()))
+      when(mockVariationService.submitDeclaration(any(), any(), any(), any())(any()))
         .thenReturn(Future.failed(EtmpCacheDataStaleException))
 
       val result = SUT.declare("aUTR")(

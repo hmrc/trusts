@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents}
 import services.VariationService
-import utils.ValidationUtil
-
+import utils.{Session, ValidationUtil}
 import javax.inject.Inject
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import config.AppConfig
@@ -60,7 +60,7 @@ class TrustVariationsController @Inject()(
         },
         declarationForApi => {
           variationService
-            .submitDeclaration(identifier, request.internalId, declarationForApi)
+            .submitDeclaration(identifier, request.internalId, Session.id(hc), declarationForApi)
             .map { context =>
               if (appConfig.nonRepudiate){
                 nonRepudiationService.maintain(identifier, context.payload)

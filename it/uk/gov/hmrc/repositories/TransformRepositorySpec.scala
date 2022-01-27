@@ -36,10 +36,10 @@ class TransformRepositorySpec extends AsyncFreeSpec with IntegrationTestBase {
 
       val repository = application.injector.instanceOf[TransformationRepository]
 
-      val storedOk = repository.set("UTRUTRUTR", "InternalId", data)
+      val storedOk = repository.set("UTRUTRUTR", "InternalId", "sessionId", data)
       storedOk.futureValue mustBe true
 
-      val retrieved = repository.get("UTRUTRUTR", "InternalId")
+      val retrieved = repository.get("UTRUTRUTR", "InternalId", "sessionId")
 
       retrieved.futureValue mustBe Some(data)
     }

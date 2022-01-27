@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,20 +98,20 @@ class TaxableMigrationService @Inject()(
     }
   }
 
-  def migratingFromNonTaxableToTaxable(identifier: String, internalId: String): Future[Boolean] = {
-    getTaxableMigrationFlag(identifier, internalId).map(_.contains(true))
+  def migratingFromNonTaxableToTaxable(identifier: String, internalId: String, sessionId: String): Future[Boolean] = {
+    getTaxableMigrationFlag(identifier, internalId, sessionId).map(_.contains(true))
   }
 
-  def getTaxableMigrationFlag(identifier: String, internalId: String): Future[Option[Boolean]] = {
-    taxableMigrationRepository.get(identifier, internalId).recoverWith {
+  def getTaxableMigrationFlag(identifier: String, internalId: String, sessionId: String): Future[Option[Boolean]] = {
+    taxableMigrationRepository.get(identifier, internalId, sessionId).recoverWith {
       case e =>
         logger.error(s"Error getting taxable migration flag from repository: ${e.getMessage}")
         Future.failed(e)
     }
   }
 
-  def setTaxableMigrationFlag(identifier: String, internalId: String, migratingToTaxable: Boolean): Future[Boolean] = {
-    taxableMigrationRepository.set(identifier, internalId, migratingToTaxable).recoverWith {
+  def setTaxableMigrationFlag(identifier: String, internalId: String, sessionId: String, migratingToTaxable: Boolean): Future[Boolean] = {
+    taxableMigrationRepository.set(identifier, internalId, sessionId, migratingToTaxable).recoverWith {
       case e =>
         logger.error(s"Error setting taxable migration flag in repository: ${e.getMessage}")
         Future.failed(e)

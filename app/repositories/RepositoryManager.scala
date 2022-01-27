@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,9 @@ abstract class RepositoryManager @Inject()(
 
   val key: String
 
-  def get[T](identifier: String, internalId: String)(implicit rds: Reads[T]): Future[Option[T]] = {
+  def get[T](identifier: String, internalId: String, sessionId: String)(implicit rds: Reads[T]): Future[Option[T]] = {
     collection.flatMap { collection =>
-      collection.find(selector(identifier, internalId), None).one[JsObject].map(opt =>
+      collection.find(selector(identifier, internalId, sessionId), None).one[JsObject].map(opt =>
         for  {
           document <- opt
           data <- (document \ key).asOpt[T]
@@ -54,25 +54,25 @@ abstract class RepositoryManager @Inject()(
     }
   }
 
-  def set[T](identifier: String, internalId: String, data: T)(implicit wts: Writes[T]): Future[Boolean] = {
+  def set[T](identifier: String, internalId: String, sessionId: String, data: T)(implicit wts: Writes[T]): Future[Boolean] = {
 
     val modifier = Json.obj(
       "$set" -> Json.obj(
-        "id" -> createKey(identifier, internalId),
+        "id" -> createKey(identifier, internalId, sessionId),
         "updatedAt" -> Json.obj("$date" -> Timestamp.valueOf(LocalDateTime.now())),
         key -> Json.toJson(data)
       )
     )
 
     collection.flatMap {
-      _.update(ordered = false).one(selector(identifier, internalId), modifier, upsert = true, multi = false).map {
+      _.update(ordered = false).one(selector(identifier, internalId, sessionId), modifier, upsert = true, multi = false).map {
         result => result.ok
       }
     }
   }
 
-  def resetCache(identifier: String, internalId: String): Future[Option[JsObject]] = {
-    collection.flatMap(_.findAndRemove(selector(identifier, internalId), None, None, WriteConcern.Default, None, None, Seq.empty).map(
+  def resetCache(identifier: String, internalId: String, sessionId: String): Future[Option[JsObject]] = {
+    collection.flatMap(_.findAndRemove(selector(identifier, internalId, sessionId), None, None, WriteConcern.Default, None, None, Seq.empty).map(
       _.value
     ))
   }
@@ -104,11 +104,11 @@ abstract class RepositoryManager @Inject()(
     } yield createdLastUpdatedIndex && createdIdIndex
   }
 
-  private def selector(identifier: String, internalId: String): JsObject = Json.obj(
-    "id" -> createKey(identifier, internalId)
+  private def selector(identifier: String, internalId: String, sessionId: String): JsObject = Json.obj(
+    "id" -> createKey(identifier, internalId, sessionId)
   )
 
-  private def createKey(identifier: String, internalId: String): String = s"$identifier-$internalId"
+  private def createKey(identifier: String, internalId: String, sessionId: String): String = s"$identifier-$internalId-$sessionId"
 
   final val dropIndexes: Unit = {
 

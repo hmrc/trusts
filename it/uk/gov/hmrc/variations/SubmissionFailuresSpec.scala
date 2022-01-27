@@ -37,7 +37,7 @@ class SubmissionFailuresSpec extends ConnectorSpecHelper  {
 
     lazy val get5MLDTrustNonTaxableResponse: String = getJsonFromFile("5MLD/NonTaxable/des/valid-get-trust-5mld-non-taxable-des-response.json")
 
-    when(stubbedCacheRepository.get(eqTo(utr), any()))
+    when(stubbedCacheRepository.get(eqTo(utr), any(), any()))
       .thenReturn(Future.successful(Some(Json.parse(get5MLDTrustNonTaxableResponse))))
 
     stubForGet(server, s"/trusts/registration/UTR/$utr", INTERNAL_SERVER_ERROR, "")

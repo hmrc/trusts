@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,10 +90,10 @@ class AmendBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with 
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(originalBeneficiary)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         when(mockLocalDateService.now).thenReturn(endDate)
@@ -109,7 +109,7 @@ class AmendBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with 
         val transform = AmendBeneficiaryTransform(Some(index), Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -171,10 +171,10 @@ class AmendBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with 
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(originalBeneficiary)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         when(mockLocalDateService.now).thenReturn(endDate)
@@ -190,7 +190,7 @@ class AmendBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with 
         val transform = AmendBeneficiaryTransform(Some(index), Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -247,10 +247,10 @@ class AmendBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with 
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(originalBeneficiary)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         when(mockLocalDateService.now).thenReturn(endDate)
@@ -266,7 +266,7 @@ class AmendBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with 
         val transform = AmendBeneficiaryTransform(Some(index), Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -323,10 +323,10 @@ class AmendBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with 
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(originalBeneficiary)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         when(mockLocalDateService.now).thenReturn(endDate)
@@ -342,7 +342,7 @@ class AmendBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with 
         val transform = AmendBeneficiaryTransform(Some(index), Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -399,10 +399,10 @@ class AmendBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with 
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(originalBeneficiary)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         when(mockLocalDateService.now).thenReturn(endDate)
@@ -418,7 +418,7 @@ class AmendBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with 
         val transform = AmendBeneficiaryTransform(Some(index), Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -475,10 +475,10 @@ class AmendBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with 
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(originalBeneficiary)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         when(mockLocalDateService.now).thenReturn(endDate)
@@ -494,7 +494,7 @@ class AmendBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with 
         val transform = AmendBeneficiaryTransform(Some(index), Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -557,10 +557,10 @@ class AmendBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with 
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(beneficiaryType, Seq(Json.toJson(originalBeneficiary)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         when(mockLocalDateService.now).thenReturn(endDate)
@@ -576,7 +576,7 @@ class AmendBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with 
         val transform = AmendBeneficiaryTransform(Some(index), Json.toJson(amendedBeneficiary), Json.toJson(originalBeneficiary), endDate, beneficiaryType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 

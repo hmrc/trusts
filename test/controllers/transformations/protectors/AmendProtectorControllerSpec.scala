@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,10 +94,10 @@ class AmendProtectorControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(protectorType, Seq(Json.toJson(originalProtector)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         when(mockLocalDateService.now).thenReturn(endDate)
@@ -113,7 +113,7 @@ class AmendProtectorControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
         val transform = AmendProtectorTransform(Some(index), Json.toJson(amendedProtector), Json.toJson(originalProtector), endDate, protectorType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -168,10 +168,10 @@ class AmendProtectorControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(protectorType, Seq(Json.toJson(originalProtector)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         when(mockLocalDateService.now).thenReturn(endDate)
@@ -187,7 +187,7 @@ class AmendProtectorControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
         val transform = AmendProtectorTransform(Some(index), Json.toJson(amendedProtector), Json.toJson(originalProtector), endDate, protectorType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 

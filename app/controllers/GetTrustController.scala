@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,9 @@ import services.auditing.AuditService
 import services.{TaxYearService, TransformationService, TrustsService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.Constants._
-import utils.RequiredEntityDetailsForMigration
-
+import utils.{RequiredEntityDetailsForMigration, Session}
 import java.time.LocalDate
+
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -246,10 +246,10 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
   }
 
-  private def resetCacheIfRequested(identifier: String, internalId: String, refreshEtmpData: Boolean): Future[Unit] = {
+  private def resetCacheIfRequested(identifier: String, internalId: String, sessionId: String, refreshEtmpData: Boolean): Future[Unit] = {
     if (refreshEtmpData) {
-      val resetTransforms = transformationService.removeAllTransformations(identifier, internalId)
-      val resetCache = trustsService.resetCache(identifier, internalId)
+      val resetTransforms = transformationService.removeAllTransformations(identifier, internalId, sessionId)
+      val resetCache = trustsService.resetCache(identifier, internalId, sessionId)
       for {
         _ <- resetTransforms
         cache <- resetCache
@@ -265,11 +265,11 @@ class GetTrustController @Inject()(identify: IdentifierAction,
       {
 
         for {
-          _ <- resetCacheIfRequested(identifier, request.internalId, refreshEtmpData)
+          _ <- resetCacheIfRequested(identifier, request.internalId, Session.id(hc), refreshEtmpData)
           data <- if (applyTransformations) {
-            transformationService.getTransformedData(identifier, request.internalId)
+            transformationService.getTransformedData(identifier, request.internalId, Session.id(hc))
           } else {
-            trustsService.getTrustInfo(identifier, request.internalId)
+            trustsService.getTrustInfo(identifier, request.internalId, Session.id(hc))
           }
         } yield (
           successResponse(f, identifier) orElse

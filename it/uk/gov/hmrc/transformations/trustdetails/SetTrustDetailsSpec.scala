@@ -16,7 +16,7 @@ import repositories.TransformationRepository
 import transformers.trustdetails.SetTrustDetailTransform
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
-import utils.JsonUtils
+import utils.{JsonUtils, Session}
 
 import scala.concurrent.Future
 
@@ -36,6 +36,8 @@ class SetTrustDetailsSpec extends AsyncFreeSpec with MockitoSugar with Integrati
         bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(stubbedTrustsConnector)
       ).build()
+
+    val sessionId: String = Session.id(hc)
 
     "must add series of transforms" - {
 
@@ -72,7 +74,7 @@ class SetTrustDetailsSpec extends AsyncFreeSpec with MockitoSugar with Integrati
         val setValueResponse = route(app, setValueRequest).get
         status(setValueResponse) mustBe OK
 
-        whenReady(repository.get(identifier, "id")) { transforms =>
+        whenReady(repository.get(identifier, "id", sessionId)) { transforms =>
           transforms.get.deltaTransforms mustBe Seq(
             SetTrustDetailTransform(JsString("FR"), "lawCountry"),
             SetTrustDetailTransform(JsString("GB"), "administrationCountry"),
@@ -110,7 +112,7 @@ class SetTrustDetailsSpec extends AsyncFreeSpec with MockitoSugar with Integrati
         val setValueResponse = route(app, setValueRequest).get
         status(setValueResponse) mustBe OK
 
-        whenReady(repository.get(identifier, "id")) { transforms =>
+        whenReady(repository.get(identifier, "id", sessionId)) { transforms =>
           transforms.get.deltaTransforms mustBe Seq(
             SetTrustDetailTransform(JsBoolean(true), "trustUKProperty"),
             SetTrustDetailTransform(JsBoolean(true), "trustRecorded"),

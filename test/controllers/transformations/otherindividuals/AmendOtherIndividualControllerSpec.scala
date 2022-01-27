@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,10 +90,10 @@ class AmendOtherIndividualControllerSpec extends AnyFreeSpec with MockitoSugar w
         mockLocalDateService
       )(Implicits.global, Helpers.stubControllerComponents())
 
-      when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+      when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
         .thenReturn(Future.successful(buildInputJson(Seq(Json.toJson(originalOtherIndividual)))))
 
-      when(mockTransformationService.addNewTransform(any(), any(), any()))
+      when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
         .thenReturn(Future.successful(true))
 
       when(mockLocalDateService.now).thenReturn(endDate)
@@ -109,7 +109,7 @@ class AmendOtherIndividualControllerSpec extends AnyFreeSpec with MockitoSugar w
       val transform = AmendOtherIndividualTransform(Some(index), Json.toJson(amendedOtherIndividual), Json.toJson(originalOtherIndividual), endDate)
 
       verify(mockTransformationService)
-        .addNewTransform(equalTo(utr), any(), equalTo(transform))
+        .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,10 +86,10 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(asset)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         val body = removeAsset(assetType)
@@ -105,7 +105,7 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
         val transform = RemoveAssetTransform(Some(index), Json.toJson(asset), endDate, assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
     }
@@ -130,10 +130,10 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(asset)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         val body = removeAsset(assetType)
@@ -149,7 +149,7 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
         val transform = RemoveAssetTransform(Some(index), Json.toJson(asset), endDate, assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
     }
@@ -176,10 +176,10 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(asset)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         val body = removeAsset(assetType)
@@ -195,7 +195,7 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
         val transform = RemoveAssetTransform(Some(index), Json.toJson(asset), endDate, assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
     }
@@ -221,10 +221,10 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(asset)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         val body = removeAsset(assetType)
@@ -240,7 +240,7 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
         val transform = RemoveAssetTransform(Some(index), Json.toJson(asset), endDate, assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
     }
@@ -264,10 +264,10 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(asset)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         val body = removeAsset(assetType)
@@ -283,7 +283,7 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
         val transform = RemoveAssetTransform(Some(index), Json.toJson(asset), endDate, assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
     }
@@ -306,10 +306,10 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(asset)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         val body = removeAsset(assetType)
@@ -325,7 +325,7 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
         val transform = RemoveAssetTransform(Some(index), Json.toJson(asset), endDate, assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
     }
@@ -352,10 +352,10 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
           mockTransformationService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(asset)))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         val body = removeAsset(assetType)
@@ -371,7 +371,7 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
         val transform = RemoveAssetTransform(Some(index), Json.toJson(asset), endDate, assetType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
     }

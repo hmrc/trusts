@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,10 +94,10 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(settlorType, Json.toJson(originalSettlor))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         when(mockLocalDateService.now).thenReturn(endDate)
@@ -113,7 +113,7 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
         val transform = AmendSettlorTransform(Some(index), Json.toJson(amendedSettlor), Json.toJson(originalSettlor), endDate, settlorType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -170,10 +170,10 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
           mockLocalDateService
         )(Implicits.global, Helpers.stubControllerComponents())
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(buildInputJson(settlorType, Json.toJson(originalSettlor))))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         when(mockLocalDateService.now).thenReturn(endDate)
@@ -189,7 +189,7 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
         val transform = AmendSettlorTransform(Some(index), Json.toJson(amendedSettlor), Json.toJson(originalSettlor), endDate, settlorType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
@@ -258,10 +258,10 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
 
         val desResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-        when(mockTransformationService.getTransformedTrustJson(any(), any())(any()))
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
           .thenReturn(Future.successful(desResponse.as[JsObject]))
 
-        when(mockTransformationService.addNewTransform(any(), any(), any()))
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(Future.successful(true))
 
         when(mockLocalDateService.now).thenReturn(endDate)
@@ -277,7 +277,7 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
           val transform = AmendSettlorTransform(None, Json.toJson(amendedSettlor), Json.toJson(originalSettlor), endDate, settlorType)
 
         verify(mockTransformationService)
-          .addNewTransform(equalTo(utr), any(), equalTo(transform))
+          .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
 
       }
 
