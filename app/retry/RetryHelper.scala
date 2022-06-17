@@ -60,7 +60,7 @@ trait RetryHelper extends Logging {
             currentAttempt
           )(
             next = { nextWait =>
-              logger.warn(s"[Session ID: ${Session.id(hc)}] failed, retrying after $nextWait ms, attempt $currentAttempt")
+              logger.warn(s"[RetryHelper][retryWithBackOff][Session ID: ${Session.id(hc)}] failed, retrying after $nextWait ms, attempt $currentAttempt")
               after(
                 duration = nextWait.milliseconds,
                 scheduler = as.scheduler,
@@ -74,16 +74,16 @@ trait RetryHelper extends Logging {
               }
           },
             last = { () =>
-              logger.info(s"[Session ID: ${Session.id(hc)}] last retry completed, attempt $currentAttempt, result: $lastExecution, time of each attempt: ${lastExecution.timeOfEachTick}")
+              logger.warn(s"[RetryHelper][retryWithBackOff][Session ID: ${Session.id(hc)}] last retry completed, attempt $currentAttempt, result: $lastExecution, time of each attempt: ${lastExecution.timeOfEachTick}")
               Future.successful(RetryExecution(lastExecution.ticks, Some(result)))
             }
           )
       case success =>
-        logger.info(s"[Session ID: ${Session.id(hc)}] attempt completed, result did not require retry. $success, time of each attempt: ${lastExecution.timeOfEachTick}")
+        logger.info(s"[RetryHelper][retryWithBackOff][Session ID: ${Session.id(hc)}] attempt completed, result did not require retry. $success, time of each attempt: ${lastExecution.timeOfEachTick}")
         Future.successful(RetryExecution(lastExecution.ticks, Some(success)))
     } recoverWith {
       case _ =>
-        logger.error(s"[Session ID: ${Session.id(hc)}] attempt failed due to Future throwing a throwable")
+        logger.error(s"[RetryHelper][retryWithBackOff][Session ID: ${Session.id(hc)}] attempt failed due to Future throwing a throwable")
         Future.successful(RetryExecution(lastExecution.ticks, None))
     }
   }
@@ -103,10 +103,10 @@ object RetryHelper extends Logging {
                           (next: Int => Future[T], last: () => Future[T]): Future[T] = {
     if (currentAttempt < maxAttempts) {
       val wait = Math.ceil(currentWait * waitFactor).toInt
-      logger.info(s"[RetryHelper] waiting for $wait milliseconds")
+      logger.info(s"[RetryHelper][calculateWaitTime] waiting for $wait milliseconds")
       next(wait)
     } else {
-      logger.info(s"[RetryHelper] no more attempts left")
+      logger.info(s"[RetryHelper][calculateWaitTime] no more attempts left")
       last()
     }
   }

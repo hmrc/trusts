@@ -40,7 +40,6 @@ object RegistrationResponse extends Logging {
 
   implicit lazy val httpReads: HttpReads[RegistrationResponse] =
     (_: String, _: String, response: HttpResponse) => {
-      logger.info(s"response status received from des: ${response.status}")
       response.status match {
         case OK =>
           response.json.as[RegistrationTrnResponse]
@@ -49,10 +48,10 @@ object RegistrationResponse extends Logging {
         case BAD_REQUEST =>
           BadRequestResponse
         case SERVICE_UNAVAILABLE =>
-          logger.error("Service unavailable response from des.")
+          logger.error("[RegistrationResponse][httpReads] Service unavailable response from des.")
           ServiceUnavailableResponse
         case status =>
-          logger.error(s"Error response from des with status $status and body: ${response.body}")
+          logger.error(s"[RegistrationResponse][httpReads] Error response from des with status $status and body: ${response.body}")
           InternalServerErrorResponse
       }
   }
@@ -60,13 +59,13 @@ object RegistrationResponse extends Logging {
   private def parseForbiddenResponse(json: JsValue): RegistrationResponse = {
     json.toString() match {
       case response if response.contains(ALREADY_REGISTERED_CODE) =>
-        logger.info("already registered response from des.")
+        logger.info("[RegistrationResponse][parseForbiddenResponse] already registered response from des.")
         AlreadyRegisteredResponse
       case response if response.contains(NO_MATCH_CODE) =>
-        logger.info("No match response from des.")
+        logger.info("[RegistrationResponse][parseForbiddenResponse] No match response from des.")
         NoMatchResponse
       case _ =>
-        logger.error("Forbidden response from des.")
+        logger.error("[RegistrationResponse][parseForbiddenResponse] Forbidden response from des.")
         InternalServerErrorResponse
     }
   }

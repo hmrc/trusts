@@ -75,7 +75,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
   def applyDeclarationTransformations(identifier: String, internalId: String, json: JsValue)(implicit hc: HeaderCarrier): Future[JsResult[JsValue]] = {
     repository.get(identifier, internalId, Session.id(hc)).map {
       case None =>
-        logger.info(s"[Session ID: ${Session.id(hc)}]" +
+        logger.info(s"[TransformationService][applyDeclarationTransformations][Session ID: ${Session.id(hc)}]" +
           s" no transformations to apply")
         JsSuccess(json)
       case Some(transformations) =>
@@ -92,18 +92,16 @@ class TransformationService @Inject()(repository: TransformationRepository,
 
         for {
           initial <- {
-            logger.debug(s"[Session ID: ${Session.id(hc)}] applying transformations $transformations")
-            logger.info(s"[Session ID: ${Session.id(hc)}]" +
+            logger.info(s"[TransformationService][applyDeclarationTransformations][Session ID: ${Session.id(hc)}]" +
               s" applying transformations")
             transformations.applyTransform(json)
           }
           transformed <- {
-            logger.info(s"[Session ID: ${Session.id(hc)}]" +
+            logger.info(s"[TransformationService][applyDeclarationTransformations][Session ID: ${Session.id(hc)}]" +
               s" applying declaration transformations")
             transformations.applyDeclarationTransform(initial)
           }
         } yield {
-          logger.debug(s"[Session ID: ${Session.id(hc)}] transformations have been applied, final output $transformed")
           transformed
         }
     }
@@ -111,14 +109,9 @@ class TransformationService @Inject()(repository: TransformationRepository,
 
   def populateLeadTrusteeAddress(beforeJson: JsValue)(implicit hc: HeaderCarrier): JsResult[JsValue] = {
     val pathToLeadTrusteeAddress = __ \ 'details \ 'trust \ 'entities \ 'leadTrustees \ 'identification \ 'address
-
-    logger.debug(s"[Session ID: ${Session.id(hc)}] setting address on lead trustee")
-
     if (beforeJson.transform(pathToLeadTrusteeAddress.json.pick).isSuccess) {
-      logger.debug(s"[Session ID: ${Session.id(hc)}] lead trustee already had an address, no modification")
       JsSuccess(beforeJson)
     } else {
-      logger.debug(s"[Session ID: ${Session.id(hc)}] copying address from correspondence and setting on lead trustee")
       val pathToCorrespondenceAddress = __ \ 'correspondence \ 'address
       val copyAddress = __.json.update(pathToLeadTrusteeAddress.json.copyFrom(pathToCorrespondenceAddress.json.pick))
       beforeJson.transform(copyAddress)
@@ -136,7 +129,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }.flatMap(newTransforms =>
       repository.set(identifier, internalId, Session.id(hc), newTransforms)).recoverWith {
       case e =>
-        logger.error(s"Exception adding new transform: ${e.getMessage}")
+        logger.error(s"[TransformationService][addNewTransform] Exception adding new transform: ${e.getMessage}")
         Future.failed(e)
     }
   }

@@ -46,7 +46,7 @@ class PromoteTrusteeController @Inject()(identify: IdentifierAction,
         case (_, Some(_)) =>
           promoteBusiness(identifier, index)
         case _ =>
-          logger.error(s"[promote][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
+          logger.error(s"[PromoteTrusteeController][promote][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as an amended lead trustee")
           Future.successful(BadRequest)
       }

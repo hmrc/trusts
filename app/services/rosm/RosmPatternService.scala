@@ -47,23 +47,21 @@ class RosmPatternServiceImpl @Inject()(trustsService: TrustsService, taxEnrolmen
       case AffinityGroup.Organisation =>
         setSubscriptionId(trn, taxable) map {
           case TaxEnrolmentSuccess =>
-            logger.info(s"[enrolAndLogResult][Session ID: ${Session.id(hc)}]" +
+            logger.info(s"[RosmPatternServiceImpl][enrolAndLogResult][Session ID: ${Session.id(hc)}]" +
               s" Rosm completed successfully for provided trn: $trn.")
             TaxEnrolmentSuccess
           case _ =>
-            logger.error(s"[enrolAndLogResult][Session ID: ${Session.id(hc)}]" +
+            logger.error(s"[RosmPatternServiceImpl][enrolAndLogResult][Session ID: ${Session.id(hc)}]" +
               s"Rosm pattern is not completed for trn: $trn.")
             TaxEnrolmentFailure
         } recover {
           case NonFatal(exception) =>
-            logger.error(s"[enrolAndLogResult][Session ID: ${Session.id(hc)}]" +
-              s"Rosm pattern is not completed for trn: $trn.")
-            logger.error(s"[enrolAndLogResult][Session ID: ${Session.id(hc)}]" +
-              s"Rosm Exception received: $exception.")
+            logger.error(s"[RosmPatternServiceImpl][enrolAndLogResult][Session ID: ${Session.id(hc)}]" +
+              s"Rosm pattern is not completed for trn: $trn. Exception recieved: exception")
             TaxEnrolmentFailure
         }
       case _ =>
-        logger.info(s"[enrolAndLogResult][Session ID: ${Session.id(hc)}]" +
+        logger.info(s"[RosmPatternServiceImpl][enrolAndLogResult][Session ID: ${Session.id(hc)}]" +
           "Tax enrolments is not required for Agent.")
         Future.successful(TaxEnrolmentNotProcessed)
     }

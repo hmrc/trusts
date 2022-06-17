@@ -47,7 +47,7 @@ class DemoteLeadTrusteeController @Inject()(identify: IdentifierAction,
         case (_, Some(_)) =>
           demoteBusiness(identifier)
         case _ =>
-          logger.error(s"[demote][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
+          logger.error(s"[DemoteLeadTrusteeController][demote][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as a lead trustee")
           Future.successful(BadRequest)
       }

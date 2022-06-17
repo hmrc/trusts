@@ -53,7 +53,7 @@ class RegisterTrustController @Inject()(
         case Some(_) =>
           amendRegistration
         case _ =>
-          logger.error(s"[Session ID: ${request.sessionId}] no draft id provided in headers")
+          logger.warn(s"[RegisterTrustController][registration][Session ID: ${request.sessionId}] no draft id provided in headers")
           Future.successful(BadRequest(Json.toJson(noDraftIdProvided)))
       }
   }
@@ -73,7 +73,7 @@ class RegisterTrustController @Inject()(
         case Right(registration) =>
           register(registration)
         case Left(validationErrors) =>
-          logger.error(s"[Session ID: ${request.sessionId}] problem validating submission: $validationErrors")
+          logger.warn(s"[RegisterTrustController][validateRegistration][Session ID: ${request.sessionId}] problem validating submission: $validationErrors")
           Future.successful(invalidRequestErrorResponse)
       }
   }
@@ -113,30 +113,30 @@ class RegisterTrustController @Inject()(
 
   private def handleAlreadyRegisteredResponse()(implicit request: IdentifierRequest[JsValue]): Future[Result] = {
 
-    logger.info(s"[registration][Session ID: ${request.sessionId}] Returning already registered response.")
+    logger.info(s"[RegisterTrustController][registration][Session ID: ${request.sessionId}] Returning already registered response.")
     Future.successful(Conflict(Json.toJson(alreadyRegisteredTrustsResponse)))
   }
 
   private def handleNoMatchResponse()(implicit request: IdentifierRequest[JsValue]): Future[Result] = {
 
-    logger.info(s"[registration][Session ID: ${request.sessionId}] Returning no match response.")
+    logger.info(s"[RegisterTrustController][registration][Session ID: ${request.sessionId}] Returning no match response.")
     Future.successful(Forbidden(Json.toJson(noMatchRegistrationResponse)))
   }
 
   private def handleBadRequestResponse()(implicit request: IdentifierRequest[JsValue]): Future[Result] = {
 
-    logger.error(s"[registration][Session ID: ${request.sessionId}] bad request response from DES")
+    logger.error(s"[RegisterTrustController][registration][Session ID: ${request.sessionId}] bad request response from DES")
     Future.successful(InternalServerError(Json.toJson(internalServerErrorResponse)))
   }
 
   private def handleServiceUnavailableResponse()(implicit request: IdentifierRequest[JsValue]): Future[Result] = {
 
-    logger.error(s"[registration][Session ID: ${request.sessionId}] Service unavailable response from DES")
+    logger.error(s"[RegisterTrustController][registration][Session ID: ${request.sessionId}] Service unavailable response from DES")
     Future.successful(InternalServerError(Json.toJson(internalServerErrorResponse)))
   }
 
   private def handleInternalServerErrorResponse()(implicit request: IdentifierRequest[JsValue]): Future[Result] = {
-    logger.error(s"[registration][Session ID: ${request.sessionId}] Internal server error.")
+    logger.error(s"[RegisterTrustController][registration][Session ID: ${request.sessionId}] Internal server error.")
     Future.successful(InternalServerError(Json.toJson(internalServerErrorResponse)))
   }
 

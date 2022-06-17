@@ -65,7 +65,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil with L
       trustees => {
         val ninoList: List[(String, Int)] = getTrusteesNinoWithIndex(trustees)
         val duplicatesNino = findDuplicates(ninoList).reverse
-        logger.info(s"[indTrusteesDuplicateNino] Number of Duplicate Nino found : ${duplicatesNino.size} ")
+        logger.info(s"[DomainValidator][indTrusteesDuplicateNino] Duplicate Nino's found : ${duplicatesNino.size} ")
         duplicatesNino.map {
           case (_, index) =>
             Some(TrustsValidationError(s"NINO is already used for another individual trustee.",
@@ -81,7 +81,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil with L
       indBeneficiary => {
         val ninoList: List[(String, Int)] = getIndBenificiaryNinoWithIndex(indBeneficiary)
         val duplicatesNino = findDuplicates(ninoList).reverse
-        logger.info(s"[indBeneficiariesDuplicateNino] Number of Duplicate Nino found : ${duplicatesNino.size} ")
+        logger.info(s"[DomainValidator][indBeneficiariesDuplicateNino] Duplicate Nino's found : ${duplicatesNino.size}")
         duplicatesNino.map {
           case (_, index) =>
             Some(TrustsValidationError(s"NINO is already used for another individual beneficiary.",
@@ -110,7 +110,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil with L
       indBeneficiary => {
         val passportNumberList: List[(String, Int)] = getIndBenificiaryPassportNumberWithIndex(indBeneficiary)
         val duplicatePassportNumberList = findDuplicates(passportNumberList).reverse
-        logger.info(s"[indBeneficiariesDuplicatePassportNumber] Number of Duplicate passport number found : ${duplicatePassportNumberList.size} ")
+        logger.info(s"[DomainValidator][indBeneficiariesDuplicatePassportNumber] Duplicate passport numbers found : ${duplicatePassportNumberList.size} ")
         duplicatePassportNumberList.map {
           case (passport, index) =>
             Some(TrustsValidationError(s"Passport number is already used for another individual beneficiary.",
@@ -133,7 +133,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil with L
               .zipWithIndex
               .filter(_._1.beneficiaryType.isEmpty)
 
-            logger.info(s"[IndBeneficiariesBeneficiaryType] Number of Beneficiary Types not set found : ${beneficiaryTypeNotSet.size} ")
+            logger.info(s"[DomainValidator][IndBeneficiariesBeneficiaryType] Number of Beneficiary Types not set found : ${beneficiaryTypeNotSet.size} ")
 
             beneficiaryTypeNotSet.map {
               case (_, index) =>
@@ -155,7 +155,7 @@ class DomainValidator(registration : Registration) extends ValidationUtil with L
       trustees => {
         val utrList: List[(String, Int)] = getTrusteesUtrWithIndex(trustees)
         val duplicatesUtr = findDuplicates(utrList).reverse
-        logger.info(s"[businessTrusteesDuplicateUtr] Number of Duplicate utr found : ${duplicatesUtr.size} ")
+        logger.info(s"[DomainValidator][businessTrusteesDuplicateUtr] Number of Duplicate utrs found : ${duplicatesUtr.size} ")
         duplicatesUtr.map {
           case (utr, index) =>
             Some(TrustsValidationError(s"Utr is already used for another business trustee.",

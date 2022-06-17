@@ -52,7 +52,7 @@ class TaxableMigrationController @Inject()(
             case _ => Future.successful(InternalServerError)
           }
         case JsError(errors) =>
-          logger.error(s"[setTaxableMigrationFlag] failed to validate request body: $errors")
+          logger.warn(s"[TaxableMigrationController][setTaxableMigrationFlag] failed to validate request body: $errors")
           Future.successful(BadRequest)
       }
   }

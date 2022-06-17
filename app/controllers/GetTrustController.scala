@@ -81,7 +81,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
             case JsSuccess(DisplayTrustLeadTrusteeType(None, Some(leadTrusteeOrg)), _) =>
               Ok(Json.toJson(leadTrusteeOrg))
             case _ =>
-              logger.error(s"[getLeadTrustee][UTR/URN: $identifier] something unexpected has happened. " +
+              logger.error(s"[GetTrustController][getLeadTrustee][UTR/URN: $identifier] something unexpected has happened. " +
                 s"doGet has succeeded but picked lead trustee json has failed validation.")
               InternalServerError
           }
@@ -160,7 +160,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
         f(processed.getTrust) match {
           case JsSuccess(value, _) => Ok(Json.toJson(value))
           case JsError(errors) =>
-            logger.error(s"[Identifier: $identifier] Failed to check entities: $errors")
+            logger.error(s"[GetTrustController][areEntitiesCompleteForMigration][Identifier: $identifier] Failed to check entities: $errors")
             InternalServerError
         }
     }
@@ -278,7 +278,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
           ).apply(data)
       } recover {
         case e =>
-          logger.error(s"[Session ID: ${request.sessionId}][UTR/URN: $identifier] Failed to get trust info ${e.getMessage}")
+          logger.error(s"[GetTrustcontroller][dpGet][Session ID: ${request.sessionId}][UTR/URN: $identifier] Failed to get trust info ${e.getMessage}")
           InternalServerError
       }
   }

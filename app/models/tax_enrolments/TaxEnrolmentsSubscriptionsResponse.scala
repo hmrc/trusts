@@ -31,16 +31,16 @@ object TaxEnrolmentsSubscriptionsResponse extends Logging {
       case OK =>
         parseOkResponse(response, subscriptionId)
       case BAD_REQUEST =>
-        logger.error(s"[TaxEnrolmentsSubscriptions] [SubscriptionId: $subscriptionId] Bad Request response from des ")
+        logger.error(s"[TaxEnrolmentsSubscriptionsResponse][httpReads][SubscriptionId: $subscriptionId] Bad Request response from des ")
         throw BadRequestException
       case NOT_FOUND =>
-        logger.error(s"[TaxEnrolmentsSubscriptions] [SubscriptionId: $subscriptionId] Not found response from des")
+        logger.error(s"[TaxEnrolmentsSubscriptionsResponse][httpReads][SubscriptionId: $subscriptionId] Not found response from des")
         throw NotFoundException
       case SERVICE_UNAVAILABLE =>
-        logger.error(s"[TaxEnrolmentsSubscriptions] [SubscriptionId: $subscriptionId] Service unavailable response from des.")
+        logger.error(s"[TaxEnrolmentsSubscriptionsResponse][httpReads][SubscriptionId: $subscriptionId] Service unavailable response from des.")
         throw ServiceNotAvailableException("Des service is down.")
       case status =>
-        logger.error(s"[TaxEnrolmentsSubscriptions] [SubscriptionId: $subscriptionId] Error response from des : ${status}")
+        logger.error(s"[TaxEnrolmentsSubscriptionsResponse][httpReads][SubscriptionId: $subscriptionId] Error response from des : ${status}")
         throw InternalServerErrorException(s"Error response from des $status")
     }
   }

@@ -37,8 +37,7 @@ class TaxEnrolmentCallbackController @Inject()(migrationService: TaxableMigratio
   def taxableSubscriptionCallback(trn: String): Action[JsValue] = Action.async(parse.json) {
     implicit request =>
       val hc : HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
-
-      logger.info(s"[taxableSubscriptionCallback][Session ID: ${Session.id(hc)}][TRN: $trn]" +
+      logger.info(s"[TaxEnrolmentCallbackController][taxableSubscriptionCallback][Session ID: ${Session.id(hc)}][TRN: $trn]" +
         s" Tax-enrolment: taxable subscription callback message was: ${request.body}")
       Future(Ok(""))
   }
@@ -46,8 +45,7 @@ class TaxEnrolmentCallbackController @Inject()(migrationService: TaxableMigratio
   def nonTaxableSubscriptionCallback(trn: String): Action[JsValue] = Action.async(parse.json) {
     implicit request =>
       val hc : HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
-
-      logger.info(s"[nonTaxableSubscriptionCallback][Session ID: ${Session.id(hc)}][TRN: $trn]" +
+      logger.info(s"[TaxEnrolmentCallbackController][nonTaxableSubscriptionCallback][Session ID: ${Session.id(hc)}][TRN: $trn]" +
         s" Tax-enrolment: non-taxable subscription callback message was: ${request.body}")
       Future(Ok(""))
   }
@@ -56,12 +54,12 @@ class TaxEnrolmentCallbackController @Inject()(migrationService: TaxableMigratio
     implicit request =>
       implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
-      logger.info(s"[migrationSubscriptionCallback][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn]" +
+      logger.info(s"[TaxEnrolmentCallbackController][migrationSubscriptionCallback][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn]" +
         s" Tax-enrolment: migration subscription callback triggered")
       for {
         utr <- migrationService.completeMigration(subscriptionId, urn)
       } yield {
-        logger.info(s"[migrationSubscriptionCallback] callback complete utr $utr")
+        logger.info(s"[TaxEnrolmentCallbackController][migrationSubscriptionCallback] callback complete utr $utr")
         Ok("")
       }
   }

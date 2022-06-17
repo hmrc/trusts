@@ -76,7 +76,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
   )
 
   private lazy val ensureIndexes = {
-    logger.info("Ensuring collection indexes")
+    logger.info("[RegistrationSubmissionRepository][ensureIndexes] Ensuring collection indexes")
     for {
       collection <- Future.successful(mongo.api.collection[JSONCollection](collectionName))
       createdCreatedIndex <- collection.indexesManager.ensure(createdAtIndex)
@@ -145,7 +145,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
   def removeAllDrafts(): Future[Boolean] = for {
     collection <- Future.successful(mongo.api.collection[JSONCollection](collectionName))
     result <- if (config.removeSavedRegistrations) {
-      logger.info("Removing all registration submissions.")
+      logger.info("[RegistrationSubmissionRepository][removeAllDrafts] Removing all registration submissions.")
       collection.delete().one(Json.obj(), None).map(_.ok)
     } else {
       Future.successful(true)

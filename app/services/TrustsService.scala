@@ -41,7 +41,7 @@ class TrustsService @Inject()(val trustsConnector: TrustsConnector,
       case response: GetTrustSuccessResponse => response.responseHeader.formBundleNo
       case response =>
         val msg = s"Failed to retrieve latest form bundle no from ETMP: $response"
-        logger.warn(s"[getTrustInfoFormBundleNo][UTR/URN: $identifier] $msg")
+        logger.warn(s"[TransformationService][getTrustInfoFormBundleNo][UTR/URN: $identifier] $msg")
         throw InternalServerErrorException(s"Submission could not proceed, $msg")
     }
 
@@ -79,7 +79,7 @@ class TrustsService @Inject()(val trustsConnector: TrustsConnector,
       case Some(x) =>
         x.validate[GetTrustSuccessResponse].fold(
           errs => {
-            logger.error(s"Unable to parse json from cache as GetTrustSuccessResponse - $errs")
+            logger.error(s"[TransformationService][getTrustInfoFormBundleNo] Unable to parse json from cache as GetTrustSuccessResponse - $errs")
             Future.failed[GetTrustResponse](new Exception(errs.toString))
           },
           response => {
