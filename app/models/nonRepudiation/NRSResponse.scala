@@ -32,26 +32,25 @@ object NRSResponse extends Logging {
 
   implicit lazy val httpReads: HttpReads[NRSResponse] =
     (_: String, _: String, response: HttpResponse) => {
-      logger.info(s"response status received from NRS: ${response.status}")
       response.status match {
         case ACCEPTED =>
           response.json.as[Success]
         case BAD_REQUEST =>
           BadRequest
         case UNAUTHORIZED =>
-          logger.error("No X-API-Key provided or it is invalid.")
+          logger.error("[NRSResponse] No X-API-Key provided or it is invalid.")
           Unauthorised
         case BAD_GATEWAY =>
           BadGateway
         case SERVICE_UNAVAILABLE =>
-          logger.error("Service unavailable response from NRS.")
+          logger.error("[NRSResponse] Service unavailable response from NRS.")
           ServiceUnavailable
         case GATEWAY_TIMEOUT =>
           GatewayTimeout
         case CHECKSUM_FAILED =>
           ChecksumFailed
         case status =>
-          logger.error(s"Error response from NRS with status $status and body: ${response.body}")
+          logger.error(s"[NRSResponse] Error response from NRS with status $status and body: ${response.body}")
           InternalServerError
       }
     }

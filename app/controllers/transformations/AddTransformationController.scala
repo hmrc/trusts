@@ -75,7 +75,7 @@ abstract class AddTransformationController @Inject()(identify: IdentifierAction,
             }
 
           case JsError(errors) =>
-            logger.warn(s"[addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
+            logger.warn(s"[AddTransformationController][addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
               s"Supplied json did not pass validation - $errors")
             Future.successful(BadRequest)
         }

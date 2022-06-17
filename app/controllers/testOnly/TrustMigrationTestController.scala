@@ -36,7 +36,7 @@ class TrustMigrationTestController @Inject()(migrationService: TaxableMigrationS
     implicit request =>
       implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
-      logger.info(s"[migrateToTaxable][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn]" +
+      logger.info(s"[TrustMigrationTestController][migrateToTaxable][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn]" +
         s" Tax-enrolment: migration subscription callback message was: ${request.body}")
       migrationService.migrateSubscriberToTaxable(subscriptionId, urn)
       Future(Ok("Done"))

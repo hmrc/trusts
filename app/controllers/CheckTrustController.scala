@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.IdentifierAction
-import models.existing_trust.ExistingCheckRequest
+import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
 import models.existing_trust.ExistingCheckResponse._
 import models.registration.ApiResponse._
 import play.api.Logging
@@ -36,13 +36,18 @@ class CheckTrustController @Inject()(trustsService: TrustsService,
     withJsonBody[ExistingCheckRequest] {
       trustsCheckRequest =>
         trustsService.checkExistingTrust(trustsCheckRequest).map {
-          result =>
-            logger.info(s"[checkExistingTrust][Session ID: ${request.sessionId}] response: $result")
+          result: ExistingCheckResponse =>
             result match {
               case Matched => Ok(matchResponse)
-              case NotMatched => Ok(noMatchResponse)
-              case AlreadyRegistered => Conflict(Json.toJson(alreadyRegisteredTrustsResponse))
-              case _ => InternalServerError(Json.toJson(internalServerErrorResponse))
+              case NotMatched =>
+                logger.warn(s"[CheckTrustController][checkExistingTrust][Session ID: ${request.sessionId}] trust could not be matched")
+                Ok(noMatchResponse)
+              case AlreadyRegistered =>
+                logger.warn(s"[CheckTrustController][checkExistingTrust][Session ID: ${request.sessionId}] trust already registered")
+                Conflict(Json.toJson(alreadyRegisteredTrustsResponse))
+              case _ =>
+                logger.error(s"[CheckTrustController][checkExistingTrust][Session ID: ${request.sessionId}] trusts check failed due to $result")
+                InternalServerError(Json.toJson(internalServerErrorResponse))
             }
         }
     }

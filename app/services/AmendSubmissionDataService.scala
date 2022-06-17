@@ -33,7 +33,7 @@ class AmendSubmissionDataService @Inject()(localDateService: LocalDateService) e
       case JsSuccess(value, _) =>
         value
       case JsError(errors) =>
-        logger.error(s"[Submission Date] could not add submission date: $errors")
+        logger.error(s"[AmendSubmissionDataService][applyRulesAndAddSubmissionDate] could not add submission date: $errors")
         amendedJson
     }
   }

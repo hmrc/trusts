@@ -31,30 +31,26 @@ object VariationResponse extends Logging {
   implicit lazy val httpReads: HttpReads[VariationResponse] =
     new HttpReads[VariationResponse] {
       override def read(method: String, url: String, response: HttpResponse): VariationResponse = {
-
-        logger.debug(s"response body ${response.body}")
-
-        logger.info(s"response status received from des: ${response.status}")
         response.status match {
           case OK =>
             response.json.as[VariationResponse]
           case BAD_REQUEST if response.body contains "INVALID_CORRELATIONID" =>
-            logger.error(s"Bad Request for invalid correlation id response from des ")
+            logger.error(s"[VariationResponse][httpReads] Bad Request for invalid correlation id response from des ")
             throw InternalServerErrorException("Invalid correlation id response from des")
           case BAD_REQUEST =>
-            logger.error(s"Bad Request response from des ")
+            logger.error(s"[VariationResponse][httpReads] Bad Request response from des")
             throw BadRequestException
           case CONFLICT =>
-            logger.error(s"Conflict response from des")
+            logger.error(s"[VariationResponse][httpReads] Conflict response from des")
             throw InternalServerErrorException("Conflict response from des")
           case INTERNAL_SERVER_ERROR =>
-            logger.error(s"Internal server error response from des")
+            logger.error(s"[VariationResponse][httpReads] Internal server error response from des")
             throw InternalServerErrorException("des is currently experiencing problems that require live service intervention")
           case SERVICE_UNAVAILABLE =>
-            logger.error("Service unavailable response from des.")
+            logger.error("[VariationResponse][httpReads] Service unavailable response from des.")
             throw ServiceNotAvailableException("des dependent service is down.")
           case status =>
-            logger.error(s"Error response from des : $status")
+            logger.error(s"[VariationResponse][httpReads] Error response from des : $status")
             throw InternalServerErrorException(s"Error response from des $status")
         }
       }

@@ -52,8 +52,6 @@ class SubscriptionConnector @Inject()(http: HttpClient, config: AppConfig) exten
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
     val subscriptionIdEndpointUrl = s"$trustsServiceUrl/trn/$trn/subscription"
-    logger.debug(s"[getSubscriptionId][Session ID: ${Session.id(hc)}][TRN: $trn]" +
-      s" Sending get subscription id request to DES, url=$subscriptionIdEndpointUrl")
 
     val response = http.GET[SubscriptionIdResponse](subscriptionIdEndpointUrl)
     (SubscriptionIdResponse.httpReads, implicitly[HeaderCarrier](hc), implicitly[ExecutionContext])

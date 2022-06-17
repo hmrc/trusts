@@ -44,18 +44,9 @@ class VariationService @Inject()(
                                   taxableMigrationService: TaxableMigrationService
                                 ) extends Logging {
 
-  private case class LoggingContext(identifier: String)(implicit hc: HeaderCarrier) {
-    def info(content: String): Unit = logger.info(format(content))
-    def error(content: String): Unit = logger.error(format(content))
-    def warn(content: String): Unit = logger.warn(format(content))
-
-    def format(content: String): String = s"[submitDeclaration][Session ID: ${Session.id(hc)}][UTR/URN: $identifier] $content"
-  }
 
   def submitDeclaration(identifier: String, internalId: String, sessionId: String, declaration: DeclarationForApi)
                        (implicit hc: HeaderCarrier): Future[VariationContext] = {
-
-    implicit val logging: LoggingContext = LoggingContext(identifier)
 
     getCachedTrustData(identifier, internalId, sessionId).flatMap { originalResponse: TrustProcessedResponse =>
       transformationService.populateLeadTrusteeAddress(originalResponse.getTrust) match {
@@ -75,7 +66,7 @@ class VariationService @Inject()(
                 JsError.toJson(e)
               )
 
-              logging.error(s"Failed to transform trust info ${JsError.toJson(errors)}")
+              logger.error(s"[VariationService][submitDeclaration][Session ID: ${Session.id(hc)}][UTR/URN: $identifier] Failed to transform trust info ${JsError.toJson(errors)}")
               Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
           }
         case e@JsError(errors) =>
@@ -89,7 +80,7 @@ class VariationService @Inject()(
             JsError.toJson(e)
           )
 
-          logging.error(s"Failed to populate lead trustee address ${JsError.toJson(errors)}")
+          logger.error(s"[VariationService][submitDeclaration][Session ID: ${Session.id(hc)}][UTR/URN: $identifier] Failed to populate lead trustee address ${JsError.toJson(errors)}")
           Future.failed(InternalServerErrorException("There was a problem transforming data for submission to ETMP"))
       }
     }
@@ -101,9 +92,7 @@ class VariationService @Inject()(
                                  declaration: DeclarationForApi,
                                  originalJson: JsValue,
                                  response: TrustProcessedResponse)
-                                (implicit hc: HeaderCarrier, logging: LoggingContext): Future[VariationContext] = {
-        logger.debug(s"[Session ID: ${Session.id(hc)}]" +
-          s" transformation to final submission, applying declaration transform to shape data into variations payload")
+                                (implicit hc: HeaderCarrier): Future[VariationContext] = {
 
         declarationTransformer.transform(
           response,
@@ -112,7 +101,7 @@ class VariationService @Inject()(
           localDateService.now
         ) match {
           case JsSuccess(value, _) =>
-            logging.info("successfully transformed json for declaration")
+            logger.info(s"[VariationService][transformAndSubmit][Session ID: ${Session.id(hc)}][UTR/URN: $identifier] successfully transformed json for declaration")
             submitVariationAndCheckForMigration(identifier, value, internalId, sessionId)
           case JsError(errors) =>
 
@@ -124,24 +113,24 @@ class VariationService @Inject()(
               errorReason = "Problem transforming data for ETMP submission"
             )
 
-            logging.error(s"Problem transforming data for ETMP submission: ${JsError.toJson(errors)}")
+            logger.error(s"[VariationService][transformAndSubmit][Session ID: ${Session.id(hc)}][UTR/URN: $identifier] Problem transforming data for ETMP submission: ${JsError.toJson(errors)}")
             Future.failed(InternalServerErrorException(s"There was a problem transforming data for submission to ETMP: ${JsError.toJson(errors)}"))
     }
   }
 
-  private def getCachedTrustData(identifier: String, internalId: String, sessionId: String)(implicit logging: LoggingContext): Future[TrustProcessedResponse] = {
+  private def getCachedTrustData(identifier: String, internalId: String, sessionId: String): Future[TrustProcessedResponse] = {
     for {
       response <- trustsService.getTrustInfo(identifier, internalId, sessionId)
       fbn <- trustsService.getTrustInfoFormBundleNo(identifier)
     } yield response match {
       case tpr: TrustProcessedResponse if tpr.responseHeader.formBundleNo == fbn =>
-        logging.info("returning TrustProcessedResponse")
+        logger.info(s"[VariationService][getCachedTrustData][Session ID: $sessionId][UTR/URN: $identifier] returning TrustProcessedResponse")
         response.asInstanceOf[TrustProcessedResponse]
       case _: TrustProcessedResponse =>
-        logging.info("ETMP cached data in mongo has become stale, rejecting submission")
+        logger.warn(s"[VariationService][getCachedTrustData][Session ID: $sessionId][UTR/URN: $identifier] ETMP cached data in mongo has become stale, rejecting submission")
         throw EtmpCacheDataStaleException
       case _ =>
-        logging.warn("Trust was not in a processed state")
+        logger.warn(s"[VariationService][getCachedTrustData][Session ID: $sessionId][UTR/URN: $identifier] Trust was not in a processed state")
         throw InternalServerErrorException("Submission could not proceed, Trust data was not in a processed state")
     }
   }
@@ -151,10 +140,10 @@ class VariationService @Inject()(
 
     def migrateNonTaxableToTaxable(migrateToTaxable: Boolean, subscriptionId: String, identifier: String): Future[TaxEnrolmentSubscriberResponse] = {
       if (migrateToTaxable) {
-        logger.info(s"[Session ID: ${Session.id(hc)}][UTR/URN: $identifier] trust has migrated to taxable, preparing tax-enrolments to be allocated the UTR")
+        logger.info(s"[VariationService][migrateNonTaxableToTaxable][Session ID: ${Session.id(hc)}][UTR/URN: $identifier] trust has migrated to taxable, preparing tax-enrolments to be allocated the UTR")
         taxableMigrationService.migrateSubscriberToTaxable(subscriptionId, identifier)
       } else {
-        logger.info(s"[Session ID: ${Session.id(hc)}][UTR/URN: $identifier] trust did not require a migration to taxable")
+        logger.info(s"[VariationService][migrateNonTaxableToTaxable][Session ID: ${Session.id(hc)}][UTR/URN: $identifier] trust did not require a migration to taxable")
         Future.successful(TaxEnrolmentNotProcessed)
       }
     }
@@ -187,7 +176,7 @@ class VariationService @Inject()(
 
     trustsService.trustVariation(payload) map { response =>
 
-      logger.info(s"[Session ID: ${Session.id(hc)}][UTR/URN: $identifier] trust submitted a variation")
+      logger.info(s"[VariationService][submitVariation][Session ID: ${Session.id(hc)}][UTR/URN: $identifier] trust submitted a variation")
 
       auditService.auditVariationSuccess(
         internalId,

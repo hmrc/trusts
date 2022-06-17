@@ -55,16 +55,16 @@ class CleanupSubmissionDraftController @Inject()(
           } match {
             case JsSuccess(data, _) =>
               val draftWithSectionReset = draft.copy(draftData = data)
-              logger.info(s"[reset][Session ID: ${request.sessionId}]" +
-                s" removed mapped data and answers$section")
+              logger.info(s"[CleanupSubmissionDraftController][reset][Session ID: ${request.sessionId}]" +
+                s" removed mapped data and answers $section")
               submissionRepository.setDraft(draftWithSectionReset).map(x => if (x) Ok else InternalServerError)
             case _: JsError =>
-              logger.info(s"[reset][Session ID: ${request.sessionId}]" +
+              logger.error(s"[CleanupSubmissionDraftController][reset][Session ID: ${request.sessionId}]" +
                 s" failed to reset for $section")
               Future.successful(InternalServerError)
           }
         case None =>
-          logger.info(s"[reset][Session ID: ${request.sessionId}]" +
+          logger.warn(s"[CleanupSubmissionDraftController][reset][Session ID: ${request.sessionId}]" +
             s" no draft, cannot reset section $section")
           Future.successful(InternalServerError)
       }

@@ -129,17 +129,14 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
   private def auditEvent(event: NRSSubmission, execution: RetryHelper.RetryExecution)(implicit hc: HeaderCarrier): NRSResponse = {
     execution.result match {
       case Some(success @ NRSResponse.Success(_)) =>
-        logger.info(s"[Session ID: ${Session.id(hc)}] Successfully non-repudiated submission")
         val auditEvent = NrsAuditEvent(event.metadata, success)
         nrsAuditService.audit(auditEvent)
         success
       case Some(error: NRSResponse) =>
-        logger.info(s"[Session ID: ${Session.id(hc)}] Unable to non-repudiated submission due to $error")
         val auditEvent = NrsAuditEvent(event.metadata, error)
         nrsAuditService.audit(auditEvent)
         error
       case _ =>
-        logger.info(s"[Session ID: ${Session.id(hc)}] Unable to non-repudiate submission, internal server error")
         val response = NRSResponse.InternalServerError
         val auditEvent = NrsAuditEvent(event.metadata, response)
         nrsAuditService.audit(auditEvent)

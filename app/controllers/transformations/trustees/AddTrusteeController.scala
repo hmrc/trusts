@@ -45,7 +45,7 @@ class AddTrusteeController @Inject()(identify: IdentifierAction,
         case (_, Some(_)) =>
           addBusiness(identifier)
         case _ =>
-          logger.error(s"[add][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
+          logger.error(s"[AddTrusteeController][add][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as a trustee")
           Future.successful(BadRequest)
       }
