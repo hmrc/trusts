@@ -20,14 +20,13 @@ import base.BaseSpec
 import connector.NonRepudiationConnector
 import models.nonRepudiation._
 import models.requests.{CredentialData, IdentifierRequest}
-import org.joda.time.DateTime
+import java.time.{LocalDate, LocalDateTime, ZoneId, ZoneOffset}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => mEq, _}
 import org.mockito.Mockito.{doNothing, reset, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.{JsObject, JsValue, Json}
-import play.api.test.FakeRequest
 import retry.RetryHelper
 import services.auditing.NRSAuditService
 import services.dates.LocalDateTimeService
@@ -35,9 +34,7 @@ import services.encoding.PayloadEncodingService
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, LoginTimes}
 import uk.gov.hmrc.http.{Authorization, ForwardedFor, HeaderCarrier, RequestId, SessionId}
-import utils.{Headers, JsonFixtures}
-
-import java.time.{LocalDateTime, ZoneOffset}
+import utils.JsonFixtures
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.matching.Regex
@@ -62,14 +59,14 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
 
   private val credential: CredentialData = CredentialData(
     Some("groupIdentifier"),
-    LoginTimes(DateTime.parse("2020-10-10"), Some(DateTime.parse("2020-10-05"))),
+    LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, Some(LocalDate.parse("2020-10-05").atStartOfDay(ZoneId.of("Europe/London")).toInstant)),
     Some(Credentials("12345", "governmentGateway")),
     Some("client@email.com")
   )
 
   private val credentialNotPopulated: CredentialData = CredentialData(
     None,
-    LoginTimes(DateTime.parse("2020-10-10"), None),
+    LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, None),
     None,
     None
   )

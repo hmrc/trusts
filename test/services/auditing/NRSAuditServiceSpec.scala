@@ -20,15 +20,13 @@ import base.BaseSpec
 import models.auditing.NrsAuditEvent
 import models.nonRepudiation._
 import models.requests.CredentialData
-import org.joda.time.DateTime
+import java.time.{LocalDate, LocalDateTime, ZoneId}
 import org.mockito.ArgumentMatchers.{any, eq => equalTo}
 import org.mockito.Mockito.verify
 import play.api.libs.json.Json
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.auth.core.retrieve.LoginTimes
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-
-import java.time.LocalDateTime
 
 class NRSAuditServiceSpec extends BaseSpec {
 
@@ -48,7 +46,7 @@ class NRSAuditServiceSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "name"),
         agentDetails = Some(Json.obj("example" -> "agent details")),
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), provider = None, email = None)
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, None), provider = None, email = None)
       )
 
       val metaData = MetaData(
@@ -130,7 +128,7 @@ class NRSAuditServiceSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "name"),
         agentDetails = None,
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), provider = None, email = None)
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, None), provider = None, email = None)
       )
 
       val metaData = MetaData(
@@ -209,7 +207,7 @@ class NRSAuditServiceSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "name"),
         agentDetails = None,
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), provider = None, email = None)
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, None), provider = None, email = None)
       )
 
       val metaData = MetaData(
@@ -288,7 +286,7 @@ class NRSAuditServiceSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "name"),
         agentDetails = None,
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(DateTime.parse("2020-10-10"), None), provider = None, email = None)
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, None), provider = None, email = None)
       )
 
       val metaData = MetaData(
