@@ -20,7 +20,8 @@ import base.BaseSpec
 import models.auditing.NrsAuditEvent
 import models.nonRepudiation._
 import models.requests.CredentialData
-import java.time.{LocalDate, LocalDateTime, ZoneId}
+import java.time.{Instant, LocalDateTime}
+
 import org.mockito.ArgumentMatchers.{any, eq => equalTo}
 import org.mockito.Mockito.verify
 import play.api.libs.json.Json
@@ -46,7 +47,7 @@ class NRSAuditServiceSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "name"),
         agentDetails = Some(Json.obj("example" -> "agent details")),
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, None), provider = None, email = None)
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None), provider = None, email = None)
       )
 
       val metaData = MetaData(
@@ -94,7 +95,7 @@ class NRSAuditServiceSpec extends BaseSpec {
           |       "email": "No email",
           |       "groupIdentifier": "No group identifier",
           |       "loginTimes": {
-          |           "currentLogin": "2020-10-10T00:00:00.000Z"
+          |           "currentLogin": "2020-10-10T00:00:00Z"
           |        }
           |     }
           |   },
@@ -128,7 +129,7 @@ class NRSAuditServiceSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "name"),
         agentDetails = None,
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, None), provider = None, email = None)
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None), provider = None, email = None)
       )
 
       val metaData = MetaData(
@@ -173,7 +174,7 @@ class NRSAuditServiceSpec extends BaseSpec {
           |       "email": "No email",
           |       "groupIdentifier": "No group identifier",
           |       "loginTimes": {
-          |           "currentLogin": "2020-10-10T00:00:00.000Z"
+          |           "currentLogin": "2020-10-10T00:00:00Z"
           |        }
           |     }
           |   },
@@ -207,7 +208,7 @@ class NRSAuditServiceSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "name"),
         agentDetails = None,
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, None), provider = None, email = None)
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None), provider = None, email = None)
       )
 
       val metaData = MetaData(
@@ -252,7 +253,7 @@ class NRSAuditServiceSpec extends BaseSpec {
           |       "email": "No email",
           |       "groupIdentifier": "No group identifier",
           |       "loginTimes": {
-          |           "currentLogin": "2020-10-10T00:00:00.000Z"
+          |           "currentLogin": "2020-10-10T00:00:00Z"
           |        }
           |     }
           |   },
@@ -286,7 +287,7 @@ class NRSAuditServiceSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "name"),
         agentDetails = None,
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, None), provider = None, email = None)
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None), provider = None, email = None)
       )
 
       val metaData = MetaData(
@@ -331,7 +332,7 @@ class NRSAuditServiceSpec extends BaseSpec {
           |       "email": "No email",
           |       "groupIdentifier": "No group identifier",
           |       "loginTimes": {
-          |           "currentLogin": "2020-10-10T00:00:00.000Z"
+          |           "currentLogin": "2020-10-10T00:00:00Z"
           |        }
           |     }
           |   },

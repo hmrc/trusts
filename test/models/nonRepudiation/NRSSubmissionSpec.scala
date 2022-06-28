@@ -18,7 +18,8 @@ package models.nonRepudiation
 
 import base.BaseSpec
 import models.requests.CredentialData
-import java.time.{LocalDate, LocalDateTime, ZoneId}
+import java.time.{Instant, LocalDateTime}
+
 import play.api.libs.json.Json
 import org.scalatest.matchers.must.Matchers._
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
@@ -40,7 +41,8 @@ class NRSSubmissionSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "declaration"),
         agentDetails = Some(Json.obj("example" -> "agent")),
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, None), provider = None, email = None)
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None),
+        provider = None, email = None)
       )
 
       val payLoad = NRSSubmission(
@@ -85,7 +87,7 @@ class NRSSubmissionSpec extends BaseSpec {
           |       "email": "No email",
           |       "groupIdentifier": "No group identifier",
           |       "loginTimes": {
-          |           "currentLogin": "2020-10-10T00:00:00.000Z"
+          |           "currentLogin": "2020-10-10T00:00:00Z"
           |       }
           |     },
           |     "declaration": {
@@ -119,7 +121,7 @@ class NRSSubmissionSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "declaration"),
         agentDetails = None,
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, None), provider = None, email = None)
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None), provider = None, email = None)
       )
 
       val payLoad = NRSSubmission(
@@ -164,7 +166,7 @@ class NRSSubmissionSpec extends BaseSpec {
           |       "email": "No email",
           |       "groupIdentifier": "No group identifier",
           |       "loginTimes": {
-          |           "currentLogin": "2020-10-10T00:00:00.000Z"
+          |           "currentLogin": "2020-10-10T00:00:00Z"
           |       }
           |     },
           |     "declaration": {
@@ -195,7 +197,7 @@ class NRSSubmissionSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "declaration"),
         agentDetails = Some(Json.obj("example" -> "agent")),
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, None), provider = None, email = None)
+        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None), provider = None, email = None)
       )
 
       val payLoad = NRSSubmission(
@@ -240,7 +242,7 @@ class NRSSubmissionSpec extends BaseSpec {
           |       "email": "No email",
           |       "groupIdentifier": "No group identifier",
           |       "loginTimes": {
-          |           "currentLogin": "2020-10-10T00:00:00.000Z"
+          |           "currentLogin": "2020-10-10T00:00:00Z"
           |       }
           |     },
           |     "declaration": {
