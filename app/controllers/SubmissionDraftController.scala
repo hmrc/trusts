@@ -153,7 +153,7 @@ class SubmissionDraftController @Inject()(
           }
         )
       case e: JsError =>
-        logger.error(s"[applyDataSet][Session ID: ${request.sessionId}]" +
+        logger.error(s"[SubmissionDraftController][applyDataSet][Session ID: ${request.sessionId}]" +
           s" Can't apply operations to draft data: $e.errors.")
         Future.successful(InternalServerError(e.errors.toString()))
     }
@@ -219,10 +219,9 @@ class SubmissionDraftController @Inject()(
                              (implicit request: IdentifierRequest[AnyContent], rds: Reads[A], wts: Writes[B]): Future[Result] = {
     getAtPath[A](draftId, path) map {
       case Success(value) =>
-        logger.info(s"[Session ID: ${request.sessionId}] value found at $path")
         Ok(Json.toJson(f(value)))
       case Failure(exception) =>
-        logger.info(exception.getMessage)
+        logger.warn(exception.getMessage)
         NotFound
     }
   }
@@ -235,10 +234,10 @@ class SubmissionDraftController @Inject()(
           case JsSuccess(value, _) =>
             Success(value)
           case _: JsError =>
-            Failure(new NotFoundException(s"[Session ID: ${request.sessionId}] value not found at $path"))
+            Failure(new NotFoundException(s"[SubmissionDraftController][getAtPath][Session ID: ${request.sessionId}] value not found at $path"))
         }
       case None =>
-        Failure(new NotFoundException(s"[Session ID: ${request.sessionId}] no draft, cannot return value at $path"))
+        Failure(new NotFoundException(s"[SubmissionDraftController][getAtPath][Session ID: ${request.sessionId}] no draft, cannot return value at $path"))
     }
   }
 

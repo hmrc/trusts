@@ -29,15 +29,14 @@ case object OrchestratorToTaxableFailure extends OrchestratorToTaxableResponse
 object OrchestratorToTaxableResponse extends Logging {
 
   implicit lazy val httpReads: HttpReads[OrchestratorToTaxableResponse] = (_: String, _: String, response: HttpResponse) => {
-    logger.info(s"Response status received from orchestrator: ${response.status}")
     response.status match {
       case NO_CONTENT | OK | ACCEPTED =>
         OrchestratorToTaxableSuccess
       case BAD_REQUEST =>
-        logger.error("Bad request response received from orchestrator")
+        logger.error("[OrchestratorToTaxableResponse][httpReads] Bad request response received from orchestrator")
         throw BadRequestException
       case status =>
-        logger.error(s"Error response from orchestrator: $status")
+        logger.error(s"[OrchestratorToTaxableResponse][httpReads] Error response from orchestrator: $status")
         throw InternalServerErrorException(s"Error response from orchestrator: $status")
     }
   }

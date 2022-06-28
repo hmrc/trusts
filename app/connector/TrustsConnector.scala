@@ -75,7 +75,7 @@ class TrustsConnector @Inject()(http: HttpClient, config: AppConfig) extends Log
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
-    logger.info(s"[Session ID: ${Session.id(hc)}] matching trust for correlationId: $correlationId")
+    logger.info(s"[TrustsConnector][checkExistingTrust][Session ID: ${Session.id(hc)}] matching trust for correlationId: $correlationId")
 
     http.POST[JsValue, ExistingCheckResponse](
       matchTrustsEndpoint,
@@ -90,7 +90,7 @@ class TrustsConnector @Inject()(http: HttpClient, config: AppConfig) extends Log
 
     val reads = RegistrationResponse.httpReads
 
-    logger.info(s"[Session ID: ${Session.id(hc)}] registering trust for correlationId: $correlationId")
+    logger.info(s"[TrustsConnector][registerTrust][Session ID: ${Session.id(hc)}] registering trust for correlationId: $correlationId")
 
     http.POST[JsValue, RegistrationResponse](
       trustRegistrationEndpoint,
@@ -103,7 +103,7 @@ class TrustsConnector @Inject()(http: HttpClient, config: AppConfig) extends Log
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
-    logger.info(s"[Session ID: ${Session.id(hc)}][UTR/URN: $identifier]" +
+    logger.info(s"[TrustsConnector][getTrustInfo][Session ID: ${Session.id(hc)}][UTR/URN: $identifier]" +
       s" getting playback for trust for correlationId: $correlationId")
 
         http.GET[GetTrustResponse](
@@ -119,7 +119,7 @@ class TrustsConnector @Inject()(http: HttpClient, config: AppConfig) extends Log
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
-    logger.info(s"[Session ID: ${Session.id(hc)}]" +
+    logger.info(s"[TrustsConnector][trustVariation][Session ID: ${Session.id(hc)}]" +
       s" submitting trust variation for correlationId: $correlationId")
 
     http.POST[JsValue, VariationResponse](trustVariationsEndpoint, trustVariations)(

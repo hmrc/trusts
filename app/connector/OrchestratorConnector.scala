@@ -34,7 +34,7 @@ class OrchestratorConnector @Inject()(http: HttpClient, config: AppConfig) exten
   private def headers = Seq(CONTENT_TYPE -> CONTENT_TYPE_JSON)
 
   def migrateToTaxable(urn: String, utr: String)(implicit hc: HeaderCarrier): Future[OrchestratorToTaxableResponse] = {
-    logger.info(s"[OrchestratorConnector][Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr] migrateToTaxable")
+    logger.info(s"[OrchestratorConnector][migrateToTaxable][Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr] starting migration from non-taxable to taxable")
 
     val orchestratorHeaders = hc.withExtraHeaders(headers: _*)
 

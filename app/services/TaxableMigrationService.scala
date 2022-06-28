@@ -39,7 +39,7 @@ class TaxableMigrationService @Inject()(
                                 (implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
     taxEnrolmentConnector.migrateSubscriberToTaxable(subscriptionId, urn) recover {
       case e: Exception =>
-        logger.error(s"[Session ID: ${Session.id(hc)}]" +
+        logger.error(s"[TaxableMigrationService][migrateSubscriberToTaxable][Session ID: ${Session.id(hc)}]" +
           s"[SubscriptionId: $subscriptionId, URN: $urn]" +
           s" failed to prepare tax-enrolments for UTR"
         )
@@ -53,7 +53,7 @@ class TaxableMigrationService @Inject()(
   def completeMigration(subscriptionId: String, urn: String)
                        (implicit hc: HeaderCarrier): Future[OrchestratorToTaxableResponse] = {
     logger.info(
-      s"[Session ID: ${Session.id(hc)}]" +
+      s"[TaxableMigrationService][completeMigration][Session ID: ${Session.id(hc)}]" +
       s"[SubscriptionId: $subscriptionId, URN: $urn]" +
       s" tax-enrolment received UTR, completing migration to taxable process with orchestrator"
     )
@@ -71,7 +71,7 @@ class TaxableMigrationService @Inject()(
     taxEnrolmentConnector.subscriptions(subscriptionId) recover {
       case e: Exception =>
         logger.error(
-          s"[Session ID: ${Session.id(hc)}]" +
+          s"[TaxableMigrationService][getUtrFromSubscriptions][Session ID: ${Session.id(hc)}]" +
             s"[SubscriptionId: $subscriptionId, URN: $urn]" +
             s" unable to get UTR from subscription to complete migration to taxable"
         )
@@ -87,7 +87,7 @@ class TaxableMigrationService @Inject()(
     orchestratorConnector.migrateToTaxable(urn, utr) recover {
       case e: Exception =>
         logger.error(
-          s"[Session ID: ${Session.id(hc)}]" +
+          s"[TaxableMigrationService][updateOrchestratorToTaxable][Session ID: ${Session.id(hc)}]" +
             s"[UTR: $utr, URN: $urn]" +
             s" unable to trigger orchestration to clean up credentials"
         )
@@ -105,7 +105,7 @@ class TaxableMigrationService @Inject()(
   def getTaxableMigrationFlag(identifier: String, internalId: String, sessionId: String): Future[Option[Boolean]] = {
     taxableMigrationRepository.get(identifier, internalId, sessionId).recoverWith {
       case e =>
-        logger.error(s"Error getting taxable migration flag from repository: ${e.getMessage}")
+        logger.error(s"[TaxableMigrationService][getTaxableMigrationFlag] Error getting taxable migration flag from repository: ${e.getMessage}")
         Future.failed(e)
     }
   }
@@ -113,7 +113,7 @@ class TaxableMigrationService @Inject()(
   def setTaxableMigrationFlag(identifier: String, internalId: String, sessionId: String, migratingToTaxable: Boolean): Future[Boolean] = {
     taxableMigrationRepository.set(identifier, internalId, sessionId, migratingToTaxable).recoverWith {
       case e =>
-        logger.error(s"Error setting taxable migration flag in repository: ${e.getMessage}")
+        logger.error(s"[TaxableMigrationService][setTaxableMigrationFlag] Error setting taxable migration flag in repository: ${e.getMessage}")
         Future.failed(e)
     }
   }

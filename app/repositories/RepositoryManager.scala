@@ -84,7 +84,7 @@ abstract class RepositoryManager @Inject()(
     } yield res
 
   private def ensureIndexes: Future[Boolean] = {
-    logger.info("Ensuring collection indexes")
+    logger.info("[RepositoryManager][ensureIndexes] Ensuring collection indexes")
 
     lazy val lastUpdatedIndex: Index = Index(
       key = Seq("updatedAt" -> IndexType.Ascending),
@@ -119,7 +119,7 @@ abstract class RepositoryManager @Inject()(
         collection <- Future.successful(mongo.api.collection[JSONCollection](collectionName))
         indexes <- collection.indexesManager.list()
       } yield {
-        logger.info(s"[IndexesManager] indexes found on mongo collection $collectionName: $indexes")
+        logger.info(s"[RepositoryManager][dropIndexes] indexes found on mongo collection $collectionName: $indexes")
         ()
       }
     }
@@ -130,11 +130,11 @@ abstract class RepositoryManager @Inject()(
         for {
           collection <- Future.successful(mongo.api.collection[JSONCollection](collectionName))
           _ <- collection.indexesManager.dropAll()
-          _ <- Future.successful(logger.info(s"[IndexesManager] dropped indexes on collection $collectionName"))
+          _ <- Future.successful(logger.info(s"[RepositoryManager][dropIndexes] dropped indexes on collection $collectionName"))
           _ <- logIndexes
         } yield ()
       } else {
-        logger.info(s"[IndexesManager] indexes not modified on collection $collectionName")
+        logger.info(s"[RepositoryManager][dropIndexes] indexes not modified on collection $collectionName")
         Future.successful(())
       }
     } yield ()

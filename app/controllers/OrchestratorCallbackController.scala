@@ -36,7 +36,7 @@ class OrchestratorCallbackController @Inject()(auditService: MigrationAuditServi
     implicit request =>
       implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
-      logger.info(s"[migrationToTaxableCallback][Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr]" +
+      logger.info(s"[OrchestratorCallbackController][migrationToTaxableCallback][Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr]" +
         s" Orchestrator: migrate subscription callback message was: ${request.body}")
 
       val success = (request.body \ "success").asOpt[Boolean]
@@ -46,7 +46,7 @@ class OrchestratorCallbackController @Inject()(auditService: MigrationAuditServi
           val errorMessage = (request.body \ "errorMessage").asOpt[String]
 
           logger.error(
-            s"[migrationToTaxableCallback]" +
+            s"[OrchestratorCallbackController][migrationToTaxableCallback]" +
             s"[Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr]" +
             s" Orchestrator: migrate subscription failed," +
             s" error message was: ${errorMessage.getOrElse(request.body)}"

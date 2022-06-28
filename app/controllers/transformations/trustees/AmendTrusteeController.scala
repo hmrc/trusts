@@ -46,7 +46,7 @@ class AmendTrusteeController @Inject()(identify: IdentifierAction,
         case (_, Some(_)) =>
           amendLeadBusiness(identifier)
         case _ =>
-          logger.error(s"[amendLeadTrustee][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
+          logger.error(s"[AmendTrusteeController][amendLeadTrustee][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as a lead trustee")
           Future.successful(BadRequest)
       }
@@ -62,7 +62,7 @@ class AmendTrusteeController @Inject()(identify: IdentifierAction,
         case (_, Some(_)) =>
           amendBusiness(identifier, index)
         case _ =>
-          logger.error(s"[amendTrustee][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
+          logger.error(s"[AmendTrusteeController][amendTrustee][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
             s" Supplied json could not be read as a trustee")
           Future.successful(BadRequest)
       }

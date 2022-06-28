@@ -73,20 +73,20 @@ class TrustDetailsSubmissionDraftController @Inject()(
 
           (matchingName, detailsName) match {
             case (JsSuccess(date, _), JsError(_)) =>
-              logger.info(s"[Session ID: ${request.sessionId}]" +
+              logger.info(s"[TaxEnrolmentCallbackController][getTrustName][Session ID: ${request.sessionId}]" +
                 s" found trust name in matching")
               Ok(Json.obj("trustName" -> date))
             case (JsError(_), JsSuccess(date, _)) =>
-              logger.info(s"[Session ID: ${request.sessionId}]" +
+              logger.info(s"[TaxEnrolmentCallbackController][getTrustName][Session ID: ${request.sessionId}]" +
                 s" found trust name in trust details")
               Ok(Json.obj("trustName" -> date))
             case _ =>
-              logger.info(s"[Session ID: ${request.sessionId}]" +
+              logger.info(s"[TaxEnrolmentCallbackController][getTrustName][Session ID: ${request.sessionId}]" +
                 s" no trust name found")
               NotFound
           }
         case None =>
-          logger.info(s"[Session ID: ${request.sessionId}]" +
+          logger.info(s"[TaxEnrolmentCallbackController][getTrustName][Session ID: ${request.sessionId}]" +
             s" no draft, cannot return trust name")
           NotFound
       }
