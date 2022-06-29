@@ -16,9 +16,9 @@
 
 package controllers.actions
 
+import java.time.{LocalDate, ZoneId}
 import base.BaseSpec
 import com.google.inject.Inject
-import org.joda.time.DateTime
 import org.scalatest.matchers.must.Matchers._
 import play.api.mvc.{BodyParsers, Results}
 import play.api.test.Helpers._
@@ -27,7 +27,6 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, LoginTimes, Retrieval, ~}
 import uk.gov.hmrc.http.HeaderCarrier
-
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthActionSpec extends BaseSpec {
@@ -45,10 +44,10 @@ class AuthActionSpec extends BaseSpec {
   private type AllRetrievals = Future[Some[String] ~ Some[AffinityGroup] ~ Option[String] ~ LoginTimes ~ Option[Credentials] ~ Option[String]]
 
   private def minimumAuthRetrievals(affinityGroup: AffinityGroup): AllRetrievals =
-    Future.successful(Some("id") ~ Some(affinityGroup) ~ None ~ LoginTimes(DateTime.parse("2020-10-10"), None) ~ None ~ None)
+    Future.successful(Some("id") ~ Some(affinityGroup) ~ None ~ LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, None) ~ None ~ None)
 
   private def allRetrievals(affinityGroup: AffinityGroup): AllRetrievals  =
-    Future.successful(Some("id") ~ Some(affinityGroup) ~ Some("groupIdentifier") ~ LoginTimes(DateTime.parse("2020-10-10"), None) ~ Some(Credentials("12345", "governmentGateway")) ~ Some("org@email.com"))
+    Future.successful(Some("id") ~ Some(affinityGroup) ~ Some("groupIdentifier") ~ LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, None) ~ Some(Credentials("12345", "governmentGateway")) ~ Some("org@email.com"))
 
   private def actionToTest(authConnector: AuthConnector) = {
     new AuthenticatedIdentifierAction(authConnector, injector.instanceOf[BodyParsers.Default])(ExecutionContext.Implicits.global)

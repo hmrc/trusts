@@ -30,9 +30,6 @@ case class CredentialData(
 
 object CredentialData {
 
-  // Required by Format[LoginTimes]
-  import utils.JodaDateTimeFormatter._
-
   import Credentials.{reads => credReads}
 
   implicit val credentialReads: Reads[Credentials] = credReads
