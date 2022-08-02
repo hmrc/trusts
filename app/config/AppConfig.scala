@@ -39,7 +39,7 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
   val subscriptionToken : String = configuration.get[String]("microservice.services.subscription.token")
 
   val trustsApiRegistrationSchema5MLD : String =
-    "/resources/schemas/5MLD/trusts-api-registration-schema-1.3.0.json"
+    "/resources/schemas/5MLD/trusts-api-registration-schema-1.4.2.json"
 
   val variationsApiSchema5MLD: String =
     "/resources/schemas/5MLD/variations-api-schema-4.8.0.json"

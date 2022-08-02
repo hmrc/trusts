@@ -84,4 +84,6 @@ GET         /submission-drafts/:draftId/correspondence-address                  
 
 GET         /submission-drafts/:draftId/is-trust-taxable                                controllers.TrustDetailsSubmissionDraftController.getTrustTaxable(draftId: String)
 
+GET         /submission-drafts/:draftId/is-express-trust                                controllers.TrustDetailsSubmissionDraftController.getIsExpressTrust(draftId: String)
+
 GET         /submission-drafts/:draftId/first-tax-year-available                        controllers.TaxLiabilitySubmissionDraftController.getFirstTaxYearAvailable(draftId: String)

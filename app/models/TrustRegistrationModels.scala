@@ -384,6 +384,7 @@ case class TrustDetailsType(startDate: LocalDate,
                             expressTrust: Option[Boolean],        // new 5MLD required
                             trustUKResident: Option[Boolean],     // new 5MLD required
                             trustUKProperty: Option[Boolean],     // new 5MLD optional
+                            schedule3aExempt: Option[Boolean],
                             trustRecorded: Option[Boolean],       // new 5MLD required
                             trustUKRelation: Option[Boolean]) {   // new 5MLD required
 
