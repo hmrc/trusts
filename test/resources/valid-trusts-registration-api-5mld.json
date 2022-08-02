@@ -51,6 +51,7 @@
       "expressTrust": true,
       "trustUKResident": true,
       "trustUKProperty": true,
+      "schedule3aExempt": true,
       "lawCountry": "DE",
       "administrationCountry": "DE",
       "trustRecorded": false,

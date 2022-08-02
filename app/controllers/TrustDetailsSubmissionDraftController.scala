@@ -61,6 +61,13 @@ class TrustDetailsSubmissionDraftController @Inject()(
       getResult[Boolean](draftId, path)
   }
 
+  def getIsExpressTrust(draftId: String): Action[AnyContent] = identify.async {
+    implicit request =>
+
+      val path = JsPath \ "main" \ "data" \ "expressTrust"
+      getResult[Boolean](draftId, path)
+  }
+
   def getTrustName(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>
       submissionRepository.getDraft(draftId, request.internalId).map {
