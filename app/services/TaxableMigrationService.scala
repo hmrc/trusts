@@ -24,10 +24,11 @@ import services.auditing.MigrationAuditService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.Session
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+@Singleton
 class TaxableMigrationService @Inject()(
                                          auditService: MigrationAuditService,
                                          taxEnrolmentConnector: TaxEnrolmentConnector,

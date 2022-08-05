@@ -17,20 +17,29 @@
 package config
 
 import com.google.inject.AbstractModule
+import connector.{TaxEnrolmentConnector, TaxEnrolmentConnectorImpl}
 import controllers.actions.{AuthenticatedIdentifierAction, IdentifierAction}
 import repositories._
+import retry.{NrsRetryHelper, RetryHelper}
+import services.rosm.{RosmPatternService, RosmPatternServiceImpl, TaxEnrolmentsService, TaxEnrolmentsServiceImpl}
 
 class Module extends AbstractModule {
 
   override def configure(): Unit = {
     // For session based storage instead of cred based, change to SessionIdentifierAction
-    bind(classOf[IdentifierAction]).to(classOf[AuthenticatedIdentifierAction])
+    bind(classOf[IdentifierAction]).to(classOf[AuthenticatedIdentifierAction]).asEagerSingleton()
 
     bind(classOf[MongoDriver]).to(classOf[TrustsMongoDriver]).asEagerSingleton()
 
-    bind(classOf[TransformationRepository]).to(classOf[TransformationRepositoryImpl])
-    bind(classOf[CacheRepository]).to(classOf[CacheRepositoryImpl])
-    bind(classOf[RegistrationSubmissionRepository]).to(classOf[RegistrationSubmissionRepositoryImpl])
-    bind(classOf[TaxableMigrationRepository]).to(classOf[TaxableMigrationRepositoryImpl])
+    bind(classOf[TransformationRepository]).to(classOf[TransformationRepositoryImpl]).asEagerSingleton()
+    bind(classOf[CacheRepository]).to(classOf[CacheRepositoryImpl]).asEagerSingleton()
+    bind(classOf[RegistrationSubmissionRepository]).to(classOf[RegistrationSubmissionRepositoryImpl]).asEagerSingleton()
+    bind(classOf[TaxableMigrationRepository]).to(classOf[TaxableMigrationRepositoryImpl]).asEagerSingleton()
+
+    bind(classOf[TaxEnrolmentConnector]).to(classOf[TaxEnrolmentConnectorImpl]).asEagerSingleton()
+    bind(classOf[TaxEnrolmentsService]).to(classOf[TaxEnrolmentsServiceImpl]).asEagerSingleton()
+    bind(classOf[RosmPatternService]).to(classOf[RosmPatternServiceImpl]).asEagerSingleton()
+
+    bind(classOf[RetryHelper]).to(classOf[NrsRetryHelper]).asEagerSingleton()
   }
 }

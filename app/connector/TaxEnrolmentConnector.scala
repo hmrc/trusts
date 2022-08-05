@@ -16,7 +16,6 @@
 
 package connector
 
-import com.google.inject.ImplementedBy
 import config.AppConfig
 import javax.inject.Inject
 import models.tax_enrolments.{TaxEnrolmentSubscriberResponse, TaxEnrolmentSubscription, TaxEnrolmentsSubscriptionsResponse}
@@ -24,7 +23,6 @@ import play.api.Logging
 import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utils.Constants._
-import utils.Session
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -89,7 +87,6 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
   }
 }
 
-@ImplementedBy(classOf[TaxEnrolmentConnectorImpl])
 trait TaxEnrolmentConnector {
 
   def getTaxEnrolmentSubscription(subscriptionId: String, taxable: Boolean, trn: String): TaxEnrolmentSubscription

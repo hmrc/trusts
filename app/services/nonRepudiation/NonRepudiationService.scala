@@ -29,13 +29,14 @@ import services.auditing.NRSAuditService
 import services.dates.LocalDateTimeService
 import services.encoding.PayloadEncodingService
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.{Headers, Session}
+import utils.Headers
 
 import java.time.ZoneOffset
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
+@Singleton
 class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
                                       localDateTimeService: LocalDateTimeService,
                                       payloadEncodingService: PayloadEncodingService,
@@ -117,6 +118,7 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
   }
 
   private def scheduleNrsSubmission(event: NRSSubmission)(implicit hc: HeaderCarrier): Future[NRSResponse] = {
+    Future.successful(models.nonRepudiation.NRSResponse.Success("12345"))
 
     def f: () => Future[NRSResponse] = () => connector.nonRepudiate(event)
 

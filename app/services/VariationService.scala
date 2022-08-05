@@ -27,7 +27,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.JsonOps._
 import utils.Session
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.tax_enrolments.{TaxEnrolmentNotProcessed, TaxEnrolmentSubscriberResponse}
 import services.auditing.VariationAuditService
 import services.dates.LocalDateService
@@ -35,6 +35,7 @@ import services.dates.LocalDateService
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+@Singleton
 class VariationService @Inject()(
                                   trustsService: TrustsService,
                                   transformationService: TransformationService,
