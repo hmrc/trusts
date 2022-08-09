@@ -26,7 +26,9 @@ import utils.JsonOps.{doNothing, prunePathAndPutNewValue, putNewValue}
 import utils.{DeedOfVariation, TypeOfTrust}
 
 import java.time.LocalDate
+import javax.inject.Singleton
 
+@Singleton
 class DeclarationTransformer {
 
   def transform(response: TrustProcessedResponse,

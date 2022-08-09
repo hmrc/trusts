@@ -16,7 +16,6 @@
 
 package services.rosm
 
-import com.google.inject.ImplementedBy
 import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSubscriberResponse, TaxEnrolmentSuccess}
 import play.api.Logging
 import services.TrustsService
@@ -68,7 +67,7 @@ class RosmPatternServiceImpl @Inject()(trustsService: TrustsService, taxEnrolmen
   }
 
 }
-@ImplementedBy(classOf[RosmPatternServiceImpl])
+
 trait RosmPatternService {
   def setSubscriptionId(trn: String, taxable: Boolean)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse]
   def enrolAndLogResult(trn: String, affinityGroup: AffinityGroup, taxable: Boolean)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse]

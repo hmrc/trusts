@@ -17,7 +17,7 @@
 package connector
 
 import config.AppConfig
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.orchestrator.OrchestratorMigrationRequest
 import models.tax_enrolments.OrchestratorToTaxableResponse
 import play.api.Logging
@@ -29,6 +29,7 @@ import utils.Session
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+@Singleton
 class OrchestratorConnector @Inject()(http: HttpClient, config: AppConfig) extends Logging {
 
   private def headers = Seq(CONTENT_TYPE -> CONTENT_TYPE_JSON)

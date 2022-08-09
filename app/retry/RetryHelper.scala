@@ -18,7 +18,6 @@ package retry
 
 import akka.actor.ActorSystem
 import akka.pattern.Patterns.after
-import com.google.inject.ImplementedBy
 import play.api.Logging
 import retry.RetryHelper.RetryExecution
 
@@ -28,10 +27,9 @@ import scala.concurrent.{ExecutionContext, Future}
 import utils.Session
 import uk.gov.hmrc.http.HeaderCarrier
 
-@ImplementedBy(classOf[NrsRetryHelper])
 trait RetryHelper extends Logging {
 
-  val as: ActorSystem = ActorSystem()
+  val as: ActorSystem = ActorSystem("RetryHelperActors")
 
   val maxAttempts: Int
   val factor: Int

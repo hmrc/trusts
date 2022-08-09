@@ -23,8 +23,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import utils.Constants.{DETAILS, TAXABLE, TRUST}
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
+@Singleton
 class VariationAuditService @Inject()(auditConnector: AuditConnector)
   extends AuditService(auditConnector) {
 

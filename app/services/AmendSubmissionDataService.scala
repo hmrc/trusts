@@ -21,8 +21,9 @@ import play.api.libs.json._
 import services.dates.LocalDateService
 import utils.JsonOps.{JsValueOps, putNewValue}
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
+@Singleton
 class AmendSubmissionDataService @Inject()(localDateService: LocalDateService) extends Logging {
 
   def applyRulesAndAddSubmissionDate(json: JsValue): JsValue = {

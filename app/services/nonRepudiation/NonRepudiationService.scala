@@ -29,13 +29,14 @@ import services.auditing.NRSAuditService
 import services.dates.LocalDateTimeService
 import services.encoding.PayloadEncodingService
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.{Headers, Session}
+import utils.Headers
 
 import java.time.ZoneOffset
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
+@Singleton
 class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
                                       localDateTimeService: LocalDateTimeService,
                                       payloadEncodingService: PayloadEncodingService,

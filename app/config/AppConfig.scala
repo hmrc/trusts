@@ -17,11 +17,11 @@
 package config
 
 import javax.inject.{Inject, Singleton}
-import play.api.Configuration
+import play.api.{Configuration, Logging}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class AppConfig @Inject()(configuration: Configuration, servicesConfig: ServicesConfig) {
+class AppConfig @Inject()(configuration: Configuration, servicesConfig: ServicesConfig) extends Logging {
 
   val registrationBaseUrl : String = servicesConfig.baseUrl("registration")
   val subscriptionBaseUrl : String = servicesConfig.baseUrl("subscription")
@@ -94,5 +94,12 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
   val nrsRetryWaitMs = configuration.get[Int]("nrs.retryWaitMs")
   val nrsRetryWaitFactor = configuration.get[Int]("nrs.retryWaitFactor")
   val nrsTotalAttempts = configuration.get[Int]("nrs.totalAttempts")
+
+  logger.info(s"""=============== FEATURE FLAGS ===============
+                 |            nonRepudiate = ${nonRepudiate}
+                 |      dropIndexesEnabled = ${dropIndexesEnabled}
+                 |removeSavedRegistrations = ${removeSavedRegistrations}
+                 |=============== ============= ===============""".stripMargin)
+
 }
 
