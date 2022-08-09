@@ -66,6 +66,7 @@ trait IntegrationTestBase extends ScalaFutures {
       val f: Future[Assertion] = for {
           connection <- getConnection()
           _ = dropTheDatabase(connection)
+          _ = connection.askClose()(Duration(1, "s"))
         } yield {
           block(application)
         }
