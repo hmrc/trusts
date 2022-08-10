@@ -21,9 +21,10 @@ import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
 
+@Singleton
 class MigrationAuditService @Inject()(auditConnector: AuditConnector)
   extends AuditService(auditConnector) {
 

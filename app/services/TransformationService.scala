@@ -31,10 +31,11 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.Constants._
 import utils.Session
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+@Singleton
 class TransformationService @Inject()(repository: TransformationRepository,
                                       trustsService: TrustsService,
                                       auditService: AuditService) extends Logging {

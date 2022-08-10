@@ -21,7 +21,9 @@ import models.FirstTaxYearAvailable
 import uk.gov.hmrc.time.TaxYear
 
 import java.time.{LocalDate, MonthDay}
+import javax.inject.Singleton
 
+@Singleton
 class TaxYearService {
 
   def currentDate: LocalDate = LocalDate.now

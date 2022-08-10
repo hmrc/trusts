@@ -19,17 +19,17 @@ package connector
 import java.util.UUID
 
 import config.AppConfig
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.tax_enrolments.SubscriptionIdResponse
 import play.api.Logging
 import play.api.http.HeaderNames
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utils.Constants._
-import utils.Session
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class SubscriptionConnector @Inject()(http: HttpClient, config: AppConfig) extends Logging {
 
   private lazy val trustsServiceUrl : String = s"${config.subscriptionBaseUrl}/trusts"

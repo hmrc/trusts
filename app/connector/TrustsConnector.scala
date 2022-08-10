@@ -30,10 +30,11 @@ import utils.Constants._
 import utils.Session
 
 import java.util.UUID
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class TrustsConnector @Inject()(http: HttpClient, config: AppConfig) extends Logging {
 
   private lazy val trustsServiceUrl: String =

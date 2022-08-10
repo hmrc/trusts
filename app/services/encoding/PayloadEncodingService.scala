@@ -20,6 +20,9 @@ import org.apache.commons.codec.binary.Base64
 import org.apache.commons.codec.digest.DigestUtils
 import play.api.libs.json.{JsValue, Json}
 
+import javax.inject.Singleton
+
+@Singleton
 class PayloadEncodingService {
 
   def encode(payload: JsValue): String =

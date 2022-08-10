@@ -18,7 +18,6 @@ package services.rosm
 
 import akka.actor.ActorSystem
 import akka.pattern.after
-import com.google.inject.ImplementedBy
 import config.AppConfig
 import connector.TaxEnrolmentConnector
 import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentSubscriberResponse}
@@ -37,8 +36,9 @@ class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector: TaxEnrolmentConn
   private val DELAY_SECONDS_BETWEEN_REQUEST = config.delayToConnectTaxEnrolment
   private val MAX_TRIES = config.maxRetry
 
+  private val as: ActorSystem = ActorSystem("TaxEnrolmentActors")
+
   override def setSubscriptionId(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
-    implicit val as: ActorSystem = ActorSystem()
     enrolSubscriberWithRetry(subscriptionId, 1, taxable, trn)
   }
 
@@ -46,19 +46,19 @@ class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector: TaxEnrolmentConn
                                        acc: Int,
                                        taxable: Boolean,
                                        trn: String)
-                                      (implicit as: ActorSystem, hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
+                                      (implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
     makeRequest(subscriptionId, taxable, trn: String) recoverWith {
-      case NonFatal(_) =>
+      case NonFatal(_) => {
+        val logHeader = s"[TaxEnrolmentsServiceImpl][enrolSubscriberWithRetry][Session ID: ${Session.id(hc)}]"
         if (isMaxRetryReached(acc)) {
-          logger.error(s"[TaxEnrolmentsServiceImpl][enrolSubscriberWithRetry][Session ID: ${Session.id(hc)}]" +
-            s" Maximum retry completed. Tax enrolment failed for subscription id $subscriptionId")
+          logger.error(s"$logHeader Maximum retry completed. Tax enrolment failed for subscription id $subscriptionId")
           Future.successful(TaxEnrolmentFailure)
         } else {
-          after(DELAY_SECONDS_BETWEEN_REQUEST.seconds, as.scheduler){
-            logger.error(s"[TaxEnrolmentsServiceImpl][enrolSubscriberWithRetry][Session ID: ${Session.id(hc)}]" +
-              s" Retrying to enrol subscription id $subscriptionId, $acc")
+          after(DELAY_SECONDS_BETWEEN_REQUEST.seconds, as.scheduler) {
+            logger.error(s"$logHeader Retrying to enrol subscription id $subscriptionId, $acc")
             enrolSubscriberWithRetry(subscriptionId, acc + 1, taxable, trn)
           }
+        }
       }
     }
   }
@@ -72,7 +72,6 @@ class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector: TaxEnrolmentConn
 
 }
 
-@ImplementedBy(classOf[TaxEnrolmentsServiceImpl])
 trait TaxEnrolmentsService{
    def setSubscriptionId(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse]
 }
