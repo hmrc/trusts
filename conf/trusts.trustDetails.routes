@@ -19,6 +19,7 @@ PUT         /:identifier/deed-of-variation                      controllers.tran
 PUT         /:identifier/inter-vivos                            controllers.transformations.trustdetails.TrustDetailsTransformationController.setInterVivos(identifier: String)
 PUT         /:identifier/efrbs-start-date                       controllers.transformations.trustdetails.TrustDetailsTransformationController.setEfrbsStartDate(identifier: String)
 PUT         /:identifier/residential-status                     controllers.transformations.trustdetails.TrustDetailsTransformationController.setResidentialStatus(identifier: String)
+PUT         /:identifier/schedule-3a-exempt                     controllers.transformations.trustdetails.TrustDetailsTransformationController.setSchedule3aExempt(identifier: String)
 
 PUT         /:identifier/migrating-trust-details                controllers.transformations.trustdetails.TrustDetailsTransformationController.setMigratingTrustDetails(identifier: String)
 PUT         /:identifier/non-migrating-trust-details            controllers.transformations.trustdetails.TrustDetailsTransformationController.setNonMigratingTrustDetails(identifier: String)

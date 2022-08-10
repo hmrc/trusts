@@ -42,7 +42,7 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
     "/resources/schemas/5MLD/trusts-api-registration-schema-1.4.2.json"
 
   val variationsApiSchema5MLD: String =
-    "/resources/schemas/5MLD/variations-api-schema-4.8.0.json"
+    "/resources/schemas/5MLD/variations-api-schema-4.8.1.json"
 
   private def insertTRN(url: String, trn: String) = url.replace(":trn", trn)
 
