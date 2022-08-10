@@ -98,6 +98,7 @@ object Constants {
   val RECORDED = "trustRecorded"
   val UK_RELATION = "trustUKRelation"
   val START_DATE = "startDate"
+  val SCHEDULE_3A_EXEMPT = "schedule3aExempt"
 
   val LAW_COUNTRY = "lawCountry"
   val ADMINISTRATION_COUNTRY = "administrationCountry"

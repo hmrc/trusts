@@ -292,6 +292,50 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
 
     }
 
+    "when setting schedule3aExempt question" - {
+
+      "must return an OK" in {
+
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
+
+        val request = FakeRequest(PUT, "path")
+          .withBody(JsBoolean(true))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.setSchedule3aExempt(utr).apply(request)
+
+        status(result) mustBe OK
+
+        verify(mockTransformationService).addNewTransform(
+          equalTo(utr),
+          equalTo("id"),
+          equalTo(SetTrustDetailTransform(JsBoolean(true), "schedule3aExempt"))
+        )(any())
+      }
+
+      "return a BadRequest for malformed json" in {
+
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
+
+        val request = FakeRequest(PUT, "path")
+          .withBody(Json.parse("{}"))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.setSchedule3aExempt(utr).apply(request)
+
+        status(result) mustBe BAD_REQUEST
+      }
+
+    }
+
     "when setting uk relation question" - {
 
       "must return an OK" in {
