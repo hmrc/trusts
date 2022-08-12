@@ -4,7 +4,7 @@ import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.{GetTrustSuccessResponse, ResponseHeader}
 import models.variation.VariationResponse
-import models.{DeclarationName, FeatureResponse, NameType}
+import models.{DeclarationName, NameType}
 import models.variation.DeclarationForApi
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.Mockito._
@@ -39,7 +39,7 @@ class SubmissionSuccessSpec extends AsyncWordSpec with MockitoSugar with Integra
     )
 
     val trustResponse: GetTrustSuccessResponse = new GetTrustSuccessResponse{
-      val responseHeader = ResponseHeader("Processed", "123456789012")
+      val responseHeader: ResponseHeader = ResponseHeader("Processed", "123456789012")
     }
 
     lazy val get5MLDTrustNonTaxableResponse: String = getJsonFromFile("5MLD/NonTaxable/des/valid-get-trust-5mld-non-taxable-des-response.json")

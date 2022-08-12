@@ -31,7 +31,6 @@ import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import repositories.RegistrationSubmissionRepository
-import services.TaxYearService
 import services.dates.LocalDateTimeService
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import utils.JsonFixtures

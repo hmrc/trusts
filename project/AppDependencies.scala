@@ -6,11 +6,11 @@ object AppDependencies {
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc"               %% "simple-reactivemongo"       % "8.0.0-play-28",
-    "uk.gov.hmrc"               %% "bootstrap-backend-play-28"  % "5.24.0",
-    "com.github.java-json-tools" % "json-schema-validator"      % "2.2.14",
-    "uk.gov.hmrc"               %% "tax-year"                   % "1.4.0",
-    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.12.4"
+    "uk.gov.hmrc"                   %% "simple-reactivemongo"       % "8.0.0-play-28",
+    "uk.gov.hmrc"                   %% "bootstrap-backend-play-28"  % "5.24.0",
+    "com.github.java-json-tools"    % "json-schema-validator"       % "2.2.14",
+    "uk.gov.hmrc"                   %% "tax-year"                   % "1.4.0",
+    "com.fasterxml.jackson.module"  %% "jackson-module-scala"       % "2.12.4"
   )
 
   val test: Seq[ModuleID] = Seq(
@@ -31,12 +31,12 @@ object AppDependencies {
   val akkaHttpVersion = "10.1.12"
 
   val overrides = Seq(
-    "com.typesafe.akka" %% "akka-stream_2.12" % akkaVersion,
-    "com.typesafe.akka" %% "akka-protobuf_2.12" % akkaVersion,
-    "com.typesafe.akka" %% "akka-slf4j_2.12" % akkaVersion,
-    "com.typesafe.akka" %% "akka-actor_2.12" % akkaVersion,
-    "com.typesafe.akka" %% "akka-http-core_2.12" % akkaHttpVersion,
-    "commons-codec" % "commons-codec" % "1.15"
+    "com.typesafe.akka" %% "akka-stream_2.12"     % akkaVersion,
+    "com.typesafe.akka" %% "akka-protobuf_2.12"   % akkaVersion,
+    "com.typesafe.akka" %% "akka-slf4j_2.12"      % akkaVersion,
+    "com.typesafe.akka" %% "akka-actor_2.12"      % akkaVersion,
+    "com.typesafe.akka" %% "akka-http-core_2.12"  % akkaHttpVersion,
+    "commons-codec"     % "commons-codec"         % "1.15"
   )
 
 }
