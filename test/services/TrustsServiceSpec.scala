@@ -26,7 +26,7 @@ import models.registration.RegistrationTrnResponse
 import models.tax_enrolments.SubscriptionIdResponse
 import models.variation.VariationResponse
 import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
+import org.mockito.Mockito.{times, verify, verifyNoMoreInteractions, when}
 import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.JsValue
 import repositories.CacheRepositoryImpl
@@ -236,7 +236,7 @@ class TrustsServiceSpec extends BaseSpec {
         val futureResult = SUT.getTrustInfo(utr, myId, sessionId)
         whenReady(futureResult) { result =>
           result mustBe models.get_trust.TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))
-          verifyZeroInteractions(mockSubscriptionConnector)
+          verifyNoMoreInteractions(mockSubscriptionConnector)
         }
       }
     }
