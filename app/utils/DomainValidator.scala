@@ -41,6 +41,21 @@ class DomainValidator(registration : Registration) extends ValidationUtil with L
     }
   }
 
+  def validateSchedule3aExempt: Option[TrustsValidationError] = {
+    val isExpressTrust = registration.trust.details.expressTrust.getOrElse(false)
+    val isTrustTaxable = registration.trust.details.trustTaxable.getOrElse(false)
+
+    registration.trust.details.schedule3aExempt match {
+      case None => None
+      case Some(_) =>
+        if (isExpressTrust && isTrustTaxable) {
+          None
+        } else {
+          Some(TrustsValidationError("Schedule 3a Exemption should only exist for a Express and Taxable Trust.", "/trust/details/schedule3aExempt"))
+        }
+    }
+  }
+
   def trustEfrbsDateIsNotFutureDate: Option[TrustsValidationError] = {
     isNotFutureDate(registration.trust.details.efrbsStartDate,
       "/trust/details/efrbsStartDate", "Trusts efrbs start date")
@@ -194,7 +209,8 @@ object BusinessValidation {
     val errorsList = List(
       domainValidator.trustStartDateIsNotFutureDate,
       domainValidator.validateEfrbsDate,
-      domainValidator.trustEfrbsDateIsNotFutureDate
+      domainValidator.trustEfrbsDateIsNotFutureDate,
+      domainValidator.validateSchedule3aExempt
     ).flatten
 
       errorsList ++

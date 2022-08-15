@@ -955,6 +955,9 @@
         "trustUKProperty": {
           "$ref": "#/definitions/checkElement"
         },
+        "schedule3aExempt": {
+          "$ref": "#/definitions/checkElement"
+        },
         "lawCountry": {
           "$ref": "#/definitions/nonUKCountryType"
         },

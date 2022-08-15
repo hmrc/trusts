@@ -26,7 +26,7 @@ import utils.{DataExamples, JsonUtils}
 class ValidationServiceSpec extends BaseSpec with DataExamples with EitherValues {
 
   private lazy val validationService: ValidationService = new ValidationService()
-  private lazy val trustValidator : Validator = validationService.get("/resources/schemas/5MLD/trusts-api-registration-schema-1.3.0.json")
+  private lazy val trustValidator : Validator = validationService.get("/resources/schemas/5MLD/trusts-api-registration-schema-1.4.2.json")
 
   "a validator " should {
     "return an empty list of errors when " when {

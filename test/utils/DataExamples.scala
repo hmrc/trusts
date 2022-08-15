@@ -105,6 +105,12 @@ trait DataExamples extends  JsonFixtures {
     registration(Some(trustDetailsType))
   }
 
+  def registrationWithSchedule3aExempt(schedule3aExempt: Boolean, expressTrust: Boolean, trustTaxable: Boolean): Registration = {
+    val trustDetailsType = registrationRequest.trust.details.copy(schedule3aExempt = Some(schedule3aExempt),
+      expressTrust = Some(expressTrust), trustTaxable = Some(trustTaxable))
+    registration(Some(trustDetailsType))
+  }
+
   def listOfIndividualTrustees = List(TrusteeType(trusteeIndividual(),None),TrusteeType(trusteeIndividual("2030-01-01"),None))
   def listOfOrgTrustees = List(TrusteeType(None,trusteeOrg),TrusteeType(None,trusteeOrg))
   def listOfIndAndOrgTrustees = List(TrusteeType(trusteeIndividual("2030-01-01"),trusteeOrg))
