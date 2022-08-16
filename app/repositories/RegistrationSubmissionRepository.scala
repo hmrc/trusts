@@ -16,19 +16,19 @@
 
 package repositories
 
-import javax.inject.Inject
+import config.AppConfig
+import models.registration.{RegistrationSubmissionDraft, RegistrationSubmissionDraftDB}
+import org.mongodb.scala.model.Filters.{and, empty, equal}
+import org.mongodb.scala.model._
 import play.api.Logging
-import play.api.libs.json._
-import reactivemongo.api.Cursor
-import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.BSONDocument
-import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
-import reactivemongo.play.json.collection.JSONCollection
+import play.api.libs.json.Format
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
-import config.AppConfig
-import models.registration.RegistrationSubmissionDraft
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 trait RegistrationSubmissionRepository {
@@ -37,7 +37,7 @@ trait RegistrationSubmissionRepository {
 
   def setDraft(uiState: RegistrationSubmissionDraft): Future[Boolean]
 
-  def getRecentDrafts(internalId: String, affinityGroup: AffinityGroup): Future[List[RegistrationSubmissionDraft]]
+  def getRecentDrafts(internalId: String, affinityGroup: AffinityGroup): Future[Seq[RegistrationSubmissionDraft]]
 
   def removeDraft(draftId: String, internalId: String): Future[Boolean]
 
@@ -45,113 +45,112 @@ trait RegistrationSubmissionRepository {
 }
 
 class RegistrationSubmissionRepositoryImpl @Inject()(
-                                                      mongo: MongoDriver,
+                                                      mongoComponent: MongoComponent,
                                                       config: AppConfig
-                                                    )(implicit ec: ExecutionContext) extends RegistrationSubmissionRepository with Logging {
+                                                    )(implicit ec: ExecutionContext) extends
+  PlayMongoRepository[RegistrationSubmissionDraftDB](
+    mongoComponent = mongoComponent,
+    collectionName = "registration-submissions",
+    domainFormat = Format(RegistrationSubmissionDraftDB.reads, RegistrationSubmissionDraftDB.writes),
+    indexes = Seq(
+      IndexModel(
+        Indexes.ascending("createdAt"),
+        IndexOptions().name("ui-state-created-at-index").expireAfter(config.registrationTtlInSeconds, TimeUnit.SECONDS)
+      ),
+      IndexModel(
+        Indexes.ascending("draftId"),
+        IndexOptions().name("draft-id-index")
+      ),
+      IndexModel(
+        Indexes.ascending("internalId"),
+        IndexOptions().name("internal-id-index")
+      )
+    )
+  ) with
+  RegistrationSubmissionRepository with Logging {
 
-  private val collectionName: String = "registration-submissions"
+  private def convertFromDBModel(dbModel: RegistrationSubmissionDraftDB): RegistrationSubmissionDraft = {
+    RegistrationSubmissionDraft(
+      draftId = dbModel.draftId,
+      internalId = dbModel.internalId,
+      createdAt = dbModel.createdAt,
+      draftData = dbModel.draftData,
+      reference = dbModel.reference,
+      inProgress = dbModel.inProgress
+    )
+  }
 
-  private val cacheTtl = config.registrationTtlInSeconds
-
-  private def collection: Future[JSONCollection] =
-    for {
-      _ <- ensureIndexes
-      res <- Future.successful(mongo.api.collection[JSONCollection](collectionName))
-    } yield res
-
-  private val createdAtIndex = Index(
-    key = Seq("createdAt" -> IndexType.Ascending),
-    name = Some("ui-state-created-at-index"),
-    options = BSONDocument("expireAfterSeconds" -> cacheTtl)
-  )
-
-  private val draftIdIndex = Index(
-    key = Seq("draftId" -> IndexType.Ascending),
-    name = Some("draft-id-index")
-  )
-
-  private val internalIdIndex = Index(
-    key = Seq("internalId" -> IndexType.Ascending),
-    name = Some("internal-id-index")
-  )
-
-  private lazy val ensureIndexes = {
-    logger.info("[RegistrationSubmissionRepository][ensureIndexes] Ensuring collection indexes")
-    for {
-      collection <- Future.successful(mongo.api.collection[JSONCollection](collectionName))
-      createdCreatedIndex <- collection.indexesManager.ensure(createdAtIndex)
-      createdIdIndex <- collection.indexesManager.ensure(draftIdIndex)
-      createdInternalIdIndex <- collection.indexesManager.ensure(internalIdIndex)
-    } yield createdCreatedIndex && createdIdIndex && createdInternalIdIndex
+  private def convertToDBModel(ogModel: RegistrationSubmissionDraft): RegistrationSubmissionDraftDB = {
+    RegistrationSubmissionDraftDB(
+      draftId = ogModel.draftId,
+      internalId = ogModel.internalId,
+      createdAt = ogModel.createdAt,
+      draftData = ogModel.draftData,
+      reference = ogModel.reference,
+      inProgress = ogModel.inProgress
+    )
   }
 
   override def setDraft(uiState: RegistrationSubmissionDraft): Future[Boolean] = {
 
-    val selector = Json.obj(
-      "draftId" -> uiState.draftId,
-      "internalId" -> uiState.internalId
+    val selector = and(
+      equal("draftId",  uiState.draftId),
+      equal("internalId", uiState.internalId)
     )
 
-    val modifier = Json.obj(
-      "$set" -> uiState
-    )
+    val updateOptions = new ReplaceOptions().upsert(true)
 
-    collection.flatMap {
-      _.update(ordered = false).one(selector, modifier, upsert = true).map {
-        lastError =>
-          lastError.ok
-      }
+    collection.replaceOne(selector, convertToDBModel(uiState), updateOptions).toFutureOption().map {
+      case Some(_) => true
+      case None => false
     }
   }
 
   override def getDraft(draftId: String, internalId: String): Future[Option[RegistrationSubmissionDraft]] = {
-    val selector = Json.obj(
-      "draftId" -> draftId,
-      "internalId" -> internalId
+    val selector = and(
+      equal("draftId", draftId),
+      equal("internalId", internalId)
     )
 
-    collection.flatMap(_.find(
-      selector = selector, None).one[RegistrationSubmissionDraft])
+    collection.find(selector).first().toFutureOption().map{
+      optModel => optModel.map(convertFromDBModel)
+    }
   }
 
-  override def getRecentDrafts(internalId: String, affinityGroup: AffinityGroup): Future[List[RegistrationSubmissionDraft]] = {
-    val maxDocs = if (affinityGroup == Organisation) 1 else -1
+  override def getRecentDrafts(internalId: String, affinityGroup: AffinityGroup): Future[Seq[RegistrationSubmissionDraft]] = {
+    val maxDocs = if (affinityGroup == Organisation) 1 else Int.MaxValue
 
-    val selector = Json.obj(
-      "internalId" -> internalId,
-      "inProgress" -> Json.obj("$eq" -> true)
+    val selector = and(
+      equal("internalId", internalId),
+      equal("inProgress", true)
     )
 
-    collection.flatMap(_.find(
-      selector = selector, projection = None)
-      .sort(Json.obj("createdAt" -> -1))
-      .cursor[RegistrationSubmissionDraft]()
-      .collect[List](maxDocs, Cursor.FailOnError[List[RegistrationSubmissionDraft]]()))
+    val sort = Sorts.descending("createdAt")
+
+    collection.find(selector).sort(sort).limit(maxDocs).toFuture().map{
+      seq => seq.map(convertFromDBModel)
+    }
   }
 
   override def removeDraft(draftId: String, internalId: String): Future[Boolean] = {
-    val selector = Json.obj(
-      "draftId" -> draftId,
-      "internalId" -> internalId
+    val selector = and(
+      equal("draftId", draftId),
+      equal("internalId", internalId)
     )
-
-    collection.flatMap(_.delete().one(selector)).map(_.ok)
+    collection.deleteOne(selector).toFuture().map(_.wasAcknowledged())
   }
 
   /**
    * All registration submissions will be deleted from mongo on the 30th April
    * This is so that we don't have any lingering 4MLD draft registrations when we switch on 5MLD
    */
-  def removeAllDrafts(): Future[Boolean] = for {
-    collection <- Future.successful(mongo.api.collection[JSONCollection](collectionName))
-    result <- if (config.removeSavedRegistrations) {
-      logger.info("[RegistrationSubmissionRepository][removeAllDrafts] Removing all registration submissions.")
-      collection.delete().one(Json.obj(), None).map(_.ok)
+  def removeAllDrafts(): Future[Boolean] =
+    if(config.removeSavedRegistrations) {
+      collection.deleteMany(empty()).toFuture().map { deleteResult =>
+        logger.info("[RegistrationSubmissionRepository][removeAllDrafts] Removing all registration submissions.")
+        deleteResult.wasAcknowledged()
+      }
     } else {
       Future.successful(true)
     }
-  } yield result
-
-  final val removeRegistrationSubmissions = removeAllDrafts()
-
 }

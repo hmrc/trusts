@@ -5,6 +5,7 @@ import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.mongodb.scala.Document
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.mockito.MockitoSugar
@@ -12,7 +13,7 @@ import play.api.inject.bind
 import play.api.libs.json.{JsBoolean, JsString, JsValue, Json}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
-import repositories.TransformationRepository
+import repositories.{TransformationRepository, TransformationRepositoryImpl}
 import transformers.trustdetails.SetTrustDetailTransform
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
@@ -41,9 +42,11 @@ class SetTrustDetailsSpec extends AsyncFreeSpec with MockitoSugar with Integrati
 
     "must add series of transforms" - {
 
-      "when migrating" in assertMongoTest(application) { app =>
+      "when migrating" in {
 
-        val repository = app.injector.instanceOf[TransformationRepository]
+        val repository = application.injector.instanceOf[TransformationRepositoryImpl]
+        await(repository.collection.deleteMany(filter = Document()).toFuture())
+        await(repository.ensureIndexes)
 
         val identifier: String = "NTTRUST00000001"
 
@@ -71,7 +74,7 @@ class SetTrustDetailsSpec extends AsyncFreeSpec with MockitoSugar with Integrati
           .withBody(body)
           .withHeaders(CONTENT_TYPE -> "application/json")
 
-        val setValueResponse = route(app, setValueRequest).get
+        val setValueResponse = route(application, setValueRequest).get
         status(setValueResponse) mustBe OK
 
         whenReady(repository.get(identifier, "id", sessionId)) { transforms =>
@@ -89,9 +92,11 @@ class SetTrustDetailsSpec extends AsyncFreeSpec with MockitoSugar with Integrati
         }
       }
 
-      "when not migrating" in assertMongoTest(application) { app =>
+      "when not migrating" in {
 
-        val repository = app.injector.instanceOf[TransformationRepository]
+        val repository = application.injector.instanceOf[TransformationRepositoryImpl]
+        await(repository.collection.deleteMany(filter = Document()).toFuture())
+        await(repository.ensureIndexes)
 
         val identifier: String = "0123456789"
 
@@ -109,7 +114,7 @@ class SetTrustDetailsSpec extends AsyncFreeSpec with MockitoSugar with Integrati
           .withBody(body)
           .withHeaders(CONTENT_TYPE -> "application/json")
 
-        val setValueResponse = route(app, setValueRequest).get
+        val setValueResponse = route(application, setValueRequest).get
         status(setValueResponse) mustBe OK
 
         whenReady(repository.get(identifier, "id", sessionId)) { transforms =>

@@ -21,6 +21,7 @@ import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.mongodb.scala.Document
 import org.scalatest.Assertion
 import org.scalatest.matchers.must.Matchers._
 import org.scalatest.freespec.AsyncFreeSpec
@@ -30,6 +31,7 @@ import play.api.inject.bind
 import play.api.libs.json.{JsArray, JsValue, Json}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
+import repositories.TransformationRepositoryImpl
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
 import utils.JsonUtils
@@ -54,12 +56,24 @@ class AddTrusteeSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTes
         )
         .build()
 
-    "must return amended data in a subsequent 'get' call with provisional flags" in assertMongoTest(application) { application =>
-      runTest("5174384721", application)
+    val repository = application.injector.instanceOf[TransformationRepositoryImpl]
+
+    def dropDB(): Unit = {
+      await(repository.collection.deleteMany(filter = Document()).toFuture())
+      await(repository.ensureIndexes)
+    }
+
+    "must return amended data in a subsequent 'get' call with provisional flags, for identifier '5174384721'" in {
+      runTest("0123456789ABCDE", application)
+    }
+
+    "must return amended data in a subsequent 'get' call with provisional flags, for identifier '0123456789ABCDE'" in {
       runTest("0123456789ABCDE", application)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {
+      dropDB()
+
       // Ensure passes schema
       val result = route(application, FakeRequest(GET, s"/trusts/trustees/$identifier/transformed/trustee")).get
       status(result) mustBe OK

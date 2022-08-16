@@ -21,6 +21,7 @@ import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.mongodb.scala.Document
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.Assertion
 import org.scalatest.matchers.must.Matchers._
@@ -30,6 +31,7 @@ import play.api.inject.bind
 import play.api.libs.json.JsValue
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
+import repositories.TransformationRepositoryImpl
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
 import utils.JsonUtils
@@ -38,10 +40,10 @@ import scala.concurrent.Future
 
 class AddBusinessSettlorSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTestBase {
 
-  lazy val getTrustResponse: GetTrustSuccessResponse =
+  private lazy val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
-  lazy val expectedInitialGetJson: JsValue =
+  private lazy val expectedInitialGetJson: JsValue =
     JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an add business settlor call" - {
@@ -72,12 +74,24 @@ class AddBusinessSettlorSpec extends AsyncFreeSpec with MockitoSugar with Integr
       )
       .build()
 
-    "must return add data in a subsequent 'get' call with a UTR" in assertMongoTest(application) { application =>
+    val repository = application.injector.instanceOf[TransformationRepositoryImpl]
+
+    def dropDB(): Unit = {
+      await(repository.collection.deleteMany(filter = Document()).toFuture())
+      await(repository.ensureIndexes)
+    }
+
+    "must return add data in a subsequent 'get' call with a UTR, for identifier '5465416546'" in {
       runTest("5465416546", application)
+    }
+
+    "must return add data in a subsequent 'get' call with a URN, for identifier '0123456789ABCDE'" in {
       runTest("0123456789ABCDE", application)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {
+      dropDB()
+
       val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(result) mustBe OK
       contentAsJson(result) mustBe expectedInitialGetJson

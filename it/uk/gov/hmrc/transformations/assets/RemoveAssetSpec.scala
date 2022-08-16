@@ -21,6 +21,7 @@ import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.mongodb.scala.Document
 import org.scalatest.Assertion
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.must.Matchers._
@@ -30,6 +31,7 @@ import play.api.inject.bind
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
+import repositories.TransformationRepositoryImpl
 import transformers.remove.RemoveAsset
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
@@ -43,6 +45,7 @@ class RemoveAssetSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTe
   private val urn: String = "0123456789ABCDE"
 
   private def runTest(identifier: String, application: Application, assetType: String): Assertion = {
+    dropDB()
 
     val body: JsValue = Json.parse(
       s"""
@@ -85,12 +88,19 @@ class RemoveAssetSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTe
     ).build()
   }
 
+  private val repository = application.injector.instanceOf[TransformationRepositoryImpl]
+
+  private def dropDB(): Unit = {
+    await(repository.collection.deleteMany(filter = Document()).toFuture())
+    await(repository.ensureIndexes)
+  }
+
   "Remove asset" - {
-    "must return amended data in a subsequent 'get' call for each asset type" in assertMongoTest(application) { app =>
+    "must return amended data in a subsequent 'get' call for each asset type" in {
 
       for (assetType <- RemoveAsset.validAssetTypes) {
-        runTest(utr, app, assetType)
-        runTest(urn, app, assetType)
+        runTest(utr, application, assetType)
+        runTest(urn, application, assetType)
       }
 
       RemoveAsset.validAssetTypes.length mustBe 7

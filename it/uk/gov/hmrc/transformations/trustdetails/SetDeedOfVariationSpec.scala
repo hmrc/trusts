@@ -21,6 +21,7 @@ import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.mongodb.scala.Document
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.Assertion
 import org.scalatest.matchers.must.Matchers._
@@ -30,6 +31,7 @@ import play.api.inject.bind
 import play.api.libs.json.{JsString, JsValue}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
+import repositories.TransformationRepositoryImpl
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
 import utils.JsonUtils
@@ -53,12 +55,24 @@ class SetDeedOfVariationSpec extends AsyncFreeSpec with MockitoSugar with Integr
         bind[TrustsConnector].toInstance(stubbedTrustsConnector)
       ).build()
 
-    "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
+    val repository = application.injector.instanceOf[TransformationRepositoryImpl]
+
+    def dropDB(): Unit = {
+      await(repository.collection.deleteMany(filter = Document()).toFuture())
+      await(repository.ensureIndexes)
+    }
+
+    "must return amended data in a subsequent 'get' call, for identifier '0123456789'" in {
       runTest("0123456789", application)
+    }
+
+    "must return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in {
       runTest("0123456789ABCDE", application)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {
+      dropDB()
+
       val initialGetResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(initialGetResult) mustBe OK
 

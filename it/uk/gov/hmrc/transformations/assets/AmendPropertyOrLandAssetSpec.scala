@@ -21,9 +21,10 @@ import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
+import org.mongodb.scala.Document
+import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AsyncFreeSpec
-import org.scalatest.Assertion
 import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
@@ -31,6 +32,7 @@ import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers.{GET, contentAsJson, route, status, _}
 import play.api.test.{FakeRequest, Helpers}
+import repositories.TransformationRepositoryImpl
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
 import utils.{JsonUtils, NonTaxable5MLDFixtures}
@@ -39,12 +41,12 @@ import scala.concurrent.Future
 
 class AmendPropertyOrLandAssetSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTestBase with ScalaFutures {
 
-  lazy val getTrustResponse: GetTrustSuccessResponse =
+  private lazy val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromString(NonTaxable5MLDFixtures.DES.get5MLDTrustNonTaxableResponseWithAllAssetTypes).as[GetTrustSuccessResponse]
 
-  lazy val expectedInitialGetJson: JsValue = NonTaxable5MLDFixtures.Trusts.getTransformedNonTaxableTrustResponseWithAllAssetTypes
+  private lazy val expectedInitialGetJson: JsValue = NonTaxable5MLDFixtures.Trusts.getTransformedNonTaxableTrustResponseWithAllAssetTypes
 
-  lazy val expectedSubsequentGetJson: JsValue = JsonUtils.getJsonValueFromFile("5MLD/NonTaxable/transforms/assets/propertyorland/amend-after-etmp-call.json")
+  private lazy val expectedSubsequentGetJson: JsValue = JsonUtils.getJsonValueFromFile("5MLD/NonTaxable/transforms/assets/propertyorland/amend-after-etmp-call.json")
 
   "an amend property or land asset call" - {
 
@@ -64,12 +66,23 @@ class AmendPropertyOrLandAssetSpec extends AsyncFreeSpec with MockitoSugar with 
         bind[TrustsConnector].toInstance(mockTrustsConnector)
       ).build()
 
-    "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
+    val repository = application.injector.instanceOf[TransformationRepositoryImpl]
+
+    def dropDB(): Unit = {
+      await(repository.collection.deleteMany(filter = Document()).toFuture())
+      await(repository.ensureIndexes)
+    }
+
+    "must return amended data in a subsequent 'get' call, for identifier '0123456789'" in {
       runTest("0123456789", application)
+    }
+
+    "must return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in {
       runTest("0123456789ABCDE", application)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {
+      dropDB()
       val initialGetResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(initialGetResult) mustBe OK
       contentAsJson(initialGetResult) mustBe expectedInitialGetJson

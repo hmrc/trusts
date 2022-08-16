@@ -21,6 +21,7 @@ import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
+import org.mongodb.scala.Document
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.Assertion
@@ -31,6 +32,7 @@ import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers.{GET, contentAsJson, route, status, _}
 import play.api.test.{FakeRequest, Helpers}
+import repositories.TransformationRepositoryImpl
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
 import utils.JsonUtils
@@ -39,10 +41,10 @@ import scala.concurrent.Future
 
 class AmendLargeBeneficiarySpec extends AsyncFreeSpec with MockitoSugar with IntegrationTestBase with ScalaFutures {
 
-  val getTrustResponse: GetTrustSuccessResponse =
+  private val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
-  val expectedInitialGetJson: JsValue =
+  private val expectedInitialGetJson: JsValue =
     JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an amend large beneficiary call" - {
@@ -60,12 +62,24 @@ class AmendLargeBeneficiarySpec extends AsyncFreeSpec with MockitoSugar with Int
         )
         .build()
 
-    "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
+    val repository = application.injector.instanceOf[TransformationRepositoryImpl]
+
+    def dropDB(): Unit = {
+      await(repository.collection.deleteMany(filter = Document()).toFuture())
+      await(repository.ensureIndexes)
+    }
+
+    "must return amended data in a subsequent 'get' call, for identifier '5174384721'" in {
       runTest("5174384721", application)
+    }
+
+    "must return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in {
       runTest("0123456789ABCDE", application)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {
+      dropDB()
+
       val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(result) mustBe OK
       contentAsJson(result) mustBe expectedInitialGetJson

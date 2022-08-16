@@ -62,5 +62,4 @@ class SubmissionFailuresSpec extends ConnectorSpecHelper  {
 
   }
 
-
 }

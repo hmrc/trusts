@@ -18,10 +18,12 @@ package uk.gov.hmrc.repositories
 
 import models.NameType
 import models.variation.{AmendedLeadTrusteeIndType, IdentificationType, TrusteeIndividualType}
+import org.mongodb.scala.Document
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
-import repositories.TransformationRepository
+import play.api.test.Helpers.{await, defaultAwaitTimeout}
+import repositories.TransformationRepositoryImpl
 import transformers.ComposedDeltaTransform
 import transformers.trustees._
 import uk.gov.hmrc.itbase.IntegrationTestBase
@@ -30,20 +32,7 @@ import java.time.LocalDate
 
 class TransformRepositorySpec extends AsyncFreeSpec with IntegrationTestBase {
 
-  "a transform repository" - {
-
-    "must be able to store and retrieve a payload" in assertMongoTest(createApplication) { application =>
-
-      val repository = application.injector.instanceOf[TransformationRepository]
-
-      val storedOk = repository.set("UTRUTRUTR", "InternalId", "sessionId", data)
-      storedOk.futureValue mustBe true
-
-      val retrieved = repository.get("UTRUTRUTR", "InternalId", "sessionId")
-
-      retrieved.futureValue mustBe Some(data)
-    }
-  }
+  private val repository = createApplication.injector.instanceOf[TransformationRepositoryImpl]
 
   private val data: ComposedDeltaTransform = ComposedDeltaTransform(
     Seq(
@@ -82,4 +71,22 @@ class TransformRepositorySpec extends AsyncFreeSpec with IntegrationTestBase {
       )
     )
   )
+
+  private def dropDB(): Unit = {
+    await(repository.collection.deleteMany(filter = Document()).toFuture())
+    await(repository.ensureIndexes)
+  }
+
+  "a transform repository" - {
+
+    "must be able to store and retrieve a payload" in {
+      dropDB()
+
+      val storedOk = repository.set("UTRUTRUTR", "InternalId", "sessionId", data)
+      storedOk.futureValue mustBe true
+
+      val retrieved = repository.get("UTRUTRUTR", "InternalId", "sessionId")
+      retrieved.futureValue mustBe Some(data)
+    }
+  }
 }

@@ -17,20 +17,35 @@
 package repositories
 
 import config.AppConfig
+import org.mongodb.scala.model._
 import play.api.libs.json._
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CacheRepositoryImpl @Inject()(
-                                     mongo: MongoDriver,
+                                     mongo: MongoComponent,
                                      config: AppConfig
-                                   )(implicit ec: ExecutionContext) extends RepositoryManager(mongo, config) with CacheRepository {
+                                   )(implicit ec: ExecutionContext) extends PlayMongoRepository[JsValue](
+  mongoComponent = mongo,
+  collectionName = "trusts",
+  domainFormat = implicitly[Format[JsValue]],
+  indexes = Seq(
+    IndexModel(
+      Indexes.ascending("updatedAt"),
+      IndexOptions().name("etmp-data-updated-at-index").expireAfter(config.ttlInSeconds, TimeUnit.SECONDS).unique(false)
+    ),
+    IndexModel(
+      Indexes.ascending("id"),
+      IndexOptions().name("id-index").unique(false)
+    )
+  )
+) with RepositoryHelper[JsValue] with CacheRepository {
 
-  override val collectionName: String = "trusts"
-
-  override val lastUpdatedIndexName: String = "etmp-data-updated-at-index"
-
+  override implicit val executionContext: ExecutionContext = ec
   override val key: String = "etmpData"
 
   override def get(identifier: String, internalId: String, sessionId: String): Future[Option[JsValue]] = {
@@ -38,7 +53,7 @@ class CacheRepositoryImpl @Inject()(
   }
 
   override def set(identifier: String, internalId: String, sessionId: String, data: JsValue): Future[Boolean] = {
-    set[JsValue](identifier, internalId, sessionId, data)
+    upsert[JsValue](identifier, internalId, sessionId, data)
   }
 }
 
@@ -48,5 +63,5 @@ trait CacheRepository {
 
   def set(identifier: String, internalId: String, sessionId: String, data: JsValue): Future[Boolean]
 
-  def resetCache(identifier: String, internalId: String, sessionId: String): Future[Option[JsObject]]
+  def resetCache(identifier: String, internalId: String, sessionId: String): Future[Option[JsValue]]
 }
