@@ -108,6 +108,7 @@ case class RegistrationSubmissionDraft(draftId: String,
 
 object RegistrationSubmissionDraft {
 
+  //TODO - Ina - check if dates/time needs to be updated in mongo migration ticket
   implicit lazy val reads: Reads[RegistrationSubmissionDraft] = (
     (__ \ "draftId").read[String] and
       (__ \ "internalId").read[String] and
@@ -125,4 +126,6 @@ object RegistrationSubmissionDraft {
       (__ \ "reference").writeNullable[String] and
       (__ \ "inProgress").writeNullable[Boolean]
     ) (unlift(RegistrationSubmissionDraft.unapply))
+
+  implicit lazy val format: Format[RegistrationSubmissionDraft] = Format(reads, writes)
 }

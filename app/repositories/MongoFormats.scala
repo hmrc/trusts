@@ -16,17 +16,18 @@
 
 package repositories
 
-//import play.modules.reactivemongo.ReactiveMongoComponent
-//import uk.gov.hmrc.mongo.MongoComponent
-//import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
-//
-//import javax.inject.{Inject, Singleton}
+import play.api.libs.json._
 
-//@Singleton
-//class TrustsMongoDriver @Inject()(val component: MongoComponent) extends MongoDriver
-//
-//sealed trait MongoDriver {
-//  protected val component: MongoComponent
-//
-//  lazy val api: DB = component.mongoConnector.db()
-//}
+object MongoFormats {
+  implicit val booleanFormat: Format[Boolean] = new Format[Boolean]{
+    override def reads(json: JsValue): JsResult[Boolean] = json match {
+      case boolean: JsBoolean => JsSuccess(boolean.value)
+      case JsNumber(value) => if(value == 1) JsSuccess(true) else if(value == 0) JsSuccess(false) else JsError("cannot parse boolean")
+      case JsString(value) => JsSuccess(value.toBoolean)
+      case _ => JsError("cannot parse boolean")
+    }
+
+    override def writes(o: Boolean): JsValue = if(o) JsTrue else JsFalse
+  }
+
+}

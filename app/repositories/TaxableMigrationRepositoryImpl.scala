@@ -17,19 +17,36 @@
 package repositories
 
 import config.AppConfig
+import org.mongodb.scala.model._
+import play.api.libs.json.Format
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+import repositories.MongoFormats._
 
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class TaxableMigrationRepositoryImpl @Inject()(
-                                                mongo: MongoDriver,
+                                                mongo: MongoComponent,
                                                 config: AppConfig
-                                              )(implicit ec: ExecutionContext) extends RepositoryManager(mongo, config) with TaxableMigrationRepository {
+                                              )(implicit ec: ExecutionContext) extends PlayMongoRepository[Boolean](
+  mongoComponent = mongo,
+  collectionName = "taxable-migration",
+  domainFormat = booleanFormat,
+  indexes = Seq(
+    IndexModel(
+      Indexes.ascending("updatedAt"),
+      IndexOptions().name("taxable-migration-updated-at-index").expireAfter(config.ttlInSeconds, TimeUnit.SECONDS).unique(false)
+    ),
+    IndexModel(
+      Indexes.ascending("id"),
+      IndexOptions().name("id-index").unique(false)
+    )
+  )
+) with RepositoryHelper[Boolean] with TaxableMigrationRepository {
 
-  override val collectionName: String = "taxable-migration"
-
-  override val lastUpdatedIndexName: String = "taxable-migration-updated-at-index"
-
+  override implicit val executionContext: ExecutionContext = ec
   override val key: String = "migratingToTaxable"
 
   override def get(identifier: String, internalId: String, sessionId: String): Future[Option[Boolean]] = {
@@ -37,7 +54,7 @@ class TaxableMigrationRepositoryImpl @Inject()(
   }
 
   override def set(identifier: String, internalId: String, sessionId: String, migratingToTaxable: Boolean): Future[Boolean] = {
-    set[Boolean](identifier, internalId, sessionId, migratingToTaxable)
+    upsert[Boolean](identifier, internalId, sessionId, migratingToTaxable)
   }
 }
 

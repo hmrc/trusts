@@ -6,7 +6,7 @@ object AppDependencies {
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc"                   %% "simple-reactivemongo"       % "8.0.0-play-28",
+    "uk.gov.hmrc.mongo"             %% "hmrc-mongo-play-28"         % "0.70.0",
     "uk.gov.hmrc"                   %% "bootstrap-backend-play-28"  % "5.24.0",
     "com.github.java-json-tools"    % "json-schema-validator"       % "2.2.14",
     "uk.gov.hmrc"                   %% "tax-year"                   % "1.4.0",
@@ -14,6 +14,7 @@ object AppDependencies {
   )
 
   val test: Seq[ModuleID] = Seq(
+    "uk.gov.hmrc.mongo"             %% "hmrc-mongo-test-play-28"    % "0.70.0",
     "uk.gov.hmrc"                   %% "bootstrap-test-play-28"     % "5.24.0",
     "org.scalatest"                 %% "scalatest"                  % "3.2.9",
     "org.mockito"                   % "mockito-core"                % "3.11.2",
