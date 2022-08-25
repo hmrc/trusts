@@ -61,6 +61,7 @@ class SetTrustDetailsTransformSpec extends AnyFreeSpec {
             """
               |{
               |  "lawCountry": "FR",
+              |  "schedule3aExempt": true,
               |  "administrationCountry": "GB",
               |  "residentialStatus": {
               |    "nonUK": {
