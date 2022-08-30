@@ -123,7 +123,8 @@ case class TrustDetailsType(
                              trustUKProperty: Option[Boolean], // new 5MLD optional
                              trustRecorded: Option[Boolean], // new 5MLD required
                              trustUKRelation: Option[Boolean], // new 5MLD required
-                             settlorsUkBased: Option[Boolean] // requires pruning before submission
+                             settlorsUkBased: Option[Boolean], // requires pruning before submission,
+                             schedule3aExempt: Option[Boolean]
                            )
 
 object TrustDetailsType {
