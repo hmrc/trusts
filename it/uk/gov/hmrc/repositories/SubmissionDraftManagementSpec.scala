@@ -41,32 +41,32 @@ class SubmissionDraftManagementSpec extends AsyncFreeSpec with MockitoSugar with
 
   "working with submission drafts" - {
 
-    "must read an empty document" in assertMongoTest(createApplication) { application =>
+    "must read an empty document" in {
       // Initial empty
-      val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts")).get
+      val result = route(createApplication, FakeRequest(GET, "/trusts/register/submission-drafts")).get
       status(result) mustBe OK
       contentAsJson(result) mustBe Json.parse("[]")
     }
 
-    "must read non-existent draft" in assertMongoTest(createApplication) { application =>
+    "must read non-existent draft" in {
       // Read non-existent draft
-      val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/beneficiaries")).get
+      val result = route(createApplication, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/beneficiaries")).get
       status(result) mustBe NOT_FOUND
     }
 
-    "must create a draft section" in assertMongoTest(createApplication) { application =>
+    "must create a draft section" in {
       // Create draft section
       val draftRequestData = RegistrationSubmissionDraftData(draftData, None, None)
       val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/main")
         .withBody(Json.toJson(draftRequestData))
         .withHeaders(CONTENT_TYPE -> "application/json")
-      val result = route(application, request).get
+      val result = route(createApplication, request).get
       status(result) mustBe OK
     }
 
-    "must read a draft section" ignore assertMongoTest(createApplication) { application =>
+    "must read a draft section" ignore {
       // Read draft section
-      val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/main")).get
+      val result = route(createApplication, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/main")).get
       status(result) mustBe OK
 
       val json = contentAsJson(result)
@@ -77,19 +77,19 @@ class SubmissionDraftManagementSpec extends AsyncFreeSpec with MockitoSugar with
       assert(json.transform(referencePath.json.pick).isError)
     }
 
-    "must update a section" in assertMongoTest(createApplication) { application =>
+    "must update a section" in {
       // Update draft section
       val amendedDraftRequestData = RegistrationSubmissionDraftData(amendedDraftData, Some("amendedReference"), None)
       val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/main")
         .withBody(Json.toJson(amendedDraftRequestData))
         .withHeaders(CONTENT_TYPE -> "application/json")
-      val result = route(application, request).get
+      val result = route(createApplication, request).get
       status(result) mustBe OK
     }
 
-    "must read an amended section" ignore assertMongoTest(createApplication) { application =>
+    "must read an amended section" ignore {
       // Read amended draft section
-      val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/main")).get
+      val result = route(createApplication, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/main")).get
       status(result) mustBe OK
 
       val resultJson = contentAsJson(result)
@@ -97,9 +97,9 @@ class SubmissionDraftManagementSpec extends AsyncFreeSpec with MockitoSugar with
       resultJson.transform(referencePath.json.pick) mustBe JsSuccess(JsString("amendedReference"), referencePath)
     }
 
-    "must read all drafts" ignore assertMongoTest(createApplication) { application =>
+    "must read all drafts" ignore {
       // Read all drafts
-      val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts")).get
+      val result = route(createApplication, FakeRequest(GET, "/trusts/register/submission-drafts")).get
       status(result) mustBe OK
       val json = contentAsJson(result)
 
@@ -114,15 +114,15 @@ class SubmissionDraftManagementSpec extends AsyncFreeSpec with MockitoSugar with
       draft.transform(referencePath.json.pick) mustBe JsSuccess(JsString("amendedReference"), referencePath)
     }
 
-    "must delete a draft" in assertMongoTest(createApplication) { application =>
+    "must delete a draft" in {
       // Delete draft
-      val result = route(application, FakeRequest(DELETE, "/trusts/register/submission-drafts/Draft0001")).get
+      val result = route(createApplication, FakeRequest(DELETE, "/trusts/register/submission-drafts/Draft0001")).get
       status(result) mustBe OK
     }
 
-    "must read all empty drafts" in assertMongoTest(createApplication) { application =>
+    "must read all empty drafts" in {
       // Read all (empty) drafts
-      val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts")).get
+      val result = route(createApplication, FakeRequest(GET, "/trusts/register/submission-drafts")).get
       status(result) mustBe OK
       contentAsJson(result) mustBe Json.parse("[]")
     }

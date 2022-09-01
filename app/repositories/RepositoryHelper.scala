@@ -16,21 +16,15 @@
 
 package repositories
 
-import play.api.libs.json.{JsObject, Json, Reads, Writes}
-import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
-import com.mongodb.client.model.ReturnDocument
-import org.joda.time.{DateTime, DateTimeZone}
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.bson.conversions.Bson
-import org.mongodb.scala.model.Filters.{and, equal}
-import org.mongodb.scala.model.Updates.{combine, currentTimestamp, set}
-import org.mongodb.scala.model.{FindOneAndReplaceOptions, FindOneAndUpdateOptions, Updates}
-import uk.gov.hmrc.mongo.play.json.Codecs.{logger, toBson}
+import org.mongodb.scala.model.Filters.equal
+import org.mongodb.scala.model.FindOneAndUpdateOptions
+import org.mongodb.scala.model.Updates.{combine, set}
+import play.api.libs.json.{JsObject, Json, Reads, Writes}
+import uk.gov.hmrc.mongo.play.json.Codecs.toBson
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
-import uk.gov.hmrc.mongo.play.json.formats.MongoJodaFormats
 
-import java.sql.Timestamp
 import java.time.LocalDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -74,6 +68,6 @@ trait RepositoryHelper[T] {
     )
     val updateOptions = new FindOneAndUpdateOptions().upsert(true)
 
-    collection.findOneAndUpdate(selector(identifier, internalId, sessionId), modifier, updateOptions).toFutureOption().map(_.isDefined)
+    collection.findOneAndUpdate(selector(identifier, internalId, sessionId), modifier, updateOptions).toFutureOption().map(_ => true)
   }
 }

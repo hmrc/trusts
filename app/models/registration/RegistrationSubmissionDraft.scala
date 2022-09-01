@@ -16,9 +16,10 @@
 
 package models.registration
 
-import models.MongoDateTimeFormats
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.{localDateTimeFormat, localDateTimeReads, localDateTimeWrites}
+import uk.gov.hmrc.mongo.play.json.formats.MongoJodaFormats
 
 import java.time.LocalDateTime
 
@@ -108,11 +109,10 @@ case class RegistrationSubmissionDraft(draftId: String,
 
 object RegistrationSubmissionDraft {
 
-  //TODO - Ina - check if dates/time needs to be updated in mongo migration ticket
   implicit lazy val reads: Reads[RegistrationSubmissionDraft] = (
     (__ \ "draftId").read[String] and
       (__ \ "internalId").read[String] and
-      (__ \ "createdAt").read(MongoDateTimeFormats.localDateTimeRead) and
+      (__ \ "createdAt").read(localDateTimeReads) and
       (__ \ "draftData").read[JsValue] and
       (__ \ "reference").readNullable[String] and
       (__ \ "inProgress").readNullable[Boolean]
@@ -121,7 +121,7 @@ object RegistrationSubmissionDraft {
   implicit lazy val writes: OWrites[RegistrationSubmissionDraft] = (
     (__ \ "draftId").write[String] and
       (__ \ "internalId").write[String] and
-      (__ \ "createdAt").write(MongoDateTimeFormats.localDateTimeWrite) and
+      (__ \ "createdAt").write(localDateTimeWrites) and
       (__ \ "draftData").write[JsValue] and
       (__ \ "reference").writeNullable[String] and
       (__ \ "inProgress").writeNullable[Boolean]

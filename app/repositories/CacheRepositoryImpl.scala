@@ -21,7 +21,6 @@ import org.mongodb.scala.model._
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
-import repositories.MongoFormats._
 
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -30,10 +29,10 @@ import scala.concurrent.{ExecutionContext, Future}
 class CacheRepositoryImpl @Inject()(
                                      mongo: MongoComponent,
                                      config: AppConfig
-                                   )(implicit ec: ExecutionContext, reads: Reads[JsValue], writes: Writes[JsValue]) extends PlayMongoRepository[JsValue](
+                                   )(implicit ec: ExecutionContext) extends PlayMongoRepository[JsValue](
   mongoComponent = mongo,
   collectionName = "trusts",
-  domainFormat = Format(reads, writes), //TODO - INA - change this implementation
+  domainFormat = implicitly[Format[JsValue]],
   indexes = Seq(
     IndexModel(
       Indexes.ascending("updatedAt"),

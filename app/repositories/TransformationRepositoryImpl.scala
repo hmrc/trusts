@@ -18,7 +18,6 @@ package repositories
 
 import config.AppConfig
 import org.mongodb.scala.model.{IndexModel, IndexOptions, Indexes}
-import play.api.libs.json._
 import transformers.ComposedDeltaTransform
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository

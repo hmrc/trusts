@@ -18,10 +18,9 @@ package repositories
 
 import config.AppConfig
 import org.mongodb.scala.model._
-import play.api.libs.json.Format
+import repositories.MongoFormats._
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
-import repositories.MongoFormats._
 
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject

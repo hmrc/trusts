@@ -16,18 +16,26 @@
 
 package uk.gov.hmrc.repositories
 
+import org.mongodb.scala.Document
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.must.Matchers._
-import repositories.TaxableMigrationRepository
+import play.api.test.Helpers.{await, defaultAwaitTimeout}
+import repositories.TaxableMigrationRepositoryImpl
 import uk.gov.hmrc.itbase.IntegrationTestBase
 
 class TaxableMigrationRepositorySpec extends AsyncFreeSpec with IntegrationTestBase {
 
+  private val repository = createApplication.injector.instanceOf[TaxableMigrationRepositoryImpl]
+
+  private def dropDB(): Unit = {
+    await(repository.collection.deleteMany(filter = Document()).toFuture())
+    await(repository.ensureIndexes)
+  }
+
   "TaxableMigrationRepository" - {
 
-    "must be able to store and retrieve a boolean" in assertMongoTest(createApplication) { application =>
-
-      val repository = application.injector.instanceOf[TaxableMigrationRepository]
+    "must be able to store and retrieve a boolean" in {
+      dropDB()
 
       val migratingToTaxable = true
 

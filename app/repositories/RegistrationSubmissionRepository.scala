@@ -16,25 +16,18 @@
 
 package repositories
 
-import com.mongodb.client.model.Indexes.ascending
-
-import javax.inject.Inject
+import config.AppConfig
+import models.registration.RegistrationSubmissionDraft
+import org.mongodb.scala.model.Filters.{and, empty, equal}
+import org.mongodb.scala.model._
 import play.api.Logging
-import play.api.libs.json._
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
-import config.AppConfig
-import models.registration.{RegistrationSubmissionDraft, RegistrationSubmissionDraftData}
-import org.mongodb.scala.MongoCollection
-import org.mongodb.scala.model.Updates.{combine, set}
-import org.mongodb.scala.model._
 import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.play.json.Codecs.toBson
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
-import org.mongodb.scala.model.Filters.{and, empty, equal}
 
-import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 trait RegistrationSubmissionRepository {
@@ -84,7 +77,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
 
     val updateOptions = new FindOneAndReplaceOptions().upsert(true)
 
-    collection.findOneAndReplace(selector, uiState, updateOptions).toFutureOption().map(_.isDefined)
+    collection.findOneAndReplace(selector, uiState, updateOptions).toFutureOption().map(_ => true)
   }
 
   override def getDraft(draftId: String, internalId: String): Future[Option[RegistrationSubmissionDraft]] = {
@@ -97,7 +90,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
   }
 
   override def getRecentDrafts(internalId: String, affinityGroup: AffinityGroup): Future[Seq[RegistrationSubmissionDraft]] = {
-    val maxDocs = if (affinityGroup == Organisation) 1 else -1 //TODO - make sure this method returns all the documents when affinityGroup is not organisation. If it doesn't work, use Int.MaxValue
+    val maxDocs = if (affinityGroup == Organisation) 1 else Int.MaxValue
 
     val selector = and(
       equal("internalId", internalId),
@@ -123,7 +116,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
    */
   def removeAllDrafts(): Future[Boolean] =
     if(config.removeSavedRegistrations) {
-      collection.deleteOne(empty()).toFuture().map { deleteResult =>
+      collection.deleteMany(empty()).toFuture().map { deleteResult =>
         logger.info("[RegistrationSubmissionRepository][removeAllDrafts] Removing all registration submissions.")
         deleteResult.wasAcknowledged()
       }
