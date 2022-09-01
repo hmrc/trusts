@@ -24,7 +24,8 @@ import java.time.LocalDate
 case class NonMigratingTrustDetails(trustUKProperty: Boolean,
                                     trustRecorded: Boolean,
                                     trustUKRelation: Option[Boolean],
-                                    trustUKResident: Boolean)
+                                    trustUKResident: Boolean,
+                                    schedule3aExempt: Option[Boolean] = None)
 
 object NonMigratingTrustDetails {
   implicit val format: Format[NonMigratingTrustDetails] = Json.format[NonMigratingTrustDetails]

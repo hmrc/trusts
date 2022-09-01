@@ -35,7 +35,7 @@ case class SetTrustDetailsTransform(value: JsValue,
       val fields = if (migratingFromNonTaxableToTaxable) {
         Seq(LAW_COUNTRY, RESIDENTIAL_STATUS, UK_RELATION, DEED_OF_VARIATION, INTER_VIVOS, EFRBS_START_DATE)
       } else {
-        Seq(UK_RELATION)
+        Seq(UK_RELATION, SCHEDULE_3A_EXEMPT)
       }
       removeJsValueFields(existingTrustDetails, fields)
     }
