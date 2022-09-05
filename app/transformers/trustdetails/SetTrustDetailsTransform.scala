@@ -33,7 +33,7 @@ case class SetTrustDetailsTransform(value: JsValue,
      */
     def pruneOptionalFields(existingTrustDetails: JsValue): JsValue = {
       val fields = if (migratingFromNonTaxableToTaxable) {
-        Seq(LAW_COUNTRY, RESIDENTIAL_STATUS, UK_RELATION, DEED_OF_VARIATION, INTER_VIVOS, EFRBS_START_DATE)
+        Seq(LAW_COUNTRY, SCHEDULE_3A_EXEMPT, RESIDENTIAL_STATUS, UK_RELATION, DEED_OF_VARIATION, INTER_VIVOS, EFRBS_START_DATE)
       } else {
         Seq(UK_RELATION, SCHEDULE_3A_EXEMPT)
       }

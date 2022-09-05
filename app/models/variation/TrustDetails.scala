@@ -42,7 +42,8 @@ case class MigratingTrustDetails(lawCountry: Option[String],
                                  deedOfVariation: Option[String],
                                  interVivos: Option[Boolean],
                                  efrbsStartDate: Option[LocalDate],
-                                 settlorsUkBased: Option[Boolean] = None)
+                                 settlorsUkBased: Option[Boolean] = None,
+                                 schedule3aExempt: Option[Boolean] = None)
 
 object MigratingTrustDetails {
   implicit val format: Format[MigratingTrustDetails] = Json.format[MigratingTrustDetails]

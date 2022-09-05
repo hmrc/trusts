@@ -742,7 +742,9 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
             typeOfTrust = "Will Trust or Intestacy Trust",
             deedOfVariation = None,
             interVivos = None,
-            efrbsStartDate = None
+            efrbsStartDate = None,
+            settlorsUkBased = None,
+            schedule3aExempt = Some(true)
           ))
 
           val request = FakeRequest(PUT, "path")
