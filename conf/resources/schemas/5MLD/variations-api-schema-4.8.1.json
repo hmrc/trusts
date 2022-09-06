@@ -1204,6 +1204,9 @@
 				"trustUKResident": {
 					"$ref": "#/definitions/checkElement"
 				},
+				"schedule3aExempt": {
+					"$ref": "#/definitions/checkElement"
+				},
 				"trustRecorded": {
 					"$ref": "#/definitions/checkElement"
 				},

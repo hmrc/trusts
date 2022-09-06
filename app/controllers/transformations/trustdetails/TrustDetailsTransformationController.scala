@@ -43,6 +43,7 @@ class TrustDetailsTransformationController @Inject()(identify: IdentifierAction,
   def setProperty(identifier: String): Action[JsValue] = addNewTransform[Boolean](identifier, UK_PROPERTY)
   def setRecorded(identifier: String): Action[JsValue] = addNewTransform[Boolean](identifier, RECORDED)
   def setUKRelation(identifier: String): Action[JsValue] = addNewTransform[Boolean](identifier, UK_RELATION)
+  def setSchedule3aExempt(identifier: String): Action[JsValue] = addNewTransform[Boolean](identifier, SCHEDULE_3A_EXEMPT)
 
   def setLawCountry(identifier: String): Action[JsValue] = addNewTransform[String](identifier, LAW_COUNTRY)
   def setAdministrationCountry(identifier: String): Action[JsValue] = addNewTransform[String](identifier, ADMINISTRATION_COUNTRY)

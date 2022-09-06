@@ -4,6 +4,7 @@
       "details": {
         "startDate": "2001-01-01",
         "lawCountry": "FR",
+        "schedule3aExempt": true,
         "administrationCountry": "GB",
         "residentialStatus": {
           "nonUK": {

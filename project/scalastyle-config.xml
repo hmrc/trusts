@@ -1,0 +1,5 @@
+<check enabled="true" class="org.scalastyle.scalariform.NumberOfMethodsInTypeChecker" level="warning">
+    <parameters>
+        <parameter name="maxMethods">80</parameter>
+    </parameters>
+</check>
