@@ -31,9 +31,10 @@ import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
-import repositories.TransformationRepositoryImpl
+import repositories.{CacheRepositoryImpl, RegistrationSubmissionRepositoryImpl, TaxableMigrationRepositoryImpl, TransformationRepositoryImpl}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
+import uk.gov.hmrc.mongo.cache.CacheIdType
 import utils.{JsonUtils, NonTaxable5MLDFixtures}
 
 import scala.concurrent.Future
@@ -73,15 +74,18 @@ class AddBusinessAssetSpec extends AsyncFreeSpec with MockitoSugar with Integrat
       await(repository.ensureIndexes)
     }
 
-    "must return amended data in a subsequent 'get' call" in {
-
+    "must return amended data in a subsequent 'get' call (identifier length is 10)" in {
       runTest("0123456789", application)
+    }
+
+    "must return amended data in a subsequent 'get' call" in {
       runTest("0123456789ABCDE", application)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {
       dropDB()
       val initialGetResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
+      println("\n\n\n\n" + Console.BLUE + contentAsJson(initialGetResult) + "\n\n\n\n" + Console.RESET)
       status(initialGetResult) mustBe OK
       contentAsJson(initialGetResult) mustBe expectedInitialGetJson
 

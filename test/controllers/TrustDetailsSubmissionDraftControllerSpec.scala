@@ -52,7 +52,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       |{
       |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
       |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
-      |    "createdAt" : { "$date" : 1597323808000 },
+      |    "createdAt" : { "$date" : { "$numberLong": "1597323808000" } },
       |    "draftData" : {
       |        "taxLiability" : {
       |            "data" : {
@@ -140,7 +140,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       |{
       |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
       |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
-      |    "createdAt" : { "$date" : 1597323808000 },
+      |    "createdAt" : { "$date" : { "$numberLong": "1597323808000" } },
       |    "draftData" : {
       |        "trustDetails" : {
       |           "data": {
@@ -166,7 +166,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       |{
       |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
       |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
-      |    "createdAt" : { "$date" : 1597323808000 },
+      |    "createdAt" : { "$date" : { "$numberLong": "1597323808000" } },
       |    "draftData" : {
       |        "main" : {
       |            "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
@@ -202,7 +202,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
           |{
           |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
           |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
-          |    "createdAt" : { "$date" : 1597323808000 },
+          |    "createdAt" : { "$date" : { "$numberLong" : "1597323808000" } },
           |    "draftData" : {
           |       "main" : {
           |            "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
@@ -247,7 +247,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
           |{
           |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
           |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
-          |    "createdAt" : { "$date" : 1597323808000 },
+          |    "createdAt" : { "$date" : { "$numberLong": "1597323808000" } },
           |    "draftData" : {
           |       "main" : {
           |            "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
@@ -295,7 +295,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
           |{
           |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
           |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
-          |    "createdAt" : { "$date" : 1597323808000 },
+          |    "createdAt" : { "$date" : { "$numberLong": "1597323808000" } },
           |    "draftData" : {
           |       "main" : {
           |            "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
@@ -349,7 +349,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
           |{
           |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
           |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
-          |    "createdAt" : { "$date" : 1597323808000 },
+          |    "createdAt" : { "$date" : { "$numberLong" : "1597323808000" } },
           |    "draftData" : {
           |       "trustDetails": {
           |         "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
@@ -526,7 +526,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
           |{
           |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
           |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
-          |    "createdAt" : { "$date" : 1597323808000 },
+          |    "createdAt" : { "$date" : { "$numberLong" : "1597323808000" } },
           |    "draftData" : {
           |       "main" : {
           |            "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",

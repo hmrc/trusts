@@ -73,7 +73,7 @@ class AddMoneyAssetSpec extends AsyncFreeSpec with MockitoSugar with Integration
     }
 
     "must return amended data in a subsequent 'get' call" in {
-//      runTest("0123456789", application)
+      runTest("0123456789", application)
       runTest("0123456789ABCDE", application)
     }
 
@@ -83,18 +83,18 @@ class AddMoneyAssetSpec extends AsyncFreeSpec with MockitoSugar with Integration
       status(initialGetResult) mustBe OK
       contentAsJson(initialGetResult) mustBe expectedInitialGetJson
 
-//      (contentAsJson(initialGetResult) == expectedInitialGetJson) mustBe true
+      (contentAsJson(initialGetResult) == expectedInitialGetJson) mustBe true
 
-//      val addRequest = FakeRequest(POST, s"/trusts/assets/add-money/$identifier")
-//        .withBody(payload)
-//        .withHeaders(CONTENT_TYPE -> "application/json")
-//
-//      val addResult = route(application, addRequest).get
-//      status(addResult) mustBe OK
-//
-//      val subsequentGetResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
-//      status(subsequentGetResult) mustBe OK
-//      contentAsJson(subsequentGetResult) mustBe expectedSubsequentGetJson
+      val addRequest = FakeRequest(POST, s"/trusts/assets/add-money/$identifier")
+        .withBody(payload)
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val addResult = route(application, addRequest).get
+      status(addResult) mustBe OK
+
+      val subsequentGetResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
+      status(subsequentGetResult) mustBe OK
+      contentAsJson(subsequentGetResult) mustBe expectedSubsequentGetJson
     }
   }
 }

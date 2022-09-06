@@ -18,8 +18,7 @@ package models.registration
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.{localDateTimeFormat, localDateTimeReads, localDateTimeWrites}
-import uk.gov.hmrc.mongo.play.json.formats.MongoJodaFormats
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.{localDateTimeReads, localDateTimeWrites}
 
 import java.time.LocalDateTime
 
