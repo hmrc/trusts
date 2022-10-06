@@ -94,7 +94,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
   override def setDraft(uiState: RegistrationSubmissionDraft): Future[Boolean] = {
 
     val selector = and(
-      equal("draftId",  uiState.draftId),
+      equal("draftId", uiState.draftId),
       equal("internalId", uiState.internalId)
     )
 
@@ -112,7 +112,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
       equal("internalId", internalId)
     )
 
-    collection.find(selector).first().toFutureOption().map{
+    collection.find(selector).first().toFutureOption().map {
       optModel => optModel.map(convertFromDBModel)
     }
   }
@@ -127,7 +127,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
 
     val sort = Sorts.descending("createdAt")
 
-    collection.find(selector).sort(sort).limit(maxDocs).toFuture().map{
+    collection.find(selector).sort(sort).limit(maxDocs).toFuture().map {
       seq => seq.map(convertFromDBModel)
     }
   }
@@ -145,7 +145,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
    * This is so that we don't have any lingering 4MLD draft registrations when we switch on 5MLD
    */
   def removeAllDrafts(): Future[Boolean] =
-    if(config.removeSavedRegistrations) {
+    if (config.removeSavedRegistrations) {
       collection.deleteMany(empty()).toFuture().map { deleteResult =>
         logger.info("[RegistrationSubmissionRepository][removeAllDrafts] Removing all registration submissions.")
         deleteResult.wasAcknowledged()

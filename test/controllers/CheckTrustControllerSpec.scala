@@ -17,6 +17,9 @@
 package controllers
 
 import base.BaseSpec
+import controllers.actions.FakeIdentifierAction
+import models.existing_trust.ExistingCheckRequest
+import models.existing_trust.ExistingCheckResponse.{AlreadyRegistered, Matched, NotMatched, ServiceUnavailable}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatest.matchers.must.Matchers._
@@ -25,11 +28,8 @@ import play.api.libs.json.Json
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
-import controllers.actions.FakeIdentifierAction
-import models.existing_trust.ExistingCheckRequest
-import models.existing_trust.ExistingCheckResponse.{AlreadyRegistered, Matched, NotMatched, ServiceUnavailable}
 import services.{TrustsService, ValidationService}
+import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 
 import scala.concurrent.Future
 
@@ -57,7 +57,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
         status(result) mustBe OK
         (contentAsJson(result) \ "match").as[Boolean] mustBe true
       }
-      
+
       "trusts data match with existing trusts with postcode in lowercase. " in {
 
         val SUT = new CheckTrustController(mockTrustsService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))

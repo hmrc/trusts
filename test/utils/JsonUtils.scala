@@ -23,18 +23,18 @@ import scala.io.Source
 
 trait JsonUtils {
 
-  def getJsonFromFile(filename :String) :String = {
+  def getJsonFromFile(filename: String): String = {
     val source = Source.fromFile(getClass.getResource(s"/$filename").getPath)
     val jsonString = source.mkString
     source.close()
     jsonString
   }
 
-  def getJsonValueFromFile(filename:String) :JsValue = {
+  def getJsonValueFromFile(filename: String): JsValue = {
     Json.parse(getJsonFromFile(filename))
   }
 
-  def getJsonValueFromString(jsonString : String ):JsValue = {
+  def getJsonValueFromString(jsonString: String): JsValue = {
     Json.parse(jsonString)
   }
 

@@ -25,7 +25,7 @@ import play.api.libs.json.{JsObject, Json, Reads, Writes}
 import uk.gov.hmrc.mongo.play.json.Codecs.toBson
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.{ExecutionContext, Future}
 
 trait RepositoryHelper[T] {
@@ -34,7 +34,12 @@ trait RepositoryHelper[T] {
 
   val key: String
 
-  def get[T](identifier: String, internalId: String, sessionId: String)(implicit rds: Reads[T]): Future[Option[T]] = {
+  private def selector(identifier: String, internalId: String, sessionId: String): Bson =
+    equal("id", createKey(identifier, internalId, sessionId))
+
+  private def createKey(identifier: String, internalId: String, sessionId: String): String = s"$identifier-$internalId-$sessionId"
+
+  def getOpt(identifier: String, internalId: String, sessionId: String)(implicit rds: Reads[T]): Future[Option[T]] = {
     collection.find[BsonDocument](selector(identifier, internalId, sessionId)).headOption()
       .map(_.map(bsonDocument =>
         Json.parse(bsonDocument.toJson).as[JsObject])
@@ -42,29 +47,22 @@ trait RepositoryHelper[T] {
       )
   }
 
-  private def selector(identifier: String, internalId: String, sessionId: String): Bson =
-    equal("id", createKey(identifier, internalId, sessionId))
-
-  private def createKey(identifier: String, internalId: String, sessionId: String): String = s"$identifier-$internalId-$sessionId"
-
-
-  def resetCache(identifier: String, internalId: String, sessionId: String): Future[Option[T]] = {
-    collection.findOneAndDelete(selector(identifier, internalId, sessionId)).toFutureOption()
+  def resetCache(identifier: String, internalId: String, sessionId: String): Future[Boolean] = {
+    collection.deleteOne(selector(identifier, internalId, sessionId)).toFutureOption()
+      .map(_.exists(_.wasAcknowledged()))
   }
 
-  def upsert[T](identifier: String, internalId: String, sessionId: String, data: T)(implicit wts: Writes[T]): Future[Boolean] = {
+  def upsert(identifier: String, internalId: String, sessionId: String, data: T)(implicit wts: Writes[T]): Future[Boolean] = {
 
     val modifier = combine(
       set("id", toBson(createKey(identifier, internalId, sessionId))),
-      set("updatedAt", toBson(LocalDateTime.now())),
+      set("updatedAt", toBson(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli)),
       set(key, toBson(data))
     )
 
     val updateOptions = new UpdateOptions().upsert(true)
 
-    collection.updateOne(selector(identifier, internalId, sessionId), modifier, updateOptions).toFutureOption().map {
-      case Some(_) => true
-      case None => false
-    }
+    collection.updateOne(selector(identifier, internalId, sessionId), modifier, updateOptions).toFutureOption()
+      .map(_.isDefined)
   }
 }

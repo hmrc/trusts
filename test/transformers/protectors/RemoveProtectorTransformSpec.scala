@@ -35,13 +35,16 @@ import scala.concurrent.Future
 
 class RemoveProtectorTransformSpec extends AnyFreeSpec with ScalaFutures with MockitoSugar {
 
-  private def protectorJson(value1 : String, endDate: Option[LocalDate] = None, withLineNo: Boolean = true) = {
+  private def protectorJson(value1: String, endDate: Option[LocalDate] = None, withLineNo: Boolean = true) = {
     val a = Json.obj("field1" -> value1, "field2" -> "value20")
 
-    val b = if (endDate.isDefined) {a.deepMerge(Json.obj("entityEnd" -> endDate.get))
+    val b = if (endDate.isDefined) {
+      a.deepMerge(Json.obj("entityEnd" -> endDate.get))
     } else a
 
-    if (withLineNo) {b.deepMerge(Json.obj("lineNo" -> 12))}
+    if (withLineNo) {
+      b.deepMerge(Json.obj("lineNo" -> 12))
+    }
     else b
   }
 
@@ -57,7 +60,7 @@ class RemoveProtectorTransformSpec extends AnyFreeSpec with ScalaFutures with Mo
   "Remove Protector Transforms should round trip through JSON as part of Composed Transform" in {
     val OUT = ComposedDeltaTransform(Seq(
       RemoveProtectorTransform(Some(56), protectorJson("Blah Blah Blah"), LocalDate.of(1563, 10, 23), "protector"),
-      RemoveProtectorTransform(Some(12), protectorJson("Foo"), LocalDate.of(2317, 12, 21),  "protectorCompany")
+      RemoveProtectorTransform(Some(12), protectorJson("Foo"), LocalDate.of(2317, 12, 21), "protectorCompany")
     ))
 
     Json.toJson(OUT).validate[ComposedDeltaTransform] match {
@@ -132,7 +135,7 @@ class RemoveProtectorTransformSpec extends AnyFreeSpec with ScalaFutures with Mo
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value.transform(
-          (JsPath()  \ "details" \ "trust" \ "entities" \ "protectors" \ "protector"  ).json.pick).isError mustBe true
+          (JsPath() \ "details" \ "trust" \ "entities" \ "protectors" \ "protector").json.pick).isError mustBe true
         case _ => fail("Transform failed")
       }
     }

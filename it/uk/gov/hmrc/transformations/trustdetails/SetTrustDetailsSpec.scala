@@ -1,3 +1,19 @@
+/*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package uk.gov.hmrc.transformations.trustdetails
 
 import connector.TrustsConnector
@@ -6,14 +22,12 @@ import models.get_trust.GetTrustSuccessResponse
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.mongodb.scala.Document
-import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.must.Matchers._
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.libs.json.{JsBoolean, JsString, JsValue, Json}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
-import repositories.{TransformationRepository, TransformationRepositoryImpl}
+import repositories.TransformationRepositoryImpl
 import transformers.trustdetails.SetTrustDetailTransform
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
@@ -21,9 +35,9 @@ import utils.{JsonUtils, Session}
 
 import scala.concurrent.Future
 
-class SetTrustDetailsSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTestBase {
+class SetTrustDetailsSpec extends IntegrationTestBase {
 
-  "a set trust details call" - {
+  "a set trust details call" should {
 
     val getTrustResponse: JsValue = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json")
 
@@ -40,11 +54,12 @@ class SetTrustDetailsSpec extends AsyncFreeSpec with MockitoSugar with Integrati
 
     val sessionId: String = Session.id(hc)
 
-    "must add series of transforms" - {
+    "add series of transforms" should {
 
-      "when migrating" in {
+      "when migrating" in assertMongoTest(application) { app =>
 
-        val repository = application.injector.instanceOf[TransformationRepositoryImpl]
+        def repository = application.injector.instanceOf[TransformationRepositoryImpl]
+
         await(repository.collection.deleteMany(filter = Document()).toFuture())
         await(repository.ensureIndexes)
 
@@ -92,9 +107,10 @@ class SetTrustDetailsSpec extends AsyncFreeSpec with MockitoSugar with Integrati
         }
       }
 
-      "when not migrating" in {
+      "when not migrating" in assertMongoTest(application) { app =>
 
-        val repository = application.injector.instanceOf[TransformationRepositoryImpl]
+        def repository = application.injector.instanceOf[TransformationRepositoryImpl]
+
         await(repository.collection.deleteMany(filter = Document()).toFuture())
         await(repository.ensureIndexes)
 

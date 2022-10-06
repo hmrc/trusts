@@ -49,11 +49,11 @@ class CacheRepositoryImpl @Inject()(
   override val key: String = "etmpData"
 
   override def get(identifier: String, internalId: String, sessionId: String): Future[Option[JsValue]] = {
-    get[JsValue](identifier, internalId, sessionId)
+    getOpt(identifier, internalId, sessionId)
   }
 
   override def set(identifier: String, internalId: String, sessionId: String, data: JsValue): Future[Boolean] = {
-    upsert[JsValue](identifier, internalId, sessionId, data)
+    upsert(identifier, internalId, sessionId, data)
   }
 }
 
@@ -63,5 +63,5 @@ trait CacheRepository {
 
   def set(identifier: String, internalId: String, sessionId: String, data: JsValue): Future[Boolean]
 
-  def resetCache(identifier: String, internalId: String, sessionId: String): Future[Option[JsValue]]
+  def resetCache(identifier: String, internalId: String, sessionId: String): Future[Boolean]
 }

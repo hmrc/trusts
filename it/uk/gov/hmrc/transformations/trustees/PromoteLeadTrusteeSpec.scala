@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,17 +23,13 @@ import models.variation.{IdentificationType, LeadTrusteeIndType}
 import models.{AddressType, NameType}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.mongodb.scala.Document
-import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.Assertion
 import org.scalatest.matchers.must.Matchers._
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
-import repositories.TransformationRepositoryImpl
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
 import utils.JsonUtils
@@ -41,69 +37,60 @@ import utils.JsonUtils
 import java.time.LocalDate
 import scala.concurrent.Future
 
-class PromoteLeadTrusteeSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTestBase {
+class PromoteLeadTrusteeSpec extends IntegrationTestBase {
 
   val getTrustResponse: GetTrustSuccessResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
   val expectedInitialGetJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
-  "a promote lead trustee call" - {
+  "a promote lead trustee call" should {
 
-      val newTrusteeIndInfo = LeadTrusteeIndType(
-        lineNo = None,
-        bpMatchStatus = None,
-        name = NameType("John", Some("William"), "O'Connor"),
-        dateOfBirth = LocalDate.of(1965, 2, 10),
-        phoneNumber = "newPhone",
-        email = Some("newEmail"),
-        identification = IdentificationType(
-          Some("ST123456"),
+    val newTrusteeIndInfo = LeadTrusteeIndType(
+      lineNo = None,
+      bpMatchStatus = None,
+      name = NameType("John", Some("William"), "O'Connor"),
+      dateOfBirth = LocalDate.of(1965, 2, 10),
+      phoneNumber = "newPhone",
+      email = Some("newEmail"),
+      identification = IdentificationType(
+        Some("ST123456"),
+        None,
+        Some(AddressType(
+          "221B Baker Street",
+          "Suite 16",
+          Some("Newcastle upon Tyne"),
           None,
-          Some(AddressType(
-            "221B Baker Street",
-            "Suite 16",
-            Some("Newcastle upon Tyne"),
-            None,
-            Some("NE1 2LA"),
-            "GB"
-          )),
-          None),
-        countryOfResidence = None,
-        legallyIncapable = None,
-        nationality = None,
-        entityStart = LocalDate.of(2012, 2, 20),
-        entityEnd = None
+          Some("NE1 2LA"),
+          "GB"
+        )),
+        None),
+      countryOfResidence = None,
+      legallyIncapable = None,
+      nationality = None,
+      entityStart = LocalDate.of(2012, 2, 20),
+      entityEnd = None
+    )
+
+    val expectedGetAfterPromoteTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-promote-trustee.json")
+
+    val stubbedTrustsConnector = mock[TrustsConnector]
+    when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
+
+    def application = applicationBuilder
+      .overrides(
+        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[TrustsConnector].toInstance(stubbedTrustsConnector)
       )
+      .build()
 
-      val expectedGetAfterPromoteTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-promote-trustee.json")
+    "return amended data in a subsequent 'get' call, for identifier '5174384721'" in assertMongoTest(application)({ (app) =>
+      runTest("5174384721", app)
+    })
 
-      val stubbedTrustsConnector = mock[TrustsConnector]
-      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
-
-      val application = applicationBuilder
-        .overrides(
-          bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-          bind[TrustsConnector].toInstance(stubbedTrustsConnector)
-        )
-        .build()
-
-    val repository = application.injector.instanceOf[TransformationRepositoryImpl]
-
-    def dropDB(): Unit = {
-      await(repository.collection.deleteMany(filter = Document()).toFuture())
-      await(repository.ensureIndexes)
-    }
-
-    "must return amended data in a subsequent 'get' call, for identifier '5174384721'" in {
-      runTest("5174384721", application)
-    }
-
-    "must return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in {
-      runTest("0123456789ABCDE", application)
-    }
+    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application)({ (app) =>
+      runTest("0123456789ABCDE", app)
+    })
 
     def runTest(identifier: String, application: Application): Assertion = {
-      dropDB()
-
       val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(result) mustBe OK
       contentAsJson(result) mustBe expectedInitialGetJson

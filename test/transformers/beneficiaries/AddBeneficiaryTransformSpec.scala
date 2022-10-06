@@ -16,8 +16,8 @@
 
 package transformers.beneficiaries
 
-import models.{AddressType, NameType}
 import models.variation._
+import models.{AddressType, NameType}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json

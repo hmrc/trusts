@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,9 @@ import models.get_trust.GetTrustSuccessResponse
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.mongodb.scala.Document
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.Assertion
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.must.Matchers._
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
@@ -39,7 +37,7 @@ import utils.JsonUtils
 
 import scala.concurrent.Future
 
-class AmendDeceasedSettlorSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTestBase with ScalaFutures {
+class AmendDeceasedSettlorSpec extends IntegrationTestBase with ScalaFutures {
 
   private val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
@@ -47,34 +45,34 @@ class AmendDeceasedSettlorSpec extends AsyncFreeSpec with MockitoSugar with Inte
   private val expectedInitialGetJson: JsValue =
     JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
-  "an amend deceased settlor call" - {
+  "an amend deceased settlor call" should {
 
-      val expectedGetAfterAmendJson: JsValue =
-        JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-deceased-settlor.json")
+    val expectedGetAfterAmendJson: JsValue =
+      JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-deceased-settlor.json")
 
-      val stubbedTrustsConnector = mock[TrustsConnector]
-      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
+    val stubbedTrustsConnector = mock[TrustsConnector]
+    when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
 
-      val application = applicationBuilder
-        .overrides(
-          bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-          bind[TrustsConnector].toInstance(stubbedTrustsConnector)
-        )
-        .build()
+    def application = applicationBuilder
+      .overrides(
+        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[TrustsConnector].toInstance(stubbedTrustsConnector)
+      )
+      .build()
 
-    val repository = application.injector.instanceOf[TransformationRepositoryImpl]
+    def repository = application.injector.instanceOf[TransformationRepositoryImpl]
 
     def dropDB(): Unit = {
       await(repository.collection.deleteMany(filter = Document()).toFuture())
       await(repository.ensureIndexes)
     }
 
-    "must return amended data in a subsequent 'get' call, for identifier '5174384721'" in {
-      runTest("5174384721", application)
+    "return amended data in a subsequent 'get' call, for identifier '5174384721'" in assertMongoTest(application) { app =>
+      runTest("5174384721", app)
     }
 
-    "must return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in {
-      runTest("0123456789ABCDE", application)
+    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) { app =>
+      runTest("0123456789ABCDE", app)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {

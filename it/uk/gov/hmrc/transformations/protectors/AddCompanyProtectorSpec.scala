@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,8 @@ import models.get_trust.GetTrustSuccessResponse
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.mongodb.scala.Document
-import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.Assertion
 import org.scalatest.matchers.must.Matchers._
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
@@ -38,7 +36,7 @@ import utils.JsonUtils
 
 import scala.concurrent.Future
 
-class AddCompanyProtectorSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTestBase {
+class AddCompanyProtectorSpec extends IntegrationTestBase {
 
   private lazy val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
@@ -46,43 +44,43 @@ class AddCompanyProtectorSpec extends AsyncFreeSpec with MockitoSugar with Integ
   private lazy val expectedInitialGetJson: JsValue =
     JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
-  "an add company protector call" - {
+  "an add company protector call" should {
 
-      val newCompanyProtectorJson = Json.parse(
-        """
-          |{
-          | "entityStart": "2010-05-03",
-          | "name": "TestCompany"
-          |}
-          |""".stripMargin
+    val newCompanyProtectorJson = Json.parse(
+      """
+        |{
+        | "entityStart": "2010-05-03",
+        | "name": "TestCompany"
+        |}
+        |""".stripMargin
+    )
+
+    lazy val expectedGetAfterAddProtectorJson: JsValue =
+      JsonUtils.getJsonValueFromFile("add-company-protector-after-etmp-call.json")
+
+    val stubbedTrustsConnector = mock[TrustsConnector]
+    when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
+
+    def application = applicationBuilder
+      .overrides(
+        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[TrustsConnector].toInstance(stubbedTrustsConnector)
       )
+      .build()
 
-      lazy val expectedGetAfterAddProtectorJson: JsValue =
-        JsonUtils.getJsonValueFromFile("add-company-protector-after-etmp-call.json")
-
-      val stubbedTrustsConnector = mock[TrustsConnector]
-      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
-
-      val application = applicationBuilder
-        .overrides(
-          bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-          bind[TrustsConnector].toInstance(stubbedTrustsConnector)
-        )
-        .build()
-
-    val repository = application.injector.instanceOf[TransformationRepositoryImpl]
+    def repository = application.injector.instanceOf[TransformationRepositoryImpl]
 
     def dropDB(): Unit = {
       await(repository.collection.deleteMany(filter = Document()).toFuture())
       await(repository.ensureIndexes)
     }
 
-    "must return add data in a subsequent 'get' call, for identifier '5465416546'" in {
+    "return add data in a subsequent 'get' call, for identifier '5465416546'" in assertMongoTest(application) { app =>
       runTest("5465416546", application)
     }
 
-    "must return add data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in {
-      runTest("0123456789ABCDE", application)
+    "return add data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) { app =>
+      runTest("0123456789ABCDE", app)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {

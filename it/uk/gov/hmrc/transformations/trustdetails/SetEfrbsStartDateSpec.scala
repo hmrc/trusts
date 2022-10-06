@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,8 @@ import models.get_trust.GetTrustSuccessResponse
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.mongodb.scala.Document
-import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.Assertion
 import org.scalatest.matchers.must.Matchers._
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
@@ -39,36 +37,36 @@ import utils.JsonUtils
 import java.time.LocalDate
 import scala.concurrent.Future
 
-class SetEfrbsStartDateSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTestBase {
+class SetEfrbsStartDateSpec extends IntegrationTestBase {
 
-  "a set EFRBS start date call" - {
+  "a set EFRBS start date call" should {
 
-    val getTrustResponse : JsValue = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json")
+    val getTrustResponse: JsValue = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json")
 
     val stubbedTrustsConnector = mock[TrustsConnector]
 
     when(stubbedTrustsConnector.getTrustInfo(any()))
       .thenReturn(Future.successful(getTrustResponse.as[GetTrustSuccessResponse]))
 
-    val application = applicationBuilder
+    def application = applicationBuilder
       .overrides(
         bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(stubbedTrustsConnector)
       ).build()
 
-    val repository = application.injector.instanceOf[TransformationRepositoryImpl]
+    def repository = application.injector.instanceOf[TransformationRepositoryImpl]
 
     def dropDB(): Unit = {
       await(repository.collection.deleteMany(filter = Document()).toFuture())
       await(repository.ensureIndexes)
     }
 
-    "must return amended data in a subsequent 'get' call, for identifier '0123456789'" in {
-      runTest("0123456789", application)
+    "return amended data in a subsequent 'get' call, for identifier '0123456789'" in assertMongoTest(application) { app =>
+      runTest("0123456789", app)
     }
 
-    "must return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in {
-      runTest("0123456789ABCDE", application)
+    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) { app =>
+      runTest("0123456789ABCDE", app)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {

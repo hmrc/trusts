@@ -45,7 +45,7 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
-  
+
   private val utr: String = "utr"
   private val index: Int = 0
   private val endDate: LocalDate = LocalDate.parse("2021-01-01")
@@ -59,7 +59,7 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
 
     baseJson.as[JsObject](__.json.update(adder))
   }
-  
+
   "Amend settlor controller" - {
 
     "individual settlor" - {
@@ -274,7 +274,7 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
 
         status(result) mustBe OK
 
-          val transform = AmendSettlorTransform(None, Json.toJson(amendedSettlor), Json.toJson(originalSettlor), endDate, settlorType)
+        val transform = AmendSettlorTransform(None, Json.toJson(amendedSettlor), Json.toJson(originalSettlor), endDate, settlorType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())

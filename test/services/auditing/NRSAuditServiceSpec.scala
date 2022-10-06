@@ -20,14 +20,14 @@ import base.BaseSpec
 import models.auditing.NrsAuditEvent
 import models.nonRepudiation._
 import models.requests.CredentialData
-import java.time.{Instant, LocalDateTime}
-
 import org.mockito.ArgumentMatchers.{any, eq => equalTo}
 import org.mockito.Mockito.verify
 import play.api.libs.json.Json
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.auth.core.retrieve.LoginTimes
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+
+import java.time.{Instant, LocalDateTime}
 
 class NRSAuditServiceSpec extends BaseSpec {
 

@@ -38,13 +38,12 @@ import play.api.test.{FakeRequest, Helpers}
 import services.auditing.AuditService
 import services.{TaxYearService, TransformationService, TrustsService}
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import utils.NonTaxable5MLDFixtures.Cache.getTransformedNonTaxableTrustResponse
-import utils.{JsonFixtures, NonTaxable5MLDFixtures, RequiredEntityDetailsForMigration, Session, Taxable5MLDFixtures}
+import utils._
+
 import java.time.LocalDate
-
-import uk.gov.hmrc.http.HeaderCarrier
-
 import scala.concurrent.Future
 
 class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAndAfter
@@ -67,7 +66,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
 
   private val mockRequiredDetailsUtil: RequiredEntityDetailsForMigration = mock[RequiredEntityDetailsForMigration]
 
-  override def afterEach(): Unit =  {
+  override def afterEach(): Unit = {
     reset(
       mockedAuditService,
       trustsService,
@@ -110,7 +109,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
         when(trustsService.resetCache(any(), any(), any()))
           .thenReturn(Future.successful(()))
         when(transformationService.removeAllTransformations(any(), any(), any()))
-          .thenReturn(Future.successful(None))
+          .thenReturn(Future.successful(true))
         when(trustsService.getTrustInfo(any(), any(), any()))
           .thenReturn(Future.successful(response))
 
@@ -132,7 +131,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
         when(trustsService.resetCache(any(), any(), any()))
           .thenReturn(Future.successful(()))
         when(transformationService.removeAllTransformations(any(), any(), any()))
-          .thenReturn(Future.successful(None))
+          .thenReturn(Future.successful(true))
         when(trustsService.getTrustInfo(any(), any(), any()))
           .thenReturn(Future.successful(response))
 

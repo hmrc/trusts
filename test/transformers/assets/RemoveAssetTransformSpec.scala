@@ -37,12 +37,16 @@ import scala.concurrent.Future
 
 class RemoveAssetTransformSpec extends AnyFreeSpec with ScalaFutures with MockitoSugar {
 
-  private def assetJson(value1 : String, endDate: Option[LocalDate] = None, withLineNo: Boolean = true) = {
+  private def assetJson(value1: String, endDate: Option[LocalDate] = None, withLineNo: Boolean = true) = {
     val a = Json.obj("field1" -> value1, "field2" -> "value20")
 
-    val b = if (endDate.isDefined) {a.deepMerge(Json.obj("endDate" -> endDate.get))} else a
+    val b = if (endDate.isDefined) {
+      a.deepMerge(Json.obj("endDate" -> endDate.get))
+    } else a
 
-    if (withLineNo) {b.deepMerge(Json.obj("lineNo" -> 12))} else b
+    if (withLineNo) {
+      b.deepMerge(Json.obj("lineNo" -> 12))
+    } else b
   }
 
   private def buildInputJson(nonEeaBusinessAssetData: Seq[JsValue]) = {
@@ -62,7 +66,7 @@ class RemoveAssetTransformSpec extends AnyFreeSpec with ScalaFutures with Mockit
 
   "Remove asset transforms should round trip through JSON as part of Composed Transform" in {
     val OUT = ComposedDeltaTransform(Seq(
-      RemoveAssetTransform(Some(56), assetJson("Blah Blah Blah"), LocalDate.of(1563, 10, 23),"nonEEABusiness"),
+      RemoveAssetTransform(Some(56), assetJson("Blah Blah Blah"), LocalDate.of(1563, 10, 23), "nonEEABusiness"),
       RemoveAssetTransform(Some(12), assetJson("Foo"), LocalDate.of(2317, 12, 21), "nonEEABusiness")
     ))
 
@@ -121,7 +125,7 @@ class RemoveAssetTransformSpec extends AnyFreeSpec with ScalaFutures with Mockit
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value.transform(
-          (JsPath()  \ "details" \ "trust" \ "assets" \ "nonEEABusiness" ).json.pick).isError mustBe true
+          (JsPath() \ "details" \ "trust" \ "assets" \ "nonEEABusiness").json.pick).isError mustBe true
         case _ => fail("Transform failed")
       }
     }

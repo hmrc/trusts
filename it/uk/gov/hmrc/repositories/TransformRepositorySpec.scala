@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,8 @@ package uk.gov.hmrc.repositories
 
 import models.NameType
 import models.variation.{AmendedLeadTrusteeIndType, IdentificationType, TrusteeIndividualType}
-import org.mongodb.scala.Document
-import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
-import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import repositories.TransformationRepositoryImpl
 import transformers.ComposedDeltaTransform
 import transformers.trustees._
@@ -30,9 +27,7 @@ import uk.gov.hmrc.itbase.IntegrationTestBase
 
 import java.time.LocalDate
 
-class TransformRepositorySpec extends AsyncFreeSpec with IntegrationTestBase {
-
-  private val repository = createApplication.injector.instanceOf[TransformationRepositoryImpl]
+class TransformRepositorySpec extends IntegrationTestBase {
 
   private val data: ComposedDeltaTransform = ComposedDeltaTransform(
     Seq(
@@ -72,21 +67,16 @@ class TransformRepositorySpec extends AsyncFreeSpec with IntegrationTestBase {
     )
   )
 
-  private def dropDB(): Unit = {
-    await(repository.collection.deleteMany(filter = Document()).toFuture())
-    await(repository.ensureIndexes)
-  }
+  "a transform repository" should {
 
-  "a transform repository" - {
-
-    "must be able to store and retrieve a payload" in {
-      dropDB()
+    "be able to store and retrieve a payload" in assertMongoTest(createApplication)({ (app) =>
+      val repository = app.injector.instanceOf[TransformationRepositoryImpl]
 
       val storedOk = repository.set("UTRUTRUTR", "InternalId", "sessionId", data)
       storedOk.futureValue mustBe true
 
       val retrieved = repository.get("UTRUTRUTR", "InternalId", "sessionId")
       retrieved.futureValue mustBe Some(data)
-    }
+    })
   }
 }

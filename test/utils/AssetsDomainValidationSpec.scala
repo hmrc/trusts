@@ -20,7 +20,7 @@ import base.BaseSpec
 import models.Registration
 import org.scalatest.matchers.must.Matchers._
 
-class AssetsDomainValidationSpec  extends BaseSpec with DataExamples {
+class AssetsDomainValidationSpec extends BaseSpec with DataExamples {
   def SUT(registration: Registration) = new AssetsDomainValidation(registration)
 
   "valueFullIsNotMoreThanValueValuePrevious" should {
@@ -28,8 +28,8 @@ class AssetsDomainValidationSpec  extends BaseSpec with DataExamples {
       val heritageFundTrust = heritageFundWithValues(valueFull = "999999999998")
       val response = SUT(heritageFundTrust).valueFullIsNotMoreThanValuePrevious
       response.flatten.size mustBe 1
-      response.flatten.zipWithIndex.map{
-        case (error,index) =>
+      response.flatten.zipWithIndex.map {
+        case (error, index) =>
           error.message mustBe "Value full must be equal or more than value previous."
           error.location mustBe s"/trust/assets/propertyOrLand/${index}/valueFull"
       }

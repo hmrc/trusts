@@ -36,13 +36,16 @@ import scala.concurrent.Future
 
 class RemoveBeneficiaryTransformSpec extends AnyFreeSpec with ScalaFutures with MockitoSugar {
 
-  private def beneficiaryJson(value1 : String, endDate: Option[LocalDate] = None, withLineNo: Boolean = true) = {
+  private def beneficiaryJson(value1: String, endDate: Option[LocalDate] = None, withLineNo: Boolean = true) = {
     val a = Json.obj("field1" -> value1, "field2" -> "value20")
 
-    val b = if (endDate.isDefined) {a.deepMerge(Json.obj("entityEnd" -> endDate.get))
+    val b = if (endDate.isDefined) {
+      a.deepMerge(Json.obj("entityEnd" -> endDate.get))
     } else a
 
-    if (withLineNo) {b.deepMerge(Json.obj("lineNo" -> 12))}
+    if (withLineNo) {
+      b.deepMerge(Json.obj("lineNo" -> 12))
+    }
     else b
   }
 
@@ -58,7 +61,7 @@ class RemoveBeneficiaryTransformSpec extends AnyFreeSpec with ScalaFutures with 
   "Remove Beneficiary Transforms should round trip through JSON as part of Composed Transform" in {
     val OUT = ComposedDeltaTransform(Seq(
       RemoveBeneficiaryTransform(Some(56), beneficiaryJson("Blah Blah Blah"), LocalDate.of(1563, 10, 23), "unidentified"),
-      RemoveBeneficiaryTransform(Some(12), beneficiaryJson("Foo"), LocalDate.of(2317, 12, 21),  "individualDetails")
+      RemoveBeneficiaryTransform(Some(12), beneficiaryJson("Foo"), LocalDate.of(2317, 12, 21), "individualDetails")
     ))
 
     Json.toJson(OUT).validate[ComposedDeltaTransform] match {
@@ -130,7 +133,7 @@ class RemoveBeneficiaryTransformSpec extends AnyFreeSpec with ScalaFutures with 
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value.transform(
-          (JsPath()  \ "details" \ "trust" \ "entities" \ "beneficiary" \ "charity"  ).json.pick).isError mustBe true
+          (JsPath() \ "details" \ "trust" \ "entities" \ "beneficiary" \ "charity").json.pick).isError mustBe true
         case _ => fail("Transform failed")
       }
     }

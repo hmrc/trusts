@@ -45,7 +45,7 @@ class AmendBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
-  
+
   private val utr: String = "utr"
   private val index: Int = 0
   private val startDate: LocalDate = LocalDate.parse("2020-01-01")
@@ -60,7 +60,7 @@ class AmendBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with 
 
     baseJson.as[JsObject](__.json.update(adder))
   }
-  
+
   "Amend beneficiary controller" - {
 
     "unidentified beneficiary" - {

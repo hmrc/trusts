@@ -1,8 +1,9 @@
 import sbt.Keys.baseDirectory
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
+import uk.gov.hmrc.DefaultBuildSettings
 
-lazy val IntegrationTest = config("it") extend(Test)
+lazy val IntegrationTest = config("it") extend Test
 
 val appName = "trusts"
 
@@ -20,34 +21,28 @@ lazy val scoverageSettings = {
     "prod.*",
     "config.*",
     "testOnlyDoNotUseInAppConf.*",
-    "views.html.*",
     "testOnly.*",
     "com.kenshoo.play.metrics*.*",
-    ".*LocalDateService.*",
-    ".*LocalDateTimeService.*",
-    ".*RichJsValue.*",
-    ".*Repository.*"
+    ".*RichJsValue.*"
   )
 
   Seq(
     ScoverageKeys.coverageExcludedPackages := excludedPackages.mkString(";"),
-    ScoverageKeys.coverageMinimum := 80,
+    ScoverageKeys.coverageMinimumStmtTotal := 80,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true
   )
 }
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
+  .enablePlugins(SbtAutoBuildPlugin, play.sbt.PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(
-    scalaVersion := "2.12.12",
+    scalaVersion := "2.12.16",
     SilencerSettings(),
     majorVersion := 0,
     PlayKeys.playDefaultPort := 9782,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
-    dependencyOverrides ++= AppDependencies.overrides,
-    update / evictionWarningOptions := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     publishingSettings,
     Compile / unmanagedSourceDirectories += baseDirectory.value / "resources"
   )
@@ -55,26 +50,25 @@ lazy val microservice = Project(appName, file("."))
   .configs(IntegrationTest)
   .settings(inConfig(Test)(testSettings))
   .settings(inConfig(IntegrationTest)(itSettings): _*)
-  .settings(
-    resolvers += Resolver.jcenterRepo
-  )
 
 lazy val testSettings: Seq[Def.Setting[_]] = Seq(
-  fork        := true,
-  javaOptions ++= Seq(
+  parallelExecution            := false,
+  fork                         := true,
+  javaOptions                  ++= Seq(
     "-Dconfig.resource=test.application.conf",
     "-Dlogger.resource=logback-test.xml"
   )
 )
 
-
-lazy val itSettings = Defaults.itSettings ++ Seq(
+lazy val itSettings = DefaultBuildSettings.integrationTestSettings() ++ Seq(
   unmanagedSourceDirectories   := Seq(
     baseDirectory.value / "it"
   ),
   parallelExecution            := false,
   fork                         := true,
-  javaOptions ++= Seq(
+  javaOptions                  ++= Seq(
     "-Dlogger.resource=logback-test.xml"
   )
 )
+
+addCommandAlias("scalastyleAll", "all scalastyle test:scalastyle it:scalastyle")

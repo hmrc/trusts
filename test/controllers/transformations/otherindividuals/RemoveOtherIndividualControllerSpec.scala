@@ -45,7 +45,7 @@ class RemoveOtherIndividualControllerSpec extends AnyFreeSpec with MockitoSugar 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
-  
+
   private val utr: String = "utr"
   private val index: Int = 0
   private val endDate: LocalDate = LocalDate.parse("2018-02-24")
@@ -77,7 +77,7 @@ class RemoveOtherIndividualControllerSpec extends AnyFreeSpec with MockitoSugar 
     entityStart = LocalDate.parse("2010-05-03"),
     entityEnd = None
   )
-  
+
   "Remove other individual controller" - {
 
     "add a new remove transform" in {

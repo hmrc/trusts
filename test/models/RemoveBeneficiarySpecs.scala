@@ -16,12 +16,12 @@
 
 package models
 
-import org.scalatest.wordspec.AnyWordSpec
-
-import java.time.LocalDate
 import org.scalatest.matchers.must.Matchers._
+import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.{JsError, JsSuccess, Json}
 import transformers.remove.RemoveBeneficiary
+
+import java.time.LocalDate
 
 class RemoveBeneficiarySpecs extends AnyWordSpec {
   "Can round trip throuh Json" in {
@@ -53,7 +53,7 @@ class RemoveBeneficiarySpecs extends AnyWordSpec {
   }
 
   "Fail to deserialise" when {
-    "beneficiray type is not understood" in  {
+    "beneficiray type is not understood" in {
       val json = Json.obj(
         "type" -> "INVALID TYPE",
         "endDate" -> LocalDate.of(2019, 12, 31),

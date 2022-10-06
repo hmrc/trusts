@@ -48,11 +48,11 @@ class TransformationRepositoryImpl @Inject()(
   override val key: String = "transforms"
 
   override def get(identifier: String, internalId: String, sessionId: String): Future[Option[ComposedDeltaTransform]] = {
-    get[ComposedDeltaTransform](identifier, internalId, sessionId)
+    getOpt(identifier, internalId, sessionId)
   }
 
   override def set(identifier: String, internalId: String, sessionId: String, transforms: ComposedDeltaTransform): Future[Boolean] = {
-    upsert[ComposedDeltaTransform](identifier, internalId, sessionId, transforms)
+    upsert(identifier, internalId, sessionId, transforms)
   }
 }
 
@@ -62,5 +62,5 @@ trait TransformationRepository {
 
   def set(identifier: String, internalId: String, sessionId: String, transforms: ComposedDeltaTransform): Future[Boolean]
 
-  def resetCache(identifier: String, internalId: String, sessionId: String): Future[Option[ComposedDeltaTransform]]
+  def resetCache(identifier: String, internalId: String, sessionId: String): Future[Boolean]
 }

@@ -27,7 +27,7 @@ import java.time.LocalDate
 
 class AmendAssetTransformSpec extends AnyFreeSpec {
 
-  private val address =  AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "GB")
+  private val address = AddressType("Line 1", "Line 2", None, None, Some("NE11NE"), "GB")
 
   private val originalAsset: NonEEABusinessType = NonEEABusinessType(
     lineNo = Some("2"),

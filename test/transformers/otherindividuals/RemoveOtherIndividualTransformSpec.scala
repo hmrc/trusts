@@ -31,10 +31,13 @@ class RemoveOtherIndividualTransformSpec extends AnyFreeSpec with ScalaFutures w
   private def otherIndividualJson(endDate: Option[LocalDate] = None, withLineNo: Boolean = true) = {
     val a = Json.obj("field1" -> "value20")
 
-    val b = if (endDate.isDefined) {a.deepMerge(Json.obj("entityEnd" -> endDate.get))
+    val b = if (endDate.isDefined) {
+      a.deepMerge(Json.obj("entityEnd" -> endDate.get))
     } else a
 
-    if (withLineNo) {b.deepMerge(Json.obj("lineNo" -> 12))}
+    if (withLineNo) {
+      b.deepMerge(Json.obj("lineNo" -> 12))
+    }
     else b
   }
 
@@ -125,7 +128,7 @@ class RemoveOtherIndividualTransformSpec extends AnyFreeSpec with ScalaFutures w
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value.transform(
-          (JsPath()  \ "details" \ "trust" \ "entities" \ "otherIndividuals" \ "naturalPerson"  ).json.pick).isError mustBe true
+          (JsPath() \ "details" \ "trust" \ "entities" \ "otherIndividuals" \ "naturalPerson").json.pick).isError mustBe true
         case _ => fail("Transform failed")
       }
     }

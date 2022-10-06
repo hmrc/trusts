@@ -18,7 +18,7 @@ package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock.{badRequest, post, serverError, urlEqualTo}
 import connector.OrchestratorConnector
-import exceptions.{InternalServerErrorException, BadRequestException}
+import exceptions.{BadRequestException, InternalServerErrorException}
 import models.orchestrator.OrchestratorMigrationRequest
 import models.tax_enrolments.OrchestratorToTaxableSuccess
 import org.scalatest.matchers.must.Matchers._

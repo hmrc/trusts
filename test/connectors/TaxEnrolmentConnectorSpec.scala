@@ -19,8 +19,8 @@ package connectors
 import connector.TaxEnrolmentConnector
 import exceptions.{BadRequestException, InternalServerErrorException, ServiceNotAvailableException}
 import models.tax_enrolments.{TaxEnrolmentSubscription, TaxEnrolmentSuccess, TaxEnrolmentsSubscriptionsResponse}
-import play.api.http.Status._
 import org.scalatest.matchers.must.Matchers._
+import play.api.http.Status._
 import play.api.libs.json.Json
 
 class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {

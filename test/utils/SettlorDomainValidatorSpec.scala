@@ -27,7 +27,7 @@ class SettlorDomainValidatorSpec extends BaseSpec with DataExamples {
   "deceasedSettlorDobIsNotFutureDate" should {
 
     "return validation error when deceased settlor's date of birth is future date" in {
-      val willTrust = willTrustWithValues("2030-01-01","2031-01-01")
+      val willTrust = willTrustWithValues("2030-01-01", "2031-01-01")
       SUT(willTrust).deceasedSettlorDobIsNotFutureDate.get.message mustBe
         "Date of birth must be today or in the past."
 
@@ -35,7 +35,7 @@ class SettlorDomainValidatorSpec extends BaseSpec with DataExamples {
     }
 
     "return None when deceased settlor's date of birth is in past" in {
-      val willTrust = willTrustWithValues("2019-01-01","2019-02-01")
+      val willTrust = willTrustWithValues("2019-01-01", "2019-02-01")
       SUT(willTrust).deceasedSettlorDobIsNotFutureDate mustBe None
       BusinessValidation.check(willTrust).size mustBe 0
     }
@@ -90,21 +90,21 @@ class SettlorDomainValidatorSpec extends BaseSpec with DataExamples {
     }
 
     "return validation error when deceased date of death is after date of birth." in {
-      val willTrust = willTrustWithValues(deceasedDateOfBirth  ="2016-01-01",deceasedDateOfDeath  ="2015-01-01")
+      val willTrust = willTrustWithValues(deceasedDateOfBirth = "2016-01-01", deceasedDateOfDeath = "2015-01-01")
       SUT(willTrust).deceasedSettlorDoDIsNotAfterDob.get.message mustBe "Date of death is after date of birth"
 
       BusinessValidation.check(willTrust).size mustBe 1
     }
 
     "return validation error when deceased settlor's date of death is future date" in {
-      val willTrust = willTrustWithValues("2019-01-01","2031-01-01")
+      val willTrust = willTrustWithValues("2019-01-01", "2031-01-01")
       SUT(willTrust).deceasedSettlorDoDIsNotFutureDate.get.message mustBe
         "Date of death must be today or in the past."
       BusinessValidation.check(willTrust).size mustBe 1
     }
 
     "return validation error when deceased settlor nino is same as trustee nino" in {
-      val willTrust = willTrustWithValues(deceasedNino="ST123456")
+      val willTrust = willTrustWithValues(deceasedNino = "ST123456")
       SUT(willTrust).deceasedSettlorIsNotTrustee.get.message mustBe
         "Deceased NINO is same as trustee NINO."
       BusinessValidation.check(willTrust).size mustBe 1
@@ -126,8 +126,8 @@ class SettlorDomainValidatorSpec extends BaseSpec with DataExamples {
     "return validation error when individual settlor has same NINO" in {
       val employmentTrust = getJsonValueFromString(trustWithValues(settlorNino = "ST019091")).validate[Registration].get
       val response = SUT(employmentTrust).livingSettlorDuplicateNino
-      response.flatten.zipWithIndex.map{
-        case (error,index) =>
+      response.flatten.zipWithIndex.map {
+        case (error, index) =>
           error.message mustBe "NINO is already used for another individual settlor."
           error.location mustBe s"/trust/entities/settlors/settlor/$index/identification/nino"
       }
@@ -138,10 +138,10 @@ class SettlorDomainValidatorSpec extends BaseSpec with DataExamples {
       val employmentTrust = getJsonValueFromString(trustWithValues(settlorDob = "2050-01-01")).validate[Registration].get
       val response = SUT(employmentTrust).livingSettlorDobIsNotFutureDate
       response.flatten.size mustBe 1
-      response.flatten.zipWithIndex.map{
-        case (error,index) =>
+      response.flatten.zipWithIndex.map {
+        case (error, index) =>
           error.message mustBe "Date of birth must be today or in the past."
-          error.location mustBe s"/trust/entities/settlors/settlor/${index+1}/dateOfBirth"
+          error.location mustBe s"/trust/entities/settlors/settlor/${index + 1}/dateOfBirth"
       }
       BusinessValidation.check(employmentTrust).size mustBe 1
     }
@@ -150,8 +150,8 @@ class SettlorDomainValidatorSpec extends BaseSpec with DataExamples {
       val trust = heritageFundWithValues(settlorPassportNumber = "AB123456789C")
       val response = SUT(trust).livingSettlorDuplicatePassportNumber
       response.flatten.size mustBe 1
-      response.flatten.zipWithIndex.map{
-        case (error,index) =>
+      response.flatten.zipWithIndex.map {
+        case (error, index) =>
           error.message mustBe "Passport number is already used for another individual settlor."
           error.location mustBe s"/trust/entities/settlors/settlor/$index/identification/passport/number"
       }
@@ -161,8 +161,8 @@ class SettlorDomainValidatorSpec extends BaseSpec with DataExamples {
     "return validation error when company settlor has same UTR" in {
       val employmentTrust = getJsonValueFromString(trustWithValues(settlorUtr = "1234561234")).validate[Registration].get
       val response = SUT(employmentTrust).livingSettlorDuplicateUtr
-      response.flatten.zipWithIndex.map{
-        case (error,index) =>
+      response.flatten.zipWithIndex.map {
+        case (error, index) =>
           error.message mustBe "Utr is already used for another settlor company."
           error.location mustBe s"/trust/entities/settlors/settlorCompany/$index/identification/utr"
       }
@@ -174,9 +174,9 @@ class SettlorDomainValidatorSpec extends BaseSpec with DataExamples {
       val response = SUT(employmentTrust).companySettlorUtrIsNotTrustUtr
       response.flatten.size mustBe 1
       response.flatten.zipWithIndex.map {
-        case (error,index) =>
+        case (error, index) =>
           error.message mustBe "Settlor company utr is same as trust utr."
-          error.location mustBe s"/trust/entities/settlors/settlorCompany/${index+1}/identification/utr"
+          error.location mustBe s"/trust/entities/settlors/settlorCompany/${index + 1}/identification/utr"
       }
       BusinessValidation.check(employmentTrust).size mustBe 1
     }
@@ -189,21 +189,21 @@ class SettlorDomainValidatorSpec extends BaseSpec with DataExamples {
     }
 
     "return validation error when deceased settlor nino is same as benficiary nino" in {
-      val willTrust = willTrustWithValues(deceasedNino="KC287322")
+      val willTrust = willTrustWithValues(deceasedNino = "KC287322")
       SUT(willTrust).deceasedSettlorIsNotBeneficiary.get.message mustBe
         "Deceased NINO is same as beneficiary NINO."
-     BusinessValidation.check(willTrust).size mustBe 1
+      BusinessValidation.check(willTrust).size mustBe 1
     }
 
     "return validation error when deceased settlor nino is same as protector nino" in {
-      val willTrust = willTrustWithValues(deceasedNino="AB123456K")
+      val willTrust = willTrustWithValues(deceasedNino = "AB123456K")
       SUT(willTrust).deceasedSettlorIsNotProtector.get.message mustBe
         "Deceased NINO is same as individual protector NINO."
       BusinessValidation.check(willTrust).size mustBe 1
     }
 
     "return no error when deceased settlor nino is different from protector nino" in {
-      val willTrust = willTrustWithValues(deceasedNino="AB123457K")
+      val willTrust = willTrustWithValues(deceasedNino = "AB123457K")
       SUT(willTrust).deceasedSettlorIsNotProtector mustBe None
       BusinessValidation.check(willTrust).size mustBe 0
     }

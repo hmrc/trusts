@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,19 @@
 
 package uk.gov.hmrc.repositories
 
-import org.mongodb.scala.Document
-import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
-import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import repositories.CacheRepositoryImpl
 import uk.gov.hmrc.itbase.IntegrationTestBase
 
-class CacheRepositorySpec extends AsyncFreeSpec with IntegrationTestBase{
+class CacheRepositorySpec extends IntegrationTestBase {
 
   private val data = Json.obj("testField" -> "testValue")
 
-  private val repository = createApplication.injector.instanceOf[CacheRepositoryImpl]
+  "a playback repository" should {
+    "be able to store and retrieve a payload" in {
+      val repository = app.injector.instanceOf[CacheRepositoryImpl]
 
-  private def dropDB(): Unit = {
-    await(repository.collection.deleteMany(filter = Document()).toFuture())
-    await(repository.ensureIndexes)
-  }
-
-  "a playback repository" - {
-    "must be able to store and retrieve a payload" in {
-      dropDB()
       val storedOk = repository.set("UTRUTRUTR", "InternalId", "sessionId", data)
       storedOk.futureValue mustBe true
 

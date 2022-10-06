@@ -16,23 +16,23 @@
 
 package models.mapping.registration
 
-import java.time.LocalDate
-
 import base.BaseSpec
 import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.{JsValue, Json}
 import utils.DataExamples
 
+import java.time.LocalDate
 
-class LeadTrusteeMapperSpec  extends BaseSpec with DataExamples {
+
+class LeadTrusteeMapperSpec extends BaseSpec with DataExamples {
 
   "Lead Trustee" should {
 
     "map to a valid json payload for a DES lead trustee" when {
       "it is individual type" when {
 
-         val domainLeadTrustee = leadTrusteeIndividual
-         val json: JsValue = Json.toJson(domainLeadTrustee)
+        val domainLeadTrustee = leadTrusteeIndividual
+        val json: JsValue = Json.toJson(domainLeadTrustee)
         "containing a name" in {
           (json \ "name" \ "firstName").get.as[String] mustBe domainLeadTrustee.leadTrusteeInd.get.name.firstName
         }

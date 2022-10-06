@@ -16,11 +16,11 @@
 
 package utils
 
-import java.time.LocalDate
-
 import base.BaseSpec
 import models.{Registration, TrustDetailsType, TrustEntitiesType}
 import org.scalatest.matchers.must.Matchers._
+
+import java.time.LocalDate
 
 class DomainValidatorSpec extends BaseSpec with DataExamples {
 
@@ -50,12 +50,12 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
     }
 
     "return None for today's date" in {
-      val request = registrationWithEfrbsStartDate(LocalDate.now,TypeOfTrust.Employment)
+      val request = registrationWithEfrbsStartDate(LocalDate.now, TypeOfTrust.Employment)
       SUT(request).trustEfrbsDateIsNotFutureDate mustBe None
     }
 
     "return validation error for tomorrow date" in {
-      val request = registrationWithEfrbsStartDate(LocalDate.now.plusDays(1),TypeOfTrust.Employment)
+      val request = registrationWithEfrbsStartDate(LocalDate.now.plusDays(1), TypeOfTrust.Employment)
       SUT(request).trustEfrbsDateIsNotFutureDate.get.message mustBe
         "Trusts efrbs start date must be today or in the past."
     }
@@ -63,7 +63,7 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
 
   "validateEfrbsDate" should {
     "return None when efrbs date is provided for employment trusts" in {
-      val employmentRelatedTrust = registrationWithEfrbsStartDate(LocalDate.now.plusDays(1000),TypeOfTrust.Employment)
+      val employmentRelatedTrust = registrationWithEfrbsStartDate(LocalDate.now.plusDays(1000), TypeOfTrust.Employment)
       SUT(employmentRelatedTrust).validateEfrbsDate mustBe None
     }
 
@@ -95,7 +95,7 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
 
     "return validation error when trustee has future date of birth" in {
       val request = registrationWithTrustess(Some(listOfIndividualTrustees))
-      val response =  SUT(request).indTrusteesDobIsNotFutureDate
+      val response = SUT(request).indTrusteesDobIsNotFutureDate
       response.flatten.size mustBe 1
       response.flatten.map {
         error =>
@@ -109,7 +109,7 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
         "individual trustee has future date of birth" in {
 
           val request = registrationWithTrustess(Some(listOfIndAndOrgTrustees))
-          val response =  SUT(request).indTrusteesDobIsNotFutureDate
+          val response = SUT(request).indTrusteesDobIsNotFutureDate
           response.flatten.size mustBe 1
           response.flatten.map {
             error =>
@@ -136,10 +136,10 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
       val request = registrationWithTrustess(Some(listOfDuplicateIndAndOrgTrustees))
       val response = SUT(request).indTrusteesDuplicateNino
       response.flatten.size mustBe 4
-      response.flatten.zipWithIndex.map{
-        case (error,index) =>
+      response.flatten.zipWithIndex.map {
+        case (error, index) =>
           error.message mustBe "NINO is already used for another individual trustee."
-          error.location mustBe s"/trust/entities/trustees/${index+1}/trusteeInd/identification/nino"
+          error.location mustBe s"/trust/entities/trustees/${index + 1}/trusteeInd/identification/nino"
       }
     }
   }
@@ -173,8 +173,8 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
       val request = registrationWithTrustess(Some(listOfDuplicateIndAndOrgTrustees))
       val response = SUT(request).businessTrusteeUtrIsNotTrustUtr
       response.flatten.size mustBe 2
-      response.flatten.zipWithIndex.map{
-        case (error,index) =>
+      response.flatten.zipWithIndex.map {
+        case (error, index) =>
           error.message mustBe "Business trustee utr is same as trust utr."
           error.location mustBe s"/trust/entities/trustees/$index/trusteeOrg/identification/utr"
       }
@@ -189,11 +189,11 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
     }
 
     "return validation error when individual beneficiaries has same nino " in {
-      val request = registrationWithBeneficiary(beneficiaryType = beneficiaryTypeEntity(Some(List(indBenficiary(),indBenficiary()))))
+      val request = registrationWithBeneficiary(beneficiaryType = beneficiaryTypeEntity(Some(List(indBenficiary(), indBenficiary()))))
       val response = SUT(request).indBeneficiariesDuplicateNino
       response.flatten.size mustBe 1
-      response.flatten.zipWithIndex.map{
-        case (error,index) =>
+      response.flatten.zipWithIndex.map {
+        case (error, index) =>
           error.message mustBe "NINO is already used for another individual beneficiary."
           error.location mustBe s"/trust/entities/beneficiary/individualDetails/$index/identification/nino"
       }
@@ -204,7 +204,7 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
 
     "return validation error when individual beneficiaries has future date of birth" in {
       val request = registrationWithBeneficiary(beneficiaryType = beneficiaryTypeEntity(Some(List(indBenficiary(nino, "2030-12-31")))))
-      val response =  SUT(request).indBeneficiariesDobIsNotFutureDate
+      val response = SUT(request).indBeneficiariesDobIsNotFutureDate
       response.flatten.size mustBe 1
       response.flatten.map {
         error =>
@@ -217,17 +217,17 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
   "indBeneficiariesDuplicatePassportNumber" should {
     "return None when individual beneficiary has different passport Number" in {
       val request = registrationWithBeneficiary(beneficiaryType
-        =   beneficiaryTypeEntity(Some(List(indBenficiary(passportIdentification()),indBenficiary(passportIdentification("AB123456789D"))))))
+      = beneficiaryTypeEntity(Some(List(indBenficiary(passportIdentification()), indBenficiary(passportIdentification("AB123456789D"))))))
       SUT(request).indBeneficiariesDuplicatePassportNumber.flatten mustBe empty
     }
 
     "return validation error when individual beneficiaries has same passport number " in {
       val request = registrationWithBeneficiary(beneficiaryType
-        =   beneficiaryTypeEntity(Some(List(indBenficiary(passportIdentification()),indBenficiary(passportIdentification())))))
+      = beneficiaryTypeEntity(Some(List(indBenficiary(passportIdentification()), indBenficiary(passportIdentification())))))
       val response = SUT(request).indBeneficiariesDuplicatePassportNumber
       response.flatten.size mustBe 1
-      response.flatten.zipWithIndex.map{
-        case (error,index) =>
+      response.flatten.zipWithIndex.map {
+        case (error, index) =>
           error.message mustBe "Passport number is already used for another individual beneficiary."
           error.location mustBe s"/trust/entities/beneficiary/individualDetails/$index/identification/passport/number"
       }
@@ -278,8 +278,8 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
       val response = SUT(request).indBeneficiariesBeneficiaryType
 
       response.flatten.size mustBe 2
-      response.flatten.zipWithIndex.map{
-        case (error,index) =>
+      response.flatten.zipWithIndex.map {
+        case (error, index) =>
           error.message mustBe "Beneficiary Type must be set if Trust Type is Employment."
           error.location mustBe s"/trust/entities/beneficiary/individualDetails/$index/beneficiaryType/individualDetails/beneficiaryType"
       }

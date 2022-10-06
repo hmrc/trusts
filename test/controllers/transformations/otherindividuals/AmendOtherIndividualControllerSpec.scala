@@ -45,7 +45,7 @@ class AmendOtherIndividualControllerSpec extends AnyFreeSpec with MockitoSugar w
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
-  
+
   private val utr: String = "utr"
   private val index: Int = 0
   private val endDate: LocalDate = LocalDate.parse("2021-01-01")
@@ -59,7 +59,7 @@ class AmendOtherIndividualControllerSpec extends AnyFreeSpec with MockitoSugar w
 
     baseJson.as[JsObject](__.json.update(adder))
   }
-  
+
   "Amend other individual controller" - {
 
     val originalOtherIndividual = NaturalPersonType(

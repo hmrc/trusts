@@ -16,12 +16,12 @@
 
 package models.variation
 
-import java.time.LocalDate
-
 import base.BaseSpec
 import models.AddressType
-import play.api.libs.json.Json
 import org.scalatest.matchers.must.Matchers._
+import play.api.libs.json.Json
+
+import java.time.LocalDate
 
 class AssetsSpec extends BaseSpec {
 

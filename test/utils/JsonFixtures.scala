@@ -16,22 +16,22 @@
 
 package utils
 
-import play.api.libs.json.JsValue
 import models._
+import play.api.libs.json.JsValue
 
 object JsonFixtures extends JsonFixtures
 
 trait JsonFixtures extends JsonUtils {
 
-  lazy val validRegistrationRequestJson: String =  getJsonFromFile("valid-trusts-registration-api.json")
+  lazy val validRegistrationRequestJson: String = getJsonFromFile("valid-trusts-registration-api.json")
 
-  lazy val validRegistration5MldRequestJson: String =  getJsonFromFile("valid-trusts-registration-api-5mld.json")
-  lazy val validRegistration5MldNontaxableRequestJson: String =  getJsonFromFile("valid-trusts-registration-api-5mld-nontaxable.json")
+  lazy val validRegistration5MldRequestJson: String = getJsonFromFile("valid-trusts-registration-api-5mld.json")
+  lazy val validRegistration5MldNontaxableRequestJson: String = getJsonFromFile("valid-trusts-registration-api-5mld-nontaxable.json")
 
-  lazy val invalidRegistrationRequestJson: String =  getJsonFromFile("invalid-payload-trusts-registration.json")
-  lazy val invalidTrustBusinessValidation: String =  getJsonFromFile("trust-business-validation-fail.json")
+  lazy val invalidRegistrationRequestJson: String = getJsonFromFile("invalid-payload-trusts-registration.json")
+  lazy val invalidTrustBusinessValidation: String = getJsonFromFile("trust-business-validation-fail.json")
 
-  lazy val validTrustVariations5mldRequestJson: String =  getJsonFromFile("valid-trusts-variations-api-5mld-taxable.json")
+  lazy val validTrustVariations5mldRequestJson: String = getJsonFromFile("valid-trusts-variations-api-5mld-taxable.json")
   lazy val validTrustVariationsTaxYears5mldRequestJson: String =
     getJsonFromFile("valid-trusts-variations-api-5mld-taxable-tax-years.json")
 

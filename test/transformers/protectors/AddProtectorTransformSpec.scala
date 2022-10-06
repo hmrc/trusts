@@ -35,9 +35,9 @@ class AddProtectorTransformSpec extends AnyFreeSpec {
 
         val newProtector = ProtectorIndividual(Some("1"),
           None,
-          NameType("abcdefghijkl",Some("abcdefghijklmn"), "abcde"),
+          NameType("abcdefghijkl", Some("abcdefghijklmn"), "abcde"),
           Some(LocalDate.parse("2000-01-01")),
-          Some(IdentificationType(Some("ST019091"),None,None, None)),
+          Some(IdentificationType(Some("ST019091"), None, None, None)),
           countryOfResidence = None,
           legallyIncapable = None,
           nationality = None,
@@ -47,9 +47,9 @@ class AddProtectorTransformSpec extends AnyFreeSpec {
 
         val newSecondProtector = ProtectorIndividual(None,
           None,
-          NameType("second",None, "protector"),
+          NameType("second", None, "protector"),
           Some(LocalDate.parse("2000-01-01")),
-          Some(IdentificationType(Some("AB123456"),None,None, None)),
+          Some(IdentificationType(Some("AB123456"), None, None, None)),
           countryOfResidence = None,
           legallyIncapable = None,
           nationality = None,

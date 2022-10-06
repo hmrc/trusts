@@ -16,16 +16,17 @@
 
 package connectors
 
-import java.time.{LocalDate, LocalDateTime, ZoneId}
 import connector.NonRepudiationConnector
 import models.nonRepudiation._
 import models.requests.CredentialData
 import org.scalatest.matchers.must.Matchers
-import play.api.http.Status.{ACCEPTED, BAD_GATEWAY, BAD_REQUEST, GATEWAY_TIMEOUT, INTERNAL_SERVER_ERROR, SERVICE_UNAVAILABLE, UNAUTHORIZED}
+import play.api.http.Status._
 import play.api.libs.json.Json
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.auth.core.retrieve.LoginTimes
 import utils.JsonUtils
+
+import java.time.{LocalDate, LocalDateTime, ZoneId}
 
 class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with JsonUtils {
 

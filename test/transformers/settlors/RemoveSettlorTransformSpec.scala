@@ -35,13 +35,16 @@ import scala.concurrent.Future
 
 class RemoveSettlorTransformSpec extends AnyFreeSpec with ScalaFutures with MockitoSugar {
 
-  private def settlorJson(value1 : String, endDate: Option[LocalDate] = None, withLineNo: Boolean = true) = {
+  private def settlorJson(value1: String, endDate: Option[LocalDate] = None, withLineNo: Boolean = true) = {
     val a = Json.obj("field1" -> value1, "field2" -> "value20")
 
-    val b = if (endDate.isDefined) {a.deepMerge(Json.obj("entityEnd" -> endDate.get))
+    val b = if (endDate.isDefined) {
+      a.deepMerge(Json.obj("entityEnd" -> endDate.get))
     } else a
 
-    if (withLineNo) {b.deepMerge(Json.obj("lineNo" -> 12))}
+    if (withLineNo) {
+      b.deepMerge(Json.obj("lineNo" -> 12))
+    }
     else b
   }
 
@@ -57,7 +60,7 @@ class RemoveSettlorTransformSpec extends AnyFreeSpec with ScalaFutures with Mock
   "Remove Settlor Transforms should round trip through JSON as part of Composed Transform" in {
     val OUT = ComposedDeltaTransform(Seq(
       RemoveSettlorTransform(Some(56), settlorJson("Blah Blah Blah"), LocalDate.of(1563, 10, 23), "settlor"),
-      RemoveSettlorTransform(Some(12), settlorJson("Foo"), LocalDate.of(2317, 12, 21),  "settlorCompany")
+      RemoveSettlorTransform(Some(12), settlorJson("Foo"), LocalDate.of(2317, 12, 21), "settlorCompany")
     ))
 
     Json.toJson(OUT).validate[ComposedDeltaTransform] match {
@@ -130,7 +133,7 @@ class RemoveSettlorTransformSpec extends AnyFreeSpec with ScalaFutures with Mock
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value.transform(
-          (JsPath()  \ "details" \ "trust" \ "entities" \ "settlors" \ "settlor"  ).json.pick).isError mustBe true
+          (JsPath() \ "details" \ "trust" \ "entities" \ "settlors" \ "settlor").json.pick).isError mustBe true
         case _ => fail("Transform failed")
       }
     }

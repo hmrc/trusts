@@ -16,7 +16,6 @@
 
 package base
 
-import java.util.UUID
 import config.AppConfig
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.wordspec.AnyWordSpec
@@ -29,6 +28,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import utils._
+
+import java.util.UUID
 
 class BaseSpec extends AnyWordSpec
   with ScalaFutures
@@ -56,7 +57,7 @@ class BaseSpec extends AnyWordSpec
           "nrs.retryWaitFactor" -> 1,
           "nrs.totalAttempts" -> 10,
           "features.nonRepudiate" -> true
-        ): _*,
+        ): _*
       )
   }
 

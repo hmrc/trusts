@@ -21,8 +21,8 @@ import controllers.actions.FakeIdentifierAction
 import models.taxable_migration.TaxableMigrationFlag
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.matchers.must.Matchers._
 import org.scalatest.concurrent.IntegrationPatience
+import org.scalatest.matchers.must.Matchers._
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
 import play.api.libs.json.{JsBoolean, JsNull, Json}
 import play.api.test.Helpers._
@@ -33,7 +33,7 @@ import utils.Session
 
 import scala.concurrent.Future
 
-class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach  with IntegrationPatience {
+class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach with IntegrationPatience {
 
   private lazy val bodyParsers = Helpers.stubControllerComponents().parsers.default
 

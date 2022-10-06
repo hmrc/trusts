@@ -49,11 +49,11 @@ class TaxableMigrationRepositoryImpl @Inject()(
   override val key: String = "migratingToTaxable"
 
   override def get(identifier: String, internalId: String, sessionId: String): Future[Option[Boolean]] = {
-    get[Boolean](identifier, internalId, sessionId)
+    getOpt(identifier, internalId, sessionId)
   }
 
   override def set(identifier: String, internalId: String, sessionId: String, migratingToTaxable: Boolean): Future[Boolean] = {
-    upsert[Boolean](identifier, internalId, sessionId, migratingToTaxable)
+    upsert(identifier, internalId, sessionId, migratingToTaxable)
   }
 }
 

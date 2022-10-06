@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,16 @@
 
 package uk.gov.hmrc.repositories
 
-import org.mongodb.scala.Document
-import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.must.Matchers._
-import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import repositories.TaxableMigrationRepositoryImpl
 import uk.gov.hmrc.itbase.IntegrationTestBase
 
-class TaxableMigrationRepositorySpec extends AsyncFreeSpec with IntegrationTestBase {
+class TaxableMigrationRepositorySpec extends IntegrationTestBase {
 
-  private val repository = createApplication.injector.instanceOf[TaxableMigrationRepositoryImpl]
+  "TaxableMigrationRepository" should {
 
-  private def dropDB(): Unit = {
-    await(repository.collection.deleteMany(filter = Document()).toFuture())
-    await(repository.ensureIndexes)
-  }
-
-  "TaxableMigrationRepository" - {
-
-    "must be able to store and retrieve a boolean" in {
-      dropDB()
-
+    "be able to store and retrieve a boolean" in assertMongoTest(createApplication)({ (app) =>
+      val repository = app.injector.instanceOf[TaxableMigrationRepositoryImpl]
       val migratingToTaxable = true
 
       val storedOk = repository.set("UTRUTRUTR", "InternalId", "sessionId", migratingToTaxable)
@@ -45,6 +34,6 @@ class TaxableMigrationRepositorySpec extends AsyncFreeSpec with IntegrationTestB
       val retrieved = repository.get("UTRUTRUTR", "InternalId", "sessionId")
 
       retrieved.futureValue mustBe Some(migratingToTaxable)
-    }
+    })
   }
 }

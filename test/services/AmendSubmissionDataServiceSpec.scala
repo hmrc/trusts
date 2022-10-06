@@ -18,8 +18,8 @@ package services
 
 import base.BaseSpec
 import org.mockito.Mockito.when
-import play.api.libs.json.Json
 import org.scalatest.matchers.must.Matchers._
+import play.api.libs.json.Json
 import services.dates.LocalDateService
 
 import java.time.LocalDate
@@ -35,21 +35,21 @@ class AmendSubmissionDataServiceSpec extends BaseSpec {
 
       val inputJson = Json.obj()
 
-        "add submission date" in {
+      "add submission date" in {
 
-          val date = "2000-01-01"
+        val date = "2000-01-01"
 
-          when(mockLocalDateService.now).thenReturn(LocalDate.parse(date))
+        when(mockLocalDateService.now).thenReturn(LocalDate.parse(date))
 
-          val result = service.applyRulesAndAddSubmissionDate(inputJson)
+        val result = service.applyRulesAndAddSubmissionDate(inputJson)
 
-          result mustBe Json.parse(
-            s"""
-              |{
-              |  "submissionDate": "$date"
-              |}
-              |""".stripMargin
-          )
+        result mustBe Json.parse(
+          s"""
+             |{
+             |  "submissionDate": "$date"
+             |}
+             |""".stripMargin
+        )
       }
     }
   }

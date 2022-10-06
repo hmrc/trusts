@@ -18,12 +18,12 @@ package models.nonRepudiation
 
 import base.BaseSpec
 import models.requests.CredentialData
-import java.time.{Instant, LocalDateTime}
-
-import play.api.libs.json.Json
 import org.scalatest.matchers.must.Matchers._
+import play.api.libs.json.Json
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.auth.core.retrieve.LoginTimes
+
+import java.time.{Instant, LocalDateTime}
 
 class NRSSubmissionSpec extends BaseSpec {
 
@@ -42,7 +42,7 @@ class NRSSubmissionSpec extends BaseSpec {
         declaration = Json.obj("example" -> "declaration"),
         agentDetails = Some(Json.obj("example" -> "agent")),
         credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None),
-        provider = None, email = None)
+          provider = None, email = None)
       )
 
       val payLoad = NRSSubmission(

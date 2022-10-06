@@ -97,7 +97,7 @@ class RosmPatternServiceSpec extends BaseSpec {
       }
     }
 
-  }//completeRosmTransaction
+  } //completeRosmTransaction
 
 }
 

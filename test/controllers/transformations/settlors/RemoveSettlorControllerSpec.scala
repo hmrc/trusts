@@ -45,7 +45,7 @@ class RemoveSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
-  
+
   private val utr: String = "utr"
   private val index: Int = 0
   private val endDate: LocalDate = LocalDate.parse("2018-02-24")
@@ -65,7 +65,7 @@ class RemoveSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
 
     baseJson.as[JsObject](__.json.update(adder))
   }
-  
+
   "Remove settlor controller" - {
 
     "individual settlor" - {

@@ -18,15 +18,15 @@ package controllers
 
 import base.BaseSpec
 import models.tax_enrolments.OrchestratorToTaxableSuccess
-import org.mockito.Mockito.when
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.when
 import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.Json
-import play.api.test.{FakeRequest, Helpers}
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import play.api.test.Helpers.{status, _}
+import play.api.test.{FakeRequest, Helpers}
 import services.TaxableMigrationService
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import scala.concurrent.Future
 
@@ -42,7 +42,9 @@ class TaxEnrolmentCallbackControllerSpec extends BaseSpec with GuiceOneServerPer
       "tax enrolment callback for subscription id enrolment  " in {
         val SUT = new TaxEnrolmentCallbackController(mockMigrationService, Helpers.stubControllerComponents())
 
-        val result = SUT.taxableSubscriptionCallback(trn).apply(postRequestWithPayload(Json.parse({"""{ "url" : "http//","state" : "SUCCESS"}"""})))
+        val result = SUT.taxableSubscriptionCallback(trn).apply(postRequestWithPayload(Json.parse({
+          """{ "url" : "http//","state" : "SUCCESS"}"""
+        })))
         status(result) mustBe OK
       }
     }
@@ -54,7 +56,9 @@ class TaxEnrolmentCallbackControllerSpec extends BaseSpec with GuiceOneServerPer
       "tax enrolment callback for subscription id enrolment  " in {
         val SUT = new TaxEnrolmentCallbackController(mockMigrationService, Helpers.stubControllerComponents())
 
-        val result = SUT.nonTaxableSubscriptionCallback(trn).apply(postRequestWithPayload(Json.parse({"""{ "url" : "http//","state" : "SUCCESS"}"""})))
+        val result = SUT.nonTaxableSubscriptionCallback(trn).apply(postRequestWithPayload(Json.parse({
+          """{ "url" : "http//","state" : "SUCCESS"}"""
+        })))
         status(result) mustBe OK
       }
     }
