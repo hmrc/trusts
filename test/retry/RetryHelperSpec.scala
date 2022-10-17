@@ -114,7 +114,7 @@ class RetryHelperSpec extends BaseSpec with MockitoSugar with ScalaFutures with 
       }
     }
 
-    "when using real config values take less than 20 seconds" ignore {
+    "when using real config values take less than 20 seconds" in {
       val app = new GuiceApplicationBuilder().build()
       val helper = app.injector.instanceOf[NrsRetryHelper]
 

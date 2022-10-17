@@ -16,13 +16,13 @@
 
 package utils
 
-import java.time.LocalDate
-
-import play.api.libs.json._
 import models._
+import play.api.libs.json._
 import utils.TypeOfTrust.TypeOfTrust
 
-trait DataExamples extends  JsonFixtures {
+import java.time.LocalDate
+
+trait DataExamples extends JsonFixtures {
 
   val nameType = NameType(
     firstName = "Oliver",
@@ -30,12 +30,14 @@ trait DataExamples extends  JsonFixtures {
     lastName = "Johnson"
   )
 
-  def passport(passportNumber : String = "AB123456789C") = Some(PassportType(passportNumber, LocalDate.now, countryOfIssue= "IN"))
+  def passport(passportNumber: String = "AB123456789C") = Some(PassportType(passportNumber, LocalDate.now, countryOfIssue = "IN"))
 
-  val nino = IdentificationType(nino = Some("WA123456A"),None,None)
-  val nino2 = IdentificationType(nino = Some("WA123457A"),None,None)
-  def passportIdentification(passportNumber : String = "AB123456789C") = IdentificationType(nino = None,passport= passport(passportNumber),None)
-  val utr = IdentificationOrgType(utr = Some("5454541615"),None)
+  val nino = IdentificationType(nino = Some("WA123456A"), None, None)
+  val nino2 = IdentificationType(nino = Some("WA123457A"), None, None)
+
+  def passportIdentification(passportNumber: String = "AB123456789C") = IdentificationType(nino = None, passport = passport(passportNumber), None)
+
+  val utr = IdentificationOrgType(utr = Some("5454541615"), None)
   val phoneNumber = "1234567890"
   val email = Some("test@test.com")
   val submissionDate = LocalDate.parse("2020-04-24")
@@ -61,7 +63,7 @@ trait DataExamples extends  JsonFixtures {
       countryOfResidence = None
     )))
 
-  def trusteeIndividual(dateOfBirthStr :String= "1500-01-01") = Some(
+  def trusteeIndividual(dateOfBirthStr: String = "1500-01-01") = Some(
     TrusteeIndividualType(
       name = nameType,
       dateOfBirth = Some(LocalDate.parse(dateOfBirthStr)),
@@ -71,7 +73,7 @@ trait DataExamples extends  JsonFixtures {
       None,
       None))
 
-  def indBenficiary(identification :IdentificationType = nino,dateOfBirthStr :String= "1500-01-01") =
+  def indBenficiary(identification: IdentificationType = nino, dateOfBirthStr: String = "1500-01-01") =
     IndividualDetailsType(
       nameType,
       Some(LocalDate.parse(dateOfBirthStr)),
@@ -85,7 +87,7 @@ trait DataExamples extends  JsonFixtures {
       None
     )
 
-  def trusteeOrg  = Some(TrusteeOrgType(
+  def trusteeOrg = Some(TrusteeOrgType(
     name = "trustee as company",
     identification = Some(utr),
     phoneNumber = None,
@@ -93,13 +95,13 @@ trait DataExamples extends  JsonFixtures {
     countryOfResidence = None))
 
 
-  def registrationWithStartDate(date : LocalDate ): Registration = {
+  def registrationWithStartDate(date: LocalDate): Registration = {
     val trustDetailsType = defaultTrustDetails.copy(startDate = date)
     registration(Some(trustDetailsType))
   }
 
 
-  def registrationWithEfrbsStartDate(date : LocalDate, typeOfTrust: TypeOfTrust): Registration = {
+  def registrationWithEfrbsStartDate(date: LocalDate, typeOfTrust: TypeOfTrust): Registration = {
     val trustDetailsType = registrationRequest.trust.details.copy(efrbsStartDate = Some(date),
       typeOfTrust = Some(typeOfTrust))
     registration(Some(trustDetailsType))
@@ -111,40 +113,44 @@ trait DataExamples extends  JsonFixtures {
     registration(Some(trustDetailsType))
   }
 
-  def listOfIndividualTrustees = List(TrusteeType(trusteeIndividual(),None),TrusteeType(trusteeIndividual("2030-01-01"),None))
-  def listOfOrgTrustees = List(TrusteeType(None,trusteeOrg),TrusteeType(None,trusteeOrg))
-  def listOfIndAndOrgTrustees = List(TrusteeType(trusteeIndividual("2030-01-01"),trusteeOrg))
+  def listOfIndividualTrustees = List(TrusteeType(trusteeIndividual(), None), TrusteeType(trusteeIndividual("2030-01-01"), None))
+
+  def listOfOrgTrustees = List(TrusteeType(None, trusteeOrg), TrusteeType(None, trusteeOrg))
+
+  def listOfIndAndOrgTrustees = List(TrusteeType(trusteeIndividual("2030-01-01"), trusteeOrg))
+
   def listOfDuplicateIndAndOrgTrustees =
-    List(TrusteeType(None,trusteeOrg),
-    TrusteeType(trusteeIndividual("2030-01-01"),trusteeOrg),
-      TrusteeType(trusteeIndividual("2030-01-01"),None),
-      TrusteeType(trusteeIndividual("2030-01-01"),None),
-      TrusteeType(trusteeIndividual("2030-01-01"),None),
-      TrusteeType(trusteeIndividual("2030-01-01"),None))
+    List(TrusteeType(None, trusteeOrg),
+      TrusteeType(trusteeIndividual("2030-01-01"), trusteeOrg),
+      TrusteeType(trusteeIndividual("2030-01-01"), None),
+      TrusteeType(trusteeIndividual("2030-01-01"), None),
+      TrusteeType(trusteeIndividual("2030-01-01"), None),
+      TrusteeType(trusteeIndividual("2030-01-01"), None))
 
 
-  def registrationWithTrustess(updatedTrustees : Option[List[TrusteeType]] ): Registration = {
+  def registrationWithTrustess(updatedTrustees: Option[List[TrusteeType]]): Registration = {
     val trustEntities = defaultTrustEntities.copy(trustees = updatedTrustees)
-    registration(trustEntities =Some(trustEntities))
+    registration(trustEntities = Some(trustEntities))
   }
 
-  def beneficiaryTypeEntity(individualDetails: Option[List[IndividualDetailsType]] = Some(List(indBenficiary(),indBenficiary(nino2))))
-  = BeneficiaryType( individualDetails, None,None,None,None,None,None)
+  def beneficiaryTypeEntity(individualDetails: Option[List[IndividualDetailsType]] = Some(List(indBenficiary(), indBenficiary(nino2))))
+  = BeneficiaryType(individualDetails, None, None, None, None, None, None)
 
-  def registrationWithBeneficiary(beneficiaryType: BeneficiaryType = beneficiaryTypeEntity()  ): Registration = {
+  def registrationWithBeneficiary(beneficiaryType: BeneficiaryType = beneficiaryTypeEntity()): Registration = {
     val trustEntities = defaultTrustEntities.copy(beneficiary = beneficiaryType)
-    registration(trustEntities =Some(trustEntities))
+    registration(trustEntities = Some(trustEntities))
   }
 
   def defaultTrustDetails: TrustDetailsType = registrationRequest.trust.details
+
   def defaultTrustEntities: TrustEntitiesType = registrationRequest.trust.entities
 
-  def registration(trustDetailsType: Option[TrustDetailsType]= Some(defaultTrustDetails),
-                           trustEntities: Option[TrustEntitiesType]= Some(defaultTrustEntities)) = {
+  def registration(trustDetailsType: Option[TrustDetailsType] = Some(defaultTrustDetails),
+                   trustEntities: Option[TrustEntitiesType] = Some(defaultTrustEntities)) = {
 
     val trust = registrationRequest.trust
     Registration(
-      trust =  trust.copy(details = trustDetailsType.get, entities = trustEntities.get),
+      trust = trust.copy(details = trustDetailsType.get, entities = trustEntities.get),
       matchData = registrationRequest.matchData,
       correspondence = registrationRequest.correspondence,
       yearsReturns = registrationRequest.yearsReturns,
@@ -154,18 +160,18 @@ trait DataExamples extends  JsonFixtures {
   }
 
 
-  def trustWithoutBeneficiary : String = {
+  def trustWithoutBeneficiary: String = {
     val json = getJsonValueFromFile("valid-trusts-registration-api.json")
-    val jsonTransformer = (__  \ 'trust \  'entities \ 'beneficiary ).json.prune
+    val jsonTransformer = (__ \ 'trust \ 'entities \ 'beneficiary).json.prune
     json.transform(jsonTransformer).get.toString()
   }
 
-  def trustWithValues(indBenficiaryDob : String ="2001-01-01",
-                      settlorNino :String = "ST019092",
-                      settlorDob :String = "2001-01-01",
-                      settlorUtr :String = "1234561235" ,
-                      typeOfTrust : TypeOfTrust = TypeOfTrust.Employment
-  ) : String = {
+  def trustWithValues(indBenficiaryDob: String = "2001-01-01",
+                      settlorNino: String = "ST019092",
+                      settlorDob: String = "2001-01-01",
+                      settlorUtr: String = "1234561235",
+                      typeOfTrust: TypeOfTrust = TypeOfTrust.Employment
+                     ): String = {
     val json = getJsonValueFromFile("trusts-dynamic.json")
     json.toString().replace("{indBeneficiaryDob}", indBenficiaryDob)
       .replace("{settlorNino}", settlorNino).replace("{settlorDob}", settlorDob)
@@ -173,11 +179,11 @@ trait DataExamples extends  JsonFixtures {
   }
 
   def willTrustWithValues(
-                           deceasedDateOfBirth : String ="2001-01-01",
-                           deceasedDateOfDeath : String ="2016-01-01",
-                           deceasedNino :String = "KC456736",
-                           typeOfTrust : TypeOfTrust = TypeOfTrust.Will,
-                           protectorNino :String = "AB123456K") : Registration = {
+                           deceasedDateOfBirth: String = "2001-01-01",
+                           deceasedDateOfDeath: String = "2016-01-01",
+                           deceasedNino: String = "KC456736",
+                           typeOfTrust: TypeOfTrust = TypeOfTrust.Will,
+                           protectorNino: String = "AB123456K"): Registration = {
 
     val json = getJsonValueFromFile("will-trust-dynamic.json")
 
@@ -191,10 +197,10 @@ trait DataExamples extends  JsonFixtures {
   }
 
   def nonTaxableTrustWithValues(
-                           deceasedDateOfBirth : String ="2001-01-01",
-                           deceasedDateOfDeath : String ="2016-01-01",
-                           deceasedNino :String = "KC456736",
-                           protectorNino :String = "AB123456K") : Registration = {
+                                 deceasedDateOfBirth: String = "2001-01-01",
+                                 deceasedDateOfDeath: String = "2016-01-01",
+                                 deceasedNino: String = "KC456736",
+                                 protectorNino: String = "AB123456K"): Registration = {
 
     val json = getJsonValueFromFile("trusts-dynamic-non-taxable.json")
 
@@ -205,21 +211,22 @@ trait DataExamples extends  JsonFixtures {
       replace("{deceasedNino}", deceasedNino)).
       validate[Registration].get
   }
-  def heritageFundWithValues(settlorPassportNumber : String ="AB123456789D",
-                             valueFull:String = "999999999999"
-                     ) : Registration = {
+
+  def heritageFundWithValues(settlorPassportNumber: String = "AB123456789D",
+                             valueFull: String = "999999999999"
+                            ): Registration = {
     val json = getJsonValueFromFile("trusts-dynamic-1.json")
     getJsonValueFromString(
-    json.toString().
-      replace("{settlorPassportNumber}", settlorPassportNumber).
-      replace("\"{valueFull}\"", valueFull))
+      json.toString().
+        replace("{settlorPassportNumber}", settlorPassportNumber).
+        replace("\"{valueFull}\"", valueFull))
       .validate[Registration].get
 
   }
 
-  def trustWithoutAssets : String = {
+  def trustWithoutAssets: String = {
     val json = getJsonValueFromFile("employment-related-trusts-1.json")
-    val jsonTransformer = (__  \ 'trust \  'assets \ 'monetary ).json.prune
+    val jsonTransformer = (__ \ 'trust \ 'assets \ 'monetary).json.prune
     json.transform(jsonTransformer).get.toString()
   }
 

@@ -20,7 +20,6 @@ import base.BaseSpec
 import connector.NonRepudiationConnector
 import models.nonRepudiation._
 import models.requests.{CredentialData, IdentifierRequest}
-import java.time.{LocalDateTime, ZoneOffset}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => mEq, _}
 import org.mockito.Mockito.{doNothing, reset, when}
@@ -35,11 +34,11 @@ import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, LoginTimes}
 import uk.gov.hmrc.http.{Authorization, ForwardedFor, HeaderCarrier, RequestId, SessionId}
 import utils.JsonFixtures
+
+import java.time.{Instant, LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.matching.Regex
-
-import java.time.Instant
 
 class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAndAfterEach {
 
@@ -161,13 +160,13 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           "loginTimes" -> Json.obj(
             "currentLogin" -> "2020-10-10T00:00:00Z",
             "previousLogin" -> "2020-10-05T00:00:00Z"
-      ),
+          ),
           "provider" -> Json.obj(
             "providerId" -> "12345",
             "providerType" -> "governmentGateway"
-      ),
+          ),
           "email" -> "client@email.com"
-      ),
+        ),
         "declaration" -> Json.obj(
           "firstName" -> "John",
           "middleName" -> "William",

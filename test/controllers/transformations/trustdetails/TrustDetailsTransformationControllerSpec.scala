@@ -186,7 +186,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
       }
 
       "return a BadRequest for malformed json" in {
-        
+
         val controller = new TrustDetailsTransformationController(
           identifierAction,
           mockTransformationService,
@@ -207,7 +207,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
     "when setting resident question" - {
 
       "must return an OK" in {
-        
+
         val controller = new TrustDetailsTransformationController(
           identifierAction,
           mockTransformationService,
@@ -709,9 +709,9 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
       }
 
     }
-    
+
     "when setting trust details" - {
-      
+
       "when migrating from non-taxable to taxable" - {
 
         "must return an OK" in {
@@ -815,9 +815,9 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
 
           status(result) mustBe BAD_REQUEST
         }
-        
+
       }
-      
+
       "when not migrating" - {
 
         "must return an OK" in {
@@ -876,7 +876,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
 
           status(result) mustBe BAD_REQUEST
         }
-        
+
       }
     }
   }

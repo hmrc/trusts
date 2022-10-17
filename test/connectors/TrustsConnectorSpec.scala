@@ -23,10 +23,10 @@ import models.existing_trust.ExistingCheckRequest._
 import models.existing_trust.ExistingCheckResponse._
 import models.get_trust._
 import models.variation.{TrustVariation, VariationResponse}
+import org.scalatest.matchers.must.Matchers._
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json, Reads}
 import utils.NonTaxable5MLDFixtures
-import org.scalatest.matchers.must.Matchers._
 
 import scala.concurrent.Future
 
@@ -37,6 +37,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
   lazy val request: ExistingCheckRequest = ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
 
   def get5MLDTrustUTREndpoint(utr: String) = s"/trusts/registration/UTR/$utr"
+
   def get5MLDTrustURNEndpoint(urn: String) = s"/trusts/registration/URN/$urn"
 
   ".checkExistingTrust" should {
@@ -192,7 +193,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
         val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
         stubForPost(server, "/trusts/registration", requestBody, OK,
-        """{"trn": "XTRN1234567"}"""
+          """{"trn": "XTRN1234567"}"""
         )
 
         val futureResult = connector.registerTrust(registrationRequest)

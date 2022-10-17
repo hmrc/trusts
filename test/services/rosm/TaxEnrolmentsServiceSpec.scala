@@ -21,7 +21,7 @@ import connector.TaxEnrolmentConnector
 import exceptions.{BadRequestException, InternalServerErrorException}
 import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentSuccess}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify, when, _}
+import org.mockito.Mockito._
 import org.scalatest.matchers.must.Matchers._
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -32,7 +32,7 @@ class TaxEnrolmentsServiceSpec extends BaseSpec {
 
   lazy val mockConnector = mock[TaxEnrolmentConnector]
 
-  lazy val SUT = new TaxEnrolmentsServiceImpl(mockConnector,appConfig)
+  lazy val SUT = new TaxEnrolmentsServiceImpl(mockConnector, appConfig)
 
   before {
     reset(mockConnector)

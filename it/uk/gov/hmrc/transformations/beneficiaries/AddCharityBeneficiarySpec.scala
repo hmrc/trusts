@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,8 @@ import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.Assertion
 import org.scalatest.matchers.must.Matchers._
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
@@ -36,50 +34,53 @@ import utils.JsonUtils
 
 import scala.concurrent.Future
 
-class AddCharityBeneficiarySpec extends AsyncFreeSpec with MockitoSugar with IntegrationTestBase {
+class AddCharityBeneficiarySpec extends IntegrationTestBase {
 
-  lazy val getTrustResponse: GetTrustSuccessResponse =
+  private lazy val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
-  lazy val expectedInitialGetJson: JsValue =
+  private lazy val expectedInitialGetJson: JsValue =
     JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
-  "an add charity beneficiary call" - {
-      val newBeneficiaryJson = Json.parse(
-        """
-          |{
-          |  "organisationName": "Charity 2",
-          |  "beneficiaryDiscretion": false,
-          |  "beneficiaryShareOfIncome": "50",
-          |  "identification": {
-          |    "address": {
-          |      "line1": "Line 1",
-          |      "line2": "Line 2",
-          |      "postCode": "NE1 1NE",
-          |      "country": "GB"
-          |    }
-          |  },
-          |  "entityStart": "2019-02-03"
-          |}
-          |""".stripMargin
+  "an add charity beneficiary call" should {
+    val newBeneficiaryJson = Json.parse(
+      """
+        |{
+        |  "organisationName": "Charity 2",
+        |  "beneficiaryDiscretion": false,
+        |  "beneficiaryShareOfIncome": "50",
+        |  "identification": {
+        |    "address": {
+        |      "line1": "Line 1",
+        |      "line2": "Line 2",
+        |      "postCode": "NE1 1NE",
+        |      "country": "GB"
+        |    }
+        |  },
+        |  "entityStart": "2019-02-03"
+        |}
+        |""".stripMargin
+    )
+
+    lazy val expectedGetAfterAddBeneficiaryJson: JsValue =
+      JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-add-charity-beneficiary.json")
+
+    val stubbedTrustsConnector = mock[TrustsConnector]
+    when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
+
+    def application = applicationBuilder
+      .overrides(
+        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[TrustsConnector].toInstance(stubbedTrustsConnector)
       )
+      .build()
 
-      lazy val expectedGetAfterAddBeneficiaryJson: JsValue =
-        JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-add-charity-beneficiary.json")
+    "return amended data in a subsequent 'get' call, for identifier '5174384721'" in assertMongoTest(application) { app =>
+      runTest("5174384721", app)
+    }
 
-      val stubbedTrustsConnector = mock[TrustsConnector]
-      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
-
-      val application = applicationBuilder
-        .overrides(
-          bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-          bind[TrustsConnector].toInstance(stubbedTrustsConnector)
-        )
-        .build()
-
-    "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
-      runTest("5174384721", application)
-      runTest("0123456789ABCDE", application)
+    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) { app =>
+      runTest("0123456789ABCDE", app)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {

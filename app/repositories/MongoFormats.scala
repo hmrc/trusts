@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package utils
+package repositories
 
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
-import play.api.libs.json.{JsPath, JsString, Reads, Writes}
+import play.api.libs.json._
 
-object JodaDateTimeFormatter {
+object MongoFormats {
+  val booleanFormat: Format[Boolean] = new Format[Boolean] {
+    override def reads(json: JsValue): JsResult[Boolean] = json match {
+      case boolean: JsBoolean => JsSuccess(boolean.value)
+      case JsNumber(value) => if (value == 1) JsSuccess(true) else if (value == 0) JsSuccess(false) else JsError("cannot parse boolean")
+      case JsString(value) => JsSuccess(value.toBoolean)
+      case _ => JsError("cannot parse boolean")
+    }
 
-  private val dateTimePattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-
-  private val formatter = DateTimeFormat.forPattern(dateTimePattern)
-
-  implicit val dateTimeReads: Reads[DateTime] =
-    JsPath.read[String]
-      .map(date => DateTime.parse(date, formatter))
-
-  implicit val dateTimeWrites: Writes[DateTime] = (d: DateTime) => JsString(d.toString(formatter))
+    override def writes(o: Boolean): JsValue = if (o) JsTrue else JsFalse
+  }
 
 }

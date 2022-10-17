@@ -29,7 +29,7 @@ import utils.WireMockHelper
 
 class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationPatience {
 
-  override def  applicationBuilder(): GuiceApplicationBuilder = {
+  override def applicationBuilder(): GuiceApplicationBuilder = {
     super.applicationBuilder()
       .configure(
         Seq(
@@ -53,16 +53,16 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
 
           "microservice.services.tax-enrolments-migration.to-taxable.serviceName" -> "HMRC-TERS-ORG",
           "microservice.services.tax-enrolments-migration.to-taxable.callback" ->
-            "http://localhost:9782/trusts/tax-enrolment/migration-to-taxable/urn/:urn/subscriptionId/:subscriptionId",
+            "http://localhost:9782/trusts/tax-enrolment/migration-to-taxable/urn/:urn/subscriptionId/:subscriptionId"
         ): _*)
   }
 
   val jsonResponse400: JsValue = Json.parse(
-      s"""
-         |{
-         | "code": "INVALID_PAYLOAD",
-         | "reason": "Submission has not passed validation. Invalid Payload."
-         |}""".stripMargin)
+    s"""
+       |{
+       | "code": "INVALID_PAYLOAD",
+       | "reason": "Submission has not passed validation. Invalid Payload."
+       |}""".stripMargin)
 
   val jsonResponse4005mld: JsValue = Json.parse(
     s"""
@@ -191,32 +191,32 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
     responseBody match {
       case Some(value) =>
         server.stubFor(post(urlEqualTo(url))
-        .withHeader(CONTENT_TYPE, containing("application/json"))
-        .withHeader(X_API_KEY, containing(appConfig.xApiKey))
-        .withRequestBody(equalTo(requestBody))
-        .willReturn(
-          aResponse()
-            .withStatus(returnStatus)
-            .withBody(value)
-            .withFixedDelay(delayResponse)))
+          .withHeader(CONTENT_TYPE, containing("application/json"))
+          .withHeader(X_API_KEY, containing(appConfig.xApiKey))
+          .withRequestBody(equalTo(requestBody))
+          .willReturn(
+            aResponse()
+              .withStatus(returnStatus)
+              .withBody(value)
+              .withFixedDelay(delayResponse)))
       case _ =>
         server.stubFor(post(urlEqualTo(url))
-        .withHeader(CONTENT_TYPE, containing("application/json"))
-        .withHeader(X_API_KEY, containing(appConfig.xApiKey))
-        .withRequestBody(equalTo(requestBody))
-        .willReturn(
-          aResponse()
-            .withStatus(returnStatus)
-            .withFixedDelay(delayResponse)))
+          .withHeader(CONTENT_TYPE, containing("application/json"))
+          .withHeader(X_API_KEY, containing(appConfig.xApiKey))
+          .withRequestBody(equalTo(requestBody))
+          .willReturn(
+            aResponse()
+              .withStatus(returnStatus)
+              .withFixedDelay(delayResponse)))
     }
   }
 
   def stubForHeaderlessPost(server: WireMockServer,
-                  url: String,
-                  requestBody: String,
-                  returnStatus: Int,
-                  responseBody: String,
-                  delayResponse: Int = 0) = {
+                            url: String,
+                            requestBody: String,
+                            returnStatus: Int,
+                            responseBody: String,
+                            delayResponse: Int = 0) = {
 
     server.stubFor(post(urlEqualTo(url))
       .withRequestBody(equalTo(requestBody))
@@ -225,7 +225,6 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
           .withStatus(returnStatus)
           .withBody(responseBody).withFixedDelay(delayResponse)))
   }
-
 
 
   def stubForGet(server: WireMockServer,
@@ -241,9 +240,9 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
   }
 
   def stubForHeaderlessGet(server: WireMockServer,
-                 url: String, returnStatus: Int,
-                 responseBody: String,
-                 delayResponse: Int = 0): StubMapping = {
+                           url: String, returnStatus: Int,
+                           responseBody: String,
+                           delayResponse: Int = 0): StubMapping = {
     server.stubFor(get(urlEqualTo(url))
       .willReturn(
         aResponse()

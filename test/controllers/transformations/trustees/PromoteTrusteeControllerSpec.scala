@@ -45,7 +45,7 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
-  
+
   private val utr: String = "utr"
   private val index: Int = 0
   private val endDate: LocalDate = LocalDate.parse("2021-01-01")
@@ -64,7 +64,7 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
 
     baseJson.as[JsObject](__.json.update(addTrustees) andThen __.json.update(addTrustTaxable))
   }
-  
+
   "Promote trustee controller" - {
 
     "individual trustee" - {

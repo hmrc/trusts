@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,67 +21,79 @@ import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.freespec.AsyncFreeSpec
+import org.mongodb.scala.Document
 import org.scalatest.Assertion
 import org.scalatest.matchers.must.Matchers._
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
+import repositories.TransformationRepositoryImpl
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
 import utils.JsonUtils
 
 import scala.concurrent.Future
 
-class AddIndividualSettlorSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTestBase {
+class AddIndividualSettlorSpec extends IntegrationTestBase {
 
-  lazy val getTrustResponse: GetTrustSuccessResponse =
+  private lazy val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
 
-  lazy val expectedInitialGetJson: JsValue =
+  private lazy val expectedInitialGetJson: JsValue =
     JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
-  "an add individual settlor call" - {
+  "an add individual settlor call" should {
 
-      val newSettlorJson = Json.parse(
-        """
-          |{
-          |  "name":{
-          |    "firstName":"abcdefghijkl",
-          |    "middleName":"abcdefghijklmn",
-          |    "lastName":"abcde"
-          |  },
-          |  "dateOfBirth":"2000-01-01",
-          |  "identification": {
-          |    "nino": "ST019091"
-          |  },
-          |  "entityStart":"2002-01-01"
-          |}
-          |""".stripMargin
+    val newSettlorJson = Json.parse(
+      """
+        |{
+        |  "name":{
+        |    "firstName":"abcdefghijkl",
+        |    "middleName":"abcdefghijklmn",
+        |    "lastName":"abcde"
+        |  },
+        |  "dateOfBirth":"2000-01-01",
+        |  "identification": {
+        |    "nino": "ST019091"
+        |  },
+        |  "entityStart":"2002-01-01"
+        |}
+        |""".stripMargin
+    )
+
+    lazy val expectedGetAfterAddSettlorJson: JsValue =
+      JsonUtils.getJsonValueFromFile("add-individual-settlor-after-etmp-call.json")
+
+    val stubbedTrustsConnector = mock[TrustsConnector]
+    when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
+
+    def application = applicationBuilder
+      .overrides(
+        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[TrustsConnector].toInstance(stubbedTrustsConnector)
       )
+      .build()
 
-      lazy val expectedGetAfterAddSettlorJson: JsValue =
-        JsonUtils.getJsonValueFromFile("add-individual-settlor-after-etmp-call.json")
+    def repository = application.injector.instanceOf[TransformationRepositoryImpl]
 
-      val stubbedTrustsConnector = mock[TrustsConnector]
-      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
+    def dropDB(): Unit = {
+      await(repository.collection.deleteMany(filter = Document()).toFuture())
+      await(repository.ensureIndexes)
+    }
 
-      val application = applicationBuilder
-        .overrides(
-          bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-          bind[TrustsConnector].toInstance(stubbedTrustsConnector)
-        )
-        .build()
+    "return add data in a subsequent 'get' call, for identifier '5174384721'" in assertMongoTest(application) { app =>
+      runTest("5174384721", app)
+    }
 
-    "must return add data in a subsequent 'get' call" in assertMongoTest(application) { application =>
-      runTest("5174384721", application)
-      runTest("0123456789ABCDE", application)
+    "return add data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) { app =>
+      runTest("0123456789ABCDE", app)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {
+      dropDB()
+
       val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(result) mustBe OK
       contentAsJson(result) mustBe expectedInitialGetJson

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,8 @@ import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.GetTrustSuccessResponse
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.Assertion
 import org.scalatest.matchers.must.Matchers._
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsValue, Json}
@@ -36,16 +34,16 @@ import utils.{JsonUtils, NonTaxable5MLDFixtures}
 
 import scala.concurrent.Future
 
-class AddPartnershipAssetSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTestBase {
+class AddPartnershipAssetSpec extends IntegrationTestBase {
 
-  lazy val getTrustResponse: GetTrustSuccessResponse =
+  private lazy val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromString(NonTaxable5MLDFixtures.DES.get5MLDTrustNonTaxableResponseWithAllAssetTypes).as[GetTrustSuccessResponse]
 
-  lazy val expectedInitialGetJson: JsValue = NonTaxable5MLDFixtures.Trusts.getTransformedNonTaxableTrustResponseWithAllAssetTypes
+  private lazy val expectedInitialGetJson: JsValue = NonTaxable5MLDFixtures.Trusts.getTransformedNonTaxableTrustResponseWithAllAssetTypes
 
-  lazy val expectedSubsequentGetJson: JsValue = JsonUtils.getJsonValueFromFile("5MLD/NonTaxable/transforms/assets/partnership/add-after-etmp-call.json")
+  private lazy val expectedSubsequentGetJson: JsValue = JsonUtils.getJsonValueFromFile("5MLD/NonTaxable/transforms/assets/partnership/add-after-etmp-call.json")
 
-  "an add partnership asset call" - {
+  "an add partnership asset call" should {
 
     val payload = Json.parse(
       """
@@ -57,15 +55,18 @@ class AddPartnershipAssetSpec extends AsyncFreeSpec with MockitoSugar with Integ
     val mockTrustsConnector = mock[TrustsConnector]
     when(mockTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
 
-    val application = applicationBuilder
+    def application = applicationBuilder
       .overrides(
         bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(mockTrustsConnector)
       ).build()
 
-    "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
-      runTest("0123456789", application)
-      runTest("0123456789ABCDE", application)
+    "return amended data in a subsequent 'get' callc" in assertMongoTest(application) { app =>
+      runTest("0123456789", app)
+    }
+
+    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) { app =>
+      runTest("0123456789ABCDE", app)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {

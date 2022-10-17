@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,14 @@
 
 package uk.gov.hmrc.repositories
 
-import org.scalatestplus.mockito.MockitoSugar
+import models.registration.RegistrationSubmissionDraftData
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.itbase.IntegrationTestBase
-import models.registration.RegistrationSubmissionDraftData
-import org.scalatest.freespec.AsyncFreeSpec
-import org.scalatest.matchers.must.Matchers._
 
-class SubmissionDraftManagementSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTestBase {
+class SubmissionDraftManagementSpec extends IntegrationTestBase {
 
   private val draftData = Json.obj(
     "field1" -> "value1",
@@ -38,35 +36,44 @@ class SubmissionDraftManagementSpec extends AsyncFreeSpec with MockitoSugar with
   private val createdAtPath = JsPath() \ 'createdAt
   private val dataPath = JsPath() \ 'data
   private val referencePath = JsPath() \ 'reference
+  private val draftIdPath = JsPath() \ 'draftId
 
-  "working with submission drafts" - {
+  "working with submission drafts" should {
 
-    "must read an empty document" in assertMongoTest(createApplication) { application =>
+    "read an empty document" in assertMongoTest(createApplication)({ (app) =>
       // Initial empty
-      val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts")).get
+      val result = route(app, FakeRequest(GET, "/trusts/register/submission-drafts")).get
       status(result) mustBe OK
       contentAsJson(result) mustBe Json.parse("[]")
-    }
+    })
 
-    "must read non-existent draft" in assertMongoTest(createApplication) { application =>
+    "read non-existent draft" in assertMongoTest(createApplication)({ (app) =>
       // Read non-existent draft
-      val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/beneficiaries")).get
+      val result = route(app, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/beneficiaries")).get
       status(result) mustBe NOT_FOUND
-    }
+    })
 
-    "must create a draft section" in assertMongoTest(createApplication) { application =>
+    "create a draft section" in assertMongoTest(createApplication)({ (app) =>
       // Create draft section
       val draftRequestData = RegistrationSubmissionDraftData(draftData, None, None)
       val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/main")
         .withBody(Json.toJson(draftRequestData))
         .withHeaders(CONTENT_TYPE -> "application/json")
-      val result = route(application, request).get
+      val result = route(app, request).get
       status(result) mustBe OK
-    }
+    })
 
-    "must read a draft section" ignore assertMongoTest(createApplication) { application =>
+    "read a draft section" in assertMongoTest(createApplication) { (app) =>
+      // Create draft section
+      val draftRequestData = RegistrationSubmissionDraftData(draftData, None, None)
+      val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/main")
+        .withBody(Json.toJson(draftRequestData))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+      val rez = route(app, request).get
+      status(rez) mustBe OK
+
       // Read draft section
-      val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/main")).get
+      val result = route(app, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/main")).get
       status(result) mustBe OK
 
       val json = contentAsJson(result)
@@ -77,19 +84,27 @@ class SubmissionDraftManagementSpec extends AsyncFreeSpec with MockitoSugar with
       assert(json.transform(referencePath.json.pick).isError)
     }
 
-    "must update a section" in assertMongoTest(createApplication) { application =>
+    "update a section" in assertMongoTest(createApplication)({ (app) =>
       // Update draft section
       val amendedDraftRequestData = RegistrationSubmissionDraftData(amendedDraftData, Some("amendedReference"), None)
       val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/main")
         .withBody(Json.toJson(amendedDraftRequestData))
         .withHeaders(CONTENT_TYPE -> "application/json")
-      val result = route(application, request).get
+      val result = route(app, request).get
       status(result) mustBe OK
-    }
+    })
 
-    "must read an amended section" ignore assertMongoTest(createApplication) { application =>
+    "read an amended section" in assertMongoTest(createApplication) { (app) =>
+      // Update draft section
+      val amendedDraftRequestData = RegistrationSubmissionDraftData(amendedDraftData, Some("amendedReference"), None)
+      val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/main")
+        .withBody(Json.toJson(amendedDraftRequestData))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+      val rez = route(app, request).get
+      status(rez) mustBe OK
+
       // Read amended draft section
-      val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/main")).get
+      val result = route(app, FakeRequest(GET, "/trusts/register/submission-drafts/Draft0001/main")).get
       status(result) mustBe OK
 
       val resultJson = contentAsJson(result)
@@ -97,9 +112,24 @@ class SubmissionDraftManagementSpec extends AsyncFreeSpec with MockitoSugar with
       resultJson.transform(referencePath.json.pick) mustBe JsSuccess(JsString("amendedReference"), referencePath)
     }
 
-    "must read all drafts" ignore assertMongoTest(createApplication) { application =>
+    "read all drafts" in assertMongoTest(createApplication) { (app) =>
+      // Create drafts section
+      val draftRequestData = RegistrationSubmissionDraftData(draftData, None, None)
+      val request = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/main")
+        .withBody(Json.toJson(draftRequestData))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+      val rez1 = route(app, request).get
+      status(rez1) mustBe OK
+      // Update draft section
+      val amendedDraftRequestData = RegistrationSubmissionDraftData(amendedDraftData, Some("amendedReference"), None)
+      val request2 = FakeRequest(POST, "/trusts/register/submission-drafts/Draft0001/main")
+        .withBody(Json.toJson(amendedDraftRequestData))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+      val rez2 = route(app, request2).get
+      status(rez2) mustBe OK
+
       // Read all drafts
-      val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts")).get
+      val result = route(app, FakeRequest(GET, "/trusts/register/submission-drafts")).get
       status(result) mustBe OK
       val json = contentAsJson(result)
 
@@ -109,22 +139,21 @@ class SubmissionDraftManagementSpec extends AsyncFreeSpec with MockitoSugar with
       val draft = drafts(0)
       assert(draft.transform(createdAtPath.json.pick).isSuccess)
 
-      val draftIdPath = JsPath() \ 'draftId
       draft.transform(draftIdPath.json.pick) mustBe JsSuccess(JsString("Draft0001"), draftIdPath)
       draft.transform(referencePath.json.pick) mustBe JsSuccess(JsString("amendedReference"), referencePath)
     }
 
-    "must delete a draft" in assertMongoTest(createApplication) { application =>
+    "delete a draft" in assertMongoTest(createApplication)({ (app) =>
       // Delete draft
-      val result = route(application, FakeRequest(DELETE, "/trusts/register/submission-drafts/Draft0001")).get
+      val result = route(app, FakeRequest(DELETE, "/trusts/register/submission-drafts/Draft0001")).get
       status(result) mustBe OK
-    }
+    })
 
-    "must read all empty drafts" in assertMongoTest(createApplication) { application =>
+    "read all empty drafts" in assertMongoTest(createApplication)({ (app) =>
       // Read all (empty) drafts
-      val result = route(application, FakeRequest(GET, "/trusts/register/submission-drafts")).get
+      val result = route(app, FakeRequest(GET, "/trusts/register/submission-drafts")).get
       status(result) mustBe OK
       contentAsJson(result) mustBe Json.parse("[]")
-    }
+    })
   }
 }

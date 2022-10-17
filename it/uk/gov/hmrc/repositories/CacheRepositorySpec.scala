@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,18 @@
 
 package uk.gov.hmrc.repositories
 
-import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
+import repositories.CacheRepositoryImpl
 import uk.gov.hmrc.itbase.IntegrationTestBase
-import repositories.CacheRepository
 
-class CacheRepositorySpec extends AsyncFreeSpec with IntegrationTestBase {
+class CacheRepositorySpec extends IntegrationTestBase {
 
-  "a playback repository" - {
-    "must be able to store and retrieve a payload"  in assertMongoTest(createApplication) { app =>
+  private val data = Json.obj("testField" -> "testValue")
 
-      val repository = app.injector.instanceOf[CacheRepository]
+  "a playback repository" should {
+    "be able to store and retrieve a payload" in {
+      val repository = app.injector.instanceOf[CacheRepositoryImpl]
 
       val storedOk = repository.set("UTRUTRUTR", "InternalId", "sessionId", data)
       storedOk.futureValue mustBe true
@@ -36,7 +36,4 @@ class CacheRepositorySpec extends AsyncFreeSpec with IntegrationTestBase {
       retrieved.futureValue mustBe Some(data)
     }
   }
-
-  private val data = Json.obj("testField" -> "testValue")
-
 }

@@ -16,16 +16,16 @@
 
 package controllers.actions
 
-import org.scalatestplus.mockito.MockitoSugar
+import models.registration.ApiResponse.invalidUTRErrorResponse
 import org.scalatest.matchers.must.Matchers._
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.Json
 import play.api.mvc.AnyContent
 import play.api.mvc.Results.{BadRequest, Ok}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import models.registration.ApiResponse.invalidUTRErrorResponse
-import org.scalatest.wordspec.AnyWordSpec
 
 import scala.concurrent.Future
 

@@ -66,7 +66,7 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
 
     baseJson.as[JsObject](__.json.update(adder))
   }
-  
+
   "Remove beneficiary controller" - {
 
     "unidentified beneficiary" - {

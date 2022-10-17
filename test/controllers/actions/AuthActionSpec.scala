@@ -16,7 +16,6 @@
 
 package controllers.actions
 
-import java.time.{LocalDate, ZoneId}
 import base.BaseSpec
 import com.google.inject.Inject
 import org.scalatest.matchers.must.Matchers._
@@ -27,6 +26,8 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, LoginTimes, Retrieval, ~}
 import uk.gov.hmrc.http.HeaderCarrier
+
+import java.time.{LocalDate, ZoneId}
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthActionSpec extends BaseSpec {
@@ -46,7 +47,7 @@ class AuthActionSpec extends BaseSpec {
   private def minimumAuthRetrievals(affinityGroup: AffinityGroup): AllRetrievals =
     Future.successful(Some("id") ~ Some(affinityGroup) ~ None ~ LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, None) ~ None ~ None)
 
-  private def allRetrievals(affinityGroup: AffinityGroup): AllRetrievals  =
+  private def allRetrievals(affinityGroup: AffinityGroup): AllRetrievals =
     Future.successful(Some("id") ~ Some(affinityGroup) ~ Some("groupIdentifier") ~ LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, None) ~ Some(Credentials("12345", "governmentGateway")) ~ Some("org@email.com"))
 
   private def actionToTest(authConnector: AuthConnector) = {
@@ -98,7 +99,7 @@ class AuthActionSpec extends BaseSpec {
     "Individual user" must {
 
       "redirect the user to the unauthorised page" in {
-        
+
         val authAction = actionToTest(new FakeAuthConnector(minimumAuthRetrievals(Individual)))
         val controller = new Harness(authAction)
         val result = controller.onSubmit()(fakeRequest)

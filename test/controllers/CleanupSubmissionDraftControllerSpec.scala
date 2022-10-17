@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.FakeIdentifierAction
-import models.registration.{RegistrationSubmission, RegistrationSubmissionDraft}
+import models.registration.RegistrationSubmissionDraft
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatest._
@@ -31,9 +31,8 @@ import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import repositories.RegistrationSubmissionRepository
-import services.TaxYearService
 import services.dates.LocalDateTimeService
-import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
+import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import utils.JsonFixtures
 
 import java.time.LocalDateTime

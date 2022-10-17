@@ -1,7 +1,9 @@
 <configuration>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>%date{ISO8601} level=[%level] logger=[%logger] thread=[%thread] message=[%message] %replace(exception=[%xException]){'^exception=\[\]$',''}%n</pattern>
+            <pattern>%date{ISO8601} level=[%level] logger=[%logger] thread=[%thread] message=[%message]
+                %replace(exception=[%xException]){'^exception=\[\]$',''}%n
+            </pattern>
         </encoder>
     </appender>
 
@@ -12,8 +14,6 @@
     <logger name="connector" level="WARN"/>
     <logger name="transformers" level="INFO"/>
     <logger name="utils" level="WARN"/>
-    <logger name="reactivemongo.core.protocol.MongoHandler" level="OFF"/>
-    <logger name="reactivemongo.api.MongoConnection" level="OFF"/>
 
     <root level="WARN">
         <appender-ref ref="CONSOLE"/>

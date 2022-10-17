@@ -31,7 +31,7 @@ import utils.Session
 
 import scala.concurrent.Future
 
-class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach  with IntegrationPatience {
+class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach with IntegrationPatience {
 
   private lazy val bodyParsers = Helpers.stubControllerComponents().parsers.default
 
@@ -59,7 +59,7 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
       "return OK" when {
         "successfully removed transforms" in {
           when(mockTransformationService.removeAllTransformations(any(), any(), any()))
-            .thenReturn(Future.successful(None))
+            .thenReturn(Future.successful(true))
 
           val request = FakeRequest(DELETE, "path")
 

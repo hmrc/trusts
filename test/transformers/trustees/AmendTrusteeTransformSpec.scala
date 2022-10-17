@@ -195,7 +195,7 @@ class AmendTrusteeTransformSpec extends AnyFreeSpec {
           name = "newName",
           phoneNumber = "newPhone",
           email = Some("newEmail"),
-          identification = IdentificationOrgType( Some("newUtr"), None, None),
+          identification = IdentificationOrgType(Some("newUtr"), None, None),
           countryOfResidence = None
         )
 

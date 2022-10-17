@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,8 @@ import models.variation.VariationResponse
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.Assertion
 import org.scalatest.matchers.must.Matchers._
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsString, JsValue, Json}
@@ -40,7 +38,7 @@ import utils.JsonUtils
 import java.time.LocalDate
 import scala.concurrent.Future
 
-class ComboBeneficiarySpec extends AsyncFreeSpec with MockitoSugar with IntegrationTestBase {
+class ComboBeneficiarySpec extends IntegrationTestBase {
 
   private lazy val getTrustResponse: GetTrustSuccessResponse =
     JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
@@ -52,27 +50,30 @@ class ComboBeneficiarySpec extends AsyncFreeSpec with MockitoSugar with Integrat
     override def now: LocalDate = LocalDate.of(2020, 4, 1)
   }
 
-  "doing a bunch of beneficiary transforms" - {
-      lazy val expectedGetAfterAddBeneficiaryJson: JsValue =
-        JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-combo-beneficiary.json")
+  "doing a bunch of beneficiary transforms" should {
+    lazy val expectedGetAfterAddBeneficiaryJson: JsValue =
+      JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-combo-beneficiary.json")
 
-      lazy val expectedDeclaredBeneficiaryJson: JsValue =
-        JsonUtils.getJsonValueFromFile("it/trusts-integration-declared-combo-beneficiary.json")
+    lazy val expectedDeclaredBeneficiaryJson: JsValue =
+      JsonUtils.getJsonValueFromFile("it/trusts-integration-declared-combo-beneficiary.json")
 
-      val stubbedTrustsConnector = mock[TrustsConnector]
-      when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
+    val stubbedTrustsConnector = mock[TrustsConnector]
+    when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
 
-      val application = applicationBuilder
-        .overrides(
-          bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
-          bind[TrustsConnector].toInstance(stubbedTrustsConnector),
-          bind[LocalDateService].toInstance(TestLocalDateService),
-        )
-        .build()
+    def application = applicationBuilder
+      .overrides(
+        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[TrustsConnector].toInstance(stubbedTrustsConnector),
+        bind[LocalDateService].toInstance(TestLocalDateService),
+      )
+      .build()
 
-    "must return amended data in a subsequent 'get' call" in assertMongoTest(application) { application =>
-      runTest("5174384721", application)
-      runTest("0123456789ABCDE", application)
+    "return amended data in a subsequent 'get' call, for identifier '5174384721'" in assertMongoTest(application) { app =>
+      runTest("5174384721", app)
+    }
+
+    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) { app =>
+      runTest("0123456789ABCDE", app)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {

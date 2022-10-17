@@ -39,7 +39,7 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import java.time.LocalDate
 import scala.concurrent.Future
 
-class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach  with IntegrationPatience {
+class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach with IntegrationPatience {
 
   private lazy val bodyParsers = Helpers.stubControllerComponents().parsers.default
 

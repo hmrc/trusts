@@ -45,7 +45,7 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
-  
+
   private val utr: String = "utr"
   private val index: Int = 0
   private val amount: Long = 1000L
@@ -60,7 +60,7 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
 
     baseJson.as[JsObject](__.json.update(adder))
   }
-  
+
   "Amend asset controller" - {
 
     "money asset" - {

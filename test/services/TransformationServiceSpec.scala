@@ -37,8 +37,8 @@ import transformers.trustees._
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.Constants._
 import utils.{JsonFixtures, JsonUtils, Session}
-import java.time.LocalDate
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with ScalaFutures with JsonFixtures {
@@ -286,7 +286,7 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
         val repository = mock[TransformationRepositoryImpl]
         val service = new TransformationService(repository, mock[TrustsService], auditService)
 
-        when(repository.resetCache(any(), any(), any())).thenReturn(Future.successful(None))
+        when(repository.resetCache(any(), any(), any())).thenReturn(Future.successful(true))
 
         val result = service.removeAllTransformations(utr, internalId, sessionId)
 

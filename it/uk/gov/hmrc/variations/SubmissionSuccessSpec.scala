@@ -1,20 +1,33 @@
+/*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package uk.gov.hmrc.variations
 
 import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.get_trust.{GetTrustSuccessResponse, ResponseHeader}
-import models.variation.VariationResponse
-import models.{DeclarationName, FeatureResponse, NameType}
-import models.variation.DeclarationForApi
-import org.scalatestplus.mockito.MockitoSugar
-import org.mockito.Mockito._
+import models.variation.{DeclarationForApi, VariationResponse}
+import models.{DeclarationName, NameType}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.scalatest.wordspec.AsyncWordSpec
+import org.mockito.Mockito._
 import org.scalatest.matchers.must.Matchers._
 import play.api.inject.bind
 import play.api.libs.json.Json
-import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
+import play.api.test.{FakeRequest, Helpers}
 import repositories.CacheRepository
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.itbase.IntegrationTestBase
@@ -22,7 +35,7 @@ import utils.NonTaxable5MLDFixtures.getJsonFromFile
 
 import scala.concurrent.Future
 
-class SubmissionSuccessSpec extends AsyncWordSpec with MockitoSugar with IntegrationTestBase {
+class SubmissionSuccessSpec extends IntegrationTestBase {
 
   val utr = "5174384721"
   val internalId = "internalId"
@@ -38,8 +51,8 @@ class SubmissionSuccessSpec extends AsyncWordSpec with MockitoSugar with Integra
       None
     )
 
-    val trustResponse: GetTrustSuccessResponse = new GetTrustSuccessResponse{
-      val responseHeader = ResponseHeader("Processed", "123456789012")
+    val trustResponse: GetTrustSuccessResponse = new GetTrustSuccessResponse {
+      val responseHeader: ResponseHeader = ResponseHeader("Processed", "123456789012")
     }
 
     lazy val get5MLDTrustNonTaxableResponse: String = getJsonFromFile("5MLD/NonTaxable/des/valid-get-trust-5mld-non-taxable-des-response.json")
@@ -53,7 +66,7 @@ class SubmissionSuccessSpec extends AsyncWordSpec with MockitoSugar with Integra
     when(stubbedTrustsConnector.trustVariation(any()))
       .thenReturn(Future.successful(VariationResponse("tvn")))
 
-    lazy val application = applicationBuilder
+    def application = applicationBuilder
       .overrides(
         bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(stubbedTrustsConnector),

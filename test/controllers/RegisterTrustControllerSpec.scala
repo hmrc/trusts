@@ -23,7 +23,7 @@ import models.nonRepudiation.NRSResponse
 import models.registration._
 import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentNotProcessed, TaxEnrolmentSuccess}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{when, _}
+import org.mockito.Mockito._
 import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json
 import play.api.mvc.BodyParsers

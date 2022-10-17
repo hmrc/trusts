@@ -17,9 +17,9 @@
 package utils
 
 import base.BaseSpec
+import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.JsValue
 import utils.JsonOps._
-import org.scalatest.matchers.must.Matchers._
 
 class JsonOpsSpec extends BaseSpec {
 

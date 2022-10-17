@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,7 @@ import models.get_trust.GetTrustSuccessResponse
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.Assertion
-import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.must.Matchers._
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.{JsObject, JsValue, Json}
@@ -37,13 +35,12 @@ import utils.{JsonUtils, NonTaxable5MLDFixtures}
 
 import scala.concurrent.Future
 
-class RemoveAssetSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTestBase {
+class RemoveAssetSpec extends IntegrationTestBase {
 
   private val utr: String = "0123456789"
   private val urn: String = "0123456789ABCDE"
 
   private def runTest(identifier: String, application: Application, assetType: String): Assertion = {
-
     val body: JsValue = Json.parse(
       s"""
          |{
@@ -75,7 +72,7 @@ class RemoveAssetSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTe
     .getJsonValueFromString(NonTaxable5MLDFixtures.DES.get5MLDTrustNonTaxableResponseWithAllAssetTypes)
     .as[GetTrustSuccessResponse]
 
-  private lazy val application: Application = {
+  private def application: Application = {
     val mockTrustsConnector = mock[TrustsConnector]
     when(mockTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
 
@@ -85,8 +82,8 @@ class RemoveAssetSpec extends AsyncFreeSpec with MockitoSugar with IntegrationTe
     ).build()
   }
 
-  "Remove asset" - {
-    "must return amended data in a subsequent 'get' call for each asset type" in assertMongoTest(application) { app =>
+  "Remove asset" should {
+    "return amended data in a subsequent 'get' call for each asset type" in assertMongoTest(application) { app =>
 
       for (assetType <- RemoveAsset.validAssetTypes) {
         runTest(utr, app, assetType)

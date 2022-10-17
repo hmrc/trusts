@@ -45,7 +45,7 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
-  
+
   private val utr: String = "utr"
   private val index: Int = 0
   private val amount: Long = 1000L
@@ -66,7 +66,7 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
 
     baseJson.as[JsObject](__.json.update(adder))
   }
-  
+
   "Remove asset controller" - {
 
     "money asset" - {
@@ -209,7 +209,7 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
         address = None,
         businessValue = None
       )
-      
+
       val assetType: String = "business"
 
       "add a new remove transform" in {
@@ -329,7 +329,7 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
 
       }
     }
-    
+
     "non-EEA business asset" - {
 
       val asset = NonEEABusinessType(

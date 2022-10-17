@@ -183,7 +183,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
   private object LocalDateTimeServiceStub extends LocalDateTimeService {
     override def now: LocalDateTime = currentDateTime
   }
-  
+
   ".getTrustTaxable" should {
 
     "respond with OK and true when trust is taxable" in {

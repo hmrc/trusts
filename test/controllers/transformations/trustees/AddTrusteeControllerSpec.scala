@@ -21,10 +21,10 @@ import models.NameType
 import models.variation.{TrusteeIndividualType, TrusteeOrgType}
 import org.mockito.ArgumentMatchers.{any, eq => equalTo}
 import org.mockito.Mockito.{reset, verify, when}
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers._
-import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsValue, Json}
@@ -66,7 +66,7 @@ class AddTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
     when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any(), any()))
       .thenReturn(Future.successful(false))
   }
-  
+
   "Add trustee controller" - {
 
     "individual trustee" - {

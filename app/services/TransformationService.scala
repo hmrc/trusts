@@ -135,7 +135,7 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
-  def removeAllTransformations(identifier: String, internalId: String, sessionId: String): Future[Option[JsObject]] = {
+  def removeAllTransformations(identifier: String, internalId: String, sessionId: String): Future[Boolean] = {
     repository.resetCache(identifier, internalId, sessionId)
   }
 

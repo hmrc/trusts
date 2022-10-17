@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,23 @@
 
 package uk.gov.hmrc.repositories
 
-import java.time.LocalDateTime
-import models.MongoDateTimeFormats
+import controllers.actions.{FakeIdentifierAction, IdentifierAction}
+import models.registration.RegistrationSubmissionDraft
+import org.scalatest.matchers.must.Matchers._
+import play.api.Application
+import play.api.inject.bind
 import play.api.libs.json._
+import play.api.mvc.ControllerComponents
+import play.api.test.Helpers.stubControllerComponents
+import repositories.RegistrationSubmissionRepositoryImpl
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.itbase.IntegrationTestBase
-import models.registration.RegistrationSubmissionDraft
-import org.scalatest.freespec.AsyncFreeSpec
-import org.scalatest.matchers.must.Matchers._
-import repositories.RegistrationSubmissionRepository
 
+import java.time.LocalDateTime
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-class RegistrationSubmissionRepositorySpec extends AsyncFreeSpec with IntegrationTestBase with MongoDateTimeFormats {
+class RegistrationSubmissionRepositorySpec extends IntegrationTestBase {
 
   // Make sure we use value of LocalDateTime that survives JSON round trip - and isn't expired.
   private val testDateTime: LocalDateTime = Json.toJson(LocalDateTime.now()).as[LocalDateTime]
@@ -50,10 +53,22 @@ class RegistrationSubmissionRepositorySpec extends AsyncFreeSpec with Integratio
     "theAnswer" -> 6.28
   )
 
-  "the registration submission repository" - {
+  val cc: ControllerComponents = stubControllerComponents()
+  val appWithoutSavedRegistration: Application = applicationBuilder
+    .configure(Seq("features.removeSavedRegistrations" -> false): _*)
+    .overrides(
+      bind[IdentifierAction].toInstance(new FakeIdentifierAction(cc.parsers.default, Agent))
+    ).build()
+  val appWithSavedRegistration: Application = applicationBuilder
+    .configure(Seq("features.removeSavedRegistrations" -> true): _*)
+    .overrides(
+      bind[IdentifierAction].toInstance(new FakeIdentifierAction(cc.parsers.default, Agent))
+    ).build()
 
-    "must be able to store and retrieve data" in assertMongoTest(createApplication) { app =>
-      val repository = app.injector.instanceOf[RegistrationSubmissionRepository]
+  "the registration submission repository" should {
+
+    "be able to store and retrieve data" in assertMongoTest(createApplication)({ (app) =>
+      val repository = app.injector.instanceOf[RegistrationSubmissionRepositoryImpl]
 
       repository.getRecentDrafts("InternalId", Agent).futureValue mustBe Seq.empty[RegistrationSubmissionDraft]
 
@@ -107,11 +122,10 @@ class RegistrationSubmissionRepositorySpec extends AsyncFreeSpec with Integratio
       repository.getDraft("draftId3", "InternalId").futureValue mustBe Some(state4)
 
       repository.getRecentDrafts("InternalId", Agent).futureValue mustBe Seq(state2, state1)
-    }
+    })
 
-    "must be able to remove drafts no longer being used" in assertMongoTest(createApplication) { app =>
-
-      val repository = app.injector.instanceOf[RegistrationSubmissionRepository]
+    "be able to remove drafts no longer being used" in assertMongoTest(createApplication)({ (app) =>
+      val repository = app.injector.instanceOf[RegistrationSubmissionRepositoryImpl]
 
       repository.removeDraft("draftId1", "InternalId").futureValue mustBe true
 
@@ -131,11 +145,10 @@ class RegistrationSubmissionRepositorySpec extends AsyncFreeSpec with Integratio
       repository.removeDraft("draftId1", "InternalId").futureValue mustBe true
 
       repository.getDraft("draftId1", "InternalId").futureValue mustBe None
-    }
+    })
 
-    "must be able to store and retrieve more than 20 drafts"  in assertMongoTest(createApplication) { app =>
-
-      val repository = app.injector.instanceOf[RegistrationSubmissionRepository]
+    "be able to store and retrieve more than 20 drafts" in assertMongoTest(createApplication)({ (app) =>
+      val repository = app.injector.instanceOf[RegistrationSubmissionRepositoryImpl]
 
       repository.getRecentDrafts("InternalId", Agent).futureValue mustBe Seq.empty[RegistrationSubmissionDraft]
 
@@ -153,12 +166,10 @@ class RegistrationSubmissionRepositorySpec extends AsyncFreeSpec with Integratio
 
       repository.getRecentDrafts("InternalId", Agent).futureValue.size mustBe 50
       repository.getRecentDrafts("InternalId", Organisation).futureValue.size mustBe 1
-    }
+    })
 
-    "must remove all documents from registration-submissions when feature enabled" in assertMongoTest(
-      applicationBuilder.configure(Seq("features.removeSavedRegistrations" -> true): _*).build()
-    ) { app =>
-      val repository = app.injector.instanceOf[RegistrationSubmissionRepository]
+    "remove all documents from registration-submissions when feature enabled" in assertMongoTest(appWithSavedRegistration)({ (app) =>
+      val repository = app.injector.instanceOf[RegistrationSubmissionRepositoryImpl]
 
       for (i <- 0 until 50) {
         val draft = RegistrationSubmissionDraft(
@@ -177,31 +188,28 @@ class RegistrationSubmissionRepositorySpec extends AsyncFreeSpec with Integratio
       Await.result(repository.removeAllDrafts(), Duration.Inf)
 
       repository.getRecentDrafts("InternalId", Agent).futureValue.size mustBe 0
-    }
+    })
+
+    "not remove all documents from registration-submissions when feature disabled" in assertMongoTest(appWithoutSavedRegistration)({ (app) =>
+      val repository = app.injector.instanceOf[RegistrationSubmissionRepositoryImpl]
+
+      for (i <- 0 until 50) {
+        val draft = RegistrationSubmissionDraft(
+          s"draftId$i",
+          "InternalId",
+          testDateTime,
+          data1,
+          Some("reference1"),
+          Some(true)
+        )
+        Await.result(repository.setDraft(draft), Duration.Inf)
+      }
+
+      repository.getRecentDrafts("InternalId", Agent).futureValue.size mustBe 50
+
+      Await.result(repository.removeAllDrafts(), Duration.Inf)
+
+      repository.getRecentDrafts("InternalId", Agent).futureValue.size mustBe 50
+    })
   }
-
-  "must not remove all documents from registration-submissions when feature disabled" in assertMongoTest(
-    applicationBuilder.configure(Seq("features.removeSavedRegistrations" -> false): _*).build()
-  ) { app =>
-    val repository = app.injector.instanceOf[RegistrationSubmissionRepository]
-
-    for (i <- 0 until 50) {
-      val draft = RegistrationSubmissionDraft(
-        s"draftId$i",
-        "InternalId",
-        testDateTime,
-        data1,
-        Some("reference1"),
-        Some(true)
-      )
-      Await.result(repository.setDraft(draft), Duration.Inf)
-    }
-
-    repository.getRecentDrafts("InternalId", Agent).futureValue.size mustBe 50
-
-    Await.result(repository.removeAllDrafts(), Duration.Inf)
-
-    repository.getRecentDrafts("InternalId", Agent).futureValue.size mustBe 50
-  }
-
 }

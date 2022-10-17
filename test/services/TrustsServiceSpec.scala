@@ -26,7 +26,7 @@ import models.registration.RegistrationTrnResponse
 import models.tax_enrolments.SubscriptionIdResponse
 import models.variation.VariationResponse
 import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito.{times, verify, verifyZeroInteractions, when}
+import org.mockito.Mockito.{times, verify, verifyNoMoreInteractions, when}
 import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.JsValue
 import repositories.CacheRepositoryImpl
@@ -42,7 +42,7 @@ class TrustsServiceSpec extends BaseSpec {
     val mockTrustsConnector: SubscriptionConnector = mock[SubscriptionConnector]
     val mockRepository: CacheRepositoryImpl = mock[CacheRepositoryImpl]
     when(mockRepository.get(any[String], any[String], any[String])).thenReturn(Future.successful(None))
-    when(mockRepository.resetCache(any[String], any[String], any[String])).thenReturn(Future.successful(None))
+    when(mockRepository.resetCache(any[String], any[String], any[String])).thenReturn(Future.successful(true))
     val myId = "myId"
     val sessionId: String = "sessionId"
 
@@ -128,7 +128,7 @@ class TrustsServiceSpec extends BaseSpec {
 
     val OUT = new TrustsService(mockSubscriptionConnector, mockTrustsConnector, mockRepository)
 
-    whenReady(OUT.getTrustInfoFormBundleNo("75464876")) {formBundleNo =>
+    whenReady(OUT.getTrustInfoFormBundleNo("75464876")) { formBundleNo =>
       formBundleNo mustBe etmpData.responseHeader.formBundleNo
     }
   }
@@ -209,7 +209,7 @@ class TrustsServiceSpec extends BaseSpec {
 
         when(mockRepository.get(any[String], any[String], any[String])).thenReturn(Future.successful(None))
 
-        when(mockRepository.resetCache(any[String], any[String], any[String])).thenReturn(Future.successful(None))
+        when(mockRepository.resetCache(any[String], any[String], any[String])).thenReturn(Future.successful(true))
 
         when(mockSubscriptionConnector.getTrustInfo(any()))
           .thenReturn(Future.successful(TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))))
@@ -236,7 +236,7 @@ class TrustsServiceSpec extends BaseSpec {
         val futureResult = SUT.getTrustInfo(utr, myId, sessionId)
         whenReady(futureResult) { result =>
           result mustBe models.get_trust.TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1"))
-          verifyZeroInteractions(mockSubscriptionConnector)
+          verifyNoMoreInteractions(mockSubscriptionConnector)
         }
       }
     }
