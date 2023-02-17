@@ -25,11 +25,10 @@ import play.api.http.ContentTypes.JSON
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utils.Constants.{CONTENT_TYPE, X_API_KEY}
 
-import scala.concurrent.ExecutionContext.Implicits._
-import scala.concurrent.Future
+import scala.concurrent.{Future, ExecutionContext}
 
 @Singleton
-class NonRepudiationConnector @Inject()(http: HttpClient, config: AppConfig) extends Logging {
+class NonRepudiationConnector @Inject()(http: HttpClient, config: AppConfig)(implicit ec: ExecutionContext) extends Logging {
 
   private def headers = Seq(CONTENT_TYPE -> JSON, X_API_KEY -> config.xApiKey)
 

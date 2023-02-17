@@ -31,6 +31,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.JsonUtils
 
 import java.time.LocalDate
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class RemoveProtectorTransformSpec extends AnyFreeSpec with ScalaFutures with MockitoSugar {

@@ -29,13 +29,12 @@ import play.api.libs.json.{JsValue, Json}
 import repositories.CacheRepository
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class TrustsService @Inject()(val trustsConnector: TrustsConnector,
                               val subscriptionConnector: SubscriptionConnector,
-                              val repository: CacheRepository) extends Logging {
+                              val repository: CacheRepository)(implicit ec: ExecutionContext) extends Logging {
 
   def getTrustInfoFormBundleNo(identifier: String): Future[String] =
     trustsConnector.getTrustInfo(identifier).map {

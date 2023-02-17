@@ -28,6 +28,7 @@ import play.api.test.{FakeRequest, Helpers}
 import services.TaxableMigrationService
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TaxEnrolmentCallbackControllerSpec extends BaseSpec with GuiceOneServerPerSuite {

@@ -30,7 +30,7 @@ import utils.Constants._
 import utils.JsonOps.prunePath
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
@@ -39,7 +39,7 @@ class SubmissionDraftController @Inject()(
                                            identify: IdentifierAction,
                                            localDateTimeService: LocalDateTimeService,
                                            cc: ControllerComponents
-                                         ) extends TrustsBaseController(cc) with Logging {
+                                         )(implicit ec: ExecutionContext) extends TrustsBaseController(cc) with Logging {
 
   def setSection(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {

@@ -32,6 +32,7 @@ import play.api.libs.json.JsValue
 import repositories.CacheRepositoryImpl
 import utils.JsonUtils
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TrustsServiceSpec extends BaseSpec {

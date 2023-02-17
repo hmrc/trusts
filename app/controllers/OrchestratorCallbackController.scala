@@ -26,10 +26,10 @@ import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.Session
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-class OrchestratorCallbackController @Inject()(auditService: MigrationAuditService, cc: ControllerComponents)
+class OrchestratorCallbackController @Inject()(auditService: MigrationAuditService, cc: ControllerComponents)(implicit ec: ExecutionContext)
   extends BackendController(cc) with Logging {
 
   def migrationToTaxableCallback(urn: String, utr: String): Action[JsValue] = Action.async(parse.json) {

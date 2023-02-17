@@ -24,13 +24,14 @@ import repositories.RegistrationSubmissionRepository
 import services.dates.LocalDateTimeService
 
 import javax.inject.Inject
+import scala.concurrent.ExecutionContext
 
 class AgentSubmissionDraftController @Inject()(
                                                 submissionRepository: RegistrationSubmissionRepository,
                                                 identify: IdentifierAction,
                                                 localDateTimeService: LocalDateTimeService,
                                                 cc: ControllerComponents
-                                              ) extends SubmissionDraftController(submissionRepository, identify, localDateTimeService, cc) {
+                                              )(implicit ec: ExecutionContext) extends SubmissionDraftController(submissionRepository, identify, localDateTimeService, cc) {
 
   def getAgentAddress(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>

@@ -24,12 +24,11 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import utils.Constants.{DETAILS, TAXABLE, TRUST}
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
 
 @Singleton
-class VariationAuditService @Inject()(auditConnector: AuditConnector)
+class VariationAuditService @Inject()(auditConnector: AuditConnector)(implicit ec: ExecutionContext)
   extends AuditService(auditConnector) {
-
-  import scala.concurrent.ExecutionContext.Implicits._
 
   private def auditVariation(event: String,
                              request: JsValue,

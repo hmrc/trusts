@@ -32,13 +32,12 @@ import utils.Constants._
 import utils.Session
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class TransformationService @Inject()(repository: TransformationRepository,
                                       trustsService: TrustsService,
-                                      auditService: AuditService) extends Logging {
+                                      auditService: AuditService)(implicit ec: ExecutionContext) extends Logging {
 
   def getTransformedTrustJson(identifier: String, internalId: String, sessionId: String)(implicit hc: HeaderCarrier): Future[JsObject] = {
     getTransformedData(identifier, internalId, sessionId).flatMap {

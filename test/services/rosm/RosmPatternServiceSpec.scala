@@ -23,6 +23,7 @@ import org.mockito.Mockito.when
 import org.scalatest.matchers.must.Matchers._
 import services.TrustsService
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class RosmPatternServiceSpec extends BaseSpec {

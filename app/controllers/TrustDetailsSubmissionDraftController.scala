@@ -25,14 +25,14 @@ import services.dates.LocalDateTimeService
 
 import java.time.LocalDate
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
 class TrustDetailsSubmissionDraftController @Inject()(
                                                 submissionRepository: RegistrationSubmissionRepository,
                                                 identify: IdentifierAction,
                                                 localDateTimeService: LocalDateTimeService,
                                                 cc: ControllerComponents
-                                              ) extends SubmissionDraftController(submissionRepository, identify, localDateTimeService, cc) {
+                                              )(implicit ec: ExecutionContext) extends SubmissionDraftController(submissionRepository, identify, localDateTimeService, cc) {
 
   private val whenTrustSetupPath: JsPath = JsPath \ "trustDetails" \ "data" \ "trustDetails" \ "whenTrustSetup"
 

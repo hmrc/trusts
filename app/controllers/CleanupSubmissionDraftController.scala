@@ -26,7 +26,7 @@ import services.dates.LocalDateTimeService
 import utils.JsonOps.prunePath
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
 class CleanupSubmissionDraftController @Inject()(
@@ -34,7 +34,7 @@ class CleanupSubmissionDraftController @Inject()(
                                                 identify: IdentifierAction,
                                                 localDateTimeService: LocalDateTimeService,
                                                 cc: ControllerComponents
-                                              ) extends SubmissionDraftController(submissionRepository, identify, localDateTimeService, cc) {
+                                              )(implicit ec: ExecutionContext) extends SubmissionDraftController(submissionRepository, identify, localDateTimeService, cc) {
 
   def removeDraft(draftId: String): Action[AnyContent] = identify.async { request =>
     submissionRepository.removeDraft(draftId, request.internalId).map { _ => Ok }

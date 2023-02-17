@@ -28,6 +28,7 @@ import uk.gov.hmrc.auth.core.retrieve.LoginTimes
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import java.time.{Instant, LocalDateTime}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class NRSAuditServiceSpec extends BaseSpec {
 

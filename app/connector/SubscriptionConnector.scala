@@ -26,11 +26,10 @@ import play.api.http.HeaderNames
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utils.Constants._
 
-import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SubscriptionConnector @Inject()(http: HttpClient, config: AppConfig) extends Logging {
+class SubscriptionConnector @Inject()(http: HttpClient, config: AppConfig)(implicit ec: ExecutionContext) extends Logging {
 
   private lazy val trustsServiceUrl : String = s"${config.subscriptionBaseUrl}/trusts"
 

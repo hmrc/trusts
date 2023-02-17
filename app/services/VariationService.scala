@@ -32,8 +32,7 @@ import models.tax_enrolments.{TaxEnrolmentNotProcessed, TaxEnrolmentSubscriberRe
 import services.auditing.VariationAuditService
 import services.dates.LocalDateService
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class VariationService @Inject()(
@@ -43,7 +42,7 @@ class VariationService @Inject()(
                                   auditService: VariationAuditService,
                                   localDateService: LocalDateService,
                                   taxableMigrationService: TaxableMigrationService
-                                ) extends Logging {
+                                )(implicit ec: ExecutionContext) extends Logging {
 
 
   def submitDeclaration(identifier: String, internalId: String, sessionId: String, declaration: DeclarationForApi)

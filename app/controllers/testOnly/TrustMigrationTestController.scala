@@ -25,12 +25,12 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.{Session, ValidationUtil}
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
 class TrustMigrationTestController @Inject()(migrationService: TaxableMigrationService,
                                              cc: ControllerComponents
-                                             ) extends TrustsBaseController(cc) with ValidationUtil with Logging {
+                                             )(implicit ec: ExecutionContext) extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
   def migrateToTaxable(subscriptionId: String, urn: String): Action[AnyContent] = Action.async {
     implicit request =>

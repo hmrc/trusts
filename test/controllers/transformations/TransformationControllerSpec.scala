@@ -29,6 +29,7 @@ import services._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import utils.Session
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach with IntegrationPatience {

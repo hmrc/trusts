@@ -22,10 +22,10 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
 @Singleton
-class MigrationAuditService @Inject()(auditConnector: AuditConnector)
+class MigrationAuditService @Inject()(auditConnector: AuditConnector)(implicit ec: ExecutionContext)
   extends AuditService(auditConnector) {
 
   def auditOrchestratorSuccess(urn: String,

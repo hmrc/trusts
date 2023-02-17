@@ -36,6 +36,7 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import utils.JsonFixtures
 
 import java.time.LocalDateTime
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TrusteeSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with JsonFixtures with Inside with ScalaFutures

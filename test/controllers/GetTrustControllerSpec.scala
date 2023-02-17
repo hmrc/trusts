@@ -44,6 +44,7 @@ import utils.NonTaxable5MLDFixtures.Cache.getTransformedNonTaxableTrustResponse
 import utils._
 
 import java.time.LocalDate
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAndAfter

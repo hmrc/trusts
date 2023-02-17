@@ -24,6 +24,8 @@ import org.mockito.Mockito.verify
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class VariationAuditServiceSpec extends BaseSpec {
 
   "auditVariationSubmitted" should {

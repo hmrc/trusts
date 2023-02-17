@@ -35,6 +35,7 @@ import services.rosm.RosmPatternService
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class RegisterTrustControllerSpec extends BaseSpec {

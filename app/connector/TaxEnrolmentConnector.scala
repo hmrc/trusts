@@ -24,12 +24,12 @@ import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utils.Constants._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
 class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
                                           config: AppConfig
-                                         ) extends TaxEnrolmentConnector with Logging {
+                                         )(implicit ec: ExecutionContext) extends TaxEnrolmentConnector with Logging {
 
   private def headers = Seq(CONTENT_TYPE -> CONTENT_TYPE_JSON)
 
@@ -63,7 +63,7 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
     http.PUT[JsValue, TaxEnrolmentSubscriberResponse](
       taxEnrolmentsEndpoint,
       Json.toJson(taxEnrolmentSubscriptionRequest)
-    )(Writes.jsValueWrites, TaxEnrolmentSubscriberResponse.httpReads, taxEnrolmentHeaders, global)
+    )(Writes.jsValueWrites, TaxEnrolmentSubscriberResponse.httpReads, taxEnrolmentHeaders, ec)
   }
 
 
@@ -83,7 +83,7 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
     val getSubscriptionsEndpoint = s"${config.taxEnrolmentsMigrationUrl}/tax-enrolments/subscriptions/$subscriptionId"
     http.GET[TaxEnrolmentsSubscriptionsResponse](
       getSubscriptionsEndpoint
-    )(TaxEnrolmentsSubscriptionsResponse.httpReads(subscriptionId), implicitly[HeaderCarrier](hc), global)
+    )(TaxEnrolmentsSubscriptionsResponse.httpReads(subscriptionId), implicitly[HeaderCarrier](hc), ec)
   }
 }
 

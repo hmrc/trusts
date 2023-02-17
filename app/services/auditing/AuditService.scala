@@ -22,11 +22,10 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
 
 @Singleton
-class AuditService @Inject()(auditConnector: AuditConnector){
-
-  import scala.concurrent.ExecutionContext.Implicits._
+class AuditService @Inject()(auditConnector: AuditConnector)(implicit ec: ExecutionContext){
 
   def audit(event: String,
             request: JsValue,

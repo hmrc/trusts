@@ -18,7 +18,6 @@ package services.encoding
 
 import org.apache.commons.codec.binary.Base64
 import org.apache.commons.codec.digest.DigestUtils
-import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 
 import javax.inject.Singleton
@@ -27,7 +26,7 @@ import javax.inject.Singleton
 class PayloadEncodingService {
 
   def encode(payload: JsValue): String =
-    Base64.encodeBase64URLSafeString(Json.toBytes(payload))
+    Base64.encodeBase64String(Json.toBytes(payload))
 
   def generateChecksum(payload: JsValue): String =
     DigestUtils.sha256Hex(Json.stringify(payload))

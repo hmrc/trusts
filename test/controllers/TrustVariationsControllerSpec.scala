@@ -37,6 +37,7 @@ import services.nonRepudiation.NonRepudiationService
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 
 import java.time.LocalDate
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach with IntegrationPatience {
