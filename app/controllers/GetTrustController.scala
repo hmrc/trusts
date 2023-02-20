@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import utils.{RequiredEntityDetailsForMigration, Session}
 import java.time.LocalDate
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
 class GetTrustController @Inject()(identify: IdentifierAction,
@@ -43,7 +43,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
                                    taxYearService: TaxYearService,
                                    validateIdentifier: ValidateIdentifierActionProvider,
                                    requiredDetailsUtil: RequiredEntityDetailsForMigration,
-                                   cc: ControllerComponents) extends BackendController(cc) with Logging {
+                                   cc: ControllerComponents)(implicit ec: ExecutionContext) extends BackendController(cc) with Logging {
 
   val errorAuditMessages: Map[GetTrustResponse, String] = Map(
     BadRequestResponse -> "Bad Request received from DES.",

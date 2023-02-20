@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,10 @@ import utils.Session
 
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TrustsConnector @Inject()(http: HttpClient, config: AppConfig) extends Logging {
+class TrustsConnector @Inject()(http: HttpClient, config: AppConfig)(implicit ec: ExecutionContext) extends Logging {
 
   private lazy val trustsServiceUrl: String =
     s"${config.registrationBaseUrl}/trusts"
@@ -111,7 +110,7 @@ class TrustsConnector @Inject()(http: HttpClient, config: AppConfig) extends Log
           get5MLDTrustOrEstateEndpoint(identifier)
         )(
           GetTrustResponse.httpReads(identifier),
-          implicitly[HeaderCarrier](hc), global
+          implicitly[HeaderCarrier](hc), ec
         )
   }
 

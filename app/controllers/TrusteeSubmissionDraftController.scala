@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,14 @@ import repositories.RegistrationSubmissionRepository
 import services.dates.LocalDateTimeService
 
 import javax.inject.Inject
+import scala.concurrent.ExecutionContext
 
 class TrusteeSubmissionDraftController @Inject()(
                                                 submissionRepository: RegistrationSubmissionRepository,
                                                 identify: IdentifierAction,
                                                 localDateTimeService: LocalDateTimeService,
                                                 cc: ControllerComponents
-                                              ) extends SubmissionDraftController(submissionRepository, identify, localDateTimeService, cc) {
+                                              )(implicit ec: ExecutionContext) extends SubmissionDraftController(submissionRepository, identify, localDateTimeService, cc) {
 
   def getLeadTrustee(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>

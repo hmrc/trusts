@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import javax.inject.Singleton
 class PayloadEncodingService {
 
   def encode(payload: JsValue): String =
-    Base64.encodeBase64URLSafeString(Json.toBytes(payload))
+    Base64.encodeBase64String(Json.toBytes(payload))
 
   def generateChecksum(payload: JsValue): String =
     DigestUtils.sha256Hex(Json.stringify(payload))

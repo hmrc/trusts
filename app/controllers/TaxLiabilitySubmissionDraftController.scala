@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import services.dates.LocalDateTimeService
 
 import java.time.LocalDate
 import javax.inject.Inject
+import scala.concurrent.ExecutionContext
 
 class TaxLiabilitySubmissionDraftController @Inject()(
                                                 submissionRepository: RegistrationSubmissionRepository,
@@ -33,7 +34,7 @@ class TaxLiabilitySubmissionDraftController @Inject()(
                                                 localDateTimeService: LocalDateTimeService,
                                                 cc: ControllerComponents,
                                                 taxYearService: TaxYearService
-                                              ) extends SubmissionDraftController(submissionRepository, identify, localDateTimeService, cc) {
+                                              )(implicit ec: ExecutionContext) extends SubmissionDraftController(submissionRepository, identify, localDateTimeService, cc) {
 
   private val whenTrustSetupPath: JsPath = JsPath \ "trustDetails" \ "data" \ "trustDetails" \ "whenTrustSetup"
 

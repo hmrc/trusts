@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import services.VariationService
 import utils.{Session, ValidationUtil}
 import javax.inject.Inject
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import config.AppConfig
 import services.auditing.AuditService
@@ -40,7 +40,7 @@ class TrustVariationsController @Inject()(
                                            nonRepudiationService: NonRepudiationService,
                                            cc: ControllerComponents,
                                            appConfig: AppConfig
-                                         ) extends TrustsBaseController(cc) with ValidationUtil with Logging {
+                                         )(implicit ec: ExecutionContext) extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
   def declare(identifier: String): Action[JsValue] = identify.async(parse.json) {
     implicit request => {

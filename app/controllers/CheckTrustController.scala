@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,11 @@ import play.api.mvc.{Action, ControllerComponents}
 import services.TrustsService
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
 class CheckTrustController @Inject()(trustsService: TrustsService,
                                      cc: ControllerComponents,
-                                     identify: IdentifierAction) extends TrustsBaseController(cc) with Logging {
+                                     identify: IdentifierAction)(implicit ec: ExecutionContext) extends TrustsBaseController(cc) with Logging {
 
   def checkExistingTrust(): Action[JsValue] = identify.async(parse.json) { implicit request =>
     withJsonBody[ExistingCheckRequest] {

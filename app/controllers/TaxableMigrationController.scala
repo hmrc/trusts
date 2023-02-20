@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,14 @@ import services.TaxableMigrationService
 import javax.inject.Inject
 import utils.Session
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
 class TaxableMigrationController @Inject()(
                                             identify: IdentifierAction,
                                             taxableMigrationService: TaxableMigrationService,
                                             cc: ControllerComponents
-                                          ) extends TrustsBaseController(cc) with Logging {
+                                          )(implicit ec: ExecutionContext) extends TrustsBaseController(cc) with Logging {
 
   def getTaxableMigrationFlag(identifier: String): Action[AnyContent] = identify.async { implicit request =>
     taxableMigrationService.getTaxableMigrationFlag(identifier, request.internalId, Session.id(hc)) map { x =>

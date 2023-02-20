@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,12 @@ import play.api.libs.json.{JsValue, Json}
 import repositories.CacheRepository
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class TrustsService @Inject()(val trustsConnector: TrustsConnector,
                               val subscriptionConnector: SubscriptionConnector,
-                              val repository: CacheRepository) extends Logging {
+                              val repository: CacheRepository)(implicit ec: ExecutionContext) extends Logging {
 
   def getTrustInfoFormBundleNo(identifier: String): Future[String] =
     trustsConnector.getTrustInfo(identifier).map {

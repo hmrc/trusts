@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,11 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utils.Constants.{CONTENT_TYPE, CONTENT_TYPE_JSON}
 import utils.Session
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
 @Singleton
-class OrchestratorConnector @Inject()(http: HttpClient, config: AppConfig) extends Logging {
+class OrchestratorConnector @Inject()(http: HttpClient, config: AppConfig)(implicit ec: ExecutionContext) extends Logging {
 
   private def headers = Seq(CONTENT_TYPE -> CONTENT_TYPE_JSON)
 
@@ -44,7 +44,7 @@ class OrchestratorConnector @Inject()(http: HttpClient, config: AppConfig) exten
     http.POST[JsValue, OrchestratorToTaxableResponse](
       orchestratorEndpoint,
       Json.toJson(migrationRequest)
-    )(Writes.jsValueWrites, OrchestratorToTaxableResponse.httpReads, orchestratorHeaders, global)
+    )(Writes.jsValueWrites, OrchestratorToTaxableResponse.httpReads, orchestratorHeaders, ec)
   }
 }
 

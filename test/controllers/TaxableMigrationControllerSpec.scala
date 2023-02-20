@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import services._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import utils.Session
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach with IntegrationPatience {
