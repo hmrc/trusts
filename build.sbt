@@ -1,5 +1,4 @@
 import sbt.Keys.baseDirectory
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 import uk.gov.hmrc.DefaultBuildSettings
 
@@ -39,12 +38,13 @@ lazy val microservice = Project(appName, file("."))
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(
     scalaVersion := "2.12.16",
-    SilencerSettings(),
+    // To resolve a bug with version 2.x.x of the scoverage plugin - https://github.com/sbt/sbt/issues/6997
+    libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always,
     majorVersion := 0,
     PlayKeys.playDefaultPort := 9782,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
-    publishingSettings,
-    Compile / unmanagedSourceDirectories += baseDirectory.value / "resources"
+    Compile / unmanagedSourceDirectories += baseDirectory.value / "resources",
+    scalacOptions += "-Wconf:src=routes/.*:s"
   )
   .settings(scoverageSettings)
   .configs(IntegrationTest)

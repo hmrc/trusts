@@ -162,7 +162,7 @@ trait DataExamples extends JsonFixtures {
 
   def trustWithoutBeneficiary: String = {
     val json = getJsonValueFromFile("valid-trusts-registration-api.json")
-    val jsonTransformer = (__ \ 'trust \ 'entities \ 'beneficiary).json.prune
+    val jsonTransformer = (__ \ Symbol("trust") \ Symbol("entities") \ Symbol("beneficiary")).json.prune
     json.transform(jsonTransformer).get.toString()
   }
 
@@ -226,7 +226,7 @@ trait DataExamples extends JsonFixtures {
 
   def trustWithoutAssets: String = {
     val json = getJsonValueFromFile("employment-related-trusts-1.json")
-    val jsonTransformer = (__ \ 'trust \ 'assets \ 'monetary).json.prune
+    val jsonTransformer = (__ \ Symbol("trust") \ Symbol("assets") \ Symbol("monetary")).json.prune
     json.transform(jsonTransformer).get.toString()
   }
 

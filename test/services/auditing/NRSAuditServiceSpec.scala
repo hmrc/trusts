@@ -26,11 +26,15 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.auth.core.retrieve.LoginTimes
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import java.time.Month._
 
 import java.time.{Instant, LocalDateTime}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class NRSAuditServiceSpec extends BaseSpec {
+
+  private val year2021 = 2021
+  private val (num3, num4, num5, num10) = (3, 4, 5, 10)
 
   ".audit" should {
 
@@ -56,7 +60,7 @@ class NRSAuditServiceSpec extends BaseSpec {
         notableEvent = NotableEvent.TrsRegistration,
         payloadContentType = "application/json",
         payloadSha256Checksum = "1cbdeb2d2b003b4d4d639af4bd2e1913f591f74c33940d97fd6a626161c20b67",
-        userSubmissionTimestamp = LocalDateTime.of(2021, 10, 5, 10, 4, 3),
+        userSubmissionTimestamp = LocalDateTime.of(year2021, OCTOBER, num5, num10, num4, num3),
         identityData = identityData,
         userAuthToken = "AbCdEf123456",
         headerData = Json.obj(
@@ -138,7 +142,7 @@ class NRSAuditServiceSpec extends BaseSpec {
         notableEvent = NotableEvent.TrsUpdateTaxable,
         payloadContentType = "application/json",
         payloadSha256Checksum = "1cbdeb2d2b003b4d4d639af4bd2e1913f591f74c33940d97fd6a626161c20b67",
-        userSubmissionTimestamp = LocalDateTime.of(2021, 10, 5, 10, 4, 3),
+        userSubmissionTimestamp = LocalDateTime.of(year2021, OCTOBER, num5, num10, num4, num3),
         identityData = identityData,
         userAuthToken = "AbCdEf123456",
         headerData = Json.obj(
@@ -217,7 +221,7 @@ class NRSAuditServiceSpec extends BaseSpec {
         notableEvent = NotableEvent.TrsUpdateNonTaxable,
         payloadContentType = "application/json",
         payloadSha256Checksum = "1cbdeb2d2b003b4d4d639af4bd2e1913f591f74c33940d97fd6a626161c20b67",
-        userSubmissionTimestamp = LocalDateTime.of(2021, 10, 5, 10, 4, 3),
+        userSubmissionTimestamp = LocalDateTime.of(year2021, OCTOBER, num5, num10, num4, num3),
         identityData = identityData,
         userAuthToken = "AbCdEf123456",
         headerData = Json.obj(
@@ -296,7 +300,7 @@ class NRSAuditServiceSpec extends BaseSpec {
         notableEvent = NotableEvent.TrsUpdateNonTaxable,
         payloadContentType = "application/json",
         payloadSha256Checksum = "1cbdeb2d2b003b4d4d639af4bd2e1913f591f74c33940d97fd6a626161c20b67",
-        userSubmissionTimestamp = LocalDateTime.of(2021, 10, 5, 10, 4, 3),
+        userSubmissionTimestamp = LocalDateTime.of(year2021, OCTOBER, num5, num10, num4, num3),
         identityData = identityData,
         userAuthToken = "AbCdEf123456",
         headerData = Json.obj(

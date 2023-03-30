@@ -34,6 +34,7 @@ import repositories.RegistrationSubmissionRepository
 import services.dates.LocalDateTimeService
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import utils.JsonFixtures
+import java.time.Month._
 
 import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -42,8 +43,11 @@ import scala.concurrent.Future
 class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with JsonFixtures with Inside with ScalaFutures
   with GuiceOneAppPerSuite {
 
-  private val createdAt: LocalDateTime = LocalDateTime.of(1997, 3, 14, 14, 45)
-  private val currentDateTime: LocalDateTime = LocalDateTime.of(1999, 3, 14, 13, 33)
+  private val (year1997, year1999, year2010, year2012) = (1997, 1999, 2010, 2012)
+  private val (num3, num9, num10, num13, num14, num30, num33, num40, num45) = (3, 9, 10, 13, 14, 30, 33, 40, 45)
+
+  private val createdAt: LocalDateTime = LocalDateTime.of(year1997, MARCH, num14, num14, num45)
+  private val currentDateTime: LocalDateTime = LocalDateTime.of(year1999, MARCH, num14, num13, num33)
 
   private val draftId: String = "draftId"
   private val internalId: String = "id"
@@ -590,8 +594,8 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       )
 
       val drafts = List(
-        RegistrationSubmissionDraft("draftId1", internalId, LocalDateTime.of(2012, 2, 3, 9, 30), Json.obj(), Some("ref"), Some(true)),
-        RegistrationSubmissionDraft("draftId2", internalId, LocalDateTime.of(2010, 10, 10, 14, 40), Json.obj(), None, Some(true))
+        RegistrationSubmissionDraft("draftId1", internalId, LocalDateTime.of(year2012, FEBRUARY, num3, num9, num30), Json.obj(), Some("ref"), Some(true)),
+        RegistrationSubmissionDraft("draftId2", internalId, LocalDateTime.of(year2010, OCTOBER, num10, num14, num40), Json.obj(), None, Some(true))
       )
 
       when(submissionRepository.getRecentDrafts(any(), any()))
@@ -635,8 +639,8 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       )
 
       val drafts = List(
-        RegistrationSubmissionDraft("draftId1", internalId, LocalDateTime.of(2012, 2, 3, 9, 30), Json.obj(), Some("ref"), Some(true)),
-        RegistrationSubmissionDraft("draftId2", internalId, LocalDateTime.of(2010, 10, 10, 14, 40), Json.obj(), None, Some(true))
+        RegistrationSubmissionDraft("draftId1", internalId, LocalDateTime.of(year2012, FEBRUARY, num3, num9, num30), Json.obj(), Some("ref"), Some(true)),
+        RegistrationSubmissionDraft("draftId2", internalId, LocalDateTime.of(year2010, OCTOBER, num10, num14, num40), Json.obj(), None, Some(true))
       )
 
       when(submissionRepository.getRecentDrafts(any(), any()))

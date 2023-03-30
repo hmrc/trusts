@@ -33,14 +33,14 @@ class ValidationServiceSpec extends BaseSpec with DataExamples with EitherValues
       "Json having all required fields" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
 
-        trustValidator.validate[Registration](jsonString) must not be 'left
+        trustValidator.validate[Registration](jsonString) must not be Symbol("left")
         trustValidator.validate[Registration](jsonString).value mustBe a[Registration]
       }
 
       "Json having trust with organisation trustees" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-org-trustees.json")
 
-        trustValidator.validate[Registration](jsonString) must not be 'left
+        trustValidator.validate[Registration](jsonString) must not be Symbol("left")
         trustValidator.validate[Registration](jsonString).value mustBe a[Registration]
       }
     }
@@ -94,24 +94,24 @@ class ValidationServiceSpec extends BaseSpec with DataExamples with EitherValues
 
       "individual trustees has no identification" in {
         val jsonString = JsonUtils.getJsonFromFile("trusts-without-trustees-identification.json")
-        trustValidator.validate[Registration](jsonString) mustBe 'right
+        trustValidator.validate[Registration](jsonString) mustBe Symbol("right")
       }
 
       "natural people identification is not provided." in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-deed-of-variation-01.json")
-        trustValidator.validate[Registration](jsonString) mustBe 'right
+        trustValidator.validate[Registration](jsonString) mustBe Symbol("right")
       }
     }
 
     "return a list of validation errors " when {
       "json document is invalid" in {
         val jsonString = JsonUtils.getJsonFromFile("invalid-payload-trusts-registration.json")
-        trustValidator.validate[Registration](jsonString) mustBe 'left
+        trustValidator.validate[Registration](jsonString) mustBe Symbol("left")
       }
 
       "json document is valid but failed to match with Domain" in {
         val jsonString = JsonUtils.getJsonFromFile("valid-trusts-registration-api.json")
-        trustValidator.validate[ExistingCheckRequest](jsonString) mustBe 'left
+        trustValidator.validate[ExistingCheckRequest](jsonString) mustBe Symbol("left")
       }
 
       "date of birth of trustee is before 1500/01/01" in {
@@ -147,7 +147,7 @@ class ValidationServiceSpec extends BaseSpec with DataExamples with EitherValues
     "allow a submission with no assets for non-taxable" in {
       val errorList = trustValidator.validate[Registration](trustWithoutAssets)
 
-      errorList must be('right)
+      errorList must be(Symbol("right"))
     }
 
     "return a list of validation errors for trusts " when {

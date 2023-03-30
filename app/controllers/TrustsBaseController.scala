@@ -42,7 +42,7 @@ class TrustsBaseController(cc: ControllerComponents) extends BackendController(c
     }
 
 
-  def handleErrorResponseByField(field: Seq[(JsPath, Seq[JsonValidationError])]): Result = {
+  def handleErrorResponseByField(field: scala.collection.Seq[(JsPath, scala.collection.Seq[JsonValidationError])]): Result = {
 
     val fields = field.map { case (key, validationError) =>
       (key.toString.stripPrefix("/"), validationError.head.message)

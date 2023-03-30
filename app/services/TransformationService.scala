@@ -107,12 +107,13 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
-  def populateLeadTrusteeAddress(beforeJson: JsValue)(implicit hc: HeaderCarrier): JsResult[JsValue] = {
-    val pathToLeadTrusteeAddress = __ \ 'details \ 'trust \ 'entities \ 'leadTrustees \ 'identification \ 'address
+  def populateLeadTrusteeAddress(beforeJson: JsValue): JsResult[JsValue] = {
+    val pathToLeadTrusteeAddress = __ \ Symbol("details") \ Symbol("trust") \ Symbol("entities") \
+      Symbol("leadTrustees") \ Symbol("identification") \ Symbol("address")
     if (beforeJson.transform(pathToLeadTrusteeAddress.json.pick).isSuccess) {
       JsSuccess(beforeJson)
     } else {
-      val pathToCorrespondenceAddress = __ \ 'correspondence \ 'address
+      val pathToCorrespondenceAddress = __ \ Symbol("correspondence") \ Symbol("address")
       val copyAddress = __.json.update(pathToLeadTrusteeAddress.json.copyFrom(pathToCorrespondenceAddress.json.pick))
       beforeJson.transform(copyAddress)
     }

@@ -38,6 +38,7 @@ import services.dates.LocalDateService
 import transformers.DeclarationTransformer
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{JsonFixtures, JsonUtils, NonTaxable5MLDFixtures}
+import java.time.Month.MARCH
 
 import java.time.LocalDate
 import scala.concurrent.Future
@@ -62,7 +63,8 @@ class VariationServiceSpec extends AnyWordSpec
   val declarationForApi: DeclarationForApi = DeclarationForApi(declaration, None, None)
 
   object LocalDateServiceStub extends LocalDateService {
-    override def now: LocalDate = LocalDate.of(1999, 3, 14)
+    private val (year1999, num14) = (1999, 14)
+    override def now: LocalDate = LocalDate.of(year1999, MARCH, num14)
   }
 
   private val auditService = mock[VariationAuditService]
@@ -90,7 +92,7 @@ class VariationServiceSpec extends AnyWordSpec
   "Declare no change" should {
     "submit data correctly when the version matches, and then reset the cache" in {
 
-      when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any()))
+      when(transformationService.populateLeadTrusteeAddress(any[JsValue]))
         .thenReturn(JsSuccess(trustInfoJson5MLD))
       when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
         .thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
@@ -158,7 +160,7 @@ class VariationServiceSpec extends AnyWordSpec
 
         when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
           .thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
-        when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any()))
+        when(transformationService.populateLeadTrusteeAddress(any[JsValue]))
           .thenReturn(JsSuccess(trustInfoJson5MLD))
         when(trustsService.getTrustInfoFormBundleNo(utr))
           .thenReturn(Future.successful(formBundleNo))
@@ -190,7 +192,7 @@ class VariationServiceSpec extends AnyWordSpec
 
         when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
           .thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
-        when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any()))
+        when(transformationService.populateLeadTrusteeAddress(any[JsValue]))
           .thenReturn(JsSuccess(trustInfoJson5MLD))
         when(trustsService.getTrustInfoFormBundleNo(utr))
           .thenReturn(Future.successful(formBundleNo))
@@ -228,7 +230,7 @@ class VariationServiceSpec extends AnyWordSpec
           .thenReturn(Future.successful(formBundleNo))
         when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
           .thenReturn(Future.successful(JsError("Errors")))
-        when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any()))
+        when(transformationService.populateLeadTrusteeAddress(any[JsValue]))
           .thenReturn(JsSuccess(trustInfoJson5MLD))
         when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId), equalTo(sessionId)))
           .thenReturn(Future.successful(response))
@@ -254,7 +256,7 @@ class VariationServiceSpec extends AnyWordSpec
 
         when(trustsService.getTrustInfoFormBundleNo(utr))
           .thenReturn(Future.successful(formBundleNo))
-        when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any()))
+        when(transformationService.populateLeadTrusteeAddress(any[JsValue]))
           .thenReturn(JsError("Error"))
         when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId), equalTo(sessionId)))
           .thenReturn(Future.successful(response))
@@ -280,7 +282,7 @@ class VariationServiceSpec extends AnyWordSpec
 
     "performs the migration if the transformation requires it" in {
 
-      when(transformationService.populateLeadTrusteeAddress(any[JsValue])(any()))
+      when(transformationService.populateLeadTrusteeAddress(any[JsValue]))
         .thenReturn(JsSuccess(trustInfoJson5MLD))
       when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
         .thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))

@@ -40,7 +40,7 @@ class DeclarationTransformer {
     val responseHeader = response.responseHeader
 
     responseJson.transform(
-      (__ \ 'applicationType).json.prune andThen
+      (__ \ Symbol("applicationType")).json.prune andThen
         DECLARATION.json.prune andThen
         removeDetailsTypeFields(responseJson) andThen
         updateCorrespondence(responseJson) andThen
@@ -48,7 +48,7 @@ class DeclarationTransformer {
         convertLeadTrustee(responseJson) andThen
         addPreviousLeadTrustee(responseJson, originalJson, submissionDate) andThen
         pruneEmptyTrustees(responseJson) andThen
-        putNewValue(__ \ 'reqHeader \ FORM_BUNDLE_NUMBER, JsString(responseHeader.formBundleNo)) andThen
+        putNewValue(__ \ Symbol("reqHeader") \ FORM_BUNDLE_NUMBER, JsString(responseHeader.formBundleNo)) andThen
         addDeclaration(declarationForApi, responseJson) andThen
         addAgentIfDefined(declarationForApi.agentDetails) andThen
         addEndDateIfDefined(declarationForApi.endDate) andThen
@@ -61,11 +61,11 @@ class DeclarationTransformer {
 
   private val pathToLeadTrustees: JsPath =  ENTITIES \ LEAD_TRUSTEE
   private val pathToTrustees: JsPath = ENTITIES \ TRUSTEES
-  private val pathToLeadTrusteeAddress = pathToLeadTrustees \ IDENTIFICATION \ 'address
-  private val pathToLeadTrusteePhoneNumber = pathToLeadTrustees \ 'phoneNumber
-  private val pathToLeadTrusteeCountry = pathToLeadTrusteeAddress \ 'country
-  private val pathToCorrespondenceAddress = CORRESPONDENCE \ 'address
-  private val pathToCorrespondencePhoneNumber = CORRESPONDENCE \ 'phoneNumber
+  private val pathToLeadTrusteeAddress = pathToLeadTrustees \ IDENTIFICATION \ Symbol("address")
+  private val pathToLeadTrusteePhoneNumber = pathToLeadTrustees \ Symbol("phoneNumber")
+  private val pathToLeadTrusteeCountry = pathToLeadTrusteeAddress \ Symbol("country")
+  private val pathToCorrespondenceAddress = CORRESPONDENCE \ Symbol("address")
+  private val pathToCorrespondencePhoneNumber = CORRESPONDENCE \ Symbol("phoneNumber")
   private val pathToShareAssets: JsPath = TRUST \ ASSETS \ SHARES_ASSET
   private val pathToTrustDetails: JsPath = TRUST \ DETAILS
   private val pickLeadTrustee = pathToLeadTrustees.json.pick
@@ -77,22 +77,22 @@ class DeclarationTransformer {
     val inUk = leadTrusteeCountry.isError || leadTrusteeCountry.get == JsString(GB)
     pathToCorrespondenceAddress.json.prune andThen
       pathToCorrespondencePhoneNumber.json.prune andThen
-      putNewValue(CORRESPONDENCE \ 'abroadIndicator, JsBoolean(!inUk)) andThen
+      putNewValue(CORRESPONDENCE \ Symbol("abroadIndicator"), JsBoolean(!inUk)) andThen
       __.json.update(pathToCorrespondenceAddress.json.copyFrom(pathToLeadTrusteeAddress.json.pick)) andThen
       __.json.update(pathToCorrespondencePhoneNumber.json.copyFrom(pathToLeadTrusteePhoneNumber.json.pick))
   }
 
   private def fixLeadTrusteeAddress(leadTrusteeJson: JsValue, leadTrusteePath: JsPath): Reads[JsObject] = {
-    if (leadTrusteeJson.transform((leadTrusteePath \ IDENTIFICATION \ 'utr).json.pick).isSuccess ||
-      leadTrusteeJson.transform((leadTrusteePath \ IDENTIFICATION \ 'nino).json.pick).isSuccess) {
-      (leadTrusteePath \ IDENTIFICATION \ 'address).json.prune
+    if (leadTrusteeJson.transform((leadTrusteePath \ IDENTIFICATION \ Symbol("utr")).json.pick).isSuccess ||
+      leadTrusteeJson.transform((leadTrusteePath \ IDENTIFICATION \ Symbol("nino")).json.pick).isSuccess) {
+      (leadTrusteePath \ IDENTIFICATION \ Symbol("address")).json.prune
     } else {
       doNothing()
     }
   }
 
   private def determineTrusteeField(rootPath: JsPath, json: JsValue): String = {
-    val namePath = (rootPath \ 'name).json.pick[JsObject]
+    val namePath = (rootPath \ Symbol("name")).json.pick[JsObject]
 
     json.transform(namePath).flatMap(_.validate[NameType]) match {
       case JsSuccess(_, _) => INDIVIDUAL_LEAD_TRUSTEE
@@ -135,7 +135,7 @@ class DeclarationTransformer {
     if (agentDetails.isDefined) {
       JsSuccess.apply(agentDetails.get.agentAddress)
     } else {
-      responseJson.transform((pathToLeadTrustees \ IDENTIFICATION \ 'address).json.pick).map(_.as[AddressType])
+      responseJson.transform((pathToLeadTrustees \ IDENTIFICATION \ Symbol("address")).json.pick).map(_.as[AddressType])
     }
   }
 
@@ -217,7 +217,7 @@ class DeclarationTransformer {
 
   private def addAgentIfDefined(agentDetails: Option[AgentDetails]): Reads[JsObject] = {
     agentDetails match {
-      case Some(value) => putNewValue(__ \ 'agentDetails, Json.toJson(value))
+      case Some(value) => putNewValue(__ \ Symbol("agentDetails"), Json.toJson(value))
       case None => doNothing()
     }
   }
@@ -225,7 +225,7 @@ class DeclarationTransformer {
   private def addEndDateIfDefined(endDate: Option[LocalDate]): Reads[JsObject] = {
     endDate match {
       case Some(date) =>
-        putNewValue(__ \ 'trustEndDate, Json.toJson(date))
+        putNewValue(__ \ Symbol("trustEndDate"), Json.toJson(date))
       case _ =>
         doNothing()
     }

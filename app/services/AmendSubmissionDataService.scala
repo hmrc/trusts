@@ -29,7 +29,7 @@ class AmendSubmissionDataService @Inject()(localDateService: LocalDateService) e
   def applyRulesAndAddSubmissionDate(json: JsValue): JsValue = {
     val amendedJson = json.applyRules
     amendedJson.transform {
-      putNewValue(__ \ 'submissionDate, Json.toJson(localDateService.now))
+      putNewValue(__ \ Symbol("submissionDate"), Json.toJson(localDateService.now))
     } match {
       case JsSuccess(value, _) =>
         value

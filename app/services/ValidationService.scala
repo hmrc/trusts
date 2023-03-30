@@ -88,7 +88,7 @@ class Validator(schema: JsonSchema) extends Logging {
     }
   }
 
-  protected def getValidationErrors(errors: Seq[(JsPath, Seq[JsonValidationError])]): List[TrustsValidationError] = {
+  private def getValidationErrors(errors: scala.collection.Seq[(JsPath, scala.collection.Seq[JsonValidationError])]): List[TrustsValidationError] = {
     val validationErrors = errors.flatMap(errors => errors._2.map(error => TrustsValidationError(error.message, errors._1.toString()))).toList
     logger.debug(s"[Validator][getValidationErrors] validationErrors in validate :  $validationErrors")
     validationErrors
