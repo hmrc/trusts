@@ -87,13 +87,13 @@ class RegisterTrustController @Inject()(
         }
         enrol(response, registration)
       case AlreadyRegisteredResponse =>
-        handleAlreadyRegisteredResponse
+        handleAlreadyRegisteredResponse()
       case NoMatchResponse =>
-        handleNoMatchResponse
+        handleNoMatchResponse()
       case BadRequestResponse =>
-        handleBadRequestResponse
+        handleBadRequestResponse()
       case ServiceUnavailableResponse =>
-        handleServiceUnavailableResponse
+        handleServiceUnavailableResponse()
       case _ =>
         handleInternalServerErrorResponse()
     }

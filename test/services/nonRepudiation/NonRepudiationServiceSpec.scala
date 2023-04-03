@@ -34,6 +34,7 @@ import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, LoginTimes}
 import uk.gov.hmrc.http.{Authorization, ForwardedFor, HeaderCarrier, RequestId, SessionId}
 import utils.JsonFixtures
+import java.time.Month._
 
 import java.time.{Instant, LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -47,6 +48,8 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
   private val mockPayloadEncodingService = mock[PayloadEncodingService]
   private val retryHelper = injector.instanceOf[RetryHelper]
   private val mockNrsAuditService = mock[NRSAuditService]
+
+  private val (year2021, num5, num12, num18) = (2021, 5, 12, 18)
 
   val v4UuidRegex: Regex = "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[4][0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$".r
 
@@ -108,7 +111,8 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         ))
 
       implicit val request: IdentifierRequest[JsValue] =
-        IdentifierRequest(fakeRequestWithHeaders, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Agent, credentialData = credential)
+        IdentifierRequest(fakeRequestWithHeaders, internalId = "internalId", sessionId = "sessionId",
+          affinityGroup = AffinityGroup.Agent, credentialData = credential)
 
       val trn = "ABTRUST12345678"
 
@@ -116,7 +120,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
       when(mockLocalDateTimeService.now(ZoneOffset.UTC))
-        .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
+        .thenReturn(LocalDateTime.of(year2021, OCTOBER, num18, num12, num5))
 
       when(mockPayloadEncodingService.encode(mEq(payLoad)))
         .thenReturn("encodedPayload")
@@ -192,7 +196,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
       when(mockLocalDateTimeService.now(ZoneOffset.UTC))
-        .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
+        .thenReturn(LocalDateTime.of(year2021, OCTOBER, num18, num12, num5))
 
       when(mockPayloadEncodingService.encode(mEq(payLoad)))
         .thenReturn("encodedPayload")
@@ -233,7 +237,8 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
       val payLoadWithoutAgentDetails = Json.toJson(registrationRequest).as[JsObject] - "agentDetails"
 
       implicit val request: IdentifierRequest[JsValue] =
-        IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId", affinityGroup = AffinityGroup.Organisation, credentialData = credentialNotPopulated)
+        IdentifierRequest(fakeRequest, internalId = "internalId", sessionId = "sessionId",
+          affinityGroup = AffinityGroup.Organisation, credentialData = credentialNotPopulated)
 
       val identityData = Json.obj(
         "internalId" -> "internalId",
@@ -267,7 +272,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
       when(mockLocalDateTimeService.now(ZoneOffset.UTC))
-        .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
+        .thenReturn(LocalDateTime.of(year2021, OCTOBER, num18, num12, num5))
 
       when(mockPayloadEncodingService.encode(mEq(payLoadWithoutAgentDetails)))
         .thenReturn("encodedPayload")
@@ -353,7 +358,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
         when(mockLocalDateTimeService.now(ZoneOffset.UTC))
-          .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
+          .thenReturn(LocalDateTime.of(year2021, OCTOBER, num18, num12, num5))
 
         when(mockPayloadEncodingService.encode(mEq(payLoad)))
           .thenReturn("encodedPayload")
@@ -438,7 +443,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
         when(mockLocalDateTimeService.now(ZoneOffset.UTC))
-          .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
+          .thenReturn(LocalDateTime.of(year2021, OCTOBER, num18, num12, num5))
 
         when(mockPayloadEncodingService.encode(mEq(payLoad)))
           .thenReturn("encodedPayload")
@@ -534,7 +539,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
         when(mockLocalDateTimeService.now(ZoneOffset.UTC))
-          .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
+          .thenReturn(LocalDateTime.of(year2021, OCTOBER, num18, num12, num5))
 
         when(mockPayloadEncodingService.encode(mEq(payLoad)))
           .thenReturn("encodedPayload")
@@ -626,7 +631,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
           .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
         when(mockLocalDateTimeService.now(ZoneOffset.UTC))
-          .thenReturn(LocalDateTime.of(2021, 10, 18, 12, 5))
+          .thenReturn(LocalDateTime.of(year2021, OCTOBER, num18, num12, num5))
 
         when(mockPayloadEncodingService.encode(mEq(payLoad)))
           .thenReturn("encodedPayload")

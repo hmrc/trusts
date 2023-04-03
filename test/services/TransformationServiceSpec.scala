@@ -37,6 +37,7 @@ import transformers.trustees._
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.Constants._
 import utils.{JsonFixtures, JsonUtils, Session}
+import java.time.Month._
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -44,7 +45,10 @@ import scala.concurrent.Future
 
 class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with ScalaFutures with JsonFixtures {
 
-  private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(1000, Millis), interval = Span(15, Millis))
+  private val (year1965, day10, spanLength1000, spanLength15) = (1965, 10, 1000, 15)
+
+  private implicit val pc: PatienceConfig = PatienceConfig(timeout = Span(spanLength1000, Millis),
+    interval = Span(spanLength15, Millis))
 
   private val utr: String = "utr"
   private val internalId = "internalId"
@@ -52,7 +56,7 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
   private val unitTestLeadTrusteeInfo = AmendedLeadTrusteeIndType(
     bpMatchStatus = None,
     name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-    dateOfBirth = LocalDate.of(1965, 2, 10),
+    dateOfBirth = LocalDate.of(year1965, FEBRUARY, day10),
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = IdentificationType(Some("newNino"), None, None, None),
@@ -90,7 +94,7 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
   private val existingLeadTrusteeInfo = AmendedLeadTrusteeIndType(
     bpMatchStatus = None,
     name = NameType("existingFirstName", Some("existingMiddleName"), "existingLastName"),
-    dateOfBirth = LocalDate.of(1965, 2, 10),
+    dateOfBirth = LocalDate.of(year1965, FEBRUARY, day10),
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = IdentificationType(Some("newNino"), None, None, None),
@@ -102,7 +106,7 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
   private val newLeadTrusteeIndInfo = AmendedLeadTrusteeIndType(
     bpMatchStatus = None,
     name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-    dateOfBirth = LocalDate.of(1965, 2, 10),
+    dateOfBirth = LocalDate.of(year1965, FEBRUARY, day10),
     phoneNumber = "newPhone",
     email = Some("newEmail"),
     identification = IdentificationType(Some("newNino"), None, None, None),
@@ -195,7 +199,7 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
         val newLeadTrusteeIndInfo = AmendedLeadTrusteeIndType(
           bpMatchStatus = None,
           name = NameType("newFirstName", Some("newMiddleName"), "newLastName"),
-          dateOfBirth = LocalDate.of(1965, 2, 10),
+          dateOfBirth = LocalDate.of(year1965, FEBRUARY, day10),
           phoneNumber = "newPhone",
           email = Some("newEmail"),
           identification = IdentificationType(

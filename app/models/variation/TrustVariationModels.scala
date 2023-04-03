@@ -36,7 +36,7 @@ case class TrustVariation(
 
 object TrustVariation {
 
-  val variationReads: Reads[TrustVariation] = {
+  private val variationReads: Reads[TrustVariation] = {
     (
       (__ \ "matchData").read[MatchData] and
         (__ \ "correspondence").read[Correspondence] and
@@ -50,7 +50,7 @@ object TrustVariation {
       ) (TrustVariation.apply _)
   }
 
-  val writeToDes: Writes[TrustVariation] = (
+  private val writeToDes: Writes[TrustVariation] = (
     (JsPath \ "matchData").write[MatchData] and
       (JsPath \ "correspondence").write[Correspondence] and
       (JsPath \ "yearsReturns").writeNullable[YearsReturns] and

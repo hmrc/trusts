@@ -35,7 +35,7 @@ class MDTPTransformationSpec extends AnyFreeSpec {
 
       val result = processedResponse.transform.get
 
-      result.getTrust.transform((JsPath \ 'details \ 'trust \ 'entities \ 'trustees).json.pick).get mustBe afterJson
+      result.getTrust.transform((JsPath \ Symbol("details") \ Symbol("trust") \ Symbol("entities") \ Symbol("trustees")).json.pick).get mustBe afterJson
     }
 
     "must transform beneficiaries" in {
@@ -47,7 +47,7 @@ class MDTPTransformationSpec extends AnyFreeSpec {
 
       val result = processedResponse.transform.get
 
-      result.getTrust.transform((JsPath \ 'details \ 'trust \ 'entities \ 'beneficiary).json.pick).get mustBe afterJson
+      result.getTrust.transform((JsPath \ Symbol("details") \ Symbol("trust") \ Symbol("entities") \ Symbol("beneficiary")).json.pick).get mustBe afterJson
     }
 
     "must transform settlors" in {
@@ -59,7 +59,7 @@ class MDTPTransformationSpec extends AnyFreeSpec {
 
       val result = processedResponse.transform.get
 
-      result.getTrust.transform((JsPath \ 'details \ 'trust \ 'entities \ 'settlors).json.pick).get mustBe afterJson
+      result.getTrust.transform((JsPath \ Symbol("details") \ Symbol("trust") \ Symbol("entities") \ Symbol("settlors")).json.pick).get mustBe afterJson
     }
 
     "must transform protectors" in {
@@ -71,7 +71,7 @@ class MDTPTransformationSpec extends AnyFreeSpec {
 
       val result = processedResponse.transform.get
 
-      result.getTrust.transform((JsPath \ 'details \ 'trust \ 'entities \ 'protectors).json.pick).get mustBe afterJson
+      result.getTrust.transform((JsPath \ Symbol("details") \ Symbol("trust") \ Symbol("entities") \ Symbol("protectors")).json.pick).get mustBe afterJson
     }
 
   }
