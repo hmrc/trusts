@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.transformations.taxliability
 
+import cats.data.EitherT
 import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import models.get_trust.GetTrustSuccessResponse
+import errors.TrustErrors
+import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
 import models.{YearReturnType, YearsReturns}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -46,7 +48,7 @@ class SetYearsReturnsSpec extends IntegrationTestBase {
     val stubbedTrustsConnector = mock[TrustsConnector]
 
     when(stubbedTrustsConnector.getTrustInfo(any()))
-      .thenReturn(Future.successful(getTrustResponse.as[GetTrustSuccessResponse]))
+      .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse.as[GetTrustSuccessResponse]))))
 
     def application = applicationBuilder
       .overrides(

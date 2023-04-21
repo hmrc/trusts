@@ -16,11 +16,14 @@
 
 package services
 
-import models.get_trust.{GetTrustSuccessResponse, TrustProcessedResponse}
+import cats.data.EitherT
+import errors.{ServerError, TrustErrors}
+import models.get_trust.{ClosedRequestResponse, GetTrustResponse, GetTrustSuccessResponse, TrustProcessedResponse}
 import models.variation.{AmendedLeadTrusteeIndType, IdentificationType}
 import models.{AddressType, NameType}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers._
@@ -37,13 +40,13 @@ import transformers.trustees._
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.Constants._
 import utils.{JsonFixtures, JsonUtils, Session}
-import java.time.Month._
 
 import java.time.LocalDate
+import java.time.Month._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with ScalaFutures with JsonFixtures {
+class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with ScalaFutures with JsonFixtures with EitherValues {
 
   private val (year1965, day10, spanLength1000, spanLength15) = (1965, 10, 1000, 15)
 
@@ -127,16 +130,17 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
           RemoveTrusteeTransform(Some(0), originalTrusteeIndJson, LocalDate.parse("2019-12-21"), "trusteeInd"),
           AmendTrusteeTransform(None, Json.toJson(unitTestLeadTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
         )
-        when(repository.get(any(), any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
-        when(repository.set(any(), any(), any(), any())).thenReturn(Future.successful(true))
+        when(repository.get(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](Future.successful(Right(Some(ComposedDeltaTransform(existingTransforms))))))
+        when(repository.set(any(), any(), any(), any())).thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-before.json")
         val afterJson: JsValue = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-ind-and-remove.json")
 
-        val result: Future[JsResult[JsValue]] = service.applyDeclarationTransformations(utr, internalId, beforeJson)
+        val result = service.applyDeclarationTransformations(utr, internalId, beforeJson).value
 
-        whenReady(result) {
-          _.get mustEqual afterJson
+        whenReady(result) { r =>
+          r.value.get mustEqual afterJson
         }
       }
 
@@ -144,15 +148,31 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
         val repository = mock[TransformationRepositoryImpl]
         val service = new TransformationService(repository, mock[TrustsService], auditService)
 
-        when(repository.get(any(), any(), any())).thenReturn(Future.successful(None))
-        when(repository.set(any(), any(), any(), any())).thenReturn(Future.successful(true))
+        when(repository.get(any(), any(), any())).thenReturn(EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](Future.successful(Right(None))))
+        when(repository.set(any(), any(), any(), any())).thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-before.json")
 
-        val result: Future[JsResult[JsValue]] = service.applyDeclarationTransformations(utr, internalId, beforeJson)
+        val result = service.applyDeclarationTransformations(utr, internalId, beforeJson).value
 
-        whenReady(result) {
-          _.get mustEqual beforeJson
+        whenReady(result) { r =>
+          r.value.get mustEqual beforeJson
+        }
+      }
+
+      "must return ServerError() when repository.get returns an exception from Mongo" in {
+        val repository = mock[TransformationRepositoryImpl]
+        val service = new TransformationService(repository, mock[TrustsService], auditService)
+
+        when(repository.get(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](Future.successful(Left(ServerError("exception message")))))
+
+        val beforeJson: JsValue = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-before.json")
+
+        val result = service.applyDeclarationTransformations(utr, internalId, beforeJson).value
+
+        whenReady(result) { r =>
+          r mustBe Left(ServerError("exception message"))
         }
       }
     }
@@ -171,22 +191,74 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
       }
     }
 
+    "when .getTransformedTrustJson" - {
+
+      "must return Left(ServerError(message)) when trust is not in a processed state" in {
+        val trustsService = mock[TrustsService]
+        val repository = mock[TransformationRepositoryImpl]
+        val service = new TransformationService(repository, trustsService, auditService)
+
+        when(trustsService.getTrustInfo(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(ClosedRequestResponse))))
+
+        when(service.getTransformedData(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(ClosedRequestResponse))))
+
+        val result = service.getTransformedTrustJson(utr, internalId, sessionId).value
+        whenReady(result) { r =>
+          r mustBe Left(ServerError("Trust is not in a processed state."))
+        }
+
+      }
+
+      "must return Left(ServerError()) when there's an error getting trust info, message is nonEmpty" in {
+        val trustsService = mock[TrustsService]
+        val repository = mock[TransformationRepositoryImpl]
+        val service = new TransformationService(repository, trustsService, auditService)
+
+        when(trustsService.getTrustInfo(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Left(ServerError("validation errors")))))
+
+        val result = service.getTransformedTrustJson(utr, internalId, sessionId).value
+        whenReady(result) { r =>
+          r mustBe Left(ServerError())
+        }
+
+      }
+
+      "must return Left(ServerError()) when failed to get trust info" in {
+        val trustsService = mock[TrustsService]
+        val repository = mock[TransformationRepositoryImpl]
+        val service = new TransformationService(repository, trustsService, auditService)
+
+        when(trustsService.getTrustInfo(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Left(ServerError()))))
+
+        val result = service.getTransformedTrustJson(utr, internalId, sessionId).value
+        whenReady(result) { r =>
+          r mustBe Left(ServerError())
+        }
+
+      }
+    }
+
     "when .getTransformedData" - {
       "must fix lead trustee address of ETMP json read from DES service" in {
         val response = get5MLDTrustResponse.as[GetTrustSuccessResponse]
         val processedResponse = response.asInstanceOf[TrustProcessedResponse]
         val trustsService = mock[TrustsService]
-        when(trustsService.getTrustInfo(any(), any(), any())).thenReturn(Future.successful(response))
+        when(trustsService.getTrustInfo(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(response))))
 
         val transformedJson = JsonUtils.getJsonValueFromFile("valid-get-trust-response-transformed.json")
         val expectedResponse = TrustProcessedResponse(transformedJson, processedResponse.responseHeader)
 
         val repository = mock[TransformationRepositoryImpl]
-        when(repository.get(any(), any(), any())).thenReturn(Future.successful(None))
+        when(repository.get(any(), any(), any())).thenReturn(EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](Future.successful(Right(None))))
         val service = new TransformationService(repository, trustsService, auditService)
-        val result = service.getTransformedData(utr, internalId, sessionId)
-        whenReady(result) {
-          _ mustEqual expectedResponse
+        val result = service.getTransformedData(utr, internalId, sessionId).value
+        whenReady(result) { r =>
+          r mustBe Right(expectedResponse)
         }
       }
 
@@ -194,7 +266,8 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
         val response = get5MLDTrustResponse.as[GetTrustSuccessResponse]
         val processedResponse = response.asInstanceOf[TrustProcessedResponse]
         val trustsService = mock[TrustsService]
-        when(trustsService.getTrustInfo(any(), any(), any())).thenReturn(Future.successful(response))
+        when(trustsService.getTrustInfo(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(response))))
 
         val newLeadTrusteeIndInfo = AmendedLeadTrusteeIndType(
           bpMatchStatus = None,
@@ -218,16 +291,36 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
 
         val repository = mock[TransformationRepositoryImpl]
 
-        when(repository.get(any(), any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
+        when(repository.get(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](Future.successful(Right(Some(ComposedDeltaTransform(existingTransforms))))))
 
         val transformedJson = JsonUtils.getJsonValueFromFile("valid-get-trust-response-transformed-with-amend.json")
         val expectedResponse = models.get_trust.TrustProcessedResponse(transformedJson, processedResponse.responseHeader)
 
         val service = new TransformationService(repository, trustsService, auditService)
 
-        val result = service.getTransformedData(utr, internalId, sessionId)
-        whenReady(result) {
-          _ mustEqual expectedResponse
+        val result = service.getTransformedData(utr, internalId, sessionId).value
+        whenReady(result) { r =>
+          r mustBe Right(expectedResponse)
+        }
+      }
+
+      "must return TrustErrors when applyTransformations returns trustErrors" in {
+        val response = get5MLDTrustResponse.as[GetTrustSuccessResponse]
+        val trustsService = mock[TrustsService]
+        when(trustsService.getTrustInfo(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(response))))
+
+        val repository = mock[TransformationRepositoryImpl]
+
+        when(repository.get(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](Future.successful(Left(ServerError()))))
+
+        val service = new TransformationService(repository, trustsService, auditService)
+
+        val result = service.getTransformedData(utr, internalId, sessionId).value
+        whenReady(result) { r =>
+          r mustBe Left(ServerError())
         }
       }
     }
@@ -238,15 +331,16 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
         val repository = mock[TransformationRepositoryImpl]
         val service = new TransformationService(repository, mock[TrustsService], auditService)
 
-        when(repository.get(any(), any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(Nil))))
-        when(repository.set(any(), any(), any(), any())).thenReturn(Future.successful(true))
+        when(repository.get(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](Future.successful(Right(Some(ComposedDeltaTransform(Nil))))))
+
+        when(repository.set(any(), any(), any(), any())).thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         val result = service.addNewTransform(
           utr,
           internalId,
           AmendTrusteeTransform(None, Json.toJson(newLeadTrusteeIndInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
-
-        )
+        ).value
         whenReady(result) { _ =>
 
           verify(repository).set(
@@ -263,14 +357,17 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
         val service = new TransformationService(repository, mock[TrustsService], auditService)
 
         val existingTransforms = Seq(AmendTrusteeTransform(None, Json.toJson(existingLeadTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd"))
-        when(repository.get(any(), any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
-        when(repository.set(any(), any(), any(), any())).thenReturn(Future.successful(true))
+
+        when(repository.get(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](Future.successful(Right(Some(ComposedDeltaTransform(existingTransforms))))))
+
+        when(repository.set(any(), any(), any(), any())).thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         val result = service.addNewTransform(
           utr,
           internalId,
           AmendTrusteeTransform(None, Json.toJson(newLeadTrusteeIndInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
-        )
+        ).value
 
         whenReady(result) { _ =>
           verify(repository).set(
@@ -284,6 +381,48 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
           )
         }
       }
+
+      "must return ServerError() when repository.get returns an error" in {
+        val repository = mock[TransformationRepositoryImpl]
+        val service = new TransformationService(repository, mock[TrustsService], auditService)
+
+        when(repository.get(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](Future.successful(Left(ServerError()))))
+
+        when(repository.set(any(), any(), any(), any())).thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
+
+        val result = service.addNewTransform(
+          utr,
+          internalId,
+          AmendTrusteeTransform(None, Json.toJson(newLeadTrusteeIndInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
+        ).value
+
+        whenReady(result) { r =>
+          r mustBe Left(ServerError())
+        }
+      }
+
+      "must return ServerError() when adding a new transform fails" in {
+        val repository = mock[TransformationRepositoryImpl]
+        val service = new TransformationService(repository, mock[TrustsService], auditService)
+
+        val existingTransforms = Seq(AmendTrusteeTransform(None, Json.toJson(existingLeadTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd"))
+
+        when(repository.get(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](Future.successful(Right(Some(ComposedDeltaTransform(existingTransforms))))))
+
+        when(repository.set(any(), any(), any(), any())).thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
+
+        val result = service.addNewTransform(
+          utr,
+          internalId,
+          AmendTrusteeTransform(None, Json.toJson(newLeadTrusteeIndInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
+        ).value
+
+        whenReady(result) { r =>
+          r mustBe Left(ServerError())
+        }
+      }
     }
 
     "when .removeAllTransformations" - {
@@ -291,18 +430,33 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
         val repository = mock[TransformationRepositoryImpl]
         val service = new TransformationService(repository, mock[TrustsService], auditService)
 
-        when(repository.resetCache(any(), any(), any())).thenReturn(Future.successful(true))
+        when(repository.resetCache(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
-        val result = service.removeAllTransformations(utr, internalId, sessionId)
+        val result = service.removeAllTransformations(utr, internalId, sessionId).value
 
         whenReady(result) { _ =>
           verify(repository).resetCache(utr, internalId, sessionId)
         }
       }
+
+      "must return a Left(ServerError) repository returns an exception from Mongo" in {
+        val repository = mock[TransformationRepositoryImpl]
+        val service = new TransformationService(repository, mock[TrustsService], auditService)
+
+        when(repository.resetCache(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
+
+        val result = service.removeAllTransformations(utr, internalId, sessionId).value
+
+        whenReady(result) { r =>
+          r mustBe Left(ServerError())
+        }
+      }
     }
 
-    "when .amendTrustTypeDependentMigrationTransforms" - {
-      "must amend individual beneficiary and business settlor transforms that contain trust-type-dependent fields" in {
+    "when .removeTrustTypeDependentTransformFields" - {
+      "must remove individual beneficiary and business settlor transforms that contain trust-type-dependent fields" in {
 
         val trustTypeDependentBeneficiaryFields = Json.parse(
           """
@@ -335,10 +489,13 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
           AmendBeneficiaryTransform(None, Json.obj(), Json.obj(), LocalDate.now(), INDIVIDUAL_BENEFICIARY),
           AmendBeneficiaryTransform(None, Json.obj(), Json.obj(), LocalDate.now(), COMPANY_BENEFICIARY)
         )
-        when(repository.get(any(), any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
-        when(repository.set(any(), any(), any(), any())).thenReturn(Future.successful(true))
 
-        val result = service.removeTrustTypeDependentTransformFields(utr, internalId, sessionId)
+        when(repository.get(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](Future.successful(Right(Some(ComposedDeltaTransform(existingTransforms))))))
+
+        when(repository.set(any(), any(), any(), any())).thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
+
+        val result = service.removeTrustTypeDependentTransformFields(utr, internalId, sessionId).value
 
         whenReady(result) { _ =>
           verify(repository).set(
@@ -361,6 +518,24 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
           )
         }
       }
+
+      "must return ServerError() when failed to remove fields" in {
+
+        val repository = mock[TransformationRepositoryImpl]
+        val service = new TransformationService(repository, mock[TrustsService], auditService)
+
+        when(repository.get(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](Future.successful(Left(ServerError()))))
+
+        when(repository.set(any(), any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError("exception message")))))
+
+        val result = service.removeTrustTypeDependentTransformFields(utr, internalId, sessionId).value
+
+        whenReady(result) { r =>
+          r mustBe Left(ServerError())
+        }
+      }
     }
 
     "when .removeOptionalTrustDetailTransforms" - {
@@ -381,10 +556,12 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
           SetTrustDetailTransform(Json.toJson(LocalDate.parse("2000-01-01")), "efrbsStartDate"),
           SetTrustDetailTransform(JsString("Replaced the will trust"), "deedOfVariation")
         )
-        when(repository.get(any(), any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(existingTransforms))))
-        when(repository.set(any(), any(), any(), any())).thenReturn(Future.successful(true))
+        when(repository.get(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](Future.successful(Right(Some(ComposedDeltaTransform(existingTransforms))))))
 
-        val result = service.removeOptionalTrustDetailTransforms(utr, internalId, sessionId)
+        when(repository.set(any(), any(), any(), any())).thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
+
+        val result = service.removeOptionalTrustDetailTransforms(utr, internalId, sessionId).value
 
         whenReady(result) { _ =>
           verify(repository).set(
@@ -400,6 +577,23 @@ class TransformationServiceSpec extends AnyFreeSpec with MockitoSugar with Scala
               SetTrustDetailTransform(JsString("Inter vivos Settlement"), "typeOfTrust")
             ))
           )
+        }
+      }
+
+      "must return ServerError() when remove all transforms fails" in {
+        val repository = mock[TransformationRepositoryImpl]
+        val service = new TransformationService(repository, mock[TrustsService], auditService)
+
+        when(repository.get(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](Future.successful(Left(ServerError("exception message")))))
+
+        when(repository.set(any(), any(), any(), any())).thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
+
+        val result = service.removeOptionalTrustDetailTransforms(utr, internalId, sessionId).value
+
+        whenReady(result) { r =>
+          r mustBe Left(ServerError())
+
         }
       }
     }

@@ -16,7 +16,6 @@
 
 package models.tax_enrolments
 
-import exceptions._
 import play.api.Logging
 import play.api.http.Status._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
@@ -27,6 +26,8 @@ case object TaxEnrolmentSuccess extends TaxEnrolmentSubscriberResponse
 case object TaxEnrolmentFailure extends TaxEnrolmentSubscriberResponse
 case object TaxEnrolmentNotProcessed extends TaxEnrolmentSubscriberResponse
 
+case class TaxEnrolmentFailureResponse(message: String) extends TaxEnrolmentSubscriberResponse
+
 object TaxEnrolmentSubscriberResponse extends Logging {
 
   implicit lazy val httpReads: HttpReads[TaxEnrolmentSubscriberResponse] = (_: String, _: String, response: HttpResponse) => {
@@ -35,10 +36,10 @@ object TaxEnrolmentSubscriberResponse extends Logging {
         TaxEnrolmentSuccess
       case BAD_REQUEST =>
         logger.error("[TaxEnrolmentSubscriberResponse][httpReads] Bad request response received from tax enrolment")
-        throw BadRequestException
+        TaxEnrolmentFailureResponse("Bad request")
       case status =>
-        logger.error(s"[TaxEnrolmentSubscriberResponse][httpReads] Error response from tax enrolment: $status")
-        throw InternalServerErrorException(s"Error response from tax enrolment: $status")
+        logger.error(s"[TaxEnrolmentSubscriberResponse][httpReads] Unexpected error response from tax enrolment: $status")
+        TaxEnrolmentFailureResponse(s"Unexpected error response from tax enrolment. Status: $status")
     }
   }
 }

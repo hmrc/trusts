@@ -18,7 +18,7 @@ package services.auditing
 
 import base.BaseSpec
 import models.auditing.VariationAuditEvent
-import models.variation.VariationResponse
+import models.variation.VariationSuccessResponse
 import org.mockito.ArgumentMatchers.{any, eq => equalTo}
 import org.mockito.Mockito.verify
 import play.api.libs.json.Json
@@ -37,7 +37,7 @@ class VariationAuditServiceSpec extends BaseSpec {
 
         val request = Json.obj()
 
-        val response = VariationResponse("TRN123456")
+        val response = VariationSuccessResponse("TRN123456")
 
         service.auditVariationSuccess("internalId", false, request, response)
 
@@ -63,7 +63,7 @@ class VariationAuditServiceSpec extends BaseSpec {
           "agentDetails" -> Json.obj() // Doesn't care about contents of object
         )
 
-        val response = VariationResponse("TRN123456")
+        val response = VariationSuccessResponse("TRN123456")
         service.auditVariationSuccess("internalId", false, request, response)
 
         val expectedAuditData = VariationAuditEvent(
@@ -100,7 +100,7 @@ class VariationAuditServiceSpec extends BaseSpec {
           "trustTaxable" -> true
         )
 
-        service.auditVariationSuccess("internalId", false, request, VariationResponse("TRN123456"))
+        service.auditVariationSuccess("internalId", false, request, VariationSuccessResponse("TRN123456"))
 
         val expectedAuditData = VariationAuditEvent(
           request = request,
@@ -137,7 +137,7 @@ class VariationAuditServiceSpec extends BaseSpec {
           "trustTaxable" -> false
         )
 
-        service.auditVariationSuccess("internalId", false, request, VariationResponse("TRN123456"))
+        service.auditVariationSuccess("internalId", false, request, VariationSuccessResponse("TRN123456"))
 
         val expectedAuditData = VariationAuditEvent(
           request = request,

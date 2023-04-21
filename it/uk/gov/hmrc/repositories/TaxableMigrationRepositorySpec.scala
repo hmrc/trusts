@@ -29,11 +29,11 @@ class TaxableMigrationRepositorySpec extends IntegrationTestBase {
       val migratingToTaxable = true
 
       val storedOk = repository.set("UTRUTRUTR", "InternalId", "sessionId", migratingToTaxable)
-      storedOk.futureValue mustBe true
+      storedOk.value.futureValue mustBe Right(true)
 
       val retrieved = repository.get("UTRUTRUTR", "InternalId", "sessionId")
 
-      retrieved.futureValue mustBe Some(migratingToTaxable)
+      retrieved.value.futureValue mustBe Right(Some(migratingToTaxable))
     })
   }
 }

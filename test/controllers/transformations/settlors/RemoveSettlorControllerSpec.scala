@@ -16,7 +16,9 @@
 
 package controllers.transformations.settlors
 
+import cats.data.EitherT
 import controllers.actions.FakeIdentifierAction
+import errors.{ServerError, TrustErrors}
 import models.NameType
 import models.variation._
 import org.mockito.ArgumentMatchers.{any, eq => equalTo}
@@ -95,10 +97,10 @@ class RemoveSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(settlorType, Seq(Json.toJson(settlor)))))
+          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(settlorType, Seq(Json.toJson(settlor)))))))
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
-          .thenReturn(Future.successful(true))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         val body = removeSettlor(settlorType)
 
@@ -114,6 +116,33 @@ class RemoveSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
+
+      }
+
+      "must return an Internal Server Error when getTransformedTrustJson fails" in {
+
+        val mockTransformationService = mock[TransformationService]
+
+        val controller = new RemoveSettlorController(
+          identifierAction,
+          mockTransformationService
+        )(Implicits.global, Helpers.stubControllerComponents())
+
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
+          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Left(ServerError("message")))))
+
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
+
+        val body = removeSettlor(settlorType)
+
+        val request = FakeRequest(POST, "path")
+          .withBody(Json.toJson(body))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.remove(utr).apply(request)
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
 
       }
     }
@@ -144,10 +173,10 @@ class RemoveSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(settlorType, Seq(Json.toJson(settlor)))))
+          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(settlorType, Seq(Json.toJson(settlor)))))))
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
-          .thenReturn(Future.successful(true))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         val body = removeSettlor(settlorType)
 
@@ -163,6 +192,33 @@ class RemoveSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
+
+      }
+
+      "must return an Internal Server Error when addNewTransform fails" in {
+
+        val mockTransformationService = mock[TransformationService]
+
+        val controller = new RemoveSettlorController(
+          identifierAction,
+          mockTransformationService
+        )(Implicits.global, Helpers.stubControllerComponents())
+
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
+          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(settlorType, Seq(Json.toJson(settlor)))))))
+
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
+
+        val body = removeSettlor(settlorType)
+
+        val request = FakeRequest(POST, "path")
+          .withBody(Json.toJson(body))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.remove(utr).apply(request)
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
 
       }
     }

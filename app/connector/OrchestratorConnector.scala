@@ -16,35 +16,45 @@
 
 package connector
 
+import cats.data.EitherT
 import config.AppConfig
-import javax.inject.{Inject, Singleton}
+import errors.ServerError
 import models.orchestrator.OrchestratorMigrationRequest
-import models.tax_enrolments.OrchestratorToTaxableResponse
-import play.api.Logging
+import models.tax_enrolments.{OrchestratorToTaxableFailureResponse, OrchestratorToTaxableResponse, OrchestratorToTaxableSuccessResponse}
 import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utils.Constants.{CONTENT_TYPE, CONTENT_TYPE_JSON}
 import utils.Session
+import utils.TrustEnvelope.TrustEnvelope
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
 
 @Singleton
-class OrchestratorConnector @Inject()(http: HttpClient, config: AppConfig)(implicit ec: ExecutionContext) extends Logging {
+class OrchestratorConnector @Inject()(http: HttpClient, config: AppConfig)(implicit ec: ExecutionContext) extends ConnectorErrorResponseHandler {
+
+  val className: String = this.getClass.getSimpleName
 
   private def headers = Seq(CONTENT_TYPE -> CONTENT_TYPE_JSON)
 
-  def migrateToTaxable(urn: String, utr: String)(implicit hc: HeaderCarrier): Future[OrchestratorToTaxableResponse] = {
-    logger.info(s"[OrchestratorConnector][migrateToTaxable][Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr] starting migration from non-taxable to taxable")
+  def migrateToTaxable(urn: String, utr: String)(implicit hc: HeaderCarrier): TrustEnvelope[OrchestratorToTaxableSuccessResponse] = EitherT {
+    logger.info(s"[$className][migrateToTaxable][Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr] starting migration from non-taxable to taxable")
 
     val orchestratorHeaders = hc.withExtraHeaders(headers: _*)
 
     val orchestratorEndpoint = s"${config.orchestratorUrl}/trusts-enrolment-orchestrator/orchestration-process"
     val migrationRequest = OrchestratorMigrationRequest(urn, utr)
+
     http.POST[JsValue, OrchestratorToTaxableResponse](
       orchestratorEndpoint,
       Json.toJson(migrationRequest)
-    )(Writes.jsValueWrites, OrchestratorToTaxableResponse.httpReads, orchestratorHeaders, ec)
+    )(Writes.jsValueWrites, OrchestratorToTaxableResponse.httpReads, orchestratorHeaders, ec).map {
+      case response: OrchestratorToTaxableSuccessResponse => Right(response)
+      case response: OrchestratorToTaxableFailureResponse => Left(ServerError(response.message))
+    }.recover {
+      case ex =>
+        Left(handleError(ex, "migrateToTaxable", orchestratorEndpoint))
+    }
   }
 }
 

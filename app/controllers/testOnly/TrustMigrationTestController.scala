@@ -17,6 +17,7 @@
 package controllers.testOnly
 
 import controllers._
+
 import javax.inject.Inject
 import play.api.Logging
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -32,13 +33,14 @@ class TrustMigrationTestController @Inject()(migrationService: TaxableMigrationS
                                              cc: ControllerComponents
                                              )(implicit ec: ExecutionContext) extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
+
   def migrateToTaxable(subscriptionId: String, urn: String): Action[AnyContent] = Action.async {
     implicit request =>
       implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
       logger.info(s"[TrustMigrationTestController][migrateToTaxable][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn]" +
         s" Tax-enrolment: migration subscription callback message was: ${request.body}")
-      migrationService.migrateSubscriberToTaxable(subscriptionId, urn)
-      Future(Ok("Done"))
+      migrationService.migrateSubscriberToTaxable(subscriptionId, urn).value.flatMap(_ => Future(Ok("Done")))
+
   }
 }

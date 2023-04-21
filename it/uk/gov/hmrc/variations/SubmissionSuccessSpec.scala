@@ -16,16 +16,18 @@
 
 package uk.gov.hmrc.variations
 
+import cats.data.EitherT
 import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import models.get_trust.{GetTrustSuccessResponse, ResponseHeader}
-import models.variation.{DeclarationForApi, VariationResponse}
+import errors.TrustErrors
+import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse, ResponseHeader}
+import models.variation.{DeclarationForApi, VariationSuccessResponse}
 import models.{DeclarationName, NameType}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.matchers.must.Matchers._
 import play.api.inject.bind
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import repositories.CacheRepository
@@ -58,13 +60,13 @@ class SubmissionSuccessSpec extends IntegrationTestBase {
     lazy val get5MLDTrustNonTaxableResponse: String = getJsonFromFile("5MLD/NonTaxable/des/valid-get-trust-5mld-non-taxable-des-response.json")
 
     when(stubbedCacheRepository.get(eqTo(utr), any(), any()))
-      .thenReturn(Future.successful(Some(Json.parse(get5MLDTrustNonTaxableResponse))))
+      .thenReturn(EitherT[Future, TrustErrors, Option[JsValue]](Future.successful(Right(Some(Json.parse(get5MLDTrustNonTaxableResponse))))))
 
     when(stubbedTrustsConnector.getTrustInfo(eqTo(utr)))
-      .thenReturn(Future.successful(trustResponse))
+      .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(trustResponse))))
 
     when(stubbedTrustsConnector.trustVariation(any()))
-      .thenReturn(Future.successful(VariationResponse("tvn")))
+      .thenReturn(EitherT[Future, TrustErrors, VariationSuccessResponse](Future.successful(Right(VariationSuccessResponse("tvn")))))
 
     def application = applicationBuilder
       .overrides(

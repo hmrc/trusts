@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.transformations.trustees
 
+import cats.data.EitherT
 import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import models.get_trust.GetTrustSuccessResponse
+import errors.TrustErrors
+import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
 import models.variation.{IdentificationType, LeadTrusteeIndType}
 import models.{AddressType, NameType}
 import org.mockito.ArgumentMatchers._
@@ -73,7 +75,8 @@ class PromoteLeadTrusteeSpec extends IntegrationTestBase {
     val expectedGetAfterPromoteTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-promote-trustee.json")
 
     val stubbedTrustsConnector = mock[TrustsConnector]
-    when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
+    when(stubbedTrustsConnector.getTrustInfo(any()))
+      .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse))))
 
     def application = applicationBuilder
       .overrides(

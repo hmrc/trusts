@@ -93,8 +93,12 @@ object RetryHelper extends Logging {
     val totalTime: Int = ticks.sum
 
     def timeOfEachTick: Seq[Int] =
-      if (ticks.isEmpty) Nil
-      else ticks.drop(1).scanLeft(ticks.head)((acc, x) => acc + x)
+      if (ticks.isEmpty) {
+        Nil
+      }
+      else {
+        ticks.drop(1).scanLeft(ticks.head)((acc, x) => acc + x)
+      }
   }
 
   def calculateWaitTime[T](maxAttempts: Int, waitFactor: Int, currentWait: Int, currentAttempt: Int)

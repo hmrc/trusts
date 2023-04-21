@@ -17,9 +17,11 @@
 package controllers
 
 import base.BaseSpec
+import cats.data.EitherT
 import controllers.actions.FakeIdentifierAction
-import models.existing_trust.ExistingCheckRequest
+import errors.{ServerError, TrustErrors}
 import models.existing_trust.ExistingCheckResponse.{AlreadyRegistered, Matched, NotMatched, ServiceUnavailable}
+import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatest.matchers.must.Matchers._
@@ -28,7 +30,7 @@ import play.api.libs.json.Json
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers
 import play.api.test.Helpers._
-import services.{TrustsService, ValidationService}
+import services.TrustsService
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -36,14 +38,13 @@ import scala.concurrent.Future
 
 class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
-  lazy val validatationService: ValidationService = new ValidationService()
-  val mockTrustsService = mock[TrustsService]
+  private val mockTrustsService = mock[TrustsService]
 
-  lazy val bodyParsers = injector.instanceOf[BodyParsers.Default]
+  private lazy val bodyParsers = injector.instanceOf[BodyParsers.Default]
 
-  val validPayloadRequest = Json.parse("""{"name": "trust name","postcode": "NE1 1NE","utr": "1234567890"}""")
-  val validPayloadPostCodeLowerCase = Json.parse("""{"name": "trust name","postcode": "aa9a 9aa","utr": "1234567890"}""")
-  val validPayloadRequestWithoutPostCode = Json.parse("""{"name": "trust name","utr": "1234567890"}""")
+  private val validPayloadRequest = Json.parse("""{"name": "trust name","postcode": "NE1 1NE","utr": "1234567890"}""")
+  private val validPayloadPostCodeLowerCase = Json.parse("""{"name": "trust name","postcode": "aa9a 9aa","utr": "1234567890"}""")
+  private val validPayloadRequestWithoutPostCode = Json.parse("""{"name": "trust name","utr": "1234567890"}""")
 
 
   ".checkExistingTrust" should {
@@ -53,7 +54,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
         val SUT = new CheckTrustController(mockTrustsService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
         when(mockTrustsService.checkExistingTrust(any[ExistingCheckRequest]))
-          .thenReturn(Future.successful(Matched))
+          .thenReturn(EitherT[Future, TrustErrors, ExistingCheckResponse](Future.successful(Right(Matched))))
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequest))
         status(result) mustBe OK
         (contentAsJson(result) \ "match").as[Boolean] mustBe true
@@ -63,7 +64,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
         val SUT = new CheckTrustController(mockTrustsService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
         when(mockTrustsService.checkExistingTrust(any[ExistingCheckRequest]))
-          .thenReturn(Future.successful(Matched))
+          .thenReturn(EitherT[Future, TrustErrors, ExistingCheckResponse](Future.successful(Right(Matched))))
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadPostCodeLowerCase))
         status(result) mustBe OK
         (contentAsJson(result) \ "match").as[Boolean] mustBe true
@@ -75,7 +76,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
         val SUT = new CheckTrustController(mockTrustsService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
         when(mockTrustsService.checkExistingTrust(any[ExistingCheckRequest]))
-          .thenReturn(Future.successful(Matched))
+          .thenReturn(EitherT[Future, TrustErrors, ExistingCheckResponse](Future.successful(Right(Matched))))
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequestWithoutPostCode))
         status(result) mustBe OK
         (contentAsJson(result) \ "match").as[Boolean] mustBe true
@@ -86,7 +87,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "trusts data does not match with existing trusts." in {
         val SUT = new CheckTrustController(mockTrustsService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
         when(mockTrustsService.checkExistingTrust(any[ExistingCheckRequest]))
-          .thenReturn(Future.successful(NotMatched))
+          .thenReturn(EitherT[Future, TrustErrors, ExistingCheckResponse](Future.successful(Right(NotMatched))))
 
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequest))
         status(result) mustBe OK
@@ -99,7 +100,7 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
       "trusts data matched with already registered trusts." in {
         val SUT = new CheckTrustController(mockTrustsService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
         when(mockTrustsService.checkExistingTrust(any[ExistingCheckRequest]))
-          .thenReturn(Future.successful(AlreadyRegistered))
+          .thenReturn(EitherT[Future, TrustErrors, ExistingCheckResponse](Future.successful(Right(AlreadyRegistered))))
 
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequest))
         status(result) mustBe CONFLICT
@@ -180,7 +181,35 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
         val SUT = new CheckTrustController(mockTrustsService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
         when(mockTrustsService.checkExistingTrust(any[ExistingCheckRequest]))
-          .thenReturn(Future.successful(ServiceUnavailable))
+          .thenReturn(EitherT[Future, TrustErrors, ExistingCheckResponse](Future.successful(Right(ServiceUnavailable))))
+
+        val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequest))
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+        val output = contentAsJson(result)
+        (output \ "code").as[String] mustBe "INTERNAL_SERVER_ERROR"
+        (output \ "message").as[String] mustBe "Internal server error."
+      }
+
+      "checkExistingTrust returns an exception with a message" in {
+
+        val SUT = new CheckTrustController(mockTrustsService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
+        when(mockTrustsService.checkExistingTrust(any[ExistingCheckRequest]))
+          .thenReturn(EitherT[Future, TrustErrors, ExistingCheckResponse](Future.successful(Left(ServerError("exception message")))))
+
+        val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequest))
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+        val output = contentAsJson(result)
+        (output \ "code").as[String] mustBe "INTERNAL_SERVER_ERROR"
+        (output \ "message").as[String] mustBe "Internal server error."
+      }
+
+      "checkExistingTrust returns ServerError, where message is an empty string" in {
+
+        val SUT = new CheckTrustController(mockTrustsService, Helpers.stubControllerComponents(), new FakeIdentifierAction(bodyParsers, Organisation))
+        when(mockTrustsService.checkExistingTrust(any[ExistingCheckRequest]))
+          .thenReturn(EitherT[Future, TrustErrors, ExistingCheckResponse](Future.successful(Left(ServerError()))))
 
         val result = SUT.checkExistingTrust().apply(postRequestWithPayload(validPayloadRequest))
 

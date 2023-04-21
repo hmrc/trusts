@@ -16,7 +16,9 @@
 
 package controllers
 
+import cats.data.EitherT
 import controllers.actions.{IdentifierAction, ValidateIdentifierActionProvider}
+import errors.ServerError
 import models.auditing.TrustAuditing
 import models.get_trust.GetTrustResponse.CLOSED_REQUEST_STATUS
 import models.get_trust.{BadRequestResponse, ResourceNotFoundResponse, _}
@@ -29,9 +31,10 @@ import services.auditing.AuditService
 import services.{TaxYearService, TransformationService, TrustsService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.Constants._
+import utils.TrustEnvelope.TrustEnvelope
 import utils.{RequiredEntityDetailsForMigration, Session}
-import java.time.LocalDate
 
+import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
@@ -45,6 +48,8 @@ class GetTrustController @Inject()(identify: IdentifierAction,
                                    requiredDetailsUtil: RequiredEntityDetailsForMigration,
                                    cc: ControllerComponents)(implicit ec: ExecutionContext) extends BackendController(cc) with Logging {
 
+  private val className = this.getClass.getSimpleName
+
   val errorAuditMessages: Map[GetTrustResponse, String] = Map(
     BadRequestResponse -> "Bad Request received from DES.",
     ResourceNotFoundResponse -> "Not Found received from DES.",
@@ -53,7 +58,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     ClosedRequestResponse -> "Closed Request response received from DES."
   )
 
-  val errorResponses: Map[GetTrustResponse, Result] = Map (
+  val errorResponses: Map[GetTrustResponse, Result] = Map(
     ResourceNotFoundResponse -> NotFound,
     ClosedRequestResponse -> Status(CLOSED_REQUEST_STATUS),
     ServiceUnavailableResponse -> ServiceUnavailable
@@ -81,7 +86,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
             case JsSuccess(DisplayTrustLeadTrusteeType(None, Some(leadTrusteeOrg)), _) =>
               Ok(Json.toJson(leadTrusteeOrg))
             case _ =>
-              logger.error(s"[GetTrustController][getLeadTrustee][UTR/URN: $identifier] something unexpected has happened. " +
+              logger.error(s"[$className][getLeadTrustee][UTR/URN: $identifier] something unexpected has happened. " +
                 s"doGet has succeeded but picked lead trustee json has failed validation.")
               InternalServerError
           }
@@ -160,7 +165,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
         f(processed.getTrust) match {
           case JsSuccess(value, _) => Ok(Json.toJson(value))
           case JsError(errors) =>
-            logger.error(s"[GetTrustController][areEntitiesCompleteForMigration][Identifier: $identifier] Failed to check entities: $errors")
+            logger.error(s"[$className][areEntitiesCompleteForMigration][Identifier: $identifier] Failed to check entities: $errors")
             InternalServerError
         }
     }
@@ -216,10 +221,11 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   private def getElementAtPath(identifier: String, path: JsPath, defaultValue: JsValue, applyTransformations: Boolean)
                               (insertIntoObject: JsValue => JsValue): Action[AnyContent] = {
     processEtmpData(identifier, applyTransformations) {
-      transformed => transformed
-        .transform(path.json.pick)
-        .map(insertIntoObject)
-        .getOrElse(defaultValue)
+      transformed =>
+        transformed
+          .transform(path.json.pick)
+          .map(insertIntoObject)
+          .getOrElse(defaultValue)
     }
   }
 
@@ -246,41 +252,58 @@ class GetTrustController @Inject()(identify: IdentifierAction,
     }
   }
 
-  private def resetCacheIfRequested(identifier: String, internalId: String, sessionId: String, refreshEtmpData: Boolean): Future[Unit] = {
+  private def resetCacheIfRequested(identifier: String, internalId: String, sessionId: String, refreshEtmpData: Boolean): TrustEnvelope[Unit] = EitherT {
     if (refreshEtmpData) {
       val resetTransforms = transformationService.removeAllTransformations(identifier, internalId, sessionId)
       val resetCache = trustsService.resetCache(identifier, internalId, sessionId)
-      for {
+
+      val expectedResult = for {
         _ <- resetTransforms
         cache <- resetCache
       } yield cache
+
+      expectedResult.value.map {
+        case Right(cache) => Right(cache)
+        case Left(ServerError(message)) if message.nonEmpty =>
+          logger.warn(s"[$className][resetCacheIfRequested][SessionId: $sessionId] failed to reset cache. Message: $message")
+          Left(ServerError())
+        case Left(_) =>
+          logger.warn(s"[$className][resetCacheIfRequested][SessionId: $sessionId] failed to reset cache.")
+          Left(ServerError())
+      }
+
     } else {
-      Future.successful(())
+      Future.successful(Right(()))
     }
   }
 
   private def doGet(identifier: String, applyTransformations: Boolean, refreshEtmpData: Boolean = false)
                    (f: GetTrustSuccessResponse => Result): Action[AnyContent] = (validateIdentifier(identifier) andThen identify).async {
-    implicit request =>
-      {
+    implicit request => {
 
-        for {
-          _ <- resetCacheIfRequested(identifier, request.internalId, Session.id(hc), refreshEtmpData)
-          data <- if (applyTransformations) {
-            transformationService.getTransformedData(identifier, request.internalId, Session.id(hc))
-          } else {
-            trustsService.getTrustInfo(identifier, request.internalId, Session.id(hc))
-          }
-        } yield (
-          successResponse(f, identifier) orElse
-            notEnoughDataResponse(identifier) orElse
-            errorResponse(identifier)
-          ).apply(data)
-      } recover {
-        case e =>
-          logger.error(s"[GetTrustcontroller][doGet][Session ID: ${request.sessionId}][UTR/URN: $identifier] Failed to get trust info ${e.getMessage}")
+      val expectedResult = for {
+        _ <- resetCacheIfRequested(identifier, request.internalId, Session.id(hc), refreshEtmpData)
+        data <- if (applyTransformations) {
+          transformationService.getTransformedData(identifier, request.internalId, Session.id(hc))
+        } else {
+          trustsService.getTrustInfo(identifier, request.internalId, Session.id(hc))
+        }
+      } yield (
+        successResponse(f, identifier) orElse
+          notEnoughDataResponse(identifier) orElse
+          errorResponse(identifier)
+        ).apply(data)
+
+      expectedResult.value.map {
+        case Right(result) => result
+        case Left(ServerError(message)) if message.nonEmpty =>
+          logger.warn(s"[$className][doGet][SessionID: ${Session.id(hc)}] failed to get trust info. Message: $message")
+          InternalServerError
+        case Left(_) =>
+          logger.warn(s"[$className][doGet][SessionID: ${Session.id(hc)}] failed to get trust info.")
           InternalServerError
       }
+    }
   }
 
   private def successResponse(f: GetTrustSuccessResponse => Result,

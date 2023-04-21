@@ -17,12 +17,13 @@
 package connectors
 
 import connector.TrustsConnector
-import exceptions._
+import errors.{BadRequestErrorResponse, ServiceNotAvailableErrorResponse, TrustErrors, VariationFailureForAudit}
 import models.existing_trust.ExistingCheckRequest
 import models.existing_trust.ExistingCheckRequest._
 import models.existing_trust.ExistingCheckResponse._
 import models.get_trust._
-import models.variation.{TrustVariation, VariationResponse}
+import models.variation.{TrustVariation, VariationSuccessResponse}
+import org.scalatest.EitherValues
 import org.scalatest.matchers.must.Matchers._
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json, Reads}
@@ -30,15 +31,14 @@ import utils.NonTaxable5MLDFixtures
 
 import scala.concurrent.Future
 
-class TrustsConnectorSpec extends ConnectorSpecHelper {
+class TrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
-  lazy val connector: TrustsConnector = injector.instanceOf[TrustsConnector]
+  private lazy val connector: TrustsConnector = injector.instanceOf[TrustsConnector]
+  private lazy val request: ExistingCheckRequest = ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
 
-  lazy val request: ExistingCheckRequest = ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
+  private def get5MLDTrustUTREndpoint(utr: String) = s"/trusts/registration/UTR/$utr"
 
-  def get5MLDTrustUTREndpoint(utr: String) = s"/trusts/registration/UTR/$utr"
-
-  def get5MLDTrustURNEndpoint(urn: String) = s"/trusts/registration/URN/$urn"
+  private def get5MLDTrustURNEndpoint(urn: String) = s"/trusts/registration/URN/$urn"
 
   ".checkExistingTrust" should {
 
@@ -48,11 +48,11 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
         stubForPost(server, "/trusts/match", requestBody, OK, """{"match": true}""")
 
-        val futureResult = connector.checkExistingTrust(request)
+        val futureResult = connector.checkExistingTrust(request).value
 
         whenReady(futureResult) {
           result =>
-            result mustBe Matched
+            result mustBe Right(Matched)
         }
       }
     }
@@ -63,10 +63,10 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
         stubForPost(server, "/trusts/match", requestBody, OK, """{"match": false}""")
 
-        val futureResult = connector.checkExistingTrust(request)
+        val futureResult = connector.checkExistingTrust(request).value
 
         whenReady(futureResult) {
-          result => result mustBe NotMatched
+          result => result mustBe Right(NotMatched)
         }
       }
     }
@@ -89,10 +89,10 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
               |}
               |""".stripMargin)))
 
-          val futureResult = connector.checkExistingTrust(wrongPayloadRequest)
+          val futureResult = connector.checkExistingTrust(wrongPayloadRequest).value
 
           whenReady(futureResult) {
-            result => result mustBe BadRequest
+            result => result mustBe Right(BadRequest)
           }
         }
       }
@@ -113,10 +113,10 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
               |}
               |""".stripMargin)))
 
-          val futureResult = connector.checkExistingTrust(request)
+          val futureResult = connector.checkExistingTrust(request).value
 
           whenReady(futureResult) {
-            result => result mustBe AlreadyRegistered
+            result => result mustBe Right(AlreadyRegistered)
           }
         }
       }
@@ -137,10 +137,10 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
               |}
               |""".stripMargin)))
 
-          val futureResult = connector.checkExistingTrust(request)
+          val futureResult = connector.checkExistingTrust(request).value
 
           whenReady(futureResult) {
-            result => result mustBe ServiceUnavailable
+            result => result mustBe Right(ServiceUnavailable)
           }
         }
       }
@@ -161,10 +161,10 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
               |}
               |""".stripMargin)))
 
-          val futureResult = connector.checkExistingTrust(request)
+          val futureResult = connector.checkExistingTrust(request).value
 
           whenReady(futureResult) {
-            result => result mustBe ServerError
+            result => result mustBe Right(ServerError)
           }
         }
       }
@@ -175,10 +175,10 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
 
           stubForPost(server, "/trusts/match", requestBody, CONFLICT, "{}")
 
-          val futureResult = connector.checkExistingTrust(request)
+          val futureResult = connector.checkExistingTrust(request).value
 
           whenReady(futureResult) {
-            result => result mustBe ServerError
+            result => result mustBe Right(ServerError)
           }
         }
       }
@@ -196,17 +196,17 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
           """{"trn": "XTRN1234567"}"""
         )
 
-        val futureResult = connector.registerTrust(registrationRequest)
+        val futureResult = connector.registerTrust(registrationRequest).value
 
         whenReady(futureResult) {
-          result => result mustBe models.registration.RegistrationTrnResponse("XTRN1234567")
+          result => result mustBe Right(models.registration.RegistrationTrnResponse("XTRN1234567"))
         }
       }
     }
 
     "5MLD" when {
 
-      "return BadRequestException" when {
+      "return BadRequestResponse" when {
 
         "payload sent downstream is invalid" in {
           val requestBody = Json.stringify(Json.toJson(invalidRegistrationRequest))
@@ -223,16 +223,16 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
                |""".stripMargin
           )
 
-          val futureResult = connector.registerTrust(invalidRegistrationRequest)
+          val futureResult = connector.registerTrust(invalidRegistrationRequest).value
 
           whenReady(futureResult) {
-            result => result mustBe models.registration.BadRequestResponse
+            result => result mustBe Right(models.registration.BadRequestResponse)
           }
 
         }
       }
 
-      "return AlreadyRegisteredException" when {
+      "return AlreadyRegisteredResponse" when {
 
         "trusts is already registered with provided details" in {
           val requestBody = Json.stringify(Json.toJson(registrationRequest))
@@ -250,15 +250,15 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
                |""".stripMargin
           )
 
-          val futureResult = connector.registerTrust(registrationRequest)
+          val futureResult = connector.registerTrust(registrationRequest).value
 
           whenReady(futureResult) {
-            result => result mustBe models.registration.AlreadyRegisteredResponse
+            result => result mustBe Right(models.registration.AlreadyRegisteredResponse)
           }
         }
       }
 
-      "return NoMatchException" when {
+      "return NoMatchResponse" when {
 
         "payload has UTR that does not match" in {
           val requestBody = Json.stringify(Json.toJson(registrationRequest))
@@ -276,15 +276,15 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
                |""".stripMargin
           )
 
-          val futureResult = connector.registerTrust(registrationRequest)
+          val futureResult = connector.registerTrust(registrationRequest).value
 
           whenReady(futureResult) {
-            result => result mustBe models.registration.NoMatchResponse
+            result => result mustBe Right(models.registration.NoMatchResponse)
           }
         }
       }
 
-      "return ServiceUnavailableException" when {
+      "return ServiceUnavailableResponse" when {
 
         "downstream dependent service is not responding" in {
           val requestBody = Json.stringify(Json.toJson(registrationRequest))
@@ -302,15 +302,15 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
                |""".stripMargin
           )
 
-          val futureResult = connector.registerTrust(registrationRequest)
+          val futureResult = connector.registerTrust(registrationRequest).value
 
           whenReady(futureResult) {
-            result => result mustBe models.registration.ServiceUnavailableResponse
+            result => result mustBe Right(models.registration.ServiceUnavailableResponse)
           }
         }
       }
 
-      "return InternalServerErrorException" when {
+      "return InternalServerErrorResponse" when {
 
         "downstream is experiencing some problem" in {
           val requestBody = Json.stringify(Json.toJson(registrationRequest))
@@ -328,26 +328,26 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
                |""".stripMargin
           )
 
-          val futureResult = connector.registerTrust(registrationRequest)
+          val futureResult = connector.registerTrust(registrationRequest).value
 
 
           whenReady(futureResult) {
-            result => result mustBe models.registration.InternalServerErrorResponse
+            result => result mustBe Right(models.registration.InternalServerErrorResponse)
           }
         }
       }
 
-      "return InternalServerErrorException" when {
+      "return InternalServerErrorResponse" when {
 
         "downstream is returning 403 without ALREADY REGISTERED code" in {
           val requestBody = Json.stringify(Json.toJson(registrationRequest))
 
           stubForPost(server, "/trusts/registration", requestBody, FORBIDDEN, "{}")
-          val futureResult = connector.registerTrust(registrationRequest)
+          val futureResult = connector.registerTrust(registrationRequest).value
 
 
           whenReady(futureResult) {
-            result => result mustBe models.registration.InternalServerErrorResponse
+            result => result mustBe Right(models.registration.InternalServerErrorResponse)
           }
         }
       }
@@ -376,7 +376,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
             val utr = "1234567890"
             stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, get5MLDTrustResponseJson)
 
-            val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(utr)
+            val futureResult: Future[Either[TrustErrors, GetTrustResponse]] = connector.getTrustInfo(utr).value
 
             whenReady(futureResult) { result =>
 
@@ -384,7 +384,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
               val expectedJson = (get5MLDTrustResponse \ "trustOrEstateDisplay").as[JsValue]
 
               result match {
-                case r: TrustProcessedResponse =>
+                case Right(r: TrustProcessedResponse) =>
                   r.responseHeader mustBe expectedHeader
                   r.getTrust mustBe expectedJson
                 case _ => fail
@@ -405,7 +405,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
             val utr = "1234567890"
             stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, getTrustPropertyLandNoPreviousValue)
 
-            val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(utr)
+            val futureResult: Future[Either[TrustErrors, GetTrustResponse]] = connector.getTrustInfo(utr).value
 
             whenReady(futureResult) { result =>
 
@@ -413,7 +413,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
               val expectedJson = (getTrustPropertyLandNoPreviousValueJson \ "trustOrEstateDisplay").as[JsValue]
 
               result match {
-                case r: TrustProcessedResponse =>
+                case Right(r: TrustProcessedResponse) =>
                   r.responseHeader mustBe expectedHeader
                   r.getTrust mustBe expectedJson
                 case _ => fail
@@ -434,10 +434,10 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
             val utr = "1234567800"
             stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, getTrustOrEstateProcessingResponseJson)
 
-            val futureResult = connector.getTrustInfo(utr)
+            val futureResult = connector.getTrustInfo(utr).value
 
             whenReady(futureResult) { result =>
-              result mustBe TrustFoundResponse(ResponseHeader("In Processing", "1"))
+              result mustBe Right(TrustFoundResponse(ResponseHeader("In Processing", "1")))
             }
           }
         }
@@ -457,13 +457,15 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
             val utr = "1234567890"
             stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, getTrustMalformedJsonResponse)
 
-            val futureResult = connector.getTrustInfo(utr)
+            val futureResult = connector.getTrustInfo(utr).value
 
             whenReady(futureResult) { result =>
-              result mustBe NotEnoughDataResponse(Json.parse(getTrustMalformedJsonResponse), Json.parse(
+              result mustBe Right(
+                NotEnoughDataResponse(Json.parse(getTrustMalformedJsonResponse), Json.parse(
                 """
                   |{"obj.details.trust.entities.leadTrustees.phoneNumber":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.identification":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.name":[{"msg":["error.path.missing"],"args":[]}]}
                   |""".stripMargin))
+              )
             }
           }
 
@@ -485,10 +487,10 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
             stubForGet(server, get5MLDTrustUTREndpoint(utr), BAD_REQUEST,
               Json.stringify(jsonResponse400))
 
-            val futureResult = connector.getTrustInfo(utr)
+            val futureResult = connector.getTrustInfo(utr).value
 
             whenReady(futureResult) { result =>
-              result mustBe BadRequestResponse
+              result mustBe Right(BadRequestResponse)
             }
           }
         }
@@ -508,13 +510,15 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
             val utr = "6666666666"
             stubForGet(server, get5MLDTrustUTREndpoint(utr), OK, Json.stringify(jsonResponse204))
 
-            val futureResult = connector.getTrustInfo(utr)
+            val futureResult = connector.getTrustInfo(utr).value
 
             whenReady(futureResult) { result =>
-              result mustBe NotEnoughDataResponse(jsonResponse204, Json.parse(
+              result mustBe Right(
+                NotEnoughDataResponse(jsonResponse204, Json.parse(
                 """
                   |{"obj":[{"msg":["'responseHeader' is undefined on object: {\"code\":\"NO_CONTENT\",\"reason\":\"No Content.\"}"],"args":[]}]}
                   |""".stripMargin))
+              )
             }
           }
         }
@@ -534,10 +538,10 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
             val utr = "1234567892"
             stubForGet(server, get5MLDTrustUTREndpoint(utr), NOT_FOUND, "")
 
-            val futureResult = connector.getTrustInfo(utr)
+            val futureResult = connector.getTrustInfo(utr).value
 
             whenReady(futureResult) { result =>
-              result mustBe ResourceNotFoundResponse
+              result mustBe Right(ResourceNotFoundResponse)
             }
           }
         }
@@ -557,10 +561,10 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
             val utr = "1234567893"
             stubForGet(server, get5MLDTrustUTREndpoint(utr), INTERNAL_SERVER_ERROR, "")
 
-            val futureResult = connector.getTrustInfo(utr)
+            val futureResult = connector.getTrustInfo(utr).value
 
             whenReady(futureResult) { result =>
-              result mustBe InternalServerErrorResponse
+              result mustBe Right(InternalServerErrorResponse)
             }
           }
         }
@@ -580,10 +584,10 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
             val utr = "1234567894"
             stubForGet(server, get5MLDTrustUTREndpoint(utr), SERVICE_UNAVAILABLE, "")
 
-            val futureResult = connector.getTrustInfo(utr)
+            val futureResult = connector.getTrustInfo(utr).value
 
             whenReady(futureResult) { result =>
-              result mustBe ServiceUnavailableResponse
+              result mustBe Right(ServiceUnavailableResponse)
             }
           }
         }
@@ -606,7 +610,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
             val urn = "1234567890ADCEF"
             stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, NonTaxable5MLDFixtures.DES.get5MLDTrustNonTaxableResponse)
 
-            val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(urn)
+            val futureResult: Future[Either[TrustErrors, GetTrustResponse]] = connector.getTrustInfo(urn).value
 
             val expectedResponse = Json.parse(NonTaxable5MLDFixtures.DES.get5MLDTrustNonTaxableResponse)
 
@@ -616,7 +620,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
               val expectedJson = (expectedResponse \ "trustOrEstateDisplay").as[JsValue]
 
               result match {
-                case r: TrustProcessedResponse =>
+                case Right(r: TrustProcessedResponse) =>
 
                   r.responseHeader mustBe expectedHeader
                   r.getTrust mustBe expectedJson
@@ -638,7 +642,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
             val urn = "1234567890ADCEF"
             stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, getTrustPropertyLandNoPreviousValue)
 
-            val futureResult: Future[GetTrustResponse] = connector.getTrustInfo(urn)
+            val futureResult: Future[Either[TrustErrors, GetTrustResponse]] = connector.getTrustInfo(urn).value
 
             whenReady(futureResult) { result =>
 
@@ -646,7 +650,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
               val expectedJson = (getTrustPropertyLandNoPreviousValueJson \ "trustOrEstateDisplay").as[JsValue]
 
               result match {
-                case r: TrustProcessedResponse =>
+                case Right(r: TrustProcessedResponse) =>
                   r.responseHeader mustBe expectedHeader
                   r.getTrust mustBe expectedJson
                 case _ => fail
@@ -667,10 +671,10 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
             val urn = "1234567890ADCEF"
             stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, getTrustOrEstateProcessingResponseJson)
 
-            val futureResult = connector.getTrustInfo(urn)
+            val futureResult = connector.getTrustInfo(urn).value
 
             whenReady(futureResult) { result =>
-              result mustBe TrustFoundResponse(ResponseHeader("In Processing", "1"))
+              result mustBe Right(TrustFoundResponse(ResponseHeader("In Processing", "1")))
             }
           }
         }
@@ -690,13 +694,15 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
             val urn = "1234567890ADCEF"
             stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, getTrustMalformedJsonResponse)
 
-            val futureResult = connector.getTrustInfo(urn)
+            val futureResult = connector.getTrustInfo(urn).value
 
             whenReady(futureResult) { result =>
-              result mustBe NotEnoughDataResponse(Json.parse(getTrustMalformedJsonResponse), Json.parse(
+              result mustBe Right(
+                NotEnoughDataResponse(Json.parse(getTrustMalformedJsonResponse), Json.parse(
                 """
                   |{"obj.details.trust.entities.leadTrustees.phoneNumber":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.identification":[{"msg":["error.path.missing"],"args":[]}],"obj.details.trust.entities.leadTrustees.name":[{"msg":["error.path.missing"],"args":[]}]}
                   |""".stripMargin))
+              )
             }
           }
 
@@ -718,10 +724,10 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
             stubForGet(server, get5MLDTrustURNEndpoint(urn), BAD_REQUEST,
               Json.stringify(jsonResponse4005mld))
 
-            val futureResult = connector.getTrustInfo(urn)
+            val futureResult = connector.getTrustInfo(urn).value
 
             whenReady(futureResult) { result =>
-              result mustBe BadRequestResponse
+              result mustBe Right(BadRequestResponse)
             }
           }
         }
@@ -741,13 +747,15 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
             val urn = "1234567890ADCEF"
             stubForGet(server, get5MLDTrustURNEndpoint(urn), OK, Json.stringify(jsonResponse204))
 
-            val futureResult = connector.getTrustInfo(urn)
+            val futureResult = connector.getTrustInfo(urn).value
 
             whenReady(futureResult) { result =>
-              result mustBe NotEnoughDataResponse(jsonResponse204, Json.parse(
+              result mustBe Right(
+                NotEnoughDataResponse(jsonResponse204, Json.parse(
                 """
                   |{"obj":[{"msg":["'responseHeader' is undefined on object: {\"code\":\"NO_CONTENT\",\"reason\":\"No Content.\"}"],"args":[]}]}
                   |""".stripMargin))
+              )
             }
           }
         }
@@ -767,10 +775,10 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
             val urn = "1234567890ADCEF"
             stubForGet(server, get5MLDTrustURNEndpoint(urn), NOT_FOUND, "")
 
-            val futureResult = connector.getTrustInfo(urn)
+            val futureResult = connector.getTrustInfo(urn).value
 
             whenReady(futureResult) { result =>
-              result mustBe ResourceNotFoundResponse
+              result mustBe Right(ResourceNotFoundResponse)
             }
           }
         }
@@ -790,10 +798,10 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
             val urn = "1234567890ADCEF"
             stubForGet(server, get5MLDTrustURNEndpoint(urn), INTERNAL_SERVER_ERROR, "")
 
-            val futureResult = connector.getTrustInfo(urn)
+            val futureResult = connector.getTrustInfo(urn).value
 
             whenReady(futureResult) { result =>
-              result mustBe InternalServerErrorResponse
+              result mustBe Right(InternalServerErrorResponse)
             }
           }
         }
@@ -813,17 +821,15 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
             val urn = "1234567890ADCEF"
             stubForGet(server, get5MLDTrustURNEndpoint(urn), SERVICE_UNAVAILABLE, "")
 
-            val futureResult = connector.getTrustInfo(urn)
+            val futureResult = connector.getTrustInfo(urn).value
 
             whenReady(futureResult) { result =>
-              result mustBe ServiceUnavailableResponse
+              result mustBe Right(ServiceUnavailableResponse)
             }
           }
         }
       }
-
     }
-
   }
 
   ".TrustVariation" should {
@@ -838,11 +844,11 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
           s"""{"tvn": "XXTVN1234567890"}"""
         )
 
-        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest))
+        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest)).value
 
         whenReady(futureResult) { result =>
-          result mustBe a[VariationResponse]
-          inside(result) { case VariationResponse(tvn) => tvn must fullyMatch regex """^[a-zA-Z0-9]{15}$""".r }
+          result mustBe Right(VariationSuccessResponse("XXTVN1234567890"))
+          inside(result.value) { case VariationSuccessResponse(tvn) => tvn must fullyMatch regex """^[a-zA-Z0-9]{15}$""".r }
         }
       }
     }
@@ -853,16 +859,16 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
         val requestBody = Json.stringify(Json.toJson(trustVariationsNoPreviousPropertyValueRequest))
         stubForPost(server, url, requestBody, OK, """{"tvn": "XXTVN1234567890"}""")
 
-        val futureResult = connector.trustVariation(Json.toJson(trustVariationsNoPreviousPropertyValueRequest))
+        val futureResult = connector.trustVariation(Json.toJson(trustVariationsNoPreviousPropertyValueRequest)).value
 
         whenReady(futureResult) { result =>
-          result mustBe a[VariationResponse]
-          inside(result) { case VariationResponse(tvn) => tvn must fullyMatch regex """^[a-zA-Z0-9]{15}$""".r }
+          result mustBe Right(VariationSuccessResponse("XXTVN1234567890"))
+          inside(result.value) { case VariationSuccessResponse(tvn) => tvn must fullyMatch regex """^[a-zA-Z0-9]{15}$""".r }
         }
       }
     }
 
-    "return BadRequestException" when {
+    "return BadRequestErrorResponse" when {
       "payload sent to des is invalid" in {
 
         implicit val invalidVariationRead: Reads[TrustVariation] = Json.reads[TrustVariation]
@@ -878,16 +884,16 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
              |}""".stripMargin
         )
 
-        val futureResult = connector.trustVariation(Json.toJson(variation))
+        val futureResult = connector.trustVariation(Json.toJson(variation)).value
 
-        whenReady(futureResult.failed) {
-          result => result mustBe BadRequestException
+        whenReady(futureResult) {
+          result => result mustBe  Left(VariationFailureForAudit(BadRequestErrorResponse, "Bad request"))
         }
 
       }
     }
 
-    "return DuplicateSubmissionException" when {
+    "return errors.InternalServerErrorResponse" when {
       "trusts two requests are submitted with the same Correlation ID." in {
 
         val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
@@ -900,15 +906,15 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
              |}""".stripMargin
         )
 
-        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest))
+        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest)).value
 
-        whenReady(futureResult.failed) {
-          result => result mustBe an[InternalServerErrorException]
+        whenReady(futureResult) {
+          result => result mustBe Left(VariationFailureForAudit(errors.InternalServerErrorResponse, "Conflict response from des"))
         }
       }
     }
 
-    "return InvalidCorrelationIdException" when {
+    "return errors.InternalServerErrorResponse" when {
       "trusts provides an invalid Correlation ID." in {
         val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
 
@@ -920,15 +926,15 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
              |}""".stripMargin
         )
 
-        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest))
+        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest)).value
 
-        whenReady(futureResult.failed) {
-          result => result mustBe an[InternalServerErrorException]
+        whenReady(futureResult) {
+          result => result mustBe Left(VariationFailureForAudit(errors.InternalServerErrorResponse, "Invalid correlation id response from des"))
         }
       }
     }
 
-    "return ServiceUnavailableException  " when {
+    "return ServiceNotAvailableErrorResponse  " when {
       "des dependent service is not responding " in {
         val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
 
@@ -940,15 +946,15 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
              |}""".stripMargin
         )
 
-        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest))
+        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest)).value
 
-        whenReady(futureResult.failed) {
-          result => result mustBe an[ServiceNotAvailableException]
+        whenReady(futureResult) {
+          result => result mustBe Left(VariationFailureForAudit(ServiceNotAvailableErrorResponse, "des dependent service is down."))
         }
       }
     }
 
-    "return InternalServerErrorException" when {
+    "return errors.InternalServerErrorResponse" when {
       "des is experiencing some problem." in {
         val requestBody = Json.stringify(Json.toJson(trustVariationsRequest))
 
@@ -960,13 +966,15 @@ class TrustsConnectorSpec extends ConnectorSpecHelper {
              |}""".stripMargin
         )
 
-        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest))
+        val futureResult = connector.trustVariation(Json.toJson(trustVariationsRequest)).value
 
-        whenReady(futureResult.failed) {
-          result => result mustBe an[InternalServerErrorException]
+        whenReady(futureResult) {
+          result => result mustBe Left(VariationFailureForAudit(
+            errors.InternalServerErrorResponse,
+            "des is currently experiencing problems that require live service intervention"
+          ))
         }
       }
     }
-
   }
 }

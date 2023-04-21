@@ -16,21 +16,23 @@
 
 package controllers.transformations
 
-import exceptions.InternalServerErrorException
+import cats.data.EitherT
+import errors.ServerError
 import play.api.libs.json._
 import utils.Constants._
+import utils.TrustEnvelope.TrustEnvelope
 
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.Future
 
 trait TransformationHelper {
 
   def path(`type`: String, index: Option[Int]): JsPath
 
-  def findJson(json: JsValue, `type`: String, index: Option[Int]): Try[JsObject] = {
+  def findJson(json: JsValue, `type`: String, index: Option[Int]): TrustEnvelope[JsObject] = EitherT {
     val p = path(`type`, index)
     json.transform(p.json.pick).fold(
-      _ => Failure(InternalServerErrorException(s"Could not locate json at $p")),
-      value => scala.util.Success(value.as[JsObject])
+      _ => Future.successful(Left(ServerError(s"Could not locate json at $p"))),
+      value => Future.successful(Right(value.as[JsObject]))
     )
   }
 
@@ -38,13 +40,11 @@ trait TransformationHelper {
 
 object TransformationHelper {
 
-  def isTrustTaxable(json: JsObject): Try[Boolean] = {
-    Success(
-      json.transform((TRUST \ DETAILS \ TAXABLE).json.pick[JsBoolean]) match {
-        case JsSuccess(JsBoolean(value), _) => value
-        case _ => true
-      }
-    )
+  def isTrustTaxable(json: JsObject): TrustEnvelope[Boolean] = EitherT {
+    json.transform((TRUST \ DETAILS \ TAXABLE).json.pick[JsBoolean]) match {
+      case JsSuccess(JsBoolean(value), _) => Future.successful(Right(value))
+      case _ => Future.successful(Right(true))
+    }
   }
 
 }

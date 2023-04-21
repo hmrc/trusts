@@ -16,8 +16,10 @@
 
 package uk.gov.hmrc.variations
 
+import cats.data.EitherT
 import connectors.ConnectorSpecHelper
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
+import errors.TrustErrors
 import models.auditing.TrustAuditing
 import models.variation.DeclarationForApi
 import models.{DeclarationName, NameType}
@@ -26,7 +28,7 @@ import org.mockito.Mockito._
 import org.scalatest.matchers.must.Matchers._
 import play.api.http.Status.INTERNAL_SERVER_ERROR
 import play.api.inject.bind
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import repositories.CacheRepository
@@ -54,7 +56,7 @@ class SubmissionFailuresSpec extends ConnectorSpecHelper {
     lazy val get5MLDTrustNonTaxableResponse: String = getJsonFromFile("5MLD/NonTaxable/des/valid-get-trust-5mld-non-taxable-des-response.json")
 
     when(stubbedCacheRepository.get(eqTo(utr), any(), any()))
-      .thenReturn(Future.successful(Some(Json.parse(get5MLDTrustNonTaxableResponse))))
+      .thenReturn(EitherT[Future, TrustErrors, Option[JsValue]](Future.successful(Right(Some(Json.parse(get5MLDTrustNonTaxableResponse))))))
 
     stubForGet(server, s"/trusts/registration/UTR/$utr", INTERNAL_SERVER_ERROR, "")
 

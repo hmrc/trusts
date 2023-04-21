@@ -18,12 +18,14 @@ package controllers.transformations
 
 import controllers.actions.IdentifierAction
 import controllers.TrustsBaseController
+import errors.ServerError
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents}
 import services.TransformationService
 import transformers.DeltaTransform
 import transformers.remove.Remove
+
 import javax.inject.Inject
 import utils.Session
 
@@ -34,6 +36,8 @@ abstract class RemoveTransformationController @Inject()(identify: IdentifierActi
                                                        (implicit ec: ExecutionContext, cc: ControllerComponents)
   extends TrustsBaseController(cc) with TransformationHelper with Logging {
 
+  private val className = this.getClass.getSimpleName
+
   def transform[T <: Remove](remove: T, entity: JsValue): DeltaTransform
 
   def addNewTransform[T <: Remove](identifier: String)(implicit rds: Reads[T]): Action[JsValue] = {
@@ -42,16 +46,28 @@ abstract class RemoveTransformationController @Inject()(identify: IdentifierActi
         request.body.validate[T] match {
 
           case JsSuccess(remove, _) =>
-            for {
+            val expectedResult = for {
               json <- transformationService.getTransformedTrustJson(identifier, request.internalId, Session.id(hc))
-              entity <- Future.fromTry(findJson(json, remove.`type`, Some(remove.index)))
+              entity <- findJson(json, remove.`type`, Some(remove.index))
               _ <- transformationService.addNewTransform(identifier, request.internalId, transform(remove, entity))
             } yield {
               Ok
             }
 
+            expectedResult.value.map {
+              case Right(status) => status
+              case Left(ServerError(message)) if message.nonEmpty =>
+                logger.warn(s"[$className][addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
+                  s"failed to add new transformation. Message: $message")
+                InternalServerError
+              case Left(_) =>
+                logger.warn(s"[$className][addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
+                  s"failed to add new transformation")
+                InternalServerError
+            }
+
           case JsError(errors) =>
-            logger.warn(s"[AmendTransformationController][addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
+            logger.warn(s"[$className][addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
               s"Supplied json did not pass validation - $errors")
             Future.successful(BadRequest)
         }

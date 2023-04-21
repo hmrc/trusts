@@ -21,10 +21,11 @@ import org.mongodb.scala.model._
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+import utils.TrustEnvelope.TrustEnvelope
 
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class CacheRepositoryImpl @Inject()(
@@ -47,22 +48,23 @@ class CacheRepositoryImpl @Inject()(
 ) with RepositoryHelper[JsValue] with CacheRepository {
 
   override implicit val executionContext: ExecutionContext = ec
+  override val className: String = "CacheRepositoryImpl"
   override val key: String = "etmpData"
 
-  override def get(identifier: String, internalId: String, sessionId: String): Future[Option[JsValue]] = {
+  override def get(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Option[JsValue]] = {
     getOpt(identifier, internalId, sessionId)
   }
 
-  override def set(identifier: String, internalId: String, sessionId: String, data: JsValue): Future[Boolean] = {
+  override def set(identifier: String, internalId: String, sessionId: String, data: JsValue): TrustEnvelope[Boolean] = {
     upsert(identifier, internalId, sessionId, data)
   }
 }
 
 trait CacheRepository {
 
-  def get(identifier: String, internalId: String, sessionId: String): Future[Option[JsValue]]
+  def get(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Option[JsValue]]
 
-  def set(identifier: String, internalId: String, sessionId: String, data: JsValue): Future[Boolean]
+  def set(identifier: String, internalId: String, sessionId: String, data: JsValue): TrustEnvelope[Boolean]
 
-  def resetCache(identifier: String, internalId: String, sessionId: String): Future[Boolean]
+  def resetCache(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Boolean]
 }

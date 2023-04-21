@@ -16,7 +16,9 @@
 
 package controllers.transformations.settlors
 
+import cats.data.EitherT
 import controllers.actions.FakeIdentifierAction
+import errors.{ServerError, TrustErrors}
 import models.NameType
 import models.variation.{SettlorCompany, SettlorIndividual}
 import org.mockito.ArgumentMatchers.{any, eq => equalTo}
@@ -27,7 +29,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
@@ -56,15 +58,15 @@ class AddSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
     reset(mockTransformationService)
 
     when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-      .thenReturn(Future.successful(Json.obj()))
+      .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(Json.obj()))))
 
     when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
-      .thenReturn(Future.successful(true))
+      .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
     reset(mockTaxableMigrationService)
 
     when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any(), any()))
-      .thenReturn(Future.successful(false))
+      .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(false))))
   }
 
   "Add settlor controller" - {
@@ -106,6 +108,27 @@ class AddSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
+
+      }
+
+      "must return an Internal Server Error when getTransformedTrustJson fails" in {
+
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
+          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Left(ServerError()))))
+
+        val controller = new AddSettlorController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
+
+        val request = FakeRequest(POST, "path")
+          .withBody(Json.toJson(settlor))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.addIndividual(utr).apply(request)
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
 
       }
 
@@ -164,6 +187,48 @@ class AddSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
+
+      }
+
+      "must return an Internal Server Error when addNewTransform fails" in {
+
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
+
+        val controller = new AddSettlorController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
+
+        val request = FakeRequest(POST, "path")
+          .withBody(Json.toJson(settlor))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.addBusiness(utr).apply(request)
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+
+      }
+
+      "must return an Internal Server Error when migratingFromNonTaxableToTaxable fails" in {
+
+        when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
+
+        val controller = new AddSettlorController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
+
+        val request = FakeRequest(POST, "path")
+          .withBody(Json.toJson(settlor))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.addBusiness(utr).apply(request)
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
 
       }
 

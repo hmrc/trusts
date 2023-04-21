@@ -34,26 +34,23 @@ class TransformationController @Inject()(
                                         )(implicit ec: ExecutionContext) extends TrustsBaseController(cc) with Logging {
 
   def removeTransforms(identifier: String): Action[AnyContent] = identify.async { implicit request =>
-    transformationService.removeAllTransformations(identifier, request.internalId, Session.id(hc)) map { _ =>
-      Ok
-    } recoverWith {
-      case _ => Future.successful(InternalServerError)
+    transformationService.removeAllTransformations(identifier, request.internalId, Session.id(hc)).value.flatMap {
+      case Left(_) => Future.successful(InternalServerError)
+      case Right(_) => Future.successful(Ok)
     }
   }
 
   def removeTrustTypeDependentTransformFields(identifier: String): Action[AnyContent] = identify.async { implicit request =>
-    transformationService.removeTrustTypeDependentTransformFields(identifier, request.internalId, Session.id(hc)) map { _ =>
-      Ok
-    } recoverWith {
-      case _ => Future.successful(InternalServerError)
+    transformationService.removeTrustTypeDependentTransformFields(identifier, request.internalId, Session.id(hc)).value.map {
+      case Left(_) => InternalServerError
+      case Right(_) => Ok
     }
   }
 
   def removeOptionalTrustDetailTransforms(identifier: String): Action[AnyContent] = identify.async { implicit request =>
-    transformationService.removeOptionalTrustDetailTransforms(identifier, request.internalId, Session.id(hc)) map { _ =>
-      Ok
-    } recoverWith {
-      case _ => Future.successful(InternalServerError)
+    transformationService.removeOptionalTrustDetailTransforms(identifier, request.internalId, Session.id(hc)).value.map {
+      case Left(_) => InternalServerError
+      case Right(_) => Ok
     }
   }
 

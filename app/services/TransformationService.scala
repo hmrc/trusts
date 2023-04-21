@@ -16,11 +16,12 @@
 
 package services
 
-import exceptions.InternalServerErrorException
+import cats.data.EitherT
+import errors.ServerError
 import models.auditing.TrustAuditing
-import models.get_trust.{GetTrustResponse, TransformationErrorResponse, TrustProcessedResponse}
+import models.get_trust.{GetTrustResponse, TrustProcessedResponse}
 import play.api.Logging
-import play.api.libs.json.{JsObject, JsResult, JsSuccess, JsValue, Json, __, _}
+import play.api.libs.json._
 import repositories.TransformationRepository
 import services.auditing.AuditService
 import transformers._
@@ -30,6 +31,7 @@ import transformers.trustdetails.SetTrustDetailTransform
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.Constants._
 import utils.Session
+import utils.TrustEnvelope.TrustEnvelope
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -39,46 +41,71 @@ class TransformationService @Inject()(repository: TransformationRepository,
                                       trustsService: TrustsService,
                                       auditService: AuditService)(implicit ec: ExecutionContext) extends Logging {
 
-  def getTransformedTrustJson(identifier: String, internalId: String, sessionId: String)(implicit hc: HeaderCarrier): Future[JsObject] = {
-    getTransformedData(identifier, internalId, sessionId).flatMap {
-      case TrustProcessedResponse(json, _) => Future.successful(json.as[JsObject])
-      case _ => Future.failed(InternalServerErrorException("Trust is not in a processed state."))
+  private val className = this.getClass.getSimpleName
+
+  def getTransformedTrustJson(identifier: String, internalId: String, sessionId: String)
+                             (implicit hc: HeaderCarrier): TrustEnvelope[JsObject] = EitherT {
+    getTransformedData(identifier, internalId, sessionId).value.flatMap {
+      case Right(TrustProcessedResponse(json, _)) => Future.successful(Right(json.as[JsObject]))
+      case Right(_) =>
+        Future.successful(Left(ServerError("Trust is not in a processed state.")))
+      case Left(ServerError(message)) if message.nonEmpty =>
+        logger.warn(s"[$className][getTransformedTrustJson][SessionId: $sessionId] failed to get transformed trust data - $message")
+        Future.successful(Left(ServerError()))
+      case Left(_) =>
+        logger.warn(s"[$className][getTransformedTrustJson][SessionId: $sessionId] failed to get transformed trust data.")
+        Future.successful(Left(ServerError()))
     }
   }
 
-  def getTransformedData(identifier: String, internalId: String, sessionId: String)(implicit hc: HeaderCarrier): Future[GetTrustResponse] = {
-    trustsService.getTrustInfo(identifier, internalId, sessionId).flatMap {
-      case response: TrustProcessedResponse =>
+  def getTransformedData(identifier: String, internalId: String, sessionId: String)
+                        (implicit hc: HeaderCarrier): TrustEnvelope[GetTrustResponse] = EitherT {
+    trustsService.getTrustInfo(identifier, internalId, sessionId).value.flatMap {
+      case Right(response: TrustProcessedResponse) =>
         populateLeadTrusteeAddress(response.getTrust) match {
           case JsSuccess(fixed, _) =>
 
-            applyTransformations(identifier, internalId, fixed).map {
-              case JsSuccess(transformed, _) =>
-                TrustProcessedResponse(transformed, response.responseHeader)
-              case JsError(errors) => TransformationErrorResponse(errors.toString)
+            applyTransformations(identifier, internalId, fixed).value.map {
+              case Right(JsSuccess(transformed, _)) =>
+                Right(TrustProcessedResponse(transformed, response.responseHeader))
+              case Right(JsError(errors)) =>
+                logger.warn(s"[$className][getTransformedData][SessionId: $sessionId] failed to apply transformations - $errors")
+                Left(ServerError(errors.toString))
+              case Left(trustErrors) => Left(trustErrors)
             }
-          case JsError(errors) => Future.successful(TransformationErrorResponse(errors.toString))
+          case JsError(errors) =>
+            logger.warn(s"[$className][getTransformedData][SessionId: $sessionId] cannot populate lead trustee address - $errors")
+            Future.successful(Left(ServerError(errors.toString)))
         }
-      case response => Future.successful(response)
+      case Right(response) => Future.successful(Right(response))
+      case Left(ServerError(message)) if message.nonEmpty =>
+        logger.warn(s"[$className][getTransformedData][SessionId: $sessionId] failed to get trust info - $message")
+        Future.successful(Left(ServerError()))
+      case Left(_) =>
+        logger.warn(s"[$className][getTransformedData][SessionId: $sessionId] failed to get trust info.")
+        Future.successful(Left(ServerError()))
     }
   }
 
-  private def applyTransformations(identifier: String, internalId: String, json: JsValue)(implicit hc: HeaderCarrier): Future[JsResult[JsValue]] = {
-    repository.get(identifier, internalId, Session.id(hc)).map {
-      case None =>
-        JsSuccess(json)
-      case Some(transformations) =>
-        transformations.applyTransform(json)
+  private def applyTransformations(identifier: String, internalId: String, json: JsValue)
+                                  (implicit hc: HeaderCarrier): TrustEnvelope[JsResult[JsValue]] = EitherT {
+    repository.get(identifier, internalId, Session.id(hc)).value.map {
+      case Right(None) =>
+        Right(JsSuccess(json))
+      case Right(Some(transformations)) =>
+        Right(transformations.applyTransform(json))
+      case Left(trustErrors) => Left(trustErrors)
     }
   }
 
-  def applyDeclarationTransformations(identifier: String, internalId: String, json: JsValue)(implicit hc: HeaderCarrier): Future[JsResult[JsValue]] = {
-    repository.get(identifier, internalId, Session.id(hc)).map {
-      case None =>
-        logger.info(s"[TransformationService][applyDeclarationTransformations][Session ID: ${Session.id(hc)}]" +
+  def applyDeclarationTransformations(identifier: String, internalId: String, json: JsValue)
+                                     (implicit hc: HeaderCarrier): TrustEnvelope[JsResult[JsValue]] = EitherT {
+    repository.get(identifier, internalId, Session.id(hc)).value.map {
+      case Right(None) =>
+        logger.info(s"[$className][applyDeclarationTransformations][Session ID: ${Session.id(hc)}]" +
           s" no transformations to apply")
-        JsSuccess(json)
-      case Some(transformations) =>
+        Right(JsSuccess(json))
+      case Right(Some(transformations)) =>
 
         auditService.audit(
           event = TrustAuditing.TRUST_TRANSFORMATIONS,
@@ -90,22 +117,25 @@ class TransformationService @Inject()(repository: TransformationRepository,
           )
         )
 
-        for {
+        val expectedTransformedResult = for {
           initial <- {
-            logger.info(s"[TransformationService][applyDeclarationTransformations][Session ID: ${Session.id(hc)}]" +
+            logger.info(s"[$className][applyDeclarationTransformations][Session ID: ${Session.id(hc)}]" +
               s" applying transformations")
             transformations.applyTransform(json)
           }
           transformed <- {
-            logger.info(s"[TransformationService][applyDeclarationTransformations][Session ID: ${Session.id(hc)}]" +
+            logger.info(s"[$className][applyDeclarationTransformations][Session ID: ${Session.id(hc)}]" +
               s" applying declaration transformations")
             transformations.applyDeclarationTransform(initial)
           }
-        } yield {
-          transformed
-        }
+        } yield transformed
+
+        Right(expectedTransformedResult)
+
+      case Left(trustErrors) => Left(trustErrors)
     }
   }
+
 
   def populateLeadTrusteeAddress(beforeJson: JsValue): JsResult[JsValue] = {
     val pathToLeadTrusteeAddress = __ \ Symbol("details") \ Symbol("trust") \ Symbol("entities") \
@@ -119,42 +149,63 @@ class TransformationService @Inject()(repository: TransformationRepository,
     }
   }
 
-  def addNewTransform(identifier: String, internalId: String, newTransform: DeltaTransform)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    repository.get(identifier, internalId, Session.id(hc)).map {
-      case None =>
-        ComposedDeltaTransform(Seq(newTransform))
-
-      case Some(composedTransform) =>
-        composedTransform :+ newTransform
-
-    }.flatMap(newTransforms =>
-      repository.set(identifier, internalId, Session.id(hc), newTransforms)).recoverWith {
-      case e =>
-        logger.error(s"[TransformationService][addNewTransform] Exception adding new transform: ${e.getMessage}")
-        Future.failed(e)
+  def addNewTransform(identifier: String, internalId: String, newTransform: DeltaTransform)
+                     (implicit hc: HeaderCarrier): TrustEnvelope[Boolean] = EitherT {
+    repository.get(identifier, internalId, Session.id(hc)).value.map {
+      case Right(None) => Right(ComposedDeltaTransform(Seq(newTransform)))
+      case Right(Some(composedTransform)) => Right(composedTransform :+ newTransform)
+      case Left(_) =>
+        logger.warn(s"[$className][addNewTransform] Exception from mongo, failed to get data from repository.")
+        Left(ServerError())
+    }.flatMap {
+      case Left(trustErrors) => Future.successful(Left(trustErrors))
+      case Right(newTransforms) =>
+          repository.set(identifier, internalId, Session.id(hc), newTransforms).value.flatMap {
+            case Right(value) => Future.successful(Right(value))
+            case Left(_) =>
+              logger.warn(s"[$className][addNewTransform] Exception from mongo, failed to add new transform.")
+              Future.successful(Left(ServerError()))
+          }
     }
   }
 
-  def removeAllTransformations(identifier: String, internalId: String, sessionId: String): Future[Boolean] = {
-    repository.resetCache(identifier, internalId, sessionId)
+  def removeAllTransformations(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Boolean] = EitherT {
+    repository.resetCache(identifier, internalId, sessionId).value.map {
+      case Left(_) =>
+        logger.warn(s"[$className][removeAllTransformations][SessionId: $sessionId] failed to remove transform.")
+        Left(ServerError())
+      case Right(value) => Right(value)
+    }
   }
 
-  def removeTrustTypeDependentTransformFields(identifier: String, internalId: String, sessionId: String): Future[Boolean] = {
-    for {
+  def removeTrustTypeDependentTransformFields(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Boolean] = EitherT {
+    val expectedResult = for {
       transforms <- repository.get(identifier, internalId, sessionId)
-      updatedTransforms = transforms match {
-        case Some(value) => ComposedDeltaTransform(value.deltaTransforms.map {
-          case x: AddBeneficiaryTransform => x.copy(entity = x.removeTrustTypeDependentFields(x.entity))
-          case x: AmendBeneficiaryTransform => x.copy(amended = x.removeTrustTypeDependentFields(x.amended))
-          case x: AddSettlorTransform => x.copy(entity = x.removeTrustTypeDependentFields(x.entity))
-          case x: AmendSettlorTransform => x.copy(amended = x.removeTrustTypeDependentFields(x.amended))
-          case x => x
-        })
-        case None => ComposedDeltaTransform()
-      }
+      updatedTransforms = handleTransformsForRemoveTrustTypeDependent(transforms)
       result <- repository.set(identifier, internalId, sessionId, updatedTransforms)
     } yield {
       result
+    }
+
+    expectedResult.value.map {
+      case Right(result) => Right(result)
+      case Left(_) =>
+        logger.warn(s"[$className][removeTrustTypeDependentTransformFields][SessionId: $sessionId] " +
+          s"an error occurred, failed to transform json and remove fields.")
+        Left(ServerError())
+    }
+  }
+
+  private def handleTransformsForRemoveTrustTypeDependent(transforms: Option[ComposedDeltaTransform]): ComposedDeltaTransform = {
+    transforms match {
+      case Some(value) => ComposedDeltaTransform(value.deltaTransforms.map {
+        case x: AddBeneficiaryTransform => x.copy(entity = x.removeTrustTypeDependentFields(x.entity))
+        case x: AmendBeneficiaryTransform => x.copy(amended = x.removeTrustTypeDependentFields(x.amended))
+        case x: AddSettlorTransform => x.copy(entity = x.removeTrustTypeDependentFields(x.entity))
+        case x: AmendSettlorTransform => x.copy(amended = x.removeTrustTypeDependentFields(x.amended))
+        case x => x
+      })
+      case None => ComposedDeltaTransform()
     }
   }
 
@@ -170,11 +221,11 @@ class TransformationService @Inject()(repository: TransformationRepository,
    *  non-UK-resident trust to that of a UK-resident trust</li>
    * </ol>
    */
-  def removeOptionalTrustDetailTransforms(identifier: String, internalId: String, sessionId: String): Future[Boolean] = {
+  def removeOptionalTrustDetailTransforms(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Boolean] = EitherT {
 
     val optionalTrustDetails = Seq(LAW_COUNTRY, UK_RELATION, DEED_OF_VARIATION, INTER_VIVOS, EFRBS_START_DATE)
 
-    for {
+    val expectedResult = for {
       transforms <- repository.get(identifier, internalId, sessionId)
       updatedTransforms = transforms match {
         case Some(value) => ComposedDeltaTransform(value.deltaTransforms.filter {
@@ -186,6 +237,14 @@ class TransformationService @Inject()(repository: TransformationRepository,
       result <- repository.set(identifier, internalId, sessionId, updatedTransforms)
     } yield {
       result
+    }
+
+    expectedResult.value.flatMap {
+      case Left(_) =>
+        logger.warn(s"[$className][removeOptionalTrustDetailTransforms][SessionId: $sessionId] " +
+          s"an error occurred, failed to retrieve trusts details from repository.")
+        Future.successful(Left(ServerError()))
+      case Right(result) => Future.successful(Right(result))
     }
   }
 }

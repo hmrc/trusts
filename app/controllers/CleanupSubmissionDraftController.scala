@@ -17,7 +17,9 @@
 package controllers
 
 import controllers.actions.IdentifierAction
+import errors.ServerError
 import models.registration.RegistrationSubmission.{AnswerSection, MappedPiece}
+import models.registration.RegistrationSubmissionDraft
 import models.requests.IdentifierRequest
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
@@ -26,48 +28,74 @@ import services.dates.LocalDateTimeService
 import utils.JsonOps.prunePath
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class CleanupSubmissionDraftController @Inject()(
                                                 submissionRepository: RegistrationSubmissionRepository,
                                                 identify: IdentifierAction,
                                                 localDateTimeService: LocalDateTimeService,
                                                 cc: ControllerComponents
-                                              )(implicit ec: ExecutionContext) extends SubmissionDraftController(submissionRepository, identify, localDateTimeService, cc) {
+                                              )(implicit ec: ExecutionContext)
+  extends SubmissionDraftController(submissionRepository, identify, localDateTimeService, cc) {
+
+  private val className = this.getClass.getSimpleName
 
   def removeDraft(draftId: String): Action[AnyContent] = identify.async { request =>
-    submissionRepository.removeDraft(draftId, request.internalId).map { _ => Ok }
+    submissionRepository.removeDraft(draftId, request.internalId).value.map {
+      case Right(_) => Ok
+      case Left(ServerError(message)) if message.nonEmpty =>
+        logger.warn(s"[$className][removeDraft][Session ID: ${request.sessionId}] failed to remove draft. Message: $message")
+        InternalServerError
+      case Left(_) =>
+        logger.warn(s"[$className][removeDraft][Session ID: ${request.sessionId}] an error occurred, failed to remove draft.")
+        InternalServerError
+    }
   }
 
   def reset(draftId: String, section: String, mappedDataKey: String): Action[AnyContent] = identify.async {
     implicit request =>
-      submissionRepository.getDraft(draftId, request.internalId).flatMap {
-        case Some(draft) =>
-          val userAnswersPath = __ \ section
-          val rowsPath = AnswerSection.path \ section
-          val mappedDataPath = MappedPiece.path \ mappedDataKey
-
-          draft.draftData.transform {
-            prunePath(userAnswersPath) andThen
-              prunePath(rowsPath) andThen
-              prunePath(mappedDataPath)
-          } match {
-            case JsSuccess(data, _) =>
-              val draftWithSectionReset = draft.copy(draftData = data)
-              logger.info(s"[CleanupSubmissionDraftController][reset][Session ID: ${request.sessionId}]" +
-                s" removed mapped data and answers $section")
-              submissionRepository.setDraft(draftWithSectionReset).map(x => if (x) Ok else InternalServerError)
-            case _: JsError =>
-              logger.error(s"[CleanupSubmissionDraftController][reset][Session ID: ${request.sessionId}]" +
-                s" failed to reset for $section")
-              Future.successful(InternalServerError)
-          }
-        case None =>
-          logger.warn(s"[CleanupSubmissionDraftController][reset][Session ID: ${request.sessionId}]" +
-            s" no draft, cannot reset section $section")
+      submissionRepository.getDraft(draftId, request.internalId).value.flatMap {
+        case Right(Some(draft)) => transformDraftDataForReset(draft, section, mappedDataKey)
+        case Right(None) =>
+          logger.warn(s"[$className][reset][Session ID: ${request.sessionId}] no draft, cannot reset section $section")
+          Future.successful(InternalServerError)
+        case Left(ServerError(message)) if message.nonEmpty =>
+          logger.warn(s"[$className][reset][Session ID: ${request.sessionId}] cannot reset section $section. Message: $message")
+          Future.successful(InternalServerError)
+        case Left(_) =>
+          logger.warn(s"[$className][reset][Session ID: ${request.sessionId}] an error occurred, cannot reset section $section")
           Future.successful(InternalServerError)
       }
+  }
+
+  private def transformDraftDataForReset(draft: RegistrationSubmissionDraft, section: String, mappedDataKey: String)
+                                        (implicit request: IdentifierRequest[AnyContent]): Future[Status] = {
+    val userAnswersPath = __ \ section
+    val rowsPath = AnswerSection.path \ section
+    val mappedDataPath = MappedPiece.path \ mappedDataKey
+
+    draft.draftData.transform {
+      prunePath(userAnswersPath) andThen
+        prunePath(rowsPath) andThen
+        prunePath(mappedDataPath)
+    } match {
+      case JsSuccess(data, _) =>
+        val draftWithSectionReset = draft.copy(draftData = data)
+        logger.info(s"[$className][reset][Session ID: ${request.sessionId}] removed mapped data and answers $section")
+        submissionRepository.setDraft(draftWithSectionReset).value.map {
+          case Right(true) => Ok
+          case Right(_) => InternalServerError
+          case Left(ServerError(message)) if message.nonEmpty =>
+            logger.warn(s"[$className][reset][Session ID: ${request.sessionId}] failed to reset for $section. Message: $message")
+            InternalServerError
+          case Left(_) =>
+            logger.warn(s"[$className][reset][Session ID: ${request.sessionId}] there was a problem, failed to reset for $section.")
+            InternalServerError
+        }
+      case _: JsError =>
+        logger.error(s"[$className][reset][Session ID: ${request.sessionId}] failed to reset for $section")
+        Future.successful(InternalServerError)
+    }
   }
 
   def removeRoleInCompany(draftId: String): Action[AnyContent] = identify.async {
@@ -75,8 +103,8 @@ class CleanupSubmissionDraftController @Inject()(
 
       import utils.JsonOps.RemoveRoleInCompanyFields
 
-      submissionRepository.getDraft(draftId, request.internalId).flatMap {
-        case Some(draft) =>
+      submissionRepository.getDraft(draftId, request.internalId).value.flatMap {
+        case Right(Some(draft)) =>
 
           val initialDraftData: JsValue = draft.draftData
 
@@ -84,11 +112,25 @@ class CleanupSubmissionDraftController @Inject()(
 
           val newDraft = draft.copy(draftData = updatedDraftData)
 
-          submissionRepository.setDraft(newDraft).map(
-            result => if (result) Ok else InternalServerError
-          )
-
-        case _ => Future.successful(InternalServerError)
+          submissionRepository.setDraft(newDraft).value.map {
+            case Right(true) => Ok
+            case Right(_) => InternalServerError
+            case Left(ServerError(message)) if message.nonEmpty =>
+              logger.warn(s"[$className][reset][Session ID: ${request.sessionId}] failed to set draft. Message: $message")
+              InternalServerError
+            case Left(_) =>
+              logger.warn(s"[$className][removeRoleInCompany][Session ID: ${request.sessionId}] problem to set draft.")
+              InternalServerError
+          }
+        case Right(_) => Future.successful(InternalServerError)
+        case Left(ServerError(message)) if message.nonEmpty =>
+          logger.warn(s"[$className][removeRoleInCompany][Session ID: ${request.sessionId}] " +
+            s"failed to remove role in company fields. Message: $message")
+          Future.successful(InternalServerError)
+        case Left(_) =>
+          logger.warn(s"[$className][removeRoleInCompany][Session ID: ${request.sessionId}] " +
+            s"an error occurred while getting draft, cannot remove role in company fields")
+          Future.successful(InternalServerError)
       }
   }
 
@@ -109,8 +151,8 @@ class CleanupSubmissionDraftController @Inject()(
   private def removeAtPath(draftId: String, path: JsPath)
                           (implicit request: IdentifierRequest[AnyContent]): Future[Result] = {
 
-    submissionRepository.getDraft(draftId, request.internalId).flatMap {
-      case Some(draft) =>
+    submissionRepository.getDraft(draftId, request.internalId).value.flatMap {
+      case Right(Some(draft)) =>
 
         val initialDraftData: JsValue = draft.draftData
 
@@ -121,11 +163,24 @@ class CleanupSubmissionDraftController @Inject()(
 
         val newDraft = draft.copy(draftData = updatedDraftData)
 
-        submissionRepository.setDraft(newDraft).map(
-          result => if (result) Ok else InternalServerError
-        )
+        submissionRepository.setDraft(newDraft).value.map {
+          case Right(true) => Ok
+          case Right(_) => InternalServerError
+          case Left(ServerError(message)) if message.nonEmpty =>
+            logger.warn(s"[$className][removeAtPath][Session ID: ${request.sessionId}] failed to set new draft data. Message: $message")
+            InternalServerError
+          case Left(_) =>
+            logger.warn(s"[$className][removeAtPath][Session ID: ${request.sessionId}] there was a problem, failed to set new draft data.")
+            InternalServerError
+        }
 
-      case _ => Future.successful(NotFound)
+      case Right(_) => Future.successful(NotFound)
+      case Left(ServerError(message)) if message.nonEmpty =>
+        logger.warn(s"[$className][removeAtPath][Session ID: ${request.sessionId}] cannot remove at path. Message: $message")
+        Future.successful(InternalServerError)
+      case Left(_) =>
+        logger.warn(s"[$className][removeAtPath][Session ID: ${request.sessionId}] there was a problem, cannot remove at path")
+        Future.successful(InternalServerError)
     }
   }
 }

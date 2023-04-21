@@ -16,10 +16,12 @@
 
 package uk.gov.hmrc.transformations.trustees
 
+import cats.data.EitherT
 import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
+import errors.TrustErrors
 import models.NameType
-import models.get_trust.{DisplayTrustIdentificationType, DisplayTrustTrusteeIndividualType, GetTrustSuccessResponse}
+import models.get_trust.{DisplayTrustIdentificationType, DisplayTrustTrusteeIndividualType, GetTrustResponse, GetTrustSuccessResponse}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.Assertion
@@ -65,7 +67,8 @@ class AmendTrusteeSpec extends IntegrationTestBase {
     val expectedGetAfterAmendTrusteeJson: JsValue = JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-trustee.json")
 
     val stubbedTrustsConnector = mock[TrustsConnector]
-    when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
+    when(stubbedTrustsConnector.getTrustInfo(any()))
+      .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse))))
 
     def application = applicationBuilder
       .overrides(

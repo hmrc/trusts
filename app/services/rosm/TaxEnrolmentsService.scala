@@ -24,20 +24,22 @@ import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentSubscriberRespons
 import play.api.Logging
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.Session
+import utils.TrustEnvelope.TrustEnvelope
 
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
-import scala.util.control.NonFatal
+import scala.concurrent.{ExecutionContext, Future}
 
-class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector: TaxEnrolmentConnector, config: AppConfig)(implicit ec: ExecutionContext) extends TaxEnrolmentsService with Logging {
+class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector: TaxEnrolmentConnector, config: AppConfig)
+                                        (implicit ec: ExecutionContext) extends TaxEnrolmentsService with Logging {
 
   private val DELAY_SECONDS_BETWEEN_REQUEST = config.delayToConnectTaxEnrolment
   private val MAX_TRIES = config.maxRetry
 
   private val as: ActorSystem = ActorSystem("TaxEnrolmentActors")
 
-  override def setSubscriptionId(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
+  override def setSubscriptionId(subscriptionId: String, taxable: Boolean, trn: String)
+                                (implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
     enrolSubscriberWithRetry(subscriptionId, 1, taxable, trn)
   }
 
@@ -46,8 +48,9 @@ class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector: TaxEnrolmentConn
                                        taxable: Boolean,
                                        trn: String)
                                       (implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
-    makeRequest(subscriptionId, taxable, trn: String) recoverWith {
-      case NonFatal(_) => {
+    makeRequest(subscriptionId, taxable, trn: String).value.flatMap {
+      case Right(response) => Future.successful(response)
+      case Left(_) =>
         val logHeader = s"[TaxEnrolmentsServiceImpl][enrolSubscriberWithRetry][Session ID: ${Session.id(hc)}]"
         if (isMaxRetryReached(acc)) {
           logger.error(s"$logHeader Maximum retry completed. Tax enrolment failed for subscription id $subscriptionId")
@@ -58,14 +61,14 @@ class TaxEnrolmentsServiceImpl @Inject()(taxEnrolmentConnector: TaxEnrolmentConn
             enrolSubscriberWithRetry(subscriptionId, acc + 1, taxable, trn)
           }
         }
-      }
     }
   }
 
   private def isMaxRetryReached(currentCounter: Int): Boolean =
     currentCounter == MAX_TRIES
 
-  private def makeRequest(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier): Future[TaxEnrolmentSubscriberResponse] = {
+  private def makeRequest(subscriptionId: String, taxable: Boolean, trn: String)
+                         (implicit hc: HeaderCarrier): TrustEnvelope[TaxEnrolmentSubscriberResponse] = {
     taxEnrolmentConnector.enrolSubscriber(subscriptionId, taxable, trn: String)
   }
 

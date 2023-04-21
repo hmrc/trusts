@@ -16,7 +16,9 @@
 
 package controllers
 
+import cats.data.EitherT
 import controllers.actions.FakeIdentifierAction
+import errors.{ServerError, TrustErrors}
 import models.registration.RegistrationSubmissionDraft
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
@@ -220,7 +222,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
           |""".stripMargin).as[RegistrationSubmissionDraft]
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(cache)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(cache)))))
 
       val request = FakeRequest("GET", "path")
 
@@ -265,7 +267,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
           |""".stripMargin).as[RegistrationSubmissionDraft]
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(cache)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(cache)))))
 
       val request = FakeRequest("GET", "path")
 
@@ -315,7 +317,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
           |""".stripMargin).as[RegistrationSubmissionDraft]
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(cache)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(cache)))))
 
       val request = FakeRequest("GET", "path")
 
@@ -366,7 +368,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
           |""".stripMargin).as[RegistrationSubmissionDraft]
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(cache)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(cache)))))
 
       val request = FakeRequest("GET", "path")
 
@@ -397,7 +399,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(None))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(None))))
 
       val request = FakeRequest("GET", "path")
 
@@ -418,13 +420,36 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(mockSubmissionDraftNoData)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraftNoData)))))
 
       val request = FakeRequest("GET", "path")
 
       val result = controller.getTrustName(draftId).apply(request)
 
       status(result) mustBe NOT_FOUND
+    }
+
+    "respond with InternalServerError when repository returns an exception from Mongo" in {
+      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val submissionRepository = mock[RegistrationSubmissionRepository]
+
+      val controller = new TrustDetailsSubmissionDraftController(
+        submissionRepository,
+        identifierAction,
+        LocalDateTimeServiceStub,
+        Helpers.stubControllerComponents()
+      )
+
+      when(submissionRepository.getDraft(any(), any()))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(
+          Left(ServerError("operation failed due to exception from Mongo"))
+        )))
+
+      val request = FakeRequest("GET", "path")
+
+      val result = controller.getTrustName(draftId).apply(request)
+
+      status(result) mustBe INTERNAL_SERVER_ERROR
     }
 
   }
@@ -443,7 +468,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(mockSubmissionDraft)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraft)))))
 
       val request = FakeRequest("GET", "path")
 
@@ -477,7 +502,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(None))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(None))))
 
       val request = FakeRequest("GET", "path")
 
@@ -498,7 +523,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(mockSubmissionDraftNoData)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraftNoData)))))
 
       val request = FakeRequest("GET", "path")
 
@@ -546,7 +571,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
           |""".stripMargin).as[RegistrationSubmissionDraft]
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(cache)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(cache)))))
 
       val request = FakeRequest("GET", "path")
 
@@ -572,7 +597,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(None))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(None))))
 
       val request = FakeRequest("GET", "path")
 
@@ -593,7 +618,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(mockSubmissionDraftNoData)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraftNoData)))))
 
       val request = FakeRequest("GET", "path")
 
@@ -618,7 +643,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(whenTrustSetupAtNewPath)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(whenTrustSetupAtNewPath)))))
 
       val request = FakeRequest("GET", "path")
 
@@ -649,7 +674,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(None))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(None))))
 
       val request = FakeRequest("GET", "path")
 
@@ -670,7 +695,7 @@ class TrustDetailsSubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(mockSubmissionDraftNoData)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraftNoData)))))
 
       val request = FakeRequest("GET", "path")
 

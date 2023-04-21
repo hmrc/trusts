@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.transformations.beneficiaries
 
+import cats.data.EitherT
 import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import models.get_trust.GetTrustSuccessResponse
+import errors.TrustErrors
+import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.Assertion
@@ -49,7 +51,8 @@ class AmendLargeBeneficiarySpec extends IntegrationTestBase with ScalaFutures {
       JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-amend-large-beneficiary.json")
 
     val stubbedTrustsConnector = mock[TrustsConnector]
-    when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
+    when(stubbedTrustsConnector.getTrustInfo(any()))
+      .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse))))
 
     def application = applicationBuilder
       .overrides(

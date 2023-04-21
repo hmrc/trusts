@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.transformations.trustees
 
+import cats.data.EitherT
 import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import models.get_trust.GetTrustSuccessResponse
+import errors.TrustErrors
+import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.Assertion
@@ -43,7 +45,8 @@ class AddTrusteeSpec extends IntegrationTestBase {
 
     val stubbedTrustsConnector = mock[TrustsConnector]
 
-    when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse.as[GetTrustSuccessResponse]))
+    when(stubbedTrustsConnector.getTrustInfo(any()))
+      .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse.as[GetTrustSuccessResponse]))))
 
     def application = applicationBuilder
       .overrides(

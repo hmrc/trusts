@@ -16,7 +16,9 @@
 
 package controllers.transformations.assets
 
+import cats.data.EitherT
 import controllers.actions.FakeIdentifierAction
+import errors.{ServerError, TrustErrors}
 import models.AddressType
 import models.variation._
 import org.mockito.ArgumentMatchers.{any, eq => equalTo}
@@ -87,10 +89,10 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))
+          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))))
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
-          .thenReturn(Future.successful(true))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         when(mockLocalDateService.now).thenReturn(endDate)
 
@@ -106,6 +108,35 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
+
+      }
+
+      "must return an Internal Server Error when addNewTransform fails" in {
+
+        val mockTransformationService = mock[TransformationService]
+        val mockLocalDateService = mock[LocalDateService]
+
+        val controller = new AmendAssetController(
+          identifierAction,
+          mockTransformationService,
+          mockLocalDateService
+        )(Implicits.global, Helpers.stubControllerComponents())
+
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
+          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))))
+
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError("exception message")))))
+
+        when(mockLocalDateService.now).thenReturn(endDate)
+
+        val request = FakeRequest(POST, "path")
+          .withBody(Json.toJson(amendedAsset))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.amendMoney(utr, index).apply(request)
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
 
       }
 
@@ -158,10 +189,10 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))
+          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))))
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
-          .thenReturn(Future.successful(true))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         when(mockLocalDateService.now).thenReturn(endDate)
 
@@ -177,6 +208,35 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
+
+      }
+
+      "must return an Internal Server Error when getTransformedTrustJson fails" in {
+
+        val mockTransformationService = mock[TransformationService]
+        val mockLocalDateService = mock[LocalDateService]
+
+        val controller = new AmendAssetController(
+          identifierAction,
+          mockTransformationService,
+          mockLocalDateService
+        )(Implicits.global, Helpers.stubControllerComponents())
+
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
+          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Left(ServerError()))))
+
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
+
+        when(mockLocalDateService.now).thenReturn(endDate)
+
+        val request = FakeRequest(POST, "path")
+          .withBody(Json.toJson(amendedAsset))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.amendPropertyOrLand(utr, index).apply(request)
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
 
       }
 
@@ -231,10 +291,10 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))
+          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))))
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
-          .thenReturn(Future.successful(true))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         when(mockLocalDateService.now).thenReturn(endDate)
 
@@ -303,10 +363,10 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))
+          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))))
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
-          .thenReturn(Future.successful(true))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         when(mockLocalDateService.now).thenReturn(endDate)
 
@@ -373,10 +433,10 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))
+          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))))
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
-          .thenReturn(Future.successful(true))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         when(mockLocalDateService.now).thenReturn(endDate)
 
@@ -442,10 +502,10 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))
+          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))))
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
-          .thenReturn(Future.successful(true))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         when(mockLocalDateService.now).thenReturn(endDate)
 
@@ -515,10 +575,10 @@ class AmendAssetControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaF
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))
+          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(originalAsset)))))))
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
-          .thenReturn(Future.successful(true))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         when(mockLocalDateService.now).thenReturn(endDate)
 

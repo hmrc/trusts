@@ -67,10 +67,10 @@ class RegistrationSubmissionRepositorySpec extends IntegrationTestBase {
 
   "the registration submission repository" should {
 
-    "be able to store and retrieve data" in assertMongoTest(createApplication)({ (app) =>
+    "be able to store and retrieve data" in assertMongoTest(createApplication)({ app =>
       val repository = app.injector.instanceOf[RegistrationSubmissionRepositoryImpl]
 
-      repository.getRecentDrafts("InternalId", Agent).futureValue mustBe Seq.empty[RegistrationSubmissionDraft]
+      repository.getRecentDrafts("InternalId", Agent).value.futureValue mustBe Right(Seq.empty[RegistrationSubmissionDraft])
 
       val state1 = RegistrationSubmissionDraft(
         "draftId1",
@@ -81,7 +81,7 @@ class RegistrationSubmissionRepositorySpec extends IntegrationTestBase {
         Some(true)
       )
 
-      repository.setDraft(state1).futureValue mustBe true
+      repository.setDraft(state1).value.futureValue mustBe Right(true)
 
       val state2 = RegistrationSubmissionDraft(
         "draftId2",
@@ -92,7 +92,7 @@ class RegistrationSubmissionRepositorySpec extends IntegrationTestBase {
         Some(true)
       )
 
-      repository.setDraft(state2).futureValue mustBe true
+      repository.setDraft(state2).value.futureValue mustBe Right(true)
 
       val state3 = RegistrationSubmissionDraft(
         "draftId1",
@@ -103,7 +103,7 @@ class RegistrationSubmissionRepositorySpec extends IntegrationTestBase {
         None
       )
 
-      repository.setDraft(state3).futureValue mustBe true
+      repository.setDraft(state3).value.futureValue mustBe Right(true)
 
       val state4 = RegistrationSubmissionDraft(
         "draftId3",
@@ -114,20 +114,20 @@ class RegistrationSubmissionRepositorySpec extends IntegrationTestBase {
         Some(false)
       )
 
-      repository.setDraft(state4).futureValue mustBe true
+      repository.setDraft(state4).value.futureValue mustBe Right(true)
 
-      repository.getDraft("draftId1", "InternalId").futureValue mustBe Some(state1)
-      repository.getDraft("draftId2", "InternalId").futureValue mustBe Some(state2)
-      repository.getDraft("draftId1", "InternalId2").futureValue mustBe Some(state3)
-      repository.getDraft("draftId3", "InternalId").futureValue mustBe Some(state4)
+      repository.getDraft("draftId1", "InternalId").value.futureValue mustBe Right(Some(state1))
+      repository.getDraft("draftId2", "InternalId").value.futureValue mustBe Right(Some(state2))
+      repository.getDraft("draftId1", "InternalId2").value.futureValue mustBe Right(Some(state3))
+      repository.getDraft("draftId3", "InternalId").value.futureValue mustBe Right(Some(state4))
 
-      repository.getRecentDrafts("InternalId", Agent).futureValue mustBe Seq(state2, state1)
+      repository.getRecentDrafts("InternalId", Agent).value.futureValue mustBe Right(Seq(state2, state1))
     })
 
-    "be able to remove drafts no longer being used" in assertMongoTest(createApplication)({ (app) =>
+    "be able to remove drafts no longer being used" in assertMongoTest(createApplication)({ app =>
       val repository = app.injector.instanceOf[RegistrationSubmissionRepositoryImpl]
 
-      repository.removeDraft("draftId1", "InternalId").futureValue mustBe true
+      repository.removeDraft("draftId1", "InternalId").value.futureValue mustBe Right(true)
 
       val state1 = RegistrationSubmissionDraft(
         "draftId1",
@@ -138,19 +138,19 @@ class RegistrationSubmissionRepositorySpec extends IntegrationTestBase {
         Some(true)
       )
 
-      repository.setDraft(state1).futureValue mustBe true
+      repository.setDraft(state1).value.futureValue mustBe Right(true)
 
-      repository.getDraft("draftId1", "InternalId").futureValue mustBe Some(state1)
+      repository.getDraft("draftId1", "InternalId").value.futureValue mustBe Right(Some(state1))
 
-      repository.removeDraft("draftId1", "InternalId").futureValue mustBe true
+      repository.removeDraft("draftId1", "InternalId").value.futureValue mustBe Right(true)
 
-      repository.getDraft("draftId1", "InternalId").futureValue mustBe None
+      repository.getDraft("draftId1", "InternalId").value.futureValue mustBe Right(None)
     })
 
-    "be able to store and retrieve more than 20 drafts" in assertMongoTest(createApplication)({ (app) =>
+    "be able to store and retrieve more than 20 drafts" in assertMongoTest(createApplication)({ app =>
       val repository = app.injector.instanceOf[RegistrationSubmissionRepositoryImpl]
 
-      repository.getRecentDrafts("InternalId", Agent).futureValue mustBe Seq.empty[RegistrationSubmissionDraft]
+      repository.getRecentDrafts("InternalId", Agent).value.futureValue mustBe Right(Seq.empty[RegistrationSubmissionDraft])
 
       for (i <- 0 until 50) {
         val state = RegistrationSubmissionDraft(
@@ -161,14 +161,14 @@ class RegistrationSubmissionRepositorySpec extends IntegrationTestBase {
           Some("reference1"),
           Some(true)
         )
-        repository.setDraft(state).futureValue mustBe true
+        repository.setDraft(state).value.futureValue mustBe Right(true)
       }
 
-      repository.getRecentDrafts("InternalId", Agent).futureValue.size mustBe 50
-      repository.getRecentDrafts("InternalId", Organisation).futureValue.size mustBe 1
+      repository.getRecentDrafts("InternalId", Agent).value.futureValue.map(_.size) mustBe Right(50)
+      repository.getRecentDrafts("InternalId", Organisation).value.futureValue.map(_.size) mustBe Right(1)
     })
 
-    "remove all documents from registration-submissions when feature enabled" in assertMongoTest(appWithSavedRegistration)({ (app) =>
+    "remove all documents from registration-submissions when feature enabled" in assertMongoTest(appWithSavedRegistration)({ app =>
       val repository = app.injector.instanceOf[RegistrationSubmissionRepositoryImpl]
 
       for (i <- 0 until 50) {
@@ -180,17 +180,17 @@ class RegistrationSubmissionRepositorySpec extends IntegrationTestBase {
           Some("reference1"),
           Some(true)
         )
-        Await.result(repository.setDraft(draft), Duration.Inf)
+        Await.result(repository.setDraft(draft).value, Duration.Inf)
       }
 
-      repository.getRecentDrafts("InternalId", Agent).futureValue.size mustBe 50
+      repository.getRecentDrafts("InternalId", Agent).value.futureValue.map(_.size) mustBe Right(50)
 
-      Await.result(repository.removeAllDrafts(), Duration.Inf)
+      Await.result(repository.removeAllDrafts().value, Duration.Inf)
 
-      repository.getRecentDrafts("InternalId", Agent).futureValue.size mustBe 0
+      repository.getRecentDrafts("InternalId", Agent).value.futureValue.map(_.size) mustBe Right(0)
     })
 
-    "not remove all documents from registration-submissions when feature disabled" in assertMongoTest(appWithoutSavedRegistration)({ (app) =>
+    "not remove all documents from registration-submissions when feature disabled" in assertMongoTest(appWithoutSavedRegistration)({ app =>
       val repository = app.injector.instanceOf[RegistrationSubmissionRepositoryImpl]
 
       for (i <- 0 until 50) {
@@ -202,14 +202,14 @@ class RegistrationSubmissionRepositorySpec extends IntegrationTestBase {
           Some("reference1"),
           Some(true)
         )
-        Await.result(repository.setDraft(draft), Duration.Inf)
+        Await.result(repository.setDraft(draft).value, Duration.Inf)
       }
 
-      repository.getRecentDrafts("InternalId", Agent).futureValue.size mustBe 50
+      repository.getRecentDrafts("InternalId", Agent).value.futureValue.map(_.size) mustBe Right(50)
 
-      Await.result(repository.removeAllDrafts(), Duration.Inf)
+      Await.result(repository.removeAllDrafts().value, Duration.Inf)
 
-      repository.getRecentDrafts("InternalId", Agent).futureValue.size mustBe 50
+      repository.getRecentDrafts("InternalId", Agent).value.futureValue.map(_.size) mustBe Right(50)
     })
   }
 }

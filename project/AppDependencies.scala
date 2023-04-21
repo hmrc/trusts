@@ -14,7 +14,8 @@ object AppDependencies {
     "com.github.java-json-tools"    % "json-schema-validator"       % "2.2.14",
     "uk.gov.hmrc"                   %% "tax-year"                   % "3.1.0",
     "com.fasterxml.jackson.module"  %% "jackson-module-scala"       % "2.14.2",
-    "commons-codec"                 % "commons-codec"               % "1.15"
+    "commons-codec"                 % "commons-codec"               % "1.15",
+    "org.typelevel"                 %% "cats-core"                  % "2.9.0"
   )
 
   val test: Seq[ModuleID] = Seq(

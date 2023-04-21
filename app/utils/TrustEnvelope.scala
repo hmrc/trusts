@@ -14,8 +14,23 @@
  * limitations under the License.
  */
 
-package models.variation
+package utils
 
-import play.api.libs.json.JsValue
+import cats.data.EitherT
+import errors.TrustErrors
 
-case class VariationContext(payload: JsValue, result: VariationSuccessResponse)
+import scala.concurrent.{ExecutionContext, Future}
+
+object TrustEnvelope {
+  type TrustEnvelope[T] = EitherT[Future, TrustErrors, T]
+
+  def apply[T](t: T): EitherT[Future, TrustErrors, T] =
+    EitherT[Future, TrustErrors, T](Future.successful(Right(t)))
+
+  def apply[T](eitherArg: Either[TrustErrors, T])(implicit ec: ExecutionContext): TrustEnvelope[T] =
+    EitherT.fromEither[Future](eitherArg)
+
+  def fromFuture[T](t: Future[T])(implicit ec: ExecutionContext): TrustEnvelope[T] = EitherT.right(t)
+
+}
+

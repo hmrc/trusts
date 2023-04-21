@@ -30,10 +30,10 @@ class CacheRepositorySpec extends IntegrationTestBase {
       val repository = app.injector.instanceOf[CacheRepositoryImpl]
 
       val storedOk = repository.set("UTRUTRUTR", "InternalId", "sessionId", data)
-      storedOk.futureValue mustBe true
+      storedOk.value.futureValue mustBe Right(true)
 
       val retrieved = repository.get("UTRUTRUTR", "InternalId", "sessionId")
-      retrieved.futureValue mustBe Some(data)
+      retrieved.value.futureValue mustBe Right(Some(data))
     }
   }
 }

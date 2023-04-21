@@ -16,10 +16,11 @@
 
 package services
 
-import exceptions.EtmpCacheDataStaleException
-import models.get_trust.{ResponseHeader, TrustProcessedResponse}
-import models.tax_enrolments.TaxEnrolmentSuccess
-import models.variation.{DeclarationForApi, VariationResponse}
+import cats.data.EitherT
+import errors.{EtmpCacheDataStaleErrorResponse, InternalServerErrorResponse, ServerError, TrustErrors, VariationFailureForAudit}
+import models.get_trust.{GetTrustResponse, ResourceNotFoundResponse, ResponseHeader, TrustProcessedResponse}
+import models.tax_enrolments.{TaxEnrolmentSubscriberResponse, TaxEnrolmentSuccess}
+import models.variation.{DeclarationForApi, VariationContext, VariationSuccessResponse}
 import models.{DeclarationName, NameType}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => equalTo}
@@ -32,15 +33,15 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
+import play.api.libs.json._
 import services.auditing.VariationAuditService
 import services.dates.LocalDateService
 import transformers.DeclarationTransformer
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{JsonFixtures, JsonUtils, NonTaxable5MLDFixtures}
-import java.time.Month.MARCH
 
 import java.time.LocalDate
+import java.time.Month.MARCH
 import scala.concurrent.Future
 
 class VariationServiceSpec extends AnyWordSpec
@@ -95,18 +96,18 @@ class VariationServiceSpec extends AnyWordSpec
       when(transformationService.populateLeadTrusteeAddress(any[JsValue]))
         .thenReturn(JsSuccess(trustInfoJson5MLD))
       when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
-        .thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
+        .thenReturn(EitherT[Future, TrustErrors, JsResult[JsValue]](Future.successful(Right(JsSuccess(transformedEtmpResponseJson)))))
       when(trustsService.getTrustInfoFormBundleNo(utr))
-        .thenReturn(Future.successful(formBundleNo))
+        .thenReturn(EitherT[Future, TrustErrors, String](Future.successful(Right(formBundleNo))))
 
       val response = TrustProcessedResponse(trustInfoJson5MLD, ResponseHeader("Processed", formBundleNo))
 
       when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId), equalTo(sessionId)))
-        .thenReturn(Future.successful(response))
+        .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(response))))
       when(trustsService.trustVariation(any()))
-        .thenReturn(Future.successful(VariationResponse(subscriberId)))
+        .thenReturn(EitherT[Future, TrustErrors, VariationSuccessResponse](Future.successful(Right(VariationSuccessResponse(subscriberId)))))
       when(taxableMigrationService.migratingFromNonTaxableToTaxable(utr, internalId, sessionId))
-        .thenReturn(Future.successful(false))
+        .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(false))))
       when(transformer.transform(any(), any(), any(), any()))
         .thenReturn(JsSuccess(transformedJson))
 
@@ -114,8 +115,8 @@ class VariationServiceSpec extends AnyWordSpec
 
       val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
 
-      whenReady(OUT.submitDeclaration(utr, internalId, sessionId, declarationForApi)) { variationResponse =>
-        variationResponse.result mustBe VariationResponse(subscriberId)
+      whenReady(OUT.submitDeclaration(utr, internalId, sessionId, declarationForApi).value) { variationResponse =>
+        variationResponse mustBe Right(VariationContext(transformedJson, VariationSuccessResponse(subscriberId)))
 
         verify(transformationService, times(1)).
           applyDeclarationTransformations(equalTo(utr), equalTo(internalId), equalTo(trustInfoJson5MLD))(any[HeaderCarrier])
@@ -127,28 +128,81 @@ class VariationServiceSpec extends AnyWordSpec
         arg.getValue mustBe transformedJson
       }
     }
-  }
 
-  "Fail if the etmp data version doesn't match our submission data" in {
+    "Fail if the etmp data version doesn't match our submission data" in {
 
-    when(trustsService.getTrustInfoFormBundleNo(utr))
-      .thenReturn(Future.successful("31415900000"))
-    when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
-      .thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
-    when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId), equalTo(sessionId)))
-      .thenReturn(Future.successful(TrustProcessedResponse(trustInfoJson5MLD, ResponseHeader("Processed", formBundleNo))))
-    when(trustsService.trustVariation(any()))
-      .thenReturn(Future.successful(VariationResponse(subscriberId)))
-    when(transformer.transform(any(), any(), any(), any()))
-      .thenReturn(JsSuccess(transformedJson))
+      when(trustsService.getTrustInfoFormBundleNo(utr))
+        .thenReturn(EitherT[Future, TrustErrors, String](Future.successful(Right("31415900000"))))
+      when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
+        .thenReturn(EitherT[Future, TrustErrors, JsResult[JsValue]](Future.successful(Right(JsSuccess(transformedEtmpResponseJson)))))
+      when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId), equalTo(sessionId)))
+        .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(
+          Right(TrustProcessedResponse(trustInfoJson5MLD, ResponseHeader("Processed", formBundleNo)))
+        )))
+      when(trustsService.trustVariation(any()))
+        .thenReturn(EitherT[Future, TrustErrors, VariationSuccessResponse](Future.successful(Right(VariationSuccessResponse(subscriberId)))))
+      when(transformer.transform(any(), any(), any(), any()))
+        .thenReturn(JsSuccess(transformedJson))
 
-    val OUT = application.injector.instanceOf[VariationService]
+      val OUT = application.injector.instanceOf[VariationService]
 
-    whenReady(OUT.submitDeclaration(utr, internalId, sessionId, declarationForApi).failed) { exception =>
-      exception mustBe an[EtmpCacheDataStaleException.type]
+      whenReady(OUT.submitDeclaration(utr, internalId, sessionId, declarationForApi).value) { result =>
+        result mustBe Left(VariationFailureForAudit(EtmpCacheDataStaleErrorResponse, "Etmp data is stale"))
 
-      verify(trustsService, times(0)).trustVariation(any())
+        verify(trustsService, times(0)).trustVariation(any())
+      }
     }
+
+    "Fail if trust response is not a trust processed response" in {
+      val trustResponse = ResourceNotFoundResponse
+
+      when(trustsService.getTrustInfoFormBundleNo(utr))
+        .thenReturn(EitherT[Future, TrustErrors, String](Future.successful(Right("31415900000"))))
+      when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
+        .thenReturn(EitherT[Future, TrustErrors, JsResult[JsValue]](Future.successful(Right(JsSuccess(transformedEtmpResponseJson)))))
+      when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId), equalTo(sessionId)))
+        .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(trustResponse))))
+      when(trustsService.trustVariation(any()))
+        .thenReturn(EitherT[Future, TrustErrors, VariationSuccessResponse](Future.successful(Right(VariationSuccessResponse(subscriberId)))))
+      when(transformer.transform(any(), any(), any(), any()))
+        .thenReturn(JsSuccess(transformedJson))
+
+      val OUT = application.injector.instanceOf[VariationService]
+
+      whenReady(OUT.submitDeclaration(utr, internalId, sessionId, declarationForApi).value) { result =>
+        result mustBe Left(VariationFailureForAudit(
+          InternalServerErrorResponse,
+          "Submission could not proceed, Trust data was not in a processed state"
+        ))
+
+        verify(trustsService, times(0)).trustVariation(any())
+      }
+    }
+
+    "return a VariationFailureForAudit when getTrustInfo returns a ServerError(message), where message is nonEmpty" in {
+
+      when(transformationService.populateLeadTrusteeAddress(any[JsValue]))
+        .thenReturn(JsSuccess(trustInfoJson5MLD))
+      when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
+        .thenReturn(EitherT[Future, TrustErrors, JsResult[JsValue]](Future.successful(Right(JsSuccess(transformedEtmpResponseJson)))))
+      when(trustsService.getTrustInfoFormBundleNo(utr))
+        .thenReturn(EitherT[Future, TrustErrors, String](Future.successful(Right(formBundleNo))))
+
+      when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId), equalTo(sessionId)))
+        .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Left(ServerError("exception errors")))))
+      when(trustsService.trustVariation(any()))
+        .thenReturn(EitherT[Future, TrustErrors, VariationSuccessResponse](Future.successful(Right(VariationSuccessResponse(subscriberId)))))
+      when(taxableMigrationService.migratingFromNonTaxableToTaxable(utr, internalId, sessionId))
+        .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(false))))
+
+      val OUT = application.injector.instanceOf[VariationService]
+
+      whenReady(OUT.submitDeclaration(utr, internalId, sessionId, declarationForApi).value) { result =>
+        result mustBe Left(VariationFailureForAudit(errors.InternalServerErrorResponse, "exception errors"))
+
+      }
+    }
+
   }
 
   "auditing" should {
@@ -159,29 +213,29 @@ class VariationServiceSpec extends AnyWordSpec
         val response = TrustProcessedResponse(trustInfoJson5MLD, ResponseHeader("Processed", formBundleNo))
 
         when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
-          .thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
+          .thenReturn(EitherT[Future, TrustErrors, JsResult[JsValue]](Future.successful(Right(JsSuccess(transformedEtmpResponseJson)))))
         when(transformationService.populateLeadTrusteeAddress(any[JsValue]))
           .thenReturn(JsSuccess(trustInfoJson5MLD))
         when(trustsService.getTrustInfoFormBundleNo(utr))
-          .thenReturn(Future.successful(formBundleNo))
+          .thenReturn(EitherT[Future, TrustErrors, String](Future.successful(Right(formBundleNo))))
         when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId), equalTo(sessionId)))
-          .thenReturn(Future.successful(response))
+          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(response))))
         when(trustsService.trustVariation(any()))
-          .thenReturn(Future.successful(VariationResponse(subscriberId)))
+          .thenReturn(EitherT[Future, TrustErrors, VariationSuccessResponse](Future.successful(Right(VariationSuccessResponse(subscriberId)))))
         when(taxableMigrationService.migratingFromNonTaxableToTaxable(utr, internalId, sessionId))
-          .thenReturn(Future.successful(false))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(false))))
         when(transformer.transform(any(), any(), any(), any()))
           .thenReturn(JsSuccess(transformedJson))
 
         val OUT = application.injector.instanceOf[VariationService]
 
-        whenReady(OUT.submitDeclaration(utr, internalId, sessionId, declarationForApi)) { _ =>
+        whenReady(OUT.submitDeclaration(utr, internalId, sessionId, declarationForApi).value) { _ =>
 
           verify(auditService).auditVariationSuccess(
             equalTo(internalId),
             equalTo(false),
             equalTo(transformedJson),
-            equalTo(VariationResponse(subscriberId))
+            equalTo(VariationSuccessResponse(subscriberId))
           )(any())
         }
       }
@@ -191,31 +245,31 @@ class VariationServiceSpec extends AnyWordSpec
         val response = TrustProcessedResponse(trustInfoJson5MLD, ResponseHeader("Processed", formBundleNo))
 
         when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
-          .thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
+          .thenReturn(EitherT[Future, TrustErrors, JsResult[JsValue]](Future.successful(Right(JsSuccess(transformedEtmpResponseJson)))))
         when(transformationService.populateLeadTrusteeAddress(any[JsValue]))
           .thenReturn(JsSuccess(trustInfoJson5MLD))
         when(trustsService.getTrustInfoFormBundleNo(utr))
-          .thenReturn(Future.successful(formBundleNo))
+          .thenReturn(EitherT[Future, TrustErrors, String](Future.successful(Right(formBundleNo))))
         when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId), equalTo(sessionId)))
-          .thenReturn(Future.successful(response))
+          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(response))))
         when(trustsService.trustVariation(any()))
-          .thenReturn(Future.successful(VariationResponse(subscriberId)))
+          .thenReturn(EitherT[Future, TrustErrors, VariationSuccessResponse](Future.successful(Right(VariationSuccessResponse(subscriberId)))))
         when(taxableMigrationService.migratingFromNonTaxableToTaxable(utr, internalId, sessionId))
-          .thenReturn(Future.successful(true))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
         when(taxableMigrationService.migrateSubscriberToTaxable(equalTo(subscriberId), equalTo(utr))(any[HeaderCarrier]))
-          .thenReturn(Future.successful(TaxEnrolmentSuccess))
+          .thenReturn(EitherT[Future, TrustErrors, TaxEnrolmentSubscriberResponse](Future.successful(Right(TaxEnrolmentSuccess))))
         when(transformer.transform(any(), any(), any(), any()))
           .thenReturn(JsSuccess(transformedJson))
 
         val OUT = application.injector.instanceOf[VariationService]
 
-        whenReady(OUT.submitDeclaration(utr, internalId, sessionId, declarationForApi)) { _ =>
+        whenReady(OUT.submitDeclaration(utr, internalId, sessionId, declarationForApi).value) { _ =>
 
           verify(auditService).auditVariationSuccess(
             equalTo(internalId),
             equalTo(true),
             equalTo(transformedJson),
-            equalTo(VariationResponse(subscriberId))
+            equalTo(VariationSuccessResponse(subscriberId))
           )(any())
         }
       }
@@ -227,17 +281,22 @@ class VariationServiceSpec extends AnyWordSpec
         val response = TrustProcessedResponse(trustInfoJson5MLD, ResponseHeader("Processed", formBundleNo))
 
         when(trustsService.getTrustInfoFormBundleNo(utr))
-          .thenReturn(Future.successful(formBundleNo))
+          .thenReturn(EitherT[Future, TrustErrors, String](Future.successful(Right(formBundleNo))))
         when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
-          .thenReturn(Future.successful(JsError("Errors")))
+          .thenReturn(EitherT[Future, TrustErrors, JsResult[JsValue]](Future.successful(Right(JsError("Errors")))))
         when(transformationService.populateLeadTrusteeAddress(any[JsValue]))
           .thenReturn(JsSuccess(trustInfoJson5MLD))
         when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId), equalTo(sessionId)))
-          .thenReturn(Future.successful(response))
+          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(response))))
 
         val OUT = application.injector.instanceOf[VariationService]
 
-        whenReady(OUT.submitDeclaration(utr, internalId, sessionId, declarationForApi).failed) { _ =>
+        whenReady(OUT.submitDeclaration(utr, internalId, sessionId, declarationForApi).value) { result =>
+
+          result mustBe Left(VariationFailureForAudit(
+            errors.InternalServerErrorResponse,
+            "There was a problem transforming data for submission to ETMP"
+          ))
 
           verify(auditService).auditTransformationError(
             equalTo(internalId),
@@ -255,15 +314,20 @@ class VariationServiceSpec extends AnyWordSpec
         val response = TrustProcessedResponse(trustInfoJson5MLD, ResponseHeader("Processed", formBundleNo))
 
         when(trustsService.getTrustInfoFormBundleNo(utr))
-          .thenReturn(Future.successful(formBundleNo))
+          .thenReturn(EitherT[Future, TrustErrors, String](Future.successful(Right(formBundleNo))))
         when(transformationService.populateLeadTrusteeAddress(any[JsValue]))
           .thenReturn(JsError("Error"))
         when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId), equalTo(sessionId)))
-          .thenReturn(Future.successful(response))
+          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(response))))
 
         val OUT = application.injector.instanceOf[VariationService]
 
-        whenReady(OUT.submitDeclaration(utr, internalId, sessionId, declarationForApi).failed) { _ =>
+        whenReady(OUT.submitDeclaration(utr, internalId, sessionId, declarationForApi).value) { result =>
+
+          result mustBe Left(VariationFailureForAudit(
+            errors.InternalServerErrorResponse,
+            "There was a problem transforming data for submission to ETMP"
+          ))
 
           verify(auditService).auditTransformationError(
             equalTo(internalId),
@@ -285,20 +349,20 @@ class VariationServiceSpec extends AnyWordSpec
       when(transformationService.populateLeadTrusteeAddress(any[JsValue]))
         .thenReturn(JsSuccess(trustInfoJson5MLD))
       when(transformationService.applyDeclarationTransformations(any(), any(), any())(any[HeaderCarrier]))
-        .thenReturn(Future.successful(JsSuccess(transformedEtmpResponseJson)))
+        .thenReturn(EitherT[Future, TrustErrors, JsResult[JsValue]](Future.successful(Right(JsSuccess(transformedEtmpResponseJson)))))
       when(trustsService.getTrustInfoFormBundleNo(utr))
-        .thenReturn(Future.successful(formBundleNo))
+        .thenReturn(EitherT[Future, TrustErrors, String](Future.successful(Right(formBundleNo))))
 
       val response = TrustProcessedResponse(trustInfoJson5MLD, ResponseHeader("Processed", formBundleNo))
 
       when(trustsService.getTrustInfo(equalTo(utr), equalTo(internalId), equalTo(sessionId)))
-        .thenReturn(Future.successful(response))
+        .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(response))))
       when(trustsService.trustVariation(any()))
-        .thenReturn(Future.successful(VariationResponse(subscriberId)))
+        .thenReturn(EitherT[Future, TrustErrors, VariationSuccessResponse](Future.successful(Right(VariationSuccessResponse(subscriberId)))))
       when(taxableMigrationService.migratingFromNonTaxableToTaxable(utr, internalId, sessionId))
-        .thenReturn(Future.successful(true))
+        .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
       when(taxableMigrationService.migrateSubscriberToTaxable(equalTo(subscriberId), equalTo(utr))(any[HeaderCarrier]))
-        .thenReturn(Future.successful(TaxEnrolmentSuccess))
+        .thenReturn(EitherT[Future, TrustErrors, TaxEnrolmentSubscriberResponse](Future.successful(Right(TaxEnrolmentSuccess))))
       when(transformer.transform(any(), any(), any(), any()))
         .thenReturn(JsSuccess(transformedJson))
 
@@ -306,8 +370,8 @@ class VariationServiceSpec extends AnyWordSpec
 
       val transformedResponse = TrustProcessedResponse(transformedEtmpResponseJson, ResponseHeader("Processed", formBundleNo))
 
-      whenReady(OUT.submitDeclaration(utr, internalId, sessionId, declarationForApi)) { variationResponse =>
-        variationResponse.result mustBe VariationResponse(subscriberId)
+      whenReady(OUT.submitDeclaration(utr, internalId, sessionId, declarationForApi).value) { variationContext =>
+        variationContext mustBe Right(VariationContext(transformedJson, VariationSuccessResponse(subscriberId)))
 
         verify(transformationService, times(1)).
           applyDeclarationTransformations(equalTo(utr), equalTo(internalId), equalTo(trustInfoJson5MLD))(any[HeaderCarrier])

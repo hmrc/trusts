@@ -16,20 +16,23 @@
 
 package connector
 
-import java.util.UUID
-
+import cats.data.EitherT
 import config.AppConfig
-import javax.inject.{Inject, Singleton}
-import models.tax_enrolments.SubscriptionIdResponse
-import play.api.Logging
+import errors.ServerError
+import models.tax_enrolments.{SubscriptionIdFailureResponse, SubscriptionIdResponse, SubscriptionIdSuccessResponse}
 import play.api.http.HeaderNames
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utils.Constants._
+import utils.TrustEnvelope.TrustEnvelope
 
-import scala.concurrent.{ExecutionContext, Future}
+import java.util.UUID
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
 
 @Singleton
-class SubscriptionConnector @Inject()(http: HttpClient, config: AppConfig)(implicit ec: ExecutionContext) extends Logging {
+class SubscriptionConnector @Inject()(http: HttpClient, config: AppConfig)(implicit ec: ExecutionContext) extends ConnectorErrorResponseHandler {
+
+  val className: String = this.getClass.getSimpleName
 
   private lazy val trustsServiceUrl : String = s"${config.subscriptionBaseUrl}/trusts"
 
@@ -44,7 +47,7 @@ class SubscriptionConnector @Inject()(http: HttpClient, config: AppConfig)(impli
       CORRELATION_HEADER -> correlationId
     )
 
-   def getSubscriptionId(trn: String): Future[SubscriptionIdResponse] = {
+   def getSubscriptionId(trn: String): TrustEnvelope[SubscriptionIdSuccessResponse] = EitherT {
 
     val correlationId = UUID.randomUUID().toString
 
@@ -52,10 +55,15 @@ class SubscriptionConnector @Inject()(http: HttpClient, config: AppConfig)(impli
 
     val subscriptionIdEndpointUrl = s"$trustsServiceUrl/trn/$trn/subscription"
 
-    val response = http.GET[SubscriptionIdResponse](subscriptionIdEndpointUrl)
-    (SubscriptionIdResponse.httpReads, implicitly[HeaderCarrier](hc), implicitly[ExecutionContext])
-
-    response
+    http.GET[SubscriptionIdResponse](subscriptionIdEndpointUrl)(
+      SubscriptionIdResponse.httpReads, implicitly[HeaderCarrier](hc), implicitly[ExecutionContext]
+    ).map {
+      case response: SubscriptionIdSuccessResponse => Right(response)
+      case response: SubscriptionIdFailureResponse => Left(ServerError(response.message))
+    }.recover {
+      case ex =>
+        Left(handleError(ex, "getSubscriptionId", subscriptionIdEndpointUrl))
+    }
   }
 
 }

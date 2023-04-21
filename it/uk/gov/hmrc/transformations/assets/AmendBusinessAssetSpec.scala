@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.transformations.assets
 
+import cats.data.EitherT
 import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import models.get_trust.GetTrustSuccessResponse
+import errors.TrustErrors
+import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.Assertion
@@ -55,7 +57,8 @@ class AmendBusinessAssetSpec extends IntegrationTestBase with ScalaFutures {
         |""".stripMargin)
 
     val mockTrustsConnector = mock[TrustsConnector]
-    when(mockTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
+    when(mockTrustsConnector.getTrustInfo(any()))
+      .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse))))
 
     def application = applicationBuilder
       .overrides(

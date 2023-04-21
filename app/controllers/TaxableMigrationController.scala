@@ -34,11 +34,12 @@ class TaxableMigrationController @Inject()(
                                             cc: ControllerComponents
                                           )(implicit ec: ExecutionContext) extends TrustsBaseController(cc) with Logging {
 
+  private val className = this.getClass.getSimpleName
+
   def getTaxableMigrationFlag(identifier: String): Action[AnyContent] = identify.async { implicit request =>
-    taxableMigrationService.getTaxableMigrationFlag(identifier, request.internalId, Session.id(hc)) map { x =>
-      Ok(Json.toJson(TaxableMigrationFlag(x)))
-    } recoverWith {
-      case _ => Future.successful(InternalServerError)
+    taxableMigrationService.getTaxableMigrationFlag(identifier, request.internalId, Session.id(hc)).value.map {
+      case Left(_) => InternalServerError
+      case Right(value) => Ok(Json.toJson(TaxableMigrationFlag(value)))
     }
   }
 
@@ -46,13 +47,14 @@ class TaxableMigrationController @Inject()(
     implicit request =>
       request.body.validate[Boolean] match {
         case JsSuccess(migratingToTaxable, _) =>
-          taxableMigrationService.setTaxableMigrationFlag(identifier, request.internalId, Session.id(hc), migratingToTaxable) map { _ =>
-            Ok
-          } recoverWith {
-            case _ => Future.successful(InternalServerError)
+          taxableMigrationService.setTaxableMigrationFlag(identifier, request.internalId, Session.id(hc), migratingToTaxable).value.map {
+            case Right(_) => Ok
+            case Left(_) =>
+              logger.warn(s"[$className][setTaxableMigrationFlag] an error occurred, failed to set taxable migration flag.")
+              InternalServerError
           }
         case JsError(errors) =>
-          logger.warn(s"[TaxableMigrationController][setTaxableMigrationFlag] failed to validate request body: $errors")
+          logger.warn(s"[$className][setTaxableMigrationFlag] failed to validate request body: $errors")
           Future.successful(BadRequest)
       }
   }

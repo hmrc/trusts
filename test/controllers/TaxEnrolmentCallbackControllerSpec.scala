@@ -17,7 +17,9 @@
 package controllers
 
 import base.BaseSpec
-import models.tax_enrolments.OrchestratorToTaxableSuccess
+import cats.data.EitherT
+import errors.{ServerError, TrustErrors}
+import models.tax_enrolments.OrchestratorToTaxableSuccessResponse
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.when
 import org.scalatest.matchers.must.Matchers._
@@ -26,16 +28,14 @@ import play.api.libs.json.Json
 import play.api.test.Helpers.{status, _}
 import play.api.test.{FakeRequest, Helpers}
 import services.TaxableMigrationService
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TaxEnrolmentCallbackControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
-  val auditConnector = mock[AuditConnector]
-  val mockMigrationService = mock[TaxableMigrationService]
-  val trn = "XTRN1234567"
+  private val mockMigrationService = mock[TaxableMigrationService]
+  private val trn = "XTRN1234567"
 
   ".taxableSubscriptionCallback" should {
 
@@ -70,7 +70,8 @@ class TaxEnrolmentCallbackControllerSpec extends BaseSpec with GuiceOneServerPer
     val subscriptionId = "testSubId"
     "return 200 " when {
       "tax enrolment callback for subscription id enrolment " in {
-        when(mockMigrationService.completeMigration(eqTo(subscriptionId), eqTo(urn))(any())).thenReturn(Future.successful(OrchestratorToTaxableSuccess))
+        when(mockMigrationService.completeMigration(eqTo(subscriptionId), eqTo(urn))(any()))
+          .thenReturn(EitherT[Future, TrustErrors, OrchestratorToTaxableSuccessResponse](Future.successful(Right(OrchestratorToTaxableSuccessResponse()))))
 
         val SUT = new TaxEnrolmentCallbackController(mockMigrationService, Helpers.stubControllerComponents())
 
@@ -78,6 +79,20 @@ class TaxEnrolmentCallbackControllerSpec extends BaseSpec with GuiceOneServerPer
         val request = FakeRequest("POST", url).withHeaders(CONTENT_TYPE -> "application/json")
         val result = SUT.migrationSubscriptionCallback(subscriptionId, urn).apply(request)
         status(result) mustBe OK
+      }
+    }
+
+    "return 500" when {
+      "callback failed" in {
+        when(mockMigrationService.completeMigration(eqTo(subscriptionId), eqTo(urn))(any()))
+          .thenReturn(EitherT[Future, TrustErrors, OrchestratorToTaxableSuccessResponse](Future.successful(Left(ServerError()))))
+
+        val SUT = new TaxEnrolmentCallbackController(mockMigrationService, Helpers.stubControllerComponents())
+
+        val url = s"/tax-enrolment/migration-to-taxable/urn/$urn/subscriptionId/$subscriptionId"
+        val request = FakeRequest("POST", url).withHeaders(CONTENT_TYPE -> "application/json")
+        val result = SUT.migrationSubscriptionCallback(subscriptionId, urn).apply(request)
+        status(result) mustBe INTERNAL_SERVER_ERROR
       }
     }
   }
