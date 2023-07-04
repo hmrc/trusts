@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.transformations.trustdetails
 
+import cats.data.EitherT
 import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import models.get_trust.GetTrustSuccessResponse
+import errors.TrustErrors
+import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.mongodb.scala.Document
@@ -45,7 +47,7 @@ class SetAdministrationCountrySpec extends IntegrationTestBase {
     val stubbedTrustsConnector = mock[TrustsConnector]
 
     when(stubbedTrustsConnector.getTrustInfo(any()))
-      .thenReturn(Future.successful(getTrustResponse.as[GetTrustSuccessResponse]))
+      .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse.as[GetTrustSuccessResponse]))))
 
     def application = applicationBuilder
       .overrides(

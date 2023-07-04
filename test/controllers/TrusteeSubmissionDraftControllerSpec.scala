@@ -16,7 +16,9 @@
 
 package controllers
 
+import cats.data.EitherT
 import controllers.actions.FakeIdentifierAction
+import errors.TrustErrors
 import models.registration.RegistrationSubmissionDraft
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
@@ -155,7 +157,7 @@ class TrusteeSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(mockSubmissionDraft)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraft)))))
 
       val request = FakeRequest("GET", "path")
 
@@ -192,7 +194,7 @@ class TrusteeSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(None))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(None))))
 
       val request = FakeRequest("GET", "path")
 

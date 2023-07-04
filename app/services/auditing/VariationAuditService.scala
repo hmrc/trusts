@@ -17,7 +17,7 @@
 package services.auditing
 
 import models.auditing.{TrustAuditing, VariationAuditEvent}
-import models.variation.VariationResponse
+import models.variation.VariationSuccessResponse
 import play.api.libs.json.{JsBoolean, JsPath, JsSuccess, JsValue, Json, Reads}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -52,7 +52,7 @@ class VariationAuditService @Inject()(auditConnector: AuditConnector)(implicit e
   def auditVariationSuccess(internalId: String,
                             migrateToTaxable: Boolean,
                             payload: JsValue,
-                            variationResponse: VariationResponse
+                            variationResponse: VariationSuccessResponse
                              )(implicit hc: HeaderCarrier): Unit = {
     val hasField = (field: String) =>
       payload.transform((JsPath \ field).json.pick).isSuccess

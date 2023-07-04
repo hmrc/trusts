@@ -16,28 +16,27 @@
 
 package models.tax_enrolments
 
-import exceptions._
 import play.api.Logging
 import play.api.http.Status._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
 sealed trait OrchestratorToTaxableResponse
 
-case object OrchestratorToTaxableSuccess extends OrchestratorToTaxableResponse
-case object OrchestratorToTaxableFailure extends OrchestratorToTaxableResponse
+case class OrchestratorToTaxableSuccessResponse() extends OrchestratorToTaxableResponse
+case class OrchestratorToTaxableFailureResponse(message: String) extends OrchestratorToTaxableResponse
 
 object OrchestratorToTaxableResponse extends Logging {
 
   implicit lazy val httpReads: HttpReads[OrchestratorToTaxableResponse] = (_: String, _: String, response: HttpResponse) => {
     response.status match {
       case NO_CONTENT | OK | ACCEPTED =>
-        OrchestratorToTaxableSuccess
+        OrchestratorToTaxableSuccessResponse()
       case BAD_REQUEST =>
         logger.error("[OrchestratorToTaxableResponse][httpReads] Bad request response received from orchestrator")
-        throw BadRequestException
+        OrchestratorToTaxableFailureResponse("Bad request")
       case status =>
         logger.error(s"[OrchestratorToTaxableResponse][httpReads] Error response from orchestrator: $status")
-        throw InternalServerErrorException(s"Error response from orchestrator: $status")
+        OrchestratorToTaxableFailureResponse(s"Error response from orchestrator: $status")
     }
   }
 }

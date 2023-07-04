@@ -16,42 +16,53 @@
 
 package models.variation
 
+import errors.{BadRequestErrorResponse, InternalServerErrorResponse, ServiceNotAvailableErrorResponse, VariationErrors}
 import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
-import exceptions._
 
-final case class VariationResponse(tvn: String)
+sealed trait VariationResponse
+case class VariationSuccessResponse(tvn: String) extends VariationResponse
+case class VariationFailureResponse(status: Int, errorType: VariationErrors, message: String) extends VariationResponse
 
 object VariationResponse extends Logging {
 
-  implicit val formats: Format[VariationResponse] = Json.format[VariationResponse]
+  implicit val formats: Format[VariationSuccessResponse] = Json.format[VariationSuccessResponse]
 
   implicit lazy val httpReads: HttpReads[VariationResponse] =
     new HttpReads[VariationResponse] {
       override def read(method: String, url: String, response: HttpResponse): VariationResponse = {
         response.status match {
           case OK =>
-            response.json.as[VariationResponse]
+            response.json.as[VariationSuccessResponse]
           case BAD_REQUEST if response.body contains "INVALID_CORRELATIONID" =>
             logger.error(s"[VariationResponse][httpReads] Bad Request for invalid correlation id response from des ")
-            throw InternalServerErrorException("Invalid correlation id response from des")
+            VariationFailureResponse(BAD_REQUEST, InternalServerErrorResponse, "Invalid correlation id response from des")
+
           case BAD_REQUEST =>
             logger.error(s"[VariationResponse][httpReads] Bad Request response from des")
-            throw BadRequestException
+            VariationFailureResponse(BAD_REQUEST, BadRequestErrorResponse, "Bad request")
+
           case CONFLICT =>
             logger.error(s"[VariationResponse][httpReads] Conflict response from des")
-            throw InternalServerErrorException("Conflict response from des")
+            VariationFailureResponse(CONFLICT, InternalServerErrorResponse, "Conflict response from des")
+
           case INTERNAL_SERVER_ERROR =>
             logger.error(s"[VariationResponse][httpReads] Internal server error response from des")
-            throw InternalServerErrorException("des is currently experiencing problems that require live service intervention")
+            VariationFailureResponse(
+              INTERNAL_SERVER_ERROR,
+              InternalServerErrorResponse,
+              "des is currently experiencing problems that require live service intervention"
+            )
+
           case SERVICE_UNAVAILABLE =>
             logger.error("[VariationResponse][httpReads] Service unavailable response from des.")
-            throw ServiceNotAvailableException("des dependent service is down.")
+            VariationFailureResponse(SERVICE_UNAVAILABLE, ServiceNotAvailableErrorResponse, "des dependent service is down.")
+
           case status =>
-            logger.error(s"[VariationResponse][httpReads] Error response from des : $status")
-            throw InternalServerErrorException(s"Error response from des $status")
+            logger.error(s"[VariationResponse][httpReads] Unexpected error response from des. Status: $status")
+            VariationFailureResponse(status, InternalServerErrorResponse, s"Unexpected error response from des. Status: $status")
         }
       }
     }

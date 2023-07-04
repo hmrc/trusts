@@ -16,7 +16,9 @@
 
 package controllers
 
+import cats.data.EitherT
 import controllers.actions.FakeIdentifierAction
+import errors.TrustErrors
 import models.registration.RegistrationSubmissionDraft
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
@@ -115,7 +117,7 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(mockSubmissionDraftAgentDetails)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraftAgentDetails)))))
 
       val request = FakeRequest("GET", "path")
 
@@ -149,7 +151,7 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(None))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(None))))
 
       val request = FakeRequest("GET", "path")
 
@@ -170,7 +172,7 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(mockSubmissionDraftNoData)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraftNoData)))))
 
       val request = FakeRequest("GET", "path")
 
@@ -194,7 +196,7 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(mockSubmissionDraftAgentDetails)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraftAgentDetails)))))
 
       val request = FakeRequest("GET", "path")
 
@@ -223,7 +225,7 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(None))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(None))))
 
       val request = FakeRequest("GET", "path")
 
@@ -244,7 +246,7 @@ class AgentSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar w
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(mockSubmissionDraftNoData)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraftNoData)))))
 
       val request = FakeRequest("GET", "path")
 

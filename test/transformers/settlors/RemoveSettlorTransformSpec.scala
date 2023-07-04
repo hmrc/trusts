@@ -16,6 +16,8 @@
 
 package transformers.settlors
 
+import cats.data.EitherT
+import errors.TrustErrors
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
@@ -160,12 +162,13 @@ class RemoveSettlorTransformSpec extends AnyFreeSpec with ScalaFutures with Mock
       val trustsService = mock[TrustsService]
       val auditService = mock[AuditService]
       val transforms = Seq(RemoveSettlorTransform(Some(1), settlorJson("Two"), LocalDate.of(2018, 4, 21), "settlorCompany"))
-      when(repo.get(any(), any(), any())).thenReturn(Future.successful(Some(ComposedDeltaTransform(transforms))))
+      when(repo.get(any(), any(), any()))
+        .thenReturn(EitherT[Future, TrustErrors, Option[ComposedDeltaTransform]](Future.successful(Right(Some(ComposedDeltaTransform(transforms))))))
 
       val SUT = new TransformationService(repo, trustsService, auditService)
 
-      SUT.applyDeclarationTransformations("UTRUTRUTR", "InternalId", inputJson)(HeaderCarrier()).futureValue match {
-        case JsSuccess(value, _) => value mustBe expectedOutput
+      SUT.applyDeclarationTransformations("UTRUTRUTR", "InternalId", inputJson)(HeaderCarrier()).value.futureValue match {
+        case Right(JsSuccess(value, _)) => value mustBe expectedOutput
         case _ => fail("Transform failed")
       }
     }

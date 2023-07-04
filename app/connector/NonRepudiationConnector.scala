@@ -33,9 +33,7 @@ class NonRepudiationConnector @Inject()(http: HttpClient, config: AppConfig)(imp
   private def headers = Seq(CONTENT_TYPE -> JSON, X_API_KEY -> config.xApiKey)
 
    def nonRepudiate(json: NRSSubmission)(implicit hc: HeaderCarrier): Future[NRSResponse] = {
-
-  http.POST[NRSSubmission, NRSResponse](config.nonRepudiationUrl, json, headers)
-
+     http.POST[NRSSubmission, NRSResponse](config.nonRepudiationUrl, json, headers)
   }
 
 }

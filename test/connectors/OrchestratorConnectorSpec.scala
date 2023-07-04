@@ -18,9 +18,9 @@ package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock.{badRequest, post, serverError, urlEqualTo}
 import connector.OrchestratorConnector
-import exceptions.{BadRequestException, InternalServerErrorException}
+import errors.ServerError
 import models.orchestrator.OrchestratorMigrationRequest
-import models.tax_enrolments.OrchestratorToTaxableSuccess
+import models.tax_enrolments.OrchestratorToTaxableSuccessResponse
 import org.scalatest.matchers.must.Matchers._
 import play.api.http.Status._
 import play.api.libs.json.Json
@@ -37,45 +37,47 @@ class OrchestratorConnectorSpec extends ConnectorSpecHelper {
     val request: OrchestratorMigrationRequest = OrchestratorMigrationRequest(urn, utr)
     val requestBody = Json.stringify(Json.toJson(request))
 
-    "return Success" when {
-      "tax enrolments successfully subscribed to provided subscription id" in {
-        val responseBody = """{"success": "true"}"""
-        stubForHeaderlessPost(server, "/trusts-enrolment-orchestrator/orchestration-process", requestBody, OK, responseBody)
+    "return OrchestratorToTaxableSuccessResponse" when {
 
-        val futureResult = connector.migrateToTaxable(urn, utr)
+      Seq(OK, NO_CONTENT, ACCEPTED).foreach { status =>
+        s"tax enrolments successfully subscribed to provided subscription id (status: $status)" in {
+          val responseBody = """{"success": "true"}"""
+          stubForHeaderlessPost(server, "/trusts-enrolment-orchestrator/orchestration-process", requestBody, status, responseBody)
 
-        whenReady(futureResult) {
-          result => result mustBe OrchestratorToTaxableSuccess
+          val futureResult = connector.migrateToTaxable(urn, utr).value
+
+          whenReady(futureResult) {
+            result => result mustBe Right(OrchestratorToTaxableSuccessResponse())
+          }
         }
       }
     }
 
-    "return BadRequestException " when {
+
+    "return ServerError(message)" when {
       "tax enrolments returns BadRequest " in {
         server.stubFor(
           post(urlEqualTo("/trusts-enrolment-orchestrator/orchestration-process"))
             .willReturn(badRequest)
         )
 
-        val futureResult = connector.migrateToTaxable(urn, utr)
+        val futureResult = connector.migrateToTaxable(urn, utr).value
 
-        whenReady(futureResult.failed) {
-          result => result mustBe BadRequestException
+        whenReady(futureResult) {
+          result => result mustBe Left(ServerError("Bad request"))
         }
       }
-    }
 
-    "return InternalServerErrorException " when {
       "tax enrolments returns internal server error " in {
         server.stubFor(
           post(urlEqualTo("/trusts-enrolment-orchestrator/orchestration-process"))
             .willReturn(serverError)
         )
 
-        val futureResult = connector.migrateToTaxable(urn, utr)
+        val futureResult = connector.migrateToTaxable(urn, utr).value
 
-        whenReady(futureResult.failed) {
-          result => result mustBe an[InternalServerErrorException]
+        whenReady(futureResult) {
+          result => result mustBe Left(ServerError("Error response from orchestrator: 500"))
         }
       }
     }

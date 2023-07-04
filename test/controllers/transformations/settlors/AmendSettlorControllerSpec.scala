@@ -16,7 +16,9 @@
 
 package controllers.transformations.settlors
 
+import cats.data.EitherT
 import controllers.actions.FakeIdentifierAction
+import errors.{ServerError, TrustErrors}
 import models.NameType
 import models.variation._
 import org.mockito.ArgumentMatchers.{any, eq => equalTo}
@@ -95,10 +97,10 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(settlorType, Json.toJson(originalSettlor))))
+          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(settlorType, Json.toJson(originalSettlor))))))
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
-          .thenReturn(Future.successful(true))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         when(mockLocalDateService.now).thenReturn(endDate)
 
@@ -114,6 +116,35 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
+
+      }
+
+      "must return an Internal Server Error when getTransformedTrustJson fails" in {
+
+        val mockTransformationService = mock[TransformationService]
+        val mockLocalDateService = mock[LocalDateService]
+
+        val controller = new AmendSettlorController(
+          identifierAction,
+          mockTransformationService,
+          mockLocalDateService
+        )(Implicits.global, Helpers.stubControllerComponents())
+
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
+          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Left(ServerError("exception message")))))
+
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
+
+        when(mockLocalDateService.now).thenReturn(endDate)
+
+        val request = FakeRequest(POST, "path")
+          .withBody(Json.toJson(amendedSettlor))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.amendIndividual(utr, index).apply(request)
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
 
       }
 
@@ -171,10 +202,10 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(Future.successful(buildInputJson(settlorType, Json.toJson(originalSettlor))))
+          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(settlorType, Json.toJson(originalSettlor))))))
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
-          .thenReturn(Future.successful(true))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         when(mockLocalDateService.now).thenReturn(endDate)
 
@@ -190,6 +221,35 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
+
+      }
+
+      "must return an Internal Server Error when addNewTransform fails" in {
+
+        val mockTransformationService = mock[TransformationService]
+        val mockLocalDateService = mock[LocalDateService]
+
+        val controller = new AmendSettlorController(
+          identifierAction,
+          mockTransformationService,
+          mockLocalDateService
+        )(Implicits.global, Helpers.stubControllerComponents())
+
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
+          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(settlorType, Json.toJson(originalSettlor))))))
+
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
+
+        when(mockLocalDateService.now).thenReturn(endDate)
+
+        val request = FakeRequest(POST, "path")
+          .withBody(Json.toJson(amendedSettlor))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.amendBusiness(utr, index).apply(request)
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
 
       }
 
@@ -259,10 +319,10 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
         val desResponse = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(Future.successful(desResponse.as[JsObject]))
+          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(desResponse.as[JsObject]))))
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
-          .thenReturn(Future.successful(true))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         when(mockLocalDateService.now).thenReturn(endDate)
 

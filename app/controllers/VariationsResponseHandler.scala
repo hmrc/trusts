@@ -16,70 +16,74 @@
 
 package controllers
 
-import javax.inject.Inject
+import errors._
+import models.requests.IdentifierRequest
 import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc.Result
-import uk.gov.hmrc.http.HeaderCarrier
-import exceptions.{DuplicateSubmissionException, EtmpCacheDataStaleException, InvalidCorrelationIdException, ServiceNotAvailableException}
-import models.requests.IdentifierRequest
 import services.auditing.AuditService
+import uk.gov.hmrc.http.HeaderCarrier
 import utils.ErrorResponses._
+
+import javax.inject.Inject
 
 class VariationsResponseHandler @Inject()(auditService: AuditService) extends Logging {
 
-  def recoverFromException(auditType: String)(implicit request: IdentifierRequest[JsValue],hc: HeaderCarrier): PartialFunction[Throwable, Result] = {
+  private val className = this.getClass.getSimpleName
 
-    case InvalidCorrelationIdException =>
-      logger.error(s"[VariationsResponseHandler][recoverFromException][Session ID: ${request.sessionId}] InvalidCorrelationIdException returned")
-      auditService.auditErrorResponse(
-        auditType,
-        request.body,
-        request.internalId,
-        errorReason = "Submission has not passed validation. Invalid CorrelationId."
-      )
-      invalidCorrelationIdErrorResponse
+  def recoverErrorResponse(variationFailure: VariationFailureForAudit, auditType: String)
+                          (implicit request: IdentifierRequest[JsValue], hc: HeaderCarrier): Result = {
 
-    case DuplicateSubmissionException =>
-      logger.error(s"[VariationsResponseHandler][recoverFromException][Session ID: ${request.sessionId}] DuplicateSubmissionException returned")
-      auditService.auditErrorResponse(
-        auditType,
-        request.body,
-        request.internalId,
-        errorReason = "Duplicate Correlation Id was submitted."
-      )
-      duplicateSubmissionErrorResponse
+    variationFailure.reason match {
+      case InvalidCorrelationIdErrorResponse =>
+        logger.error(s"[$className][recoverErrorResponse][Session ID: ${request.sessionId}] InvalidCorrelationIdErrorResponse returned")
+        auditService.auditErrorResponse(
+          auditType,
+          request.body,
+          request.internalId,
+          errorReason = "Submission has not passed validation. Invalid CorrelationId."
+        )
+        invalidCorrelationIdErrorResponse
 
-    case ServiceNotAvailableException(_) =>
-      logger.error(s"[VariationsResponseHandler][recoverFromException][Session ID: ${request.sessionId}] ServiceNotAvailableException returned")
-      auditService.auditErrorResponse(
-        auditType,
-        request.body,
-        request.internalId,
-        errorReason = "Service unavailable."
-      )
-      serviceUnavailableErrorResponse
+      case DuplicateSubmissionErrorResponse =>
+        logger.error(s"[$className][recoverErrorResponse][Session ID: ${request.sessionId}] DuplicateSubmissionErrorResponse returned")
+        auditService.auditErrorResponse(auditType, request.body, request.internalId, errorReason = "Duplicate Correlation Id was submitted.")
+        duplicateSubmissionErrorResponse
 
-    case EtmpCacheDataStaleException =>
-      logger.error(s"[VariationsResponseHandler][recoverFromException][Session ID: ${request.sessionId}] EtmpCacheDataStaleException returned")
-      auditService.auditErrorResponse(
-        auditType,
-        request.body,
-        request.internalId,
-        errorReason = "Cached ETMP data stale."
-      )
-      etmpDataStaleErrorResponse
+      case ServiceNotAvailableErrorResponse =>
+        logger.error(s"[$className][recoverErrorResponse][Session ID: ${request.sessionId}] ServiceNotAvailableErrorResponse returned")
+        auditService.auditErrorResponse(
+          auditType,
+          request.body,
+          request.internalId,
+          errorReason = "Service unavailable."
+        )
+        serviceUnavailableErrorResponse
 
-    case e =>
-      logger.error(s"[VariationsResponseHandler][recoverFromException][Session ID: ${request.sessionId}] Exception returned ${e.getMessage}")
-      auditService.auditErrorResponse(
-        auditType,
-        request.body,
-        request.internalId,
-        errorReason = s"${e.getMessage}"
-      )
-      internalServerErrorErrorResponse
+      case EtmpCacheDataStaleErrorResponse =>
+        logger.error(s"[$className][recoverErrorResponse][Session ID: ${request.sessionId}] EtmpCacheDataStaleErrorResponse returned")
+        auditService.auditErrorResponse(
+          auditType,
+          request.body,
+          request.internalId,
+          errorReason = "Cached ETMP data stale."
+        )
+        etmpDataStaleErrorResponse
+
+      case errorResponse =>
+        logger.error(s"[$className][recoverErrorResponse][Session ID: ${request.sessionId}] " +
+          s"$errorResponse returned with message: ${variationFailure.message}"
+        )
+
+        auditService.auditErrorResponse(
+          auditType,
+          request.body,
+          request.internalId,
+          errorReason = s"${variationFailure.message}"
+        )
+
+        internalServerErrorErrorResponse
+    }
   }
-
 
 }

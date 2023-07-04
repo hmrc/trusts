@@ -17,9 +17,10 @@
 package services.rosm
 
 import base.BaseSpec
+import cats.data.EitherT
 import connector.TaxEnrolmentConnector
-import exceptions.{BadRequestException, InternalServerErrorException}
-import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentSuccess}
+import errors.{ServerError, TrustErrors}
+import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentSubscriberResponse, TaxEnrolmentSuccess}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatest.matchers.must.Matchers._
@@ -31,9 +32,8 @@ import scala.concurrent.{Await, Future}
 
 class TaxEnrolmentsServiceSpec extends BaseSpec {
 
-  lazy val mockConnector = mock[TaxEnrolmentConnector]
-
-  lazy val SUT = new TaxEnrolmentsServiceImpl(mockConnector, appConfig)
+  private lazy val mockConnector = mock[TaxEnrolmentConnector]
+  private lazy val SUT = new TaxEnrolmentsServiceImpl(mockConnector, appConfig)
 
   before {
     reset(mockConnector)
@@ -46,8 +46,8 @@ class TaxEnrolmentsServiceSpec extends BaseSpec {
 
     "return TaxEnrolmentSuccess  " when {
       "connector returns success taxEnrolmentSubscriberResponse." in {
-        when(mockConnector.enrolSubscriber("123456789", taxable, trn)).
-          thenReturn(Future.successful(TaxEnrolmentSuccess))
+        when(mockConnector.enrolSubscriber("123456789", taxable, trn))
+          .thenReturn(EitherT[Future, TrustErrors, TaxEnrolmentSubscriberResponse](Future.successful(Right(TaxEnrolmentSuccess))))
 
         val futureResult = SUT.setSubscriptionId("123456789", taxable, trn)
 
@@ -60,8 +60,8 @@ class TaxEnrolmentsServiceSpec extends BaseSpec {
 
     "return TaxEnrolmentFailure " when {
       "tax enrolment returns internal server error." in {
-        when(mockConnector.enrolSubscriber("123456789", taxable, trn)).
-          thenReturn(Future.failed(new InternalServerErrorException("")))
+        when(mockConnector.enrolSubscriber("123456789", taxable, trn))
+          .thenReturn(EitherT[Future, TrustErrors, TaxEnrolmentSubscriberResponse](Future.successful(Left(ServerError("internal server error")))))
         val result = Await.result(SUT.setSubscriptionId("123456789", taxable, trn), Duration.Inf)
         result mustBe TaxEnrolmentFailure
         verify(mockConnector, times(10)).enrolSubscriber(any(), any(), any())(any[HeaderCarrier])
@@ -70,8 +70,8 @@ class TaxEnrolmentsServiceSpec extends BaseSpec {
 
     "return TaxEnrolmentFailure " when {
       "tax enrolment returns error" in {
-        when(mockConnector.enrolSubscriber("123456789", taxable, trn)).
-          thenReturn(Future.failed(BadRequestException))
+        when(mockConnector.enrolSubscriber("123456789", taxable, trn))
+          .thenReturn(EitherT[Future, TrustErrors, TaxEnrolmentSubscriberResponse](Future.successful(Left(ServerError("bad request")))))
 
         val result = Await.result(SUT.setSubscriptionId("123456789", taxable, trn), Duration.Inf)
         result mustBe TaxEnrolmentFailure

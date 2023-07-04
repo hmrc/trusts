@@ -16,7 +16,9 @@
 
 package controllers.transformations.trustdetails
 
+import cats.data.EitherT
 import controllers.actions.FakeIdentifierAction
+import errors.{ServerError, TrustErrors}
 import models.variation.{MigratingTrustDetails, NonMigratingTrustDetails}
 import models.{NonUKType, ResidentialStatusType, UkType}
 import org.mockito.ArgumentMatchers.{any, eq => equalTo}
@@ -27,7 +29,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.{JsBoolean, JsString, Json}
+import play.api.libs.json.{JsBoolean, JsObject, JsString, Json}
 import play.api.mvc.BodyParsers
 import play.api.test.Helpers.{CONTENT_TYPE, _}
 import play.api.test.{FakeRequest, Helpers}
@@ -59,15 +61,15 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
     reset(mockTransformationService)
 
     when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-      .thenReturn(Future.successful(Json.obj()))
+      .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(Json.obj()))))
 
     when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
-      .thenReturn(Future.successful(true))
+      .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
     reset(mockTaxableMigrationService)
 
     when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any(), any()))
-      .thenReturn(Future.successful(false))
+      .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(false))))
   }
 
   "Trust details transforms" - {
@@ -95,6 +97,27 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
           equalTo("id"),
           equalTo(SetTrustDetailTransform(JsBoolean(true), "expressTrust"))
         )(any())
+      }
+
+      "must return an Internal Server Error when getTransformedTrustJson fails" in {
+
+        when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
+          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Left(ServerError()))))
+
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
+
+        val request = FakeRequest(PUT, "path")
+          .withBody(JsBoolean(true))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.setExpress(utr).apply(request)
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+
       }
 
       "return a BadRequest for malformed json" in {
@@ -141,6 +164,27 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
         )(any())
       }
 
+      "must return an Internal Server Error when addNewTransform fails" in {
+
+        when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError("exception message")))))
+
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
+
+        val request = FakeRequest(PUT, "path")
+          .withBody(JsBoolean(true))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.setProperty(utr).apply(request)
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+
+      }
+
       "return a BadRequest for malformed json" in {
 
         val controller = new TrustDetailsTransformationController(
@@ -183,6 +227,27 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
           equalTo("id"),
           equalTo(SetTrustDetailTransform(JsBoolean(true), "trustRecorded"))
         )(any())
+      }
+
+      "must return an Internal Server Error when migratingFromNonTaxableToTaxable fails" in {
+
+        when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
+
+        val controller = new TrustDetailsTransformationController(
+          identifierAction,
+          mockTransformationService,
+          mockTaxableMigrationService
+        )(Implicits.global, Helpers.stubControllerComponents())
+
+        val request = FakeRequest(PUT, "path")
+          .withBody(JsBoolean(true))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.setRecorded(utr).apply(request)
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+
       }
 
       "return a BadRequest for malformed json" in {
@@ -717,7 +782,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
         "must return an OK" in {
 
           when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any(), any()))
-            .thenReturn(Future.successful(true))
+            .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
           val controller = new TrustDetailsTransformationController(
             identifierAction,
@@ -823,7 +888,7 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
         "must return an OK" in {
 
           when(mockTaxableMigrationService.migratingFromNonTaxableToTaxable(any(), any(), any()))
-            .thenReturn(Future.successful(false))
+            .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(false))))
 
           val controller = new TrustDetailsTransformationController(
             identifierAction,
@@ -878,6 +943,58 @@ class TrustDetailsTransformationControllerSpec extends AnyFreeSpec
         }
 
       }
+    }
+  }
+
+  "when adding multiple transformations" - {
+
+    "must return an OK" in {
+
+      val controller = new TrustDetailsTransformationController(
+        identifierAction,
+        mockTransformationService,
+        mockTaxableMigrationService
+      )(Implicits.global, Helpers.stubControllerComponents())
+
+      val request = FakeRequest(PUT, "path")
+        .withBody(JsBoolean(true))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = {
+        controller.setExpress(utr).apply(request)
+        controller.setProperty(utr).apply(request)
+      }
+
+      val expressTrustTransform = SetTrustDetailTransform(JsBoolean(true), "expressTrust")
+      val trustUKPropertyTransform = SetTrustDetailTransform(JsBoolean(true), "trustUKProperty")
+
+      status(result) mustBe OK
+
+      verify(mockTransformationService).addNewTransform(equalTo(utr), equalTo("id"), equalTo(expressTrustTransform))(any())
+      verify(mockTransformationService).addNewTransform(equalTo(utr), equalTo("id"), equalTo(trustUKPropertyTransform))(any())
+    }
+
+    "must return an Internal Server error when addNewTransform fails" in {
+
+      when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
+        .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
+
+      val controller = new TrustDetailsTransformationController(
+        identifierAction,
+        mockTransformationService,
+        mockTaxableMigrationService
+      )(Implicits.global, Helpers.stubControllerComponents())
+
+      val request = FakeRequest(PUT, "path")
+        .withBody(JsBoolean(true))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = {
+        controller.setExpress(utr).apply(request)
+        controller.setProperty(utr).apply(request)
+      }
+
+      status(result) mustBe INTERNAL_SERVER_ERROR
     }
   }
 }

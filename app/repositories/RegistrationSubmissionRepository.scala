@@ -16,8 +16,11 @@
 
 package repositories
 
+import cats.data.EitherT
 import config.AppConfig
+import errors.ServerError
 import models.registration.{RegistrationSubmissionDraft, RegistrationSubmissionDraftDB}
+import org.mongodb.scala.MongoException
 import org.mongodb.scala.model.Filters.{and, empty, equal}
 import org.mongodb.scala.model._
 import play.api.Logging
@@ -26,6 +29,7 @@ import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+import utils.TrustEnvelope.TrustEnvelope
 
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -33,15 +37,15 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait RegistrationSubmissionRepository {
 
-  def getDraft(draftId: String, internalId: String): Future[Option[RegistrationSubmissionDraft]]
+  def getDraft(draftId: String, internalId: String): TrustEnvelope[Option[RegistrationSubmissionDraft]]
 
-  def setDraft(uiState: RegistrationSubmissionDraft): Future[Boolean]
+  def setDraft(uiState: RegistrationSubmissionDraft): TrustEnvelope[Boolean]
 
-  def getRecentDrafts(internalId: String, affinityGroup: AffinityGroup): Future[Seq[RegistrationSubmissionDraft]]
+  def getRecentDrafts(internalId: String, affinityGroup: AffinityGroup): TrustEnvelope[Seq[RegistrationSubmissionDraft]]
 
-  def removeDraft(draftId: String, internalId: String): Future[Boolean]
+  def removeDraft(draftId: String, internalId: String): TrustEnvelope[Boolean]
 
-  def removeAllDrafts(): Future[Boolean]
+  def removeAllDrafts(): TrustEnvelope[Boolean]
 }
 
 class RegistrationSubmissionRepositoryImpl @Inject()(
@@ -66,8 +70,9 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
         IndexOptions().name("internal-id-index")
       )
     )
-  ) with
-  RegistrationSubmissionRepository with Logging {
+  ) with RegistrationSubmissionRepository with Logging {
+
+  private val className = this.getClass.getSimpleName
 
   private def convertFromDBModel(dbModel: RegistrationSubmissionDraftDB): RegistrationSubmissionDraft = {
     RegistrationSubmissionDraft(
@@ -91,7 +96,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
     )
   }
 
-  override def setDraft(uiState: RegistrationSubmissionDraft): Future[Boolean] = {
+  override def setDraft(uiState: RegistrationSubmissionDraft): TrustEnvelope[Boolean] = EitherT {
 
     val selector = and(
       equal("draftId", uiState.draftId),
@@ -100,24 +105,41 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
 
     val updateOptions = new ReplaceOptions().upsert(true)
 
-    collection.replaceOne(selector, convertToDBModel(uiState), updateOptions).toFutureOption().map {
-      case Some(_) => true
-      case None => false
+    collection.replaceOne(selector, convertToDBModel(uiState), updateOptions)
+      .toFutureOption()
+      .map {
+        case Some(_) => Right(true)
+        case None => Right(false)
+      }.recover {
+      case e: MongoException =>
+        logger.error(s"[$className][setDraft] failed to update $collectionName ${e.getMessage}")
+        Left(ServerError(e.getMessage))
+      case e: Exception =>
+        logger.error(s"[$className][setDraft] $collectionName ${e.getMessage}")
+        Left(ServerError(e.getMessage))
     }
   }
 
-  override def getDraft(draftId: String, internalId: String): Future[Option[RegistrationSubmissionDraft]] = {
+  override def getDraft(draftId: String, internalId: String): TrustEnvelope[Option[RegistrationSubmissionDraft]] = EitherT {
     val selector = and(
       equal("draftId", draftId),
       equal("internalId", internalId)
     )
 
-    collection.find(selector).first().toFutureOption().map {
-      optModel => optModel.map(convertFromDBModel)
+    collection.find(selector).first()
+      .toFutureOption()
+      .map(optDraft => Right(optDraft.map(convertFromDBModel))
+      ).recover {
+      case e: MongoException =>
+        logger.error(s"[$className][getDraft] failed to fetch from $collectionName ${e.getMessage}")
+        Left(ServerError(e.getMessage))
+      case e: Exception =>
+        logger.error(s"[$className][getDraft] $collectionName ${e.getMessage}")
+        Left(ServerError(e.getMessage))
     }
   }
 
-  override def getRecentDrafts(internalId: String, affinityGroup: AffinityGroup): Future[Seq[RegistrationSubmissionDraft]] = {
+  override def getRecentDrafts(internalId: String, affinityGroup: AffinityGroup): TrustEnvelope[Seq[RegistrationSubmissionDraft]] = EitherT {
     val maxDocs = if (affinityGroup == Organisation) 1 else Int.MaxValue
 
     val selector = and(
@@ -127,30 +149,59 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
 
     val sort = Sorts.descending("createdAt")
 
-    collection.find(selector).sort(sort).limit(maxDocs).toFuture().map {
-      seq => seq.map(convertFromDBModel)
+    collection.find(selector).sort(sort).limit(maxDocs)
+      .toFuture()
+      .map { seq => Right(seq.map(convertFromDBModel))
+      }.recover {
+      case e: MongoException =>
+        logger.error(s"[$className][getRecentDrafts] failed to fetch from $collectionName ${e.getMessage}")
+        Left(ServerError(e.getMessage))
+      case e: Exception =>
+        logger.error(s"[$className][getRecentDrafts] $collectionName ${e.getMessage}")
+        Left(ServerError(e.getMessage))
     }
+
   }
 
-  override def removeDraft(draftId: String, internalId: String): Future[Boolean] = {
+  override def removeDraft(draftId: String, internalId: String): TrustEnvelope[Boolean] = EitherT {
     val selector = and(
       equal("draftId", draftId),
       equal("internalId", internalId)
     )
-    collection.deleteOne(selector).toFuture().map(_.wasAcknowledged())
+    collection.deleteOne(selector)
+      .toFuture()
+      .map(deleteResult => Right(deleteResult.wasAcknowledged()))
+      .recover {
+        case e: MongoException =>
+          logger.error(s"[$className][removeDraft] failed to remove draft from $collectionName ${e.getMessage}")
+          Left(ServerError(e.getMessage))
+        case e: Exception =>
+          logger.error(s"[$className][removeDraft] $collectionName ${e.getMessage}")
+          Left(ServerError(e.getMessage))
+      }
   }
 
   /**
    * All registration submissions will be deleted from mongo on the 30th April
    * This is so that we don't have any lingering 4MLD draft registrations when we switch on 5MLD
    */
-  def removeAllDrafts(): Future[Boolean] =
+  def removeAllDrafts(): TrustEnvelope[Boolean] = EitherT {
     if (config.removeSavedRegistrations) {
-      collection.deleteMany(empty()).toFuture().map { deleteResult =>
-        logger.info("[RegistrationSubmissionRepository][removeAllDrafts] Removing all registration submissions.")
-        deleteResult.wasAcknowledged()
+      collection.deleteMany(empty())
+        .toFuture()
+        .map { deleteResult =>
+          logger.info(s"[$className][removeAllDrafts] Removing all registration submissions.")
+          Right(deleteResult.wasAcknowledged())
+        }.recover {
+        case e: MongoException =>
+          logger.error(s"[$className][removeAllDrafts] failed to removeAll drafts from $collectionName ${e.getMessage}")
+          Left(ServerError(e.getMessage))
+        case e: Exception =>
+          logger.error(s"[$className][removeAllDrafts] $collectionName ${e.getMessage}")
+          Left(ServerError(e.getMessage))
       }
     } else {
-      Future.successful(true)
+      Future.successful(Right(true))
     }
+  }
 }

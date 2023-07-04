@@ -16,10 +16,12 @@
 
 package uk.gov.hmrc.transformations.beneficiaries
 
+import cats.data.EitherT
 import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import models.get_trust.GetTrustSuccessResponse
-import models.variation.VariationResponse
+import errors.TrustErrors
+import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
+import models.variation.VariationSuccessResponse
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -58,7 +60,8 @@ class ComboBeneficiarySpec extends IntegrationTestBase {
       JsonUtils.getJsonValueFromFile("it/trusts-integration-declared-combo-beneficiary.json")
 
     val stubbedTrustsConnector = mock[TrustsConnector]
-    when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
+    when(stubbedTrustsConnector.getTrustInfo(any()))
+      .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse))))
 
     def application = applicationBuilder
       .overrides(
@@ -94,10 +97,11 @@ class ComboBeneficiarySpec extends IntegrationTestBase {
       status(newResult) mustBe OK
       contentAsJson(newResult) mustBe expectedGetAfterAddBeneficiaryJson
 
-      lazy val variationResponse = VariationResponse("TVN12345678")
+      lazy val variationResponse = VariationSuccessResponse("TVN12345678")
       lazy val payloadCaptor = ArgumentCaptor.forClass(classOf[JsValue])
 
-      when(stubbedTrustsConnector.trustVariation(payloadCaptor.capture())).thenReturn(Future.successful(variationResponse))
+      when(stubbedTrustsConnector.trustVariation(payloadCaptor.capture()))
+        .thenReturn(EitherT[Future, TrustErrors, VariationSuccessResponse](Future.successful(Right(variationResponse))))
 
       val declaration = Json.parse(
         """

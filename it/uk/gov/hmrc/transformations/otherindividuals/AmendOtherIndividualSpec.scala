@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.transformations.otherindividuals
 
+import cats.data.EitherT
 import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import models.get_trust.GetTrustSuccessResponse
+import errors.TrustErrors
+import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.mongodb.scala.Document
@@ -53,7 +55,7 @@ class AmendOtherIndividualSpec extends IntegrationTestBase with ScalaFutures {
     val stubbedTrustsConnector = mock[TrustsConnector]
 
     when(stubbedTrustsConnector.getTrustInfo(any()))
-      .thenReturn(Future.successful(getTrustResponse))
+      .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse))))
 
     def application = applicationBuilder
       .overrides(

@@ -21,10 +21,11 @@ import org.mongodb.scala.model._
 import repositories.MongoFormats._
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+import utils.TrustEnvelope.TrustEnvelope
 
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class TaxableMigrationRepositoryImpl @Inject()(
@@ -47,20 +48,21 @@ class TaxableMigrationRepositoryImpl @Inject()(
 ) with RepositoryHelper[Boolean] with TaxableMigrationRepository {
 
   override implicit val executionContext: ExecutionContext = ec
+  override val className: String = "TaxableMigrationRepositoryImpl"
   override val key: String = "migratingToTaxable"
 
-  override def get(identifier: String, internalId: String, sessionId: String): Future[Option[Boolean]] = {
+  override def get(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Option[Boolean]] = {
     getOpt(identifier, internalId, sessionId)
   }
 
-  override def set(identifier: String, internalId: String, sessionId: String, migratingToTaxable: Boolean): Future[Boolean] = {
+  override def set(identifier: String, internalId: String, sessionId: String, migratingToTaxable: Boolean): TrustEnvelope[Boolean] = {
     upsert(identifier, internalId, sessionId, migratingToTaxable)
   }
 }
 
 trait TaxableMigrationRepository {
 
-  def get(identifier: String, internalId: String, sessionId: String): Future[Option[Boolean]]
+  def get(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Option[Boolean]]
 
-  def set(identifier: String, internalId: String, sessionId: String, migratingToTaxable: Boolean): Future[Boolean]
+  def set(identifier: String, internalId: String, sessionId: String, migratingToTaxable: Boolean): TrustEnvelope[Boolean]
 }

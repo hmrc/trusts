@@ -16,7 +16,9 @@
 
 package controllers
 
+import cats.data.EitherT
 import controllers.actions.FakeIdentifierAction
+import errors.{ServerError, TrustErrors}
 import models.registration.{RegistrationSubmission, RegistrationSubmissionDraft}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
@@ -34,8 +36,8 @@ import repositories.RegistrationSubmissionRepository
 import services.dates.LocalDateTimeService
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import utils.JsonFixtures
-import java.time.Month._
 
+import java.time.Month._
 import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -127,10 +129,10 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(None))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(None))))
 
       when(submissionRepository.setDraft(any()))
-        .thenReturn(Future.successful(true))
+        .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
       val body = Json.parse(
         """
@@ -180,10 +182,10 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(existingDraft)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(existingDraft)))))
 
       when(submissionRepository.setDraft(any()))
-        .thenReturn(Future.successful(true))
+        .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
       val body = Json.parse(
         """
@@ -224,9 +226,125 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       verify(submissionRepository).getDraft(draftId, internalId)
       verify(submissionRepository).setDraft(expectedDraft)
     }
+
+    "return an Internal server error" when {
+
+      "submissionRepository.setDraft returns Right(false)" in {
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
+
+        when(submissionRepository.getDraft(any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(existingDraft)))))
+
+        when(submissionRepository.setDraft(any()))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(false))))
+
+        val body = Json.parse(
+          """
+            |{
+            | "data": {
+            |  "field1": "value1",
+            |  "field2": "value2",
+            |  "field3": 3
+            | },
+            | "reference": "theReference"
+            |}
+            |""".stripMargin)
+
+        val request = FakeRequest("POST", "path")
+          .withBody(body)
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.setSection(draftId, "sectionKey").apply(request)
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+
+      "submissionRepository.setDraft returns an exception from Mongo, where message is nonEmpty" in {
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
+
+        when(submissionRepository.getDraft(any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(None))))
+
+        when(submissionRepository.setDraft(any()))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError("operation failed due to exception from Mongo")))))
+
+        val body = Json.parse(
+          """
+            |{
+            | "data": {
+            |  "field1": "value1",
+            |  "field2": "value2",
+            |  "field3": 3
+            | },
+            | "reference": "theReference"
+            |}
+            |""".stripMargin)
+
+        val request = FakeRequest("POST", "path")
+          .withBody(body)
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.setSection(draftId, "sectionKey").apply(request)
+        status(result) mustBe INTERNAL_SERVER_ERROR
+
+      }
+
+      "submissionRepository.setDraft returns an exception from Mongo, where message is an empty string" in {
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
+
+        when(submissionRepository.getDraft(any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(None))))
+
+        when(submissionRepository.setDraft(any()))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
+
+        val body = Json.parse(
+          """
+            |{
+            | "data": {
+            |  "field1": "value1",
+            |  "field2": "value2",
+            |  "field3": 3
+            | },
+            | "reference": "theReference"
+            |}
+            |""".stripMargin)
+
+        val request = FakeRequest("POST", "path")
+          .withBody(body)
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.setSection(draftId, "sectionKey").apply(request)
+        status(result) mustBe INTERNAL_SERVER_ERROR
+
+      }
+    }
   }
 
-  ".setSectionSet" should {
+  ".setDataset" should {
 
     "set data into correct sections" in {
       val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
@@ -240,10 +358,10 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(existingDraft)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(existingDraft)))))
 
       when(submissionRepository.setDraft(any()))
-        .thenReturn(Future.successful(true))
+        .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
       val data = Json.parse(
         """
@@ -377,10 +495,10 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(existingDraft)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(existingDraft)))))
 
       when(submissionRepository.setDraft(any()))
-        .thenReturn(Future.successful(true))
+        .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
       val data = Json.parse(
         """
@@ -488,6 +606,81 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       verify(submissionRepository).setDraft(expectedDraft)
     }
 
+    "return an Internal server error" when {
+
+      "submissionRepository.setDraft returns Right(false)" in {
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
+
+        when(submissionRepository.getDraft(any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(None))))
+
+        when(submissionRepository.setDraft(any()))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(false))))
+
+        val data = Json.parse(
+          """
+            |{
+            | "field1": "value1",
+            | "field2": "value2",
+            | "field3": 3
+            |}
+            |""".stripMargin)
+
+        val set = RegistrationSubmission.DataSet(data, List.empty, List.empty)
+
+        val request = FakeRequest("POST", "path")
+          .withBody(Json.toJson(set))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.setDataset(draftId, "sectionKey").apply(request)
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+
+      "submissionRepository.setDraft returns an exception from Mongo" in {
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
+
+        when(submissionRepository.getDraft(any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(None))))
+
+        when(submissionRepository.setDraft(any()))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError("operation failed due to exception from Mongo")))))
+
+        val data = Json.parse(
+          """
+            |{
+            | "field1": "value1",
+            | "field2": "value2",
+            | "field3": 3
+            |}
+            |""".stripMargin)
+
+        val set = RegistrationSubmission.DataSet(data, List.empty, List.empty)
+
+        val request = FakeRequest("POST", "path")
+          .withBody(Json.toJson(set))
+          .withHeaders(CONTENT_TYPE -> "application/json")
+
+        val result = controller.setDataset(draftId, "sectionKey").apply(request)
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+    }
+
   }
 
   ".getSection" should {
@@ -504,7 +697,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(existingDraft)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(existingDraft)))))
 
       val request = FakeRequest("GET", "path")
 
@@ -540,7 +733,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
 
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(Some(existingDraft)))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(existingDraft)))))
 
       val request = FakeRequest("GET", "path")
 
@@ -571,12 +764,56 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(Future.successful(None))
+        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(None))))
 
       val request = FakeRequest("GET", "path")
 
       val result = controller.getSection(draftId, "sectionKey2").apply(request)
       status(result) mustBe NOT_FOUND
+    }
+
+    "return an Internal server error" when {
+      "submissionRepository.getDraft returns an exception from Mongo, where message is nonEmpty" in {
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
+
+        when(submissionRepository.getDraft(any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(
+            Left(ServerError("operation failed due to exception from Mongo"))
+          )))
+
+        val request = FakeRequest("GET", "path")
+
+        val result = controller.getSection(draftId, "sectionKey2").apply(request)
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+
+      "submissionRepository.getDraft returns an exception from Mongo, where message is an empty string" in {
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
+
+        when(submissionRepository.getDraft(any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Left(ServerError()))))
+
+        val request = FakeRequest("GET", "path")
+
+        val result = controller.getSection(draftId, "sectionKey2").apply(request)
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
     }
   }
 
@@ -599,7 +836,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       )
 
       when(submissionRepository.getRecentDrafts(any(), any()))
-        .thenReturn(Future.successful(drafts))
+        .thenReturn(EitherT[Future, TrustErrors, Seq[RegistrationSubmissionDraft]](Future.successful(Right(drafts))))
 
       val request = FakeRequest("GET", "path")
 
@@ -644,7 +881,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       )
 
       when(submissionRepository.getRecentDrafts(any(), any()))
-        .thenReturn(Future.successful(drafts))
+        .thenReturn(EitherT[Future, TrustErrors, Seq[RegistrationSubmissionDraft]](Future.successful(Right(drafts))))
 
       val request = FakeRequest("GET", "path")
 
@@ -684,7 +921,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       )
 
       when(submissionRepository.getRecentDrafts(any(), any()))
-        .thenReturn(Future.successful(List()))
+        .thenReturn(EitherT[Future, TrustErrors, Seq[RegistrationSubmissionDraft]](Future.successful(Right(List()))))
 
       val request = FakeRequest("GET", "path")
 
@@ -697,6 +934,50 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
 
       contentType(result) mustBe Some(JSON)
       contentAsJson(result) mustBe expectedDraftJson
+    }
+
+    "return an Internal server error" when {
+      "submissionRepository.getRecentDrafts returns an exception from Mongo, where message is nonEmpty" in {
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
+
+        when(submissionRepository.getRecentDrafts(any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Seq[RegistrationSubmissionDraft]](Future.successful(
+            Left(ServerError("operation failed due to exception from Mongo"))
+          )))
+
+        val request = FakeRequest("GET", "path")
+
+        val result = controller.getDrafts().apply(request)
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+
+      "submissionRepository.getRecentDrafts returns an exception from Mongo, where message is an empty string" in {
+        val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+        val submissionRepository = mock[RegistrationSubmissionRepository]
+
+        val controller = new SubmissionDraftController(
+          submissionRepository,
+          identifierAction,
+          LocalDateTimeServiceStub,
+          Helpers.stubControllerComponents()
+        )
+
+        when(submissionRepository.getRecentDrafts(any(), any()))
+          .thenReturn(EitherT[Future, TrustErrors, Seq[RegistrationSubmissionDraft]](Future.successful(Left(ServerError()))))
+
+        val request = FakeRequest("GET", "path")
+
+        val result = controller.getDrafts().apply(request)
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
     }
   }
 

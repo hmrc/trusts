@@ -17,11 +17,12 @@
 package controllers
 
 import base.BaseSpec
+import cats.data.EitherT
 import controllers.actions.FakeIdentifierAction
-import exceptions._
+import errors.{EtmpCacheDataStaleErrorResponse, ServerError, ServiceNotAvailableErrorResponse, TrustErrors, VariationFailureForAudit}
 import models.auditing.TrustAuditing
 import models.nonRepudiation.NRSResponse
-import models.variation.{DeclarationForApi, VariationContext, VariationResponse}
+import models.variation.{DeclarationForApi, VariationContext, VariationSuccessResponse}
 import models.{DeclarationName, NameType}
 import org.mockito.ArgumentMatchers.{eq => Meq, _}
 import org.mockito.Mockito._
@@ -82,7 +83,9 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       when(mockNonRepudiationService.maintain(any(), any())(any(), any())).thenReturn(Future.successful(NRSResponse.Success("uuid")))
 
       when(mockVariationService.submitDeclaration(any(), any(), any(), any())(any()))
-        .thenReturn(Future.successful(VariationContext(Json.obj(), VariationResponse("TVN123"))))
+        .thenReturn(EitherT[Future, TrustErrors, VariationContext](Future.successful(
+          Right(VariationContext(Json.obj(), VariationSuccessResponse("TVN123")))
+        )))
 
       val result = SUT.declare("aUTR")(
         FakeRequest("POST", "/no-change/aUTR").withBody(Json.toJson(declarationForApi))
@@ -94,7 +97,7 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       )
     }
 
-    "return bad request when declaring no change and there is a form bundle number mismatch" in {
+    "return Bad Request when declaring no change and there is a form bundle number mismatch" in {
       val SUT = trustVariationsController
       val declaration = DeclarationName(
         NameType("firstname", None, "Surname")
@@ -103,7 +106,9 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       val declarationForApi = DeclarationForApi(declaration, None, None)
 
       when(mockVariationService.submitDeclaration(any(), any(), any(), any())(any()))
-        .thenReturn(Future.failed(EtmpCacheDataStaleException))
+        .thenReturn(EitherT[Future, TrustErrors, VariationContext](Future.successful(
+          Left(VariationFailureForAudit(EtmpCacheDataStaleErrorResponse, "Etmp data is stale"))
+        )))
 
       val result = SUT.declare("aUTR")(
         FakeRequest("POST", "/no-change/aUTR").withBody(Json.toJson(declarationForApi))
@@ -121,6 +126,59 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
         Meq("id"),
         Meq("Cached ETMP data stale.")
       )(any())
+    }
+
+    "return Service Unavailable when des dependent service is down" in {
+      val SUT = trustVariationsController
+      val declaration = DeclarationName(
+        NameType("firstname", None, "Surname")
+      )
+
+      val declarationForApi =
+        DeclarationForApi(declaration, None, endDate = Some(LocalDate.of(2021, 2, 5)))
+
+      when(mockVariationService.submitDeclaration(any(), any(), any(), any())(any()))
+        .thenReturn(EitherT[Future, TrustErrors, VariationContext](Future.successful(
+          Left(VariationFailureForAudit(ServiceNotAvailableErrorResponse, "Service unavailable."))
+        )))
+
+      val result = SUT.declare("aUTR")(
+        FakeRequest("POST", "/no-change/aUTR").withBody(Json.toJson(declarationForApi))
+      )
+
+      status(result) mustBe SERVICE_UNAVAILABLE
+      contentAsJson(result) mustBe Json.obj(
+        "code" -> "SERVICE_UNAVAILABLE",
+        "message" -> "Service unavailable."
+      )
+
+      verify(mockAuditService).auditErrorResponse(
+        Meq(TrustAuditing.TRUST_VARIATION_SUBMISSION_FAILED),
+        any(),
+        Meq("id"),
+        Meq("Service unavailable.")
+      )(any())
+    }
+
+    "return an Internal Server Error when submitDeclaration returns Left(ServerError()) " in {
+      val SUT = trustVariationsController
+      val declaration = DeclarationName(
+        NameType("firstname", None, "Surname")
+      )
+
+      val declarationForApi =
+        DeclarationForApi(declaration, None, endDate = Some(LocalDate.of(2021, 2, 5)))
+
+      when(mockNonRepudiationService.maintain(any(), any())(any(), any())).thenReturn(Future.successful(NRSResponse.Success("uuid")))
+
+      when(mockVariationService.submitDeclaration(any(), any(), any(), any())(any()))
+        .thenReturn(EitherT[Future, TrustErrors, VariationContext](Future.successful(Left(ServerError()))))
+
+      val result = SUT.declare("aUTR")(
+        FakeRequest("POST", "/no-change/aUTR").withBody(Json.toJson(declarationForApi))
+      )
+
+      status(result) mustBe INTERNAL_SERVER_ERROR
     }
   }
 }

@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.transformations.trustdetails
 
+import cats.data.EitherT
 import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import models.get_trust.GetTrustSuccessResponse
+import errors.TrustErrors
+import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.mongodb.scala.Document
@@ -44,7 +46,7 @@ class SetTrustDetailsSpec extends IntegrationTestBase {
     val stubbedTrustsConnector = mock[TrustsConnector]
 
     when(stubbedTrustsConnector.getTrustInfo(any()))
-      .thenReturn(Future.successful(getTrustResponse.as[GetTrustSuccessResponse]))
+      .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse.as[GetTrustSuccessResponse]))))
 
     def application = applicationBuilder
       .overrides(
@@ -92,8 +94,8 @@ class SetTrustDetailsSpec extends IntegrationTestBase {
         val setValueResponse = route(application, setValueRequest).get
         status(setValueResponse) mustBe OK
 
-        whenReady(repository.get(identifier, "id", sessionId)) { transforms =>
-          transforms.get.deltaTransforms mustBe Seq(
+        whenReady(repository.get(identifier, "id", sessionId).value) { transforms =>
+          transforms.value.get.deltaTransforms mustBe Seq(
             SetTrustDetailTransform(JsString("FR"), "lawCountry"),
             SetTrustDetailTransform(JsString("GB"), "administrationCountry"),
             SetTrustDetailTransform(Json.parse("""{"nonUK":{"sch5atcgga92":true}}"""), "residentialStatus"),
@@ -133,8 +135,8 @@ class SetTrustDetailsSpec extends IntegrationTestBase {
         val setValueResponse = route(application, setValueRequest).get
         status(setValueResponse) mustBe OK
 
-        whenReady(repository.get(identifier, "id", sessionId)) { transforms =>
-          transforms.get.deltaTransforms mustBe Seq(
+        whenReady(repository.get(identifier, "id", sessionId).value) { transforms =>
+          transforms.value.get.deltaTransforms mustBe Seq(
             SetTrustDetailTransform(JsBoolean(true), "trustUKProperty"),
             SetTrustDetailTransform(JsBoolean(true), "trustRecorded"),
             SetTrustDetailTransform(JsBoolean(true), "trustUKResident")

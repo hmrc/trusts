@@ -16,17 +16,19 @@
 
 package services
 
+import cats.data.EitherT
 import connector.{SubscriptionConnector, TrustsConnector}
-import exceptions.InternalServerErrorException
+import errors.{InternalServerErrorResponse, ServerError, VariationFailureForAudit}
 import models._
 import models.existing_trust.{ExistingCheckRequest, ExistingCheckResponse}
 import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse, TrustProcessedResponse}
 import models.registration.RegistrationResponse
-import models.tax_enrolments.SubscriptionIdResponse
-import models.variation.VariationResponse
+import models.tax_enrolments.SubscriptionIdSuccessResponse
+import models.variation.VariationSuccessResponse
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import repositories.CacheRepository
+import utils.TrustEnvelope.TrustEnvelope
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -36,61 +38,98 @@ class TrustsService @Inject()(val trustsConnector: TrustsConnector,
                               val subscriptionConnector: SubscriptionConnector,
                               val repository: CacheRepository)(implicit ec: ExecutionContext) extends Logging {
 
-  def getTrustInfoFormBundleNo(identifier: String): Future[String] =
-    trustsConnector.getTrustInfo(identifier).map {
-      case response: GetTrustSuccessResponse => response.responseHeader.formBundleNo
-      case response =>
-        val msg = s"Failed to retrieve latest form bundle no from ETMP: $response"
-        logger.warn(s"[TransformationService][getTrustInfoFormBundleNo][UTR/URN: $identifier] $msg")
-        throw InternalServerErrorException(s"Submission could not proceed, $msg")
-    }
+  private val className = this.getClass.getSimpleName
 
-  def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest): Future[ExistingCheckResponse] = {
+  def getTrustInfoFormBundleNo(identifier: String): TrustEnvelope[String] = EitherT {
+    trustsConnector.getTrustInfo(identifier).value.map {
+      case Right(response: GetTrustSuccessResponse) => Right(response.responseHeader.formBundleNo)
+      case Right(response) =>
+        val msg = s"Failed to retrieve latest form bundle no from ETMP: $response"
+        logger.error(s"[$className][getTrustInfoFormBundleNo][UTR/URN: $identifier] $msg")
+        Left(VariationFailureForAudit(InternalServerErrorResponse, s"Submission could not proceed. $msg"))
+
+      case Left(ServerError(message)) if message.nonEmpty =>
+        logger.warn(s"[$className][UTR/URN: $identifier] Failed to get trust info. $message")
+        Left(ServerError())
+
+      case Left(_) =>
+        logger.warn(s"[$className][UTR/URN: $identifier] Failed to get trust info.")
+        Left(ServerError())
+    }
+  }
+
+  def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest): TrustEnvelope[ExistingCheckResponse] = {
     trustsConnector.checkExistingTrust(existingTrustCheckRequest)
   }
 
-  def registerTrust(registration: Registration): Future[RegistrationResponse] = {
+  def registerTrust(registration: Registration): TrustEnvelope[RegistrationResponse] = {
     trustsConnector.registerTrust(registration)
   }
 
-  def getSubscriptionId(trn: String): Future[SubscriptionIdResponse] = {
+  def getSubscriptionId(trn: String): TrustEnvelope[SubscriptionIdSuccessResponse] = {
     subscriptionConnector.getSubscriptionId(trn)
   }
 
-  def resetCache(identifier: String, internalId: String, sessionId: String): Future[Unit] = {
-    repository.resetCache(identifier, internalId, sessionId).map { _ =>
-      Future.successful(())
+  def resetCache(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Unit] = EitherT {
+    repository.resetCache(identifier, internalId, sessionId).value.map {
+      case Left(trustErrors) => Left(trustErrors)
+      case Right(_) => Right(())
     }
   }
 
-  def refreshCacheAndGetTrustInfo(identifier: String, internalId: String, sessionId: String): Future[GetTrustResponse] = {
-    repository.resetCache(identifier, internalId, sessionId).flatMap { _ =>
-      trustsConnector.getTrustInfo(identifier).flatMap {
-        case response: TrustProcessedResponse =>
-          repository.set(identifier, internalId, sessionId, Json.toJson(response)(TrustProcessedResponse.mongoWrites))
-            .map(_ => response)
-        case x => Future.successful(x)
-      }
+  def refreshCacheAndGetTrustInfo(identifier: String, internalId: String, sessionId: String): TrustEnvelope[GetTrustResponse] = EitherT {
+    repository.resetCache(identifier, internalId, sessionId).value.flatMap {
+      case Right(_) =>
+        trustsConnector.getTrustInfo(identifier).value.flatMap {
+          case Right(response: TrustProcessedResponse) =>
+            repository.set(identifier, internalId, sessionId, Json.toJson(response)(TrustProcessedResponse.mongoWrites)).value
+              .map {
+                case Left(_) =>
+                  logger.warn(s"[$className][refreshCacheAndGetTrustInfo][SessionId: $sessionId] problem while setting trust info.")
+                  Left(ServerError())
+                case Right(_) => Right(response)
+              }
+          case Right(getTrustResponse) => Future.successful(Right(getTrustResponse))
+          case Left(ServerError(message)) if message.nonEmpty =>
+            logger.warn(s"[$className][refreshCacheAndGetTrustInfo][SessionId: $sessionId] failed to get trust info. Message: $message")
+            Future.successful(Left(ServerError()))
+          case Left(_) =>
+            Future.successful(Left(ServerError()))
+        }
+      case Left(_) =>
+        logger.warn(s"[$className][refreshCacheAndGetTrustInfo][SessionId: $sessionId] reset cache failed.")
+        Future.successful(Left(ServerError()))
     }
   }
 
-  def getTrustInfo(identifier: String, internalId: String, sessionId: String): Future[GetTrustResponse] = {
-    repository.get(identifier, internalId, sessionId).flatMap {
-      case Some(x) =>
-        x.validate[GetTrustSuccessResponse].fold(
+  def getTrustInfo(identifier: String, internalId: String, sessionId: String): TrustEnvelope[GetTrustResponse] = EitherT {
+    repository.get(identifier, internalId, sessionId).value.flatMap {
+      case Right(Some(value)) =>
+        value.validate[GetTrustSuccessResponse].fold(
           errs => {
-            logger.error(s"[TransformationService][getTrustInfoFormBundleNo] Unable to parse json from cache as GetTrustSuccessResponse - $errs")
-            Future.failed[GetTrustResponse](new Exception(errs.toString))
+            logger.error(s"[$className][getTrustInfo][SessionId: $sessionId] " +
+              s"Unable to parse json from cache as GetTrustSuccessResponse - $errs")
+            Future.successful(Left(ServerError(errs.toString)))
           },
           response => {
-            Future.successful(response)
+            Future.successful(Right(response))
           }
         )
-      case None =>
-        refreshCacheAndGetTrustInfo(identifier, internalId, sessionId)
+      case Right(None) =>
+        refreshCacheAndGetTrustInfo(identifier, internalId, sessionId).value
+      case Left(ServerError(message)) if message.nonEmpty =>
+        logger.warn(s"[$className][getTrustInfo][SessionId: $sessionId] Failed to get data from cache repository. Message: $message")
+        Future.successful(Left(ServerError()))
+      case Left(_) =>
+        logger.warn(s"[$className][getTrustInfo][SessionId: $sessionId] Failed to get data from cache repository.")
+        Future.successful(Left(ServerError()))
     }
   }
 
-  def trustVariation(trustVariation: JsValue): Future[VariationResponse] =
-    trustsConnector.trustVariation(trustVariation: JsValue)
+  def trustVariation(trustVariation: JsValue): TrustEnvelope[VariationSuccessResponse] = EitherT {
+    trustsConnector.trustVariation(trustVariation: JsValue).value.map {
+      case Left(ServerError(message)) if message.nonEmpty => Left(VariationFailureForAudit(InternalServerErrorResponse, message))
+      case value => value
+    }
+  }
 }

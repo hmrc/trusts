@@ -16,7 +16,9 @@
 
 package controllers.transformations.otherindividuals
 
+import cats.data.EitherT
 import controllers.actions.FakeIdentifierAction
+import errors.{ServerError, TrustErrors}
 import models.NameType
 import models.variation._
 import org.mockito.ArgumentMatchers.{any, eq => equalTo}
@@ -90,10 +92,10 @@ class RemoveOtherIndividualControllerSpec extends AnyFreeSpec with MockitoSugar 
       )(Implicits.global, Helpers.stubControllerComponents())
 
       when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-        .thenReturn(Future.successful(buildInputJson(Seq(Json.toJson(otherIndividual)))))
+        .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(Seq(Json.toJson(otherIndividual)))))))
 
       when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
-        .thenReturn(Future.successful(true))
+        .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
       val body = removeOtherIndividual
 
@@ -109,6 +111,60 @@ class RemoveOtherIndividualControllerSpec extends AnyFreeSpec with MockitoSugar 
 
       verify(mockTransformationService)
         .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
+
+    }
+
+    "must return an Internal Server Error when getTransformedTrustJson fails" in {
+
+      val mockTransformationService = mock[TransformationService]
+
+      val controller = new RemoveOtherIndividualController(
+        identifierAction,
+        mockTransformationService
+      )(Implicits.global, Helpers.stubControllerComponents())
+
+      when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
+        .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Left(ServerError("message")))))
+
+      when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
+        .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
+
+      val body = removeOtherIndividual
+
+      val request = FakeRequest(POST, "path")
+        .withBody(Json.toJson(body))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.remove(utr).apply(request)
+
+      status(result) mustBe INTERNAL_SERVER_ERROR
+
+    }
+
+    "must return an Internal Server Error when addNewTransform fails" in {
+
+      val mockTransformationService = mock[TransformationService]
+
+      val controller = new RemoveOtherIndividualController(
+        identifierAction,
+        mockTransformationService
+      )(Implicits.global, Helpers.stubControllerComponents())
+
+      when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
+        .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(Seq(Json.toJson(otherIndividual)))))))
+
+      when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
+        .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
+
+      val body = removeOtherIndividual
+
+      val request = FakeRequest(POST, "path")
+        .withBody(Json.toJson(body))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.remove(utr).apply(request)
+
+      status(result) mustBe INTERNAL_SERVER_ERROR
 
     }
 

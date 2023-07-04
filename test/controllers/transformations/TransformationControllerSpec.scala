@@ -17,7 +17,9 @@
 package controllers.transformations
 
 import base.BaseSpec
+import cats.data.EitherT
 import controllers.actions.FakeIdentifierAction
+import errors.{ServerError, TrustErrors}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.IntegrationPatience
@@ -60,7 +62,7 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
       "return OK" when {
         "successfully removed transforms" in {
           when(mockTransformationService.removeAllTransformations(any(), any(), any()))
-            .thenReturn(Future.successful(true))
+            .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
           val request = FakeRequest(DELETE, "path")
 
@@ -74,7 +76,9 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
       "return INTERNAL_SERVER_ERROR" when {
         "failed to remove transforms" in {
           when(mockTransformationService.removeAllTransformations(any(), any(), any()))
-            .thenReturn(Future.failed(new Throwable("repository reset failed")))
+            .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(
+              Left(ServerError("operation failed due to exception from Mongo"))
+            )))
 
           val request = FakeRequest(DELETE, "path")
 
@@ -91,7 +95,7 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
       "return OK" when {
         "successfully removed transforms" in {
           when(mockTransformationService.removeTrustTypeDependentTransformFields(any(), any(), any()))
-            .thenReturn(Future.successful(true))
+            .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
           val request = FakeRequest(DELETE, "path")
 
@@ -105,7 +109,7 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
       "return INTERNAL_SERVER_ERROR" when {
         "failed to remove transforms" in {
           when(mockTransformationService.removeTrustTypeDependentTransformFields(any(), any(), any()))
-            .thenReturn(Future.failed(new Throwable()))
+            .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
 
           val request = FakeRequest(DELETE, "path")
 
@@ -122,7 +126,7 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
       "return OK" when {
         "successfully removed transforms" in {
           when(mockTransformationService.removeOptionalTrustDetailTransforms(any(), any(), any()))
-            .thenReturn(Future.successful(true))
+            .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
           val request = FakeRequest(DELETE, "path")
 
@@ -136,7 +140,7 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
       "return INTERNAL_SERVER_ERROR" when {
         "failed to remove transforms" in {
           when(mockTransformationService.removeOptionalTrustDetailTransforms(any(), any(), any()))
-            .thenReturn(Future.failed(new Throwable()))
+            .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
 
           val request = FakeRequest(DELETE, "path")
 

@@ -14,8 +14,18 @@
  * limitations under the License.
  */
 
-package models.variation
+package connector
 
-import play.api.libs.json.JsValue
+import errors.{ServerError, TrustErrors}
+import play.api.Logging
 
-case class VariationContext(payload: JsValue, result: VariationSuccessResponse)
+trait ConnectorErrorResponseHandler extends Logging  {
+
+  val className: String
+
+  def handleError(ex: Throwable, methodName: String, url: String): TrustErrors = {
+    logger.error(s"[$className][$methodName] Exception thrown with message ${ex.getMessage}")
+    ServerError(s"Error occurred when calling $url with exception ${ex.getMessage}")
+  }
+
+}

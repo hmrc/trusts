@@ -17,7 +17,9 @@
 package controllers
 
 import base.BaseSpec
+import cats.data.EitherT
 import controllers.actions.FakeIdentifierAction
+import errors.{ServerError, TrustErrors}
 import models.taxable_migration.TaxableMigrationFlag
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -60,7 +62,7 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
     "return OK" when {
       "taxable migration defined" in {
         when(mockTaxableMigrationService.getTaxableMigrationFlag(any(), any(), any()))
-          .thenReturn(Future.successful(Some(true)))
+          .thenReturn(EitherT[Future, TrustErrors, Option[Boolean]](Future.successful(Right(Some(true)))))
 
         val request = FakeRequest(GET, "path")
 
@@ -73,7 +75,7 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
 
       "taxable migration flag undefined" in {
         when(mockTaxableMigrationService.getTaxableMigrationFlag(any(), any(), any()))
-          .thenReturn(Future.successful(None))
+          .thenReturn(EitherT[Future, TrustErrors, Option[Boolean]](Future.successful(Right(None))))
 
         val request = FakeRequest(GET, "path")
 
@@ -88,7 +90,7 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
     "return INTERNAL_SERVER_ERROR" when {
       "repository get fails" in {
         when(mockTaxableMigrationService.getTaxableMigrationFlag(any(), any(), any()))
-          .thenReturn(Future.failed(new Throwable("repository get failed")))
+          .thenReturn(EitherT[Future, TrustErrors, Option[Boolean]](Future.successful(Left(ServerError()))))
 
         val request = FakeRequest(GET, "path")
 
@@ -105,7 +107,7 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
 
       "setting to true" in {
         when(mockTaxableMigrationService.setTaxableMigrationFlag(any(), any(), any(), any()))
-          .thenReturn(Future.successful(true))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         val result = taxableMigrationController.setTaxableMigrationFlag(identifier)
           .apply(postRequestWithPayload(JsBoolean(true)))
@@ -117,7 +119,7 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
 
       "setting to false" in {
         when(mockTaxableMigrationService.setTaxableMigrationFlag(any(), any(), any(), any()))
-          .thenReturn(Future.successful(true))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         val result = taxableMigrationController.setTaxableMigrationFlag(identifier)
           .apply(postRequestWithPayload(JsBoolean(false)))
@@ -140,7 +142,7 @@ class TaxableMigrationControllerSpec extends BaseSpec with BeforeAndAfter with B
     "return INTERNAL_SERVER_ERROR" when {
       "repository set fails" in {
         when(mockTaxableMigrationService.setTaxableMigrationFlag(any(), any(), any(), any()))
-          .thenReturn(Future.failed(new Throwable("repository set failed")))
+          .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
 
         val result = taxableMigrationController.setTaxableMigrationFlag(identifier)
           .apply(postRequestWithPayload(JsBoolean(true)))

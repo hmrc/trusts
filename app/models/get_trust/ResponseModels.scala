@@ -18,18 +18,18 @@ package models.get_trust
 
 import play.api.libs.json.JsValue
 
-sealed trait TrustErrorResponse extends GetTrustResponse
+sealed trait GetTrustErrorResponse extends GetTrustResponse
 
-case object BadRequestResponse extends TrustErrorResponse
+case object BadRequestResponse extends GetTrustErrorResponse
 
-case object ResourceNotFoundResponse extends TrustErrorResponse
+case object ResourceNotFoundResponse extends GetTrustErrorResponse
 
-case object InternalServerErrorResponse extends TrustErrorResponse
+case object InternalServerErrorResponse extends GetTrustErrorResponse
 
-case class NotEnoughDataResponse(json: JsValue, errors: JsValue) extends TrustErrorResponse
+case class NotEnoughDataResponse(json: JsValue, errors: JsValue) extends GetTrustErrorResponse
 
-case object ServiceUnavailableResponse extends TrustErrorResponse
+case object ServiceUnavailableResponse extends GetTrustErrorResponse
 
-case object ClosedRequestResponse extends TrustErrorResponse
+case object ClosedRequestResponse extends GetTrustErrorResponse
 
-case class TransformationErrorResponse(errors: String) extends TrustErrorResponse
+case class TransformationErrorResponse(errors: String) extends GetTrustErrorResponse

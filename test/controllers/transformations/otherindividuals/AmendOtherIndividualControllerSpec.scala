@@ -16,7 +16,9 @@
 
 package controllers.transformations.otherindividuals
 
+import cats.data.EitherT
 import controllers.actions.FakeIdentifierAction
+import errors.{ServerError, TrustErrors}
 import models.NameType
 import models.variation.NaturalPersonType
 import org.mockito.ArgumentMatchers.{any, eq => equalTo}
@@ -91,10 +93,10 @@ class AmendOtherIndividualControllerSpec extends AnyFreeSpec with MockitoSugar w
       )(Implicits.global, Helpers.stubControllerComponents())
 
       when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-        .thenReturn(Future.successful(buildInputJson(Seq(Json.toJson(originalOtherIndividual)))))
+        .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(Seq(Json.toJson(originalOtherIndividual)))))))
 
       when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
-        .thenReturn(Future.successful(true))
+        .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
       when(mockLocalDateService.now).thenReturn(endDate)
 
@@ -110,6 +112,64 @@ class AmendOtherIndividualControllerSpec extends AnyFreeSpec with MockitoSugar w
 
       verify(mockTransformationService)
         .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
+
+    }
+
+    "must return an Internal Server Error when getTransformedTrustJson fails" in {
+
+      val mockTransformationService = mock[TransformationService]
+      val mockLocalDateService = mock[LocalDateService]
+
+      val controller = new AmendOtherIndividualController(
+        identifierAction,
+        mockTransformationService,
+        mockLocalDateService
+      )(Implicits.global, Helpers.stubControllerComponents())
+
+      when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
+        .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Left(ServerError("exception message")))))
+
+      when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
+        .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
+
+      when(mockLocalDateService.now).thenReturn(endDate)
+
+      val request = FakeRequest(POST, "path")
+        .withBody(Json.toJson(amendedOtherIndividual))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amend(utr, index).apply(request)
+
+      status(result) mustBe INTERNAL_SERVER_ERROR
+
+    }
+
+    "must return an Internal Server Error when addNewTransform fails" in {
+
+      val mockTransformationService = mock[TransformationService]
+      val mockLocalDateService = mock[LocalDateService]
+
+      val controller = new AmendOtherIndividualController(
+        identifierAction,
+        mockTransformationService,
+        mockLocalDateService
+      )(Implicits.global, Helpers.stubControllerComponents())
+
+      when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
+        .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(Seq(Json.toJson(originalOtherIndividual)))))))
+
+      when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
+        .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
+
+      when(mockLocalDateService.now).thenReturn(endDate)
+
+      val request = FakeRequest(POST, "path")
+        .withBody(Json.toJson(amendedOtherIndividual))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.amend(utr, index).apply(request)
+
+      status(result) mustBe INTERNAL_SERVER_ERROR
 
     }
 

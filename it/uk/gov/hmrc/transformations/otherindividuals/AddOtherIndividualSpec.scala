@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.transformations.otherindividuals
 
+import cats.data.EitherT
 import connector.TrustsConnector
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import models.get_trust.GetTrustSuccessResponse
+import errors.TrustErrors
+import models.get_trust.{GetTrustResponse, GetTrustSuccessResponse}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.mongodb.scala.Document
@@ -66,7 +68,8 @@ class AddOtherIndividualSpec extends IntegrationTestBase {
       JsonUtils.getJsonValueFromFile("it/trusts-integration-get-after-add-other-individual.json")
 
     val stubbedTrustsConnector = mock[TrustsConnector]
-    when(stubbedTrustsConnector.getTrustInfo(any())).thenReturn(Future.successful(getTrustResponse))
+    when(stubbedTrustsConnector.getTrustInfo(any()))
+      .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse))))
 
     def application = applicationBuilder
       .overrides(

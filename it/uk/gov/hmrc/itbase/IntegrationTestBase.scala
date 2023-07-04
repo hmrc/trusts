@@ -23,7 +23,7 @@ import org.mongodb.scala.bson.BsonDocument
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest.{Assertion, BeforeAndAfterEach}
+import org.scalatest.{Assertion, BeforeAndAfterEach, EitherValues}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
@@ -42,7 +42,8 @@ class IntegrationTestBase extends AnyWordSpec
   with ScalaFutures
   with MongoDateTimeFormats
   with MockitoSugar
-  with BeforeAndAfterEach {
+  with BeforeAndAfterEach
+  with EitherValues {
 
   implicit val defaultPatience: PatienceConfig = PatienceConfig(timeout = Span(30, Seconds), interval = Span(15, Millis))
 

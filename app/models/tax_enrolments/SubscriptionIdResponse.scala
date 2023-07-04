@@ -18,34 +18,36 @@ package models.tax_enrolments
 
 import play.api.Logging
 import play.api.http.Status._
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
-import exceptions._
 
-final case class SubscriptionIdResponse(subscriptionId: String)
+trait SubscriptionIdResponse
+
+final case class SubscriptionIdSuccessResponse(subscriptionId: String) extends SubscriptionIdResponse
+final case class SubscriptionIdFailureResponse(message: String) extends SubscriptionIdResponse
 
 object SubscriptionIdResponse extends Logging {
 
-  implicit val formats = Json.format[SubscriptionIdResponse]
+  implicit val formats: OFormat[SubscriptionIdSuccessResponse] = Json.format[SubscriptionIdSuccessResponse]
 
   implicit lazy val httpReads: HttpReads[SubscriptionIdResponse] =
     new HttpReads[SubscriptionIdResponse] {
       override def read(method: String, url: String, response: HttpResponse): SubscriptionIdResponse = {
         response.status match {
           case OK =>
-            response.json.as[SubscriptionIdResponse]
+            response.json.as[SubscriptionIdSuccessResponse]
           case BAD_REQUEST =>
-            logger.error(s"[SubscriptionIdResponse][httpReads] Bad Request response from des ")
-            throw  BadRequestException
+            logger.error(s"[SubscriptionIdResponse][httpReads] Bad Request response from des")
+            SubscriptionIdFailureResponse("Bad request")
           case NOT_FOUND =>
             logger.error(s"[SubscriptionIdResponse][httpReads] Not found response from des")
-            throw  NotFoundException
+            SubscriptionIdFailureResponse("Not found")
           case SERVICE_UNAVAILABLE =>
             logger.error("[SubscriptionIdResponse][httpReads] Service unavailable response from des.")
-            throw new ServiceNotAvailableException("Des dependent service is down.")
+            SubscriptionIdFailureResponse("Des dependent service is down.")
           case status =>
-            logger.error(s"[SubscriptionIdResponse][httpReads] Error response from des : ${status}")
-            throw new InternalServerErrorException(s"Error response from des $status")
+            logger.error(s"[SubscriptionIdResponse][httpReads] Error response from des : $status")
+            SubscriptionIdFailureResponse(s"Error response from des $status")
         }
       }
     }

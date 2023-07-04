@@ -21,10 +21,11 @@ import org.mongodb.scala.model.{IndexModel, IndexOptions, Indexes}
 import transformers.ComposedDeltaTransform
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+import utils.TrustEnvelope.TrustEnvelope
 
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class TransformationRepositoryImpl @Inject()(
@@ -46,22 +47,23 @@ class TransformationRepositoryImpl @Inject()(
   )
 ) with RepositoryHelper[ComposedDeltaTransform] with TransformationRepository {
   override implicit val executionContext: ExecutionContext = ec
+  override val className: String = "TransformationRepositoryImpl"
   override val key: String = "transforms"
 
-  override def get(identifier: String, internalId: String, sessionId: String): Future[Option[ComposedDeltaTransform]] = {
+  override def get(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Option[ComposedDeltaTransform]] = {
     getOpt(identifier, internalId, sessionId)
   }
 
-  override def set(identifier: String, internalId: String, sessionId: String, transforms: ComposedDeltaTransform): Future[Boolean] = {
+  override def set(identifier: String, internalId: String, sessionId: String, transforms: ComposedDeltaTransform): TrustEnvelope[Boolean] = {
     upsert(identifier, internalId, sessionId, transforms)
   }
 }
 
 trait TransformationRepository {
 
-  def get(identifier: String, internalId: String, sessionId: String): Future[Option[ComposedDeltaTransform]]
+  def get(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Option[ComposedDeltaTransform]]
 
-  def set(identifier: String, internalId: String, sessionId: String, transforms: ComposedDeltaTransform): Future[Boolean]
+  def set(identifier: String, internalId: String, sessionId: String, transforms: ComposedDeltaTransform): TrustEnvelope[Boolean]
 
-  def resetCache(identifier: String, internalId: String, sessionId: String): Future[Boolean]
+  def resetCache(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Boolean]
 }

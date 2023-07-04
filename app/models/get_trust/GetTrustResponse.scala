@@ -68,23 +68,23 @@ object GetTrustResponse extends Logging {
       case OK =>
         parseOkResponse(response, identifier)
       case BAD_REQUEST =>
-        logger.warn(s"[UTR/URN: $identifier]" +
+        logger.warn(s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
           s" bad request returned from des: ${response.json}")
         BadRequestResponse
       case NOT_FOUND =>
-        logger.info(s"[UTR/URN: $identifier]" +
+        logger.info(s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
           s" trust not found in ETMP for given identifier")
         ResourceNotFoundResponse
       case SERVICE_UNAVAILABLE =>
-        logger.warn(s"[UTR/URN: $identifier]" +
+        logger.warn(s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
           s" service is unavailable, unable to get trust")
         ServiceUnavailableResponse
       case CLOSED_REQUEST_STATUS =>
-        logger.warn(s"[UTR/URN: $identifier]" +
+        logger.warn(s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
           s" service is unavailable, server closed the request")
         ClosedRequestResponse
       case status =>
-        logger.error(s"[UTR/URN: $identifier]" +
+        logger.error(s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
           s" error occurred when getting trust, status: $status")
         InternalServerErrorResponse
     }
@@ -94,7 +94,8 @@ object GetTrustResponse extends Logging {
     response.json.validate[GetTrustSuccessResponse] match {
       case JsSuccess(trustFound, _) => trustFound
       case JsError(errors) =>
-        logger.error(s"[UTR/URN: $identifier] Cannot parse as TrustFoundResponse due to ${JsError.toJson(errors)}")
+        logger.error(s"[GetTrustResponse][parseOkResponse][UTR/URN: $identifier] " +
+          s"Cannot parse as TrustFoundResponse due to ${JsError.toJson(errors)}")
         NotEnoughDataResponse(response.json, JsError.toJson(errors))
     }
   }

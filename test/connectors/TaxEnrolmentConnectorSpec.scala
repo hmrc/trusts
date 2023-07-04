@@ -17,8 +17,8 @@
 package connectors
 
 import connector.TaxEnrolmentConnector
-import exceptions.{BadRequestException, InternalServerErrorException, ServiceNotAvailableException}
-import models.tax_enrolments.{TaxEnrolmentSubscription, TaxEnrolmentSuccess, TaxEnrolmentsSubscriptionsResponse}
+import errors.ServerError
+import models.tax_enrolments.{TaxEnrolmentSubscription, TaxEnrolmentSuccess, TaxEnrolmentsSubscriptionsSuccessResponse}
 import org.scalatest.matchers.must.Matchers._
 import play.api.http.Status._
 import play.api.libs.json.Json
@@ -52,9 +52,7 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
           "123456789"
         )
       }
-
     }
-
   }
 
   ".enrolSubscriber" should {
@@ -62,41 +60,39 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
     val taxable: Boolean = true
     val trn = "XTRN1234567"
 
-    "return Success" when {
+    "return success response" when {
       "tax enrolments successfully subscribed to provided subscription id" in {
 
         stubForPut(server, "/tax-enrolments/subscriptions/123456789/subscriber", 204)
 
-        val futureResult = connector.enrolSubscriber("123456789", taxable, trn)
+        val futureResult = connector.enrolSubscriber("123456789", taxable, trn).value
 
-        whenReady(futureResult) {
-          result => result mustBe TaxEnrolmentSuccess
+        whenReady(futureResult) { result =>
+          result mustBe Right(TaxEnrolmentSuccess)
         }
       }
     }
 
-    "return BadRequestException " when {
+    "return ServerError(message) " when {
       "tax enrolments returns bad request " in {
 
-        stubForPut(server, "/tax-enrolments/subscriptions/987654321/subscriber", 400)
+        stubForPut(server, "/tax-enrolments/subscriptions/987654321/subscriber", BAD_REQUEST)
 
-        val futureResult = connector.enrolSubscriber("987654321", taxable, trn)
+        val futureResult = connector.enrolSubscriber("987654321", taxable, trn).value
 
-        whenReady(futureResult.failed) {
-          result => result mustBe BadRequestException
+        whenReady(futureResult) {
+          result => result mustBe Left(ServerError("Bad request"))
         }
       }
-    }
 
-    "return InternalServerErrorException " when {
       "tax enrolments returns internal server error " in {
 
-        stubForPut(server, "/tax-enrolments/subscriptions/987654321/subscriber", 500)
+        stubForPut(server, "/tax-enrolments/subscriptions/987654321/subscriber", INTERNAL_SERVER_ERROR)
 
-        val futureResult = connector.enrolSubscriber("987654321", taxable, trn)
+        val futureResult = connector.enrolSubscriber("987654321", taxable, trn).value
 
-        whenReady(futureResult.failed) {
-          result => result mustBe an[InternalServerErrorException]
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError("Unexpected error response from tax enrolment. Status: 500"))
         }
       }
     }
@@ -106,41 +102,40 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
 
     val urn = "NTTRUST00000001"
 
-    "return Success" when {
+    "return success response" when {
       "tax enrolments successfully subscribed to provided subscription id" in {
 
-        stubForPut(server, "/tax-enrolments/subscriptions/123456789/subscriber", 204)
+        stubForPut(server, "/tax-enrolments/subscriptions/123456789/subscriber", NO_CONTENT)
 
-        val futureResult = connector.migrateSubscriberToTaxable("123456789", urn)
+        val futureResult = connector.migrateSubscriberToTaxable("123456789", urn).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Right(TaxEnrolmentSuccess)
+        }
+      }
+    }
+
+    "return ServerError(message) " when {
+
+      "tax enrolments returns bad request" in {
+
+        stubForPut(server, "/tax-enrolments/subscriptions/987654321/subscriber", BAD_REQUEST)
+
+        val futureResult = connector.migrateSubscriberToTaxable("987654321", urn).value
 
         whenReady(futureResult) {
-          result => result mustBe TaxEnrolmentSuccess
+          result => result mustBe Left(ServerError("Bad request"))
         }
       }
-    }
 
-    "return BadRequestException " when {
-      "tax enrolments returns bad request " in {
+      "tax enrolments returns internal server error" in {
 
-        stubForPut(server, "/tax-enrolments/subscriptions/987654321/subscriber", 400)
+        stubForPut(server, "/tax-enrolments/subscriptions/987654321/subscriber", INTERNAL_SERVER_ERROR)
 
-        val futureResult = connector.migrateSubscriberToTaxable("987654321", urn)
+        val futureResult = connector.migrateSubscriberToTaxable("987654321", urn).value
 
-        whenReady(futureResult.failed) {
-          result => result mustBe BadRequestException
-        }
-      }
-    }
-
-    "return InternalServerErrorException " when {
-      "tax enrolments returns internal server error " in {
-
-        stubForPut(server, "/tax-enrolments/subscriptions/987654321/subscriber", 500)
-
-        val futureResult = connector.migrateSubscriberToTaxable("987654321", urn)
-
-        whenReady(futureResult.failed) {
-          result => result mustBe an[InternalServerErrorException]
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError("Unexpected error response from tax enrolment. Status: 500"))
         }
       }
     }
@@ -152,51 +147,190 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
     val utr = "123456789"
     val subscriptionId = "987654321"
 
-    "return Success" when {
+    val response = Json.parse(
+      s"""
+         |{
+         |   "created": 1482329348256,
+         |    "lastModified": 1482329348256,
+         |    "credId": "d8474a25-71b6-45ed-859e-77dd5f087be6",
+         |    "serviceName": "HMRC-TERS-ORG",
+         |    "identifiers": [{
+         |        "key": "SAUTR",
+         |        "value": "$utr"
+         |    }],
+         |    "callback": "http://trusts.protected.mdtp/tax-enrolments/migration-to-taxable/urn/$urn/subscriptionId/$subscriptionId",
+         |    "state": "PROCESSED",
+         |    "etmpId": "da4053bf-2ea3-4cb8-bb9c-65b70252b656",
+         |    "groupIdentifier": "c808798d-0d81-4a34-82c2-bbf13b3ac2fa"
+         |}
+         |""".stripMargin)
 
-      val response = Json.parse(
-        s"""
-           |{
-           |   "created": 1482329348256,
-           |    "lastModified": 1482329348256,
-           |    "credId": "d8474a25-71b6-45ed-859e-77dd5f087be6",
-           |    "serviceName": "HMRC-TERS-ORG",
-           |    "identifiers": [{
-           |        "key": "SAUTR",
-           |        "value": "$utr"
-           |    }],
-           |    "callback": "http://trusts.protected.mdtp/tax-enrolments/migration-to-taxable/urn/$urn/subscriptionId/$subscriptionId",
-           |    "state": "PROCESSED",
-           |    "etmpId": "da4053bf-2ea3-4cb8-bb9c-65b70252b656",
-           |    "groupIdentifier": "c808798d-0d81-4a34-82c2-bbf13b3ac2fa"
-           |}
-           |""".stripMargin)
+    "return success response" when {
 
       "tax enrolments successfully returned for provided subscription id" in {
 
         stubForHeaderlessGet(server, s"/tax-enrolments/subscriptions/$subscriptionId", OK, response.toString())
 
-        val futureResult = connector.subscriptions(subscriptionId)
+        val futureResult = connector.subscriptions(subscriptionId).value
 
-        whenReady(futureResult) {
-          result => {
-            result mustBe TaxEnrolmentsSubscriptionsResponse(subscriptionId, utr, "PROCESSED")
-          }
+        whenReady(futureResult) { result =>
+          result mustBe Right(TaxEnrolmentsSubscriptionsSuccessResponse(subscriptionId, utr, "PROCESSED"))
+        }
+      }
+    }
+
+    "return ServerError(message)" when {
+
+      "an exception is recovered" in {
+        val invalidJsonResponse = Json.parse(
+          s"""
+             |{
+             |   "created": 1482329348256,
+             |    "lastModified": 1482329348256,
+             |    "credId": "d8474a25-71b6-45ed-859e-77dd5f087be6",
+             |    "serviceName": "HMRC-TERS-ORG",
+             |    "identifiers": [{
+             |        "key": "SAUTR"
+             |    }],
+             |    "etmpId": "da4053bf-2ea3-4cb8-bb9c-65b70252b656",
+             |    "groupIdentifier": "c808798d-0d81-4a34-82c2-bbf13b3ac2fa"
+             |}
+             |""".stripMargin)
+
+        val endpoint = s"/tax-enrolments/subscriptions/$subscriptionId"
+
+        stubForHeaderlessGet(server, endpoint, OK, invalidJsonResponse.toString())
+
+        val futureResult = connector.subscriptions(subscriptionId).value
+
+        val url = server.url(endpoint)
+        val exceptionMessage = "JsResultException(errors:List(((0)/value,List(JsonValidationError(List(error.path.missing),WrappedArray())))))"
+
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError(s"Error occurred when calling $url with exception $exceptionMessage"))
         }
       }
 
-      "return ServiceNotAvailableException " when {
-        "tax enrolments returns service not available error " in {
+      "OK response but no state supplied" in {
+        val responseWithNoState = Json.parse(
+          s"""
+             |{
+             |   "created": 1482329348256,
+             |    "lastModified": 1482329348256,
+             |    "credId": "d8474a25-71b6-45ed-859e-77dd5f087be6",
+             |    "serviceName": "HMRC-TERS-ORG",
+             |    "identifiers": [{
+             |        "key": "SAUTR",
+             |        "value": "$utr"
+             |    }],
+             |    "callback": "http://trusts.protected.mdtp/tax-enrolments/migration-to-taxable/urn/$urn/subscriptionId/$subscriptionId",
+             |    "etmpId": "da4053bf-2ea3-4cb8-bb9c-65b70252b656",
+             |    "groupIdentifier": "c808798d-0d81-4a34-82c2-bbf13b3ac2fa"
+             |}
+             |""".stripMargin)
 
-          stubForHeaderlessGet(server, s"/tax-enrolments/subscriptions/$subscriptionId", SERVICE_UNAVAILABLE, response.toString())
+        stubForHeaderlessGet(server, s"/tax-enrolments/subscriptions/$subscriptionId", OK, responseWithNoState.toString())
 
-          val futureResult = connector.subscriptions(subscriptionId)
+        val futureResult = connector.subscriptions(subscriptionId).value
 
-          whenReady(futureResult.failed) {
-            result => result mustBe an[ServiceNotAvailableException]
-          }
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError(s"[SubscriptionId: $subscriptionId, UTR: $utr] InvalidDataErrorResponse - No State supplied"))
+        }
+      }
+
+      "OK response but no UTR supplied" in {
+        val responseWithNoUTR = Json.parse(
+          s"""
+             |{
+             |   "created": 1482329348256,
+             |    "lastModified": 1482329348256,
+             |    "credId": "d8474a25-71b6-45ed-859e-77dd5f087be6",
+             |    "serviceName": "HMRC-TERS-ORG",
+             |    "identifiers": [],
+             |    "callback": "http://trusts.protected.mdtp/tax-enrolments/migration-to-taxable/urn/$urn/subscriptionId/$subscriptionId",
+             |    "state": "PROCESSED",
+             |    "etmpId": "da4053bf-2ea3-4cb8-bb9c-65b70252b656",
+             |    "groupIdentifier": "c808798d-0d81-4a34-82c2-bbf13b3ac2fa"
+             |}
+             |""".stripMargin)
+
+        stubForHeaderlessGet(server, s"/tax-enrolments/subscriptions/$subscriptionId", OK, responseWithNoUTR.toString())
+
+        val futureResult = connector.subscriptions(subscriptionId).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError(s"[SubscriptionId: $subscriptionId] InvalidDataErrorResponse - No UTR supplied"))
+        }
+      }
+
+      "OK response but no state or UTR supplied" in {
+        val responseWithNoStateOrUtr = Json.parse(
+          s"""
+             |{
+             |   "created": 1482329348256,
+             |    "lastModified": 1482329348256,
+             |    "credId": "d8474a25-71b6-45ed-859e-77dd5f087be6",
+             |    "serviceName": "HMRC-TERS-ORG",
+             |    "identifiers": [],
+             |    "callback": "http://trusts.protected.mdtp/tax-enrolments/migration-to-taxable/urn/$urn/subscriptionId/$subscriptionId",
+             |    "etmpId": "da4053bf-2ea3-4cb8-bb9c-65b70252b656",
+             |    "groupIdentifier": "c808798d-0d81-4a34-82c2-bbf13b3ac2fa"
+             |}
+             |""".stripMargin)
+
+        stubForHeaderlessGet(server, s"/tax-enrolments/subscriptions/$subscriptionId", OK, responseWithNoStateOrUtr.toString())
+
+        val futureResult = connector.subscriptions(subscriptionId).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError(s"[SubscriptionId: $subscriptionId] InvalidDataErrorResponse - No State or UTR supplied"))
+        }
+      }
+
+      "des returns a bad request response" in {
+
+        stubForHeaderlessGet(server, s"/tax-enrolments/subscriptions/$subscriptionId", BAD_REQUEST, response.toString())
+
+        val futureResult = connector.subscriptions(subscriptionId).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError("Bad request"))
+        }
+      }
+
+      "des returns a not found response" in {
+
+        stubForHeaderlessGet(server, s"/tax-enrolments/subscriptions/$subscriptionId", NOT_FOUND, response.toString())
+
+        val futureResult = connector.subscriptions(subscriptionId).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError("Not found"))
+        }
+      }
+
+      "des returns a service not available error response" in {
+
+        stubForHeaderlessGet(server, s"/tax-enrolments/subscriptions/$subscriptionId", SERVICE_UNAVAILABLE, response.toString())
+
+        val futureResult = connector.subscriptions(subscriptionId).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError("Des service is down."))
+        }
+      }
+
+      "des returns an unexpected error response" in {
+
+        stubForHeaderlessGet(server, s"/tax-enrolments/subscriptions/$subscriptionId", TOO_MANY_REQUESTS, response.toString())
+
+        val futureResult = connector.subscriptions(subscriptionId).value
+
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError(s"Error response from des $TOO_MANY_REQUESTS"))
         }
       }
     }
   }
+
 }
