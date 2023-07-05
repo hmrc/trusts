@@ -70,14 +70,12 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
   private val mockRequiredDetailsUtil: RequiredEntityDetailsForMigration = mock[RequiredEntityDetailsForMigration]
 
   override def afterEach(): Unit = {
-    reset(
-      mockedAuditService,
-      trustsService,
-      mockAuditConnector,
-      mockConfig,
-      transformationService,
-      mockRequiredDetailsUtil
-    )
+    reset(mockedAuditService)
+    reset(trustsService)
+    reset(mockAuditConnector)
+    reset(mockConfig)
+    reset(transformationService)
+    reset(mockRequiredDetailsUtil)
   }
 
   private def getTrustController = {

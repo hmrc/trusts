@@ -81,19 +81,19 @@ object ReqHeader {
 
 case class Trust(details: TrustDetailsType,
                  entities: TrustEntitiesType,
-                 assets: Option[Assets])
+                 assets: Option[variation.Assets])
 
 object Trust {
   implicit val trustFormat: Format[Trust] = Json.format[Trust]
 }
 
-case class TrustEntitiesType(naturalPerson: Option[List[NaturalPersonType]],
-                             beneficiary: BeneficiaryType,
-                             deceased: Option[WillType],
-                             leadTrustees: List[LeadTrusteeType],
-                             trustees: Option[List[TrusteeType]],
-                             protectors: Option[ProtectorsType],
-                             settlors: Option[Settlors])
+case class TrustEntitiesType(naturalPerson: Option[List[variation.NaturalPersonType]],
+                             beneficiary: variation.BeneficiaryType,
+                             deceased: Option[variation.WillType],
+                             leadTrustees: List[variation.LeadTrusteeType],
+                             trustees: Option[List[variation.TrusteeType]],
+                             protectors: Option[variation.ProtectorsType],
+                             settlors: Option[variation.Settlors])
 
 object TrustEntitiesType {
   implicit val trustEntitiesTypeFormat: Format[TrustEntitiesType] = Json.format[TrustEntitiesType]

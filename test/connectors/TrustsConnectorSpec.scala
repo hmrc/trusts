@@ -387,7 +387,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
                 case Right(r: TrustProcessedResponse) =>
                   r.responseHeader mustBe expectedHeader
                   r.getTrust mustBe expectedJson
-                case _ => fail
+                case _ => fail()
               }
             }
           }
@@ -416,7 +416,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
                 case Right(r: TrustProcessedResponse) =>
                   r.responseHeader mustBe expectedHeader
                   r.getTrust mustBe expectedJson
-                case _ => fail
+                case _ => fail()
               }
             }
           }
@@ -624,7 +624,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
                   r.responseHeader mustBe expectedHeader
                   r.getTrust mustBe expectedJson
-                case _ => fail
+                case _ => fail()
               }
             }
           }
@@ -653,7 +653,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
                 case Right(r: TrustProcessedResponse) =>
                   r.responseHeader mustBe expectedHeader
                   r.getTrust mustBe expectedJson
-                case _ => fail
+                case _ => fail()
               }
             }
           }
