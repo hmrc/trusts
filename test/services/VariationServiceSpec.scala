@@ -88,7 +88,7 @@ class VariationServiceSpec extends AnyWordSpec
     .overrides(bind[TransformationService].toInstance(transformationService))
     .overrides(bind[DeclarationTransformer].toInstance(transformer))
     .overrides(bind[TaxableMigrationService].toInstance(taxableMigrationService))
-    .build
+    .build()
 
   "Declare no change" should {
     "submit data correctly when the version matches, and then reset the cache" in {

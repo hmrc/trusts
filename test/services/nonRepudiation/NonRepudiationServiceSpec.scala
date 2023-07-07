@@ -53,8 +53,10 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
 
   val v4UuidRegex: Regex = "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[4][0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$".r
 
-  override def beforeEach() = {
-    reset(mockConnector, mockLocalDateTimeService, mockPayloadEncodingService)
+  override def beforeEach(): Unit = {
+    reset(mockConnector)
+    reset(mockLocalDateTimeService)
+    reset(mockPayloadEncodingService)
   }
 
   private val SUT = new NonRepudiationService(mockConnector, mockLocalDateTimeService, mockPayloadEncodingService, retryHelper, mockNrsAuditService)

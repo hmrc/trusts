@@ -26,7 +26,7 @@ import play.api.libs.json.{Format, JsPath, Json, JsonValidationError, Reads}
 import utils.BusinessValidation
 
 import javax.inject.{Inject, Singleton}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
