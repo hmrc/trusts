@@ -26,7 +26,7 @@ import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.RegistrationSubmissionRepository
-import services.dates.LocalDateTimeService
+import services.dates.TimeService
 import utils.Constants._
 import utils.JsonOps.prunePath
 import utils.TrustEnvelope.TrustEnvelope
@@ -37,7 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class SubmissionDraftController @Inject()(
                                            submissionRepository: RegistrationSubmissionRepository,
                                            identify: IdentifierAction,
-                                           localDateTimeService: LocalDateTimeService,
+                                           timeService: TimeService,
                                            cc: ControllerComponents
                                          )(implicit ec: ExecutionContext) extends TrustsBaseController(cc) with Logging {
 
@@ -50,7 +50,7 @@ class SubmissionDraftController @Inject()(
           val expectedResult = for {
             optionalDraftData <- submissionRepository.getDraft(draftId, request.internalId)
             draft = optionalDraftData.getOrElse(
-              RegistrationSubmissionDraft(draftId, request.internalId, localDateTimeService.now, Json.obj(), None, Some(true))
+              RegistrationSubmissionDraft(draftId, request.internalId, timeService.now, Json.obj(), None, Some(true))
             )
             body: JsValue = draftData.data
             path = JsPath() \ sectionKey
@@ -127,7 +127,7 @@ class SubmissionDraftController @Inject()(
           val expectedResult = for {
             optionalDraftData <- submissionRepository.getDraft(draftId, request.internalId)
             draft = optionalDraftData.getOrElse(
-              RegistrationSubmissionDraft(draftId, request.internalId, localDateTimeService.now, Json.obj(), None, Some(true))
+              RegistrationSubmissionDraft(draftId, request.internalId, timeService.now, Json.obj(), None, Some(true))
             )
             appliedDataSetResult <- applyDataSet(draft, dataSetOperations(sectionKey, dataSet))
           } yield appliedDataSetResult

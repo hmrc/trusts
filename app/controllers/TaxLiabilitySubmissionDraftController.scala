@@ -22,19 +22,20 @@ import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.RegistrationSubmissionRepository
 import services.TaxYearService
-import services.dates.LocalDateTimeService
+import services.dates.TimeService
 
 import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class TaxLiabilitySubmissionDraftController @Inject()(
-                                                submissionRepository: RegistrationSubmissionRepository,
-                                                identify: IdentifierAction,
-                                                localDateTimeService: LocalDateTimeService,
-                                                cc: ControllerComponents,
-                                                taxYearService: TaxYearService
-                                              )(implicit ec: ExecutionContext) extends SubmissionDraftController(submissionRepository, identify, localDateTimeService, cc) {
+                                                       submissionRepository: RegistrationSubmissionRepository,
+                                                       identify: IdentifierAction,
+                                                       timeService: TimeService,
+                                                       cc: ControllerComponents,
+                                                       taxYearService: TaxYearService
+                                                     )(implicit ec: ExecutionContext)
+  extends SubmissionDraftController(submissionRepository, identify, timeService, cc) {
 
   private val whenTrustSetupPath: JsPath = JsPath \ "trustDetails" \ "data" \ "trustDetails" \ "whenTrustSetup"
 

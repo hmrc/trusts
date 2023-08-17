@@ -28,7 +28,7 @@ import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.{JsObject, JsValue, Json}
 import retry.RetryHelper
 import services.auditing.NRSAuditService
-import services.dates.LocalDateTimeService
+import services.dates.TimeService
 import services.encoding.PayloadEncodingService
 import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, LoginTimes}
@@ -44,7 +44,7 @@ import scala.util.matching.Regex
 class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAndAfterEach {
 
   private val mockConnector = mock[NonRepudiationConnector]
-  private val mockLocalDateTimeService = mock[LocalDateTimeService]
+  private val mockTimeService = mock[TimeService]
   private val mockPayloadEncodingService = mock[PayloadEncodingService]
   private val retryHelper = injector.instanceOf[RetryHelper]
   private val mockNrsAuditService = mock[NRSAuditService]
@@ -55,11 +55,11 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
 
   override def beforeEach(): Unit = {
     reset(mockConnector)
-    reset(mockLocalDateTimeService)
+    reset(mockTimeService)
     reset(mockPayloadEncodingService)
   }
 
-  private val SUT = new NonRepudiationService(mockConnector, mockLocalDateTimeService, mockPayloadEncodingService, retryHelper, mockNrsAuditService)
+  private val SUT = new NonRepudiationService(mockConnector, mockTimeService, mockPayloadEncodingService, retryHelper, mockNrsAuditService)
 
   doNothing().when(mockNrsAuditService).audit(any())(any())
 
@@ -121,7 +121,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
       when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
         .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
-      when(mockLocalDateTimeService.now(ZoneOffset.UTC))
+      when(mockTimeService.now(ZoneOffset.UTC))
         .thenReturn(LocalDateTime.of(year2021, OCTOBER, num18, num12, num5))
 
       when(mockPayloadEncodingService.encode(mEq(payLoad)))
@@ -197,7 +197,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
       when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
         .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
-      when(mockLocalDateTimeService.now(ZoneOffset.UTC))
+      when(mockTimeService.now(ZoneOffset.UTC))
         .thenReturn(LocalDateTime.of(year2021, OCTOBER, num18, num12, num5))
 
       when(mockPayloadEncodingService.encode(mEq(payLoad)))
@@ -273,7 +273,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
       when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
         .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
-      when(mockLocalDateTimeService.now(ZoneOffset.UTC))
+      when(mockTimeService.now(ZoneOffset.UTC))
         .thenReturn(LocalDateTime.of(year2021, OCTOBER, num18, num12, num5))
 
       when(mockPayloadEncodingService.encode(mEq(payLoadWithoutAgentDetails)))
@@ -359,7 +359,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
           .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
-        when(mockLocalDateTimeService.now(ZoneOffset.UTC))
+        when(mockTimeService.now(ZoneOffset.UTC))
           .thenReturn(LocalDateTime.of(year2021, OCTOBER, num18, num12, num5))
 
         when(mockPayloadEncodingService.encode(mEq(payLoad)))
@@ -444,7 +444,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
           .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
-        when(mockLocalDateTimeService.now(ZoneOffset.UTC))
+        when(mockTimeService.now(ZoneOffset.UTC))
           .thenReturn(LocalDateTime.of(year2021, OCTOBER, num18, num12, num5))
 
         when(mockPayloadEncodingService.encode(mEq(payLoad)))
@@ -540,7 +540,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
           .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
-        when(mockLocalDateTimeService.now(ZoneOffset.UTC))
+        when(mockTimeService.now(ZoneOffset.UTC))
           .thenReturn(LocalDateTime.of(year2021, OCTOBER, num18, num12, num5))
 
         when(mockPayloadEncodingService.encode(mEq(payLoad)))
@@ -632,7 +632,7 @@ class NonRepudiationServiceSpec extends BaseSpec with JsonFixtures with BeforeAn
         when(mockConnector.nonRepudiate(payloadCaptor.capture())(any()))
           .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))
 
-        when(mockLocalDateTimeService.now(ZoneOffset.UTC))
+        when(mockTimeService.now(ZoneOffset.UTC))
           .thenReturn(LocalDateTime.of(year2021, OCTOBER, num18, num12, num5))
 
         when(mockPayloadEncodingService.encode(mEq(payLoad)))

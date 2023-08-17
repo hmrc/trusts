@@ -18,13 +18,13 @@ package models.registration
 
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json.{JsValue, OWrites, Reads, __}
-import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.{localDateTimeReads, localDateTimeWrites}
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 case class RegistrationSubmissionDraftDB(draftId: String,
                                        internalId: String,
-                                       createdAt: LocalDateTime,
+                                       createdAt: Instant,
                                        draftData: JsValue,
                                        reference: Option[String],
                                        inProgress: Option[Boolean])
@@ -34,7 +34,7 @@ object RegistrationSubmissionDraftDB {
   implicit lazy val reads: Reads[RegistrationSubmissionDraftDB] = (
     (__ \ "draftId").read[String] and
       (__ \ "internalId").read[String] and
-      (__ \ "createdAt").read(localDateTimeReads) and
+      (__ \ "createdAt").read(MongoJavatimeFormats.instantReads) and
       (__ \ "draftData").read[JsValue] and
       (__ \ "reference").readNullable[String] and
       (__ \ "inProgress").readNullable[Boolean]
@@ -43,7 +43,7 @@ object RegistrationSubmissionDraftDB {
   implicit lazy val writes: OWrites[RegistrationSubmissionDraftDB] = (
     (__ \ "draftId").write[String] and
       (__ \ "internalId").write[String] and
-      (__ \ "createdAt").write(localDateTimeWrites) and
+      (__ \ "createdAt").write(MongoJavatimeFormats.instantWrites) and
       (__ \ "draftData").write[JsValue] and
       (__ \ "reference").writeNullable[String] and
       (__ \ "inProgress").writeNullable[Boolean]

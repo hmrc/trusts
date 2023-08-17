@@ -68,7 +68,7 @@ class AmendIndividualProtectorSpec extends IntegrationTestBase with ScalaFutures
 
     def dropDB(): Unit = {
       await(repository.collection.deleteMany(filter = Document()).toFuture())
-      await(repository.ensureIndexes)
+      await(repository.ensureIndexes())
     }
 
     "return amended data in a subsequent 'get' call, for identifier '5174384721'" in assertMongoTest(application) { app =>

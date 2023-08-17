@@ -33,12 +33,12 @@ import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import repositories.RegistrationSubmissionRepository
-import services.dates.LocalDateTimeService
+import services.dates.TimeService
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import utils.JsonFixtures
 
 import java.time.Month._
-import java.time.LocalDateTime
+import java.time.{Instant, LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -48,8 +48,8 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
   private val (year1997, year1999, year2010, year2012) = (1997, 1999, 2010, 2012)
   private val (num3, num9, num10, num13, num14, num30, num33, num40, num45) = (3, 9, 10, 13, 14, 30, 33, 40, 45)
 
-  private val createdAt: LocalDateTime = LocalDateTime.of(year1997, MARCH, num14, num14, num45)
-  private val currentDateTime: LocalDateTime = LocalDateTime.of(year1999, MARCH, num14, num13, num33)
+  private val createdAt: Instant = LocalDateTime.of(year1997, MARCH, num14, num14, num45).atZone(ZoneOffset.UTC).toInstant
+  private val currentDateTime: Instant = LocalDateTime.of(year1999, MARCH, num14, num13, num33).atZone(ZoneOffset.UTC).toInstant
 
   private val draftId: String = "draftId"
   private val internalId: String = "id"
@@ -80,8 +80,8 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
     inProgress = Some(true)
   )
 
-  private object LocalDateTimeServiceStub extends LocalDateTimeService {
-    override def now: LocalDateTime = currentDateTime
+  private object TimeServiceStub extends TimeService {
+    override def now: Instant = currentDateTime
   }
 
   ".setSection" should {
@@ -94,7 +94,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
+        TimeServiceStub,
         Helpers.stubControllerComponents()
       )
       val body = Json.parse(
@@ -124,7 +124,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
+        TimeServiceStub,
         Helpers.stubControllerComponents()
       )
 
@@ -177,7 +177,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
+        TimeServiceStub,
         Helpers.stubControllerComponents()
       )
 
@@ -236,7 +236,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         val controller = new SubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -273,7 +273,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         val controller = new SubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -311,7 +311,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         val controller = new SubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -353,7 +353,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
+        TimeServiceStub,
         Helpers.stubControllerComponents()
       )
 
@@ -490,7 +490,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
+        TimeServiceStub,
         Helpers.stubControllerComponents()
       )
 
@@ -615,7 +615,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         val controller = new SubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -651,7 +651,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         val controller = new SubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -692,7 +692,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
+        TimeServiceStub,
         Helpers.stubControllerComponents()
       )
 
@@ -707,7 +707,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       val expectedDraftJson = Json.parse(
         """
           |{
-          | "createdAt": "1997-03-14T14:45:00",
+          | "createdAt": "1997-03-14T14:45:00Z",
           | "data": {
           |   "field1": "value1",
           |   "field2": "value2",
@@ -727,7 +727,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
+        TimeServiceStub,
         Helpers.stubControllerComponents()
       )
 
@@ -742,7 +742,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       val expectedDraftJson = Json.parse(
         """
           |{
-          | "createdAt": "1997-03-14T14:45:00",
+          | "createdAt": "1997-03-14T14:45:00Z",
           | "data": {},
           | "reference": "theRef"
           |}
@@ -759,7 +759,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
+        TimeServiceStub,
         Helpers.stubControllerComponents()
       )
 
@@ -780,7 +780,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         val controller = new SubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -802,7 +802,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         val controller = new SubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -826,13 +826,13 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
+        TimeServiceStub,
         Helpers.stubControllerComponents()
       )
 
       val drafts = List(
-        RegistrationSubmissionDraft("draftId1", internalId, LocalDateTime.of(year2012, FEBRUARY, num3, num9, num30), Json.obj(), Some("ref"), Some(true)),
-        RegistrationSubmissionDraft("draftId2", internalId, LocalDateTime.of(year2010, OCTOBER, num10, num14, num40), Json.obj(), None, Some(true))
+        RegistrationSubmissionDraft("draftId1", internalId, LocalDateTime.of(year2012, FEBRUARY, num3, num9, num30).toInstant(ZoneOffset.UTC), Json.obj(), Some("ref"), Some(true)),
+        RegistrationSubmissionDraft("draftId2", internalId, LocalDateTime.of(year2010, OCTOBER, num10, num14, num40).toInstant(ZoneOffset.UTC), Json.obj(), None, Some(true))
       )
 
       when(submissionRepository.getRecentDrafts(any(), any()))
@@ -849,12 +849,12 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         """
           |[
           | {
-          |   "createdAt": "2012-02-03T09:30:00",
+          |   "createdAt": "2012-02-03T09:30:00Z",
           |   "draftId": "draftId1",
           |   "reference": "ref"
           | },
           | {
-          |   "createdAt": "2010-10-10T14:40:00",
+          |   "createdAt": "2010-10-10T14:40:00Z",
           |   "draftId": "draftId2"
           | }
           |]
@@ -871,13 +871,13 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
+        TimeServiceStub,
         Helpers.stubControllerComponents()
       )
 
       val drafts = List(
-        RegistrationSubmissionDraft("draftId1", internalId, LocalDateTime.of(year2012, FEBRUARY, num3, num9, num30), Json.obj(), Some("ref"), Some(true)),
-        RegistrationSubmissionDraft("draftId2", internalId, LocalDateTime.of(year2010, OCTOBER, num10, num14, num40), Json.obj(), None, Some(true))
+        RegistrationSubmissionDraft("draftId1", internalId, LocalDateTime.of(year2012, FEBRUARY, num3, num9, num30).toInstant(ZoneOffset.UTC), Json.obj(), Some("ref"), Some(true)),
+        RegistrationSubmissionDraft("draftId2", internalId, LocalDateTime.of(year2010, OCTOBER, num10, num14, num40).toInstant(ZoneOffset.UTC), Json.obj(), None, Some(true))
       )
 
       when(submissionRepository.getRecentDrafts(any(), any()))
@@ -894,12 +894,12 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         """
           |[
           | {
-          |   "createdAt": "2012-02-03T09:30:00",
+          |   "createdAt": "2012-02-03T09:30:00Z",
           |   "draftId": "draftId1",
           |   "reference": "ref"
           | },
           | {
-          |   "createdAt": "2010-10-10T14:40:00",
+          |   "createdAt": "2010-10-10T14:40:00Z",
           |   "draftId": "draftId2"
           | }
           |]
@@ -916,7 +916,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
       val controller = new SubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
+        TimeServiceStub,
         Helpers.stubControllerComponents()
       )
 
@@ -944,7 +944,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         val controller = new SubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -966,7 +966,7 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         val controller = new SubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 

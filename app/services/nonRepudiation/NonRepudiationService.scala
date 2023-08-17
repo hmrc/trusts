@@ -26,7 +26,7 @@ import play.api.http.HeaderNames
 import play.api.libs.json._
 import retry.RetryHelper
 import services.auditing.NRSAuditService
-import services.dates.LocalDateTimeService
+import services.dates.TimeService
 import services.encoding.PayloadEncodingService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.Headers
@@ -38,7 +38,7 @@ import scala.util.Try
 
 @Singleton
 class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
-                                      localDateTimeService: LocalDateTimeService,
+                                      timeService: TimeService,
                                       payloadEncodingService: PayloadEncodingService,
                                       retryHelper: RetryHelper,
                                       nrsAuditService: NRSAuditService
@@ -103,7 +103,7 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
             notableEvent,
             JSON,
             payloadChecksum,
-            localDateTimeService.now(ZoneOffset.UTC),
+            timeService.now(ZoneOffset.UTC),
             identityData(payload),
             token.value,
             headers,

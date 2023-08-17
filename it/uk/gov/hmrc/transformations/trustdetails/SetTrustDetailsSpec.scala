@@ -63,7 +63,7 @@ class SetTrustDetailsSpec extends IntegrationTestBase {
         def repository = application.injector.instanceOf[TransformationRepositoryImpl]
 
         await(repository.collection.deleteMany(filter = Document()).toFuture())
-        await(repository.ensureIndexes)
+        await(repository.ensureIndexes())
 
         val identifier: String = "NTTRUST00000001"
 
@@ -114,7 +114,7 @@ class SetTrustDetailsSpec extends IntegrationTestBase {
         def repository = application.injector.instanceOf[TransformationRepositoryImpl]
 
         await(repository.collection.deleteMany(filter = Document()).toFuture())
-        await(repository.ensureIndexes)
+        await(repository.ensureIndexes())
 
         val identifier: String = "0123456789"
 

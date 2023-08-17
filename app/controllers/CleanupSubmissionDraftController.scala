@@ -24,19 +24,19 @@ import models.requests.IdentifierRequest
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.RegistrationSubmissionRepository
-import services.dates.LocalDateTimeService
+import services.dates.TimeService
 import utils.JsonOps.prunePath
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CleanupSubmissionDraftController @Inject()(
-                                                submissionRepository: RegistrationSubmissionRepository,
-                                                identify: IdentifierAction,
-                                                localDateTimeService: LocalDateTimeService,
-                                                cc: ControllerComponents
+                                                  submissionRepository: RegistrationSubmissionRepository,
+                                                  identify: IdentifierAction,
+                                                  timeService: TimeService,
+                                                  cc: ControllerComponents
                                               )(implicit ec: ExecutionContext)
-  extends SubmissionDraftController(submissionRepository, identify, localDateTimeService, cc) {
+  extends SubmissionDraftController(submissionRepository, identify, timeService, cc) {
 
   private val className = this.getClass.getSimpleName
 

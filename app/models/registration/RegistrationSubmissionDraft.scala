@@ -16,11 +16,11 @@
 
 package models.registration
 
-import models.MongoDateTimeFormats
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 object RegistrationSubmission {
   // Piece to be inserted into final registration data. data == JsNull means remove value.
@@ -101,7 +101,7 @@ object RegistrationSubmissionDraftData {
 // Full draft data as stored in database.
 case class RegistrationSubmissionDraft(draftId: String,
                                        internalId: String,
-                                       createdAt: LocalDateTime,
+                                       createdAt: Instant,
                                        draftData: JsValue,
                                        reference: Option[String],
                                        inProgress: Option[Boolean])
@@ -111,7 +111,7 @@ object RegistrationSubmissionDraft {
   implicit lazy val reads: Reads[RegistrationSubmissionDraft] = (
     (__ \ "draftId").read[String] and
       (__ \ "internalId").read[String] and
-      (__ \ "createdAt").read(MongoDateTimeFormats.localDateTimeRead) and
+      (__ \ "createdAt").read(MongoJavatimeFormats.instantReads) and
       (__ \ "draftData").read[JsValue] and
       (__ \ "reference").readNullable[String] and
       (__ \ "inProgress").readNullable[Boolean]
@@ -120,7 +120,7 @@ object RegistrationSubmissionDraft {
   implicit lazy val writes: OWrites[RegistrationSubmissionDraft] = (
     (__ \ "draftId").write[String] and
       (__ \ "internalId").write[String] and
-      (__ \ "createdAt").write(MongoDateTimeFormats.localDateTimeWrite) and
+      (__ \ "createdAt").write(MongoJavatimeFormats.instantWrites) and
       (__ \ "draftData").write[JsValue] and
       (__ \ "reference").writeNullable[String] and
       (__ \ "inProgress").writeNullable[Boolean]
