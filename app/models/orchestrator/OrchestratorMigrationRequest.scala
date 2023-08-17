@@ -16,12 +16,12 @@
 
 package models.orchestrator
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class OrchestratorMigrationRequest(urn: String, utr: String)
 
 object OrchestratorMigrationRequest {
-  implicit val format = Json.format[OrchestratorMigrationRequest]
+  implicit val format: OFormat[OrchestratorMigrationRequest] = Json.format[OrchestratorMigrationRequest]
 }
 
 

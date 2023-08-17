@@ -14,7 +14,7 @@
 ->          /register                                                                       register.Routes
 
 # Register a trust, existing UTR
-POST        /check                                                                          controllers.CheckTrustController.checkExistingTrust
+POST        /check                                                                          controllers.CheckTrustController.checkExistingTrust()
 
 # Maintain playback
 GET         /:identifier/refresh                                                            controllers.GetTrustController.getFromEtmp(identifier: String)

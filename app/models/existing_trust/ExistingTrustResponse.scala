@@ -16,16 +16,16 @@
 
 package models.existing_trust
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class ExistingTrustResponse(`match`:Boolean)
 
 object ExistingTrustResponse {
-  implicit val formats = Json.format[ExistingTrustResponse]
+  implicit val formats: OFormat[ExistingTrustResponse] = Json.format[ExistingTrustResponse]
 }
 
 case class DesErrorResponse(code: String,reason: String )
 
 object DesErrorResponse {
-  implicit val formats = Json.format[DesErrorResponse]
+  implicit val formats: OFormat[DesErrorResponse] = Json.format[DesErrorResponse]
 }
