@@ -75,7 +75,7 @@ class AddCompanyProtectorSpec extends IntegrationTestBase {
 
     def dropDB(): Unit = {
       await(repository.collection.deleteMany(filter = Document()).toFuture())
-      await(repository.ensureIndexes)
+      await(repository.ensureIndexes())
     }
 
     "return add data in a subsequent 'get' call, for identifier '5465416546'" in assertMongoTest(application) { app =>

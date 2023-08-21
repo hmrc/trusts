@@ -33,18 +33,19 @@ import play.api.mvc.BodyParsers
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import repositories.RegistrationSubmissionRepository
-import services.dates.LocalDateTimeService
+import services.dates.TimeService
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import utils.JsonFixtures
 
-import java.time.LocalDateTime
+import java.time.{Instant, LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with JsonFixtures with Inside with ScalaFutures
   with GuiceOneAppPerSuite {
 
-  private val currentDateTime: LocalDateTime = LocalDateTime.of(1999, 3, 14, 13, 33)
+  private val currentDateTime: Instant =
+    LocalDateTime.of(1999, 3, 14, 13, 33).toInstant(ZoneOffset.UTC)
 
   private val draftId: String = "draftId"
   private val internalId: String = "id"
@@ -56,7 +57,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
       |{
       |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
       |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
-      |    "createdAt" : { "$date" : 1597323808000 },
+      |    "createdAt" : { "$date" : {  "$numberLong"  : "1597323808000"  } },
       |    "draftData" : {
       |        "taxLiability" : {
       |            "data" : {
@@ -139,8 +140,8 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
       |}
       |""".stripMargin).as[RegistrationSubmissionDraft]
 
-  private object LocalDateTimeServiceStub extends LocalDateTimeService {
-    override def now: LocalDateTime = currentDateTime
+  private object TimeServiceStub extends TimeService {
+    override def now: Instant = currentDateTime
   }
 
   ".removeDraft" should {
@@ -152,7 +153,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
       val controller = new CleanupSubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
+        TimeServiceStub,
         Helpers.stubControllerComponents()
       )
 
@@ -175,7 +176,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -195,7 +196,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -219,7 +220,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
       val controller = new CleanupSubmissionDraftController(
         submissionRepository,
         identifierAction,
-        LocalDateTimeServiceStub,
+        TimeServiceStub,
         Helpers.stubControllerComponents()
       )
 
@@ -228,7 +229,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
           |{
           |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
           |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
-          |    "createdAt" : { "$date" : 1597323808000 },
+          |    "createdAt" : { "$date" : {  "$numberLong"  : "1597323808000"  } },
           |    "draftData" : {
           |        "main" : {
           |            "_id" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
@@ -299,7 +300,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -320,7 +321,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -343,7 +344,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -366,7 +367,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -390,7 +391,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -414,7 +415,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -443,7 +444,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -469,7 +470,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -490,7 +491,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -513,7 +514,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -534,7 +535,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -558,7 +559,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -582,7 +583,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -612,7 +613,9 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
             |  "draftId": "98c002e9-ef92-420b-83f6-62e6fff0c301",
             |  "internalId": "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
             |  "createdAt": {
-            |    "$date": 1597323808000
+            |     "$date": {
+            |         "$numberLong" : "1597323808000"
+            |       }
             |  },
             |  "draftData": {
             |    "registration": {
@@ -630,7 +633,9 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
             |  "draftId": "98c002e9-ef92-420b-83f6-62e6fff0c301",
             |  "internalId": "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
             |  "createdAt": {
-            |    "$date": 1597323808000
+            |     "$date": {
+            |         "$numberLong" : "1597323808000"
+            |       }
             |  },
             |  "draftData": {
             |    "registration": {
@@ -645,7 +650,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -674,7 +679,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -698,7 +703,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -722,7 +727,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -746,7 +751,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -771,7 +776,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -798,7 +803,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -830,7 +835,9 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
             |  "draftId": "98c002e9-ef92-420b-83f6-62e6fff0c301",
             |  "internalId": "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
             |  "createdAt": {
-            |    "$date": 1597323808000
+            |     "$date": {
+            |         "$numberLong" : "1597323808000"
+            |       }
             |  },
             |  "draftData": {
             |    "registration": {
@@ -848,7 +855,9 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
             |  "draftId": "98c002e9-ef92-420b-83f6-62e6fff0c301",
             |  "internalId": "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
             |  "createdAt": {
-            |    "$date": 1597323808000
+            |     "$date": {
+            |         "$numberLong" : "1597323808000"
+            |       }
             |  },
             |  "draftData": {
             |    "registration": {
@@ -863,7 +872,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -892,7 +901,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -916,7 +925,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -940,7 +949,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -964,7 +973,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -989,7 +998,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 
@@ -1016,7 +1025,7 @@ class CleanupSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
         val controller = new CleanupSubmissionDraftController(
           submissionRepository,
           identifierAction,
-          LocalDateTimeServiceStub,
+          TimeServiceStub,
           Helpers.stubControllerComponents()
         )
 

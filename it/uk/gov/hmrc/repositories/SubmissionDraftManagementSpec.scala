@@ -33,10 +33,10 @@ class SubmissionDraftManagementSpec extends IntegrationTestBase {
     "fieldY" -> "new value1",
     "fieldZ" -> " new value2"
   )
-  private val createdAtPath = JsPath() \ 'createdAt
-  private val dataPath = JsPath() \ 'data
-  private val referencePath = JsPath() \ 'reference
-  private val draftIdPath = JsPath() \ 'draftId
+  private val createdAtPath = JsPath() \ "createdAt"
+  private val dataPath = JsPath() \ "data"
+  private val referencePath = JsPath() \ "reference"
+  private val draftIdPath = JsPath() \ "draftId"
 
   "working with submission drafts" should {
 

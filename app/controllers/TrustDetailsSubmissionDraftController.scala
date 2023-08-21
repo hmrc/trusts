@@ -21,18 +21,19 @@ import models.AddressType
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.RegistrationSubmissionRepository
-import services.dates.LocalDateTimeService
+import services.dates.TimeService
 
 import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class TrustDetailsSubmissionDraftController @Inject()(
-                                                submissionRepository: RegistrationSubmissionRepository,
-                                                identify: IdentifierAction,
-                                                localDateTimeService: LocalDateTimeService,
-                                                cc: ControllerComponents
-                                              )(implicit ec: ExecutionContext) extends SubmissionDraftController(submissionRepository, identify, localDateTimeService, cc) {
+                                                       submissionRepository: RegistrationSubmissionRepository,
+                                                       identify: IdentifierAction,
+                                                       timeService: TimeService,
+                                                       cc: ControllerComponents
+                                                     )(implicit ec: ExecutionContext)
+  extends SubmissionDraftController(submissionRepository, identify, timeService, cc) {
 
   private val className = this.getClass.getSimpleName
   private val whenTrustSetupPath: JsPath = JsPath \ "trustDetails" \ "data" \ "trustDetails" \ "whenTrustSetup"

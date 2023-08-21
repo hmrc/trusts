@@ -1,4 +1,4 @@
-POST        /                                                                           controllers.RegisterTrustController.registration
+POST        /                                                                           controllers.RegisterTrustController.registration()
 
 # Used by trusts-frontend
 GET         /submission-drafts/:draftId/registration                                    controllers.SubmissionDraftController.getSection(draftId: String, sectionKey: String = "registration")

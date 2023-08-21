@@ -16,12 +16,12 @@
 
 package services.dates
 
-import java.time.{LocalDateTime, ZoneId}
+import java.time.{Instant, LocalDateTime, ZoneId}
 import javax.inject.Singleton
 
 @Singleton
-class LocalDateTimeService {
-  def now: LocalDateTime = LocalDateTime.now
+class TimeService {
+  def now: Instant = Instant.now()
 
   def now(zone: ZoneId): LocalDateTime = LocalDateTime.now(zone)
 }

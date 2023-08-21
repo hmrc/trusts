@@ -21,17 +21,18 @@ import models.LeadTrusteeType
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.RegistrationSubmissionRepository
-import services.dates.LocalDateTimeService
+import services.dates.TimeService
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class TrusteeSubmissionDraftController @Inject()(
-                                                submissionRepository: RegistrationSubmissionRepository,
-                                                identify: IdentifierAction,
-                                                localDateTimeService: LocalDateTimeService,
-                                                cc: ControllerComponents
-                                              )(implicit ec: ExecutionContext) extends SubmissionDraftController(submissionRepository, identify, localDateTimeService, cc) {
+                                                  submissionRepository: RegistrationSubmissionRepository,
+                                                  identify: IdentifierAction,
+                                                  timeService: TimeService,
+                                                  cc: ControllerComponents
+                                                )(implicit ec: ExecutionContext)
+  extends SubmissionDraftController(submissionRepository, identify, timeService, cc) {
 
   def getLeadTrustee(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>

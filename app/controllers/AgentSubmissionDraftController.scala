@@ -21,7 +21,7 @@ import models.AddressType
 import play.api.libs.json.JsPath
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.RegistrationSubmissionRepository
-import services.dates.LocalDateTimeService
+import services.dates.TimeService
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -29,9 +29,10 @@ import scala.concurrent.ExecutionContext
 class AgentSubmissionDraftController @Inject()(
                                                 submissionRepository: RegistrationSubmissionRepository,
                                                 identify: IdentifierAction,
-                                                localDateTimeService: LocalDateTimeService,
+                                                timeService: TimeService,
                                                 cc: ControllerComponents
-                                              )(implicit ec: ExecutionContext) extends SubmissionDraftController(submissionRepository, identify, localDateTimeService, cc) {
+                                              )(implicit ec: ExecutionContext)
+  extends SubmissionDraftController(submissionRepository, identify, timeService, cc) {
 
   def getAgentAddress(draftId: String): Action[AnyContent] = identify.async {
     implicit request =>

@@ -28,14 +28,15 @@ import repositories.RegistrationSubmissionRepositoryImpl
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.itbase.IntegrationTestBase
 
-import java.time.LocalDateTime
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 class RegistrationSubmissionRepositorySpec extends IntegrationTestBase {
 
-  // Make sure we use value of LocalDateTime that survives JSON round trip - and isn't expired.
-  private val testDateTime: LocalDateTime = Json.toJson(LocalDateTime.now()).as[LocalDateTime]
+  // Make sure we use value of Instant that survives JSON round trip - and isn't expired.
+  private val testDateTime: Instant = Instant.now.truncatedTo(ChronoUnit.MILLIS)
 
   private val data1 = Json.obj(
     "field1" -> "value1",
