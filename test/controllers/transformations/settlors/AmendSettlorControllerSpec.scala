@@ -300,6 +300,8 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
         name = NameType("John", None, "Doe"),
         dateOfBirth = None,
         dateOfDeath = None,
+        countryOfResidence = None,
+        nationality = None,
         identification = None
       )
 

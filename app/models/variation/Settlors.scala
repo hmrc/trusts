@@ -119,6 +119,8 @@ object WillType {
 case class AmendDeceasedSettlor(name: NameType,
                                 dateOfBirth: Option[LocalDate],
                                 dateOfDeath: Option[LocalDate],
+                                countryOfResidence: Option[String],
+                                nationality: Option[String],
                                 identification: Option[IdentificationType])
 
 object AmendDeceasedSettlor {
