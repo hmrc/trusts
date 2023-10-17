@@ -278,6 +278,8 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
             name = NameType("updated first", None, "updated last"),
             dateOfBirth = None,
             dateOfDeath = None,
+            countryOfResidence = None,
+            nationality = None,
             identification = None
           )
 
@@ -318,6 +320,8 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
             name = NameType("updated first", None, "updated last"),
             dateOfBirth = None,
             dateOfDeath = None,
+            countryOfResidence = None,
+            nationality = None,
             identification = None
           )
 
