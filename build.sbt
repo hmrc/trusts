@@ -49,9 +49,9 @@ lazy val microservice = Project(appName, file("."))
   .settings(scoverageSettings)
   .configs(IntegrationTest)
   .settings(inConfig(Test)(testSettings))
-  .settings(inConfig(IntegrationTest)(itSettings): _*)
+  .settings(inConfig(IntegrationTest)(itSettings))
 
-lazy val testSettings: Seq[Def.Setting[_]] = Seq(
+lazy val testSettings: Seq[Def.Setting[?]] = Seq(
   parallelExecution            := false,
   fork                         := true,
   javaOptions                  ++= Seq(
