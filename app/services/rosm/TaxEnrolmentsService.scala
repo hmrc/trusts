@@ -16,8 +16,8 @@
 
 package services.rosm
 
-import akka.actor.ActorSystem
-import akka.pattern.after
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.pattern.after
 import config.AppConfig
 import connector.TaxEnrolmentConnector
 import models.tax_enrolments.{TaxEnrolmentFailure, TaxEnrolmentSubscriberResponse}

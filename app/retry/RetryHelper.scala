@@ -16,8 +16,8 @@
 
 package retry
 
-import akka.actor.ActorSystem
-import akka.pattern.Patterns.after
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.pattern.Patterns.after
 import play.api.Logging
 import retry.RetryHelper.RetryExecution
 
