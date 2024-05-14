@@ -1,7 +1,5 @@
 import uk.gov.hmrc.DefaultBuildSettings.itSettings
 
-lazy val IntegrationTest = config("it") extend Test
-
 ThisBuild / scalaVersion := "2.13.13"
 ThisBuild / majorVersion := 0
 
@@ -22,7 +20,7 @@ lazy val microservice = Project(appName, file("."))
 lazy val it = project
   .enablePlugins(PlayScala)
   .dependsOn(microservice % "test->test")
-  .settings(itSettings() )
+  .settings(itSettings())
 
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys

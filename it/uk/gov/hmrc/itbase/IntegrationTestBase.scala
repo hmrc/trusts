@@ -68,7 +68,6 @@ class IntegrationTestBase extends AnyWordSpec
         "mongodb.uri" -> connectionString,
         "metrics.enabled" -> false,
         "auditing.enabled" -> false,
-        "mongo-async-driver.org.apache.pekko.log-dead-letters" -> 0,
         "features.mongo.dropIndexes" -> true
       ): _*)
 
