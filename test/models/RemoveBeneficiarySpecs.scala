@@ -38,7 +38,7 @@ class RemoveBeneficiarySpecs extends AnyWordSpec {
         "index" -> 6
       )
 
-      json.as[RemoveBeneficiary] mustBe (RemoveBeneficiary(LocalDate.of(2019, 12, 31), 6, "unidentified"))
+      json.as[RemoveBeneficiary] mustBe RemoveBeneficiary(LocalDate.of(2019, 12, 31), 6, "unidentified")
     }
 
     "beneficiary is IndividualType" in {
@@ -48,7 +48,7 @@ class RemoveBeneficiarySpecs extends AnyWordSpec {
         "index" -> 6
       )
 
-      json.as[RemoveBeneficiary] mustBe (RemoveBeneficiary(LocalDate.of(2019, 12, 31), 6, "individualDetails"))
+      json.as[RemoveBeneficiary] mustBe RemoveBeneficiary(LocalDate.of(2019, 12, 31), 6, "individualDetails")
     }
   }
 

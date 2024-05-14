@@ -130,7 +130,7 @@ class TrustsServiceSpec extends BaseSpec {
       val mockTrustsConnector: SubscriptionConnector = mock[SubscriptionConnector]
       val mockRepository = mock[CacheRepositoryImpl]
       when(mockSubscriptionConnector.getTrustInfo(any()))
-        .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right((etmpData)))))
+        .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(etmpData))))
 
       val OUT = new TrustsService(mockSubscriptionConnector, mockTrustsConnector, mockRepository)
 

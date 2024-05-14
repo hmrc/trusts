@@ -96,9 +96,9 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
   val nrsTotalAttempts = configuration.get[Int]("nrs.totalAttempts")
 
   logger.info(s"""=============== FEATURE FLAGS ===============
-                 |            nonRepudiate = ${nonRepudiate}
-                 |      dropIndexesEnabled = ${dropIndexesEnabled}
-                 |removeSavedRegistrations = ${removeSavedRegistrations}
+                 |            nonRepudiate = $nonRepudiate
+                 |      dropIndexesEnabled = $dropIndexesEnabled
+                 |removeSavedRegistrations = $removeSavedRegistrations
                  |=============== ============= ===============""".stripMargin)
 
 }

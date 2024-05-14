@@ -39,7 +39,7 @@ class VariationAuditServiceSpec extends BaseSpec {
 
         val response = VariationSuccessResponse("TRN123456")
 
-        service.auditVariationSuccess("internalId", false, request, response)
+        service.auditVariationSuccess("internalId", migrateToTaxable = false, request, response)
 
         val expectedAuditData = VariationAuditEvent(
           request = request,
@@ -64,7 +64,7 @@ class VariationAuditServiceSpec extends BaseSpec {
         )
 
         val response = VariationSuccessResponse("TRN123456")
-        service.auditVariationSuccess("internalId", false, request, response)
+        service.auditVariationSuccess("internalId", migrateToTaxable = false, request, response)
 
         val expectedAuditData = VariationAuditEvent(
           request = request,
@@ -100,7 +100,7 @@ class VariationAuditServiceSpec extends BaseSpec {
           "trustTaxable" -> true
         )
 
-        service.auditVariationSuccess("internalId", false, request, VariationSuccessResponse("TRN123456"))
+        service.auditVariationSuccess("internalId", migrateToTaxable = false, request, VariationSuccessResponse("TRN123456"))
 
         val expectedAuditData = VariationAuditEvent(
           request = request,
@@ -137,7 +137,7 @@ class VariationAuditServiceSpec extends BaseSpec {
           "trustTaxable" -> false
         )
 
-        service.auditVariationSuccess("internalId", false, request, VariationSuccessResponse("TRN123456"))
+        service.auditVariationSuccess("internalId", migrateToTaxable = false, request, VariationSuccessResponse("TRN123456"))
 
         val expectedAuditData = VariationAuditEvent(
           request = request,

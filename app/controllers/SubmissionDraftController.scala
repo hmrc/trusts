@@ -140,7 +140,8 @@ class SubmissionDraftController @Inject()(
               InternalServerError
           }
 
-        case _ => Future.successful(BadRequest)
+        case _ =>
+          Future.successful(BadRequest)
       }
     }
   }

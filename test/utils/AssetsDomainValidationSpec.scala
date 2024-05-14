@@ -31,7 +31,7 @@ class AssetsDomainValidationSpec extends BaseSpec with DataExamples {
       response.flatten.zipWithIndex.map {
         case (error, index) =>
           error.message mustBe "Value full must be equal or more than value previous."
-          error.location mustBe s"/trust/assets/propertyOrLand/${index}/valueFull"
+          error.location mustBe s"/trust/assets/propertyOrLand/$index/valueFull"
       }
 
       BusinessValidation.check(heritageFundTrust).size mustBe 1

@@ -6,7 +6,7 @@ This service is responsible for registering, playing back and varying a Trust re
 ## Running the service locally
 
 
-To run locally using the micro-service provided by the service manager:
+To run locally using the microservice provided by the service manager:
 
 ```
 sm2 --start TRUSTS_ALL

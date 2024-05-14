@@ -32,7 +32,7 @@ class AssetsDomainValidation (registration: Registration) extends ValidationUtil
               val isValid = property.valueFull >= property.valuePrevious
               if (!isValid) {
                 Some(TrustsValidationError(s"Value full must be equal or more than value previous.",
-                  s"/trust/assets/propertyOrLand/${index}/valueFull"))
+                  s"/trust/assets/propertyOrLand/$index/valueFull"))
               } else {
                 None
               }

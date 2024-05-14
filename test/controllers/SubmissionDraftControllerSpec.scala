@@ -40,7 +40,8 @@ import utils.JsonFixtures
 import java.time.Month._
 import java.time.{Instant, LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with JsonFixtures with Inside with ScalaFutures
   with GuiceOneAppPerSuite {
@@ -679,6 +680,24 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         val result = controller.setDataset(draftId, "sectionKey").apply(request)
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
+    }
+
+    "return BadRequest given a request with invalid JSON" in {
+      val controller = new SubmissionDraftController(
+        mock[RegistrationSubmissionRepository],
+        new FakeIdentifierAction(bodyParsers, Organisation),
+        TimeServiceStub,
+        Helpers.stubControllerComponents()
+      )
+
+      val invalidJson = "{ \"someInvalidRequestJson\": \"value1\"}"
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(Json.parse(invalidJson)))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.setDataset(draftId, "sectionKey").apply(request)
+      status(result) mustBe BAD_REQUEST
     }
 
   }

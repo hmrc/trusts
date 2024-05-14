@@ -128,6 +128,28 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
       )(any())
     }
 
+    "return Bad Request when JSON request body is invalid" in {
+      val SUT = trustVariationsController
+
+      val invalidJson =
+        """
+          |{
+          |  "declaration": {
+          |    "name": {
+          |      "firstName": "firstname",
+          |      "thisJsonIsIncorrect": "Surname"
+          |    }
+          |  }
+          |}
+          |""".stripMargin
+
+      val result = SUT.declare("aUTR")(
+        FakeRequest("POST", "/no-change/aUTR").withBody(Json.parse(invalidJson))
+      )
+
+      status(result) mustBe BAD_REQUEST
+    }
+
     "return Service Unavailable when des dependent service is down" in {
       val SUT = trustVariationsController
       val declaration = DeclarationName(

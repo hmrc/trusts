@@ -5,11 +5,12 @@ lazy val IntegrationTest = config("it") extend Test
 ThisBuild / scalaVersion := "2.13.13"
 ThisBuild / majorVersion := 0
 
-lazy val microservice = (project in file("."))
+val appName = "trusts"
+
+lazy val microservice = Project(appName, file("."))
   .enablePlugins(SbtAutoBuildPlugin, play.sbt.PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(
-    name := "trusts",
     scalaVersion := "2.13.12",
     PlayKeys.playDefaultPort := 9782,
     libraryDependencies ++= AppDependencies(),
@@ -21,18 +22,7 @@ lazy val microservice = (project in file("."))
 lazy val it = project
   .enablePlugins(PlayScala)
   .dependsOn(microservice % "test->test")
-  .settings(itSettings() ++ testSettings)
-
-
-// TODO move to specbase
-lazy val testSettings: Seq[Def.Setting[?]] = Seq(
-  parallelExecution            := false,
-  fork                         := true,
-  javaOptions                  ++= Seq(
-    "-Dconfig.resource=test.application.conf",
-    "-Dlogger.resource=logback-test.xml"
-  )
-)
+  .settings(itSettings() )
 
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys

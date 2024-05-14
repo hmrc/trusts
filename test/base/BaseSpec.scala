@@ -39,6 +39,8 @@ class BaseSpec extends AnyWordSpec
   with GuiceOneServerPerSuite
   with Inside {
 
+  System.setProperty("logger.resource","logback-test.xml")
+
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
 
   lazy val application = applicationBuilder().build()
