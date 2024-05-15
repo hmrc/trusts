@@ -10,7 +10,6 @@ object AppDependencies {
     "uk.gov.hmrc"                   %% "bootstrap-backend-play-30"  % playBootstrapVersion,
     "com.github.java-json-tools"    % "json-schema-validator"       % "2.2.14",
     "uk.gov.hmrc"                   %% "tax-year"                   % "3.3.0",
-//    "com.fasterxml.jackson.module"  %% "jackson-module-scala"       % "2.17.0",
     "commons-codec"                 % "commons-codec"               % "1.17.0",
     "org.typelevel"                 %% "cats-core"                  % "2.10.0"
   )
@@ -18,7 +17,7 @@ object AppDependencies {
   val test: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"                   %% "bootstrap-test-play-30"     % playBootstrapVersion,
     "uk.gov.hmrc.mongo"             %% "hmrc-mongo-test-play-30"    % mongoHmrcVersion,
-    "org.scalatestplus"             %% "scalacheck-1-17"             % "3.2.17.0"
+    "org.scalatestplus"             %% "scalacheck-1-17"            % "3.2.18.0"
   ).map(_ % Test)
 
   def apply(): Seq[ModuleID]        = compile ++ test

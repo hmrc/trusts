@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,14 +62,14 @@ class TransformRepositorySpec extends IntegrationTestBase {
           LocalDate.parse("2010-10-10"),
           None
         )),
-        "trusteeInd",
+        "trusteeInd"
       )
     )
   )
 
   "a transform repository" should {
 
-    "be able to store and retrieve a payload" in assertMongoTest(createApplication)({ (app) =>
+    "be able to store and retrieve a payload" in assertMongoTest(createApplication)({ app =>
       val repository = app.injector.instanceOf[TransformationRepositoryImpl]
 
       val storedOk = repository.set("UTRUTRUTR", "InternalId", "sessionId", data)

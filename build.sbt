@@ -9,7 +9,6 @@ lazy val microservice = Project(appName, file("."))
   .enablePlugins(SbtAutoBuildPlugin, play.sbt.PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(
-    scalaVersion := "2.13.12",
     PlayKeys.playDefaultPort := 9782,
     libraryDependencies ++= AppDependencies(),
     Compile / unmanagedSourceDirectories += baseDirectory.value / "resources",
@@ -17,25 +16,10 @@ lazy val microservice = Project(appName, file("."))
     scoverageSettings
   )
 
-//lazy val IntegrationTest = config("it") extend Test
-
-//
-//lazy val itSettings2 = itSettings() ++ Seq(
-//  unmanagedSourceDirectories   := Seq(
-//    baseDirectory.value / "it"
-//  ),
-//  parallelExecution            := false,
-//  fork                         := true,
-//  javaOptions                  ++= Seq(
-//    "-Dlogger.resource=logback-test.xml",
-//    "-Dconfig.resource=test.application.conf"
-//  )
-//)
-
 lazy val it = project.in(file("it"))
   .enablePlugins(PlayScala)
   .dependsOn(microservice % "test->test")
-  .settings(itSettings())
+  .settings(itSettings(true))
 
 
 lazy val scoverageSettings = {
@@ -65,4 +49,4 @@ lazy val scoverageSettings = {
   )
 }
 
-addCommandAlias("scalastyleAll", "all scalastyle Test/scalastyle IntegrationTest/scalastyle")
+addCommandAlias("scalastyleAll", "all scalastyle Test/scalastyle it/Test/scalastyle")
