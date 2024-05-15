@@ -17,9 +17,13 @@ lazy val microservice = Project(appName, file("."))
     scoverageSettings
   )
 
-lazy val it = project
+lazy val it = project.in(file("it"))
   .enablePlugins(PlayScala)
   .dependsOn(microservice % "test->test")
+  .settings(
+    libraryDependencies ++= AppDependencies.test,
+    Test / parallelExecution := false
+  )
   .settings(itSettings())
 
 lazy val scoverageSettings = {
