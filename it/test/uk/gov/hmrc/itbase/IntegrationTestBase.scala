@@ -68,7 +68,7 @@ class IntegrationTestBase extends AnyWordSpec
         "mongodb.uri" -> connectionString,
         "metrics.enabled" -> false,
         "auditing.enabled" -> false,
-        "features.mongo.dropIndexes" -> true
+//        "features.mongo.dropIndexes" -> true
       ): _*)
 
   def cleanDatabase(application: Application): Unit = {

@@ -17,14 +17,26 @@ lazy val microservice = Project(appName, file("."))
     scoverageSettings
   )
 
+//lazy val IntegrationTest = config("it") extend Test
+
+//
+//lazy val itSettings2 = itSettings() ++ Seq(
+//  unmanagedSourceDirectories   := Seq(
+//    baseDirectory.value / "it"
+//  ),
+//  parallelExecution            := false,
+//  fork                         := true,
+//  javaOptions                  ++= Seq(
+//    "-Dlogger.resource=logback-test.xml",
+//    "-Dconfig.resource=test.application.conf"
+//  )
+//)
+
 lazy val it = project.in(file("it"))
   .enablePlugins(PlayScala)
   .dependsOn(microservice % "test->test")
-  .settings(
-    libraryDependencies ++= AppDependencies.test,
-    Test / parallelExecution := false
-  )
   .settings(itSettings())
+
 
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
