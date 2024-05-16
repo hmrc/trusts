@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ class RegisterTrustControllerSpec extends BaseSpec {
       "individual user called the register endpoint with a valid 5mld json payload " in {
 
         when(mockTrustsService.registerTrust(any[Registration]))
-          .thenReturn(EitherT[Future, TrustErrors, RegistrationResponse]((Future.successful(Right(RegistrationTrnResponse(trnResponse))))))
+          .thenReturn(EitherT[Future, TrustErrors, RegistrationResponse](Future.successful(Right(RegistrationTrnResponse(trnResponse)))))
 
         when(mockNonRepudiationService.register(any(), any())(any(), any()))
           .thenReturn(Future.successful(NRSResponse.Success("2880d8aa-4691-49a4-aa6a-99191a51b9ef")))

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -444,7 +444,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
               result mustBe Right(
                 NotEnoughDataResponse(jsonResponse204, Json.parse(
                 """
-                  |{"obj":[{"msg":["'responseHeader' is undefined on object: {\"code\":\"NO_CONTENT\",\"reason\":\"No Content.\"}"],"args":[]}]}
+                  |{"obj":[{"msg":["'responseHeader' is undefined on object. Available keys are 'code', 'reason'"],"args":[]}]}
                   |""".stripMargin))
               )
             }
@@ -591,7 +591,7 @@ class TrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
               result mustBe Right(
                 NotEnoughDataResponse(jsonResponse204, Json.parse(
                 """
-                  |{"obj":[{"msg":["'responseHeader' is undefined on object: {\"code\":\"NO_CONTENT\",\"reason\":\"No Content.\"}"],"args":[]}]}
+                  |{"obj":[{"msg":["'responseHeader' is undefined on object. Available keys are 'code', 'reason'"],"args":[]}]}
                   |""".stripMargin))
               )
             }

@@ -1,8 +1,4 @@
 project/metals.sbt
-.*
-*/test.json
-!.gitignore
-
 .cache
 /.classpath
 db
@@ -34,3 +30,4 @@ test-result
 tmp
 .idea_modules
 bin
+.bsp

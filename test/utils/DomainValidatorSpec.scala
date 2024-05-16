@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,12 +76,16 @@ class DomainValidatorSpec extends BaseSpec with DataExamples {
 
   "validateSchedule3aExempt" should {
     "return None when schedule3aExempt is provided for a Express and Taxable Trust" in {
-      val trustWithSchedule3aExempt = registrationWithSchedule3aExempt(true, true, true)
+      val trustWithSchedule3aExempt =
+        registrationWithSchedule3aExempt(schedule3aExempt = true, expressTrust = true, trustTaxable = true)
+
       SUT(trustWithSchedule3aExempt).validateSchedule3aExempt mustBe None
     }
 
     "return validation error when schedule3aExempt is provided when not an Express and Taxable trust" in {
-      val trustWithSchedule3aExempt = registrationWithSchedule3aExempt(true, true, false)
+      val trustWithSchedule3aExempt =
+        registrationWithSchedule3aExempt(schedule3aExempt = true, expressTrust = true, trustTaxable = false)
+
       SUT(trustWithSchedule3aExempt).validateSchedule3aExempt.get.message mustBe
         "Schedule 3a Exemption should only exist for a Express and Taxable Trust."
     }

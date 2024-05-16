@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -620,7 +620,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
           val processedResponse = TrustProcessedResponse(getTransformedTrustResponse, ResponseHeader("Processed", "1"))
 
           when(trustsService.getTrustInfo(any[String], any[String], any[String]))
-            .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right((processedResponse)))))
+            .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(processedResponse))))
 
           val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/trust-details/$utr/transformed"))
 
@@ -656,7 +656,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
           val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
           when(trustsService.getTrustInfo(any[String], any[String], any[String]))
-            .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right((processedResponse)))))
+            .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(processedResponse))))
 
           val result = getTrustController.getTrustDetails(utr, applyTransformations).apply(FakeRequest(GET, s"/trusts/trust-details/$utr/transformed"))
 
@@ -710,7 +710,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
       "return 403 - Forbidden with parked content" in {
 
         when(transformationService.getTransformedData(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right((TrustFoundResponse(ResponseHeader("Parked", "1")))))))
+          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(TrustFoundResponse(ResponseHeader("Parked", "1"))))))
 
         val result = getTrustController.getYearsReturns(utr).apply(FakeRequest(GET, s"/trusts/tax-liability/$utr/transformed"))
 
@@ -724,7 +724,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
         val processedResponse = TrustProcessedResponse(getTransformedTrustResponseWithYearsReturns, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
-          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right((processedResponse)))))
+          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(processedResponse))))
 
         val result = getTrustController.getYearsReturns(utr).apply(FakeRequest(GET, s"/trusts/tax-liability/$utr/transformed"))
 
@@ -761,7 +761,7 @@ class GetTrustControllerSpec extends AnyWordSpec with MockitoSugar with BeforeAn
         val processedResponse = TrustProcessedResponse(cached, ResponseHeader("Processed", "1"))
 
         when(transformationService.getTransformedData(any[String], any[String], any[String])(any()))
-          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right((processedResponse)))))
+          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(processedResponse))))
 
         val result = getTrustController.getYearsReturns(utr).apply(FakeRequest(GET, s"/trusts/tax-liability/$utr/transformed"))
 

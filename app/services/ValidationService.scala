@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ class Validator(schema: JsonSchema) extends Logging {
   private def getValidationErrors(validationOutput: ProcessingReport): List[TrustsValidationError] = {
     val validationErrors: List[TrustsValidationError] = validationOutput.iterator.asScala.toList.filter(m => m.getLogLevel == ERROR).map(m => {
       val error = m.asJson()
-      val message = error.findValue(JsonErrorMessageTag).asText("")
+      val message = error.findValue(JsonErrorMessageTag).asText()
       val location = error.findValue(JsonErrorInstanceTag).at(s"/$JsonErrorPointerTag").asText()
       val locations = error.findValues(JsonErrorPointerTag)
       logger.error(s"[Validator][getValidationErrors] validation failed at locations :  $locations")

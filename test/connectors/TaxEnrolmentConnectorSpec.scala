@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -204,7 +204,7 @@ class TaxEnrolmentConnectorSpec extends ConnectorSpecHelper {
         val futureResult = connector.subscriptions(subscriptionId).value
 
         val url = server.url(endpoint)
-        val exceptionMessage = "JsResultException(errors:List(((0)/value,List(JsonValidationError(List(error.path.missing),ArraySeq())))))"
+        val exceptionMessage = "JsResultException(errors:List(((0)/value,List(JsonValidationError(List(error.path.missing),List())))))"
 
         whenReady(futureResult) { result =>
           result mustBe Left(ServerError(s"Error occurred when calling $url with exception $exceptionMessage"))

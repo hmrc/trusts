@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ class VariationAuditServiceSpec extends BaseSpec {
 
         val response = VariationSuccessResponse("TRN123456")
 
-        service.auditVariationSuccess("internalId", false, request, response)
+        service.auditVariationSuccess("internalId", migrateToTaxable = false, request, response)
 
         val expectedAuditData = VariationAuditEvent(
           request = request,
@@ -64,7 +64,7 @@ class VariationAuditServiceSpec extends BaseSpec {
         )
 
         val response = VariationSuccessResponse("TRN123456")
-        service.auditVariationSuccess("internalId", false, request, response)
+        service.auditVariationSuccess("internalId", migrateToTaxable = false, request, response)
 
         val expectedAuditData = VariationAuditEvent(
           request = request,
@@ -100,7 +100,7 @@ class VariationAuditServiceSpec extends BaseSpec {
           "trustTaxable" -> true
         )
 
-        service.auditVariationSuccess("internalId", false, request, VariationSuccessResponse("TRN123456"))
+        service.auditVariationSuccess("internalId", migrateToTaxable = false, request, VariationSuccessResponse("TRN123456"))
 
         val expectedAuditData = VariationAuditEvent(
           request = request,
@@ -137,7 +137,7 @@ class VariationAuditServiceSpec extends BaseSpec {
           "trustTaxable" -> false
         )
 
-        service.auditVariationSuccess("internalId", false, request, VariationSuccessResponse("TRN123456"))
+        service.auditVariationSuccess("internalId", migrateToTaxable = false, request, VariationSuccessResponse("TRN123456"))
 
         val expectedAuditData = VariationAuditEvent(
           request = request,

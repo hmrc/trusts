@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -679,6 +679,24 @@ class SubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with J
         val result = controller.setDataset(draftId, "sectionKey").apply(request)
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
+    }
+
+    "return BadRequest given a request with invalid JSON" in {
+      val controller = new SubmissionDraftController(
+        mock[RegistrationSubmissionRepository],
+        new FakeIdentifierAction(bodyParsers, Organisation),
+        TimeServiceStub,
+        Helpers.stubControllerComponents()
+      )
+
+      val invalidJson = "{ \"someInvalidRequestJson\": \"value1\"}"
+
+      val request = FakeRequest("POST", "path")
+        .withBody(Json.toJson(Json.parse(invalidJson)))
+        .withHeaders(CONTENT_TYPE -> "application/json")
+
+      val result = controller.setDataset(draftId, "sectionKey").apply(request)
+      status(result) mustBe BAD_REQUEST
     }
 
   }

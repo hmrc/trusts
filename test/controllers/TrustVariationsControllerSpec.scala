@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,6 +126,28 @@ class TrustVariationsControllerSpec extends BaseSpec with BeforeAndAfter with Be
         Meq("id"),
         Meq("Cached ETMP data stale.")
       )(any())
+    }
+
+    "return Bad Request when JSON request body is invalid" in {
+      val SUT = trustVariationsController
+
+      val invalidJson =
+        """
+          |{
+          |  "declaration": {
+          |    "name": {
+          |      "firstName": "firstname",
+          |      "thisJsonIsIncorrect": "Surname"
+          |    }
+          |  }
+          |}
+          |""".stripMargin
+
+      val result = SUT.declare("aUTR")(
+        FakeRequest("POST", "/no-change/aUTR").withBody(Json.parse(invalidJson))
+      )
+
+      status(result) mustBe BAD_REQUEST
     }
 
     "return Service Unavailable when des dependent service is down" in {

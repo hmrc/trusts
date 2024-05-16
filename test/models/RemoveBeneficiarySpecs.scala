@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ class RemoveBeneficiarySpecs extends AnyWordSpec {
         "index" -> 6
       )
 
-      json.as[RemoveBeneficiary] mustBe (RemoveBeneficiary(LocalDate.of(2019, 12, 31), 6, "unidentified"))
+      json.as[RemoveBeneficiary] mustBe RemoveBeneficiary(LocalDate.of(2019, 12, 31), 6, "unidentified")
     }
 
     "beneficiary is IndividualType" in {
@@ -48,7 +48,7 @@ class RemoveBeneficiarySpecs extends AnyWordSpec {
         "index" -> 6
       )
 
-      json.as[RemoveBeneficiary] mustBe (RemoveBeneficiary(LocalDate.of(2019, 12, 31), 6, "individualDetails"))
+      json.as[RemoveBeneficiary] mustBe RemoveBeneficiary(LocalDate.of(2019, 12, 31), 6, "individualDetails")
     }
   }
 
