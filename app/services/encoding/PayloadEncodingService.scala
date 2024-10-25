@@ -17,7 +17,6 @@
 package services.encoding
 
 import org.apache.commons.codec.binary.Base64
-import org.apache.commons.codec.digest.DigestUtils
 import play.api.libs.json.{JsValue, Json}
 
 import java.security.MessageDigest

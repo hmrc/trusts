@@ -64,9 +64,9 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClientV2,
                   methodName: String)
                  (implicit hc: HeaderCarrier): TrustEnvelope[TaxEnrolmentSubscriberResponse] = EitherT {
 
-//    val taxEnrolmentHeaders = hc.withExtraHeaders(headers: _*)
+    val taxEnrolmentHeaders = hc.withExtraHeaders(headers: _*).extraHeaders
     http.put(url"$taxEnrolmentsEndpoint")
-      .setHeader(headers:_*)
+      .setHeader(taxEnrolmentHeaders:_*)
       .withBody(Json.toJson(taxEnrolmentSubscriptionRequest))
       .execute[TaxEnrolmentSubscriberResponse]
     .map {

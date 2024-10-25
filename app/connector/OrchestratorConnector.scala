@@ -41,13 +41,13 @@ class OrchestratorConnector @Inject()(http: HttpClientV2, config: AppConfig)(imp
   def migrateToTaxable(urn: String, utr: String)(implicit hc: HeaderCarrier): TrustEnvelope[OrchestratorToTaxableSuccessResponse] = EitherT {
     logger.info(s"[$className][migrateToTaxable][Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr] starting migration from non-taxable to taxable")
 
-//    val orchestratorHeaders = hc.withExtraHeaders(headers: _*)
+    val orchestratorHeaders = hc.withExtraHeaders(headers: _*).extraHeaders
 
     val orchestratorEndpoint = s"${config.orchestratorUrl}/trusts-enrolment-orchestrator/orchestration-process"
     val migrationRequest = OrchestratorMigrationRequest(urn, utr)
 
     http.post(url"$orchestratorEndpoint")
-      .setHeader(headers:_*)
+      .setHeader(orchestratorHeaders:_*)
       .withBody(Json.toJson(migrationRequest))
       .execute[OrchestratorToTaxableResponse]
       .map {
