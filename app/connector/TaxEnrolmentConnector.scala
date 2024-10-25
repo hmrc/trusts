@@ -20,15 +20,16 @@ import cats.data.EitherT
 import config.AppConfig
 import errors.ServerError
 import models.tax_enrolments._
-import play.api.libs.json.{JsValue, Json, Writes}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import play.api.libs.json.Json
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import utils.Constants._
 import utils.TrustEnvelope.TrustEnvelope
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
+class TaxEnrolmentConnectorImpl @Inject()(http: HttpClientV2,
                                           config: AppConfig
                                          )(implicit ec: ExecutionContext) extends TaxEnrolmentConnector with ConnectorErrorResponseHandler {
 
@@ -63,12 +64,12 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
                   methodName: String)
                  (implicit hc: HeaderCarrier): TrustEnvelope[TaxEnrolmentSubscriberResponse] = EitherT {
 
-    val taxEnrolmentHeaders = hc.withExtraHeaders(headers: _*)
-
-    http.PUT[JsValue, TaxEnrolmentSubscriberResponse](
-      taxEnrolmentsEndpoint,
-      Json.toJson(taxEnrolmentSubscriptionRequest)
-    )(Writes.jsValueWrites, TaxEnrolmentSubscriberResponse.httpReads, taxEnrolmentHeaders, ec).map {
+//    val taxEnrolmentHeaders = hc.withExtraHeaders(headers: _*)
+    http.put(url"$taxEnrolmentsEndpoint")
+      .setHeader(headers:_*)
+      .withBody(Json.toJson(taxEnrolmentSubscriptionRequest))
+      .execute[TaxEnrolmentSubscriberResponse]
+    .map {
       case TaxEnrolmentFailureResponse(message) => Left(ServerError(message))
       case response => Right(response)
     }.recover {
@@ -95,9 +96,9 @@ class TaxEnrolmentConnectorImpl @Inject()(http: HttpClient,
   override def subscriptions(subscriptionId: String)
                             (implicit hc: HeaderCarrier): TrustEnvelope[TaxEnrolmentsSubscriptionsSuccessResponse] = EitherT {
     val getSubscriptionsEndpoint = s"${config.taxEnrolmentsMigrationUrl}/tax-enrolments/subscriptions/$subscriptionId"
-    http.GET[TaxEnrolmentsSubscriptionsResponse](
-      getSubscriptionsEndpoint
-    )(TaxEnrolmentsSubscriptionsResponse.httpReads(subscriptionId), implicitly[HeaderCarrier](hc), ec).map {
+    http.get(url"$getSubscriptionsEndpoint")
+      .execute[TaxEnrolmentsSubscriptionsResponse](TaxEnrolmentsSubscriptionsResponse.httpReads(subscriptionId), ec)
+      .map {
       case response: TaxEnrolmentsSubscriptionsSuccessResponse => Right(response)
       case response:TaxEnrolmentsSubscriptionsFailureResponse => Left(ServerError(response.message))
     }.recover {

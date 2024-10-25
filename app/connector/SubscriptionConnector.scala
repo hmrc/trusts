@@ -21,7 +21,8 @@ import config.AppConfig
 import errors.ServerError
 import models.tax_enrolments.{SubscriptionIdFailureResponse, SubscriptionIdResponse, SubscriptionIdSuccessResponse}
 import play.api.http.HeaderNames
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import utils.Constants._
 import utils.TrustEnvelope.TrustEnvelope
 
@@ -30,7 +31,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class SubscriptionConnector @Inject()(http: HttpClient, config: AppConfig)(implicit ec: ExecutionContext) extends ConnectorErrorResponseHandler {
+class SubscriptionConnector @Inject()(http: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext) extends ConnectorErrorResponseHandler {
 
   val className: String = this.getClass.getSimpleName
 
@@ -54,10 +55,9 @@ class SubscriptionConnector @Inject()(http: HttpClient, config: AppConfig)(impli
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = desHeaders(correlationId))
 
     val subscriptionIdEndpointUrl = s"$trustsServiceUrl/trn/$trn/subscription"
-
-    http.GET[SubscriptionIdResponse](subscriptionIdEndpointUrl)(
-      SubscriptionIdResponse.httpReads, implicitly[HeaderCarrier](hc), implicitly[ExecutionContext]
-    ).map {
+    http.get(url"$subscriptionIdEndpointUrl")
+      .execute[SubscriptionIdResponse]
+    .map {
       case response: SubscriptionIdSuccessResponse => Right(response)
       case response: SubscriptionIdFailureResponse => Left(ServerError(response.message))
     }.recover {

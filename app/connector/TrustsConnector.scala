@@ -26,7 +26,8 @@ import models.registration.RegistrationResponse
 import models.variation.{VariationFailureResponse, VariationResponse, VariationSuccessResponse}
 import play.api.http.HeaderNames
 import play.api.libs.json._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier,  StringContextOps}
 import utils.Constants._
 import utils.Session
 import utils.TrustEnvelope.TrustEnvelope
@@ -36,7 +37,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class TrustsConnector @Inject()(http: HttpClient, config: AppConfig)(implicit ec: ExecutionContext) extends ConnectorErrorResponseHandler {
+class TrustsConnector @Inject()(http: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext) extends ConnectorErrorResponseHandler {
 
   val className: String = this.getClass.getSimpleName
 
@@ -81,10 +82,10 @@ class TrustsConnector @Inject()(http: HttpClient, config: AppConfig)(implicit ec
 
     logger.info(s"[$className][checkExistingTrust][Session ID: ${Session.id(hc)}] matching trust for correlationId: $correlationId")
 
-    http.POST[JsValue, ExistingCheckResponse](
-      matchTrustsEndpoint,
-      Json.toJson(existingTrustCheckRequest)
-    )(implicitly[Writes[JsValue]], ExistingCheckResponse.httpReads, implicitly[HeaderCarrier](hc), implicitly[ExecutionContext]).map(Right(_)).recover {
+    http.post(url"$matchTrustsEndpoint")
+      .withBody(Json.toJson(existingTrustCheckRequest))
+      .execute[ExistingCheckResponse]
+      .map(Right(_)).recover {
       case ex =>
         Left(handleError(ex, "checkExistingTrust", matchTrustsEndpoint))
     }
@@ -95,14 +96,14 @@ class TrustsConnector @Inject()(http: HttpClient, config: AppConfig)(implicit ec
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
-    val reads = RegistrationResponse.httpReads
+//    val reads = RegistrationResponse.httpReads
 
     logger.info(s"[$className][registerTrust][Session ID: ${Session.id(hc)}] registering trust for correlationId: $correlationId")
 
-    http.POST[JsValue, RegistrationResponse](
-      trustRegistrationEndpoint,
-      Json.toJson(registration)
-    )(implicitly[Writes[JsValue]], reads, implicitly[HeaderCarrier](hc), implicitly[ExecutionContext]).map(Right(_)).recover {
+    http.post(url"$trustRegistrationEndpoint")
+      .withBody(Json.toJson(registration))
+      .execute[RegistrationResponse]
+    .map(Right(_)).recover {
       case ex =>
         Left(handleError(ex, "registerTrust", trustRegistrationEndpoint))
     }
@@ -115,13 +116,10 @@ class TrustsConnector @Inject()(http: HttpClient, config: AppConfig)(implicit ec
 
     logger.info(s"[$className][getTrustInfo][Session ID: ${Session.id(hc)}][UTR/URN: $identifier]" +
       s" getting playback for trust for correlationId: $correlationId")
-
-    http.GET[GetTrustResponse](
-      get5MLDTrustOrEstateEndpoint(identifier)
-    )(
-      GetTrustResponse.httpReads(identifier),
-      implicitly[HeaderCarrier](hc), ec
-    ).map(Right(_)).recover {
+    val fullUrl = get5MLDTrustOrEstateEndpoint(identifier)
+    http.get(url"$fullUrl")
+      .execute[GetTrustResponse](GetTrustResponse.httpReads(identifier), ec)
+      .map(Right(_)).recover {
       case ex =>
         Left(handleError(ex, "getTrustInfo", get5MLDTrustOrEstateEndpoint(identifier)))
     }
@@ -135,12 +133,10 @@ class TrustsConnector @Inject()(http: HttpClient, config: AppConfig)(implicit ec
     logger.info(s"[$className][trustVariation][Session ID: ${Session.id(hc)}]" +
       s" submitting trust variation for correlationId: $correlationId")
 
-    http.POST[JsValue, VariationResponse](trustVariationsEndpoint, trustVariations)(
-      implicitly[Writes[JsValue]],
-      VariationResponse.httpReads,
-      implicitly[HeaderCarrier](hc),
-      implicitly[ExecutionContext]
-    ).map {
+    http.post(url"$trustVariationsEndpoint")
+      .withBody(trustVariations)
+      .execute[VariationResponse]
+      .map {
       case response: VariationSuccessResponse => Right(response)
       case response: VariationFailureResponse =>
         logger.warn(s"[$className][trustVariation][Session ID: ${Session.id(hc)}] " +

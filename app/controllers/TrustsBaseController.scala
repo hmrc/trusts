@@ -22,6 +22,7 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.ErrorResponses._
 
 import scala.concurrent.Future
+import scala.reflect.ClassTag
 
 class TrustsBaseController(cc: ControllerComponents) extends BackendController(cc) {
 
@@ -31,7 +32,7 @@ class TrustsBaseController(cc: ControllerComponents) extends BackendController(c
 
   override protected def withJsonBody[T](f: T => Future[Result])
                                         (implicit request: Request[JsValue],
-                                         m: Manifest[T],
+                                         ct     : ClassTag[T],
                                          reads: Reads[T]) : Future[Result] =
     request.body.validate[T] match {
       case JsSuccess(payload, _) =>

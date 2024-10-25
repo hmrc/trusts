@@ -20,6 +20,7 @@ import play.api.Logging
 import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK, SERVICE_UNAVAILABLE}
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
+import scala.language.implicitConversions
 
 sealed trait TaxEnrolmentsSubscriptionsResponse
 

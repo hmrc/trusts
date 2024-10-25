@@ -20,14 +20,20 @@ import org.apache.commons.codec.binary.Base64
 import org.apache.commons.codec.digest.DigestUtils
 import play.api.libs.json.{JsValue, Json}
 
+import java.security.MessageDigest
 import javax.inject.Singleton
 
 @Singleton
 class PayloadEncodingService {
 
   def encode(payload: JsValue): String =
-    Base64.encodeBase64String(Json.toBytes(payload))
+    new String(Base64.encodeBase64(Json.toBytes(payload)))
 
-  def generateChecksum(payload: JsValue): String =
-    DigestUtils.sha256Hex(Json.stringify(payload))
+  def generateChecksum(payload: JsValue): String = {
+    val digest = MessageDigest.getInstance("SHA-256")
+    val hash = digest.digest(Json.stringify(payload).getBytes("UTF-8"))
+    hash.map("%02x".format(_)).mkString
+  }
+
+
 }

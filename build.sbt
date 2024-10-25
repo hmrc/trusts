@@ -1,6 +1,6 @@
 import uk.gov.hmrc.DefaultBuildSettings.itSettings
 
-ThisBuild / scalaVersion := "2.13.13"
+ThisBuild / scalaVersion := "2.13.15"
 ThisBuild / majorVersion := 0
 
 val appName = "trusts"

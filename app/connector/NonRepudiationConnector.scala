@@ -19,21 +19,26 @@ package connector
 import config.AppConfig
 
 import javax.inject.{Inject, Singleton}
-import models.nonRepudiation.{NRSSubmission, NRSResponse}
+import models.nonRepudiation.{NRSResponse, NRSSubmission}
 import play.api.Logging
+import play.api.libs.json.Json
 import play.api.http.ContentTypes.JSON
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.client.HttpClientV2
 import utils.Constants.{CONTENT_TYPE, X_API_KEY}
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 
-import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class NonRepudiationConnector @Inject()(http: HttpClient, config: AppConfig)(implicit ec: ExecutionContext) extends Logging {
+class NonRepudiationConnector @Inject()(http: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext) extends Logging {
 
   private def headers = Seq(CONTENT_TYPE -> JSON, X_API_KEY -> config.xApiKey)
-
-   def nonRepudiate(json: NRSSubmission)(implicit hc: HeaderCarrier): Future[NRSResponse] = {
-     http.POST[NRSSubmission, NRSResponse](config.nonRepudiationUrl, json, headers)
+  val fullUrl: String =config.nonRepudiationUrl
+   def nonRepudiate(payload: NRSSubmission)(implicit hc: HeaderCarrier): Future[NRSResponse] = {
+     http.post(url"$fullUrl")
+       .setHeader(headers: _*)
+       .withBody(Json.toJson(payload))
+       .execute[NRSResponse]
   }
 
 }
