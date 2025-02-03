@@ -96,8 +96,6 @@ class TrustsConnector @Inject()(http: HttpClientV2, config: AppConfig)(implicit 
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
-//    val reads = RegistrationResponse.httpReads
-
     logger.info(s"[$className][registerTrust][Session ID: ${Session.id(hc)}] registering trust for correlationId: $correlationId")
 
     http.post(url"$trustRegistrationEndpoint")
@@ -121,7 +119,7 @@ class TrustsConnector @Inject()(http: HttpClientV2, config: AppConfig)(implicit 
       .execute[GetTrustResponse](GetTrustResponse.httpReads(identifier), ec)
       .map(Right(_)).recover {
       case ex =>
-        Left(handleError(ex, "getTrustInfo", get5MLDTrustOrEstateEndpoint(identifier)))
+        Left(handleError(new Exception("Failed to getTrustInfo"),"getTrustInfo", get5MLDTrustOrEstateEndpoint(identifier)))
     }
   }
 
