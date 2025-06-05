@@ -18,6 +18,7 @@ package controllers.transformations.taxliability
 
 import controllers.actions.IdentifierAction
 import controllers.transformations.AddTransformationController
+import controllers.transformations.assets.AssetController
 import models.YearsReturns
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents}
@@ -32,7 +33,7 @@ class TaxLiabilityTransformationController @Inject()(identify: IdentifierAction,
                                                      transformationService: TransformationService,
                                                      taxableMigrationService: TaxableMigrationService)
                                                     (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AddTransformationController(identify, transformationService, taxableMigrationService) {
+  extends AddTransformationController(identify, transformationService, taxableMigrationService) with AssetController {
 
   def setYearsReturns(identifier: String): Action[JsValue] = addNewTransform[YearsReturns](identifier)
 

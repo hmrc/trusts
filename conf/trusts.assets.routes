@@ -13,7 +13,7 @@ POST       /amend-shares/:identifier/:index                       controllers.tr
 POST       /add-business/:identifier                              controllers.transformations.assets.AddAssetController.addBusiness(identifier: String)
 POST       /amend-business/:identifier/:index                     controllers.transformations.assets.AmendAssetController.amendBusiness(identifier: String, index: Int)
 
-POST       /add-partnership/:identifier                           controllers.transformations.assets.AddAssetController.addPartnership(identifier: String)
+POST       /add-partnership/:identifier/:index                    controllers.transformations.assets.AddAssetController.addPartnership(identifier: String, index: Int)
 POST       /amend-partnership/:identifier/:index                  controllers.transformations.assets.AmendAssetController.amendPartnership(identifier: String, index: Int)
 
 POST       /add-other/:identifier                                 controllers.transformations.assets.AddAssetController.addOther(identifier: String)

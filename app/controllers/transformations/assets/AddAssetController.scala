@@ -33,7 +33,7 @@ class AddAssetController @Inject()(identify: IdentifierAction,
                                    transformationService: TransformationService,
                                    taxableMigrationService: TaxableMigrationService)
                                   (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AddTransformationController(identify, transformationService, taxableMigrationService) {
+  extends AddTransformationController(identify, transformationService, taxableMigrationService) with AssetController {
 
   def addMoney(identifier: String): Action[JsValue] = addNewTransform[AssetMonetaryAmountType](identifier, MONEY_ASSET)
 
@@ -43,7 +43,7 @@ class AddAssetController @Inject()(identify: IdentifierAction,
 
   def addBusiness(identifier: String): Action[JsValue] = addNewTransform[BusinessAssetType](identifier, BUSINESS_ASSET)
 
-  def addPartnership(identifier: String): Action[JsValue] = addNewTransform[PartnershipType](identifier, PARTNERSHIP_ASSET)
+  def addPartnership(identifier: String, index: Int): Action[JsValue] = addNewTransform[PartnershipType](identifier, PARTNERSHIP_ASSET, false, Some(index))
 
   def addOther(identifier: String): Action[JsValue] = addNewTransform[OtherAssetType](identifier, OTHER_ASSET)
 

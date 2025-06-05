@@ -36,24 +36,25 @@ abstract class AddTransformationController @Inject()(identify: IdentifierAction,
                                                      transformationService: TransformationService,
                                                      taxableMigrationService: TaxableMigrationService)
                                                     (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends TrustsBaseController(cc) with Logging {
+  extends TrustsBaseController(cc) with TransformationHelper with Logging {
 
   private val className = this.getClass.getSimpleName
 
   def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)
                   (implicit wts: Writes[T]): DeltaTransform
 
-  def addNewTransform[T](identifier: String, `type`: String = "", addMultipleTransforms: Boolean = false)
+  def addNewTransform[T](identifier: String, `type`: String = "", addMultipleTransforms: Boolean = false, index: Option[Int] = None)
                         (implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = {
     identify.async(parse.json) {
       implicit request => {
         request.body.validate[T] match {
 
           case JsSuccess(entityToAdd, _) =>
-
+            println("=========================== JsSuccess =================================" + entityToAdd + "=========================== JsSuccess =================================")
             val expectedResult = for {
               trust <- transformationService.getTransformedTrustJson(identifier, request.internalId, Session.id(hc))
               isTaxable <- isTrustTaxable(trust)
+//              originalEntity <- findJson(trust, `type`, index)
               migratingFromNonTaxableToTaxable <- taxableMigrationService.migratingFromNonTaxableToTaxable(identifier, request.internalId, Session.id(hc))
               _ <- addTransformOrTransforms(entityToAdd, identifier, `type`, isTaxable, migratingFromNonTaxableToTaxable, addMultipleTransforms)
             } yield {
@@ -88,7 +89,8 @@ abstract class AddTransformationController @Inject()(identify: IdentifierAction,
                                           migratingFromNonTaxableToTaxable: Boolean,
                                           addMultipleTransforms: Boolean)
                                          (implicit wts: Writes[A], request: IdentifierRequest[JsValue]): TrustEnvelope[Boolean] = {
-
+println("=============================" + entityToAdd + "=============================")
+    println("=========================== addTransformOrTransforms method =================================")
     def addTransform[B](value: B, `type`: String)(implicit wts: Writes[B]): TrustEnvelope[Boolean] = {
       transformationService.addNewTransform(
         identifier = identifier,

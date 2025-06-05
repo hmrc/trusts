@@ -18,6 +18,7 @@ package controllers.transformations.otherindividuals
 
 import controllers.actions.IdentifierAction
 import controllers.transformations.AddTransformationController
+import controllers.transformations.assets.AssetController
 import models.variation.NaturalPersonType
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc.{Action, ControllerComponents}
@@ -32,7 +33,7 @@ class AddOtherIndividualController @Inject()(identify: IdentifierAction,
                                              transformationService: TransformationService,
                                              taxableMigrationService: TaxableMigrationService)
                                             (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AddTransformationController(identify, transformationService, taxableMigrationService) {
+  extends AddTransformationController(identify, transformationService, taxableMigrationService) with AssetController {
 
   def add(identifier: String): Action[JsValue] = addNewTransform[NaturalPersonType](identifier)
 

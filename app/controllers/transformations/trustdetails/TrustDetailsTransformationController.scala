@@ -18,6 +18,7 @@ package controllers.transformations.trustdetails
 
 import controllers.actions.IdentifierAction
 import controllers.transformations.AddTransformationController
+import controllers.transformations.assets.AssetController
 import models.ResidentialStatusType
 import models.variation.{MigratingTrustDetails, NonMigratingTrustDetails}
 import play.api.libs.json._
@@ -35,7 +36,7 @@ class TrustDetailsTransformationController @Inject()(identify: IdentifierAction,
                                                      transformationService: TransformationService,
                                                      taxableMigrationService: TaxableMigrationService)
                                                     (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AddTransformationController(identify, transformationService, taxableMigrationService) {
+  extends AddTransformationController(identify, transformationService, taxableMigrationService) with AssetController {
 
   def setExpress(identifier: String): Action[JsValue] = addNewTransform[Boolean](identifier, EXPRESS)
   def setResident(identifier: String): Action[JsValue] = addNewTransform[Boolean](identifier, UK_RESIDENT)
