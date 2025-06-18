@@ -50,7 +50,6 @@ abstract class AddTransformationController @Inject()(identify: IdentifierAction,
         request.body.validate[T] match {
 
           case JsSuccess(entityToAdd, _) =>
-            println("=========================== JsSuccess =================================" + entityToAdd + "=========================== JsSuccess =================================")
             val expectedResult = for {
               trust <- transformationService.getTransformedTrustJson(identifier, request.internalId, Session.id(hc))
               isTaxable <- isTrustTaxable(trust)
@@ -89,8 +88,6 @@ abstract class AddTransformationController @Inject()(identify: IdentifierAction,
                                           migratingFromNonTaxableToTaxable: Boolean,
                                           addMultipleTransforms: Boolean)
                                          (implicit wts: Writes[A], request: IdentifierRequest[JsValue]): TrustEnvelope[Boolean] = {
-println("=============================" + entityToAdd + "=============================")
-    println("=========================== addTransformOrTransforms method =================================")
     def addTransform[B](value: B, `type`: String)(implicit wts: Writes[B]): TrustEnvelope[Boolean] = {
       transformationService.addNewTransform(
         identifier = identifier,
