@@ -35,19 +35,19 @@ class AddAssetController @Inject()(identify: IdentifierAction,
                                   (implicit ec: ExecutionContext, cc: ControllerComponents)
   extends AddTransformationController(identify, transformationService, taxableMigrationService) with AssetController {
 
-  def addMoney(identifier: String): Action[JsValue] = addNewTransform[AssetMonetaryAmountType](identifier, MONEY_ASSET)
+  def addMoney(identifier: String, index: Int): Action[JsValue] = addNewTransform[AssetMonetaryAmountType](identifier, MONEY_ASSET, false, Some(index))
 
-  def addPropertyOrLand(identifier: String): Action[JsValue] = addNewTransform[PropertyLandType](identifier, PROPERTY_OR_LAND_ASSET)
+  def addPropertyOrLand(identifier: String, index: Int): Action[JsValue] = addNewTransform[PropertyLandType](identifier, PROPERTY_OR_LAND_ASSET, false, Some(index))
 
-  def addShares(identifier: String): Action[JsValue] = addNewTransform[SharesType](identifier, SHARES_ASSET)
+  def addShares(identifier: String, index: Int): Action[JsValue] = addNewTransform[SharesType](identifier, SHARES_ASSET, false, Some(index))
 
-  def addBusiness(identifier: String): Action[JsValue] = addNewTransform[BusinessAssetType](identifier, BUSINESS_ASSET)
+  def addBusiness(identifier: String, index: Int): Action[JsValue] = addNewTransform[BusinessAssetType](identifier, BUSINESS_ASSET, false, Some(index))
 
   def addPartnership(identifier: String, index: Int): Action[JsValue] = addNewTransform[PartnershipType](identifier, PARTNERSHIP_ASSET, false, Some(index))
 
-  def addOther(identifier: String): Action[JsValue] = addNewTransform[OtherAssetType](identifier, OTHER_ASSET)
+  def addOther(identifier: String, index: Int): Action[JsValue] = addNewTransform[OtherAssetType](identifier, OTHER_ASSET, false, Some(index))
 
-  def addNonEeaBusiness(identifier: String): Action[JsValue] = addNewTransform[NonEEABusinessType](identifier, NON_EEA_BUSINESS_ASSET)
+  def addNonEeaBusiness(identifier: String, index: Int): Action[JsValue] = addNewTransform[NonEEABusinessType](identifier, NON_EEA_BUSINESS_ASSET, false, Some(index))
 
   override def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)
                            (implicit wts: Writes[T]): DeltaTransform = {
