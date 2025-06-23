@@ -3,7 +3,7 @@ GET         /:identifier/transformed/lead-trustee     controllers.GetTrustContro
 
 GET         /:identifier/transformed/trustee          controllers.GetTrustController.getTrustees(identifier: String)
 
-POST        /add-new-lead/:identifier/                controllers.transformations.trustees.DemoteLeadTrusteeController.demote(identifier: String)
+POST        /add-new-lead/:identifier                 controllers.transformations.trustees.DemoteLeadTrusteeController.demote(identifier: String)
 
 POST        /amend-lead/:identifier                   controllers.transformations.trustees.AmendTrusteeController.amendLeadTrustee(identifier: String)
 
