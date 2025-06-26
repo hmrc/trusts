@@ -30,6 +30,7 @@ trait TransformationHelper {
 
   def findJson(json: JsValue, `type`: String, index: Option[Int]): TrustEnvelope[JsObject] = EitherT {
     val p = path(`type`, index)
+    println("==============================p========================"+p+"::::::::::::::; json "+json)
     json.transform(p.json.pick).fold(
       _ => Future.successful(Left(ServerError(s"Could not locate json at $p"))),
       value => Future.successful(Right(value.as[JsObject]))

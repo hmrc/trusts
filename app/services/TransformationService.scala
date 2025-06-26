@@ -152,9 +152,13 @@ class TransformationService @Inject()(repository: TransformationRepository,
   def addNewTransform(identifier: String, internalId: String, newTransform: DeltaTransform)
                      (implicit hc: HeaderCarrier): TrustEnvelope[Boolean] = EitherT {
     repository.get(identifier, internalId, Session.id(hc)).value.map {
-      case Right(None) => Right(ComposedDeltaTransform(Seq(newTransform)))
-      case Right(Some(composedTransform)) => Right(composedTransform :+ newTransform)
+      case Right(None) => println("111111111111111111")
+        Right(ComposedDeltaTransform(Seq(newTransform)))
+      case Right(Some(composedTransform)) =>
+        println("22222222222222222222222222")
+        Right(composedTransform :+ newTransform)
       case Left(_) =>
+        println("333333333333333333")
         logger.warn(s"[$className][addNewTransform] Exception from mongo, failed to get data from repository.")
         Left(ServerError())
     }.flatMap {
