@@ -16,7 +16,7 @@ POST       /amend-business/:identifier/:index                           controll
 POST       /add-partnership/:identifier/:index                          controllers.transformations.assets.AddAssetController.addPartnership(identifier: String, index: Int)
 POST       /amend-partnership/:identifier/:index                        controllers.transformations.assets.AmendAssetController.amendPartnership(identifier: String, index: Int)
 
-POST       /add-other/:identifier                                       controllers.transformations.assets.AddAssetController.addOther(identifier: String, index: Int)
+POST       /add-other/:identifier/:index                                       controllers.transformations.assets.AddAssetController.addOther(identifier: String, index: Int)
 POST       /amend-other/:identifier/:index                              controllers.transformations.assets.AmendAssetController.amendOther(identifier: String, index: Int)
 
 POST       /add-non-eea-business/:identifier/:index                     controllers.transformations.assets.AddAssetController.addNonEeaBusiness(identifier: String, index: Int)
