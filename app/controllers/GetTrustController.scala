@@ -253,6 +253,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   }
 
   private def resetCacheIfRequested(identifier: String, internalId: String, sessionId: String, refreshEtmpData: Boolean): TrustEnvelope[Unit] = EitherT {
+    logger.info(s"resetCacheIfRequested --start $identifier, $internalId, $sessionId, $refreshEtmpData")
     if (refreshEtmpData) {
       val resetTransforms = transformationService.removeAllTransformations(identifier, internalId, sessionId)
       val resetCache = trustsService.resetCache(identifier, internalId, sessionId)
@@ -280,7 +281,7 @@ class GetTrustController @Inject()(identify: IdentifierAction,
   private def doGet(identifier: String, applyTransformations: Boolean, refreshEtmpData: Boolean = false)
                    (f: GetTrustSuccessResponse => Result): Action[AnyContent] = (validateIdentifier(identifier) andThen identify).async {
     implicit request => {
-
+      logger.info(s"doGet ... start $identifier, $applyTransformations, $refreshEtmpData")
       val expectedResult = for {
         _ <- resetCacheIfRequested(identifier, request.internalId, Session.id(hc), refreshEtmpData)
         data <- if (applyTransformations) {

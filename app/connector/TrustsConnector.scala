@@ -109,18 +109,19 @@ class TrustsConnector @Inject()(http: HttpClientV2, config: AppConfig)(implicit 
 
   def getTrustInfo(identifier: String): TrustEnvelope[GetTrustResponse] = EitherT {
     val correlationId = UUID.randomUUID().toString
-
+    logger.info(s"getTrustInfo Connector...start $identifier, $correlationId")
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
     logger.info(s"[$className][getTrustInfo][Session ID: ${Session.id(hc)}][UTR/URN: $identifier]" +
       s" getting playback for trust for correlationId: $correlationId")
     val fullUrl = get5MLDTrustOrEstateEndpoint(identifier)
-    http.get(url"$fullUrl")
+    http
+      .get(url"$fullUrl")
       .execute[GetTrustResponse](GetTrustResponse.httpReads(identifier), ec)
       .map(Right(_)).recover {
-      case ex =>
-        Left(handleError(new Exception("Failed to getTrustInfo"),"getTrustInfo", get5MLDTrustOrEstateEndpoint(identifier)))
-    }
+        case ex =>
+          Left(handleError(new Exception("Failed to getTrustInfo"),"getTrustInfo", fullUrl))
+      }
   }
 
   def trustVariation(trustVariations: JsValue): TrustEnvelope[VariationSuccessResponse] = EitherT {

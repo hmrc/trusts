@@ -46,6 +46,7 @@ trait RepositoryHelper[T] extends Logging {
   private def createKey(identifier: String, internalId: String, sessionId: String): String = s"$identifier-$internalId-$sessionId"
 
   def getOpt(identifier: String, internalId: String, sessionId: String)(implicit rds: Reads[T]): TrustEnvelope[Option[T]] = EitherT {
+    logger.info(s"getOpt... start $identifier, $internalId, $sessionId")
     collection.find[BsonDocument](selector(identifier, internalId, sessionId))
       .headOption()
       .map { optBsonDocument =>
