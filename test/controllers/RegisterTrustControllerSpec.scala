@@ -263,6 +263,30 @@ class RegisterTrustControllerSpec extends BaseSpec {
         verify(rosmPatternService, times(0)).enrolAndLogResult(any(), any(), any())(any[HeaderCarrier])
       }
 
+      "input request fails schema validation for missing settlor data" in {
+
+        val SUT = new RegisterTrustController(
+          mockTrustsService,
+          appConfig,
+          validationService,
+          fakeOrganisationAuthAction,
+          rosmPatternService,
+          mockNonRepudiationService,
+          Helpers.stubControllerComponents(),
+          default5mldDataService
+        )
+
+        val result = SUT.registration().apply(postRequestWithPayload(Json.parse(invalidRegistrationRequestMissingSettlorDataJson)))
+
+        status(result) mustBe BAD_REQUEST
+
+        val output = contentAsJson(result)
+        (output \ "code").as[String] mustBe "BAD_REQUEST"
+        (output \ "message").as[String] mustBe "Provided request is invalid."
+
+        verify(rosmPatternService, times(0)).enrolAndLogResult(any(), any(), any())(any[HeaderCarrier])
+      }
+
       "input request fails business validation" in {
 
         val SUT = new RegisterTrustController(

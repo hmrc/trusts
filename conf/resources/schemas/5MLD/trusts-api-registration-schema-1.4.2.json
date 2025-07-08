@@ -404,7 +404,8 @@
       },
       "required": [
         "beneficiary",
-        "leadTrustees"
+        "leadTrustees",
+        "settlors"
       ],
       "additionalProperties": false
     },
