@@ -78,6 +78,7 @@ class TrustsService @Inject()(val trustsConnector: TrustsConnector,
   }
 
   def refreshCacheAndGetTrustInfo(identifier: String, internalId: String, sessionId: String): TrustEnvelope[GetTrustResponse] = EitherT {
+    logger.info(s"refreshCacheAndGetTrustInfo...start $identifier, $internalId, $sessionId")
     repository.resetCache(identifier, internalId, sessionId).value.flatMap {
       case Right(_) =>
         trustsConnector.getTrustInfo(identifier).value.flatMap {
@@ -103,6 +104,7 @@ class TrustsService @Inject()(val trustsConnector: TrustsConnector,
   }
 
   def getTrustInfo(identifier: String, internalId: String, sessionId: String): TrustEnvelope[GetTrustResponse] = EitherT {
+    logger.info(s"getTrustInfo..start $identifier, $internalId, $sessionId")
     repository.get(identifier, internalId, sessionId).value.flatMap {
       case Right(Some(value)) =>
         value.validate[GetTrustSuccessResponse].fold(
