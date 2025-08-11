@@ -18,6 +18,8 @@ package uk.gov.hmrc.repositories
 
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import models.registration.RegistrationSubmissionDraft
+import org.bson.BsonType
+import org.mongodb.scala.model.Filters.`type`
 import org.scalatest.matchers.must.Matchers._
 import play.api.Application
 import play.api.inject.bind
@@ -27,13 +29,14 @@ import play.api.test.Helpers.stubControllerComponents
 import repositories.RegistrationSubmissionRepositoryImpl
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.itbase.IntegrationTestBase
+import uk.gov.hmrc.mongo.test.MongoSupport
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-class RegistrationSubmissionRepositorySpec extends IntegrationTestBase {
+class RegistrationSubmissionRepositorySpec extends IntegrationTestBase with MongoSupport {
 
   // Make sure we use value of Instant that survives JSON round trip - and isn't expired.
   private val testDateTime: Instant = Instant.now.truncatedTo(ChronoUnit.MILLIS)
@@ -210,6 +213,28 @@ class RegistrationSubmissionRepositorySpec extends IntegrationTestBase {
 
       Await.result(repository.removeAllDrafts().value, Duration.Inf)
 
+      repository.getRecentDrafts("InternalId", Agent).value.futureValue.map(_.size) mustBe Right(50)
+    })
+
+    "be able to store and retrieve a payload with correct date time format" in assertMongoTest(createApplication)({ app =>
+      val repository = app.injector.instanceOf[RegistrationSubmissionRepositoryImpl]
+
+      for (i <- 0 until 50) {
+        val draft = RegistrationSubmissionDraft(
+          s"draftId$i",
+          "InternalId",
+          testDateTime,
+          data1,
+          Some("reference1"),
+          Some(true)
+        )
+        Await.result(repository.setDraft(draft).value, Duration.Inf)
+      }
+
+      val query = `type`("createdAt", BsonType.DATE_TIME)
+      val documents = repository.collection.countDocuments(query).toFuture().futureValue.toInt
+
+      documents must be > 0
       repository.getRecentDrafts("InternalId", Agent).value.futureValue.map(_.size) mustBe Right(50)
     })
   }

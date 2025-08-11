@@ -81,7 +81,7 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
 
   val ttlInSeconds: Int = configuration.get[Int]("mongodb.ttlSeconds")
 
-  val dropIndexesEnabled: Boolean = configuration.get[Boolean]("features.mongo.dropIndexes")
+  val dropIndexesEnabled: Boolean = configuration.getOptional[Boolean]("features.mongo.dropIndexes").getOrElse(false)
 
   val registrationTtlInSeconds: Int = configuration.get[Int]("mongodb.registration.ttlSeconds")
 

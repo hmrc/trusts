@@ -44,7 +44,8 @@ class CacheRepositoryImpl @Inject()(
       Indexes.ascending("id"),
       IndexOptions().name("id-index").unique(false)
     )
-  )
+  ),
+  replaceIndexes = config.dropIndexesEnabled
 ) with RepositoryHelper[JsValue] with CacheRepository {
 
   override implicit val executionContext: ExecutionContext = ec

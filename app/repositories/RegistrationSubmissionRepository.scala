@@ -69,7 +69,8 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
         Indexes.ascending("internalId"),
         IndexOptions().name("internal-id-index")
       )
-    )
+    ),
+    replaceIndexes = config.dropIndexesEnabled
   ) with RegistrationSubmissionRepository with Logging {
 
   private val className = this.getClass.getSimpleName
@@ -140,7 +141,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
   }
 
   override def getRecentDrafts(internalId: String, affinityGroup: AffinityGroup): TrustEnvelope[Seq[RegistrationSubmissionDraft]] = EitherT {
-    val maxDocs = if (affinityGroup == Organisation) 1 else Int.MaxValue
+    val maxDocs = if (affinityGroup == Organisation) 1 else Short.MaxValue.toInt
 
     val selector = and(
       equal("internalId", internalId),
