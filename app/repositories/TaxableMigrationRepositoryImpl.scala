@@ -44,7 +44,8 @@ class TaxableMigrationRepositoryImpl @Inject()(
       Indexes.ascending("id"),
       IndexOptions().name("id-index").unique(false)
     )
-  )
+  ),
+  replaceIndexes = config.dropIndexesEnabled
 ) with RepositoryHelper[Boolean] with TaxableMigrationRepository {
 
   override implicit val executionContext: ExecutionContext = ec

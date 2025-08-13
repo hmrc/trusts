@@ -19,7 +19,7 @@ package repositories
 import cats.data.EitherT
 import errors.ServerError
 import org.mongodb.scala.MongoException
-import org.mongodb.scala.bson.BsonDocument
+import org.mongodb.scala.bson.{BsonDateTime, BsonDocument}
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.UpdateOptions
@@ -30,7 +30,7 @@ import uk.gov.hmrc.mongo.play.json.Codecs.toBson
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import utils.TrustEnvelope.TrustEnvelope
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.Instant
 import scala.concurrent.ExecutionContext
 
 trait RepositoryHelper[T] extends Logging {
@@ -79,10 +79,9 @@ trait RepositoryHelper[T] extends Logging {
   }
 
   def upsert(identifier: String, internalId: String, sessionId: String, data: T)(implicit wts: Writes[T]): TrustEnvelope[Boolean] = EitherT {
-
     val modifier = combine(
       set("id", toBson(createKey(identifier, internalId, sessionId))),
-      set("updatedAt", toBson(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli)),
+      set("updatedAt", BsonDateTime(Instant.now().toEpochMilli)),
       set(key, toBson(data))
     )
 

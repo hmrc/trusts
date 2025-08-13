@@ -2,15 +2,15 @@ import sbt.*
 
 object AppDependencies {
 
-  private val mongoHmrcVersion = "2.6.0"
-  private val playBootstrapVersion = "9.13.0"
+  private val mongoHmrcVersion = "2.7.0"
+  private val playBootstrapVersion = "9.19.0"
 
   val compile: Seq[ModuleID] = Seq(
     "uk.gov.hmrc.mongo"             %% "hmrc-mongo-play-30"         % mongoHmrcVersion,
     "uk.gov.hmrc"                   %% "bootstrap-backend-play-30"  % playBootstrapVersion,
     "com.github.java-json-tools"    %  "json-schema-validator"      % "2.2.14",
     "uk.gov.hmrc"                   %% "tax-year"                   % "6.0.0",
-    "commons-codec"                 %  "commons-codec"              % "20041127.091804",
+    "commons-codec"                 %  "commons-codec"              % "1.19.0",
     "org.typelevel"                 %% "cats-core"                  % "2.13.0"
   )
 

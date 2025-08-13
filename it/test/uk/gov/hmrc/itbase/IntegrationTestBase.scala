@@ -18,7 +18,6 @@ package uk.gov.hmrc.itbase
 
 import config.AppConfig
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import models.MongoDateTimeFormats
 import org.mongodb.scala.bson.BsonDocument
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -27,48 +26,43 @@ import org.scalatest.{Assertion, BeforeAndAfterEach, EitherValues}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
-import play.api.inject.bind
+import play.api.inject.{Injector, bind}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers.stubControllerComponents
 import repositories.{CacheRepositoryImpl, RegistrationSubmissionRepositoryImpl, TaxableMigrationRepositoryImpl, TransformationRepositoryImpl}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.DurationInt
 
 class IntegrationTestBase extends AnyWordSpec
   with GuiceOneServerPerSuite
   with ScalaFutures
-  with MongoDateTimeFormats
   with MockitoSugar
   with BeforeAndAfterEach
   with EitherValues {
 
   implicit val defaultPatience: PatienceConfig = PatienceConfig(timeout = Span(30, Seconds), interval = Span(15, Millis))
 
-  val connectionString = "mongodb://localhost:27017/trusts-integration"
-
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
 
   private val cc = stubControllerComponents()
 
-  lazy val createApplication = applicationBuilder
+  lazy val createApplication: Application = applicationBuilder
     .overrides(
       bind[IdentifierAction].toInstance(new FakeIdentifierAction(cc.parsers.default, Agent))
     ).build()
 
-  def injector = createApplication.injector
+  def injector: Injector = createApplication.injector
 
   def appConfig: AppConfig = injector.instanceOf[AppConfig]
 
   def applicationBuilder: GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .configure(Seq(
-        "mongodb.uri" -> connectionString,
         "metrics.enabled" -> false,
-        "auditing.enabled" -> false,
-        "features.mongo.dropIndexes" -> true
+        "auditing.enabled" -> false
       ): _*)
 
   def cleanDatabase(application: Application): Unit = {
@@ -83,7 +77,6 @@ class IntegrationTestBase extends AnyWordSpec
       Await.result(db.collection.deleteMany(BsonDocument()).toFuture(), 10.seconds).wasAcknowledged()
     )
 
-
     assert(cleanDbs, "Mongo DB was not cleaned properly or something went wrong!")
   }
 
@@ -91,5 +84,7 @@ class IntegrationTestBase extends AnyWordSpec
       cleanDatabase(application)
       block(application)
   }
+
+  def await[A](future: Future[A]): A = Await.result(future, 10.seconds)
 
 }

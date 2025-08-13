@@ -44,7 +44,8 @@ class TransformationRepositoryImpl @Inject()(
       Indexes.ascending("id"),
       IndexOptions().name("id-index").unique(false)
     )
-  )
+  ),
+  replaceIndexes = config.dropIndexesEnabled
 ) with RepositoryHelper[ComposedDeltaTransform] with TransformationRepository {
   override implicit val executionContext: ExecutionContext = ec
   override val className: String = "TransformationRepositoryImpl"
