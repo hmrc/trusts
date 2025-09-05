@@ -21,6 +21,7 @@ import connector.{TaxEnrolmentConnector, TaxEnrolmentConnectorImpl}
 import controllers.actions.{AuthenticatedIdentifierAction, IdentifierAction}
 import repositories._
 import retry.{NrsRetryHelper, RetryHelper}
+import scheduler.SchedulerForLastUpdated
 import services.rosm.{RosmPatternService, RosmPatternServiceImpl, TaxEnrolmentsService, TaxEnrolmentsServiceImpl}
 
 class Module extends AbstractModule {
@@ -39,5 +40,7 @@ class Module extends AbstractModule {
     bind(classOf[RosmPatternService]).to(classOf[RosmPatternServiceImpl]).asEagerSingleton()
 
     bind(classOf[RetryHelper]).to(classOf[NrsRetryHelper]).asEagerSingleton()
+
+    bind(classOf[SchedulerForLastUpdated]).asEagerSingleton()
   }
 }
