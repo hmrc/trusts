@@ -19,10 +19,14 @@ package repositories
 import cats.data.EitherT
 import config.AppConfig
 import errors.ServerError
+import models.UpdatedCounterValues
 import models.registration.{RegistrationSubmissionDraft, RegistrationSubmissionDraftDB}
-import org.mongodb.scala.MongoException
+import org.bson.BsonType
+import org.bson.types.ObjectId
+import org.mongodb.scala.bson.{BsonDateTime, BsonDocument}
 import org.mongodb.scala.model.Filters.{and, empty, equal}
 import org.mongodb.scala.model._
+import org.mongodb.scala.{MongoException, Observable}
 import play.api.Logging
 import play.api.libs.json.Format
 import uk.gov.hmrc.auth.core.AffinityGroup
@@ -31,9 +35,11 @@ import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import utils.TrustEnvelope.TrustEnvelope
 
+import java.time.Instant
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 trait RegistrationSubmissionRepository {
 
@@ -46,6 +52,11 @@ trait RegistrationSubmissionRepository {
   def removeDraft(draftId: String, internalId: String): TrustEnvelope[Boolean]
 
   def removeAllDrafts(): TrustEnvelope[Boolean]
+
+  def getAllInvalidDateDocuments(limit: Int = 1000): Observable[ObjectId]
+
+  def updateAllInvalidDateDocuments(ids: Seq[ObjectId]): Future[UpdatedCounterValues]
+
 }
 
 class RegistrationSubmissionRepositoryImpl @Inject()(
@@ -73,29 +84,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
     replaceIndexes = config.dropIndexesEnabled
   ) with RegistrationSubmissionRepository with Logging {
 
-  private val className = this.getClass.getSimpleName
-
-  private def convertFromDBModel(dbModel: RegistrationSubmissionDraftDB): RegistrationSubmissionDraft = {
-    RegistrationSubmissionDraft(
-      draftId = dbModel.draftId,
-      internalId = dbModel.internalId,
-      createdAt = dbModel.createdAt,
-      draftData = dbModel.draftData,
-      reference = dbModel.reference,
-      inProgress = dbModel.inProgress
-    )
-  }
-
-  private def convertToDBModel(ogModel: RegistrationSubmissionDraft): RegistrationSubmissionDraftDB = {
-    RegistrationSubmissionDraftDB(
-      draftId = ogModel.draftId,
-      internalId = ogModel.internalId,
-      createdAt = ogModel.createdAt,
-      draftData = ogModel.draftData,
-      reference = ogModel.reference,
-      inProgress = ogModel.inProgress
-    )
-  }
+  val className = this.getClass.getSimpleName
 
   override def setDraft(uiState: RegistrationSubmissionDraft): TrustEnvelope[Boolean] = EitherT {
 
@@ -112,13 +101,24 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
         case Some(_) => Right(true)
         case None => Right(false)
       }.recover {
-      case e: MongoException =>
-        logger.error(s"[$className][setDraft] failed to update $collectionName ${e.getMessage}")
-        Left(ServerError(e.getMessage))
-      case e: Exception =>
-        logger.error(s"[$className][setDraft] $collectionName ${e.getMessage}")
-        Left(ServerError(e.getMessage))
-    }
+        case e: MongoException =>
+          logger.error(s"[$className][setDraft] failed to update $collectionName ${e.getMessage}")
+          Left(ServerError(e.getMessage))
+        case e: Exception =>
+          logger.error(s"[$className][setDraft] $collectionName ${e.getMessage}")
+          Left(ServerError(e.getMessage))
+      }
+  }
+
+  private def convertToDBModel(ogModel: RegistrationSubmissionDraft): RegistrationSubmissionDraftDB = {
+    RegistrationSubmissionDraftDB(
+      draftId = ogModel.draftId,
+      internalId = ogModel.internalId,
+      createdAt = ogModel.createdAt,
+      draftData = ogModel.draftData,
+      reference = ogModel.reference,
+      inProgress = ogModel.inProgress
+    )
   }
 
   override def getDraft(draftId: String, internalId: String): TrustEnvelope[Option[RegistrationSubmissionDraft]] = EitherT {
@@ -131,13 +131,13 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
       .toFutureOption()
       .map(optDraft => Right(optDraft.map(convertFromDBModel))
       ).recover {
-      case e: MongoException =>
-        logger.error(s"[$className][getDraft] failed to fetch from $collectionName ${e.getMessage}")
-        Left(ServerError(e.getMessage))
-      case e: Exception =>
-        logger.error(s"[$className][getDraft] $collectionName ${e.getMessage}")
-        Left(ServerError(e.getMessage))
-    }
+        case e: MongoException =>
+          logger.error(s"[$className][getDraft] failed to fetch from $collectionName ${e.getMessage}")
+          Left(ServerError(e.getMessage))
+        case e: Exception =>
+          logger.error(s"[$className][getDraft] $collectionName ${e.getMessage}")
+          Left(ServerError(e.getMessage))
+      }
   }
 
   override def getRecentDrafts(internalId: String, affinityGroup: AffinityGroup): TrustEnvelope[Seq[RegistrationSubmissionDraft]] = EitherT {
@@ -154,14 +154,25 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
       .toFuture()
       .map { seq => Right(seq.map(convertFromDBModel))
       }.recover {
-      case e: MongoException =>
-        logger.error(s"[$className][getRecentDrafts] failed to fetch from $collectionName ${e.getMessage}")
-        Left(ServerError(e.getMessage))
-      case e: Exception =>
-        logger.error(s"[$className][getRecentDrafts] $collectionName ${e.getMessage}")
-        Left(ServerError(e.getMessage))
-    }
+        case e: MongoException =>
+          logger.error(s"[$className][getRecentDrafts] failed to fetch from $collectionName ${e.getMessage}")
+          Left(ServerError(e.getMessage))
+        case e: Exception =>
+          logger.error(s"[$className][getRecentDrafts] $collectionName ${e.getMessage}")
+          Left(ServerError(e.getMessage))
+      }
 
+  }
+
+  private def convertFromDBModel(dbModel: RegistrationSubmissionDraftDB): RegistrationSubmissionDraft = {
+    RegistrationSubmissionDraft(
+      draftId = dbModel.draftId,
+      internalId = dbModel.internalId,
+      createdAt = dbModel.createdAt,
+      draftData = dbModel.draftData,
+      reference = dbModel.reference,
+      inProgress = dbModel.inProgress
+    )
   }
 
   override def removeDraft(draftId: String, internalId: String): TrustEnvelope[Boolean] = EitherT {
@@ -194,15 +205,38 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
           logger.info(s"[$className][removeAllDrafts] Removing all registration submissions.")
           Right(deleteResult.wasAcknowledged())
         }.recover {
-        case e: MongoException =>
-          logger.error(s"[$className][removeAllDrafts] failed to removeAll drafts from $collectionName ${e.getMessage}")
-          Left(ServerError(e.getMessage))
-        case e: Exception =>
-          logger.error(s"[$className][removeAllDrafts] $collectionName ${e.getMessage}")
-          Left(ServerError(e.getMessage))
-      }
+          case e: MongoException =>
+            logger.error(s"[$className][removeAllDrafts] failed to removeAll drafts from $collectionName ${e.getMessage}")
+            Left(ServerError(e.getMessage))
+          case e: Exception =>
+            logger.error(s"[$className][removeAllDrafts] $collectionName ${e.getMessage}")
+            Left(ServerError(e.getMessage))
+        }
     } else {
       Future.successful(Right(true))
     }
+  }
+
+
+  override def getAllInvalidDateDocuments(limit: Int): Observable[ObjectId] = {
+    val selector = Filters.not(Filters.`type`("updatedAt", BsonType.DATE_TIME))
+    val sortById = Sorts.ascending("_id")
+    collection.find[BsonDocument](selector).sort(sortById).limit(limit)
+      .map(jsToObjectId)
+  }
+
+  private def jsToObjectId(js: BsonDocument): ObjectId =
+    Try(js.getObjectId("_id").getValue) match {
+      case Failure(exception) => logger.error(s"[$className][jsToObjectId] $collectionName ${exception.getMessage}")
+        throw new Exception("not found")
+      case Success(value) => value
+    }
+
+  override def updateAllInvalidDateDocuments(ids: Seq[ObjectId]): Future[UpdatedCounterValues] = {
+    val update = Updates.set("updatedAt", BsonDateTime(Instant.now().toEpochMilli))
+    val filterIn = Filters.in("_id", ids: _*)
+    collection.updateMany(filterIn, update).toFuture()
+      .map(_ => UpdatedCounterValues(matched = ids.size, updated = ids.size, errors = 0))
+      .recover { case _ => UpdatedCounterValues(matched = ids.size, updated = 0, errors = ids.size) }
   }
 }

@@ -22,31 +22,23 @@ import org.apache.pekko.stream.scaladsl.{Keep, Sink, SinkQueueWithCancel, Source
 import org.apache.pekko.stream.{ActorAttributes, Materializer}
 import org.bson.types.ObjectId
 import play.api.{Configuration, Logger}
-import repositories.RepositoryHelper
+import repositories.RegistrationSubmissionRepositoryImpl
 
-import javax.inject.Singleton
 import scala.concurrent.duration.FiniteDuration
-import scala.jdk.CollectionConverters.CollectionHasAsScala
 
-@Singleton
-class SchedulerForLastUpdated @Inject()(repositoriesJava: java.util.Set[RepositoryHelper[_]],
-                                        config: Configuration
-                                       )(implicit mat: Materializer) extends WorkerConfig {
+class SchedulerForRegistrationSubmissionRepo @Inject()(registrationSubmissionRepo: RegistrationSubmissionRepositoryImpl,
+                                                       config: Configuration)
+                                                      (implicit mat: Materializer) extends WorkerConfig {
 
 
   private val logger = Logger(this.getClass)
   private val initialDelay: FiniteDuration = durationValueFromConfig("workers.metrics-worker.initial-delay", config)
   private val interval: FiniteDuration = durationValueFromConfig("workers.metrics-worker.interval ", config)
 
-  private val repositories = repositoriesJava.asScala.toSeq
-
-
-  logger.info("################### SchedulerForLastUpdated started ###################")
-
 
   val tap: SinkQueueWithCancel[Unit] = {
     Source
-      .tick(initialDelay, interval, fixBadUpdatedAt(limit = 1000))
+      .tick(initialDelay, interval, fixBadUpdatedAt())
       .flatMapConcat(identity)
       .wireTapMat(Sink.queue())(Keep.right)
       .toMat(Sink.ignore)(Keep.left)
@@ -55,23 +47,20 @@ class SchedulerForLastUpdated @Inject()(repositoriesJava: java.util.Set[Reposito
   }
 
   def fixBadUpdatedAt(limit: Int = 1000): Source[Unit, _] = {
-    val repositoryHelper = repositories.map {
-      ele =>
-        logger.info("################### fixBadUpdatedAt started ###################" + ele)
-        Source
-          .fromPublisher(ele.getAllInvalidDateDocuments(limit = limit))
-          .fold(List.empty[ObjectId])((acc, id) => id :: acc)
-          .mapAsync(parallelism = 1) { ids =>
-            if (ids.isEmpty) {
-              scala.concurrent.Future.successful(UpdatedCounterValues(0, 0, 0)).map(_.report(ele.className))(mat.executionContext)
-            } else {
-              ele.updateAllInvalidDateDocuments(ids)
-                .map(_.report(ele.className))(mat.executionContext)
-            }
-          }
-    }
-    repositoryHelper.reduce(_ concat _)
+
+    logger.info("################### fixBadUpdatedAt started ###################" + registrationSubmissionRepo)
+    Source
+      .fromPublisher(registrationSubmissionRepo.getAllInvalidDateDocuments(limit = limit))
+      .fold(List.empty[ObjectId])((acc, id) => id :: acc)
+      .mapAsync(parallelism = 1) { ids =>
+        if (ids.isEmpty) {
+          scala.concurrent.Future.successful(UpdatedCounterValues(0, 0, 0))
+            .map(_.report(registrationSubmissionRepo.className))(mat.executionContext)
+        } else {
+          registrationSubmissionRepo.updateAllInvalidDateDocuments(ids)
+            .map(_.report(registrationSubmissionRepo.className))(mat.executionContext)
+        }
+      }
   }
 
-  logger.info("################### SchedulerForLastUpdated ended ###################")
 }

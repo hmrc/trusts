@@ -16,8 +16,6 @@
 
 package models
 
-import play.api.i18n.Lang.logger
-
 case class UpdatedCounterValues(matched: Long = 0L, updated: Long = 0L, errors: Long = 0L) {
 
   def +(other: UpdatedCounterValues): UpdatedCounterValues =
@@ -27,6 +25,6 @@ case class UpdatedCounterValues(matched: Long = 0L, updated: Long = 0L, errors: 
       errors = errors + other.errors
     )
 
-  def report(): Unit =
-    logger.info(s"[UpdatedCounterValues] matched=$matched updated=$updated errors=$errors")
+  def report(name:String): Unit =
+    println(s"[UpdatedCounterValues] matched=$matched updated=$updated errors=$errors name = $name  ")
 }

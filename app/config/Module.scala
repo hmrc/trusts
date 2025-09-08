@@ -16,12 +16,13 @@
 
 package config
 
-import com.google.inject.AbstractModule
+import com.google.inject.{AbstractModule, TypeLiteral}
+import com.google.inject.multibindings.Multibinder
 import connector.{TaxEnrolmentConnector, TaxEnrolmentConnectorImpl}
 import controllers.actions.{AuthenticatedIdentifierAction, IdentifierAction}
 import repositories._
 import retry.{NrsRetryHelper, RetryHelper}
-import scheduler.SchedulerForLastUpdated
+import scheduler.{SchedulerForLastUpdated, SchedulerForRegistrationSubmissionRepo}
 import services.rosm.{RosmPatternService, RosmPatternServiceImpl, TaxEnrolmentsService, TaxEnrolmentsServiceImpl}
 
 class Module extends AbstractModule {
@@ -41,6 +42,22 @@ class Module extends AbstractModule {
 
     bind(classOf[RetryHelper]).to(classOf[NrsRetryHelper]).asEagerSingleton()
 
+
+    val juiceBinder = Multibinder.newSetBinder(
+      binder(),
+      new TypeLiteral[RepositoryHelper[_]]() {}
+    )
+
+    juiceBinder.addBinding().to(classOf[TransformationRepositoryImpl])
+    juiceBinder.addBinding().to(classOf[CacheRepositoryImpl])
+    juiceBinder.addBinding().to(classOf[TaxableMigrationRepositoryImpl])
+
     bind(classOf[SchedulerForLastUpdated]).asEagerSingleton()
+
+
+    bind(classOf[SchedulerForRegistrationSubmissionRepo]).asEagerSingleton()
+
+
+
   }
 }
