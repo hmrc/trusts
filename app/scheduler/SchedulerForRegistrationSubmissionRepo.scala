@@ -37,6 +37,7 @@ class SchedulerForRegistrationSubmissionRepo @Inject()(registrationSubmissionRep
 
 
   val tap: SinkQueueWithCancel[Unit] = {
+    logger.info("[SchedulerForRegistrationSubmissionRepo] init")
     Source
       .tick(initialDelay, interval, fixBadUpdatedAt())
       .flatMapConcat(identity)
@@ -44,23 +45,31 @@ class SchedulerForRegistrationSubmissionRepo @Inject()(registrationSubmissionRep
       .toMat(Sink.ignore)(Keep.left)
       .withAttributes(ActorAttributes.supervisionStrategy(supervisionStrategy))
       .run()
+
   }
 
   def fixBadUpdatedAt(limit: Int = 1000): Source[Unit, _] = {
-
-    logger.info("################### fixBadUpdatedAt started ###################" + registrationSubmissionRepo)
+    logger.info("[SchedulerForRegistrationSubmissionRepo][fixBadUpdatedAt] Calling " + registrationSubmissionRepo)
+    logger.info(s"started [$registrationSubmissionRepo][fixBadUpdatedAt] method with limit = $limit")
     Source
       .fromPublisher(registrationSubmissionRepo.getAllInvalidDateDocuments(limit = limit))
       .fold(List.empty[ObjectId])((acc, id) => id :: acc)
       .mapAsync(parallelism = 1) { ids =>
         if (ids.isEmpty) {
+
           scala.concurrent.Future.successful(UpdatedCounterValues(0, 0, 0))
             .map(_.report(registrationSubmissionRepo.className))(mat.executionContext)
+
         } else {
+
           registrationSubmissionRepo.updateAllInvalidDateDocuments(ids)
             .map(_.report(registrationSubmissionRepo.className))(mat.executionContext)
         }
+      }.map{ ele =>
+        logger.info(s"[SchedulerForRegistrationSubmissionRepo][fixBadUpdatedAt] ended $ele")
+        ele
       }
+
   }
 
 }

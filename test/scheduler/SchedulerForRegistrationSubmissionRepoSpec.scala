@@ -1,22 +1,20 @@
 package scheduler
 
+import base.BaseSpec
 import models.UpdatedCounterValues
 import org.apache.pekko.stream.Materializer
 import org.bson.types.ObjectId
 import org.mockito.ArgumentMatchers.{any, anyInt}
+import org.mockito.Mockito.{times, verify, when}
 import org.mockito.{ArgumentCaptor, Mockito}
-import org.mockito.Mockito.{verify, when}
 import org.mongodb.scala.Observable
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 import repositories.RegistrationSubmissionRepositoryImpl
 
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, Future}
 
-class SchedulerForRegistrationSubmissionRepoSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
+class SchedulerForRegistrationSubmissionRepoSpec extends BaseSpec {
 
   val registrationSubmissionRepositoryImpl: RegistrationSubmissionRepositoryImpl = Mockito.mock(classOf[RegistrationSubmissionRepositoryImpl])
 
@@ -33,35 +31,32 @@ class SchedulerForRegistrationSubmissionRepoSpec extends AnyWordSpec with Matche
 
 
   "SchedulerForRegistrationSubmissionRepo" when {
+    "check for each repo with the ids" in new Setup {
 
-      "set the totals for metrics from a queue of UpdatedCounterValues and returns the current totals as a UpdatedCounterValues" in new Setup {
+      val limit = 3
+      val ids: Seq[ObjectId] = Seq.fill(limit)(new ObjectId())
+      val objectData: Observable[ObjectId] = Observable.apply(ids)
 
+      when(registrationSubmissionRepositoryImpl.getAllInvalidDateDocuments(anyInt())).thenReturn(objectData)
 
-        val ids = Seq.fill(3)(new ObjectId())
-        val objectData: Observable[ObjectId] = Observable.apply(ids)
+      when(registrationSubmissionRepositoryImpl.updateAllInvalidDateDocuments(any[Seq[ObjectId]]()))
+        .thenReturn(Future.successful(UpdatedCounterValues(1, 2, 3)))
 
-        when(registrationSubmissionRepositoryImpl.getAllInvalidDateDocuments(anyInt())).thenReturn(objectData)
+      Await.result(schedulerForRegistrationSubmissionRepo.tap.pull(), 2.seconds)
 
-        when(registrationSubmissionRepositoryImpl.updateAllInvalidDateDocuments(any[Seq[ObjectId]]()))
-          .thenReturn(Future.successful(UpdatedCounterValues(1, 2, 3)))
+      verify(registrationSubmissionRepositoryImpl, times(1)).getAllInvalidDateDocuments(anyInt())
 
-        Await.result(schedulerForRegistrationSubmissionRepo.tap.pull(), 2.seconds)
+      val captor: ArgumentCaptor[Seq[ObjectId]] =
+        ArgumentCaptor.forClass(classOf[Seq[ObjectId]])
 
-        verify(registrationSubmissionRepositoryImpl).getAllInvalidDateDocuments(anyInt())
+      verify(registrationSubmissionRepositoryImpl).updateAllInvalidDateDocuments(captor.capture())
 
-        val captor: ArgumentCaptor[Seq[ObjectId]] =
-          ArgumentCaptor.forClass(classOf[Seq[ObjectId]])
+      captor.getValue must contain allElementsOf (ids)
 
-        verify(registrationSubmissionRepositoryImpl).updateAllInvalidDateDocuments(captor.capture())
+      objectData mustBe registrationSubmissionRepositoryImpl.getAllInvalidDateDocuments(limit)
 
-        captor.getValue contains (ids)
+    }
 
-        assert(objectData eq registrationSubmissionRepositoryImpl.getAllInvalidDateDocuments(3))
-
-
-
-      }
   }
-
 
 }

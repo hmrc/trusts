@@ -37,14 +37,10 @@ class SchedulerForLastUpdated @Inject()(repositoriesJava: java.util.Set[Reposito
   private val logger = Logger(this.getClass)
   private val initialDelay: FiniteDuration = durationValueFromConfig("workers.metrics-worker.initial-delay", config)
   private val interval: FiniteDuration = durationValueFromConfig("workers.metrics-worker.interval ", config)
-
   private val repositories = repositoriesJava.asScala.toSeq
 
-
-  logger.info("################### SchedulerForLastUpdated started ###################")
-
-
   val tap: SinkQueueWithCancel[Unit] = {
+    logger.info("[SchedulerForLastUpdated] init")
     Source
       .tick(initialDelay, interval, fixBadUpdatedAt(limit = 1000))
       .flatMapConcat(identity)
@@ -54,10 +50,11 @@ class SchedulerForLastUpdated @Inject()(repositoriesJava: java.util.Set[Reposito
       .run()
   }
 
+
   def fixBadUpdatedAt(limit: Int = 1000): Source[Unit, _] = {
     val repositoryHelper = repositories.map {
       ele =>
-        logger.info("################### fixBadUpdatedAt started ###################" + ele)
+        logger.info(s"started [$ele][fixBadUpdatedAt] method with limit = $limit")
         Source
           .fromPublisher(ele.getAllInvalidDateDocuments(limit = limit))
           .fold(List.empty[ObjectId])((acc, id) => id :: acc)
@@ -69,9 +66,12 @@ class SchedulerForLastUpdated @Inject()(repositoriesJava: java.util.Set[Reposito
                 .map(_.report(ele.className))(mat.executionContext)
             }
           }
+    }.map {
+      ele =>
+        logger.info(s"[SchedulerForLastUpdated][fixBadUpdatedAt] ended $ele")
+        ele
     }
     repositoryHelper.reduce(_ concat _)
   }
 
-  logger.info("################### SchedulerForLastUpdated ended ###################")
 }
