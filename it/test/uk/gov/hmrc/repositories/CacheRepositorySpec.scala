@@ -17,11 +17,14 @@
 package uk.gov.hmrc.repositories
 
 import org.bson.BsonType
+import org.bson.types.ObjectId
 import org.mongodb.scala.model.Filters.`type`
-import org.scalatest.matchers.must.Matchers._
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import repositories.CacheRepositoryImpl
 import uk.gov.hmrc.itbase.IntegrationTestBase
+
+import scala.concurrent.Await
+import scala.concurrent.duration.DurationInt
 
 class CacheRepositorySpec extends IntegrationTestBase {
 
@@ -53,6 +56,25 @@ class CacheRepositorySpec extends IntegrationTestBase {
       // Optional: Check if our specific document has the correct format
       val retrieved = repository.get("UTRUTRUTR", "InternalId", "sessionId")
       retrieved.value.futureValue mustBe Right(Some(data))
+    })
+
+
+    "get the docs with invalid date time format" in assertMongoTest(createApplication)({ app =>
+      val repository = app.injector.instanceOf[CacheRepositoryImpl]
+
+      val d: JsObject = Json.obj(
+        "updatedAt" -> "23423423423423234234"
+      )
+
+      Await.result(repository.collection.insertOne(d).toFuture(), 3.seconds)
+
+      val ids: Seq[ObjectId] = Await.result(repository.getAllInvalidDateDocuments(limit = 1).toFuture(), 3.seconds)
+
+      ids.size must be >= 0
+
+      val res = Await.result(repository.updateAllInvalidDateDocuments(ids), 3.seconds)
+      res.updated.toInt must be >= 0
+
     })
 
   }
