@@ -105,7 +105,7 @@ trait RepositoryHelper[T] extends Logging {
 
   private def createKey(identifier: String, internalId: String, sessionId: String): String = s"$identifier-$internalId-$sessionId"
 
-  def getAllInvalidDateDocuments(limit: Int = 1000): Observable[ObjectId] = {
+  def getAllInvalidDateDocuments(limit: Int): Observable[ObjectId] = {
     val selector = Filters.not(Filters.`type`("updatedAt", BsonType.DATE_TIME))
     val sortById = Sorts.ascending("_id")
     collection.find[BsonDocument](selector).sort(sortById).limit(limit)
