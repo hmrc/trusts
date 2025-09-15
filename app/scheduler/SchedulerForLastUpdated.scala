@@ -52,7 +52,7 @@ class SchedulerForLastUpdated @Inject()(repositoriesJava: java.util.Set[Reposito
   }
 
 
-  def fixBadUpdatedAt(limit: Int = 100): Source[Unit, _] = {
+  def fixBadUpdatedAt(limit:Int): Source[Unit, _] = {
     val repositoryHelper = repositories.map {
       ele =>
         logger.info(s"started [$ele][fixBadUpdatedAt] method with limit = $limit")

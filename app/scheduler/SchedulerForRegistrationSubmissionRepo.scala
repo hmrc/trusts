@@ -48,7 +48,7 @@ class SchedulerForRegistrationSubmissionRepo @Inject()(registrationSubmissionRep
 
   }
 
-  def fixBadUpdatedAt(limit: Int = 100): Source[Unit, _] = {
+  def fixBadUpdatedAt(limit: Int): Source[Unit, _] = {
     logger.info("[SchedulerForRegistrationSubmissionRepo][fixBadUpdatedAt] Calling " + registrationSubmissionRepo)
     logger.info(s"started [$registrationSubmissionRepo][fixBadUpdatedAt] method with limit = $limit")
     Source
