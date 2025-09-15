@@ -53,7 +53,7 @@ trait RegistrationSubmissionRepository {
 
   def removeAllDrafts(): TrustEnvelope[Boolean]
 
-  def getAllInvalidDateDocuments(limit: Int = 1000): Observable[ObjectId]
+  def getAllInvalidDateDocuments(limit: Int): Observable[ObjectId]
 
   def updateAllInvalidDateDocuments(ids: Seq[ObjectId]): Future[UpdatedCounterValues]
 
