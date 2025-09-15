@@ -32,14 +32,14 @@ class SchedulerForRegistrationSubmissionRepo @Inject()(registrationSubmissionRep
 
 
   private val logger = Logger(this.getClass)
-  private val initialDelay: FiniteDuration = durationValueFromConfig("workers.metrics-worker.initial-delay", config)
-  private val interval: FiniteDuration = durationValueFromConfig("workers.metrics-worker.interval ", config)
-
+  private val initialDelay: FiniteDuration = durationValueFromConfig("schedulers.initial-delay", config)
+  private val interval: FiniteDuration = durationValueFromConfig("schedulers.interval ", config)
+  private val queryLimit: Int = config.get[Int]("schedulers.queryLimit")
 
   val tap: SinkQueueWithCancel[Unit] = {
     logger.info("[SchedulerForRegistrationSubmissionRepo] init")
     Source
-      .tick(initialDelay, interval, fixBadUpdatedAt())
+      .tick(initialDelay, interval, fixBadUpdatedAt(queryLimit))
       .flatMapConcat(identity)
       .wireTapMat(Sink.queue())(Keep.right)
       .toMat(Sink.ignore)(Keep.left)
@@ -48,7 +48,7 @@ class SchedulerForRegistrationSubmissionRepo @Inject()(registrationSubmissionRep
 
   }
 
-  def fixBadUpdatedAt(limit: Int = 1000): Source[Unit, _] = {
+  def fixBadUpdatedAt(limit: Int = 100): Source[Unit, _] = {
     logger.info("[SchedulerForRegistrationSubmissionRepo][fixBadUpdatedAt] Calling " + registrationSubmissionRepo)
     logger.info(s"started [$registrationSubmissionRepo][fixBadUpdatedAt] method with limit = $limit")
     Source

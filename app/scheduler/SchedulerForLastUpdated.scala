@@ -35,14 +35,15 @@ class SchedulerForLastUpdated @Inject()(repositoriesJava: java.util.Set[Reposito
 
 
   private val logger = Logger(this.getClass)
-  private val initialDelay: FiniteDuration = durationValueFromConfig("workers.metrics-worker.initial-delay", config)
-  private val interval: FiniteDuration = durationValueFromConfig("workers.metrics-worker.interval ", config)
+  private val initialDelay: FiniteDuration = durationValueFromConfig("schedulers.initial-delay", config)
+  private val interval: FiniteDuration = durationValueFromConfig("schedulers.interval ", config)
+  private val queryLimit: Int = config.get[Int]("schedulers.queryLimit")
   private val repositories = repositoriesJava.asScala.toSeq
 
   val tap: SinkQueueWithCancel[Unit] = {
     logger.info("[SchedulerForLastUpdated] init")
     Source
-      .tick(initialDelay, interval, fixBadUpdatedAt(limit = 1000))
+      .tick(initialDelay, interval, fixBadUpdatedAt(queryLimit))
       .flatMapConcat(identity)
       .wireTapMat(Sink.queue())(Keep.right)
       .toMat(Sink.ignore)(Keep.left)
@@ -51,7 +52,7 @@ class SchedulerForLastUpdated @Inject()(repositoriesJava: java.util.Set[Reposito
   }
 
 
-  def fixBadUpdatedAt(limit: Int = 1000): Source[Unit, _] = {
+  def fixBadUpdatedAt(limit: Int = 100): Source[Unit, _] = {
     val repositoryHelper = repositories.map {
       ele =>
         logger.info(s"started [$ele][fixBadUpdatedAt] method with limit = $limit")
