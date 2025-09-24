@@ -37,7 +37,7 @@ class SchedulerForRegistrationSubmissionRepo @Inject()(registrationSubmissionRep
   private val queryLimit: Int = config.get[Int]("schedulers.queryLimit")
 
   val tap: SinkQueueWithCancel[Unit] = {
-    logger.info("[SchedulerForRegistrationSubmissionRepo] init")
+    logger.info("[SchedulerForRegistrationSubmissionRepo][Tap] init")
     Source
       .tick(initialDelay, interval, fixBadUpdatedAt(queryLimit))
       .flatMapConcat(identity)
@@ -49,8 +49,7 @@ class SchedulerForRegistrationSubmissionRepo @Inject()(registrationSubmissionRep
   }
 
   def fixBadUpdatedAt(limit: Int): Source[Unit, _] = {
-    logger.info("[SchedulerForRegistrationSubmissionRepo][fixBadUpdatedAt] Calling " + registrationSubmissionRepo)
-    logger.info(s"started [$registrationSubmissionRepo][fixBadUpdatedAt] method with limit = $limit")
+    logger.info(s"started [SchedulerForRegistrationSubmissionRepo][fixBadUpdatedAt] [$registrationSubmissionRepo] method with limit = $limit")
     Source
       .fromPublisher(registrationSubmissionRepo.getAllInvalidDateDocuments(limit = limit))
       .fold(List.empty[ObjectId])((acc, id) => id :: acc)
@@ -65,9 +64,9 @@ class SchedulerForRegistrationSubmissionRepo @Inject()(registrationSubmissionRep
           registrationSubmissionRepo.updateAllInvalidDateDocuments(ids)
             .map(_.report(registrationSubmissionRepo.className))(mat.executionContext)
         }
-      }.map{ ele =>
-        logger.info(s"[SchedulerForRegistrationSubmissionRepo][fixBadUpdatedAt] ended $ele")
-        ele
+      }.map{ repo =>
+        logger.info(s"[SchedulerForRegistrationSubmissionRepo][fixBadUpdatedAt] ended $repo")
+        repo
       }
 
   }
