@@ -114,8 +114,8 @@ trait RepositoryHelper[T] extends Logging {
 
   private def jsToObjectId(js: BsonDocument): ObjectId =
     Try(js.getObjectId("_id").getValue) match {
-      case Failure(exception) => logger.error(s"[$className][jsToObjectId] $collectionName Exception  :  ${exception.getMessage}")
-        throw new Exception("_id is not found", exception.fillInStackTrace())
+      case Failure(exception) => logger.error(s"[$className][jsToObjectId] failed to fetch id from : $collectionName Exception : ${exception.getMessage}")
+        throw new Exception("_id is not found")
       case Success(value) => value
     }
 
