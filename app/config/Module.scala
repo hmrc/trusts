@@ -16,14 +16,17 @@
 
 package config
 
-import com.google.inject.AbstractModule
+import com.google.inject.multibindings.Multibinder
+import com.google.inject.{AbstractModule, TypeLiteral}
 import connector.{TaxEnrolmentConnector, TaxEnrolmentConnectorImpl}
 import controllers.actions.{AuthenticatedIdentifierAction, IdentifierAction}
+import play.api.{Configuration, Environment}
 import repositories._
 import retry.{NrsRetryHelper, RetryHelper}
+import scheduler.{SchedulerForLastUpdated, SchedulerForRegistrationSubmissionRepo}
 import services.rosm.{RosmPatternService, RosmPatternServiceImpl, TaxEnrolmentsService, TaxEnrolmentsServiceImpl}
 
-class Module extends AbstractModule {
+class Module(environment: Environment, configuration: Configuration) extends AbstractModule {
 
   override def configure(): Unit = {
     // For session based storage instead of cred based, change to SessionIdentifierAction
@@ -39,5 +42,21 @@ class Module extends AbstractModule {
     bind(classOf[RosmPatternService]).to(classOf[RosmPatternServiceImpl]).asEagerSingleton()
 
     bind(classOf[RetryHelper]).to(classOf[NrsRetryHelper]).asEagerSingleton()
+
+    val schedulerEnabled: Boolean = configuration.getOptional[Boolean]("schedulers.enabled").getOrElse(false)
+    if (schedulerEnabled) {
+
+      val juiceBinder = Multibinder.newSetBinder(
+        binder(),
+        new TypeLiteral[RepositoryHelper[_]]() {}
+      )
+
+      juiceBinder.addBinding().to(classOf[TransformationRepositoryImpl])
+      juiceBinder.addBinding().to(classOf[CacheRepositoryImpl])
+      juiceBinder.addBinding().to(classOf[TaxableMigrationRepositoryImpl])
+
+      bind(classOf[SchedulerForLastUpdated]).asEagerSingleton()
+      bind(classOf[SchedulerForRegistrationSubmissionRepo]).asEagerSingleton()
+    }
   }
 }

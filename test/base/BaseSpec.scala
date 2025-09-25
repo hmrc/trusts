@@ -18,6 +18,7 @@ package base
 
 import config.AppConfig
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfter, Inside}
 import org.scalatestplus.mockito.MockitoSugar
@@ -36,6 +37,7 @@ class BaseSpec extends AnyWordSpec
   with MockitoSugar
   with JsonFixtures
   with BeforeAndAfter
+  with Matchers
   with GuiceOneServerPerSuite
   with Inside {
 

@@ -20,6 +20,7 @@ import config.AppConfig
 import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import org.mongodb.scala.bson.BsonDocument
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.must.Matchers
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{Assertion, BeforeAndAfterEach, EitherValues}
@@ -40,6 +41,7 @@ class IntegrationTestBase extends AnyWordSpec
   with GuiceOneServerPerSuite
   with ScalaFutures
   with MockitoSugar
+  with Matchers
   with BeforeAndAfterEach
   with EitherValues {
 

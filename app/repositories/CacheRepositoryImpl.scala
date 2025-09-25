@@ -18,7 +18,7 @@ package repositories
 
 import config.AppConfig
 import org.mongodb.scala.model._
-import play.api.libs.json._
+import play.api.libs.json.{Format, JsValue}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import utils.TrustEnvelope.TrustEnvelope
@@ -59,6 +59,7 @@ class CacheRepositoryImpl @Inject()(
   override def set(identifier: String, internalId: String, sessionId: String, data: JsValue): TrustEnvelope[Boolean] = {
     upsert(identifier, internalId, sessionId, data)
   }
+
 }
 
 trait CacheRepository {
@@ -68,4 +69,5 @@ trait CacheRepository {
   def set(identifier: String, internalId: String, sessionId: String, data: JsValue): TrustEnvelope[Boolean]
 
   def resetCache(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Boolean]
+
 }
