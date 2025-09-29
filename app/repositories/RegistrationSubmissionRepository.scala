@@ -219,10 +219,12 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
 
 
   override def getAllInvalidDateDocuments(limit: Int): Observable[ObjectId] = {
-    val selector = Filters.not(Filters.`type`("updatedAt", BsonType.DATE_TIME))
+    logger.info(s"[$className][getAllInvalidDateDocuments] started fetching invalid documents")
+    val selector = Filters.not(Filters.`type`("createdAt", BsonType.DATE_TIME))
     val sortById = Sorts.ascending("_id")
     collection.find[BsonDocument](selector).sort(sortById).limit(limit)
       .map(jsToObjectId)
+
   }
 
   private def jsToObjectId(js: BsonDocument): ObjectId =
@@ -233,7 +235,7 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
     }
 
   override def updateAllInvalidDateDocuments(ids: Seq[ObjectId]): Future[UpdatedCounterValues] = {
-    val update = Updates.set("updatedAt", BsonDateTime(Instant.now().toEpochMilli))
+    val update = Updates.set("createdAt", BsonDateTime(Instant.now().toEpochMilli))
     val filterIn = Filters.in("_id", ids: _*)
     collection.updateMany(filterIn, update).toFuture()
       .map(_ => UpdatedCounterValues(matched = ids.size, updated = ids.size, errors = 0))

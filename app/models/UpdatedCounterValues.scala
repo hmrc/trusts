@@ -16,7 +16,9 @@
 
 package models
 
-case class UpdatedCounterValues(matched: Long = 0L, updated: Long = 0L, errors: Long = 0L) {
+import play.api.Logging
+
+case class UpdatedCounterValues(matched: Long = 0L, updated: Long = 0L, errors: Long = 0L) extends Logging {
 
   def +(other: UpdatedCounterValues): UpdatedCounterValues =
     copy(
@@ -25,6 +27,6 @@ case class UpdatedCounterValues(matched: Long = 0L, updated: Long = 0L, errors: 
       errors = errors + other.errors
     )
 
-  def report(name:String): Unit =
-    println(s"[UpdatedCounterValues] matched=$matched updated=$updated errors=$errors name = $name  ")
+  def report(name: String): Unit =
+    logger.info(s"[UpdatedCounterValues] matched=$matched updated=$updated errors=$errors name = $name  ")
 }
