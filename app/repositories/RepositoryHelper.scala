@@ -18,15 +18,12 @@ package repositories
 
 import cats.data.EitherT
 import errors.ServerError
-import models.UpdatedCounterValues
-import org.bson.BsonType
-import org.bson.types.ObjectId
+import org.mongodb.scala.MongoException
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.bson.{BsonDateTime, BsonDocument}
 import org.mongodb.scala.model.Filters.equal
+import org.mongodb.scala.model.UpdateOptions
 import org.mongodb.scala.model.Updates.{combine, set}
-import org.mongodb.scala.model.{Filters, Sorts, UpdateOptions, Updates}
-import org.mongodb.scala.{MongoException, Observable}
 import play.api.Logging
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.Codecs.toBson
@@ -34,8 +31,7 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import utils.TrustEnvelope.TrustEnvelope
 
 import java.time.Instant
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.ExecutionContext
 
 trait RepositoryHelper[T] extends Logging {
   self: PlayMongoRepository[T] =>
@@ -104,27 +100,4 @@ trait RepositoryHelper[T] extends Logging {
     equal("id", createKey(identifier, internalId, sessionId))
 
   private def createKey(identifier: String, internalId: String, sessionId: String): String = s"$identifier-$internalId-$sessionId"
-
-  def getAllInvalidDateDocuments(limit: Int): Observable[ObjectId] = {
-    val selector = Filters.not(Filters.`type`("updatedAt", BsonType.DATE_TIME))
-    val sortById = Sorts.ascending("_id")
-    collection.find[BsonDocument](selector).sort(sortById).limit(limit)
-      .map(jsToObjectId)
-  }
-
-  private def jsToObjectId(js: BsonDocument): ObjectId =
-    Try(js.getObjectId("_id").getValue) match {
-      case Failure(exception) => logger.error(s"[$className][jsToObjectId] failed to fetch id from : $collectionName", exception)
-        throw new Exception("_id is not found")
-      case Success(value) => value
-    }
-
-
-  def updateAllInvalidDateDocuments(ids: Seq[ObjectId]): Future[UpdatedCounterValues] = {
-    val update = Updates.set("updatedAt", BsonDateTime(Instant.now().toEpochMilli))
-    val filterIn = Filters.in("_id", ids: _*)
-    collection.updateMany(filterIn, update).toFuture()
-      .map(_ => UpdatedCounterValues(matched = ids.size, updated = ids.size, errors = 0))
-      .recover { case _ => UpdatedCounterValues(matched = ids.size, updated = 0, errors = ids.size) }
-  }
 }

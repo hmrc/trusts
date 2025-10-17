@@ -19,14 +19,10 @@ package repositories
 import cats.data.EitherT
 import config.AppConfig
 import errors.ServerError
-import models.UpdatedCounterValues
 import models.registration.{RegistrationSubmissionDraft, RegistrationSubmissionDraftDB}
-import org.bson.BsonType
-import org.bson.types.ObjectId
-import org.mongodb.scala.bson.{BsonDateTime, BsonDocument}
+import org.mongodb.scala.MongoException
 import org.mongodb.scala.model.Filters.{and, empty, equal}
 import org.mongodb.scala.model._
-import org.mongodb.scala.{MongoException, Observable}
 import play.api.Logging
 import play.api.libs.json.Format
 import uk.gov.hmrc.auth.core.AffinityGroup
@@ -35,11 +31,9 @@ import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import utils.TrustEnvelope.TrustEnvelope
 
-import java.time.Instant
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
 
 trait RegistrationSubmissionRepository {
 
@@ -52,10 +46,6 @@ trait RegistrationSubmissionRepository {
   def removeDraft(draftId: String, internalId: String): TrustEnvelope[Boolean]
 
   def removeAllDrafts(): TrustEnvelope[Boolean]
-
-  def getAllInvalidDateDocuments(limit: Int): Observable[ObjectId]
-
-  def updateAllInvalidDateDocuments(ids: Seq[ObjectId]): Future[UpdatedCounterValues]
 
 }
 
@@ -215,30 +205,5 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
     } else {
       Future.successful(Right(true))
     }
-  }
-
-
-  override def getAllInvalidDateDocuments(limit: Int): Observable[ObjectId] = {
-    logger.info(s"[$className][getAllInvalidDateDocuments] started fetching invalid documents")
-    val selector = Filters.not(Filters.`type`("createdAt", BsonType.DATE_TIME))
-    val sortById = Sorts.ascending("_id")
-    collection.find[BsonDocument](selector).sort(sortById).limit(limit)
-      .map(jsToObjectId)
-
-  }
-
-  private def jsToObjectId(js: BsonDocument): ObjectId =
-    Try(js.getObjectId("_id").getValue) match {
-      case Failure(exception) => logger.error(s"[$className][jsToObjectId] failed to fetch id from : $collectionName", exception)
-        throw new Exception("_id is not found")
-      case Success(value) => value
-    }
-
-  override def updateAllInvalidDateDocuments(ids: Seq[ObjectId]): Future[UpdatedCounterValues] = {
-    val update = Updates.set("createdAt", BsonDateTime(Instant.now().toEpochMilli))
-    val filterIn = Filters.in("_id", ids: _*)
-    collection.updateMany(filterIn, update).toFuture()
-      .map(_ => UpdatedCounterValues(matched = ids.size, updated = ids.size, errors = 0))
-      .recover { case _ => UpdatedCounterValues(matched = ids.size, updated = 0, errors = ids.size) }
   }
 }
