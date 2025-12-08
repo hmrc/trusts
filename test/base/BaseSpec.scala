@@ -55,9 +55,9 @@ class BaseSpec extends AnyWordSpec
         Seq(
           "metrics.enabled" -> false,
           "auditing.enabled" -> false,
-          "nrs.retryWaitMs" -> 10,
-          "nrs.retryWaitFactor" -> 1,
-          "nrs.totalAttempts" -> 10,
+          "nrs-orchestrator.retryWaitMs" -> 10,
+          "nrs-orchestrator.retryWaitFactor" -> 1,
+          "nrs-orchestrator.totalAttempts" -> 10,
           "features.nonRepudiate" -> true
         ): _*
       )

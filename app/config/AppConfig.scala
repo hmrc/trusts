@@ -30,7 +30,7 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
   val getTrustOrEstateUrl : String = servicesConfig.baseUrl("playback")
   val varyTrustOrEstateUrl : String = servicesConfig.baseUrl("variation")
   val orchestratorUrl : String = servicesConfig.baseUrl("orchestrator")
-  val nonRepudiationUrl : String = s"${servicesConfig.baseUrl("non-repudiation")}/submission"
+  val nonRepudiationUrl : String = s"${servicesConfig.baseUrl("non-repudiation")}/nrs-orchestrator/submission"
 
   val registrationEnvironment : String = configuration.get[String]("microservice.services.registration.environment")
   val registrationToken : String = configuration.get[String]("microservice.services.registration.token")
@@ -91,9 +91,9 @@ class AppConfig @Inject()(configuration: Configuration, servicesConfig: Services
 
   val nonRepudiate: Boolean = configuration.get[Boolean]("features.nonRepudiate")
 
-  val nrsRetryWaitMs = configuration.get[Int]("nrs.retryWaitMs")
-  val nrsRetryWaitFactor = configuration.get[Int]("nrs.retryWaitFactor")
-  val nrsTotalAttempts = configuration.get[Int]("nrs.totalAttempts")
+  val nrsRetryWaitMs = configuration.get[Int]("nrs-orchestrator.retryWaitMs")
+  val nrsRetryWaitFactor = configuration.get[Int]("nrs-orchestrator.retryWaitFactor")
+  val nrsTotalAttempts = configuration.get[Int]("nrs-orchestrator.totalAttempts")
 
   logger.info(s"""=============== FEATURE FLAGS ===============
                  |            nonRepudiate = $nonRepudiate
