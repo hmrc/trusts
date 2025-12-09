@@ -67,7 +67,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
 
       "submitting a taxable registration event" in {
 
-        val nonRepudiationEndpointUrl = s"nrs-orchestrator/submission"
+        val nonRepudiationEndpointUrl = s"/nrs-orchestrator/submission"
         stubNRSPost(server,
           nonRepudiationEndpointUrl,
           Json.toJson(payLoad).toString,
@@ -87,7 +87,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
 
       "return ServiceUnavailableResponse when NRS returns service unavailable" in {
 
-        val nonRepudiationEndpointUrl = s"nrs-orchestrator/submission"
+        val nonRepudiationEndpointUrl = s"/nrs-orchestrator/submission"
         stubNRSPost(server,
           nonRepudiationEndpointUrl,
           Json.toJson(payLoad).toString,
@@ -103,7 +103,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
 
       "return BadRequestResponse when NRS returns bad request" in {
 
-        val nonRepudiationEndpointUrl = s"nrs-orchestrator/submission"
+        val nonRepudiationEndpointUrl = s"/nrs-orchestrator/submission"
         stubNRSPost(server,
           nonRepudiationEndpointUrl,
           Json.toJson(payLoad).toString,
@@ -119,7 +119,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
 
       "return BadGatewayResponse when NRS returns bad gateway" in {
 
-        val nonRepudiationEndpointUrl = s"nrs-orchestrator/submission"
+        val nonRepudiationEndpointUrl = s"/nrs-orchestrator/submission"
         stubNRSPost(server,
           nonRepudiationEndpointUrl,
           Json.toJson(payLoad).toString,
@@ -134,7 +134,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
       }
       "return UnauthorisedResponse when NRS returns unauthorised response" in {
 
-        val nonRepudiationEndpointUrl = s"nrs-orchestrator/submission"
+        val nonRepudiationEndpointUrl = s"/nrs-orchestrator/submission"
         stubNRSPost(server,
           nonRepudiationEndpointUrl,
           Json.toJson(payLoad).toString,
@@ -149,7 +149,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
       }
       "return GatewayTimeoutResponse when NRS returns gateway timeout response" in {
 
-        val nonRepudiationEndpointUrl = s"nrs-orchestrator/submission"
+        val nonRepudiationEndpointUrl = s"/nrs-orchestrator/submission"
         stubNRSPost(server,
           nonRepudiationEndpointUrl,
           Json.toJson(payLoad).toString,
@@ -164,7 +164,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
       }
       "return InternalServerErrorResponse when NRS returns internal server error response" in {
 
-        val nonRepudiationEndpointUrl = s"nrs-orchestrator/submission"
+        val nonRepudiationEndpointUrl = s"/nrs-orchestrator/submission"
         stubNRSPost(server,
           nonRepudiationEndpointUrl,
           Json.toJson(payLoad).toString,
@@ -180,7 +180,7 @@ class NonRepudiationConnectorSpec extends ConnectorSpecHelper with Matchers with
 
       "return ChecksumFailedResponse when NRS returns checksum failed error response" in {
 
-        val nonRepudiationEndpointUrl = s"nrs-orchestrator/submission"
+        val nonRepudiationEndpointUrl = s"/nrs-orchestrator/submission"
         stubNRSPost(server,
           nonRepudiationEndpointUrl,
           Json.toJson(payLoad).toString,
