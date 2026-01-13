@@ -24,7 +24,7 @@ import scala.io.Source
 trait JsonUtils {
 
   def getJsonFromFile(filename: String): String = {
-    val source = Source.fromFile(getClass.getResource(s"/$filename").getPath)
+    val source = Source.fromInputStream(getClass.getResourceAsStream(s"/$filename"))
     val jsonString = source.mkString
     source.close()
     jsonString
