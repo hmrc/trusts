@@ -19,7 +19,10 @@ package repositories
 import cats.data.EitherT
 import config.AppConfig
 import errors.ServerError
+import models.RegistrationSubmissionValidationStats
 import models.registration.{RegistrationSubmissionDraft, RegistrationSubmissionDraftDB}
+import org.mongodb.scala.bson._
+import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.MongoException
 import org.mongodb.scala.model.Filters.{and, empty, equal}
 import org.mongodb.scala.model._
@@ -31,6 +34,8 @@ import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import utils.TrustEnvelope.TrustEnvelope
 
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -46,6 +51,8 @@ trait RegistrationSubmissionRepository {
   def removeDraft(draftId: String, internalId: String): TrustEnvelope[Boolean]
 
   def removeAllDrafts(): TrustEnvelope[Boolean]
+
+  def countRecordsWithMissingOrIncorrectCreatedAt(): TrustEnvelope[RegistrationSubmissionValidationStats]
 
 }
 
@@ -205,5 +212,99 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
     } else {
       Future.successful(Right(true))
     }
+  }
+
+  override def countRecordsWithMissingOrIncorrectCreatedAt(): TrustEnvelope[RegistrationSubmissionValidationStats] = EitherT {
+    val existsFilter: Document = Document(
+      "$ne" -> BsonArray(
+        Document("$type" -> "$createdAt"),
+        "missing"
+      )
+    )
+
+    val oldCreatedAtFilter: Document = Document(
+      "$and" -> BsonArray(
+        Document(
+          "$lt" -> BsonArray(
+            "$createdAt",
+            BsonDateTime(Instant.now().minus(28, ChronoUnit.DAYS).toEpochMilli)
+          )
+        ),
+        existsFilter,
+        Document(
+          "$eq" -> BsonArray(
+            Document("$type" -> "$createdAt"),
+            "date"
+          )
+        )
+      )
+    )
+
+    val incorrectTypeFilter: Document = Document(
+      "$and" -> BsonArray(
+        Document(
+          "$ne" -> BsonArray(
+            Document("$type" -> "$createdAt"),
+            "date"
+          )
+        ),
+        existsFilter
+      )
+    )
+
+    val noCreatedAtFilter: Document = Document(
+      "$eq" -> BsonArray(
+        Document("$type" -> "$createdAt"),
+        "missing"
+      )
+    )
+
+    def aggregationSum(aggregationName: String, aggregationDoc: Document): BsonField =
+      Accumulators.sum(
+        aggregationName,
+        Document(
+          "$cond" -> BsonArray(
+            aggregationDoc,
+            BsonInt32(1),
+            BsonInt32(0)
+          )
+        )
+      )
+
+    val pipeline: Seq[Bson] = Seq(
+      Aggregates.group(
+        "IncorrectCreatedAt",
+        aggregationSum("createdAtBeyondTTLCount", oldCreatedAtFilter),
+        aggregationSum("createdAtNotDateTimeCount", incorrectTypeFilter),
+        aggregationSum("docsWithNoCreatedAtFieldCount", noCreatedAtFilter),
+      )
+    )
+
+    def getValueFromDocumentMap(key: String)(docMap: Map[String, BsonValue]) =
+      docMap.get(key) match {
+        case Some(value) => value.asInt32().getValue
+        case None => 0
+      }
+
+    collection
+      .aggregate[Document](
+        pipeline = pipeline
+      )
+      .toFuture()
+      .map ((docs: Seq[Document]) => {
+        val docMap: Map[String, BsonValue] = docs.headOption.getOrElse(Iterable.empty).toMap
+        RegistrationSubmissionValidationStats(
+          createdAtBeyondTTLCount = getValueFromDocumentMap("createdAtBeyondTTLCount")(docMap),
+          createdAtNotDateTimeCount = getValueFromDocumentMap("createdAtNotDateTimeCount")(docMap),
+          noCreatedAtCount = getValueFromDocumentMap("docsWithNoCreatedAtFieldCount")(docMap)
+        )
+      }
+      )
+      .map((t: RegistrationSubmissionValidationStats) => Right(t))
+      .recover {
+        case e: MongoException =>
+          logger.error(s"[$className][countRecordsBeyondTTL] Failed get records older then 28 DAYS, ${e.getMessage}")
+          Left(ServerError(e.getMessage))
+      }
   }
 }
