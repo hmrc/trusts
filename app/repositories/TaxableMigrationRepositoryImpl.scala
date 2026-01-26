@@ -28,42 +28,58 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class TaxableMigrationRepositoryImpl @Inject()(
-                                                mongo: MongoComponent,
-                                                config: AppConfig
-                                              )(implicit ec: ExecutionContext) extends PlayMongoRepository[Boolean](
-  mongoComponent = mongo,
-  collectionName = "taxable-migration",
-  domainFormat = booleanFormat,
-  indexes = Seq(
-    IndexModel(
-      Indexes.ascending("updatedAt"),
-      IndexOptions().name("taxable-migration-updated-at-index").expireAfter(config.ttlInSeconds, TimeUnit.SECONDS).unique(false)
-    ),
-    IndexModel(
-      Indexes.ascending("id"),
-      IndexOptions().name("id-index").unique(false)
+class TaxableMigrationRepositoryImpl @Inject() (
+  mongo: MongoComponent,
+  config: AppConfig
+)(implicit ec: ExecutionContext)
+    extends PlayMongoRepository[Boolean](
+      mongoComponent = mongo,
+      collectionName = "taxable-migration",
+      domainFormat = booleanFormat,
+      indexes = Seq(
+        IndexModel(
+          Indexes.ascending("updatedAt"),
+          IndexOptions()
+            .name("taxable-migration-updated-at-index")
+            .expireAfter(config.ttlInSeconds, TimeUnit.SECONDS)
+            .unique(false)
+        ),
+        IndexModel(
+          Indexes.ascending("id"),
+          IndexOptions().name("id-index").unique(false)
+        )
+      ),
+      replaceIndexes = config.dropIndexesEnabled
     )
-  ),
-  replaceIndexes = config.dropIndexesEnabled
-) with RepositoryHelper[Boolean] with TaxableMigrationRepository {
+    with RepositoryHelper[Boolean]
+    with TaxableMigrationRepository {
 
-  override implicit val executionContext: ExecutionContext = ec
-  override val className: String = "TaxableMigrationRepositoryImpl"
-  override val key: String = "migratingToTaxable"
+  implicit override val executionContext: ExecutionContext = ec
+  override val className: String                           = "TaxableMigrationRepositoryImpl"
+  override val key: String                                 = "migratingToTaxable"
 
-  override def get(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Option[Boolean]] = {
+  override def get(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Option[Boolean]] =
     getOpt(identifier, internalId, sessionId)
-  }
 
-  override def set(identifier: String, internalId: String, sessionId: String, migratingToTaxable: Boolean): TrustEnvelope[Boolean] = {
+  override def set(
+    identifier: String,
+    internalId: String,
+    sessionId: String,
+    migratingToTaxable: Boolean
+  ): TrustEnvelope[Boolean] =
     upsert(identifier, internalId, sessionId, migratingToTaxable)
-  }
+
 }
 
 trait TaxableMigrationRepository {
 
   def get(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Option[Boolean]]
 
-  def set(identifier: String, internalId: String, sessionId: String, migratingToTaxable: Boolean): TrustEnvelope[Boolean]
+  def set(
+    identifier: String,
+    internalId: String,
+    sessionId: String,
+    migratingToTaxable: Boolean
+  ): TrustEnvelope[Boolean]
+
 }

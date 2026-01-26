@@ -28,37 +28,41 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class CacheRepositoryImpl @Inject()(
-                                     mongo: MongoComponent,
-                                     config: AppConfig
-                                   )(implicit ec: ExecutionContext) extends PlayMongoRepository[JsValue](
-  mongoComponent = mongo,
-  collectionName = "trusts",
-  domainFormat = implicitly[Format[JsValue]],
-  indexes = Seq(
-    IndexModel(
-      Indexes.ascending("updatedAt"),
-      IndexOptions().name("etmp-data-updated-at-index").expireAfter(config.ttlInSeconds, TimeUnit.SECONDS).unique(false)
-    ),
-    IndexModel(
-      Indexes.ascending("id"),
-      IndexOptions().name("id-index").unique(false)
+class CacheRepositoryImpl @Inject() (
+  mongo: MongoComponent,
+  config: AppConfig
+)(implicit ec: ExecutionContext)
+    extends PlayMongoRepository[JsValue](
+      mongoComponent = mongo,
+      collectionName = "trusts",
+      domainFormat = implicitly[Format[JsValue]],
+      indexes = Seq(
+        IndexModel(
+          Indexes.ascending("updatedAt"),
+          IndexOptions()
+            .name("etmp-data-updated-at-index")
+            .expireAfter(config.ttlInSeconds, TimeUnit.SECONDS)
+            .unique(false)
+        ),
+        IndexModel(
+          Indexes.ascending("id"),
+          IndexOptions().name("id-index").unique(false)
+        )
+      ),
+      replaceIndexes = config.dropIndexesEnabled
     )
-  ),
-  replaceIndexes = config.dropIndexesEnabled
-) with RepositoryHelper[JsValue] with CacheRepository {
+    with RepositoryHelper[JsValue]
+    with CacheRepository {
 
-  override implicit val executionContext: ExecutionContext = ec
-  override val className: String = "CacheRepositoryImpl"
-  override val key: String = "etmpData"
+  implicit override val executionContext: ExecutionContext = ec
+  override val className: String                           = "CacheRepositoryImpl"
+  override val key: String                                 = "etmpData"
 
-  override def get(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Option[JsValue]] = {
+  override def get(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Option[JsValue]] =
     getOpt(identifier, internalId, sessionId)
-  }
 
-  override def set(identifier: String, internalId: String, sessionId: String, data: JsValue): TrustEnvelope[Boolean] = {
+  override def set(identifier: String, internalId: String, sessionId: String, data: JsValue): TrustEnvelope[Boolean] =
     upsert(identifier, internalId, sessionId, data)
-  }
 
 }
 

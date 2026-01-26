@@ -48,9 +48,9 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
-  private val utr: String = "utr"
-  private val index: Int = 0
-  private val amount: Long = 1000L
+  private val utr: String        = "utr"
+  private val index: Int         = 0
+  private val amount: Long       = 1000L
   private val endDate: LocalDate = LocalDate.parse("2018-02-24")
 
   private def removeAsset(assetType: String): RemoveAsset = RemoveAsset(
@@ -89,7 +89,11 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(asset)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(asset)))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -121,7 +125,11 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(asset)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(asset)))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError("exception message")))))
@@ -160,7 +168,11 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(asset)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(asset)))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -233,7 +245,11 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(asset)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(asset)))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -278,7 +294,11 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(asset)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(asset)))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -321,7 +341,11 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(asset)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(asset)))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -363,7 +387,11 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(asset)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(asset)))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -409,7 +437,11 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(asset)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(assetType, Seq(Json.toJson(asset)))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -451,4 +483,5 @@ class RemoveAssetControllerSpec extends AnyFreeSpec with MockitoSugar with Scala
 
     }
   }
+
 }

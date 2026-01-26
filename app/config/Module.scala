@@ -42,4 +42,5 @@ class Module(environment: Environment, configuration: Configuration) extends Abs
     bind(classOf[RetryHelper]).to(classOf[NrsRetryHelper]).asEagerSingleton()
 
   }
+
 }

@@ -37,15 +37,18 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 @Singleton
-class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
-                                      timeService: TimeService,
-                                      payloadEncodingService: PayloadEncodingService,
-                                      retryHelper: RetryHelper,
-                                      nrsAuditService: NRSAuditService
-                                     )
-                                     (implicit val ec: ExecutionContext) extends Logging {
+class NonRepudiationService @Inject() (
+  connector: NonRepudiationConnector,
+  timeService: TimeService,
+  payloadEncodingService: PayloadEncodingService,
+  retryHelper: RetryHelper,
+  nrsAuditService: NRSAuditService
+)(implicit val ec: ExecutionContext)
+    extends Logging {
 
-  private def identityData(payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): IdentityData = {
+  private def identityData(
+    payload: JsValue
+  )(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): IdentityData = {
 
     val takeFirstForwardedFor: Option[String] = hc.forwarded.map { forwardedFor =>
       Try(forwardedFor.value.split(",").head)
@@ -67,16 +70,17 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
   }
 
   private def headers(implicit request: IdentifierRequest[_]): JsObject = {
-    val headers: Map[String, JsString] = request.headers
-      .toMap
+    val headers: Map[String, JsString] = request.headers.toMap
       .map(header => header._1 -> JsString(header._2 mkString ","))
 
     val trueUserAgent: String =
-      request.headers.get(Headers.TRUE_USER_AGENT)
-      .getOrElse(
-        request.headers.get(HeaderNames.USER_AGENT)
-          .getOrElse("No User Agent")
-      )
+      request.headers
+        .get(Headers.TRUE_USER_AGENT)
+        .getOrElse(
+          request.headers
+            .get(HeaderNames.USER_AGENT)
+            .getOrElse("No User Agent")
+        )
 
     JsObject(headers)
       .-(Headers.TRUE_USER_AGENT)
@@ -85,15 +89,14 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
       .+((HeaderNames.USER_AGENT.toLowerCase, JsString(trueUserAgent)))
   }
 
-  private final def sendEvent(payload: JsValue,
-                              notableEvent: NotableEvent,
-                              searchKey: SearchKey,
-                              searchValue: String
-                             )(implicit hc: HeaderCarrier,
-                               request: IdentifierRequest[_]): Future[NRSResponse] = {
+  final private def sendEvent(payload: JsValue, notableEvent: NotableEvent, searchKey: SearchKey, searchValue: String)(
+    implicit
+    hc: HeaderCarrier,
+    request: IdentifierRequest[_]
+  ): Future[NRSResponse] =
     hc.authorization match {
       case Some(token) =>
-        val encodedPayload = payloadEncodingService.encode(payload)
+        val encodedPayload  = payloadEncodingService.encode(payload)
         val payloadChecksum = payloadEncodingService.generateChecksum(payload)
 
         val event = NRSSubmission(
@@ -112,52 +115,58 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
         )
 
         scheduleNrsSubmission(event)
-      case None =>
+      case None        =>
         Future.successful(NRSResponse.NoActiveSession)
     }
-  }
 
   private def scheduleNrsSubmission(event: NRSSubmission)(implicit hc: HeaderCarrier): Future[NRSResponse] = {
 
     def f: () => Future[NRSResponse] = () => connector.nonRepudiate(event)
 
-    retryHelper.retryOnFailure(f).map {
-      finalResult =>
-        auditEvent(event, finalResult)
+    retryHelper.retryOnFailure(f).map { finalResult =>
+      auditEvent(event, finalResult)
     }
   }
 
-  private def auditEvent(event: NRSSubmission, execution: RetryHelper.RetryExecution)(implicit hc: HeaderCarrier): NRSResponse = {
+  private def auditEvent(event: NRSSubmission, execution: RetryHelper.RetryExecution)(implicit
+    hc: HeaderCarrier
+  ): NRSResponse =
     execution.result match {
       case Some(success @ NRSResponse.Success(_)) =>
         val auditEvent = NrsAuditEvent(event.metadata, success)
         nrsAuditService.audit(auditEvent)
         success
-      case Some(error: NRSResponse) =>
+      case Some(error: NRSResponse)               =>
         val auditEvent = NrsAuditEvent(event.metadata, error)
         nrsAuditService.audit(auditEvent)
         error
-      case _ =>
-        val response = NRSResponse.InternalServerError
+      case _                                      =>
+        val response   = NRSResponse.InternalServerError
         val auditEvent = NrsAuditEvent(event.metadata, response)
         nrsAuditService.audit(auditEvent)
         response
     }
-  }
 
-  def getDeclaration(payload: JsValue): JsValue = {
-    payload.transform(
-      (__ \ "declaration" \ "name").json.pick
-    ).getOrElse(JsString("No Declaration Name"))
-  }
+  def getDeclaration(payload: JsValue): JsValue =
+    payload
+      .transform(
+        (__ \ "declaration" \ "name").json.pick
+      )
+      .getOrElse(JsString("No Declaration Name"))
 
   def getAgentDetails(payload: JsValue): Option[JsValue] =
     payload.transform((__ \ "agentDetails").json.pick).asOpt
 
-  def register(trn: String, payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): Future[NRSResponse] =
+  def register(trn: String, payload: JsValue)(implicit
+    hc: HeaderCarrier,
+    request: IdentifierRequest[_]
+  ): Future[NRSResponse] =
     sendEvent(payload, NotableEvent.TrsRegistration, SearchKey.TRN, trn)
 
-  def maintain(identifier: String, payload: JsValue)(implicit hc: HeaderCarrier, request: IdentifierRequest[_]): Future[NRSResponse] = {
+  def maintain(identifier: String, payload: JsValue)(implicit
+    hc: HeaderCarrier,
+    request: IdentifierRequest[_]
+  ): Future[NRSResponse] = {
 
     val isUtr = (x: String) => x.length != 15
 
@@ -167,4 +176,5 @@ class NonRepudiationService @Inject()(connector: NonRepudiationConnector,
       sendEvent(payload, NotableEvent.TrsUpdateNonTaxable, SearchKey.URN, identifier)
     }
   }
+
 }

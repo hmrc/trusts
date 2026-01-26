@@ -38,7 +38,7 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
         "amend settlor details by replacing the settlor" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-settlor-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-settlor-transform-after.json")
+          val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-settlor-transform-after.json")
 
           val amended = SettlorIndividual(
             lineNo = None,
@@ -53,8 +53,7 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
             None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "lineNo": "1",
               |  "bpMatchStatus": "01",
@@ -67,7 +66,8 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendSettlorTransform(Some(0), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), `type`)
+          val transformer =
+            AmendSettlorTransform(Some(0), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), `type`)
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -79,7 +79,8 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
         "set an end date for the original settlor, adding in the amendment as a new settlor for a settlor known by etmp" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-settlor-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-settlor-transform-after-declaration.json")
+          val afterJson  =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-individual-settlor-transform-after-declaration.json")
 
           val amended = SettlorIndividual(
             lineNo = None,
@@ -94,8 +95,7 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
             None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "lineNo": "1",
               |  "bpMatchStatus": "01",
@@ -108,16 +108,24 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendSettlorTransform(Some(0), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
+          val transformer = AmendSettlorTransform(
+            Some(0),
+            Json.toJson(amended),
+            original,
+            endDate = LocalDate.parse("2020-03-25"),
+            `type`
+          )
 
           val applied = transformer.applyTransform(beforeJson).get
-          val result = transformer.applyDeclarationTransform(applied).get
+          val result  = transformer.applyDeclarationTransform(applied).get
           result mustBe afterJson
         }
 
         "amend the new settlor that is not known to etmp" in {
-          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-new-individual-settlor-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-new-individual-settlor-transform-after-declaration.json")
+          val beforeJson =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-new-individual-settlor-transform-before.json")
+          val afterJson  =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-new-individual-settlor-transform-after-declaration.json")
 
           val amended = SettlorIndividual(
             lineNo = None,
@@ -132,8 +140,7 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
             None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "name": {
               |    "firstName": "Second",
@@ -144,10 +151,16 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendSettlorTransform(Some(1), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
+          val transformer = AmendSettlorTransform(
+            Some(1),
+            Json.toJson(amended),
+            original,
+            endDate = LocalDate.parse("2020-03-25"),
+            `type`
+          )
 
           val applied = transformer.applyTransform(beforeJson).get
-          val result = transformer.applyDeclarationTransform(applied).get
+          val result  = transformer.applyDeclarationTransform(applied).get
           result mustBe afterJson
         }
       }
@@ -162,7 +175,7 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
         "amend settlor details by replacing the settlor" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-business-settlor-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-business-settlor-transform-after.json")
+          val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-business-settlor-transform-after.json")
 
           val amended = SettlorCompany(
             lineNo = None,
@@ -176,8 +189,7 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
             entityEnd = None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "lineNo": "1",
               |  "bpMatchStatus": "01",
@@ -186,7 +198,8 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendSettlorTransform(Some(0), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), `type`)
+          val transformer =
+            AmendSettlorTransform(Some(0), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), `type`)
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -198,7 +211,8 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
         "set an end date for the original settlor, adding in the amendment as a new settlor for a settlor known by etmp" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-business-settlor-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-business-settlor-transform-after-declaration.json")
+          val afterJson  =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-business-settlor-transform-after-declaration.json")
 
           val amended = SettlorCompany(
             lineNo = None,
@@ -212,8 +226,7 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
             entityEnd = None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "lineNo": "1",
               |  "bpMatchStatus": "01",
@@ -222,17 +235,25 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendSettlorTransform(Some(0), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
+          val transformer = AmendSettlorTransform(
+            Some(0),
+            Json.toJson(amended),
+            original,
+            endDate = LocalDate.parse("2020-03-25"),
+            `type`
+          )
 
           val applied = transformer.applyTransform(beforeJson).get
-          val result = transformer.applyDeclarationTransform(applied).get
+          val result  = transformer.applyDeclarationTransform(applied).get
           result mustBe afterJson
         }
 
         "amend the new settlor that is not known to etmp" in {
 
-          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-new-business-settlor-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-new-business-settlor-transform-after-declaration.json")
+          val beforeJson =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-new-business-settlor-transform-before.json")
+          val afterJson  =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-new-business-settlor-transform-after-declaration.json")
 
           val amended = SettlorCompany(
             lineNo = None,
@@ -246,18 +267,23 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
             entityEnd = None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "name": "Second",
               |  "entityStart": "2020-02-28"
               |}
               |""".stripMargin)
 
-          val transformer = AmendSettlorTransform(Some(1), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
+          val transformer = AmendSettlorTransform(
+            Some(1),
+            Json.toJson(amended),
+            original,
+            endDate = LocalDate.parse("2020-03-25"),
+            `type`
+          )
 
           val applied = transformer.applyTransform(beforeJson).get
-          val result = transformer.applyDeclarationTransform(applied).get
+          val result  = transformer.applyDeclarationTransform(applied).get
           result mustBe afterJson
         }
       }
@@ -272,7 +298,7 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
         "amend settlor details by replacing it, but retaining their start date, bpMatchStatus and lineNo" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-deceased-settlor-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-deceased-settlor-transform-after.json")
+          val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-deceased-settlor-transform-after.json")
 
           val amended = AmendDeceasedSettlor(
             name = NameType("updated first", None, "updated last"),
@@ -283,8 +309,7 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
             identification = None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "lineNo":"1",
               |  "bpMatchStatus": "01",
@@ -314,7 +339,7 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
         "amend settlor details by replacing it, but retaining their start date, bpMatchStatus and lineNo" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-deceased-settlor-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-deceased-settlor-transform-after.json")
+          val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-deceased-settlor-transform-after.json")
 
           val amended = AmendDeceasedSettlor(
             name = NameType("updated first", None, "updated last"),
@@ -325,8 +350,7 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
             identification = None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "lineNo":"1",
               |  "bpMatchStatus": "01",
@@ -347,10 +371,11 @@ class AmendSettlorTransformSpec extends AnyFreeSpec {
           val transformer = AmendSettlorTransform(None, Json.toJson(amended), original, LocalDate.now(), `type`)
 
           val applied = transformer.applyTransform(beforeJson).get
-          val result = transformer.applyDeclarationTransform(applied).get
+          val result  = transformer.applyDeclarationTransform(applied).get
           result mustBe afterJson
         }
       }
     }
   }
+
 }

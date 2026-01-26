@@ -19,8 +19,7 @@ package transformers.assets
 import play.api.libs.json._
 import transformers.AddEntityTransform
 
-case class AddAssetTransform(entity: JsValue,
-                             `type`: String) extends AssetTransform with AddEntityTransform
+case class AddAssetTransform(entity: JsValue, `type`: String) extends AssetTransform with AddEntityTransform
 
 object AddAssetTransform {
 

@@ -20,8 +20,8 @@ import play.api.libs.json._
 import transformers.AddEntityTransform
 import utils.Constants.ROLE_IN_COMPANY
 
-case class AddBeneficiaryTransform(entity: JsValue,
-                                   `type`: String) extends BeneficiaryTransform with AddEntityTransform {
+case class AddBeneficiaryTransform(entity: JsValue, `type`: String)
+    extends BeneficiaryTransform with AddEntityTransform {
 
   override val trustTypeDependentFields: Seq[String] = Seq(ROLE_IN_COMPANY)
 }

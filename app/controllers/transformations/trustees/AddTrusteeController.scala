@@ -30,25 +30,26 @@ import utils.Constants._
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class AddTrusteeController @Inject()(identify: IdentifierAction,
-                                     transformationService: TransformationService,
-                                     taxableMigrationService: TaxableMigrationService)
-                                    (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AddTransformationController(identify, transformationService, taxableMigrationService) with TrusteeController {
+class AddTrusteeController @Inject() (
+  identify: IdentifierAction,
+  transformationService: TransformationService,
+  taxableMigrationService: TaxableMigrationService
+)(implicit ec: ExecutionContext, cc: ControllerComponents)
+    extends AddTransformationController(identify, transformationService, taxableMigrationService)
+    with TrusteeController {
 
-  def add(identifier: String): Action[JsValue] = identify.async(parse.json) {
-    implicit request => {
-
-      (validate[TrusteeIndividualType], validate[TrusteeOrgType]) match {
-        case (Some(_), _) =>
-          addIndividual(identifier)
-        case (_, Some(_)) =>
-          addBusiness(identifier)
-        case _ =>
-          logger.error(s"[AddTrusteeController][add][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
-            s" Supplied json could not be read as a trustee")
-          Future.successful(BadRequest)
-      }
+  def add(identifier: String): Action[JsValue] = identify.async(parse.json) { implicit request =>
+    (validate[TrusteeIndividualType], validate[TrusteeOrgType]) match {
+      case (Some(_), _) =>
+        addIndividual(identifier)
+      case (_, Some(_)) =>
+        addBusiness(identifier)
+      case _            =>
+        logger.error(
+          s"[AddTrusteeController][add][Session ID: ${request.sessionId}][UTR/URN: $identifier]" +
+            s" Supplied json could not be read as a trustee"
+        )
+        Future.successful(BadRequest)
     }
   }
 
@@ -58,9 +59,9 @@ class AddTrusteeController @Inject()(identify: IdentifierAction,
   def addBusiness(identifier: String)(implicit request: IdentifierRequest[JsValue]): Future[Result] =
     addNewTransform[TrusteeOrgType](identifier, BUSINESS_TRUSTEE).apply(request)
 
-  override def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)
-                           (implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)(
+    implicit wts: Writes[T]
+  ): DeltaTransform =
     AddTrusteeTransform(Json.toJson(value), `type`)
-  }
 
 }

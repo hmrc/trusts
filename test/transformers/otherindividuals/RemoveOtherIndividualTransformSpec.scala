@@ -37,8 +37,7 @@ class RemoveOtherIndividualTransformSpec extends AnyFreeSpec with ScalaFutures w
 
     if (withLineNo) {
       b.deepMerge(Json.obj("lineNo" -> 12))
-    }
-    else b
+    } else b
   }
 
   private def buildInputJson(otherIndividualData: Seq[JsValue]) = {
@@ -51,14 +50,16 @@ class RemoveOtherIndividualTransformSpec extends AnyFreeSpec with ScalaFutures w
   }
 
   "Remove OtherIndividual Transforms should round trip through JSON as part of Composed Transform" in {
-    val OUT = ComposedDeltaTransform(Seq(
-      RemoveOtherIndividualTransform(Some(56), otherIndividualJson(), LocalDate.of(1563, 10, 23)),
-      RemoveOtherIndividualTransform(Some(12), otherIndividualJson(), LocalDate.of(2317, 12, 21))
-    ))
+    val OUT = ComposedDeltaTransform(
+      Seq(
+        RemoveOtherIndividualTransform(Some(56), otherIndividualJson(), LocalDate.of(1563, 10, 23)),
+        RemoveOtherIndividualTransform(Some(12), otherIndividualJson(), LocalDate.of(2317, 12, 21))
+      )
+    )
 
     Json.toJson(OUT).validate[ComposedDeltaTransform] match {
       case JsSuccess(result, _) => result mustBe OUT
-      case _ => fail("Transform failed")
+      case _                    => fail("Transform failed")
     }
   }
 
@@ -66,71 +67,91 @@ class RemoveOtherIndividualTransformSpec extends AnyFreeSpec with ScalaFutures w
 
     "remove an otherIndividual from the list that is returned to the frontend" in {
 
-      val inputJson = buildInputJson(Seq(
-        otherIndividualJson(),
-        otherIndividualJson(),
-        otherIndividualJson()
-      ))
+      val inputJson = buildInputJson(
+        Seq(
+          otherIndividualJson(),
+          otherIndividualJson(),
+          otherIndividualJson()
+        )
+      )
 
-      val expectedOutput = buildInputJson(Seq(
-        otherIndividualJson(),
-        otherIndividualJson()
-      ))
+      val expectedOutput = buildInputJson(
+        Seq(
+          otherIndividualJson(),
+          otherIndividualJson()
+        )
+      )
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveOtherIndividualTransform(Some(1), Json.obj(), LocalDate.of(2018, 4, 21))))
+      val OUT =
+        ComposedDeltaTransform(Seq(RemoveOtherIndividualTransform(Some(1), Json.obj(), LocalDate.of(2018, 4, 21))))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe expectedOutput
-        case JsError(errors) => fail(s"Transform failed: $errors")
+        case JsError(errors)     => fail(s"Transform failed: $errors")
       }
     }
 
     "not affect the document if the index is too high" in {
-      val inputJson = buildInputJson(Seq(
-        otherIndividualJson(),
-        otherIndividualJson(),
-        otherIndividualJson()
-      ))
+      val inputJson = buildInputJson(
+        Seq(
+          otherIndividualJson(),
+          otherIndividualJson(),
+          otherIndividualJson()
+        )
+      )
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveOtherIndividualTransform(Some(10), Json.obj(), LocalDate.of(2018, 4, 21))))
+      val OUT =
+        ComposedDeltaTransform(Seq(RemoveOtherIndividualTransform(Some(10), Json.obj(), LocalDate.of(2018, 4, 21))))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
-        case _ => fail("Transform failed")
+        case _                   => fail("Transform failed")
       }
     }
 
     "not affect the document if the index is too low" in {
-      val inputJson = buildInputJson(Seq(
-        otherIndividualJson(),
-        otherIndividualJson(),
-        otherIndividualJson()
-      ))
+      val inputJson = buildInputJson(
+        Seq(
+          otherIndividualJson(),
+          otherIndividualJson(),
+          otherIndividualJson()
+        )
+      )
 
-      val OUT = ComposedDeltaTransform(Seq(RemoveOtherIndividualTransform(Some(-1), Json.obj(), LocalDate.of(2018, 4, 21))))
+      val OUT =
+        ComposedDeltaTransform(Seq(RemoveOtherIndividualTransform(Some(-1), Json.obj(), LocalDate.of(2018, 4, 21))))
 
       OUT.applyTransform(inputJson) match {
         case JsSuccess(value, _) => value mustBe inputJson
-        case _ => fail("Transform failed")
+        case _                   => fail("Transform failed")
       }
     }
 
     "remove the section if the last otherIndividual in that section is removed" in {
-      val inputJson = buildInputJson(Seq(
-        otherIndividualJson()
-      ))
+      val inputJson = buildInputJson(
+        Seq(
+          otherIndividualJson()
+        )
+      )
 
       val transforms = Seq(
-        RemoveOtherIndividualTransform(Some(0), otherIndividualJson(None, withLineNo = false), LocalDate.of(2018, 4, 21))
+        RemoveOtherIndividualTransform(
+          Some(0),
+          otherIndividualJson(None, withLineNo = false),
+          LocalDate.of(2018, 4, 21)
+        )
       )
 
       val OUT = ComposedDeltaTransform(transforms)
 
       OUT.applyTransform(inputJson) match {
-        case JsSuccess(value, _) => value.transform(
-          (JsPath() \ "details" \ "trust" \ "entities" \ "otherIndividuals" \ "naturalPerson").json.pick).isError mustBe true
-        case _ => fail("Transform failed")
+        case JsSuccess(value, _) =>
+          value
+            .transform((JsPath() \ "details" \ "trust" \ "entities" \ "otherIndividuals" \ "naturalPerson").json.pick)
+            .isError mustBe true
+        case _                   => fail("Transform failed")
       }
     }
   }
+
 }

@@ -29,15 +29,18 @@ import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-class OrchestratorCallbackController @Inject()(auditService: MigrationAuditService, cc: ControllerComponents)(implicit ec: ExecutionContext)
-  extends BackendController(cc) with Logging {
+class OrchestratorCallbackController @Inject() (auditService: MigrationAuditService, cc: ControllerComponents)(implicit
+  ec: ExecutionContext
+) extends BackendController(cc) with Logging {
 
   def migrationToTaxableCallback(urn: String, utr: String): Action[JsValue] = Action.async(parse.json) {
     implicit request =>
-      implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
+      implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
-      logger.info(s"[OrchestratorCallbackController][migrationToTaxableCallback][Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr]" +
-        s" Orchestrator: migrate subscription callback message was: ${request.body}")
+      logger.info(
+        s"[OrchestratorCallbackController][migrationToTaxableCallback][Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr]" +
+          s" Orchestrator: migrate subscription callback message was: ${request.body}"
+      )
 
       val success = (request.body \ "success").asOpt[Boolean]
 
@@ -47,19 +50,20 @@ class OrchestratorCallbackController @Inject()(auditService: MigrationAuditServi
 
           logger.error(
             s"[OrchestratorCallbackController][migrationToTaxableCallback]" +
-            s"[Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr]" +
-            s" Orchestrator: migrate subscription failed," +
-            s" error message was: ${errorMessage.getOrElse(request.body)}"
+              s"[Session ID: ${Session.id(hc)}][URN: $urn, UTR: $utr]" +
+              s" Orchestrator: migrate subscription failed," +
+              s" error message was: ${errorMessage.getOrElse(request.body)}"
           )
 
           auditService
             .auditOrchestratorFailure(urn, utr, errorMessage.getOrElse("Error"))
 
           Future(NoContent)
-        case _ =>
+        case _           =>
           auditService.auditOrchestratorSuccess(urn, utr)
           Future(NoContent)
       }
 
   }
+
 }

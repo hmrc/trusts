@@ -48,8 +48,8 @@ class RemoveSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
-  private val utr: String = "utr"
-  private val index: Int = 0
+  private val utr: String        = "utr"
+  private val index: Int         = 0
   private val endDate: LocalDate = LocalDate.parse("2018-02-24")
 
   private def removeSettlor(settlorType: String): RemoveSettlor = RemoveSettlor(
@@ -97,7 +97,11 @@ class RemoveSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(settlorType, Seq(Json.toJson(settlor)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(settlorType, Seq(Json.toJson(settlor)))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -173,7 +177,11 @@ class RemoveSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(settlorType, Seq(Json.toJson(settlor)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(settlorType, Seq(Json.toJson(settlor)))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -205,7 +213,11 @@ class RemoveSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(settlorType, Seq(Json.toJson(settlor)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(settlorType, Seq(Json.toJson(settlor)))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
@@ -242,4 +254,5 @@ class RemoveSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Sca
 
     }
   }
+
 }

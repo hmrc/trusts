@@ -19,8 +19,7 @@ package transformers.protectors
 import play.api.libs.json._
 import transformers.AddEntityTransform
 
-case class AddProtectorTransform(entity: JsValue,
-                                 `type`: String) extends ProtectorTransform with AddEntityTransform
+case class AddProtectorTransform(entity: JsValue, `type`: String) extends ProtectorTransform with AddEntityTransform
 
 object AddProtectorTransform {
 

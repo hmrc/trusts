@@ -32,30 +32,42 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class AuthActionSpec extends BaseSpec {
 
-  private implicit class HelperOps[A](a: A) {
+  implicit private class HelperOps[A](a: A) {
     def ~[B](b: B) = new ~(a, b)
   }
 
   private val cc = stubControllerComponents()
 
   class Harness(authAction: IdentifierAction) {
-    def onSubmit() = authAction.apply(cc.parsers.json) { _ => Results.Ok }
+    def onSubmit() = authAction.apply(cc.parsers.json)(_ => Results.Ok)
   }
 
-  private type AllRetrievals = Future[Some[String] ~ Some[AffinityGroup] ~ Option[String] ~ LoginTimes ~ Option[Credentials] ~ Option[String]]
+  private type AllRetrievals =
+    Future[Some[String] ~ Some[AffinityGroup] ~ Option[String] ~ LoginTimes ~ Option[Credentials] ~ Option[String]]
 
   private def minimumAuthRetrievals(affinityGroup: AffinityGroup): AllRetrievals =
-    Future.successful(Some("id") ~ Some(affinityGroup) ~ None ~ LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, None) ~ None ~ None)
+    Future.successful(
+      Some("id") ~ Some(affinityGroup) ~ None ~ LoginTimes(
+        LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant,
+        None
+      ) ~ None ~ None
+    )
 
   private def allRetrievals(affinityGroup: AffinityGroup): AllRetrievals =
-    Future.successful(Some("id") ~ Some(affinityGroup) ~ Some("groupIdentifier") ~ LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, None) ~ Some(Credentials("12345", "governmentGateway")) ~ Some("org@email.com"))
+    Future.successful(
+      Some("id") ~ Some(affinityGroup) ~ Some("groupIdentifier") ~ LoginTimes(
+        LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant,
+        None
+      ) ~ Some(Credentials("12345", "governmentGateway")) ~ Some("org@email.com")
+    )
 
-  private def actionToTest(authConnector: AuthConnector) = {
-    new AuthenticatedIdentifierAction(authConnector, injector.instanceOf[BodyParsers.Default])(ExecutionContext.Implicits.global)
-  }
+  private def actionToTest(authConnector: AuthConnector) =
+    new AuthenticatedIdentifierAction(authConnector, injector.instanceOf[BodyParsers.Default])(
+      ExecutionContext.Implicits.global
+    )
 
   private val agentAffinityGroup = AffinityGroup.Agent
-  private val orgAffinityGroup = AffinityGroup.Organisation
+  private val orgAffinityGroup   = AffinityGroup.Organisation
 
   "Auth Action" when {
 
@@ -64,7 +76,7 @@ class AuthActionSpec extends BaseSpec {
       "return email, login times, groupIdentifier and provider information" in {
         val authAction = actionToTest(new FakeAuthConnector(allRetrievals(agentAffinityGroup)))
         val controller = new Harness(authAction)
-        val result = controller.onSubmit()(fakeRequest)
+        val result     = controller.onSubmit()(fakeRequest)
 
         status(result) mustBe OK
       }
@@ -76,7 +88,7 @@ class AuthActionSpec extends BaseSpec {
 
         val authAction = actionToTest(new FakeAuthConnector(minimumAuthRetrievals(agentAffinityGroup)))
         val controller = new Harness(authAction)
-        val result = controller.onSubmit()(fakeRequest)
+        val result     = controller.onSubmit()(fakeRequest)
 
         status(result) mustBe OK
       }
@@ -89,7 +101,7 @@ class AuthActionSpec extends BaseSpec {
 
         val authAction = actionToTest(new FakeAuthConnector(minimumAuthRetrievals(orgAffinityGroup)))
         val controller = new Harness(authAction)
-        val result = controller.onSubmit()(fakeRequest)
+        val result     = controller.onSubmit()(fakeRequest)
 
         status(result) mustBe OK
       }
@@ -102,7 +114,7 @@ class AuthActionSpec extends BaseSpec {
 
         val authAction = actionToTest(new FakeAuthConnector(minimumAuthRetrievals(Individual)))
         val controller = new Harness(authAction)
-        val result = controller.onSubmit()(fakeRequest)
+        val result     = controller.onSubmit()(fakeRequest)
         status(result) mustBe UNAUTHORIZED
       }
 
@@ -114,7 +126,7 @@ class AuthActionSpec extends BaseSpec {
 
         val authAction = actionToTest(new FakeFailingAuthConnector(new MissingBearerToken))
         val controller = new Harness(authAction)
-        val result = controller.onSubmit()(fakeRequest)
+        val result     = controller.onSubmit()(fakeRequest)
 
         status(result) mustBe UNAUTHORIZED
       }
@@ -126,26 +138,32 @@ class AuthActionSpec extends BaseSpec {
 
         val authAction = actionToTest(new FakeFailingAuthConnector(new BearerTokenExpired))
         val controller = new Harness(authAction)
-        val result = controller.onSubmit()(fakeRequest)
+        val result     = controller.onSubmit()(fakeRequest)
 
         status(result) mustBe UNAUTHORIZED
       }
     }
   }
+
 }
 
-class FakeFailingAuthConnector @Inject()(exceptionToReturn: Throwable) extends AuthConnector {
+class FakeFailingAuthConnector @Inject() (exceptionToReturn: Throwable) extends AuthConnector {
   val serviceUrl: String = ""
 
-  override def authorise[A](predicate: Predicate, retrieval: Retrieval[A])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[A] =
+  override def authorise[A](predicate: Predicate, retrieval: Retrieval[A])(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[A] =
     Future.failed(exceptionToReturn)
+
 }
 
 class FakeAuthConnector(stubbedRetrievalResult: Future[_]) extends AuthConnector {
 
-  override def authorise[A](predicate: Predicate, retrieval: Retrieval[A])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[A] = {
+  override def authorise[A](predicate: Predicate, retrieval: Retrieval[A])(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[A] =
     stubbedRetrievalResult.map(_.asInstanceOf[A])
-  }
 
 }
-

@@ -48,8 +48,8 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
-  private val utr: String = "utr"
-  private val index: Int = 0
+  private val utr: String        = "utr"
+  private val index: Int         = 0
   private val endDate: LocalDate = LocalDate.parse("2021-01-01")
 
   private val invalidBody: JsValue = Json.parse("{}")
@@ -88,7 +88,7 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       "must add a new amend transform" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new AmendSettlorController(
           identifierAction,
@@ -97,7 +97,11 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(settlorType, Json.toJson(originalSettlor))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(settlorType, Json.toJson(originalSettlor))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -112,7 +116,13 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
 
         status(result) mustBe OK
 
-        val transform = AmendSettlorTransform(Some(index), Json.toJson(amendedSettlor), Json.toJson(originalSettlor), endDate, settlorType)
+        val transform = AmendSettlorTransform(
+          Some(index),
+          Json.toJson(amendedSettlor),
+          Json.toJson(originalSettlor),
+          endDate,
+          settlorType
+        )
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
@@ -122,7 +132,7 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       "must return an Internal Server Error when getTransformedTrustJson fails" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new AmendSettlorController(
           identifierAction,
@@ -151,7 +161,7 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       "must return an error for invalid json" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new AmendSettlorController(
           identifierAction,
@@ -193,7 +203,7 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       "must add a new amend transform" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new AmendSettlorController(
           identifierAction,
@@ -202,7 +212,11 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(settlorType, Json.toJson(originalSettlor))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(settlorType, Json.toJson(originalSettlor))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -217,7 +231,13 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
 
         status(result) mustBe OK
 
-        val transform = AmendSettlorTransform(Some(index), Json.toJson(amendedSettlor), Json.toJson(originalSettlor), endDate, settlorType)
+        val transform = AmendSettlorTransform(
+          Some(index),
+          Json.toJson(amendedSettlor),
+          Json.toJson(originalSettlor),
+          endDate,
+          settlorType
+        )
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
@@ -227,7 +247,7 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       "must return an Internal Server Error when addNewTransform fails" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new AmendSettlorController(
           identifierAction,
@@ -236,7 +256,11 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(settlorType, Json.toJson(originalSettlor))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(settlorType, Json.toJson(originalSettlor))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
@@ -256,7 +280,7 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       "must return an error for invalid json" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new AmendSettlorController(
           identifierAction,
@@ -277,8 +301,7 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
 
     "deceased settlor" - {
 
-      val originalSettlor = Json.parse(
-        """
+      val originalSettlor = Json.parse("""
           |{
           |  "lineNo":"1",
           |  "bpMatchStatus": "01",
@@ -310,7 +333,7 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       "must add a new amend transform" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new AmendSettlorController(
           identifierAction,
@@ -336,7 +359,8 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
 
         status(result) mustBe OK
 
-        val transform = AmendSettlorTransform(None, Json.toJson(amendedSettlor), Json.toJson(originalSettlor), endDate, settlorType)
+        val transform =
+          AmendSettlorTransform(None, Json.toJson(amendedSettlor), Json.toJson(originalSettlor), endDate, settlorType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
@@ -346,7 +370,7 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       "must return an error for invalid json" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new AmendSettlorController(
           identifierAction,
@@ -365,4 +389,5 @@ class AmendSettlorControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       }
     }
   }
+
 }

@@ -23,11 +23,11 @@ object DeedOfVariation extends Enumeration {
   type DeedOfVariation = Value
 
   val AbsoluteInterestUnderWill = Value("Previously there was only an absolute interest under the will")
-  val ReplacedWill = Value("Replaced the will trust")
-  val AdditionToWill = Value("Addition to the will trust")
+  val ReplacedWill              = Value("Replaced the will trust")
+  val AdditionToWill            = Value("Addition to the will trust")
 
-  implicit val reads: Reads[DeedOfVariation] = Reads.enumNameReads(DeedOfVariation)
-  implicit val writes: Writes[DeedOfVariation] = Writes.enumNameWrites
-  implicit val formats: Format[DeedOfVariation]  = Format(reads, writes)
+  implicit val reads: Reads[DeedOfVariation]    = Reads.enumNameReads(DeedOfVariation)
+  implicit val writes: Writes[DeedOfVariation]  = Writes.enumNameWrites
+  implicit val formats: Format[DeedOfVariation] = Format(reads, writes)
 
 }

@@ -28,17 +28,23 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
 
   val util: RequiredEntityDetailsForMigration = injector.instanceOf[RequiredEntityDetailsForMigration]
 
-  def runTest(entities: JsPath, `type`: Option[String], newValue: JsValue, expectedResult: MigrationStatus, typeOfTrust: Option[String] = None)
-             (f: JsValue => JsResult[MigrationStatus]): Assertion = {
+  def runTest(
+    entities: JsPath,
+    `type`: Option[String],
+    newValue: JsValue,
+    expectedResult: MigrationStatus,
+    typeOfTrust: Option[String] = None
+  )(f: JsValue => JsResult[MigrationStatus]): Assertion = {
 
     def removeAndAdd(): Reads[JsObject] = `type` match {
-      case None => prunePathAndPutNewValue(entities, newValue)
-      case Some(t) => prunePathAndPutNewValue(entities \ INDIVIDUAL_BENEFICIARY, JsArray()) andThen
-        prunePathAndPutNewValue(entities \ COMPANY_BENEFICIARY, JsArray()) andThen
-        prunePathAndPutNewValue(entities \ TRUST_BENEFICIARY, JsArray()) andThen
-        prunePathAndPutNewValue(entities \ CHARITY_BENEFICIARY, JsArray()) andThen
-        prunePathAndPutNewValue(entities \ OTHER_BENEFICIARY, JsArray()) andThen
-        putNewValue(entities \ t, newValue)
+      case None    => prunePathAndPutNewValue(entities, newValue)
+      case Some(t) =>
+        prunePathAndPutNewValue(entities \ INDIVIDUAL_BENEFICIARY, JsArray()) andThen
+          prunePathAndPutNewValue(entities \ COMPANY_BENEFICIARY, JsArray())  andThen
+          prunePathAndPutNewValue(entities \ TRUST_BENEFICIARY, JsArray())    andThen
+          prunePathAndPutNewValue(entities \ CHARITY_BENEFICIARY, JsArray())  andThen
+          prunePathAndPutNewValue(entities \ OTHER_BENEFICIARY, JsArray())    andThen
+          putNewValue(entities \ t, newValue)
     }
 
     val trust = getTransformedTrustResponse
@@ -46,9 +52,10 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
         removeAndAdd() andThen
           (typeOfTrust match {
             case Some(value) => prunePathAndPutNewValue(TRUST \ DETAILS \ TYPE_OF_TRUST, JsString(value))
-            case None => prunePath(TRUST \ DETAILS \ TYPE_OF_TRUST)
+            case None        => prunePath(TRUST \ DETAILS \ TYPE_OF_TRUST)
           })
-      ).get
+      )
+      .get
 
     val result = f(trust)
 
@@ -60,14 +67,12 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
     "areBeneficiariesCompleteForMigration" must {
 
       lazy val f: JsValue => JsResult[MigrationStatus] = util.areBeneficiariesCompleteForMigration
-      val entities = ENTITIES \ BENEFICIARIES
+      val entities                                     = ENTITIES \ BENEFICIARIES
 
       "return NeedsUpdating" when {
 
-        "no beneficiaries" in {
-
+        "no beneficiaries" in
           runTest(entities, None, Json.obj(), expectedResult = NeedsUpdating)(f)
-        }
 
         "individual beneficiary doesn't have required data" when {
 
@@ -156,7 +161,13 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(entities, Some(`type`), beneficiary, expectedResult = NeedsUpdating, typeOfTrust = Some("Employment Related"))(f)
+            runTest(
+              entities,
+              Some(`type`),
+              beneficiary,
+              expectedResult = NeedsUpdating,
+              typeOfTrust = Some("Employment Related")
+            )(f)
           }
         }
 
@@ -384,7 +395,13 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                 |""".stripMargin
             )
 
-            runTest(entities, Some(`type`), beneficiary, expectedResult = Updated, typeOfTrust = Some("Employment Related"))(f)
+            runTest(
+              entities,
+              Some(`type`),
+              beneficiary,
+              expectedResult = Updated,
+              typeOfTrust = Some("Employment Related")
+            )(f)
           }
         }
 
@@ -555,10 +572,8 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
 
           val `type` = INDIVIDUAL_BENEFICIARY
 
-          "no individuals" in {
-
+          "no individuals" in
             runTest(entities, Some(`type`), JsArray(), expectedResult = NothingToUpdate)(f)
-          }
 
           "has an end date" in {
 
@@ -586,10 +601,8 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
 
           val `type` = COMPANY_BENEFICIARY
 
-          "no companies" in {
-
+          "no companies" in
             runTest(entities, Some(`type`), JsArray(), expectedResult = NothingToUpdate)(f)
-          }
 
           "has an end date" in {
 
@@ -632,10 +645,8 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
 
           val `type` = TRUST_BENEFICIARY
 
-          "no trusts" in {
-
+          "no trusts" in
             runTest(entities, Some(`type`), JsArray(), expectedResult = NothingToUpdate)(f)
-          }
 
           "has an end date" in {
 
@@ -678,10 +689,8 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
 
           val `type` = CHARITY_BENEFICIARY
 
-          "no charities" in {
-
+          "no charities" in
             runTest(entities, Some(`type`), JsArray(), expectedResult = NothingToUpdate)(f)
-          }
 
           "has an end date" in {
 
@@ -724,10 +733,8 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
 
           val `type` = OTHER_BENEFICIARY
 
-          "no others" in {
-
+          "no others" in
             runTest(entities, Some(`type`), JsArray(), expectedResult = NothingToUpdate)(f)
-          }
 
           "has an end date" in {
 
@@ -754,7 +761,7 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
       lazy val f: JsValue => JsResult[MigrationStatus] = util.areSettlorsCompleteForMigration
 
       val entities = ENTITIES \ SETTLORS
-      val `type` = BUSINESS_SETTLOR
+      val `type`   = BUSINESS_SETTLOR
 
       "return NeedsUpdating" when {
         "business settlor doesn't have required data" when {
@@ -774,7 +781,13 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                   |""".stripMargin
               )
 
-              runTest(entities, Some(`type`), settlor, expectedResult = NeedsUpdating, typeOfTrust = Some("Employment Related"))(f)
+              runTest(
+                entities,
+                Some(`type`),
+                settlor,
+                expectedResult = NeedsUpdating,
+                typeOfTrust = Some("Employment Related")
+              )(f)
             }
 
             "missing companyTime" in {
@@ -791,7 +804,13 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                   |""".stripMargin
               )
 
-              runTest(entities, Some(`type`), settlor, expectedResult = NeedsUpdating, typeOfTrust = Some("Employment Related"))(f)
+              runTest(
+                entities,
+                Some(`type`),
+                settlor,
+                expectedResult = NeedsUpdating,
+                typeOfTrust = Some("Employment Related")
+              )(f)
             }
           }
         }
@@ -832,7 +851,13 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
                   |""".stripMargin
               )
 
-              runTest(entities, Some(`type`), settlor, expectedResult = Updated, typeOfTrust = Some("Employment Related"))(f)
+              runTest(
+                entities,
+                Some(`type`),
+                settlor,
+                expectedResult = Updated,
+                typeOfTrust = Some("Employment Related")
+              )(f)
             }
           }
         }
@@ -840,10 +865,8 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
 
       "return NothingToUpdate" when {
 
-        "no business settlors" in {
-
+        "no business settlors" in
           runTest(entities, Some(`type`), JsArray(), expectedResult = NothingToUpdate)(f)
-        }
 
         "has an end date" in {
 
@@ -864,4 +887,5 @@ class RequiredEntityDetailsForMigrationSpec extends BaseSpec {
       }
     }
   }
+
 }

@@ -22,16 +22,18 @@ import play.api.libs.json.{Format, Json, Writes}
 
 import java.time.LocalDate
 
-case class NaturalPersonType(lineNo: Option[String],
-                             bpMatchStatus: Option[String],
-                             name: NameType,
-                             dateOfBirth: Option[LocalDate],
-                             identification: Option[IdentificationType],
-                             countryOfResidence: Option[String],
-                             legallyIncapable: Option[Boolean],
-                             nationality: Option[String],
-                             entityStart: LocalDate,
-                             entityEnd: Option[LocalDate]) extends Entity[NaturalPersonType] {
+case class NaturalPersonType(
+  lineNo: Option[String],
+  bpMatchStatus: Option[String],
+  name: NameType,
+  dateOfBirth: Option[LocalDate],
+  identification: Option[IdentificationType],
+  countryOfResidence: Option[String],
+  legallyIncapable: Option[Boolean],
+  nationality: Option[String],
+  entityStart: LocalDate,
+  entityEnd: Option[LocalDate]
+) extends Entity[NaturalPersonType] {
 
   override val writeToMaintain: Writes[NaturalPersonType] = NaturalPersonType.writeToMaintain
 }
@@ -39,17 +41,21 @@ case class NaturalPersonType(lineNo: Option[String],
 object NaturalPersonType {
   implicit val naturalPersonTypeFormat: Format[NaturalPersonType] = Json.format[NaturalPersonType]
 
-  val writeToMaintain: Writes[NaturalPersonType] = (o: NaturalPersonType) => Json.obj(
-    "lineNo" -> o.lineNo,
-    "bpMatchStatus" -> o.bpMatchStatus,
-    "name" -> o.name,
-    "dateOfBirth" -> o.dateOfBirth,
-    "identification" -> o.identification,
-    "countryOfResidence" -> o.countryOfResidence,
-    "legallyIncapable" -> o.legallyIncapable,
-    "nationality" -> o.nationality,
-    "entityStart" -> o.entityStart,
-    "entityEnd" -> o.entityEnd,
-    "provisional" -> o.lineNo.isEmpty
-  ).withoutNulls
+  val writeToMaintain: Writes[NaturalPersonType] = (o: NaturalPersonType) =>
+    Json
+      .obj(
+        "lineNo"             -> o.lineNo,
+        "bpMatchStatus"      -> o.bpMatchStatus,
+        "name"               -> o.name,
+        "dateOfBirth"        -> o.dateOfBirth,
+        "identification"     -> o.identification,
+        "countryOfResidence" -> o.countryOfResidence,
+        "legallyIncapable"   -> o.legallyIncapable,
+        "nationality"        -> o.nationality,
+        "entityStart"        -> o.entityStart,
+        "entityEnd"          -> o.entityEnd,
+        "provisional"        -> o.lineNo.isEmpty
+      )
+      .withoutNulls
+
 }

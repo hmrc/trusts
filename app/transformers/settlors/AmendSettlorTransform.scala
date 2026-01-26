@@ -23,71 +23,67 @@ import utils.JsonOps.prunePathAndPutNewValue
 
 import java.time.LocalDate
 
-case class AmendSettlorTransform(index: Option[Int],
-                                 amended: JsValue,
-                                 original: JsValue,
-                                 endDate: LocalDate,
-                                 `type`: String) extends SettlorTransform with AmendEntityTransform {
+case class AmendSettlorTransform(
+  index: Option[Int],
+  amended: JsValue,
+  original: JsValue,
+  endDate: LocalDate,
+  `type`: String
+) extends SettlorTransform with AmendEntityTransform {
 
   override val trustTypeDependentFields: Seq[String] = Seq(COMPANY_TYPE, COMPANY_TIME)
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
+  override def applyTransform(input: JsValue): JsResult[JsValue] =
     if (isDeceasedSettlor) {
       amendDeceasedAndPreserveData(input)
     } else {
       amendAtPosition(input, path, index, preserveFields(etmpFields))
     }
-  }
 
-  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
+  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] =
     if (isDeceasedSettlor) {
       JsSuccess(input)
     } else {
       endSettlorIfKnownToEtmp(input)
     }
-  }
 
-  private def amendDeceasedAndPreserveData(input: JsValue): JsResult[JsObject] = {
+  private def amendDeceasedAndPreserveData(input: JsValue): JsResult[JsObject] =
     input.transform(
       prunePathAndPutNewValue(path, preserveFields(etmpFields :+ ENTITY_START))
     )
-  }
 
-  private def preserveFields(fields: Seq[String]): JsValue = {
-    fields.foldLeft[JsValue](amended)((updated, field) => {
-      copyField(original, field, updated)
-    })
-  }
+  private def preserveFields(fields: Seq[String]): JsValue =
+    fields.foldLeft[JsValue](amended)((updated, field) => copyField(original, field, updated))
 
-  private def endSettlorIfKnownToEtmp(input:JsValue): JsResult[JsValue] = {
-    original.transform(lineNoPick).fold(
-      _ => JsSuccess(input),
-      lineNo => {
-        stripEtmpStatusForMatching(input, lineNo).fold(
-          _ => endEntity(input, path, original, endDate, endDateField),
-          newEntities => addEndedEntity(input, newEntities)
-        )
-      }
-    )
-  }
-
-  private def stripEtmpStatusForMatching(input: JsValue, lineNo: JsValue): JsResult[Seq[JsObject]] = {
-    input.transform(path.json.pick).map {
-      value =>
-        value.as[Seq[JsObject]].collect {
-          case x: JsObject if x \ LINE_NUMBER == JsDefined(lineNo) => removeJsObjectFields(x, etmpFields)
-          case x => x
-        }
-    }
-  }
-
-  private def addEndedEntity(input: JsValue, newEntities: Seq[JsObject]): JsResult[JsObject] = {
-    input.transform(__.json.update(
-      path.json.put(
-        JsArray(newEntities ++ Seq(objectPlusField(original, ENTITY_END, Json.toJson(endDate))))
+  private def endSettlorIfKnownToEtmp(input: JsValue): JsResult[JsValue] =
+    original
+      .transform(lineNoPick)
+      .fold(
+        _ => JsSuccess(input),
+        lineNo =>
+          stripEtmpStatusForMatching(input, lineNo).fold(
+            _ => endEntity(input, path, original, endDate, endDateField),
+            newEntities => addEndedEntity(input, newEntities)
+          )
       )
-    ))
-  }
+
+  private def stripEtmpStatusForMatching(input: JsValue, lineNo: JsValue): JsResult[Seq[JsObject]] =
+    input.transform(path.json.pick).map { value =>
+      value.as[Seq[JsObject]].collect {
+        case x: JsObject if x \ LINE_NUMBER == JsDefined(lineNo) => removeJsObjectFields(x, etmpFields)
+        case x                                                   => x
+      }
+    }
+
+  private def addEndedEntity(input: JsValue, newEntities: Seq[JsObject]): JsResult[JsObject] =
+    input.transform(
+      __.json.update(
+        path.json.put(
+          JsArray(newEntities ++ Seq(objectPlusField(original, ENTITY_END, Json.toJson(endDate))))
+        )
+      )
+    )
+
 }
 
 object AmendSettlorTransform {

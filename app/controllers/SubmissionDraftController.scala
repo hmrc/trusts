@@ -34,45 +34,47 @@ import utils.TrustEnvelope.TrustEnvelope
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SubmissionDraftController @Inject()(
-                                           submissionRepository: RegistrationSubmissionRepository,
-                                           identify: IdentifierAction,
-                                           timeService: TimeService,
-                                           cc: ControllerComponents
-                                         )(implicit ec: ExecutionContext) extends TrustsBaseController(cc) with Logging {
+class SubmissionDraftController @Inject() (
+  submissionRepository: RegistrationSubmissionRepository,
+  identify: IdentifierAction,
+  timeService: TimeService,
+  cc: ControllerComponents
+)(implicit ec: ExecutionContext)
+    extends TrustsBaseController(cc) with Logging {
 
   private val className = this.getClass.getSimpleName
 
-  def setSection(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
-    implicit request => {
-      request.body.validate[RegistrationSubmissionDraftData] match {
-        case JsSuccess(draftData, _) =>
-          val expectedResult = for {
-            optionalDraftData <- submissionRepository.getDraft(draftId, request.internalId)
-            draft = optionalDraftData.getOrElse(
+  def setSection(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) { implicit request =>
+    request.body.validate[RegistrationSubmissionDraftData] match {
+      case JsSuccess(draftData, _) =>
+        val expectedResult = for {
+          optionalDraftData        <- submissionRepository.getDraft(draftId, request.internalId)
+          draft                     =
+            optionalDraftData.getOrElse(
               RegistrationSubmissionDraft(draftId, request.internalId, timeService.now, Json.obj(), None, Some(true))
             )
-            body: JsValue = draftData.data
-            path = JsPath() \ sectionKey
-            dataTransformationResult <- draftDataTransformationForSetSection(draftData, draft, path, body)
-          } yield dataTransformationResult
+          body: JsValue             = draftData.data
+          path                      = JsPath() \ sectionKey
+          dataTransformationResult <- draftDataTransformationForSetSection(draftData, draft, path, body)
+        } yield dataTransformationResult
 
-          expectedResult.value.map {
-            case Right(dataTransformationResult) => dataTransformationResult
-            case Left(ErrorWithResult(result)) => result
-            case Left(_) =>
-              logger.warn(s"[$className][setSection][Session ID: ${request.sessionId}] failed to set section.")
-              InternalServerError
-          }
-        case _ => Future.successful(BadRequest)
-      }
+        expectedResult.value.map {
+          case Right(dataTransformationResult) => dataTransformationResult
+          case Left(ErrorWithResult(result))   => result
+          case Left(_)                         =>
+            logger.warn(s"[$className][setSection][Session ID: ${request.sessionId}] failed to set section.")
+            InternalServerError
+        }
+      case _                       => Future.successful(BadRequest)
     }
   }
 
-  private def draftDataTransformationForSetSection(draftData: RegistrationSubmissionDraftData,
-                                                   draft: RegistrationSubmissionDraft,
-                                                   path: JsPath,
-                                                   body: JsValue)(implicit request: IdentifierRequest[JsValue]): TrustEnvelope[Result] = EitherT {
+  private def draftDataTransformationForSetSection(
+    draftData: RegistrationSubmissionDraftData,
+    draft: RegistrationSubmissionDraft,
+    path: JsPath,
+    body: JsValue
+  )(implicit request: IdentifierRequest[JsValue]): TrustEnvelope[Result] = EitherT {
     draft.draftData.transform(
       prunePath(path) andThen
         JsPath.json.update {
@@ -80,22 +82,26 @@ class SubmissionDraftController @Inject()(
         }
     ) match {
       case JsSuccess(newDraftData, _) =>
-        val newReference = draftData.reference orElse draft.reference
+        val newReference  = draftData.reference orElse draft.reference
         val newInProgress = draftData.inProgress orElse draft.inProgress
-        val newDraft = draft.copy(draftData = newDraftData, reference = newReference, inProgress = newInProgress)
+        val newDraft      = draft.copy(draftData = newDraftData, reference = newReference, inProgress = newInProgress)
         submissionRepository.setDraft(newDraft).value.map {
-          case Right(true) => Right(Ok)
-          case Right(_) => Left(ErrorWithResult(InternalServerError))
+          case Right(true)                                    => Right(Ok)
+          case Right(_)                                       => Left(ErrorWithResult(InternalServerError))
           case Left(ServerError(message)) if message.nonEmpty =>
-            logger.warn(s"[$className][draftDataTransformationForSetSection][Session ID: ${request.sessionId}] " +
-              s" cannot transform data for set section. Message: $message")
+            logger.warn(
+              s"[$className][draftDataTransformationForSetSection][Session ID: ${request.sessionId}] " +
+                s" cannot transform data for set section. Message: $message"
+            )
             Left(ServerError())
-          case Left(_) =>
-            logger.warn(s"[$className][draftDataTransformationForSetSection][Session ID: ${request.sessionId}] " +
-              s"there was a problem, cannot transform data for set section.")
+          case Left(_)                                        =>
+            logger.warn(
+              s"[$className][draftDataTransformationForSetSection][Session ID: ${request.sessionId}] " +
+                s"there was a problem, cannot transform data for set section."
+            )
             Left(ServerError())
         }
-      case e: JsError => Future.successful(Left(ErrorWithResult(InternalServerError(e.errors.toString()))))
+      case e: JsError                 => Future.successful(Left(ErrorWithResult(InternalServerError(e.errors.toString()))))
     }
   }
 
@@ -104,49 +110,53 @@ class SubmissionDraftController @Inject()(
     prunePath(sectionPath) andThen JsPath.json.update(sectionPath.json.put(registrationSectionData))
   }
 
-  private def setRegistrationSections(pieces: List[RegistrationSubmission.MappedPiece]): List[Reads[JsObject]] = {
+  private def setRegistrationSections(pieces: List[RegistrationSubmission.MappedPiece]): List[Reads[JsObject]] =
     pieces.map {
       case RegistrationSubmission.MappedPiece(path, JsNull) =>
         prunePath(MappedPiece.path \ path)
-      case piece =>
+      case piece                                            =>
         setRegistrationSection(piece.elementPath, piece.data)
     }
-  }
 
-  private def setAnswerSections(key: String, answerSections: List[RegistrationSubmission.AnswerSection]): Reads[JsObject] = {
+  private def setAnswerSections(
+    key: String,
+    answerSections: List[RegistrationSubmission.AnswerSection]
+  ): Reads[JsObject] = {
     val sectionPath = AnswerSection.path \ key
 
     prunePath(sectionPath) andThen JsPath.json.update(sectionPath.json.put(Json.toJson(answerSections)))
   }
 
-  def setDataset(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) {
-    implicit request => {
-      request.body.validate[RegistrationSubmission.DataSet] match {
-        case JsSuccess(dataSet, _) =>
+  def setDataset(draftId: String, sectionKey: String): Action[JsValue] = identify.async(parse.json) { implicit request =>
+    request.body.validate[RegistrationSubmission.DataSet] match {
+      case JsSuccess(dataSet, _) =>
 
-          val expectedResult = for {
-            optionalDraftData <- submissionRepository.getDraft(draftId, request.internalId)
-            draft = optionalDraftData.getOrElse(
+        val expectedResult = for {
+          optionalDraftData    <- submissionRepository.getDraft(draftId, request.internalId)
+          draft                 =
+            optionalDraftData.getOrElse(
               RegistrationSubmissionDraft(draftId, request.internalId, timeService.now, Json.obj(), None, Some(true))
             )
-            appliedDataSetResult <- applyDataSet(draft, dataSetOperations(sectionKey, dataSet))
-          } yield appliedDataSetResult
+          appliedDataSetResult <- applyDataSet(draft, dataSetOperations(sectionKey, dataSet))
+        } yield appliedDataSetResult
 
-          expectedResult.value.map {
-            case Right(appliedDataSetResult) => appliedDataSetResult
-            case Left(ErrorWithResult(result)) => result
-            case Left(_) =>
-              logger.warn(s"[$className][setDataset][Session ID: ${request.sessionId}] failed to set dataset.")
-              InternalServerError
-          }
+        expectedResult.value.map {
+          case Right(appliedDataSetResult)   => appliedDataSetResult
+          case Left(ErrorWithResult(result)) => result
+          case Left(_)                       =>
+            logger.warn(s"[$className][setDataset][Session ID: ${request.sessionId}] failed to set dataset.")
+            InternalServerError
+        }
 
-        case _ =>
-          Future.successful(BadRequest)
-      }
+      case _ =>
+        Future.successful(BadRequest)
     }
   }
 
-  private def dataSetOperations(sectionKey: String, incomingDraftData: RegistrationSubmission.DataSet): List[Reads[JsObject]] = {
+  private def dataSetOperations(
+    sectionKey: String,
+    incomingDraftData: RegistrationSubmission.DataSet
+  ): List[Reads[JsObject]] = {
     val sectionPath = JsPath() \ sectionKey
 
     List(
@@ -158,26 +168,34 @@ class SubmissionDraftController @Inject()(
     ) ++ setRegistrationSections(incomingDraftData.registrationPieces)
   }
 
-  private def applyDataSet(draft: RegistrationSubmissionDraft, operations: List[Reads[JsObject]])
-                          (implicit request: IdentifierRequest[JsValue]): TrustEnvelope[Result] = EitherT {
+  private def applyDataSet(draft: RegistrationSubmissionDraft, operations: List[Reads[JsObject]])(implicit
+    request: IdentifierRequest[JsValue]
+  ): TrustEnvelope[Result] = EitherT {
     operations.foldLeft[JsResult[JsValue]](JsSuccess(draft.draftData))((cur, xform) =>
-      cur.flatMap(_.transform(xform))) match {
+      cur.flatMap(_.transform(xform))
+    ) match {
       case JsSuccess(newDraftData, _) =>
 
         val newDraft = draft.copy(draftData = newDraftData)
 
         submissionRepository.setDraft(newDraft).value.map {
-          case Right(true) => Right(Ok)
-          case Right(_) => Left(ErrorWithResult(InternalServerError))
+          case Right(true)                                    => Right(Ok)
+          case Right(_)                                       => Left(ErrorWithResult(InternalServerError))
           case Left(ServerError(message)) if message.nonEmpty =>
-            logger.warn(s"[$className][applyDataSet][Session ID: ${request.sessionId}] can't apply operations to draft data. Message: $message")
+            logger.warn(
+              s"[$className][applyDataSet][Session ID: ${request.sessionId}] can't apply operations to draft data. Message: $message"
+            )
             Left(ServerError())
-          case Left(_) =>
-            logger.warn(s"[$className][applyDataSet][Session ID: ${request.sessionId}] there was a problem, can't apply operations to draft data.")
+          case Left(_)                                        =>
+            logger.warn(
+              s"[$className][applyDataSet][Session ID: ${request.sessionId}] there was a problem, can't apply operations to draft data."
+            )
             Left(ServerError())
         }
       case e: JsError =>
-        logger.error(s"[$className][applyDataSet][Session ID: ${request.sessionId}] Can't apply operations to draft data: ${e.errors}.")
+        logger.error(
+          s"[$className][applyDataSet][Session ID: ${request.sessionId}] Can't apply operations to draft data: ${e.errors}."
+        )
         Future.successful(Left(ErrorWithResult(InternalServerError(e.errors.toString()))))
     }
   }
@@ -185,18 +203,22 @@ class SubmissionDraftController @Inject()(
   def getSection(draftId: String, sectionKey: String): Action[AnyContent] = identify.async {
     implicit request: IdentifierRequest[AnyContent] =>
       submissionRepository.getDraft(draftId, request.internalId).value.map {
-        case Right(Some(draft)) =>
+        case Right(Some(draft))                             =>
           val path = JsPath() \ sectionKey
           draft.draftData.transform(path.json.pick) match {
             case JsSuccess(data, _) => Ok(buildResponseJson(draft, data))
-            case _: JsError => Ok(buildResponseJson(draft, Json.obj()))
+            case _: JsError         => Ok(buildResponseJson(draft, Json.obj()))
           }
-        case Right(None) => NotFound
+        case Right(None)                                    => NotFound
         case Left(ServerError(message)) if message.nonEmpty =>
-          logger.warn(s"[$className][getSection][Session ID: ${request.sessionId}] failed to get section. Message: $message")
+          logger.warn(
+            s"[$className][getSection][Session ID: ${request.sessionId}] failed to get section. Message: $message"
+          )
           InternalServerError
-        case Left(_) =>
-          logger.warn(s"[$className][getSection][Session ID: ${request.sessionId}] there was a problem, failed to get section.")
+        case Left(_)                                        =>
+          logger.warn(
+            s"[$className][getSection][Session ID: ${request.sessionId}] there was a problem, failed to get section."
+          )
           InternalServerError
       }
   }
@@ -208,7 +230,7 @@ class SubmissionDraftController @Inject()(
         implicit val draftWrites: Writes[RegistrationSubmissionDraft] = (draft: RegistrationSubmissionDraft) => {
           val obj = Json.obj(
             CREATED_AT -> draft.createdAt,
-            DRAFT_ID -> draft.draftId
+            DRAFT_ID   -> draft.draftId
           )
           addReferenceIfDefined(obj, draft.reference)
         }
@@ -216,10 +238,14 @@ class SubmissionDraftController @Inject()(
         Ok(Json.toJson(drafts))
 
       case Left(ServerError(message)) if message.nonEmpty =>
-        logger.warn(s"[$className][getDrafts][Session ID: ${request.sessionId}] failed to get drafts. Message: $message")
+        logger.warn(
+          s"[$className][getDrafts][Session ID: ${request.sessionId}] failed to get drafts. Message: $message"
+        )
         InternalServerError
-      case Left(_) =>
-        logger.warn(s"[$className][getDrafts][Session ID: ${request.sessionId}] there was a problem, failed to get drafts.")
+      case Left(_)                                        =>
+        logger.warn(
+          s"[$className][getDrafts][Session ID: ${request.sessionId}] there was a problem, failed to get drafts."
+        )
         InternalServerError
     }
   }
@@ -228,58 +254,67 @@ class SubmissionDraftController @Inject()(
 
     val obj = Json.obj(
       CREATED_AT -> draft.createdAt,
-      DATA -> data
+      DATA       -> data
     )
     addReferenceIfDefined(obj, draft.reference)
   }
 
-  private def addReferenceIfDefined(obj: JsObject, reference: Option[String]): JsObject = {
+  private def addReferenceIfDefined(obj: JsObject, reference: Option[String]): JsObject =
     reference match {
       case Some(r) => obj + (REFERENCE -> JsString(r))
-      case _ => obj
+      case _       => obj
     }
-  }
 
-  protected def get[T](draftData: JsValue, path: JsPath)(implicit rds: Reads[T]): JsResult[T] = {
+  protected def get[T](draftData: JsValue, path: JsPath)(implicit rds: Reads[T]): JsResult[T] =
     draftData.transform(path.json.pick).map(_.as[T])
-  }
 
-  protected def getResult[T](draftId: String, path: JsPath)
-                            (implicit request: IdentifierRequest[AnyContent], rds: Reads[T], wts: Writes[T]): Future[Result] = {
+  protected def getResult[T](draftId: String, path: JsPath)(implicit
+    request: IdentifierRequest[AnyContent],
+    rds: Reads[T],
+    wts: Writes[T]
+  ): Future[Result] =
     getResult[T, T](draftId, path)(x => x)
-  }
 
-  protected def getResult[A, B](draftId: String, path: JsPath)
-                               (f: A => B)
-                               (implicit request: IdentifierRequest[AnyContent], rds: Reads[A], wts: Writes[B]): Future[Result] = {
+  protected def getResult[A, B](draftId: String, path: JsPath)(
+    f: A => B
+  )(implicit request: IdentifierRequest[AnyContent], rds: Reads[A], wts: Writes[B]): Future[Result] =
     getAtPath[A](draftId, path).value.map {
-      case Right(value) =>
+      case Right(value)                 =>
         Ok(Json.toJson(f(value)))
       case Left(NotFoundError(message)) =>
         logger.warn(message)
         NotFound
-      case Left(_) =>
+      case Left(_)                      =>
         InternalServerError
     }
-  }
 
-  private def getAtPath[T](draftId: String, path: JsPath)
-                          (implicit request: IdentifierRequest[AnyContent], rds: Reads[T]): TrustEnvelope[T] = EitherT {
+  private def getAtPath[T](draftId: String, path: JsPath)(implicit
+    request: IdentifierRequest[AnyContent],
+    rds: Reads[T]
+  ): TrustEnvelope[T] = EitherT {
     submissionRepository.getDraft(draftId, request.internalId).value.map {
-      case Right(Some(draft)) =>
+      case Right(Some(draft))                             =>
         draft.draftData.transform(path.json.pick).map(_.as[T]) match {
           case JsSuccess(value, _) =>
             Right(value)
-          case _: JsError =>
+          case _: JsError          =>
             Left(NotFoundError(s"[$className][getAtPath][Session ID: ${request.sessionId}] value not found at $path"))
         }
-      case Right(None) =>
-        Left(NotFoundError(s"[$className][getAtPath][Session ID: ${request.sessionId}] no draft, cannot return value at $path"))
+      case Right(None)                                    =>
+        Left(
+          NotFoundError(
+            s"[$className][getAtPath][Session ID: ${request.sessionId}] no draft, cannot return value at $path"
+          )
+        )
       case Left(ServerError(message)) if message.nonEmpty =>
-        logger.warn(s"[$className][getAtPath][Session ID: ${request.sessionId}] cannot return value at $path. Message: $message")
+        logger.warn(
+          s"[$className][getAtPath][Session ID: ${request.sessionId}] cannot return value at $path. Message: $message"
+        )
         Left(ServerError())
-      case Left(_) =>
-        logger.warn(s"[$className][getAtPath][Session ID: ${request.sessionId}] there was a problem, cannot return value at $path")
+      case Left(_)                                        =>
+        logger.warn(
+          s"[$className][getAtPath][Session ID: ${request.sessionId}] there was a problem, cannot return value at $path"
+        )
         Left(ServerError())
     }
   }

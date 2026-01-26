@@ -22,31 +22,30 @@ import utils.Constants._
 
 import java.time.LocalDate
 
-case class AmendTrusteeTransform(index: Option[Int],
-                                 amended: JsValue,
-                                 original: JsValue,
-                                 endDate: LocalDate,
-                                 `type`: String) extends TrusteeTransform with AmendEntityTransform {
+case class AmendTrusteeTransform(
+  index: Option[Int],
+  amended: JsValue,
+  original: JsValue,
+  endDate: LocalDate,
+  `type`: String
+) extends TrusteeTransform with AmendEntityTransform {
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
+  override def applyTransform(input: JsValue): JsResult[JsValue] =
     if (isLeadTrustee) {
       setLeadTrustee(input)
     } else {
       removeAndAdd(input)
     }
-  }
 
-  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
+  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] =
     if (isLeadTrustee) {
       input.transform((leadTrusteePath \ BP_MATCH_STATUS).json.prune)
     } else {
       removeTrusteeTransform.applyDeclarationTransform(input)
     }
-  }
 
-  private val removeTrusteeTransform: RemoveTrusteeTransform = {
+  private val removeTrusteeTransform: RemoveTrusteeTransform =
     RemoveTrusteeTransform(index, original, endDate, `type`)
-  }
 
   private def setLeadTrustee(input: JsValue): JsResult[JsValue] = {
     val entityStartPath = leadTrusteePath \ ENTITY_START
@@ -54,25 +53,25 @@ case class AmendTrusteeTransform(index: Option[Int],
     input.transform(entityStartPath.json.pick) match {
       case JsSuccess(entityStart, _) =>
         input.transform(
-          leadTrusteePath.json.prune andThen
-            __.json.update(leadTrusteePath.json.put(amended)) andThen
+          leadTrusteePath.json.prune                              andThen
+            __.json.update(leadTrusteePath.json.put(amended))     andThen
             __.json.update(entityStartPath.json.put(entityStart)) andThen
-            (leadTrusteePath \ LINE_NUMBER).json.prune andThen
-            (leadTrusteePath \ BP_MATCH_STATUS).json.prune andThen
+            (leadTrusteePath \ LINE_NUMBER).json.prune            andThen
+            (leadTrusteePath \ BP_MATCH_STATUS).json.prune        andThen
             putAmendedBpMatchStatus(amended)
         )
-      case e: JsError => e
+      case e: JsError                => e
     }
   }
 
-  private def removeAndAdd(input: JsValue): JsResult[JsValue] = {
+  private def removeAndAdd(input: JsValue): JsResult[JsValue] =
     for {
-      startDate <- original.transform((__ \ `type` \ ENTITY_START).json.pick)
-      trusteeRemovedJson <- removeTrusteeTransform.applyTransform(input)
+      startDate           <- original.transform((__ \ `type` \ ENTITY_START).json.pick)
+      trusteeRemovedJson  <- removeTrusteeTransform.applyTransform(input)
       trusteeWithStartDate = objectPlusField(amended, ENTITY_START, startDate)
-      trusteeAddedJson <- AddTrusteeTransform(trusteeWithStartDate, `type`).applyTransform(trusteeRemovedJson)
+      trusteeAddedJson    <- AddTrusteeTransform(trusteeWithStartDate, `type`).applyTransform(trusteeRemovedJson)
     } yield trusteeAddedJson
-  }
+
 }
 
 object AmendTrusteeTransform {

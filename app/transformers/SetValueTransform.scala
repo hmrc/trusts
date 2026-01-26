@@ -23,7 +23,7 @@ trait SetValueTransform extends DeltaTransform with JsonOperations {
   val path: JsPath
   val value: JsValue
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
+  override def applyTransform(input: JsValue): JsResult[JsValue] =
     pruneThenAddTo(input, path, value)
-  }
+
 }

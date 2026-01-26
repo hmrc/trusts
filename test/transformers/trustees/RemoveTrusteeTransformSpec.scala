@@ -37,7 +37,8 @@ class RemoveTrusteeTransformSpec extends AnyFreeSpec {
 
       val transformedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-remove-trustee-ind.json")
 
-      val transformer = new RemoveTrusteeTransform(index = Some(0), originalTrusteeJson, endDate = endDate, "trusteeInd")
+      val transformer =
+        new RemoveTrusteeTransform(index = Some(0), originalTrusteeJson, endDate = endDate, "trusteeInd")
 
       val result = transformer.applyTransform(cachedJson).get
 
@@ -67,8 +68,7 @@ class RemoveTrusteeTransformSpec extends AnyFreeSpec {
 
       val transformedJson = JsonUtils.getJsonValueFromFile("trusts-transformed-trustee-removed-at-index.json")
 
-      val trustee = Json.parse(
-        """
+      val trustee = Json.parse("""
           |          {
           |            "trusteeOrg": {
           |              "name": "Trustee Org 1",
@@ -111,18 +111,21 @@ class RemoveTrusteeTransformSpec extends AnyFreeSpec {
       val transformedJson = JsonUtils.getJsonValueFromFile("trusts-etmp-multiple-trustees-removed.json")
 
       // remove trustee individual
-      val firstTrusteeRemoved = new RemoveTrusteeTransform(index = Some(0), originalTrusteeJson, endDate, "trusteeInd").applyTransform(cachedJson).get
+      val firstTrusteeRemoved = new RemoveTrusteeTransform(index = Some(0), originalTrusteeJson, endDate, "trusteeInd")
+        .applyTransform(cachedJson)
+        .get
 
       // remove trustee organisation
-      val result = new RemoveTrusteeTransform(Some(1), originalTrusteeJson, endDate, "trusteeOrg").applyTransform(firstTrusteeRemoved).get
+      val result = new RemoveTrusteeTransform(Some(1), originalTrusteeJson, endDate, "trusteeOrg")
+        .applyTransform(firstTrusteeRemoved)
+        .get
 
       result mustBe transformedJson
 
     }
 
     "re-add the original trustee, setting an end date at declaration, if known by Etmp" in {
-      val removeKnownTrusteeToEtmp = Json.parse(
-        """
+      val removeKnownTrusteeToEtmp = Json.parse("""
           |          {
           |            "trusteeInd":{
           |              "lineNo":"1",
@@ -142,8 +145,7 @@ class RemoveTrusteeTransformSpec extends AnyFreeSpec {
           |          }
           |""".stripMargin)
 
-      val removeNewlyAddedTrustee = Json.parse(
-        """
+      val removeNewlyAddedTrustee = Json.parse("""
           |          {
           |            "trusteeOrg": {
           |              "name": "Trustee Org 1",

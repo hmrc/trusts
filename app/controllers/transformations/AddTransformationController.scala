@@ -32,75 +32,90 @@ import utils.{Session, TrustEnvelope}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class AddTransformationController @Inject()(identify: IdentifierAction,
-                                                     transformationService: TransformationService,
-                                                     taxableMigrationService: TaxableMigrationService)
-                                                    (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends TrustsBaseController(cc) with Logging {
+abstract class AddTransformationController @Inject() (
+  identify: IdentifierAction,
+  transformationService: TransformationService,
+  taxableMigrationService: TaxableMigrationService
+)(implicit ec: ExecutionContext, cc: ControllerComponents)
+    extends TrustsBaseController(cc) with Logging {
 
   private val className = this.getClass.getSimpleName
 
-  def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)
-                  (implicit wts: Writes[T]): DeltaTransform
+  def transform[T](value: T, `type`: String, isTaxable: Boolean, migratingFromNonTaxableToTaxable: Boolean)(implicit
+    wts: Writes[T]
+  ): DeltaTransform
 
-  def addNewTransform[T](identifier: String, `type`: String = "", addMultipleTransforms: Boolean = false)
-                        (implicit rds: Reads[T], wts: Writes[T]): Action[JsValue] = {
-    identify.async(parse.json) {
-      implicit request => {
-        request.body.validate[T] match {
+  def addNewTransform[T](identifier: String, `type`: String = "", addMultipleTransforms: Boolean = false)(implicit
+    rds: Reads[T],
+    wts: Writes[T]
+  ): Action[JsValue] =
+    identify.async(parse.json) { implicit request =>
+      request.body.validate[T] match {
 
-          case JsSuccess(entityToAdd, _) =>
+        case JsSuccess(entityToAdd, _) =>
 
-            val expectedResult = for {
-              trust <- transformationService.getTransformedTrustJson(identifier, request.internalId, Session.id(hc))
-              isTaxable <- isTrustTaxable(trust)
-              migratingFromNonTaxableToTaxable <- taxableMigrationService.migratingFromNonTaxableToTaxable(identifier, request.internalId, Session.id(hc))
-              _ <- addTransformOrTransforms(entityToAdd, identifier, `type`, isTaxable, migratingFromNonTaxableToTaxable, addMultipleTransforms)
-            } yield {
-              Ok
-            }
+          val expectedResult = for {
+            trust                            <- transformationService.getTransformedTrustJson(identifier, request.internalId, Session.id(hc))
+            isTaxable                        <- isTrustTaxable(trust)
+            migratingFromNonTaxableToTaxable <-
+              taxableMigrationService.migratingFromNonTaxableToTaxable(identifier, request.internalId, Session.id(hc))
+            _                                <- addTransformOrTransforms(
+                                                  entityToAdd,
+                                                  identifier,
+                                                  `type`,
+                                                  isTaxable,
+                                                  migratingFromNonTaxableToTaxable,
+                                                  addMultipleTransforms
+                                                )
+          } yield Ok
 
-            expectedResult.value.map {
-              case Right(status) => status
-              case Left(ServerError(message)) if message.nonEmpty =>
-                logger.warn(s"[$className][addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
-                  s"Failed to add new transform. Message: $message")
-                InternalServerError
-              case Left(_) =>
-                logger.warn(s"[$className][addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
-                  s"Failed to add new transform")
-                InternalServerError
-            }
+          expectedResult.value.map {
+            case Right(status)                                  => status
+            case Left(ServerError(message)) if message.nonEmpty =>
+              logger.warn(
+                s"[$className][addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
+                  s"Failed to add new transform. Message: $message"
+              )
+              InternalServerError
+            case Left(_)                                        =>
+              logger.warn(
+                s"[$className][addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
+                  s"Failed to add new transform"
+              )
+              InternalServerError
+          }
 
-          case JsError(errors) =>
-            logger.warn(s"[$className][addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
-              s"Supplied json did not pass validation - $errors")
-            Future.successful(BadRequest)
-        }
+        case JsError(errors) =>
+          logger.warn(
+            s"[$className][addNewTransform][Session ID: ${request.sessionId}][UTR/URN: $identifier] " +
+              s"Supplied json did not pass validation - $errors"
+          )
+          Future.successful(BadRequest)
       }
     }
-  }
 
-  private def addTransformOrTransforms[A](entityToAdd: A,
-                                          identifier: String,
-                                          `type`: String,
-                                          isTaxable: Boolean,
-                                          migratingFromNonTaxableToTaxable: Boolean,
-                                          addMultipleTransforms: Boolean)
-                                         (implicit wts: Writes[A], request: IdentifierRequest[JsValue]): TrustEnvelope[Boolean] = {
+  private def addTransformOrTransforms[A](
+    entityToAdd: A,
+    identifier: String,
+    `type`: String,
+    isTaxable: Boolean,
+    migratingFromNonTaxableToTaxable: Boolean,
+    addMultipleTransforms: Boolean
+  )(implicit wts: Writes[A], request: IdentifierRequest[JsValue]): TrustEnvelope[Boolean] = {
 
-    def addTransform[B](value: B, `type`: String)(implicit wts: Writes[B]): TrustEnvelope[Boolean] = {
+    def addTransform[B](value: B, `type`: String)(implicit wts: Writes[B]): TrustEnvelope[Boolean] =
       transformationService.addNewTransform(
         identifier = identifier,
         internalId = request.internalId,
         newTransform = transform(value, `type`, isTaxable, migratingFromNonTaxableToTaxable)
       )
-    }
 
     if (addMultipleTransforms) {
-      Json.toJson(entityToAdd).as[JsObject].fields.foldLeft(TrustEnvelope(true))((x, field) => {
-        x.flatMap(_ => addTransform(field._2, field._1))
-      })
+      Json
+        .toJson(entityToAdd)
+        .as[JsObject]
+        .fields
+        .foldLeft(TrustEnvelope(true))((x, field) => x.flatMap(_ => addTransform(field._2, field._1)))
     } else {
       addTransform(entityToAdd, `type`)
     }

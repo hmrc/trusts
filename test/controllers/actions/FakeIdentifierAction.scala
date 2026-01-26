@@ -25,9 +25,15 @@ import java.time.{LocalDate, ZoneId}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class FakeIdentifierAction @Inject()(bodyParsers: BodyParser[AnyContent], affinityGroup: AffinityGroup) extends IdentifierAction {
+class FakeIdentifierAction @Inject() (bodyParsers: BodyParser[AnyContent], affinityGroup: AffinityGroup)
+    extends IdentifierAction {
 
-  private val credential = CredentialData(None, LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, None), None, None)
+  private val credential = CredentialData(
+    None,
+    LoginTimes(LocalDate.parse("2020-10-10").atStartOfDay(ZoneId.of("Europe/London")).toInstant, None),
+    None,
+    None
+  )
 
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] =
     block(IdentifierRequest(request, "id", "sessionID", affinityGroup, credential))

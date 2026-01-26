@@ -66,4 +66,5 @@ class AddAssetTransformSpec extends AnyFreeSpec {
     }
 
   }
+
 }

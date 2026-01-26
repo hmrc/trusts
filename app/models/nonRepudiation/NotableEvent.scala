@@ -20,7 +20,6 @@ import models.{Enumerable, WithName}
 
 sealed trait NotableEvent
 
-
 object NotableEvent extends Enumerable.Implicits {
 
   case object TrsRegistration extends WithName("trs-registration") with NotableEvent
@@ -28,9 +27,12 @@ object NotableEvent extends Enumerable.Implicits {
   case object TrsUpdateNonTaxable extends WithName("trs-update-non-taxable") with NotableEvent
 
   val values: Set[NotableEvent] = Set(
-    TrsRegistration, TrsUpdateTaxable, TrsUpdateNonTaxable
+    TrsRegistration,
+    TrsUpdateTaxable,
+    TrsUpdateNonTaxable
   )
 
   implicit val enumerable: Enumerable[NotableEvent] =
     Enumerable(values.toSeq.map(v => v.toString -> v): _*)
+
 }

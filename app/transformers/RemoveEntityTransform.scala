@@ -29,11 +29,10 @@ trait RemoveEntityTransform extends DeltaTransform with JsonOperations {
   val path: JsPath
   val endDateField: String = ENTITY_END
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
+  override def applyTransform(input: JsValue): JsResult[JsValue] =
     removeAtPosition(input, path, index)
-  }
 
-  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
+  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] =
     endEntity(input, path, Json.toJson(entity), endDate, endDateField)
-  }
+
 }

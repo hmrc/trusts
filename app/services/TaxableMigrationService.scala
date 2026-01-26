@@ -31,32 +31,36 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class TaxableMigrationService @Inject()(
-                                         auditService: MigrationAuditService,
-                                         taxEnrolmentConnector: TaxEnrolmentConnector,
-                                         orchestratorConnector: OrchestratorConnector,
-                                         taxableMigrationRepository: TaxableMigrationRepository
-                                       )(implicit ec: ExecutionContext) extends Logging {
+class TaxableMigrationService @Inject() (
+  auditService: MigrationAuditService,
+  taxEnrolmentConnector: TaxEnrolmentConnector,
+  orchestratorConnector: OrchestratorConnector,
+  taxableMigrationRepository: TaxableMigrationRepository
+)(implicit ec: ExecutionContext)
+    extends Logging {
 
   private val className = this.getClass.getSimpleName
 
-  def migrateSubscriberToTaxable(subscriptionId: String, urn: String)
-                                (implicit hc: HeaderCarrier): TrustEnvelope[TaxEnrolmentSubscriberResponse] = EitherT {
+  def migrateSubscriberToTaxable(subscriptionId: String, urn: String)(implicit
+    hc: HeaderCarrier
+  ): TrustEnvelope[TaxEnrolmentSubscriberResponse] = EitherT {
     taxEnrolmentConnector.migrateSubscriberToTaxable(subscriptionId, urn).value.map {
       case Left(error: ServerError) if error.message.nonEmpty =>
-        logger.warn(s"[$className][migrateSubscriberToTaxable][Session ID: ${Session.id(hc)}]" +
-          s"[SubscriptionId: $subscriptionId, URN: $urn] failed to prepare tax-enrolments for UTR"
+        logger.warn(
+          s"[$className][migrateSubscriberToTaxable][Session ID: ${Session.id(hc)}]" +
+            s"[SubscriptionId: $subscriptionId, URN: $urn] failed to prepare tax-enrolments for UTR"
         )
         auditService.auditTaxEnrolmentFailure(subscriptionId, urn, error.message)
         Left(ServerError())
 
-      case Left(_) => Left(ServerError())
+      case Left(_)         => Left(ServerError())
       case Right(response) => Right(response)
     }
   }
 
-  def completeMigration(subscriptionId: String, urn: String)
-                       (implicit hc: HeaderCarrier): TrustEnvelope[OrchestratorToTaxableSuccessResponse] = EitherT {
+  def completeMigration(subscriptionId: String, urn: String)(implicit
+    hc: HeaderCarrier
+  ): TrustEnvelope[OrchestratorToTaxableSuccessResponse] = EitherT {
     logger.info(
       s"[$className][completeMigration][Session ID: ${Session.id(hc)}]" +
         s"[SubscriptionId: $subscriptionId, URN: $urn]" +
@@ -66,35 +70,41 @@ class TaxableMigrationService @Inject()(
     val result = for {
       subscriptionResponse <- getUtrFromSubscriptions(subscriptionId, urn)
       orchestratorResponse <- updateOrchestratorToTaxable(urn, subscriptionResponse.utr)
-    } yield {
-      orchestratorResponse
-    }
+    } yield orchestratorResponse
 
     result.value.map {
-      case Right(orchestratorResponse) => Right(orchestratorResponse)
-      case Left(errors.TaxEnrolmentFailure) =>
-        logger.warn(s"[$className][completeMigration][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn] " +
-        s"failed to complete migration due to TaxEnrolmentFailure")
+      case Right(orchestratorResponse)        => Right(orchestratorResponse)
+      case Left(errors.TaxEnrolmentFailure)   =>
+        logger.warn(
+          s"[$className][completeMigration][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn] " +
+            s"failed to complete migration due to TaxEnrolmentFailure"
+        )
         Left(ServerError("TaxEnrolmentFailure"))
       case Left(OrchestratorToTaxableFailure) =>
-        logger.warn(s"[$className][completeMigration][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn] " +
-        s"failed to complete migration due to OrchestratorToTaxableFailure")
+        logger.warn(
+          s"[$className][completeMigration][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn] " +
+            s"failed to complete migration due to OrchestratorToTaxableFailure"
+        )
         Left(ServerError("OrchestratorToTaxableFailure"))
-      case Left(_) =>
-        logger.warn(s"[$className][completeMigration][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn] " +
-          s"there was a problem, failed to complete migration")
+      case Left(_)                            =>
+        logger.warn(
+          s"[$className][completeMigration][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn] " +
+            s"there was a problem, failed to complete migration"
+        )
         Left(ServerError())
     }
   }
 
-  private def getUtrFromSubscriptions(subscriptionId: String, urn: String)
-                                     (implicit hc: HeaderCarrier): TrustEnvelope[TaxEnrolmentsSubscriptionsSuccessResponse] = EitherT {
+  private def getUtrFromSubscriptions(subscriptionId: String, urn: String)(implicit
+    hc: HeaderCarrier
+  ): TrustEnvelope[TaxEnrolmentsSubscriptionsSuccessResponse] = EitherT {
     taxEnrolmentConnector.subscriptions(subscriptionId).value.map {
       case Right(taxEnrolmentsSubscriptionsSuccessResponse) => Right(taxEnrolmentsSubscriptionsSuccessResponse)
-      case Left(ServerError(message)) if message.nonEmpty =>
-        logger.warn(s"[$className][getUtrFromSubscriptions][Session ID: ${Session.id(hc)}]" +
-          s"[SubscriptionId: $subscriptionId, URN: $urn] unable to get UTR from subscription to complete migration to taxable"
-      )
+      case Left(ServerError(message)) if message.nonEmpty   =>
+        logger.warn(
+          s"[$className][getUtrFromSubscriptions][Session ID: ${Session.id(hc)}]" +
+            s"[SubscriptionId: $subscriptionId, URN: $urn] unable to get UTR from subscription to complete migration to taxable"
+        )
         auditService.auditTaxEnrolmentFailure(subscriptionId, urn, message)
         Left(errors.TaxEnrolmentFailure)
 
@@ -102,14 +112,16 @@ class TaxableMigrationService @Inject()(
     }
   }
 
-  private def updateOrchestratorToTaxable(urn: String, utr: String)
-                                         (implicit hc: HeaderCarrier): TrustEnvelope[OrchestratorToTaxableSuccessResponse] = EitherT {
+  private def updateOrchestratorToTaxable(urn: String, utr: String)(implicit
+    hc: HeaderCarrier
+  ): TrustEnvelope[OrchestratorToTaxableSuccessResponse] = EitherT {
     orchestratorConnector.migrateToTaxable(urn, utr).value.map {
-      case Right(successResponse) => Right(successResponse)
+      case Right(successResponse)                         => Right(successResponse)
       case Left(ServerError(message)) if message.nonEmpty =>
-        logger.warn(s"[$className][updateOrchestratorToTaxable][Session ID: ${Session.id(hc)}]" +
-          s"[UTR: $utr, URN: $urn] unable to trigger orchestration to clean up credentials"
-      )
+        logger.warn(
+          s"[$className][updateOrchestratorToTaxable][Session ID: ${Session.id(hc)}]" +
+            s"[UTR: $utr, URN: $urn] unable to trigger orchestration to clean up credentials"
+        )
         auditService.auditOrchestratorFailure(urn, utr, message)
         Left(OrchestratorToTaxableFailure)
 
@@ -117,34 +129,51 @@ class TaxableMigrationService @Inject()(
     }
   }
 
-  def migratingFromNonTaxableToTaxable(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Boolean] = EitherT {
+  def migratingFromNonTaxableToTaxable(
+    identifier: String,
+    internalId: String,
+    sessionId: String
+  ): TrustEnvelope[Boolean] = EitherT {
     getTaxableMigrationFlag(identifier, internalId, sessionId).value.map {
       case Right(Some(value)) => Right(value)
-      case Right(_) => Right(false)
-      case Left(trustErrors) => Left(trustErrors)
+      case Right(_)           => Right(false)
+      case Left(trustErrors)  => Left(trustErrors)
     }
 
   }
 
-  def getTaxableMigrationFlag(identifier: String, internalId: String, sessionId: String): TrustEnvelope[Option[Boolean]] = EitherT {
+  def getTaxableMigrationFlag(
+    identifier: String,
+    internalId: String,
+    sessionId: String
+  ): TrustEnvelope[Option[Boolean]] = EitherT {
     taxableMigrationRepository.get(identifier, internalId, sessionId).value.map {
-      case Right(value) => Right(value)
+      case Right(value)                                   => Right(value)
       case Left(ServerError(message)) if message.nonEmpty =>
-        logger.error(s"[$className][getTaxableMigrationFlag] failed to get taxable migration flag from repository. Message: $message")
+        logger.error(
+          s"[$className][getTaxableMigrationFlag] failed to get taxable migration flag from repository. Message: $message"
+        )
         Left(ServerError())
-      case Left(_) =>
+      case Left(_)                                        =>
         logger.error(s"[$className][getTaxableMigrationFlag] failed to get taxable migration flag from repository.")
         Left(ServerError())
     }
   }
 
-  def setTaxableMigrationFlag(identifier: String, internalId: String, sessionId: String, migratingToTaxable: Boolean): TrustEnvelope[Boolean] = EitherT {
+  def setTaxableMigrationFlag(
+    identifier: String,
+    internalId: String,
+    sessionId: String,
+    migratingToTaxable: Boolean
+  ): TrustEnvelope[Boolean] = EitherT {
     taxableMigrationRepository.set(identifier, internalId, sessionId, migratingToTaxable).value.map {
-      case Right(value) => Right(value)
+      case Right(value)                                   => Right(value)
       case Left(ServerError(message)) if message.nonEmpty =>
-        logger.error(s"[$className][setTaxableMigrationFlag] failed to set taxable migration flag in repository. Message: $message")
+        logger.error(
+          s"[$className][setTaxableMigrationFlag] failed to set taxable migration flag in repository. Message: $message"
+        )
         Left(ServerError())
-      case Left(_) =>
+      case Left(_)                                        =>
         logger.error(s"[$className][setTaxableMigrationFlag] failed to set taxable migration flag in repository.")
         Left(ServerError())
     }

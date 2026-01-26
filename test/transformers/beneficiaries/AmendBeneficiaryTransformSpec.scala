@@ -38,7 +38,7 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
         "amend a beneficiaries details by replacing the beneficiary" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-charity-beneficiary-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-charity-beneficiary-transform-after.json")
+          val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-charity-beneficiary-transform-after.json")
 
           val amended = BeneficiaryCharityType(
             lineNo = None,
@@ -46,18 +46,19 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
             organisationName = "Charity Name",
             beneficiaryDiscretion = None,
             beneficiaryShareOfIncome = None,
-            identification = Some(IdentificationOrgType(
-              utr = Some("1234567890"),
-              address = None,
-              safeId = None
-            )),
+            identification = Some(
+              IdentificationOrgType(
+                utr = Some("1234567890"),
+                address = None,
+                safeId = None
+              )
+            ),
             countryOfResidence = None,
             entityStart = LocalDate.parse("2018-02-28"),
             entityEnd = None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "lineNo": "2",
               |  "bpMatchStatus": "01",
@@ -69,7 +70,13 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendBeneficiaryTransform(Some(1), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), beneficiaryType)
+          val transformer = AmendBeneficiaryTransform(
+            Some(1),
+            Json.toJson(amended),
+            original,
+            LocalDate.parse("2020-03-25"),
+            beneficiaryType
+          )
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -81,7 +88,8 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
         "set an end date for the original beneficiary, adding in the amendment as a new beneficiary for a beneficiary known by etmp" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-charity-beneficiary-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-charity-beneficiary-transform-after-declaration.json")
+          val afterJson  =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-charity-beneficiary-transform-after-declaration.json")
 
           val amended = BeneficiaryCharityType(
             lineNo = None,
@@ -89,18 +97,19 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
             organisationName = "Updated Charity Name",
             beneficiaryDiscretion = None,
             beneficiaryShareOfIncome = None,
-            identification = Some(IdentificationOrgType(
-              utr = Some("1234567890"),
-              address = None,
-              safeId = None
-            )),
+            identification = Some(
+              IdentificationOrgType(
+                utr = Some("1234567890"),
+                address = None,
+                safeId = None
+              )
+            ),
             countryOfResidence = None,
             entityStart = LocalDate.parse("2018-02-28"),
             entityEnd = None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "lineNo": "2",
               |  "bpMatchStatus": "01",
@@ -112,16 +121,24 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendBeneficiaryTransform(Some(1), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), beneficiaryType)
+          val transformer = AmendBeneficiaryTransform(
+            Some(1),
+            Json.toJson(amended),
+            original,
+            LocalDate.parse("2020-03-25"),
+            beneficiaryType
+          )
 
           val applied = transformer.applyTransform(beforeJson).get
-          val result = transformer.applyDeclarationTransform(applied).get
+          val result  = transformer.applyDeclarationTransform(applied).get
           result mustBe afterJson
         }
 
         "amend the new beneficiary that is not known to etmp" in {
-          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-new-charity-beneficiary-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-new-charity-beneficiary-transform-after-declaration.json")
+          val beforeJson =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-new-charity-beneficiary-transform-before.json")
+          val afterJson  =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-new-charity-beneficiary-transform-after-declaration.json")
 
           val amended = BeneficiaryCharityType(
             lineNo = None,
@@ -135,18 +152,23 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
             entityEnd = None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "organisationName":  "Charity 3",
               |  "entityStart": "2018-02-28"
               |}
               |""".stripMargin)
 
-          val transformer = AmendBeneficiaryTransform(Some(2), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), beneficiaryType)
+          val transformer = AmendBeneficiaryTransform(
+            Some(2),
+            Json.toJson(amended),
+            original,
+            LocalDate.parse("2020-03-25"),
+            beneficiaryType
+          )
 
           val applied = transformer.applyTransform(beforeJson).get
-          val result = transformer.applyDeclarationTransform(applied).get
+          val result  = transformer.applyDeclarationTransform(applied).get
           result mustBe afterJson
         }
       }
@@ -161,7 +183,7 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
         "amend a beneficiary's details by replacing the beneficiary" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-company-beneficiary-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-company-beneficiary-transform-after.json")
+          val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-company-beneficiary-transform-after.json")
 
           val amended = BeneficiaryCompanyType(
             lineNo = None,
@@ -169,18 +191,19 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
             organisationName = "Company Name",
             beneficiaryDiscretion = None,
             beneficiaryShareOfIncome = None,
-            identification = Some(IdentificationOrgType(
-              utr = Some("1234567890"),
-              address = None,
-              safeId = None
-            )),
+            identification = Some(
+              IdentificationOrgType(
+                utr = Some("1234567890"),
+                address = None,
+                safeId = None
+              )
+            ),
             countryOfResidence = None,
             entityStart = LocalDate.parse("2018-02-28"),
             entityEnd = None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "lineNo": "2",
               |  "bpMatchStatus": "01",
@@ -192,7 +215,13 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendBeneficiaryTransform(Some(1), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), beneficiaryType)
+          val transformer = AmendBeneficiaryTransform(
+            Some(1),
+            Json.toJson(amended),
+            original,
+            LocalDate.parse("2020-03-25"),
+            beneficiaryType
+          )
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -204,7 +233,8 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
         "set an end date for the original beneficiary, adding in the amendment as a new beneficiary for a beneficiary known by etmp" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-company-beneficiary-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-company-beneficiary-transform-after-declaration.json")
+          val afterJson  =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-company-beneficiary-transform-after-declaration.json")
 
           val amended = BeneficiaryCompanyType(
             lineNo = None,
@@ -212,18 +242,19 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
             organisationName = "Updated Company Name",
             beneficiaryDiscretion = None,
             beneficiaryShareOfIncome = None,
-            identification = Some(IdentificationOrgType(
-              utr = Some("1234567890"),
-              address = None,
-              safeId = None
-            )),
+            identification = Some(
+              IdentificationOrgType(
+                utr = Some("1234567890"),
+                address = None,
+                safeId = None
+              )
+            ),
             countryOfResidence = None,
             entityStart = LocalDate.parse("2018-02-28"),
             entityEnd = None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "lineNo": "2",
               |  "bpMatchStatus": "01",
@@ -235,17 +266,25 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendBeneficiaryTransform(Some(1), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), beneficiaryType)
+          val transformer = AmendBeneficiaryTransform(
+            Some(1),
+            Json.toJson(amended),
+            original,
+            LocalDate.parse("2020-03-25"),
+            beneficiaryType
+          )
 
           val applied = transformer.applyTransform(beforeJson).get
-          val result = transformer.applyDeclarationTransform(applied).get
+          val result  = transformer.applyDeclarationTransform(applied).get
           result mustBe afterJson
         }
 
         "amend the new beneficiary that is not known to etmp" in {
 
-          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-new-company-beneficiary-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-new-company-beneficiary-transform-after-declaration.json")
+          val beforeJson =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-new-company-beneficiary-transform-before.json")
+          val afterJson  =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-new-company-beneficiary-transform-after-declaration.json")
 
           val amended = BeneficiaryCompanyType(
             lineNo = None,
@@ -259,18 +298,23 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
             entityEnd = None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "organisationName": "Company 3",
               |  "entityStart": "2018-02-28"
               |}
               |""".stripMargin)
 
-          val transformer = AmendBeneficiaryTransform(Some(2), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), beneficiaryType)
+          val transformer = AmendBeneficiaryTransform(
+            Some(2),
+            Json.toJson(amended),
+            original,
+            LocalDate.parse("2020-03-25"),
+            beneficiaryType
+          )
 
           val applied = transformer.applyTransform(beforeJson).get
-          val result = transformer.applyDeclarationTransform(applied).get
+          val result  = transformer.applyDeclarationTransform(applied).get
           result mustBe afterJson
         }
       }
@@ -284,8 +328,10 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
 
         "amend a beneficiaries details by replacing the beneficiary" in {
 
-          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-beneficiary-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-beneficiary-transform-after.json")
+          val beforeJson =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-individual-beneficiary-transform-before.json")
+          val afterJson  =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-individual-beneficiary-transform-after.json")
 
           val amended = IndividualDetailsType(
             lineNo = None,
@@ -296,16 +342,20 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
             beneficiaryType = None,
             beneficiaryDiscretion = None,
             beneficiaryShareOfIncome = None,
-            identification = Some(IdentificationType(
-              nino = None,
-              passport = Some(PassportType(
-                number = "123456789",
-                expirationDate = LocalDate.parse("2025-01-01"),
-                countryOfIssue = "DE"
-              )),
-              address = None,
-              safeId = None
-            )),
+            identification = Some(
+              IdentificationType(
+                nino = None,
+                passport = Some(
+                  PassportType(
+                    number = "123456789",
+                    expirationDate = LocalDate.parse("2025-01-01"),
+                    countryOfIssue = "DE"
+                  )
+                ),
+                address = None,
+                safeId = None
+              )
+            ),
             countryOfResidence = None,
             legallyIncapable = None,
             nationality = None,
@@ -313,8 +363,7 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
             entityEnd = None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "lineNo": "2",
               |  "bpMatchStatus": "01",
@@ -331,7 +380,13 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendBeneficiaryTransform(Some(1), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), beneficiaryType)
+          val transformer = AmendBeneficiaryTransform(
+            Some(1),
+            Json.toJson(amended),
+            original,
+            LocalDate.parse("2020-03-25"),
+            beneficiaryType
+          )
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -342,8 +397,10 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
 
         "set an end date for the original beneficiary, adding in the amendment as a new beneficiary for a beneficiary known by etmp" in {
 
-          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-beneficiary-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-beneficiary-transform-after-declaration.json")
+          val beforeJson =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-individual-beneficiary-transform-before.json")
+          val afterJson  =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-individual-beneficiary-transform-after-declaration.json")
 
           val amended = IndividualDetailsType(
             lineNo = None,
@@ -354,16 +411,20 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
             beneficiaryType = None,
             beneficiaryDiscretion = None,
             beneficiaryShareOfIncome = None,
-            identification = Some(IdentificationType(
-              nino = None,
-              passport = Some(PassportType(
-                number = "123456789",
-                expirationDate = LocalDate.parse("2025-01-01"),
-                countryOfIssue = "DE"
-              )),
-              address = None,
-              safeId = None
-            )),
+            identification = Some(
+              IdentificationType(
+                nino = None,
+                passport = Some(
+                  PassportType(
+                    number = "123456789",
+                    expirationDate = LocalDate.parse("2025-01-01"),
+                    countryOfIssue = "DE"
+                  )
+                ),
+                address = None,
+                safeId = None
+              )
+            ),
             countryOfResidence = None,
             legallyIncapable = None,
             nationality = None,
@@ -371,8 +432,7 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
             entityEnd = None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "lineNo": "2",
               |  "bpMatchStatus": "01",
@@ -389,17 +449,26 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendBeneficiaryTransform(Some(1), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), beneficiaryType)
+          val transformer = AmendBeneficiaryTransform(
+            Some(1),
+            Json.toJson(amended),
+            original,
+            LocalDate.parse("2020-03-25"),
+            beneficiaryType
+          )
 
           val applied = transformer.applyTransform(beforeJson).get
-          val result = transformer.applyDeclarationTransform(applied).get
+          val result  = transformer.applyDeclarationTransform(applied).get
           result mustBe afterJson
         }
 
         "amend the new beneficiary that is not known to etmp" in {
 
-          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-new-individual-beneficiary-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-new-individual-beneficiary-transform-after-declaration.json")
+          val beforeJson =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-new-individual-beneficiary-transform-before.json")
+          val afterJson  = JsonUtils.getJsonValueFromFile(
+            "transforms/trusts-new-individual-beneficiary-transform-after-declaration.json"
+          )
 
           val amended = IndividualDetailsType(
             lineNo = None,
@@ -418,8 +487,7 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
             entityEnd = None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "name": {
               |    "firstName": "New First 3",
@@ -430,10 +498,16 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendBeneficiaryTransform(Some(2), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), beneficiaryType)
+          val transformer = AmendBeneficiaryTransform(
+            Some(2),
+            Json.toJson(amended),
+            original,
+            LocalDate.parse("2020-03-25"),
+            beneficiaryType
+          )
 
           val applied = transformer.applyTransform(beforeJson).get
-          val result = transformer.applyDeclarationTransform(applied).get
+          val result  = transformer.applyDeclarationTransform(applied).get
           result mustBe afterJson
         }
       }
@@ -448,7 +522,7 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
         "amend a beneficiaries details by replacing the beneficiary" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-other-beneficiary-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-other-beneficiary-transform-after.json")
+          val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-other-beneficiary-transform-after.json")
 
           val amended = OtherType(
             lineNo = None,
@@ -462,8 +536,7 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
             entityEnd = None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "lineNo":"2",
               |  "address":{
@@ -477,7 +550,13 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendBeneficiaryTransform(Some(1), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), beneficiaryType)
+          val transformer = AmendBeneficiaryTransform(
+            Some(1),
+            Json.toJson(amended),
+            original,
+            LocalDate.parse("2020-03-25"),
+            beneficiaryType
+          )
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -489,7 +568,8 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
         "set an end date for the original beneficiary, adding in the amendment as a new beneficiary for a beneficiary known by etmp" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-other-beneficiary-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-other-beneficiary-transform-after-declaration.json")
+          val afterJson  =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-other-beneficiary-transform-after-declaration.json")
 
           val amended = OtherType(
             lineNo = None,
@@ -503,8 +583,7 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
             entityEnd = None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "lineNo":"2",
               |  "address":{
@@ -518,17 +597,25 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendBeneficiaryTransform(Some(1), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), beneficiaryType)
+          val transformer = AmendBeneficiaryTransform(
+            Some(1),
+            Json.toJson(amended),
+            original,
+            LocalDate.parse("2020-03-25"),
+            beneficiaryType
+          )
 
           val applied = transformer.applyTransform(beforeJson).get
-          val result = transformer.applyDeclarationTransform(applied).get
+          val result  = transformer.applyDeclarationTransform(applied).get
           result mustBe afterJson
         }
 
         "amend the new beneficiary that is not known to etmp" in {
 
-          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-new-other-beneficiary-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-new-other-beneficiary-transform-after-declaration.json")
+          val beforeJson =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-new-other-beneficiary-transform-before.json")
+          val afterJson  =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-new-other-beneficiary-transform-after-declaration.json")
 
           val amended = OtherType(
             lineNo = None,
@@ -542,18 +629,23 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
             entityEnd = None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "description":"New 3",
               |  "entityStart":"2020-02-12"
               |}
               |""".stripMargin)
 
-          val transformer = AmendBeneficiaryTransform(Some(2), Json.toJson(amended), original, LocalDate.parse("2020-03-12"), beneficiaryType)
+          val transformer = AmendBeneficiaryTransform(
+            Some(2),
+            Json.toJson(amended),
+            original,
+            LocalDate.parse("2020-03-12"),
+            beneficiaryType
+          )
 
           val applied = transformer.applyTransform(beforeJson).get
-          val result = transformer.applyDeclarationTransform(applied).get
+          val result  = transformer.applyDeclarationTransform(applied).get
           result mustBe afterJson
         }
       }
@@ -568,7 +660,7 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
         "amend a beneficiaries details by replacing the beneficiary" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-trust-beneficiary-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-trust-beneficiary-transform-after.json")
+          val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-trust-beneficiary-transform-after.json")
 
           val amended = BeneficiaryTrustType(
             lineNo = None,
@@ -576,18 +668,19 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
             organisationName = "Trust Name",
             beneficiaryDiscretion = None,
             beneficiaryShareOfIncome = None,
-            identification = Some(IdentificationOrgType(
-              utr = Some("1234567890"),
-              address = None,
-              safeId = None
-            )),
+            identification = Some(
+              IdentificationOrgType(
+                utr = Some("1234567890"),
+                address = None,
+                safeId = None
+              )
+            ),
             countryOfResidence = None,
             entityStart = LocalDate.parse("2018-02-28"),
             entityEnd = None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "lineNo": "2",
               |  "bpMatchStatus": "01",
@@ -599,7 +692,13 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendBeneficiaryTransform(Some(1), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), beneficiaryType)
+          val transformer = AmendBeneficiaryTransform(
+            Some(1),
+            Json.toJson(amended),
+            original,
+            LocalDate.parse("2020-03-25"),
+            beneficiaryType
+          )
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -611,7 +710,8 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
         "set an end date for the original beneficiary, adding in the amendment as a new beneficiary for a beneficiary known by etmp" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-trust-beneficiary-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-trust-beneficiary-transform-after-declaration.json")
+          val afterJson  =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-trust-beneficiary-transform-after-declaration.json")
 
           val amended = BeneficiaryTrustType(
             lineNo = None,
@@ -619,18 +719,19 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
             organisationName = "Updated Trust Name",
             beneficiaryDiscretion = None,
             beneficiaryShareOfIncome = None,
-            identification = Some(IdentificationOrgType(
-              utr = Some("1234567890"),
-              address = None,
-              safeId = None
-            )),
+            identification = Some(
+              IdentificationOrgType(
+                utr = Some("1234567890"),
+                address = None,
+                safeId = None
+              )
+            ),
             countryOfResidence = None,
             entityStart = LocalDate.parse("2018-02-28"),
             entityEnd = None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "lineNo": "2",
               |  "bpMatchStatus": "01",
@@ -642,17 +743,25 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendBeneficiaryTransform(Some(1), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), beneficiaryType)
+          val transformer = AmendBeneficiaryTransform(
+            Some(1),
+            Json.toJson(amended),
+            original,
+            LocalDate.parse("2020-03-25"),
+            beneficiaryType
+          )
 
           val applied = transformer.applyTransform(beforeJson).get
-          val result = transformer.applyDeclarationTransform(applied).get
+          val result  = transformer.applyDeclarationTransform(applied).get
           result mustBe afterJson
         }
 
         "amend the new beneficiary that is not known to etmp" in {
 
-          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-new-trust-beneficiary-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-new-trust-beneficiary-transform-after-declaration.json")
+          val beforeJson =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-new-trust-beneficiary-transform-before.json")
+          val afterJson  =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-new-trust-beneficiary-transform-after-declaration.json")
 
           val amended = BeneficiaryTrustType(
             lineNo = None,
@@ -666,18 +775,23 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
             entityEnd = None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "organisationName":  "Trust 3",
               |  "entityStart": "2018-02-28"
               |}
               |""".stripMargin)
 
-          val transformer = AmendBeneficiaryTransform(Some(2), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), beneficiaryType)
+          val transformer = AmendBeneficiaryTransform(
+            Some(2),
+            Json.toJson(amended),
+            original,
+            endDate = LocalDate.parse("2020-03-25"),
+            beneficiaryType
+          )
 
           val applied = transformer.applyTransform(beforeJson).get
-          val result = transformer.applyDeclarationTransform(applied).get
+          val result  = transformer.applyDeclarationTransform(applied).get
           result mustBe afterJson
         }
       }
@@ -685,8 +799,7 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
 
     "when unidentified" - {
 
-      val originalJson = Json.parse(
-        """
+      val originalJson = Json.parse("""
           |{
           |  "lineNo":"2",
           |  "bpMatchStatus": "01",
@@ -704,10 +817,13 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
 
         "successfully update a beneficiary's details" in {
 
-          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-unidentified-beneficiary-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-unidentified-beneficiary-transform-after.json")
+          val beforeJson     =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-unidentified-beneficiary-transform-before.json")
+          val afterJson      =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-unidentified-beneficiary-transform-after.json")
           val newDescription = "This description has been updated"
-          val transformer = AmendBeneficiaryTransform(Some(1), JsString(newDescription), originalJson, endDate, beneficiaryType)
+          val transformer    =
+            AmendBeneficiaryTransform(Some(1), JsString(newDescription), originalJson, endDate, beneficiaryType)
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -717,16 +833,21 @@ class AmendBeneficiaryTransformSpec extends AnyFreeSpec {
       "at declaration time" - {
 
         "set an end date for the original beneficiary, adding in the amendment as a new beneficiary for a beneficiary known by etmp" in {
-          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-unidentified-beneficiary-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-unidentified-beneficiary-transform-after-declaration.json")
+          val beforeJson     =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-unidentified-beneficiary-transform-before.json")
+          val afterJson      = JsonUtils.getJsonValueFromFile(
+            "transforms/trusts-unidentified-beneficiary-transform-after-declaration.json"
+          )
           val newDescription = "This description has been updated"
-          val transformer = AmendBeneficiaryTransform(Some(1), JsString(newDescription), originalJson, endDate, beneficiaryType)
+          val transformer    =
+            AmendBeneficiaryTransform(Some(1), JsString(newDescription), originalJson, endDate, beneficiaryType)
 
           val transformed = transformer.applyTransform(beforeJson).get
-          val result = transformer.applyDeclarationTransform(transformed).get
+          val result      = transformer.applyDeclarationTransform(transformed).get
           result mustBe afterJson
         }
       }
     }
   }
+
 }

@@ -36,7 +36,7 @@ class AmendTrusteeTransformSpec extends AnyFreeSpec {
       "successfully set a new trustee's details" in {
 
         val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-trustee-transform-before.json")
-        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-trustee-transform-after-ind.json")
+        val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-trustee-transform-after-ind.json")
 
         val newTrusteeInfo = TrusteeIndividualType(
           lineNo = Some("newLineNo"),
@@ -52,8 +52,7 @@ class AmendTrusteeTransformSpec extends AnyFreeSpec {
           entityEnd = None
         )
 
-        val originalTrusteeInfo = Json.parse(
-          """
+        val originalTrusteeInfo = Json.parse("""
             |{
             |   "trusteeInd":{
             |     "lineNo": "1",
@@ -72,7 +71,8 @@ class AmendTrusteeTransformSpec extends AnyFreeSpec {
             |}
             |""".stripMargin)
 
-        val transformer = AmendTrusteeTransform(Some(0), Json.toJson(newTrusteeInfo), originalTrusteeInfo, endDate, "trusteeInd")
+        val transformer =
+          AmendTrusteeTransform(Some(0), Json.toJson(newTrusteeInfo), originalTrusteeInfo, endDate, "trusteeInd")
 
         val result = transformer.applyTransform(beforeJson).get
         result mustBe afterJson
@@ -84,7 +84,7 @@ class AmendTrusteeTransformSpec extends AnyFreeSpec {
       "successfully set a new trustee's details" in {
 
         val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-trustee-transform-before.json")
-        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-trustee-transform-after-org.json")
+        val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-trustee-transform-after-org.json")
 
         val newTrusteeInfo = TrusteeOrgType(
           lineNo = Some("newLineNo"),
@@ -98,8 +98,7 @@ class AmendTrusteeTransformSpec extends AnyFreeSpec {
           entityEnd = None
         )
 
-        val originalTrusteeInfo = Json.parse(
-          """
+        val originalTrusteeInfo = Json.parse("""
             |{
             |   "trusteeOrg":{
             |     "lineNo": "1",
@@ -114,7 +113,8 @@ class AmendTrusteeTransformSpec extends AnyFreeSpec {
             |}
             |""".stripMargin)
 
-        val transformer = AmendTrusteeTransform(Some(1), Json.toJson(newTrusteeInfo), originalTrusteeInfo, endDate, "trusteeOrg")
+        val transformer =
+          AmendTrusteeTransform(Some(1), Json.toJson(newTrusteeInfo), originalTrusteeInfo, endDate, "trusteeOrg")
 
         val result = transformer.applyTransform(beforeJson).get
         result mustBe afterJson
@@ -127,7 +127,7 @@ class AmendTrusteeTransformSpec extends AnyFreeSpec {
         "successfully set a new ind lead trustee's details" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-ind.json")
+          val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-ind.json")
 
           val newTrusteeInfo = AmendedLeadTrusteeIndType(
             bpMatchStatus = None,
@@ -141,7 +141,8 @@ class AmendTrusteeTransformSpec extends AnyFreeSpec {
             nationality = None
           )
 
-          val transformer = AmendTrusteeTransform(None, Json.toJson(newTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
+          val transformer =
+            AmendTrusteeTransform(None, Json.toJson(newTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -162,12 +163,14 @@ class AmendTrusteeTransformSpec extends AnyFreeSpec {
           nationality = None
         )
 
-        val transformer = AmendTrusteeTransform(None, Json.toJson(newTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
+        val transformer =
+          AmendTrusteeTransform(None, Json.toJson(newTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeInd")
 
         "successfully set a new ind lead trustee's details" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-ind-fully-matched.json")
+          val afterJson  =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-ind-fully-matched.json")
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -175,8 +178,11 @@ class AmendTrusteeTransformSpec extends AnyFreeSpec {
 
         "remove the bp match status at declare time" in {
 
-          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-ind-fully-matched.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-ind-fully-matched-declare.json")
+          val beforeJson =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-ind-fully-matched.json")
+          val afterJson  = JsonUtils.getJsonValueFromFile(
+            "transforms/trusts-lead-trustee-transform-after-ind-fully-matched-declare.json"
+          )
 
           val result = transformer.applyDeclarationTransform(beforeJson).get
           result mustBe afterJson
@@ -189,7 +195,7 @@ class AmendTrusteeTransformSpec extends AnyFreeSpec {
       "successfully set a new org lead trustee's details" in {
 
         val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-before.json")
-        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-org.json")
+        val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-lead-trustee-transform-after-org.json")
 
         val newTrusteeInfo = AmendedLeadTrusteeOrgType(
           name = "newName",
@@ -199,11 +205,13 @@ class AmendTrusteeTransformSpec extends AnyFreeSpec {
           countryOfResidence = None
         )
 
-        val transformer = AmendTrusteeTransform(None, Json.toJson(newTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeOrg")
+        val transformer =
+          AmendTrusteeTransform(None, Json.toJson(newTrusteeInfo), Json.obj(), LocalDate.now(), "leadTrusteeOrg")
 
         val result = transformer.applyTransform(beforeJson).get
         result mustBe afterJson
       }
     }
   }
+
 }

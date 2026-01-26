@@ -27,7 +27,7 @@ import models.variation.{VariationFailureResponse, VariationResponse, VariationS
 import play.api.http.HeaderNames
 import play.api.libs.json._
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{HeaderCarrier,  StringContextOps}
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import utils.Constants._
 import utils.Session
 import utils.TrustEnvelope.TrustEnvelope
@@ -37,7 +37,8 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class TrustsConnector @Inject()(http: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext) extends ConnectorErrorResponseHandler {
+class TrustsConnector @Inject() (http: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext)
+    extends ConnectorErrorResponseHandler {
 
   val className: String = this.getClass.getSimpleName
 
@@ -53,13 +54,12 @@ class TrustsConnector @Inject()(http: HttpClientV2, config: AppConfig)(implicit 
   private lazy val getTrustOrEstateUrl: String =
     s"${config.getTrustOrEstateUrl}/trusts"
 
-  def get5MLDTrustOrEstateEndpoint(identifier: String): String = {
+  def get5MLDTrustOrEstateEndpoint(identifier: String): String =
     if (identifier.length == 10) {
       s"$getTrustOrEstateUrl/registration/UTR/$identifier"
     } else {
       s"$getTrustOrEstateUrl/registration/URN/$identifier"
     }
-  }
 
   private lazy val trustVariationsEndpoint: String =
     s"${config.varyTrustOrEstateUrl}/trusts/variation"
@@ -70,57 +70,66 @@ class TrustsConnector @Inject()(http: HttpClientV2, config: AppConfig)(implicit 
   private def registrationHeaders(correlationId: String): Seq[(String, String)] =
     Seq(
       HeaderNames.AUTHORIZATION -> s"Bearer ${config.registrationToken}",
-      CONTENT_TYPE -> CONTENT_TYPE_JSON,
-      ENVIRONMENT_HEADER -> config.registrationEnvironment,
-      CORRELATION_HEADER -> correlationId
+      CONTENT_TYPE              -> CONTENT_TYPE_JSON,
+      ENVIRONMENT_HEADER        -> config.registrationEnvironment,
+      CORRELATION_HEADER        -> correlationId
     )
 
-  def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest): TrustEnvelope[ExistingCheckResponse] = EitherT {
-    val correlationId = UUID.randomUUID().toString
+  def checkExistingTrust(existingTrustCheckRequest: ExistingCheckRequest): TrustEnvelope[ExistingCheckResponse] =
+    EitherT {
+      val correlationId = UUID.randomUUID().toString
 
-    implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
+      implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
-    logger.info(s"[$className][checkExistingTrust][Session ID: ${Session.id(hc)}] matching trust for correlationId: $correlationId")
+      logger.info(
+        s"[$className][checkExistingTrust][Session ID: ${Session.id(hc)}] matching trust for correlationId: $correlationId"
+      )
 
-    http.post(url"$matchTrustsEndpoint")
-      .withBody(Json.toJson(existingTrustCheckRequest))
-      .execute[ExistingCheckResponse]
-      .map(Right(_)).recover {
-      case ex =>
-        Left(handleError(ex, "checkExistingTrust", matchTrustsEndpoint))
+      http
+        .post(url"$matchTrustsEndpoint")
+        .withBody(Json.toJson(existingTrustCheckRequest))
+        .execute[ExistingCheckResponse]
+        .map(Right(_))
+        .recover { case ex =>
+          Left(handleError(ex, "checkExistingTrust", matchTrustsEndpoint))
+        }
     }
-  }
 
   def registerTrust(registration: Registration): TrustEnvelope[RegistrationResponse] = EitherT {
     val correlationId = UUID.randomUUID().toString
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
-    logger.info(s"[$className][registerTrust][Session ID: ${Session.id(hc)}] registering trust for correlationId: $correlationId")
+    logger.info(
+      s"[$className][registerTrust][Session ID: ${Session.id(hc)}] registering trust for correlationId: $correlationId"
+    )
 
-    http.post(url"$trustRegistrationEndpoint")
+    http
+      .post(url"$trustRegistrationEndpoint")
       .withBody(Json.toJson(registration))
       .execute[RegistrationResponse]
-    .map(Right(_)).recover {
-      case ex =>
+      .map(Right(_))
+      .recover { case ex =>
         Left(handleError(ex, "registerTrust", trustRegistrationEndpoint))
-    }
+      }
   }
 
   def getTrustInfo(identifier: String): TrustEnvelope[GetTrustResponse] = EitherT {
-    val correlationId = UUID.randomUUID().toString
+    val correlationId              = UUID.randomUUID().toString
     logger.info(s"getTrustInfo Connector...start $identifier, $correlationId")
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
-    logger.info(s"[$className][getTrustInfo][Session ID: ${Session.id(hc)}][UTR/URN: $identifier]" +
-      s" getting playback for trust for correlationId: $correlationId")
+    logger.info(
+      s"[$className][getTrustInfo][Session ID: ${Session.id(hc)}][UTR/URN: $identifier]" +
+        s" getting playback for trust for correlationId: $correlationId"
+    )
     val fullUrl = get5MLDTrustOrEstateEndpoint(identifier)
     http
       .get(url"$fullUrl")
       .execute[GetTrustResponse](GetTrustResponse.httpReads(identifier), ec)
-      .map(Right(_)).recover {
-        case ex =>
-          Left(handleError(new Exception("Failed to getTrustInfo"),"getTrustInfo", fullUrl))
+      .map(Right(_))
+      .recover { case ex =>
+        Left(handleError(new Exception("Failed to getTrustInfo"), "getTrustInfo", fullUrl))
       }
   }
 
@@ -129,21 +138,27 @@ class TrustsConnector @Inject()(http: HttpClientV2, config: AppConfig)(implicit 
 
     implicit val hc: HeaderCarrier = HeaderCarrier(extraHeaders = registrationHeaders(correlationId))
 
-    logger.info(s"[$className][trustVariation][Session ID: ${Session.id(hc)}]" +
-      s" submitting trust variation for correlationId: $correlationId")
+    logger.info(
+      s"[$className][trustVariation][Session ID: ${Session.id(hc)}]" +
+        s" submitting trust variation for correlationId: $correlationId"
+    )
 
-    http.post(url"$trustVariationsEndpoint")
+    http
+      .post(url"$trustVariationsEndpoint")
       .withBody(trustVariations)
       .execute[VariationResponse]
       .map {
-      case response: VariationSuccessResponse => Right(response)
-      case response: VariationFailureResponse =>
-        logger.warn(s"[$className][trustVariation][Session ID: ${Session.id(hc)}] " +
-          s"trust variation failed with status: ${response.status}, with message: ${response.message}")
-        Left(VariationFailureForAudit(response.errorType, response.message))
-    }.recover {
-      case ex =>
+        case response: VariationSuccessResponse => Right(response)
+        case response: VariationFailureResponse =>
+          logger.warn(
+            s"[$className][trustVariation][Session ID: ${Session.id(hc)}] " +
+              s"trust variation failed with status: ${response.status}, with message: ${response.message}"
+          )
+          Left(VariationFailureForAudit(response.errorType, response.message))
+      }
+      .recover { case ex =>
         Left(handleError(ex, "trustVariation", trustVariationsEndpoint))
-    }
+      }
   }
+
 }

@@ -22,47 +22,45 @@ import java.time.LocalDateTime
 import play.api.libs.json._
 import uk.gov.hmrc.auth.core.AffinityGroup
 
-case class NRSSubmission(payload: String,
-                         metadata: MetaData)
+case class NRSSubmission(payload: String, metadata: MetaData)
 
 object NRSSubmission {
   implicit val formats: OFormat[NRSSubmission] = Json.format[NRSSubmission]
 }
 
 case class IdentityData(
-                         internalId: String,
-                         affinityGroup: AffinityGroup,
-                         deviceId: String,
-                         clientIP: String,
-                         clientPort: String,
-                         sessionId: String,
-                         requestId: String,
-                         credential: CredentialData,
-                         declaration: JsValue,
-                         agentDetails: Option[JsValue]
-                       )
+  internalId: String,
+  affinityGroup: AffinityGroup,
+  deviceId: String,
+  clientIP: String,
+  clientPort: String,
+  sessionId: String,
+  requestId: String,
+  credential: CredentialData,
+  declaration: JsValue,
+  agentDetails: Option[JsValue]
+)
 
 object IdentityData {
   implicit val formats: OFormat[IdentityData] = Json.format[IdentityData]
 
-  val txmWrites : Writes[IdentityData] = Writes { identity =>
-    Json.toJsObject(identity).
-      -("deviceId").
-      -("clientIP").
-      -("clientPort")
+  val txmWrites: Writes[IdentityData] = Writes { identity =>
+    Json.toJsObject(identity).-("deviceId").-("clientIP").-("clientPort")
   }
+
 }
 
-case class MetaData(businessId: String,
-                    notableEvent: NotableEvent,
-                    payloadContentType: String,
-                    payloadSha256Checksum: String,
-                    userSubmissionTimestamp: LocalDateTime,
-                    identityData: IdentityData,
-                    userAuthToken: String,
-                    headerData: JsValue,
-                    searchKeys: SearchKeys
-                   )
+case class MetaData(
+  businessId: String,
+  notableEvent: NotableEvent,
+  payloadContentType: String,
+  payloadSha256Checksum: String,
+  userSubmissionTimestamp: LocalDateTime,
+  identityData: IdentityData,
+  userAuthToken: String,
+  headerData: JsValue,
+  searchKeys: SearchKeys
+)
 
 object MetaData {
 
@@ -72,16 +70,16 @@ object MetaData {
 
   val txmWrites: Writes[MetaData] = Writes { metaData =>
     Json.obj(
-      "businessId" -> metaData.businessId,
-      "notableEvent" -> metaData.notableEvent,
-      "payloadSha256Checksum" -> metaData.payloadSha256Checksum,
+      "businessId"              -> metaData.businessId,
+      "notableEvent"            -> metaData.notableEvent,
+      "payloadSha256Checksum"   -> metaData.payloadSha256Checksum,
       "userSubmissionTimestamp" -> Json.toJson(metaData.userSubmissionTimestamp),
-      "identityData" -> Json.toJson(metaData.identityData)(IdentityData.txmWrites),
-      "searchKeys" -> Json.toJson(metaData.searchKeys)
+      "identityData"            -> Json.toJson(metaData.identityData)(IdentityData.txmWrites),
+      "searchKeys"              -> Json.toJson(metaData.searchKeys)
     )
   }
-}
 
+}
 
 case class SearchKeys(searchKey: SearchKey, value: String)
 
@@ -89,12 +87,12 @@ object SearchKeys {
 
   implicit val reads: Reads[SearchKeys] = Json.reads[SearchKeys]
 
-  implicit val writes: OWrites[SearchKeys] = OWrites {
-    terms: SearchKeys =>
-      terms.searchKey match {
-        case SearchKey.TRN => Json.obj("trn" -> terms.value)
-        case SearchKey.UTR => Json.obj("utr" -> terms.value)
-        case SearchKey.URN => Json.obj("urn" -> terms.value)
-      }
+  implicit val writes: OWrites[SearchKeys] = OWrites { terms: SearchKeys =>
+    terms.searchKey match {
+      case SearchKey.TRN => Json.obj("trn" -> terms.value)
+      case SearchKey.UTR => Json.obj("utr" -> terms.value)
+      case SearchKey.URN => Json.obj("urn" -> terms.value)
+    }
   }
+
 }

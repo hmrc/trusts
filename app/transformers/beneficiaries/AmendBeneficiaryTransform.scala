@@ -22,23 +22,25 @@ import utils.Constants._
 
 import java.time.LocalDate
 
-case class AmendBeneficiaryTransform(index: Option[Int],
-                                     amended: JsValue,
-                                     original: JsValue,
-                                     endDate: LocalDate,
-                                     `type`: String) extends BeneficiaryTransform with AmendEntityTransform {
+case class AmendBeneficiaryTransform(
+  index: Option[Int],
+  amended: JsValue,
+  original: JsValue,
+  endDate: LocalDate,
+  `type`: String
+) extends BeneficiaryTransform with AmendEntityTransform {
 
   override val trustTypeDependentFields: Seq[String] = Seq(ROLE_IN_COMPANY)
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
+  override def applyTransform(input: JsValue): JsResult[JsValue] =
     if (`type` == UNIDENTIFIED_BENEFICIARY) {
-      val description: String = amended.as[JsString].value
+      val description: String                = amended.as[JsString].value
       val originalAndAmendedMerged: JsObject = original.as[JsObject].deepMerge(Json.obj("description" -> description))
       amendAtPosition(input, path, index, removeJsObjectFields(originalAndAmendedMerged, etmpFields))
     } else {
       super.applyTransform(input)
     }
-  }
+
 }
 
 object AmendBeneficiaryTransform {

@@ -28,14 +28,15 @@ import transformers.remove.{Remove, RemoveAsset}
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class RemoveAssetController @Inject()(identify: IdentifierAction,
-                                      transformationService: TransformationService)
-                                     (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends RemoveTransformationController(identify, transformationService) with AssetController {
+class RemoveAssetController @Inject() (identify: IdentifierAction, transformationService: TransformationService)(
+  implicit
+  ec: ExecutionContext,
+  cc: ControllerComponents
+) extends RemoveTransformationController(identify, transformationService) with AssetController {
 
   def remove(identifier: String): Action[JsValue] = addNewTransform[RemoveAsset](identifier)
 
-  override def transform[T <: Remove](remove: T, entity: JsValue): DeltaTransform = {
+  override def transform[T <: Remove](remove: T, entity: JsValue): DeltaTransform =
     RemoveAssetTransform(Some(remove.index), entity, remove.endDate, remove.`type`)
-  }
+
 }

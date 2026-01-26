@@ -24,14 +24,17 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-final protected class FakeAuthConnector @Inject()(exception: Option[AuthorisationException] = None) extends AuthConnector {
+final protected class FakeAuthConnector @Inject() (exception: Option[AuthorisationException] = None)
+    extends AuthConnector {
 
   private def success: Any = ()
 
-  override def authorise[A](predicate: Predicate, retrieval: Retrieval[A])
-                           (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[A] = {
+  override def authorise[A](predicate: Predicate, retrieval: Retrieval[A])(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[A] =
     exception.fold(Future.successful(success.asInstanceOf[A]))(Future.failed(_))
-  }
+
 }
 
 object FakeAuthConnector {

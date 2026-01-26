@@ -48,10 +48,12 @@ class AmendAssetTransformSpec extends AnyFreeSpec {
 
       "successfully update an asset's details" in {
 
-        val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-non-eea-business-asset-transform-before.json")
-        val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-non-eea-business-asset-transform-after.json")
+        val beforeJson =
+          JsonUtils.getJsonValueFromFile("transforms/trusts-non-eea-business-asset-transform-before.json")
+        val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-non-eea-business-asset-transform-after.json")
 
-        val transformer = AmendAssetTransform(Some(1), Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, "nonEEABusiness")
+        val transformer =
+          AmendAssetTransform(Some(1), Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, "nonEEABusiness")
 
         val result = transformer.applyTransform(beforeJson).get
         result mustBe afterJson
@@ -63,10 +65,18 @@ class AmendAssetTransformSpec extends AnyFreeSpec {
       "when non-EEA business asset" - {
         "set an end date for the original asset and add in the amendment as a new asset not known to ETMP" in {
 
-          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-non-eea-business-asset-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-non-eea-business-asset-transform-after-declaration.json")
+          val beforeJson =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-non-eea-business-asset-transform-before.json")
+          val afterJson  =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-non-eea-business-asset-transform-after-declaration.json")
 
-          val transformer = AmendAssetTransform(Some(1), Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, "nonEEABusiness")
+          val transformer = AmendAssetTransform(
+            Some(1),
+            Json.toJson(amendedAsset),
+            Json.toJson(originalAsset),
+            endDate,
+            "nonEEABusiness"
+          )
 
           val transformed = transformer.applyTransform(beforeJson).get
 
@@ -86,9 +96,11 @@ class AmendAssetTransformSpec extends AnyFreeSpec {
           val amendedAsset: OtherAssetType = originalAsset.copy(description = "Amended description 1")
 
           val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-other-asset-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-other-asset-transform-after-declaration.json")
+          val afterJson  =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-other-asset-transform-after-declaration.json")
 
-          val transformer = AmendAssetTransform(Some(0), Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, "other")
+          val transformer =
+            AmendAssetTransform(Some(0), Json.toJson(amendedAsset), Json.toJson(originalAsset), endDate, "other")
 
           val transformed = transformer.applyTransform(beforeJson).get
 
@@ -98,4 +110,5 @@ class AmendAssetTransformSpec extends AnyFreeSpec {
       }
     }
   }
+
 }

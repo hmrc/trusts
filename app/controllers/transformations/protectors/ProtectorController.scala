@@ -21,10 +21,10 @@ import utils.Constants._
 
 trait ProtectorController {
 
-  def path(`type`: String, index: Option[Int]): JsPath = {
+  def path(`type`: String, index: Option[Int]): JsPath =
     index match {
       case Some(i) => ENTITIES \ PROTECTORS \ `type` \ i
-      case _ => throw new Exception(s"Index should not be None for protector type ${`type`}.")
+      case _       => throw new Exception(s"Index should not be None for protector type ${`type`}.")
     }
-  }
+
 }

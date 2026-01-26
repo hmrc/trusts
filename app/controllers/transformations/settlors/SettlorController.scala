@@ -22,14 +22,14 @@ import utils.Constants._
 
 trait SettlorController extends Logging {
 
-  def path(`type`: String, index: Option[Int]): JsPath = {
+  def path(`type`: String, index: Option[Int]): JsPath =
     index match {
       case Some(i) =>
         logger.info(s"[SettlorController][path] Index defined. Settlor is living and of type ${`type`}.")
         ENTITIES \ SETTLORS \ `type` \ i
-      case _ =>
+      case _       =>
         logger.info(s"[SettlorController][path] Index not defined. Settlor is deceased.")
         ENTITIES \ `type`
     }
-  }
+
 }

@@ -25,25 +25,29 @@ import models.registration.ApiResponse.invalidUTRErrorResponse
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.matching.Regex
 
-class ValidateIdentifierActionProvider @Inject()()
-                                                (implicit val parser: BodyParsers.Default, executionContext: ExecutionContext) {
+class ValidateIdentifierActionProvider @Inject() ()(implicit
+  val parser: BodyParsers.Default,
+  executionContext: ExecutionContext
+) {
 
   def apply(identifier: String) = new ValidateIdentifierAction(identifier)
 
 }
 
-class ValidateIdentifierAction @Inject()(identifier: String)
-                                        (implicit val parser: BodyParsers.Default, val executionContext: ExecutionContext)
-  extends ActionFilter[Request] with ActionBuilder[Request, AnyContent] {
+class ValidateIdentifierAction @Inject() (identifier: String)(implicit
+  val parser: BodyParsers.Default,
+  val executionContext: ExecutionContext
+) extends ActionFilter[Request] with ActionBuilder[Request, AnyContent] {
 
-  override protected def filter[A](request: Request[A]): Future[Option[Result]] = Future.successful{
+  override protected def filter[A](request: Request[A]): Future[Option[Result]] = Future.successful {
 
     identifier match {
       case Identifiers.utrPattern(_) => None
       case Identifiers.urnPattern(_) => None
-      case _ => Some(BadRequest(toJson(invalidUTRErrorResponse)))
+      case _                         => Some(BadRequest(toJson(invalidUTRErrorResponse)))
     }
   }
+
 }
 
 object Identifiers {

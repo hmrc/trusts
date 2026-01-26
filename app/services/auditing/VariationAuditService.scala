@@ -27,14 +27,16 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class VariationAuditService @Inject()(auditConnector: AuditConnector)(implicit ec: ExecutionContext)
-  extends AuditService(auditConnector) {
+class VariationAuditService @Inject() (auditConnector: AuditConnector)(implicit ec: ExecutionContext)
+    extends AuditService(auditConnector) {
 
-  private def auditVariation(event: String,
-                             request: JsValue,
-                             internalId: String,
-                             migrateToTaxable: Boolean,
-                             response: JsValue)(implicit hc: HeaderCarrier): Unit = {
+  private def auditVariation(
+    event: String,
+    request: JsValue,
+    internalId: String,
+    migrateToTaxable: Boolean,
+    response: JsValue
+  )(implicit hc: HeaderCarrier): Unit = {
 
     val auditPayload = VariationAuditEvent(
       request = request,
@@ -49,22 +51,22 @@ class VariationAuditService @Inject()(auditConnector: AuditConnector)(implicit e
     )
   }
 
-  def auditVariationSuccess(internalId: String,
-                            migrateToTaxable: Boolean,
-                            payload: JsValue,
-                            variationResponse: VariationSuccessResponse
-                             )(implicit hc: HeaderCarrier): Unit = {
-    val hasField = (field: String) =>
-      payload.transform((JsPath \ field).json.pick).isSuccess
+  def auditVariationSuccess(
+    internalId: String,
+    migrateToTaxable: Boolean,
+    payload: JsValue,
+    variationResponse: VariationSuccessResponse
+  )(implicit hc: HeaderCarrier): Unit = {
+    val hasField = (field: String) => payload.transform((JsPath \ field).json.pick).isSuccess
 
     val isAgent = hasField("agentDetails")
     val isClose = hasField("trustEndDate")
 
     val event = (isAgent, isClose) match {
       case (false, false) => TrustAuditing.VARIATION_SUBMITTED_BY_ORGANISATION
-      case (false, true) => TrustAuditing.CLOSURE_SUBMITTED_BY_ORGANISATION
-      case (true, false) => TrustAuditing.VARIATION_SUBMITTED_BY_AGENT
-      case _ => TrustAuditing.CLOSURE_SUBMITTED_BY_AGENT
+      case (false, true)  => TrustAuditing.CLOSURE_SUBMITTED_BY_ORGANISATION
+      case (true, false)  => TrustAuditing.VARIATION_SUBMITTED_BY_AGENT
+      case _              => TrustAuditing.CLOSURE_SUBMITTED_BY_AGENT
     }
 
     val trustTaxablePick: Reads[JsBoolean] = (TRUST \ DETAILS \ TAXABLE).json.pick[JsBoolean]
@@ -72,10 +74,10 @@ class VariationAuditService @Inject()(auditConnector: AuditConnector)(implicit e
     val response = payload.transform(trustTaxablePick) match {
       case JsSuccess(JsBoolean(trustTaxable), _) =>
         Json.obj(
-          "tvn" -> variationResponse.tvn,
+          "tvn"          -> variationResponse.tvn,
           "trustTaxable" -> trustTaxable
         )
-      case _ => Json.toJson(variationResponse)
+      case _                                     => Json.toJson(variationResponse)
     }
 
     auditVariation(
@@ -87,22 +89,23 @@ class VariationAuditService @Inject()(auditConnector: AuditConnector)(implicit e
     )
   }
 
-  def auditTransformationError(internalId: String,
-                               utr: String,
-                               data: JsValue = Json.obj(),
-                               transforms: JsValue,
-                               errorReason: String = "",
-                               jsErrors: JsValue = Json.obj()
-                                       )(implicit hc: HeaderCarrier): Unit = {
+  def auditTransformationError(
+    internalId: String,
+    utr: String,
+    data: JsValue = Json.obj(),
+    transforms: JsValue,
+    errorReason: String = "",
+    jsErrors: JsValue = Json.obj()
+  )(implicit hc: HeaderCarrier): Unit = {
     val request = Json.obj(
-      "utr" -> utr,
-      "data" -> data,
+      "utr"             -> utr,
+      "data"            -> data,
       "transformations" -> transforms
     )
 
     val response = Json.obj(
       "errorReason" -> errorReason,
-      "jsErrors" -> jsErrors
+      "jsErrors"    -> jsErrors
     )
 
     audit(
@@ -112,6 +115,5 @@ class VariationAuditService @Inject()(auditConnector: AuditConnector)(implicit e
       response = response
     )
   }
-
 
 }

@@ -30,27 +30,37 @@ import utils.Constants._
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class AmendBeneficiaryController @Inject()(identify: IdentifierAction,
-                                           transformationService: TransformationService,
-                                           localDateService: LocalDateService)
-                                          (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AmendTransformationController(identify, transformationService) with BeneficiaryController {
+class AmendBeneficiaryController @Inject() (
+  identify: IdentifierAction,
+  transformationService: TransformationService,
+  localDateService: LocalDateService
+)(implicit ec: ExecutionContext, cc: ControllerComponents)
+    extends AmendTransformationController(identify, transformationService) with BeneficiaryController {
 
-  def amendUnidentified(identifier: String, index: Int): Action[JsValue] = addNewTransform[String](identifier, Some(index), UNIDENTIFIED_BENEFICIARY)
+  def amendUnidentified(identifier: String, index: Int): Action[JsValue] =
+    addNewTransform[String](identifier, Some(index), UNIDENTIFIED_BENEFICIARY)
 
-  def amendIndividual(identifier: String, index: Int): Action[JsValue] = addNewTransform[IndividualDetailsType](identifier, Some(index), INDIVIDUAL_BENEFICIARY)
+  def amendIndividual(identifier: String, index: Int): Action[JsValue] =
+    addNewTransform[IndividualDetailsType](identifier, Some(index), INDIVIDUAL_BENEFICIARY)
 
-  def amendCharity(identifier: String, index: Int): Action[JsValue] = addNewTransform[BeneficiaryCharityType](identifier, Some(index), CHARITY_BENEFICIARY)
+  def amendCharity(identifier: String, index: Int): Action[JsValue] =
+    addNewTransform[BeneficiaryCharityType](identifier, Some(index), CHARITY_BENEFICIARY)
 
-  def amendOther(identifier: String, index: Int): Action[JsValue] = addNewTransform[OtherType](identifier, Some(index), OTHER_BENEFICIARY)
+  def amendOther(identifier: String, index: Int): Action[JsValue] =
+    addNewTransform[OtherType](identifier, Some(index), OTHER_BENEFICIARY)
 
-  def amendCompany(identifier: String, index: Int): Action[JsValue] = addNewTransform[BeneficiaryCompanyType](identifier, Some(index), COMPANY_BENEFICIARY)
+  def amendCompany(identifier: String, index: Int): Action[JsValue] =
+    addNewTransform[BeneficiaryCompanyType](identifier, Some(index), COMPANY_BENEFICIARY)
 
-  def amendTrust(identifier: String, index: Int): Action[JsValue] = addNewTransform[BeneficiaryTrustType](identifier, Some(index), TRUST_BENEFICIARY)
+  def amendTrust(identifier: String, index: Int): Action[JsValue] =
+    addNewTransform[BeneficiaryTrustType](identifier, Some(index), TRUST_BENEFICIARY)
 
-  def amendLarge(identifier: String, index: Int): Action[JsValue] = addNewTransform[LargeType](identifier, Some(index), LARGE_BENEFICIARY)
+  def amendLarge(identifier: String, index: Int): Action[JsValue] =
+    addNewTransform[LargeType](identifier, Some(index), LARGE_BENEFICIARY)
 
-  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(
+    implicit wts: Writes[T]
+  ): DeltaTransform =
     AmendBeneficiaryTransform(index, Json.toJson(amended), original, localDateService.now, `type`)
-  }
+
 }

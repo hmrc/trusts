@@ -29,35 +29,35 @@ import utils.WireMockHelper
 
 class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationPatience {
 
-  override def applicationBuilder(): GuiceApplicationBuilder = {
-    super.applicationBuilder()
+  override def applicationBuilder(): GuiceApplicationBuilder =
+    super
+      .applicationBuilder()
       .configure(
         Seq(
-          "microservice.services.registration.port" -> server.port(),
-          "microservice.services.subscription.port" -> server.port(),
-          "microservice.services.playback.port" -> server.port(),
-          "microservice.services.variation.port" -> server.port(),
-          "microservice.services.tax-enrolments.port" -> server.port(),
+          "microservice.services.registration.port"             -> server.port(),
+          "microservice.services.subscription.port"             -> server.port(),
+          "microservice.services.playback.port"                 -> server.port(),
+          "microservice.services.variation.port"                -> server.port(),
+          "microservice.services.tax-enrolments.port"           -> server.port(),
           "microservice.services.tax-enrolments-migration.port" -> server.port(),
-          "microservice.services.orchestrator.port" -> server.port(),
-          "microservice.services.non-repudiation.port" -> server.port(),
+          "microservice.services.orchestrator.port"             -> server.port(),
+          "microservice.services.non-repudiation.port"          -> server.port(),
 
           "microservice.services.tax-enrolments.non-taxable.serviceName" -> "serviceNameNonTaxable",
-          "microservice.services.tax-enrolments.non-taxable.callback" ->
+          "microservice.services.tax-enrolments.non-taxable.callback"    ->
             "http://localhost:9782/trusts/tax-enrolment/registration/non-taxable/hmrc-tersnt-org/:trn/subscriptions",
 
           "microservice.services.tax-enrolments.taxable.serviceName" -> "serviceNameTaxable",
-          "microservice.services.tax-enrolments.taxable.callback" ->
+          "microservice.services.tax-enrolments.taxable.callback"    ->
             "http://localhost:9782/trusts/tax-enrolment/registration/taxable/hmrc-ters-org/:trn/subscriptions",
 
           "microservice.services.tax-enrolments-migration.to-taxable.serviceName" -> "HMRC-TERS-ORG",
-          "microservice.services.tax-enrolments-migration.to-taxable.callback" ->
+          "microservice.services.tax-enrolments-migration.to-taxable.callback"    ->
             "http://localhost:9782/trusts/tax-enrolment/migration-to-taxable/urn/:urn/subscriptionId/:subscriptionId"
-        ): _*)
-  }
+        ): _*
+      )
 
-  val jsonResponse400: JsValue = Json.parse(
-    s"""
+  val jsonResponse400: JsValue = Json.parse(s"""
        |{
        | "code": "INVALID_PAYLOAD",
        | "reason": "Submission has not passed validation. Invalid Payload."
@@ -76,50 +76,44 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
      """.stripMargin
   )
 
-  val jsonResponseAlreadyRegistered: JsValue = Json.parse(
-    s"""
+  val jsonResponseAlreadyRegistered: JsValue = Json.parse(s"""
        |{
        | "code": "ALREADY_REGISTERED",
        | "reason": "Trust/ Estate is already registered."
        |}""".stripMargin)
 
-  val jsonResponse403NoMatch: JsValue = Json.parse(
-    s"""
+  val jsonResponse403NoMatch: JsValue = Json.parse(s"""
        |{
        | "code": "NO_MATCH",
        | "reason": "There is no match in HMRC records."
        |}""".stripMargin)
 
-  val jsonResponse503: JsValue = Json.parse(
-    s"""
+  val jsonResponse503: JsValue = Json.parse(s"""
        |{
        | "code": "SERVICE_UNAVAILABLE",
        | "reason": "Dependent systems are currently not responding"
        |}""".stripMargin)
 
-  val jsonResponse500: JsValue = Json.parse(
-    s"""
+  val jsonResponse500: JsValue = Json.parse(s"""
        |{
        | "code": "SERVER_ERROR",
        | "reason": "DES is currently experiencing problems that require live service intervention"
        |}""".stripMargin)
 
-  //subscription id
-  val jsonResponse400GetSubscriptionId: JsValue = Json.parse(
-    s"""
+  // subscription id
+  val jsonResponse400GetSubscriptionId: JsValue = Json.parse(s"""
        |{
        | "code": "INVALID_TRN",
        | "reason": "Submission has not passed validation. Invalid parameter TRN."
        |}""".stripMargin)
 
-  val jsonResponse404GetSubscriptionId: JsValue = Json.parse(
-    s"""
+  val jsonResponse404GetSubscriptionId: JsValue = Json.parse(s"""
        |{
        | "code": "NOT_FOUND",
        | "reason": "The remote endpoint has indicated that no data can be found for given TRN."
        |}""".stripMargin)
 
-  //get trust
+  // get trust
 
   val jsonResponse400InvalidUTR: JsValue = Json.parse(
     s"""
@@ -130,7 +124,6 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
      """.stripMargin
   )
 
-
   val jsonResponse400InvalidRegime: JsValue = Json.parse(
     s"""
        |{
@@ -140,126 +133,147 @@ class ConnectorSpecHelper extends BaseSpec with WireMockHelper with IntegrationP
      """.stripMargin
   )
 
-  val jsonResponse409DuplicateCorrelation: JsValue = Json.parse(
-    s"""
+  val jsonResponse409DuplicateCorrelation: JsValue = Json.parse(s"""
        |{
        | "code": "DUPLICATE_SUBMISSION",
        | "reason": "Duplicate Correlation Id was submitted."
        |}""".stripMargin)
 
-
-  val jsonResponse400CorrelationId: JsValue = Json.parse(
-    s"""
+  val jsonResponse400CorrelationId: JsValue = Json.parse(s"""
        |{
        | "code": "INVALID_CORRELATIONID",
        | "reason": "Submission has not passed validation. Invalid CorrelationId."
        |}""".stripMargin)
 
-  val jsonResponse204: JsValue = Json.parse(
-    s"""
+  val jsonResponse204: JsValue = Json.parse(s"""
        |{
        | "code": "NO_CONTENT",
        | "reason": "No Content."
        |}""".stripMargin)
 
+  def stubForPost(
+    server: WireMockServer,
+    url: String,
+    requestBody: String,
+    returnStatus: Int,
+    responseBody: String,
+    delayResponse: Int = 0
+  ) =
 
-  def stubForPost(server: WireMockServer,
-                  url: String,
-                  requestBody: String,
-                  returnStatus: Int,
-                  responseBody: String,
-                  delayResponse: Int = 0) = {
+    server.stubFor(
+      post(urlEqualTo(url))
+        .withHeader(CONTENT_TYPE, containing("application/json"))
+        .withHeader("Environment", containing("dev"))
+        .withRequestBody(equalTo(requestBody))
+        .willReturn(
+          aResponse()
+            .withStatus(returnStatus)
+            .withBody(responseBody)
+            .withFixedDelay(delayResponse)
+        )
+    )
 
-    server.stubFor(post(urlEqualTo(url))
-      .withHeader(CONTENT_TYPE, containing("application/json"))
-      .withHeader("Environment", containing("dev"))
-      .withRequestBody(equalTo(requestBody))
-      .willReturn(
-        aResponse()
-          .withStatus(returnStatus)
-          .withBody(responseBody).withFixedDelay(delayResponse)))
-  }
-
-  def stubNRSPost(server: WireMockServer,
-                  url: String,
-                  requestBody: String,
-                  returnStatus: Int,
-                  responseBody: Option[String] = None,
-                  delayResponse: Int = 0) = {
+  def stubNRSPost(
+    server: WireMockServer,
+    url: String,
+    requestBody: String,
+    returnStatus: Int,
+    responseBody: Option[String] = None,
+    delayResponse: Int = 0
+  ) =
 
     responseBody match {
       case Some(value) =>
-        server.stubFor(post(urlEqualTo(url))
-          .withHeader(CONTENT_TYPE, containing("application/json"))
-          .withHeader(X_API_KEY, containing(appConfig.xApiKey))
-          .withRequestBody(equalTo(requestBody))
-          .willReturn(
-            aResponse()
-              .withStatus(returnStatus)
-              .withBody(value)
-              .withFixedDelay(delayResponse)))
-      case _ =>
-        server.stubFor(post(urlEqualTo(url))
-          .withHeader(CONTENT_TYPE, containing("application/json"))
-          .withHeader(X_API_KEY, containing(appConfig.xApiKey))
-          .withRequestBody(equalTo(requestBody))
-          .willReturn(
-            aResponse()
-              .withStatus(returnStatus)
-              .withFixedDelay(delayResponse)))
+        server.stubFor(
+          post(urlEqualTo(url))
+            .withHeader(CONTENT_TYPE, containing("application/json"))
+            .withHeader(X_API_KEY, containing(appConfig.xApiKey))
+            .withRequestBody(equalTo(requestBody))
+            .willReturn(
+              aResponse()
+                .withStatus(returnStatus)
+                .withBody(value)
+                .withFixedDelay(delayResponse)
+            )
+        )
+      case _           =>
+        server.stubFor(
+          post(urlEqualTo(url))
+            .withHeader(CONTENT_TYPE, containing("application/json"))
+            .withHeader(X_API_KEY, containing(appConfig.xApiKey))
+            .withRequestBody(equalTo(requestBody))
+            .willReturn(
+              aResponse()
+                .withStatus(returnStatus)
+                .withFixedDelay(delayResponse)
+            )
+        )
     }
-  }
 
-  def stubForHeaderlessPost(server: WireMockServer,
-                            url: String,
-                            requestBody: String,
-                            returnStatus: Int,
-                            responseBody: String,
-                            delayResponse: Int = 0) = {
+  def stubForHeaderlessPost(
+    server: WireMockServer,
+    url: String,
+    requestBody: String,
+    returnStatus: Int,
+    responseBody: String,
+    delayResponse: Int = 0
+  ) =
 
-    server.stubFor(post(urlEqualTo(url))
-      .withRequestBody(equalTo(requestBody))
-      .willReturn(
-        aResponse()
-          .withStatus(returnStatus)
-          .withBody(responseBody).withFixedDelay(delayResponse)))
-  }
+    server.stubFor(
+      post(urlEqualTo(url))
+        .withRequestBody(equalTo(requestBody))
+        .willReturn(
+          aResponse()
+            .withStatus(returnStatus)
+            .withBody(responseBody)
+            .withFixedDelay(delayResponse)
+        )
+    )
 
+  def stubForGet(
+    server: WireMockServer,
+    url: String,
+    returnStatus: Int,
+    responseBody: String,
+    delayResponse: Int = 0
+  ): StubMapping =
+    server.stubFor(
+      get(urlEqualTo(url))
+        .withHeader("content-Type", containing("application/json"))
+        .willReturn(
+          aResponse()
+            .withStatus(returnStatus)
+            .withBody(responseBody)
+            .withFixedDelay(delayResponse)
+        )
+    )
 
-  def stubForGet(server: WireMockServer,
-                 url: String, returnStatus: Int,
-                 responseBody: String,
-                 delayResponse: Int = 0): StubMapping = {
-    server.stubFor(get(urlEqualTo(url))
-      .withHeader("content-Type", containing("application/json"))
-      .willReturn(
-        aResponse()
-          .withStatus(returnStatus)
-          .withBody(responseBody).withFixedDelay(delayResponse)))
-  }
+  def stubForHeaderlessGet(
+    server: WireMockServer,
+    url: String,
+    returnStatus: Int,
+    responseBody: String,
+    delayResponse: Int = 0
+  ): StubMapping =
+    server.stubFor(
+      get(urlEqualTo(url))
+        .willReturn(
+          aResponse()
+            .withStatus(returnStatus)
+            .withBody(responseBody)
+            .withFixedDelay(delayResponse)
+        )
+    )
 
-  def stubForHeaderlessGet(server: WireMockServer,
-                           url: String, returnStatus: Int,
-                           responseBody: String,
-                           delayResponse: Int = 0): StubMapping = {
-    server.stubFor(get(urlEqualTo(url))
-      .willReturn(
-        aResponse()
-          .withStatus(returnStatus)
-          .withBody(responseBody).withFixedDelay(delayResponse)))
-  }
-
-  def stubForPut(server: WireMockServer,
-                 url: String,
-                 returnStatus: Int,
-                 delayResponse: Int = 0): StubMapping = {
-    server.stubFor(put(urlEqualTo(url))
-      .withHeader("content-Type", containing("application/json"))
-      .willReturn(
-        aResponse()
-          .withStatus(returnStatus)
-          .withFixedDelay(delayResponse)))
-  }
-
+  def stubForPut(server: WireMockServer, url: String, returnStatus: Int, delayResponse: Int = 0): StubMapping =
+    server.stubFor(
+      put(urlEqualTo(url))
+        .withHeader("content-Type", containing("application/json"))
+        .willReturn(
+          aResponse()
+            .withStatus(returnStatus)
+            .withFixedDelay(delayResponse)
+        )
+    )
 
 }

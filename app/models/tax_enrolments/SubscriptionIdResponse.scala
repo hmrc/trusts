@@ -32,25 +32,23 @@ object SubscriptionIdResponse extends Logging {
 
   implicit lazy val httpReads: HttpReads[SubscriptionIdResponse] =
     new HttpReads[SubscriptionIdResponse] {
-      override def read(method: String, url: String, response: HttpResponse): SubscriptionIdResponse = {
+      override def read(method: String, url: String, response: HttpResponse): SubscriptionIdResponse =
         response.status match {
-          case OK =>
+          case OK                  =>
             response.json.as[SubscriptionIdSuccessResponse]
-          case BAD_REQUEST =>
+          case BAD_REQUEST         =>
             logger.error(s"[SubscriptionIdResponse][httpReads] Bad Request response from des")
             SubscriptionIdFailureResponse("Bad request")
-          case NOT_FOUND =>
+          case NOT_FOUND           =>
             logger.error(s"[SubscriptionIdResponse][httpReads] Not found response from des")
             SubscriptionIdFailureResponse("Not found")
           case SERVICE_UNAVAILABLE =>
             logger.error("[SubscriptionIdResponse][httpReads] Service unavailable response from des.")
             SubscriptionIdFailureResponse("Des dependent service is down.")
-          case status =>
+          case status              =>
             logger.error(s"[SubscriptionIdResponse][httpReads] Error response from des : $status")
             SubscriptionIdFailureResponse(s"Error response from des $status")
         }
-      }
     }
-
 
 }

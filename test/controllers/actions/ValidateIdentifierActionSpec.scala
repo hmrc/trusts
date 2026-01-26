@@ -39,30 +39,26 @@ class ValidateIdentifierActionSpec extends AnyWordSpec with MockitoSugar with Gu
     "provided a UTR" should {
 
       "accept a valid 10 digit UTR" in {
-        val action = createSUT("1234567890")
-        val response = action.invokeBlock[AnyContent](FakeRequest(GET, "/"),
-          _ => Future.successful(Ok))
+        val action   = createSUT("1234567890")
+        val response = action.invokeBlock[AnyContent](FakeRequest(GET, "/"), _ => Future.successful(Ok))
         await(response) mustBe Ok
       }
 
       "reject a UTR with less than 10 digits" in {
-        val action = createSUT("123456789")
-        val response = action.invokeBlock[AnyContent](FakeRequest(GET, "/"),
-          _ => Future.successful(Ok))
+        val action   = createSUT("123456789")
+        val response = action.invokeBlock[AnyContent](FakeRequest(GET, "/"), _ => Future.successful(Ok))
         await(response) mustBe BadRequest(Json.toJson(invalidUTRErrorResponse))
       }
 
       "reject a UTR with more than 10 digits" in {
-        val action = createSUT("12345678901")
-        val response = action.invokeBlock[AnyContent](FakeRequest(GET, "/"),
-          _ => Future.successful(Ok))
+        val action   = createSUT("12345678901")
+        val response = action.invokeBlock[AnyContent](FakeRequest(GET, "/"), _ => Future.successful(Ok))
         await(response) mustBe BadRequest(Json.toJson(invalidUTRErrorResponse))
       }
 
       "reject a UTR containing letters" in {
-        val action = createSUT("12345678AB")
-        val response = action.invokeBlock[AnyContent](FakeRequest(GET, "/"),
-          _ => Future.successful(Ok))
+        val action   = createSUT("12345678AB")
+        val response = action.invokeBlock[AnyContent](FakeRequest(GET, "/"), _ => Future.successful(Ok))
         await(response) mustBe BadRequest(Json.toJson(invalidUTRErrorResponse))
       }
     }
@@ -70,26 +66,24 @@ class ValidateIdentifierActionSpec extends AnyWordSpec with MockitoSugar with Gu
     "provided a URN" should {
 
       "accept a valid 15 character URN" in {
-        val action = createSUT("1234567827ACDEF")
-        val response = action.invokeBlock[AnyContent](FakeRequest(GET, "/"),
-          _ => Future.successful(Ok))
+        val action   = createSUT("1234567827ACDEF")
+        val response = action.invokeBlock[AnyContent](FakeRequest(GET, "/"), _ => Future.successful(Ok))
         await(response) mustBe Ok
       }
 
       "reject a URN with less than 15 characters" in {
-        val action = createSUT("1234567827ACDE")
-        val response = action.invokeBlock[AnyContent](FakeRequest(GET, "/"),
-          _ => Future.successful(Ok))
+        val action   = createSUT("1234567827ACDE")
+        val response = action.invokeBlock[AnyContent](FakeRequest(GET, "/"), _ => Future.successful(Ok))
         await(response) mustBe BadRequest(Json.toJson(invalidUTRErrorResponse))
       }
 
       "reject a URN with more than 15 characters" in {
-        val action = createSUT("1234567827ACDEFC")
-        val response = action.invokeBlock[AnyContent](FakeRequest(GET, "/"),
-          _ => Future.successful(Ok))
+        val action   = createSUT("1234567827ACDEFC")
+        val response = action.invokeBlock[AnyContent](FakeRequest(GET, "/"), _ => Future.successful(Ok))
         await(response) mustBe BadRequest(Json.toJson(invalidUTRErrorResponse))
       }
     }
 
   }
+
 }
