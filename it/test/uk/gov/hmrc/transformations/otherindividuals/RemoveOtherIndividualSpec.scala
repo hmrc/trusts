@@ -46,29 +46,33 @@ class RemoveOtherIndividualSpec extends IntegrationTestBase {
       .getJsonValueFromFile("trusts-etmp-received-multiple-otherIndividuals.json")
 
     when(stubbedTrustsConnector.getTrustInfo(any()))
-      .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse.as[GetTrustSuccessResponse]))))
+      .thenReturn(
+        EitherT[Future, TrustErrors, GetTrustResponse](
+          Future.successful(Right(getTrustResponse.as[GetTrustSuccessResponse]))
+        )
+      )
 
     def application = applicationBuilder
       .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[IdentifierAction]
+          .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(stubbedTrustsConnector)
       )
       .build()
 
-    "return amended data in a subsequent 'get' call, for identifier '5174384721'" in assertMongoTest(application)({ (app) =>
+    "return amended data in a subsequent 'get' call, for identifier '5174384721'" in assertMongoTest(application)(app =>
       runTest("5174384721", app)
-    })
+    )
 
-    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application)({ (app) =>
-      runTest("0123456789ABCDE", app)
-    })
+    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application)(
+      app => runTest("0123456789ABCDE", app)
+    )
 
     def runTest(identifier: String, application: Application): Assertion = {
       val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
       status(result) mustBe OK
 
-      val removeOtherIndividualAtIndex = Json.parse(
-        """
+      val removeOtherIndividualAtIndex = Json.parse("""
           |{
           |	"index": 0,
           |	"endDate": "2010-10-10"
@@ -86,8 +90,7 @@ class RemoveOtherIndividualSpec extends IntegrationTestBase {
       status(newResult) mustBe OK
 
       val otherIndividuals = (contentAsJson(newResult) \ "naturalPerson").as[JsArray]
-      otherIndividuals mustBe Json.parse(
-        """
+      otherIndividuals mustBe Json.parse("""
           |[
           | {
           |   "lineNo": "2",
@@ -107,4 +110,5 @@ class RemoveOtherIndividualSpec extends IntegrationTestBase {
           |""".stripMargin)
     }
   }
+
 }

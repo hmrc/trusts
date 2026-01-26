@@ -74,7 +74,8 @@ class AddLargeBeneficiarySpec extends IntegrationTestBase {
 
     def application = applicationBuilder
       .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[IdentifierAction]
+          .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(stubbedTrustsConnector)
       )
       .build()
@@ -83,13 +84,14 @@ class AddLargeBeneficiarySpec extends IntegrationTestBase {
       runTest("5174384721", app)
     }
 
-    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) { app =>
-      runTest("0123456789ABCDE", app)
+    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) {
+      app =>
+        runTest("0123456789ABCDE", app)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {
       val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
-      status(result) mustBe OK
+      status(result)        mustBe OK
       contentAsJson(result) mustBe expectedInitialGetJson
 
       val addRequest = FakeRequest(POST, s"/trusts/beneficiaries/add-large/$identifier")
@@ -100,9 +102,9 @@ class AddLargeBeneficiarySpec extends IntegrationTestBase {
       status(addResult) mustBe OK
 
       val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
-      status(newResult) mustBe OK
+      status(newResult)        mustBe OK
       contentAsJson(newResult) mustBe expectedGetAfterAddBeneficiaryJson
     }
   }
-}
 
+}

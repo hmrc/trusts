@@ -47,7 +47,7 @@ class AddBusinessSettlorSpec extends IntegrationTestBase {
     JsonUtils.getJsonValueFromFile("it/trusts-integration-get-initial.json")
 
   "an add business settlor call" should {
-    val newCompanySettlorJson = (
+    val newCompanySettlorJson =
       """
         |{
         |  "companyTime": false,
@@ -59,7 +59,6 @@ class AddBusinessSettlorSpec extends IntegrationTestBase {
         |  "name": "Test"
         |}
         |""".stripMargin
-      )
 
     lazy val expectedGetAfterAddSettlorJson: JsValue =
       JsonUtils.getJsonValueFromFile("add-business-settlor-after-etmp-call.json")
@@ -70,7 +69,8 @@ class AddBusinessSettlorSpec extends IntegrationTestBase {
 
     def application = applicationBuilder
       .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[IdentifierAction]
+          .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(stubbedTrustsConnector)
       )
       .build()
@@ -82,11 +82,15 @@ class AddBusinessSettlorSpec extends IntegrationTestBase {
       await(repository.ensureIndexes())
     }
 
-    "return add data in a subsequent 'get' call with a UTR, for identifier '5465416546'" in assertMongoTest(application) { app =>
+    "return add data in a subsequent 'get' call with a UTR, for identifier '5465416546'" in assertMongoTest(
+      application
+    ) { app =>
       runTest("5465416546", application)
     }
 
-    "return add data in a subsequent 'get' call with a URN, for identifier '0123456789ABCDE'" in assertMongoTest(application) { app =>
+    "return add data in a subsequent 'get' call with a URN, for identifier '0123456789ABCDE'" in assertMongoTest(
+      application
+    ) { app =>
       runTest("0123456789ABCDE", app)
     }
 
@@ -94,7 +98,7 @@ class AddBusinessSettlorSpec extends IntegrationTestBase {
       dropDB()
 
       val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
-      status(result) mustBe OK
+      status(result)        mustBe OK
       contentAsJson(result) mustBe expectedInitialGetJson
 
       val addRequest = FakeRequest(POST, s"/trusts/settlors/add-business/$identifier")
@@ -105,8 +109,9 @@ class AddBusinessSettlorSpec extends IntegrationTestBase {
       status(addResult) mustBe OK
 
       val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
-      status(newResult) mustBe OK
+      status(newResult)        mustBe OK
       contentAsJson(newResult) mustBe expectedGetAfterAddSettlorJson
     }
   }
+
 }
