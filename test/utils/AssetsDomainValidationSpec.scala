@@ -26,12 +26,11 @@ class AssetsDomainValidationSpec extends BaseSpec with DataExamples {
   "valueFullIsNotMoreThanValueValuePrevious" should {
     "return validation error when value full is more than value previous in property and land asset " in {
       val heritageFundTrust = heritageFundWithValues(valueFull = "999999999998")
-      val response = SUT(heritageFundTrust).valueFullIsNotMoreThanValuePrevious
+      val response          = SUT(heritageFundTrust).valueFullIsNotMoreThanValuePrevious
       response.flatten.size mustBe 1
-      response.flatten.zipWithIndex.map {
-        case (error, index) =>
-          error.message mustBe "Value full must be equal or more than value previous."
-          error.location mustBe s"/trust/assets/propertyOrLand/$index/valueFull"
+      response.flatten.zipWithIndex.map { case (error, index) =>
+        error.message  mustBe "Value full must be equal or more than value previous."
+        error.location mustBe s"/trust/assets/propertyOrLand/$index/valueFull"
       }
 
       BusinessValidation.check(heritageFundTrust).size mustBe 1
@@ -39,8 +38,8 @@ class AssetsDomainValidationSpec extends BaseSpec with DataExamples {
 
     "return none when value full is same as value previous in property and land asset " in {
       val heritageFundTrust = heritageFundWithValues(valueFull = "999999999999")
-      val response = SUT(heritageFundTrust).valueFullIsNotMoreThanValuePrevious
-      response.flatten mustBe empty
+      val response          = SUT(heritageFundTrust).valueFullIsNotMoreThanValuePrevious
+      response.flatten                            mustBe empty
       BusinessValidation.check(heritageFundTrust) mustBe empty
     }
   }

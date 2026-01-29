@@ -23,6 +23,6 @@ trait AssetTransform {
   val `type`: String
   val path: JsPath = TRUST \ ASSETS \ `type`
 
-  def isNonEeaBusiness: Boolean = `type` == NON_EEA_BUSINESS_ASSET
+  def isNonEeaBusiness: Boolean          = `type` == NON_EEA_BUSINESS_ASSET
   val nonEeaBusinessEndDateField: String = "endDate"
 }

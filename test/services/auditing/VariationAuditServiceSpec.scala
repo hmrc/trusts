@@ -33,7 +33,7 @@ class VariationAuditServiceSpec extends BaseSpec {
     "send Variation Submitted by Organisation" when {
       "there are no special JSON fields" in {
         val connector = mock[AuditConnector]
-        val service = new VariationAuditService(connector)
+        val service   = new VariationAuditService(connector)
 
         val request = Json.obj()
 
@@ -50,14 +50,15 @@ class VariationAuditServiceSpec extends BaseSpec {
 
         verify(connector).sendExplicitAudit[VariationAuditEvent](
           equalTo("VariationSubmittedByOrganisation"),
-          equalTo(expectedAuditData))(any(), any(), any())
+          equalTo(expectedAuditData)
+        )(any(), any(), any())
       }
     }
 
     "send Variation Submitted by Agent" when {
       "there is an AgentDetails JSON field" in {
         val connector = mock[AuditConnector]
-        val service = new VariationAuditService(connector)
+        val service   = new VariationAuditService(connector)
 
         val request = Json.obj(
           "agentDetails" -> Json.obj() // Doesn't care about contents of object
@@ -75,18 +76,19 @@ class VariationAuditServiceSpec extends BaseSpec {
 
         verify(connector).sendExplicitAudit[VariationAuditEvent](
           equalTo("VariationSubmittedByAgent"),
-          equalTo(expectedAuditData))(any(), any(), any())
+          equalTo(expectedAuditData)
+        )(any(), any(), any())
       }
     }
 
     "send Closure Submitted by Organisation" when {
       "there is an endTrustDate field" in {
         val connector = mock[AuditConnector]
-        val service = new VariationAuditService(connector)
+        val service   = new VariationAuditService(connector)
 
         val request = Json.obj(
           "trustEndDate" -> "2012-02-12",
-          "details" -> Json.obj(
+          "details"      -> Json.obj(
             "trust" -> Json.obj(
               "details" -> Json.obj(
                 "trustTaxable" -> true
@@ -96,11 +98,16 @@ class VariationAuditServiceSpec extends BaseSpec {
         )
 
         val response = Json.obj(
-          "tvn" -> "TRN123456",
+          "tvn"          -> "TRN123456",
           "trustTaxable" -> true
         )
 
-        service.auditVariationSuccess("internalId", migrateToTaxable = false, request, VariationSuccessResponse("TRN123456"))
+        service.auditVariationSuccess(
+          "internalId",
+          migrateToTaxable = false,
+          request,
+          VariationSuccessResponse("TRN123456")
+        )
 
         val expectedAuditData = VariationAuditEvent(
           request = request,
@@ -111,19 +118,20 @@ class VariationAuditServiceSpec extends BaseSpec {
 
         verify(connector).sendExplicitAudit[VariationAuditEvent](
           equalTo("ClosureSubmittedByOrganisation"),
-          equalTo(expectedAuditData))(any(), any(), any())
+          equalTo(expectedAuditData)
+        )(any(), any(), any())
       }
     }
 
     "send Closure Submitted by Agent" when {
       "there are agentDetails and endTrustDate JSON fields" in {
         val connector = mock[AuditConnector]
-        val service = new VariationAuditService(connector)
+        val service   = new VariationAuditService(connector)
 
         val request = Json.obj(
           "trustEndDate" -> "2012-02-12",
           "agentDetails" -> Json.obj(), // Doesn't care about contents of object
-          "details" -> Json.obj(
+          "details"      -> Json.obj(
             "trust" -> Json.obj(
               "details" -> Json.obj(
                 "trustTaxable" -> false
@@ -133,11 +141,16 @@ class VariationAuditServiceSpec extends BaseSpec {
         )
 
         val response = Json.obj(
-          "tvn" -> "TRN123456",
+          "tvn"          -> "TRN123456",
           "trustTaxable" -> false
         )
 
-        service.auditVariationSuccess("internalId", migrateToTaxable = false, request, VariationSuccessResponse("TRN123456"))
+        service.auditVariationSuccess(
+          "internalId",
+          migrateToTaxable = false,
+          request,
+          VariationSuccessResponse("TRN123456")
+        )
 
         val expectedAuditData = VariationAuditEvent(
           request = request,
@@ -148,7 +161,8 @@ class VariationAuditServiceSpec extends BaseSpec {
 
         verify(connector).sendExplicitAudit[VariationAuditEvent](
           equalTo("ClosureSubmittedByAgent"),
-          equalTo(expectedAuditData))(any(), any(), any())
+          equalTo(expectedAuditData)
+        )(any(), any(), any())
       }
     }
   }

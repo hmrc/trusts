@@ -49,30 +49,34 @@ trait RegistrationSubmissionRepository {
 
 }
 
-class RegistrationSubmissionRepositoryImpl @Inject()(
-                                                      mongoComponent: MongoComponent,
-                                                      config: AppConfig
-                                                    )(implicit ec: ExecutionContext) extends
-  PlayMongoRepository[RegistrationSubmissionDraftDB](
-    mongoComponent = mongoComponent,
-    collectionName = "registration-submissions",
-    domainFormat = Format(RegistrationSubmissionDraftDB.reads, RegistrationSubmissionDraftDB.writes),
-    indexes = Seq(
-      IndexModel(
-        Indexes.ascending("createdAt"),
-        IndexOptions().name("ui-state-created-at-index").expireAfter(config.registrationTtlInSeconds, TimeUnit.SECONDS)
+class RegistrationSubmissionRepositoryImpl @Inject() (
+  mongoComponent: MongoComponent,
+  config: AppConfig
+)(implicit ec: ExecutionContext)
+    extends PlayMongoRepository[RegistrationSubmissionDraftDB](
+      mongoComponent = mongoComponent,
+      collectionName = "registration-submissions",
+      domainFormat = Format(RegistrationSubmissionDraftDB.reads, RegistrationSubmissionDraftDB.writes),
+      indexes = Seq(
+        IndexModel(
+          Indexes.ascending("createdAt"),
+          IndexOptions()
+            .name("ui-state-created-at-index")
+            .expireAfter(config.registrationTtlInSeconds, TimeUnit.SECONDS)
+        ),
+        IndexModel(
+          Indexes.ascending("draftId"),
+          IndexOptions().name("draft-id-index")
+        ),
+        IndexModel(
+          Indexes.ascending("internalId"),
+          IndexOptions().name("internal-id-index")
+        )
       ),
-      IndexModel(
-        Indexes.ascending("draftId"),
-        IndexOptions().name("draft-id-index")
-      ),
-      IndexModel(
-        Indexes.ascending("internalId"),
-        IndexOptions().name("internal-id-index")
-      )
-    ),
-    replaceIndexes = config.dropIndexesEnabled
-  ) with RegistrationSubmissionRepository with Logging {
+      replaceIndexes = config.dropIndexesEnabled
+    )
+    with RegistrationSubmissionRepository
+    with Logging {
 
   val className = this.getClass.getSimpleName
 
@@ -85,22 +89,24 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
 
     val updateOptions = new ReplaceOptions().upsert(true)
 
-    collection.replaceOne(selector, convertToDBModel(uiState), updateOptions)
+    collection
+      .replaceOne(selector, convertToDBModel(uiState), updateOptions)
       .toFutureOption()
       .map {
         case Some(_) => Right(true)
-        case None => Right(false)
-      }.recover {
+        case None    => Right(false)
+      }
+      .recover {
         case e: MongoException =>
           logger.error(s"[$className][setDraft] failed to update $collectionName ${e.getMessage}")
           Left(ServerError(e.getMessage))
-        case e: Exception =>
+        case e: Exception      =>
           logger.error(s"[$className][setDraft] $collectionName ${e.getMessage}")
           Left(ServerError(e.getMessage))
       }
   }
 
-  private def convertToDBModel(ogModel: RegistrationSubmissionDraft): RegistrationSubmissionDraftDB = {
+  private def convertToDBModel(ogModel: RegistrationSubmissionDraft): RegistrationSubmissionDraftDB =
     RegistrationSubmissionDraftDB(
       draftId = ogModel.draftId,
       internalId = ogModel.internalId,
@@ -109,28 +115,33 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
       reference = ogModel.reference,
       inProgress = ogModel.inProgress
     )
-  }
 
-  override def getDraft(draftId: String, internalId: String): TrustEnvelope[Option[RegistrationSubmissionDraft]] = EitherT {
-    val selector = and(
-      equal("draftId", draftId),
-      equal("internalId", internalId)
-    )
+  override def getDraft(draftId: String, internalId: String): TrustEnvelope[Option[RegistrationSubmissionDraft]] =
+    EitherT {
+      val selector = and(
+        equal("draftId", draftId),
+        equal("internalId", internalId)
+      )
 
-    collection.find(selector).first()
-      .toFutureOption()
-      .map(optDraft => Right(optDraft.map(convertFromDBModel))
-      ).recover {
-        case e: MongoException =>
-          logger.error(s"[$className][getDraft] failed to fetch from $collectionName ${e.getMessage}")
-          Left(ServerError(e.getMessage))
-        case e: Exception =>
-          logger.error(s"[$className][getDraft] $collectionName ${e.getMessage}")
-          Left(ServerError(e.getMessage))
-      }
-  }
+      collection
+        .find(selector)
+        .first()
+        .toFutureOption()
+        .map(optDraft => Right(optDraft.map(convertFromDBModel)))
+        .recover {
+          case e: MongoException =>
+            logger.error(s"[$className][getDraft] failed to fetch from $collectionName ${e.getMessage}")
+            Left(ServerError(e.getMessage))
+          case e: Exception      =>
+            logger.error(s"[$className][getDraft] $collectionName ${e.getMessage}")
+            Left(ServerError(e.getMessage))
+        }
+    }
 
-  override def getRecentDrafts(internalId: String, affinityGroup: AffinityGroup): TrustEnvelope[Seq[RegistrationSubmissionDraft]] = EitherT {
+  override def getRecentDrafts(
+    internalId: String,
+    affinityGroup: AffinityGroup
+  ): TrustEnvelope[Seq[RegistrationSubmissionDraft]] = EitherT {
     val maxDocs = if (affinityGroup == Organisation) 1 else Short.MaxValue.toInt
 
     val selector = and(
@@ -140,21 +151,24 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
 
     val sort = Sorts.descending("createdAt")
 
-    collection.find(selector).sort(sort).limit(maxDocs)
+    collection
+      .find(selector)
+      .sort(sort)
+      .limit(maxDocs)
       .toFuture()
-      .map { seq => Right(seq.map(convertFromDBModel))
-      }.recover {
+      .map(seq => Right(seq.map(convertFromDBModel)))
+      .recover {
         case e: MongoException =>
           logger.error(s"[$className][getRecentDrafts] failed to fetch from $collectionName ${e.getMessage}")
           Left(ServerError(e.getMessage))
-        case e: Exception =>
+        case e: Exception      =>
           logger.error(s"[$className][getRecentDrafts] $collectionName ${e.getMessage}")
           Left(ServerError(e.getMessage))
       }
 
   }
 
-  private def convertFromDBModel(dbModel: RegistrationSubmissionDraftDB): RegistrationSubmissionDraft = {
+  private def convertFromDBModel(dbModel: RegistrationSubmissionDraftDB): RegistrationSubmissionDraft =
     RegistrationSubmissionDraft(
       draftId = dbModel.draftId,
       internalId = dbModel.internalId,
@@ -163,21 +177,21 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
       reference = dbModel.reference,
       inProgress = dbModel.inProgress
     )
-  }
 
   override def removeDraft(draftId: String, internalId: String): TrustEnvelope[Boolean] = EitherT {
     val selector = and(
       equal("draftId", draftId),
       equal("internalId", internalId)
     )
-    collection.deleteOne(selector)
+    collection
+      .deleteOne(selector)
       .toFuture()
       .map(deleteResult => Right(deleteResult.wasAcknowledged()))
       .recover {
         case e: MongoException =>
           logger.error(s"[$className][removeDraft] failed to remove draft from $collectionName ${e.getMessage}")
           Left(ServerError(e.getMessage))
-        case e: Exception =>
+        case e: Exception      =>
           logger.error(s"[$className][removeDraft] $collectionName ${e.getMessage}")
           Left(ServerError(e.getMessage))
       }
@@ -189,16 +203,20 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
    */
   def removeAllDrafts(): TrustEnvelope[Boolean] = EitherT {
     if (config.removeSavedRegistrations) {
-      collection.deleteMany(empty())
+      collection
+        .deleteMany(empty())
         .toFuture()
         .map { deleteResult =>
           logger.info(s"[$className][removeAllDrafts] Removing all registration submissions.")
           Right(deleteResult.wasAcknowledged())
-        }.recover {
+        }
+        .recover {
           case e: MongoException =>
-            logger.error(s"[$className][removeAllDrafts] failed to removeAll drafts from $collectionName ${e.getMessage}")
+            logger.error(
+              s"[$className][removeAllDrafts] failed to removeAll drafts from $collectionName ${e.getMessage}"
+            )
             Left(ServerError(e.getMessage))
-          case e: Exception =>
+          case e: Exception      =>
             logger.error(s"[$className][removeAllDrafts] $collectionName ${e.getMessage}")
             Left(ServerError(e.getMessage))
         }
@@ -206,4 +224,5 @@ class RegistrationSubmissionRepositoryImpl @Inject()(
       Future.successful(Right(true))
     }
   }
+
 }

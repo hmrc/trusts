@@ -29,15 +29,19 @@ import transformers.otherindividuals.AmendOtherIndividualTransform
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class AmendOtherIndividualController @Inject()(identify: IdentifierAction,
-                                               transformationService: TransformationService,
-                                               localDateService: LocalDateService)
-                                              (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends AmendTransformationController(identify, transformationService) with OtherIndividualController {
+class AmendOtherIndividualController @Inject() (
+  identify: IdentifierAction,
+  transformationService: TransformationService,
+  localDateService: LocalDateService
+)(implicit ec: ExecutionContext, cc: ControllerComponents)
+    extends AmendTransformationController(identify, transformationService) with OtherIndividualController {
 
-  def amend(identifier: String, index: Int): Action[JsValue] = addNewTransform[NaturalPersonType](identifier, Some(index))
+  def amend(identifier: String, index: Int): Action[JsValue] =
+    addNewTransform[NaturalPersonType](identifier, Some(index))
 
-  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(implicit wts: Writes[T]): DeltaTransform = {
+  override def transform[T](original: JsValue, amended: T, index: Option[Int], `type`: String, isTaxable: Boolean)(
+    implicit wts: Writes[T]
+  ): DeltaTransform =
     AmendOtherIndividualTransform(index, Json.toJson(amended), original, localDateService.now)
-  }
+
 }

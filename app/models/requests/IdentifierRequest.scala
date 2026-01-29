@@ -22,11 +22,11 @@ import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, LoginTimes}
 
 case class CredentialData(
-                           groupIdentifier: Option[String],
-                           loginTimes: LoginTimes,
-                           provider: Option[Credentials],
-                           email: Option[String]
-                         )
+  groupIdentifier: Option[String],
+  loginTimes: LoginTimes,
+  provider: Option[Credentials],
+  email: Option[String]
+)
 
 object CredentialData {
 
@@ -43,19 +43,19 @@ object CredentialData {
   implicit val optionCredentialsWrites: Writes[Option[Credentials]] = {
     case Some(value) =>
       Json.toJson(value)
-    case None =>
+    case None        =>
       Json.obj(
-        "providerId" -> JsString("No provider id"),
+        "providerId"   -> JsString("No provider id"),
         "providerType" -> JsString("No provider type")
       )
   }
 
-  implicit private val credentialWrites : OWrites[CredentialData] = { o =>
+  implicit private val credentialWrites: OWrites[CredentialData] = { o =>
     Json.obj(
       "groupIdentifier" -> JsString(o.groupIdentifier.getOrElse("No group identifier")),
-      "loginTimes" -> Json.toJson(o.loginTimes),
-      "provider" -> Json.toJson(o.provider),
-      "email" -> JsString(o.email.getOrElse("No email"))
+      "loginTimes"      -> Json.toJson(o.loginTimes),
+      "provider"        -> Json.toJson(o.provider),
+      "email"           -> JsString(o.email.getOrElse("No email"))
     )
   }
 
@@ -63,10 +63,10 @@ object CredentialData {
 
 }
 
-case class IdentifierRequest[A](request: Request[A],
-                                internalId: String,
-                                sessionId: String,
-                                affinityGroup: AffinityGroup,
-                                credentialData: CredentialData
-                               )
-  extends WrappedRequest[A](request)
+case class IdentifierRequest[A](
+  request: Request[A],
+  internalId: String,
+  sessionId: String,
+  affinityGroup: AffinityGroup,
+  credentialData: CredentialData
+) extends WrappedRequest[A](request)

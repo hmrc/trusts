@@ -22,12 +22,14 @@ import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.Instant
 
-case class RegistrationSubmissionDraftDB(draftId: String,
-                                       internalId: String,
-                                       createdAt: Instant,
-                                       draftData: JsValue,
-                                       reference: Option[String],
-                                       inProgress: Option[Boolean])
+case class RegistrationSubmissionDraftDB(
+  draftId: String,
+  internalId: String,
+  createdAt: Instant,
+  draftData: JsValue,
+  reference: Option[String],
+  inProgress: Option[Boolean]
+)
 
 object RegistrationSubmissionDraftDB {
 
@@ -38,7 +40,7 @@ object RegistrationSubmissionDraftDB {
       (__ \ "draftData").read[JsValue] and
       (__ \ "reference").readNullable[String] and
       (__ \ "inProgress").readNullable[Boolean]
-    ) (RegistrationSubmissionDraftDB.apply _)
+  )(RegistrationSubmissionDraftDB.apply _)
 
   implicit lazy val writes: OWrites[RegistrationSubmissionDraftDB] = (
     (__ \ "draftId").write[String] and
@@ -47,5 +49,6 @@ object RegistrationSubmissionDraftDB {
       (__ \ "draftData").write[JsValue] and
       (__ \ "reference").writeNullable[String] and
       (__ \ "inProgress").writeNullable[Boolean]
-    ) (unlift(RegistrationSubmissionDraftDB.unapply))
+  )(unlift(RegistrationSubmissionDraftDB.unapply))
+
 }

@@ -20,9 +20,8 @@ import java.time.LocalDate
 
 import play.api.libs.json.{Format, Json}
 
-case class RemoveOtherIndividual(endDate: LocalDate,
-                                 index: Int) extends Remove
+case class RemoveOtherIndividual(endDate: LocalDate, index: Int) extends Remove
 
 object RemoveOtherIndividual {
-  implicit val formats : Format[RemoveOtherIndividual] = Json.format[RemoveOtherIndividual]
+  implicit val formats: Format[RemoveOtherIndividual] = Json.format[RemoveOtherIndividual]
 }

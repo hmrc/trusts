@@ -28,14 +28,15 @@ import transformers.trustees.RemoveTrusteeTransform
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class RemoveTrusteeController @Inject()(identify: IdentifierAction,
-                                        transformationService: TransformationService)
-                                       (implicit ec: ExecutionContext, cc: ControllerComponents)
-  extends RemoveTransformationController(identify, transformationService) with TrusteeController {
+class RemoveTrusteeController @Inject() (identify: IdentifierAction, transformationService: TransformationService)(
+  implicit
+  ec: ExecutionContext,
+  cc: ControllerComponents
+) extends RemoveTransformationController(identify, transformationService) with TrusteeController {
 
   def remove(identifier: String): Action[JsValue] = addNewTransform[RemoveTrustee](identifier)
 
-  override def transform[T <: Remove](remove: T, entity: JsValue): DeltaTransform = {
+  override def transform[T <: Remove](remove: T, entity: JsValue): DeltaTransform =
     RemoveTrusteeTransform(Some(remove.index), entity, remove.endDate, remove.`type`)
-  }
+
 }

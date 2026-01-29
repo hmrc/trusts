@@ -36,8 +36,7 @@ class AssetsSpec extends BaseSpec {
         endDate = Some(LocalDate.of(2021, 1, 5))
       )
 
-      val result = Json.parse(
-        """
+      val result = Json.parse("""
           | {
           |   "lineNo": "1",
           |   "orgName": "Panda care Ltd",
@@ -69,8 +68,7 @@ class AssetsSpec extends BaseSpec {
         endDate = Some(LocalDate.of(2021, 1, 5))
       )
 
-      val result = Json.parse(
-        """
+      val result = Json.parse("""
           | {
           |   "orgName": "Panda care Ltd",
           |   "address": {
@@ -91,4 +89,5 @@ class AssetsSpec extends BaseSpec {
 
     }
   }
+
 }

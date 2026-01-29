@@ -43,8 +43,8 @@ import java.time.{Instant, LocalDate, LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TaxLiabilitySubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with JsonFixtures with Inside with ScalaFutures
-  with GuiceOneAppPerSuite {
+class TaxLiabilitySubmissionDraftControllerSpec
+    extends AnyWordSpec with MockitoSugar with JsonFixtures with Inside with ScalaFutures with GuiceOneAppPerSuite {
 
   private val currentDateTime: Instant =
     LocalDateTime.of(1999, 3, 14, 13, 33).toInstant(ZoneOffset.UTC)
@@ -55,8 +55,8 @@ class TaxLiabilitySubmissionDraftControllerSpec extends AnyWordSpec with Mockito
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
-  private lazy val whenTrustSetupAtNewPath = Json.parse(
-    """
+  private lazy val whenTrustSetupAtNewPath = Json
+    .parse("""
       |{
       |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
       |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
@@ -79,10 +79,11 @@ class TaxLiabilitySubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       |    },
       |    "inProgress" : true
       |}
-      |""".stripMargin).as[RegistrationSubmissionDraft]
+      |""".stripMargin)
+    .as[RegistrationSubmissionDraft]
 
-  private lazy val draftWithTaxLiabilityStartDate = Json.parse(
-    """
+  private lazy val draftWithTaxLiabilityStartDate = Json
+    .parse("""
       |{
       |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
       |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
@@ -114,10 +115,11 @@ class TaxLiabilitySubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       |    },
       |    "inProgress" : true
       |}
-      |""".stripMargin).as[RegistrationSubmissionDraft]
+      |""".stripMargin)
+    .as[RegistrationSubmissionDraft]
 
-  private lazy val mockSubmissionDraftNoData = Json.parse(
-    """
+  private lazy val mockSubmissionDraftNoData = Json
+    .parse("""
       |{
       |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
       |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
@@ -133,7 +135,8 @@ class TaxLiabilitySubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       |    },
       |    "inProgress" : true
       |}
-      |""".stripMargin).as[RegistrationSubmissionDraft]
+      |""".stripMargin)
+    .as[RegistrationSubmissionDraft]
 
   private object TimeServiceStub extends TimeService {
     override def now: Instant = currentDateTime
@@ -142,7 +145,7 @@ class TaxLiabilitySubmissionDraftControllerSpec extends AnyWordSpec with Mockito
   ".getTaxLiabilityStartDate" should {
 
     "respond with OK with the start date" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TaxLiabilitySubmissionDraftController(
@@ -154,7 +157,11 @@ class TaxLiabilitySubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(draftWithTaxLiabilityStartDate)))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](
+            Future.successful(Right(Some(draftWithTaxLiabilityStartDate)))
+          )
+        )
 
       val request = FakeRequest("GET", "path")
 
@@ -162,19 +169,18 @@ class TaxLiabilitySubmissionDraftControllerSpec extends AnyWordSpec with Mockito
 
       status(result) mustBe OK
 
-      val expectedDraftJson = Json.parse(
-        """
+      val expectedDraftJson = Json.parse("""
           |{
           | "startDate": "2020-10-10"
           |}
           |""".stripMargin)
 
-      contentType(result) mustBe Some(JSON)
+      contentType(result)   mustBe Some(JSON)
       contentAsJson(result) mustBe expectedDraftJson
     }
 
     "respond with NotFound when no draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TaxLiabilitySubmissionDraftController(
@@ -196,7 +202,7 @@ class TaxLiabilitySubmissionDraftControllerSpec extends AnyWordSpec with Mockito
     }
 
     "respond with NotFound when no start date in draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TaxLiabilitySubmissionDraftController(
@@ -208,7 +214,11 @@ class TaxLiabilitySubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraftNoData)))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](
+            Future.successful(Right(Some(mockSubmissionDraftNoData)))
+          )
+        )
 
       val request = FakeRequest("GET", "path")
 
@@ -224,7 +234,7 @@ class TaxLiabilitySubmissionDraftControllerSpec extends AnyWordSpec with Mockito
     val date = LocalDate.parse("2015-04-06")
 
     "respond with OK with the first tax year available" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TaxLiabilitySubmissionDraftController(
@@ -236,7 +246,11 @@ class TaxLiabilitySubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(whenTrustSetupAtNewPath)))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](
+            Future.successful(Right(Some(whenTrustSetupAtNewPath)))
+          )
+        )
 
       val firstTaxYearAvailable = FirstTaxYearAvailable(4, earlierYearsToDeclare = true)
 
@@ -248,14 +262,14 @@ class TaxLiabilitySubmissionDraftControllerSpec extends AnyWordSpec with Mockito
 
       status(result) mustBe OK
 
-      contentType(result) mustBe Some(JSON)
+      contentType(result)   mustBe Some(JSON)
       contentAsJson(result) mustBe Json.toJson(firstTaxYearAvailable)
 
       verify(taxYearService).firstTaxYearAvailable(date)
     }
 
     "respond with NotFound when no draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TaxLiabilitySubmissionDraftController(
@@ -277,7 +291,7 @@ class TaxLiabilitySubmissionDraftControllerSpec extends AnyWordSpec with Mockito
     }
 
     "respond with NotFound when no start date in draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TaxLiabilitySubmissionDraftController(
@@ -289,7 +303,11 @@ class TaxLiabilitySubmissionDraftControllerSpec extends AnyWordSpec with Mockito
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraftNoData)))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](
+            Future.successful(Right(Some(mockSubmissionDraftNoData)))
+          )
+        )
 
       val request = FakeRequest("GET", "path")
 
@@ -299,4 +317,5 @@ class TaxLiabilitySubmissionDraftControllerSpec extends AnyWordSpec with Mockito
     }
 
   }
+
 }

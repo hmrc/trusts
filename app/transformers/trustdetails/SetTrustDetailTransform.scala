@@ -20,8 +20,7 @@ import play.api.libs.json._
 import transformers.SetValueTransform
 import utils.Constants._
 
-case class SetTrustDetailTransform(value: JsValue,
-                                   `type`: String) extends SetValueTransform {
+case class SetTrustDetailTransform(value: JsValue, `type`: String) extends SetValueTransform {
 
   override val path: JsPath = TRUST \ DETAILS \ `type`
 }

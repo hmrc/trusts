@@ -63,7 +63,8 @@ class AddSettlorTransformSpec extends AnyFreeSpec {
         "must add a new individual settlor" in {
           val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-          val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-second-individual-settlor.json")
+          val afterJson =
+            JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-after-add-second-individual-settlor.json")
 
           val transformer = new AddSettlorTransform(Json.toJson(newSettlor), `type`)
 
@@ -104,7 +105,8 @@ class AddSettlorTransformSpec extends AnyFreeSpec {
         "must add a new business settlor" in {
           val trustJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-add-new-business-settlor.json")
 
-          val afterJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-add-second-business-settlor.json")
+          val afterJson =
+            JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached-add-second-business-settlor.json")
 
           val transformer = new AddSettlorTransform(Json.toJson(newSettlor), `type`)
 
@@ -115,4 +117,5 @@ class AddSettlorTransformSpec extends AnyFreeSpec {
       }
     }
   }
+
 }

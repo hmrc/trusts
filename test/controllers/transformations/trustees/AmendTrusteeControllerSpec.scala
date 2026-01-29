@@ -48,8 +48,8 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
-  private val utr: String = "utr"
-  private val index: Int = 0
+  private val utr: String        = "utr"
+  private val index: Int         = 0
   private val endDate: LocalDate = LocalDate.parse("2021-01-01")
 
   private val invalidBody: JsValue = Json.parse("{}")
@@ -89,7 +89,7 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       "must add a new amend transform" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new AmendTrusteeController(
           identifierAction,
@@ -98,7 +98,11 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(Seq(Json.toJson(originalTrustee)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(Seq(Json.toJson(originalTrustee)))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -113,7 +117,13 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
 
         status(result) mustBe OK
 
-        val transform = AmendTrusteeTransform(Some(index), Json.toJson(amendedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
+        val transform = AmendTrusteeTransform(
+          Some(index),
+          Json.toJson(amendedTrustee),
+          Json.toJson(originalTrustee),
+          endDate,
+          trusteeType
+        )
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
@@ -123,7 +133,7 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       "must return an Internal Server Error when getTransformedTrustJson fails" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new AmendTrusteeController(
           identifierAction,
@@ -152,7 +162,7 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       "must return an error for invalid json" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new AmendTrusteeController(
           identifierAction,
@@ -194,7 +204,7 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       "must add a new amend transform" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new AmendTrusteeController(
           identifierAction,
@@ -203,7 +213,11 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(Seq(Json.toJson(originalTrustee)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(Seq(Json.toJson(originalTrustee)))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -218,7 +232,13 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
 
         status(result) mustBe OK
 
-        val transform = AmendTrusteeTransform(Some(index), Json.toJson(amendedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
+        val transform = AmendTrusteeTransform(
+          Some(index),
+          Json.toJson(amendedTrustee),
+          Json.toJson(originalTrustee),
+          endDate,
+          trusteeType
+        )
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
@@ -228,7 +248,7 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       "must return an Internal Server Error when addNewTransform fails" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new AmendTrusteeController(
           identifierAction,
@@ -237,7 +257,11 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(Seq(Json.toJson(originalTrustee)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(Seq(Json.toJson(originalTrustee)))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
@@ -257,7 +281,7 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       "must return an error for invalid json" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new AmendTrusteeController(
           identifierAction,
@@ -278,8 +302,7 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
 
     "individual lead trustee" - {
 
-      val originalTrustee = Json.parse(
-        """
+      val originalTrustee = Json.parse("""
           |{
           |  "lineNo": "1",
           |  "bpMatchStatus": "01",
@@ -310,7 +333,7 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       "must add a new amend transform" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new AmendTrusteeController(
           identifierAction,
@@ -336,7 +359,8 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
 
         status(result) mustBe OK
 
-        val transform = AmendTrusteeTransform(None, Json.toJson(amendedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
+        val transform =
+          AmendTrusteeTransform(None, Json.toJson(amendedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
@@ -346,7 +370,7 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       "must return an error for invalid json" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new AmendTrusteeController(
           identifierAction,
@@ -367,8 +391,7 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
 
     "business lead trustee" - {
 
-      val originalTrustee = Json.parse(
-        """
+      val originalTrustee = Json.parse("""
           |{
           |  "lineNo": "1",
           |  "bpMatchStatus": "01",
@@ -395,7 +418,7 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       "must add a new amend transform" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new AmendTrusteeController(
           identifierAction,
@@ -421,7 +444,8 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
 
         status(result) mustBe OK
 
-        val transform = AmendTrusteeTransform(None, Json.toJson(amendedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
+        val transform =
+          AmendTrusteeTransform(None, Json.toJson(amendedTrustee), Json.toJson(originalTrustee), endDate, trusteeType)
 
         verify(mockTransformationService)
           .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
@@ -431,7 +455,7 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       "must return an error for invalid json" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new AmendTrusteeController(
           identifierAction,
@@ -450,4 +474,5 @@ class AmendTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Scal
       }
     }
   }
+
 }

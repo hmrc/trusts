@@ -21,10 +21,8 @@ import transformers.AmendEntityTransform
 
 import java.time.LocalDate
 
-case class AmendOtherIndividualTransform(index: Option[Int],
-                                         amended: JsValue,
-                                         original: JsValue,
-                                         endDate: LocalDate) extends OtherIndividualTransform with AmendEntityTransform
+case class AmendOtherIndividualTransform(index: Option[Int], amended: JsValue, original: JsValue, endDate: LocalDate)
+    extends OtherIndividualTransform with AmendEntityTransform
 
 object AmendOtherIndividualTransform {
 

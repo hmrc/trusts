@@ -25,23 +25,24 @@ import java.time.LocalDate
 
 trait Settlor[T] extends MigrationEntity[T]
 
-case class Settlors(settlor: Option[List[SettlorIndividual]],
-                    settlorCompany: Option[List[SettlorCompany]])
+case class Settlors(settlor: Option[List[SettlorIndividual]], settlorCompany: Option[List[SettlorCompany]])
 
 object Settlors {
   implicit val settlorsFormat: Format[Settlors] = Json.format[Settlors]
 }
 
-case class SettlorIndividual(lineNo: Option[String],
-                             bpMatchStatus: Option[String],
-                             name: NameType,
-                             dateOfBirth: Option[LocalDate],
-                             identification: Option[IdentificationType],
-                             countryOfResidence: Option[String],
-                             legallyIncapable: Option[Boolean],
-                             nationality: Option[String],
-                             entityStart: LocalDate,
-                             entityEnd: Option[LocalDate]) extends Settlor[SettlorIndividual] {
+case class SettlorIndividual(
+  lineNo: Option[String],
+  bpMatchStatus: Option[String],
+  name: NameType,
+  dateOfBirth: Option[LocalDate],
+  identification: Option[IdentificationType],
+  countryOfResidence: Option[String],
+  legallyIncapable: Option[Boolean],
+  nationality: Option[String],
+  entityStart: LocalDate,
+  entityEnd: Option[LocalDate]
+) extends Settlor[SettlorIndividual] {
 
   override val writeToMaintain: Writes[SettlorIndividual] = SettlorIndividual.writeToMaintain
 }
@@ -49,79 +50,93 @@ case class SettlorIndividual(lineNo: Option[String],
 object SettlorIndividual {
   implicit val settlorFormat: Format[SettlorIndividual] = Json.format[SettlorIndividual]
 
-  val writeToMaintain: Writes[SettlorIndividual] = (o: SettlorIndividual) => Json.obj(
-    "lineNo" -> o.lineNo,
-    "bpMatchStatus" -> o.bpMatchStatus,
-    "name" -> o.name,
-    "dateOfBirth" -> o.dateOfBirth,
-    "identification" -> o.identification,
-    "countryOfResidence" -> o.countryOfResidence,
-    "legallyIncapable" -> o.legallyIncapable,
-    "nationality" -> o.nationality,
-    "entityStart" -> o.entityStart,
-    "entityEnd" -> o.entityEnd,
-    "provisional" -> o.lineNo.isEmpty
-  ).withoutNulls
+  val writeToMaintain: Writes[SettlorIndividual] = (o: SettlorIndividual) =>
+    Json
+      .obj(
+        "lineNo"             -> o.lineNo,
+        "bpMatchStatus"      -> o.bpMatchStatus,
+        "name"               -> o.name,
+        "dateOfBirth"        -> o.dateOfBirth,
+        "identification"     -> o.identification,
+        "countryOfResidence" -> o.countryOfResidence,
+        "legallyIncapable"   -> o.legallyIncapable,
+        "nationality"        -> o.nationality,
+        "entityStart"        -> o.entityStart,
+        "entityEnd"          -> o.entityEnd,
+        "provisional"        -> o.lineNo.isEmpty
+      )
+      .withoutNulls
+
 }
 
-case class SettlorCompany(lineNo: Option[String],
-                          bpMatchStatus: Option[String],
-                          name: String,
-                          companyType: Option[String],
-                          companyTime: Option[Boolean],
-                          identification: Option[IdentificationOrgType],
-                          countryOfResidence: Option[String],
-                          entityStart: LocalDate,
-                          entityEnd: Option[LocalDate]) extends Settlor[SettlorCompany] {
+case class SettlorCompany(
+  lineNo: Option[String],
+  bpMatchStatus: Option[String],
+  name: String,
+  companyType: Option[String],
+  companyTime: Option[Boolean],
+  identification: Option[IdentificationOrgType],
+  countryOfResidence: Option[String],
+  entityStart: LocalDate,
+  entityEnd: Option[LocalDate]
+) extends Settlor[SettlorCompany] {
 
   override val writeToMaintain: Writes[SettlorCompany] = SettlorCompany.writeToMaintain
 
-  override def hasRequiredDataForMigration(trustType: Option[TypeOfTrust]): Boolean = {
+  override def hasRequiredDataForMigration(trustType: Option[TypeOfTrust]): Boolean =
     trustType match {
       case Some(Employment) => companyType.isDefined && companyTime.isDefined
-      case _ => true
+      case _                => true
     }
-  }
+
 }
 
 object SettlorCompany {
   implicit val settlorCompanyFormat: Format[SettlorCompany] = Json.format[SettlorCompany]
 
-  val writeToMaintain: Writes[SettlorCompany] = (o: SettlorCompany) => Json.obj(
-    "lineNo" -> o.lineNo,
-    "bpMatchStatus" -> o.bpMatchStatus,
-    "name" -> o.name,
-    "companyType" -> o.companyType,
-    "companyTime" -> o.companyTime,
-    "identification" -> o.identification,
-    "countryOfResidence" -> o.countryOfResidence,
-    "entityStart" -> o.entityStart,
-    "entityEnd" -> o.entityEnd,
-    "provisional" -> o.lineNo.isEmpty
-  ).withoutNulls
+  val writeToMaintain: Writes[SettlorCompany] = (o: SettlorCompany) =>
+    Json
+      .obj(
+        "lineNo"             -> o.lineNo,
+        "bpMatchStatus"      -> o.bpMatchStatus,
+        "name"               -> o.name,
+        "companyType"        -> o.companyType,
+        "companyTime"        -> o.companyTime,
+        "identification"     -> o.identification,
+        "countryOfResidence" -> o.countryOfResidence,
+        "entityStart"        -> o.entityStart,
+        "entityEnd"          -> o.entityEnd,
+        "provisional"        -> o.lineNo.isEmpty
+      )
+      .withoutNulls
+
 }
 
-case class WillType(lineNo: Option[String],
-                    bpMatchStatus: Option[String],
-                    name: NameType,
-                    dateOfBirth: Option[LocalDate],
-                    dateOfDeath: Option[LocalDate],
-                    identification: Option[IdentificationType],
-                    countryOfResidence: Option[String],
-                    nationality: Option[String],
-                    entityStart: LocalDate,
-                    entityEnd: Option[LocalDate])
+case class WillType(
+  lineNo: Option[String],
+  bpMatchStatus: Option[String],
+  name: NameType,
+  dateOfBirth: Option[LocalDate],
+  dateOfDeath: Option[LocalDate],
+  identification: Option[IdentificationType],
+  countryOfResidence: Option[String],
+  nationality: Option[String],
+  entityStart: LocalDate,
+  entityEnd: Option[LocalDate]
+)
 
 object WillType {
   implicit val willTypeFormat: Format[WillType] = Json.format[WillType]
 }
 
-case class AmendDeceasedSettlor(name: NameType,
-                                dateOfBirth: Option[LocalDate],
-                                dateOfDeath: Option[LocalDate],
-                                countryOfResidence: Option[String],
-                                nationality: Option[String],
-                                identification: Option[IdentificationType])
+case class AmendDeceasedSettlor(
+  name: NameType,
+  dateOfBirth: Option[LocalDate],
+  dateOfDeath: Option[LocalDate],
+  countryOfResidence: Option[String],
+  nationality: Option[String],
+  identification: Option[IdentificationType]
+)
 
 object AmendDeceasedSettlor {
   implicit val formats: Format[AmendDeceasedSettlor] = Json.format[AmendDeceasedSettlor]

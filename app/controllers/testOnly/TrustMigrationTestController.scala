@@ -29,18 +29,19 @@ import utils.{Session, ValidationUtil}
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-class TrustMigrationTestController @Inject()(migrationService: TaxableMigrationService,
-                                             cc: ControllerComponents
-                                             )(implicit ec: ExecutionContext) extends TrustsBaseController(cc) with ValidationUtil with Logging {
+class TrustMigrationTestController @Inject() (migrationService: TaxableMigrationService, cc: ControllerComponents)(
+  implicit ec: ExecutionContext
+) extends TrustsBaseController(cc) with ValidationUtil with Logging {
 
+  def migrateToTaxable(subscriptionId: String, urn: String): Action[AnyContent] = Action.async { implicit request =>
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
-  def migrateToTaxable(subscriptionId: String, urn: String): Action[AnyContent] = Action.async {
-    implicit request =>
-      implicit val hc : HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
-
-      logger.info(s"[TrustMigrationTestController][migrateToTaxable][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn]" +
-        s" Tax-enrolment: migration subscription callback message was: ${request.body}")
-      migrationService.migrateSubscriberToTaxable(subscriptionId, urn).value.flatMap(_ => Future(Ok("Done")))
+    logger.info(
+      s"[TrustMigrationTestController][migrateToTaxable][Session ID: ${Session.id(hc)}][SubscriptionId: $subscriptionId, URN: $urn]" +
+        s" Tax-enrolment: migration subscription callback message was: ${request.body}"
+    )
+    migrationService.migrateSubscriberToTaxable(subscriptionId, urn).value.flatMap(_ => Future(Ok("Done")))
 
   }
+
 }

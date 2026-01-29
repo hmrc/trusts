@@ -46,20 +46,25 @@ class SetTrustDetailsSpec extends IntegrationTestBase {
     val stubbedTrustsConnector = mock[TrustsConnector]
 
     when(stubbedTrustsConnector.getTrustInfo(any()))
-      .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustResponse.as[GetTrustSuccessResponse]))))
+      .thenReturn(
+        EitherT[Future, TrustErrors, GetTrustResponse](
+          Future.successful(Right(getTrustResponse.as[GetTrustSuccessResponse]))
+        )
+      )
 
     def application = applicationBuilder
       .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[IdentifierAction]
+          .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(stubbedTrustsConnector)
-      ).build()
+      )
+      .build()
 
     val sessionId: String = Session.id(hc)
 
     "add series of transforms" should {
 
       "when migrating" in assertMongoTest(application) { app =>
-
         def repository = application.injector.instanceOf[TransformationRepositoryImpl]
 
         await(repository.collection.deleteMany(filter = Document()).toFuture())
@@ -110,7 +115,6 @@ class SetTrustDetailsSpec extends IntegrationTestBase {
       }
 
       "when not migrating" in assertMongoTest(application) { app =>
-
         def repository = application.injector.instanceOf[TransformationRepositoryImpl]
 
         await(repository.collection.deleteMany(filter = Document()).toFuture())

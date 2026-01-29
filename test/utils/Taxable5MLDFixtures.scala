@@ -21,15 +21,16 @@ import play.api.libs.json.JsValue
 object Taxable5MLDFixtures extends JsonFixtures {
 
   object DES {
+
     /**
      * These fixtures are used to mock a response from the DES connector.
      * These fixtures must conform with the schema for API#1488
      */
 
-
   }
 
   object Cache {
+
     /**
      * These fixtures are used to mock the behaviour when the CacheRepository finds a record for Display or variation in the mongo cache.
      * The shape of the data is such that the HTTP reads has already been completed in GetTrustResponse.httpReads
@@ -46,6 +47,7 @@ object Taxable5MLDFixtures extends JsonFixtures {
   }
 
   object Trusts {
+
     /**
      * These fixtures are used to test the response from the trusts microservice at the:
      * /trusts/:identifier
@@ -54,38 +56,52 @@ object Taxable5MLDFixtures extends JsonFixtures {
      */
 
     object LeadTrustee {
+
       lazy val taxable5mld2134514321LeadTrustee: JsValue =
         getJsonValueFromFile("5MLD/Taxable/trusts/lead-trustee/2134514321-taxable-lead-trustee.json")
+
     }
 
     object Trustees {
+
       lazy val taxable5mld2134514321Trustees: JsValue =
         getJsonValueFromFile("5MLD/Taxable/trusts/trustees/2134514321-taxable-trustees.json")
+
     }
 
     object Beneficiaries {
+
       lazy val taxable5mld2134514321Beneficiaries: JsValue =
         getJsonValueFromFile("5MLD/Taxable/trusts/beneficiaries/2134514321-taxable-beneficiaries.json")
+
     }
 
     object Assets {
+
       lazy val taxable5mld2134514321Assets: JsValue =
         getJsonValueFromFile("5MLD/Taxable/trusts/assets/2134514321-taxable-assets.json")
+
     }
 
     object Settlors {
+
       lazy val taxable5mld2134514321Settlors: JsValue =
         getJsonValueFromFile("5MLD/Taxable/trusts/settlors/2134514321-taxable-settlors.json")
+
     }
 
     object Protectors {
+
       lazy val taxable5mld2134514321Protectors: JsValue =
         getJsonValueFromFile("5MLD/Taxable/trusts/protectors/2134514321-taxable-protectors.json")
+
     }
 
     object OtherIndividuals {
+
       lazy val taxable5mld2134514321OtherIndividuals: JsValue =
         getJsonValueFromFile("5MLD/Taxable/trusts/other-individuals/2134514321-taxable-other-individuals.json")
+
     }
 
   }

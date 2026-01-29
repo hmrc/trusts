@@ -32,13 +32,17 @@ object VariationResponse extends Logging {
 
   implicit lazy val httpReads: HttpReads[VariationResponse] =
     new HttpReads[VariationResponse] {
-      override def read(method: String, url: String, response: HttpResponse): VariationResponse = {
+      override def read(method: String, url: String, response: HttpResponse): VariationResponse =
         response.status match {
-          case OK =>
+          case OK                                                            =>
             response.json.as[VariationSuccessResponse]
           case BAD_REQUEST if response.body contains "INVALID_CORRELATIONID" =>
             logger.error(s"[VariationResponse][httpReads] Bad Request for invalid correlation id response from des ")
-            VariationFailureResponse(BAD_REQUEST, InternalServerErrorResponse, "Invalid correlation id response from des")
+            VariationFailureResponse(
+              BAD_REQUEST,
+              InternalServerErrorResponse,
+              "Invalid correlation id response from des"
+            )
 
           case BAD_REQUEST =>
             logger.error(s"[VariationResponse][httpReads] Bad Request response from des")
@@ -58,13 +62,20 @@ object VariationResponse extends Logging {
 
           case SERVICE_UNAVAILABLE =>
             logger.error("[VariationResponse][httpReads] Service unavailable response from des.")
-            VariationFailureResponse(SERVICE_UNAVAILABLE, ServiceNotAvailableErrorResponse, "des dependent service is down.")
+            VariationFailureResponse(
+              SERVICE_UNAVAILABLE,
+              ServiceNotAvailableErrorResponse,
+              "des dependent service is down."
+            )
 
           case status =>
             logger.error(s"[VariationResponse][httpReads] Unexpected error response from des. Status: $status")
-            VariationFailureResponse(status, InternalServerErrorResponse, s"Unexpected error response from des. Status: $status")
+            VariationFailureResponse(
+              status,
+              InternalServerErrorResponse,
+              s"Unexpected error response from des. Status: $status"
+            )
         }
-      }
     }
 
 }

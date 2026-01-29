@@ -18,25 +18,19 @@ package models.auditing
 
 import play.api.libs.json.{Format, JsValue, Json}
 
-case class RequestAndResponseAuditEvent(request: JsValue,
-                                        internalAuthId: String,
-                                        response: JsValue)
+case class RequestAndResponseAuditEvent(request: JsValue, internalAuthId: String, response: JsValue)
 
 object RequestAndResponseAuditEvent {
   implicit val formats: Format[RequestAndResponseAuditEvent] = Json.format[RequestAndResponseAuditEvent]
 }
 
-case class VariationAuditEvent(request: JsValue,
-                               internalAuthId: String,
-                               migrateToTaxable: Boolean,
-                               response: JsValue)
+case class VariationAuditEvent(request: JsValue, internalAuthId: String, migrateToTaxable: Boolean, response: JsValue)
 
 object VariationAuditEvent {
   implicit val formats: Format[VariationAuditEvent] = Json.format[VariationAuditEvent]
 }
 
-case class OrchestratorAuditEvent(request: JsValue,
-                                  response: JsValue)
+case class OrchestratorAuditEvent(request: JsValue, response: JsValue)
 
 object OrchestratorAuditEvent {
   implicit val formats: Format[OrchestratorAuditEvent] = Json.format[OrchestratorAuditEvent]

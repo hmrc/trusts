@@ -39,16 +39,19 @@ import scala.concurrent.Future
 class TrustsServiceSpec extends BaseSpec {
 
   private trait TrustsServiceFixture {
-    lazy val request = ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
+    lazy val request                               = ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")
     val mockSubscriptionConnector: TrustsConnector = mock[TrustsConnector]
     val mockTrustsConnector: SubscriptionConnector = mock[SubscriptionConnector]
-    val mockRepository: CacheRepositoryImpl = mock[CacheRepositoryImpl]
+    val mockRepository: CacheRepositoryImpl        = mock[CacheRepositoryImpl]
+
     when(mockRepository.get(any[String], any[String], any[String]))
       .thenReturn(EitherT[Future, TrustErrors, Option[JsValue]](Future.successful(Right(None))))
+
     when(mockRepository.resetCache(any[String], any[String], any[String]))
       .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
-    val myId = "myId"
-    val sessionId: String = "sessionId"
+
+    val myId                                       = "myId"
+    val sessionId: String                          = "sessionId"
 
     val SUT = new TrustsService(mockSubscriptionConnector, mockTrustsConnector, mockRepository)
   }
@@ -60,8 +63,8 @@ class TrustsServiceSpec extends BaseSpec {
         when(mockSubscriptionConnector.checkExistingTrust(request))
           .thenReturn(EitherT[Future, TrustErrors, ExistingCheckResponse](Future.successful(Right(Matched))))
         val futureResult = SUT.checkExistingTrust(request).value
-        whenReady(futureResult) {
-          result => result mustBe Right(Matched)
+        whenReady(futureResult) { result =>
+          result mustBe Right(Matched)
         }
       }
     }
@@ -71,8 +74,8 @@ class TrustsServiceSpec extends BaseSpec {
         when(mockSubscriptionConnector.checkExistingTrust(request))
           .thenReturn(EitherT[Future, TrustErrors, ExistingCheckResponse](Future.successful(Right(NotMatched))))
         val futureResult = SUT.checkExistingTrust(request).value
-        whenReady(futureResult) {
-          result => result mustBe Right(NotMatched)
+        whenReady(futureResult) { result =>
+          result mustBe Right(NotMatched)
         }
       }
     }
@@ -82,8 +85,8 @@ class TrustsServiceSpec extends BaseSpec {
         when(mockSubscriptionConnector.checkExistingTrust(request))
           .thenReturn(EitherT[Future, TrustErrors, ExistingCheckResponse](Future.successful(Right(BadRequest))))
         val futureResult = SUT.checkExistingTrust(request).value
-        whenReady(futureResult) {
-          result => result mustBe Right(BadRequest)
+        whenReady(futureResult) { result =>
+          result mustBe Right(BadRequest)
         }
       }
     }
@@ -93,8 +96,8 @@ class TrustsServiceSpec extends BaseSpec {
         when(mockSubscriptionConnector.checkExistingTrust(request))
           .thenReturn(EitherT[Future, TrustErrors, ExistingCheckResponse](Future.successful(Right(AlreadyRegistered))))
         val futureResult = SUT.checkExistingTrust(request).value
-        whenReady(futureResult) {
-          result => result mustBe Right(AlreadyRegistered)
+        whenReady(futureResult) { result =>
+          result mustBe Right(AlreadyRegistered)
         }
       }
     }
@@ -104,8 +107,8 @@ class TrustsServiceSpec extends BaseSpec {
         when(mockSubscriptionConnector.checkExistingTrust(request))
           .thenReturn(EitherT[Future, TrustErrors, ExistingCheckResponse](Future.successful(Right(ServiceUnavailable))))
         val futureResult = SUT.checkExistingTrust(request).value
-        whenReady(futureResult) {
-          result => result mustBe Right(ServiceUnavailable)
+        whenReady(futureResult) { result =>
+          result mustBe Right(ServiceUnavailable)
         }
 
       }
@@ -114,10 +117,14 @@ class TrustsServiceSpec extends BaseSpec {
     "return ExistingCheckResponse.ServerError " when {
       "connector returns ExistingCheckResponse.ServerError." in new TrustsServiceFixture {
         when(mockSubscriptionConnector.checkExistingTrust(request))
-          .thenReturn(EitherT[Future, TrustErrors, ExistingCheckResponse](Future.successful(Right(ExistingCheckResponse.ServerError))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, ExistingCheckResponse](
+              Future.successful(Right(ExistingCheckResponse.ServerError))
+            )
+          )
         val futureResult = SUT.checkExistingTrust(request).value
-        whenReady(futureResult) {
-          result => result mustBe Right(ExistingCheckResponse.ServerError)
+        whenReady(futureResult) { result =>
+          result mustBe Right(ExistingCheckResponse.ServerError)
         }
       }
     }
@@ -125,10 +132,10 @@ class TrustsServiceSpec extends BaseSpec {
 
   ".getTrustInfoFormBundleNo" should {
     "return formBundle No from ETMP Data" in {
-      val etmpData = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
-      val mockSubscriptionConnector = mock[TrustsConnector]
+      val etmpData                                   = JsonUtils.getJsonValueFromFile("trusts-etmp-received.json").as[GetTrustSuccessResponse]
+      val mockSubscriptionConnector                  = mock[TrustsConnector]
       val mockTrustsConnector: SubscriptionConnector = mock[SubscriptionConnector]
-      val mockRepository = mock[CacheRepositoryImpl]
+      val mockRepository                             = mock[CacheRepositoryImpl]
       when(mockSubscriptionConnector.getTrustInfo(any()))
         .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(etmpData))))
 
@@ -140,10 +147,10 @@ class TrustsServiceSpec extends BaseSpec {
     }
 
     "return VariationFailureForAudit when connector.getTrustInfo response isn't GetTrustSuccessResponse" in {
-      val errorResponse = ResourceNotFoundResponse
-      val mockSubscriptionConnector = mock[TrustsConnector]
+      val errorResponse                              = ResourceNotFoundResponse
+      val mockSubscriptionConnector                  = mock[TrustsConnector]
       val mockTrustsConnector: SubscriptionConnector = mock[SubscriptionConnector]
-      val mockRepository = mock[CacheRepositoryImpl]
+      val mockRepository                             = mock[CacheRepositoryImpl]
       when(mockSubscriptionConnector.getTrustInfo(any()))
         .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(errorResponse))))
 
@@ -161,11 +168,13 @@ class TrustsServiceSpec extends BaseSpec {
 
     "return ServerError()" when {
       "connector.getTrustInfo returns ServerError(message), where message is nonEmpty" in {
-        val mockSubscriptionConnector = mock[TrustsConnector]
+        val mockSubscriptionConnector                  = mock[TrustsConnector]
         val mockTrustsConnector: SubscriptionConnector = mock[SubscriptionConnector]
-        val mockRepository = mock[CacheRepositoryImpl]
+        val mockRepository                             = mock[CacheRepositoryImpl]
         when(mockSubscriptionConnector.getTrustInfo(any()))
-          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Left(ServerError("exception message")))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Left(ServerError("exception message"))))
+          )
 
         val OUT = new TrustsService(mockSubscriptionConnector, mockTrustsConnector, mockRepository)
 
@@ -175,9 +184,9 @@ class TrustsServiceSpec extends BaseSpec {
       }
 
       "connector.getTrustInfo returns ServerError(message), where message is an empty string)" in {
-        val mockSubscriptionConnector = mock[TrustsConnector]
+        val mockSubscriptionConnector                  = mock[TrustsConnector]
         val mockTrustsConnector: SubscriptionConnector = mock[SubscriptionConnector]
-        val mockRepository = mock[CacheRepositoryImpl]
+        val mockRepository                             = mock[CacheRepositoryImpl]
         when(mockSubscriptionConnector.getTrustInfo(any()))
           .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Left(ServerError()))))
 
@@ -195,34 +204,43 @@ class TrustsServiceSpec extends BaseSpec {
     "return SuccessRegistrationResponse " when {
       "connector returns SuccessRegistrationResponse." in new TrustsServiceFixture {
         when(mockSubscriptionConnector.registerTrust(registrationRequest))
-          .thenReturn(EitherT[Future, TrustErrors, RegistrationResponse](Future.successful(Right(RegistrationTrnResponse("trn123")))))
-        val futureResult: Future[Either[TrustErrors, RegistrationResponse]] = SUT.registerTrust(registrationRequest).value
-        whenReady(futureResult) {
-          result => result mustBe Right(RegistrationTrnResponse("trn123"))
+          .thenReturn(
+            EitherT[Future, TrustErrors, RegistrationResponse](
+              Future.successful(Right(RegistrationTrnResponse("trn123")))
+            )
+          )
+        val futureResult: Future[Either[TrustErrors, RegistrationResponse]] =
+          SUT.registerTrust(registrationRequest).value
+        whenReady(futureResult) { result =>
+          result mustBe Right(RegistrationTrnResponse("trn123"))
         }
       }
     }
 
     "return AlreadyRegisteredResponse " when {
       "connector returns  AlreadyRegisteredResponse." in new TrustsServiceFixture {
-        when(mockSubscriptionConnector.registerTrust(registrationRequest)).
-          thenReturn(EitherT[Future, TrustErrors, RegistrationResponse](Future.successful(Right(AlreadyRegisteredResponse))))
-        val futureResult: Future[Either[TrustErrors, RegistrationResponse]] = SUT.registerTrust(registrationRequest).value
+        when(mockSubscriptionConnector.registerTrust(registrationRequest)).thenReturn(
+          EitherT[Future, TrustErrors, RegistrationResponse](Future.successful(Right(AlreadyRegisteredResponse)))
+        )
+        val futureResult: Future[Either[TrustErrors, RegistrationResponse]] =
+          SUT.registerTrust(registrationRequest).value
 
-        whenReady(futureResult) {
-          result => result mustBe Right(AlreadyRegisteredResponse)
+        whenReady(futureResult) { result =>
+          result mustBe Right(AlreadyRegisteredResponse)
         }
       }
     }
 
     "return same ServerError(message) " when {
       "connector handles an exception." in new TrustsServiceFixture {
-        when(mockSubscriptionConnector.registerTrust(registrationRequest)).
-          thenReturn(EitherT[Future, TrustErrors, RegistrationResponse](Future.successful(Left(ServerError("exception message")))))
-        val futureResult: Future[Either[TrustErrors, RegistrationResponse]] = SUT.registerTrust(registrationRequest).value
+        when(mockSubscriptionConnector.registerTrust(registrationRequest)).thenReturn(
+          EitherT[Future, TrustErrors, RegistrationResponse](Future.successful(Left(ServerError("exception message"))))
+        )
+        val futureResult: Future[Either[TrustErrors, RegistrationResponse]] =
+          SUT.registerTrust(registrationRequest).value
 
-        whenReady(futureResult) {
-          result => result mustBe Left(ServerError("exception message"))
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError("exception message"))
         }
       }
     }
@@ -233,28 +251,36 @@ class TrustsServiceSpec extends BaseSpec {
 
     "return SubscriptionIdResponse " when {
       "connector returns SubscriptionIdResponse." in new TrustsServiceFixture {
-        when(mockTrustsConnector.getSubscriptionId("trn123456789")).
-          thenReturn(EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](Future.successful(Right(SubscriptionIdSuccessResponse("123456789")))))
+        when(mockTrustsConnector.getSubscriptionId("trn123456789")).thenReturn(
+          EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](
+            Future.successful(Right(SubscriptionIdSuccessResponse("123456789")))
+          )
+        )
 
-        val futureResult: Future[Either[TrustErrors, SubscriptionIdSuccessResponse]] = SUT.getSubscriptionId("trn123456789").value
+        val futureResult: Future[Either[TrustErrors, SubscriptionIdSuccessResponse]] =
+          SUT.getSubscriptionId("trn123456789").value
 
-        whenReady(futureResult) {
-          result => result mustBe Right(SubscriptionIdSuccessResponse("123456789"))
+        whenReady(futureResult) { result =>
+          result mustBe Right(SubscriptionIdSuccessResponse("123456789"))
         }
       }
     }
 
     "return the same ServerError(message) as connector" when {
       "connector recovers an exception." in new TrustsServiceFixture {
-        when(mockTrustsConnector.getSubscriptionId("trn123456789")).
-          thenReturn(EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](Future.successful(
-            Left(ServerError("Error response from des 500"))
-          )))
+        when(mockTrustsConnector.getSubscriptionId("trn123456789")).thenReturn(
+          EitherT[Future, TrustErrors, SubscriptionIdSuccessResponse](
+            Future.successful(
+              Left(ServerError("Error response from des 500"))
+            )
+          )
+        )
 
-        val futureResult: Future[Either[TrustErrors, SubscriptionIdSuccessResponse]] = SUT.getSubscriptionId("trn123456789").value
+        val futureResult: Future[Either[TrustErrors, SubscriptionIdSuccessResponse]] =
+          SUT.getSubscriptionId("trn123456789").value
 
-        whenReady(futureResult) {
-          result => result mustBe Left(ServerError("Error response from des 500"))
+        whenReady(futureResult) { result =>
+          result mustBe Left(ServerError("Error response from des 500"))
         }
       }
     }
@@ -265,7 +291,7 @@ class TrustsServiceSpec extends BaseSpec {
       when(mockRepository.resetCache(any(), any(), any()))
         .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
-      val utr = "123456789"
+      val utr                                             = "123456789"
       val futureResult: Future[Either[TrustErrors, Unit]] = SUT.resetCache(utr, myId, sessionId).value
 
       whenReady(futureResult) { result =>
@@ -277,7 +303,7 @@ class TrustsServiceSpec extends BaseSpec {
       when(mockRepository.resetCache(any(), any(), any()))
         .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError("exception message")))))
 
-      val utr = "123456789"
+      val utr                                             = "123456789"
       val futureResult: Future[Either[TrustErrors, Unit]] = SUT.resetCache(utr, myId, sessionId).value
 
       whenReady(futureResult) { result =>
@@ -291,9 +317,9 @@ class TrustsServiceSpec extends BaseSpec {
     "return TrustFoundResponse" when {
 
       "TrustFoundResponse is returned from DES Connector with a Processed flag and a trust body when not cached" in new TrustsServiceFixture {
-        val utr = "1234567890"
+        val utr                           = "1234567890"
         val fullEtmpResponseJson: JsValue = get5MLDTrustResponse
-        val trustInfoJson: JsValue = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
+        val trustInfoJson: JsValue        = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
 
         when(mockRepository.get(any[String], any[String], any[String]))
           .thenReturn(EitherT[Future, TrustErrors, Option[JsValue]](Future.successful(Right(None))))
@@ -302,9 +328,13 @@ class TrustsServiceSpec extends BaseSpec {
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         when(mockSubscriptionConnector.getTrustInfo(any()))
-          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(
-            Right(TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1")))
-          )))
+          .thenReturn(
+            EitherT[Future, TrustErrors, GetTrustResponse](
+              Future.successful(
+                Right(TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1")))
+              )
+            )
+          )
 
         when(mockRepository.set(any(), any(), any(), any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -321,14 +351,18 @@ class TrustsServiceSpec extends BaseSpec {
         val utr = "1234567890"
 
         val fullEtmpResponseJson: JsValue = get5MLDTrustResponse
-        val trustInfoJson: JsValue = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
+        val trustInfoJson: JsValue        = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
 
         when(mockRepository.get(any[String], any[String], any[String]))
-          .thenReturn(EitherT[Future, TrustErrors, Option[JsValue]](Future.successful(Right(Some(fullEtmpResponseJson)))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, Option[JsValue]](Future.successful(Right(Some(fullEtmpResponseJson))))
+          )
         when(mockSubscriptionConnector.getTrustInfo(any()))
-          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](
-            Future.failed(new Exception("Connector should not have been called"))
-          ))
+          .thenReturn(
+            EitherT[Future, TrustErrors, GetTrustResponse](
+              Future.failed(new Exception("Connector should not have been called"))
+            )
+          )
 
         val futureResult: Future[Either[TrustErrors, GetTrustResponse]] = SUT.getTrustInfo(utr, myId, sessionId).value
 
@@ -346,9 +380,13 @@ class TrustsServiceSpec extends BaseSpec {
         val utr = "1234567890"
 
         when(mockSubscriptionConnector.getTrustInfo(any()))
-          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(
-            Right(TrustFoundResponse(ResponseHeader("In Processing", "1")))
-          )))
+          .thenReturn(
+            EitherT[Future, TrustErrors, GetTrustResponse](
+              Future.successful(
+                Right(TrustFoundResponse(ResponseHeader("In Processing", "1")))
+              )
+            )
+          )
 
         val futureResult: Future[Either[TrustErrors, GetTrustResponse]] = SUT.getTrustInfo(utr, myId, sessionId).value
 
@@ -360,15 +398,17 @@ class TrustsServiceSpec extends BaseSpec {
 
     Seq(ResourceNotFoundResponse, BadRequestResponse, InternalServerErrorResponse, ServiceUnavailableResponse).foreach {
       getTrustErrorResponse =>
-
         s"return $getTrustErrorResponse" when {
           s"$getTrustErrorResponse is returned from DES Connector" in new TrustsServiceFixture {
 
             when(mockSubscriptionConnector.getTrustInfo(any()))
-              .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustErrorResponse))))
+              .thenReturn(
+                EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Right(getTrustErrorResponse)))
+              )
 
-            val utr = "123456789"
-            val futureResult: Future[Either[TrustErrors, GetTrustResponse]] = SUT.getTrustInfo(utr, myId, sessionId).value
+            val utr                                                         = "123456789"
+            val futureResult: Future[Either[TrustErrors, GetTrustResponse]] =
+              SUT.getTrustInfo(utr, myId, sessionId).value
 
             whenReady(futureResult) { result =>
               result mustBe Right(getTrustErrorResponse)
@@ -379,9 +419,9 @@ class TrustsServiceSpec extends BaseSpec {
 
     "return Left(ServerError())" when {
       "repository.set fails after getting trust info" in new TrustsServiceFixture {
-        val utr = "1234567890"
+        val utr                           = "1234567890"
         val fullEtmpResponseJson: JsValue = get5MLDTrustResponse
-        val trustInfoJson: JsValue = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
+        val trustInfoJson: JsValue        = (fullEtmpResponseJson \ "trustOrEstateDisplay").as[JsValue]
 
         when(mockRepository.get(any[String], any[String], any[String]))
           .thenReturn(EitherT[Future, TrustErrors, Option[JsValue]](Future.successful(Right(None))))
@@ -390,9 +430,13 @@ class TrustsServiceSpec extends BaseSpec {
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         when(mockSubscriptionConnector.getTrustInfo(any()))
-          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(
-            Right(TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1")))
-          )))
+          .thenReturn(
+            EitherT[Future, TrustErrors, GetTrustResponse](
+              Future.successful(
+                Right(TrustProcessedResponse(trustInfoJson, ResponseHeader("Processed", "1")))
+              )
+            )
+          )
 
         when(mockRepository.set(any(), any(), any(), any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
@@ -412,9 +456,11 @@ class TrustsServiceSpec extends BaseSpec {
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
         when(mockSubscriptionConnector.getTrustInfo(any()))
-          .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Left(ServerError("exception message")))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Left(ServerError("exception message"))))
+          )
 
-        val utr = "123456789"
+        val utr                                                         = "123456789"
         val futureResult: Future[Either[TrustErrors, GetTrustResponse]] = SUT.getTrustInfo(utr, myId, sessionId).value
 
         whenReady(futureResult) { result =>
@@ -432,7 +478,7 @@ class TrustsServiceSpec extends BaseSpec {
         when(mockSubscriptionConnector.getTrustInfo(any()))
           .thenReturn(EitherT[Future, TrustErrors, GetTrustResponse](Future.successful(Left(ServerError()))))
 
-        val utr = "123456789"
+        val utr                                                         = "123456789"
         val futureResult: Future[Either[TrustErrors, GetTrustResponse]] = SUT.getTrustInfo(utr, myId, sessionId).value
 
         whenReady(futureResult) { result =>
@@ -447,7 +493,7 @@ class TrustsServiceSpec extends BaseSpec {
         when(mockRepository.resetCache(any(), any(), any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
 
-        val utr = "123456789"
+        val utr                                                         = "123456789"
         val futureResult: Future[Either[TrustErrors, GetTrustResponse]] = SUT.getTrustInfo(utr, myId, sessionId).value
 
         whenReady(futureResult) { result =>
@@ -459,7 +505,7 @@ class TrustsServiceSpec extends BaseSpec {
         when(mockRepository.get(any(), any(), any()))
           .thenReturn(EitherT[Future, TrustErrors, Option[JsValue]](Future.successful(Left(ServerError()))))
 
-        val utr = "123456789"
+        val utr                                                         = "123456789"
         val futureResult: Future[Either[TrustErrors, GetTrustResponse]] = SUT.getTrustInfo(utr, myId, sessionId).value
 
         whenReady(futureResult) { result =>
@@ -469,9 +515,13 @@ class TrustsServiceSpec extends BaseSpec {
 
       "repository.get returns ServerError(message), where message is an empty string" in new TrustsServiceFixture {
         when(mockRepository.get(any(), any(), any()))
-          .thenReturn(EitherT[Future, TrustErrors, Option[JsValue]](Future.successful(Left(ServerError("operation failed due to exception")))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, Option[JsValue]](
+              Future.successful(Left(ServerError("operation failed due to exception")))
+            )
+          )
 
-        val utr = "123456789"
+        val utr                                                         = "123456789"
         val futureResult: Future[Either[TrustErrors, GetTrustResponse]] = SUT.getTrustInfo(utr, myId, sessionId).value
 
         whenReady(futureResult) { result =>
@@ -488,10 +538,14 @@ class TrustsServiceSpec extends BaseSpec {
 
       "connector returns VariationResponse." in new TrustsServiceFixture {
 
-        when(mockSubscriptionConnector.trustVariation(trustVariationsRequest)).
-          thenReturn(EitherT[Future, TrustErrors, VariationSuccessResponse](Future.successful(Right(VariationSuccessResponse("tvn123")))))
+        when(mockSubscriptionConnector.trustVariation(trustVariationsRequest)).thenReturn(
+          EitherT[Future, TrustErrors, VariationSuccessResponse](
+            Future.successful(Right(VariationSuccessResponse("tvn123")))
+          )
+        )
 
-        val futureResult: Future[Either[TrustErrors, VariationSuccessResponse]] = SUT.trustVariation(trustVariationsRequest).value
+        val futureResult: Future[Either[TrustErrors, VariationSuccessResponse]] =
+          SUT.trustVariation(trustVariationsRequest).value
 
         whenReady(futureResult) { result =>
           result mustBe Right(VariationSuccessResponse("tvn123"))
@@ -499,14 +553,17 @@ class TrustsServiceSpec extends BaseSpec {
       }
     }
 
-
     "return VariationFailureForAudit" when {
       "connector returns ServerError(message), where message is nonEmpty" in new TrustsServiceFixture {
 
-        when(mockSubscriptionConnector.trustVariation(trustVariationsRequest)).
-          thenReturn(EitherT[Future, TrustErrors, VariationSuccessResponse](Future.successful(Left(ServerError("Duplicate submission")))))
+        when(mockSubscriptionConnector.trustVariation(trustVariationsRequest)).thenReturn(
+          EitherT[Future, TrustErrors, VariationSuccessResponse](
+            Future.successful(Left(ServerError("Duplicate submission")))
+          )
+        )
 
-        val futureResult: Future[Either[TrustErrors, VariationSuccessResponse]] = SUT.trustVariation(trustVariationsRequest).value
+        val futureResult: Future[Either[TrustErrors, VariationSuccessResponse]] =
+          SUT.trustVariation(trustVariationsRequest).value
 
         whenReady(futureResult) { result =>
           result mustBe Left(VariationFailureForAudit(errors.InternalServerErrorResponse, "Duplicate submission"))
@@ -517,10 +574,11 @@ class TrustsServiceSpec extends BaseSpec {
     "return ServerError()" when {
       "connector returns ServerError(message), where message is an empty string" in new TrustsServiceFixture {
 
-        when(mockSubscriptionConnector.trustVariation(trustVariationsRequest)).
-          thenReturn(EitherT[Future, TrustErrors, VariationSuccessResponse](Future.successful(Left(ServerError()))))
+        when(mockSubscriptionConnector.trustVariation(trustVariationsRequest))
+          .thenReturn(EitherT[Future, TrustErrors, VariationSuccessResponse](Future.successful(Left(ServerError()))))
 
-        val futureResult: Future[Either[TrustErrors, VariationSuccessResponse]] = SUT.trustVariation(trustVariationsRequest).value
+        val futureResult: Future[Either[TrustErrors, VariationSuccessResponse]] =
+          SUT.trustVariation(trustVariationsRequest).value
 
         whenReady(futureResult) { result =>
           result mustBe Left(ServerError())
@@ -529,5 +587,5 @@ class TrustsServiceSpec extends BaseSpec {
       }
     }
   }
-}
 
+}

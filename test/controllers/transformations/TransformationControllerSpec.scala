@@ -34,26 +34,25 @@ import utils.Session
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach with IntegrationPatience {
+class TransformationControllerSpec
+    extends BaseSpec with BeforeAndAfter with BeforeAndAfterEach with IntegrationPatience {
 
   private lazy val bodyParsers = Helpers.stubControllerComponents().parsers.default
 
   private val mockTransformationService = mock[TransformationService]
 
   private val identifier: String = "utr"
-  private val sessionId: String = Session.id(hc)
+  private val sessionId: String  = Session.id(hc)
 
-  private def transformationController = {
+  private def transformationController =
     new TransformationController(
       new FakeIdentifierAction(bodyParsers, Organisation),
       mockTransformationService,
       Helpers.stubControllerComponents()
     )
-  }
 
-  override def beforeEach(): Unit = {
+  override def beforeEach(): Unit =
     reset(mockTransformationService)
-  }
 
   "TransformationController" when {
 
@@ -76,9 +75,13 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
       "return INTERNAL_SERVER_ERROR" when {
         "failed to remove transforms" in {
           when(mockTransformationService.removeAllTransformations(any(), any(), any()))
-            .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(
-              Left(ServerError("operation failed due to exception from Mongo"))
-            )))
+            .thenReturn(
+              EitherT[Future, TrustErrors, Boolean](
+                Future.successful(
+                  Left(ServerError("operation failed due to exception from Mongo"))
+                )
+              )
+            )
 
           val request = FakeRequest(DELETE, "path")
 
@@ -152,4 +155,5 @@ class TransformationControllerSpec extends BaseSpec with BeforeAndAfter with Bef
       }
     }
   }
+
 }

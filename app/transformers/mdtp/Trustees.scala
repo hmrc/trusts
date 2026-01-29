@@ -24,7 +24,7 @@ object Trustees extends Entities[TrusteeType] {
 
   override val path: JsPath = ENTITIES \ TRUSTEES
 
-  override def updateEntity(trustee: TrusteeType): JsValue = {
+  override def updateEntity(trustee: TrusteeType): JsValue =
     trustee match {
       case TrusteeType(Some(trusteeInd), None) =>
         Json.obj(
@@ -34,9 +34,8 @@ object Trustees extends Entities[TrusteeType] {
         Json.obj(
           BUSINESS_TRUSTEE -> Json.toJson(trusteeOrg)(TrusteeOrgType.writeToMaintain)
         )
-      case _ =>
+      case _                                   =>
         Json.obj()
     }
-  }
 
 }

@@ -33,14 +33,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class NRSAuditServiceSpec extends BaseSpec {
 
-  private val year2021 = 2021
+  private val year2021                  = 2021
   private val (num3, num4, num5, num10) = (3, 4, 5, 10)
 
   ".audit" should {
 
     "audit a successful registration to NRS" in {
       val connector = mock[AuditConnector]
-      val service = new NRSAuditService(connector)
+      val service   = new NRSAuditService(connector)
 
       val identityData = IdentityData(
         internalId = "internalId",
@@ -52,7 +52,12 @@ class NRSAuditServiceSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "name"),
         agentDetails = Some(Json.obj("example" -> "agent details")),
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None), provider = None, email = None)
+        credential = CredentialData(
+          groupIdentifier = None,
+          loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None),
+          provider = None,
+          email = None
+        )
       )
 
       val metaData = MetaData(
@@ -64,7 +69,7 @@ class NRSAuditServiceSpec extends BaseSpec {
         identityData = identityData,
         userAuthToken = "AbCdEf123456",
         headerData = Json.obj(
-          "Gov-Client-Public-IP" -> "198.51.100.0",
+          "Gov-Client-Public-IP"   -> "198.51.100.0",
           "Gov-Client-Public-Port" -> "12345"
         ),
         searchKeys = SearchKeys(SearchKey.TRN, "ABTRUST123456789")
@@ -74,8 +79,7 @@ class NRSAuditServiceSpec extends BaseSpec {
 
       service.audit(event)
 
-      val expectedAuditData = Json.parse(
-        """{
+      val expectedAuditData = Json.parse("""{
           | "payload": {
           |   "businessId": "trs",
           |   "notableEvent": "trs-registration",
@@ -115,14 +119,16 @@ class NRSAuditServiceSpec extends BaseSpec {
           |}
           |""".stripMargin)
 
-      verify(connector).sendExplicitAudit(
-        equalTo("NonRepudiationTrustRegistration"),
-        equalTo(expectedAuditData))(any(), any(), any())
+      verify(connector).sendExplicitAudit(equalTo("NonRepudiationTrustRegistration"), equalTo(expectedAuditData))(
+        any(),
+        any(),
+        any()
+      )
     }
 
     "audit a successful taxable update to NRS" in {
       val connector = mock[AuditConnector]
-      val service = new NRSAuditService(connector)
+      val service   = new NRSAuditService(connector)
 
       val identityData = IdentityData(
         internalId = "internalId",
@@ -134,7 +140,12 @@ class NRSAuditServiceSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "name"),
         agentDetails = None,
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None), provider = None, email = None)
+        credential = CredentialData(
+          groupIdentifier = None,
+          loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None),
+          provider = None,
+          email = None
+        )
       )
 
       val metaData = MetaData(
@@ -146,7 +157,7 @@ class NRSAuditServiceSpec extends BaseSpec {
         identityData = identityData,
         userAuthToken = "AbCdEf123456",
         headerData = Json.obj(
-          "Gov-Client-Public-IP" -> "198.51.100.0",
+          "Gov-Client-Public-IP"   -> "198.51.100.0",
           "Gov-Client-Public-Port" -> "12345"
         ),
         searchKeys = SearchKeys(SearchKey.UTR, "1234567890")
@@ -156,8 +167,7 @@ class NRSAuditServiceSpec extends BaseSpec {
 
       service.audit(event)
 
-      val expectedAuditData = Json.parse(
-        """{
+      val expectedAuditData = Json.parse("""{
           | "payload": {
           |   "businessId": "trs",
           |   "notableEvent": "trs-update-taxable",
@@ -194,14 +204,16 @@ class NRSAuditServiceSpec extends BaseSpec {
           |}
           |""".stripMargin)
 
-      verify(connector).sendExplicitAudit(
-        equalTo("NonRepudiationTrustTaxableUpdate"),
-        equalTo(expectedAuditData))(any(), any(), any())
+      verify(connector).sendExplicitAudit(equalTo("NonRepudiationTrustTaxableUpdate"), equalTo(expectedAuditData))(
+        any(),
+        any(),
+        any()
+      )
     }
 
     "audit a successful non-taxable update to NRS" in {
       val connector = mock[AuditConnector]
-      val service = new NRSAuditService(connector)
+      val service   = new NRSAuditService(connector)
 
       val identityData = IdentityData(
         internalId = "internalId",
@@ -213,7 +225,12 @@ class NRSAuditServiceSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "name"),
         agentDetails = None,
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None), provider = None, email = None)
+        credential = CredentialData(
+          groupIdentifier = None,
+          loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None),
+          provider = None,
+          email = None
+        )
       )
 
       val metaData = MetaData(
@@ -225,7 +242,7 @@ class NRSAuditServiceSpec extends BaseSpec {
         identityData = identityData,
         userAuthToken = "AbCdEf123456",
         headerData = Json.obj(
-          "Gov-Client-Public-IP" -> "198.51.100.0",
+          "Gov-Client-Public-IP"   -> "198.51.100.0",
           "Gov-Client-Public-Port" -> "12345"
         ),
         searchKeys = SearchKeys(SearchKey.URN, "ABTRUS12345678")
@@ -235,8 +252,7 @@ class NRSAuditServiceSpec extends BaseSpec {
 
       service.audit(event)
 
-      val expectedAuditData = Json.parse(
-        """{
+      val expectedAuditData = Json.parse("""{
           | "payload": {
           |   "businessId": "trs",
           |   "notableEvent": "trs-update-non-taxable",
@@ -273,14 +289,16 @@ class NRSAuditServiceSpec extends BaseSpec {
           |}
           |""".stripMargin)
 
-      verify(connector).sendExplicitAudit(
-        equalTo("NonRepudiationTrustNonTaxableUpdate"),
-        equalTo(expectedAuditData))(any(), any(), any())
+      verify(connector).sendExplicitAudit(equalTo("NonRepudiationTrustNonTaxableUpdate"), equalTo(expectedAuditData))(
+        any(),
+        any(),
+        any()
+      )
     }
 
     "audit a non-successful event to NRS" in {
       val connector = mock[AuditConnector]
-      val service = new NRSAuditService(connector)
+      val service   = new NRSAuditService(connector)
 
       val identityData = IdentityData(
         internalId = "internalId",
@@ -292,7 +310,12 @@ class NRSAuditServiceSpec extends BaseSpec {
         requestId = "requestId",
         declaration = Json.obj("example" -> "name"),
         agentDetails = None,
-        credential = CredentialData(groupIdentifier = None, loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None), provider = None, email = None)
+        credential = CredentialData(
+          groupIdentifier = None,
+          loginTimes = LoginTimes(Instant.parse("2020-10-10T00:00:00Z"), None),
+          provider = None,
+          email = None
+        )
       )
 
       val metaData = MetaData(
@@ -304,7 +327,7 @@ class NRSAuditServiceSpec extends BaseSpec {
         identityData = identityData,
         userAuthToken = "AbCdEf123456",
         headerData = Json.obj(
-          "Gov-Client-Public-IP" -> "198.51.100.0",
+          "Gov-Client-Public-IP"   -> "198.51.100.0",
           "Gov-Client-Public-Port" -> "12345"
         ),
         searchKeys = SearchKeys(SearchKey.URN, "ABTRUS12345678")
@@ -314,8 +337,7 @@ class NRSAuditServiceSpec extends BaseSpec {
 
       service.audit(event)
 
-      val expectedAuditData = Json.parse(
-        """{
+      val expectedAuditData = Json.parse("""{
           | "payload": {
           |   "businessId": "trs",
           |   "notableEvent": "trs-update-non-taxable",
@@ -352,9 +374,12 @@ class NRSAuditServiceSpec extends BaseSpec {
           |}
           |""".stripMargin)
 
-      verify(connector).sendExplicitAudit(
-        equalTo("NonRepudiationTrustNonTaxableUpdate"),
-        equalTo(expectedAuditData))(any(), any(), any())
+      verify(connector).sendExplicitAudit(equalTo("NonRepudiationTrustNonTaxableUpdate"), equalTo(expectedAuditData))(
+        any(),
+        any(),
+        any()
+      )
     }
   }
+
 }

@@ -48,10 +48,10 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
-  private val utr: String = "utr"
-  private val index: Int = 0
+  private val utr: String          = "utr"
+  private val index: Int           = 0
   private val startDate: LocalDate = LocalDate.parse("2020-01-01")
-  private val endDate: LocalDate = LocalDate.parse("2021-01-01")
+  private val endDate: LocalDate   = LocalDate.parse("2021-01-01")
 
   private def removeBeneficiary(beneficiaryType: String): RemoveBeneficiary = RemoveBeneficiary(
     endDate = endDate,
@@ -64,7 +64,8 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
   private def buildInputJson(beneficiaryType: String, beneficiaryData: Seq[JsValue]): JsObject = {
     val baseJson = JsonUtils.getJsonValueFromFile("trusts-etmp-get-trust-cached.json")
 
-    val adder = (__ \ "details" \ "trust" \ "entities" \ "beneficiary" \ beneficiaryType).json.put(JsArray(beneficiaryData))
+    val adder =
+      (__ \ "details" \ "trust" \ "entities" \ "beneficiary" \ beneficiaryType).json.put(JsArray(beneficiaryData))
 
     baseJson.as[JsObject](__.json.update(adder))
   }
@@ -95,7 +96,11 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary)))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -176,9 +181,13 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(
-            Right(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary))))
-          )))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(
+                Right(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary))))
+              )
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -210,9 +219,13 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(
-            Right(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary))))
-          )))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(
+                Right(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary))))
+              )
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
@@ -256,9 +269,13 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(
-            Right(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary))))
-          )))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(
+                Right(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary))))
+              )
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -307,7 +324,11 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary)))))))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(Right(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary)))))
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -356,9 +377,13 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(
-            Right(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary))))
-          )))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(
+                Right(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary))))
+              )
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -407,9 +432,13 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(
-            Right(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary))))
-          )))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(
+                Right(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary))))
+              )
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -464,9 +493,13 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(
-            Right(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary))))
-          )))
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(
+                Right(buildInputJson(beneficiaryType, Seq(Json.toJson(beneficiary))))
+              )
+            )
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -508,4 +541,5 @@ class RemoveBeneficiaryControllerSpec extends AnyFreeSpec with MockitoSugar with
 
     }
   }
+
 }

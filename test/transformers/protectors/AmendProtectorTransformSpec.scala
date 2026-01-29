@@ -37,24 +37,29 @@ class AmendProtectorTransformSpec extends AnyFreeSpec {
 
         "amend a protector details by replacing the protector" in {
 
-          val beforeJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-protector-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-protector-transform-after.json")
+          val beforeJson =
+            JsonUtils.getJsonValueFromFile("transforms/trusts-individual-protector-transform-before.json")
+          val afterJson  = JsonUtils.getJsonValueFromFile("transforms/trusts-individual-protector-transform-after.json")
 
           val amended = ProtectorIndividual(
             lineNo = None,
             bpMatchStatus = None,
             NameType("First 2", None, "Last 2"),
             None,
-            identification = Some(IdentificationType(
-              nino = None,
-              passport = Some(PassportType(
-                number = "123456789",
-                expirationDate = LocalDate.parse("2025-01-01"),
-                countryOfIssue = "DE"
-              )),
-              address = None,
-              safeId = None
-            )),
+            identification = Some(
+              IdentificationType(
+                nino = None,
+                passport = Some(
+                  PassportType(
+                    number = "123456789",
+                    expirationDate = LocalDate.parse("2025-01-01"),
+                    countryOfIssue = "DE"
+                  )
+                ),
+                address = None,
+                safeId = None
+              )
+            ),
             countryOfResidence = None,
             legallyIncapable = None,
             nationality = None,
@@ -62,8 +67,7 @@ class AmendProtectorTransformSpec extends AnyFreeSpec {
             None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "lineNo": "2",
               |  "bpMatchStatus": "01",
@@ -79,7 +83,8 @@ class AmendProtectorTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendProtectorTransform(Some(1), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), `type`)
+          val transformer =
+            AmendProtectorTransform(Some(1), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), `type`)
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -101,16 +106,20 @@ class AmendProtectorTransformSpec extends AnyFreeSpec {
             bpMatchStatus = None,
             NameType("Updated First 2", None, "Updated Last 2"),
             dateOfBirth = Some(LocalDate.parse("2012-01-01")),
-            identification = Some(IdentificationType(
-              nino = None,
-              passport = Some(PassportType(
-                number = "123456789",
-                expirationDate = LocalDate.parse("2025-01-01"),
-                countryOfIssue = "DE"
-              )),
-              address = None,
-              safeId = None
-            )),
+            identification = Some(
+              IdentificationType(
+                nino = None,
+                passport = Some(
+                  PassportType(
+                    number = "123456789",
+                    expirationDate = LocalDate.parse("2025-01-01"),
+                    countryOfIssue = "DE"
+                  )
+                ),
+                address = None,
+                safeId = None
+              )
+            ),
             countryOfResidence = None,
             legallyIncapable = None,
             nationality = None,
@@ -118,8 +127,7 @@ class AmendProtectorTransformSpec extends AnyFreeSpec {
             None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "lineNo": "2",
               |  "bpMatchStatus": "01",
@@ -135,10 +143,16 @@ class AmendProtectorTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendProtectorTransform(Some(1), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
+          val transformer = AmendProtectorTransform(
+            Some(1),
+            Json.toJson(amended),
+            original,
+            endDate = LocalDate.parse("2020-03-25"),
+            `type`
+          )
 
           val applied = transformer.applyTransform(beforeJson).get
-          val result = transformer.applyDeclarationTransform(applied).get
+          val result  = transformer.applyDeclarationTransform(applied).get
           result mustBe afterJson
         }
 
@@ -147,7 +161,9 @@ class AmendProtectorTransformSpec extends AnyFreeSpec {
             JsonUtils.getJsonValueFromFile("transforms/trusts-new-individual-protector-transform-before.json")
 
           val afterJson =
-            JsonUtils.getJsonValueFromFile("transforms/trusts-new-individual-protector-transform-after-declaration.json")
+            JsonUtils.getJsonValueFromFile(
+              "transforms/trusts-new-individual-protector-transform-after-declaration.json"
+            )
 
           val amended = ProtectorIndividual(
             lineNo = None,
@@ -162,8 +178,7 @@ class AmendProtectorTransformSpec extends AnyFreeSpec {
             None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "name": {
               |    "firstName": "New First 3",
@@ -173,10 +188,16 @@ class AmendProtectorTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendProtectorTransform(Some(2), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
+          val transformer = AmendProtectorTransform(
+            Some(2),
+            Json.toJson(amended),
+            original,
+            endDate = LocalDate.parse("2020-03-25"),
+            `type`
+          )
 
           val applied = transformer.applyTransform(beforeJson).get
-          val result = transformer.applyDeclarationTransform(applied).get
+          val result  = transformer.applyDeclarationTransform(applied).get
           result mustBe afterJson
         }
       }
@@ -191,24 +212,25 @@ class AmendProtectorTransformSpec extends AnyFreeSpec {
         "amend a protector's details by replacing the protector" in {
 
           val beforeJson = JsonUtils.getJsonValueFromFile("trusts-business-protector-transform-before.json")
-          val afterJson = JsonUtils.getJsonValueFromFile("trusts-business-protector-transform-after.json")
+          val afterJson  = JsonUtils.getJsonValueFromFile("trusts-business-protector-transform-after.json")
 
           val amended = ProtectorCompany(
             lineNo = None,
             bpMatchStatus = None,
             "Company Name",
-            identification = Some(IdentificationOrgType(
-              utr = Some("1234567890"),
-              address = None,
-              safeId = None
-            )),
+            identification = Some(
+              IdentificationOrgType(
+                utr = Some("1234567890"),
+                address = None,
+                safeId = None
+              )
+            ),
             countryOfResidence = None,
             LocalDate.parse("2018-02-28"),
             None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "lineNo": "2",
               |  "bpMatchStatus": "01",
@@ -220,7 +242,8 @@ class AmendProtectorTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendProtectorTransform(Some(1), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), `type`)
+          val transformer =
+            AmendProtectorTransform(Some(1), Json.toJson(amended), original, LocalDate.parse("2020-03-25"), `type`)
 
           val result = transformer.applyTransform(beforeJson).get
           result mustBe afterJson
@@ -241,18 +264,19 @@ class AmendProtectorTransformSpec extends AnyFreeSpec {
             lineNo = None,
             bpMatchStatus = None,
             "Updated Company Name",
-            identification = Some(IdentificationOrgType(
-              utr = Some("1234567890"),
-              address = None,
-              safeId = None
-            )),
+            identification = Some(
+              IdentificationOrgType(
+                utr = Some("1234567890"),
+                address = None,
+                safeId = None
+              )
+            ),
             countryOfResidence = None,
             LocalDate.parse("2018-02-28"),
             None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "lineNo": "2",
               |  "bpMatchStatus": "01",
@@ -264,10 +288,16 @@ class AmendProtectorTransformSpec extends AnyFreeSpec {
               |}
               |""".stripMargin)
 
-          val transformer = AmendProtectorTransform(Some(1), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
+          val transformer = AmendProtectorTransform(
+            Some(1),
+            Json.toJson(amended),
+            original,
+            endDate = LocalDate.parse("2020-03-25"),
+            `type`
+          )
 
           val applied = transformer.applyTransform(beforeJson).get
-          val result = transformer.applyDeclarationTransform(applied).get
+          val result  = transformer.applyDeclarationTransform(applied).get
           result mustBe afterJson
         }
 
@@ -288,21 +318,27 @@ class AmendProtectorTransformSpec extends AnyFreeSpec {
             None
           )
 
-          val original: JsValue = Json.parse(
-            """
+          val original: JsValue = Json.parse("""
               |{
               |  "name": "Company 3",
               |  "entityStart": "2018-02-28"
               |}
               |""".stripMargin)
 
-          val transformer = AmendProtectorTransform(Some(2), Json.toJson(amended), original, endDate = LocalDate.parse("2020-03-25"), `type`)
+          val transformer = AmendProtectorTransform(
+            Some(2),
+            Json.toJson(amended),
+            original,
+            endDate = LocalDate.parse("2020-03-25"),
+            `type`
+          )
 
           val applied = transformer.applyTransform(beforeJson).get
-          val result = transformer.applyDeclarationTransform(applied).get
+          val result  = transformer.applyDeclarationTransform(applied).get
           result mustBe afterJson
         }
       }
     }
   }
+
 }

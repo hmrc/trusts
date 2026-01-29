@@ -23,7 +23,7 @@ trait AddEntityTransform extends DeltaTransform with AmendableTransform {
   val path: JsPath
   val entity: JsValue
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
+  override def applyTransform(input: JsValue): JsResult[JsValue] =
     addToList(input, path, entity)
-  }
+
 }

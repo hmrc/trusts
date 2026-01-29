@@ -24,36 +24,36 @@ import utils.JsonOps.doNothing
 
 import java.time.LocalDate
 
-case class PromoteTrusteeTransform(index: Option[Int],
-                                   amended: JsValue,
-                                   original: JsValue,
-                                   endDate: LocalDate,
-                                   `type`: String,
-                                   isTaxable: Boolean) extends TrusteeTransform with AmendEntityTransform {
+case class PromoteTrusteeTransform(
+  index: Option[Int],
+  amended: JsValue,
+  original: JsValue,
+  endDate: LocalDate,
+  `type`: String,
+  isTaxable: Boolean
+) extends TrusteeTransform with AmendEntityTransform {
 
-  override def applyTransform(input: JsValue): JsResult[JsValue] = {
+  override def applyTransform(input: JsValue): JsResult[JsValue] =
     transform(input)
-  }
 
-  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] = {
+  override def applyDeclarationTransform(input: JsValue): JsResult[JsValue] =
     if (index.isDefined) {
       for {
-        endDateAddedJson <- removeTrusteeTransform.applyDeclarationTransform(input)
+        endDateAddedJson         <- removeTrusteeTransform.applyDeclarationTransform(input)
         bpMatchStatusRemovedJson <- endDateAddedJson.transform((leadTrusteePath \ BP_MATCH_STATUS).json.prune)
       } yield bpMatchStatusRemovedJson
     } else {
       JsSuccess(input)
     }
-  }
 
   private val removeTrusteeTransform = RemoveTrusteeTransform(index, original, endDate, `type`)
 
   private def transform(input: JsValue): JsResult[JsValue] = {
     val jsonWithNewLeadTrustee: JsResult[JsValue] = if (index.isDefined) {
       for {
-        entityStart <- original.transform((__ \ `type` \ ENTITY_START).json.pick)
+        entityStart         <- original.transform((__ \ `type` \ ENTITY_START).json.pick)
         trusteePromotedJson <- input.transform(promoteTrustee(entityStart = Some(entityStart)))
-        trusteeRemovedJson <- removeTrusteeTransform.applyTransform(trusteePromotedJson)
+        trusteeRemovedJson  <- removeTrusteeTransform.applyTransform(trusteePromotedJson)
       } yield trusteeRemovedJson
     } else {
       input.transform(promoteTrustee(entityStart = None))
@@ -64,19 +64,19 @@ case class PromoteTrusteeTransform(index: Option[Int],
     }
   }
 
-  private def promoteTrustee(entityStart: Option[JsValue]): Reads[JsObject] = {
-    leadTrusteePath.json.prune andThen
-      __.json.update(leadTrusteePath.json.put(amended)) andThen
+  private def promoteTrustee(entityStart: Option[JsValue]): Reads[JsObject] =
+    leadTrusteePath.json.prune                                                                         andThen
+      __.json.update(leadTrusteePath.json.put(amended))                                                andThen
       entityStart.fold(doNothing())(x => __.json.update((leadTrusteePath \ ENTITY_START).json.put(x))) andThen
-      (leadTrusteePath \ LINE_NUMBER).json.prune andThen
-      (leadTrusteePath \ BP_MATCH_STATUS).json.prune andThen
-      putAmendedBpMatchStatus(amended) andThen
+      (leadTrusteePath \ LINE_NUMBER).json.prune                                                       andThen
+      (leadTrusteePath \ BP_MATCH_STATUS).json.prune                                                   andThen
+      putAmendedBpMatchStatus(amended)                                                                 andThen
       (if (isIndividualTrustee) (leadTrusteePath \ LEGALLY_INCAPABLE).json.prune else doNothing())
-  }
 
   private def demoteLeadTrusteeTransform(input: JsValue): DeltaTransform = {
 
-    def validate[T](implicit rds: Reads[T]): Option[T] = input.transform(leadTrusteePath.json.pick).flatMap(_.validate[T]).asOpt
+    def validate[T](implicit rds: Reads[T]): Option[T] =
+      input.transform(leadTrusteePath.json.pick).flatMap(_.validate[T]).asOpt
 
     (validate[LeadTrusteeIndType], validate[LeadTrusteeOrgType]) match {
 
@@ -114,21 +114,20 @@ case class PromoteTrusteeTransform(index: Option[Int],
     }
   }
 
-  private def adjustIdentification(identification: IdentificationType): Option[IdentificationType] = {
+  private def adjustIdentification(identification: IdentificationType): Option[IdentificationType] =
     (isTaxable, identification.nino.isDefined) match {
       case (true, true) => Some(identification.copy(address = None))
-      case (false, _) => None
-      case _ => Some(identification)
+      case (false, _)   => None
+      case _            => Some(identification)
     }
-  }
 
-  private def adjustIdentification(identification: IdentificationOrgType): Option[IdentificationOrgType] = {
+  private def adjustIdentification(identification: IdentificationOrgType): Option[IdentificationOrgType] =
     (isTaxable, identification.utr.isDefined) match {
       case (true, true) => Some(identification.copy(address = None))
-      case (false, _) => None
-      case _ => Some(identification)
+      case (false, _)   => None
+      case _            => Some(identification)
     }
-  }
+
 }
 
 object PromoteTrusteeTransform {

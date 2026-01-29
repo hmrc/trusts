@@ -33,70 +33,83 @@ trait GetTrustSuccessResponse extends GetTrustResponse {
 
 object GetTrustSuccessResponse {
 
-  implicit val writes: Writes[GetTrustSuccessResponse] = Writes{
+  implicit val writes: Writes[GetTrustSuccessResponse] = Writes {
     case TrustProcessedResponse(trust, header) =>
       Json.obj(
         RESPONSE_HEADER -> header,
-        GET_TRUST -> Json.toJson(trust.as[GetTrust])
+        GET_TRUST       -> Json.toJson(trust.as[GetTrust])
       )
-    case TrustFoundResponse(header) =>
+    case TrustFoundResponse(header)            =>
       Json.obj(RESPONSE_HEADER -> header)
   }
 
   implicit val reads: Reads[GetTrustSuccessResponse] = (json: JsValue) => {
     val header = (json \ RESPONSE_HEADER).validate[ResponseHeader]
     (json \ TRUST_OR_ESTATE_DISPLAY).toOption match {
-      case None =>
+      case None    =>
         header.map(TrustFoundResponse)
       case Some(x) =>
         x.validate[GetTrust] match {
           case JsSuccess(_, _) =>
             header.map(h => get_trust.TrustProcessedResponse(x, h))
-          case x: JsError => x
+          case x: JsError      => x
         }
 
     }
   }
+
 }
 
 object GetTrustResponse extends Logging {
 
   final val CLOSED_REQUEST_STATUS = 499
 
-  implicit def httpReads(identifier: String): HttpReads[GetTrustResponse] = (_: String, _: String, response: HttpResponse) => {
-    response.status match {
-      case OK =>
-        parseOkResponse(response, identifier)
-      case BAD_REQUEST =>
-        logger.warn(s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
-          s" bad request returned from des: ${response.json}")
-        BadRequestResponse
-      case NOT_FOUND =>
-        logger.info(s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
-          s" trust not found in ETMP for given identifier")
-        ResourceNotFoundResponse
-      case SERVICE_UNAVAILABLE =>
-        logger.warn(s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
-          s" service is unavailable, unable to get trust")
-        ServiceUnavailableResponse
-      case CLOSED_REQUEST_STATUS =>
-        logger.warn(s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
-          s" service is unavailable, server closed the request")
-        ClosedRequestResponse
-      case status =>
-        logger.error(s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
-          s" error occurred when getting trust, status: $status")
-        InternalServerErrorResponse
-    }
-  }
+  implicit def httpReads(identifier: String): HttpReads[GetTrustResponse] =
+    (_: String, _: String, response: HttpResponse) =>
+      response.status match {
+        case OK                    =>
+          parseOkResponse(response, identifier)
+        case BAD_REQUEST           =>
+          logger.warn(
+            s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
+              s" bad request returned from des: ${response.json}"
+          )
+          BadRequestResponse
+        case NOT_FOUND             =>
+          logger.info(
+            s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
+              s" trust not found in ETMP for given identifier"
+          )
+          ResourceNotFoundResponse
+        case SERVICE_UNAVAILABLE   =>
+          logger.warn(
+            s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
+              s" service is unavailable, unable to get trust"
+          )
+          ServiceUnavailableResponse
+        case CLOSED_REQUEST_STATUS =>
+          logger.warn(
+            s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
+              s" service is unavailable, server closed the request"
+          )
+          ClosedRequestResponse
+        case status                =>
+          logger.error(
+            s"[GetTrustResponse][httpReads][UTR/URN: $identifier]" +
+              s" error occurred when getting trust, status: $status"
+          )
+          InternalServerErrorResponse
+      }
 
-  private def parseOkResponse(response: HttpResponse, identifier: String) : GetTrustResponse = {
+  private def parseOkResponse(response: HttpResponse, identifier: String): GetTrustResponse =
     response.json.validate[GetTrustSuccessResponse] match {
       case JsSuccess(trustFound, _) => trustFound
-      case JsError(errors) =>
-        logger.error(s"[GetTrustResponse][parseOkResponse][UTR/URN: $identifier] " +
-          s"Cannot parse as TrustFoundResponse due to ${JsError.toJson(errors)}")
+      case JsError(errors)          =>
+        logger.error(
+          s"[GetTrustResponse][parseOkResponse][UTR/URN: $identifier] " +
+            s"Cannot parse as TrustFoundResponse due to ${JsError.toJson(errors)}"
+        )
         NotEnoughDataResponse(response.json, JsError.toJson(errors))
     }
-  }
+
 }

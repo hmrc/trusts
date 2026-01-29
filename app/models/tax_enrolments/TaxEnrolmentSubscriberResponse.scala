@@ -30,16 +30,19 @@ case class TaxEnrolmentFailureResponse(message: String) extends TaxEnrolmentSubs
 
 object TaxEnrolmentSubscriberResponse extends Logging {
 
-  implicit lazy val httpReads: HttpReads[TaxEnrolmentSubscriberResponse] = (_: String, _: String, response: HttpResponse) => {
-    response.status match {
-      case NO_CONTENT =>
-        TaxEnrolmentSuccess
-      case BAD_REQUEST =>
-        logger.error("[TaxEnrolmentSubscriberResponse][httpReads] Bad request response received from tax enrolment")
-        TaxEnrolmentFailureResponse("Bad request")
-      case status =>
-        logger.error(s"[TaxEnrolmentSubscriberResponse][httpReads] Unexpected error response from tax enrolment: $status")
-        TaxEnrolmentFailureResponse(s"Unexpected error response from tax enrolment. Status: $status")
-    }
-  }
+  implicit lazy val httpReads: HttpReads[TaxEnrolmentSubscriberResponse] =
+    (_: String, _: String, response: HttpResponse) =>
+      response.status match {
+        case NO_CONTENT  =>
+          TaxEnrolmentSuccess
+        case BAD_REQUEST =>
+          logger.error("[TaxEnrolmentSubscriberResponse][httpReads] Bad request response received from tax enrolment")
+          TaxEnrolmentFailureResponse("Bad request")
+        case status      =>
+          logger.error(
+            s"[TaxEnrolmentSubscriberResponse][httpReads] Unexpected error response from tax enrolment: $status"
+          )
+          TaxEnrolmentFailureResponse(s"Unexpected error response from tax enrolment. Status: $status")
+      }
+
 }

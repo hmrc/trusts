@@ -42,14 +42,15 @@ import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
-class RemoveOtherIndividualControllerSpec extends AnyFreeSpec with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite {
+class RemoveOtherIndividualControllerSpec
+    extends AnyFreeSpec with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite {
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
-  private val utr: String = "utr"
-  private val index: Int = 0
+  private val utr: String        = "utr"
+  private val index: Int         = 0
   private val endDate: LocalDate = LocalDate.parse("2018-02-24")
 
   private val removeOtherIndividual: RemoveOtherIndividual = RemoveOtherIndividual(
@@ -92,7 +93,11 @@ class RemoveOtherIndividualControllerSpec extends AnyFreeSpec with MockitoSugar 
       )(Implicits.global, Helpers.stubControllerComponents())
 
       when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-        .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(Seq(Json.toJson(otherIndividual)))))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, JsObject](
+            Future.successful(Right(buildInputJson(Seq(Json.toJson(otherIndividual)))))
+          )
+        )
 
       when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
         .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -151,7 +156,11 @@ class RemoveOtherIndividualControllerSpec extends AnyFreeSpec with MockitoSugar 
       )(Implicits.global, Helpers.stubControllerComponents())
 
       when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-        .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(buildInputJson(Seq(Json.toJson(otherIndividual)))))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, JsObject](
+            Future.successful(Right(buildInputJson(Seq(Json.toJson(otherIndividual)))))
+          )
+        )
 
       when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
         .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
@@ -187,4 +196,5 @@ class RemoveOtherIndividualControllerSpec extends AnyFreeSpec with MockitoSugar 
 
     }
   }
+
 }

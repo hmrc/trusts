@@ -39,36 +39,36 @@ case object InternalServerErrorResponse extends RegistrationResponse
 object RegistrationResponse extends Logging {
 
   implicit lazy val httpReads: HttpReads[RegistrationResponse] =
-    (_: String, _: String, response: HttpResponse) => {
+    (_: String, _: String, response: HttpResponse) =>
       response.status match {
-        case OK =>
+        case OK                  =>
           response.json.as[RegistrationTrnResponse]
-        case FORBIDDEN =>
+        case FORBIDDEN           =>
           parseForbiddenResponse(response.json)
-        case BAD_REQUEST =>
+        case BAD_REQUEST         =>
           BadRequestResponse
         case SERVICE_UNAVAILABLE =>
           logger.error("[RegistrationResponse][httpReads] Service unavailable response from des.")
           ServiceUnavailableResponse
-        case status =>
-          logger.error(s"[RegistrationResponse][httpReads] Error response from des with status $status and body: ${response.body}")
+        case status              =>
+          logger.error(
+            s"[RegistrationResponse][httpReads] Error response from des with status $status and body: ${response.body}"
+          )
           InternalServerErrorResponse
       }
-  }
 
-  private def parseForbiddenResponse(json: JsValue): RegistrationResponse = {
+  private def parseForbiddenResponse(json: JsValue): RegistrationResponse =
     json.toString() match {
       case response if response.contains(ALREADY_REGISTERED_CODE) =>
         logger.info("[RegistrationResponse][parseForbiddenResponse] already registered response from des.")
         AlreadyRegisteredResponse
-      case response if response.contains(NO_MATCH_CODE) =>
+      case response if response.contains(NO_MATCH_CODE)           =>
         logger.info("[RegistrationResponse][parseForbiddenResponse] No match response from des.")
         NoMatchResponse
-      case _ =>
+      case _                                                      =>
         logger.error("[RegistrationResponse][parseForbiddenResponse] Forbidden response from des.")
         InternalServerErrorResponse
     }
-  }
 
 }
 

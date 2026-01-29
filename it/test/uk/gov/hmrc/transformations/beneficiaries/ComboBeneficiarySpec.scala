@@ -65,7 +65,8 @@ class ComboBeneficiarySpec extends IntegrationTestBase {
 
     def application = applicationBuilder
       .overrides(
-        bind[IdentifierAction].toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
+        bind[IdentifierAction]
+          .toInstance(new FakeIdentifierAction(Helpers.stubControllerComponents().parsers.default, Organisation)),
         bind[TrustsConnector].toInstance(stubbedTrustsConnector),
         bind[LocalDateService].toInstance(TestLocalDateService)
       )
@@ -75,36 +76,36 @@ class ComboBeneficiarySpec extends IntegrationTestBase {
       runTest("5174384721", app)
     }
 
-    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) { app =>
-      runTest("0123456789ABCDE", app)
+    "return amended data in a subsequent 'get' call, for identifier '0123456789ABCDE'" in assertMongoTest(application) {
+      app =>
+        runTest("0123456789ABCDE", app)
     }
 
     def runTest(identifier: String, application: Application): Assertion = {
       val result = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
-      status(result) mustBe OK
+      status(result)        mustBe OK
       contentAsJson(result) mustBe expectedInitialGetJson
 
-      status(addCharityBeneficiary(identifier, application)) mustBe OK
-      status(addIndividualBeneficiary(identifier, application)) mustBe OK
-      status(addUnidentifiedBeneficiary(identifier, application)) mustBe OK
+      status(addCharityBeneficiary(identifier, application))        mustBe OK
+      status(addIndividualBeneficiary(identifier, application))     mustBe OK
+      status(addUnidentifiedBeneficiary(identifier, application))   mustBe OK
       status(amendUnidentifiedBeneficiary(identifier, application)) mustBe OK
-      status(removeCharityBeneficiary(identifier, application)) mustBe OK
-      status(amendCharityBeneficiary(identifier, application)) mustBe OK
-      status(removeOtherBeneficiary(identifier, application)) mustBe OK
-      status(amendCompanyBeneficiary(identifier, application)) mustBe OK
+      status(removeCharityBeneficiary(identifier, application))     mustBe OK
+      status(amendCharityBeneficiary(identifier, application))      mustBe OK
+      status(removeOtherBeneficiary(identifier, application))       mustBe OK
+      status(amendCompanyBeneficiary(identifier, application))      mustBe OK
 
       val newResult = route(application, FakeRequest(GET, s"/trusts/$identifier/transformed")).get
-      status(newResult) mustBe OK
+      status(newResult)        mustBe OK
       contentAsJson(newResult) mustBe expectedGetAfterAddBeneficiaryJson
 
       lazy val variationResponse = VariationSuccessResponse("TVN12345678")
-      lazy val payloadCaptor = ArgumentCaptor.forClass(classOf[JsValue])
+      lazy val payloadCaptor     = ArgumentCaptor.forClass(classOf[JsValue])
 
       when(stubbedTrustsConnector.trustVariation(payloadCaptor.capture()))
         .thenReturn(EitherT[Future, TrustErrors, VariationSuccessResponse](Future.successful(Right(variationResponse))))
 
-      val declaration = Json.parse(
-        """
+      val declaration = Json.parse("""
           |{
           | "declaration": {
           |     "name": { "firstName": "John", "lastName": "Doe" }
@@ -202,8 +203,7 @@ class ComboBeneficiarySpec extends IntegrationTestBase {
   }
 
   private def removeCharityBeneficiary(identifier: String, application: Application) = {
-    val removeJson = Json.parse(
-      """
+    val removeJson = Json.parse("""
         |{
         | "endDate": "2014-03-12",
         | "index": 0,
@@ -245,8 +245,7 @@ class ComboBeneficiarySpec extends IntegrationTestBase {
   }
 
   private def removeOtherBeneficiary(identifier: String, application: Application) = {
-    val removeJson = Json.parse(
-      """
+    val removeJson = Json.parse("""
         |{
         | "endDate": "2014-03-16",
         | "index": 0,
@@ -286,4 +285,5 @@ class ComboBeneficiarySpec extends IntegrationTestBase {
 
     route(application, addRequest).get
   }
+
 }

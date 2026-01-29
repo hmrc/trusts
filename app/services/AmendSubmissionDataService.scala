@@ -24,7 +24,7 @@ import utils.JsonOps.{JsValueOps, putNewValue}
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class AmendSubmissionDataService @Inject()(localDateService: LocalDateService) extends Logging {
+class AmendSubmissionDataService @Inject() (localDateService: LocalDateService) extends Logging {
 
   def applyRulesAndAddSubmissionDate(json: JsValue): JsValue = {
     val amendedJson = json.applyRules
@@ -33,9 +33,12 @@ class AmendSubmissionDataService @Inject()(localDateService: LocalDateService) e
     } match {
       case JsSuccess(value, _) =>
         value
-      case JsError(errors) =>
-        logger.error(s"[AmendSubmissionDataService][applyRulesAndAddSubmissionDate] could not add submission date: $errors")
+      case JsError(errors)     =>
+        logger.error(
+          s"[AmendSubmissionDataService][applyRulesAndAddSubmissionDate] could not add submission date: $errors"
+        )
         amendedJson
     }
   }
+
 }

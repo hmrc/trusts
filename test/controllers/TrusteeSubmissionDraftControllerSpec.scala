@@ -41,8 +41,8 @@ import java.time.{Instant, LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TrusteeSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar with JsonFixtures with Inside with ScalaFutures
-  with GuiceOneAppPerSuite {
+class TrusteeSubmissionDraftControllerSpec
+    extends AnyWordSpec with MockitoSugar with JsonFixtures with Inside with ScalaFutures with GuiceOneAppPerSuite {
 
   private val currentDateTime: Instant =
     LocalDateTime.of(1999, 3, 14, 13, 33).toInstant(ZoneOffset.UTC)
@@ -51,8 +51,8 @@ class TrusteeSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
 
   private lazy val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
-  private lazy val mockSubmissionDraft = Json.parse(
-    """
+  private lazy val mockSubmissionDraft = Json
+    .parse("""
       |{
       |    "draftId" : "98c002e9-ef92-420b-83f6-62e6fff0c301",
       |    "internalId" : "Int-b25955c7-6565-4702-be4b-3b5cddb71f54",
@@ -137,8 +137,8 @@ class TrusteeSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
       |    },
       |    "inProgress" : true
       |}
-      |""".stripMargin).as[RegistrationSubmissionDraft]
-
+      |""".stripMargin)
+    .as[RegistrationSubmissionDraft]
 
   private object TimeServiceStub extends TimeService {
     override def now: Instant = currentDateTime
@@ -147,7 +147,7 @@ class TrusteeSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
   ".getLeadTrustee" should {
 
     "respond with OK with the lead trustee" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TrusteeSubmissionDraftController(
@@ -158,7 +158,11 @@ class TrusteeSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
       )
 
       when(submissionRepository.getDraft(any(), any()))
-        .thenReturn(EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](Future.successful(Right(Some(mockSubmissionDraft)))))
+        .thenReturn(
+          EitherT[Future, TrustErrors, Option[RegistrationSubmissionDraft]](
+            Future.successful(Right(Some(mockSubmissionDraft)))
+          )
+        )
 
       val request = FakeRequest("GET", "path")
 
@@ -166,8 +170,7 @@ class TrusteeSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
 
       status(result) mustBe OK
 
-      val expectedDraftJson = Json.parse(
-        """
+      val expectedDraftJson = Json.parse("""
           |{
           |  "leadTrusteeOrg": {
           |    "name": "Lead Org",
@@ -179,12 +182,12 @@ class TrusteeSubmissionDraftControllerSpec extends AnyWordSpec with MockitoSugar
           |}
           |""".stripMargin)
 
-      contentType(result) mustBe Some(JSON)
+      contentType(result)   mustBe Some(JSON)
       contentAsJson(result) mustBe expectedDraftJson
     }
 
     "respond with NotFound when no draft" in {
-      val identifierAction = new FakeIdentifierAction(bodyParsers, Organisation)
+      val identifierAction     = new FakeIdentifierAction(bodyParsers, Organisation)
       val submissionRepository = mock[RegistrationSubmissionRepository]
 
       val controller = new TrusteeSubmissionDraftController(

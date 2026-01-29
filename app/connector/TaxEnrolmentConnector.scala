@@ -29,91 +29,111 @@ import utils.TrustEnvelope.TrustEnvelope
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class TaxEnrolmentConnectorImpl @Inject()(http: HttpClientV2,
-                                          config: AppConfig
-                                         )(implicit ec: ExecutionContext) extends TaxEnrolmentConnector with ConnectorErrorResponseHandler {
+class TaxEnrolmentConnectorImpl @Inject() (http: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext)
+    extends TaxEnrolmentConnector with ConnectorErrorResponseHandler {
 
   val className: String = this.getClass.getSimpleName
 
   private def headers = Seq(CONTENT_TYPE -> CONTENT_TYPE_JSON)
 
-  override def getTaxEnrolmentSubscription(subscriptionId: String, taxable: Boolean, trn: String): TaxEnrolmentSubscription = {
+  override def getTaxEnrolmentSubscription(
+    subscriptionId: String,
+    taxable: Boolean,
+    trn: String
+  ): TaxEnrolmentSubscription =
     if (taxable) {
       TaxEnrolmentSubscription(
         serviceName = config.taxEnrolmentsPayloadBodyServiceNameTaxable,
         callback = config.taxEnrolmentsPayloadBodyCallbackTaxable(trn),
-        etmpId = subscriptionId)
+        etmpId = subscriptionId
+      )
     } else {
       TaxEnrolmentSubscription(
         serviceName = config.taxEnrolmentsPayloadBodyServiceNameNonTaxable,
         callback = config.taxEnrolmentsPayloadBodyCallbackNonTaxable(trn),
-        etmpId = subscriptionId)
+        etmpId = subscriptionId
+      )
     }
-  }
 
-  override def getTaxEnrolmentMigration(subscriptionId: String, urn: String): TaxEnrolmentSubscription = {
+  override def getTaxEnrolmentMigration(subscriptionId: String, urn: String): TaxEnrolmentSubscription =
     TaxEnrolmentSubscription(
       serviceName = config.taxEnrolmentsMigrationPayloadServiceName,
       callback = config.taxEnrolmentsMigrationPayloadBodyCallback(subscriptionId, urn),
-      etmpId = subscriptionId)
+      etmpId = subscriptionId
+    )
 
-  }
-
-  def getResponse(taxEnrolmentsEndpoint: String,
-                  taxEnrolmentSubscriptionRequest: TaxEnrolmentSubscription,
-                  methodName: String)
-                 (implicit hc: HeaderCarrier): TrustEnvelope[TaxEnrolmentSubscriberResponse] = EitherT {
+  def getResponse(
+    taxEnrolmentsEndpoint: String,
+    taxEnrolmentSubscriptionRequest: TaxEnrolmentSubscription,
+    methodName: String
+  )(implicit hc: HeaderCarrier): TrustEnvelope[TaxEnrolmentSubscriberResponse] = EitherT {
 
     val taxEnrolmentHeaders = hc.withExtraHeaders(headers: _*).extraHeaders
-    http.put(url"$taxEnrolmentsEndpoint")
-      .setHeader(taxEnrolmentHeaders:_*)
+    http
+      .put(url"$taxEnrolmentsEndpoint")
+      .setHeader(taxEnrolmentHeaders: _*)
       .withBody(Json.toJson(taxEnrolmentSubscriptionRequest))
       .execute[TaxEnrolmentSubscriberResponse]
-    .map {
-      case TaxEnrolmentFailureResponse(message) => Left(ServerError(message))
-      case response => Right(response)
-    }.recover {
-      case ex =>
+      .map {
+        case TaxEnrolmentFailureResponse(message) => Left(ServerError(message))
+        case response                             => Right(response)
+      }
+      .recover { case ex =>
         Left(handleError(ex, methodName, taxEnrolmentsEndpoint))
-    }
+      }
   }
 
-
-  override def enrolSubscriber(subscriptionId: String, taxable: Boolean, trn: String)
-                              (implicit hc: HeaderCarrier): TrustEnvelope[TaxEnrolmentSubscriberResponse] = {
-    val taxEnrolmentsEndpoint = s"${config.taxEnrolmentsUrl}/tax-enrolments/subscriptions/$subscriptionId/subscriber"
-    val taxEnrolmentSubscriptionRequest: TaxEnrolmentSubscription = getTaxEnrolmentSubscription(subscriptionId, taxable, trn)
+  override def enrolSubscriber(subscriptionId: String, taxable: Boolean, trn: String)(implicit
+    hc: HeaderCarrier
+  ): TrustEnvelope[TaxEnrolmentSubscriberResponse] = {
+    val taxEnrolmentsEndpoint                                     = s"${config.taxEnrolmentsUrl}/tax-enrolments/subscriptions/$subscriptionId/subscriber"
+    val taxEnrolmentSubscriptionRequest: TaxEnrolmentSubscription =
+      getTaxEnrolmentSubscription(subscriptionId, taxable, trn)
     getResponse(taxEnrolmentsEndpoint, taxEnrolmentSubscriptionRequest, "enrolSubscriber")
   }
 
-  override def migrateSubscriberToTaxable(subscriptionId: String, urn: String)
-                                         (implicit hc: HeaderCarrier): TrustEnvelope[TaxEnrolmentSubscriberResponse] = {
-    val taxEnrolmentsEndpoint = s"${config.taxEnrolmentsMigrationUrl}/tax-enrolments/subscriptions/$subscriptionId/subscriber"
+  override def migrateSubscriberToTaxable(subscriptionId: String, urn: String)(implicit
+    hc: HeaderCarrier
+  ): TrustEnvelope[TaxEnrolmentSubscriberResponse] = {
+    val taxEnrolmentsEndpoint                                     =
+      s"${config.taxEnrolmentsMigrationUrl}/tax-enrolments/subscriptions/$subscriptionId/subscriber"
     val taxEnrolmentSubscriptionRequest: TaxEnrolmentSubscription = getTaxEnrolmentMigration(subscriptionId, urn)
     getResponse(taxEnrolmentsEndpoint, taxEnrolmentSubscriptionRequest, "migrateSubscriberToTaxable")
   }
 
-  override def subscriptions(subscriptionId: String)
-                            (implicit hc: HeaderCarrier): TrustEnvelope[TaxEnrolmentsSubscriptionsSuccessResponse] = EitherT {
+  override def subscriptions(
+    subscriptionId: String
+  )(implicit hc: HeaderCarrier): TrustEnvelope[TaxEnrolmentsSubscriptionsSuccessResponse] = EitherT {
     val getSubscriptionsEndpoint = s"${config.taxEnrolmentsMigrationUrl}/tax-enrolments/subscriptions/$subscriptionId"
-    http.get(url"$getSubscriptionsEndpoint")
+    http
+      .get(url"$getSubscriptionsEndpoint")
       .execute[TaxEnrolmentsSubscriptionsResponse](TaxEnrolmentsSubscriptionsResponse.httpReads(subscriptionId), ec)
       .map {
-      case response: TaxEnrolmentsSubscriptionsSuccessResponse => Right(response)
-      case response:TaxEnrolmentsSubscriptionsFailureResponse => Left(ServerError(response.message))
-    }.recover {
-      case ex =>
+        case response: TaxEnrolmentsSubscriptionsSuccessResponse => Right(response)
+        case response: TaxEnrolmentsSubscriptionsFailureResponse => Left(ServerError(response.message))
+      }
+      .recover { case ex =>
         Left(handleError(ex, "subscriptions", getSubscriptionsEndpoint))
-    }
+      }
   }
+
 }
 
 trait TaxEnrolmentConnector {
 
   def getTaxEnrolmentSubscription(subscriptionId: String, taxable: Boolean, trn: String): TaxEnrolmentSubscription
-  def getTaxEnrolmentMigration(subscriptionId: String,  urn: String): TaxEnrolmentSubscription
-  def enrolSubscriber(subscriptionId: String, taxable: Boolean, trn: String)(implicit hc: HeaderCarrier): TrustEnvelope[TaxEnrolmentSubscriberResponse]
-  def migrateSubscriberToTaxable(subscriptionId: String, urn: String)(implicit hc: HeaderCarrier): TrustEnvelope[TaxEnrolmentSubscriberResponse]
-  def subscriptions(subscriptionId: String)(implicit hc: HeaderCarrier): TrustEnvelope[TaxEnrolmentsSubscriptionsSuccessResponse]
+  def getTaxEnrolmentMigration(subscriptionId: String, urn: String): TaxEnrolmentSubscription
+
+  def enrolSubscriber(subscriptionId: String, taxable: Boolean, trn: String)(implicit
+    hc: HeaderCarrier
+  ): TrustEnvelope[TaxEnrolmentSubscriberResponse]
+
+  def migrateSubscriberToTaxable(subscriptionId: String, urn: String)(implicit
+    hc: HeaderCarrier
+  ): TrustEnvelope[TaxEnrolmentSubscriberResponse]
+
+  def subscriptions(subscriptionId: String)(implicit
+    hc: HeaderCarrier
+  ): TrustEnvelope[TaxEnrolmentsSubscriptionsSuccessResponse]
 
 }

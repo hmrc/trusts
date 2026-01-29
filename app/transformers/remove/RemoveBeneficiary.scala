@@ -21,11 +21,10 @@ import utils.Constants._
 
 import java.time.LocalDate
 
-case class RemoveBeneficiary(endDate: LocalDate,
-                             index: Int,
-                             override val `type`: String) extends Remove
+case class RemoveBeneficiary(endDate: LocalDate, index: Int, override val `type`: String) extends Remove
 
 object RemoveBeneficiary {
+
   val validBeneficiaryTypes: Seq[String] = Seq(
     INDIVIDUAL_BENEFICIARY,
     UNIDENTIFIED_BENEFICIARY,
@@ -36,7 +35,9 @@ object RemoveBeneficiary {
     OTHER_BENEFICIARY
   )
 
-  val reads: Reads[RemoveBeneficiary] = Json.reads[RemoveBeneficiary].filter(rb => validBeneficiaryTypes.contains(rb.`type`))
+  val reads: Reads[RemoveBeneficiary]    =
+    Json.reads[RemoveBeneficiary].filter(rb => validBeneficiaryTypes.contains(rb.`type`))
+
   val writes: OWrites[RemoveBeneficiary] = Json.writes[RemoveBeneficiary]
 
   implicit val formats: Format[RemoveBeneficiary] = Format(reads, writes)

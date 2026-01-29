@@ -48,8 +48,8 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
 
   private val identifierAction = new FakeIdentifierAction(bodyParsers, Agent)
 
-  private val utr: String = "utr"
-  private val index: Int = 0
+  private val utr: String        = "utr"
+  private val index: Int         = 0
   private val endDate: LocalDate = LocalDate.parse("2021-01-01")
 
   private val invalidBody: JsValue = Json.parse("{}")
@@ -61,7 +61,7 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
 
     val addTrustTaxable = isTaxable match {
       case Some(value) => (__ \ "details" \ "trust" \ "details" \ "trustTaxable").json.put(JsBoolean(value))
-      case None => __.json.pick[JsObject]
+      case None        => __.json.pick[JsObject]
     }
 
     baseJson.as[JsObject](__.json.update(addTrustees) andThen __.json.update(addTrustTaxable))
@@ -106,7 +106,7 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
           "taxable" in {
 
             val mockTransformationService = mock[TransformationService]
-            val mockLocalDateService = mock[LocalDateService]
+            val mockLocalDateService      = mock[LocalDateService]
 
             val controller = new PromoteTrusteeController(
               identifierAction,
@@ -115,12 +115,18 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
             )(Implicits.global, Helpers.stubControllerComponents())
 
             when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-              .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(
-                buildInputJson(
-                  Seq(Json.toJson(originalTrustee)),
-                  isTaxable = Some(true)
+              .thenReturn(
+                EitherT[Future, TrustErrors, JsObject](
+                  Future.successful(
+                    Right(
+                      buildInputJson(
+                        Seq(Json.toJson(originalTrustee)),
+                        isTaxable = Some(true)
+                      )
+                    )
+                  )
                 )
-              ))))
+              )
 
             when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
               .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -135,7 +141,14 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
 
             status(result) mustBe OK
 
-            val transform = PromoteTrusteeTransform(Some(index), Json.toJson(promotedTrustee), Json.toJson(originalTrustee), endDate, trusteeType, isTaxable = true)
+            val transform = PromoteTrusteeTransform(
+              Some(index),
+              Json.toJson(promotedTrustee),
+              Json.toJson(originalTrustee),
+              endDate,
+              trusteeType,
+              isTaxable = true
+            )
 
             verify(mockTransformationService)
               .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
@@ -144,7 +157,7 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
           "non-taxable" in {
 
             val mockTransformationService = mock[TransformationService]
-            val mockLocalDateService = mock[LocalDateService]
+            val mockLocalDateService      = mock[LocalDateService]
 
             val controller = new PromoteTrusteeController(
               identifierAction,
@@ -153,12 +166,18 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
             )(Implicits.global, Helpers.stubControllerComponents())
 
             when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-              .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(
-                buildInputJson(
-                  Seq(Json.toJson(originalTrustee)),
-                  isTaxable = Some(false)
+              .thenReturn(
+                EitherT[Future, TrustErrors, JsObject](
+                  Future.successful(
+                    Right(
+                      buildInputJson(
+                        Seq(Json.toJson(originalTrustee)),
+                        isTaxable = Some(false)
+                      )
+                    )
+                  )
                 )
-              ))))
+              )
 
             when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
               .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -173,7 +192,14 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
 
             status(result) mustBe OK
 
-            val transform = PromoteTrusteeTransform(Some(index), Json.toJson(promotedTrustee), Json.toJson(originalTrustee), endDate, trusteeType, isTaxable = false)
+            val transform = PromoteTrusteeTransform(
+              Some(index),
+              Json.toJson(promotedTrustee),
+              Json.toJson(originalTrustee),
+              endDate,
+              trusteeType,
+              isTaxable = false
+            )
 
             verify(mockTransformationService)
               .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
@@ -184,7 +210,7 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
       "must return an Internal Server Error when getTransformedTrustJson fails" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new PromoteTrusteeController(
           identifierAction,
@@ -208,13 +234,12 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
 
         status(result) mustBe INTERNAL_SERVER_ERROR
 
-
       }
 
       "must return an error for invalid json" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new PromoteTrusteeController(
           identifierAction,
@@ -264,7 +289,7 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
           "taxable" in {
 
             val mockTransformationService = mock[TransformationService]
-            val mockLocalDateService = mock[LocalDateService]
+            val mockLocalDateService      = mock[LocalDateService]
 
             val controller = new PromoteTrusteeController(
               identifierAction,
@@ -273,12 +298,18 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
             )(Implicits.global, Helpers.stubControllerComponents())
 
             when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-              .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(
-                buildInputJson(
-                  Seq(Json.toJson(originalTrustee)),
-                  isTaxable = Some(true)
+              .thenReturn(
+                EitherT[Future, TrustErrors, JsObject](
+                  Future.successful(
+                    Right(
+                      buildInputJson(
+                        Seq(Json.toJson(originalTrustee)),
+                        isTaxable = Some(true)
+                      )
+                    )
+                  )
                 )
-              ))))
+              )
 
             when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
               .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -293,7 +324,14 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
 
             status(result) mustBe OK
 
-            val transform = PromoteTrusteeTransform(Some(index), Json.toJson(promotedTrustee), Json.toJson(originalTrustee), endDate, trusteeType, isTaxable = true)
+            val transform = PromoteTrusteeTransform(
+              Some(index),
+              Json.toJson(promotedTrustee),
+              Json.toJson(originalTrustee),
+              endDate,
+              trusteeType,
+              isTaxable = true
+            )
 
             verify(mockTransformationService)
               .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
@@ -302,7 +340,7 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
           "non-taxable" in {
 
             val mockTransformationService = mock[TransformationService]
-            val mockLocalDateService = mock[LocalDateService]
+            val mockLocalDateService      = mock[LocalDateService]
 
             val controller = new PromoteTrusteeController(
               identifierAction,
@@ -311,12 +349,18 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
             )(Implicits.global, Helpers.stubControllerComponents())
 
             when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-              .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(
-                buildInputJson(
-                  Seq(Json.toJson(originalTrustee)),
-                  isTaxable = Some(false)
+              .thenReturn(
+                EitherT[Future, TrustErrors, JsObject](
+                  Future.successful(
+                    Right(
+                      buildInputJson(
+                        Seq(Json.toJson(originalTrustee)),
+                        isTaxable = Some(false)
+                      )
+                    )
+                  )
                 )
-              ))))
+              )
 
             when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
               .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
@@ -331,7 +375,14 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
 
             status(result) mustBe OK
 
-            val transform = PromoteTrusteeTransform(Some(index), Json.toJson(promotedTrustee), Json.toJson(originalTrustee), endDate, trusteeType, isTaxable = false)
+            val transform = PromoteTrusteeTransform(
+              Some(index),
+              Json.toJson(promotedTrustee),
+              Json.toJson(originalTrustee),
+              endDate,
+              trusteeType,
+              isTaxable = false
+            )
 
             verify(mockTransformationService)
               .addNewTransform(equalTo(utr), any(), equalTo(transform))(any())
@@ -342,7 +393,7 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
       "must return an Internal Server Error when addNewTransform fails" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new PromoteTrusteeController(
           identifierAction,
@@ -351,12 +402,18 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
         )(Implicits.global, Helpers.stubControllerComponents())
 
         when(mockTransformationService.getTransformedTrustJson(any(), any(), any())(any()))
-          .thenReturn(EitherT[Future, TrustErrors, JsObject](Future.successful(Right(
-            buildInputJson(
-              Seq(Json.toJson(originalTrustee)),
-              isTaxable = Some(true)
+          .thenReturn(
+            EitherT[Future, TrustErrors, JsObject](
+              Future.successful(
+                Right(
+                  buildInputJson(
+                    Seq(Json.toJson(originalTrustee)),
+                    isTaxable = Some(true)
+                  )
+                )
+              )
             )
-          ))))
+          )
 
         when(mockTransformationService.addNewTransform(any(), any(), any())(any()))
           .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Left(ServerError()))))
@@ -375,7 +432,7 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
       "must return an error for invalid json" in {
 
         val mockTransformationService = mock[TransformationService]
-        val mockLocalDateService = mock[LocalDateService]
+        val mockLocalDateService      = mock[LocalDateService]
 
         val controller = new PromoteTrusteeController(
           identifierAction,
@@ -394,4 +451,5 @@ class PromoteTrusteeControllerSpec extends AnyFreeSpec with MockitoSugar with Sc
       }
     }
   }
+
 }
