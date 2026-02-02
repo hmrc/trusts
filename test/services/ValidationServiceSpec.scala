@@ -27,7 +27,7 @@ class ValidationServiceSpec extends BaseSpec with DataExamples with EitherValues
 
   private lazy val validationService: ValidationService = new ValidationService()
 
-  private lazy val trustValidator: Validator            =
+  private lazy val trustValidator: Validator =
     validationService.get("/resources/schemas/5MLD/trusts-api-registration-schema-1.4.2.json")
 
   "a validator " should {

@@ -50,8 +50,8 @@ class TrustsServiceSpec extends BaseSpec {
     when(mockRepository.resetCache(any[String], any[String], any[String]))
       .thenReturn(EitherT[Future, TrustErrors, Boolean](Future.successful(Right(true))))
 
-    val myId                                       = "myId"
-    val sessionId: String                          = "sessionId"
+    val myId              = "myId"
+    val sessionId: String = "sessionId"
 
     val SUT = new TrustsService(mockSubscriptionConnector, mockTrustsConnector, mockRepository)
   }

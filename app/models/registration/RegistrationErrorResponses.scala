@@ -27,23 +27,23 @@ object RegistrationErrorResponse {
 
 object ApiResponse {
 
-  def alreadyRegisteredTrustsResponse: RegistrationErrorResponse    =
+  def alreadyRegisteredTrustsResponse: RegistrationErrorResponse =
     RegistrationErrorResponse(ALREADY_REGISTERED_CODE, ALREADY_REGISTERED_TRUSTS_MESSAGE)
 
-  def alreadyRegisteredEstateResponse: RegistrationErrorResponse    =
+  def alreadyRegisteredEstateResponse: RegistrationErrorResponse =
     RegistrationErrorResponse(ALREADY_REGISTERED_CODE, ALREADY_REGISTERED_ESTATE_MESSAGE)
 
-  def invalidUTRErrorResponse: RegistrationErrorResponse            =
+  def invalidUTRErrorResponse: RegistrationErrorResponse =
     RegistrationErrorResponse(INVALID_UTR_CODE, INVALID_UTR_MESSAGE)
 
-  def noMatchRegistrationResponse: RegistrationErrorResponse        =
+  def noMatchRegistrationResponse: RegistrationErrorResponse =
     RegistrationErrorResponse(NO_MATCH_CODE, NO_MATCH_MESSAGE)
 
-  def internalServerErrorResponse: RegistrationErrorResponse        =
+  def internalServerErrorResponse: RegistrationErrorResponse =
     RegistrationErrorResponse(INTERNAL_SERVER_ERROR_CODE, INTERNAL_SERVER_ERROR_MESSAGE)
 
   def insufficientEnrolmentErrorResponse: RegistrationErrorResponse =
     RegistrationErrorResponse(UNAUTHORISED, INSUFFICIENT_ENROLMENT_MESSAGE)
 
-  def noDraftIdProvided: RegistrationErrorResponse                  = RegistrationErrorResponse(NO_DRAFT_ID, NO_DRAFT_ID_MESSAGE)
+  def noDraftIdProvided: RegistrationErrorResponse = RegistrationErrorResponse(NO_DRAFT_ID, NO_DRAFT_ID_MESSAGE)
 }

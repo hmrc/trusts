@@ -25,7 +25,7 @@ trait JsonFixtures extends JsonUtils {
 
   lazy val validRegistrationRequestJson: String = getJsonFromFile("valid-trusts-registration-api.json")
 
-  lazy val validRegistration5MldRequestJson: String           = getJsonFromFile("valid-trusts-registration-api-5mld.json")
+  lazy val validRegistration5MldRequestJson: String = getJsonFromFile("valid-trusts-registration-api-5mld.json")
 
   lazy val validRegistration5MldNontaxableRequestJson: String = getJsonFromFile(
     "valid-trusts-registration-api-5mld-nontaxable.json"
@@ -34,7 +34,7 @@ trait JsonFixtures extends JsonUtils {
   lazy val invalidRegistrationRequestJson: String = getJsonFromFile("invalid-payload-trusts-registration.json")
   lazy val invalidTrustBusinessValidation: String = getJsonFromFile("trust-business-validation-fail.json")
 
-  lazy val validTrustVariations5mldRequestJson: String         = getJsonFromFile(
+  lazy val validTrustVariations5mldRequestJson: String = getJsonFromFile(
     "valid-trusts-variations-api-5mld-taxable.json"
   )
 
@@ -52,7 +52,7 @@ trait JsonFixtures extends JsonUtils {
 
   lazy val invalidTrustVariationsRequest: JsValue = getJsonValueFromFile("invalid-payload-trusts-variations.json")
 
-  lazy val registrationRequest: Registration        =
+  lazy val registrationRequest: Registration =
     getJsonValueFromFile("valid-trusts-registration-api.json").validate[Registration].get
 
   lazy val invalidRegistrationRequest: Registration =
@@ -62,7 +62,7 @@ trait JsonFixtures extends JsonUtils {
 
   lazy val get5MLDTrustResponse: JsValue = getJsonValueFromFile("valid-get-trust-response.json")
 
-  lazy val getTrustPropertyLandNoPreviousValue: String      = getJsonFromFile(
+  lazy val getTrustPropertyLandNoPreviousValue: String = getJsonFromFile(
     "valid-get-trust-response-property-or-land-no-previous-value.json"
   )
 
@@ -70,13 +70,13 @@ trait JsonFixtures extends JsonUtils {
     "valid-get-trust-response-property-or-land-no-previous-value.json"
   )
 
-  lazy val getTransformedTrustResponse: JsValue                 = getJsonValueFromFile("transformed-get-trust-response.json")
+  lazy val getTransformedTrustResponse: JsValue = getJsonValueFromFile("transformed-get-trust-response.json")
 
-  lazy val getTransformedTrustAllAssetsResponse: JsValue        = getJsonValueFromFile(
+  lazy val getTransformedTrustAllAssetsResponse: JsValue = getJsonValueFromFile(
     "transformed-get-trust-all-assets-response.json"
   )
 
-  lazy val getTransformedTrustResponse5mld: JsValue             = getJsonValueFromFile(
+  lazy val getTransformedTrustResponse5mld: JsValue = getJsonValueFromFile(
     "5MLD/Taxable/cached/2134514321-taxable.json"
   )
 
@@ -86,21 +86,21 @@ trait JsonFixtures extends JsonUtils {
 
   lazy val getEmptyTransformedTrustResponse: JsValue = getJsonValueFromFile("empty-transformed-get-trust-response.json")
 
-  lazy val getTransformedApiResponse: JsValue         = getJsonValueFromFile("trust-transformed-get-api-result.json")
+  lazy val getTransformedApiResponse: JsValue = getJsonValueFromFile("trust-transformed-get-api-result.json")
 
   lazy val getTransformedLeadTrusteeResponse: JsValue = getJsonValueFromFile(
     "trust-transformed-get-lead-trustee-result.json"
   )
 
-  lazy val getTransformedTrusteesResponse: JsValue    = getJsonValueFromFile("trust-transformed-get-trustees-result.json")
+  lazy val getTransformedTrusteesResponse: JsValue = getJsonValueFromFile("trust-transformed-get-trustees-result.json")
 
   lazy val getTransformedBeneficiariesResponse: JsValue = getJsonValueFromFile(
     "trust-transformed-get-beneficiary-result.json"
   )
 
-  lazy val getTransformedSettlorsResponse: JsValue      = getJsonValueFromFile("trust-transformed-get-settlor-result.json")
+  lazy val getTransformedSettlorsResponse: JsValue = getJsonValueFromFile("trust-transformed-get-settlor-result.json")
 
-  lazy val getTransformedAllAssetsResponse: JsValue     = getJsonValueFromFile(
+  lazy val getTransformedAllAssetsResponse: JsValue = getJsonValueFromFile(
     "trust-transformed-get-all-assets-result.json"
   )
 

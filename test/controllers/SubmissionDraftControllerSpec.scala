@@ -48,7 +48,7 @@ class SubmissionDraftControllerSpec
   private val (year1997, year1999, year2010, year2012)                      = (1997, 1999, 2010, 2012)
   private val (num3, num9, num10, num13, num14, num30, num33, num40, num45) = (3, 9, 10, 13, 14, 30, 33, 40, 45)
 
-  private val createdAt: Instant       =
+  private val createdAt: Instant =
     LocalDateTime.of(year1997, MARCH, num14, num14, num45).atZone(ZoneOffset.UTC).toInstant
 
   private val currentDateTime: Instant =
@@ -75,7 +75,7 @@ class SubmissionDraftControllerSpec
       |""".stripMargin
   )
 
-  private val existingDraft     = RegistrationSubmissionDraft(
+  private val existingDraft = RegistrationSubmissionDraft(
     draftId = draftId,
     internalId = internalId,
     createdAt = createdAt,

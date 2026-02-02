@@ -35,7 +35,7 @@ object RemoveBeneficiary {
     OTHER_BENEFICIARY
   )
 
-  val reads: Reads[RemoveBeneficiary]    =
+  val reads: Reads[RemoveBeneficiary] =
     Json.reads[RemoveBeneficiary].filter(rb => validBeneficiaryTypes.contains(rb.`type`))
 
   val writes: OWrites[RemoveBeneficiary] = Json.writes[RemoveBeneficiary]

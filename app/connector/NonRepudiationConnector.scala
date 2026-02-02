@@ -33,8 +33,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class NonRepudiationConnector @Inject() (http: HttpClientV2, config: AppConfig)(implicit ec: ExecutionContext)
     extends Logging {
 
-  private def headers                                                                       = Seq(CONTENT_TYPE -> JSON, X_API_KEY -> config.xApiKey)
-  val fullUrl: String                                                                       = config.nonRepudiationUrl
+  private def headers = Seq(CONTENT_TYPE -> JSON, X_API_KEY -> config.xApiKey)
+  val fullUrl: String = config.nonRepudiationUrl
 
   def nonRepudiate(payload: NRSSubmission)(implicit hc: HeaderCarrier): Future[NRSResponse] =
     http

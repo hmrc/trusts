@@ -56,7 +56,7 @@ class VariationServiceSpec
   private val sessionId: String          = "sessionId"
   private val subscriberId               = "TVN34567890"
 
-  private val fullEtmpResponseJson5MLD    =
+  private val fullEtmpResponseJson5MLD =
     JsonUtils.getJsonValueFromString(NonTaxable5MLDFixtures.DES.get5MLDTrustNonTaxableResponse)
 
   private val transformedEtmpResponseJson = Json.parse("""{ "field": "Arbitrary transformed JSON" }""")

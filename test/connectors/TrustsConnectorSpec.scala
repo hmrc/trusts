@@ -33,7 +33,7 @@ import scala.concurrent.Future
 
 class TrustsConnectorSpec extends ConnectorSpecHelper with EitherValues {
 
-  private lazy val connector: TrustsConnector    = injector.instanceOf[TrustsConnector]
+  private lazy val connector: TrustsConnector = injector.instanceOf[TrustsConnector]
 
   private lazy val request: ExistingCheckRequest =
     ExistingCheckRequest("trust name", postcode = Some("NE65TA"), "1234567890")

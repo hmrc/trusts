@@ -30,7 +30,7 @@ case class GetTrustDesResponse(getTrust: Option[GetTrust], responseHeader: Respo
 object GetTrustDesResponse {
   implicit val writes: Writes[GetTrustDesResponse] = Json.writes[GetTrustDesResponse]
 
-  implicit val reads: Reads[GetTrustDesResponse]   = (
+  implicit val reads: Reads[GetTrustDesResponse] = (
     (JsPath \ TRUST_OR_ESTATE_DISPLAY).readNullable[GetTrust] and
       (JsPath \ RESPONSE_HEADER).read[ResponseHeader]
   )(GetTrustDesResponse.apply _)

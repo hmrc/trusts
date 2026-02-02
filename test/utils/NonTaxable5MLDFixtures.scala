@@ -27,11 +27,11 @@ object NonTaxable5MLDFixtures extends JsonFixtures {
      * These fixtures must conform with the schema for API#1488
      */
 
-    lazy val get5MLDTrustNonTaxableResponse: String                  = getJsonFromFile(
+    lazy val get5MLDTrustNonTaxableResponse: String = getJsonFromFile(
       "5MLD/NonTaxable/des/valid-get-trust-5mld-non-taxable-des-response.json"
     )
 
-    lazy val newGet5MLDTrustNonTaxableResponse: String               = getJsonFromFile(
+    lazy val newGet5MLDTrustNonTaxableResponse: String = getJsonFromFile(
       "5MLD/NonTaxable/des/new-valid-get-trust-5mld-non-taxable-des-response.json"
     )
 
@@ -74,11 +74,11 @@ object NonTaxable5MLDFixtures extends JsonFixtures {
 
     }
 
-    lazy val getTransformedNonTaxableTrustResponse: JsValue                  = getJsonValueFromFile(
+    lazy val getTransformedNonTaxableTrustResponse: JsValue = getJsonValueFromFile(
       "5MLD/NonTaxable/trusts/get-trust-transformed-non-taxable-response.json"
     )
 
-    lazy val newGetTransformedNonTaxableTrustResponse: JsValue               = getJsonValueFromFile(
+    lazy val newGetTransformedNonTaxableTrustResponse: JsValue = getJsonValueFromFile(
       "5MLD/NonTaxable/trusts/new-get-trust-transformed-non-taxable-response.json"
     )
 

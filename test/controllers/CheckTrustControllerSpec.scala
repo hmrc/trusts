@@ -42,9 +42,9 @@ class CheckTrustControllerSpec extends BaseSpec with GuiceOneServerPerSuite {
 
   private lazy val bodyParsers = injector.instanceOf[BodyParsers.Default]
 
-  private val validPayloadRequest                = Json.parse("""{"name": "trust name","postcode": "NE1 1NE","utr": "1234567890"}""")
+  private val validPayloadRequest = Json.parse("""{"name": "trust name","postcode": "NE1 1NE","utr": "1234567890"}""")
 
-  private val validPayloadPostCodeLowerCase      =
+  private val validPayloadPostCodeLowerCase =
     Json.parse("""{"name": "trust name","postcode": "aa9a 9aa","utr": "1234567890"}""")
 
   private val validPayloadRequestWithoutPostCode = Json.parse("""{"name": "trust name","utr": "1234567890"}""")
